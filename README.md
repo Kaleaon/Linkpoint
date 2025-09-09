@@ -91,6 +91,15 @@ This project uses several key libraries:
 - **AndroidX** - Android support libraries
 - **Custom OpenJPEG binding** - JPEG2000 image decoding
 
+## Documentation
+
+For detailed technical information about the project architecture and improvements:
+
+- **[API Analysis and Improvements](docs/API_Analysis_and_Improvements.md)** - Comprehensive analysis of LibreMetaverse API implementation and graphics engine architecture
+- **[API Usage Catalog](docs/API_Usage_Catalog.md)** - Complete mapping of all APIs, libraries, and frameworks used in the project  
+- **[Graphics Engine Roadmap](docs/Graphics_Engine_Roadmap.md)** - Detailed improvement plan for graphics and performance enhancements
+- **[Research Summary](docs/Research_Summary.md)** - Executive summary of OpenMetaverse/LibreMetaverse research and improvement opportunities
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
