@@ -29,6 +29,8 @@ public class EventBus {
             try {
                 this.method.invoke(this.subscriber, new Object[]{this.event});
             } catch (Exception e) {
+                // Log reflection errors for debugging
+                android.util.Log.e("EventBus", "Failed to invoke event handler method", e);
             }
         }
 

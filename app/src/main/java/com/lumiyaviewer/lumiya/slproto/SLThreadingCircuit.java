@@ -24,6 +24,9 @@ public class SLThreadingCircuit extends SLCircuit implements Executor {
                         SLThreadingCircuit.this.InvokeProcessIdle();
                     }
                 } catch (InterruptedException e) {
+                    // Thread was interrupted, restore interrupt status and exit
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
             Debug.Printf("SLThreadingCircuit: working thread exiting.", new Object[0]);
