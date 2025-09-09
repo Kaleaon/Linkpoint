@@ -12,7 +12,7 @@ public class ShaderPreprocessor {
     private final ImmutableMap<String, String> definedMacros;
 
     public ShaderPreprocessor(Map<String, String> map) {
-        this.definedMacros = ImmutableMap.copyOf((Map) map);
+        this.definedMacros = ImmutableMap.copyOf(map);
     }
 
     @Nullable
@@ -30,7 +30,7 @@ public class ShaderPreprocessor {
             if (readLine.startsWith("#ifdef") || readLine.startsWith("#ifndef")) {
                 boolean startsWith = readLine.startsWith("#ifdef");
                 boolean containsKey = this.definedMacros.containsKey(readLine.substring(readLine.indexOf(32)).trim());
-                Object processCode = processCode(bufferedReader, startsWith == containsKey ? stringBuilder : null);
+                String processCode = processCode(bufferedReader, startsWith == containsKey ? stringBuilder : null);
                 if (Objects.equal(processCode, "#else")) {
                     processCode = processCode(bufferedReader, startsWith != containsKey ? stringBuilder : null);
                 }
