@@ -135,7 +135,7 @@ TexturePriority.java       - Priority-based texture loading
 ```java
 SpatialTree.java           - Octree/spatial partitioning
 SpatialObjectIndex.java    - Object indexing system
-FrustrumPlanes.java        - View frustum culling
+FrustumPlanes.java         - View frustum culling
 DrawList.java              - Render queue management
 
 // Draw List Entries
