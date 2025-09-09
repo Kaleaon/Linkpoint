@@ -32,12 +32,10 @@ This document is organized into four main phases, each with specific goals, tech
 - [6. Phase 2: Rendering Pipeline Enhancement (6-12 months)](#6-phase-2-rendering-pipeline-enhancement-6-12-months)
 - [7. Phase 3: Advanced Features (12-18 months)](#7-phase-3-advanced-features-12-18-months)
 - [8. Phase 4: Future Technologies (18+ months)](#8-phase-4-future-technologies-18-months)
-- [9. LSL Subsystem Modernization](#9-lsl-subsystem-modernization)
-- [10. Inventory Modernization](#10-inventory-modernization)
-- [11. Conclusion](#11-conclusion)
-- [12. Developer Experience Improvements](#12-developer-experience-improvements)
-- [13. Success Metrics](#13-success-metrics)
-- [14. Resource Requirements](#14-resource-requirements)
+- [9. Developer Experience Improvements](#9-developer-experience-improvements)
+- [10. Success Metrics](#10-success-metrics)
+- [11. Resource Requirements](#11-resource-requirements)
+- [12. Conclusion](#12-conclusion)
 
 ---
 
@@ -893,10 +891,192 @@ The new Vulkan backend will be implemented as a new set of classes that will coe
 
 ---
 
----
+## 7. Phase 3: Advanced Features (12-18 months)
+
+This phase introduces advanced rendering features that will bring the engine to a modern standard.
+
+### 7.1. Vulkan Rendering Backend
+...
+### 7.2. Compute Shader Integration
+
+- **Goal**: Leverage the power of compute shaders to offload complex computations from the CPU to the GPU.
+- **Details**:
+
+#### 7.2.1. Overview
+
+Many of the computationally expensive tasks in a modern rendering engine, such as particle systems, skinning, and post-processing, are currently performed on the CPU in our client. This can be a major performance bottleneck, especially on mobile devices. This initiative will integrate compute shaders into the rendering engine to offload these tasks to the GPU. This will free up the CPU to work on other tasks, and it will allow us to implement more complex and visually impressive effects.
+
+#### 7.2.2. Problem Analysis
+
+Performing complex computations on the CPU has several drawbacks:
+
+*   **Performance**: The CPU is not as well-suited for parallel computations as the GPU. This means that tasks like particle systems and skinning can be very slow when performed on the CPU.
+*   **Battery Consumption**: Performing a lot of work on the CPU can be a major drain on the battery.
+*   **Limited Visuals**: The performance limitations of the CPU make it difficult to implement complex visual effects like large-scale particle systems and advanced post-processing.
+
+#### 7.2.3. Proposed Solution
+
+The proposed solution is to use OpenGL ES 3.1 compute shaders to implement GPU-based particle systems, GPU animation, and a flexible post-processing pipeline.
+
+**1. GPU Particle Systems:**
+
+We will implement a GPU-based particle system that uses a compute shader to update the position and velocity of each particle in each frame. The particle data will be stored in a shader storage buffer object (SSBO), and the compute shader will read from and write to this buffer. This will allow us to simulate a much larger number of particles than is possible with a CPU-based system.
+
+**2. GPU Animation (Skinning):**
+
+We will implement a GPU-based skinning system that uses a compute shader to perform the skinning calculations. The bone matrices and vertex data will be stored in SSBOs, and the compute shader will output the skinned vertices to a new buffer. This buffer will then be used as the vertex buffer for the rendering pass. This will offload the skinning calculations from the CPU to the GPU, which will free up the CPU to work on other tasks.
+
+**3. Post-Processing Pipeline:**
+
+We will implement a flexible, compute shader-based post-processing pipeline. This will allow us to easily implement a wide range of post-processing effects, such as:
+
+*   **Bloom**: A common effect that creates a soft glow around bright objects.
+*   **Depth of Field**: An effect that simulates the focusing of a camera lens.
+*   **Color Grading**: An effect that allows us to adjust the colors of the final image.
+
+The post-processing pipeline will work by taking the final rendered image as input, and then applying a series of compute shaders to it to produce the final, post-processed image.
+
+#### 7.2.4. Implementation Plan
+
+1.  **Implement Compute Shader Framework**:
+    *   Create a `ComputeShader` class that encapsulates a compute shader program.
+    *   Create a `ComputeShaderManager` class that is responsible for loading and managing compute shaders.
+2.  **Implement GPU Particle System**:
+    *   Create a `GpuParticleSystem` class that uses a compute shader to update the particles.
+    *   Create a new rendering path for rendering the GPU-based particles.
+3.  **Implement GPU Animation**:
+    *   Create a `GpuSkinner` class that uses a compute shader to perform the skinning calculations.
+    *   Update the animation system to use the new `GpuSkinner`.
+4.  **Implement Post-Processing Pipeline**:
+    *   Create a `PostProcessingPipeline` class that can be used to apply a series of post-processing effects to the final rendered image.
+    *   Implement a set of common post-processing effects, such as bloom, depth of field, and color grading.
+5.  **Testing**:
+    *   Create test scenes to verify that the new GPU-based systems are working correctly.
+    *   Profile the application to measure the performance improvements.
+
+#### 7.2.5. Developer Experience Improvements
+
+*   **Compute Shader Library**: Create a library of common compute shader utility functions to make it easier to write new compute shaders.
+*   **Post-Processing Editor**: Create a simple editor that allows artists and developers to easily create and preview post-processing effects.
+*   **Clear Documentation**: Write clear documentation that explains how to use the new compute shader-based systems.
+
+#### 7.2.6. Risks and Mitigation
+
+*   **Risk**: Compute shaders require OpenGL ES 3.1, which may not be available on all target devices.
+    *   **Mitigation**: We will check for OpenGL ES 3.1 support at runtime. On devices that do not support it, we will fall back to the existing CPU-based implementations.
+*   **Risk**: Writing and debugging compute shaders can be difficult.
+    *   **Mitigation**: We will start with simple implementations and then iterate on them to add more advanced features. We will also use graphics debuggers like RenderDoc to debug the compute shaders.
+*   **Risk**: The performance of compute shaders can be affected by a variety of factors, such as the size of the work groups and the memory access patterns.
+    *   **Mitigation**: We will carefully profile the compute shaders to identify and eliminate any performance bottlenecks.
+
 ---
 
-## 8. Phase 4: Future Technologies (18+ months)
+## 7. Phase 3: Advanced Features (12-18 months)
+
+This phase introduces advanced rendering features that will bring the engine to a modern standard.
+
+### 7.1. Vulkan Rendering Backend
+...
+### 7.2. Compute Shader Integration
+...
+### 7.3. Advanced Lighting and Effects
+
+- **Goal**: Implement a deferred rendering pipeline and advanced post-processing effects like Screen-Space Ambient Occlusion (SSAO).
+- **Details**:
+
+#### 7.3.1. Overview
+
+The current forward rendering pipeline is not well-suited for scenes with a large number of lights or complex post-processing effects. This initiative will implement a modern deferred rendering pipeline, which will allow us to efficiently render a large number of dynamic lights and to implement advanced post-processing effects like Screen-Space Ambient Occlusion (SSAO).
+
+#### 7.3.2. Problem Analysis
+
+The forward rendering pipeline has several limitations:
+
+*   **Performance with Many Lights**: The performance of a forward renderer is directly proportional to the number of lights in the scene. This makes it difficult to support a large number of dynamic lights.
+*   **Limited Post-Processing**: While it's possible to do post-processing with a forward renderer, it's not as efficient or as flexible as with a deferred renderer.
+*   **Lack of Geometric Information**: The forward rendering pipeline does not provide easy access to the geometry and material information for each fragment, which is needed for many advanced rendering techniques.
+
+#### 7.3.3. Proposed Solution
+
+The proposed solution is to implement a deferred rendering pipeline with support for advanced post-processing effects like SSAO.
+
+**1. Deferred Rendering:**
+
+We will implement a deferred rendering pipeline with the following passes:
+
+1.  **Geometry Pass**: In this pass, we will render the scene to a G-buffer, which will store the position, normal, albedo, and specular/roughness for each fragment.
+2.  **Lighting Pass**: In this pass, we will render a full-screen quad and use the G-buffer textures to calculate the lighting for each fragment. This will allow us to support a large number of dynamic lights with a minimal performance impact.
+
+**2. Screen-Space Ambient Occlusion (SSAO):**
+
+We will implement SSAO as a post-processing effect. The SSAO implementation will have the following passes:
+
+1.  **SSAO Pass**: A compute shader will be used to calculate the occlusion factor for each fragment based on the depth and normal information in the G-buffer.
+2.  **Blur Pass**: A blur pass will be applied to the SSAO texture to smooth out the noise.
+3.  **Lighting Pass**: The final lighting pass will sample the SSAO texture and use the occlusion factor to modulate the ambient lighting.
+
+**3. Architectural Diagram:**
+
+```
++--------------------------+
+|      Geometry Pass       |
+| (render to G-buffer)     |
++--------------------------+
+           |
+           V
++--------------------------+      +--------------------------+
+|        SSAO Pass         |      |      Lighting Pass       |
+| (calculate occlusion)    |      | (calculate lighting)     |
++--------------------------+      +--------------------------+
+           |                                  |
+           V                                  V
++--------------------------+      +--------------------------+
+|        Blur Pass         |      |      Combine Pass        |
+|  (blur SSAO texture)     |----->| (combine lighting        |
++--------------------------+      |  and SSAO)               |
+                                  +--------------------------+
+                                             |
+                                             V
+                                  +--------------------------+
+                                  |      Final Image         |
+                                  +--------------------------+
+```
+
+#### 7.3.4. Implementation Plan
+
+1.  **Implement G-buffer**:
+    *   Create a set of textures for the G-buffer (position, normal, albedo, etc.).
+    *   Update the rendering engine to render the scene to the G-buffer using Multiple Render Targets (MRT).
+2.  **Implement Deferred Lighting**:
+    *   Write a new set of shaders for the deferred lighting pass.
+    *   Implement support for a large number of dynamic lights.
+3.  **Implement SSAO**:
+    *   Implement the SSAO pass using a compute shader.
+    *   Implement the blur pass for the SSAO texture.
+    *   Update the lighting pass to use the SSAO texture.
+4.  **Testing**:
+    *   Create a test scene with a large number of lights to verify that the deferred rendering pipeline is working correctly.
+    *   Create a test scene with complex geometry to verify that the SSAO is working correctly.
+    *   Profile the application to measure the performance of the new pipeline.
+
+#### 7.3.5. Developer Experience Improvements
+
+*   **G-buffer Debug View**: Create a new debug view mode that allows developers to visualize the contents of the G-buffer textures.
+*   **SSAO Debug View**: Create a new debug view mode that visualizes the SSAO texture.
+*   **Clear Documentation**: Write clear documentation that explains how the new deferred rendering pipeline works.
+
+#### 7.3.6. Risks and Mitigation
+
+*   **Risk**: Deferred rendering can be more complex to implement than forward rendering.
+    *   **Mitigation**: We will start with a simple implementation and then iterate on it to add more advanced features. We will also leverage the many online tutorials and guides for deferred rendering.
+*   **Risk**: The G-buffer can consume a lot of memory, which can be a problem on mobile devices.
+    *   **Mitigation**: We will carefully choose the format and resolution of the G-buffer textures to minimize memory usage. We will also investigate techniques for packing data into the G-buffer more efficiently.
+*   **Risk**: SSAO can be a performance-intensive effect.
+    *   **Mitigation**: We will provide quality settings that allow users to trade visual quality for performance. We will also investigate more advanced techniques like HBAO+ for future improvements.
+
+---
+
+## 8. Protocol Modernization
 
 This section outlines the plan for modernizing the client's implementation of the Second Life protocol to support new and updated features.
 
@@ -954,6 +1134,61 @@ The new architecture will be modular, consisting of a new **WebRTC voice module*
 
 ---
 
+## 8. Protocol Modernization
+
+This section outlines the plan for modernizing the client's implementation of the Second Life protocol to support new and updated features.
+
+### 8.1. WebRTC for Voice
+
+- **Goal**: Replace the legacy Vivox voice system with the new WebRTC standard for voice communication.
+- **Details**:
+
+#### 8.1.1. Overview
+
+The official Second Life platform is transitioning from the proprietary Vivox voice system to the open WebRTC standard. To maintain compatibility and to take advantage of the benefits of WebRTC (such as better performance and lower latency), our client must also implement support for this new protocol. This initiative will involve integrating a WebRTC library for Android, implementing the necessary signaling logic, and updating the UI to support the new voice system.
+
+The core of this transition will be the adoption of the open-source C++ WebRTC library from `webrtc.org`. This will enable a host of modern features, including:
+*   NAT hole punching via STUN.
+*   Data relaying via TURN.
+*   Stereo audio.
+*   Configurable audio/video bandwidth allowing control over audio and video quality.
+*   Audio noise reduction.
+*   Audio automatic gain control.
+*   Audio echo cancellation.
+
+#### 8.1.2. Architecture
+
+The new architecture will be modular, consisting of a new **WebRTC voice module** and a supporting **dynamic library** that wraps the native `webrtc.org` library.
+
+*   **Modular Design**: The voice subsystem in the viewer is designed to be modular. This allows for a clean separation of concerns and makes it easier to maintain and upgrade the voice system in the future.
+*   **Signaling**:
+    *   **Spatial Voice**: Handled by a dedicated "Second Life Voice Server" that runs alongside each region.
+    *   **AdHoc and Group Voice**: Handled by a pool of dedicated "Second Life Voice Servers".
+    *   **P2P Voice**: Routed through the AdHoc voice server pool, simulating a two-person conference. This is a key architectural detail that simplifies the implementation by avoiding direct peer-to-peer connections between clients.
+*   **No Separate Executable**: Unlike the old Vivox system, the new WebRTC implementation will not require a separate `SLVoice` executable. The WebRTC library will be integrated directly into the client.
+
+#### 8.1.3. Implementation Plan
+
+1.  **Integrate WebRTC Library**: We will use the official WebRTC library for Android, which is available as a pre-compiled AAR file. This will be added as a dependency to the project.
+2.  **Reverse-Engineer Signaling Protocol**: The signaling protocol used by the Second Life servers is not publicly documented. We will need to analyze the communication between the official viewer and the signaling servers to understand the protocol. This will involve using network analysis tools like Wireshark.
+3.  **Implement Signaling Client**: Once the signaling protocol is understood, we will implement a new signaling client in the Linkpoint client to handle the communication with the Second Life voice servers.
+4.  **Create `WebRTCManager`**: A new `WebRTCManager` class will be created to encapsulate all of the WebRTC-related logic, including initialization, connection management, and audio stream handling.
+5.  **Update UI**: The user interface will be updated to support the new WebRTC voice system, including new controls for connecting, disconnecting, and managing audio settings.
+6.  **Testing**:
+    *   Thoroughly test the new voice system for functionality and stability.
+    *   Test under various network conditions to ensure robustness.
+    *   Test on a wide range of Android devices to ensure compatibility.
+
+#### 8.1.4. Risks and Mitigation
+
+*   **Risk**: The signaling protocol may be complex and difficult to reverse-engineer.
+    *   **Mitigation**: We will leverage community resources and any available public information to aid in the reverse-engineering process. We will also consider a phased approach, starting with basic voice functionality and then adding more advanced features over time.
+*   **Risk**: The WebRTC library can be complex to use.
+    *   **Mitigation**: We will start with a simple implementation and then iterate on it to add more advanced features. We will also leverage the many online tutorials and guides for using WebRTC on Android.
+*   **Risk**: The performance of WebRTC can be affected by network conditions.
+    *   **Mitigation**: We will implement strategies for dealing with poor network conditions, such as reducing the audio quality or temporarily disconnecting from the voice chat.
+
+---
 
 ## 9. LSL Subsystem Modernization
 
@@ -1026,7 +1261,15 @@ The implementation of these new functions will be done on a case-by-case basis. 
 
 ---
 
-## 11. Conclusion
+## 11. Phase 4: Future Technologies (18+ months)
+
+This phase explores and integrates cutting-edge technologies to future-proof the engine.
+
+- **Details**: To be expanded.
+
+---
+
+## 12. Conclusion
 
 This document has laid out a comprehensive and ambitious roadmap for the modernization of the Linkpoint graphics engine. By following this plan, we will be able to deliver a more performant, visually stunning, and feature-rich experience to our users.
 
@@ -1041,7 +1284,7 @@ While the plan is detailed, it is also a living document. It will be updated and
 
 ---
 
-## 12. Developer Experience Improvements
+## 13. Developer Experience Improvements
 
 This section will detail improvements to the development workflow, including debugging tools, profiling utilities, and documentation.
 
@@ -1049,7 +1292,7 @@ This section will detail improvements to the development workflow, including deb
 
 ---
 
-## 13. Success Metrics
+## 14. Success Metrics
 
 This section will define the key performance indicators (KPIs) and metrics that will be used to measure the success of the modernization effort.
 
@@ -1057,7 +1300,7 @@ This section will define the key performance indicators (KPIs) and metrics that 
 
 ---
 
-## 14. Resource Requirements
+## 15. Resource Requirements
 
 This section will outline the resources required for the successful execution of this plan, including personnel, hardware, and software.
 

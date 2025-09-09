@@ -20,7 +20,7 @@ public class DaoLog {
     }
 
     public static int e(String str) {
-        return Log.w(TAG, str);
+        return Log.e(TAG, str);
     }
 
     public static int e(String str, Throwable th) {
