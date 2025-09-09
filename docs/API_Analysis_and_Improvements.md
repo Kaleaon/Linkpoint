@@ -1,3 +1,7 @@
+> **Note:** This document has been superseded by the new [Graphics Engine Modernization Plan](./Graphics_Engine_Modernization_Plan.md). This document is kept for historical purposes only. Please refer to the new plan for the most up-to-date information.
+
+---
+
 # Linkpoint API Analysis and Graphics Engine Improvements
 
 ## Table of Contents
