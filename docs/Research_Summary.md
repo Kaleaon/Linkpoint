@@ -40,7 +40,7 @@ The analysis identified **300+ Java classes** implementing Second Life protocol 
 #### Protocol Implementation (85 classes)
 - **Core Protocol**: SLAgentCircuit, SLConnection, SLMessage hierarchy
 - **Message Types**: 150+ different message types for all SL functionality
-- **Data Types**: LLVector3, LLQuaternion, LLUUID, LLSD types
+- **Data Types**: LLVector3, LLQuaternion, UUID, LLSD types
 - **Network Layer**: UDP circuits, HTTP capabilities, event queues
 
 #### Graphics Engine (120 classes)  
