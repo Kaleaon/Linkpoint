@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">ഹോമിലേക്ക് നാവിഗേറ്റുചെയ്യുക</string>
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+    <string name="abc_action_bar_up_description">മുകളിലേക്ക് നാവിഗേറ്റുചെയ്യുക</string>
+    <string name="abc_action_menu_overflow_description">കൂടുതൽ‍ ഓപ്‌ഷനുകള്‍</string>
+    <string name="abc_action_mode_done">പൂർത്തിയാക്കി</string>
+    <string name="abc_activity_chooser_view_see_all">എല്ലാം കാണുക</string>
+    <string name="abc_activitychooserview_choose_application">ഒരു അപ്ലിക്കേഷൻ തിരഞ്ഞെടുക്കുക</string>
+    <string name="abc_capital_off">ഓഫ്</string>
+    <string name="abc_capital_on">ഓൺ</string>
+    <string name="abc_search_hint">തിരയുക…</string>
+    <string name="abc_searchview_description_clear">അന്വേഷണം മായ്‌ക്കുക</string>
+    <string name="abc_searchview_description_query">തിരയൽ അന്വേഷണം</string>
+    <string name="abc_searchview_description_search">തിരയൽ</string>
+    <string name="abc_searchview_description_submit">അന്വേഷണം സമർപ്പിക്കുക</string>
+    <string name="abc_searchview_description_voice">ശബ്ദതിരയൽ</string>
+    <string name="abc_shareactionprovider_share_with">ഇവരുമായി പങ്കിടുക</string>
+    <string name="abc_shareactionprovider_share_with_application">%s എന്നതുമായി പങ്കിടുക</string>
+    <string name="abc_toolbar_collapse_description">ചുരുക്കുക</string>
+    <string name="back_button_content_description">പിന്നോട്ട്</string>
+    <string name="cancel_button">റദ്ദാക്കുക</string>
+    <string name="dialog_button_got_it">മനസ്സിലായി</string>
+    <string name="dialog_button_open_help_center">സഹായ കേന്ദ്രം തുറക്കുക</string>
+    <string name="dialog_message_incompatible_phone">Daydream അനുയോജ്യതയുള്ള ഫോൺ ആവശ്യമാണ്. കൂടുതൽ വിവരങ്ങൾക്ക് Daydream സഹായ കേന്ദ്രം സന്ദർശിക്കുക.</string>
+    <string name="dialog_message_no_cardboard">നിങ്ങളുടെ വ്യൂവർ കോൺഫിഗർ ചെയ്യുന്നതിന് കാർഡ്ബോർഡ് ആപ്പ് സ്വന്തമാക്കുക.</string>
+    <string name="dialog_message_setup">മികച്ച അനുഭവം ലഭിക്കാൻ നിങ്ങളുടെ വ്യൂവർ സജ്ജമാക്കുക.</string>
+    <string name="dialog_title">ക്രമീകരിക്കുക</string>
+    <string name="dialog_title_incompatible_phone">അനുയോജ്യമല്ലാത്ത ഫോൺ</string>
+    <string name="dialog_title_vr_core_not_enabled">സജ്ജമാക്കല്‍‌ ആവശ്യമാണ്</string>
+    <string name="dialog_title_vr_core_not_installed">ഇൻസ്റ്റാൾ ചെയ്യേണ്ടതുണ്ട്</string>
+    <string name="dialog_title_warning">മുന്നറിയിപ്പ്</string>
+    <string name="dialog_vr_core_not_enabled">Google VR സേവനങ്ങൾ പ്രവർത്തനക്ഷമമാക്കാതെ ഈ അപ്ലിക്കേഷൻ ശരിയായി പ്രവർത്തിച്ചേക്കില്ല, തുടരുന്നതിന് ഫോൺ ക്രമീകരണത്തിൽ ഇത് പ്രവർത്തനക്ഷമമാക്കുക.</string>
+    <string name="dialog_vr_core_not_installed">Google VR സേവനങ്ങൾ ഇല്ലാതെ ഈ അപ്ലിക്കേഷൻ ശരിയായി പ്രവർത്തിച്ചേക്കില്ല. തുടരുന്നതിന് Play സ്റ്റോറിൽ നിന്നും Google VR സേവനങ്ങൾ ഇൻസ്റ്റാളുചെയ്യുക.</string>
+    <string name="go_to_playstore_button">Play സ്‌റ്റോറിലേക്ക് പോകുക</string>
+    <string name="go_to_vr_listeners_settings_button">ക്രമീകരണത്തിലേക്ക് പോകുക</string>
+    <string name="no_browser_text">വെബ്‌സൈറ്റ് തുറക്കുന്നതിന് ബ്രൗസറൊന്നുമില്ല</string>
+    <string name="place_your_phone_into_cardboard">നിങ്ങളുടെ കാർഡ്ബോർഡ് വ്യൂവറിലേക്ക് നിങ്ങളുടെ ഫോൺ വയ്ക്കുക</string>
+    <string name="place_your_viewer_into_viewer_format">നിങ്ങളുടെ %s വ്യൂവറിലേക്ക് നിങ്ങളുടെ ഫോൺ വയ്ക്കുക</string>
+    <string name="search_menu_title">തിരയുക</string>
+    <string name="settings_button_content_description">ക്രമീകരണം</string>
+    <string name="setup_button">സജ്ജമാക്കല്‍‌</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="switch_viewer_action">സ്വിച്ച്</string>
+    <string name="switch_viewer_prompt">മറ്റൊരു വ്യൂവർ ഉപയോഗിക്കുന്നുണ്ടോ?</string>
+</resources>

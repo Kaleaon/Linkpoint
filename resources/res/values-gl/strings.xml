@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">Ir á páxina de inicio</string>
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+    <string name="abc_action_bar_up_description">Desprazarse cara arriba</string>
+    <string name="abc_action_menu_overflow_description">Máis opcións</string>
+    <string name="abc_action_mode_done">Feito</string>
+    <string name="abc_activity_chooser_view_see_all">Ver todas</string>
+    <string name="abc_activitychooserview_choose_application">Escoller unha aplicación</string>
+    <string name="abc_capital_off">DESACTIVAR</string>
+    <string name="abc_capital_on">ACTIVAR</string>
+    <string name="abc_search_hint">Buscar…</string>
+    <string name="abc_searchview_description_clear">Borrar consulta</string>
+    <string name="abc_searchview_description_query">Consulta de busca</string>
+    <string name="abc_searchview_description_search">Buscar</string>
+    <string name="abc_searchview_description_submit">Enviar consulta</string>
+    <string name="abc_searchview_description_voice">Busca por voz</string>
+    <string name="abc_shareactionprovider_share_with">Compartir con</string>
+    <string name="abc_shareactionprovider_share_with_application">Compartir con %s</string>
+    <string name="abc_toolbar_collapse_description">Contraer</string>
+    <string name="back_button_content_description">Volver</string>
+    <string name="cancel_button">Cancelar</string>
+    <string name="dialog_button_got_it">DE ACORDO</string>
+    <string name="dialog_button_open_help_center">ABRIR CENTRO DE AXUDA</string>
+    <string name="dialog_message_incompatible_phone">Necesitas un teléfono compatible con Daydream. Para máis información, visita o Centro de axuda de Daydream.</string>
+    <string name="dialog_message_no_cardboard">Instala a aplicación Cardboard para configurar o teu visor.</string>
+    <string name="dialog_message_setup">Configura o teu visor para ter a mellor experiencia posible.</string>
+    <string name="dialog_title">Configurar</string>
+    <string name="dialog_title_incompatible_phone">O teléfono non é compatible</string>
+    <string name="dialog_title_vr_core_not_enabled">Configuración obrigatoria</string>
+    <string name="dialog_title_vr_core_not_installed">Instalación obrigatoria</string>
+    <string name="dialog_title_warning">Aviso</string>
+    <string name="dialog_vr_core_not_enabled">É posible que esta aplicación non funcione correctamente se non activas o compoñente Servizos de RV de Google. Antes de continuar actívao na configuración do teléfono.</string>
+    <string name="dialog_vr_core_not_installed">É posible que esta aplicación non funcione correctamente sen o compoñente Servizos de RV de Google. Antes de continuar instálao desde Play Store.</string>
+    <string name="go_to_playstore_button">Ir a Play Store</string>
+    <string name="go_to_vr_listeners_settings_button">Ir á configuración</string>
+    <string name="no_browser_text">Non hai ningún navegador para abrir o sitio web</string>
+    <string name="place_your_phone_into_cardboard">Coloca o teléfono no teu visor de Cardboard</string>
+    <string name="place_your_viewer_into_viewer_format">Coloca o teléfono no visor %s</string>
+    <string name="search_menu_title">Buscar</string>
+    <string name="settings_button_content_description">Configuración</string>
+    <string name="setup_button">Configurar</string>
+    <string name="status_bar_notification_info_overflow">&gt;999</string>
+    <string name="switch_viewer_action">Cambiar</string>
+    <string name="switch_viewer_prompt">Queres usar un visor distinto?</string>
+</resources>

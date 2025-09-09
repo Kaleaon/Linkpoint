@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
+    <item android:id="@+id/item_outfit_wear" android:title="Wear"/>
+    <item android:id="@+id/item_outfit_attach" android:title="Attach"/>
+    <item android:id="@+id/item_outfit_attach_to" android:title="Attach to..">
+        <menu>
+            <item android:id="@+id/item_outfit_attach_to_point" android:title="Attachment point"/>
+        </menu>
+    </item>
+    <item android:id="@+id/item_outfit_add" android:title="Add"/>
+    <item android:id="@+id/item_outfit_add_to" android:title="Add to...">
+        <menu>
+            <item android:id="@+id/item_outfit_add_to_point" android:title="Attachment point"/>
+        </menu>
+    </item>
+    <item android:id="@+id/item_outfit_detach" android:title="Detach"/>
+    <item android:id="@+id/item_outfit_take_off" android:title="Take off"/>
+</menu>
