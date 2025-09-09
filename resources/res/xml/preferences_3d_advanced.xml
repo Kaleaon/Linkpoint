@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:title="@string/prefs_category_3d_advanced">
+    <CheckBoxPreference android:title="Anti-aliasing" android:key="fxaa_enable" android:summary="Smooth edges at the expense of lower frame rate" android:defaultValue="false"/>
+    <CheckBoxPreference android:title="Sky clouds" android:key="clouds_enable" android:summary="Render clouds on the sky" android:defaultValue="true"/>
+    <ListPreference android:entries="@array/pref_time_of_day" android:title="Time of day" android:key="render_time_of_day" android:summary="%s" android:defaultValue="sim" android:entryValues="@array/pref_time_of_day_values"/>
+</PreferenceScreen>

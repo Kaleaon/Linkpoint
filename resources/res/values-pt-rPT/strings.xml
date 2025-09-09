@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">Navegar para a página inicial</string>
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+    <string name="abc_action_bar_up_description">Navegar para cima</string>
+    <string name="abc_action_menu_overflow_description">Mais opções</string>
+    <string name="abc_action_mode_done">Concluído</string>
+    <string name="abc_activity_chooser_view_see_all">Ver tudo</string>
+    <string name="abc_activitychooserview_choose_application">Escolher uma aplicação</string>
+    <string name="abc_capital_off">DESATIVADO</string>
+    <string name="abc_capital_on">ATIVADO</string>
+    <string name="abc_search_hint">Pesquisar...</string>
+    <string name="abc_searchview_description_clear">Limpar consulta</string>
+    <string name="abc_searchview_description_query">Consulta de pesquisa</string>
+    <string name="abc_searchview_description_search">Pesquisar</string>
+    <string name="abc_searchview_description_submit">Enviar consulta</string>
+    <string name="abc_searchview_description_voice">Pesquisa por voz</string>
+    <string name="abc_shareactionprovider_share_with">Partilhar com</string>
+    <string name="abc_shareactionprovider_share_with_application">Partilhar com %s</string>
+    <string name="abc_toolbar_collapse_description">Reduzir</string>
+    <string name="back_button_content_description">anterior</string>
+    <string name="cancel_button">Cancelar</string>
+    <string name="dialog_button_got_it">COMPREENDI</string>
+    <string name="dialog_button_open_help_center">ABRIR O CENTRO DE AJUDA</string>
+    <string name="dialog_message_incompatible_phone">É necessário um telemóvel compatível com Daydream. Visite o Centro de Ajuda do Daydream para obter mais informações.</string>
+    <string name="dialog_message_no_cardboard">Obtenha a aplicação Cardboard para configurar o seu visualizador.</string>
+    <string name="dialog_message_setup">Configure o seu visualizador para obter a melhor experiência.</string>
+    <string name="dialog_title">Configurar</string>
+    <string name="dialog_title_incompatible_phone">Telemóvel incompatível</string>
+    <string name="dialog_title_vr_core_not_enabled">Configuração necessária</string>
+    <string name="dialog_title_vr_core_not_installed">Instalação necessária</string>
+    <string name="dialog_title_warning">Aviso</string>
+    <string name="dialog_vr_core_not_enabled">Esta aplicação pode não funcionar corretamente sem ativar os Serviços de RV da Google. Ative os Serviços de RV da Google nas Definições do telemóvel antes de continuar.</string>
+    <string name="dialog_vr_core_not_installed">Esta aplicação pode não funcionar corretamente sem os Serviços de RV da Google. Instale os Serviços de RV da Google a partir da Play Store antes de continuar.</string>
+    <string name="go_to_playstore_button">Ir para a Play Store</string>
+    <string name="go_to_vr_listeners_settings_button">Aceder às Definições</string>
+    <string name="no_browser_text">Sem navegador para abrir o Website</string>
+    <string name="place_your_phone_into_cardboard">Coloque o telemóvel no visualizador do Cardboard</string>
+    <string name="place_your_viewer_into_viewer_format">Coloque o telemóvel no visualizador %s</string>
+    <string name="search_menu_title">Pesquisar</string>
+    <string name="settings_button_content_description">definições</string>
+    <string name="setup_button">Configuração</string>
+    <string name="status_bar_notification_info_overflow">+999</string>
+    <string name="switch_viewer_action">Mudar</string>
+    <string name="switch_viewer_prompt">Visualizador diferente?</string>
+</resources>

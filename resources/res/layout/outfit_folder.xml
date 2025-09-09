@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.lumiyaviewer.lumiya.ui.common.LoadingLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:id="@+id/loading_layout" android:layout_width="match_parent" android:layout_height="match_parent" app:withButteryProgressBar="true">
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+        <ListView android:id="@+id/item_list" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_weight="1"/>
+        <LinearLayout android:layout_gravity="right" android:orientation="horizontal" android:id="@+id/wear_buttons_layout" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="0">
+            <Button android:layout_gravity="center_vertical" android:id="@+id/outfit_folder_wear_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_wear" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+            <Button android:layout_gravity="center_vertical" android:id="@+id/outfit_folder_add_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_add_to_outfit" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+        </LinearLayout>
+    </LinearLayout>
+</com.lumiyaviewer.lumiya.ui.common.LoadingLayout>

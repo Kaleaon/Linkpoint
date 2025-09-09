@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:title="@string/prefs_category_notifications_group">
+    <CheckBoxPreference android:title="Enable notification" android:key="enableNotifyGroupMessage" android:summary="Notify for group messages" android:defaultValue="true"/>
+    <CheckBoxPreference android:title="Group message sound" android:key="soundOnGroupMessage" android:summary="Play sound on group message" android:dependency="enableNotifyGroupMessage" android:defaultValue="true"/>
+    <com.lumiyaviewer.lumiya.ui.settings.RingtonePreference android:title="Sound for group message" android:key="notifySoundGroupMessage" android:summary="Sound to play when group message is received" android:dependency="soundOnGroupMessage" android:defaultValue="content://settings/system/notification_sound" android:ringtoneType="notification" android:showDefault="true" app:defaultRawResource="@raw/lumiya_group_message"/>
+    <ListPreference android:entries="@array/pref_led_action" android:title="Blink LED for group messages" android:key="notifyLEDgroupMessages" android:summary="%s" android:dependency="enableNotifyGroupMessage" android:defaultValue="none" android:entryValues="@array/pref_led_action_values"/>
+    <ListPreference android:entries="@array/pref_led_color" android:title="LED color for group messages" android:key="notifyLEDColorGroupMessages" android:summary="%s" android:dependency="enableNotifyGroupMessage" android:defaultValue="FF0000" android:entryValues="@array/pref_led_color_values"/>
+</PreferenceScreen>
