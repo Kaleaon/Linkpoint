@@ -95,10 +95,34 @@ This project uses several key libraries:
 
 For detailed technical information about the project architecture and improvements:
 
+### Core Architecture Documentation
 - **[API Analysis and Improvements](docs/API_Analysis_and_Improvements.md)** - Comprehensive analysis of LibreMetaverse API implementation and graphics engine architecture
 - **[API Usage Catalog](docs/API_Usage_Catalog.md)** - Complete mapping of all APIs, libraries, and frameworks used in the project  
 - **[Graphics Engine Roadmap](docs/Graphics_Engine_Roadmap.md)** - Detailed improvement plan for graphics and performance enhancements
 - **[Research Summary](docs/Research_Summary.md)** - Executive summary of OpenMetaverse/LibreMetaverse research and improvement opportunities
+
+### Modernization Documentation
+- **[Lumiya Modernization Guide](docs/Lumiya_Modernization_Guide.md)** - Comprehensive guide for modernizing Lumiya Viewer to work with Second Life using contemporary technologies
+- **[Broken Code Analysis and Fixes](docs/Broken_Code_Analysis_and_Fixes.md)** - Detailed analysis of broken code areas with specific fixes using modern virtual world technologies
+- **[Second Life Integration Guide](docs/Second_Life_Integration_Guide.md)** - Specific implementation details for integrating modern technologies with Second Life protocols
+- **[Implementation Roadmap](docs/Implementation_Roadmap.md)** - Practical step-by-step implementation guide with specific code changes and testing procedures
+
+### Key Modernization Features
+
+The modernization effort integrates insights from leading virtual world and metaverse projects:
+
+#### Referenced Technologies
+- **@webaverse-studios/webaverse** - Modern WebXR/3D web technologies and asset pipeline
+- **OMI Group (github.com/omigroup)** - Open Metaverse Interoperability standards
+- **@cinderblocks/libremetaverse** - Contemporary C# Second Life protocol implementation  
+- **Second Life OpenMetaverse Community** - Protocol modernization insights
+
+#### Key Improvements
+- **Modern Protocol Stack**: HTTP/2 CAPS, WebSocket events, OAuth2 authentication
+- **Advanced Graphics Pipeline**: Vulkan rendering, PBR materials, Basis Universal textures
+- **Interoperability Standards**: glTF 2.0, VRM avatars, OMI extensions
+- **Performance Optimization**: Multi-threaded rendering, GPU memory pools, adaptive quality
+- **Build System Fixes**: Resolved Android resource conflicts and native compilation issues
 
 ## License
 
