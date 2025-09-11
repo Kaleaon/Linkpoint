@@ -29,23 +29,27 @@ public abstract class RequestOperator<K, T> implements RequestHandler<K> {
         this.toHandler.onRequestCancelled(obj);
     }
 
-    /* synthetic */ void processRequestData(Object obj) {
-        Object processRequest = processRequest(obj);
-        if (processRequest != null) {
-            this.resultHandler.onResultData(obj, processRequest);
+    /* synthetic */ void processRequestAsync(Object obj) {
+        Object result = processRequest(obj);
+        if (result != null) {
+            this.resultHandler.onResultData(obj, result);
         } else {
             this.toHandler.onRequest(obj);
         }
     }
 
+    /* synthetic */ void cancelRequestAsync(Object obj) {
+        this.toHandler.onRequestCancelled(obj);
+    }
+
     public void onRequest(@Nonnull K k) {
         if (this.executor != null) {
-            this.executor.execute(new -$Lambda$3htMVvcf7XlS6QCgMv3cESjj4go(this, k));
+            this.executor.execute(() -> processRequestAsync(k));
             return;
         }
-        Object processRequest = processRequest(k);
-        if (processRequest != null) {
-            this.resultHandler.onResultData(k, processRequest);
+        Object processResult = processRequest(k);
+        if (processResult != null) {
+            this.resultHandler.onResultData(k, processResult);
         } else {
             this.toHandler.onRequest(k);
         }
@@ -53,7 +57,7 @@ public abstract class RequestOperator<K, T> implements RequestHandler<K> {
 
     public void onRequestCancelled(@Nonnull K k) {
         if (this.executor != null) {
-            this.executor.execute(new AnonymousClass1(this, k));
+            this.executor.execute(() -> cancelRequestAsync(k));
         } else {
             this.toHandler.onRequestCancelled(k);
         }

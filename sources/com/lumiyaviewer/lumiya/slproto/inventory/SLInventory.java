@@ -2454,14 +2454,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_42520  reason: not valid java name */
-    public /* synthetic */ void m179lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_42520(SLInventoryEntry sLInventoryEntry, SLInventoryEntry sLInventoryEntry2) {
+    /* renamed from: requestFolderUpdateForParent - handles folder update for parent UUID */
+    public /* synthetic */ void requestFolderUpdateForParent(SLInventoryEntry sLInventoryEntry, SLInventoryEntry sLInventoryEntry2) {
         this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.parentUUID);
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_48053  reason: not valid java name */
-    public /* synthetic */ void m180lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_48053(SLInventoryEntry sLInventoryEntry, byte[] bArr, UUID uuid, boolean z, OnNotecardUpdatedListener onNotecardUpdatedListener) {
+    /* renamed from: uploadNotecardContentsHandler - handles notecard content upload and callback notification */
+    public /* synthetic */ void uploadNotecardContentsHandler(SLInventoryEntry sLInventoryEntry, byte[] bArr, UUID uuid, boolean z, OnNotecardUpdatedListener onNotecardUpdatedListener) {
         UUID uuid2 = null;
         Object[] objArr = new Object[1];
         objArr[0] = sLInventoryEntry != null ? sLInventoryEntry.uuid : null;
