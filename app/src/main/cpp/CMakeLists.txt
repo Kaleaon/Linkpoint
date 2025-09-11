@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10.2)
 project("basis_transcoder")
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Add Basis Universal transcoder sources
@@ -22,6 +22,7 @@ add_definitions(
     -DBASISU_SUPPORT_SSE=0
     -DBASISU_SUPPORT_OPENCL=0
     -DBASISU_NO_ITERATOR_DEBUG_LEVEL
+    -DBASISD_SUPPORT_KTX2_ZSTD=1
     -DANDROID
 )
 

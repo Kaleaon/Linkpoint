@@ -36,8 +36,12 @@ public class ModernTextureManager {
             Log.i(TAG, "Basis transcoder native library loaded successfully");
         } catch (UnsatisfiedLinkError e) {
             Log.e(TAG, "Failed to load basis transcoder native library", e);
+            throw new RuntimeException("Critical: Native library not available", e);
         }
     }
+    
+    // Instance state
+    private boolean initialized = false;
     
     // Native method declarations
     private static native boolean nativeInit();
@@ -49,18 +53,29 @@ public class ModernTextureManager {
     
     public ModernTextureManager(Context context) {
         // Initialize the transcoder
-        if (!nativeInit()) {
-            Log.e(TAG, "Failed to initialize native transcoder");
-            return;
+        try {
+            if (!nativeInit()) {
+                Log.e(TAG, "Failed to initialize native transcoder");
+                throw new RuntimeException("Native transcoder initialization failed");
+            }
+            
+            // Detect GPU capabilities
+            detectGPUCapabilities();
+            
+            Log.i(TAG, "ModernTextureManager initialized with GPU capabilities:");
+            Log.i(TAG, "  ASTC support: " + supportsASTC);
+            Log.i(TAG, "  ETC2 support: " + supportsETC2);
+            Log.i(TAG, "  BC7 support: " + supportsBC7);
+            
+            initialized = true;
+            
+        } catch (UnsatisfiedLinkError e) {
+            Log.e(TAG, "Native library not available", e);
+            throw new RuntimeException("Native library loading failed", e);
+        } catch (Exception e) {
+            Log.e(TAG, "Unexpected error during initialization", e);
+            throw new RuntimeException("ModernTextureManager initialization failed", e);
         }
-        
-        // Detect GPU capabilities
-        detectGPUCapabilities();
-        
-        Log.i(TAG, "ModernTextureManager initialized with GPU capabilities:");
-        Log.i(TAG, "  ASTC support: " + supportsASTC);
-        Log.i(TAG, "  ETC2 support: " + supportsETC2);
-        Log.i(TAG, "  BC7 support: " + supportsBC7);
     }
     
     /**
@@ -74,6 +89,13 @@ public class ModernTextureManager {
                           extensions.contains("GL_ARB_ES3_compatibility");
             supportsBC7 = extensions.contains("GL_EXT_texture_compression_bptc");
         }
+    }
+    
+    /**
+     * Check if the texture manager is properly initialized
+     */
+    public boolean isInitialized() {
+        return initialized;
     }
     
     /**
@@ -95,6 +117,9 @@ public class ModernTextureManager {
      * Load and transcode a KTX2 texture from input stream
      */
     public TextureData loadKTX2Texture(InputStream inputStream) throws IOException {
+        if (!initialized) {
+            throw new IllegalStateException("ModernTextureManager not properly initialized");
+        }
         return loadKTX2Texture(inputStream, getOptimalTextureFormat());
     }
     
@@ -102,6 +127,9 @@ public class ModernTextureManager {
      * Load and transcode a KTX2 texture with specific format
      */
     public TextureData loadKTX2Texture(InputStream inputStream, int targetFormat) throws IOException {
+        if (!initialized) {
+            throw new IllegalStateException("ModernTextureManager not properly initialized");
+        }
         // Read KTX2 data from input stream
         byte[] ktx2Data = readInputStreamToByteArray(inputStream);
         

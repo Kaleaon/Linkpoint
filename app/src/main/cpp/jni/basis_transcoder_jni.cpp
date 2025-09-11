@@ -133,22 +133,50 @@ Java_com_lumiyaviewer_lumiya_render_ModernTextureManager_nativeTranscodeTexture(
     
     basist::transcoder_texture_format format = getTranscoderFormat(targetFormat);
     
-    // Get transcoded size
-    uint32_t transcoded_size = instance->transcoder.get_transcoded_texture_size(
-        0, level, format
-    );
-    
-    if (transcoded_size == 0) {
-        LOGE("Failed to get transcoded texture size");
+    // Start transcoding first
+    if (!instance->transcoder.start_transcoding()) {
+        LOGE("Failed to start transcoding");
         return nullptr;
     }
     
+    // Get level info to calculate buffer size
+    basist::ktx2_image_level_info level_info;
+    if (!instance->transcoder.get_image_level_info(level_info, level, 0, 0)) {
+        LOGE("Failed to get image level info");
+        return nullptr;
+    }
+    
+    // Calculate the required output buffer size based on format
+    uint32_t output_size_in_bytes;
+    uint32_t blocks_or_pixels_buf_size;
+    
+    if (format == basist::transcoder_texture_format::cTFRGBA32) {
+        // Uncompressed format: 4 bytes per pixel
+        blocks_or_pixels_buf_size = level_info.m_orig_width * level_info.m_orig_height;
+        output_size_in_bytes = blocks_or_pixels_buf_size * 4;
+    } else {
+        // Compressed formats: size in blocks
+        blocks_or_pixels_buf_size = level_info.m_num_blocks_x * level_info.m_num_blocks_y;
+        
+        // Calculate bytes per block for different formats
+        uint32_t bytes_per_block = 16; // Default for most formats like ASTC, ETC2
+        if (format == basist::transcoder_texture_format::cTFBC7_RGBA) {
+            bytes_per_block = 16; // BC7 uses 16 bytes per block
+        }
+        
+        output_size_in_bytes = blocks_or_pixels_buf_size * bytes_per_block;
+    }
+    
     // Allocate buffer for transcoded data
-    std::vector<uint8_t> transcoded_data(transcoded_size);
+    std::vector<uint8_t> transcoded_data(output_size_in_bytes);
     
     // Perform transcoding
-    bool success = instance->transcoder.transcode_image(
-        0, level, transcoded_data.data(), transcoded_size, format, 0
+    bool success = instance->transcoder.transcode_image_level(
+        level, 0, 0, // level_index, layer_index, face_index
+        transcoded_data.data(), 
+        blocks_or_pixels_buf_size, // This parameter expects blocks for compressed, pixels for uncompressed
+        format,
+        0 // decode_flags
     );
     
     if (!success) {
@@ -157,13 +185,13 @@ Java_com_lumiyaviewer_lumiya_render_ModernTextureManager_nativeTranscodeTexture(
     }
     
     // Create Java byte array and copy data
-    jbyteArray result = env->NewByteArray(transcoded_size);
+    jbyteArray result = env->NewByteArray(output_size_in_bytes);
     if (result) {
-        env->SetByteArrayRegion(result, 0, transcoded_size, 
+        env->SetByteArrayRegion(result, 0, output_size_in_bytes, 
                                reinterpret_cast<jbyte*>(transcoded_data.data()));
     }
     
-    LOGI("Successfully transcoded texture: %d bytes", transcoded_size);
+    LOGI("Successfully transcoded texture: %d bytes", output_size_in_bytes);
     return result;
 }
 
