@@ -224,8 +224,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_accounts_ManageAccountsActivity_6140  reason: not valid java name */
-    public /* synthetic */ void m386lambda$com_lumiyaviewer_lumiya_ui_accounts_ManageAccountsActivity_6140(AccountList.AccountInfo accountInfo, DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onDeleteAccountConfirmed(AccountList.AccountInfo accountInfo, DialogInterface dialogInterface, int i) {
         dialogInterface.dismiss();
         deleteAccount(accountInfo);
     }

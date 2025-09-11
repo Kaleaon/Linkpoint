@@ -21,8 +21,7 @@ public class TeleportSLURLActivity extends AppCompatActivity implements View.OnC
     private SLURL slurl = null;
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_login_TeleportSLURLActivity_4598  reason: not valid java name */
-    public /* synthetic */ void m638lambda$com_lumiyaviewer_lumiya_ui_login_TeleportSLURLActivity_4598(DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onTeleportCancelled(DialogInterface dialogInterface, int i) {
         dialogInterface.cancel();
         finish();
     }

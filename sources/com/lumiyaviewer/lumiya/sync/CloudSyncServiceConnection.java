@@ -205,8 +205,7 @@ public class CloudSyncServiceConnection implements ServiceConnection {
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_sync_CloudSyncServiceConnection_8286  reason: not valid java name */
-    public /* synthetic */ void m383lambda$com_lumiyaviewer_lumiya_sync_CloudSyncServiceConnection_8286() {
+    public /* synthetic */ void disconnectFromSyncService() {
         Debug.Printf("LumiyaCloud: disconnecting from sync service", new Object[0]);
         this.context.unbindService(this);
     }

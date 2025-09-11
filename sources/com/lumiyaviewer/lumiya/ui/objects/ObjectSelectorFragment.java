@@ -175,8 +175,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$r
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10042  reason: not valid java name */
-    public /* synthetic */ void m682lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10042(Throwable th) {
+    public /* synthetic */ void onObjectLoadError(Throwable th) {
         View view;
         if ((th instanceof SLGridConnection.NotConnectedException) && (view = getView()) != null) {
             View findViewById = view.findViewById(R.id.object_progress_bar);
@@ -191,8 +190,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$r
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10971  reason: not valid java name */
-    public /* synthetic */ void m683lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10971(ObjectsManager.ObjectDisplayList objectDisplayList) {
+    public /* synthetic */ void onObjectListUpdated(ObjectsManager.ObjectDisplayList objectDisplayList) {
         int i = 8;
         ImmutableList<SLObjectDisplayInfo> immutableList = objectDisplayList.objects;
         View view = getView();

@@ -583,8 +583,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_10987  reason: not valid java name */
-    public /* synthetic */ void m583lambda$com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_10987(ChatterNameRetriever chatterNameRetriever) {
+    public /* synthetic */ void onAssetNameRetrieved(ChatterNameRetriever chatterNameRetriever) {
         SLInventoryEntry data = this.entrySubscription.getData();
         if (data != null) {
             showUserInfo(data.ownerUUID, this.ownerNameRetriever, R.id.asset_owner_card_view, R.id.asset_owner_name, R.id.asset_owner_pic);
@@ -594,8 +593,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_20027  reason: not valid java name */
-    public /* synthetic */ void m584lambda$com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_20027() {
+    public /* synthetic */ void closeDetailsFragment() {
         FragmentActivity activity = getActivity();
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this);
@@ -603,8 +601,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_26713  reason: not valid java name */
-    public /* synthetic */ void m585lambda$com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_26713(Dialog dialog, View view) {
+    public /* synthetic */ void onPermissionsApplyClicked(Dialog dialog, View view) {
         applyEditedPermissions(dialog);
         dialog.dismiss();
     }

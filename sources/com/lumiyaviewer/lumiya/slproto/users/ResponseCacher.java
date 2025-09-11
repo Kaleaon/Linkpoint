@@ -74,8 +74,7 @@ abstract class ResponseCacher<KeyType, MessageType> implements Refreshable<KeyTy
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_ResponseCacher_1058  reason: not valid java name */
-    public /* synthetic */ void m267lambda$com_lumiyaviewer_lumiya_slproto_users_ResponseCacher_1058(Object obj) {
+    public /* synthetic */ void invalidateCachedResponse(Object obj) {
         CachedResponse cachedResponse = (CachedResponse) this.cachedresponseDao.load(getKeyString(obj));
         if (cachedResponse != null) {
             cachedResponse.setMustRevalidate(true);
