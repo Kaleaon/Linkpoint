@@ -264,7 +264,7 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
         }
         if (sLTempCircuit != null) {
             for (SLMessage Handle : sLTempCircuit.getPendingMessages()) {
-                Handle.lambda$-com_lumiyaviewer_lumiya_slproto_SLThreadingCircuit_1833(this);
+                Handle.handleMessage(this);
             }
         }
     }
