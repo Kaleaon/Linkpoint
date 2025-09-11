@@ -2479,20 +2479,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_49599  reason: not valid java name */
-    public /* synthetic */ void m181lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_49599(boolean z, byte[] bArr, OnNotecardUpdatedListener onNotecardUpdatedListener, SLInventoryEntry sLInventoryEntry) {
+    public /* synthetic */ void uploadNotecardContentsHandler1(boolean z, byte[] bArr, OnNotecardUpdatedListener onNotecardUpdatedListener, SLInventoryEntry sLInventoryEntry) {
         StartUploadingNotecardContents(sLInventoryEntry, (UUID) null, z, bArr, onNotecardUpdatedListener);
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_50229  reason: not valid java name */
-    public /* synthetic */ void m182lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_50229(boolean z, byte[] bArr, OnNotecardUpdatedListener onNotecardUpdatedListener, SLInventoryEntry sLInventoryEntry) {
+    public /* synthetic */ void uploadNotecardContentsHandler2(boolean z, byte[] bArr, OnNotecardUpdatedListener onNotecardUpdatedListener, SLInventoryEntry sLInventoryEntry) {
         StartUploadingNotecardContents(sLInventoryEntry, (UUID) null, z, bArr, onNotecardUpdatedListener);
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_51539  reason: not valid java name */
-    public /* synthetic */ void m183lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_51539(UUID uuid, UUID uuid2, UUID uuid3, Runnable runnable) {
+    public /* synthetic */ void copyInventoryFromNotecardHandler(UUID uuid, UUID uuid2, UUID uuid3, Runnable runnable) {
         try {
             String capabilityOrThrow = getCaps().getCapabilityOrThrow(SLCaps.SLCapability.CopyInventoryFromNotecard);
             new LLSDXMLRequest().PerformRequest(capabilityOrThrow, new LLSDMap(new LLSDMap.LLSDMapEntry("notecard-id", new LLSDUUID(uuid)), new LLSDMap.LLSDMapEntry("object-id", new LLSDUUID()), new LLSDMap.LLSDMapEntry("item-id", new LLSDUUID(uuid2)), new LLSDMap.LLSDMapEntry("folder-id", new LLSDUUID(uuid3)), new LLSDMap.LLSDMapEntry("callback-id", new LLSDInt(0))));

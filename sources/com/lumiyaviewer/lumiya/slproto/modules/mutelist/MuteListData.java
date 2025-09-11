@@ -98,16 +98,14 @@ public class MuteListData {
         return false;
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795  reason: not valid java name */
-    static /* synthetic */ boolean m228lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795(MuteListEntry muteListEntry, Map.Entry entry) {
+    static /* synthetic */ boolean isEntryNameNotEqual(MuteListEntry muteListEntry, Map.Entry entry) {
         if (entry != null) {
             return !((String) entry.getKey()).equals(muteListEntry.name);
         }
         return false;
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273  reason: not valid java name */
-    static /* synthetic */ boolean m229lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273(MuteListKey muteListKey, Map.Entry entry) {
+    static /* synthetic */ boolean isMuteKeyNotEqual(MuteListKey muteListKey, Map.Entry entry) {
         if (entry != null) {
             return !((MuteListKey) entry.getKey()).equals(muteListKey);
         }
@@ -129,7 +127,7 @@ public class MuteListData {
             private final /* synthetic */ Object f124$f0;
 
             private final /* synthetic */ boolean $m$0(Object obj) {
-                return MuteListData.m229lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273((MuteListKey) this.f124$f0, (Map.Entry) obj);
+                return MuteListData.isMuteKeyNotEqual((MuteListKey) this.f124$f0, (Map.Entry) obj);
             }
 
             {

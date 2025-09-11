@@ -66,8 +66,7 @@ public class BalanceManager {
         this.moneyTransactionPool.setDisposeHandler(new $Lambda$xo_DO1h0hLJizWUYkWN5MuOYxk(), userManager2.getDatabaseExecutor());
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705  reason: not valid java name */
-    static /* synthetic */ void m286lambda$com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705(LazyList lazyList) {
+    static /* synthetic */ void closeLazyListHandler(LazyList lazyList) {
         if (!lazyList.isClosed()) {
             lazyList.close();
         }
@@ -216,8 +215,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_4293  reason: not valid java name */
-    public /* synthetic */ void m287lambda$com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_4293() {
+    public /* synthetic */ void clearAllMoneyTransactions() {
         this.moneyTransactionDao.deleteAll();
         updateMoneyTransactions();
     }

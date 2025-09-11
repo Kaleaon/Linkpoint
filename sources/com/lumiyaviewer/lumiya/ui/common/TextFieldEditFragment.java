@@ -39,15 +39,13 @@ public abstract class TextFieldEditFragment extends ChatterFragment implements B
     public abstract String getFieldHint(Context context);
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TextFieldEditFragment_1854  reason: not valid java name */
-    public /* synthetic */ void m556lambda$com_lumiyaviewer_lumiya_ui_common_TextFieldEditFragment_1854(View view, DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onResetButtonClicked(View view, DialogInterface dialogInterface, int i) {
         ((TextView) view.findViewById(R.id.field_edit_text)).setText(this.originalText);
         dialogInterface.dismiss();
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TextFieldEditFragment_4960  reason: not valid java name */
-    public /* synthetic */ void m557lambda$com_lumiyaviewer_lumiya_ui_common_TextFieldEditFragment_4960(String str, DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onSaveButtonClicked(String str, DialogInterface dialogInterface, int i) {
         SLAgentCircuit activeAgentCircuit;
         dialogInterface.dismiss();
         if (!(this.userManager == null || this.chatterID == null || (activeAgentCircuit = this.userManager.getActiveAgentCircuit()) == null)) {
@@ -57,8 +55,7 @@ public abstract class TextFieldEditFragment extends ChatterFragment implements B
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TextFieldEditFragment_5518  reason: not valid java name */
-    public /* synthetic */ void m558lambda$com_lumiyaviewer_lumiya_ui_common_TextFieldEditFragment_5518(DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onCancelButtonClicked(DialogInterface dialogInterface, int i) {
         dialogInterface.cancel();
         closeFragment();
     }

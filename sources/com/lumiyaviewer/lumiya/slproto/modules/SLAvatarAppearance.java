@@ -648,16 +648,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
         if (this.serverSideAppearanceUpdateTask != null) {
             this.serverSideAppearanceUpdateTask.cancel(true);
         }
-        this.serverSideAppearanceUpdateTask = GenericHTTPExecutor.getInstance().submit(new Runnable(i, this, str) {
+        this.serverSideAppearanceUpdateTask = GenericHTTPExecutor.getInstance().submit(() -> performServerSideAppearanceUpdate(i, str));
 
-            /* renamed from: -$f0 */
-            private final /* synthetic */ int f119$f0;
 
-            /* renamed from: -$f1 */
-            private final /* synthetic */ Object f120$f1;
-
-            /* renamed from: -$f2 */
-            private final /* synthetic */ Object f121$f2;
 
             private final /* synthetic */ void $m$0(
 /*
@@ -1717,8 +1710,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearance_17963  reason: not valid java name */
-    public /* synthetic */ void m202lambda$com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearance_17963(int i, String str) {
+    public /* synthetic */ void performServerSideAppearanceUpdate(int i, String str) {
         LLSDXMLRequest lLSDXMLRequest = new LLSDXMLRequest();
         LLSDMap lLSDMap = new LLSDMap(new LLSDMap.LLSDMapEntry("cof_version", new LLSDInt(i)));
         int i2 = 3;

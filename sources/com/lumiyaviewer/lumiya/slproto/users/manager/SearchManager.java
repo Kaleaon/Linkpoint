@@ -20,8 +20,7 @@ public class SearchManager {
         this.searchResults.setDisposeHandler(new $Lambda$bhNrB7VMDi5fNhRKl1Wi5s6H9k(), this.dbExecutor);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_SearchManager_1019  reason: not valid java name */
-    static /* synthetic */ void m350lambda$com_lumiyaviewer_lumiya_slproto_users_manager_SearchManager_1019(LazyList lazyList) {
+    static /* synthetic */ void closeSearchResultsHandler(LazyList lazyList) {
         if (!lazyList.isClosed()) {
             lazyList.close();
         }
