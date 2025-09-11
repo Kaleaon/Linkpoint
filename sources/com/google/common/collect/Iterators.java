@@ -316,33 +316,18 @@ public final class Iterators {
         return cycle(Lists.newArrayList((E[]) tArr));
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:5:0x000e  */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public static boolean elementsEqual(java.util.Iterator<?> r3, java.util.Iterator<?> r4) {
-        /*
-            r0 = 0
-        L_0x0001:
-            boolean r1 = r3.hasNext()
-            if (r1 != 0) goto L_0x000e
-            boolean r1 = r4.hasNext()
-            if (r1 == 0) goto L_0x0024
-        L_0x000d:
-            return r0
-        L_0x000e:
-            boolean r1 = r4.hasNext()
-            if (r1 == 0) goto L_0x0023
-            java.lang.Object r1 = r3.next()
-            java.lang.Object r2 = r4.next()
-            boolean r1 = com.google.common.base.Objects.equal(r1, r2)
-            if (r1 != 0) goto L_0x0001
-            return r0
-        L_0x0023:
-            return r0
-        L_0x0024:
-            r0 = 1
-            goto L_0x000d
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.google.common.collect.Iterators.elementsEqual(java.util.Iterator, java.util.Iterator):boolean");
+    public static boolean elementsEqual(Iterator<?> iterator1, Iterator<?> iterator2) {
+        while (iterator1.hasNext()) {
+            if (!iterator2.hasNext()) {
+                return false;
+            }
+            Object o1 = iterator1.next();
+            Object o2 = iterator2.next();
+            if (!Objects.equal(o1, o2)) {
+                return false;
+            }
+        }
+        return !iterator2.hasNext();
     }
 
     @Deprecated

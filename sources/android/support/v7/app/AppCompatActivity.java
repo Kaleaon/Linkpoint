@@ -32,41 +32,24 @@ public class AppCompatActivity extends FragmentActivity implements AppCompatCall
     private Resources mResources;
     private int mThemeId = 0;
 
-    /* JADX WARNING: Code restructure failed: missing block: B:11:0x0028, code lost:
-        r0 = getWindow();
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    private boolean performMenuItemShortcut(int r4, android.view.KeyEvent r5) {
-        /*
-            r3 = this;
-            r2 = 0
-            int r0 = android.os.Build.VERSION.SDK_INT
-            r1 = 26
-            if (r0 < r1) goto L_0x0008
-        L_0x0007:
-            return r2
-        L_0x0008:
-            boolean r0 = r5.isCtrlPressed()
-            if (r0 != 0) goto L_0x0007
-            int r0 = r5.getMetaState()
-            boolean r0 = android.view.KeyEvent.metaStateHasNoModifiers(r0)
-            if (r0 != 0) goto L_0x0007
-            int r0 = r5.getRepeatCount()
-            if (r0 != 0) goto L_0x0007
-            int r0 = r5.getKeyCode()
-            boolean r0 = android.view.KeyEvent.isModifierKey(r0)
-            if (r0 != 0) goto L_0x0007
-            android.view.Window r0 = r3.getWindow()
-            if (r0 == 0) goto L_0x0007
-            android.view.View r1 = r0.getDecorView()
-            if (r1 == 0) goto L_0x0007
-            android.view.View r0 = r0.getDecorView()
-            boolean r0 = r0.dispatchKeyShortcutEvent(r5)
-            if (r0 == 0) goto L_0x0007
-            r0 = 1
-            return r0
-        */
-        throw new UnsupportedOperationException("Method not decompiled: android.support.v7.app.AppCompatActivity.performMenuItemShortcut(int, android.view.KeyEvent):boolean");
+    private boolean performMenuItemShortcut(int keyCode, KeyEvent event) {
+        if (Build.VERSION.SDK_INT >= 26) {
+            return false;
+        }
+        if (event.isCtrlPressed() || 
+            !KeyEvent.metaStateHasNoModifiers(event.getMetaState()) || 
+            event.getRepeatCount() != 0 || 
+            KeyEvent.isModifierKey(event.getKeyCode())) {
+            return false;
+        }
+        Window window = getWindow();
+        if (window != null) {
+            View decorView = window.getDecorView();
+            if (decorView != null) {
+                return decorView.dispatchKeyShortcutEvent(event);
+            }
+        }
+        return false;
     }
 
     public void addContentView(View view, ViewGroup.LayoutParams layoutParams) {

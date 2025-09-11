@@ -152,107 +152,60 @@ public final class IntMath {
         return (int) j;
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:35:0x0065, code lost:
-        if ((((r2 & 1) != 0) & (r9 == java.math.RoundingMode.HALF_EVEN)) == false) goto L_0x0036;
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public static int divide(int r7, int r8, java.math.RoundingMode r9) {
+    public static int divide(int p, int q, RoundingMode mode) {
+        Preconditions.checkNotNull(mode);
+        if (q == 0) {
+            throw new ArithmeticException("/ by zero");
+        }
+        int div = p / q;
+        int rem = p - q * div; // equal to p % q
+
+        if (rem == 0) {
+            return div;
+        }
+
         /*
-            r0 = 1
-            r1 = 0
-            com.google.common.base.Preconditions.checkNotNull(r9)
-            if (r8 == 0) goto L_0x0026
-            int r2 = r7 / r8
-            int r3 = r8 * r2
-            int r3 = r7 - r3
-            if (r3 == 0) goto L_0x002f
-            r4 = r7 ^ r8
-            int r4 = r4 >> 31
-            r5 = r4 | 1
-            int[] r4 = com.google.common.math.IntMath.AnonymousClass1.$SwitchMap$java$math$RoundingMode
-            int r6 = r9.ordinal()
-            r4 = r4[r6]
-            switch(r4) {
-                case 1: goto L_0x0030;
-                case 2: goto L_0x0036;
-                case 3: goto L_0x0040;
-                case 4: goto L_0x003a;
-                case 5: goto L_0x003c;
-                case 6: goto L_0x0044;
-                case 7: goto L_0x0044;
-                case 8: goto L_0x0044;
-                default: goto L_0x0020;
-            }
-        L_0x0020:
-            java.lang.AssertionError r0 = new java.lang.AssertionError
-            r0.<init>()
-            throw r0
-        L_0x0026:
-            java.lang.ArithmeticException r0 = new java.lang.ArithmeticException
-            java.lang.String r1 = "/ by zero"
-            r0.<init>(r1)
-            throw r0
-        L_0x002f:
-            return r2
-        L_0x0030:
-            if (r3 == 0) goto L_0x0033
-            r0 = r1
-        L_0x0033:
-            com.google.common.math.MathPreconditions.checkRoundingUnnecessary(r0)
-        L_0x0036:
-            if (r1 != 0) goto L_0x006c
-            r0 = r2
-        L_0x0039:
-            return r0
-        L_0x003a:
-            r1 = r0
-            goto L_0x0036
-        L_0x003c:
-            if (r5 <= 0) goto L_0x0036
-            r1 = r0
-            goto L_0x0036
-        L_0x0040:
-            if (r5 >= 0) goto L_0x0036
-            r1 = r0
-            goto L_0x0036
-        L_0x0044:
-            int r3 = java.lang.Math.abs(r3)
-            int r4 = java.lang.Math.abs(r8)
-            int r4 = r4 - r3
-            int r3 = r3 - r4
-            if (r3 == 0) goto L_0x0054
-            if (r3 <= 0) goto L_0x0036
-            r1 = r0
-            goto L_0x0036
-        L_0x0054:
-            java.math.RoundingMode r3 = java.math.RoundingMode.HALF_UP
-            if (r9 != r3) goto L_0x005a
-        L_0x0058:
-            r1 = r0
-            goto L_0x0036
-        L_0x005a:
-            java.math.RoundingMode r3 = java.math.RoundingMode.HALF_EVEN
-            if (r9 == r3) goto L_0x0068
-            r4 = r1
-        L_0x005f:
-            r3 = r2 & 1
-            if (r3 != 0) goto L_0x006a
-            r3 = r1
-        L_0x0064:
-            r3 = r3 & r4
-            if (r3 != 0) goto L_0x0058
-            goto L_0x0036
-        L_0x0068:
-            r4 = r0
-            goto L_0x005f
-        L_0x006a:
-            r3 = r0
-            goto L_0x0064
-        L_0x006c:
-            int r0 = r2 + r5
-            goto L_0x0039
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.google.common.math.IntMath.divide(int, int, java.math.RoundingMode):int");
+         * Normal Java division rounds towards 0, consistently with RoundingMode.DOWN. We just have to
+         * deal with the cases where rounding towards 0 is wrong, which typically depends on the sign of
+         * p / q.
+         *
+         * signum is 1 if p and q are both nonnegative or both negative, and -1 otherwise.
+         */
+        int signum = 1 | ((p ^ q) >> (Integer.SIZE - 1));
+        boolean increment;
+        switch (mode) {
+            case UNNECESSARY:
+                MathPreconditions.checkRoundingUnnecessary(rem == 0);
+                // fall through
+            case DOWN:
+                increment = false;
+                break;
+            case UP:
+                increment = true;
+                break;
+            case CEILING:
+                increment = signum > 0;
+                break;
+            case FLOOR:
+                increment = signum < 0;
+                break;
+            case HALF_EVEN:
+            case HALF_DOWN:
+            case HALF_UP:
+                int absRem = Math.abs(rem);
+                int cmpRemToHalfDivisor = absRem - (Math.abs(q) - absRem);
+                // subtracting two nonnegative ints can't overflow
+                // cmpRemToHalfDivisor has the same sign as compare(abs(rem), abs(q) / 2).
+                if (cmpRemToHalfDivisor == 0) { // exactly on the half mark
+                    increment = (mode == RoundingMode.HALF_UP | ((div & 1) != 0) & (mode == RoundingMode.HALF_EVEN));
+                } else {
+                    increment = cmpRemToHalfDivisor > 0; // closer to the UP value
+                }
+                break;
+            default:
+                throw new AssertionError();
+        }
+        return increment ? div + signum : div;
     }
 
     public static int factorial(int i) {

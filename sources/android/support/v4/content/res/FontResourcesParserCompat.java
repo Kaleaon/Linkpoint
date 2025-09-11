@@ -107,31 +107,17 @@ public class FontResourcesParserCompat {
         }
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:4:0x0009  */
-    /* JADX WARNING: Removed duplicated region for block: B:8:0x0012  */
     @android.support.annotation.Nullable
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public static android.support.v4.content.res.FontResourcesParserCompat.FamilyResourceEntry parse(org.xmlpull.v1.XmlPullParser r3, android.content.res.Resources r4) throws org.xmlpull.v1.XmlPullParserException, java.io.IOException {
-        /*
-            r2 = 2
-        L_0x0001:
-            int r0 = r3.next()
-            if (r0 != r2) goto L_0x000e
-        L_0x0007:
-            if (r0 != r2) goto L_0x0012
-            android.support.v4.content.res.FontResourcesParserCompat$FamilyResourceEntry r0 = readFamilies(r3, r4)
-            return r0
-        L_0x000e:
-            r1 = 1
-            if (r0 != r1) goto L_0x0001
-            goto L_0x0007
-        L_0x0012:
-            org.xmlpull.v1.XmlPullParserException r0 = new org.xmlpull.v1.XmlPullParserException
-            java.lang.String r1 = "No start tag found"
-            r0.<init>(r1)
-            throw r0
-        */
-        throw new UnsupportedOperationException("Method not decompiled: android.support.v4.content.res.FontResourcesParserCompat.parse(org.xmlpull.v1.XmlPullParser, android.content.res.Resources):android.support.v4.content.res.FontResourcesParserCompat$FamilyResourceEntry");
+    public static android.support.v4.content.res.FontResourcesParserCompat.FamilyResourceEntry parse(org.xmlpull.v1.XmlPullParser parser, android.content.res.Resources resources) throws org.xmlpull.v1.XmlPullParserException, java.io.IOException {
+        int eventType;
+        do {
+            eventType = parser.next();
+        } while (eventType != XmlPullParser.START_TAG && eventType != XmlPullParser.END_DOCUMENT);
+        
+        if (eventType != XmlPullParser.START_TAG) {
+            throw new XmlPullParserException("No start tag found");
+        }
+        return readFamilies(parser, resources);
     }
 
     public static List<List<byte[]>> readCerts(Resources resources, @ArrayRes int i) {
