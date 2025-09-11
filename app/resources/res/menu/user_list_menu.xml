@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
+    <item android:icon="?attr/MenuIconLocalChat" android:id="@+id/item_local_chat" android:title="Local chat"/>
+    <item android:icon="?attr/MenuIconChatBubble" android:id="@+id/item_recent" android:title="Recent"/>
+    <item android:icon="?attr/MenuIconSearch" android:id="@+id/item_search_people" android:title="Search"/>
+    <item android:icon="?attr/MenuIconMinimap" android:id="@+id/item_minimap" android:title="Minimap"/>
+    <item android:icon="?attr/MenuIconInventory" android:id="@+id/item_inventory" android:title="Inventory"/>
+    <item android:icon="?attr/MenuIconSignOff" android:id="@+id/item_signout" android:title="Sign out"/>
+</menu>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">Boshiga o‘tish</string>
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+    <string name="abc_action_bar_up_description">Yuqoriga o‘tish</string>
+    <string name="abc_action_menu_overflow_description">Boshqa parametrlar</string>
+    <string name="abc_action_mode_done">Tayyor</string>
+    <string name="abc_activity_chooser_view_see_all">Barchasini ko‘rish</string>
+    <string name="abc_activitychooserview_choose_application">Dastur tanlang</string>
+    <string name="abc_capital_off">O‘CHIQ</string>
+    <string name="abc_capital_on">YONIQ</string>
+    <string name="abc_search_hint">Qidirish…</string>
+    <string name="abc_searchview_description_clear">So‘rovni tozalash</string>
+    <string name="abc_searchview_description_query">So‘rovni izlash</string>
+    <string name="abc_searchview_description_search">Qidirish</string>
+    <string name="abc_searchview_description_submit">So‘rov yaratish</string>
+    <string name="abc_searchview_description_voice">Ovozli qidiruv</string>
+    <string name="abc_shareactionprovider_share_with">Ruxsat berish</string>
+    <string name="abc_shareactionprovider_share_with_application">%sga ruxsat berish</string>
+    <string name="abc_toolbar_collapse_description">Yig‘ish</string>
+    <string name="back_button_content_description">orqaga</string>
+    <string name="cancel_button">Bekor qilish</string>
+    <string name="dialog_button_got_it">OK</string>
+    <string name="dialog_button_open_help_center">YORDAM MARKAZI SAHIFASINI OCHISH</string>
+    <string name="dialog_message_incompatible_phone">Bu telefon Daydream texnologiyasini qo‘llab-quvvatlamaydi. Bu haqda batafsil ma’lumot olish uchun Daydream ma’lumotlar markazi sahifasiga tashrif buyuring.</string>
+    <string name="dialog_message_no_cardboard">Garniturani sozlash uchun Cardboard ilovasini yuklab oling.</string>
+    <string name="dialog_message_setup">Cardboard garniturasidan samarali foydalanish uchun uni sozlang.</string>
+    <string name="dialog_title">Sozlash</string>
+    <string name="dialog_title_incompatible_phone">Telefon mos emas</string>
+    <string name="dialog_title_vr_core_not_enabled">Ilovani sozlang</string>
+    <string name="dialog_title_vr_core_not_installed">Ilovani o‘rnating</string>
+    <string name="dialog_title_warning">Diqqat!</string>
+    <string name="dialog_vr_core_not_enabled">Bu ilova to‘g‘ri ishlashi uchun Google VR xizmatlarini yoqish lozim. Davom ettirishdan avval Google VR xizmatlarini telefon Sozlamalaridan yoqing.</string>
+    <string name="dialog_vr_core_not_installed">Bu ilova to‘g‘ri ishlashi uchun Google VR xizmatlarini o‘rnatish lozim. Davom ettirishdan avval Google VR xizmatlari ilovasini Google Play Marketdan yuklab oling.</string>
+    <string name="go_to_playstore_button">Google Play Marketga o‘tish</string>
+    <string name="go_to_vr_listeners_settings_button">Sozlamalarga o‘tish</string>
+    <string name="no_browser_text">Brauzer yo‘q. Veb-saytni ochib bo‘lmadi.</string>
+    <string name="place_your_phone_into_cardboard">Telefonni Cardboard garniturasi ichiga joylang</string>
+    <string name="place_your_viewer_into_viewer_format">Telefonni %s garniturasi ichiga joylang</string>
+    <string name="search_menu_title">Qidirish</string>
+    <string name="settings_button_content_description">sozlamalar</string>
+    <string name="setup_button">Sozlash</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="switch_viewer_action">Tanlash</string>
+    <string name="switch_viewer_prompt">Sizda boshqa VR garniturasimi?</string>
+</resources>

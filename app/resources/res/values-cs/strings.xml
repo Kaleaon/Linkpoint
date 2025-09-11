@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">Přejít na plochu</string>
+    <string name="abc_action_bar_home_description_format">%1$s – %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s – %3$s</string>
+    <string name="abc_action_bar_up_description">Přejít nahoru</string>
+    <string name="abc_action_menu_overflow_description">Více možností</string>
+    <string name="abc_action_mode_done">Hotovo</string>
+    <string name="abc_activity_chooser_view_see_all">Zobrazit vše</string>
+    <string name="abc_activitychooserview_choose_application">Vybrat aplikaci</string>
+    <string name="abc_capital_off">VYPNUTO</string>
+    <string name="abc_capital_on">ZAPNUTO</string>
+    <string name="abc_search_hint">Vyhledat…</string>
+    <string name="abc_searchview_description_clear">Smazat dotaz</string>
+    <string name="abc_searchview_description_query">Vyhledávací dotaz</string>
+    <string name="abc_searchview_description_search">Hledat</string>
+    <string name="abc_searchview_description_submit">Odeslat dotaz</string>
+    <string name="abc_searchview_description_voice">Hlasové vyhledávání</string>
+    <string name="abc_shareactionprovider_share_with">Sdílet pomocí</string>
+    <string name="abc_shareactionprovider_share_with_application">Sdílet pomocí %s</string>
+    <string name="abc_toolbar_collapse_description">Sbalit</string>
+    <string name="back_button_content_description">zpět</string>
+    <string name="cancel_button">Zrušit</string>
+    <string name="dialog_button_got_it">ROZUMÍM</string>
+    <string name="dialog_button_open_help_center">OTEVŘÍT CENTRUM NÁPOVĚDY</string>
+    <string name="dialog_message_incompatible_phone">Je vyžadován telefon kompatibilní s aplikací Daydream. Další informace najdete v centru nápovědy.</string>
+    <string name="dialog_message_no_cardboard">Stáhněte si aplikaci Cardboard ke konfiguraci svých brýlí.</string>
+    <string name="dialog_message_setup">Nastavte si brýle, abyste měli co nejlepší zážitek.</string>
+    <string name="dialog_title">Konfigurovat</string>
+    <string name="dialog_title_incompatible_phone">Nekompatibilní telefon</string>
+    <string name="dialog_title_vr_core_not_enabled">Je vyžadováno nastavení</string>
+    <string name="dialog_title_vr_core_not_installed">Je vyžadována instalace</string>
+    <string name="dialog_title_warning">Upozornění</string>
+    <string name="dialog_vr_core_not_enabled">Tato aplikace nemusí bez povolení Služeb VR Google správně fungovat. Než budete pokračovat, povolte je prosím v nastavení telefonu.</string>
+    <string name="dialog_vr_core_not_installed">Tato aplikace nemusí bez Služeb VR Google správně fungovat. Než budete pokračovat, nainstalujte prosím Služby VR Google z obchodu Play.</string>
+    <string name="go_to_playstore_button">Přejít do obchodu Play</string>
+    <string name="go_to_vr_listeners_settings_button">Přejít na nastavení</string>
+    <string name="no_browser_text">Chybí prohlížeč k otevření webových stránek</string>
+    <string name="place_your_phone_into_cardboard">Vložte telefon do brýlí Cardboard</string>
+    <string name="place_your_viewer_into_viewer_format">Vložte telefon do brýlí %s</string>
+    <string name="search_menu_title">Hledat</string>
+    <string name="settings_button_content_description">nastavení</string>
+    <string name="setup_button">Nastavit</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="switch_viewer_action">Přepnout</string>
+    <string name="switch_viewer_prompt">Máte jiné brýle?</string>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
+    <item android:id="@+id/item_open_chat" android:title="Open chat"/>
+    <item android:icon="?attr/MenuIconCard" android:id="@+id/item_view_profile" android:title="View profile" app:showAsAction="ifRoom"/>
+    <item android:icon="?attr/MenuIconVoice" android:id="@+id/item_start_voice" android:title="Voice chat" app:showAsAction="ifRoom"/>
+    <item android:id="@+id/item_location_details" android:title="Location details"/>
+    <item android:id="@+id/item_play_parcel_media" android:title="Play sound stream"/>
+    <item android:id="@+id/item_send_group_notice" android:title="Send group notice"/>
+    <item android:id="@+id/item_offer_teleport" android:title="Offer teleport"/>
+    <item android:id="@+id/item_request_teleport" android:title="Request teleport"/>
+    <item android:id="@+id/item_teleport_to" android:title="Teleport to..."/>
+    <item android:id="@+id/item_pay_user" android:title="Send money"/>
+    <item android:id="@+id/item_share_object" android:title="Share item"/>
+    <item android:id="@+id/item_add_friend" android:title="Add friend"/>
+    <item android:id="@+id/item_remove_friend" android:title="Remove friend"/>
+    <item android:id="@+id/item_enable_voice" android:title="Enable voice"/>
+    <item android:icon="?attr/MenuIconClose" android:id="@+id/item_close" android:title="Close chat" app:showAsAction="ifRoom"/>
+    <item android:id="@+id/item_close_and_mute" android:title="Close and mute"/>
+    <item android:id="@+id/item_unmute" android:title="Unmute"/>
+    <item android:id="@+id/item_unblock" android:title="Unblock"/>
+</menu>

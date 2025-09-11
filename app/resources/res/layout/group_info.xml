@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:id="@+id/group_main" android:scrollbars="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+        <LinearLayout android:orientation="horizontal" android:id="@+id/group_desc_with_image" android:padding="3dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <com.lumiyaviewer.lumiya.ui.common.ImageAssetView android:layout_gravity="center" android:id="@+id/group_insignia" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1"/>
+            <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:gravity="right" android:id="@+id/group_member_count" android:padding="5dp" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1"/>
+        </LinearLayout>
+        <TextView android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/group_charter" style="?android:attr/listSeparatorTextViewStyle"/>
+        <LinearLayout android:orientation="horizontal" android:padding="3dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:ellipsize="end" android:id="@+id/text_group_charter" android:paddingLeft="3dp" android:paddingRight="3dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:singleLine="false" android:layout_weight="1"/>
+        </LinearLayout>
+        <TextView android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/group_membership" style="?android:attr/listSeparatorTextViewStyle"/>
+        <LinearLayout android:orientation="horizontal" android:padding="3dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:ellipsize="end" android:id="@+id/text_group_membership" android:paddingLeft="3dp" android:paddingRight="3dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1"/>
+            <Button android:id="@+id/button_group_join" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/group_join" android:layout_weight="0"/>
+            <Button android:id="@+id/button_group_leave" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/group_leave" android:layout_weight="0"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

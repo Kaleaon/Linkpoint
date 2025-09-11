@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:title="@string/prefs_category_cache">
+    <com.lumiyaviewer.lumiya.ui.settings.CacheLocationPreference android:title="Cache location" android:key="cache_location"/>
+    <com.lumiyaviewer.lumiya.ui.settings.ClearCachePreference android:title="Clear cache" android:key="clear_cache" android:summary="Clear texture and data cache"/>
+</PreferenceScreen>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:layout_gravity="center_horizontal" android:id="@+id/lumia_logo_layout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10sp">
+    <ImageView android:id="@+id/secondLifeLogo" android:layout_width="64sp" android:layout_height="64sp" android:layout_marginRight="20sp" android:src="@drawable/lumiya_128" android:scaleType="fitXY"/>
+    <LinearLayout android:layout_gravity="center" android:orientation="vertical" android:id="@+id/lumiya_top_text" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <TextView android:textAppearance="?android:attr/textAppearanceLarge" android:textSize="30sp" android:textStyle="bold" android:id="@+id/textView1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lumiya_top_name"/>
+        <TextView android:id="@+id/textView2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/lumiya_top_descr"/>
+    </LinearLayout>
+    <TextView android:gravity="right|center_vertical|center_horizontal|center" android:layout_gravity="center" android:id="@+id/whatsnewText" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginRight="20sp" android:layout_weight="1"/>
+</LinearLayout>

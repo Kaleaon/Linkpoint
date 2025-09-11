@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:orientation="vertical" android:fitsSystemWindows="true" android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="5dp" android:layout_weight="1">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/notecard_edit_title"/>
+        <EditText android:id="@+id/notecardEditTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:inputType="textAutoCorrect"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="@string/notecard_edit_description"/>
+        <EditText android:id="@+id/notecardEditDescription" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:inputType="textAutoCorrect"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="@string/notecard_edit_contents"/>
+        <EditText android:gravity="top" android:id="@+id/notecardEditContents" android:layout_width="match_parent" android:layout_height="match_parent" android:singleLine="false" android:layout_weight="1" android:inputType="textMultiLine"/>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:id="@+id/notecard_error_layout" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginRight="10dp">
+        <TextView android:layout_gravity="center_vertical" android:id="@+id/notecardErrorMessage" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1"/>
+        <Button android:layout_gravity="top|right|center_vertical|center_horizontal|center" android:id="@+id/notecardErrorDiscard" android:paddingLeft="10dp" android:paddingRight="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="8dp" android:minHeight="10dp" android:text="✕" android:layout_weight="0" style="@style/BorderlessButton"/>
+    </LinearLayout>
+    <LinearLayout android:layout_gravity="right" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <ProgressBar android:layout_gravity="center_vertical" android:id="@+id/notecardProgressIndicator" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginRight="10dp" android:indeterminate="true" style="@style/Widget.ProgressBar.Small"/>
+        <TextView android:layout_gravity="center_vertical" android:id="@+id/notecardProgressText" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_weight="1"/>
+        <Button android:layout_gravity="center_vertical" android:id="@+id/notecardSaveButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/notecard_save"/>
+        <Button android:layout_gravity="center_vertical" android:id="@+id/notecardDiscardButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/notecard_discard"/>
+        <Button android:layout_gravity="center_vertical" android:id="@+id/notecardEditButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/notecard_edit"/>
+    </LinearLayout>
+</LinearLayout>

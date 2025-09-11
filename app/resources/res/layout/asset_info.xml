@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:id="@+id/swipe_refresh_layout" android:background="?attr/CardableBackground" android:paddingTop="4dp" android:paddingBottom="4dp" android:layout_width="match_parent" android:layout_height="match_parent">
+    <ScrollView android:id="@+id/profile_scroll" android:scrollbars="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+        <com.lumiyaviewer.lumiya.ui.common.LoadingLayout android:id="@+id/loading_layout" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:layout_marginBottom="10dp">
+                <android.support.v7.widget.CardView android:id="@+id/asset_name_type_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp" android:layout_marginBottom="8dp">
+                            <LinearLayout android:layout_gravity="center_vertical" android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="1">
+                                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/asset_info_type" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+                                <TextView android:ellipsize="end" android:id="@+id/asset_info_name" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" style="@style/CardCaption"/>
+                            </LinearLayout>
+                            <ImageView android:layout_gravity="center_vertical" android:id="@+id/asset_info_icon" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="5dp" android:layout_weight="0"/>
+                        </LinearLayout>
+                        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/asset_action_button" android:paddingTop="0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/asset_attach_button" android:paddingTop="0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_attach" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/asset_detach_button" android:paddingTop="0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_detach" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/asset_wear_button" android:paddingTop="0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_wear" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/asset_take_off_button" android:paddingTop="0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_take_off" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/asset_play_anim_button" android:paddingTop="0dp" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_play_animation" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/asset_stop_anim_button" android:paddingTop="0dp" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_stop_animation" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                            <TextView android:gravity="center" android:layout_gravity="center_vertical" android:id="@+id/asset_worn_text" android:paddingLeft="16dp" android:paddingTop="0dp" android:paddingRight="16dp" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/Worn" android:layout_weight="0"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+                <android.support.v7.widget.CardView android:id="@+id/asset_description_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="0">
+                        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp" android:layout_marginBottom="14dp">
+                            <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/asset_info_description" style="@style/CardCaption"/>
+                            <TextView android:id="@+id/asset_info_description" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="false"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+                <android.support.v7.widget.CardView android:id="@+id/asset_permissions_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="0">
+                        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp">
+                            <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/asset_info_permissions" style="@style/CardCaption"/>
+                            <TableLayout android:paddingTop="3dp" android:paddingBottom="3dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:stretchColumns="0">
+                                <TableRow>
+                                    <TextView android:text="@string/asset_owner"/>
+                                    <TextView android:id="@+id/asset_permission_owner_copy" android:padding="3dp" android:text="@string/asset_permission_copy"/>
+                                    <TextView android:id="@+id/asset_permission_owner_modify" android:padding="3dp" android:text="@string/asset_permission_modify"/>
+                                    <TextView android:id="@+id/asset_permission_owner_transfer" android:padding="3dp" android:text="@string/asset_permission_transfer"/>
+                                </TableRow>
+                                <TableRow>
+                                    <TextView android:text="@string/asset_next_owner"/>
+                                    <TextView android:id="@+id/asset_permission_next_owner_copy" android:padding="3dp" android:text="@string/asset_permission_copy"/>
+                                    <TextView android:id="@+id/asset_permission_next_owner_modify" android:padding="3dp" android:text="@string/asset_permission_modify"/>
+                                    <TextView android:id="@+id/asset_permission_next_owner_transfer" android:padding="3dp" android:text="@string/asset_permission_transfer"/>
+                                </TableRow>
+                                <TableRow>
+                                    <TextView android:text="@string/asset_group"/>
+                                    <TextView android:id="@+id/asset_permission_group_copy" android:padding="3dp" android:text="@string/asset_permission_copy"/>
+                                    <TextView android:id="@+id/asset_permission_group_modify" android:padding="3dp" android:text="@string/asset_permission_modify"/>
+                                    <TextView android:id="@+id/asset_permission_group_transfer" android:padding="3dp" android:text="@string/asset_permission_transfer"/>
+                                </TableRow>
+                                <TableRow>
+                                    <TextView android:text="@string/asset_everyone"/>
+                                    <TextView android:id="@+id/asset_permission_everyone_copy" android:padding="3dp" android:text="@string/asset_permission_copy"/>
+                                    <TextView android:id="@+id/asset_permission_everyone_modify" android:padding="3dp" android:text="@string/asset_permission_modify"/>
+                                    <TextView android:id="@+id/asset_permission_everyone_transfer" android:padding="3dp" android:text="@string/asset_permission_transfer"/>
+                                </TableRow>
+                            </TableLayout>
+                        </LinearLayout>
+                        <Button android:layout_gravity="center_vertical" android:id="@+id/edit_permissions_button" android:paddingTop="0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="0dp" android:text="@string/edit_permissions_button" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+                <android.support.v7.widget.CardView android:id="@+id/asset_owner_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp">
+                            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1">
+                                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/asset_owner"/>
+                                <TextView android:id="@+id/asset_owner_name" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="false" style="@style/CardCaption"/>
+                            </LinearLayout>
+                            <com.lumiyaviewer.lumiya.ui.chat.ChatterPicView android:layout_gravity="top|right|center_vertical|center_horizontal|center" android:id="@+id/asset_owner_pic" android:layout_width="36dp" android:layout_height="36dp" android:layout_weight="0"/>
+                        </LinearLayout>
+                        <Button android:layout_gravity="center_vertical" android:id="@+id/asset_owner_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_view_profile" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+                <android.support.v7.widget.CardView android:id="@+id/asset_creator_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp">
+                            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1">
+                                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/asset_creator"/>
+                                <TextView android:id="@+id/asset_creator_name" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="false" style="@style/CardCaption"/>
+                            </LinearLayout>
+                            <com.lumiyaviewer.lumiya.ui.chat.ChatterPicView android:layout_gravity="top|right|center_vertical|center_horizontal|center" android:id="@+id/asset_creator_pic" android:layout_width="36dp" android:layout_height="36dp" android:layout_weight="0"/>
+                        </LinearLayout>
+                        <Button android:layout_gravity="center_vertical" android:id="@+id/asset_creator_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_view_profile" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+                <android.support.v7.widget.CardView android:id="@+id/asset_last_owner_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp">
+                            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1">
+                                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/asset_last_owner"/>
+                                <TextView android:id="@+id/asset_last_owner_name" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="false" style="@style/CardCaption"/>
+                            </LinearLayout>
+                            <com.lumiyaviewer.lumiya.ui.chat.ChatterPicView android:layout_gravity="top|right|center_vertical|center_horizontal|center" android:id="@+id/asset_last_owner_pic" android:layout_width="36dp" android:layout_height="36dp" android:layout_weight="0"/>
+                        </LinearLayout>
+                        <Button android:layout_gravity="center_vertical" android:id="@+id/asset_last_owner_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_view_profile" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+            </LinearLayout>
+        </com.lumiyaviewer.lumiya.ui.common.LoadingLayout>
+    </ScrollView>
+</android.support.v4.widget.SwipeRefreshLayout>
