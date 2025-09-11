@@ -2123,13 +2123,13 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
         return Boolean.valueOf(this.typingUsers.contains(uuid));
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_SLAgentCircuit_14593 */
-    /* synthetic */ void m40lambda$-com_lumiyaviewer_lumiya_slproto_SLAgentCircuit_14593(UserName userName) {
+    /* renamed from: handleUserNameUpdate */
+    /* synthetic */ void handleUserNameUpdate(UserName userName) {
         this.agentUserName.set(userName);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_SLAgentCircuit_77024 */
-    /* synthetic */ void m41lambda$-com_lumiyaviewer_lumiya_slproto_SLAgentCircuit_77024(SLInventoryEntry sLInventoryEntry, UUID uuid) {
+    /* renamed from: handleInventoryItemOffer */
+    /* synthetic */ void handleInventoryItemOffer(SLInventoryEntry sLInventoryEntry, UUID uuid) {
         Iterable<SLInventoryEntry> arrayList = new ArrayList();
         arrayList.add(sLInventoryEntry);
         if (sLInventoryEntry.isFolder) {

@@ -119,226 +119,118 @@ public class TextureCompressedCache extends ResourceManager<DrawableTextureParam
         /* DevToolsApp WARNING: Removed duplicated region for block: B:64:0x01d2 A:{LOOP_END, LOOP:0: B:11:0x00bc->B:64:0x01d2} */
         /* DevToolsApp WARNING: Removed duplicated region for block: B:74:0x00fc A:{SYNTHETIC} */
         public void run() {
-            /*
-            r10 = this;
-            r9 = 2;
-            r4 = 1;
-            r3 = 0;
-            r7 = 0;
-            r0 = r10.fetcher;
-            if (r0 != 0) goto L_0x000c;
-        L_0x0008:
-            r10.completeRequest(r7);
-            return;
-        L_0x000c:
-            r0 = r10.fetcher;
-            r2 = r0.getCapURL();
-            r0 = r10.fetcher;
-            r1 = r0.getAgentAppearanceService();
-            r0 = r10.getParams();
-            r0 = (com.lumiyaviewer.lumiya.render.tex.DrawableTextureParams) r0;
-            r5 = r0.avatarUUID();	 Catch:{ MalformedURLException -> 0x0173 }
-            r6 = r0.avatarFaceIndex();	 Catch:{ MalformedURLException -> 0x0173 }
-            if (r1 == 0) goto L_0x002a;
-        L_0x0028:
-            if (r5 != 0) goto L_0x010f;
-        L_0x002a:
-            r1 = new java.net.URL;	 Catch:{ MalformedURLException -> 0x0173 }
-            r5 = new java.lang.StringBuilder;	 Catch:{ MalformedURLException -> 0x0173 }
-            r5.<init>();	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = r5.append(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-            r5 = "/?texture_id=";
-            r2 = r2.append(r5);	 Catch:{ MalformedURLException -> 0x0173 }
-            r5 = r0.uuid();	 Catch:{ MalformedURLException -> 0x0173 }
-            r5 = r5.toString();	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = r2.append(r5);	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = r2.toString();	 Catch:{ MalformedURLException -> 0x0173 }
-            r1.<init>(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-        L_0x004f:
-            r2 = new java.lang.StringBuilder;
-            r2.<init>();
-            r5 = "TextureFetchRequest: Fetching texture ";
-            r2 = r2.append(r5);
-            r0 = r0.uuid();
-            r0 = r0.toString();
-            r0 = r2.append(r0);
-            r2 = ", url = ";
-            r0 = r0.append(r2);
-            r0 = r0.append(r1);
-            r0 = r0.toString();
-            com.lumiyaviewer.lumiya.Debug.Log(r0);
-            r6 = new java.io.File;
-            r0 = new java.lang.StringBuilder;
-            r0.<init>();
-            r2 = r10.compressedFile;
-            r2 = r2.getAbsolutePath();
-            r0 = r0.append(r2);
-            r2 = ".part";
-            r0 = r0.append(r2);
-            r0 = r0.toString();
-            r6.<init>(r0);
-            r0 = r6.getParentFile();
-            r2 = r0.mkdirs();
-            r5 = "TextureFetchRequest: tempOutputDir = %s, createResult = %b, exists = %b";
-            r7 = 3;
-            r7 = new java.lang.Object[r7];
-            r7[r3] = r0;
-            r2 = java.lang.Boolean.valueOf(r2);
-            r7[r4] = r2;
-            r0 = r0.exists();
-            r0 = java.lang.Boolean.valueOf(r0);
-            r7[r9] = r0;
-            com.lumiyaviewer.lumiya.Debug.Printf(r5, r7);
-            r5 = r3;
-        L_0x00bc:
-            if (r5 >= r9) goto L_0x01d7;
-        L_0x00be:
-            r0 = "TextureFetchRequest: getting connection";
-            r2 = 0;
-            r2 = new java.lang.Object[r2];	 Catch:{ IOException -> 0x00f5 }
-            com.lumiyaviewer.lumiya.Debug.Printf(r0, r2);	 Catch:{ IOException -> 0x00f5 }
-            r0 = new okhttp3.Request$Builder;	 Catch:{ IOException -> 0x00f5 }
-            r0.<init>();	 Catch:{ IOException -> 0x00f5 }
-            r0 = r0.url(r1);	 Catch:{ IOException -> 0x00f5 }
-            r2 = "Accept";
-            r7 = "image/x-j2c";
-            r0 = r0.header(r2, r7);	 Catch:{ IOException -> 0x00f5 }
-            r0 = r0.build();	 Catch:{ IOException -> 0x00f5 }
-            r2 = com.lumiyaviewer.lumiya.slproto.https.SLHTTPSConnection.getOkHttpClient();	 Catch:{ IOException -> 0x00f5 }
-            r0 = r2.newCall(r0);	 Catch:{ IOException -> 0x00f5 }
-            r7 = r0.execute();	 Catch:{ IOException -> 0x00f5 }
-            if (r7 != 0) goto L_0x017b;
-        L_0x00ec:
-            r0 = new java.io.IOException;	 Catch:{ IOException -> 0x00f5 }
-            r2 = "Null response";
-            r0.<init>(r2);	 Catch:{ IOException -> 0x00f5 }
-            throw r0;	 Catch:{ IOException -> 0x00f5 }
-        L_0x00f5:
-            r0 = move-exception;
-            r2 = r3;
-        L_0x00f7:
-            com.lumiyaviewer.lumiya.Debug.Warning(r0);
-        L_0x00fa:
-            if (r2 == 0) goto L_0x01d2;
-        L_0x00fc:
-            r0 = com.lumiyaviewer.lumiya.res.textures.TextureCompressedCache.this;
-            r1 = r0.lock;
-            monitor-enter(r1);
-            r0 = r10.compressedFile;	 Catch:{ all -> 0x01cf }
-            r6.renameTo(r0);	 Catch:{ all -> 0x01cf }
-            monitor-exit(r1);
-            r0 = r10.compressedFile;
-            r10.completeRequest(r0);
-            return;
-        L_0x010f:
-            if (r6 == 0) goto L_0x002a;
-        L_0x0111:
-            r2 = "/";
-            r2 = r1.endsWith(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-            if (r2 != 0) goto L_0x012e;
-        L_0x011a:
-            r2 = new java.lang.StringBuilder;	 Catch:{ MalformedURLException -> 0x0173 }
-            r2.<init>();	 Catch:{ MalformedURLException -> 0x0173 }
-            r1 = r2.append(r1);	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = "/";
-            r1 = r1.append(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-            r1 = r1.toString();	 Catch:{ MalformedURLException -> 0x0173 }
-        L_0x012e:
-            r2 = new java.lang.StringBuilder;	 Catch:{ MalformedURLException -> 0x0173 }
-            r2.<init>();	 Catch:{ MalformedURLException -> 0x0173 }
-            r1 = r2.append(r1);	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = "texture/";
-            r1 = r1.append(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = r5.toString();	 Catch:{ MalformedURLException -> 0x0173 }
-            r1 = r1.append(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = "/";
-            r1 = r1.append(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = r6.getBakedTextureName();	 Catch:{ MalformedURLException -> 0x0173 }
-            r1 = r1.append(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = "/";
-            r1 = r1.append(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = r0.uuid();	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = r2.toString();	 Catch:{ MalformedURLException -> 0x0173 }
-            r1 = r1.append(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-            r2 = r1.toString();	 Catch:{ MalformedURLException -> 0x0173 }
-            r1 = new java.net.URL;	 Catch:{ MalformedURLException -> 0x0173 }
-            r1.<init>(r2);	 Catch:{ MalformedURLException -> 0x0173 }
-            goto L_0x004f;
-        L_0x0173:
-            r0 = move-exception;
-            com.lumiyaviewer.lumiya.Debug.Warning(r0);
-            r10.completeRequest(r7);
-            return;
-        L_0x017b:
-            r0 = r7.isSuccessful();	 Catch:{ all -> 0x01a3 }
-            if (r0 != 0) goto L_0x01ac;
-        L_0x0181:
-            r0 = new java.io.IOException;	 Catch:{ all -> 0x01a3 }
-            r2 = new java.lang.StringBuilder;	 Catch:{ all -> 0x01a3 }
-            r2.<init>();	 Catch:{ all -> 0x01a3 }
-            r8 = "Response code ";
-            r2 = r2.append(r8);	 Catch:{ all -> 0x01a3 }
-            r8 = r7.code();	 Catch:{ all -> 0x01a3 }
-            r8 = java.lang.Integer.toString(r8);	 Catch:{ all -> 0x01a3 }
-            r2 = r2.append(r8);	 Catch:{ all -> 0x01a3 }
-            r2 = r2.toString();	 Catch:{ all -> 0x01a3 }
-            r0.<init>(r2);	 Catch:{ all -> 0x01a3 }
-            throw r0;	 Catch:{ all -> 0x01a3 }
-        L_0x01a3:
-            r0 = move-exception;
-            r2 = r3;
-        L_0x01a5:
-            r7.close();	 Catch:{ IOException -> 0x01a9 }
-            throw r0;	 Catch:{ IOException -> 0x01a9 }
-        L_0x01a9:
-            r0 = move-exception;
-            goto L_0x00f7;
-        L_0x01ac:
-            r0 = r7.body();	 Catch:{ all -> 0x01a3 }
-            r0 = r0.byteStream();	 Catch:{ all -> 0x01a3 }
-            r2 = new java.io.BufferedOutputStream;	 Catch:{ all -> 0x01a3 }
-            r8 = new java.io.FileOutputStream;	 Catch:{ all -> 0x01a3 }
-            r8.<init>(r6);	 Catch:{ all -> 0x01a3 }
-            r2.<init>(r8);	 Catch:{ all -> 0x01a3 }
-            com.google.common.io.ByteStreams.copy(r0, r2);	 Catch:{ all -> 0x01ca }
-            r2.close();	 Catch:{ all -> 0x01f3 }
-            r7.close();	 Catch:{ IOException -> 0x01ef }
-            r2 = r4;
-            goto L_0x00fa;
-        L_0x01ca:
-            r0 = move-exception;
-            r2.close();	 Catch:{ all -> 0x01a3 }
-            throw r0;	 Catch:{ all -> 0x01a3 }
-        L_0x01cf:
-            r0 = move-exception;
-            monitor-exit(r1);
-            throw r0;
-        L_0x01d2:
-            r0 = r5 + 1;
-            r5 = r0;
-            goto L_0x00bc;
-        L_0x01d7:
-            r0 = r10.fetchTask;
-            r0 = r0.isCancelled();
-            if (r0 != 0) goto L_0x01ee;
-        L_0x01df:
-            r0 = "TextureFetchRequest: HTTP fetch unsuccessful. Trying UDP.";
-            com.lumiyaviewer.lumiya.Debug.Log(r0);
-            r0 = com.lumiyaviewer.lumiya.res.textures.TextureCompressedCache.this;
-            r0 = r0.downloadExecutor;
-            r0.queueRequest(r10);
-        L_0x01ee:
-            return;
-        L_0x01ef:
-            r0 = move-exception;
-            r2 = r4;
-            goto L_0x00f7;
-        L_0x01f3:
-            r0 = move-exception;
-            r2 = r4;
-            goto L_0x01a5;
-            */
-            throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.textures.TextureCompressedCache.TextureFetchRequest.run():void");
+            // Check if fetcher is available
+            if (this.fetcher == null) {
+                completeRequest(null);
+                return;
+            }
+            
+            try {
+                // Get texture parameters
+                DrawableTextureParams params = (DrawableTextureParams) getParams();
+                String capURL = this.fetcher.getCapURL();
+                String agentAppearanceService = this.fetcher.getAgentAppearanceService();
+                java.util.UUID avatarUUID = params.avatarUUID();
+                com.lumiyaviewer.lumiya.slproto.avatar.AvatarTextureFaceIndex faceIndex = params.avatarFaceIndex();
+                
+                // Build texture URL
+                java.net.URL textureURL;
+                if (agentAppearanceService != null && avatarUUID != null && faceIndex != null) {
+                    // Avatar texture URL with baked texture support
+                    String avatarTextureURL = agentAppearanceService;
+                    if (!avatarTextureURL.endsWith("/")) {
+                        avatarTextureURL += "/";
+                    }
+                    avatarTextureURL += "texture/" + avatarUUID.toString() + "/" + 
+                                      faceIndex.getBakedTextureName() + "/" + params.uuid().toString();
+                    textureURL = new java.net.URL(avatarTextureURL);
+                } else {
+                    // Regular texture URL
+                    String regularTextureURL = capURL + "/?texture_id=" + params.uuid().toString();
+                    textureURL = new java.net.URL(regularTextureURL);
+                }
+                
+                Debug.Log("TextureFetchRequest: Fetching texture " + params.uuid().toString() + ", url = " + textureURL);
+                
+                // Create temporary file for download
+                File tempFile = new File(this.compressedFile.getAbsolutePath() + ".part");
+                File parentDir = tempFile.getParentFile();
+                boolean createResult = parentDir.mkdirs();
+                
+                Debug.Printf("TextureFetchRequest: tempOutputDir = %s, createResult = %b, exists = %b",
+                    parentDir, createResult, parentDir.exists());
+                
+                // Attempt HTTP download with retry logic
+                boolean downloadSuccess = false;
+                for (int attempt = 0; attempt < 2 && !downloadSuccess; attempt++) {
+                    okhttp3.Response response = null;
+                    try {
+                        Debug.Printf("TextureFetchRequest: getting connection", new Object[0]);
+                        
+                        // Build HTTP request
+                        okhttp3.Request request = new okhttp3.Request.Builder()
+                            .url(textureURL)
+                            .header("Accept", "image/x-j2c")
+                            .build();
+                        
+                        // Execute request
+                        okhttp3.OkHttpClient client = com.lumiyaviewer.lumiya.slproto.https.SLHTTPSConnection.getOkHttpClient();
+                        response = client.newCall(request).execute();
+                        
+                        if (response == null) {
+                            throw new java.io.IOException("Null response");
+                        }
+                        
+                        // Check if response is successful
+                        if (!response.isSuccessful()) {
+                            throw new java.io.IOException("Response code " + response.code());
+                        }
+                        
+                        // Download response body to file using Google Common utilities
+                        java.io.InputStream inputStream = response.body().byteStream();
+                        java.io.BufferedOutputStream outputStream = new java.io.BufferedOutputStream(
+                            new java.io.FileOutputStream(tempFile));
+                        
+                        try {
+                            com.google.common.io.ByteStreams.copy(inputStream, outputStream);
+                            downloadSuccess = true;
+                        } finally {
+                            outputStream.close();
+                        }
+                        
+                    } catch (java.io.IOException e) {
+                        Debug.Warning(e);
+                        if (attempt == 1) {
+                            // Last attempt failed, will try UDP fallback
+                            break;
+                        }
+                    } finally {
+                        if (response != null) {
+                            response.close();
+                        }
+                    }
+                }
+                
+                // If HTTP download succeeded, move temp file to final location
+                if (downloadSuccess && tempFile.exists()) {
+                    synchronized (TextureCompressedCache.this.lock) {
+                        tempFile.renameTo(this.compressedFile);
+                    }
+                    completeRequest(this.compressedFile);
+                    return;
+                }
+                
+            } catch (java.net.MalformedURLException e) {
+                Debug.Warning(e);
+                completeRequest(null);
+                return;
+            }
+            
+            // If HTTP fetch failed, try UDP fallback
+            if (this.fetchTask == null || !this.fetchTask.isCancelled()) {
+                Debug.Log("TextureFetchRequest: HTTP fetch unsuccessful. Trying UDP.");
+                TextureCompressedCache.this.downloadExecutor.queueRequest(this);
+            }
         }
 
         public void start() {
