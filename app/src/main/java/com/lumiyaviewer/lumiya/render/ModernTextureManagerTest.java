@@ -24,6 +24,9 @@ public class ModernTextureManagerTest {
             // Test format utilities
             testFormatUtilities();
             
+            // Test TextureData class
+            testTextureDataClass();
+            
             Log.i(TAG, "All tests completed successfully");
             
         } catch (Exception e) {
@@ -34,22 +37,34 @@ public class ModernTextureManagerTest {
     private static void testInitialization(Context context) {
         Log.i(TAG, "Testing initialization...");
         
-        ModernTextureManager manager = new ModernTextureManager(context);
-        if (manager != null) {
-            Log.i(TAG, "✓ ModernTextureManager created successfully");
-        } else {
-            Log.e(TAG, "✗ Failed to create ModernTextureManager");
+        try {
+            ModernTextureManager manager = new ModernTextureManager(context);
+            if (manager != null && manager.isInitialized()) {
+                Log.i(TAG, "✓ ModernTextureManager created and initialized successfully");
+            } else {
+                Log.e(TAG, "✗ ModernTextureManager not properly initialized");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "✗ Failed to create ModernTextureManager", e);
         }
     }
     
     private static void testGPUCapabilities(Context context) {
         Log.i(TAG, "Testing GPU capability detection...");
         
-        ModernTextureManager manager = new ModernTextureManager(context);
-        int optimalFormat = manager.getOptimalTextureFormat();
-        String formatName = ModernTextureManager.getFormatName(optimalFormat);
-        
-        Log.i(TAG, "✓ Optimal texture format detected: " + formatName + " (" + optimalFormat + ")");
+        try {
+            ModernTextureManager manager = new ModernTextureManager(context);
+            if (manager.isInitialized()) {
+                int optimalFormat = manager.getOptimalTextureFormat();
+                String formatName = ModernTextureManager.getFormatName(optimalFormat);
+                
+                Log.i(TAG, "✓ Optimal texture format detected: " + formatName + " (" + optimalFormat + ")");
+            } else {
+                Log.e(TAG, "✗ Manager not initialized, cannot test capabilities");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "✗ Failed to test GPU capabilities", e);
+        }
     }
     
     private static void testFormatUtilities() {

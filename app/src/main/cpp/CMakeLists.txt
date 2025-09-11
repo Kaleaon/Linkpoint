@@ -4,12 +4,19 @@ cmake_minimum_required(VERSION 3.10.2)
 project("basis_transcoder")
 
 # Set C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Add Basis Universal transcoder sources
 set(BASIS_TRANSCODER_SOURCES
     basis_universal/basisu_transcoder.cpp
+)
+
+# Native source files (should integrate with existing openjpeg if present)
+set(NATIVE_SOURCES
+    ${BASIS_TRANSCODER_SOURCES}
+    jni/basis_transcoder_jni.cpp
+    jni/openjpeg_basis_integration.cpp
 )
 
 # Include directories
@@ -22,6 +29,7 @@ add_definitions(
     -DBASISU_SUPPORT_SSE=0
     -DBASISU_SUPPORT_OPENCL=0
     -DBASISU_NO_ITERATOR_DEBUG_LEVEL
+    -DBASISD_SUPPORT_KTX2_ZSTD=1
     -DANDROID
 )
 
@@ -35,11 +43,12 @@ if(ANDROID)
 endif()
 
 # Create the shared library
+# Integrate with existing openjpeg library by using the same name
+set(LIBRARY_NAME "openjpeg")
 add_library(
-    basis_transcoder
+    ${LIBRARY_NAME}
     SHARED
-    ${BASIS_TRANSCODER_SOURCES}
-    jni/basis_transcoder_jni.cpp
+    ${NATIVE_SOURCES}
 )
 
 # Find required libraries
@@ -48,7 +57,7 @@ find_library(android-lib android)
 
 # Link libraries
 target_link_libraries(
-    basis_transcoder
+    ${LIBRARY_NAME}
     ${log-lib}
     ${android-lib}
 )
