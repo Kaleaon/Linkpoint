@@ -82,16 +82,16 @@ public class MuteListData {
         this.muteListNames = builder2.build();
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795  reason: not valid java name */
-    static /* synthetic */ boolean m226lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795(MuteListEntry muteListEntry, Map.Entry entry) {
+    /* renamed from: isEntryNameNotEqual - checks if mute list entry name doesn't match the given entry key */
+    static /* synthetic */ boolean isEntryNameNotEqual(MuteListEntry muteListEntry, Map.Entry entry) {
         if (entry != null) {
             return !((String) entry.getKey()).equals(muteListEntry.name);
         }
         return false;
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217  reason: not valid java name */
-    static /* synthetic */ boolean m227lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217(MuteListKey muteListKey, Map.Entry entry) {
+    /* renamed from: isMuteKeyNotEqual - checks if mute list key doesn't match the given entry key */
+    static /* synthetic */ boolean isMuteKeyNotEqual(MuteListKey muteListKey, Map.Entry entry) {
         if (entry != null) {
             return !((MuteListKey) entry.getKey()).equals(muteListKey);
         }
@@ -154,7 +154,7 @@ public class MuteListData {
                 private final /* synthetic */ Object f125$f0;
 
                 private final /* synthetic */ boolean $m$0(Object obj) {
-                    return MuteListData.m226lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795((MuteListEntry) this.f125$f0, (Map.Entry) obj);
+                    return MuteListData.isEntryNameNotEqual((MuteListEntry) this.f125$f0, (Map.Entry) obj);
                 }
 
                 {
@@ -174,7 +174,7 @@ public class MuteListData {
             private final /* synthetic */ Object f126$f0;
 
             private final /* synthetic */ boolean $m$0(Object obj) {
-                return MuteListData.m227lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217((MuteListKey) this.f126$f0, (Map.Entry) obj);
+                return MuteListData.isMuteKeyNotEqual((MuteListKey) this.f126$f0, (Map.Entry) obj);
             }
 
             {

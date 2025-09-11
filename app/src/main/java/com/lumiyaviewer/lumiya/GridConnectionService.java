@@ -1543,8 +1543,8 @@ public class GridConnectionService extends Service implements OnSharedPreference
         VoicePluginServiceConnection.setInstallOfferDisplayed(false);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_GridConnectionService_20777 */
-    /* synthetic */ void m12lambda$-com_lumiyaviewer_lumiya_GridConnectionService_20777(ChatterNameRetriever chatterNameRetriever) {
+    /* renamed from: updateNotificationOnNameRetrieve - updates online notification when chatter name is retrieved */
+    /* synthetic */ void updateNotificationOnNameRetrieve(ChatterNameRetriever chatterNameRetriever) {
         updateOnlineNotification();
     }
 
