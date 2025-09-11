@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
+    <item android:icon="?attr/MenuIconEdit" android:id="@+id/item_pick_rename" android:title="@string/menu_item_rename" app:showAsAction="ifRoom"/>
+    <item android:icon="?attr/MenuIconTrash" android:id="@+id/item_pick_delete" android:title="@string/menu_item_delete" app:showAsAction="ifRoom"/>
+</menu>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:orientation="vertical" android:padding="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content">
+    <TableLayout android:padding="3dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:stretchColumns="0">
+        <TableRow>
+            <View android:layout_width="0dp" android:layout_height="0dp"/>
+            <TextView android:padding="3dp" android:visibility="invisible" android:text="@string/asset_permission_transfer" android:height="0dp"/>
+            <TextView android:padding="3dp" android:visibility="invisible" android:text="@string/asset_permission_transfer" android:height="0dp"/>
+            <TextView android:padding="3dp" android:visibility="invisible" android:text="@string/asset_permission_transfer" android:height="0dp"/>
+        </TableRow>
+        <TableRow>
+            <View android:layout_width="0dp" android:layout_height="0dp"/>
+            <TextView android:layout_gravity="center" android:padding="3dp" android:text="@string/asset_permission_copy"/>
+            <TextView android:layout_gravity="center" android:padding="3dp" android:text="@string/asset_permission_modify"/>
+            <TextView android:layout_gravity="center" android:padding="3dp" android:text="@string/asset_permission_transfer"/>
+        </TableRow>
+        <TableRow>
+            <TextView android:layout_gravity="center_vertical" android:padding="3dp" android:text="@string/asset_owner"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_owner_copy" android:padding="3dp" android:layout_width="wrap_content"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_owner_modify" android:padding="3dp" android:layout_width="wrap_content"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_owner_transfer" android:padding="3dp" android:layout_width="wrap_content"/>
+        </TableRow>
+        <TableRow>
+            <TextView android:layout_gravity="center_vertical" android:padding="3dp" android:text="@string/asset_next_owner"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_next_owner_copy" android:padding="3dp" android:layout_width="wrap_content"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_next_owner_modify" android:padding="3dp" android:layout_width="wrap_content"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_next_owner_transfer" android:padding="3dp" android:layout_width="wrap_content"/>
+        </TableRow>
+        <TableRow>
+            <TextView android:layout_gravity="center_vertical" android:padding="3dp" android:text="@string/asset_group"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_group_copy" android:padding="3dp" android:layout_width="wrap_content"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_group_modify" android:padding="3dp" android:layout_width="wrap_content"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_group_transfer" android:padding="3dp" android:layout_width="wrap_content"/>
+        </TableRow>
+        <TableRow>
+            <TextView android:layout_gravity="center_vertical" android:padding="3dp" android:text="@string/asset_everyone"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_everyone_copy" android:padding="3dp" android:layout_width="wrap_content"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_everyone_modify" android:padding="3dp" android:layout_width="wrap_content"/>
+            <CheckBox android:layout_gravity="center" android:id="@+id/asset_permission_cb_everyone_transfer" android:padding="3dp" android:layout_width="wrap_content"/>
+        </TableRow>
+    </TableLayout>
+    <LinearLayout android:layout_gravity="right" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <Button android:id="@+id/okButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/save_permissions_button" style="@style/BorderlessCardButton"/>
+        <Button android:id="@+id/cancelButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/cancel" style="@style/BorderlessCardButton"/>
+    </LinearLayout>
+</LinearLayout>

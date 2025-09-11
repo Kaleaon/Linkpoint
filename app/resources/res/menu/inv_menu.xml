@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
+    <item android:icon="?attr/MenuIconSort" android:id="@+id/item_sort_order" android:title="@string/menu_item_inventory_sort" app:showAsAction="never|ifRoom|withText"/>
+    <item android:icon="?attr/MenuIconNewFolder" android:id="@+id/item_new_folder" android:title="@string/menu_item_inventory_new_folder" app:showAsAction="never|ifRoom|withText"/>
+    <item android:icon="?attr/MenuIconNewNotecard" android:id="@+id/item_new_notecard" android:title="@string/menu_item_inventory_new_notecard" app:showAsAction="never|ifRoom|withText"/>
+    <item android:icon="?attr/MenuIconPinMap" android:id="@+id/item_create_landmark" android:title="@string/menu_item_create_landmark" app:showAsAction="never|ifRoom|withText"/>
+</menu>

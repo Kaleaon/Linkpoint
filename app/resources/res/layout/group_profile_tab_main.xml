@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:id="@+id/swipe_refresh_layout" android:background="?attr/CardableBackground" android:paddingTop="4dp" android:paddingBottom="4dp" android:layout_width="match_parent" android:layout_height="match_parent">
+    <ScrollView android:id="@+id/profile_scroll" android:scrollbars="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+        <com.lumiyaviewer.lumiya.ui.common.LoadingLayout android:id="@+id/loading_layout" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:id="@+id/group_profile_details" android:visibility="visible" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp">
+                <android.support.v7.widget.CardView android:id="@+id/group_main_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="0">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp" android:layout_marginBottom="14dp">
+                            <com.lumiyaviewer.lumiya.ui.common.ImageAssetView android:layout_gravity="left" android:id="@+id/group_pic_view" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginRight="10dp" android:layout_weight="1" android:layout_toLeftOf="@+id/profile_minor_details" android:layout_alignParentLeft="true" android:layout_alignParentTop="true"/>
+                            <LinearLayout android:orientation="vertical" android:id="@+id/profile_minor_details" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_weight="1" android:layout_alignTop="@+id/group_pic_view" android:layout_alignBottom="@+id/group_pic_view" android:layout_alignParentRight="true">
+                                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_gravity="right" android:id="@+id/text_profile_member_count" android:scrollbars="none" android:layout_width="wrap_content" android:layout_height="wrap_content" android:singleLine="false" style="@style/CardCaption"/>
+                                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:gravity="right" android:layout_gravity="right" android:id="@+id/text_profile_join_fee" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                                <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1"/>
+                                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_gravity="right" android:id="@+id/text_profile_open_enrollment" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_gravity="right" android:id="@+id/text_profile_show_in_search" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+                <android.support.v7.widget.CardView android:id="@+id/group_membership_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp">
+                            <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:id="@+id/group_membership_caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/membership_caption"/>
+                            <TextView android:id="@+id/group_membership_role" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="false" style="@style/CardCaption"/>
+                        </LinearLayout>
+                        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="14dp">
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/group_join_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_group_join" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/group_leave_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_group_leave" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/group_invite_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_group_invite" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                            <Button android:layout_gravity="center_vertical" android:id="@+id/group_change_role_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_group_change_role" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+                <android.support.v7.widget.CardView android:id="@+id/membership_settings_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp">
+                            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1">
+                                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/membership_card_title"/>
+                                <TextView android:id="@+id/land_contribution_text" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="false" style="@style/CardCaption"/>
+                            </LinearLayout>
+                            <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                                <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                                    <CheckBox android:id="@+id/show_in_profile_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true"/>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/show_in_profile_checkbox_title"/>
+                                </LinearLayout>
+                                <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                                    <CheckBox android:id="@+id/active_group_checkbox" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true"/>
+                                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/active_group_checkbox_title"/>
+                                </LinearLayout>
+                            </LinearLayout>
+                        </LinearLayout>
+                        <Button android:layout_gravity="center_vertical" android:id="@+id/group_profile_contribution_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/contribute_land_button_title" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+                <android.support.v7.widget.CardView android:id="@+id/group_founder_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp">
+                            <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1">
+                                <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/founder_caption"/>
+                                <TextView android:id="@+id/group_founder_name" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="false" style="@style/CardCaption"/>
+                            </LinearLayout>
+                            <com.lumiyaviewer.lumiya.ui.chat.ChatterPicView android:layout_gravity="top|right|center_vertical|center_horizontal|center" android:id="@+id/group_founder_pic" android:layout_width="36dp" android:layout_height="36dp" android:layout_weight="0"/>
+                        </LinearLayout>
+                        <Button android:layout_gravity="center_vertical" android:id="@+id/group_profile_view_founder_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/button_view_profile" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+                <android.support.v7.widget.CardView android:id="@+id/group_profile_charter_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="0">
+                        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp" android:layout_marginBottom="14dp">
+                            <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/group_profile_charter" style="@style/CardCaption"/>
+                            <TextView android:id="@+id/group_profile_charter_text" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="false"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+                <android.support.v7.widget.CardView android:id="@+id/group_key_card_view" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="4dp" android:layout_marginRight="10dp" android:layout_marginBottom="4dp" app:cardBackgroundColor="?attr/CardViewDetailsBackground" app:cardElevation="2dp">
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="14dp" android:layout_marginRight="16dp">
+                            <TextView android:textAppearance="?android:attr/textAppearanceSmall" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/profile_group_key"/>
+                            <TextView android:ellipsize="end" android:id="@+id/text_profile_group_key" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" style="@style/CardCaption"/>
+                        </LinearLayout>
+                        <Button android:layout_gravity="center_vertical" android:id="@+id/button_copy_group_key" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/copy_agent_key" android:layout_weight="0" style="@style/BorderlessCardButton"/>
+                    </LinearLayout>
+                </android.support.v7.widget.CardView>
+            </LinearLayout>
+        </com.lumiyaviewer.lumiya.ui.common.LoadingLayout>
+    </ScrollView>
+</android.support.v4.widget.SwipeRefreshLayout>
