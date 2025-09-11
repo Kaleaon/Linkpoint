@@ -275,9 +275,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     };
     private boolean camButtonEnabled = false;
     private final Object chatEventHandler = new Object() {
-        /* access modifiers changed from: package-private */
-        /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_render_WorldViewActivity$1_50098  reason: not valid java name */
-        public /* synthetic */ void m846lambda$com_lumiyaviewer_lumiya_ui_render_WorldViewActivity$1_50098(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
+        /* synthetic */ void handleChatMessageEvent(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
             WorldViewActivity.this.handleChatEvent(chatMessageEvent);
         }
 
@@ -2432,15 +2430,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         return cls == ContactsFragment.class || cls == ChatFragment.class || cls == ObjectDetailsFragment.class || cls == OutfitsFragment.class || cls == UserProfileFragment.class;
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_10269  reason: not valid java name */
-    public /* synthetic */ void m843lambda$com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_10269(ValueAnimator valueAnimator) {
+    /* synthetic */ void animateInsetsBackground(ValueAnimator valueAnimator) {
         this.insetsBackground.setAlpha(1.0f - valueAnimator.getAnimatedFraction());
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_43183  reason: not valid java name */
-    public /* synthetic */ void m844lambda$com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_43183(DialogInterface dialogInterface, int i) {
+    /* synthetic */ void handleBuyObjectDialog(DialogInterface dialogInterface, int i) {
         SLAgentCircuit activeAgentCircuit;
         if (!(this.userManager == null || (activeAgentCircuit = this.userManager.getActiveAgentCircuit()) == null || this.pickedObject == null)) {
             activeAgentCircuit.BuyObject(this.pickedObject.localID, this.pickedObject.saleType, this.pickedObject.salePrice);
@@ -2448,9 +2442,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         dialogInterface.dismiss();
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_48476  reason: not valid java name */
-    public /* synthetic */ void m845lambda$com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_48476(List list, DialogInterface dialogInterface, int i) {
+    /* synthetic */ void handleHUDSelection(List list, DialogInterface dialogInterface, int i) {
         if (i >= 0 && i < list.size()) {
             displayHUD(((SelectableAttachment) list.get(i)).getLocalID());
         }
