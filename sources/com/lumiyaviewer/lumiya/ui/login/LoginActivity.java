@@ -321,9 +321,7 @@ public class LoginActivity extends ThemedActivity implements View.OnClickListene
         updateConnectingStatus();
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_login_LoginActivity_5985  reason: not valid java name */
-    public /* synthetic */ void m636lambda$com_lumiyaviewer_lumiya_ui_login_LoginActivity_5985() {
+    /* synthetic */ void adjustWhatsNewVisibility() {
         if (findViewById(R.id.login_spacer).getHeight() < 2 && findViewById(R.id.whatsnewText).getVisibility() != 8) {
             findViewById(R.id.whatsnewText).setVisibility(8);
         }

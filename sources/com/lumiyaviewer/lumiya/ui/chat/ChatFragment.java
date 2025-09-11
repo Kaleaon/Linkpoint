@@ -827,9 +827,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv
         view.findViewById(R.id.chat_vr_mode_controls).setVisibility(8);
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_ChatFragment_22290  reason: not valid java name */
-    public /* synthetic */ void m413lambda$com_lumiyaviewer_lumiya_ui_chat_ChatFragment_22290(DialogInterface dialogInterface, int i) {
+    /* synthetic */ void handleClearChatHistory(DialogInterface dialogInterface, int i) {
         if (this.chatterID != null) {
             UserManager userManager = this.chatterID.getUserManager();
             if (userManager != null) {

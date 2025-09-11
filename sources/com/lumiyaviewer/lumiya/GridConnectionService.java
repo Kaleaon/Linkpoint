@@ -1017,9 +1017,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.-$Lambda$3DowF6pLKgVj
         VoicePluginServiceConnection.setInstallOfferDisplayed(false);
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_GridConnectionService_20777  reason: not valid java name */
-    public /* synthetic */ void m9lambda$com_lumiyaviewer_lumiya_GridConnectionService_20777(ChatterNameRetriever chatterNameRetriever) {
+    /* synthetic */ void updateNotification(ChatterNameRetriever chatterNameRetriever) {
         updateOnlineNotification();
     }
 

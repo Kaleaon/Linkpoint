@@ -167,9 +167,7 @@ public class InventoryActivity extends MasterDetailsActivity {
         return cls.equals(InventoryFragment.class);
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_inventory_InventoryActivity_10944  reason: not valid java name */
-    public /* synthetic */ void m589lambda$com_lumiyaviewer_lumiya_ui_inventory_InventoryActivity_10944(int i, DialogInterface dialogInterface, int i2) {
+    /* synthetic */ void handleSortOrderChange(int i, DialogInterface dialogInterface, int i2) {
         if (i != i2) {
             InventoryFragmentHelper.setSortOrder(this, i2);
             EventBus.getInstance().publish(new InventorySortOrderChangedEvent(i2));

@@ -2427,9 +2427,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         return this.executor;
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_10310  reason: not valid java name */
-    public /* synthetic */ void m177lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_10310(long j, UUID uuid, boolean z, boolean z2) {
+    /* synthetic */ void handleInventoryFetchComplete(long j, UUID uuid, boolean z, boolean z2) {
         Debug.Printf("Inventory: onFetchComplete: folderId = '%s'", Long.valueOf(j));
         this.fetchRequests.remove(uuid);
         SLInventoryEntry findEntry = this.db.findEntry(uuid);
@@ -2450,9 +2448,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         updateFolderLoadingStatus(uuid);
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_27010  reason: not valid java name */
-    public /* synthetic */ void m178lambda$com_lumiyaviewer_lumiya_slproto_inventory_SLInventory_27010(SLInventoryEntry sLInventoryEntry, SLInventoryEntry sLInventoryEntry2) {
+    /* synthetic */ void handleInventoryFolderUpdate(SLInventoryEntry sLInventoryEntry, SLInventoryEntry sLInventoryEntry2) {
         this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.uuid);
         this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.parentUUID);
     }
