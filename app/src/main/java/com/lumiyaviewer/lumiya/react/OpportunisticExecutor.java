@@ -18,88 +18,65 @@ public class OpportunisticExecutor implements Executor {
     private final Set<Runnable> runOnceRunnables = new HashSet();
     private final Thread thread;
     private final Runnable worker = new Runnable() {
-        /* DevToolsApp WARNING: Missing block: B:36:?, code:
-            com.lumiyaviewer.lumiya.react.OpportunisticExecutor.-get0(r3.this$0).unlock();
-            r0.run();
-     */
+        @Override
         public void run() {
-            /*
-            r3 = this;
-        L_0x0000:
-            r0 = com.lumiyaviewer.lumiya.react.OpportunisticExecutor.this;	 Catch:{ all -> 0x0065 }
-            r0 = r0.lock;	 Catch:{ all -> 0x0065 }
-            r0.lock();	 Catch:{ all -> 0x0065 }
-        L_0x0009:
-            r0 = com.lumiyaviewer.lumiya.react.OpportunisticExecutor.this;	 Catch:{ all -> 0x0065 }
-            r0 = r0.queue;	 Catch:{ all -> 0x0065 }
-            r0 = r0.poll();	 Catch:{ all -> 0x0065 }
-            r0 = (java.lang.Runnable) r0;	 Catch:{ all -> 0x0065 }
-            if (r0 != 0) goto L_0x0082;
-        L_0x0017:
-            r0 = 0;
-        L_0x0018:
-            r1 = com.lumiyaviewer.lumiya.react.OpportunisticExecutor.this;	 Catch:{ all -> 0x0065 }
-            r1 = r1.runOnceRunnables;	 Catch:{ all -> 0x0065 }
-            r1 = r1.isEmpty();	 Catch:{ all -> 0x0065 }
-            if (r1 != 0) goto L_0x0076;
-        L_0x0024:
-            r1 = 1;
-            r0 = com.lumiyaviewer.lumiya.react.OpportunisticExecutor.this;	 Catch:{ all -> 0x0065 }
-            r0 = r0.runOnceRunnables;	 Catch:{ all -> 0x0065 }
-            r2 = r0.iterator();	 Catch:{ all -> 0x0065 }
-            r0 = r2.hasNext();	 Catch:{ all -> 0x0065 }
-            if (r0 == 0) goto L_0x0075;
-        L_0x0035:
-            r0 = r2.next();	 Catch:{ all -> 0x0065 }
-            r0 = (java.lang.Runnable) r0;	 Catch:{ all -> 0x0065 }
-            r2.remove();	 Catch:{ all -> 0x0065 }
-            r2 = com.lumiyaviewer.lumiya.react.OpportunisticExecutor.this;	 Catch:{ all -> 0x005a }
-            r2 = r2.lock;	 Catch:{ all -> 0x005a }
-            r2.unlock();	 Catch:{ all -> 0x005a }
-            r0.run();	 Catch:{ Exception -> 0x0055 }
-        L_0x004a:
-            r0 = com.lumiyaviewer.lumiya.react.OpportunisticExecutor.this;	 Catch:{ all -> 0x0065 }
-            r0 = r0.lock;	 Catch:{ all -> 0x0065 }
-            r0.lock();	 Catch:{ all -> 0x0065 }
-            r0 = r1;
-            goto L_0x0018;
-        L_0x0055:
-            r0 = move-exception;
-            com.lumiyaviewer.lumiya.Debug.Warning(r0);	 Catch:{ all -> 0x005a }
-            goto L_0x004a;
-        L_0x005a:
-            r0 = move-exception;
-            r1 = com.lumiyaviewer.lumiya.react.OpportunisticExecutor.this;	 Catch:{ all -> 0x0065 }
-            r1 = r1.lock;	 Catch:{ all -> 0x0065 }
-            r1.lock();	 Catch:{ all -> 0x0065 }
-            throw r0;	 Catch:{ all -> 0x0065 }
-        L_0x0065:
-            r0 = move-exception;
-            r1 = com.lumiyaviewer.lumiya.react.OpportunisticExecutor.this;	 Catch:{ Exception -> 0x0070 }
-            r1 = r1.lock;	 Catch:{ Exception -> 0x0070 }
-            r1.unlock();	 Catch:{ Exception -> 0x0070 }
-            throw r0;	 Catch:{ Exception -> 0x0070 }
-        L_0x0070:
-            r0 = move-exception;
-            com.lumiyaviewer.lumiya.Debug.Warning(r0);
-            goto L_0x0000;
-        L_0x0075:
-            r0 = r1;
-        L_0x0076:
-            if (r0 != 0) goto L_0x0009;
-        L_0x0078:
-            r0 = com.lumiyaviewer.lumiya.react.OpportunisticExecutor.this;	 Catch:{ all -> 0x0065 }
-            r0 = r0.notEmpty;	 Catch:{ all -> 0x0065 }
-            r0.await();	 Catch:{ all -> 0x0065 }
-            goto L_0x0009;
-        L_0x0082:
-            r1 = com.lumiyaviewer.lumiya.react.OpportunisticExecutor.this;	 Catch:{ Exception -> 0x0070 }
-            r1 = r1.lock;	 Catch:{ Exception -> 0x0070 }
-            r1.unlock();	 Catch:{ Exception -> 0x0070 }
-            r0.run();	 Catch:{ Exception -> 0x0070 }
-            goto L_0x0000;
-            */
-            throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.react.OpportunisticExecutor.1.run():void");
+            while (true) {
+                try {
+                    lock.lock();
+                    
+                    // Process regular queue items
+                    Runnable task;
+                    while ((task = queue.poll()) != null) {
+                        lock.unlock();
+                        try {
+                            task.run();
+                        } catch (Exception e) {
+                            Debug.Warning(e);
+                        }
+                        lock.lock();
+                    }
+                    
+                    // Process run-once runnables
+                    boolean hasRunOnceWork = false;
+                    if (!runOnceRunnables.isEmpty()) {
+                        hasRunOnceWork = true;
+                        
+                        // Process all run-once runnables
+                        var iterator = runOnceRunnables.iterator();
+                        while (iterator.hasNext()) {
+                            Runnable runOnceTask = iterator.next();
+                            iterator.remove();
+                            
+                            lock.unlock();
+                            try {
+                                runOnceTask.run();
+                            } catch (Exception e) {
+                                Debug.Warning(e);
+                            }
+                            lock.lock();
+                        }
+                    }
+                    
+                    // If no work was done, wait for new tasks
+                    if (!hasRunOnceWork) {
+                        try {
+                            notEmpty.await();
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            break;
+                        }
+                    }
+                    
+                } catch (Exception e) {
+                    Debug.Warning(e);
+                } finally {
+                    try {
+                        lock.unlock();
+                    } catch (Exception e) {
+                        Debug.Warning(e);
+                    }
+                }
+            }
         }
     };
 

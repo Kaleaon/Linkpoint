@@ -31,49 +31,22 @@ public class FrustrumInfo {
     /* DevToolsApp WARNING: Missing block: B:7:0x0018, code:
             return false;
      */
-    public boolean equals(java.lang.Object r4) {
-        /*
-        r3 = this;
-        r2 = 0;
-        r0 = r4 instanceof com.lumiyaviewer.lumiya.render.spatial.FrustrumInfo;
-        if (r0 != 0) goto L_0x0006;
-    L_0x0005:
-        return r2;
-    L_0x0006:
-        r4 = (com.lumiyaviewer.lumiya.render.spatial.FrustrumInfo) r4;
-        r0 = r4.viewX;
-        r1 = r3.viewX;
-        r0 = (r0 > r1 ? 1 : (r0 == r1 ? 0 : -1));
-        if (r0 != 0) goto L_0x0018;
-    L_0x0010:
-        r0 = r4.viewY;
-        r1 = r3.viewY;
-        r0 = (r0 > r1 ? 1 : (r0 == r1 ? 0 : -1));
-        if (r0 == 0) goto L_0x0019;
-    L_0x0018:
-        return r2;
-    L_0x0019:
-        r0 = r4.viewZ;
-        r1 = r3.viewZ;
-        r0 = (r0 > r1 ? 1 : (r0 == r1 ? 0 : -1));
-        if (r0 != 0) goto L_0x0018;
-    L_0x0021:
-        r0 = r4.viewDistance;
-        r1 = r3.viewDistance;
-        r0 = (r0 > r1 ? 1 : (r0 == r1 ? 0 : -1));
-        if (r0 != 0) goto L_0x0018;
-    L_0x0029:
-        r0 = r3.mvpMatrix;
-        r1 = r4.mvpMatrix;
-        r0 = java.util.Arrays.equals(r0, r1);
-        if (r0 != 0) goto L_0x0034;
-    L_0x0033:
-        return r2;
-    L_0x0034:
-        r0 = 1;
-        return r0;
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.render.spatial.FrustrumInfo.equals(java.lang.Object):boolean");
+    public boolean equals(java.lang.Object obj) {
+        if (!(obj instanceof FrustrumInfo)) {
+            return false;
+        }
+        
+        FrustrumInfo other = (FrustrumInfo) obj;
+        
+        // Compare all float fields
+        if (Float.compare(other.viewX, this.viewX) != 0) return false;
+        if (Float.compare(other.viewY, this.viewY) != 0) return false;
+        if (Float.compare(other.viewZ, this.viewZ) != 0) return false;
+        if (Float.compare(other.viewDistance, this.viewDistance) != 0) return false;
+        
+        // Compare matrix arrays
+        return Arrays.equals(this.mvpMatrix, other.mvpMatrix);
+    }
     }
 
     public int hashCode() {
