@@ -27,183 +27,84 @@ class AsyncOperationExecutor implements Runnable, Handler.Callback {
     AsyncOperationExecutor() {
     }
 
-    /* JADX WARNING: Can't fix incorrect switch cases order */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    private void executeOperation(de.greenrobot.dao.async.AsyncOperation r4) {
-        /*
-            r3 = this;
-            long r0 = java.lang.System.currentTimeMillis()
-            r4.timeStarted = r0
-            int[] r0 = de.greenrobot.dao.async.AsyncOperationExecutor.AnonymousClass1.$SwitchMap$de$greenrobot$dao$async$AsyncOperation$OperationType     // Catch:{ Throwable -> 0x002f }
-            de.greenrobot.dao.async.AsyncOperation$OperationType r1 = r4.type     // Catch:{ Throwable -> 0x002f }
-            int r1 = r1.ordinal()     // Catch:{ Throwable -> 0x002f }
-            r0 = r0[r1]     // Catch:{ Throwable -> 0x002f }
-            switch(r0) {
-                case 1: goto L_0x0039;
-                case 2: goto L_0x0041;
-                case 3: goto L_0x004b;
-                case 4: goto L_0x0057;
-                case 5: goto L_0x005f;
-                case 6: goto L_0x0069;
-                case 7: goto L_0x0075;
-                case 8: goto L_0x007d;
-                case 9: goto L_0x0087;
-                case 10: goto L_0x0093;
-                case 11: goto L_0x009b;
-                case 12: goto L_0x00a5;
-                case 13: goto L_0x00b1;
-                case 14: goto L_0x00b6;
-                case 15: goto L_0x00bb;
-                case 16: goto L_0x00c7;
-                case 17: goto L_0x00d3;
-                case 18: goto L_0x00dc;
-                case 19: goto L_0x00e3;
-                case 20: goto L_0x00ef;
-                case 21: goto L_0x00f9;
-                case 22: goto L_0x0107;
-                default: goto L_0x0013;
-            }     // Catch:{ Throwable -> 0x002f }
-        L_0x0013:
-            de.greenrobot.dao.DaoException r0 = new de.greenrobot.dao.DaoException     // Catch:{ Throwable -> 0x002f }
-            java.lang.StringBuilder r1 = new java.lang.StringBuilder     // Catch:{ Throwable -> 0x002f }
-            r1.<init>()     // Catch:{ Throwable -> 0x002f }
-            java.lang.String r2 = "Unsupported operation: "
-            java.lang.StringBuilder r1 = r1.append(r2)     // Catch:{ Throwable -> 0x002f }
-            de.greenrobot.dao.async.AsyncOperation$OperationType r2 = r4.type     // Catch:{ Throwable -> 0x002f }
-            java.lang.StringBuilder r1 = r1.append(r2)     // Catch:{ Throwable -> 0x002f }
-            java.lang.String r1 = r1.toString()     // Catch:{ Throwable -> 0x002f }
-            r0.<init>((java.lang.String) r1)     // Catch:{ Throwable -> 0x002f }
-            throw r0     // Catch:{ Throwable -> 0x002f }
-        L_0x002f:
-            r0 = move-exception
-            r4.throwable = r0
-        L_0x0032:
-            long r0 = java.lang.System.currentTimeMillis()
-            r4.timeCompleted = r0
-            return
-        L_0x0039:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r0 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r1 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            r0.delete(r1)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x0041:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r1 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r0 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            java.lang.Iterable r0 = (java.lang.Iterable) r0     // Catch:{ Throwable -> 0x002f }
-            r1.deleteInTx(r0)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x004b:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r1 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r0 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object[] r0 = (java.lang.Object[]) r0     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object[] r0 = (java.lang.Object[]) r0     // Catch:{ Throwable -> 0x002f }
-            r1.deleteInTx((T[]) r0)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x0057:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r0 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r1 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            r0.insert(r1)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x005f:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r1 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r0 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            java.lang.Iterable r0 = (java.lang.Iterable) r0     // Catch:{ Throwable -> 0x002f }
-            r1.insertInTx(r0)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x0069:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r1 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r0 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object[] r0 = (java.lang.Object[]) r0     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object[] r0 = (java.lang.Object[]) r0     // Catch:{ Throwable -> 0x002f }
-            r1.insertInTx((T[]) r0)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x0075:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r0 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r1 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            r0.insertOrReplace(r1)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x007d:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r1 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r0 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            java.lang.Iterable r0 = (java.lang.Iterable) r0     // Catch:{ Throwable -> 0x002f }
-            r1.insertOrReplaceInTx(r0)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x0087:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r1 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r0 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object[] r0 = (java.lang.Object[]) r0     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object[] r0 = (java.lang.Object[]) r0     // Catch:{ Throwable -> 0x002f }
-            r1.insertOrReplaceInTx((T[]) r0)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x0093:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r0 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r1 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            r0.update(r1)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x009b:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r1 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r0 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            java.lang.Iterable r0 = (java.lang.Iterable) r0     // Catch:{ Throwable -> 0x002f }
-            r1.updateInTx(r0)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x00a5:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r1 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r0 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object[] r0 = (java.lang.Object[]) r0     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object[] r0 = (java.lang.Object[]) r0     // Catch:{ Throwable -> 0x002f }
-            r1.updateInTx((T[]) r0)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x00b1:
-            r3.executeTransactionRunnable(r4)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x00b6:
-            r3.executeTransactionCallable(r4)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x00bb:
-            java.lang.Object r0 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            de.greenrobot.dao.query.Query r0 = (de.greenrobot.dao.query.Query) r0     // Catch:{ Throwable -> 0x002f }
-            java.util.List r0 = r0.list()     // Catch:{ Throwable -> 0x002f }
-            r4.result = r0     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x00c7:
-            java.lang.Object r0 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            de.greenrobot.dao.query.Query r0 = (de.greenrobot.dao.query.Query) r0     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r0 = r0.unique()     // Catch:{ Throwable -> 0x002f }
-            r4.result = r0     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x00d3:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r0 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r1 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            r0.deleteByKey(r1)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x00dc:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r0 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            r0.deleteAll()     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x00e3:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r0 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r1 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r0 = r0.load(r1)     // Catch:{ Throwable -> 0x002f }
-            r4.result = r0     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x00ef:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r0 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.util.List r0 = r0.loadAll()     // Catch:{ Throwable -> 0x002f }
-            r4.result = r0     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x00f9:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r0 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            long r0 = r0.count()     // Catch:{ Throwable -> 0x002f }
-            java.lang.Long r0 = java.lang.Long.valueOf(r0)     // Catch:{ Throwable -> 0x002f }
-            r4.result = r0     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        L_0x0107:
-            de.greenrobot.dao.AbstractDao<java.lang.Object, java.lang.Object> r0 = r4.dao     // Catch:{ Throwable -> 0x002f }
-            java.lang.Object r1 = r4.parameter     // Catch:{ Throwable -> 0x002f }
-            r0.refresh(r1)     // Catch:{ Throwable -> 0x002f }
-            goto L_0x0032
-        */
-        throw new UnsupportedOperationException("Method not decompiled: de.greenrobot.dao.async.AsyncOperationExecutor.executeOperation(de.greenrobot.dao.async.AsyncOperation):void");
+    private void executeOperation(AsyncOperation operation) {
+        operation.timeStarted = System.currentTimeMillis();
+        try {
+            switch (operation.type) {
+                case Delete:
+                    operation.dao.delete(operation.parameter);
+                    break;
+                case DeleteInTxIterable:
+                    operation.dao.deleteInTx((Iterable<?>) operation.parameter);
+                    break;
+                case DeleteInTxArray:
+                    operation.dao.deleteInTx((Object[]) operation.parameter);
+                    break;
+                case Insert:
+                    operation.dao.insert(operation.parameter);
+                    break;
+                case InsertInTxIterable:
+                    operation.dao.insertInTx((Iterable<?>) operation.parameter);
+                    break;
+                case InsertInTxArray:
+                    operation.dao.insertInTx((Object[]) operation.parameter);
+                    break;
+                case InsertOrReplace:
+                    operation.dao.insertOrReplace(operation.parameter);
+                    break;
+                case InsertOrReplaceInTxIterable:
+                    operation.dao.insertOrReplaceInTx((Iterable<?>) operation.parameter);
+                    break;
+                case InsertOrReplaceInTxArray:
+                    operation.dao.insertOrReplaceInTx((Object[]) operation.parameter);
+                    break;
+                case Update:
+                    operation.dao.update(operation.parameter);
+                    break;
+                case UpdateInTxIterable:
+                    operation.dao.updateInTx((Iterable<?>) operation.parameter);
+                    break;
+                case UpdateInTxArray:
+                    operation.dao.updateInTx((Object[]) operation.parameter);
+                    break;
+                case TransactionRunnable:
+                    executeTransactionRunnable(operation);
+                    break;
+                case TransactionCallable:
+                    executeTransactionCallable(operation);
+                    break;
+                case QueryList:
+                    operation.result = ((de.greenrobot.dao.query.Query<?>) operation.parameter).list();
+                    break;
+                case QueryUnique:
+                    operation.result = ((de.greenrobot.dao.query.Query<?>) operation.parameter).unique();
+                    break;
+                case DeleteByKey:
+                    operation.dao.deleteByKey(operation.parameter);
+                    break;
+                case DeleteAll:
+                    operation.dao.deleteAll();
+                    break;
+                case Load:
+                    operation.result = operation.dao.load(operation.parameter);
+                    break;
+                case LoadAll:
+                    operation.result = operation.dao.loadAll();
+                    break;
+                case Count:
+                    operation.result = Long.valueOf(operation.dao.count());
+                    break;
+                case Refresh:
+                    operation.dao.refresh(operation.parameter);
+                    break;
+                default:
+                    throw new DaoException("Unsupported operation: " + operation.type);
+            }
+        } catch (Throwable th) {
+            operation.throwable = th;
+        } finally {
+            operation.timeCompleted = System.currentTimeMillis();
+        }
     }
 
     private void executeOperationAndPostCompleted(AsyncOperation asyncOperation) {
