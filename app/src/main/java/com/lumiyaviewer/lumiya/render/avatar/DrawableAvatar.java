@@ -423,8 +423,8 @@ public class DrawableAvatar extends DrawableAvatarStub implements IntersectPicka
         return this.drawableHUD;
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_render_avatar_DrawableAvatar_15479 */
-    /* synthetic */ void m76lambda$-com_lumiyaviewer_lumiya_render_avatar_DrawableAvatar_15479() {
+    /* renamed from: updateAvatarShape */
+    /* synthetic */ void updateAvatarShape() {
         boolean z = false;
         AvatarShapeParams avatarShapeParams = this.shapeParams;
         if (avatarShapeParams != null) {

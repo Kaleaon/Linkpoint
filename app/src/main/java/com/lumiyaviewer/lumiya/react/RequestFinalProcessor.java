@@ -17,11 +17,11 @@ public abstract class RequestFinalProcessor<K, T> implements RequestHandler<K> {
     }
 
     /* renamed from: cancelRequest */
-    protected void lambda$-com_lumiyaviewer_lumiya_react_RequestFinalProcessor_1437(@Nonnull K k) {
+    protected void handleRequestCancellation(@Nonnull K k) {
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestFinalProcessor_673 */
-    /* synthetic */ void m53lambda$-com_lumiyaviewer_lumiya_react_RequestFinalProcessor_673(Object obj) {
+    /* renamed from: handleRequestProcessing */
+    /* synthetic */ void handleRequestProcessing(Object obj) {
         try {
             this.resultHandler.onResultData(obj, processRequest(obj));
         } catch (Throwable th) {
@@ -45,7 +45,7 @@ public abstract class RequestFinalProcessor<K, T> implements RequestHandler<K> {
         if (this.executor != null) {
             this.executor.execute(new AnonymousClass1(this, k));
         } else {
-            lambda$-com_lumiyaviewer_lumiya_react_RequestFinalProcessor_1437(k);
+            handleRequestCancellation(k);
         }
     }
 

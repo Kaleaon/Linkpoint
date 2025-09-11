@@ -15,13 +15,13 @@ public class AsyncRequestHandler<K> implements RequestHandler<K> {
         this.baseHandler = requestHandler;
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_AsyncRequestHandler_553 */
-    /* synthetic */ void m50lambda$-com_lumiyaviewer_lumiya_react_AsyncRequestHandler_553(Object obj) {
+    /* renamed from: handleAsyncRequest */
+    /* synthetic */ void handleAsyncRequest(Object obj) {
         this.baseHandler.onRequest(obj);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_AsyncRequestHandler_690 */
-    /* synthetic */ void m51lambda$-com_lumiyaviewer_lumiya_react_AsyncRequestHandler_690(Object obj) {
+    /* renamed from: handleAsyncRequestCancelled */
+    /* synthetic */ void handleAsyncRequestCancelled(Object obj) {
         this.baseHandler.onRequestCancelled(obj);
     }
 
