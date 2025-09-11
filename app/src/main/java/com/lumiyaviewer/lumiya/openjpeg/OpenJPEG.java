@@ -39,7 +39,8 @@ public class OpenJPEG implements GLTexture {
     public enum ImageFormat {
         Raw,
         JPEG2000,
-        TGA
+        TGA,
+        KTX2  // Modern texture format with Basis Universal compression
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues */
@@ -66,6 +67,14 @@ public class OpenJPEG implements GLTexture {
 
     static {
         System.loadLibrary("openjpeg");
+        
+        // Initialize Basis Universal transcoder for KTX2 support
+        try {
+            // This will be implemented in the native code
+            // initBasisTranscoder(); // Called lazily when needed
+        } catch (UnsatisfiedLinkError e) {
+            Debug.Warning(e); // Log but don't fail - KTX2 support will be unavailable
+        }
     }
 
     public OpenJPEG(int i, int i2, int i3, int i4, int i5, int i6) throws OutOfMemoryError {
@@ -135,7 +144,45 @@ public class OpenJPEG implements GLTexture {
             TextureMemoryTracker.allocOpenJpegMemory(this.rawBuffer.capacity(), this.mmapped);
             return;
         }
-        throw new IOException("Unsupported format for image stream.");
+        if (imageFormat == ImageFormat.KTX2) {
+            // Initialize Basis Universal transcoder if needed
+            if (!initBasisTranscoder()) {
+                throw new IOException("Failed to initialize Basis Universal transcoder");
+            }
+            
+            byte[] ktx2Data = new byte[inputStream.available()];
+            inputStream.read(ktx2Data);
+            
+            // Verify it's actually KTX2 format
+            if (!isKTX2Format(ktx2Data)) {
+                throw new IOException("Data is not in KTX2 format");
+            }
+            
+            // Get dimensions
+            int[] dimensions = getKTX2Dimensions(ktx2Data);
+            if (dimensions == null || dimensions.length != 3) {
+                throw new IOException("Failed to get KTX2 texture dimensions");
+            }
+            
+            this.width = dimensions[0];
+            this.height = dimensions[1];
+            // dimensions[2] is mip levels - could be used later
+            
+            // Decompress with optimal format (RGBA32 for compatibility)
+            this.rawBuffer = decompressKTX2(ktx2Data, 3); // 3 = RGBA32
+            if (this.rawBuffer == null) {
+                throw new IOException("Failed to decompress KTX2 texture");
+            }
+            
+            // Set texture properties for RGBA32 format
+            this.num_components = 4; // RGBA
+            this.bytes_per_pixel = 4; // 4 bytes per pixel
+            this.error_code = 0;
+            
+            TextureMemoryTracker.allocOpenJpegMemory(this.rawBuffer.capacity(), this.mmapped);
+            return;
+        }
+        throw new IOException("Unsupported format for image stream: " + imageFormat);
     }
 
     private native ByteBuffer allocateNew(int i, int i2, int i3, int i4, int i5, int i6);
@@ -200,6 +247,47 @@ public class OpenJPEG implements GLTexture {
     private native int writeJPEG2K(String str, ByteBuffer byteBuffer, int i, int i2, int i3, int i4);
 
     private native void writeRaw(ByteBuffer byteBuffer, String str);
+
+    // KTX2/Basis Universal transcoding methods
+    private native boolean initBasisTranscoder();
+    private native ByteBuffer decompressKTX2(byte[] ktx2Data, int targetFormat);
+    private native int[] getKTX2Dimensions(byte[] ktx2Data);
+    private native boolean isKTX2Format(byte[] data);
+    
+    /**
+     * Auto-detect texture format from data
+     */
+    public static ImageFormat detectTextureFormat(byte[] data) {
+        if (data == null || data.length < 12) {
+            return ImageFormat.JPEG2000; // Default fallback
+        }
+        
+        // Check for KTX2 magic bytes first
+        if (data[0] == (byte)0xAB && data[1] == 0x4B && data[2] == 0x54 && data[3] == 0x58 &&
+            data[4] == 0x20 && data[5] == 0x32 && data[6] == 0x30 && data[7] == (byte)0xBB &&
+            data[8] == 0x0D && data[9] == 0x0A && data[10] == 0x1A && data[11] == 0x0A) {
+            return ImageFormat.KTX2;
+        }
+        
+        // Check for JPEG2000 magic bytes (JP2 format)
+        if (data.length >= 8 && data[0] == 0x00 && data[1] == 0x00 && data[2] == 0x00 && data[3] == 0x0C &&
+            data[4] == 0x6A && data[5] == 0x50 && data[6] == 0x20 && data[7] == 0x20) {
+            return ImageFormat.JPEG2000;
+        }
+        
+        // Check for TGA format (basic detection)
+        if (data.length >= 18) {
+            // TGA files don't have a clear magic number, but we can check some characteristics
+            // This is a basic check - may need refinement
+            byte imageType = data[2];
+            if (imageType == 2 || imageType == 3 || imageType == 10 || imageType == 11) {
+                return ImageFormat.TGA;
+            }
+        }
+        
+        // Default to JPEG2000 for backward compatibility
+        return ImageFormat.JPEG2000;
+    }
 
     public boolean CompressETC1() throws IOException {
         if (VERSION.SDK_INT < 8 || this.rawBuffer == null || this.num_components != 3 || this.num_extra_components != 0 || (this.bytes_per_pixel != 2 && this.bytes_per_pixel != 3)) {

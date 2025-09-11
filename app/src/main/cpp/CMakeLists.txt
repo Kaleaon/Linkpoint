@@ -12,6 +12,13 @@ set(BASIS_TRANSCODER_SOURCES
     basis_universal/basisu_transcoder.cpp
 )
 
+# Native source files (should integrate with existing openjpeg if present)
+set(NATIVE_SOURCES
+    ${BASIS_TRANSCODER_SOURCES}
+    jni/basis_transcoder_jni.cpp
+    jni/openjpeg_basis_integration.cpp
+)
+
 # Include directories
 include_directories(
     basis_universal
@@ -36,11 +43,12 @@ if(ANDROID)
 endif()
 
 # Create the shared library
+# Integrate with existing openjpeg library by using the same name
+set(LIBRARY_NAME "openjpeg")
 add_library(
-    basis_transcoder
+    ${LIBRARY_NAME}
     SHARED
-    ${BASIS_TRANSCODER_SOURCES}
-    jni/basis_transcoder_jni.cpp
+    ${NATIVE_SOURCES}
 )
 
 # Find required libraries
@@ -49,7 +57,7 @@ find_library(android-lib android)
 
 # Link libraries
 target_link_libraries(
-    basis_transcoder
+    ${LIBRARY_NAME}
     ${log-lib}
     ${android-lib}
 )
