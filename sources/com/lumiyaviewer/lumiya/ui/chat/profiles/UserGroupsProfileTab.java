@@ -86,8 +86,7 @@ public class UserGroupsProfileTab extends ChatterReloadableFragment implements L
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserGroupsProfileTab_2041  reason: not valid java name */
-    public /* synthetic */ void m508lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserGroupsProfileTab_2041(AdapterView adapterView, View view, int i, long j) {
+    public /* synthetic */ void onGroupItemClicked(AdapterView adapterView, View view, int i, long j) {
         Object item = adapterView.getAdapter().getItem(i);
         if ((item instanceof AvatarGroupList.AvatarGroupEntry) && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
             DetailsActivity.showEmbeddedDetails(getActivity(), GroupProfileFragment.class, GroupProfileFragment.makeSelection(ChatterID.getGroupChatterID(this.chatterID.agentUUID, ((AvatarGroupList.AvatarGroupEntry) item).GroupID)));

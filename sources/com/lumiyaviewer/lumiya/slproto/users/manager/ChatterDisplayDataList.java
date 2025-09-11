@@ -71,8 +71,7 @@ abstract class ChatterDisplayDataList {
     public abstract List<ChatterID> getChatters();
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ChatterDisplayDataList_2957  reason: not valid java name */
-    public /* synthetic */ void m288lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ChatterDisplayDataList_2957() {
+    public /* synthetic */ void performListRefresh() {
         this.needsRefresh.set(false);
         refreshList();
     }

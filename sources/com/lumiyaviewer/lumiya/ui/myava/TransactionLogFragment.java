@@ -233,8 +233,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_myava_TransactionLogFragment_4757  reason: not valid java name */
-    public /* synthetic */ void m665lambda$com_lumiyaviewer_lumiya_ui_myava_TransactionLogFragment_4757(DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onClearTransactionLogConfirmed(DialogInterface dialogInterface, int i) {
         dialogInterface.dismiss();
         performClearTransactionLog();
     }

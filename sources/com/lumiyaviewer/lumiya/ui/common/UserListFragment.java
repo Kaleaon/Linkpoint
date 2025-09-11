@@ -58,8 +58,7 @@ public abstract class UserListFragment extends Fragment {
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_UserListFragment_1689  reason: not valid java name */
-    public /* synthetic */ void m578lambda$com_lumiyaviewer_lumiya_ui_common_UserListFragment_1689(AdapterView adapterView, View view, int i, long j) {
+    public /* synthetic */ void onUserListItemClicked(AdapterView adapterView, View view, int i, long j) {
         ChatterID chatterID;
         Object itemAtPosition = adapterView.getItemAtPosition(i);
         if ((itemAtPosition instanceof ChatterDisplayInfo) && this.userManager != null && (chatterID = ((ChatterDisplayInfo) itemAtPosition).getChatterID(this.userManager)) != null) {

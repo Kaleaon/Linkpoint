@@ -26,8 +26,7 @@ public class AvatarPickerForShare extends AvatarPickerFragment {
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_avapicker_AvatarPickerForShare_1468  reason: not valid java name */
-    public /* synthetic */ void m387lambda$com_lumiyaviewer_lumiya_ui_avapicker_AvatarPickerForShare_1468() {
+    public /* synthetic */ void closeAvatarPicker() {
         FragmentActivity activity = getActivity();
         if (activity instanceof DetailsActivity) {
             ((DetailsActivity) activity).closeDetailsFragment(this);

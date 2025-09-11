@@ -320,14 +320,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_myava_MuteListFragment_3737  reason: not valid java name */
-    public /* synthetic */ void m650lambda$com_lumiyaviewer_lumiya_ui_myava_MuteListFragment_3737(AdapterView adapterView, View view, int i, long j) {
+    public /* synthetic */ void onMuteListItemClicked(AdapterView adapterView, View view, int i, long j) {
         Toast.makeText(getContext(), getString(R.string.mute_list_dismiss_hint), 0).show();
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_myava_MuteListFragment_5870  reason: not valid java name */
-    public /* synthetic */ void m651lambda$com_lumiyaviewer_lumiya_ui_myava_MuteListFragment_5870(MuteListEntry muteListEntry, DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onUnmuteConfirmed(MuteListEntry muteListEntry, DialogInterface dialogInterface, int i) {
         dialogInterface.dismiss();
         doUnblock(muteListEntry);
     }
