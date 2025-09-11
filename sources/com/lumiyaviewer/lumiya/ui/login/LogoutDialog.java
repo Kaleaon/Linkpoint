@@ -187,8 +187,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_login_LogoutDialog_3137  reason: not valid java name */
-    public /* synthetic */ void m637lambda$com_lumiyaviewer_lumiya_ui_login_LogoutDialog_3137() {
+    public /* synthetic */ void performLogoutAction() {
         SLAgentCircuit activeAgentCircuit;
         SLGridConnection gridConnection;
         boolean z = true;

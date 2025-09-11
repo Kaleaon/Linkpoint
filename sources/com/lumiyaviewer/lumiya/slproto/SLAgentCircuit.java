@@ -2200,14 +2200,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.-$Lambda$K1xW
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_SLAgentCircuit_14593  reason: not valid java name */
-    public /* synthetic */ void m127lambda$com_lumiyaviewer_lumiya_slproto_SLAgentCircuit_14593(UserName userName) {
+    /* renamed from: setAgentUserName - sets the agent username in the circuit */
+    public /* synthetic */ void setAgentUserName(UserName userName) {
         this.agentUserName.set(userName);
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_SLAgentCircuit_77024  reason: not valid java name */
-    public /* synthetic */ void m128lambda$com_lumiyaviewer_lumiya_slproto_SLAgentCircuit_77024(SLInventoryEntry sLInventoryEntry, UUID uuid) {
+    /* renamed from: sendInventoryOffer - sends inventory items as instant message offer to another agent */
+    public /* synthetic */ void sendInventoryOffer(SLInventoryEntry sLInventoryEntry, UUID uuid) {
         ArrayList<SLInventoryEntry> arrayList = new ArrayList<>();
         arrayList.add(sLInventoryEntry);
         if (sLInventoryEntry.isFolder) {

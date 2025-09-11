@@ -144,49 +144,30 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
         }
     }
 
-    /* DevToolsApp WARNING: Removed duplicated region for block: B:20:0x002c A:{SYNTHETIC} */
-    public int drainTo(java.util.Collection<? super T> r5, int r6) {
-        /*
-        r4 = this;
-        r0 = r4.lock;
-        r0.lock();
-        r1 = 0;
-        r0 = r4.queues;	 Catch:{ all -> 0x0033 }
-        r0 = r0.values();	 Catch:{ all -> 0x0033 }
-        r2 = r0.iterator();	 Catch:{ all -> 0x0033 }
-    L_0x0010:
-        r0 = r2.hasNext();	 Catch:{ all -> 0x0033 }
-        if (r0 == 0) goto L_0x003a;
-    L_0x0016:
-        r0 = r2.next();	 Catch:{ all -> 0x0033 }
-        r0 = (java.util.Queue) r0;	 Catch:{ all -> 0x0033 }
-    L_0x001c:
-        r3 = r0.poll();	 Catch:{ all -> 0x0033 }
-        if (r3 == 0) goto L_0x002a;
-    L_0x0022:
-        if (r1 >= r6) goto L_0x002a;
-    L_0x0024:
-        r5.add(r3);	 Catch:{ all -> 0x0033 }
-        r1 = r1 + 1;
-        goto L_0x001c;
-    L_0x002a:
-        if (r1 < r6) goto L_0x0010;
-    L_0x002c:
-        r0 = r1;
-    L_0x002d:
-        r1 = r4.lock;
-        r1.unlock();
-        return r0;
-    L_0x0033:
-        r0 = move-exception;
-        r1 = r4.lock;
-        r1.unlock();
-        throw r0;
-    L_0x003a:
-        r0 = r1;
-        goto L_0x002d;
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.collections.PriorityBinQueue.drainTo(java.util.Collection, int):int");
+    public int drainTo(Collection<? super T> collection, int maxElements) {
+        this.lock.lock();
+        try {
+            int drained = 0;
+            // Iterate through queues in priority order (TreeMap maintains sorted order)
+            for (Queue<T> queue : this.queues.values()) {
+                // Drain items from current priority queue until empty or limit reached
+                while (drained < maxElements) {
+                    T item = queue.poll();
+                    if (item == null) {
+                        break; // Queue is empty, move to next priority level
+                    }
+                    collection.add(item);
+                    drained++;
+                }
+                // Stop if we've reached the maximum number of elements to drain
+                if (drained >= maxElements) {
+                    break;
+                }
+            }
+            return drained;
+        } finally {
+            this.lock.unlock();
+        }
     }
 
     public T element() {

@@ -33,9 +33,7 @@ public abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> implements Reques
             this(obj, obj2);
         }
 
-        /* access modifiers changed from: package-private */
-        /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestForwarder$DownstreamSubscription_827  reason: not valid java name */
-        public /* synthetic */ void m30lambda$com_lumiyaviewer_lumiya_react_RequestForwarder$DownstreamSubscription_827(Object obj) {
+        /* synthetic */ void handleDataProcessing(Object obj) {
             RequestForwarder.this.processResultInternal(this.key, obj);
         }
 

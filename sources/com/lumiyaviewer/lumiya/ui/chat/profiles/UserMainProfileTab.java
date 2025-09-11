@@ -101,9 +101,7 @@ public class UserMainProfileTab extends ChatterReloadableFragment implements Loa
         }
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserMainProfileTab_9585  reason: not valid java name */
-    public /* synthetic */ void m509lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserMainProfileTab_9585(ChatterNameRetriever chatterNameRetriever) {
+    /* synthetic */ void updatePartnerProfile(ChatterNameRetriever chatterNameRetriever) {
         if (getView() != null) {
             this.userProfilePartnerName.setText(chatterNameRetriever.getResolvedName());
             this.userProfilePartnerPic.setChatterID(chatterNameRetriever.chatterID, chatterNameRetriever.getResolvedName());

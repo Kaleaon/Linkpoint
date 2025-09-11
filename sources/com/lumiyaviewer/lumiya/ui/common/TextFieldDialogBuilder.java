@@ -27,8 +27,7 @@ public class TextFieldDialogBuilder {
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TextFieldDialogBuilder_2200  reason: not valid java name */
-    public /* synthetic */ void m549lambda$com_lumiyaviewer_lumiya_ui_common_TextFieldDialogBuilder_2200(DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onTextDialogCancelled(DialogInterface dialogInterface, int i) {
         dialogInterface.dismiss();
         if (this.cancelledListener != null) {
             this.cancelledListener.onTextCancelled();
@@ -36,8 +35,7 @@ public class TextFieldDialogBuilder {
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TextFieldDialogBuilder_2416  reason: not valid java name */
-    public /* synthetic */ void m550lambda$com_lumiyaviewer_lumiya_ui_common_TextFieldDialogBuilder_2416(EditText editText, DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onTextDialogConfirmed(EditText editText, DialogInterface dialogInterface, int i) {
         dialogInterface.dismiss();
         if (this.listener != null) {
             this.listener.onTextEntered(editText.getText().toString());

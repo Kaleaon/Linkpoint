@@ -166,7 +166,7 @@ public class SLCircuit extends SLMessageHandler {
     }
 
     public void HandleMessage(SLMessage sLMessage) {
-        sLMessage.lambda$-com_lumiyaviewer_lumiya_slproto_SLThreadingCircuit_1833(this);
+        sLMessage.handleMessage(this);
     }
 
     public void HandlePacketAck(PacketAck packetAck) {
@@ -197,168 +197,95 @@ public class SLCircuit extends SLMessageHandler {
     public void ProcessNetworkError() {
     }
 
-    /* DevToolsApp WARNING: Removed duplicated region for block: B:48:0x0109  */
-    /* DevToolsApp WARNING: Removed duplicated region for block: B:16:0x007f A:{LOOP_START, LOOP:0: B:16:0x007f->B:19:0x008f} */
-    /* DevToolsApp WARNING: Removed duplicated region for block: B:16:0x007f A:{LOOP_START, LOOP:0: B:16:0x007f->B:19:0x008f} */
-    /* DevToolsApp WARNING: Removed duplicated region for block: B:48:0x0109  */
     public boolean ProcessReceive() throws java.io.IOException {
-        /*
-        r8 = this;
-        r0 = 0;
-        r3 = 1;
-        r4 = 0;
-        r1 = r8.rxBuffer;
-        r1.clear();
-        r1 = r8.rxBuffer;
-        r2 = java.nio.ByteOrder.BIG_ENDIAN;
-        r1.order(r2);
-        r1 = r8.datagramChannel;
-        r2 = r8.rxBuffer;
-        r1 = r1.read(r2);
-        if (r1 == 0) goto L_0x0106;
-    L_0x0019:
-        r1 = r8.rxBuffer;
-        r1.flip();
-        r1 = r8.receivedAcks;
-        r1.clear();
-        r1 = r8.rxBuffer;
-        r2 = r8.tempBuffer;
-        r5 = r8.receivedAcks;
-        r2 = com.lumiyaviewer.lumiya.slproto.SLMessage.Unpack(r1, r2, r5);
-        if (r2 == 0) goto L_0x00ca;
-    L_0x002f:
-        r6 = android.os.SystemClock.elapsedRealtime();
-        r8.lastReceivedPacketMillis = r6;
-        r8.pingSentCount = r4;
-        r1 = r2.seqNum;
-        r5 = r8.lastReceivedSeqnum;
-        r1 = r1 - r5;
-        if (r1 > 0) goto L_0x010b;
-    L_0x003e:
-        r1 = "Detected incoming out of order: seqNum = %d";
-        r5 = new java.lang.Object[r3];
-        r6 = r2.seqNum;
-        r6 = java.lang.Integer.valueOf(r6);
-        r5[r4] = r6;
-        com.lumiyaviewer.lumiya.Debug.Printf(r1, r5);
-        r1 = r2 instanceof com.lumiyaviewer.lumiya.slproto.messages.PacketAck;
-        if (r1 != 0) goto L_0x00c6;
-    L_0x0052:
-        r1 = r2 instanceof com.lumiyaviewer.lumiya.slproto.messages.StartPingCheck;
-        r1 = r1 ^ 1;
-        if (r1 == 0) goto L_0x00c6;
-    L_0x0058:
-        r1 = r2 instanceof com.lumiyaviewer.lumiya.slproto.messages.CompletePingCheck;
-        r1 = r1 ^ 1;
-        if (r1 == 0) goto L_0x010b;
-    L_0x005e:
-        r1 = r8.handledPackets;
-        r5 = r2.seqNum;
-        r5 = java.lang.Integer.valueOf(r5);
-        r1 = r1.contains(r5);
-        if (r1 == 0) goto L_0x010b;
-    L_0x006c:
-        r1 = "Detected incoming duplicate: seqNum = %d";
-        r5 = new java.lang.Object[r3];
-        r6 = r2.seqNum;
-        r6 = java.lang.Integer.valueOf(r6);
-        r5[r4] = r6;
-        com.lumiyaviewer.lumiya.Debug.Printf(r1, r5);
-        r1 = r3;
-    L_0x007d:
-        if (r1 != 0) goto L_0x0109;
-    L_0x007f:
-        r1 = r8.handledPackets;
-        r1 = r1.size();
-        r5 = 1024; // 0x400 float:1.435E-42 double:5.06E-321;
-        if (r1 < r5) goto L_0x0091;
-    L_0x0089:
-        r1 = r8.handledPackets;
-        r1 = r1.poll();
-        if (r1 != 0) goto L_0x007f;
-    L_0x0091:
-        r1 = r8.handledPackets;
-        r5 = r2.seqNum;
-        r5 = java.lang.Integer.valueOf(r5);
-        r1.add(r5);
-        r1 = r2.seqNum;
-        r8.lastReceivedSeqnum = r1;
-        r1 = r2 instanceof com.lumiyaviewer.lumiya.slproto.messages.PacketAck;
-        if (r1 != 0) goto L_0x00a8;
-    L_0x00a4:
-        r1 = r2 instanceof com.lumiyaviewer.lumiya.slproto.messages.StartPingCheck;
-        if (r1 == 0) goto L_0x00c8;
-    L_0x00a8:
-        r2.lambda$-com_lumiyaviewer_lumiya_slproto_SLThreadingCircuit_1833(r8);
-        r1 = r0;
-    L_0x00ac:
-        r0 = r8.receivedAcks;
-        r5 = r0.iterator();
-    L_0x00b2:
-        r0 = r5.hasNext();
-        if (r0 == 0) goto L_0x00d2;
-    L_0x00b8:
-        r0 = r5.next();
-        r0 = (java.lang.Integer) r0;
-        r0 = r0.intValue();
-        r8.ProcessReceivedAck(r0);
-        goto L_0x00b2;
-    L_0x00c6:
-        r1 = r4;
-        goto L_0x007d;
-    L_0x00c8:
-        r1 = r2;
-        goto L_0x00ac;
-    L_0x00ca:
-        r1 = "message discarded!";
-        com.lumiyaviewer.lumiya.Debug.Log(r1);
-        r1 = r0;
-        goto L_0x00ac;
-    L_0x00d2:
-        if (r2 == 0) goto L_0x0100;
-    L_0x00d4:
-        r0 = r2.isReliable;
-        if (r0 == 0) goto L_0x0100;
-    L_0x00d8:
-        r0 = r8.pendingAcks;
-        r5 = r0.iterator();
-    L_0x00de:
-        r0 = r5.hasNext();
-        if (r0 == 0) goto L_0x0107;
-    L_0x00e4:
-        r0 = r5.next();
-        r0 = (java.lang.Integer) r0;
-        r0 = r0.intValue();
-        r6 = r2.seqNum;
-        if (r0 != r6) goto L_0x00de;
-    L_0x00f2:
-        r0 = r3;
-    L_0x00f3:
-        if (r0 != 0) goto L_0x0100;
-    L_0x00f5:
-        r0 = r8.pendingAcks;
-        r2 = r2.seqNum;
-        r2 = java.lang.Integer.valueOf(r2);
-        r0.add(r2);
-    L_0x0100:
-        if (r1 == 0) goto L_0x0105;
-    L_0x0102:
-        r8.HandleMessage(r1);
-    L_0x0105:
-        return r3;
-    L_0x0106:
-        return r4;
-    L_0x0107:
-        r0 = r4;
-        goto L_0x00f3;
-    L_0x0109:
-        r1 = r0;
-        goto L_0x00ac;
-    L_0x010b:
-        r1 = r4;
-        goto L_0x007d;
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.SLCircuit.ProcessReceive():boolean");
+        // Clear and prepare buffer for reading
+        this.rxBuffer.clear();
+        this.rxBuffer.order(ByteOrder.BIG_ENDIAN);
+        
+        // Try to read from the datagram channel
+        int bytesRead = this.datagramChannel.read(this.rxBuffer);
+        if (bytesRead == 0) {
+            return false;
+        }
+        
+        // Prepare buffer for parsing
+        this.rxBuffer.flip();
+        this.receivedAcks.clear();
+        
+        // Unpack the message
+        SLMessage message = SLMessage.Unpack(this.rxBuffer, this.tempBuffer, this.receivedAcks);
+        if (message == null) {
+            Debug.Log("message discarded!");
+            return true;
+        }
+        
+        // Update timing and reset ping count on successful receive
+        this.lastReceivedPacketMillis = SystemClock.elapsedRealtime();
+        this.pingSentCount = 0;
+        
+        // Check for out-of-order packets
+        boolean isDuplicate = false;
+        int seqDiff = message.seqNum - this.lastReceivedSeqnum;
+        if (seqDiff <= 0) {
+            Debug.Printf("Detected incoming out of order: seqNum = %d", message.seqNum);
+            
+            // Check if this is a special message type that we should process anyway
+            if (!(message instanceof com.lumiyaviewer.lumiya.slproto.messages.PacketAck) &&
+                !(message instanceof com.lumiyaviewer.lumiya.slproto.messages.StartPingCheck) &&
+                !(message instanceof com.lumiyaviewer.lumiya.slproto.messages.CompletePingCheck)) {
+                
+                // Check if we've already handled this packet
+                if (this.handledPackets.contains(message.seqNum)) {
+                    Debug.Printf("Detected incoming duplicate: seqNum = %d", message.seqNum);
+                    isDuplicate = true;
+                }
+            }
+        }
+        
+        SLMessage messageToHandle = null;
+        if (!isDuplicate) {
+            // Maintain the handled packets queue (LRU with max size)
+            while (this.handledPackets.size() >= TRACK_HANDLED_PACKETS) {
+                this.handledPackets.poll();
+            }
+            this.handledPackets.add(message.seqNum);
+            this.lastReceivedSeqnum = message.seqNum;
+            
+            // Handle special message types immediately
+            if (message instanceof com.lumiyaviewer.lumiya.slproto.messages.PacketAck ||
+                message instanceof com.lumiyaviewer.lumiya.slproto.messages.StartPingCheck) {
+                message.handleMessage(this);
+            } else {
+                messageToHandle = message;
+            }
+        }
+        
+        // Process any received acknowledgments
+        for (Integer ackSeqNum : this.receivedAcks) {
+            ProcessReceivedAck(ackSeqNum);
+        }
+        
+        // Add reliable messages to pending acks (unless duplicate)
+        if (message != null && message.isReliable && !isDuplicate) {
+            // Check if we already have this sequence number in pending acks
+            boolean alreadyPending = false;
+            for (Integer pendingSeq : this.pendingAcks) {
+                if (pendingSeq == message.seqNum) {
+                    alreadyPending = true;
+                    break;
+                }
+            }
+            if (!alreadyPending) {
+                this.pendingAcks.add(message.seqNum);
+            }
+        }
+        
+        // Handle the message if it's not a special type
+        if (messageToHandle != null) {
+            HandleMessage(messageToHandle);
+        }
+        
+        return true;
     }
 
     public void ProcessReceivedAck(int i) {

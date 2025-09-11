@@ -12,8 +12,7 @@ class NearbyChattersDisplayDataList extends ChatterDisplayDataList {
         super(userManager, onListUpdated, new $Lambda$D8uG4BZ932XmwoX97ZE2tEBU1gE());
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_NearbyChattersDisplayDataList_807  reason: not valid java name */
-    static /* synthetic */ int m332lambda$com_lumiyaviewer_lumiya_slproto_users_manager_NearbyChattersDisplayDataList_807(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2) {
+    static /* synthetic */ int compareByDistanceToUser(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2) {
         int compare = Float.compare(chatterDisplayData.distanceToUser, chatterDisplayData2.distanceToUser);
         return compare != 0 ? compare : chatterDisplayData.compareTo(chatterDisplayData2);
     }

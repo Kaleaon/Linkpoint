@@ -114,60 +114,41 @@ public class SLGridConnection extends SLConnection {
             return true;
      */
     private synchronized boolean Reconnect() {
-        /*
-        r4 = this;
-        r2 = 0;
-        r3 = 1;
-        monitor-enter(r4);
-        r0 = r4.userWantsConnected;	 Catch:{ all -> 0x004e }
-        if (r0 == 0) goto L_0x0049;
-    L_0x0007:
-        r0 = r4.hadConnected;	 Catch:{ all -> 0x004e }
-        if (r0 == 0) goto L_0x0049;
-    L_0x000b:
-        r0 = com.lumiyaviewer.lumiya.GlobalOptions.getInstance();	 Catch:{ all -> 0x004e }
-        r0 = r0.getAutoReconnect();	 Catch:{ all -> 0x004e }
-        if (r0 == 0) goto L_0x0049;
-    L_0x0015:
-        r0 = r4.reconnectAttempts;	 Catch:{ all -> 0x004e }
-        r1 = com.lumiyaviewer.lumiya.GlobalOptions.getInstance();	 Catch:{ all -> 0x004e }
-        r1 = r1.getMaxReconnectAttempts();	 Catch:{ all -> 0x004e }
-        if (r0 >= r1) goto L_0x0049;
-    L_0x0021:
-        r0 = r4.connectionState;	 Catch:{ all -> 0x004e }
-        r1 = com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState.Idle;	 Catch:{ all -> 0x004e }
-        if (r0 != r1) goto L_0x0047;
-    L_0x0027:
-        r0 = r4.authParams;	 Catch:{ all -> 0x004e }
-        if (r0 == 0) goto L_0x0047;
-    L_0x002b:
-        r0 = r4.reconnectAttempts;	 Catch:{ all -> 0x004e }
-        r0 = r0 + 1;
-        r4.reconnectAttempts = r0;	 Catch:{ all -> 0x004e }
-        r0 = 1;
-        r4.isReconnecting = r0;	 Catch:{ all -> 0x004e }
-        r0 = r4.eventBus;	 Catch:{ all -> 0x004e }
-        r1 = new com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent;	 Catch:{ all -> 0x004e }
-        r2 = r4.reconnectAttempts;	 Catch:{ all -> 0x004e }
-        r1.<init>(r2);	 Catch:{ all -> 0x004e }
-        r0.publish(r1);	 Catch:{ all -> 0x004e }
-        r0 = "last";
-        r1 = 1;
-        r4.startConnecting(r1, r0);	 Catch:{ all -> 0x004e }
-    L_0x0047:
-        monitor-exit(r4);
-        return r3;
-    L_0x0049:
-        r0 = 0;
-        r4.isReconnecting = r0;	 Catch:{ all -> 0x004e }
-        monitor-exit(r4);
-        return r2;
-    L_0x004e:
-        r0 = move-exception;
-        monitor-exit(r4);
-        throw r0;
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.SLGridConnection.Reconnect():boolean");
+    public synchronized boolean Reconnect() {
+        // Check if we should attempt reconnection
+        if (!this.userWantsConnected || !this.hadConnected) {
+            this.isReconnecting = false;
+            return false;
+        }
+        
+        if (!com.lumiyaviewer.lumiya.GlobalOptions.getInstance().getAutoReconnect()) {
+            this.isReconnecting = false;
+            return false;
+        }
+        
+        if (this.reconnectAttempts >= com.lumiyaviewer.lumiya.GlobalOptions.getInstance().getMaxReconnectAttempts()) {
+            this.isReconnecting = false;
+            return false;
+        }
+        
+        // Only reconnect if we're in idle state and have auth params
+        if (this.connectionState != ConnectionState.Idle || this.authParams == null) {
+            this.isReconnecting = false;
+            return true; // Return true to indicate we're still trying to reconnect
+        }
+        
+        // Attempt reconnection
+        this.reconnectAttempts++;
+        this.isReconnecting = true;
+        
+        // Publish reconnecting event
+        this.eventBus.publish(new com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent(this.reconnectAttempts));
+        
+        // Start connecting with "last" location
+        startConnecting(true, "last");
+        
+        return true;
+    }
     }
 
     public static String getAutoresponse() {

@@ -163,9 +163,7 @@ public class ConnectedActivity extends ThemedActivity implements ObjectPopupsAct
         }
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_ConnectedActivity_3108  reason: not valid java name */
-    public /* synthetic */ void m527lambda$com_lumiyaviewer_lumiya_ui_common_ConnectedActivity_3108(View view) {
+    /* synthetic */ void handleConnectionAction(View view) {
         SLGridConnection gridConnection = GridConnectionService.getGridConnection();
         SLGridConnection.ConnectionState connectionState = gridConnection.getConnectionState();
         if (connectionState == SLGridConnection.ConnectionState.Connecting) {

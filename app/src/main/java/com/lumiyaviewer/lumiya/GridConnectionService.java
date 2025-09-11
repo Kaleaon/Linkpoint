@@ -1271,7 +1271,114 @@ public class GridConnectionService extends Service implements OnSharedPreference
         r2 = r3;
         goto L_0x00aa;
         */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.GridConnectionService.showUnreadNotificationSingle(com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo, int, java.lang.String, java.lang.String, boolean, java.lang.String):void");
+        // Early return if notification info is null
+        if (notificationInfo == null) {
+            return;
+        }
+        
+        try {
+            NotificationManager notificationManager = (NotificationManager) getSystemService("notification");
+            
+            // Determine notification content based on type and count
+            String notificationTitle;
+            String notificationText;
+            
+            if (notificationInfo.privateChatInfo().unreadCount() > 0) {
+                if (notificationInfo.privateChatInfo().unreadCount() == 1) {
+                    notificationTitle = getString(R.string.notification_private_message);
+                    notificationText = notificationInfo.privateChatInfo().lastMessage();
+                } else {
+                    notificationTitle = getString(R.string.notification_multiple_private_messages);
+                    notificationText = getString(R.string.notification_private_count, 
+                                               notificationInfo.privateChatInfo().unreadCount());
+                }
+            } else if (notificationInfo.groupChatInfo().unreadCount() > 0) {
+                if (notificationInfo.groupChatInfo().unreadCount() == 1) {
+                    notificationTitle = getString(R.string.notification_group_message);
+                    notificationText = notificationInfo.groupChatInfo().lastMessage();
+                } else {
+                    notificationTitle = getString(R.string.notification_multiple_group_messages);
+                    notificationText = getString(R.string.notification_group_count, 
+                                               notificationInfo.groupChatInfo().unreadCount());
+                }
+            } else if (notificationInfo.localChatInfo().unreadCount() > 0) {
+                if (notificationInfo.localChatInfo().unreadCount() == 1) {
+                    notificationTitle = getString(R.string.notification_local_message);
+                    notificationText = notificationInfo.localChatInfo().lastMessage();
+                } else {
+                    notificationTitle = getString(R.string.notification_multiple_local_messages);
+                    notificationText = getString(R.string.notification_local_count, 
+                                               notificationInfo.localChatInfo().unreadCount());
+                }
+            } else if (notificationInfo.objectPopupInfo().objectPopupsCount() > 0) {
+                notificationTitle = getString(R.string.notification_object_popup);
+                notificationText = getResources().getQuantityString(R.plurals.notification_object_popups, 
+                                                                   notificationInfo.objectPopupInfo().objectPopupsCount(),
+                                                                   notificationInfo.objectPopupInfo().objectPopupsCount());
+            } else {
+                // No unread content, hide notification
+                hideUnreadNotificationSingle(notificationId);
+                return;
+            }
+            
+            // Truncate long notification text
+            if (notificationText != null && notificationText.length() > 30) {
+                notificationText = notificationText.substring(0, 30) + "...";
+            }
+            
+            // Create intent for opening the app
+            Intent openIntent = new Intent(this, com.lumiyaviewer.lumiya.ui.render.WorldViewActivity.class);
+            openIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            android.app.PendingIntent pendingIntent = android.app.PendingIntent.getActivity(this, 0, openIntent, 
+                                                                                            android.app.PendingIntent.FLAG_UPDATE_CURRENT);
+            
+            // Build notification
+            android.support.v4.app.NotificationCompat.Builder builder = 
+                new android.support.v4.app.NotificationCompat.Builder(this, channelName)
+                    .setContentTitle(notificationTitle)
+                    .setContentText(notificationText)
+                    .setSmallIcon(R.drawable.ic_notification)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .setPriority(android.support.v4.app.NotificationCompat.PRIORITY_DEFAULT);
+            
+            // Set group if specified
+            if (groupKey != null) {
+                builder.setGroup(groupKey);
+                if (isSummary) {
+                    builder.setGroupSummary(true);
+                }
+            }
+            
+            // Set sort key if specified
+            if (sortKey != null) {
+                builder.setSortKey(sortKey);
+            }
+            
+            // Configure notification lights and sound based on user preferences
+            NotificationSettings settings = notifySettingsByType(NotificationType.LocalChat);
+            if (settings != null) {
+                if (settings.getNotifySound()) {
+                    builder.setDefaults(Notification.DEFAULT_SOUND);
+                } else {
+                    Debug.Printf("GridConnectionService: will not emit sound.", new Object[0]);
+                }
+                
+                if (settings.getNotifyLight()) {
+                    builder.setLights(0xff00ff00, 1000, 500); // Green light, 1s on, 0.5s off
+                } else {
+                    builder.setLights(0xff00ff00, 0, 0); // No light
+                }
+            }
+            
+            // Show the notification
+            Notification notification = builder.build();
+            notificationManager.notify(notificationId, notification);
+            this.shownNotificationIds.add(Integer.valueOf(notificationId));
+            
+        } catch (Exception e) {
+            Debug.Warning(e);
+        }
     }
 
     private void startCloudSync(UserManager userManager) {
@@ -1436,8 +1543,8 @@ public class GridConnectionService extends Service implements OnSharedPreference
         VoicePluginServiceConnection.setInstallOfferDisplayed(false);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_GridConnectionService_20777 */
-    /* synthetic */ void m12lambda$-com_lumiyaviewer_lumiya_GridConnectionService_20777(ChatterNameRetriever chatterNameRetriever) {
+    /* renamed from: updateNotificationOnNameRetrieve - updates online notification when chatter name is retrieved */
+    /* synthetic */ void updateNotificationOnNameRetrieve(ChatterNameRetriever chatterNameRetriever) {
         updateOnlineNotification();
     }
 

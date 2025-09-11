@@ -163,9 +163,7 @@ public class ChatterList {
         return this.typingUsersPool;
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ChatterList_4733  reason: not valid java name */
-    public /* synthetic */ void m295lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ChatterList_4733() {
+    /* synthetic */ void notifyNearbyListUpdate() {
         notifyListUpdated(ChatterListType.Nearby);
     }
 

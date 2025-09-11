@@ -232,7 +232,7 @@ public abstract class SLMessage implements Parcelable {
     public abstract int CalcPayloadSize();
 
     /* renamed from: Handle */
-    public abstract void lambda$-com_lumiyaviewer_lumiya_slproto_SLThreadingCircuit_1833(SLMessageHandler sLMessageHandler);
+    public abstract void handleMessage(SLMessageHandler sLMessageHandler);
 
     public void Pack(ByteBuffer byteBuffer, ByteBuffer byteBuffer2) {
         byteBuffer.clear();

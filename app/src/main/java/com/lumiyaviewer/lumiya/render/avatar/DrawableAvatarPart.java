@@ -117,87 +117,46 @@ public class DrawableAvatarPart implements ResourceConsumer {
     /* DevToolsApp WARNING: Missing block: B:31:0x0065, code:
             return;
      */
-    void setTexture(com.lumiyaviewer.lumiya.render.glres.textures.GLTextureCache r7, java.util.UUID r8) {
-        /*
-        r6 = this;
-        r0 = 0;
-        r2 = r6.updateLock;
-        monitor-enter(r2);
-        r3 = "Avatar: face %s texture %s";
-        r1 = 2;
-        r4 = new java.lang.Object[r1];	 Catch:{ all -> 0x0070 }
-        r1 = r6.faceIndex;	 Catch:{ all -> 0x0070 }
-        r1 = r1.toString();	 Catch:{ all -> 0x0070 }
-        r5 = 0;
-        r4[r5] = r1;	 Catch:{ all -> 0x0070 }
-        if (r8 == 0) goto L_0x0038;
-    L_0x0015:
-        r1 = r8.toString();	 Catch:{ all -> 0x0070 }
-    L_0x0019:
-        r5 = 1;
-        r4[r5] = r1;	 Catch:{ all -> 0x0070 }
-        com.lumiyaviewer.lumiya.Debug.Printf(r3, r4);	 Catch:{ all -> 0x0070 }
-        if (r8 == 0) goto L_0x002a;
-    L_0x0021:
-        r1 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID;	 Catch:{ all -> 0x0070 }
-        r1 = r8.equals(r1);	 Catch:{ all -> 0x0070 }
-        if (r1 == 0) goto L_0x003c;
-    L_0x0029:
-        r8 = r0;
-    L_0x002a:
-        r0 = r6.textureUUID;	 Catch:{ all -> 0x0070 }
-        if (r0 == 0) goto L_0x0046;
-    L_0x002e:
-        if (r8 == 0) goto L_0x004a;
-    L_0x0030:
-        r0 = r0.equals(r8);	 Catch:{ all -> 0x0070 }
-        if (r0 == 0) goto L_0x004a;
-    L_0x0036:
-        monitor-exit(r2);
-        return;
-    L_0x0038:
-        r1 = "null";
-        goto L_0x0019;
-    L_0x003c:
-        r1 = DEFAULT_AVATAR_TEXTURE;	 Catch:{ all -> 0x0070 }
-        r1 = r8.equals(r1);	 Catch:{ all -> 0x0070 }
-        if (r1 == 0) goto L_0x002a;
-    L_0x0044:
-        r8 = r0;
-        goto L_0x002a;
-    L_0x0046:
-        if (r8 != 0) goto L_0x004a;
-    L_0x0048:
-        monitor-exit(r2);
-        return;
-    L_0x004a:
-        r6.textureUUID = r8;	 Catch:{ all -> 0x0070 }
-        if (r8 == 0) goto L_0x0066;
-    L_0x004e:
-        r0 = r6.faceIndex;	 Catch:{ all -> 0x0070 }
-        r1 = r6.avatarUUID;	 Catch:{ all -> 0x0070 }
-        r0 = com.lumiyaviewer.lumiya.render.tex.DrawableTextureParams.create(r8, r0, r1);	 Catch:{ all -> 0x0070 }
-        r1 = com.lumiyaviewer.lumiya.res.textures.TextureCache.getInstance();	 Catch:{ all -> 0x0070 }
-        r1.RequestResource(r0, r6);	 Catch:{ all -> 0x0070 }
-        r1 = new com.lumiyaviewer.lumiya.render.drawable.DrawableFaceTexture;	 Catch:{ all -> 0x0070 }
-        r1.<init>(r0);	 Catch:{ all -> 0x0070 }
-        r6.texture = r1;	 Catch:{ all -> 0x0070 }
-    L_0x0064:
-        monitor-exit(r2);
-        return;
-    L_0x0066:
-        r0 = 0;
-        r6.texture = r0;	 Catch:{ all -> 0x0070 }
-        r0 = 0;
-        r6.meshData = r0;	 Catch:{ all -> 0x0070 }
-        r0 = 0;
-        r6.rawTexture = r0;	 Catch:{ all -> 0x0070 }
-        goto L_0x0064;
-    L_0x0070:
-        r0 = move-exception;
-        monitor-exit(r2);
-        throw r0;
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.render.avatar.DrawableAvatarPart.setTexture(com.lumiyaviewer.lumiya.render.glres.textures.GLTextureCache, java.util.UUID):void");
+    void setTexture(com.lumiyaviewer.lumiya.render.glres.textures.GLTextureCache glTextureCache, UUID textureUUID) {
+        synchronized (this.updateLock) {
+            // Log texture change for debugging
+            Debug.Printf("Avatar: face %s texture %s", 
+                this.faceIndex.toString(), 
+                textureUUID != null ? textureUUID.toString() : "null");
+            
+            // Handle null or zero UUID by setting to null or default avatar texture
+            if (textureUUID != null && com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID.equals(textureUUID)) {
+                textureUUID = null;
+            }
+            
+            // If texture hasn't changed, return early
+            if (this.textureUUID != null ? this.textureUUID.equals(textureUUID) : textureUUID == null) {
+                return;
+            }
+            
+            // If setting null texture, clear all texture-related data
+            if (textureUUID == null) {
+                this.textureUUID = null;
+                this.texture = null;
+                this.meshData = null;
+                this.rawTexture = null;
+                return;
+            }
+            
+            // Update texture UUID and request new texture
+            this.textureUUID = textureUUID;
+            
+            // Create texture parameters for this avatar part
+            com.lumiyaviewer.lumiya.render.tex.DrawableTextureParams textureParams = 
+                com.lumiyaviewer.lumiya.render.tex.DrawableTextureParams.create(
+                    textureUUID, this.faceIndex, this.avatarUUID);
+            
+            // Request the texture from cache
+            com.lumiyaviewer.lumiya.res.textures.TextureCache.getInstance()
+                .RequestResource(textureParams, this);
+            
+            // Create the drawable face texture
+            this.texture = new DrawableFaceTexture(textureParams);
+        }
     }
 }

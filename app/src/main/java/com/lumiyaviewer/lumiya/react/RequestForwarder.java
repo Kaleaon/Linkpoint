@@ -32,8 +32,7 @@ public abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> implements Reques
             this(obj, obj2);
         }
 
-        /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestForwarder$DownstreamSubscription_827 */
-        /* synthetic */ void m62lambda$-com_lumiyaviewer_lumiya_react_RequestForwarder$DownstreamSubscription_827(Object obj) {
+        /* synthetic */ void handleDataProcessing(Object obj) {
             RequestForwarder.this.processResultInternal(this.key, obj);
         }
 
@@ -76,8 +75,7 @@ public abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> implements Reques
 
     protected abstract Kdown getDownstreamKey(@Nonnull Kup kup);
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestForwarder_2672 */
-    /* synthetic */ void m61lambda$-com_lumiyaviewer_lumiya_react_RequestForwarder_2672(Object obj) {
+    /* synthetic */ void handleRequestProcessing(Object obj) {
         processRequestInternal(obj);
     }
 

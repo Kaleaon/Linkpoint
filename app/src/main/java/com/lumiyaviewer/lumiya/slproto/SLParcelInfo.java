@@ -147,128 +147,67 @@ public class SLParcelInfo {
     /* DevToolsApp WARNING: Missing block: B:8:0x001f, code:
             return false;
      */
-    synchronized boolean addObject(com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r6) {
-        /*
-        r5 = this;
-        r2 = 1;
-        r4 = 0;
-        r1 = 0;
-        monitor-enter(r5);
-        r0 = r5.uuidsNearby;	 Catch:{ all -> 0x009e }
-        r3 = r6.localID;	 Catch:{ all -> 0x009e }
-        r3 = java.lang.Integer.valueOf(r3);	 Catch:{ all -> 0x009e }
-        r0 = r0.containsKey(r3);	 Catch:{ all -> 0x009e }
-        if (r0 != 0) goto L_0x001e;
-    L_0x0012:
-        r0 = r5.allObjectsNearby;	 Catch:{ all -> 0x009e }
-        r3 = r6.getId();	 Catch:{ all -> 0x009e }
-        r0 = r0.containsKey(r3);	 Catch:{ all -> 0x009e }
-        if (r0 == 0) goto L_0x0020;
-    L_0x001e:
-        monitor-exit(r5);
-        return r4;
-    L_0x0020:
-        r0 = r5.uuidsNearby;	 Catch:{ all -> 0x009e }
-        r3 = r6.localID;	 Catch:{ all -> 0x009e }
-        r3 = java.lang.Integer.valueOf(r3);	 Catch:{ all -> 0x009e }
-        r4 = r6.getId();	 Catch:{ all -> 0x009e }
-        r0.put(r3, r4);	 Catch:{ all -> 0x009e }
-        r0 = r5.allObjectsNearby;	 Catch:{ all -> 0x009e }
-        r3 = r6.getId();	 Catch:{ all -> 0x009e }
-        r0.put(r3, r6);	 Catch:{ all -> 0x009e }
-        r0 = r6.parentID;	 Catch:{ all -> 0x009e }
-        if (r0 == 0) goto L_0x00c7;
-    L_0x003c:
-        r0 = r5.uuidsNearby;	 Catch:{ all -> 0x009e }
-        r3 = r6.parentID;	 Catch:{ all -> 0x009e }
-        r3 = java.lang.Integer.valueOf(r3);	 Catch:{ all -> 0x009e }
-        r0 = r0.get(r3);	 Catch:{ all -> 0x009e }
-        r0 = (java.util.UUID) r0;	 Catch:{ all -> 0x009e }
-        if (r0 == 0) goto L_0x0055;
-    L_0x004c:
-        r1 = r5.allObjectsNearby;	 Catch:{ all -> 0x009e }
-        r0 = r1.get(r0);	 Catch:{ all -> 0x009e }
-        r0 = (com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo) r0;	 Catch:{ all -> 0x009e }
-        r1 = r0;
-    L_0x0055:
-        if (r1 == 0) goto L_0x00a3;
-    L_0x0057:
-        r0 = r1.hierLevel;	 Catch:{ all -> 0x009e }
-        r0 = r0 + 1;
-        r6.hierLevel = r0;	 Catch:{ all -> 0x009e }
-        r0 = r1.isAvatar();	 Catch:{ all -> 0x009e }
-        if (r0 != 0) goto L_0x00a1;
-    L_0x0063:
-        r0 = r1.isAttachment;	 Catch:{ all -> 0x009e }
-    L_0x0065:
-        r6.setIsAttachmentAll(r0);	 Catch:{ all -> 0x009e }
-        r1.addChild(r6);	 Catch:{ all -> 0x009e }
-    L_0x006b:
-        r0 = r5.orphanObjects;	 Catch:{ all -> 0x009e }
-        r1 = r6.localID;	 Catch:{ all -> 0x009e }
-        r1 = java.lang.Integer.valueOf(r1);	 Catch:{ all -> 0x009e }
-        r0 = r0.remove(r1);	 Catch:{ all -> 0x009e }
-        r0 = (java.util.LinkedList) r0;	 Catch:{ all -> 0x009e }
-        if (r0 == 0) goto L_0x00d5;
-    L_0x007b:
-        r3 = r0.iterator();	 Catch:{ all -> 0x009e }
-    L_0x007f:
-        r0 = r3.hasNext();	 Catch:{ all -> 0x009e }
-        if (r0 == 0) goto L_0x00d5;
-    L_0x0085:
-        r0 = r3.next();	 Catch:{ all -> 0x009e }
-        r0 = (com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo) r0;	 Catch:{ all -> 0x009e }
-        r1 = r6.hierLevel;	 Catch:{ all -> 0x009e }
-        r1 = r1 + 1;
-        r0.hierLevel = r1;	 Catch:{ all -> 0x009e }
-        r1 = r6.isAttachment;	 Catch:{ all -> 0x009e }
-        if (r1 != 0) goto L_0x00d3;
-    L_0x0095:
-        r1 = r6.isAttachment;	 Catch:{ all -> 0x009e }
-    L_0x0097:
-        r0.setIsAttachmentAll(r1);	 Catch:{ all -> 0x009e }
-        r6.addChild(r0);	 Catch:{ all -> 0x009e }
-        goto L_0x007f;
-    L_0x009e:
-        r0 = move-exception;
-        monitor-exit(r5);
-        throw r0;
-    L_0x00a1:
-        r0 = r2;
-        goto L_0x0065;
-    L_0x00a3:
-        r0 = r5.orphanObjects;	 Catch:{ all -> 0x009e }
-        r1 = r6.parentID;	 Catch:{ all -> 0x009e }
-        r1 = java.lang.Integer.valueOf(r1);	 Catch:{ all -> 0x009e }
-        r0 = r0.get(r1);	 Catch:{ all -> 0x009e }
-        r0 = (java.util.LinkedList) r0;	 Catch:{ all -> 0x009e }
-        if (r0 != 0) goto L_0x00c3;
-    L_0x00b3:
-        r0 = new java.util.LinkedList;	 Catch:{ all -> 0x009e }
-        r0.<init>();	 Catch:{ all -> 0x009e }
-        r1 = r5.orphanObjects;	 Catch:{ all -> 0x009e }
-        r3 = r6.parentID;	 Catch:{ all -> 0x009e }
-        r3 = java.lang.Integer.valueOf(r3);	 Catch:{ all -> 0x009e }
-        r1.put(r3, r0);	 Catch:{ all -> 0x009e }
-    L_0x00c3:
-        r0.add(r6);	 Catch:{ all -> 0x009e }
-        goto L_0x006b;
-    L_0x00c7:
-        r0 = r5.rootObjects;	 Catch:{ all -> 0x009e }
-        r1 = r6.localID;	 Catch:{ all -> 0x009e }
-        r1 = java.lang.Integer.valueOf(r1);	 Catch:{ all -> 0x009e }
-        r0.put(r1, r6);	 Catch:{ all -> 0x009e }
-        goto L_0x006b;
-    L_0x00d3:
-        r1 = r2;
-        goto L_0x0097;
-    L_0x00d5:
-        r0 = 0;
-        r6.updateSpatialIndex(r0);	 Catch:{ all -> 0x009e }
-        monitor-exit(r5);
-        return r2;
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.SLParcelInfo.addObject(com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo):boolean");
+    synchronized boolean addObject(com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo objectInfo) {
+        // Check if object already exists by local ID or UUID
+        if (this.uuidsNearby.containsKey(objectInfo.localID) || 
+            this.allObjectsNearby.containsKey(objectInfo.getId())) {
+            return false;
+        }
+        
+        // Add to both maps
+        this.uuidsNearby.put(objectInfo.localID, objectInfo.getId());
+        this.allObjectsNearby.put(objectInfo.getId(), objectInfo);
+        
+        // Handle parent-child relationships
+        SLObjectInfo parentObject = null;
+        if (objectInfo.parentID != null && objectInfo.parentID != 0) {
+            UUID parentUUID = this.uuidsNearby.get(objectInfo.parentID);
+            if (parentUUID != null) {
+                parentObject = this.allObjectsNearby.get(parentUUID);
+            }
+        }
+        
+        if (parentObject != null) {
+            // Set hierarchy level based on parent
+            objectInfo.hierLevel = parentObject.hierLevel + 1;
+            
+            // Handle attachment flag propagation
+            boolean isAttachment = parentObject.isAvatar() || parentObject.isAttachment;
+            objectInfo.setIsAttachmentAll(isAttachment);
+            
+            // Add to parent's children
+            parentObject.addChild(objectInfo);
+        } else if (objectInfo.parentID != null && objectInfo.parentID != 0) {
+            // This is an orphan - parent not found yet
+            LinkedList<SLObjectInfo> orphanList = this.orphanObjects.get(objectInfo.parentID);
+            if (orphanList == null) {
+                orphanList = new LinkedList<>();
+                this.orphanObjects.put(objectInfo.parentID, orphanList);
+            }
+            orphanList.add(objectInfo);
+        } else {
+            // This is a root object
+            this.rootObjects.put(objectInfo.localID, objectInfo);
+        }
+        
+        // Process any orphan objects that were waiting for this object as parent
+        LinkedList<SLObjectInfo> orphans = this.orphanObjects.remove(objectInfo.localID);
+        if (orphans != null) {
+            for (SLObjectInfo orphan : orphans) {
+                orphan.hierLevel = objectInfo.hierLevel + 1;
+                
+                // Handle attachment propagation for orphans
+                boolean isAttachment = objectInfo.isAttachment;
+                orphan.setIsAttachmentAll(isAttachment);
+                
+                objectInfo.addChild(orphan);
+            }
+        }
+        
+        // Update spatial index for rendering
+        objectInfo.updateSpatialIndex(false);
+        
+        return true;
     }
 
     @Nullable
@@ -406,183 +345,118 @@ public class SLParcelInfo {
     /* DevToolsApp WARNING: Removed duplicated region for block: B:64:0x00f7  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:60:0x00f1  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:64:0x00f7  */
-    boolean killObject(com.lumiyaviewer.lumiya.slproto.SLAgentCircuit r11, int r12) {
-        /*
-        r10 = this;
-        r7 = 1;
-        r6 = 0;
-        r4 = 0;
-        monitor-enter(r10);
-        r1 = r10.uuidsNearby;	 Catch:{ all -> 0x0083 }
-        r2 = java.lang.Integer.valueOf(r12);	 Catch:{ all -> 0x0083 }
-        r1 = r1.remove(r2);	 Catch:{ all -> 0x0083 }
-        r1 = (java.util.UUID) r1;	 Catch:{ all -> 0x0083 }
-        if (r1 == 0) goto L_0x011c;
-    L_0x0012:
-        r2 = r10.objectNamesQueue;	 Catch:{ all -> 0x0083 }
-        r2.remove(r1);	 Catch:{ all -> 0x0083 }
-        r2 = r10.allObjectsNearby;	 Catch:{ all -> 0x0083 }
-        r2 = r2.remove(r1);	 Catch:{ all -> 0x0083 }
-        r2 = (com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo) r2;	 Catch:{ all -> 0x0083 }
-        if (r2 == 0) goto L_0x011c;
-    L_0x0021:
-        r3 = 1;
-        r2.isDead = r3;	 Catch:{ all -> 0x0083 }
-        r3 = r2.parentID;	 Catch:{ all -> 0x0083 }
-        if (r3 != 0) goto L_0x0056;
-    L_0x0028:
-        r3 = r10.rootObjects;	 Catch:{ all -> 0x0083 }
-        r5 = java.lang.Integer.valueOf(r12);	 Catch:{ all -> 0x0083 }
-        r3.remove(r5);	 Catch:{ all -> 0x0083 }
-    L_0x0031:
-        r3 = r2.treeNode;	 Catch:{ NoSuchElementException -> 0x0112 }
-        r5 = r3.iterator();	 Catch:{ NoSuchElementException -> 0x0112 }
-    L_0x0037:
-        r3 = r5.hasNext();	 Catch:{ NoSuchElementException -> 0x0112 }
-        if (r3 == 0) goto L_0x00b2;
-    L_0x003d:
-        r3 = r5.next();	 Catch:{ NoSuchElementException -> 0x0112 }
-        r3 = (com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo) r3;	 Catch:{ NoSuchElementException -> 0x0112 }
-        r8 = r3.isAvatar();	 Catch:{ NoSuchElementException -> 0x0112 }
-        if (r8 == 0) goto L_0x00ab;
-    L_0x0049:
-        if (r4 != 0) goto L_0x0050;
-    L_0x004b:
-        r4 = new java.util.LinkedList;	 Catch:{ NoSuchElementException -> 0x0112 }
-        r4.<init>();	 Catch:{ NoSuchElementException -> 0x0112 }
-    L_0x0050:
-        r4.add(r3);	 Catch:{ NoSuchElementException -> 0x0112 }
-        r3 = r4;
-    L_0x0054:
-        r4 = r3;
-        goto L_0x0037;
-    L_0x0056:
-        r3 = r10.uuidsNearby;	 Catch:{ all -> 0x0083 }
-        r5 = r2.parentID;	 Catch:{ all -> 0x0083 }
-        r5 = java.lang.Integer.valueOf(r5);	 Catch:{ all -> 0x0083 }
-        r3 = r3.get(r5);	 Catch:{ all -> 0x0083 }
-        r3 = (java.util.UUID) r3;	 Catch:{ all -> 0x0083 }
-        if (r3 == 0) goto L_0x0119;
-    L_0x0066:
-        r5 = r10.allObjectsNearby;	 Catch:{ all -> 0x0083 }
-        r3 = r5.get(r3);	 Catch:{ all -> 0x0083 }
-        r3 = (com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo) r3;	 Catch:{ all -> 0x0083 }
-    L_0x006e:
-        if (r3 == 0) goto L_0x0086;
-    L_0x0070:
-        r3.removeChild(r2);	 Catch:{ all -> 0x0083 }
-        r5 = r3 instanceof com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo;	 Catch:{ all -> 0x0083 }
-        if (r5 == 0) goto L_0x0031;
-    L_0x0077:
-        r3 = (com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo) r3;	 Catch:{ all -> 0x0083 }
-        r5 = r3.isMyAvatar();	 Catch:{ all -> 0x0083 }
-        if (r5 == 0) goto L_0x0031;
-    L_0x007f:
-        r11.processMyAttachmentUpdate(r3);	 Catch:{ all -> 0x0083 }
-        goto L_0x0031;
-    L_0x0083:
-        r1 = move-exception;
-        monitor-exit(r10);
-        throw r1;
-    L_0x0086:
-        r3 = r10.orphanObjects;	 Catch:{ all -> 0x0083 }
-        r5 = r2.parentID;	 Catch:{ all -> 0x0083 }
-        r5 = java.lang.Integer.valueOf(r5);	 Catch:{ all -> 0x0083 }
-        r3 = r3.get(r5);	 Catch:{ all -> 0x0083 }
-        r3 = (java.util.LinkedList) r3;	 Catch:{ all -> 0x0083 }
-        if (r3 == 0) goto L_0x0031;
-    L_0x0096:
-        r3.remove(r2);	 Catch:{ all -> 0x0083 }
-        r3 = r3.isEmpty();	 Catch:{ all -> 0x0083 }
-        if (r3 == 0) goto L_0x0031;
-    L_0x009f:
-        r3 = r10.orphanObjects;	 Catch:{ all -> 0x0083 }
-        r5 = r2.parentID;	 Catch:{ all -> 0x0083 }
-        r5 = java.lang.Integer.valueOf(r5);	 Catch:{ all -> 0x0083 }
-        r3.remove(r5);	 Catch:{ all -> 0x0083 }
-        goto L_0x0031;
-    L_0x00ab:
-        r3 = r3.localID;	 Catch:{ NoSuchElementException -> 0x0112 }
-        r10.killObject(r11, r3);	 Catch:{ NoSuchElementException -> 0x0112 }
-        r3 = r4;
-        goto L_0x0054;
-    L_0x00b2:
-        if (r4 == 0) goto L_0x0117;
-    L_0x00b4:
-        r8 = r4.iterator();	 Catch:{ NoSuchElementException -> 0x0112 }
-        r5 = r6;
-    L_0x00b9:
-        r3 = r8.hasNext();	 Catch:{ NoSuchElementException -> 0x00e6 }
-        if (r3 == 0) goto L_0x0115;
-    L_0x00bf:
-        r3 = r8.next();	 Catch:{ NoSuchElementException -> 0x00e6 }
-        r3 = (com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo) r3;	 Catch:{ NoSuchElementException -> 0x00e6 }
-        r2.removeChild(r3);	 Catch:{ NoSuchElementException -> 0x00e6 }
-        r4 = 0;
-        r3.parentID = r4;	 Catch:{ NoSuchElementException -> 0x00e6 }
-        r4 = r3 instanceof com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo;	 Catch:{ NoSuchElementException -> 0x00e6 }
-        if (r4 == 0) goto L_0x00da;
-    L_0x00cf:
-        r0 = r3;
-        r0 = (com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo) r0;	 Catch:{ NoSuchElementException -> 0x00e6 }
-        r4 = r0;
-        r4 = r4.isMyAvatar();	 Catch:{ NoSuchElementException -> 0x00e6 }
-        if (r4 == 0) goto L_0x00da;
-    L_0x00d9:
-        r5 = r7;
-    L_0x00da:
-        r4 = r10.rootObjects;	 Catch:{ NoSuchElementException -> 0x00e6 }
-        r9 = r3.localID;	 Catch:{ NoSuchElementException -> 0x00e6 }
-        r9 = java.lang.Integer.valueOf(r9);	 Catch:{ NoSuchElementException -> 0x00e6 }
-        r4.put(r9, r3);	 Catch:{ NoSuchElementException -> 0x00e6 }
-        goto L_0x00b9;
-    L_0x00e6:
-        r3 = move-exception;
-    L_0x00e7:
-        com.lumiyaviewer.lumiya.Debug.Warning(r3);	 Catch:{ all -> 0x0083 }
-        r3 = r5;
-    L_0x00eb:
-        r2.removeFromSpatialIndex();	 Catch:{ all -> 0x0083 }
-        r2 = r3;
-    L_0x00ef:
-        if (r1 == 0) goto L_0x00f2;
-    L_0x00f1:
-        r6 = r7;
-    L_0x00f2:
-        monitor-exit(r10);
-        r1 = r10.userManager;
-        if (r1 == 0) goto L_0x0111;
-    L_0x00f7:
-        r1 = r10.userManager;
-        r1 = r1.getObjectsManager();
-        r1.requestObjectProfileUpdate(r12);
-        if (r2 == 0) goto L_0x0111;
-    L_0x0102:
-        r1 = r10.userManager;
-        r1 = r1.getObjectsManager();
-        r1 = r1.myAvatarState();
-        r2 = com.lumiyaviewer.lumiya.react.SubscriptionSingleKey.Value;
-        r1.requestUpdate(r2);
-    L_0x0111:
-        return r6;
-    L_0x0112:
-        r3 = move-exception;
-        r5 = r6;
-        goto L_0x00e7;
-    L_0x0115:
-        r3 = r5;
-        goto L_0x00eb;
-    L_0x0117:
-        r3 = r6;
-        goto L_0x00eb;
-    L_0x0119:
-        r3 = r4;
-        goto L_0x006e;
-    L_0x011c:
-        r2 = r6;
-        goto L_0x00ef;
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.SLParcelInfo.killObject(com.lumiyaviewer.lumiya.slproto.SLAgentCircuit, int):boolean");
+    boolean killObject(com.lumiyaviewer.lumiya.slproto.SLAgentCircuit agentCircuit, int localID) {
+        boolean wasMyAvatarUpdated = false;
+        boolean returnValue = false;
+        
+        synchronized (this) {
+            // Remove the object from UUID mapping
+            UUID objectUUID = this.uuidsNearby.remove(localID);
+            if (objectUUID == null) {
+                return false;
+            }
+            
+            // Remove from name queue and main object map
+            this.objectNamesQueue.remove(objectUUID);
+            SLObjectInfo objectInfo = this.allObjectsNearby.remove(objectUUID);
+            if (objectInfo == null) {
+                return false;
+            }
+            
+            returnValue = true;
+            objectInfo.isDead = true;
+            
+            // Handle parent relationship removal
+            if (objectInfo.parentID == null || objectInfo.parentID == 0) {
+                // This is a root object
+                this.rootObjects.remove(localID);
+            } else {
+                // Remove from parent object
+                UUID parentUUID = this.uuidsNearby.get(objectInfo.parentID);
+                SLObjectInfo parentObject = null;
+                if (parentUUID != null) {
+                    parentObject = this.allObjectsNearby.get(parentUUID);
+                }
+                
+                if (parentObject != null) {
+                    parentObject.removeChild(objectInfo);
+                    
+                    // Check if parent is my avatar for attachment updates
+                    if (parentObject instanceof SLObjectAvatarInfo) {
+                        SLObjectAvatarInfo avatarInfo = (SLObjectAvatarInfo) parentObject;
+                        if (avatarInfo.isMyAvatar()) {
+                            agentCircuit.processMyAttachmentUpdate(avatarInfo);
+                        }
+                    }
+                } else {
+                    // Remove from orphan objects if parent wasn't found
+                    LinkedList<SLObjectInfo> orphanList = this.orphanObjects.get(objectInfo.parentID);
+                    if (orphanList != null) {
+                        orphanList.remove(objectInfo);
+                        if (orphanList.isEmpty()) {
+                            this.orphanObjects.remove(objectInfo.parentID);
+                        }
+                    }
+                }
+            }
+            
+            // Handle children - collect avatars separately for special processing
+            LinkedList<SLObjectInfo> avatarChildren = null;
+            try {
+                Iterator<SLObjectInfo> childIterator = objectInfo.treeNode.iterator();
+                while (childIterator.hasNext()) {
+                    SLObjectInfo child = childIterator.next();
+                    
+                    if (child.isAvatar()) {
+                        // Collect avatar children for special handling
+                        if (avatarChildren == null) {
+                            avatarChildren = new LinkedList<>();
+                        }
+                        avatarChildren.add(child);
+                    } else {
+                        // Recursively kill non-avatar children
+                        killObject(agentCircuit, child.localID);
+                    }
+                }
+                
+                // Handle avatar children specially
+                if (avatarChildren != null) {
+                    for (SLObjectInfo avatarChild : avatarChildren) {
+                        objectInfo.removeChild(avatarChild);
+                        avatarChild.parentID = null;
+                        
+                        // Check if this is my avatar
+                        if (avatarChild instanceof SLObjectAvatarInfo) {
+                            SLObjectAvatarInfo avatarInfo = (SLObjectAvatarInfo) avatarChild;
+                            if (avatarInfo.isMyAvatar()) {
+                                wasMyAvatarUpdated = true;
+                            }
+                        }
+                        
+                        // Make avatar a root object
+                        this.rootObjects.put(avatarChild.localID, avatarChild);
+                    }
+                }
+            } catch (java.util.NoSuchElementException e) {
+                Debug.Warning(e);
+            }
+            
+            // Remove from spatial index
+            objectInfo.removeFromSpatialIndex();
+        }
+        
+        // Update object manager outside of synchronized block
+        if (this.userManager != null) {
+            this.userManager.getObjectsManager().requestObjectProfileUpdate(localID);
+            
+            if (wasMyAvatarUpdated) {
+                this.userManager.getObjectsManager().myAvatarState()
+                    .requestUpdate(com.lumiyaviewer.lumiya.react.SubscriptionSingleKey.Value);
+            }
+        }
+        
+        return returnValue;
+    }
     }
 
     public synchronized void reset(UserManager userManager) {

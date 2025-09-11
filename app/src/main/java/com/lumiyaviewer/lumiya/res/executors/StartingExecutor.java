@@ -38,39 +38,27 @@ public class StartingExecutor {
             return;
      */
     private void runQueue() {
-        /*
-        r3 = this;
-    L_0x0000:
-        r0 = r3.paused;
-        if (r0 != 0) goto L_0x0012;
-    L_0x0004:
-        r1 = r3.lock;
-        monitor-enter(r1);
-        r0 = r3.activeRequests;	 Catch:{ all -> 0x0027 }
-        r0 = r0.size();	 Catch:{ all -> 0x0027 }
-        r2 = r3.maxConcurrentRequests;	 Catch:{ all -> 0x0027 }
-        if (r0 < r2) goto L_0x0013;
-    L_0x0011:
-        monitor-exit(r1);
-    L_0x0012:
-        return;
-    L_0x0013:
-        r0 = r3.waitingRequests;	 Catch:{ all -> 0x0027 }
-        r0 = r0.poll();	 Catch:{ all -> 0x0027 }
-        r0 = (com.lumiyaviewer.lumiya.res.executors.Startable) r0;	 Catch:{ all -> 0x0027 }
-        if (r0 == 0) goto L_0x0011;
-    L_0x001d:
-        r2 = r3.activeRequests;	 Catch:{ all -> 0x0027 }
-        r2.add(r0);	 Catch:{ all -> 0x0027 }
-        monitor-exit(r1);
-        r0.start();
-        goto L_0x0000;
-    L_0x0027:
-        r0 = move-exception;
-        monitor-exit(r1);
-        throw r0;
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.executors.StartingExecutor.runQueue():void");
+        while (!this.paused) {
+            Startable request;
+            synchronized (this.lock) {
+                // Check if we've reached the maximum concurrent requests limit
+                if (this.activeRequests.size() >= this.maxConcurrentRequests) {
+                    return;
+                }
+                
+                // Poll the next waiting request
+                request = this.waitingRequests.poll();
+                if (request == null) {
+                    return;
+                }
+                
+                // Add to active requests before starting
+                this.activeRequests.add(request);
+            }
+            
+            // Start the request outside of the synchronized block
+            request.start();
+        }
     }
 
     public void cancelRequest(Startable startable) {

@@ -295,8 +295,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_2539  reason: not valid java name */
-    public /* synthetic */ void m521lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_2539(AdapterView adapterView, View view, int i, long j) {
+    public /* synthetic */ void onPickItemClicked(AdapterView adapterView, View view, int i, long j) {
         Object item = adapterView.getAdapter().getItem(i);
         if ((item instanceof AvatarPicksReply.Data) && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserPickFragment.class, UserPickFragment.makeSelection(this.chatterID.agentUUID, new AvatarPickKey(((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID(), ((AvatarPicksReply.Data) item).PickID)));
@@ -304,8 +303,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_4543  reason: not valid java name */
-    public /* synthetic */ void m522lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTab_4543(SLAgentCircuit sLAgentCircuit, String str, ParcelData parcelData, int i, DialogInterface dialogInterface, int i2) {
+    public /* synthetic */ void onCreatePickConfirmed(SLAgentCircuit sLAgentCircuit, String str, ParcelData parcelData, int i, DialogInterface dialogInterface, int i2) {
         UUID randomUUID = UUID.randomUUID();
         sLAgentCircuit.getModules().userProfiles.UpdatePickInfo(randomUUID, this.userManager.getUserID(), UUIDPool.ZeroUUID, str, Strings.nullToEmpty(parcelData.getDescription()), (UUID) Optional.fromNullable(parcelData.getSnapshotUUID()).or(UUIDPool.ZeroUUID), sLAgentCircuit.getAgentGlobalPosition(), i, true);
         DetailsActivity.showEmbeddedDetails(getActivity(), UserPickFragment.class, UserPickFragment.makeSelection(this.chatterID.agentUUID, new AvatarPickKey(((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID(), randomUUID)));

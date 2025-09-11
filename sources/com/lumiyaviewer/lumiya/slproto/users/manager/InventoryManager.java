@@ -423,8 +423,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }, this.inventoryDbExecutor);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_3450  reason: not valid java name */
-    static /* synthetic */ void m324lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_3450(InventoryDB inventoryDB2, UUID uuid) {
+    static /* synthetic */ void clearInventorySessionID(InventoryDB inventoryDB2, UUID uuid) {
         SLInventoryEntry findEntry = inventoryDB2.findEntry(uuid);
         if (findEntry != null) {
             findEntry.sessionID = null;
@@ -436,8 +435,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_6838  reason: not valid java name */
-    static /* synthetic */ boolean m325lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_6838(InventoryQuery inventoryQuery) {
+    static /* synthetic */ boolean hasSearchString(InventoryQuery inventoryQuery) {
         if (inventoryQuery != null) {
             return !Strings.isNullOrEmpty(inventoryQuery.containsString());
         }

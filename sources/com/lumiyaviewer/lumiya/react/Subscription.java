@@ -62,15 +62,11 @@ public class Subscription<K, T> implements RefreshableOne {
         return this.reference;
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_Subscription_1719  reason: not valid java name */
-    public /* synthetic */ void m38lambda$com_lumiyaviewer_lumiya_react_Subscription_1719(Object obj) {
+    /* synthetic */ void handleDataCallback(Object obj) {
         this.onData.onData(obj);
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_Subscription_1938  reason: not valid java name */
-    public /* synthetic */ void m39lambda$com_lumiyaviewer_lumiya_react_Subscription_1938(Throwable th) {
+    /* synthetic */ void handleErrorCallback(Throwable th) {
         this.onError.onError(th);
     }
 

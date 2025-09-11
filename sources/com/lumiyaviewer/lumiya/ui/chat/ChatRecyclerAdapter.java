@@ -92,8 +92,7 @@ class ChatRecyclerAdapter extends RecyclerView.Adapter implements ChunkedListLoa
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_ChatRecyclerAdapter_7040  reason: not valid java name */
-    public /* synthetic */ void m415lambda$com_lumiyaviewer_lumiya_ui_chat_ChatRecyclerAdapter_7040(View view) {
+    public /* synthetic */ void onUserPictureClicked(View view) {
         ChatMessageSource attachedMessageSource;
         OnUserPicClickedListener onUserPicClickedListener2 = (OnUserPicClickedListener) this.onUserPicClickedListener.get();
         if (onUserPicClickedListener2 != null && (view instanceof ChatterPicView) && (attachedMessageSource = ((ChatterPicView) view).getAttachedMessageSource()) != null) {

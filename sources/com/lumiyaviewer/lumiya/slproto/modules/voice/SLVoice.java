@@ -338,9 +338,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         return true;
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_12525  reason: not valid java name */
-    public /* synthetic */ void m254lambda$com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_12525(int i, LLSDNode lLSDNode) {
+    /* synthetic */ void handleParcelVoiceInfo(int i, LLSDNode lLSDNode) {
         boolean z;
         VoiceChannelInfo voiceChannelInfo;
         this.currentParcelID = i;
@@ -368,9 +366,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         }
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_14030  reason: not valid java name */
-    public /* synthetic */ void m255lambda$com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_14030(VoiceLoginStatus voiceLoginStatus, VoicePluginServiceConnection voicePluginServiceConnection2) {
+    /* synthetic */ void handleVoiceLoginStatus(VoiceLoginStatus voiceLoginStatus, VoicePluginServiceConnection voicePluginServiceConnection2) {
         if (voiceLoginStatus.loggedIn) {
             this.voicePluginServiceConnection = voicePluginServiceConnection2;
             return;
@@ -380,8 +376,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_14408  reason: not valid java name */
-    public /* synthetic */ void m256lambda$com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_14408(VoiceChannelStatus voiceChannelStatus) {
+    public /* synthetic */ void handleVoiceChannelStatusUpdate(VoiceChannelStatus voiceChannelStatus) {
         if (voiceChannelStatus.errorMessage != null) {
             if (this.connectedVoiceChannel != null && Objects.equal(this.connectedVoiceChannel.voiceChannelURI, voiceChannelStatus.channelInfo.voiceChannelURI)) {
                 this.connectedVoiceChannel = null;
@@ -399,8 +394,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_4388  reason: not valid java name */
-    public /* synthetic */ void m257lambda$com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_4388() {
+    public /* synthetic */ void processVoiceConfigurationUpdate() {
         GridConnectionService serviceInstance;
         this.voiceEnabled = GlobalOptions.getInstance().getVoiceEnabled();
         if (!this.voiceEnabled) {

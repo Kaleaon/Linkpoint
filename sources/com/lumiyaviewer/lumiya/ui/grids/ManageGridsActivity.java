@@ -66,8 +66,7 @@ public class ManageGridsActivity extends ThemedActivity implements GridEditDialo
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_grids_ManageGridsActivity_6020  reason: not valid java name */
-    public /* synthetic */ void m581lambda$com_lumiyaviewer_lumiya_ui_grids_ManageGridsActivity_6020(GridList.GridInfo gridInfo, DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onDeleteGridConfirmed(GridList.GridInfo gridInfo, DialogInterface dialogInterface, int i) {
         dialogInterface.dismiss();
         deleteGrid(gridInfo);
     }

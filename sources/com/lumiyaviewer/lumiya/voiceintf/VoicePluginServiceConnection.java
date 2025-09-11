@@ -578,8 +578,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_13701  reason: not valid java name */
-    public /* synthetic */ void m904lambda$com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_13701(VoiceRinging voiceRinging, ChatterNameRetriever chatterNameRetriever) {
+    public /* synthetic */ void onVoiceCallerNameRetrieved(VoiceRinging voiceRinging, ChatterNameRetriever chatterNameRetriever) {
         if (chatterNameRetriever == this.ringingChatterNameRetriever) {
             String resolvedName = chatterNameRetriever.getResolvedName();
             if (!Strings.isNullOrEmpty(resolvedName)) {
@@ -589,8 +588,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_17898  reason: not valid java name */
-    public /* synthetic */ void m905lambda$com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_17898() {
+    public /* synthetic */ void disconnectFromVoicePlugin() {
         Debug.Printf("LumiyaVoice: disconnecting from voice plugin", new Object[0]);
         UserManager userManager2 = this.userManager.get();
         if (userManager2 != null) {

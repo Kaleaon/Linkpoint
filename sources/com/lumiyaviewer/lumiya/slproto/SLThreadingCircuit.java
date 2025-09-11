@@ -63,9 +63,7 @@ public class SLThreadingCircuit extends SLCircuit implements Executor {
         this.queue.offer(runnable);
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_SLThreadingCircuit_1833  reason: not valid java name */
-    public /* synthetic */ void m136lambda$com_lumiyaviewer_lumiya_slproto_SLThreadingCircuit_1833(SLMessage sLMessage) {
+    /* synthetic */ void handleMessage(SLMessage sLMessage) {
         sLMessage.Handle(this);
     }
 }

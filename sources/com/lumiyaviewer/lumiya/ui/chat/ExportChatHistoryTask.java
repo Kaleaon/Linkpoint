@@ -277,8 +277,7 @@ public class ExportChatHistoryTask extends AsyncTask<ChatterID, Void, ExportResu
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_ExportChatHistoryTask_2020  reason: not valid java name */
-    public /* synthetic */ void m421lambda$com_lumiyaviewer_lumiya_ui_chat_ExportChatHistoryTask_2020(ChatterNameRetriever chatterNameRetriever) {
+    public /* synthetic */ void onChatterNameRetrieved(ChatterNameRetriever chatterNameRetriever) {
         try {
             this.nameReadyLock.lock();
             this.isNameReady.set(true);

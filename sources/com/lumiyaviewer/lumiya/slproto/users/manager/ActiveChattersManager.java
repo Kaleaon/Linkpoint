@@ -1126,15 +1126,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.unreadCountsPool;
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_10179  reason: not valid java name */
-    public /* synthetic */ void m272lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_10179(ChatterID chatterID, Chatter chatter) {
+    /* synthetic */ void createSessionMark(ChatterID chatterID, Chatter chatter) {
         makeSessionMark(chatterID, chatter.getId().longValue());
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_25217  reason: not valid java name */
-    public /* synthetic */ void m276lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ActiveChattersManager_25217(ChatterID chatterID) {
+    /* synthetic */ void unmuteChatter(ChatterID chatterID) {
         boolean z = false;
         if (chatterID != null && chatterID.getChatterType() != ChatterID.ChatterType.Local) {
             synchronized (this.chatEventLock) {

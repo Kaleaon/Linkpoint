@@ -29,8 +29,7 @@ public class GoogleDriveSyncPreference extends CheckBoxPreference {
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_settings_GoogleDriveSyncPreference_1541  reason: not valid java name */
-    public /* synthetic */ void m853lambda$com_lumiyaviewer_lumiya_ui_settings_GoogleDriveSyncPreference_1541(DialogInterface dialogInterface, int i) {
+    public /* synthetic */ void onCloudPluginDownloadConfirmed(DialogInterface dialogInterface, int i) {
         dialogInterface.dismiss();
         Intent intent = new Intent("android.intent.action.VIEW");
         intent.setData(Uri.parse(LicenseChecker.CLOUD_PLUGIN_URL));

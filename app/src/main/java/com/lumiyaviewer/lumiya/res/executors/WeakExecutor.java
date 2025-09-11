@@ -2,7 +2,6 @@ package com.lumiyaviewer.lumiya.res.executors;
 
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.res.collections.WeakQueue;
-import com.lumiyaviewer.lumiya.res.executors.-$Lambda$paN_qX4OegT79dFg6kmGbliJfA0.AnonymousClass1;
 import com.lumiyaviewer.lumiya.utils.HasPriority;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.BlockingQueue;
@@ -79,27 +78,25 @@ public class WeakExecutor extends ThreadPoolExecutor {
     }
 
     WeakExecutor(String str, int i) {
-        super(i, i, 60, TimeUnit.SECONDS, new WeakQueue(), new -$Lambda$paN_qX4OegT79dFg6kmGbliJfA0(str));
+        super(i, i, 60, TimeUnit.SECONDS, new WeakQueue(), (runnable) -> createBasicThread(str, runnable));
         Debug.Printf("Executor for %s: maxThreads %d", str, Integer.valueOf(i));
         allowCoreThreadTimeOut(true);
     }
 
     public WeakExecutor(String str, int i, BlockingQueue<Runnable> blockingQueue) {
-        super(i, i, 60, TimeUnit.SECONDS, blockingQueue, new AnonymousClass1(str));
+        super(i, i, 60, TimeUnit.SECONDS, blockingQueue, (runnable) -> createPriorityThread(str, runnable));
         Debug.Printf("Executor for %s: maxThreads %d", str, Integer.valueOf(i));
         allowCoreThreadTimeOut(true);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106 */
-    static /* synthetic */ Thread m78lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106(String str, Runnable runnable) {
+    static /* synthetic */ Thread createBasicThread(String str, Runnable runnable) {
         Thread thread = new Thread(runnable, str);
         Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()));
         thread.setPriority(4);
         return thread;
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531 */
-    static /* synthetic */ Thread m79lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531(String str, Runnable runnable) {
+    static /* synthetic */ Thread createPriorityThread(String str, Runnable runnable) {
         Thread thread = new Thread(runnable, str);
         Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()));
         thread.setPriority(4);

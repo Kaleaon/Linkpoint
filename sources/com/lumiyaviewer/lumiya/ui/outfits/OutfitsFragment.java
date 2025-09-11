@@ -1008,8 +1008,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
     }
 
     /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_13544  reason: not valid java name */
-    public /* synthetic */ void m702lambda$com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_13544(AdapterView adapterView, View view, int i, long j) {
+    public /* synthetic */ void onOutfitItemClicked(AdapterView adapterView, View view, int i, long j) {
         SLInventoryEntry folder;
         UserManager userManager = getUserManager();
         if (userManager != null) {
