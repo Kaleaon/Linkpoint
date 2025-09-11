@@ -431,292 +431,211 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
             if (r0.rlvController.canTeleportToLure(r1) != false) goto L_0x0115;
      */
     private void HandleIM(com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage r8, com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource r9) {
-        /*
-        r7 = this;
-        r6 = 20;
-        r4 = 0;
-        r3 = 0;
-        r5 = 1;
-        r0 = r7.getModules();
-        if (r0 == 0) goto L_0x0014;
-    L_0x000b:
-        r1 = r0.rlvController;
-        r1 = r1.onIncomingIM(r8);
-        if (r1 == 0) goto L_0x0014;
-    L_0x0013:
-        return;
-    L_0x0014:
-        r1 = r8.MessageBlock_Field;
-        r1 = r1.Dialog;
-        switch(r1) {
-            case 0: goto L_0x01b2;
-            case 1: goto L_0x0097;
-            case 2: goto L_0x0097;
-            case 3: goto L_0x01a0;
-            case 4: goto L_0x00c0;
-            case 5: goto L_0x001b;
-            case 6: goto L_0x001b;
-            case 7: goto L_0x001b;
-            case 8: goto L_0x001b;
-            case 9: goto L_0x00d1;
-            case 10: goto L_0x001b;
-            case 11: goto L_0x001b;
-            case 12: goto L_0x001b;
-            case 13: goto L_0x001b;
-            case 14: goto L_0x001b;
-            case 15: goto L_0x001b;
-            case 16: goto L_0x001b;
-            case 17: goto L_0x00bc;
-            case 18: goto L_0x001b;
-            case 19: goto L_0x01fa;
-            case 20: goto L_0x01b2;
-            case 21: goto L_0x001b;
-            case 22: goto L_0x00ef;
-            case 23: goto L_0x001b;
-            case 24: goto L_0x001b;
-            case 25: goto L_0x001b;
-            case 26: goto L_0x0127;
-            case 27: goto L_0x001b;
-            case 28: goto L_0x001b;
-            case 29: goto L_0x001b;
-            case 30: goto L_0x001b;
-            case 31: goto L_0x01fa;
-            case 32: goto L_0x00b8;
-            case 33: goto L_0x001b;
-            case 34: goto L_0x001b;
-            case 35: goto L_0x001b;
-            case 36: goto L_0x001b;
-            case 37: goto L_0x00b8;
-            case 38: goto L_0x014f;
-            case 39: goto L_0x0161;
-            case 40: goto L_0x0161;
-            case 41: goto L_0x00b0;
-            case 42: goto L_0x00b4;
-            default: goto L_0x001b;
-        };
-    L_0x001b:
-        r0 = new java.lang.StringBuilder;
-        r0.<init>();
-        r2 = "HandleIM: unknown type = ";
-        r0 = r0.append(r2);
-        r0 = r0.append(r1);
-        r1 = ", sessionId = ";
-        r0 = r0.append(r1);
-        r1 = r8.AgentData_Field;
-        r1 = r1.SessionID;
-        r1 = r1.toString();
-        r0 = r0.append(r1);
-        r1 = ", ";
-        r0 = r0.append(r1);
-        r1 = "toAgentID = ";
-        r0 = r0.append(r1);
-        r1 = r8.MessageBlock_Field;
-        r1 = r1.ToAgentID;
-        r1 = r1.toString();
-        r0 = r0.append(r1);
-        r1 = ", ";
-        r0 = r0.append(r1);
-        r1 = "fromGroup = ";
-        r0 = r0.append(r1);
-        r1 = r8.MessageBlock_Field;
-        r1 = r1.FromGroup;
-        r0 = r0.append(r1);
-        r1 = ", ";
-        r0 = r0.append(r1);
-        r1 = "message = '";
-        r0 = r0.append(r1);
-        r1 = r8.MessageBlock_Field;
-        r1 = r1.Message;
-        r1 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r1);
-        r0 = r0.append(r1);
-        r1 = "'";
-        r0 = r0.append(r1);
-        r0 = r0.toString();
-        com.lumiyaviewer.lumiya.Debug.Log(r0);
-    L_0x0096:
-        return;
-    L_0x0097:
-        r0 = r7.localChatterID;
-        r1 = new com.lumiyaviewer.lumiya.slproto.chat.SLChatSystemMessageEvent;
-        r2 = com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown.getInstance();
-        r3 = r7.agentUUID;
-        r4 = r8.MessageBlock_Field;
-        r4 = r4.Message;
-        r4 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r4);
-        r1.<init>(r2, r3, r4);
-        r7.HandleChatEvent(r0, r1, r5);
-        goto L_0x0096;
-    L_0x00b0:
-        r7.HandleTypingNotification(r9, r5);
-        goto L_0x0096;
-    L_0x00b4:
-        r7.HandleTypingNotification(r9, r4);
-        goto L_0x0096;
-    L_0x00b8:
-        r7.HandleGroupNotice(r8, r9);
-        goto L_0x0096;
-    L_0x00bc:
-        r7.HandleSessionIM(r8, r9);
-        goto L_0x0096;
-    L_0x00c0:
-        r0 = r7.agentUUID;
-        r0 = r9.getDefaultChatter(r0);
-        r1 = new com.lumiyaviewer.lumiya.slproto.chat.SLChatInventoryItemOfferedEvent;
-        r2 = r7.agentUUID;
-        r1.<init>(r9, r2, r8);
-        r7.HandleChatEvent(r0, r1, r5);
-        goto L_0x0096;
-    L_0x00d1:
-        r0 = r7.localChatterID;
-        r1 = new com.lumiyaviewer.lumiya.slproto.chat.SLChatInventoryItemOfferedEvent;
-        r2 = new com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject;
-        r3 = r8.AgentData_Field;
-        r3 = r3.AgentID;
-        r4 = r8.MessageBlock_Field;
-        r4 = r4.FromAgentName;
-        r4 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableOEM(r4);
-        r2.<init>(r3, r4);
-        r3 = r7.agentUUID;
-        r1.<init>(r2, r3, r8);
-        r7.HandleChatEvent(r0, r1, r5);
-        goto L_0x0096;
-    L_0x00ef:
-        r1 = r9.getSourceType();
-        r2 = com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User;
-        if (r1 != r2) goto L_0x0115;
-    L_0x00f7:
-        r1 = r9.getSourceUUID();
-        if (r0 == 0) goto L_0x0115;
-    L_0x00fd:
-        r2 = r0.rlvController;
-        r2 = r2.autoAcceptTeleport(r1);
-        if (r2 == 0) goto L_0x010d;
-    L_0x0105:
-        r0 = r8.MessageBlock_Field;
-        r0 = r0.ID;
-        r7.TeleportToLure(r0);
-        goto L_0x0096;
-    L_0x010d:
-        r0 = r0.rlvController;
-        r0 = r0.canTeleportToLure(r1);
-        if (r0 == 0) goto L_0x0096;
-    L_0x0115:
-        r0 = r7.agentUUID;
-        r0 = r9.getDefaultChatter(r0);
-        r1 = new com.lumiyaviewer.lumiya.slproto.chat.SLChatLureEvent;
-        r2 = r7.agentUUID;
-        r1.<init>(r9, r2, r8);
-        r7.HandleChatEvent(r0, r1, r5);
-        goto L_0x0096;
-    L_0x0127:
-        r1 = r9.getSourceType();
-        r2 = com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User;
-        if (r1 != r2) goto L_0x013d;
-    L_0x012f:
-        if (r0 == 0) goto L_0x013d;
-    L_0x0131:
-        r0 = r0.rlvController;
-        r1 = r9.getSourceUUID();
-        r0 = r0.canTeleportToLure(r1);
-        if (r0 == 0) goto L_0x0096;
-    L_0x013d:
-        r0 = r7.agentUUID;
-        r0 = r9.getDefaultChatter(r0);
-        r1 = new com.lumiyaviewer.lumiya.slproto.chat.SLChatLureRequestEvent;
-        r2 = r7.agentUUID;
-        r1.<init>(r9, r2, r8);
-        r7.HandleChatEvent(r0, r1, r5);
-        goto L_0x0096;
-    L_0x014f:
-        r0 = r7.agentUUID;
-        r0 = r9.getDefaultChatter(r0);
-        r1 = new com.lumiyaviewer.lumiya.slproto.chat.SLChatFriendshipOfferedEvent;
-        r2 = r7.agentUUID;
-        r1.<init>(r9, r2, r8);
-        r7.HandleChatEvent(r0, r1, r5);
-        goto L_0x0096;
-    L_0x0161:
-        r0 = r7.agentUUID;
-        r0 = r9.getDefaultChatter(r0);
-        r2 = new com.lumiyaviewer.lumiya.slproto.chat.SLChatFriendshipResultEvent;
-        r3 = r7.agentUUID;
-        r2.<init>(r9, r3, r8);
-        r7.HandleChatEvent(r0, r2, r5);
-        r0 = 39;
-        if (r1 != r0) goto L_0x0096;
-    L_0x0175:
-        r0 = r9.getSourceType();
-        r1 = com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User;
-        if (r0 != r1) goto L_0x0096;
-    L_0x017d:
-        r0 = r9.getSourceUUID();
-        if (r0 == 0) goto L_0x0096;
-    L_0x0183:
-        r1 = r7.userManager;
-        r1 = r1.getChatterList();
-        r1 = r1.getFriendManager();
-        r1.addFriend(r0);
-        r1 = "requestonlinenotification";
-        r2 = new java.lang.String[r5];
-        r0 = r0.toString();
-        r2[r4] = r0;
-        r7.SendGenericMessage(r1, r2);
-        goto L_0x0096;
-    L_0x01a0:
-        r0 = r7.agentUUID;
-        r0 = r9.getDefaultChatter(r0);
-        r1 = new com.lumiyaviewer.lumiya.slproto.chat.SLChatGroupInvitationEvent;
-        r2 = r7.agentUUID;
-        r1.<init>(r9, r2, r8);
-        r7.HandleChatEvent(r0, r1, r5);
-        goto L_0x0096;
-    L_0x01b2:
-        r2 = new com.lumiyaviewer.lumiya.slproto.chat.SLChatTextEvent;
-        r0 = r7.agentUUID;
-        r2.<init>(r9, r0, r8, r3);
-        r0 = r7.agentUUID;
-        r0 = r9.getDefaultChatter(r0);
-        r3 = r7.userManager;
-        r3 = r3.isChatterActive(r0);
-        r7.HandleChatEvent(r0, r2, r5);
-        r2 = r7.userManager;
-        r2 = r2.isChatterMuted(r0);
-        if (r2 != 0) goto L_0x0096;
-    L_0x01d0:
-        if (r1 == r6) goto L_0x0096;
-    L_0x01d2:
-        r1 = r8.MessageBlock_Field;
-        r1 = r1.Offline;
-        if (r1 != 0) goto L_0x0096;
-    L_0x01d8:
-        r1 = r8.MessageBlock_Field;
-        r1 = r1.Message;
-        r1 = r1.length;
-        if (r1 == 0) goto L_0x0096;
-    L_0x01df:
-        if (r3 != 0) goto L_0x0096;
-    L_0x01e1:
-        r1 = r0 instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser;
-        if (r1 == 0) goto L_0x0096;
-    L_0x01e5:
-        r1 = com.lumiyaviewer.lumiya.slproto.SLGridConnection.getAutoresponse();
-        r2 = com.google.common.base.Strings.isNullOrEmpty(r1);
-        if (r2 != 0) goto L_0x0096;
-    L_0x01ef:
-        r0 = (com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser) r0;
-        r0 = r0.getChatterUUID();
-        r7.SendInstantMessage(r0, r1, r6);
-        goto L_0x0096;
-    L_0x01fa:
-        r0 = r7.agentUUID;
-        r0 = r9.getDefaultChatter(r0);
-        r1 = new com.lumiyaviewer.lumiya.slproto.chat.SLChatTextEvent;
-        r2 = r7.agentUUID;
-        r1.<init>(r9, r2, r8, r3);
-        r7.HandleChatEvent(r0, r1, r5);
-        goto L_0x0096;
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.SLAgentCircuit.HandleIM(com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage, com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource):void");
+    private void HandleIM(com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage improvedInstantMessage, com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource chatMessageSource) {
+        // Check if RLV controller should handle this IM
+        SLModules modules = getModules();
+        if (modules != null && modules.rlvController.onIncomingIM(improvedInstantMessage)) {
+            return; // RLV handled it
+        }
+        
+        byte dialogType = improvedInstantMessage.MessageBlock_Field.Dialog;
+        
+        switch (dialogType) {
+            case 0: // MessageFromAgent 
+            case 20: // MessageFromAgent
+                handlePersonalMessage(improvedInstantMessage, chatMessageSource);
+                break;
+                
+            case 1: // MessageBox
+            case 2: // GroupNotice  
+                handleSystemMessage(improvedInstantMessage);
+                break;
+                
+            case 3: // GroupInvitation
+                handleGroupInvitation(improvedInstantMessage, chatMessageSource);
+                break;
+                
+            case 4: // InventoryOffered
+                handleInventoryOffered(improvedInstantMessage, chatMessageSource);
+                break;
+                
+            case 9: // InventoryAccepted
+                handleInventoryOfferedFromObject(improvedInstantMessage);
+                break;
+                
+            case 17: // Session message (group chat)
+                HandleSessionIM(improvedInstantMessage, chatMessageSource);
+                break;
+                
+            case 19: // MessageFromObject
+            case 31: // MessageFromObject  
+                handleObjectMessage(improvedInstantMessage, chatMessageSource);
+                break;
+                
+            case 22: // RequestTeleport
+                handleTeleportLure(improvedInstantMessage, chatMessageSource);
+                break;
+                
+            case 26: // RequestLure
+                handleLureRequest(improvedInstantMessage, chatMessageSource);
+                break;
+                
+            case 32: // GroupNotice
+            case 37: // GroupNoticeRequested
+                HandleGroupNotice(improvedInstantMessage, chatMessageSource);
+                break;
+                
+            case 38: // FriendshipOffered
+                handleFriendshipOffered(improvedInstantMessage, chatMessageSource);
+                break;
+                
+            case 39: // FriendshipAccepted
+            case 40: // FriendshipDeclined
+                handleFriendshipResult(improvedInstantMessage, chatMessageSource);
+                break;
+                
+            case 41: // TypingStart
+                HandleTypingNotification(chatMessageSource, true);
+                break;
+                
+            case 42: // TypingStop
+                HandleTypingNotification(chatMessageSource, false);
+                break;
+                
+            default:
+                Debug.Log("HandleIM: unknown type = " + dialogType +
+                         ", sessionId = " + improvedInstantMessage.AgentData_Field.SessionID.toString() +
+                         ", toAgentID = " + improvedInstantMessage.MessageBlock_Field.ToAgentID.toString() +
+                         ", fromGroup = " + improvedInstantMessage.MessageBlock_Field.FromGroup +
+                         ", message = '" + SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message) + "'");
+                break;
+        }
+    }
+    
+    private void handlePersonalMessage(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
+        SLChatTextEvent chatEvent = new SLChatTextEvent(chatMessageSource, this.agentUUID, improvedInstantMessage, null);
+        ChatterID defaultChatter = chatMessageSource.getDefaultChatter(this.agentUUID);
+        boolean isChatterActive = this.userManager.isChatterActive(defaultChatter);
+        
+        HandleChatEvent(defaultChatter, chatEvent, true);
+        
+        // Auto-response logic
+        if (!this.userManager.isChatterMuted(defaultChatter) &&
+            improvedInstantMessage.MessageBlock_Field.Dialog != 20 && // Not MessageFromAgent
+            improvedInstantMessage.MessageBlock_Field.Offline == 0 &&
+            improvedInstantMessage.MessageBlock_Field.Message.length > 0 &&
+            !isChatterActive &&
+            defaultChatter instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser) {
+            
+            String autoResponse = SLGridConnection.getAutoresponse();
+            if (!com.google.common.base.Strings.isNullOrEmpty(autoResponse)) {
+                com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser userChatter = 
+                    (com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser) defaultChatter;
+                SendInstantMessage(userChatter.getChatterUUID(), autoResponse, (byte) 20);
+            }
+        }
+    }
+    
+    private void handleSystemMessage(ImprovedInstantMessage improvedInstantMessage) {
+        SLChatSystemMessageEvent systemEvent = new SLChatSystemMessageEvent(
+            com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown.getInstance(),
+            this.agentUUID,
+            SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message)
+        );
+        HandleChatEvent(this.localChatterID, systemEvent, true);
+    }
+    
+    private void handleGroupInvitation(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
+        SLChatGroupInvitationEvent invitationEvent = new SLChatGroupInvitationEvent(
+            chatMessageSource, this.agentUUID, improvedInstantMessage
+        );
+        HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), invitationEvent, true);
+    }
+    
+    private void handleInventoryOffered(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
+        SLChatInventoryItemOfferedEvent inventoryEvent = new SLChatInventoryItemOfferedEvent(
+            chatMessageSource, this.agentUUID, improvedInstantMessage
+        );
+        HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), inventoryEvent, true);
+    }
+    
+    private void handleInventoryOfferedFromObject(ImprovedInstantMessage improvedInstantMessage) {
+        ChatMessageSource objectSource = new com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject(
+            improvedInstantMessage.AgentData_Field.AgentID,
+            SLMessage.stringFromVariableOEM(improvedInstantMessage.MessageBlock_Field.FromAgentName)
+        );
+        
+        SLChatInventoryItemOfferedEvent inventoryEvent = new SLChatInventoryItemOfferedEvent(
+            objectSource, this.agentUUID, improvedInstantMessage
+        );
+        HandleChatEvent(this.localChatterID, inventoryEvent, true);
+    }
+    
+    private void handleObjectMessage(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
+        SLChatTextEvent chatEvent = new SLChatTextEvent(
+            chatMessageSource, this.agentUUID, improvedInstantMessage, null
+        );
+        HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), chatEvent, true);
+    }
+    
+    private void handleTeleportLure(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
+        SLModules modules = getModules();
+        if (chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.User) {
+            UUID sourceUUID = chatMessageSource.getSourceUUID();
+            if (modules != null) {
+                if (modules.rlvController.autoAcceptTeleport(sourceUUID)) {
+                    TeleportToLure(improvedInstantMessage.MessageBlock_Field.ID);
+                    return;
+                } else if (!modules.rlvController.canTeleportToLure(sourceUUID)) {
+                    return;
+                }
+            }
+        }
+        
+        SLChatLureEvent lureEvent = new SLChatLureEvent(
+            chatMessageSource, this.agentUUID, improvedInstantMessage
+        );
+        HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), lureEvent, true);
+    }
+    
+    private void handleLureRequest(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
+        SLModules modules = getModules();
+        if (chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.User && modules != null) {
+            if (!modules.rlvController.canTeleportToLure(chatMessageSource.getSourceUUID())) {
+                return;
+            }
+        }
+        
+        SLChatLureRequestEvent lureRequestEvent = new SLChatLureRequestEvent(
+            chatMessageSource, this.agentUUID, improvedInstantMessage
+        );
+        HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), lureRequestEvent, true);
+    }
+    
+    private void handleFriendshipOffered(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
+        SLChatFriendshipOfferedEvent friendshipEvent = new SLChatFriendshipOfferedEvent(
+            chatMessageSource, this.agentUUID, improvedInstantMessage
+        );
+        HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), friendshipEvent, true);
+    }
+    
+    private void handleFriendshipResult(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
+        SLChatFriendshipResultEvent friendshipResultEvent = new SLChatFriendshipResultEvent(
+            chatMessageSource, this.agentUUID, improvedInstantMessage
+        );
+        HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), friendshipResultEvent, true);
+        
+        // If friendship accepted, add to friend list and request online notification
+        if (improvedInstantMessage.MessageBlock_Field.Dialog == 39) { // FriendshipAccepted
+            if (chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.User) {
+                UUID sourceUUID = chatMessageSource.getSourceUUID();
+                if (sourceUUID != null) {
+                    this.userManager.getChatterList().getFriendManager().addFriend(sourceUUID);
+                    SendGenericMessage("requestonlinenotification", new String[]{sourceUUID.toString()});
+                }
+            }
+        }
+    }
     }
 
     private void HandleSessionIM(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
@@ -1660,195 +1579,129 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
     /* DevToolsApp WARNING: Removed duplicated region for block: B:18:0x0047  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:21:0x014c  */
     public void RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r8) {
-        /*
-        r7 = this;
-        r6 = 1;
-        r5 = 0;
-        r0 = 0;
-        r1 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID;
-        r2 = r7.userManager;
-        if (r2 == 0) goto L_0x0169;
-    L_0x0009:
-        r2 = r7.userManager;
-        r2 = r2.getCurrentLocationInfoSnapshot();
-        if (r2 == 0) goto L_0x0169;
-    L_0x0011:
-        r2 = r2.parcelData();
-        if (r2 == 0) goto L_0x0169;
-    L_0x0017:
-        r3 = r2.isGroupOwned();
-        if (r3 == 0) goto L_0x0169;
-    L_0x001d:
-        r2 = r2.getOwnerID();
-    L_0x0021:
-        if (r2 == 0) goto L_0x015a;
-    L_0x0023:
-        r3 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID;
-        r3 = r3.equals(r2);
-        if (r3 == 0) goto L_0x0166;
-    L_0x002b:
-        if (r0 == 0) goto L_0x015d;
-    L_0x002d:
-        r2 = r7.userManager;
-        r2 = r2.getChatterList();
-        r2 = r2.getGroupManager();
-        r2 = r2.getAvatarGroupList();
-        if (r2 == 0) goto L_0x0163;
-    L_0x003d:
-        r2 = r2.Groups;
-        r2 = r2.containsKey(r0);
-        if (r2 == 0) goto L_0x0163;
-    L_0x0045:
-        if (r0 != 0) goto L_0x0049;
-    L_0x0047:
-        r0 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID;
-    L_0x0049:
-        r1 = new com.lumiyaviewer.lumiya.slproto.messages.RezObject;
-        r1.<init>();
-        r2 = r1.AgentData_Field;
-        r3 = r7.circuitInfo;
-        r3 = r3.agentID;
-        r2.AgentID = r3;
-        r2 = r1.AgentData_Field;
-        r3 = r7.circuitInfo;
-        r3 = r3.sessionID;
-        r2.SessionID = r3;
-        r2 = r1.AgentData_Field;
-        r2.GroupID = r0;
-        r0 = r1.RezData_Field;
-        r2 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID;
-        r0.FromTaskID = r2;
-        r0 = r1.RezData_Field;
-        r0.BypassRaycast = r6;
-        r0 = r1.RezData_Field;
-        r2 = r7.modules;
-        r2 = r2.avatarControl;
-        r2 = r2.getAgentPosition();
-        r2 = r2.getPosition();
-        r0.RayStart = r2;
-        r0 = r1.RezData_Field;
-        r2 = r1.RezData_Field;
-        r2 = r2.RayStart;
-        r3 = r7.getModules();
-        r3 = r3.avatarControl;
-        r3 = r3.getAgentHeading();
-        r4 = 1069547520; // 0x3fc00000 float:1.5 double:5.28426686E-315;
-        r2 = r2.getRotatedOffset(r4, r3);
-        r0.RayEnd = r2;
-        r0 = r1.RezData_Field;
-        r0.RayEndIsIntersection = r6;
-        r0 = r1.RezData_Field;
-        r2 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID;
-        r0.RayTargetID = r2;
-        r0 = r1.RezData_Field;
-        r0.RezSelected = r5;
-        r0 = r1.RezData_Field;
-        r0.RemoveItem = r5;
-        r0 = r1.RezData_Field;
-        r0.ItemFlags = r5;
-        r0 = r1.RezData_Field;
-        r2 = r8.groupMask;
-        r0.GroupMask = r2;
-        r0 = r1.RezData_Field;
-        r2 = r8.everyoneMask;
-        r0.EveryoneMask = r2;
-        r0 = r1.RezData_Field;
-        r2 = r8.nextOwnerMask;
-        r0.NextOwnerMask = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.uuid;
-        r0.ItemID = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.parentUUID;
-        r0.FolderID = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.creatorUUID;
-        r0.CreatorID = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.ownerUUID;
-        r0.OwnerID = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.groupUUID;
-        r0.GroupID = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.baseMask;
-        r0.BaseMask = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.ownerMask;
-        r0.OwnerMask = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.groupMask;
-        r0.GroupMask = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.everyoneMask;
-        r0.EveryoneMask = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.nextOwnerMask;
-        r0.NextOwnerMask = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.isGroupOwned;
-        r0.GroupOwned = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = java.util.UUID.randomUUID();
-        r0.TransactionID = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.assetType;
-        r0.Type = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.invType;
-        r0.InvType = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.flags;
-        r0.Flags = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.saleType;
-        r0.SaleType = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.salePrice;
-        r0.SalePrice = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.name;
-        r2 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringToVariableOEM(r2);
-        r0.Name = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.description;
-        r2 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringToVariableOEM(r2);
-        r0.Description = r2;
-        r0 = r1.InventoryData_Field;
-        r2 = r8.creationDate;
-        r0.CreationDate = r2;
-        r0 = r1.InventoryData_Field;
-        r0.CRC = r5;
-        r1.isReliable = r6;
-        r0 = r8.ownerMask;
-        r2 = 32768; // 0x8000 float:4.5918E-41 double:1.61895E-319;
-        r0 = r0 & r2;
-        if (r0 != 0) goto L_0x0156;
-    L_0x014c:
-        r0 = r8.parentUUID;
-        r2 = new com.lumiyaviewer.lumiya.slproto.SLAgentCircuit$9;
-        r2.<init>(r0);
-        r1.setEventListener(r2);
-    L_0x0156:
-        r7.SendMessage(r1);
-        return;
-    L_0x015a:
-        r0 = r2;
-        goto L_0x002b;
-    L_0x015d:
-        r0 = r7.getActiveGroupID();
-        goto L_0x0045;
-    L_0x0163:
-        r0 = r1;
-        goto L_0x0045;
-    L_0x0166:
-        r0 = r2;
-        goto L_0x002b;
-    L_0x0169:
-        r2 = r0;
-        goto L_0x0021;
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.SLAgentCircuit.RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry):void");
+    public void RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry inventoryEntry) {
+        UUID groupID = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID;
+        UUID parcelOwnerID = null;
+        
+        // Get parcel information to determine group ownership
+        if (this.userManager != null) {
+            var locationInfo = this.userManager.getCurrentLocationInfoSnapshot();
+            if (locationInfo != null) {
+                var parcelData = locationInfo.parcelData();
+                if (parcelData != null && parcelData.isGroupOwned()) {
+                    parcelOwnerID = parcelData.getOwnerID();
+                }
+            }
+        }
+        
+        // Determine the group to use for rezzing
+        if (parcelOwnerID != null && !com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID.equals(parcelOwnerID)) {
+            groupID = parcelOwnerID;
+        } else {
+            // Check if we're in a group that can rez objects
+            if (this.userManager != null) {
+                var groupManager = this.userManager.getChatterList().getGroupManager();
+                var avatarGroupList = groupManager.getAvatarGroupList();
+                if (avatarGroupList != null && avatarGroupList.Groups.containsKey(groupID)) {
+                    // Use the group ID
+                } else {
+                    groupID = getActiveGroupID();
+                }
+            } else {
+                groupID = getActiveGroupID();
+            }
+        }
+        
+        if (groupID == null) {
+            groupID = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID;
+        }
+        
+        // Create the RezObject message
+        com.lumiyaviewer.lumiya.slproto.messages.RezObject rezMessage = 
+            new com.lumiyaviewer.lumiya.slproto.messages.RezObject();
+        
+        // Set agent data
+        rezMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
+        rezMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
+        rezMessage.AgentData_Field.GroupID = groupID;
+        
+        // Set rez data
+        rezMessage.RezData_Field.FromTaskID = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID;
+        rezMessage.RezData_Field.BypassRaycast = true;
+        
+        // Set position and rotation based on avatar location
+        var agentPosition = this.modules.avatarControl.getAgentPosition().getPosition();
+        rezMessage.RezData_Field.RayStart = agentPosition;
+        
+        // Calculate end position (1.5 meters in front of avatar)
+        var agentHeading = this.getModules().avatarControl.getAgentHeading();
+        rezMessage.RezData_Field.RayEnd = agentPosition.getRotatedOffset(1.5f, agentHeading);
+        
+        rezMessage.RezData_Field.RayEndIsIntersection = true;
+        rezMessage.RezData_Field.RayTargetID = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID;
+        rezMessage.RezData_Field.RezSelected = false;
+        rezMessage.RezData_Field.RemoveItem = false;
+        rezMessage.RezData_Field.ItemFlags = 0;
+        rezMessage.RezData_Field.GroupMask = inventoryEntry.groupMask;
+        rezMessage.RezData_Field.EveryoneMask = inventoryEntry.everyoneMask;
+        rezMessage.RezData_Field.NextOwnerMask = inventoryEntry.nextOwnerMask;
+        
+        // Set inventory data
+        rezMessage.InventoryData_Field.ItemID = inventoryEntry.uuid;
+        rezMessage.InventoryData_Field.FolderID = inventoryEntry.parentUUID;
+        rezMessage.InventoryData_Field.CreatorID = inventoryEntry.creatorUUID;
+        rezMessage.InventoryData_Field.OwnerID = inventoryEntry.ownerUUID;
+        rezMessage.InventoryData_Field.GroupID = inventoryEntry.groupUUID;
+        rezMessage.InventoryData_Field.BaseMask = inventoryEntry.baseMask;
+        rezMessage.InventoryData_Field.OwnerMask = inventoryEntry.ownerMask;
+        rezMessage.InventoryData_Field.GroupMask = inventoryEntry.groupMask;
+        rezMessage.InventoryData_Field.EveryoneMask = inventoryEntry.everyoneMask;
+        rezMessage.InventoryData_Field.NextOwnerMask = inventoryEntry.nextOwnerMask;
+        rezMessage.InventoryData_Field.GroupOwned = inventoryEntry.isGroupOwned;
+        rezMessage.InventoryData_Field.TransactionID = java.util.UUID.randomUUID();
+        rezMessage.InventoryData_Field.Type = inventoryEntry.assetType;
+        rezMessage.InventoryData_Field.InvType = inventoryEntry.invType;
+        rezMessage.InventoryData_Field.Flags = inventoryEntry.flags;
+        rezMessage.InventoryData_Field.SaleType = inventoryEntry.saleType;
+        rezMessage.InventoryData_Field.SalePrice = inventoryEntry.salePrice;
+        rezMessage.InventoryData_Field.Name = SLMessage.stringToVariableOEM(inventoryEntry.name);
+        rezMessage.InventoryData_Field.Description = SLMessage.stringToVariableOEM(inventoryEntry.description);
+        rezMessage.InventoryData_Field.CreationDate = inventoryEntry.creationDate;
+        rezMessage.InventoryData_Field.CRC = 0;
+        
+        rezMessage.isReliable = true;
+        
+        // Set up event listener if the item is not copy-ok (will be removed from inventory)
+        if ((inventoryEntry.ownerMask & 0x8000) == 0) { // PERM_COPY bit
+            UUID folderID = inventoryEntry.parentUUID;
+            rezMessage.setEventListener(new com.lumiyaviewer.lumiya.slproto.SLAgentCircuit.RezObjectEventListener(folderID));
+        }
+        
+        SendMessage(rezMessage);
+    }
+    
+    // Inner class for handling rez object events
+    private class RezObjectEventListener implements com.lumiyaviewer.lumiya.slproto.messages.SLMessageEventListener {
+        private final UUID folderID;
+        
+        public RezObjectEventListener(UUID folderID) {
+            this.folderID = folderID;
+        }
+        
+        @Override
+        public void onMessageAcknowledged() {
+            // Object was successfully rezzed, refresh inventory if needed
+            if (userManager != null) {
+                userManager.getInventoryManager().requestFolderContents(folderID);
+            }
+        }
+        
+        @Override
+        public void onMessageTimeout() {
+            // Object rezzing failed
+            Debug.Log("RezObject message timed out");
+        }
+    }
     }
 
     public void SendChatMessage(@Nonnull ChatterID chatterID, String str) {
