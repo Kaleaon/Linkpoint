@@ -10,6 +10,14 @@
 .cxx
 local.properties
 
+# NDK and native build artifacts
+.cxx/
+.externalNativeBuild/
+obj/
+libs/
+*.so
+*.a
+
 # Android
 *.apk
 *.ap_
