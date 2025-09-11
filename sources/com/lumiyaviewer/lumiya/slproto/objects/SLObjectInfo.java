@@ -104,103 +104,53 @@ public abstract class SLObjectInfo implements Identifiable<UUID> {
     protected UUID uuid;
     public float[] worldMatrix;
 
-    /* JADX WARNING: Code restructure failed: missing block: B:3:0x001f, code lost:
-        r7.objectCoords.set(0, com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r8));
-        r7.objectCoords.set(2, com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r8));
-        r8.position(r8.position() + 12);
-        r7.rotation = com.lumiyaviewer.lumiya.slproto.types.LLQuaternion.parseFloatVec3(r8);
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:5:0x004b, code lost:
-        r7.objectCoords.set(0, com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseU16Vec(r8, -128.0f, 384.0f, -256.0f, 4096.0f));
-        r7.objectCoords.set(2, com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseU16Vec(r8, -256.0f, 256.0f, -256.0f, 256.0f));
-        r8.position(r8.position() + 6);
-        r7.rotation = com.lumiyaviewer.lumiya.slproto.types.LLQuaternion.parseU16Vec3(r8, -1.0f, 1.0f);
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:8:?, code lost:
-        return;
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:9:?, code lost:
-        return;
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    private void ParseObjectData(java.nio.ByteBuffer r8) {
-        /*
-            r7 = this;
-            r6 = 0
-            r5 = 1166016512(0x45800000, float:4096.0)
-            r4 = 1136656384(0x43c00000, float:384.0)
-            r3 = 1132462080(0x43800000, float:256.0)
-            r2 = -1015021568(0xffffffffc3800000, float:-256.0)
-            java.nio.ByteOrder r0 = java.nio.ByteOrder.LITTLE_ENDIAN
-            r8.order(r0)
-            int r0 = r8.limit()
-            switch(r0) {
-                case 16: goto L_0x0074;
-                case 32: goto L_0x004b;
-                case 48: goto L_0x0042;
-                case 60: goto L_0x001f;
-                case 76: goto L_0x0016;
-                default: goto L_0x0015;
-            }
-        L_0x0015:
-            return
-        L_0x0016:
-            int r0 = r8.position()
-            int r0 = r0 + 16
-            r8.position(r0)
-        L_0x001f:
-            com.lumiyaviewer.lumiya.slproto.types.Vector3Array r0 = r7.objectCoords
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r1 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r8)
-            r0.set(r6, r1)
-            com.lumiyaviewer.lumiya.slproto.types.Vector3Array r0 = r7.objectCoords
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r1 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r8)
-            r2 = 2
-            r0.set(r2, r1)
-            int r0 = r8.position()
-            int r0 = r0 + 12
-            r8.position(r0)
-            com.lumiyaviewer.lumiya.slproto.types.LLQuaternion r0 = com.lumiyaviewer.lumiya.slproto.types.LLQuaternion.parseFloatVec3(r8)
-            r7.rotation = r0
-            goto L_0x0015
-        L_0x0042:
-            int r0 = r8.position()
-            int r0 = r0 + 16
-            r8.position(r0)
-        L_0x004b:
-            com.lumiyaviewer.lumiya.slproto.types.Vector3Array r0 = r7.objectCoords
-            r1 = -1023410176(0xffffffffc3000000, float:-128.0)
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r1 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseU16Vec(r8, r1, r4, r2, r5)
-            r0.set(r6, r1)
-            com.lumiyaviewer.lumiya.slproto.types.Vector3Array r0 = r7.objectCoords
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r1 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseU16Vec(r8, r2, r3, r2, r3)
-            r2 = 2
-            r0.set(r2, r1)
-            int r0 = r8.position()
-            int r0 = r0 + 6
-            r8.position(r0)
-            r0 = -1082130432(0xffffffffbf800000, float:-1.0)
-            r1 = 1065353216(0x3f800000, float:1.0)
-            com.lumiyaviewer.lumiya.slproto.types.LLQuaternion r0 = com.lumiyaviewer.lumiya.slproto.types.LLQuaternion.parseU16Vec3(r8, r0, r1)
-            r7.rotation = r0
-            goto L_0x0015
-        L_0x0074:
-            com.lumiyaviewer.lumiya.slproto.types.Vector3Array r0 = r7.objectCoords
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r1 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseU8Vec(r8, r4, r4, r2, r5)
-            r0.set(r6, r1)
-            com.lumiyaviewer.lumiya.slproto.types.Vector3Array r0 = r7.objectCoords
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r1 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseU8Vec(r8, r2, r3, r2, r3)
-            r2 = 2
-            r0.set(r2, r1)
-            int r0 = r8.position()
-            int r0 = r0 + 3
-            r8.position(r0)
-            r0 = -1082130432(0xffffffffbf800000, float:-1.0)
-            r1 = 1065353216(0x3f800000, float:1.0)
-            com.lumiyaviewer.lumiya.slproto.types.LLQuaternion r0 = com.lumiyaviewer.lumiya.slproto.types.LLQuaternion.parseU8Vec3(r8, r0, r1)
-            r7.rotation = r0
-            goto L_0x0015
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo.ParseObjectData(java.nio.ByteBuffer):void");
+    private void ParseObjectData(ByteBuffer buffer) {
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        int bufferSize = buffer.limit();
+        
+        switch (bufferSize) {
+            case 76:
+                // Skip first 16 bytes for this size
+                buffer.position(buffer.position() + 16);
+                // Fall through to 60 case
+            case 60:
+                // Parse position and scale as float vectors
+                this.objectCoords.set(0, LLVector3.parseFloatVec(buffer));
+                this.objectCoords.set(2, LLVector3.parseFloatVec(buffer));
+                // Skip 12 bytes
+                buffer.position(buffer.position() + 12);
+                // Parse rotation as float quaternion
+                this.rotation = LLQuaternion.parseFloatVec3(buffer);
+                break;
+                
+            case 48:
+                // Skip first 16 bytes for this size
+                buffer.position(buffer.position() + 16);
+                // Fall through to 32 case
+            case 32:
+                // Parse position and scale as U16 vectors with specific ranges
+                this.objectCoords.set(0, LLVector3.parseU16Vec(buffer, -128.0f, 384.0f, -256.0f, 4096.0f));
+                this.objectCoords.set(2, LLVector3.parseU16Vec(buffer, -256.0f, 256.0f, -256.0f, 256.0f));
+                // Skip 6 bytes
+                buffer.position(buffer.position() + 6);
+                // Parse rotation as U16 quaternion
+                this.rotation = LLQuaternion.parseU16Vec3(buffer, -1.0f, 1.0f);
+                break;
+                
+            case 16:
+                // Parse position and scale as U8 vectors with specific ranges
+                this.objectCoords.set(0, LLVector3.parseU8Vec(buffer, 384.0f, 384.0f, -256.0f, 4096.0f));
+                this.objectCoords.set(2, LLVector3.parseU8Vec(buffer, -256.0f, 256.0f, -256.0f, 256.0f));
+                // Skip 3 bytes
+                buffer.position(buffer.position() + 3);
+                // Parse rotation as U8 quaternion
+                this.rotation = LLQuaternion.parseU8Vec3(buffer, -1.0f, 1.0f);
+                break;
+                
+            default:
+                // Unknown buffer size, do nothing
+                break;
+        }
     }
 
     private void applyHoverText(@Nullable HoverText hoverText2) {

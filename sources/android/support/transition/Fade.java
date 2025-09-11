@@ -74,25 +74,14 @@ public class Fade extends Visibility {
         return ofFloat;
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:1:0x0003, code lost:
-        r0 = (java.lang.Float) r2.values.get(PROPNAME_TRANSITION_ALPHA);
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    private static float getStartAlpha(android.support.transition.TransitionValues r2, float r3) {
-        /*
-            if (r2 != 0) goto L_0x0003
-        L_0x0002:
-            return r3
-        L_0x0003:
-            java.util.Map<java.lang.String, java.lang.Object> r0 = r2.values
-            java.lang.String r1 = "android:fade:transitionAlpha"
-            java.lang.Object r0 = r0.get(r1)
-            java.lang.Float r0 = (java.lang.Float) r0
-            if (r0 == 0) goto L_0x0002
-            float r3 = r0.floatValue()
-            goto L_0x0002
-        */
-        throw new UnsupportedOperationException("Method not decompiled: android.support.transition.Fade.getStartAlpha(android.support.transition.TransitionValues, float):float");
+    private static float getStartAlpha(TransitionValues transitionValues, float defaultValue) {
+        if (transitionValues != null) {
+            Float alpha = (Float) transitionValues.values.get(PROPNAME_TRANSITION_ALPHA);
+            if (alpha != null) {
+                return alpha.floatValue();
+            }
+        }
+        return defaultValue;
     }
 
     public void captureStartValues(@NonNull TransitionValues transitionValues) {

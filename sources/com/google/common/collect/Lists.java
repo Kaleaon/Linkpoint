@@ -603,24 +603,12 @@ public final class Lists {
         return new CopyOnWriteArrayList<>();
     }
 
-    /* JADX WARNING: type inference failed for: r2v0, types: [java.lang.Iterable<? extends E>, java.lang.Iterable] */
-    /* JADX WARNING: Unknown variable types count: 1 */
-    @com.google.common.annotations.GwtIncompatible("CopyOnWriteArrayList")
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public static <E> java.util.concurrent.CopyOnWriteArrayList<E> newCopyOnWriteArrayList(java.lang.Iterable<? extends E> r2) {
-        /*
-            boolean r0 = r2 instanceof java.util.Collection
-            if (r0 != 0) goto L_0x000e
-            java.util.ArrayList r0 = newArrayList(r2)
-        L_0x0008:
-            java.util.concurrent.CopyOnWriteArrayList r1 = new java.util.concurrent.CopyOnWriteArrayList
-            r1.<init>(r0)
-            return r1
-        L_0x000e:
-            java.util.Collection r0 = com.google.common.collect.Collections2.cast(r2)
-            goto L_0x0008
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.google.common.collect.Lists.newCopyOnWriteArrayList(java.lang.Iterable):java.util.concurrent.CopyOnWriteArrayList");
+    @GwtIncompatible("CopyOnWriteArrayList")
+    public static <E> CopyOnWriteArrayList<E> newCopyOnWriteArrayList(Iterable<? extends E> elements) {
+        Collection<? extends E> collection = (elements instanceof Collection) 
+            ? Collections2.cast(elements) 
+            : newArrayList(elements);
+        return new CopyOnWriteArrayList<>(collection);
     }
 
     @GwtCompatible(serializable = true)
