@@ -21,13 +21,11 @@ public abstract class ResultOperator<K, Tin, Tout> implements ResultHandler<K, T
         this.executor = executor;
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_ResultOperator_1065 */
-    /* synthetic */ void m56lambda$-com_lumiyaviewer_lumiya_react_ResultOperator_1065(Object obj, Throwable th) {
+    /* synthetic */ void handleResultError(Object obj, Throwable th) {
         this.toHandler.onResultError(obj, th);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_ResultOperator_796 */
-    /* synthetic */ void m57lambda$-com_lumiyaviewer_lumiya_react_ResultOperator_796(Object obj, Object obj2) {
+    /* synthetic */ void handleResultData(Object obj, Object obj2) {
         this.toHandler.onResultData(obj, onData(obj2));
     }
 

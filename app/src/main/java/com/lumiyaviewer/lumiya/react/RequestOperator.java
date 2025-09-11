@@ -25,13 +25,11 @@ public abstract class RequestOperator<K, T> implements RequestHandler<K> {
         this.executor = executor;
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestOperator_1579 */
-    /* synthetic */ void m48lambda$-com_lumiyaviewer_lumiya_react_RequestOperator_1579(Object obj) {
+    /* synthetic */ void handleRequestCancellation(Object obj) {
         this.toHandler.onRequestCancelled(obj);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestOperator_996 */
-    /* synthetic */ void m49lambda$-com_lumiyaviewer_lumiya_react_RequestOperator_996(Object obj) {
+    /* synthetic */ void processRequestData(Object obj) {
         Object processRequest = processRequest(obj);
         if (processRequest != null) {
             this.resultHandler.onResultData(obj, processRequest);

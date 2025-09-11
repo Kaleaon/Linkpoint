@@ -50,18 +50,15 @@ public abstract class RequestProcessor<K, Tup, Tdown> implements RequestHandler<
         return tup != null;
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestProcessor_1507 */
-    /* synthetic */ void m58lambda$-com_lumiyaviewer_lumiya_react_RequestProcessor_1507(Object obj) {
+    /* synthetic */ void handleRequestUpdate(Object obj) {
         requestUpdateInternal(obj);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestProcessor_2159 */
-    /* synthetic */ void m59lambda$-com_lumiyaviewer_lumiya_react_RequestProcessor_2159(Object obj, Object obj2) {
+    /* synthetic */ void handleResultProcessing(Object obj, Object obj2) {
         this.resultHandler.onResultData(obj, processResult(obj, obj2));
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestProcessor_940 */
-    /* synthetic */ void m60lambda$-com_lumiyaviewer_lumiya_react_RequestProcessor_940(Object obj) {
+    /* synthetic */ void processRequest(Object obj) {
         processRequestInternal(obj);
     }
 

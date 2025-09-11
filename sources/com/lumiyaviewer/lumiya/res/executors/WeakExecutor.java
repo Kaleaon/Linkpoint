@@ -226,16 +226,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.res.executors.-$Lambd
         allowCoreThreadTimeOut(true);
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106  reason: not valid java name */
-    static /* synthetic */ Thread m107lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106(String str, Runnable runnable) {
+    static /* synthetic */ Thread createPriorityThread1(String str, Runnable runnable) {
         Thread thread = new Thread(runnable, str);
         Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()));
         thread.setPriority(4);
         return thread;
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531  reason: not valid java name */
-    static /* synthetic */ Thread m108lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531(String str, Runnable runnable) {
+    static /* synthetic */ Thread createPriorityThread2(String str, Runnable runnable) {
         Thread thread = new Thread(runnable, str);
         Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()));
         thread.setPriority(4);

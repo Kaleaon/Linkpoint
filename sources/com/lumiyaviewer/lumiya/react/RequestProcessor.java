@@ -53,9 +53,7 @@ public abstract class RequestProcessor<K, Tup, Tdown> implements RequestHandler<
         return tup != null;
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestProcessor_2159  reason: not valid java name */
-    public /* synthetic */ void m34lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_2159(Object obj, Object obj2) {
+    /* synthetic */ void handleResultProcessing(Object obj, Object obj2) {
         this.resultHandler.onResultData(obj, processResult(obj, obj2));
     }
 
