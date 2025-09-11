@@ -14,6 +14,18 @@ android {
         versionName "3.4.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        
+        // NDK configuration for native code
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+        
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++14 -O3 -ffast-math"
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
     }
 
     buildTypes {
@@ -34,6 +46,14 @@ android {
             java.srcDirs = ['src/main/java']
             res.srcDirs = ['resources/res']
             assets.srcDirs = ['resources/assets']
+        }
+    }
+
+    // NDK build configuration
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.10.2"
         }
     }
 }
