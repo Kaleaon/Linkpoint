@@ -447,6 +447,32 @@ public class SLAvatarControl extends SLModule {
         }
     }
 
+    @SLMessageHandler
+    public void HandleGenericMessage(GenericMessage genericMessage) {
+        String methodName = SLMessage.stringFromVariableOEM(genericMessage.MethodData_Field.Method);
+        Debug.Log("GenericMessage: " + methodName + " transaction " + genericMessage.AgentData_Field.TransactionID);
+        if (methodName.equals("llGetCameraAspect")) {
+            WorldViewRenderer renderer = LumiyaRendererState.instance;
+            if (renderer != null) {
+                RenderContext context = renderer.getRenderContext();
+                if (context != null) {
+                    float aspectRatio = context.aspectRatio;
+                    GenericMessage reply = new GenericMessage();
+                    reply.AgentData_Field.AgentID = this.circuitInfo.agentID;
+                    reply.AgentData_Field.SessionID = this.circuitInfo.sessionID;
+                    reply.AgentData_Field.TransactionID = genericMessage.AgentData_Field.TransactionID;
+                    reply.MethodData_Field.Method = SLMessage.stringToVariableOEM("llGetCameraAspectReply");
+                    reply.MethodData_Field.Invoice = genericMessage.MethodData_Field.Invoice;
+                    GenericMessage.ParamList param = new GenericMessage.ParamList();
+                    param.Parameter = SLMessage.stringToVariableOEM(Float.toString(aspectRatio));
+                    reply.ParamList_Fields.add(param);
+                    reply.isReliable = true;
+                    SendMessage(reply);
+                }
+            }
+        }
+    }
+
     public void ScriptAnswerYes(UUID uuid, UUID uuid2, int i) {
         ScriptAnswerYes scriptAnswerYes = new ScriptAnswerYes();
         scriptAnswerYes.AgentData_Field.AgentID = this.circuitInfo.agentID;

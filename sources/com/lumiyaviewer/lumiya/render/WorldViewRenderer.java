@@ -1429,6 +1429,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.render.-$Lambda$8oUVv
         }
     }
 
+    public RenderContext getRenderContext() {
+        return this.renderContext.get();
+    }
+
     public void setDrawPickedObject(SLObjectInfo sLObjectInfo) {
         this.drawPickedObject = sLObjectInfo;
     }

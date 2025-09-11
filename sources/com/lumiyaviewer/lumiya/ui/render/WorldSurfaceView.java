@@ -84,6 +84,7 @@ public class WorldSurfaceView extends GLSurfaceView {
             setPreserveEGLContextOnPause(true);
         }
         this.renderer = new WorldViewRenderer(this.mHandler, this.wantGL20, userManager, applyDimension);
+        LumiyaRendererState.instance = this.renderer;
         setEGLContextFactory(this.renderer);
         setRenderer(this.renderer);
     }
