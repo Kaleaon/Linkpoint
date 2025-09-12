@@ -1,3 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  android.os.Bundle
+ */
 package com.lumiyaviewer.lumiya.voice.common.messages;
 
 import android.os.Bundle;
@@ -6,7 +12,8 @@ import com.lumiyaviewer.lumiya.voice.common.model.Voice3DPosition;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChannelInfo;
 import javax.annotation.Nonnull;
 
-public class VoiceSet3DPosition implements VoicePluginMessage {
+public class VoiceSet3DPosition
+implements VoicePluginMessage {
     @Nonnull
     public final Voice3DPosition listenerPosition;
     @Nonnull
@@ -20,12 +27,13 @@ public class VoiceSet3DPosition implements VoicePluginMessage {
         this.listenerPosition = new Voice3DPosition(bundle.getBundle("listenerPosition"));
     }
 
-    public VoiceSet3DPosition(@Nonnull VoiceChannelInfo voiceChannelInfo2, @Nonnull Voice3DPosition voice3DPosition, @Nonnull Voice3DPosition voice3DPosition2) {
-        this.voiceChannelInfo = voiceChannelInfo2;
+    public VoiceSet3DPosition(@Nonnull VoiceChannelInfo voiceChannelInfo, @Nonnull Voice3DPosition voice3DPosition, @Nonnull Voice3DPosition voice3DPosition2) {
+        this.voiceChannelInfo = voiceChannelInfo;
         this.speakerPosition = voice3DPosition;
         this.listenerPosition = voice3DPosition2;
     }
 
+    @Override
     public Bundle toBundle() {
         Bundle bundle = new Bundle();
         bundle.putBundle("voiceChannelInfo", this.voiceChannelInfo.toBundle());
@@ -34,3 +42,4 @@ public class VoiceSet3DPosition implements VoicePluginMessage {
         return bundle;
     }
 }
+

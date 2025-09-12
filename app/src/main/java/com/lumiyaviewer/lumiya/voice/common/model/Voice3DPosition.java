@@ -1,6 +1,13 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  android.os.Bundle
+ */
 package com.lumiyaviewer.lumiya.voice.common.model;
 
 import android.os.Bundle;
+import com.lumiyaviewer.lumiya.voice.common.model.Voice3DVector;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
@@ -44,6 +51,7 @@ public class Voice3DPosition {
     }
 
     public String toString() {
-        return String.format("(pos %s vel %s at %s up %s left %s)", new Object[]{this.position.toString(), this.velocity.toString(), this.atOrientation.toString(), this.upOrientation.toString(), this.leftOrientation.toString()});
+        return String.format("(pos %s vel %s at %s up %s left %s)", this.position.toString(), this.velocity.toString(), this.atOrientation.toString(), this.upOrientation.toString(), this.leftOrientation.toString());
     }
 }
+

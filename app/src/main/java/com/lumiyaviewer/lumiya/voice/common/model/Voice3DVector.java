@@ -1,3 +1,10 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  android.annotation.SuppressLint
+ *  android.os.Bundle
+ */
 package com.lumiyaviewer.lumiya.voice.common.model;
 
 import android.annotation.SuppressLint;
@@ -34,8 +41,9 @@ public class Voice3DVector {
         return bundle;
     }
 
-    @SuppressLint({"DefaultLocale"})
+    @SuppressLint(value={"DefaultLocale"})
     public String toString() {
-        return String.format("(%.2f, %.2f, %.2f)", new Object[]{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z)});
+        return String.format("(%.2f, %.2f, %.2f)", Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z));
     }
 }
+
