@@ -7,5 +7,6 @@ public abstract class GLResource implements GLGenericResource {
         this.handle = Allocate(gLResourceManager);
     }
 
-    protected abstract int Allocate(GLResourceManager gLResourceManager);
+    /* access modifiers changed from: protected */
+    public abstract int Allocate(GLResourceManager gLResourceManager);
 }

@@ -2,16 +2,17 @@ package com.lumiyaviewer.lumiya.render.glres.textures;
 
 import android.annotation.TargetApi;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.opengl.GLES11;
 import android.view.Surface;
+import java.nio.Buffer;
 
 @TargetApi(15)
 public class GLExternalTexture {
     private final int handle;
     private final int height;
-    private final OnFrameAvailableListener onFrameAvailableListener = new OnFrameAvailableListener() {
+    private final SurfaceTexture.OnFrameAvailableListener onFrameAvailableListener = new SurfaceTexture.OnFrameAvailableListener() {
         public void onFrameAvailable(SurfaceTexture surfaceTexture) {
         }
     };
@@ -27,7 +28,7 @@ public class GLExternalTexture {
         GLES11.glGenTextures(1, iArr, 0);
         this.handle = iArr[0];
         bind();
-        GLES11.glTexImage2D(36197, 0, 6408, i, i2, 0, 6408, 5121, null);
+        GLES11.glTexImage2D(36197, 0, 6408, i, i2, 0, 6408, 5121, (Buffer) null);
         GLES11.glTexParameteri(36197, 10241, 9729);
         GLES11.glTexParameteri(36197, 10240, 9729);
         this.surfaceTexture = new SurfaceTexture(this.handle);
@@ -42,7 +43,7 @@ public class GLExternalTexture {
     }
 
     public Canvas getCanvas() {
-        return this.surface.lockCanvas(null);
+        return this.surface.lockCanvas((Rect) null);
     }
 
     public int getHeight() {
@@ -59,11 +60,9 @@ public class GLExternalTexture {
 
     @TargetApi(15)
     public void release() {
-        int[] iArr = new int[1];
         this.surface.release();
         this.surfaceTexture.release();
-        iArr[0] = this.handle;
-        GLES11.glDeleteTextures(1, iArr, 0);
+        GLES11.glDeleteTextures(1, new int[]{this.handle}, 0);
     }
 
     @TargetApi(11)

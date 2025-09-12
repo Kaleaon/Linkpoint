@@ -45,7 +45,7 @@ public class WeakQueue<T> implements BlockingQueue<T> {
     public boolean addAll(Collection<? extends T> collection) {
         this.lock.lock();
         try {
-            for (Object next : collection) {
+            for (T next : collection) {
                 if (next instanceof LowPriority) {
                     this.lowPriorityQueue.add(next);
                 } else {
@@ -72,10 +72,8 @@ public class WeakQueue<T> implements BlockingQueue<T> {
     public boolean contains(Object obj) {
         this.lock.lock();
         try {
-            boolean contains = !this.queue.contains(obj) ? this.lowPriorityQueue.contains(obj) : true;
-            this.lock.unlock();
-            return contains;
-        } catch (Throwable th) {
+            return !this.queue.contains(obj) ? this.lowPriorityQueue.contains(obj) : true;
+        } finally {
             this.lock.unlock();
         }
     }
@@ -83,10 +81,8 @@ public class WeakQueue<T> implements BlockingQueue<T> {
     public boolean containsAll(Collection<?> collection) {
         this.lock.lock();
         try {
-            boolean containsAll = !this.queue.containsAll(collection) ? this.lowPriorityQueue.containsAll(collection) : true;
-            this.lock.unlock();
-            return containsAll;
-        } catch (Throwable th) {
+            return !this.queue.containsAll(collection) ? this.lowPriorityQueue.containsAll(collection) : true;
+        } finally {
             this.lock.unlock();
         }
     }
@@ -95,14 +91,14 @@ public class WeakQueue<T> implements BlockingQueue<T> {
         this.lock.lock();
         int i = 0;
         try {
-            for (Object next : this.queue) {
+            for (T next : this.queue) {
                 if (next != null) {
                     collection.add(next);
                     i++;
                 }
             }
             this.queue.clear();
-            for (Object next2 : this.lowPriorityQueue) {
+            for (T next2 : this.lowPriorityQueue) {
                 if (next2 != null) {
                     collection.add(next2);
                     i++;
@@ -119,28 +115,26 @@ public class WeakQueue<T> implements BlockingQueue<T> {
         this.lock.lock();
         int i2 = 0;
         try {
-            Object next;
-            Iterator it = this.queue.iterator();
+            Iterator<T> it = this.queue.iterator();
             while (it.hasNext() && i2 < i) {
-                next = it.next();
+                T next = it.next();
                 if (next != null) {
                     collection.add(next);
                     i2++;
                 }
                 it.remove();
             }
-            it = this.lowPriorityQueue.iterator();
-            while (it.hasNext() && i2 < i) {
-                next = it.next();
-                if (next != null) {
-                    collection.add(next);
+            Iterator<T> it2 = this.lowPriorityQueue.iterator();
+            while (it2.hasNext() && i2 < i) {
+                T next2 = it2.next();
+                if (next2 != null) {
+                    collection.add(next2);
                     i2++;
                 }
-                it.remove();
+                it2.remove();
             }
-            this.lock.unlock();
             return i2;
-        } catch (Throwable th) {
+        } finally {
             this.lock.unlock();
         }
     }
@@ -156,10 +150,8 @@ public class WeakQueue<T> implements BlockingQueue<T> {
     public boolean isEmpty() {
         this.lock.lock();
         try {
-            boolean isEmpty = this.queue.isEmpty() ? this.lowPriorityQueue.isEmpty() : false;
-            this.lock.unlock();
-            return isEmpty;
-        } catch (Throwable th) {
+            return this.queue.isEmpty() ? this.lowPriorityQueue.isEmpty() : false;
+        } finally {
             this.lock.unlock();
         }
     }
@@ -178,40 +170,36 @@ public class WeakQueue<T> implements BlockingQueue<T> {
 
     public T peek() {
         this.lock.lock();
-        T t;
         try {
             if (!this.queue.isEmpty()) {
-                for (T t2 : this.queue) {
-                    if (t2 != null) {
-                        return t2;
+                for (T next : this.queue) {
+                    if (next != null) {
+                        return next;
                     }
                 }
             }
             if (!this.lowPriorityQueue.isEmpty()) {
-                for (T t22 : this.lowPriorityQueue) {
-                    if (t22 != null) {
+                for (T next2 : this.lowPriorityQueue) {
+                    if (next2 != null) {
                         this.lock.unlock();
-                        return t22;
+                        return next2;
                     }
                 }
             }
             this.lock.unlock();
             return null;
         } finally {
-            t22 = this.lock;
-            t22.unlock();
+            this.lock.unlock();
         }
     }
 
     public T poll() {
         this.lock.lock();
-        T next;
         try {
-            Iterator it;
             if (!this.queue.isEmpty()) {
-                it = this.queue.iterator();
+                Iterator<T> it = this.queue.iterator();
                 while (it.hasNext()) {
-                    next = it.next();
+                    T next = it.next();
                     if (next != null) {
                         it.remove();
                         return next;
@@ -219,43 +207,37 @@ public class WeakQueue<T> implements BlockingQueue<T> {
                 }
             }
             if (!this.lowPriorityQueue.isEmpty()) {
-                it = this.lowPriorityQueue.iterator();
-                while (it.hasNext()) {
-                    next = it.next();
-                    if (next != null) {
-                        it.remove();
+                Iterator<T> it2 = this.lowPriorityQueue.iterator();
+                while (it2.hasNext()) {
+                    T next2 = it2.next();
+                    if (next2 != null) {
+                        it2.remove();
                         this.lock.unlock();
-                        return next;
+                        return next2;
                     }
                 }
             }
             this.lock.unlock();
             return null;
         } finally {
-            next = this.lock;
-            next.unlock();
+            this.lock.unlock();
         }
     }
 
     public T poll(long j, TimeUnit timeUnit) throws InterruptedException {
-        T t = null;
         this.lock.lock();
-        while (true) {
+        do {
             try {
                 T poll = poll();
-                if (poll == null) {
-                    if (!this.notEmpty.await(j, timeUnit)) {
-                        break;
-                    }
+                if (poll != null) {
+                    this.lock.unlock();
+                    return poll;
                 }
-                this.lock.unlock();
-                return poll;
             } finally {
-                t = this.lock;
-                t.unlock();
+                this.lock.unlock();
             }
-        }
-        return t;
+        } while (this.notEmpty.await(j, timeUnit));
+        return null;
     }
 
     public void put(T t) throws InterruptedException {
@@ -277,8 +259,7 @@ public class WeakQueue<T> implements BlockingQueue<T> {
     public boolean remove(Object obj) {
         this.lock.lock();
         try {
-            boolean remove = this.queue.remove(obj) | this.lowPriorityQueue.remove(obj);
-            return remove;
+            return this.queue.remove(obj) | this.lowPriorityQueue.remove(obj);
         } finally {
             this.lock.unlock();
         }
@@ -287,8 +268,7 @@ public class WeakQueue<T> implements BlockingQueue<T> {
     public boolean removeAll(@Nonnull Collection<?> collection) {
         this.lock.lock();
         try {
-            boolean removeAll = this.queue.removeAll(collection) | this.lowPriorityQueue.removeAll(collection);
-            return removeAll;
+            return this.queue.removeAll(collection) | this.lowPriorityQueue.removeAll(collection);
         } finally {
             this.lock.unlock();
         }
@@ -297,8 +277,7 @@ public class WeakQueue<T> implements BlockingQueue<T> {
     public boolean retainAll(Collection<?> collection) {
         this.lock.lock();
         try {
-            boolean retainAll = this.queue.retainAll(collection) | this.lowPriorityQueue.retainAll(collection);
-            return retainAll;
+            return this.queue.retainAll(collection) | this.lowPriorityQueue.retainAll(collection);
         } finally {
             this.lock.unlock();
         }
@@ -307,35 +286,31 @@ public class WeakQueue<T> implements BlockingQueue<T> {
     public int size() {
         this.lock.lock();
         try {
-            int size = this.queue.size() + this.lowPriorityQueue.size();
-            return size;
+            return this.queue.size() + this.lowPriorityQueue.size();
         } finally {
             this.lock.unlock();
         }
     }
 
     public T take() throws InterruptedException {
-        T poll;
         this.lock.lock();
         while (true) {
             try {
-                poll = poll();
+                T poll = poll();
                 if (poll != null) {
-                    break;
+                    return poll;
                 }
                 this.notEmpty.await();
             } finally {
                 this.lock.unlock();
             }
         }
-        return poll;
     }
 
     public Object[] toArray() {
         this.lock.lock();
         try {
-            Object[] concat = ObjectArrays.concat(this.queue.toArray(), this.lowPriorityQueue.toArray(), Object.class);
-            return concat;
+            return ObjectArrays.concat(this.queue.toArray(), this.lowPriorityQueue.toArray(), Object.class);
         } finally {
             this.lock.unlock();
         }
@@ -344,14 +319,14 @@ public class WeakQueue<T> implements BlockingQueue<T> {
     public <T1> T1[] toArray(T1[] t1Arr) {
         this.lock.lock();
         try {
-            Object toArray = toArray();
-            if (toArray.length <= t1Arr.length) {
-                Arrays.fill(t1Arr, null);
-                System.arraycopy(toArray, 0, t1Arr, 0, toArray.length);
+            T1[] array = toArray();
+            if (array.length <= t1Arr.length) {
+                Arrays.fill(t1Arr, (Object) null);
+                System.arraycopy(array, 0, t1Arr, 0, array.length);
                 return t1Arr;
             }
             this.lock.unlock();
-            return toArray;
+            return array;
         } finally {
             this.lock.unlock();
         }

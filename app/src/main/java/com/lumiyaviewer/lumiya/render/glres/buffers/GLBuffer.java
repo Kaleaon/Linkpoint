@@ -5,18 +5,19 @@ import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.render.TextureMemoryTracker;
 import com.lumiyaviewer.lumiya.render.glres.GLResource;
 import com.lumiyaviewer.lumiya.render.glres.GLResourceManager;
-import com.lumiyaviewer.lumiya.render.glres.GLResourceManager.GLResourceReference;
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer;
 
 public class GLBuffer extends GLResource {
-    private static ThreadLocal<int[]> idBuffer = new ThreadLocal<int[]>() {
-        protected int[] initialValue() {
+    /* access modifiers changed from: private */
+    public static ThreadLocal<int[]> idBuffer = new ThreadLocal<int[]>() {
+        /* access modifiers changed from: protected */
+        public int[] initialValue() {
             return new int[1];
         }
     };
     private final DirectByteBuffer rawBuffer;
 
-    private static class GLResourceBufferReference extends GLResourceReference {
+    private static class GLResourceBufferReference extends GLResourceManager.GLResourceReference {
         private final DirectByteBuffer rawBuffer;
 
         public GLResourceBufferReference(GLResource gLResource, int i, GLResourceManager gLResourceManager, DirectByteBuffer directByteBuffer) {
@@ -41,11 +42,12 @@ public class GLBuffer extends GLResource {
         if (directByteBuffer != null) {
             TextureMemoryTracker.allocBufferMemory(directByteBuffer.getCapacity());
         }
-        GLResourceBufferReference gLResourceBufferReference = new GLResourceBufferReference(this, this.handle, gLResourceManager, this.rawBuffer);
+        new GLResourceBufferReference(this, this.handle, gLResourceManager, this.rawBuffer);
     }
 
-    protected int Allocate(GLResourceManager gLResourceManager) {
-        int[] iArr = (int[]) idBuffer.get();
+    /* access modifiers changed from: protected */
+    public int Allocate(GLResourceManager gLResourceManager) {
+        int[] iArr = idBuffer.get();
         GLES11.glGenBuffers(1, iArr, 0);
         Debug.Printf("GLBuffer: allocated buffer %d", Integer.valueOf(iArr[0]));
         return iArr[0];

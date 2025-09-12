@@ -6,7 +6,8 @@ import java.util.concurrent.PriorityBlockingQueue;
 public class HTTPFetchExecutor extends WeakExecutor {
 
     private static class InstanceHolder {
-        private static final HTTPFetchExecutor Instance = new HTTPFetchExecutor();
+        /* access modifiers changed from: private */
+        public static final HTTPFetchExecutor Instance = new HTTPFetchExecutor((HTTPFetchExecutor) null);
 
         private InstanceHolder() {
         }

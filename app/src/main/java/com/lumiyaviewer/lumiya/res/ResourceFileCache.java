@@ -8,9 +8,9 @@ public abstract class ResourceFileCache<ResourceParams, ResourceType> extends Re
     private class ResourceLoadRequest<ResParams extends ResourceParams, ResType extends ResourceType> extends ResourceRequest<ResourceParams, ResourceType> implements Runnable {
         private final File file;
 
-        public ResourceLoadRequest(ResourceParams resourceParams, ResourceManager<ResourceParams, ResourceType> resourceManager, File file) {
-            super(resourceParams, resourceManager);
-            this.file = file;
+        public ResourceLoadRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager, File file2) {
+            super(resourceparams, resourceManager);
+            this.file = file2;
         }
 
         public void cancelRequest() {
@@ -31,14 +31,18 @@ public abstract class ResourceFileCache<ResourceParams, ResourceType> extends Re
         }
     }
 
-    protected ResourceRequest<ResourceParams, ResourceType> CreateNewRequest(ResourceParams resourceParams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
-        File resourceFile = getResourceFile(resourceParams);
-        return resourceFile.exists() ? new ResourceLoadRequest(resourceParams, resourceManager, resourceFile) : createResourceGenRequest(resourceParams, resourceManager, resourceFile);
+    /* access modifiers changed from: protected */
+    public ResourceRequest<ResourceParams, ResourceType> CreateNewRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
+        File resourceFile = getResourceFile(resourceparams);
+        return resourceFile.exists() ? new ResourceLoadRequest(resourceparams, resourceManager, resourceFile) : createResourceGenRequest(resourceparams, resourceManager, resourceFile);
     }
 
-    protected abstract ResourceType createResourceFromFile(ResourceParams resourceParams, File file);
+    /* access modifiers changed from: protected */
+    public abstract ResourceType createResourceFromFile(ResourceParams resourceparams, File file);
 
-    protected abstract ResourceRequest<ResourceParams, ResourceType> createResourceGenRequest(ResourceParams resourceParams, ResourceManager<ResourceParams, ResourceType> resourceManager, File file);
+    /* access modifiers changed from: protected */
+    public abstract ResourceRequest<ResourceParams, ResourceType> createResourceGenRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager, File file);
 
-    protected abstract File getResourceFile(ResourceParams resourceParams);
+    /* access modifiers changed from: protected */
+    public abstract File getResourceFile(ResourceParams resourceparams);
 }

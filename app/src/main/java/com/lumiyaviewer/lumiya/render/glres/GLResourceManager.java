@@ -12,8 +12,10 @@ import java.util.WeakHashMap;
 public class GLResourceManager {
     private final Object glCleanableLock = new Object();
     private final Set<GLCleanable> glCleanables = Collections.newSetFromMap(new WeakHashMap());
-    private final ReferenceQueue<GLGenericResource> refQueue = new ReferenceQueue();
-    private final Set<GLGenericResourceReference> refSet = Collections.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap()));
+    /* access modifiers changed from: private */
+    public final ReferenceQueue<GLGenericResource> refQueue = new ReferenceQueue<>();
+    /* access modifiers changed from: private */
+    public final Set<GLGenericResourceReference> refSet = Collections.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap()));
 
     public static abstract class GLGenericResourceReference extends PhantomReference<GLGenericResource> {
         public GLGenericResourceReference(GLGenericResource gLGenericResource, GLResourceManager gLResourceManager) {
@@ -39,7 +41,7 @@ public class GLResourceManager {
             this.glCleanables.size();
         }
         while (true) {
-            Reference poll = this.refQueue.poll();
+            Reference<? extends GLGenericResource> poll = this.refQueue.poll();
             if (poll == null) {
                 return;
             }

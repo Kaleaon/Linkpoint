@@ -49,49 +49,49 @@ public class DrawablePrim {
         SLTextureEntry textures = primDrawParams.getTextures();
         if (textures != null) {
             SLTextureEntryFace GetDefaultTexture = textures.GetDefaultTexture();
-            if (textures.isSingleFace() && isFacesCombined) {
-                this.isSingleFace = true;
-                this.singleFaceMatrix = new float[16];
-                SLTextureEntryFace GetFace = textures.GetFace(0);
-                if (GetFace != null) {
-                    this.singleFaceColor = GetFace.getRGBA(GetDefaultTexture);
-                    UUID textureID = GetFace.getTextureID(GetDefaultTexture);
-                    if (textureID != null) {
-                        this.singleFaceTexture = new DrawableFaceTexture(DrawableTextureParams.create(textureID, TextureClass.Prim));
-                    } else {
-                        this.singleFaceTexture = null;
+            if (!textures.isSingleFace() || !isFacesCombined) {
+                this.isSingleFace = false;
+                this.singleFaceColor = 0;
+                this.singleFaceTexture = null;
+                this.singleFaceMatrix = null;
+                this.FaceColorsIDs = new int[(this.FaceCount * 2)];
+                this.FaceTextures = new DrawableFaceTexture[this.FaceCount];
+                this.FaceUVMatrices = new float[(this.FaceCount * 16)];
+                int i = 0;
+                for (int i2 = 0; i2 < this.FaceCount; i2++) {
+                    SLTextureEntryFace GetFace = textures.GetFace(drawableGeometry.getFaceID(i2));
+                    if (GetFace != null) {
+                        this.FaceColorsIDs[i] = GetFace.getRGBA(GetDefaultTexture);
+                        this.FaceColorsIDs[i + 1] = 0;
+                        UUID textureID = GetFace.getTextureID(GetDefaultTexture);
+                        if (textureID != null) {
+                            this.FaceTextures[i2] = new DrawableFaceTexture(DrawableTextureParams.create(textureID, TextureClass.Prim));
+                        }
+                        initFaceUVMatrix(GetDefaultTexture, GetFace, this.FaceUVMatrices, i2 * 16);
                     }
-                    initFaceUVMatrix(GetDefaultTexture, GetFace, this.singleFaceMatrix, 0);
-                } else {
-                    this.singleFaceColor = 0;
-                    this.singleFaceTexture = null;
+                    i += 2;
                 }
-                this.FaceColorsIDs = null;
-                this.FaceTextures = null;
-                this.FaceUVMatrices = null;
                 return;
             }
-            this.isSingleFace = false;
-            this.singleFaceColor = 0;
-            this.singleFaceTexture = null;
-            this.singleFaceMatrix = null;
-            this.FaceColorsIDs = new int[(this.FaceCount * 2)];
-            this.FaceTextures = new DrawableFaceTexture[this.FaceCount];
-            this.FaceUVMatrices = new float[(this.FaceCount * 16)];
-            int i = 0;
-            for (int i2 = 0; i2 < this.FaceCount; i2++) {
-                SLTextureEntryFace GetFace2 = textures.GetFace(drawableGeometry.getFaceID(i2));
-                if (GetFace2 != null) {
-                    this.FaceColorsIDs[i] = GetFace2.getRGBA(GetDefaultTexture);
-                    this.FaceColorsIDs[i + 1] = 0;
-                    UUID textureID2 = GetFace2.getTextureID(GetDefaultTexture);
-                    if (textureID2 != null) {
-                        this.FaceTextures[i2] = new DrawableFaceTexture(DrawableTextureParams.create(textureID2, TextureClass.Prim));
-                    }
-                    initFaceUVMatrix(GetDefaultTexture, GetFace2, this.FaceUVMatrices, i2 * 16);
+            this.isSingleFace = true;
+            this.singleFaceMatrix = new float[16];
+            SLTextureEntryFace GetFace2 = textures.GetFace(0);
+            if (GetFace2 != null) {
+                this.singleFaceColor = GetFace2.getRGBA(GetDefaultTexture);
+                UUID textureID2 = GetFace2.getTextureID(GetDefaultTexture);
+                if (textureID2 != null) {
+                    this.singleFaceTexture = new DrawableFaceTexture(DrawableTextureParams.create(textureID2, TextureClass.Prim));
+                } else {
+                    this.singleFaceTexture = null;
                 }
-                i += 2;
+                initFaceUVMatrix(GetDefaultTexture, GetFace2, this.singleFaceMatrix, 0);
+            } else {
+                this.singleFaceColor = 0;
+                this.singleFaceTexture = null;
             }
+            this.FaceColorsIDs = null;
+            this.FaceTextures = null;
+            this.FaceUVMatrices = null;
             return;
         }
         this.isSingleFace = false;
@@ -125,11 +125,11 @@ public class DrawablePrim {
         }
         if (z2 != this.drawingTextureEnabled || this.firstFace) {
             if (renderContext.hasGL20) {
-                if (z2) {
-                    renderContext.curPrimProgram.setTextureEnabled(true);
-                } else {
+                if (!z2) {
                     GLES20.glBindTexture(3553, 0);
                     renderContext.curPrimProgram.setTextureEnabled(false);
+                } else {
+                    renderContext.curPrimProgram.setTextureEnabled(true);
                 }
             } else if (z2) {
                 GLES10.glEnable(3553);
@@ -180,21 +180,17 @@ public class DrawablePrim {
     }
 
     private int getFaceRenderMask(int i, DrawableFaceTexture drawableFaceTexture) {
-        int i2 = 1;
-        int i3 = 0;
-        if ((i & ViewCompat.MEASURED_STATE_MASK) == ViewCompat.MEASURED_STATE_MASK) {
+        boolean z = false;
+        if ((i & ViewCompat.MEASURED_STATE_MASK) == -16777216) {
             return 0;
         }
         if ((i & ViewCompat.MEASURED_STATE_MASK) != 0) {
-            i3 = 1;
+            z = true;
         }
-        if (i3 == 0 && drawableFaceTexture != null) {
-            i3 = drawableFaceTexture.hasAlphaLayer();
+        if (!z && drawableFaceTexture != null) {
+            z = drawableFaceTexture.hasAlphaLayer();
         }
-        if (i3 != 0) {
-            i2 = 2;
-        }
-        return i2;
+        return z ? 2 : 1;
     }
 
     private void initFaceUVMatrix(SLTextureEntryFace sLTextureEntryFace, SLTextureEntryFace sLTextureEntryFace2, float[] fArr, int i) {
@@ -213,13 +209,12 @@ public class DrawablePrim {
     }
 
     public final int Draw(RenderContext renderContext, boolean z, PrimFlexibleInfo primFlexibleInfo, int i) {
-        GLLoadableBuffer GLBindBuffers20;
+        GLLoadableBuffer GLBindBuffers10;
         DrawableGeometry drawableGeometry = this.volumeGeometry;
         this.firstFace = true;
         if (renderContext.hasGL20) {
             float[] matrices = primFlexibleInfo != null ? primFlexibleInfo.getMatrices() : null;
-            PrimProgram primProgram = (this.isRiggedMesh && this.riggingFitsGL20) ? renderContext.riggedMeshProgram : matrices != null ? renderContext.flexiPrimProgram : renderContext.primProgram;
-            renderContext.curPrimProgram = primProgram;
+            renderContext.curPrimProgram = (!this.isRiggedMesh || !this.riggingFitsGL20) ? matrices != null ? renderContext.flexiPrimProgram : renderContext.primProgram : renderContext.riggedMeshProgram;
             GLES20.glUseProgram(renderContext.curPrimProgram.getHandle());
             renderContext.glModelApplyMatrix(renderContext.curPrimProgram.uMVPMatrix);
             renderContext.glObjWorldApplyMatrix(renderContext.curPrimProgram.uObjWorldMatrix);
@@ -229,13 +224,13 @@ public class DrawablePrim {
                 GLES20.glUniform1i(flexiPrimProgram.uNumSectionMatrices, matrices.length / 16);
                 GLES20.glUniformMatrix4fv(flexiPrimProgram.uSectionMatrices, matrices.length / 16, false, matrices, 0);
             }
-            GLBindBuffers20 = drawableGeometry.GLBindBuffers20(renderContext);
+            GLBindBuffers10 = drawableGeometry.GLBindBuffers20(renderContext);
         } else {
-            GLBindBuffers20 = drawableGeometry.GLBindBuffers10(renderContext, primFlexibleInfo);
+            GLBindBuffers10 = drawableGeometry.GLBindBuffers10(renderContext, primFlexibleInfo);
         }
         this.drawingTextureEnabled = false;
         if (this.isSingleFace) {
-            return DrawFace(renderContext, drawableGeometry, GLBindBuffers20, z, -1, this.singleFaceColor, this.singleFaceTexture, this.singleFaceMatrix, 0, i);
+            return DrawFace(renderContext, drawableGeometry, GLBindBuffers10, z, -1, this.singleFaceColor, this.singleFaceTexture, this.singleFaceMatrix, 0, i);
         }
         int i2 = 0;
         int i3 = 0;
@@ -244,7 +239,7 @@ public class DrawablePrim {
             if (i3 >= this.FaceCount) {
                 return i4;
             }
-            i2 = DrawFace(renderContext, drawableGeometry, GLBindBuffers20, z, i3, this.FaceColorsIDs[i3 * 2], this.FaceTextures[i3], this.FaceUVMatrices, i3 * 16, i) | i4;
+            i2 = DrawFace(renderContext, drawableGeometry, GLBindBuffers10, z, i3, this.FaceColorsIDs[i3 * 2], this.FaceTextures[i3], this.FaceUVMatrices, i3 * 16, i) | i4;
             i3++;
         }
     }
@@ -252,7 +247,7 @@ public class DrawablePrim {
     public final int DrawFast20(RenderContext renderContext, boolean z, PrimFlexibleInfo primFlexibleInfo, int i) {
         boolean z2 = true;
         float[] fArr = null;
-        boolean z3 = false;
+        int i2 = 0;
         DrawableGeometry drawableGeometry = this.volumeGeometry;
         if (primFlexibleInfo != null) {
             fArr = primFlexibleInfo.getMatrices();
@@ -260,7 +255,7 @@ public class DrawablePrim {
         if (i != 1) {
             z2 = false;
         }
-        PrimProgram primProgram = (this.isRiggedMesh && this.riggingFitsGL20) ? renderContext.riggedMeshProgram : fArr != null ? z2 ? renderContext.flexiPrimOpaqueProgram : renderContext.flexiPrimProgram : z2 ? renderContext.primOpaqueProgram : renderContext.primProgram;
+        PrimProgram primProgram = (!this.isRiggedMesh || !this.riggingFitsGL20) ? fArr != null ? z2 ? renderContext.flexiPrimOpaqueProgram : renderContext.flexiPrimProgram : z2 ? renderContext.primOpaqueProgram : renderContext.primProgram : renderContext.riggedMeshProgram;
         if (renderContext.curPrimProgram != primProgram) {
             renderContext.curPrimProgram = primProgram;
             GLES20.glUseProgram(renderContext.curPrimProgram.getHandle());
@@ -276,14 +271,14 @@ public class DrawablePrim {
         if (this.isSingleFace) {
             return DrawFaceFast20(renderContext, drawableGeometry, -1, this.singleFaceColor, this.singleFaceTexture, this.singleFaceMatrix, 0, i);
         }
-        int i2 = 0;
+        int i3 = 0;
         while (true) {
-            boolean z4 = z3;
-            if (i2 >= this.FaceCount) {
-                return z4;
+            int i4 = i2;
+            if (i3 >= this.FaceCount) {
+                return i4;
             }
-            z3 = z4 | DrawFaceFast20(renderContext, drawableGeometry, i2, this.FaceColorsIDs[i2 * 2], this.FaceTextures[i2], this.FaceUVMatrices, i2 * 16, i);
-            i2++;
+            i2 = i4 | DrawFaceFast20(renderContext, drawableGeometry, i3, this.FaceColorsIDs[i3 * 2], this.FaceTextures[i3], this.FaceUVMatrices, i3 * 16, i);
+            i3++;
         }
     }
 
@@ -317,7 +312,10 @@ public class DrawablePrim {
     }
 
     public final boolean UpdateRigged(RenderContext renderContext, AvatarSkeleton avatarSkeleton) {
-        return this.isRiggedMesh ? this.volumeGeometry.UpdateRigged(renderContext, avatarSkeleton) : false;
+        if (this.isRiggedMesh) {
+            return this.volumeGeometry.UpdateRigged(renderContext, avatarSkeleton);
+        }
+        return false;
     }
 
     public boolean hasExtendedBones() {

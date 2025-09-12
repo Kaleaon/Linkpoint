@@ -12,25 +12,29 @@ import com.lumiyaviewer.lumiya.slproto.terrain.TerrainPatchInfo;
 public class GLTerrainTextureCache extends GLResourceCache<TerrainPatchInfo, OpenJPEG, GLLoadedTexture> {
     private final TerrainTextureCache terrainTextureCache;
 
-    public GLTerrainTextureCache(GLLoadQueue gLLoadQueue, TerrainTextureCache terrainTextureCache) {
+    public GLTerrainTextureCache(GLLoadQueue gLLoadQueue, TerrainTextureCache terrainTextureCache2) {
         super(gLLoadQueue);
-        this.terrainTextureCache = terrainTextureCache;
+        this.terrainTextureCache = terrainTextureCache2;
     }
 
-    protected void CancelRawResource(ResourceConsumer resourceConsumer) {
+    /* access modifiers changed from: protected */
+    public void CancelRawResource(ResourceConsumer resourceConsumer) {
         this.terrainTextureCache.CancelRequest(resourceConsumer);
     }
 
-    protected int GetResourceSize(OpenJPEG openJPEG) {
+    /* access modifiers changed from: protected */
+    public int GetResourceSize(OpenJPEG openJPEG) {
         return openJPEG.getLoadedSize();
     }
 
-    protected GLLoadedTexture LoadResource(TerrainPatchInfo terrainPatchInfo, OpenJPEG openJPEG, RenderContext renderContext) {
+    /* access modifiers changed from: protected */
+    public GLLoadedTexture LoadResource(TerrainPatchInfo terrainPatchInfo, OpenJPEG openJPEG, RenderContext renderContext) {
         Debug.Printf("Terrain: Loading baked texture into GL", new Object[0]);
         return new GLLoadedTexture(renderContext, openJPEG);
     }
 
-    protected void RequestRawResource(TerrainPatchInfo terrainPatchInfo, ResourceConsumer resourceConsumer) {
+    /* access modifiers changed from: protected */
+    public void RequestRawResource(TerrainPatchInfo terrainPatchInfo, ResourceConsumer resourceConsumer) {
         this.terrainTextureCache.RequestResource(terrainPatchInfo, resourceConsumer);
     }
 }
