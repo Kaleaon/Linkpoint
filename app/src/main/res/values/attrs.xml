@@ -8,4 +8,45 @@
     <attr name="CardViewDisabledText" format="color|reference" />
     <attr name="CardableBackground" format="color|reference" />
     <attr name="ColorCardCaption" format="color|reference" />
+    
+    <!-- Material Design attributes -->
+    <attr name="textColorError" format="color|reference" />
+    <attr name="controlLabelColor" format="color|reference" />
+    
+    <!-- Lumiya-specific UI attributes -->
+    <attr name="buttonShapeMoveControl" format="reference" />
+    <attr name="TranslucentBackground" format="color|reference" />
+    <attr name="IconExpandMore" format="reference" />
+    <attr name="IconSendMessage" format="reference" />
+    <attr name="chatBubbleText" format="color|reference" />
+    
+    <!-- PagerSlidingTabStrip attributes -->
+    <attr name="pstsTabTextColor" format="color|reference" />
+    <attr name="pstsIndicatorColor" format="color|reference" />
+    <attr name="pstsShouldExpand" format="boolean" />
+    
+    <!-- Additional Lumiya attributes -->
+    <attr name="dashedSeparatorColor" format="color|reference" />
+    <attr name="IconMaterialVoiceCallThemed" format="reference" />
+    <attr name="roundRectShape" format="reference" />
+    
+    <!-- More Lumiya attributes from layout files -->
+    <attr name="chatSessionSeparatorColor" format="color|reference" />
+    <attr name="outerRingGap" format="dimension" />
+    <attr name="innerRingThickness" format="dimension" />
+    <attr name="outerRingThickness" format="dimension" />
+    <attr name="onlineIndicatorColor" format="color|reference" />
+    <attr name="withButteryProgressBar" format="boolean" />
+    
+    <!-- Icon attributes -->
+    <attr name="IconGridLocked" format="reference" />
+    <attr name="IconMaterialCheckCircle" format="reference" />
+    <attr name="IconUserObject" format="reference" />
+    <attr name="MenuIconCloseThemed" format="reference" />
+    <attr name="MenuIconObjects" format="reference" />
+    <attr name="SmallIconDollar" format="reference" />
+    <attr name="SmallIconHand" format="reference" />
+    <attr name="IconExpandDown" format="reference" />
+    <attr name="IconExpandRight" format="reference" />
+    <attr name="objectPopupsCounterBackground" format="color|reference" />
 </resources>

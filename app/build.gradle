@@ -104,6 +104,9 @@ dependencies {
     // Support libraries for backward compatibility  
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     
+    // UI Components
+    implementation 'com.astuetz:pagerslidingtabstrip:1.0.1'
+    
     // Preference support
     implementation 'androidx.preference:preference:1.2.1'
     
