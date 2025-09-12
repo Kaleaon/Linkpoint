@@ -85,7 +85,19 @@ class LumiyaGhidraComparison:
         
         try:
             env = os.environ.copy()
-            env["JAVA_HOME"] = "/usr/lib/jvm/java-17-openjdk-amd64"
+            # Set JAVA_HOME if not already set
+            if "JAVA_HOME" not in env or not env["JAVA_HOME"]:
+                # Try to detect JAVA_HOME dynamically
+                try:
+                    java_path = subprocess.check_output(["which", "java"], text=True).strip()
+                    if java_path:
+                        # Get the real path in case of symlinks
+                        java_real_path = os.path.realpath(java_path)
+                        # JAVA_HOME is usually two levels up from the java binary
+                        java_home = Path(java_real_path).parent.parent
+                        env["JAVA_HOME"] = str(java_home)
+                except Exception:
+                    pass  # If detection fails, don't set JAVA_HOME
             
             result = subprocess.run(cmd, capture_output=True, text=True, 
                                   timeout=1200, env=env)  # 20 minute timeout
