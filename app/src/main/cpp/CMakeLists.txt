@@ -14,13 +14,15 @@ set(CMAKE_ANDROID_STL_TYPE c++_shared)
 
 # Platform-specific optimizations as required
 if(ANDROID_ABI STREQUAL "arm64-v8a")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -march=armv8-a")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -ffast-math -march=armv8-a")
+    set(OPT_FLAGS "-O3 -ffast-math -march=armv8-a")
 elseif(ANDROID_ABI STREQUAL "armeabi-v7a") 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -march=armv7-a -mfpu=neon")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -ffast-math -march=armv7-a -mfpu=neon")
+    set(OPT_FLAGS "-O3 -ffast-math -march=armv7-a -mfpu=neon")
 endif()
 
+if(DEFINED OPT_FLAGS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT_FLAGS}")
+endif()
 # Add Basis Universal transcoder sources
 set(BASIS_TRANSCODER_SOURCES
     basis_universal/basisu_transcoder.cpp
