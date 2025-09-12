@@ -10,9 +10,8 @@
     <uses-feature android:name="android.software.vr.mode" android:required="false"/>
     <uses-feature android:name="android.hardware.vr.high_performance" android:required="false"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <application android:theme="@style/Theme.Lumiya" android:label="@string/app_name" android:icon="@mipmap/ic_lumiya_launcher" android:name="com.lumiyaviewer.lumiya.LumiyaApp" android:allowBackup="true" android:installLocation="auto" android:supportsRtl="true" android:fullBackupContent="@xml/backup_rules">
-        <activity android:label="@string/app_name" android:name="com.lumiyaviewer.lumiya.ui.login.LoginActivity" android:clearTaskOnLaunch="true" android:launchMode="singleTask">
+        <activity android:label="@string/app_name" android:name="com.lumiyaviewer.lumiya.ui.login.LoginActivity" android:clearTaskOnLaunch="true" android:launchMode="singleTask" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -25,7 +24,7 @@
         <activity android:label="Lumiya Viewer settings" android:name="com.lumiyaviewer.lumiya.ui.settings.SettingsActivity"/>
         <activity android:theme="@style/Theme.AppCompat.Dialog" android:label="Lumiya Viewer: Streaming media" android:name="com.lumiyaviewer.lumiya.ui.media.StreamingMediaActivity"/>
         <activity android:theme="@style/Theme.Lumiya.NoActionBar" android:label="World View" android:name="com.lumiyaviewer.lumiya.ui.render.WorldViewActivity"/>
-        <activity android:theme="@style/Theme.Lumiya.NoActionBar" android:label="VR View" android:name="com.lumiyaviewer.lumiya.ui.render.CardboardActivity" android:screenOrientation="landscape" android:enableVrMode="@string/gvr_vr_mode_component">
+        <activity android:theme="@style/Theme.Lumiya.NoActionBar" android:label="VR View" android:name="com.lumiyaviewer.lumiya.ui.render.CardboardActivity" android:screenOrientation="landscape" android:enableVrMode="@string/gvr_vr_mode_component" android:exported="false">
             <intent-filter>
                 <action android:name="com.lumiyaviewer.lumiya.ui.render.CardboardActivity"/>
                 <category android:name="com.google.intent.category.CARDBOARD"/>
