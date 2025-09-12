@@ -1,35 +1,47 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.inventory;
 
 import com.lumiyaviewer.lumiya.orm.InventoryDB;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLInventory;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public abstract class SLInventoryFetchRequest {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.inventory:
+//            SLInventory, SLInventoryEntry
+
+public abstract class SLInventoryFetchRequest
+{
+
     protected final InventoryDB db;
-    @Nonnull
     protected final SLInventoryEntry folderEntry;
     protected final long folderId;
     protected final UUID folderUUID;
     protected final SLInventory inventory;
 
-    SLInventoryFetchRequest(SLInventory sLInventory, UUID uuid) throws SLInventory.NoInventoryItemException {
-        this.inventory = sLInventory;
-        this.db = sLInventory.getDatabase();
-        this.folderUUID = uuid;
-        SLInventoryEntry findEntry = this.db.findEntry(uuid);
-        if (findEntry == null) {
+    SLInventoryFetchRequest(SLInventory slinventory, UUID uuid)
+        throws SLInventory.NoInventoryItemException
+    {
+        inventory = slinventory;
+        db = slinventory.getDatabase();
+        folderUUID = uuid;
+        slinventory = db.findEntry(uuid);
+        if (slinventory == null)
+        {
             throw new SLInventory.NoInventoryItemException(uuid);
+        } else
+        {
+            folderEntry = slinventory;
+            folderId = slinventory.getId();
+            return;
         }
-        this.folderEntry = findEntry;
-        this.folderId = findEntry.getId();
     }
 
     public abstract void cancel();
 
-    /* access modifiers changed from: protected */
-    public void completeFetch(boolean z, boolean z2) {
-        this.inventory.onFetchComplete(this, this.folderUUID, this.folderId, z, z2);
+    protected void completeFetch(boolean flag, boolean flag1)
+    {
+        inventory.onFetchComplete(this, folderUUID, folderId, flag, flag1);
     }
 
     public abstract void start();

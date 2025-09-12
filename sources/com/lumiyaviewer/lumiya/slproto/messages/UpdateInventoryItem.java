@@ -1,29 +1,41 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class UpdateInventoryItem extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<InventoryData> InventoryData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class UpdateInventoryItem extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
         public UUID TransactionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class InventoryData {
+    public static class InventoryData
+    {
+
         public int BaseMask;
         public int CRC;
         public int CallbackID;
         public int CreationDate;
         public UUID CreatorID;
-        public byte[] Description;
+        public byte Description[];
         public int EveryoneMask;
         public int Flags;
         public UUID FolderID;
@@ -32,7 +44,7 @@ public class UpdateInventoryItem extends SLMessage {
         public boolean GroupOwned;
         public int InvType;
         public UUID ItemID;
-        public byte[] Name;
+        public byte Name[];
         public int NextOwnerMask;
         public UUID OwnerID;
         public int OwnerMask;
@@ -40,94 +52,114 @@ public class UpdateInventoryItem extends SLMessage {
         public int SaleType;
         public UUID TransactionID;
         public int Type;
-    }
 
-    public UpdateInventoryItem() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 53;
-        Iterator<T> it = this.InventoryData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            InventoryData inventoryData = (InventoryData) it.next();
-            i = inventoryData.Description.length + inventoryData.Name.length + 133 + 1 + 4 + 4 + i2;
+        public InventoryData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleUpdateInventoryItem(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList InventoryData_Fields;
+
+    public UpdateInventoryItem()
+    {
+        InventoryData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 10);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packUUID(byteBuffer, this.AgentData_Field.TransactionID);
-        byteBuffer.put((byte) this.InventoryData_Fields.size());
-        for (InventoryData inventoryData : this.InventoryData_Fields) {
-            packUUID(byteBuffer, inventoryData.ItemID);
-            packUUID(byteBuffer, inventoryData.FolderID);
-            packInt(byteBuffer, inventoryData.CallbackID);
-            packUUID(byteBuffer, inventoryData.CreatorID);
-            packUUID(byteBuffer, inventoryData.OwnerID);
-            packUUID(byteBuffer, inventoryData.GroupID);
-            packInt(byteBuffer, inventoryData.BaseMask);
-            packInt(byteBuffer, inventoryData.OwnerMask);
-            packInt(byteBuffer, inventoryData.GroupMask);
-            packInt(byteBuffer, inventoryData.EveryoneMask);
-            packInt(byteBuffer, inventoryData.NextOwnerMask);
-            packBoolean(byteBuffer, inventoryData.GroupOwned);
-            packUUID(byteBuffer, inventoryData.TransactionID);
-            packByte(byteBuffer, (byte) inventoryData.Type);
-            packByte(byteBuffer, (byte) inventoryData.InvType);
-            packInt(byteBuffer, inventoryData.Flags);
-            packByte(byteBuffer, (byte) inventoryData.SaleType);
-            packInt(byteBuffer, inventoryData.SalePrice);
-            packVariable(byteBuffer, inventoryData.Name, 1);
-            packVariable(byteBuffer, inventoryData.Description, 1);
-            packInt(byteBuffer, inventoryData.CreationDate);
-            packInt(byteBuffer, inventoryData.CRC);
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = InventoryData_Fields.iterator();
+        InventoryData inventorydata;
+        int i;
+        int j;
+        for (i = 53; iterator.hasNext(); i = inventorydata.Description.length + (j + 133 + 1) + 4 + 4 + i)
+        {
+            inventorydata = (InventoryData)iterator.next();
+            j = inventorydata.Name.length;
         }
+
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.AgentData_Field.TransactionID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            InventoryData inventoryData = new InventoryData();
-            inventoryData.ItemID = unpackUUID(byteBuffer);
-            inventoryData.FolderID = unpackUUID(byteBuffer);
-            inventoryData.CallbackID = unpackInt(byteBuffer);
-            inventoryData.CreatorID = unpackUUID(byteBuffer);
-            inventoryData.OwnerID = unpackUUID(byteBuffer);
-            inventoryData.GroupID = unpackUUID(byteBuffer);
-            inventoryData.BaseMask = unpackInt(byteBuffer);
-            inventoryData.OwnerMask = unpackInt(byteBuffer);
-            inventoryData.GroupMask = unpackInt(byteBuffer);
-            inventoryData.EveryoneMask = unpackInt(byteBuffer);
-            inventoryData.NextOwnerMask = unpackInt(byteBuffer);
-            inventoryData.GroupOwned = unpackBoolean(byteBuffer);
-            inventoryData.TransactionID = unpackUUID(byteBuffer);
-            inventoryData.Type = unpackByte(byteBuffer);
-            inventoryData.InvType = unpackByte(byteBuffer);
-            inventoryData.Flags = unpackInt(byteBuffer);
-            inventoryData.SaleType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            inventoryData.SalePrice = unpackInt(byteBuffer);
-            inventoryData.Name = unpackVariable(byteBuffer, 1);
-            inventoryData.Description = unpackVariable(byteBuffer, 1);
-            inventoryData.CreationDate = unpackInt(byteBuffer);
-            inventoryData.CRC = unpackInt(byteBuffer);
-            this.InventoryData_Fields.add(inventoryData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleUpdateInventoryItem(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)10);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packUUID(bytebuffer, AgentData_Field.TransactionID);
+        bytebuffer.put((byte)InventoryData_Fields.size());
+        InventoryData inventorydata;
+        for (Iterator iterator = InventoryData_Fields.iterator(); iterator.hasNext(); packInt(bytebuffer, inventorydata.CRC))
+        {
+            inventorydata = (InventoryData)iterator.next();
+            packUUID(bytebuffer, inventorydata.ItemID);
+            packUUID(bytebuffer, inventorydata.FolderID);
+            packInt(bytebuffer, inventorydata.CallbackID);
+            packUUID(bytebuffer, inventorydata.CreatorID);
+            packUUID(bytebuffer, inventorydata.OwnerID);
+            packUUID(bytebuffer, inventorydata.GroupID);
+            packInt(bytebuffer, inventorydata.BaseMask);
+            packInt(bytebuffer, inventorydata.OwnerMask);
+            packInt(bytebuffer, inventorydata.GroupMask);
+            packInt(bytebuffer, inventorydata.EveryoneMask);
+            packInt(bytebuffer, inventorydata.NextOwnerMask);
+            packBoolean(bytebuffer, inventorydata.GroupOwned);
+            packUUID(bytebuffer, inventorydata.TransactionID);
+            packByte(bytebuffer, (byte)inventorydata.Type);
+            packByte(bytebuffer, (byte)inventorydata.InvType);
+            packInt(bytebuffer, inventorydata.Flags);
+            packByte(bytebuffer, (byte)inventorydata.SaleType);
+            packInt(bytebuffer, inventorydata.SalePrice);
+            packVariable(bytebuffer, inventorydata.Name, 1);
+            packVariable(bytebuffer, inventorydata.Description, 1);
+            packInt(bytebuffer, inventorydata.CreationDate);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        AgentData_Field.TransactionID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            InventoryData inventorydata = new InventoryData();
+            inventorydata.ItemID = unpackUUID(bytebuffer);
+            inventorydata.FolderID = unpackUUID(bytebuffer);
+            inventorydata.CallbackID = unpackInt(bytebuffer);
+            inventorydata.CreatorID = unpackUUID(bytebuffer);
+            inventorydata.OwnerID = unpackUUID(bytebuffer);
+            inventorydata.GroupID = unpackUUID(bytebuffer);
+            inventorydata.BaseMask = unpackInt(bytebuffer);
+            inventorydata.OwnerMask = unpackInt(bytebuffer);
+            inventorydata.GroupMask = unpackInt(bytebuffer);
+            inventorydata.EveryoneMask = unpackInt(bytebuffer);
+            inventorydata.NextOwnerMask = unpackInt(bytebuffer);
+            inventorydata.GroupOwned = unpackBoolean(bytebuffer);
+            inventorydata.TransactionID = unpackUUID(bytebuffer);
+            inventorydata.Type = unpackByte(bytebuffer);
+            inventorydata.InvType = unpackByte(bytebuffer);
+            inventorydata.Flags = unpackInt(bytebuffer);
+            inventorydata.SaleType = unpackByte(bytebuffer) & 0xff;
+            inventorydata.SalePrice = unpackInt(bytebuffer);
+            inventorydata.Name = unpackVariable(bytebuffer, 1);
+            inventorydata.Description = unpackVariable(bytebuffer, 1);
+            inventorydata.CreationDate = unpackInt(bytebuffer);
+            inventorydata.CRC = unpackInt(bytebuffer);
+            InventoryData_Fields.add(inventorydata);
+        }
+
     }
 }

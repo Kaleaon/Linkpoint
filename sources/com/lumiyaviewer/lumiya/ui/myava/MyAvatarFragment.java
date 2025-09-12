@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.myava;
 
 import android.content.Context;
@@ -7,18 +11,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
+import com.lumiyaviewer.lumiya.slproto.users.manager.BalanceManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
@@ -27,201 +29,270 @@ import com.lumiyaviewer.lumiya.ui.common.FragmentWithTitle;
 import com.lumiyaviewer.lumiya.ui.outfits.OutfitsFragment;
 import java.util.UUID;
 
-public class MyAvatarFragment extends FragmentWithTitle implements AdapterView.OnItemClickListener, ChatterNameRetriever.OnChatterNameUpdated {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.myava:
+//            MyAvatarDetailsPages, MyProfileFragment, MuteListFragment, TransactionLogFragment
 
-    /* renamed from: -com-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null;
-    @BindView(2131755497)
+public class MyAvatarFragment extends FragmentWithTitle
+    implements android.widget.AdapterView.OnItemClickListener, com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever.OnChatterNameUpdated
+{
+    private class MyAvatarPagesAdapter extends ArrayAdapter
+    {
+
+        private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues[];
+        final int $SWITCH_TABLE$com$lumiyaviewer$lumiya$ui$myava$MyAvatarDetailsPages[];
+        final MyAvatarFragment this$0;
+
+        private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues()
+        {
+            if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues != null)
+            {
+                return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues;
+            }
+            int ai[] = new int[MyAvatarDetailsPages.values().length];
+            try
+            {
+                ai[MyAvatarDetailsPages.pageBalance.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError nosuchfielderror3) { }
+            try
+            {
+                ai[MyAvatarDetailsPages.pageBlockList.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError nosuchfielderror2) { }
+            try
+            {
+                ai[MyAvatarDetailsPages.pageOutfits.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError nosuchfielderror1) { }
+            try
+            {
+                ai[MyAvatarDetailsPages.pageProfile.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError nosuchfielderror) { }
+            _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues = ai;
+            return ai;
+        }
+
+        public View getView(int i, View view, ViewGroup viewgroup)
+        {
+label0:
+            {
+                viewgroup = super.getView(i, view, viewgroup);
+                view = (MyAvatarDetailsPages)getItem(i);
+                if ((viewgroup instanceof TextView) && view != null)
+                {
+                    switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues()[view.ordinal()])
+                    {
+                    default:
+                        view = getString(view.getTitleResource());
+                        ((TextView)viewgroup).setText(view);
+                        break;
+
+                    case 1: // '\001'
+                        break label0;
+                    }
+                }
+                return viewgroup;
+            }
+            view = (Integer)MyAvatarFragment._2D_get0(MyAvatarFragment.this).getData();
+            if (view != null)
+            {
+                view = getString(0x7f0901c3, new Object[] {
+                    view
+                });
+            } else
+            {
+                view = getString(0x7f0901c4);
+            }
+            ((TextView)viewgroup).setText(view);
+            return viewgroup;
+        }
+
+        public MyAvatarPagesAdapter(Context context)
+        {
+            this$0 = MyAvatarFragment.this;
+            super(context, 0x1090003, MyAvatarDetailsPages.values());
+        }
+    }
+
+
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues[];
     TextView myAvatarName;
-    private ChatterNameRetriever myAvatarNameRetriever = null;
-    @BindView(2131755499)
+    private ChatterNameRetriever myAvatarNameRetriever;
     ListView myAvatarOptionsList;
-    @BindView(2131755498)
     ChatterPicView myAvatarPic;
-    /* access modifiers changed from: private */
-    public final SubscriptionData<SubscriptionSingleKey, Integer> myBalance = new SubscriptionData<>(UIThreadExecutor.getInstance(), new $Lambda$E97LbIKTNF028fQGuPv0gXqIQrc(this));
+    private final SubscriptionData myBalance = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.E97LbIKTNF028fQGuPv0gXqIQrc(this));
     private Unbinder unbinder;
 
-    private class MyAvatarPagesAdapter extends ArrayAdapter<MyAvatarDetailsPages> {
-
-        /* renamed from: -com-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
-        private static final /* synthetic */ int[] f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null;
-        final /* synthetic */ int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$ui$myava$MyAvatarDetailsPages;
-
-        /* renamed from: -getcom-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
-        private static /* synthetic */ int[] m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues() {
-            if (f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues != null) {
-                return f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues;
-            }
-            int[] iArr = new int[MyAvatarDetailsPages.values().length];
-            try {
-                iArr[MyAvatarDetailsPages.pageBalance.ordinal()] = 1;
-            } catch (NoSuchFieldError e) {
-            }
-            try {
-                iArr[MyAvatarDetailsPages.pageBlockList.ordinal()] = 2;
-            } catch (NoSuchFieldError e2) {
-            }
-            try {
-                iArr[MyAvatarDetailsPages.pageOutfits.ordinal()] = 3;
-            } catch (NoSuchFieldError e3) {
-            }
-            try {
-                iArr[MyAvatarDetailsPages.pageProfile.ordinal()] = 4;
-            } catch (NoSuchFieldError e4) {
-            }
-            f463comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = iArr;
-            return iArr;
-        }
-
-        public MyAvatarPagesAdapter(Context context) {
-            super(context, 17367043, MyAvatarDetailsPages.values());
-        }
-
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            String string;
-            View view2 = super.getView(i, view, viewGroup);
-            MyAvatarDetailsPages myAvatarDetailsPages = (MyAvatarDetailsPages) getItem(i);
-            if ((view2 instanceof TextView) && myAvatarDetailsPages != null) {
-                switch (m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues()[myAvatarDetailsPages.ordinal()]) {
-                    case 1:
-                        Integer num = (Integer) MyAvatarFragment.this.myBalance.getData();
-                        if (num != null) {
-                            string = MyAvatarFragment.this.getString(R.string.my_ava_balance_title, num);
-                        } else {
-                            string = MyAvatarFragment.this.getString(R.string.my_ava_balance_unknown);
-                        }
-                        ((TextView) view2).setText(string);
-                        break;
-                    default:
-                        ((TextView) view2).setText(MyAvatarFragment.this.getString(myAvatarDetailsPages.getTitleResource()));
-                        break;
-                }
-            }
-            return view2;
-        }
+    static SubscriptionData _2D_get0(MyAvatarFragment myavatarfragment)
+    {
+        return myavatarfragment.myBalance;
     }
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues() {
-        if (f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues != null) {
-            return f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues;
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues;
         }
-        int[] iArr = new int[MyAvatarDetailsPages.values().length];
-        try {
-            iArr[MyAvatarDetailsPages.pageBalance.ordinal()] = 1;
-        } catch (NoSuchFieldError e) {
+        int ai[] = new int[MyAvatarDetailsPages.values().length];
+        try
+        {
+            ai[MyAvatarDetailsPages.pageBalance.ordinal()] = 1;
         }
-        try {
-            iArr[MyAvatarDetailsPages.pageBlockList.ordinal()] = 2;
-        } catch (NoSuchFieldError e2) {
+        catch (NoSuchFieldError nosuchfielderror3) { }
+        try
+        {
+            ai[MyAvatarDetailsPages.pageBlockList.ordinal()] = 2;
         }
-        try {
-            iArr[MyAvatarDetailsPages.pageOutfits.ordinal()] = 3;
-        } catch (NoSuchFieldError e3) {
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[MyAvatarDetailsPages.pageOutfits.ordinal()] = 3;
         }
-        try {
-            iArr[MyAvatarDetailsPages.pageProfile.ordinal()] = 4;
-        } catch (NoSuchFieldError e4) {
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[MyAvatarDetailsPages.pageProfile.ordinal()] = 4;
         }
-        f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = iArr;
-        return iArr;
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues = ai;
+        return ai;
     }
 
-    private UUID getAgentUUID() {
+    public MyAvatarFragment()
+    {
+        myAvatarNameRetriever = null;
+    }
+
+    private UUID getAgentUUID()
+    {
         return ActivityUtils.getActiveAgentID(getArguments());
     }
 
-    public static Bundle makeSelection(UUID uuid) {
+    public static Bundle makeSelection(UUID uuid)
+    {
         Bundle bundle = new Bundle();
         ActivityUtils.setActiveAgentID(bundle, uuid);
         return bundle;
     }
 
-    public static MyAvatarFragment newInstance(UUID uuid) {
-        MyAvatarFragment myAvatarFragment = new MyAvatarFragment();
-        myAvatarFragment.setArguments(makeSelection(uuid));
-        return myAvatarFragment;
+    public static MyAvatarFragment newInstance(UUID uuid)
+    {
+        MyAvatarFragment myavatarfragment = new MyAvatarFragment();
+        myavatarfragment.setArguments(makeSelection(uuid));
+        return myavatarfragment;
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onMyBalance */
-    public void m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0(Integer num) {
-        if (this.unbinder != null) {
-            ListAdapter adapter = this.myAvatarOptionsList.getAdapter();
-            if (adapter instanceof MyAvatarPagesAdapter) {
-                ((MyAvatarPagesAdapter) adapter).notifyDataSetChanged();
+    private void onMyBalance(Integer integer)
+    {
+        if (unbinder != null)
+        {
+            integer = myAvatarOptionsList.getAdapter();
+            if (integer instanceof MyAvatarPagesAdapter)
+            {
+                ((MyAvatarPagesAdapter)integer).notifyDataSetChanged();
             }
         }
     }
 
-    public void onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-        String resolvedName = chatterNameRetriever.getResolvedName();
-        if (this.unbinder != null) {
-            this.myAvatarName.setText(resolvedName != null ? resolvedName : getString(R.string.name_loading_title));
-            this.myAvatarPic.setChatterID(chatterNameRetriever.chatterID, resolvedName);
+    void _2D_com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragment_2D_mthref_2D_0(Integer integer)
+    {
+        onMyBalance(integer);
+    }
+
+    public void onChatterNameUpdated(ChatterNameRetriever chatternameretriever)
+    {
+        String s1 = chatternameretriever.getResolvedName();
+        if (unbinder != null)
+        {
+            TextView textview = myAvatarName;
+            String s;
+            if (s1 != null)
+            {
+                s = s1;
+            } else
+            {
+                s = getString(0x7f0901c8);
+            }
+            textview.setText(s);
+            myAvatarPic.setChatterID(chatternameretriever.chatterID, s1);
         }
-        setTitle(resolvedName, (String) null);
+        setTitle(s1, null);
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        super.onCreateView(layoutInflater, viewGroup, bundle);
-        View inflate = layoutInflater.inflate(R.layout.my_avatar, viewGroup, false);
-        this.unbinder = ButterKnife.bind((Object) this, inflate);
-        this.myAvatarOptionsList.setAdapter(new MyAvatarPagesAdapter(viewGroup.getContext()));
-        this.myAvatarOptionsList.setOnItemClickListener(this);
-        return inflate;
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        super.onCreateView(layoutinflater, viewgroup, bundle);
+        layoutinflater = layoutinflater.inflate(0x7f040063, viewgroup, false);
+        unbinder = ButterKnife.bind(this, layoutinflater);
+        myAvatarOptionsList.setAdapter(new MyAvatarPagesAdapter(viewgroup.getContext()));
+        myAvatarOptionsList.setOnItemClickListener(this);
+        return layoutinflater;
     }
 
-    public void onDestroyView() {
-        if (this.unbinder != null) {
-            this.unbinder.unbind();
-            this.unbinder = null;
+    public void onDestroyView()
+    {
+        if (unbinder != null)
+        {
+            unbinder.unbind();
+            unbinder = null;
         }
         super.onDestroyView();
     }
 
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-        UUID agentUUID = getAgentUUID();
-        Object itemAtPosition = adapterView.getItemAtPosition(i);
-        if ((itemAtPosition instanceof MyAvatarDetailsPages) && agentUUID != null) {
-            switch (m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues()[((MyAvatarDetailsPages) itemAtPosition).ordinal()]) {
-                case 1:
-                    DetailsActivity.showEmbeddedDetails(getActivity(), TransactionLogFragment.class, TransactionLogFragment.makeSelection(agentUUID));
-                    return;
-                case 2:
-                    DetailsActivity.showEmbeddedDetails(getActivity(), MuteListFragment.class, MuteListFragment.makeSelection(agentUUID));
-                    return;
-                case 3:
-                    DetailsActivity.showEmbeddedDetails(getActivity(), OutfitsFragment.class, OutfitsFragment.makeSelection(agentUUID, (UUID) null));
-                    return;
-                case 4:
-                    DetailsActivity.showEmbeddedDetails(getActivity(), MyProfileFragment.class, MyProfileFragment.makeSelection(ChatterID.getUserChatterID(agentUUID, agentUUID)));
-                    return;
-                default:
-                    return;
-            }
-        }
+    public void onItemClick(AdapterView adapterview, View view, int i, long l)
+    {
+        view = getAgentUUID();
+        adapterview = ((AdapterView) (adapterview.getItemAtPosition(i)));
+        if (!(adapterview instanceof MyAvatarDetailsPages) || view == null) goto _L2; else goto _L1
+_L1:
+        _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_myava_2D_MyAvatarDetailsPagesSwitchesValues()[((MyAvatarDetailsPages)adapterview).ordinal()];
+        JVM INSTR tableswitch 1 4: default 64
+    //                   1 115
+    //                   2 100
+    //                   3 84
+    //                   4 65;
+           goto _L2 _L3 _L4 _L5 _L6
+_L2:
+        return;
+_L6:
+        DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/myava/MyProfileFragment, MyProfileFragment.makeSelection(ChatterID.getUserChatterID(view, view)));
+        return;
+_L5:
+        DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/outfits/OutfitsFragment, OutfitsFragment.makeSelection(view, null));
+        return;
+_L4:
+        DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/myava/MuteListFragment, MuteListFragment.makeSelection(view));
+        return;
+_L3:
+        DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/myava/TransactionLogFragment, TransactionLogFragment.makeSelection(view));
+        return;
     }
 
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        UUID agentUUID = getAgentUUID();
-        UserManager userManager = UserManager.getUserManager(agentUUID);
-        if (userManager != null) {
-            this.myBalance.subscribe(userManager.getBalanceManager().getBalance(), SubscriptionSingleKey.Value);
+        UUID uuid = getAgentUUID();
+        UserManager usermanager = UserManager.getUserManager(uuid);
+        if (usermanager != null)
+        {
+            myBalance.subscribe(usermanager.getBalanceManager().getBalance(), SubscriptionSingleKey.Value);
         }
-        if (agentUUID != null) {
-            this.myAvatarNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(agentUUID, agentUUID), this, UIThreadExecutor.getSerialInstance());
+        if (uuid != null)
+        {
+            myAvatarNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(uuid, uuid), this, UIThreadExecutor.getSerialInstance());
         }
     }
 
-    public void onStop() {
-        if (this.myAvatarNameRetriever != null) {
-            this.myAvatarNameRetriever.dispose();
-            this.myAvatarNameRetriever = null;
+    public void onStop()
+    {
+        if (myAvatarNameRetriever != null)
+        {
+            myAvatarNameRetriever.dispose();
+            myAvatarNameRetriever = null;
         }
-        this.myBalance.unsubscribe();
+        myBalance.unsubscribe();
         super.onStop();
     }
 }

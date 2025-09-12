@@ -1,64 +1,87 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.objpopup;
 
 import android.content.Context;
 import android.support.v4.view.ActionProvider;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
-import javax.annotation.Nullable;
 
-public class ObjectPopupsActionProvider extends ActionProvider implements View.OnClickListener {
-    private int objectPopupCount = 0;
-    @Nullable
-    private ObjectPopupsClickListener objectPopupsClickListener = null;
-    @Nullable
-    private TextView popupCountTextView = null;
+public class ObjectPopupsActionProvider extends ActionProvider
+    implements android.view.View.OnClickListener
+{
+    public static interface ObjectPopupsClickListener
+    {
 
-    public interface ObjectPopupsClickListener {
-        void onObjectPopupsClicked();
+        public abstract void onObjectPopupsClicked();
     }
 
-    public ObjectPopupsActionProvider(Context context) {
+
+    private int objectPopupCount;
+    private ObjectPopupsClickListener objectPopupsClickListener;
+    private TextView popupCountTextView;
+
+    public ObjectPopupsActionProvider(Context context)
+    {
         super(context);
+        objectPopupCount = 0;
+        popupCountTextView = null;
+        objectPopupsClickListener = null;
     }
 
-    public boolean isVisible() {
-        return this.objectPopupCount != 0;
+    public boolean isVisible()
+    {
+        boolean flag = false;
+        if (objectPopupCount != 0)
+        {
+            flag = true;
+        }
+        return flag;
     }
 
-    public void onClick(View view) {
-        if (this.objectPopupsClickListener != null) {
-            this.objectPopupsClickListener.onObjectPopupsClicked();
+    public void onClick(View view)
+    {
+        if (objectPopupsClickListener != null)
+        {
+            objectPopupsClickListener.onObjectPopupsClicked();
         }
     }
 
-    public View onCreateActionView() {
-        View inflate = LayoutInflater.from(getContext()).inflate(R.layout.object_popups_action_provider, (ViewGroup) null);
-        this.popupCountTextView = (TextView) inflate.findViewById(R.id.popupCountTextView);
-        if (this.popupCountTextView != null) {
-            this.popupCountTextView.setText(Integer.toString(this.objectPopupCount));
+    public View onCreateActionView()
+    {
+        View view = LayoutInflater.from(getContext()).inflate(0x7f040079, null);
+        popupCountTextView = (TextView)view.findViewById(0x7f10023e);
+        if (popupCountTextView != null)
+        {
+            popupCountTextView.setText(Integer.toString(objectPopupCount));
         }
-        inflate.setOnClickListener(this);
-        return inflate;
+        view.setOnClickListener(this);
+        return view;
     }
 
-    public boolean overridesItemVisibility() {
+    public boolean overridesItemVisibility()
+    {
         return true;
     }
 
-    public void setObjectPopupCount(int i) {
-        if (this.objectPopupCount != i) {
-            this.objectPopupCount = i;
-            if (this.popupCountTextView != null) {
-                this.popupCountTextView.setText(Integer.toString(i));
+    public void setObjectPopupCount(int i)
+    {
+        if (objectPopupCount != i)
+        {
+            objectPopupCount = i;
+            if (popupCountTextView != null)
+            {
+                popupCountTextView.setText(Integer.toString(i));
             }
             refreshVisibility();
         }
     }
 
-    public void setObjectPopupsClickListener(@Nullable ObjectPopupsClickListener objectPopupsClickListener2) {
-        this.objectPopupsClickListener = objectPopupsClickListener2;
+    public void setObjectPopupsClickListener(ObjectPopupsClickListener objectpopupsclicklistener)
+    {
+        objectPopupsClickListener = objectpopupsclicklistener;
     }
 }

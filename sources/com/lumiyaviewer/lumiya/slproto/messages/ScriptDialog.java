@@ -1,96 +1,128 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class ScriptDialog extends SLMessage {
-    public ArrayList<Buttons> Buttons_Fields = new ArrayList<>();
-    public Data Data_Field;
-    public ArrayList<OwnerData> OwnerData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class Buttons {
-        public byte[] ButtonLabel;
+public class ScriptDialog extends SLMessage
+{
+    public static class Buttons
+    {
+
+        public byte ButtonLabel[];
+
+        public Buttons()
+        {
+        }
     }
 
-    public static class Data {
+    public static class Data
+    {
+
         public int ChatChannel;
-        public byte[] FirstName;
+        public byte FirstName[];
         public UUID ImageID;
-        public byte[] LastName;
-        public byte[] Message;
+        public byte LastName[];
+        public byte Message[];
         public UUID ObjectID;
-        public byte[] ObjectName;
+        public byte ObjectName[];
+
+        public Data()
+        {
+        }
     }
 
-    public static class OwnerData {
+    public static class OwnerData
+    {
+
         public UUID OwnerID;
-    }
 
-    public ScriptDialog() {
-        this.zeroCoded = true;
-        this.Data_Field = new Data();
-    }
-
-    public int CalcPayloadSize() {
-        int length = this.Data_Field.FirstName.length + 17 + 1 + this.Data_Field.LastName.length + 1 + this.Data_Field.ObjectName.length + 2 + this.Data_Field.Message.length + 4 + 16 + 4 + 1;
-        Iterator<T> it = this.Buttons_Fields.iterator();
-        while (true) {
-            int i = length;
-            if (!it.hasNext()) {
-                return i + 1 + (this.OwnerData_Fields.size() * 16);
-            }
-            length = ((Buttons) it.next()).ButtonLabel.length + 1 + i;
+        public OwnerData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleScriptDialog(this);
+
+    public ArrayList Buttons_Fields;
+    public Data Data_Field;
+    public ArrayList OwnerData_Fields;
+
+    public ScriptDialog()
+    {
+        Buttons_Fields = new ArrayList();
+        OwnerData_Fields = new ArrayList();
+        zeroCoded = true;
+        Data_Field = new Data();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -66);
-        packUUID(byteBuffer, this.Data_Field.ObjectID);
-        packVariable(byteBuffer, this.Data_Field.FirstName, 1);
-        packVariable(byteBuffer, this.Data_Field.LastName, 1);
-        packVariable(byteBuffer, this.Data_Field.ObjectName, 1);
-        packVariable(byteBuffer, this.Data_Field.Message, 2);
-        packInt(byteBuffer, this.Data_Field.ChatChannel);
-        packUUID(byteBuffer, this.Data_Field.ImageID);
-        byteBuffer.put((byte) this.Buttons_Fields.size());
-        for (Buttons buttons : this.Buttons_Fields) {
-            packVariable(byteBuffer, buttons.ButtonLabel, 1);
-        }
-        byteBuffer.put((byte) this.OwnerData_Fields.size());
-        for (OwnerData ownerData : this.OwnerData_Fields) {
-            packUUID(byteBuffer, ownerData.OwnerID);
-        }
+    public int CalcPayloadSize()
+    {
+        int i = Data_Field.FirstName.length;
+        int j = Data_Field.LastName.length;
+        int k = Data_Field.ObjectName.length;
+        int l = Data_Field.Message.length;
+        Iterator iterator = Buttons_Fields.iterator();
+        for (i = i + 17 + 1 + j + 1 + k + 2 + l + 4 + 16 + 4 + 1; iterator.hasNext(); i = ((Buttons)iterator.next()).ButtonLabel.length + 1 + i) { }
+        return i + 1 + OwnerData_Fields.size() * 16;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.Data_Field.ObjectID = unpackUUID(byteBuffer);
-        this.Data_Field.FirstName = unpackVariable(byteBuffer, 1);
-        this.Data_Field.LastName = unpackVariable(byteBuffer, 1);
-        this.Data_Field.ObjectName = unpackVariable(byteBuffer, 1);
-        this.Data_Field.Message = unpackVariable(byteBuffer, 2);
-        this.Data_Field.ChatChannel = unpackInt(byteBuffer);
-        this.Data_Field.ImageID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleScriptDialog(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-66);
+        packUUID(bytebuffer, Data_Field.ObjectID);
+        packVariable(bytebuffer, Data_Field.FirstName, 1);
+        packVariable(bytebuffer, Data_Field.LastName, 1);
+        packVariable(bytebuffer, Data_Field.ObjectName, 1);
+        packVariable(bytebuffer, Data_Field.Message, 2);
+        packInt(bytebuffer, Data_Field.ChatChannel);
+        packUUID(bytebuffer, Data_Field.ImageID);
+        bytebuffer.put((byte)Buttons_Fields.size());
+        for (Iterator iterator = Buttons_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, ((Buttons)iterator.next()).ButtonLabel, 1)) { }
+        bytebuffer.put((byte)OwnerData_Fields.size());
+        for (Iterator iterator1 = OwnerData_Fields.iterator(); iterator1.hasNext(); packUUID(bytebuffer, ((OwnerData)iterator1.next()).OwnerID)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        Data_Field.ObjectID = unpackUUID(bytebuffer);
+        Data_Field.FirstName = unpackVariable(bytebuffer, 1);
+        Data_Field.LastName = unpackVariable(bytebuffer, 1);
+        Data_Field.ObjectName = unpackVariable(bytebuffer, 1);
+        Data_Field.Message = unpackVariable(bytebuffer, 2);
+        Data_Field.ChatChannel = unpackInt(bytebuffer);
+        Data_Field.ImageID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
             Buttons buttons = new Buttons();
-            buttons.ButtonLabel = unpackVariable(byteBuffer, 1);
-            this.Buttons_Fields.add(buttons);
+            buttons.ButtonLabel = unpackVariable(bytebuffer, 1);
+            Buttons_Fields.add(buttons);
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < b2; i2++) {
-            OwnerData ownerData = new OwnerData();
-            ownerData.OwnerID = unpackUUID(byteBuffer);
-            this.OwnerData_Fields.add(ownerData);
+
+        byte0 = bytebuffer.get();
+        for (int j = ((flag) ? 1 : 0); j < (byte0 & 0xff); j++)
+        {
+            OwnerData ownerdata = new OwnerData();
+            ownerdata.OwnerID = unpackUUID(bytebuffer);
+            OwnerData_Fields.add(ownerdata);
         }
+
     }
 }

@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.content.Intent;
@@ -5,89 +9,122 @@ import android.os.Bundle;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class ActivityUtils {
+public class ActivityUtils
+{
+
     public static final String EXTRA_ACTIVE_AGENT_UUID = "activeAgentUUID";
     public static final String FRAGMENT_SELECTION_KEY = "fragmentSelection";
 
-    @Nullable
-    public static UUID getActiveAgentID(@Nullable Intent intent) {
-        String stringExtra;
-        if (intent == null || (stringExtra = intent.getStringExtra("activeAgentUUID")) == null) {
+    public ActivityUtils()
+    {
+    }
+
+    public static UUID getActiveAgentID(Intent intent)
+    {
+        if (intent != null)
+        {
+            intent = intent.getStringExtra("activeAgentUUID");
+            if (intent != null)
+            {
+                return UUIDPool.getUUID(intent);
+            }
+        }
+        return null;
+    }
+
+    public static UUID getActiveAgentID(Bundle bundle)
+    {
+        if (bundle != null)
+        {
+            bundle = bundle.getString("activeAgentUUID");
+            if (bundle != null)
+            {
+                return UUIDPool.getUUID(bundle);
+            }
+        }
+        return null;
+    }
+
+    public static Bundle getFragmentSelection(Bundle bundle)
+    {
+        if (bundle != null)
+        {
+            return bundle.getBundle("fragmentSelection");
+        } else
+        {
             return null;
         }
-        return UUIDPool.getUUID(stringExtra);
     }
 
-    @Nullable
-    public static UUID getActiveAgentID(@Nullable Bundle bundle) {
-        String string;
-        if (bundle == null || (string = bundle.getString("activeAgentUUID")) == null) {
+    public static UserManager getUserManager(Intent intent)
+    {
+        intent = getActiveAgentID(intent);
+        if (intent != null)
+        {
+            return UserManager.getUserManager(intent);
+        } else
+        {
             return null;
         }
-        return UUIDPool.getUUID(string);
     }
 
-    @Nullable
-    public static Bundle getFragmentSelection(@Nullable Bundle bundle) {
-        if (bundle != null) {
-            return bundle.getBundle(FRAGMENT_SELECTION_KEY);
+    public static UserManager getUserManager(Bundle bundle)
+    {
+        bundle = getActiveAgentID(bundle);
+        if (bundle != null)
+        {
+            return UserManager.getUserManager(bundle);
+        } else
+        {
+            return null;
         }
-        return null;
     }
 
-    @Nullable
-    public static UserManager getUserManager(@Nullable Intent intent) {
-        UUID activeAgentID = getActiveAgentID(intent);
-        if (activeAgentID != null) {
-            return UserManager.getUserManager(activeAgentID);
+    public static Bundle makeFragmentArguments(UUID uuid, Bundle bundle)
+    {
+        Bundle bundle1 = new Bundle();
+        if (uuid != null)
+        {
+            bundle1.putString("activeAgentUUID", uuid.toString());
         }
-        return null;
+        if (bundle != null)
+        {
+            bundle1.putBundle("fragmentSelection", bundle);
+        }
+        return bundle1;
     }
 
-    @Nullable
-    public static UserManager getUserManager(@Nullable Bundle bundle) {
-        UUID activeAgentID = getActiveAgentID(bundle);
-        if (activeAgentID != null) {
-            return UserManager.getUserManager(activeAgentID);
-        }
-        return null;
-    }
-
-    @Nonnull
-    public static Bundle makeFragmentArguments(@Nullable UUID uuid, @Nullable Bundle bundle) {
-        Bundle bundle2 = new Bundle();
-        if (uuid != null) {
-            bundle2.putString("activeAgentUUID", uuid.toString());
-        }
-        if (bundle != null) {
-            bundle2.putBundle(FRAGMENT_SELECTION_KEY, bundle);
-        }
-        return bundle2;
-    }
-
-    public static void setActiveAgentID(Intent intent, UUID uuid) {
-        if (uuid != null) {
+    public static void setActiveAgentID(Intent intent, UUID uuid)
+    {
+        if (uuid != null)
+        {
             intent.putExtra("activeAgentUUID", uuid.toString());
         }
     }
 
-    public static void setActiveAgentID(Bundle bundle, UUID uuid) {
-        if (uuid != null) {
+    public static void setActiveAgentID(Bundle bundle, UUID uuid)
+    {
+        if (uuid != null)
+        {
             bundle.putString("activeAgentUUID", uuid.toString());
         }
     }
 
-    public static void setFragmentSelection(@Nullable Bundle bundle, @Nullable Bundle bundle2) {
-        if (bundle == null) {
+    public static void setFragmentSelection(Bundle bundle, Bundle bundle1)
+    {
+label0:
+        {
+            if (bundle != null)
+            {
+                if (bundle1 == null)
+                {
+                    break label0;
+                }
+                bundle.putBundle("fragmentSelection", bundle1);
+            }
             return;
         }
-        if (bundle2 != null) {
-            bundle.putBundle(FRAGMENT_SELECTION_KEY, bundle2);
-        } else {
-            bundle.remove(FRAGMENT_SELECTION_KEY);
-        }
+        bundle.remove("fragmentSelection");
     }
 }

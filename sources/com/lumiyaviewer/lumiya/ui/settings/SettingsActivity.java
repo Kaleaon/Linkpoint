@@ -1,53 +1,81 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.settings;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory;
 import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
 
-public class SettingsActivity extends MasterDetailsActivity {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.settings:
+//            SettingsPage, SettingsFragment, SettingsSelectionFragment
+
+public class SettingsActivity extends MasterDetailsActivity
+{
+
     private final FragmentActivityFactory detailsFragmentFactory = new FragmentActivityFactory() {
-        public Intent createIntent(Context context, Bundle bundle) {
+
+        final SettingsActivity this$0;
+
+        public Intent createIntent(Context context, Bundle bundle)
+        {
             return null;
         }
 
-        public Class<? extends Fragment> getFragmentClass() {
-            return SettingsFragment.class;
+        public Class getFragmentClass()
+        {
+            return com/lumiyaviewer/lumiya/ui/settings/SettingsFragment;
         }
+
+            
+            {
+                this$0 = SettingsActivity.this;
+                super();
+            }
     };
 
-    /* access modifiers changed from: protected */
-    public FragmentActivityFactory getDetailsFragmentFactory() {
-        return this.detailsFragmentFactory;
+    public SettingsActivity()
+    {
     }
 
-    /* access modifiers changed from: protected */
-    public Bundle getNewDetailsFragmentArguments(@Nullable Bundle bundle, @Nullable Bundle bundle2) {
-        return bundle == null ? SettingsFragment.makeSelection(SettingsPage.PageConnection.getPageResourceId()) : super.getNewDetailsFragmentArguments(bundle, bundle2);
+    protected FragmentActivityFactory getDetailsFragmentFactory()
+    {
+        return detailsFragmentFactory;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean handleConnectionEvents() {
+    protected Bundle getNewDetailsFragmentArguments(Bundle bundle, Bundle bundle1)
+    {
+        if (bundle == null)
+        {
+            return SettingsFragment.makeSelection(SettingsPage.PageConnection.getPageResourceId());
+        } else
+        {
+            return super.getNewDetailsFragmentArguments(bundle, bundle1);
+        }
+    }
+
+    protected boolean handleConnectionEvents()
+    {
         return false;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isRootDetailsFragment(Class<? extends Fragment> cls) {
-        return cls == SettingsFragment.class;
+    protected boolean isRootDetailsFragment(Class class1)
+    {
+        return class1 == com/lumiyaviewer/lumiya/ui/settings/SettingsFragment;
     }
 
-    /* access modifiers changed from: protected */
-    public void onCreate(@Nullable Bundle bundle) {
+    protected void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
-        setDefaultTitle(getString(R.string.settings_title), (String) null);
+        setDefaultTitle(getString(0x7f090303), null);
     }
 
-    /* access modifiers changed from: protected */
-    public Fragment onCreateMasterFragment(Intent intent, @Nullable Bundle bundle) {
+    protected Fragment onCreateMasterFragment(Intent intent, Bundle bundle)
+    {
         return new SettingsSelectionFragment();
     }
 }

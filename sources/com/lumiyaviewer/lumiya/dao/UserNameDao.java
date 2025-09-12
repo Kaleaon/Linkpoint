@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import android.database.Cursor;
@@ -8,96 +12,227 @@ import de.greenrobot.dao.Property;
 import de.greenrobot.dao.internal.DaoConfig;
 import java.util.UUID;
 
-public class UserNameDao extends AbstractDao<UserName, UUID> {
+// Referenced classes of package com.lumiyaviewer.lumiya.dao:
+//            UserName, DaoSession
+
+public class UserNameDao extends AbstractDao
+{
+    public static class Properties
+    {
+
+        public static final Property DisplayName = new Property(2, java/lang/String, "displayName", false, "DISPLAY_NAME");
+        public static final Property IsBadUUID;
+        public static final Property UserName = new Property(1, java/lang/String, "userName", false, "USER_NAME");
+        public static final Property Uuid = new Property(0, java/util/UUID, "uuid", true, "UUID");
+
+        static 
+        {
+            IsBadUUID = new Property(3, Boolean.TYPE, "isBadUUID", false, "IS_BAD_UUID");
+        }
+
+        public Properties()
+        {
+        }
+    }
+
+
     public static final String TABLENAME = "UserNames";
 
-    public static class Properties {
-        public static final Property DisplayName = new Property(2, String.class, "displayName", false, "DISPLAY_NAME");
-        public static final Property IsBadUUID = new Property(3, Boolean.TYPE, "isBadUUID", false, "IS_BAD_UUID");
-        public static final Property UserName = new Property(1, String.class, "userName", false, "USER_NAME");
-        public static final Property Uuid = new Property(0, UUID.class, "uuid", true, "UUID");
+    public UserNameDao(DaoConfig daoconfig)
+    {
+        super(daoconfig);
     }
 
-    public UserNameDao(DaoConfig daoConfig) {
-        super(daoConfig);
+    public UserNameDao(DaoConfig daoconfig, DaoSession daosession)
+    {
+        super(daoconfig, daosession);
     }
 
-    public UserNameDao(DaoConfig daoConfig, DaoSession daoSession) {
-        super(daoConfig, daoSession);
-    }
-
-    public static void createTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'UserNames' (" + "'UUID' TEXT PRIMARY KEY ," + "'USER_NAME' TEXT," + "'DISPLAY_NAME' TEXT," + "'IS_BAD_UUID' INTEGER NOT NULL );");
-    }
-
-    public static void dropTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'UserNames'");
-    }
-
-    /* access modifiers changed from: protected */
-    public void bindValues(SQLiteStatement sQLiteStatement, UserName userName) {
-        sQLiteStatement.clearBindings();
-        UUID uuid = userName.getUuid();
-        if (uuid != null) {
-            sQLiteStatement.bindString(1, uuid.toString());
+    public static void createTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        String s;
+        if (flag)
+        {
+            s = "IF NOT EXISTS ";
+        } else
+        {
+            s = "";
         }
-        String userName2 = userName.getUserName();
-        if (userName2 != null) {
-            sQLiteStatement.bindString(2, userName2);
-        }
-        String displayName = userName.getDisplayName();
-        if (displayName != null) {
-            sQLiteStatement.bindString(3, displayName);
-        }
-        sQLiteStatement.bindLong(4, userName.getIsBadUUID() ? 1 : 0);
+        sqlitedatabase.execSQL((new StringBuilder()).append("CREATE TABLE ").append(s).append("'UserNames' (").append("'UUID' TEXT PRIMARY KEY ,").append("'USER_NAME' TEXT,").append("'DISPLAY_NAME' TEXT,").append("'IS_BAD_UUID' INTEGER NOT NULL );").toString());
     }
 
-    public UUID getKey(UserName userName) {
-        if (userName != null) {
-            return userName.getUuid();
+    public static void dropTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        StringBuilder stringbuilder = (new StringBuilder()).append("DROP TABLE ");
+        String s;
+        if (flag)
+        {
+            s = "IF EXISTS ";
+        } else
+        {
+            s = "";
         }
-        return null;
+        sqlitedatabase.execSQL(stringbuilder.append(s).append("'UserNames'").toString());
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isEntityUpdateable() {
+    protected void bindValues(SQLiteStatement sqlitestatement, UserName username)
+    {
+        sqlitestatement.clearBindings();
+        Object obj = username.getUuid();
+        if (obj != null)
+        {
+            sqlitestatement.bindString(1, ((UUID) (obj)).toString());
+        }
+        obj = username.getUserName();
+        if (obj != null)
+        {
+            sqlitestatement.bindString(2, ((String) (obj)));
+        }
+        obj = username.getDisplayName();
+        if (obj != null)
+        {
+            sqlitestatement.bindString(3, ((String) (obj)));
+        }
+        long l;
+        if (username.getIsBadUUID())
+        {
+            l = 1L;
+        } else
+        {
+            l = 0L;
+        }
+        sqlitestatement.bindLong(4, l);
+    }
+
+    protected volatile void bindValues(SQLiteStatement sqlitestatement, Object obj)
+    {
+        bindValues(sqlitestatement, (UserName)obj);
+    }
+
+    public volatile Object getKey(Object obj)
+    {
+        return getKey((UserName)obj);
+    }
+
+    public UUID getKey(UserName username)
+    {
+        if (username != null)
+        {
+            return username.getUuid();
+        } else
+        {
+            return null;
+        }
+    }
+
+    protected boolean isEntityUpdateable()
+    {
         return true;
     }
 
-    public UserName readEntity(Cursor cursor, int i) {
-        boolean z = false;
-        String str = null;
-        UUID fromString = cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0));
-        String string = cursor.isNull(i + 1) ? null : cursor.getString(i + 1);
-        if (!cursor.isNull(i + 2)) {
-            str = cursor.getString(i + 2);
+    public UserName readEntity(Cursor cursor, int i)
+    {
+        boolean flag = false;
+        String s1 = null;
+        UUID uuid;
+        String s;
+        if (cursor.isNull(i + 0))
+        {
+            uuid = null;
+        } else
+        {
+            uuid = UUID.fromString(cursor.getString(i + 0));
         }
-        if (cursor.getShort(i + 3) != 0) {
-            z = true;
+        if (cursor.isNull(i + 1))
+        {
+            s = null;
+        } else
+        {
+            s = cursor.getString(i + 1);
         }
-        return new UserName(fromString, string, str, z);
+        if (!cursor.isNull(i + 2))
+        {
+            s1 = cursor.getString(i + 2);
+        }
+        if (cursor.getShort(i + 3) != 0)
+        {
+            flag = true;
+        }
+        return new UserName(uuid, s, s1, flag);
     }
 
-    public void readEntity(Cursor cursor, UserName userName, int i) {
-        String str = null;
-        userName.setUuid(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)));
-        userName.setUserName(cursor.isNull(i + 1) ? null : cursor.getString(i + 1));
-        if (!cursor.isNull(i + 2)) {
-            str = cursor.getString(i + 2);
-        }
-        userName.setDisplayName(str);
-        userName.setIsBadUUID(cursor.getShort(i + 3) != 0);
+    public volatile Object readEntity(Cursor cursor, int i)
+    {
+        return readEntity(cursor, i);
     }
 
-    public UUID readKey(Cursor cursor, int i) {
-        if (cursor.isNull(i + 0)) {
+    public void readEntity(Cursor cursor, UserName username, int i)
+    {
+        Object obj1 = null;
+        Object obj;
+        boolean flag;
+        if (cursor.isNull(i + 0))
+        {
+            obj = null;
+        } else
+        {
+            obj = UUID.fromString(cursor.getString(i + 0));
+        }
+        username.setUuid(((UUID) (obj)));
+        if (cursor.isNull(i + 1))
+        {
+            obj = null;
+        } else
+        {
+            obj = cursor.getString(i + 1);
+        }
+        username.setUserName(((String) (obj)));
+        if (cursor.isNull(i + 2))
+        {
+            obj = obj1;
+        } else
+        {
+            obj = cursor.getString(i + 2);
+        }
+        username.setDisplayName(((String) (obj)));
+        if (cursor.getShort(i + 3) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        username.setIsBadUUID(flag);
+    }
+
+    public volatile void readEntity(Cursor cursor, Object obj, int i)
+    {
+        readEntity(cursor, (UserName)obj, i);
+    }
+
+    public volatile Object readKey(Cursor cursor, int i)
+    {
+        return readKey(cursor, i);
+    }
+
+    public UUID readKey(Cursor cursor, int i)
+    {
+        if (cursor.isNull(i + 0))
+        {
             return null;
+        } else
+        {
+            return UUID.fromString(cursor.getString(i + 0));
         }
-        return UUID.fromString(cursor.getString(i + 0));
     }
 
-    /* access modifiers changed from: protected */
-    public UUID updateKeyAfterInsert(UserName userName, long j) {
-        return userName.getUuid();
+    protected volatile Object updateKeyAfterInsert(Object obj, long l)
+    {
+        return updateKeyAfterInsert((UserName)obj, l);
+    }
+
+    protected UUID updateKeyAfterInsert(UserName username, long l)
+    {
+        return username.getUuid();
     }
 }

@@ -1,14 +1,26 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.glres;
 
-public abstract class GLSizedResource extends GLResource {
+
+// Referenced classes of package com.lumiyaviewer.lumiya.render.glres:
+//            GLResource, GLResourceManager
+
+public abstract class GLSizedResource extends GLResource
+{
+
     private final int loadedSize;
 
-    protected GLSizedResource(GLResourceManager gLResourceManager, int i) {
-        super(gLResourceManager);
-        this.loadedSize = i;
+    protected GLSizedResource(GLResourceManager glresourcemanager, int i)
+    {
+        super(glresourcemanager);
+        loadedSize = i;
     }
 
-    public final int getLoadedSize() {
-        return this.loadedSize;
+    public final int getLoadedSize()
+    {
+        return loadedSize;
     }
 }

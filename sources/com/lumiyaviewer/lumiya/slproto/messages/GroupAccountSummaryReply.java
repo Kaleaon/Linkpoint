@@ -1,19 +1,32 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class GroupAccountSummaryReply extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public MoneyData MoneyData_Field = new MoneyData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class GroupAccountSummaryReply extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID GroupID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class MoneyData {
+    public static class MoneyData
+    {
+
         public int Balance;
         public int CurrentInterval;
         public int GroupTaxCurrent;
@@ -21,7 +34,7 @@ public class GroupAccountSummaryReply extends SLMessage {
         public int IntervalDays;
         public int LandTaxCurrent;
         public int LandTaxEstimate;
-        public byte[] LastTaxDate;
+        public byte LastTaxDate[];
         public int LightTaxCurrent;
         public int LightTaxEstimate;
         public int NonExemptMembers;
@@ -30,74 +43,89 @@ public class GroupAccountSummaryReply extends SLMessage {
         public int ParcelDirFeeCurrent;
         public int ParcelDirFeeEstimate;
         public UUID RequestID;
-        public byte[] StartDate;
-        public byte[] TaxDate;
+        public byte StartDate[];
+        public byte TaxDate[];
         public int TotalCredits;
         public int TotalDebits;
+
+        public MoneyData()
+        {
+        }
     }
 
-    public GroupAccountSummaryReply() {
-        this.zeroCoded = true;
+
+    public AgentData AgentData_Field;
+    public MoneyData MoneyData_Field;
+
+    public GroupAccountSummaryReply()
+    {
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        MoneyData_Field = new MoneyData();
     }
 
-    public int CalcPayloadSize() {
-        return this.MoneyData_Field.StartDate.length + 25 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + this.MoneyData_Field.LastTaxDate.length + 1 + this.MoneyData_Field.TaxDate.length + 36;
+    public int CalcPayloadSize()
+    {
+        return MoneyData_Field.StartDate.length + 25 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + MoneyData_Field.LastTaxDate.length + 1 + MoneyData_Field.TaxDate.length + 36;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleGroupAccountSummaryReply(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleGroupAccountSummaryReply(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 98);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.GroupID);
-        packUUID(byteBuffer, this.MoneyData_Field.RequestID);
-        packInt(byteBuffer, this.MoneyData_Field.IntervalDays);
-        packInt(byteBuffer, this.MoneyData_Field.CurrentInterval);
-        packVariable(byteBuffer, this.MoneyData_Field.StartDate, 1);
-        packInt(byteBuffer, this.MoneyData_Field.Balance);
-        packInt(byteBuffer, this.MoneyData_Field.TotalCredits);
-        packInt(byteBuffer, this.MoneyData_Field.TotalDebits);
-        packInt(byteBuffer, this.MoneyData_Field.ObjectTaxCurrent);
-        packInt(byteBuffer, this.MoneyData_Field.LightTaxCurrent);
-        packInt(byteBuffer, this.MoneyData_Field.LandTaxCurrent);
-        packInt(byteBuffer, this.MoneyData_Field.GroupTaxCurrent);
-        packInt(byteBuffer, this.MoneyData_Field.ParcelDirFeeCurrent);
-        packInt(byteBuffer, this.MoneyData_Field.ObjectTaxEstimate);
-        packInt(byteBuffer, this.MoneyData_Field.LightTaxEstimate);
-        packInt(byteBuffer, this.MoneyData_Field.LandTaxEstimate);
-        packInt(byteBuffer, this.MoneyData_Field.GroupTaxEstimate);
-        packInt(byteBuffer, this.MoneyData_Field.ParcelDirFeeEstimate);
-        packInt(byteBuffer, this.MoneyData_Field.NonExemptMembers);
-        packVariable(byteBuffer, this.MoneyData_Field.LastTaxDate, 1);
-        packVariable(byteBuffer, this.MoneyData_Field.TaxDate, 1);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)98);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.GroupID);
+        packUUID(bytebuffer, MoneyData_Field.RequestID);
+        packInt(bytebuffer, MoneyData_Field.IntervalDays);
+        packInt(bytebuffer, MoneyData_Field.CurrentInterval);
+        packVariable(bytebuffer, MoneyData_Field.StartDate, 1);
+        packInt(bytebuffer, MoneyData_Field.Balance);
+        packInt(bytebuffer, MoneyData_Field.TotalCredits);
+        packInt(bytebuffer, MoneyData_Field.TotalDebits);
+        packInt(bytebuffer, MoneyData_Field.ObjectTaxCurrent);
+        packInt(bytebuffer, MoneyData_Field.LightTaxCurrent);
+        packInt(bytebuffer, MoneyData_Field.LandTaxCurrent);
+        packInt(bytebuffer, MoneyData_Field.GroupTaxCurrent);
+        packInt(bytebuffer, MoneyData_Field.ParcelDirFeeCurrent);
+        packInt(bytebuffer, MoneyData_Field.ObjectTaxEstimate);
+        packInt(bytebuffer, MoneyData_Field.LightTaxEstimate);
+        packInt(bytebuffer, MoneyData_Field.LandTaxEstimate);
+        packInt(bytebuffer, MoneyData_Field.GroupTaxEstimate);
+        packInt(bytebuffer, MoneyData_Field.ParcelDirFeeEstimate);
+        packInt(bytebuffer, MoneyData_Field.NonExemptMembers);
+        packVariable(bytebuffer, MoneyData_Field.LastTaxDate, 1);
+        packVariable(bytebuffer, MoneyData_Field.TaxDate, 1);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.GroupID = unpackUUID(byteBuffer);
-        this.MoneyData_Field.RequestID = unpackUUID(byteBuffer);
-        this.MoneyData_Field.IntervalDays = unpackInt(byteBuffer);
-        this.MoneyData_Field.CurrentInterval = unpackInt(byteBuffer);
-        this.MoneyData_Field.StartDate = unpackVariable(byteBuffer, 1);
-        this.MoneyData_Field.Balance = unpackInt(byteBuffer);
-        this.MoneyData_Field.TotalCredits = unpackInt(byteBuffer);
-        this.MoneyData_Field.TotalDebits = unpackInt(byteBuffer);
-        this.MoneyData_Field.ObjectTaxCurrent = unpackInt(byteBuffer);
-        this.MoneyData_Field.LightTaxCurrent = unpackInt(byteBuffer);
-        this.MoneyData_Field.LandTaxCurrent = unpackInt(byteBuffer);
-        this.MoneyData_Field.GroupTaxCurrent = unpackInt(byteBuffer);
-        this.MoneyData_Field.ParcelDirFeeCurrent = unpackInt(byteBuffer);
-        this.MoneyData_Field.ObjectTaxEstimate = unpackInt(byteBuffer);
-        this.MoneyData_Field.LightTaxEstimate = unpackInt(byteBuffer);
-        this.MoneyData_Field.LandTaxEstimate = unpackInt(byteBuffer);
-        this.MoneyData_Field.GroupTaxEstimate = unpackInt(byteBuffer);
-        this.MoneyData_Field.ParcelDirFeeEstimate = unpackInt(byteBuffer);
-        this.MoneyData_Field.NonExemptMembers = unpackInt(byteBuffer);
-        this.MoneyData_Field.LastTaxDate = unpackVariable(byteBuffer, 1);
-        this.MoneyData_Field.TaxDate = unpackVariable(byteBuffer, 1);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.GroupID = unpackUUID(bytebuffer);
+        MoneyData_Field.RequestID = unpackUUID(bytebuffer);
+        MoneyData_Field.IntervalDays = unpackInt(bytebuffer);
+        MoneyData_Field.CurrentInterval = unpackInt(bytebuffer);
+        MoneyData_Field.StartDate = unpackVariable(bytebuffer, 1);
+        MoneyData_Field.Balance = unpackInt(bytebuffer);
+        MoneyData_Field.TotalCredits = unpackInt(bytebuffer);
+        MoneyData_Field.TotalDebits = unpackInt(bytebuffer);
+        MoneyData_Field.ObjectTaxCurrent = unpackInt(bytebuffer);
+        MoneyData_Field.LightTaxCurrent = unpackInt(bytebuffer);
+        MoneyData_Field.LandTaxCurrent = unpackInt(bytebuffer);
+        MoneyData_Field.GroupTaxCurrent = unpackInt(bytebuffer);
+        MoneyData_Field.ParcelDirFeeCurrent = unpackInt(bytebuffer);
+        MoneyData_Field.ObjectTaxEstimate = unpackInt(bytebuffer);
+        MoneyData_Field.LightTaxEstimate = unpackInt(bytebuffer);
+        MoneyData_Field.LandTaxEstimate = unpackInt(bytebuffer);
+        MoneyData_Field.GroupTaxEstimate = unpackInt(bytebuffer);
+        MoneyData_Field.ParcelDirFeeEstimate = unpackInt(bytebuffer);
+        MoneyData_Field.NonExemptMembers = unpackInt(bytebuffer);
+        MoneyData_Field.LastTaxDate = unpackVariable(bytebuffer, 1);
+        MoneyData_Field.TaxDate = unpackVariable(bytebuffer, 1);
     }
 }

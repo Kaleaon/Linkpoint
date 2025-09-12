@@ -1,49 +1,77 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class DirPopularQuery extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public QueryData QueryData_Field = new QueryData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class DirPopularQuery extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class QueryData {
+    public static class QueryData
+    {
+
         public int QueryFlags;
         public UUID QueryID;
+
+        public QueryData()
+        {
+        }
     }
 
-    public DirPopularQuery() {
-        this.zeroCoded = true;
+
+    public AgentData AgentData_Field;
+    public QueryData QueryData_Field;
+
+    public DirPopularQuery()
+    {
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        QueryData_Field = new QueryData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 56;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDirPopularQuery(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleDirPopularQuery(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 51);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packUUID(byteBuffer, this.QueryData_Field.QueryID);
-        packInt(byteBuffer, this.QueryData_Field.QueryFlags);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)51);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packUUID(bytebuffer, QueryData_Field.QueryID);
+        packInt(bytebuffer, QueryData_Field.QueryFlags);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.QueryData_Field.QueryID = unpackUUID(byteBuffer);
-        this.QueryData_Field.QueryFlags = unpackInt(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        QueryData_Field.QueryID = unpackUUID(bytebuffer);
+        QueryData_Field.QueryFlags = unpackInt(bytebuffer);
     }
 }

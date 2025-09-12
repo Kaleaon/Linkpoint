@@ -1,66 +1,103 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.lumiyaviewer.lumiya.slproto.users.ParcelData;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChannelInfo;
-import javax.annotation.Nullable;
 
-final class AutoValue_CurrentLocationInfo extends CurrentLocationInfo {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            CurrentLocationInfo
+
+final class AutoValue_CurrentLocationInfo extends CurrentLocationInfo
+{
+
     private final int inChatRangeUsers;
     private final int nearbyUsers;
     private final ParcelData parcelData;
     private final VoiceChannelInfo parcelVoiceChannel;
 
-    AutoValue_CurrentLocationInfo(@Nullable ParcelData parcelData2, int i, int i2, @Nullable VoiceChannelInfo voiceChannelInfo) {
-        this.parcelData = parcelData2;
-        this.nearbyUsers = i;
-        this.inChatRangeUsers = i2;
-        this.parcelVoiceChannel = voiceChannelInfo;
+    AutoValue_CurrentLocationInfo(ParcelData parceldata, int i, int j, VoiceChannelInfo voicechannelinfo)
+    {
+        parcelData = parceldata;
+        nearbyUsers = i;
+        inChatRangeUsers = j;
+        parcelVoiceChannel = voicechannelinfo;
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
             return true;
         }
-        if (!(obj instanceof CurrentLocationInfo)) {
+        if (obj instanceof CurrentLocationInfo)
+        {
+            obj = (CurrentLocationInfo)obj;
+            if ((parcelData != null ? parcelData.equals(((CurrentLocationInfo) (obj)).parcelData()) : ((CurrentLocationInfo) (obj)).parcelData() == null) && (nearbyUsers == ((CurrentLocationInfo) (obj)).nearbyUsers() && inChatRangeUsers == ((CurrentLocationInfo) (obj)).inChatRangeUsers()))
+            {
+                if (parcelVoiceChannel == null)
+                {
+                    return ((CurrentLocationInfo) (obj)).parcelVoiceChannel() == null;
+                } else
+                {
+                    return parcelVoiceChannel.equals(((CurrentLocationInfo) (obj)).parcelVoiceChannel());
+                }
+            } else
+            {
+                return false;
+            }
+        } else
+        {
             return false;
         }
-        CurrentLocationInfo currentLocationInfo = (CurrentLocationInfo) obj;
-        if (this.parcelData != null ? this.parcelData.equals(currentLocationInfo.parcelData()) : currentLocationInfo.parcelData() == null) {
-            if (this.nearbyUsers == currentLocationInfo.nearbyUsers() && this.inChatRangeUsers == currentLocationInfo.inChatRangeUsers()) {
-                return this.parcelVoiceChannel == null ? currentLocationInfo.parcelVoiceChannel() == null : this.parcelVoiceChannel.equals(currentLocationInfo.parcelVoiceChannel());
-            }
+    }
+
+    public int hashCode()
+    {
+        int j = 0;
+        int i;
+        int k;
+        int l;
+        if (parcelData == null)
+        {
+            i = 0;
+        } else
+        {
+            i = parcelData.hashCode();
         }
-        return false;
-    }
-
-    public int hashCode() {
-        int i = 0;
-        int hashCode = ((((((this.parcelData == null ? 0 : this.parcelData.hashCode()) ^ 1000003) * 1000003) ^ this.nearbyUsers) * 1000003) ^ this.inChatRangeUsers) * 1000003;
-        if (this.parcelVoiceChannel != null) {
-            i = this.parcelVoiceChannel.hashCode();
+        k = nearbyUsers;
+        l = inChatRangeUsers;
+        if (parcelVoiceChannel != null)
+        {
+            j = parcelVoiceChannel.hashCode();
         }
-        return hashCode ^ i;
+        return (((i ^ 0xf4243) * 0xf4243 ^ k) * 0xf4243 ^ l) * 0xf4243 ^ j;
     }
 
-    public int inChatRangeUsers() {
-        return this.inChatRangeUsers;
+    public int inChatRangeUsers()
+    {
+        return inChatRangeUsers;
     }
 
-    public int nearbyUsers() {
-        return this.nearbyUsers;
+    public int nearbyUsers()
+    {
+        return nearbyUsers;
     }
 
-    @Nullable
-    public ParcelData parcelData() {
-        return this.parcelData;
+    public ParcelData parcelData()
+    {
+        return parcelData;
     }
 
-    @Nullable
-    public VoiceChannelInfo parcelVoiceChannel() {
-        return this.parcelVoiceChannel;
+    public VoiceChannelInfo parcelVoiceChannel()
+    {
+        return parcelVoiceChannel;
     }
 
-    public String toString() {
-        return "CurrentLocationInfo{parcelData=" + this.parcelData + ", " + "nearbyUsers=" + this.nearbyUsers + ", " + "inChatRangeUsers=" + this.inChatRangeUsers + ", " + "parcelVoiceChannel=" + this.parcelVoiceChannel + "}";
+    public String toString()
+    {
+        return (new StringBuilder()).append("CurrentLocationInfo{parcelData=").append(parcelData).append(", ").append("nearbyUsers=").append(nearbyUsers).append(", ").append("inChatRangeUsers=").append(inChatRangeUsers).append(", ").append("parcelVoiceChannel=").append(parcelVoiceChannel).append("}").toString();
     }
 }

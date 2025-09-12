@@ -35,10 +35,9 @@ public class DrawableTerrainPatch implements ResourceConsumer {
     }
 
     public void OnResourceReady(Object obj, boolean z) {
-        String str = "DrawableTerrainPatch: got resource = %s";
         Object[] objArr = new Object[1];
         objArr[0] = obj != null ? obj.toString() : "null";
-        Debug.Printf(str, objArr);
+        Debug.Printf("DrawableTerrainPatch: got resource = %s", objArr);
         if (obj instanceof TerrainPatchGeometry) {
             this.geometry = (TerrainPatchGeometry) obj;
         } else if (obj instanceof GLLoadedTexture) {

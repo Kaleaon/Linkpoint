@@ -1,40 +1,56 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class InventoryDescendents extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<FolderData> FolderData_Fields = new ArrayList<>();
-    public ArrayList<ItemData> ItemData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class InventoryDescendents extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public int Descendents;
         public UUID FolderID;
         public UUID OwnerID;
         public int Version;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class FolderData {
+    public static class FolderData
+    {
+
         public UUID FolderID;
-        public byte[] Name;
+        public byte Name[];
         public UUID ParentID;
         public int Type;
+
+        public FolderData()
+        {
+        }
     }
 
-    public static class ItemData {
+    public static class ItemData
+    {
+
         public UUID AssetID;
         public int BaseMask;
         public int CRC;
         public int CreationDate;
         public UUID CreatorID;
-        public byte[] Description;
+        public byte Description[];
         public int EveryoneMask;
         public int Flags;
         public UUID FolderID;
@@ -43,129 +59,149 @@ public class InventoryDescendents extends SLMessage {
         public boolean GroupOwned;
         public int InvType;
         public UUID ItemID;
-        public byte[] Name;
+        public byte Name[];
         public int NextOwnerMask;
         public UUID OwnerID;
         public int OwnerMask;
         public int SalePrice;
         public int SaleType;
         public int Type;
+
+        public ItemData()
+        {
+        }
     }
 
-    public InventoryDescendents() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
+
+    public AgentData AgentData_Field;
+    public ArrayList FolderData_Fields;
+    public ArrayList ItemData_Fields;
+
+    public InventoryDescendents()
+    {
+        FolderData_Fields = new ArrayList();
+        ItemData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = FolderData_Fields.iterator();
         int i;
-        int i2 = 61;
-        Iterator<T> it = this.FolderData_Fields.iterator();
-        while (true) {
-            i = i2;
-            if (!it.hasNext()) {
-                break;
-            }
-            i2 = ((FolderData) it.next()).Name.length + 34 + i;
+        for (i = 61; iterator.hasNext(); i = ((FolderData)iterator.next()).Name.length + 34 + i) { }
+        iterator = ItemData_Fields.iterator();
+        ItemData itemdata;
+        int j;
+        for (i++; iterator.hasNext(); i = itemdata.Description.length + (j + 129 + 1) + 4 + 4 + i)
+        {
+            itemdata = (ItemData)iterator.next();
+            j = itemdata.Name.length;
         }
-        int i3 = i + 1;
-        Iterator<T> it2 = this.ItemData_Fields.iterator();
-        while (true) {
-            int i4 = i3;
-            if (!it2.hasNext()) {
-                return i4;
-            }
-            ItemData itemData = (ItemData) it2.next();
-            i3 = itemData.Description.length + itemData.Name.length + 129 + 1 + 4 + 4 + i4;
-        }
+
+        return i;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleInventoryDescendents(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleInventoryDescendents(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put(Ascii.SYN);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.FolderID);
-        packUUID(byteBuffer, this.AgentData_Field.OwnerID);
-        packInt(byteBuffer, this.AgentData_Field.Version);
-        packInt(byteBuffer, this.AgentData_Field.Descendents);
-        byteBuffer.put((byte) this.FolderData_Fields.size());
-        for (FolderData folderData : this.FolderData_Fields) {
-            packUUID(byteBuffer, folderData.FolderID);
-            packUUID(byteBuffer, folderData.ParentID);
-            packByte(byteBuffer, (byte) folderData.Type);
-            packVariable(byteBuffer, folderData.Name, 1);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)22);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.FolderID);
+        packUUID(bytebuffer, AgentData_Field.OwnerID);
+        packInt(bytebuffer, AgentData_Field.Version);
+        packInt(bytebuffer, AgentData_Field.Descendents);
+        bytebuffer.put((byte)FolderData_Fields.size());
+        FolderData folderdata;
+        for (Iterator iterator = FolderData_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, folderdata.Name, 1))
+        {
+            folderdata = (FolderData)iterator.next();
+            packUUID(bytebuffer, folderdata.FolderID);
+            packUUID(bytebuffer, folderdata.ParentID);
+            packByte(bytebuffer, (byte)folderdata.Type);
         }
-        byteBuffer.put((byte) this.ItemData_Fields.size());
-        for (ItemData itemData : this.ItemData_Fields) {
-            packUUID(byteBuffer, itemData.ItemID);
-            packUUID(byteBuffer, itemData.FolderID);
-            packUUID(byteBuffer, itemData.CreatorID);
-            packUUID(byteBuffer, itemData.OwnerID);
-            packUUID(byteBuffer, itemData.GroupID);
-            packInt(byteBuffer, itemData.BaseMask);
-            packInt(byteBuffer, itemData.OwnerMask);
-            packInt(byteBuffer, itemData.GroupMask);
-            packInt(byteBuffer, itemData.EveryoneMask);
-            packInt(byteBuffer, itemData.NextOwnerMask);
-            packBoolean(byteBuffer, itemData.GroupOwned);
-            packUUID(byteBuffer, itemData.AssetID);
-            packByte(byteBuffer, (byte) itemData.Type);
-            packByte(byteBuffer, (byte) itemData.InvType);
-            packInt(byteBuffer, itemData.Flags);
-            packByte(byteBuffer, (byte) itemData.SaleType);
-            packInt(byteBuffer, itemData.SalePrice);
-            packVariable(byteBuffer, itemData.Name, 1);
-            packVariable(byteBuffer, itemData.Description, 1);
-            packInt(byteBuffer, itemData.CreationDate);
-            packInt(byteBuffer, itemData.CRC);
+
+        bytebuffer.put((byte)ItemData_Fields.size());
+        ItemData itemdata;
+        for (Iterator iterator1 = ItemData_Fields.iterator(); iterator1.hasNext(); packInt(bytebuffer, itemdata.CRC))
+        {
+            itemdata = (ItemData)iterator1.next();
+            packUUID(bytebuffer, itemdata.ItemID);
+            packUUID(bytebuffer, itemdata.FolderID);
+            packUUID(bytebuffer, itemdata.CreatorID);
+            packUUID(bytebuffer, itemdata.OwnerID);
+            packUUID(bytebuffer, itemdata.GroupID);
+            packInt(bytebuffer, itemdata.BaseMask);
+            packInt(bytebuffer, itemdata.OwnerMask);
+            packInt(bytebuffer, itemdata.GroupMask);
+            packInt(bytebuffer, itemdata.EveryoneMask);
+            packInt(bytebuffer, itemdata.NextOwnerMask);
+            packBoolean(bytebuffer, itemdata.GroupOwned);
+            packUUID(bytebuffer, itemdata.AssetID);
+            packByte(bytebuffer, (byte)itemdata.Type);
+            packByte(bytebuffer, (byte)itemdata.InvType);
+            packInt(bytebuffer, itemdata.Flags);
+            packByte(bytebuffer, (byte)itemdata.SaleType);
+            packInt(bytebuffer, itemdata.SalePrice);
+            packVariable(bytebuffer, itemdata.Name, 1);
+            packVariable(bytebuffer, itemdata.Description, 1);
+            packInt(bytebuffer, itemdata.CreationDate);
         }
+
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.FolderID = unpackUUID(byteBuffer);
-        this.AgentData_Field.OwnerID = unpackUUID(byteBuffer);
-        this.AgentData_Field.Version = unpackInt(byteBuffer);
-        this.AgentData_Field.Descendents = unpackInt(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            FolderData folderData = new FolderData();
-            folderData.FolderID = unpackUUID(byteBuffer);
-            folderData.ParentID = unpackUUID(byteBuffer);
-            folderData.Type = unpackByte(byteBuffer);
-            folderData.Name = unpackVariable(byteBuffer, 1);
-            this.FolderData_Fields.add(folderData);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.FolderID = unpackUUID(bytebuffer);
+        AgentData_Field.OwnerID = unpackUUID(bytebuffer);
+        AgentData_Field.Version = unpackInt(bytebuffer);
+        AgentData_Field.Descendents = unpackInt(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            FolderData folderdata = new FolderData();
+            folderdata.FolderID = unpackUUID(bytebuffer);
+            folderdata.ParentID = unpackUUID(bytebuffer);
+            folderdata.Type = unpackByte(bytebuffer);
+            folderdata.Name = unpackVariable(bytebuffer, 1);
+            FolderData_Fields.add(folderdata);
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < b2; i2++) {
-            ItemData itemData = new ItemData();
-            itemData.ItemID = unpackUUID(byteBuffer);
-            itemData.FolderID = unpackUUID(byteBuffer);
-            itemData.CreatorID = unpackUUID(byteBuffer);
-            itemData.OwnerID = unpackUUID(byteBuffer);
-            itemData.GroupID = unpackUUID(byteBuffer);
-            itemData.BaseMask = unpackInt(byteBuffer);
-            itemData.OwnerMask = unpackInt(byteBuffer);
-            itemData.GroupMask = unpackInt(byteBuffer);
-            itemData.EveryoneMask = unpackInt(byteBuffer);
-            itemData.NextOwnerMask = unpackInt(byteBuffer);
-            itemData.GroupOwned = unpackBoolean(byteBuffer);
-            itemData.AssetID = unpackUUID(byteBuffer);
-            itemData.Type = unpackByte(byteBuffer);
-            itemData.InvType = unpackByte(byteBuffer);
-            itemData.Flags = unpackInt(byteBuffer);
-            itemData.SaleType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            itemData.SalePrice = unpackInt(byteBuffer);
-            itemData.Name = unpackVariable(byteBuffer, 1);
-            itemData.Description = unpackVariable(byteBuffer, 1);
-            itemData.CreationDate = unpackInt(byteBuffer);
-            itemData.CRC = unpackInt(byteBuffer);
-            this.ItemData_Fields.add(itemData);
+
+        byte0 = bytebuffer.get();
+        for (int j = ((flag) ? 1 : 0); j < (byte0 & 0xff); j++)
+        {
+            ItemData itemdata = new ItemData();
+            itemdata.ItemID = unpackUUID(bytebuffer);
+            itemdata.FolderID = unpackUUID(bytebuffer);
+            itemdata.CreatorID = unpackUUID(bytebuffer);
+            itemdata.OwnerID = unpackUUID(bytebuffer);
+            itemdata.GroupID = unpackUUID(bytebuffer);
+            itemdata.BaseMask = unpackInt(bytebuffer);
+            itemdata.OwnerMask = unpackInt(bytebuffer);
+            itemdata.GroupMask = unpackInt(bytebuffer);
+            itemdata.EveryoneMask = unpackInt(bytebuffer);
+            itemdata.NextOwnerMask = unpackInt(bytebuffer);
+            itemdata.GroupOwned = unpackBoolean(bytebuffer);
+            itemdata.AssetID = unpackUUID(bytebuffer);
+            itemdata.Type = unpackByte(bytebuffer);
+            itemdata.InvType = unpackByte(bytebuffer);
+            itemdata.Flags = unpackInt(bytebuffer);
+            itemdata.SaleType = unpackByte(bytebuffer) & 0xff;
+            itemdata.SalePrice = unpackInt(bytebuffer);
+            itemdata.Name = unpackVariable(bytebuffer, 1);
+            itemdata.Description = unpackVariable(bytebuffer, 1);
+            itemdata.CreationDate = unpackInt(bytebuffer);
+            itemdata.CRC = unpackInt(bytebuffer);
+            ItemData_Fields.add(itemdata);
         }
+
     }
 }

@@ -1,20 +1,84 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.objects;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public abstract class SLObjectProfileData {
-    public static SLObjectProfileData create(@Nonnull SLObjectInfo sLObjectInfo) {
-        HoverText hoverText = sLObjectInfo.getHoverText();
-        return new AutoValue_SLObjectProfileData(sLObjectInfo.getId(), sLObjectInfo.nameKnown ? Optional.of(Strings.nullToEmpty(sLObjectInfo.name)) : Optional.absent(), Optional.fromNullable(sLObjectInfo.getDescription()), sLObjectInfo.getOwnerUUID(), sLObjectInfo.isTouchable(), sLObjectInfo.getTouchName(), sLObjectInfo.isPayable(), sLObjectInfo.saleType, sLObjectInfo.salePrice, (sLObjectInfo.UpdateFlags & 8) != 0, sLObjectInfo.isDead, Optional.fromNullable(hoverText != null ? Strings.emptyToNull(hoverText.text()) : null), sLObjectInfo.getPayInfo(), (sLObjectInfo.UpdateFlags & 4) != 0);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.objects:
+//            SLObjectInfo, HoverText, AutoValue_SLObjectProfileData, PayInfo
+
+public abstract class SLObjectProfileData
+{
+
+    public SLObjectProfileData()
+    {
     }
 
-    public abstract Optional<String> description();
+    public static SLObjectProfileData create(SLObjectInfo slobjectinfo)
+    {
+        Object obj = slobjectinfo.getHoverText();
+        byte byte0;
+        Optional optional;
+        UUID uuid;
+        Optional optional1;
+        UUID uuid1;
+        String s;
+        PayInfo payinfo;
+        int i;
+        boolean flag;
+        boolean flag1;
+        boolean flag2;
+        boolean flag3;
+        boolean flag4;
+        if (obj != null)
+        {
+            obj = Strings.emptyToNull(((HoverText) (obj)).text());
+        } else
+        {
+            obj = null;
+        }
+        uuid = slobjectinfo.getId();
+        if (slobjectinfo.nameKnown)
+        {
+            optional = Optional.of(Strings.nullToEmpty(slobjectinfo.name));
+        } else
+        {
+            optional = Optional.absent();
+        }
+        optional1 = Optional.fromNullable(slobjectinfo.getDescription());
+        uuid1 = slobjectinfo.getOwnerUUID();
+        flag2 = slobjectinfo.isTouchable();
+        s = slobjectinfo.getTouchName();
+        flag3 = slobjectinfo.isPayable();
+        byte0 = slobjectinfo.saleType;
+        i = slobjectinfo.salePrice;
+        if ((slobjectinfo.UpdateFlags & 8) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        flag4 = slobjectinfo.isDead;
+        obj = Optional.fromNullable(obj);
+        payinfo = slobjectinfo.getPayInfo();
+        if ((slobjectinfo.UpdateFlags & 4) != 0)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        return new AutoValue_SLObjectProfileData(uuid, optional, optional1, uuid1, flag2, s, flag3, byte0, i, flag, flag4, ((Optional) (obj)), payinfo, flag1);
+    }
 
-    public abstract Optional<String> floatingText();
+    public abstract Optional description();
+
+    public abstract Optional floatingText();
 
     public abstract boolean isCopyable();
 
@@ -26,21 +90,17 @@ public abstract class SLObjectProfileData {
 
     public abstract boolean isTouchable();
 
-    public abstract Optional<String> name();
+    public abstract Optional name();
 
-    @Nullable
     public abstract UUID objectUUID();
 
-    @Nullable
     public abstract UUID ownerUUID();
 
-    @Nullable
     public abstract PayInfo payInfo();
 
     public abstract int salePrice();
 
     public abstract byte saleType();
 
-    @Nullable
     public abstract String touchName();
 }

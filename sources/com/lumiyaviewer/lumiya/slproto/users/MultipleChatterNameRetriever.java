@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users;
 
-import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,92 +12,145 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
-import javax.annotation.Nullable;
 
-public class MultipleChatterNameRetriever implements ChatterNameRetriever.OnChatterNameUpdated {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users:
+//            ChatterNameRetriever, ChatterID
+
+public class MultipleChatterNameRetriever
+    implements ChatterNameRetriever.OnChatterNameUpdated
+{
+    public static interface OnChatterNameUpdated
+    {
+
+        public abstract void onChatterNameUpdated(MultipleChatterNameRetriever multiplechatternameretriever);
+    }
+
+
     private final UUID agentUUID;
-    @Nullable
     private final Executor executor;
-    private final WeakReference<OnChatterNameUpdated> listener;
+    private final WeakReference listener;
     private final Object lock = new Object();
-    private final Map<UUID, ChatterNameRetriever> retrievers = new HashMap();
+    private final Map retrievers = new HashMap();
 
-    public interface OnChatterNameUpdated {
-        void onChatterNameUpdated(MultipleChatterNameRetriever multipleChatterNameRetriever);
+    public MultipleChatterNameRetriever(UUID uuid, OnChatterNameUpdated onchatternameupdated, Executor executor1)
+    {
+        agentUUID = uuid;
+        listener = new WeakReference(onchatternameupdated);
+        executor = executor1;
     }
 
-    public MultipleChatterNameRetriever(UUID uuid, OnChatterNameUpdated onChatterNameUpdated, Executor executor2) {
-        this.agentUUID = uuid;
-        this.listener = new WeakReference<>(onChatterNameUpdated);
-        this.executor = executor2;
+    public String addChatter(UUID uuid)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        ChatterNameRetriever chatternameretriever = (ChatterNameRetriever)retrievers.get(uuid);
+        obj;
+        JVM INSTR monitorexit ;
+        if (chatternameretriever != null)
+        {
+            return chatternameretriever.getResolvedName();
+        }
+        break MISSING_BLOCK_LABEL_37;
+        uuid;
+        throw uuid;
+        chatternameretriever = new ChatterNameRetriever(ChatterID.getUserChatterID(agentUUID, uuid), this, executor);
+        obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        uuid = (ChatterNameRetriever)retrievers.put(uuid, chatternameretriever);
+        obj;
+        JVM INSTR monitorexit ;
+        if (uuid != null)
+        {
+            uuid.dispose();
+        }
+        return chatternameretriever.getResolvedName();
+        uuid;
+        throw uuid;
     }
 
-    public String addChatter(UUID uuid) {
-        ChatterNameRetriever chatterNameRetriever;
-        ChatterNameRetriever put;
-        synchronized (this.lock) {
-            chatterNameRetriever = this.retrievers.get(uuid);
+    public void clearChatters()
+    {
+        Object obj = null;
+        Object obj2 = lock;
+        obj2;
+        JVM INSTR monitorenter ;
+        Iterator iterator = retrievers.entrySet().iterator();
+_L1:
+        java.util.Map.Entry entry;
+        if (!iterator.hasNext())
+        {
+            break MISSING_BLOCK_LABEL_95;
         }
-        if (chatterNameRetriever != null) {
-            return chatterNameRetriever.getResolvedName();
+        entry = (java.util.Map.Entry)iterator.next();
+        Object obj1;
+        obj1 = obj;
+        if (obj != null)
+        {
+            break MISSING_BLOCK_LABEL_61;
         }
-        ChatterNameRetriever chatterNameRetriever2 = new ChatterNameRetriever(ChatterID.getUserChatterID(this.agentUUID, uuid), this, this.executor);
-        synchronized (this.lock) {
-            put = this.retrievers.put(uuid, chatterNameRetriever2);
+        obj1 = new HashSet();
+        ((Set) (obj1)).add((ChatterNameRetriever)entry.getValue());
+        iterator.remove();
+        obj = obj1;
+          goto _L1
+        obj;
+        throw obj;
+        obj2;
+        JVM INSTR monitorexit ;
+        if (obj != null)
+        {
+            for (obj = ((Iterable) (obj)).iterator(); ((Iterator) (obj)).hasNext(); ((ChatterNameRetriever)((Iterator) (obj)).next()).dispose()) { }
         }
-        if (put != null) {
-            put.dispose();
-        }
-        return chatterNameRetriever2.getResolvedName();
+        return;
     }
 
-    public void clearChatters() {
-        HashSet<ChatterNameRetriever> hashSet = null;
-        synchronized (this.lock) {
-            Iterator<Map.Entry<UUID, ChatterNameRetriever>> it = this.retrievers.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry next = it.next();
-                if (hashSet == null) {
-                    hashSet = new HashSet<>();
-                }
-                hashSet.add((ChatterNameRetriever) next.getValue());
-                it.remove();
+    public void onChatterNameUpdated(ChatterNameRetriever chatternameretriever)
+    {
+        chatternameretriever = (OnChatterNameUpdated)listener.get();
+        if (chatternameretriever != null)
+        {
+            chatternameretriever.onChatterNameUpdated(this);
+        }
+    }
+
+    public void retainChatters(Set set)
+    {
+        HashSet hashset = null;
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        Iterator iterator = retrievers.entrySet().iterator();
+_L1:
+        java.util.Map.Entry entry;
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_108;
             }
+            entry = (java.util.Map.Entry)iterator.next();
+        } while (set.contains(entry.getKey()));
+        HashSet hashset1;
+        hashset1 = hashset;
+        if (hashset != null)
+        {
+            break MISSING_BLOCK_LABEL_79;
         }
-        if (hashSet != null) {
-            for (ChatterNameRetriever dispose : hashSet) {
-                dispose.dispose();
-            }
+        hashset1 = new HashSet();
+        hashset1.add((ChatterNameRetriever)entry.getValue());
+        iterator.remove();
+        hashset = hashset1;
+          goto _L1
+        obj;
+        JVM INSTR monitorexit ;
+        if (hashset != null)
+        {
+            for (set = hashset.iterator(); set.hasNext(); ((ChatterNameRetriever)set.next()).dispose()) { }
         }
-    }
-
-    public void onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-        OnChatterNameUpdated onChatterNameUpdated = (OnChatterNameUpdated) this.listener.get();
-        if (onChatterNameUpdated != null) {
-            onChatterNameUpdated.onChatterNameUpdated(this);
-        }
-    }
-
-    public void retainChatters(Set<UUID> set) {
-        HashSet<ChatterNameRetriever> hashSet = null;
-        synchronized (this.lock) {
-            Iterator<Map.Entry<UUID, ChatterNameRetriever>> it = this.retrievers.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry next = it.next();
-                if (!set.contains(next.getKey())) {
-                    if (hashSet == null) {
-                        hashSet = new HashSet<>();
-                    }
-                    hashSet.add((ChatterNameRetriever) next.getValue());
-                    it.remove();
-                }
-                hashSet = hashSet;
-            }
-        }
-        if (hashSet != null) {
-            for (ChatterNameRetriever dispose : hashSet) {
-                dispose.dispose();
-            }
-        }
+        break MISSING_BLOCK_LABEL_152;
+        set;
+        throw set;
     }
 }

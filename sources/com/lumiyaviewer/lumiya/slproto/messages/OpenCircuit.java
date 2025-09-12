@@ -1,39 +1,60 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 
-public class OpenCircuit extends SLMessage {
-    public CircuitInfo CircuitInfo_Field = new CircuitInfo();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class CircuitInfo {
+public class OpenCircuit extends SLMessage
+{
+    public static class CircuitInfo
+    {
+
         public Inet4Address IP;
         public int Port;
+
+        public CircuitInfo()
+        {
+        }
     }
 
-    public OpenCircuit() {
-        this.zeroCoded = false;
+
+    public CircuitInfo CircuitInfo_Field;
+
+    public OpenCircuit()
+    {
+        zeroCoded = false;
+        CircuitInfo_Field = new CircuitInfo();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 10;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleOpenCircuit(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleOpenCircuit(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) -1);
-        byteBuffer.put((byte) -4);
-        packIPAddress(byteBuffer, this.CircuitInfo_Field.IP);
-        packShort(byteBuffer, (short) this.CircuitInfo_Field.Port);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)-1);
+        bytebuffer.put((byte)-4);
+        packIPAddress(bytebuffer, CircuitInfo_Field.IP);
+        packShort(bytebuffer, (short)CircuitInfo_Field.Port);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.CircuitInfo_Field.IP = unpackIPAddress(byteBuffer);
-        this.CircuitInfo_Field.Port = unpackShort(byteBuffer) & 65535;
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        CircuitInfo_Field.IP = unpackIPAddress(bytebuffer);
+        CircuitInfo_Field.Port = unpackShort(bytebuffer) & 0xffff;
     }
 }

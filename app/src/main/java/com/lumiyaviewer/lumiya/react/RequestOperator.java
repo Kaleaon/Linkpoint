@@ -1,6 +1,5 @@
 package com.lumiyaviewer.lumiya.react;
 
-import com.lumiyaviewer.lumiya.react.-$Lambda$3htMVvcf7XlS6QCgMv3cESjj4go.AnonymousClass1;
 import java.util.concurrent.Executor;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -25,31 +24,31 @@ public abstract class RequestOperator<K, T> implements RequestHandler<K> {
         this.executor = executor;
     }
 
-    /* synthetic */ void handleRequestCancellation(Object obj) {
+    /* access modifiers changed from: package-private */
+    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestOperator_1579  reason: not valid java name */
+    public /* synthetic */ void m31lambda$com_lumiyaviewer_lumiya_react_RequestOperator_1579(Object obj) {
         this.toHandler.onRequestCancelled(obj);
     }
 
-    /* synthetic */ void processRequestAsync(Object obj) {
-        Object result = processRequest(obj);
-        if (result != null) {
-            this.resultHandler.onResultData(obj, result);
+    /* access modifiers changed from: package-private */
+    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestOperator_996  reason: not valid java name */
+    public /* synthetic */ void m32lambda$com_lumiyaviewer_lumiya_react_RequestOperator_996(Object obj) {
+        Object processRequest = processRequest(obj);
+        if (processRequest != null) {
+            this.resultHandler.onResultData(obj, processRequest);
         } else {
             this.toHandler.onRequest(obj);
         }
     }
 
-    /* synthetic */ void cancelRequestAsync(Object obj) {
-        this.toHandler.onRequestCancelled(obj);
-    }
-
     public void onRequest(@Nonnull K k) {
         if (this.executor != null) {
-            this.executor.execute(() -> processRequestAsync(k));
+            this.executor.execute(() -> m32lambda$com_lumiyaviewer_lumiya_react_RequestOperator_996(k));
             return;
         }
-        Object processResult = processRequest(k);
-        if (processResult != null) {
-            this.resultHandler.onResultData(k, processResult);
+        Object processRequest = processRequest(k);
+        if (processRequest != null) {
+            this.resultHandler.onResultData(k, processRequest);
         } else {
             this.toHandler.onRequest(k);
         }
@@ -57,7 +56,7 @@ public abstract class RequestOperator<K, T> implements RequestHandler<K> {
 
     public void onRequestCancelled(@Nonnull K k) {
         if (this.executor != null) {
-            this.executor.execute(() -> cancelRequestAsync(k));
+            this.executor.execute(() -> m31lambda$com_lumiyaviewer_lumiya_react_RequestOperator_1579(k));
         } else {
             this.toHandler.onRequestCancelled(k);
         }

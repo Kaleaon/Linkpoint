@@ -1,7 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
@@ -10,27 +12,30 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class ChildAgentUpdate extends SLMessage {
-    public ArrayList<AgentAccess> AgentAccess_Fields = new ArrayList<>();
-    public AgentData AgentData_Field;
-    public ArrayList<AgentInfo> AgentInfo_Fields = new ArrayList<>();
-    public ArrayList<AnimationData> AnimationData_Fields = new ArrayList<>();
-    public ArrayList<GranterBlock> GranterBlock_Fields = new ArrayList<>();
-    public ArrayList<GroupData> GroupData_Fields = new ArrayList<>();
-    public ArrayList<NVPairData> NVPairData_Fields = new ArrayList<>();
-    public ArrayList<VisualParam> VisualParam_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentAccess {
+public class ChildAgentUpdate extends SLMessage
+{
+    public static class AgentAccess
+    {
+
         public int AgentLegacyAccess;
         public int AgentMaxAccess;
+
+        public AgentAccess()
+        {
+        }
     }
 
-    public static class AgentData {
+    public static class AgentData
+    {
+
         public UUID ActiveGroupID;
         public int AgentAccess;
         public UUID AgentID;
         public LLVector3 AgentPos;
-        public byte[] AgentTextures;
+        public byte AgentTextures[];
         public LLVector3 AgentVel;
         public boolean AlwaysRun;
         public float Aspect;
@@ -49,193 +54,270 @@ public class ChildAgentUpdate extends SLMessage {
         public long RegionHandle;
         public UUID SessionID;
         public LLVector3 Size;
-        public byte[] Throttles;
+        public byte Throttles[];
         public LLVector3 UpAxis;
         public int ViewerCircuitCode;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class AgentInfo {
+    public static class AgentInfo
+    {
+
         public int Flags;
+
+        public AgentInfo()
+        {
+        }
     }
 
-    public static class AnimationData {
+    public static class AnimationData
+    {
+
         public UUID Animation;
         public UUID ObjectID;
+
+        public AnimationData()
+        {
+        }
     }
 
-    public static class GranterBlock {
+    public static class GranterBlock
+    {
+
         public UUID GranterID;
+
+        public GranterBlock()
+        {
+        }
     }
 
-    public static class GroupData {
+    public static class GroupData
+    {
+
         public boolean AcceptNotices;
         public UUID GroupID;
         public long GroupPowers;
+
+        public GroupData()
+        {
+        }
     }
 
-    public static class NVPairData {
-        public byte[] NVPairs;
+    public static class NVPairData
+    {
+
+        public byte NVPairs[];
+
+        public NVPairData()
+        {
+        }
     }
 
-    public static class VisualParam {
+    public static class VisualParam
+    {
+
         public int ParamValue;
-    }
 
-    public ChildAgentUpdate() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        int length = this.AgentData_Field.Throttles.length + 138 + 4 + 12 + 12 + 4 + 4 + 1 + 1 + 16 + 1 + 2 + this.AgentData_Field.AgentTextures.length + 16 + 1 + 1 + (this.GroupData_Fields.size() * 25) + 1 + (this.AnimationData_Fields.size() * 32) + 1 + (this.GranterBlock_Fields.size() * 16) + 1;
-        Iterator<T> it = this.NVPairData_Fields.iterator();
-        while (true) {
-            int i = length;
-            if (!it.hasNext()) {
-                return i + 1 + (this.VisualParam_Fields.size() * 1) + 1 + (this.AgentAccess_Fields.size() * 2) + 1 + (this.AgentInfo_Fields.size() * 4);
-            }
-            length = ((NVPairData) it.next()).NVPairs.length + 2 + i;
+        public VisualParam()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleChildAgentUpdate(this);
+
+    public ArrayList AgentAccess_Fields;
+    public AgentData AgentData_Field;
+    public ArrayList AgentInfo_Fields;
+    public ArrayList AnimationData_Fields;
+    public ArrayList GranterBlock_Fields;
+    public ArrayList GroupData_Fields;
+    public ArrayList NVPairData_Fields;
+    public ArrayList VisualParam_Fields;
+
+    public ChildAgentUpdate()
+    {
+        GroupData_Fields = new ArrayList();
+        AnimationData_Fields = new ArrayList();
+        GranterBlock_Fields = new ArrayList();
+        NVPairData_Fields = new ArrayList();
+        VisualParam_Fields = new ArrayList();
+        AgentAccess_Fields = new ArrayList();
+        AgentInfo_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put(Ascii.EM);
-        packLong(byteBuffer, this.AgentData_Field.RegionHandle);
-        packInt(byteBuffer, this.AgentData_Field.ViewerCircuitCode);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packLLVector3(byteBuffer, this.AgentData_Field.AgentPos);
-        packLLVector3(byteBuffer, this.AgentData_Field.AgentVel);
-        packLLVector3(byteBuffer, this.AgentData_Field.Center);
-        packLLVector3(byteBuffer, this.AgentData_Field.Size);
-        packLLVector3(byteBuffer, this.AgentData_Field.AtAxis);
-        packLLVector3(byteBuffer, this.AgentData_Field.LeftAxis);
-        packLLVector3(byteBuffer, this.AgentData_Field.UpAxis);
-        packBoolean(byteBuffer, this.AgentData_Field.ChangedGrid);
-        packFloat(byteBuffer, this.AgentData_Field.Far);
-        packFloat(byteBuffer, this.AgentData_Field.Aspect);
-        packVariable(byteBuffer, this.AgentData_Field.Throttles, 1);
-        packInt(byteBuffer, this.AgentData_Field.LocomotionState);
-        packLLQuaternion(byteBuffer, this.AgentData_Field.HeadRotation);
-        packLLQuaternion(byteBuffer, this.AgentData_Field.BodyRotation);
-        packInt(byteBuffer, this.AgentData_Field.ControlFlags);
-        packFloat(byteBuffer, this.AgentData_Field.EnergyLevel);
-        packByte(byteBuffer, (byte) this.AgentData_Field.GodLevel);
-        packBoolean(byteBuffer, this.AgentData_Field.AlwaysRun);
-        packUUID(byteBuffer, this.AgentData_Field.PreyAgent);
-        packByte(byteBuffer, (byte) this.AgentData_Field.AgentAccess);
-        packVariable(byteBuffer, this.AgentData_Field.AgentTextures, 2);
-        packUUID(byteBuffer, this.AgentData_Field.ActiveGroupID);
-        byteBuffer.put((byte) this.GroupData_Fields.size());
-        for (GroupData groupData : this.GroupData_Fields) {
-            packUUID(byteBuffer, groupData.GroupID);
-            packLong(byteBuffer, groupData.GroupPowers);
-            packBoolean(byteBuffer, groupData.AcceptNotices);
-        }
-        byteBuffer.put((byte) this.AnimationData_Fields.size());
-        for (AnimationData animationData : this.AnimationData_Fields) {
-            packUUID(byteBuffer, animationData.Animation);
-            packUUID(byteBuffer, animationData.ObjectID);
-        }
-        byteBuffer.put((byte) this.GranterBlock_Fields.size());
-        for (GranterBlock granterBlock : this.GranterBlock_Fields) {
-            packUUID(byteBuffer, granterBlock.GranterID);
-        }
-        byteBuffer.put((byte) this.NVPairData_Fields.size());
-        for (NVPairData nVPairData : this.NVPairData_Fields) {
-            packVariable(byteBuffer, nVPairData.NVPairs, 2);
-        }
-        byteBuffer.put((byte) this.VisualParam_Fields.size());
-        for (VisualParam visualParam : this.VisualParam_Fields) {
-            packByte(byteBuffer, (byte) visualParam.ParamValue);
-        }
-        byteBuffer.put((byte) this.AgentAccess_Fields.size());
-        for (AgentAccess agentAccess : this.AgentAccess_Fields) {
-            packByte(byteBuffer, (byte) agentAccess.AgentLegacyAccess);
-            packByte(byteBuffer, (byte) agentAccess.AgentMaxAccess);
-        }
-        byteBuffer.put((byte) this.AgentInfo_Fields.size());
-        for (AgentInfo agentInfo : this.AgentInfo_Fields) {
-            packInt(byteBuffer, agentInfo.Flags);
-        }
+    public int CalcPayloadSize()
+    {
+        int i = AgentData_Field.Throttles.length;
+        int j = AgentData_Field.AgentTextures.length;
+        int k = GroupData_Fields.size();
+        int l = AnimationData_Fields.size();
+        int i1 = GranterBlock_Fields.size();
+        Iterator iterator = NVPairData_Fields.iterator();
+        for (i = i + 138 + 4 + 12 + 12 + 4 + 4 + 1 + 1 + 16 + 1 + 2 + j + 16 + 1 + 1 + k * 25 + 1 + l * 32 + 1 + i1 * 16 + 1; iterator.hasNext(); i = ((NVPairData)iterator.next()).NVPairs.length + 2 + i) { }
+        return i + 1 + VisualParam_Fields.size() * 1 + 1 + AgentAccess_Fields.size() * 2 + 1 + AgentInfo_Fields.size() * 4;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.RegionHandle = unpackLong(byteBuffer);
-        this.AgentData_Field.ViewerCircuitCode = unpackInt(byteBuffer);
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.AgentData_Field.AgentPos = unpackLLVector3(byteBuffer);
-        this.AgentData_Field.AgentVel = unpackLLVector3(byteBuffer);
-        this.AgentData_Field.Center = unpackLLVector3(byteBuffer);
-        this.AgentData_Field.Size = unpackLLVector3(byteBuffer);
-        this.AgentData_Field.AtAxis = unpackLLVector3(byteBuffer);
-        this.AgentData_Field.LeftAxis = unpackLLVector3(byteBuffer);
-        this.AgentData_Field.UpAxis = unpackLLVector3(byteBuffer);
-        this.AgentData_Field.ChangedGrid = unpackBoolean(byteBuffer);
-        this.AgentData_Field.Far = unpackFloat(byteBuffer);
-        this.AgentData_Field.Aspect = unpackFloat(byteBuffer);
-        this.AgentData_Field.Throttles = unpackVariable(byteBuffer, 1);
-        this.AgentData_Field.LocomotionState = unpackInt(byteBuffer);
-        this.AgentData_Field.HeadRotation = unpackLLQuaternion(byteBuffer);
-        this.AgentData_Field.BodyRotation = unpackLLQuaternion(byteBuffer);
-        this.AgentData_Field.ControlFlags = unpackInt(byteBuffer);
-        this.AgentData_Field.EnergyLevel = unpackFloat(byteBuffer);
-        this.AgentData_Field.GodLevel = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-        this.AgentData_Field.AlwaysRun = unpackBoolean(byteBuffer);
-        this.AgentData_Field.PreyAgent = unpackUUID(byteBuffer);
-        this.AgentData_Field.AgentAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-        this.AgentData_Field.AgentTextures = unpackVariable(byteBuffer, 2);
-        this.AgentData_Field.ActiveGroupID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            GroupData groupData = new GroupData();
-            groupData.GroupID = unpackUUID(byteBuffer);
-            groupData.GroupPowers = unpackLong(byteBuffer);
-            groupData.AcceptNotices = unpackBoolean(byteBuffer);
-            this.GroupData_Fields.add(groupData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleChildAgentUpdate(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.put((byte)25);
+        packLong(bytebuffer, AgentData_Field.RegionHandle);
+        packInt(bytebuffer, AgentData_Field.ViewerCircuitCode);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packLLVector3(bytebuffer, AgentData_Field.AgentPos);
+        packLLVector3(bytebuffer, AgentData_Field.AgentVel);
+        packLLVector3(bytebuffer, AgentData_Field.Center);
+        packLLVector3(bytebuffer, AgentData_Field.Size);
+        packLLVector3(bytebuffer, AgentData_Field.AtAxis);
+        packLLVector3(bytebuffer, AgentData_Field.LeftAxis);
+        packLLVector3(bytebuffer, AgentData_Field.UpAxis);
+        packBoolean(bytebuffer, AgentData_Field.ChangedGrid);
+        packFloat(bytebuffer, AgentData_Field.Far);
+        packFloat(bytebuffer, AgentData_Field.Aspect);
+        packVariable(bytebuffer, AgentData_Field.Throttles, 1);
+        packInt(bytebuffer, AgentData_Field.LocomotionState);
+        packLLQuaternion(bytebuffer, AgentData_Field.HeadRotation);
+        packLLQuaternion(bytebuffer, AgentData_Field.BodyRotation);
+        packInt(bytebuffer, AgentData_Field.ControlFlags);
+        packFloat(bytebuffer, AgentData_Field.EnergyLevel);
+        packByte(bytebuffer, (byte)AgentData_Field.GodLevel);
+        packBoolean(bytebuffer, AgentData_Field.AlwaysRun);
+        packUUID(bytebuffer, AgentData_Field.PreyAgent);
+        packByte(bytebuffer, (byte)AgentData_Field.AgentAccess);
+        packVariable(bytebuffer, AgentData_Field.AgentTextures, 2);
+        packUUID(bytebuffer, AgentData_Field.ActiveGroupID);
+        bytebuffer.put((byte)GroupData_Fields.size());
+        GroupData groupdata;
+        for (Iterator iterator = GroupData_Fields.iterator(); iterator.hasNext(); packBoolean(bytebuffer, groupdata.AcceptNotices))
+        {
+            groupdata = (GroupData)iterator.next();
+            packUUID(bytebuffer, groupdata.GroupID);
+            packLong(bytebuffer, groupdata.GroupPowers);
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < b2; i2++) {
-            AnimationData animationData = new AnimationData();
-            animationData.Animation = unpackUUID(byteBuffer);
-            animationData.ObjectID = unpackUUID(byteBuffer);
-            this.AnimationData_Fields.add(animationData);
+
+        bytebuffer.put((byte)AnimationData_Fields.size());
+        AnimationData animationdata;
+        for (Iterator iterator1 = AnimationData_Fields.iterator(); iterator1.hasNext(); packUUID(bytebuffer, animationdata.ObjectID))
+        {
+            animationdata = (AnimationData)iterator1.next();
+            packUUID(bytebuffer, animationdata.Animation);
         }
-        byte b3 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i3 = 0; i3 < b3; i3++) {
-            GranterBlock granterBlock = new GranterBlock();
-            granterBlock.GranterID = unpackUUID(byteBuffer);
-            this.GranterBlock_Fields.add(granterBlock);
+
+        bytebuffer.put((byte)GranterBlock_Fields.size());
+        for (Iterator iterator2 = GranterBlock_Fields.iterator(); iterator2.hasNext(); packUUID(bytebuffer, ((GranterBlock)iterator2.next()).GranterID)) { }
+        bytebuffer.put((byte)NVPairData_Fields.size());
+        for (Iterator iterator3 = NVPairData_Fields.iterator(); iterator3.hasNext(); packVariable(bytebuffer, ((NVPairData)iterator3.next()).NVPairs, 2)) { }
+        bytebuffer.put((byte)VisualParam_Fields.size());
+        for (Iterator iterator4 = VisualParam_Fields.iterator(); iterator4.hasNext(); packByte(bytebuffer, (byte)((VisualParam)iterator4.next()).ParamValue)) { }
+        bytebuffer.put((byte)AgentAccess_Fields.size());
+        AgentAccess agentaccess;
+        for (Iterator iterator5 = AgentAccess_Fields.iterator(); iterator5.hasNext(); packByte(bytebuffer, (byte)agentaccess.AgentMaxAccess))
+        {
+            agentaccess = (AgentAccess)iterator5.next();
+            packByte(bytebuffer, (byte)agentaccess.AgentLegacyAccess);
         }
-        byte b4 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i4 = 0; i4 < b4; i4++) {
-            NVPairData nVPairData = new NVPairData();
-            nVPairData.NVPairs = unpackVariable(byteBuffer, 2);
-            this.NVPairData_Fields.add(nVPairData);
+
+        bytebuffer.put((byte)AgentInfo_Fields.size());
+        for (Iterator iterator6 = AgentInfo_Fields.iterator(); iterator6.hasNext(); packInt(bytebuffer, ((AgentInfo)iterator6.next()).Flags)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        AgentData_Field.RegionHandle = unpackLong(bytebuffer);
+        AgentData_Field.ViewerCircuitCode = unpackInt(bytebuffer);
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        AgentData_Field.AgentPos = unpackLLVector3(bytebuffer);
+        AgentData_Field.AgentVel = unpackLLVector3(bytebuffer);
+        AgentData_Field.Center = unpackLLVector3(bytebuffer);
+        AgentData_Field.Size = unpackLLVector3(bytebuffer);
+        AgentData_Field.AtAxis = unpackLLVector3(bytebuffer);
+        AgentData_Field.LeftAxis = unpackLLVector3(bytebuffer);
+        AgentData_Field.UpAxis = unpackLLVector3(bytebuffer);
+        AgentData_Field.ChangedGrid = unpackBoolean(bytebuffer);
+        AgentData_Field.Far = unpackFloat(bytebuffer);
+        AgentData_Field.Aspect = unpackFloat(bytebuffer);
+        AgentData_Field.Throttles = unpackVariable(bytebuffer, 1);
+        AgentData_Field.LocomotionState = unpackInt(bytebuffer);
+        AgentData_Field.HeadRotation = unpackLLQuaternion(bytebuffer);
+        AgentData_Field.BodyRotation = unpackLLQuaternion(bytebuffer);
+        AgentData_Field.ControlFlags = unpackInt(bytebuffer);
+        AgentData_Field.EnergyLevel = unpackFloat(bytebuffer);
+        AgentData_Field.GodLevel = unpackByte(bytebuffer) & 0xff;
+        AgentData_Field.AlwaysRun = unpackBoolean(bytebuffer);
+        AgentData_Field.PreyAgent = unpackUUID(bytebuffer);
+        AgentData_Field.AgentAccess = unpackByte(bytebuffer) & 0xff;
+        AgentData_Field.AgentTextures = unpackVariable(bytebuffer, 2);
+        AgentData_Field.ActiveGroupID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            GroupData groupdata = new GroupData();
+            groupdata.GroupID = unpackUUID(bytebuffer);
+            groupdata.GroupPowers = unpackLong(bytebuffer);
+            groupdata.AcceptNotices = unpackBoolean(bytebuffer);
+            GroupData_Fields.add(groupdata);
         }
-        byte b5 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i5 = 0; i5 < b5; i5++) {
-            VisualParam visualParam = new VisualParam();
-            visualParam.ParamValue = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            this.VisualParam_Fields.add(visualParam);
+
+        byte0 = bytebuffer.get();
+        for (int j = 0; j < (byte0 & 0xff); j++)
+        {
+            AnimationData animationdata = new AnimationData();
+            animationdata.Animation = unpackUUID(bytebuffer);
+            animationdata.ObjectID = unpackUUID(bytebuffer);
+            AnimationData_Fields.add(animationdata);
         }
-        byte b6 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i6 = 0; i6 < b6; i6++) {
-            AgentAccess agentAccess = new AgentAccess();
-            agentAccess.AgentLegacyAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            agentAccess.AgentMaxAccess = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            this.AgentAccess_Fields.add(agentAccess);
+
+        byte0 = bytebuffer.get();
+        for (int k = 0; k < (byte0 & 0xff); k++)
+        {
+            GranterBlock granterblock = new GranterBlock();
+            granterblock.GranterID = unpackUUID(bytebuffer);
+            GranterBlock_Fields.add(granterblock);
         }
-        byte b7 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i7 = 0; i7 < b7; i7++) {
-            AgentInfo agentInfo = new AgentInfo();
-            agentInfo.Flags = unpackInt(byteBuffer);
-            this.AgentInfo_Fields.add(agentInfo);
+
+        byte0 = bytebuffer.get();
+        for (int l = 0; l < (byte0 & 0xff); l++)
+        {
+            NVPairData nvpairdata = new NVPairData();
+            nvpairdata.NVPairs = unpackVariable(bytebuffer, 2);
+            NVPairData_Fields.add(nvpairdata);
         }
+
+        byte0 = bytebuffer.get();
+        for (int i1 = 0; i1 < (byte0 & 0xff); i1++)
+        {
+            VisualParam visualparam = new VisualParam();
+            visualparam.ParamValue = unpackByte(bytebuffer) & 0xff;
+            VisualParam_Fields.add(visualparam);
+        }
+
+        byte0 = bytebuffer.get();
+        for (int j1 = 0; j1 < (byte0 & 0xff); j1++)
+        {
+            AgentAccess agentaccess = new AgentAccess();
+            agentaccess.AgentLegacyAccess = unpackByte(bytebuffer) & 0xff;
+            agentaccess.AgentMaxAccess = unpackByte(bytebuffer) & 0xff;
+            AgentAccess_Fields.add(agentaccess);
+        }
+
+        byte0 = bytebuffer.get();
+        for (int k1 = ((flag) ? 1 : 0); k1 < (byte0 & 0xff); k1++)
+        {
+            AgentInfo agentinfo = new AgentInfo();
+            agentinfo.Flags = unpackInt(bytebuffer);
+            AgentInfo_Fields.add(agentinfo);
+        }
+
     }
 }

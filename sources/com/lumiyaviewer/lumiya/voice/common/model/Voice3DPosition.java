@@ -1,49 +1,56 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.voice.common.model;
 
 import android.os.Bundle;
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.Immutable;
 
-@Immutable
-public class Voice3DPosition {
-    @Nonnull
+// Referenced classes of package com.lumiyaviewer.lumiya.voice.common.model:
+//            Voice3DVector
+
+public class Voice3DPosition
+{
+
     public final Voice3DVector atOrientation;
-    @Nonnull
     public final Voice3DVector leftOrientation;
-    @Nonnull
     public final Voice3DVector position;
-    @Nonnull
     public final Voice3DVector upOrientation;
-    @Nonnull
     public final Voice3DVector velocity;
 
-    public Voice3DPosition(Bundle bundle) {
-        this.position = new Voice3DVector(bundle.getBundle("position"));
-        this.velocity = new Voice3DVector(bundle.getBundle("velocity"));
-        this.atOrientation = new Voice3DVector(bundle.getBundle("atOrientation"));
-        this.upOrientation = new Voice3DVector(bundle.getBundle("upOrientation"));
-        this.leftOrientation = new Voice3DVector(bundle.getBundle("leftOrientation"));
+    public Voice3DPosition(Bundle bundle)
+    {
+        position = new Voice3DVector(bundle.getBundle("position"));
+        velocity = new Voice3DVector(bundle.getBundle("velocity"));
+        atOrientation = new Voice3DVector(bundle.getBundle("atOrientation"));
+        upOrientation = new Voice3DVector(bundle.getBundle("upOrientation"));
+        leftOrientation = new Voice3DVector(bundle.getBundle("leftOrientation"));
     }
 
-    public Voice3DPosition(@Nonnull Voice3DVector voice3DVector, @Nonnull Voice3DVector voice3DVector2, @Nonnull Voice3DVector voice3DVector3, @Nonnull Voice3DVector voice3DVector4, @Nonnull Voice3DVector voice3DVector5) {
-        this.position = voice3DVector;
-        this.velocity = voice3DVector2;
-        this.atOrientation = voice3DVector3;
-        this.upOrientation = voice3DVector4;
-        this.leftOrientation = voice3DVector5;
+    public Voice3DPosition(Voice3DVector voice3dvector, Voice3DVector voice3dvector1, Voice3DVector voice3dvector2, Voice3DVector voice3dvector3, Voice3DVector voice3dvector4)
+    {
+        position = voice3dvector;
+        velocity = voice3dvector1;
+        atOrientation = voice3dvector2;
+        upOrientation = voice3dvector3;
+        leftOrientation = voice3dvector4;
     }
 
-    public Bundle toBundle() {
+    public Bundle toBundle()
+    {
         Bundle bundle = new Bundle();
-        bundle.putBundle("position", this.position.toBundle());
-        bundle.putBundle("velocity", this.velocity.toBundle());
-        bundle.putBundle("atOrientation", this.atOrientation.toBundle());
-        bundle.putBundle("upOrientation", this.upOrientation.toBundle());
-        bundle.putBundle("leftOrientation", this.leftOrientation.toBundle());
+        bundle.putBundle("position", position.toBundle());
+        bundle.putBundle("velocity", velocity.toBundle());
+        bundle.putBundle("atOrientation", atOrientation.toBundle());
+        bundle.putBundle("upOrientation", upOrientation.toBundle());
+        bundle.putBundle("leftOrientation", leftOrientation.toBundle());
         return bundle;
     }
 
-    public String toString() {
-        return String.format("(pos %s vel %s at %s up %s left %s)", new Object[]{this.position.toString(), this.velocity.toString(), this.atOrientation.toString(), this.upOrientation.toString(), this.leftOrientation.toString()});
+    public String toString()
+    {
+        return String.format("(pos %s vel %s at %s up %s left %s)", new Object[] {
+            position.toString(), velocity.toString(), atOrientation.toString(), upOrientation.toString(), leftOrientation.toString()
+        });
     }
 }

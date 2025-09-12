@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.llsd.types;
 
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode;
@@ -6,67 +10,133 @@ import java.io.IOException;
 import java.util.UUID;
 import org.xmlpull.v1.XmlSerializer;
 
-public class LLSDUUID extends LLSDNode {
+public class LLSDUUID extends LLSDNode
+{
+
     private UUID value;
 
-    public LLSDUUID() {
-        this.value = null;
+    public LLSDUUID()
+    {
+        value = null;
     }
 
-    public LLSDUUID(String str) {
-        int length = str.length();
-        long j = 0;
-        int i = 0;
-        int i2 = 0;
-        long j2 = 0;
-        long j3 = 0;
-        int i3 = 0;
-        while (i3 < length) {
-            char charAt = str.charAt(i3);
-            if (charAt != '-') {
-                j = (j << 4) | ((long) ((charAt < '0' || charAt > '9') ? (charAt < 'a' || charAt > 'f') ? (charAt < 'A' || charAt > 'F') ? 0 : (charAt - 'A') + 10 : (charAt - 'a') + 10 : charAt - '0'));
-                i++;
-                if (i >= 16) {
-                    if (i2 == 0) {
-                        j3 = j;
-                    } else {
-                        j2 = j;
-                    }
-                    i2++;
-                }
-            }
-            i3++;
-            j2 = j2;
-            j3 = j3;
-            i = i;
-            i2 = i2;
+    public LLSDUUID(String s)
+    {
+        int j;
+        int k;
+        int i1;
+        int j1;
+        long l1;
+        long l2;
+        long l3;
+        j1 = s.length();
+        l1 = 0L;
+        k = 0;
+        j = 0;
+        l2 = 0L;
+        l3 = 0L;
+        i1 = 0;
+_L2:
+        int i;
+        long l4;
+        if (i1 >= j1)
+        {
+            break; /* Loop/switch isn't completed */
         }
-        this.value = new UUID(j3, j2);
-    }
-
-    public LLSDUUID(UUID uuid) {
-        this.value = uuid;
-    }
-
-    public String asString() {
-        return this.value.toString();
-    }
-
-    public UUID asUUID() {
-        return this.value;
-    }
-
-    public void toBinary(DataOutputStream dataOutputStream) throws IOException {
-        dataOutputStream.writeByte(117);
-        dataOutputStream.writeLong(this.value.getMostSignificantBits());
-        dataOutputStream.writeLong(this.value.getLeastSignificantBits());
-    }
-
-    public void toXML(XmlSerializer xmlSerializer) throws IOException {
-        xmlSerializer.startTag("", "uuid");
-        if (this.value != null) {
-            xmlSerializer.text(this.value.toString());
+        char c = s.charAt(i1);
+        l4 = l1;
+        i = k;
+        if (c == '-')
+        {
+            break MISSING_BLOCK_LABEL_238;
         }
-        xmlSerializer.endTag("", "uuid");
+        if (c >= '0' && c <= '9')
+        {
+            i = c - 48;
+        } else
+        if (c >= 'a' && c <= 'f')
+        {
+            i = (c - 97) + 10;
+        } else
+        if (c >= 'A' && c <= 'F')
+        {
+            i = (c - 65) + 10;
+        } else
+        {
+            i = 0;
+        }
+        l1 = l1 << 4 | (long)i;
+        k++;
+        l4 = l1;
+        i = k;
+        if (k < 16)
+        {
+            break MISSING_BLOCK_LABEL_238;
+        }
+        if (j == 0)
+        {
+            l3 = l1;
+        } else
+        {
+            l2 = l1;
+        }
+        l4 = l2;
+        i = j + 1;
+        j = k;
+        l2 = l3;
+        l3 = l4;
+_L3:
+        i1++;
+        l4 = l3;
+        l3 = l2;
+        k = j;
+        l2 = l4;
+        j = i;
+        if (true) goto _L2; else goto _L1
+_L1:
+        value = new UUID(l3, l2);
+        return;
+        long l5 = l3;
+        int l = i;
+        i = j;
+        j = l;
+        l1 = l4;
+        l3 = l2;
+        l2 = l5;
+          goto _L3
+    }
+
+    public LLSDUUID(UUID uuid)
+    {
+        value = uuid;
+    }
+
+    public String asString()
+    {
+        return value.toString();
+    }
+
+    public UUID asUUID()
+    {
+        return value;
+    }
+
+    public void toBinary(DataOutputStream dataoutputstream)
+        throws IOException
+    {
+        dataoutputstream.writeByte(117);
+        dataoutputstream.writeLong(value.getMostSignificantBits());
+        dataoutputstream.writeLong(value.getLeastSignificantBits());
+    }
+
+    public void toXML(XmlSerializer xmlserializer)
+        throws IOException
+    {
+        xmlserializer.startTag("", "uuid");
+        if (value != null)
+        {
+            xmlserializer.text(value.toString());
+        }
+        xmlserializer.endTag("", "uuid");
     }
 }

@@ -1,90 +1,128 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class AvatarGroupsReply extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<GroupData> GroupData_Fields = new ArrayList<>();
-    public NewGroupData NewGroupData_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class AvatarGroupsReply extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID AvatarID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class GroupData {
+    public static class GroupData
+    {
+
         public boolean AcceptNotices;
         public UUID GroupID;
         public UUID GroupInsigniaID;
-        public byte[] GroupName;
+        public byte GroupName[];
         public long GroupPowers;
-        public byte[] GroupTitle;
+        public byte GroupTitle[];
+
+        public GroupData()
+        {
+        }
     }
 
-    public static class NewGroupData {
+    public static class NewGroupData
+    {
+
         public boolean ListInProfile;
-    }
 
-    public AvatarGroupsReply() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-        this.NewGroupData_Field = new NewGroupData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 37;
-        Iterator<T> it = this.GroupData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2 + 1;
-            }
-            GroupData groupData = (GroupData) it.next();
-            i = groupData.GroupName.length + groupData.GroupTitle.length + 10 + 16 + 1 + 16 + i2;
+        public NewGroupData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleAvatarGroupsReply(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList GroupData_Fields;
+    public NewGroupData NewGroupData_Field;
+
+    public AvatarGroupsReply()
+    {
+        GroupData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        NewGroupData_Field = new NewGroupData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -83);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.AvatarID);
-        byteBuffer.put((byte) this.GroupData_Fields.size());
-        for (GroupData groupData : this.GroupData_Fields) {
-            packLong(byteBuffer, groupData.GroupPowers);
-            packBoolean(byteBuffer, groupData.AcceptNotices);
-            packVariable(byteBuffer, groupData.GroupTitle, 1);
-            packUUID(byteBuffer, groupData.GroupID);
-            packVariable(byteBuffer, groupData.GroupName, 1);
-            packUUID(byteBuffer, groupData.GroupInsigniaID);
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = GroupData_Fields.iterator();
+        GroupData groupdata;
+        int i;
+        int j;
+        for (i = 37; iterator.hasNext(); i = groupdata.GroupName.length + (j + 10 + 16 + 1) + 16 + i)
+        {
+            groupdata = (GroupData)iterator.next();
+            j = groupdata.GroupTitle.length;
         }
-        packBoolean(byteBuffer, this.NewGroupData_Field.ListInProfile);
+
+        return i + 1;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.AvatarID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            GroupData groupData = new GroupData();
-            groupData.GroupPowers = unpackLong(byteBuffer);
-            groupData.AcceptNotices = unpackBoolean(byteBuffer);
-            groupData.GroupTitle = unpackVariable(byteBuffer, 1);
-            groupData.GroupID = unpackUUID(byteBuffer);
-            groupData.GroupName = unpackVariable(byteBuffer, 1);
-            groupData.GroupInsigniaID = unpackUUID(byteBuffer);
-            this.GroupData_Fields.add(groupData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleAvatarGroupsReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-83);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.AvatarID);
+        bytebuffer.put((byte)GroupData_Fields.size());
+        GroupData groupdata;
+        for (Iterator iterator = GroupData_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, groupdata.GroupInsigniaID))
+        {
+            groupdata = (GroupData)iterator.next();
+            packLong(bytebuffer, groupdata.GroupPowers);
+            packBoolean(bytebuffer, groupdata.AcceptNotices);
+            packVariable(bytebuffer, groupdata.GroupTitle, 1);
+            packUUID(bytebuffer, groupdata.GroupID);
+            packVariable(bytebuffer, groupdata.GroupName, 1);
         }
-        this.NewGroupData_Field.ListInProfile = unpackBoolean(byteBuffer);
+
+        packBoolean(bytebuffer, NewGroupData_Field.ListInProfile);
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.AvatarID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            GroupData groupdata = new GroupData();
+            groupdata.GroupPowers = unpackLong(bytebuffer);
+            groupdata.AcceptNotices = unpackBoolean(bytebuffer);
+            groupdata.GroupTitle = unpackVariable(bytebuffer, 1);
+            groupdata.GroupID = unpackUUID(bytebuffer);
+            groupdata.GroupName = unpackVariable(bytebuffer, 1);
+            groupdata.GroupInsigniaID = unpackUUID(bytebuffer);
+            GroupData_Fields.add(groupdata);
+        }
+
+        NewGroupData_Field.ListInProfile = unpackBoolean(bytebuffer);
     }
 }

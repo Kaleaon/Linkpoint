@@ -1,36 +1,54 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.support.v4.app.Fragment;
 
-public class StateAwareFragment extends Fragment {
-    private boolean fragmentStarted = false;
-    private boolean fragmentVisible = false;
+public class StateAwareFragment extends Fragment
+{
 
-    public boolean isFragmentStarted() {
-        return this.fragmentStarted;
+    private boolean fragmentStarted;
+    private boolean fragmentVisible;
+
+    public StateAwareFragment()
+    {
+        fragmentStarted = false;
+        fragmentVisible = false;
     }
 
-    public boolean isFragmentVisible() {
-        return this.fragmentVisible;
+    public boolean isFragmentStarted()
+    {
+        return fragmentStarted;
     }
 
-    public void onPause() {
-        this.fragmentVisible = false;
+    public boolean isFragmentVisible()
+    {
+        return fragmentVisible;
+    }
+
+    public void onPause()
+    {
+        fragmentVisible = false;
         super.onPause();
     }
 
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
-        this.fragmentVisible = true;
+        fragmentVisible = true;
     }
 
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        this.fragmentStarted = true;
+        fragmentStarted = true;
     }
 
-    public void onStop() {
-        this.fragmentStarted = false;
+    public void onStop()
+    {
+        fragmentStarted = false;
         super.onStop();
     }
 }

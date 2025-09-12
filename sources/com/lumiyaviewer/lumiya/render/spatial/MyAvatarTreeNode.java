@@ -1,31 +1,63 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.spatial;
 
 import com.lumiyaviewer.lumiya.utils.InlineList;
+import com.lumiyaviewer.lumiya.utils.InlineListEntry;
 
-public class MyAvatarTreeNode extends InlineList<DrawListEntry> {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.spatial:
+//            DrawListEntry, SpatialTree, SpatialObjectIndex, DrawList
+
+public class MyAvatarTreeNode extends InlineList
+{
+
     private final SpatialTree spatialTree;
 
-    public MyAvatarTreeNode(SpatialTree spatialTree2) {
-        this.spatialTree = spatialTree2;
+    public MyAvatarTreeNode(SpatialTree spatialtree)
+    {
+        spatialTree = spatialtree;
     }
 
-    public void addDrawables(DrawList drawList) {
-        for (DrawListEntry drawListEntry = (DrawListEntry) getFirst(); drawListEntry != null; drawListEntry = drawListEntry.getNext()) {
-            drawListEntry.addToDrawList(drawList);
+    public void addDrawables(DrawList drawlist)
+    {
+        for (DrawListEntry drawlistentry = (DrawListEntry)getFirst(); drawlistentry != null; drawlistentry = drawlistentry.getNext())
+        {
+            drawlistentry.addToDrawList(drawlist);
         }
+
     }
 
-    public void addEntry(DrawListEntry drawListEntry) {
-        super.addEntry(drawListEntry);
-        this.spatialTree.setDrawListChanged();
+    public void addEntry(DrawListEntry drawlistentry)
+    {
+        super.addEntry(drawlistentry);
+        spatialTree.setDrawListChanged();
     }
 
-    public void removeEntry(DrawListEntry drawListEntry) {
-        super.removeEntry(drawListEntry);
-        this.spatialTree.setDrawListChanged();
+    public volatile void addEntry(InlineListEntry inlinelistentry)
+    {
+        addEntry((DrawListEntry)inlinelistentry);
     }
 
-    public void requestEntryRemoval(DrawListEntry drawListEntry) {
-        this.spatialTree.spatialObjectIndex.requestEntryRemoval(drawListEntry);
+    public void removeEntry(DrawListEntry drawlistentry)
+    {
+        super.removeEntry(drawlistentry);
+        spatialTree.setDrawListChanged();
+    }
+
+    public volatile void removeEntry(InlineListEntry inlinelistentry)
+    {
+        removeEntry((DrawListEntry)inlinelistentry);
+    }
+
+    public void requestEntryRemoval(DrawListEntry drawlistentry)
+    {
+        spatialTree.spatialObjectIndex.requestEntryRemoval(drawlistentry);
+    }
+
+    public volatile void requestEntryRemoval(InlineListEntry inlinelistentry)
+    {
+        requestEntryRemoval((DrawListEntry)inlinelistentry);
     }
 }

@@ -1,7 +1,5 @@
 package com.lumiyaviewer.lumiya.react;
 
-import com.lumiyaviewer.lumiya.react.-$Lambda$s15PKVbd3BFZx563Ff4DOHT5V_w.AnonymousClass1;
-import com.lumiyaviewer.lumiya.react.-$Lambda$s15PKVbd3BFZx563Ff4DOHT5V_w.AnonymousClass2;
 import java.util.concurrent.Executor;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -19,7 +17,9 @@ public abstract class RequestProcessor<K, Tup, Tdown> implements RequestHandler<
         this.resultHandler = requestSource.attachRequestHandler(this);
     }
 
-    private void processRequestInternal(@Nonnull K k) {
+    /* access modifiers changed from: private */
+    /* renamed from: processRequestInternal */
+    public void m35lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_940(@Nonnull K k) {
         Object processRequest = processRequest(k);
         if (processRequest != null) {
             this.resultHandler.onResultData(k, processRequest);
@@ -29,7 +29,9 @@ public abstract class RequestProcessor<K, Tup, Tdown> implements RequestHandler<
         }
     }
 
-    private void requestUpdateInternal(@Nonnull K k) {
+    /* access modifiers changed from: private */
+    /* renamed from: requestUpdateInternal */
+    public void m33lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_1507(@Nonnull K k) {
         if (this.requestHandler != null) {
             this.requestHandler.onRequest(k);
         }
@@ -50,23 +52,17 @@ public abstract class RequestProcessor<K, Tup, Tdown> implements RequestHandler<
         return tup != null;
     }
 
-    /* synthetic */ void handleRequestUpdate(Object obj) {
-        requestUpdateInternal(obj);
-    }
-
-    /* synthetic */ void handleResultProcessing(Object obj, Object obj2) {
+    /* access modifiers changed from: package-private */
+    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_RequestProcessor_2159  reason: not valid java name */
+    public /* synthetic */ void m34lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_2159(Object obj, Object obj2) {
         this.resultHandler.onResultData(obj, processResult(obj, obj2));
-    }
-
-    /* synthetic */ void processRequest(Object obj) {
-        processRequestInternal(obj);
     }
 
     public void onRequest(@Nonnull K k) {
         if (this.executor != null) {
-            this.executor.execute(new -$Lambda$s15PKVbd3BFZx563Ff4DOHT5V_w(this, k));
+            this.executor.execute(() -> m35lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_940(k));
         } else {
-            processRequestInternal(k);
+            m35lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_940(k);
         }
     }
 
@@ -78,7 +74,7 @@ public abstract class RequestProcessor<K, Tup, Tdown> implements RequestHandler<
 
     public void onResultData(@Nonnull K k, Tdown tdown) {
         if (this.executor != null) {
-            this.executor.execute(new AnonymousClass2(this, k, tdown));
+            this.executor.execute(() -> this.resultHandler.onResultData(k, processResult(k, tdown)));
         } else {
             this.resultHandler.onResultData(k, processResult(k, tdown));
         }
@@ -95,9 +91,9 @@ public abstract class RequestProcessor<K, Tup, Tdown> implements RequestHandler<
 
     public void requestUpdate(K k) {
         if (this.executor != null) {
-            this.executor.execute(new AnonymousClass1(this, k));
+            this.executor.execute(() -> m33lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_1507(k));
         } else {
-            requestUpdateInternal(k);
+            m33lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_1507(k);
         }
     }
 }

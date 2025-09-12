@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.outfits;
 
 import android.content.Context;
@@ -6,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -15,28 +20,25 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.eventbus.EventBus;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
 import com.lumiyaviewer.lumiya.orm.InventoryDB;
 import com.lumiyaviewer.lumiya.orm.InventoryEntryList;
 import com.lumiyaviewer.lumiya.orm.InventoryQuery;
-import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.assets.SLWearable;
-import com.lumiyaviewer.lumiya.slproto.assets.SLWearableType;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
 import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance;
+import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
+import com.lumiyaviewer.lumiya.slproto.users.manager.InventoryManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
 import com.lumiyaviewer.lumiya.ui.common.FragmentWithTitle;
 import com.lumiyaviewer.lumiya.ui.common.LoadingLayout;
 import com.lumiyaviewer.lumiya.ui.common.ReloadableFragment;
+import com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable;
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor;
 import com.lumiyaviewer.lumiya.ui.inventory.InventoryFolderAdapter;
 import com.lumiyaviewer.lumiya.ui.inventory.InventoryFragmentHelper;
@@ -44,1074 +46,533 @@ import com.lumiyaviewer.lumiya.ui.inventory.InventorySortOrderChangedEvent;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.util.Iterator;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class OutfitsFragment extends FragmentWithTitle implements ReloadableFragment, View.OnClickListener, InventoryFolderAdapter.OnItemCheckboxClickListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.outfits:
+//            CurrentOutfitFragment
+
+public class OutfitsFragment extends FragmentWithTitle
+    implements ReloadableFragment, android.view.View.OnClickListener, com.lumiyaviewer.lumiya.ui.inventory.InventoryFolderAdapter.OnItemCheckboxClickListener
+{
+
     private static final String FOLDER_ID_KEY = "folderID";
-    private InventoryFolderAdapter adapter = null;
-    private final SubscriptionData<UUID, SLAgentCircuit> agentCircuit = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f505$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.2.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.2.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.2.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.2.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    private final SubscriptionData<InventoryQuery, InventoryEntryList> entryList = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f504$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.1.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.1.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.1.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.1.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    private final SubscriptionData<UUID, Boolean> folderLoading = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f506$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.3.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.3.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.3.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.3.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    private final AdapterView.OnItemClickListener itemClickListener = new $Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs(this);
+    private InventoryFolderAdapter adapter;
+    private final SubscriptionData agentCircuit = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.oBJjjSxYBPvwKW_FzKQvdarEfUs._cls2(this));
+    private final SubscriptionData entryList = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.oBJjjSxYBPvwKW_FzKQvdarEfUs._cls1(this));
+    private final SubscriptionData folderLoading = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.oBJjjSxYBPvwKW_FzKQvdarEfUs._cls3(this));
+    private final android.widget.AdapterView.OnItemClickListener itemClickListener = new _2D_.Lambda.oBJjjSxYBPvwKW_FzKQvdarEfUs(this);
     private ViewGroup listHeader;
     private final Object listHeaderData = new Object();
-    private final LoadableMonitor loadableMonitor = new LoadableMonitor(this.entryList);
-    private UUID myOutfitsFolderUUID = null;
-    private final SubscriptionData<InventoryQuery, InventoryEntryList> rootFolderEntryList = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
+    private final LoadableMonitor loadableMonitor;
+    private UUID myOutfitsFolderUUID;
+    private final SubscriptionData rootFolderEntryList = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.oBJjjSxYBPvwKW_FzKQvdarEfUs._cls6(this));
+    private final SubscriptionData wornAttachments = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.oBJjjSxYBPvwKW_FzKQvdarEfUs._cls4(this));
+    private final SubscriptionData wornOutfitFolder = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.oBJjjSxYBPvwKW_FzKQvdarEfUs._cls7(this));
+    private final SubscriptionData wornWearables = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.oBJjjSxYBPvwKW_FzKQvdarEfUs._cls5(this));
 
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f509$f0;
+    public OutfitsFragment()
+    {
+        adapter = null;
+        myOutfitsFolderUUID = null;
+        loadableMonitor = new LoadableMonitor(new Loadable[] {
+            entryList
+        });
+    }
 
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.6.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.6.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.6.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.6.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    private final SubscriptionData<SubscriptionSingleKey, ImmutableMap<UUID, String>> wornAttachments = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f507$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.4.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.4.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.4.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.4.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    private final SubscriptionData<SubscriptionSingleKey, UUID> wornOutfitFolder = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f510$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.7.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.7.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.7.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.7.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    private final SubscriptionData<SubscriptionSingleKey, Table<SLWearableType, UUID, SLWearable>> wornWearables = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f508$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.5.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.5.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.5.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs.5.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-
-    private void changeOutfit(boolean z) {
-        InventoryEntryList<SLInventoryEntry> data = this.entryList.getData();
-        SLAgentCircuit data2 = this.agentCircuit.getData();
-        if (data != null && data2 != null) {
-            ImmutableList.Builder builder = ImmutableList.builder();
-            for (SLInventoryEntry sLInventoryEntry : data) {
-                if (!sLInventoryEntry.isFolderOrFolderLink()) {
-                    builder.add((Object) sLInventoryEntry);
+    private void changeOutfit(boolean flag)
+    {
+        InventoryEntryList inventoryentrylist = (InventoryEntryList)entryList.getData();
+        SLAgentCircuit slagentcircuit = (SLAgentCircuit)agentCircuit.getData();
+        if (inventoryentrylist != null && slagentcircuit != null)
+        {
+            com.google.common.collect.ImmutableList.Builder builder = ImmutableList.builder();
+            Iterator iterator = inventoryentrylist.iterator();
+            do
+            {
+                if (!iterator.hasNext())
+                {
+                    break;
                 }
-            }
-            data2.getModules().avatarAppearance.ChangeOutfit(builder.build(), z, data.getFolder());
+                SLInventoryEntry slinventoryentry = (SLInventoryEntry)iterator.next();
+                if (!slinventoryentry.isFolderOrFolderLink())
+                {
+                    builder.add(slinventoryentry);
+                }
+            } while (true);
+            slagentcircuit.getModules().avatarAppearance.ChangeOutfit(builder.build(), flag, inventoryentrylist.getFolder());
         }
     }
 
-    @Nullable
-    private UUID getFolderUUID() {
-        String str = null;
-        Bundle arguments = getArguments();
-        if (arguments != null) {
-            str = arguments.getString(FOLDER_ID_KEY);
+    private UUID getFolderUUID()
+    {
+        String s = null;
+        Bundle bundle = getArguments();
+        if (bundle != null)
+        {
+            s = bundle.getString("folderID");
         }
-        return UUIDPool.getUUID(str);
+        return UUIDPool.getUUID(s);
     }
 
-    private InventoryQuery getInventoryQuery(@Nullable UUID uuid) {
-        boolean z = false;
-        if (InventoryFragmentHelper.getSortOrder(getContext()) == 0) {
-            z = true;
+    private InventoryQuery getInventoryQuery(UUID uuid)
+    {
+        boolean flag = false;
+        if (InventoryFragmentHelper.getSortOrder(getContext()) == 0)
+        {
+            flag = true;
         }
-        return InventoryQuery.create(uuid, (String) null, true, true, z, (SLAssetType) null);
+        return InventoryQuery.create(uuid, null, true, true, flag, null);
     }
 
-    @Nullable
-    private UserManager getUserManager() {
+    private UserManager getUserManager()
+    {
         return ActivityUtils.getUserManager(getArguments());
     }
 
-    public static Bundle makeSelection(@Nonnull UUID uuid, @Nullable UUID uuid2) {
+    public static Bundle makeSelection(UUID uuid, UUID uuid1)
+    {
         Bundle bundle = new Bundle();
         ActivityUtils.setActiveAgentID(bundle, uuid);
-        if (uuid2 != null) {
-            bundle.putString(FOLDER_ID_KEY, uuid2.toString());
+        if (uuid1 != null)
+        {
+            bundle.putString("folderID", uuid1.toString());
         }
         return bundle;
     }
 
-    private void navigateToFolder(UUID uuid) {
-        getArguments().putString(FOLDER_ID_KEY, uuid.toString());
+    private void navigateToFolder(UUID uuid)
+    {
+        getArguments().putString("folderID", uuid.toString());
         showInventoryList(uuid);
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onAgentCircuit */
-    public void m696com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref1(SLAgentCircuit sLAgentCircuit) {
-        SLAvatarAppearance sLAvatarAppearance = null;
-        if (this.adapter != null) {
-            InventoryFolderAdapter inventoryFolderAdapter = this.adapter;
-            if (sLAgentCircuit != null) {
-                sLAvatarAppearance = sLAgentCircuit.getModules().avatarAppearance;
+    private void onAgentCircuit(SLAgentCircuit slagentcircuit)
+    {
+        SLAvatarAppearance slavatarappearance = null;
+        if (adapter != null)
+        {
+            InventoryFolderAdapter inventoryfolderadapter = adapter;
+            if (slagentcircuit != null)
+            {
+                slavatarappearance = slagentcircuit.getModules().avatarAppearance;
             }
-            inventoryFolderAdapter.setAvatarAppearance(sLAvatarAppearance);
+            inventoryfolderadapter.setAvatarAppearance(slavatarappearance);
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onInventoryEntryList */
-    public void m695com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref0(InventoryEntryList inventoryEntryList) {
-        Debug.Printf("InventoryFragment (%s): onInventoryEntryList: %d entries", this, Integer.valueOf(inventoryEntryList.size()));
-        setTitle(inventoryEntryList.getTitle(), (String) null);
-        if (this.adapter != null) {
-            this.adapter.setData(inventoryEntryList);
+    private void onInventoryEntryList(InventoryEntryList inventoryentrylist)
+    {
+        Debug.Printf("InventoryFragment (%s): onInventoryEntryList: %d entries", new Object[] {
+            this, Integer.valueOf(inventoryentrylist.size())
+        });
+        setTitle(inventoryentrylist.getTitle(), null);
+        if (adapter != null)
+        {
+            adapter.setData(inventoryentrylist);
         }
         updateLoadingStatus();
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onLoadingStatusChanged */
-    public void m697com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref2(Boolean bool) {
+    private void onLoadingStatusChanged(Boolean boolean1)
+    {
         updateLoadingStatus();
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onRootFolderEntryList */
-    public void m700com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref5(InventoryEntryList inventoryEntryList) {
-        if (inventoryEntryList != null) {
-            Iterator it = inventoryEntryList.iterator();
-            while (it.hasNext()) {
-                SLInventoryEntry sLInventoryEntry = (SLInventoryEntry) it.next();
-                if (sLInventoryEntry.isFolder && sLInventoryEntry.typeDefault == 48) {
-                    this.myOutfitsFolderUUID = sLInventoryEntry.uuid;
-                    this.rootFolderEntryList.unsubscribe();
-                    if (getFolderUUID() == null) {
-                        showInventoryList(getFolderUUID());
-                        return;
-                    }
-                    return;
+    private void onRootFolderEntryList(InventoryEntryList inventoryentrylist)
+    {
+label0:
+        {
+            if (inventoryentrylist == null)
+            {
+                break label0;
+            }
+            inventoryentrylist = inventoryentrylist.iterator();
+            SLInventoryEntry slinventoryentry;
+            do
+            {
+                if (!inventoryentrylist.hasNext())
+                {
+                    break label0;
                 }
+                slinventoryentry = (SLInventoryEntry)inventoryentrylist.next();
+            } while (!slinventoryentry.isFolder || slinventoryentry.typeDefault != 48);
+            myOutfitsFolderUUID = slinventoryentry.uuid;
+            rootFolderEntryList.unsubscribe();
+            if (getFolderUUID() == null)
+            {
+                showInventoryList(getFolderUUID());
             }
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onWornAttachmentsChanged */
-    public void m698com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref3(ImmutableMap<UUID, String> immutableMap) {
-        if (this.adapter != null) {
-            this.adapter.setWornAttachments(immutableMap);
+    private void onWornAttachmentsChanged(ImmutableMap immutablemap)
+    {
+        if (adapter != null)
+        {
+            adapter.setWornAttachments(immutablemap);
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onWornOutfitFolder */
-    public void m701com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref6(UUID uuid) {
-        if (this.adapter != null) {
-            this.adapter.setWornOutfitFolder(uuid);
+    private void onWornOutfitFolder(UUID uuid)
+    {
+        if (adapter != null)
+        {
+            adapter.setWornOutfitFolder(uuid);
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onWornWearablesChanged */
-    public void m699com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref4(Table<SLWearableType, UUID, SLWearable> table) {
-        if (this.adapter != null) {
-            this.adapter.setWornWearables(table);
+    private void onWornWearablesChanged(Table table)
+    {
+        if (adapter != null)
+        {
+            adapter.setWornWearables(table);
         }
     }
 
-    private void showInventoryList(@Nullable UUID uuid) {
-        UUID rootFolder;
-        Debug.Printf("OutfitsNewFragment (%s): showInventoryList '%s'", this, uuid);
+    private void showInventoryList(UUID uuid)
+    {
+        Debug.Printf("OutfitsNewFragment (%s): showInventoryList '%s'", new Object[] {
+            this, uuid
+        });
         View view = getView();
-        this.entryList.unsubscribe();
-        this.agentCircuit.unsubscribe();
-        this.folderLoading.unsubscribe();
-        this.rootFolderEntryList.unsubscribe();
-        UserManager userManager = getUserManager();
-        if (userManager != null) {
-            InventoryDB database = userManager.getInventoryManager().getDatabase();
-            this.wornAttachments.subscribe(userManager.getWornAttachmentsPool(), SubscriptionSingleKey.Value);
-            this.wornWearables.subscribe(userManager.getWornWearablesPool(), SubscriptionSingleKey.Value);
-            this.wornOutfitFolder.subscribe(userManager.wornOutfitLink(), SubscriptionSingleKey.Value);
-            this.agentCircuit.subscribe(UserManager.agentCircuits(), userManager.getUserID());
-            if (uuid == null) {
-                uuid = this.myOutfitsFolderUUID;
+        entryList.unsubscribe();
+        agentCircuit.unsubscribe();
+        folderLoading.unsubscribe();
+        rootFolderEntryList.unsubscribe();
+        UserManager usermanager = getUserManager();
+        if (usermanager != null)
+        {
+            InventoryDB inventorydb = usermanager.getInventoryManager().getDatabase();
+            wornAttachments.subscribe(usermanager.getWornAttachmentsPool(), SubscriptionSingleKey.Value);
+            wornWearables.subscribe(usermanager.getWornWearablesPool(), SubscriptionSingleKey.Value);
+            wornOutfitFolder.subscribe(usermanager.wornOutfitLink(), SubscriptionSingleKey.Value);
+            agentCircuit.subscribe(UserManager.agentCircuits(), usermanager.getUserID());
+            UUID uuid1 = uuid;
+            if (uuid == null)
+            {
+                uuid1 = myOutfitsFolderUUID;
             }
-            Debug.Printf("After checking myoutfits: %s", uuid);
-            if (uuid == null && (rootFolder = userManager.getInventoryManager().getRootFolder()) != null) {
-                SLInventoryEntry findSpecialFolder = database.findSpecialFolder(rootFolder, 48);
-                if (findSpecialFolder != null) {
-                    this.myOutfitsFolderUUID = findSpecialFolder.uuid;
-                    uuid = findSpecialFolder.uuid;
-                    Debug.Printf("Found special folder: %s", uuid);
-                } else {
-                    Debug.Printf("Special folder not found", new Object[0]);
-                }
-            }
-            if (uuid != null) {
-                this.folderLoading.subscribe(userManager.getInventoryManager().getFolderLoading(), uuid);
-                this.entryList.subscribe(userManager.getInventoryManager().getInventoryEntries(), getInventoryQuery(uuid));
-                if (!(view == null || this.listHeader == null)) {
-                    if (Objects.equal(uuid, this.myOutfitsFolderUUID)) {
-                        ((TextView) this.listHeader.findViewById(R.id.itemNameTextView)).setText(R.string.current_outfit);
-                        ((ImageView) this.listHeader.findViewById(R.id.itemTypeIconView)).setImageResource(R.drawable.inv_folder);
-                        view.findViewById(R.id.wear_buttons_layout).setVisibility(8);
-                    } else {
-                        ((TextView) this.listHeader.findViewById(R.id.itemNameTextView)).setText(R.string.inventory_go_up);
-                        ((ImageView) this.listHeader.findViewById(R.id.itemTypeIconView)).setImageResource(R.drawable.inv_up);
-                        view.findViewById(R.id.wear_buttons_layout).setVisibility(0);
+            Debug.Printf("After checking myoutfits: %s", new Object[] {
+                uuid1
+            });
+            uuid = uuid1;
+            if (uuid1 == null)
+            {
+                UUID uuid2 = usermanager.getInventoryManager().getRootFolder();
+                uuid = uuid1;
+                if (uuid2 != null)
+                {
+                    uuid = inventorydb.findSpecialFolder(uuid2, 48);
+                    if (uuid != null)
+                    {
+                        myOutfitsFolderUUID = ((SLInventoryEntry) (uuid)).uuid;
+                        uuid = ((SLInventoryEntry) (uuid)).uuid;
+                        Debug.Printf("Found special folder: %s", new Object[] {
+                            uuid
+                        });
+                    } else
+                    {
+                        Debug.Printf("Special folder not found", new Object[0]);
+                        uuid = uuid1;
                     }
-                    this.listHeader.findViewById(R.id.itemSubTypeIconView).setVisibility(8);
-                    this.listHeader.setVisibility(0);
-                }
-            } else {
-                this.rootFolderEntryList.subscribe(userManager.getInventoryManager().getInventoryEntries(), InventoryQuery.create((UUID) null, (String) null, true, false, false, (SLAssetType) null));
-                if (this.listHeader != null) {
-                    this.listHeader.setVisibility(8);
-                }
-                if (view != null) {
-                    view.findViewById(R.id.wear_buttons_layout).setVisibility(8);
                 }
             }
-            if (this.adapter != null) {
-                this.adapter.setDatabase(database);
+            if (uuid != null)
+            {
+                folderLoading.subscribe(usermanager.getInventoryManager().getFolderLoading(), uuid);
+                entryList.subscribe(usermanager.getInventoryManager().getInventoryEntries(), getInventoryQuery(uuid));
+                if (view != null && listHeader != null)
+                {
+                    if (Objects.equal(uuid, myOutfitsFolderUUID))
+                    {
+                        ((TextView)listHeader.findViewById(0x7f1001bf)).setText(0x7f0900d4);
+                        ((ImageView)listHeader.findViewById(0x7f1001bd)).setImageResource(0x7f0200c0);
+                        view.findViewById(0x7f100246).setVisibility(8);
+                    } else
+                    {
+                        ((TextView)listHeader.findViewById(0x7f1001bf)).setText(0x7f09016f);
+                        ((ImageView)listHeader.findViewById(0x7f1001bd)).setImageResource(0x7f0200cc);
+                        view.findViewById(0x7f100246).setVisibility(0);
+                    }
+                    listHeader.findViewById(0x7f1001be).setVisibility(8);
+                    listHeader.setVisibility(0);
+                }
+            } else
+            {
+                rootFolderEntryList.subscribe(usermanager.getInventoryManager().getInventoryEntries(), InventoryQuery.create(null, null, true, false, false, null));
+                if (listHeader != null)
+                {
+                    listHeader.setVisibility(8);
+                }
+                if (view != null)
+                {
+                    view.findViewById(0x7f100246).setVisibility(8);
+                }
             }
-        } else {
-            this.wornAttachments.unsubscribe();
-            this.wornWearables.unsubscribe();
-            this.rootFolderEntryList.unsubscribe();
-            this.adapter.setDatabase((InventoryDB) null);
-            this.wornOutfitFolder.unsubscribe();
+            if (adapter != null)
+            {
+                adapter.setDatabase(inventorydb);
+            }
+        } else
+        {
+            wornAttachments.unsubscribe();
+            wornWearables.unsubscribe();
+            rootFolderEntryList.unsubscribe();
+            adapter.setDatabase(null);
+            wornOutfitFolder.unsubscribe();
         }
         updateLoadingStatus();
     }
 
-    private void updateLoadingStatus() {
-        boolean z;
+    private void updateLoadingStatus()
+    {
         Context context = getContext();
-        if (context != null) {
-            boolean z2 = true;
-            if (this.folderLoading.isSubscribed()) {
-                Boolean data = this.folderLoading.getData();
-                z = data != null ? data.booleanValue() : false;
-            } else {
-                z = false;
+        if (context != null)
+        {
+            boolean flag1 = true;
+            boolean flag;
+            boolean flag2;
+            if (folderLoading.isSubscribed())
+            {
+                Object obj = (Boolean)folderLoading.getData();
+                if (obj != null)
+                {
+                    flag = ((Boolean) (obj)).booleanValue();
+                } else
+                {
+                    flag = false;
+                }
+            } else
+            {
+                flag = false;
             }
-            if (this.adapter != null) {
-                z2 = this.adapter.isEmpty();
+            if (adapter != null)
+            {
+                flag1 = adapter.isEmpty();
             }
-            this.loadableMonitor.setExtraLoading(z2 ? z : false);
-            LoadableMonitor loadableMonitor2 = this.loadableMonitor;
-            if (z2) {
-                z = false;
+            obj = loadableMonitor;
+            if (flag1)
+            {
+                flag2 = flag;
+            } else
+            {
+                flag2 = false;
             }
-            loadableMonitor2.setButteryProgressBar(z);
-            this.loadableMonitor.setEmptyMessage(z2, context.getString(R.string.no_inventory_subentries));
+            ((LoadableMonitor) (obj)).setExtraLoading(flag2);
+            obj = loadableMonitor;
+            if (flag1)
+            {
+                flag = false;
+            }
+            ((LoadableMonitor) (obj)).setButteryProgressBar(flag);
+            loadableMonitor.setEmptyMessage(flag1, context.getString(0x7f0901e5));
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onOutfitItemClicked(AdapterView adapterView, View view, int i, long j) {
-        SLInventoryEntry folder;
-        UserManager userManager = getUserManager();
-        if (userManager != null) {
-            Object item = adapterView.getAdapter().getItem(i);
-            if (item == this.listHeaderData) {
-                UUID folderUUID = getFolderUUID();
-                if (folderUUID == null || Objects.equal(folderUUID, this.myOutfitsFolderUUID)) {
-                    DetailsActivity.showEmbeddedDetails(getActivity(), CurrentOutfitFragment.class, CurrentOutfitFragment.makeSelection(userManager.getUserID()));
-                    return;
-                }
-                InventoryEntryList data = this.entryList.getData();
-                if (data != null && (folder = data.getFolder()) != null) {
-                    navigateToFolder(folder.parentUUID);
-                }
-            } else if (item instanceof SLInventoryEntry) {
-                SLInventoryEntry sLInventoryEntry = (SLInventoryEntry) item;
-                Debug.Printf("Inventory: Item click: item isFolder %b invType %d typeDefault %d assetType %d", Boolean.valueOf(sLInventoryEntry.isFolder), Integer.valueOf(sLInventoryEntry.invType), Integer.valueOf(sLInventoryEntry.typeDefault), Integer.valueOf(sLInventoryEntry.assetType));
-                UUID uuid = (!sLInventoryEntry.isFolder || sLInventoryEntry.uuid == null) ? (!sLInventoryEntry.isLink() || sLInventoryEntry.invType != 8) ? null : sLInventoryEntry.assetUUID : sLInventoryEntry.uuid;
-                if (uuid != null) {
-                    navigateToFolder(uuid);
-                }
+    void _2D_com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_2D_mthref_2D_0(InventoryEntryList inventoryentrylist)
+    {
+        onInventoryEntryList(inventoryentrylist);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_2D_mthref_2D_1(SLAgentCircuit slagentcircuit)
+    {
+        onAgentCircuit(slagentcircuit);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_2D_mthref_2D_2(Boolean boolean1)
+    {
+        onLoadingStatusChanged(boolean1);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_2D_mthref_2D_3(ImmutableMap immutablemap)
+    {
+        onWornAttachmentsChanged(immutablemap);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_2D_mthref_2D_4(Table table)
+    {
+        onWornWearablesChanged(table);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_2D_mthref_2D_5(InventoryEntryList inventoryentrylist)
+    {
+        onRootFolderEntryList(inventoryentrylist);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_2D_mthref_2D_6(UUID uuid)
+    {
+        onWornOutfitFolder(uuid);
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragment_13544(AdapterView adapterview, View view, int i, long l)
+    {
+        view = getUserManager();
+        if (view == null) goto _L2; else goto _L1
+_L1:
+        adapterview = ((AdapterView) (adapterview.getAdapter().getItem(i)));
+        if (adapterview != listHeaderData) goto _L4; else goto _L3
+_L3:
+        adapterview = getFolderUUID();
+        if (adapterview != null && !Objects.equal(adapterview, myOutfitsFolderUUID)) goto _L6; else goto _L5
+_L5:
+        DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/outfits/CurrentOutfitFragment, CurrentOutfitFragment.makeSelection(view.getUserID()));
+_L2:
+        return;
+_L6:
+        adapterview = (InventoryEntryList)entryList.getData();
+        if (adapterview != null)
+        {
+            adapterview = adapterview.getFolder();
+            if (adapterview != null)
+            {
+                navigateToFolder(((SLInventoryEntry) (adapterview)).parentUUID);
+                return;
             }
         }
+        continue; /* Loop/switch isn't completed */
+_L4:
+        if (adapterview instanceof SLInventoryEntry)
+        {
+            adapterview = (SLInventoryEntry)adapterview;
+            Debug.Printf("Inventory: Item click: item isFolder %b invType %d typeDefault %d assetType %d", new Object[] {
+                Boolean.valueOf(((SLInventoryEntry) (adapterview)).isFolder), Integer.valueOf(((SLInventoryEntry) (adapterview)).invType), Integer.valueOf(((SLInventoryEntry) (adapterview)).typeDefault), Integer.valueOf(((SLInventoryEntry) (adapterview)).assetType)
+            });
+            if (((SLInventoryEntry) (adapterview)).isFolder && ((SLInventoryEntry) (adapterview)).uuid != null)
+            {
+                adapterview = ((SLInventoryEntry) (adapterview)).uuid;
+            } else
+            if (adapterview.isLink() && ((SLInventoryEntry) (adapterview)).invType == 8)
+            {
+                adapterview = ((SLInventoryEntry) (adapterview)).assetUUID;
+            } else
+            {
+                adapterview = null;
+            }
+            if (adapterview != null)
+            {
+                navigateToFolder(adapterview);
+                return;
+            }
+        }
+        if (true) goto _L2; else goto _L7
+_L7:
     }
 
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.outfit_folder_wear_button:
-                changeOutfit(true);
-                return;
-            case R.id.outfit_folder_add_button:
-                changeOutfit(false);
-                return;
-            default:
-                return;
+    public void onClick(View view)
+    {
+        switch (view.getId())
+        {
+        default:
+            return;
+
+        case 2131755591: 
+            changeOutfit(true);
+            return;
+
+        case 2131755592: 
+            changeOutfit(false);
+            break;
         }
     }
 
-    @Nullable
-    public View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
         Debug.Printf("InventoryFragment: onCreateView", new Object[0]);
-        View inflate = layoutInflater.inflate(R.layout.outfit_folder, viewGroup, false);
-        this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_folder_selected), getString(R.string.inventory_folder_fail));
-        this.listHeader = (ViewGroup) layoutInflater.inflate(R.layout.inventory_item, (ListView) inflate.findViewById(R.id.item_list), false);
-        this.adapter = new InventoryFolderAdapter(layoutInflater, true);
-        this.adapter.setOnItemCheckboxClickListener(this);
-        ((ListView) inflate.findViewById(R.id.item_list)).addHeaderView(this.listHeader, this.listHeaderData, true);
-        ((ListView) inflate.findViewById(R.id.item_list)).setAdapter(this.adapter);
-        ((ListView) inflate.findViewById(R.id.item_list)).setOnItemClickListener(this.itemClickListener);
-        inflate.findViewById(R.id.outfit_folder_wear_button).setOnClickListener(this);
-        inflate.findViewById(R.id.outfit_folder_add_button).setOnClickListener(this);
-        return inflate;
+        viewgroup = layoutinflater.inflate(0x7f04007d, viewgroup, false);
+        loadableMonitor.setLoadingLayout((LoadingLayout)viewgroup.findViewById(0x7f1000bd), getString(0x7f0901de), getString(0x7f09016d));
+        listHeader = (ViewGroup)layoutinflater.inflate(0x7f040053, (ListView)viewgroup.findViewById(0x7f1001b8), false);
+        adapter = new InventoryFolderAdapter(layoutinflater, true);
+        adapter.setOnItemCheckboxClickListener(this);
+        ((ListView)viewgroup.findViewById(0x7f1001b8)).addHeaderView(listHeader, listHeaderData, true);
+        ((ListView)viewgroup.findViewById(0x7f1001b8)).setAdapter(adapter);
+        ((ListView)viewgroup.findViewById(0x7f1001b8)).setOnItemClickListener(itemClickListener);
+        viewgroup.findViewById(0x7f100247).setOnClickListener(this);
+        viewgroup.findViewById(0x7f100248).setOnClickListener(this);
+        return viewgroup;
     }
 
-    @EventHandler
-    public void onInventorySortOrderChanged(InventorySortOrderChangedEvent inventorySortOrderChangedEvent) {
-        if (isFragmentStarted()) {
+    public void onInventorySortOrderChanged(InventorySortOrderChangedEvent inventorysortorderchangedevent)
+    {
+        if (isFragmentStarted())
+        {
             showInventoryList(getFolderUUID());
         }
     }
 
-    public void onItemCheckboxClicked(SLInventoryEntry sLInventoryEntry) {
-        SLInventoryEntry resolveLink;
-        UserManager userManager = getUserManager();
-        SLAgentCircuit data = this.agentCircuit.getData();
-        if (data != null && userManager != null) {
-            SLAvatarAppearance sLAvatarAppearance = data.getModules().avatarAppearance;
-            InventoryDB database = userManager.getInventoryManager().getDatabase();
-            if (!(database == null || (resolveLink = database.resolveLink(sLInventoryEntry)) == null)) {
-                sLInventoryEntry = resolveLink;
-            }
-            if (sLAvatarAppearance.isItemWorn(sLInventoryEntry)) {
-                if (sLInventoryEntry.isWearable()) {
-                    sLAvatarAppearance.TakeItemOff(sLInventoryEntry);
-                } else {
-                    sLAvatarAppearance.DetachInventoryItem(sLInventoryEntry);
+    public void onItemCheckboxClicked(SLInventoryEntry slinventoryentry)
+    {
+        Object obj;
+        SLAvatarAppearance slavatarappearance;
+label0:
+        {
+label1:
+            {
+                obj = getUserManager();
+                Object obj1 = (SLAgentCircuit)agentCircuit.getData();
+                if (obj1 != null && obj != null)
+                {
+                    slavatarappearance = ((SLAgentCircuit) (obj1)).getModules().avatarAppearance;
+                    obj1 = ((UserManager) (obj)).getInventoryManager().getDatabase();
+                    obj = slinventoryentry;
+                    if (obj1 != null)
+                    {
+                        obj1 = ((InventoryDB) (obj1)).resolveLink(slinventoryentry);
+                        obj = slinventoryentry;
+                        if (obj1 != null)
+                        {
+                            obj = obj1;
+                        }
+                    }
+                    if (!slavatarappearance.isItemWorn(((SLInventoryEntry) (obj))))
+                    {
+                        break label0;
+                    }
+                    if (!((SLInventoryEntry) (obj)).isWearable())
+                    {
+                        break label1;
+                    }
+                    slavatarappearance.TakeItemOff(((SLInventoryEntry) (obj)));
                 }
-            } else if (sLInventoryEntry.isWearable()) {
-                sLAvatarAppearance.WearItem(sLInventoryEntry, false);
-            } else {
-                sLAvatarAppearance.AttachInventoryItem(sLInventoryEntry, 0, false);
+                return;
             }
+            slavatarappearance.DetachInventoryItem(((SLInventoryEntry) (obj)));
+            return;
+        }
+        if (((SLInventoryEntry) (obj)).isWearable())
+        {
+            slavatarappearance.WearItem(((SLInventoryEntry) (obj)), false);
+            return;
+        } else
+        {
+            slavatarappearance.AttachInventoryItem(((SLInventoryEntry) (obj)), 0, false);
+            return;
         }
     }
 
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        EventBus.getInstance().subscribe((Object) this);
+        EventBus.getInstance().subscribe(this);
         showInventoryList(getFolderUUID());
     }
 
-    public void onStop() {
-        showInventoryList((UUID) null);
+    public void onStop()
+    {
+        showInventoryList(null);
         EventBus.getInstance().unsubscribe(this);
         super.onStop();
     }
 
-    public void setFragmentArgs(Intent intent, Bundle bundle) {
-        Debug.Printf("InventoryFragment: setFragmentArgs '%s'", bundle);
-        if (bundle != null) {
+    public void setFragmentArgs(Intent intent, Bundle bundle)
+    {
+        Debug.Printf("InventoryFragment: setFragmentArgs '%s'", new Object[] {
+            bundle
+        });
+        if (bundle != null)
+        {
             getArguments().putAll(bundle);
         }
-        if (isFragmentStarted()) {
+        if (isFragmentStarted())
+        {
             showInventoryList(getFolderUUID());
         }
     }

@@ -1,105 +1,149 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class GroupActiveProposalItemReply extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<ProposalData> ProposalData_Fields = new ArrayList<>();
-    public TransactionData TransactionData_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class GroupActiveProposalItemReply extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID GroupID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class ProposalData {
+    public static class ProposalData
+    {
+
         public boolean AlreadyVoted;
-        public byte[] EndDateTime;
+        public byte EndDateTime[];
         public float Majority;
-        public byte[] ProposalText;
+        public byte ProposalText[];
         public int Quorum;
-        public byte[] StartDateTime;
-        public byte[] TerseDateID;
-        public byte[] VoteCast;
+        public byte StartDateTime[];
+        public byte TerseDateID[];
+        public byte VoteCast[];
         public UUID VoteID;
         public UUID VoteInitiator;
+
+        public ProposalData()
+        {
+        }
     }
 
-    public static class TransactionData {
+    public static class TransactionData
+    {
+
         public int TotalNumItems;
         public UUID TransactionID;
-    }
 
-    public GroupActiveProposalItemReply() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-        this.TransactionData_Field = new TransactionData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 57;
-        Iterator<T> it = this.ProposalData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            ProposalData proposalData = (ProposalData) it.next();
-            i = proposalData.ProposalText.length + proposalData.TerseDateID.length + 33 + 1 + proposalData.StartDateTime.length + 1 + proposalData.EndDateTime.length + 1 + 1 + proposalData.VoteCast.length + 4 + 4 + 1 + i2;
+        public TransactionData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleGroupActiveProposalItemReply(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList ProposalData_Fields;
+    public TransactionData TransactionData_Field;
+
+    public GroupActiveProposalItemReply()
+    {
+        ProposalData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        TransactionData_Field = new TransactionData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 104);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.GroupID);
-        packUUID(byteBuffer, this.TransactionData_Field.TransactionID);
-        packInt(byteBuffer, this.TransactionData_Field.TotalNumItems);
-        byteBuffer.put((byte) this.ProposalData_Fields.size());
-        for (ProposalData proposalData : this.ProposalData_Fields) {
-            packUUID(byteBuffer, proposalData.VoteID);
-            packUUID(byteBuffer, proposalData.VoteInitiator);
-            packVariable(byteBuffer, proposalData.TerseDateID, 1);
-            packVariable(byteBuffer, proposalData.StartDateTime, 1);
-            packVariable(byteBuffer, proposalData.EndDateTime, 1);
-            packBoolean(byteBuffer, proposalData.AlreadyVoted);
-            packVariable(byteBuffer, proposalData.VoteCast, 1);
-            packFloat(byteBuffer, proposalData.Majority);
-            packInt(byteBuffer, proposalData.Quorum);
-            packVariable(byteBuffer, proposalData.ProposalText, 1);
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = ProposalData_Fields.iterator();
+        ProposalData proposaldata;
+        int i;
+        int j;
+        int k;
+        int l;
+        int i1;
+        for (i = 57; iterator.hasNext(); i = proposaldata.ProposalText.length + (j + 33 + 1 + k + 1 + l + 1 + 1 + i1 + 4 + 4 + 1) + i)
+        {
+            proposaldata = (ProposalData)iterator.next();
+            j = proposaldata.TerseDateID.length;
+            k = proposaldata.StartDateTime.length;
+            l = proposaldata.EndDateTime.length;
+            i1 = proposaldata.VoteCast.length;
         }
+
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.GroupID = unpackUUID(byteBuffer);
-        this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer);
-        this.TransactionData_Field.TotalNumItems = unpackInt(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            ProposalData proposalData = new ProposalData();
-            proposalData.VoteID = unpackUUID(byteBuffer);
-            proposalData.VoteInitiator = unpackUUID(byteBuffer);
-            proposalData.TerseDateID = unpackVariable(byteBuffer, 1);
-            proposalData.StartDateTime = unpackVariable(byteBuffer, 1);
-            proposalData.EndDateTime = unpackVariable(byteBuffer, 1);
-            proposalData.AlreadyVoted = unpackBoolean(byteBuffer);
-            proposalData.VoteCast = unpackVariable(byteBuffer, 1);
-            proposalData.Majority = unpackFloat(byteBuffer);
-            proposalData.Quorum = unpackInt(byteBuffer);
-            proposalData.ProposalText = unpackVariable(byteBuffer, 1);
-            this.ProposalData_Fields.add(proposalData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleGroupActiveProposalItemReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)104);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.GroupID);
+        packUUID(bytebuffer, TransactionData_Field.TransactionID);
+        packInt(bytebuffer, TransactionData_Field.TotalNumItems);
+        bytebuffer.put((byte)ProposalData_Fields.size());
+        ProposalData proposaldata;
+        for (Iterator iterator = ProposalData_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, proposaldata.ProposalText, 1))
+        {
+            proposaldata = (ProposalData)iterator.next();
+            packUUID(bytebuffer, proposaldata.VoteID);
+            packUUID(bytebuffer, proposaldata.VoteInitiator);
+            packVariable(bytebuffer, proposaldata.TerseDateID, 1);
+            packVariable(bytebuffer, proposaldata.StartDateTime, 1);
+            packVariable(bytebuffer, proposaldata.EndDateTime, 1);
+            packBoolean(bytebuffer, proposaldata.AlreadyVoted);
+            packVariable(bytebuffer, proposaldata.VoteCast, 1);
+            packFloat(bytebuffer, proposaldata.Majority);
+            packInt(bytebuffer, proposaldata.Quorum);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.GroupID = unpackUUID(bytebuffer);
+        TransactionData_Field.TransactionID = unpackUUID(bytebuffer);
+        TransactionData_Field.TotalNumItems = unpackInt(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            ProposalData proposaldata = new ProposalData();
+            proposaldata.VoteID = unpackUUID(bytebuffer);
+            proposaldata.VoteInitiator = unpackUUID(bytebuffer);
+            proposaldata.TerseDateID = unpackVariable(bytebuffer, 1);
+            proposaldata.StartDateTime = unpackVariable(bytebuffer, 1);
+            proposaldata.EndDateTime = unpackVariable(bytebuffer, 1);
+            proposaldata.AlreadyVoted = unpackBoolean(bytebuffer);
+            proposaldata.VoteCast = unpackVariable(bytebuffer, 1);
+            proposaldata.Majority = unpackFloat(bytebuffer);
+            proposaldata.Quorum = unpackInt(bytebuffer);
+            proposaldata.ProposalText = unpackVariable(bytebuffer, 1);
+            ProposalData_Fields.add(proposaldata);
+        }
+
     }
 }

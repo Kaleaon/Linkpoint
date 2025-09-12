@@ -1,22 +1,23 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.voiceintf;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.Parcelable;
-import android.support.v7.app.NotificationCompat;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.BiMap;
@@ -25,20 +26,21 @@ import com.google.common.collect.Maps;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.GridConnectionService;
 import com.lumiyaviewer.lumiya.LumiyaApp;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.licensing.LicenseChecker;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
 import com.lumiyaviewer.lumiya.slproto.chat.SLChatSystemMessageEvent;
 import com.lumiyaviewer.lumiya.slproto.chat.SLMissedVoiceCallEvent;
 import com.lumiyaviewer.lumiya.slproto.chat.SLVoiceUpgradeEvent;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
+import com.lumiyaviewer.lumiya.slproto.modules.voice.SLVoice;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo;
+import com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.chat.ChatFragment;
 import com.lumiyaviewer.lumiya.ui.chat.contacts.ChatFragmentActivityFactory;
@@ -60,19 +62,21 @@ import com.lumiyaviewer.lumiya.voice.common.messages.VoiceRejectCall;
 import com.lumiyaviewer.lumiya.voice.common.messages.VoiceRinging;
 import com.lumiyaviewer.lumiya.voice.common.messages.VoiceSetAudioProperties;
 import com.lumiyaviewer.lumiya.voice.common.messages.VoiceTerminateCall;
-import com.lumiyaviewer.lumiya.voice.common.model.VoiceBluetoothState;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChannelInfo;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceLoginInfo;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nullable;
 
-public class VoicePluginServiceConnection implements ServiceConnection {
+public class VoicePluginServiceConnection
+    implements ServiceConnection
+{
+
     public static final String ACTION_VOICE_ACCEPT = "accept";
     public static final String ACTION_VOICE_REJECT = "reject";
     private static final int INCOMING_CALL_NOTIFICATION_ID = 1001;
@@ -84,571 +88,604 @@ public class VoicePluginServiceConnection implements ServiceConnection {
     private final Context context;
     private final Handler fromPluginHandler = new Handler() {
 
-        /* renamed from: -com-lumiyaviewer-lumiya-voice-common-VoicePluginMessageTypeSwitchesValues  reason: not valid java name */
-        private static final /* synthetic */ int[] f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues = null;
-        final /* synthetic */ int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$voice$common$VoicePluginMessageType;
+        private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_voice_2D_common_2D_VoicePluginMessageTypeSwitchesValues[];
+        final int $SWITCH_TABLE$com$lumiyaviewer$lumiya$voice$common$VoicePluginMessageType[];
+        final VoicePluginServiceConnection this$0;
 
-        /* renamed from: -getcom-lumiyaviewer-lumiya-voice-common-VoicePluginMessageTypeSwitchesValues  reason: not valid java name */
-        private static /* synthetic */ int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues() {
-            if (f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues != null) {
-                return f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues;
+        private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_voice_2D_common_2D_VoicePluginMessageTypeSwitchesValues()
+        {
+            if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_voice_2D_common_2D_VoicePluginMessageTypeSwitchesValues != null)
+            {
+                return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_voice_2D_common_2D_VoicePluginMessageTypeSwitchesValues;
             }
-            int[] iArr = new int[VoicePluginMessageType.values().length];
-            try {
-                iArr[VoicePluginMessageType.VoiceAcceptCall.ordinal()] = 6;
-            } catch (NoSuchFieldError e) {
+            int ai[] = new int[VoicePluginMessageType.values().length];
+            try
+            {
+                ai[VoicePluginMessageType.VoiceAcceptCall.ordinal()] = 6;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceAudioProperties.ordinal()] = 1;
-            } catch (NoSuchFieldError e2) {
+            catch (NoSuchFieldError nosuchfielderror15) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceAudioProperties.ordinal()] = 1;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceChannelClosed.ordinal()] = 7;
-            } catch (NoSuchFieldError e3) {
+            catch (NoSuchFieldError nosuchfielderror14) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceChannelClosed.ordinal()] = 7;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceChannelStatus.ordinal()] = 2;
-            } catch (NoSuchFieldError e4) {
+            catch (NoSuchFieldError nosuchfielderror13) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceChannelStatus.ordinal()] = 2;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceConnectChannel.ordinal()] = 8;
-            } catch (NoSuchFieldError e5) {
+            catch (NoSuchFieldError nosuchfielderror12) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceConnectChannel.ordinal()] = 8;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceEnableMic.ordinal()] = 9;
-            } catch (NoSuchFieldError e6) {
+            catch (NoSuchFieldError nosuchfielderror11) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceEnableMic.ordinal()] = 9;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceInitialize.ordinal()] = 10;
-            } catch (NoSuchFieldError e7) {
+            catch (NoSuchFieldError nosuchfielderror10) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceInitialize.ordinal()] = 10;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceInitializeReply.ordinal()] = 3;
-            } catch (NoSuchFieldError e8) {
+            catch (NoSuchFieldError nosuchfielderror9) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceInitializeReply.ordinal()] = 3;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceLogin.ordinal()] = 11;
-            } catch (NoSuchFieldError e9) {
+            catch (NoSuchFieldError nosuchfielderror8) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceLogin.ordinal()] = 11;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceLoginStatus.ordinal()] = 4;
-            } catch (NoSuchFieldError e10) {
+            catch (NoSuchFieldError nosuchfielderror7) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceLoginStatus.ordinal()] = 4;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceLogout.ordinal()] = 12;
-            } catch (NoSuchFieldError e11) {
+            catch (NoSuchFieldError nosuchfielderror6) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceLogout.ordinal()] = 12;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceRejectCall.ordinal()] = 13;
-            } catch (NoSuchFieldError e12) {
+            catch (NoSuchFieldError nosuchfielderror5) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceRejectCall.ordinal()] = 13;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceRinging.ordinal()] = 5;
-            } catch (NoSuchFieldError e13) {
+            catch (NoSuchFieldError nosuchfielderror4) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceRinging.ordinal()] = 5;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceSet3DPosition.ordinal()] = 14;
-            } catch (NoSuchFieldError e14) {
+            catch (NoSuchFieldError nosuchfielderror3) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceSet3DPosition.ordinal()] = 14;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceSetAudioProperties.ordinal()] = 15;
-            } catch (NoSuchFieldError e15) {
+            catch (NoSuchFieldError nosuchfielderror2) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceSetAudioProperties.ordinal()] = 15;
             }
-            try {
-                iArr[VoicePluginMessageType.VoiceTerminateCall.ordinal()] = 16;
-            } catch (NoSuchFieldError e16) {
+            catch (NoSuchFieldError nosuchfielderror1) { }
+            try
+            {
+                ai[VoicePluginMessageType.VoiceTerminateCall.ordinal()] = 16;
             }
-            f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues = iArr;
-            return iArr;
+            catch (NoSuchFieldError nosuchfielderror) { }
+            _2D_com_2D_lumiyaviewer_2D_lumiya_2D_voice_2D_common_2D_VoicePluginMessageTypeSwitchesValues = ai;
+            return ai;
         }
 
-        public void handleMessage(Message message) {
-            if (message.what == 200 && (message.obj instanceof Bundle)) {
-                Bundle bundle = (Bundle) message.obj;
-                if (bundle.containsKey("message") && bundle.containsKey("messageType")) {
-                    try {
-                        switch (m906getcomlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues()[VoicePluginMessageType.valueOf(bundle.getString("messageType")).ordinal()]) {
-                            case 1:
-                                VoicePluginServiceConnection.this.onVoiceAudioProperties(new VoiceAudioProperties(bundle.getBundle("message")));
-                                return;
-                            case 2:
-                                VoicePluginServiceConnection.this.onVoiceChannelStatus(new VoiceChannelStatus(bundle.getBundle("message")));
-                                return;
-                            case 3:
-                                VoicePluginServiceConnection.this.onVoiceInitializeReply(new VoiceInitializeReply(bundle.getBundle("message")));
-                                return;
-                            case 4:
-                                VoicePluginServiceConnection.this.onVoiceLoginStatus(new VoiceLoginStatus(bundle.getBundle("message")));
-                                return;
-                            case 5:
-                                VoicePluginServiceConnection.this.onVoiceRinging(new VoiceRinging(bundle.getBundle("message")));
-                                return;
-                            default:
-                                return;
-                        }
-                    } catch (Exception e) {
-                        Debug.Warning(e);
-                    }
-                    Debug.Warning(e);
-                }
+        public void handleMessage(Message message)
+        {
+            if (message.what != 200 || !(message.obj instanceof Bundle))
+            {
+                break MISSING_BLOCK_LABEL_211;
             }
+            message = (Bundle)message.obj;
+            if (!message.containsKey("message") || !message.containsKey("messageType"))
+            {
+                break MISSING_BLOCK_LABEL_211;
+            }
+            VoicePluginMessageType voicepluginmessagetype = VoicePluginMessageType.valueOf(message.getString("messageType"));
+            _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_voice_2D_common_2D_VoicePluginMessageTypeSwitchesValues()[voicepluginmessagetype.ordinal()];
+            JVM INSTR tableswitch 1 5: default 211
+        //                       1 190
+        //                       2 148
+        //                       3 100
+        //                       4 127
+        //                       5 169;
+               goto _L1 _L2 _L3 _L4 _L5 _L6
+_L1:
+            break MISSING_BLOCK_LABEL_211;
+_L4:
+            VoicePluginServiceConnection._2D_wrap2(VoicePluginServiceConnection.this, new VoiceInitializeReply(message.getBundle("message")));
+            return;
+_L5:
+            try
+            {
+                VoicePluginServiceConnection._2D_wrap3(VoicePluginServiceConnection.this, new VoiceLoginStatus(message.getBundle("message")));
+                return;
+            }
+            // Misplaced declaration of an exception variable
+            catch (Message message)
+            {
+                Debug.Warning(message);
+                return;
+            }
+_L3:
+            VoicePluginServiceConnection._2D_wrap1(VoicePluginServiceConnection.this, new VoiceChannelStatus(message.getBundle("message")));
+            return;
+_L6:
+            VoicePluginServiceConnection._2D_wrap4(VoicePluginServiceConnection.this, new VoiceRinging(message.getBundle("message")));
+            return;
+_L2:
+            VoicePluginServiceConnection._2D_wrap0(VoicePluginServiceConnection.this, new VoiceAudioProperties(message.getBundle("message")));
+            return;
         }
+
+            
+            {
+                this$0 = VoicePluginServiceConnection.this;
+                super();
+            }
     };
     private final Messenger fromPluginMessenger;
-    private final Set<String> incomingCallNotificationTags = Collections.synchronizedSet(new HashSet());
+    private final Set incomingCallNotificationTags = Collections.synchronizedSet(new HashSet());
     private final Handler mainThreadHandler = new Handler();
-    @Nullable
-    private ChatterNameRetriever ringingChatterNameRetriever = null;
-    @Nullable
+    private ChatterNameRetriever ringingChatterNameRetriever;
     private Messenger toPluginMessenger;
-    private final AtomicReference<UserManager> userManager = new AtomicReference<>((Object) null);
-    private final BiMap<ChatterID, VoiceChannelInfo> voiceChannels = Maps.synchronizedBiMap(HashBiMap.create());
+    private final AtomicReference userManager = new AtomicReference(null);
+    private final BiMap voiceChannels = Maps.synchronizedBiMap(HashBiMap.create());
     private final AtomicBoolean voiceInitialized = new AtomicBoolean(false);
-    private final AtomicReference<VoiceLoginInfo> voiceLoginInfo = new AtomicReference<>((Object) null);
+    private final AtomicReference voiceLoginInfo = new AtomicReference(null);
 
-    public VoicePluginServiceConnection(Context context2) {
-        this.context = context2;
-        this.fromPluginMessenger = new Messenger(this.fromPluginHandler);
+    static void _2D_wrap0(VoicePluginServiceConnection voicepluginserviceconnection, VoiceAudioProperties voiceaudioproperties)
+    {
+        voicepluginserviceconnection.onVoiceAudioProperties(voiceaudioproperties);
     }
 
-    private void cancelNotifications(@Nullable String str) {
-        NotificationManager notificationManager = (NotificationManager) this.context.getSystemService("notification");
-        if (str != null) {
-            notificationManager.cancel(str, 1001);
-            this.incomingCallNotificationTags.remove(str);
+    static void _2D_wrap1(VoicePluginServiceConnection voicepluginserviceconnection, VoiceChannelStatus voicechannelstatus)
+    {
+        voicepluginserviceconnection.onVoiceChannelStatus(voicechannelstatus);
+    }
+
+    static void _2D_wrap2(VoicePluginServiceConnection voicepluginserviceconnection, VoiceInitializeReply voiceinitializereply)
+    {
+        voicepluginserviceconnection.onVoiceInitializeReply(voiceinitializereply);
+    }
+
+    static void _2D_wrap3(VoicePluginServiceConnection voicepluginserviceconnection, VoiceLoginStatus voiceloginstatus)
+    {
+        voicepluginserviceconnection.onVoiceLoginStatus(voiceloginstatus);
+    }
+
+    static void _2D_wrap4(VoicePluginServiceConnection voicepluginserviceconnection, VoiceRinging voiceringing)
+    {
+        voicepluginserviceconnection.onVoiceRinging(voiceringing);
+    }
+
+    public VoicePluginServiceConnection(Context context1)
+    {
+        ringingChatterNameRetriever = null;
+        context = context1;
+        fromPluginMessenger = new Messenger(fromPluginHandler);
+    }
+
+    private void cancelNotifications(String s)
+    {
+        NotificationManager notificationmanager = (NotificationManager)context.getSystemService("notification");
+        if (s != null)
+        {
+            notificationmanager.cancel(s, 1001);
+            incomingCallNotificationTags.remove(s);
             return;
         }
-        for (String cancel : this.incomingCallNotificationTags) {
-            notificationManager.cancel(cancel, 1001);
-        }
-        this.incomingCallNotificationTags.clear();
+        for (s = incomingCallNotificationTags.iterator(); s.hasNext(); notificationmanager.cancel((String)s.next(), 1001)) { }
+        incomingCallNotificationTags.clear();
     }
 
-    public static boolean checkPluginInstalled(Context context2) {
+    public static boolean checkPluginInstalled(Context context1)
+    {
+        boolean flag1 = false;
         Intent intent = new Intent();
         intent.setComponent(new ComponentName("com.lumiyaviewer.lumiya.voice", "com.lumiyaviewer.lumiya.voice.VoiceService"));
-        List<ResolveInfo> queryIntentServices = context2.getPackageManager().queryIntentServices(intent, 0);
-        return queryIntentServices != null && queryIntentServices.size() > 0;
-    }
-
-    public static boolean isPluginSupported() {
-        String[] strArr;
-        if (Build.VERSION.SDK_INT >= 21) {
-            strArr = Build.SUPPORTED_ABIS;
-        } else {
-            strArr = new String[]{Build.CPU_ABI, Build.CPU_ABI2};
-        }
-        if (strArr == null) {
-            return false;
-        }
-        for (String str : strArr) {
-            if (str != null && (str.toLowerCase().contains("armeabi") || str.toLowerCase().contains("arm64"))) {
-                return true;
+        context1 = context1.getPackageManager().queryIntentServices(intent, 0);
+        boolean flag = flag1;
+        if (context1 != null)
+        {
+            flag = flag1;
+            if (context1.size() > 0)
+            {
+                flag = true;
             }
         }
-        return false;
+        return flag;
     }
 
-    /* access modifiers changed from: private */
-    public void onVoiceAudioProperties(VoiceAudioProperties voiceAudioProperties) {
-        VoiceBluetoothState voiceBluetoothState = null;
-        Object[] objArr = new Object[1];
-        if (voiceAudioProperties != null) {
-            voiceBluetoothState = voiceAudioProperties.bluetoothState;
+    public static boolean isPluginSupported()
+    {
+        int i;
+        boolean flag1 = false;
+        String as[];
+        String s;
+        boolean flag;
+        if (android.os.Build.VERSION.SDK_INT >= 21)
+        {
+            as = Build.SUPPORTED_ABIS;
+        } else
+        {
+            as = (new String[] {
+                Build.CPU_ABI, Build.CPU_ABI2
+            });
         }
-        objArr[0] = voiceBluetoothState;
-        Debug.Printf("Voice: voice audio properties received, bluetooth state %s", objArr);
-        UserManager userManager2 = this.userManager.get();
-        if (userManager2 != null) {
-            userManager2.setVoiceAudioProperties(voiceAudioProperties);
+        flag = flag1;
+        if (as == null) goto _L2; else goto _L1
+_L1:
+        i = 0;
+_L7:
+        flag = flag1;
+        if (i >= as.length) goto _L2; else goto _L3
+_L3:
+        s = as[i];
+        if (s == null || !s.toLowerCase().contains("armeabi") && !s.toLowerCase().contains("arm64")) goto _L5; else goto _L4
+_L4:
+        flag = true;
+_L2:
+        return flag;
+_L5:
+        i++;
+        if (true) goto _L7; else goto _L6
+_L6:
+    }
+
+    private void onVoiceAudioProperties(VoiceAudioProperties voiceaudioproperties)
+    {
+        Object obj = null;
+        if (voiceaudioproperties != null)
+        {
+            obj = voiceaudioproperties.bluetoothState;
+        }
+        Debug.Printf("Voice: voice audio properties received, bluetooth state %s", new Object[] {
+            obj
+        });
+        obj = (UserManager)userManager.get();
+        if (obj != null)
+        {
+            ((UserManager) (obj)).setVoiceAudioProperties(voiceaudioproperties);
         }
     }
 
-    /* access modifiers changed from: private */
-    public void onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus) {
-        SLModules modules;
-        if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.None) {
-            cancelNotifications(voiceChannelStatus.channelInfo.voiceChannelURI);
+    private void onVoiceChannelStatus(VoiceChannelStatus voicechannelstatus)
+    {
+        if (voicechannelstatus.chatInfo.state == com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo.VoiceChatState.None)
+        {
+            cancelNotifications(voicechannelstatus.channelInfo.voiceChannelURI);
         }
-        UserManager userManager2 = this.userManager.get();
-        if (userManager2 != null) {
-            ChatterID chatterID = (ChatterID) this.voiceChannels.inverse().get(voiceChannelStatus.channelInfo);
-            if (chatterID != null) {
-                userManager2.setVoiceChatInfo(chatterID, voiceChannelStatus.chatInfo);
-                if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.None && voiceChannelStatus.chatInfo.previousState == VoiceChatInfo.VoiceChatState.Ringing && (chatterID instanceof ChatterID.ChatterIDUser)) {
-                    userManager2.getChatterList().getActiveChattersManager().HandleChatEvent(chatterID, new SLMissedVoiceCallEvent(new ChatMessageSourceUser(((ChatterID.ChatterIDUser) chatterID).getChatterUUID()), userManager2.getUserID(), LumiyaApp.getContext().getString(R.string.missed_voice_call)), true);
+        Object obj = (UserManager)userManager.get();
+        if (obj != null)
+        {
+            ChatterID chatterid = (ChatterID)voiceChannels.inverse().get(voicechannelstatus.channelInfo);
+            if (chatterid != null)
+            {
+                ((UserManager) (obj)).setVoiceChatInfo(chatterid, voicechannelstatus.chatInfo);
+                if (voicechannelstatus.chatInfo.state == com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo.VoiceChatState.None && voicechannelstatus.chatInfo.previousState == com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo.VoiceChatState.Ringing && (chatterid instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser))
+                {
+                    ((UserManager) (obj)).getChatterList().getActiveChattersManager().HandleChatEvent(chatterid, new SLMissedVoiceCallEvent(new ChatMessageSourceUser(((com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser)chatterid).getChatterUUID()), ((UserManager) (obj)).getUserID(), LumiyaApp.getContext().getString(0x7f0901ba)), true);
                 }
-                if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.Active) {
-                    userManager2.setVoiceActiveChatter(chatterID);
+                if (voicechannelstatus.chatInfo.state == com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo.VoiceChatState.Active)
+                {
+                    ((UserManager) (obj)).setVoiceActiveChatter(chatterid);
                 }
             }
-            SLAgentCircuit activeAgentCircuit = userManager2.getActiveAgentCircuit();
-            if (activeAgentCircuit != null && (modules = activeAgentCircuit.getModules()) != null) {
-                modules.voice.onVoiceChannelStatus(voiceChannelStatus);
-            }
-        }
-    }
-
-    /* access modifiers changed from: private */
-    public void onVoiceInitializeReply(VoiceInitializeReply voiceInitializeReply) {
-        if (!voiceInitializeReply.appVersionOk) {
-            UserManager userManager2 = this.userManager.get();
-            if (userManager2 != null) {
-                userManager2.getChatterList().getActiveChattersManager().HandleChatEvent(ChatterID.getLocalChatterID(userManager2.getUserID()), new SLVoiceUpgradeEvent(userManager2.getUserID(), LumiyaApp.getContext().getString(R.string.app_upgrade_for_voice_needed), false, LicenseChecker.APP_STORE_URL), false);
-            }
-        } else if (voiceInitializeReply.pluginVersionCode < 3) {
-            UserManager userManager3 = this.userManager.get();
-            if (userManager3 != null) {
-                userManager3.getChatterList().getActiveChattersManager().HandleChatEvent(ChatterID.getLocalChatterID(userManager3.getUserID()), new SLVoiceUpgradeEvent(userManager3.getUserID(), LumiyaApp.getContext().getString(R.string.plugin_upgrade_for_voice_needed), false, LicenseChecker.VOICE_PLUGIN_URL), false);
-            }
-        } else if (voiceInitializeReply.errorMessage == null) {
-            this.voiceInitialized.set(true);
-            VoiceLoginInfo voiceLoginInfo2 = this.voiceLoginInfo.get();
-            if (voiceLoginInfo2 != null) {
-                sendMessage(VoicePluginMessageType.VoiceLogin, new VoiceLogin(voiceLoginInfo2));
-            }
-        } else {
-            UserManager userManager4 = this.userManager.get();
-            if (userManager4 != null) {
-                userManager4.getChatterList().getActiveChattersManager().HandleChatEvent(ChatterID.getLocalChatterID(userManager4.getUserID()), new SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), userManager4.getUserID(), LumiyaApp.getContext().getString(R.string.voice_plugin_error_format, new Object[]{voiceInitializeReply.errorMessage})), false);
-            }
-        }
-    }
-
-    /* access modifiers changed from: private */
-    public void onVoiceLoginStatus(VoiceLoginStatus voiceLoginStatus) {
-        SLModules modules;
-        UserManager userManager2 = this.userManager.get();
-        if (userManager2 != null) {
-            SLAgentCircuit activeAgentCircuit = userManager2.getActiveAgentCircuit();
-            if (!(activeAgentCircuit == null || (modules = activeAgentCircuit.getModules()) == null)) {
-                modules.voice.onVoiceLoginStatus(this, voiceLoginStatus);
-            }
-            userManager2.setVoiceLoggedIn(voiceLoginStatus.loggedIn);
-        }
-    }
-
-    /* access modifiers changed from: private */
-    public void onVoiceRinging(VoiceRinging voiceRinging) {
-        UserManager userManager2 = this.userManager.get();
-        if (userManager2 != null && voiceRinging != null && voiceRinging.agentUUID != null) {
-            ChatterID.ChatterIDUser userChatterID = ChatterID.getUserChatterID(userManager2.getUserID(), voiceRinging.agentUUID);
-            this.voiceChannels.forcePut(userChatterID, voiceRinging.voiceChannelInfo);
-            this.ringingChatterNameRetriever = new ChatterNameRetriever(userChatterID, new ChatterNameRetriever.OnChatterNameUpdated(this, voiceRinging) {
-
-                /* renamed from: -$f0 */
-                private final /* synthetic */ Object f609$f0;
-
-                /* renamed from: -$f1 */
-                private final /* synthetic */ Object f610$f1;
-
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KEiwggiQxhrsJugAMeHgzXJrgrA.1.$m$0(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KEiwggiQxhrsJugAMeHgzXJrgrA.1.$m$0(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void onChatterNameUpdated(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KEiwggiQxhrsJugAMeHgzXJrgrA.1.onChatterNameUpdated(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KEiwggiQxhrsJugAMeHgzXJrgrA.1.onChatterNameUpdated(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-            }, UIThreadExecutor.getSerialInstance(), false);
-            this.ringingChatterNameRetriever.subscribe();
-        }
-    }
-
-    public static void setInstallOfferDisplayed(boolean z) {
-        installOfferDisplayed.set(z);
-    }
-
-    public static boolean shouldDisplayInstallOffer() {
-        return !installOfferDisplayed.getAndSet(true);
-    }
-
-    private void showIncomingCallNotification(VoiceRinging voiceRinging, String str, ChatterID chatterID) {
-        Intent intent;
-        Intent intent2 = new Intent(this.context, GridConnectionService.class);
-        intent2.setAction(ACTION_VOICE_REJECT);
-        intent2.setData(voiceRinging.toUri());
-        intent2.putExtra(INTENT_EXTRA_RINGING_MESSSAGE, voiceRinging.toBundle());
-        Intent createIntent = ChatFragmentActivityFactory.getInstance().createIntent(this.context, ChatFragment.makeSelection(chatterID));
-        createIntent.addFlags(536870912);
-        ActivityUtils.setActiveAgentID(createIntent, chatterID.agentUUID);
-        UserManager userManager2 = this.userManager.get();
-        if (userManager2 == null || (intent = userManager2.getUnreadNotificationManager().captureNotify(UnreadNotificationInfo.create(userManager2.getUserID(), 0, (List<UnreadNotificationInfo.UnreadMessageSource>) null, (NotificationType) null, 1, NotificationType.Private, UnreadNotificationInfo.UnreadMessageSource.create(chatterID, (String) null, (List<SLChatEvent>) null, 0), UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null)), createIntent)) == null) {
-            intent = createIntent;
-        }
-        Intent intent3 = new Intent(this.context, GridConnectionService.class);
-        intent3.setAction(ACTION_VOICE_ACCEPT);
-        intent3.setData(voiceRinging.toUri());
-        intent3.putExtra(INTENT_EXTRA_RINGING_MESSSAGE, voiceRinging.toBundle());
-        intent3.putExtra("chatterID", chatterID.toBundle());
-        intent3.putExtra(INTENT_EXTRA_OPEN_CHATTER, PendingIntent.getActivity(this.context, 0, intent, 0));
-        Notification build = new NotificationCompat.Builder(this.context).setSmallIcon(R.drawable.ic_incoming_voice_call).setContentTitle(str).setContentText(this.context.getString(R.string.incoming_voice_call_text)).setDefaults(-1).setPriority(1).setDeleteIntent(PendingIntent.getService(this.context, 0, intent2, 0)).setContentIntent(PendingIntent.getActivity(this.context, 0, intent, 0)).setAutoCancel(true).addAction(R.drawable.ic_voice_call_accept, this.context.getString(R.string.voice_call_accept), PendingIntent.getService(this.context, 0, intent3, 0)).addAction(R.drawable.ic_voice_call_reject, this.context.getString(R.string.voice_call_reject), PendingIntent.getService(this.context, 0, intent2, 0)).build();
-        String str2 = voiceRinging.voiceChannelInfo.voiceChannelURI;
-        this.incomingCallNotificationTags.add(str2);
-        ((NotificationManager) this.context.getSystemService("notification")).notify(str2, 1001, build);
-    }
-
-    public void acceptCall(Intent intent) {
-        if (intent.hasExtra(INTENT_EXTRA_RINGING_MESSSAGE)) {
-            VoiceRinging voiceRinging = new VoiceRinging(intent.getBundleExtra(INTENT_EXTRA_RINGING_MESSSAGE));
-            Debug.Printf("Voice: accepting session '%s', url '%s'", voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo.voiceChannelURI);
-            sendMessage(VoicePluginMessageType.VoiceAcceptCall, new VoiceAcceptCall(voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo));
-        }
-        Debug.Printf("Voice: cancelling notifications", new Object[0]);
-        cancelNotifications((String) null);
-        if (intent.hasExtra(INTENT_EXTRA_OPEN_CHATTER)) {
-            Parcelable parcelableExtra = intent.getParcelableExtra(INTENT_EXTRA_OPEN_CHATTER);
-            if (parcelableExtra instanceof PendingIntent) {
-                try {
-                    Debug.Printf("Voice: starting pending open chatter intent", new Object[0]);
-                    ((PendingIntent) parcelableExtra).send();
-                } catch (PendingIntent.CanceledException e) {
-                    Debug.Warning(e);
+            obj = ((UserManager) (obj)).getActiveAgentCircuit();
+            if (obj != null)
+            {
+                obj = ((SLAgentCircuit) (obj)).getModules();
+                if (obj != null)
+                {
+                    ((SLModules) (obj)).voice.onVoiceChannelStatus(voicechannelstatus);
                 }
             }
         }
     }
 
-    public void acceptVoiceCall(ChatterID chatterID) {
-        VoiceChannelInfo voiceChannelInfo = (VoiceChannelInfo) this.voiceChannels.get(chatterID);
-        if (voiceChannelInfo != null) {
-            Debug.Printf("Voice: cancelling notification", new Object[0]);
-            cancelNotifications((String) null);
-            Debug.Printf("Voice: accepting voice call (chatterID %s)", chatterID);
-            sendMessage(VoicePluginMessageType.VoiceAcceptCall, new VoiceAcceptCall((String) null, voiceChannelInfo));
+    private void onVoiceInitializeReply(VoiceInitializeReply voiceinitializereply)
+    {
+        if (voiceinitializereply.appVersionOk) goto _L2; else goto _L1
+_L1:
+        voiceinitializereply = (UserManager)userManager.get();
+        if (voiceinitializereply != null)
+        {
+            voiceinitializereply.getChatterList().getActiveChattersManager().HandleChatEvent(ChatterID.getLocalChatterID(voiceinitializereply.getUserID()), new SLVoiceUpgradeEvent(voiceinitializereply.getUserID(), LumiyaApp.getContext().getString(0x7f090045), false, "https://play.google.com/store/apps/details?id=com.lumiyaviewer.lumiya"), false);
         }
-    }
-
-    public void acceptVoiceCall(VoiceRinging voiceRinging) {
-        Debug.Printf("Voice: cancelling notification", new Object[0]);
-        cancelNotifications((String) null);
-        Debug.Printf("Voice: accepting voice call (session handle %s)", voiceRinging.sessionHandle);
-        sendMessage(VoicePluginMessageType.VoiceAcceptCall, new VoiceAcceptCall(voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo));
-    }
-
-    public void addChannel(ChatterID chatterID, VoiceChannelInfo voiceChannelInfo) {
-        this.voiceChannels.forcePut(chatterID, voiceChannelInfo);
-    }
-
-    public void disconnect() {
-        this.mainThreadHandler.post(new $Lambda$KEiwggiQxhrsJugAMeHgzXJrgrA(this));
-    }
-
-    public void enableVoiceMic(boolean z) {
-        sendMessage(VoicePluginMessageType.VoiceEnableMic, new VoiceEnableMic(z));
-    }
-
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onVoiceCallerNameRetrieved(VoiceRinging voiceRinging, ChatterNameRetriever chatterNameRetriever) {
-        if (chatterNameRetriever == this.ringingChatterNameRetriever) {
-            String resolvedName = chatterNameRetriever.getResolvedName();
-            if (!Strings.isNullOrEmpty(resolvedName)) {
-                showIncomingCallNotification(voiceRinging, resolvedName, chatterNameRetriever.chatterID);
-            }
+_L4:
+        return;
+_L2:
+        if (voiceinitializereply.pluginVersionCode >= 3)
+        {
+            break; /* Loop/switch isn't completed */
         }
-    }
-
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void disconnectFromVoicePlugin() {
-        Debug.Printf("LumiyaVoice: disconnecting from voice plugin", new Object[0]);
-        UserManager userManager2 = this.userManager.get();
-        if (userManager2 != null) {
-            userManager2.setVoiceLoggedIn(false);
-        }
-        sendMessage(VoicePluginMessageType.VoiceLogout, new VoiceLogout());
-        this.context.unbindService(this);
-    }
-
-    public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-        Debug.Printf("LumiyaVoice: service connected", new Object[0]);
-        this.toPluginMessenger = new Messenger(iBinder);
-        try {
-            sendMessage(VoicePluginMessageType.VoiceInitialize, new VoiceInitialize(this.context.getPackageManager().getPackageInfo(this.context.getPackageName(), 0).versionCode));
-        } catch (PackageManager.NameNotFoundException e) {
-            Debug.Warning(e);
-        }
-    }
-
-    public void onServiceDisconnected(ComponentName componentName) {
-        Debug.Printf("LumiyaCloud: service disconnected", new Object[0]);
-        UserManager userManager2 = this.userManager.get();
-        if (userManager2 != null) {
-            userManager2.setVoiceLoggedIn(false);
-        }
-    }
-
-    public void rejectCall(Intent intent) {
-        if (intent.hasExtra(INTENT_EXTRA_RINGING_MESSSAGE)) {
-            VoiceRinging voiceRinging = new VoiceRinging(intent.getBundleExtra(INTENT_EXTRA_RINGING_MESSSAGE));
-            Debug.Printf("Voice: requesting to reject session '%s', url '%s'", voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo.voiceChannelURI);
-            sendMessage(VoicePluginMessageType.VoiceRejectCall, new VoiceRejectCall(voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo));
-            cancelNotifications(voiceRinging.voiceChannelInfo.voiceChannelURI);
+        voiceinitializereply = (UserManager)userManager.get();
+        if (voiceinitializereply != null)
+        {
+            voiceinitializereply.getChatterList().getActiveChattersManager().HandleChatEvent(ChatterID.getLocalChatterID(voiceinitializereply.getUserID()), new SLVoiceUpgradeEvent(voiceinitializereply.getUserID(), LumiyaApp.getContext().getString(0x7f09027a), false, "https://play.google.com/store/apps/details?id=com.lumiyaviewer.lumiya.voice"), false);
             return;
         }
-        cancelNotifications((String) null);
-    }
-
-    public boolean sendMessage(VoicePluginMessageType voicePluginMessageType, VoicePluginMessage voicePluginMessage) {
-        if (this.toPluginMessenger != null) {
-            return VoicePluginMessenger.sendMessage(this.toPluginMessenger, voicePluginMessageType, voicePluginMessage, this.fromPluginMessenger);
+        if (true) goto _L4; else goto _L3
+_L3:
+        if (voiceinitializereply.errorMessage != null)
+        {
+            break; /* Loop/switch isn't completed */
         }
-        return false;
+        voiceInitialized.set(true);
+        voiceinitializereply = (VoiceLoginInfo)voiceLoginInfo.get();
+        if (voiceinitializereply != null)
+        {
+            sendMessage(VoicePluginMessageType.VoiceLogin, new VoiceLogin(voiceinitializereply));
+            return;
+        }
+        if (true) goto _L4; else goto _L5
+_L5:
+        UserManager usermanager = (UserManager)userManager.get();
+        if (usermanager != null)
+        {
+            usermanager.getChatterList().getActiveChattersManager().HandleChatEvent(ChatterID.getLocalChatterID(usermanager.getUserID()), new SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), usermanager.getUserID(), LumiyaApp.getContext().getString(0x7f09037f, new Object[] {
+                voiceinitializereply.errorMessage
+            })), false);
+            return;
+        }
+        if (true) goto _L4; else goto _L6
+_L6:
     }
 
-    public void setVoiceAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
-        sendMessage(VoicePluginMessageType.VoiceSetAudioProperties, voiceSetAudioProperties);
-    }
-
-    public void setVoiceLoginInfo(VoiceLoginInfo voiceLoginInfo2, UserManager userManager2) {
-        this.userManager.set(userManager2);
-        if (!Objects.equal(this.voiceLoginInfo.getAndSet(voiceLoginInfo2), voiceLoginInfo2) && this.voiceInitialized.get() && voiceLoginInfo2 != null) {
-            sendMessage(VoicePluginMessageType.VoiceLogin, new VoiceLogin(voiceLoginInfo2));
+    private void onVoiceLoginStatus(VoiceLoginStatus voiceloginstatus)
+    {
+        UserManager usermanager = (UserManager)userManager.get();
+        if (usermanager != null)
+        {
+            Object obj = usermanager.getActiveAgentCircuit();
+            if (obj != null)
+            {
+                obj = ((SLAgentCircuit) (obj)).getModules();
+                if (obj != null)
+                {
+                    ((SLModules) (obj)).voice.onVoiceLoginStatus(this, voiceloginstatus);
+                }
+            }
+            usermanager.setVoiceLoggedIn(voiceloginstatus.loggedIn);
         }
     }
 
-    public void terminateVoiceCall(ChatterID chatterID) {
-        VoiceChannelInfo voiceChannelInfo = (VoiceChannelInfo) this.voiceChannels.get(chatterID);
-        if (voiceChannelInfo != null) {
-            sendMessage(VoicePluginMessageType.VoiceTerminateCall, new VoiceTerminateCall(voiceChannelInfo));
+    private void onVoiceRinging(VoiceRinging voiceringing)
+    {
+        Object obj = (UserManager)userManager.get();
+        if (obj != null && voiceringing != null && voiceringing.agentUUID != null)
+        {
+            obj = ChatterID.getUserChatterID(((UserManager) (obj)).getUserID(), voiceringing.agentUUID);
+            voiceChannels.forcePut(obj, voiceringing.voiceChannelInfo);
+            ringingChatterNameRetriever = new ChatterNameRetriever(((ChatterID) (obj)), new _2D_.Lambda.KEiwggiQxhrsJugAMeHgzXJrgrA._cls1(this, voiceringing), UIThreadExecutor.getSerialInstance(), false);
+            ringingChatterNameRetriever.subscribe();
         }
     }
+
+    public static void setInstallOfferDisplayed(boolean flag)
+    {
+        installOfferDisplayed.set(flag);
+    }
+
+    public static boolean shouldDisplayInstallOffer()
+    {
+        return installOfferDisplayed.getAndSet(true) ^ true;
+    }
+
+    private void showIncomingCallNotification(VoiceRinging voiceringing, String s, ChatterID chatterid)
+    {
+        Intent intent1 = new Intent(context, com/lumiyaviewer/lumiya/GridConnectionService);
+        intent1.setAction("reject");
+        intent1.setData(voiceringing.toUri());
+        intent1.putExtra("ringingMessage", voiceringing.toBundle());
+        Intent intent = ChatFragmentActivityFactory.getInstance().createIntent(context, ChatFragment.makeSelection(chatterid));
+        intent.addFlags(0x20000000);
+        ActivityUtils.setActiveAgentID(intent, chatterid.agentUUID);
+        Object obj = (UserManager)userManager.get();
+        if (obj != null)
+        {
+            UnreadNotificationInfo unreadnotificationinfo = UnreadNotificationInfo.create(((UserManager) (obj)).getUserID(), 0, null, null, 1, NotificationType.Private, com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo.UnreadMessageSource.create(chatterid, null, null, 0), com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, null));
+            obj = ((UserManager) (obj)).getUnreadNotificationManager().captureNotify(unreadnotificationinfo, intent);
+            if (obj != null)
+            {
+                intent = ((Intent) (obj));
+            }
+        }
+        obj = new Intent(context, com/lumiyaviewer/lumiya/GridConnectionService);
+        ((Intent) (obj)).setAction("accept");
+        ((Intent) (obj)).setData(voiceringing.toUri());
+        ((Intent) (obj)).putExtra("ringingMessage", voiceringing.toBundle());
+        ((Intent) (obj)).putExtra("chatterID", chatterid.toBundle());
+        ((Intent) (obj)).putExtra("openChatterIntent", PendingIntent.getActivity(context, 0, intent, 0));
+        s = (new android.support.v7.app.NotificationCompat.Builder(context)).setSmallIcon(0x7f020076).setContentTitle(s).setContentText(context.getString(0x7f09015c)).setDefaults(-1).setPriority(1).setDeleteIntent(PendingIntent.getService(context, 0, intent1, 0)).setContentIntent(PendingIntent.getActivity(context, 0, intent, 0)).setAutoCancel(true).addAction(0x7f020088, context.getString(0x7f090379), PendingIntent.getService(context, 0, ((Intent) (obj)), 0)).addAction(0x7f020089, context.getString(0x7f09037a), PendingIntent.getService(context, 0, intent1, 0)).build();
+        voiceringing = voiceringing.voiceChannelInfo.voiceChannelURI;
+        incomingCallNotificationTags.add(voiceringing);
+        ((NotificationManager)context.getSystemService("notification")).notify(voiceringing, 1001, s);
+    }
+
+    public void acceptCall(Intent intent)
+    {
+        if (intent.hasExtra("ringingMessage"))
+        {
+            VoiceRinging voiceringing = new VoiceRinging(intent.getBundleExtra("ringingMessage"));
+            Debug.Printf("Voice: accepting session '%s', url '%s'", new Object[] {
+                voiceringing.sessionHandle, voiceringing.voiceChannelInfo.voiceChannelURI
+            });
+            sendMessage(VoicePluginMessageType.VoiceAcceptCall, new VoiceAcceptCall(voiceringing.sessionHandle, voiceringing.voiceChannelInfo));
+        }
+        Debug.Printf("Voice: cancelling notifications", new Object[0]);
+        cancelNotifications(null);
+        if (!intent.hasExtra("openChatterIntent"))
+        {
+            break MISSING_BLOCK_LABEL_128;
+        }
+        intent = intent.getParcelableExtra("openChatterIntent");
+        if (!(intent instanceof PendingIntent))
+        {
+            break MISSING_BLOCK_LABEL_128;
+        }
+        Debug.Printf("Voice: starting pending open chatter intent", new Object[0]);
+        ((PendingIntent)intent).send();
+        return;
+        intent;
+        Debug.Warning(intent);
+        return;
+    }
+
+    public void acceptVoiceCall(ChatterID chatterid)
+    {
+        VoiceChannelInfo voicechannelinfo = (VoiceChannelInfo)voiceChannels.get(chatterid);
+        if (voicechannelinfo != null)
+        {
+            Debug.Printf("Voice: cancelling notification", new Object[0]);
+            cancelNotifications(null);
+            Debug.Printf("Voice: accepting voice call (chatterID %s)", new Object[] {
+                chatterid
+            });
+            sendMessage(VoicePluginMessageType.VoiceAcceptCall, new VoiceAcceptCall(null, voicechannelinfo));
+        }
+    }
+
+    public void acceptVoiceCall(VoiceRinging voiceringing)
+    {
+        Debug.Printf("Voice: cancelling notification", new Object[0]);
+        cancelNotifications(null);
+        Debug.Printf("Voice: accepting voice call (session handle %s)", new Object[] {
+            voiceringing.sessionHandle
+        });
+        sendMessage(VoicePluginMessageType.VoiceAcceptCall, new VoiceAcceptCall(voiceringing.sessionHandle, voiceringing.voiceChannelInfo));
+    }
+
+    public void addChannel(ChatterID chatterid, VoiceChannelInfo voicechannelinfo)
+    {
+        voiceChannels.forcePut(chatterid, voicechannelinfo);
+    }
+
+    public void disconnect()
+    {
+        mainThreadHandler.post(new _2D_.Lambda.KEiwggiQxhrsJugAMeHgzXJrgrA(this));
+    }
+
+    public void enableVoiceMic(boolean flag)
+    {
+        sendMessage(VoicePluginMessageType.VoiceEnableMic, new VoiceEnableMic(flag));
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_13701(VoiceRinging voiceringing, ChatterNameRetriever chatternameretriever)
+    {
+        if (chatternameretriever == ringingChatterNameRetriever)
+        {
+            String s = chatternameretriever.getResolvedName();
+            if (!Strings.isNullOrEmpty(s))
+            {
+                showIncomingCallNotification(voiceringing, s, chatternameretriever.chatterID);
+            }
+        }
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_17898()
+    {
+        Debug.Printf("LumiyaVoice: disconnecting from voice plugin", new Object[0]);
+        UserManager usermanager = (UserManager)userManager.get();
+        if (usermanager != null)
+        {
+            usermanager.setVoiceLoggedIn(false);
+        }
+        sendMessage(VoicePluginMessageType.VoiceLogout, new VoiceLogout());
+        context.unbindService(this);
+    }
+
+    public void onServiceConnected(ComponentName componentname, IBinder ibinder)
+    {
+        Debug.Printf("LumiyaVoice: service connected", new Object[0]);
+        toPluginMessenger = new Messenger(ibinder);
+        try
+        {
+            componentname = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            sendMessage(VoicePluginMessageType.VoiceInitialize, new VoiceInitialize(((PackageInfo) (componentname)).versionCode));
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (ComponentName componentname)
+        {
+            Debug.Warning(componentname);
+        }
+    }
+
+    public void onServiceDisconnected(ComponentName componentname)
+    {
+        Debug.Printf("LumiyaCloud: service disconnected", new Object[0]);
+        componentname = (UserManager)userManager.get();
+        if (componentname != null)
+        {
+            componentname.setVoiceLoggedIn(false);
+        }
+    }
+
+    public void rejectCall(Intent intent)
+    {
+        if (intent.hasExtra("ringingMessage"))
+        {
+            intent = new VoiceRinging(intent.getBundleExtra("ringingMessage"));
+            Debug.Printf("Voice: requesting to reject session '%s', url '%s'", new Object[] {
+                ((VoiceRinging) (intent)).sessionHandle, ((VoiceRinging) (intent)).voiceChannelInfo.voiceChannelURI
+            });
+            sendMessage(VoicePluginMessageType.VoiceRejectCall, new VoiceRejectCall(((VoiceRinging) (intent)).sessionHandle, ((VoiceRinging) (intent)).voiceChannelInfo));
+            cancelNotifications(((VoiceRinging) (intent)).voiceChannelInfo.voiceChannelURI);
+            return;
+        } else
+        {
+            cancelNotifications(null);
+            return;
+        }
+    }
+
+    public boolean sendMessage(VoicePluginMessageType voicepluginmessagetype, VoicePluginMessage voicepluginmessage)
+    {
+        if (toPluginMessenger != null)
+        {
+            return VoicePluginMessenger.sendMessage(toPluginMessenger, voicepluginmessagetype, voicepluginmessage, fromPluginMessenger);
+        } else
+        {
+            return false;
+        }
+    }
+
+    public void setVoiceAudioProperties(VoiceSetAudioProperties voicesetaudioproperties)
+    {
+        sendMessage(VoicePluginMessageType.VoiceSetAudioProperties, voicesetaudioproperties);
+    }
+
+    public void setVoiceLoginInfo(VoiceLoginInfo voicelogininfo, UserManager usermanager)
+    {
+        userManager.set(usermanager);
+        if (!Objects.equal(voiceLoginInfo.getAndSet(voicelogininfo), voicelogininfo) && voiceInitialized.get() && voicelogininfo != null)
+        {
+            sendMessage(VoicePluginMessageType.VoiceLogin, new VoiceLogin(voicelogininfo));
+        }
+    }
+
+    public void terminateVoiceCall(ChatterID chatterid)
+    {
+        chatterid = (VoiceChannelInfo)voiceChannels.get(chatterid);
+        if (chatterid != null)
+        {
+            sendMessage(VoicePluginMessageType.VoiceTerminateCall, new VoiceTerminateCall(chatterid));
+        }
+    }
+
 }

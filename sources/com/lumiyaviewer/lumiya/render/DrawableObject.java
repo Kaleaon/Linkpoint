@@ -1,8 +1,11 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render;
 
 import android.opengl.GLES10;
 import android.opengl.Matrix;
-import android.support.v4.view.InputDeviceCompat;
 import com.google.common.base.Objects;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
@@ -17,15 +20,23 @@ import com.lumiyaviewer.lumiya.render.picking.IntersectInfo;
 import com.lumiyaviewer.lumiya.render.picking.IntersectPickable;
 import com.lumiyaviewer.lumiya.render.picking.ObjectIntersectInfo;
 import com.lumiyaviewer.lumiya.res.ResourceConsumer;
+import com.lumiyaviewer.lumiya.res.geometry.PrimCache;
 import com.lumiyaviewer.lumiya.slproto.mesh.MeshJointTranslations;
 import com.lumiyaviewer.lumiya.slproto.objects.HoverText;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
 import com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams;
 import com.lumiyaviewer.lumiya.slproto.prims.PrimFlexibleInfo;
+import com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
-import javax.annotation.Nullable;
+import com.lumiyaviewer.lumiya.slproto.types.Vector3Array;
 
-public class DrawableObject implements IntersectPickable, ResourceConsumer {
+// Referenced classes of package com.lumiyaviewer.lumiya.render:
+//            RenderContext, MatrixStack, BoundingBox, DrawableStore
+
+public class DrawableObject
+    implements IntersectPickable, ResourceConsumer
+{
+
     private static final int INVISIBLE_FRAMES_APPEAR = 10;
     private static final int INVISIBLE_FRAMES_DISAPPEAR = 10;
     private final DrawableAvatar attachedTo;
@@ -34,267 +45,388 @@ public class DrawableObject implements IntersectPickable, ResourceConsumer {
     private final DrawableStore drawableStore;
     private volatile PrimFlexibleInfo flexibleInfo;
     private volatile HoverText hoverText;
-    private int invisibleCount = 0;
-    private int invisibleFrames = 0;
-    private boolean isInvisible = false;
-    private final float[] objCoordsData;
+    private int invisibleCount;
+    private int invisibleFrames;
+    private boolean isInvisible;
+    private final float objCoordsData[];
     private final int objCoordsScale;
     private final SLObjectInfo objInfo;
-    private GLQuery occlusionQuery = null;
+    private GLQuery occlusionQuery;
 
-    public DrawableObject(DrawableStore drawableStore2, SLObjectInfo sLObjectInfo, DrawableAvatar drawableAvatar) {
-        this.drawableStore = drawableStore2;
-        this.objInfo = sLObjectInfo;
-        this.attachedTo = drawableAvatar;
-        this.objCoordsData = sLObjectInfo.getObjectCoords().getData();
-        this.objCoordsScale = sLObjectInfo.getObjectCoords().getElementOffset(1);
-        setPrimDrawParams(sLObjectInfo.getPrimDrawParams());
-        setHoverText(sLObjectInfo.getHoverText());
+    public DrawableObject(DrawableStore drawablestore, SLObjectInfo slobjectinfo, DrawableAvatar drawableavatar)
+    {
+        occlusionQuery = null;
+        isInvisible = false;
+        invisibleCount = 0;
+        invisibleFrames = 0;
+        drawableStore = drawablestore;
+        objInfo = slobjectinfo;
+        attachedTo = drawableavatar;
+        objCoordsData = slobjectinfo.getObjectCoords().getData();
+        objCoordsScale = slobjectinfo.getObjectCoords().getElementOffset(1);
+        setPrimDrawParams(slobjectinfo.getPrimDrawParams());
+        setHoverText(slobjectinfo.getHoverText());
     }
 
-    public final void ApplyJointTranslations(MeshJointTranslations meshJointTranslations) {
-        DrawablePrim drawablePrim2 = this.drawablePrim;
-        if (drawablePrim2 != null) {
-            drawablePrim2.ApplyJointTranslations(meshJointTranslations);
+    public final void ApplyJointTranslations(MeshJointTranslations meshjointtranslations)
+    {
+        DrawablePrim drawableprim = drawablePrim;
+        if (drawableprim != null)
+        {
+            drawableprim.ApplyJointTranslations(meshjointtranslations);
         }
     }
 
-    public final int Draw(RenderContext renderContext, int i) {
-        DrawablePrim drawablePrim2 = this.drawablePrim;
-        float[] fArr = this.objInfo.worldMatrix;
-        PrimFlexibleInfo primFlexibleInfo = this.flexibleInfo;
-        if (drawablePrim2 == null || fArr == null || !(!this.isInvisible)) {
+    public final int Draw(RenderContext rendercontext, int i)
+    {
+        DrawablePrim drawableprim = drawablePrim;
+        float af[] = objInfo.worldMatrix;
+        PrimFlexibleInfo primflexibleinfo = flexibleInfo;
+        if (drawableprim != null && af != null && isInvisible ^ true)
+        {
+            float f = objCoordsData[objCoordsScale];
+            float f1 = objCoordsData[objCoordsScale + 1];
+            float f2 = objCoordsData[objCoordsScale + 2];
+            rendercontext.glObjWorldPushAndMultMatrixf(af, 0);
+            rendercontext.glPushObjectScale(f, f1, f2);
+            if (primflexibleinfo != null)
+            {
+                primflexibleinfo.doFlexibleUpdate(objInfo.getPrimDrawParams().getVolumeParams().FlexiParams, rendercontext.objWorldMatrix.getMatrixData(), rendercontext.objWorldMatrix.getMatrixDataOffset(), f, f1, f2);
+            }
+            if (rendercontext.hasGL20)
+            {
+                i = drawableprim.DrawFast20(rendercontext, false, primflexibleinfo, i);
+            } else
+            {
+                i = drawableprim.Draw(rendercontext, false, primflexibleinfo, i);
+            }
+            rendercontext.glPopObjectScale();
+            rendercontext.glObjWorldPopMatrix();
+            return i;
+        } else
+        {
             return 0;
         }
-        float f = this.objCoordsData[this.objCoordsScale];
-        float f2 = this.objCoordsData[this.objCoordsScale + 1];
-        float f3 = this.objCoordsData[this.objCoordsScale + 2];
-        renderContext.glObjWorldPushAndMultMatrixf(fArr, 0);
-        renderContext.glPushObjectScale(f, f2, f3);
-        if (primFlexibleInfo != null) {
-            primFlexibleInfo.doFlexibleUpdate(this.objInfo.getPrimDrawParams().getVolumeParams().FlexiParams, renderContext.objWorldMatrix.getMatrixData(), renderContext.objWorldMatrix.getMatrixDataOffset(), f, f2, f3);
-        }
-        int DrawFast20 = renderContext.hasGL20 ? drawablePrim2.DrawFast20(renderContext, false, primFlexibleInfo, i) : drawablePrim2.Draw(renderContext, false, primFlexibleInfo, i);
-        renderContext.glPopObjectScale();
-        renderContext.glObjWorldPopMatrix();
-        return DrawFast20;
     }
 
-    public void DrawHoverText(RenderContext renderContext, boolean z) {
-        float f;
-        DrawableHoverText drawableHoverText2 = this.drawableHoverText;
-        HoverText hoverText2 = this.hoverText;
-        float[] fArr = this.objInfo.worldMatrix;
-        if (drawableHoverText2 != null && fArr != null && hoverText2 != null) {
-            float f2 = this.objInfo.worldMatrix[12];
-            float f3 = this.objInfo.worldMatrix[13];
-            float f4 = this.objInfo.worldMatrix[14];
-            if (!z) {
-                float f5 = this.objCoordsData[this.objCoordsScale];
-                float f6 = this.objCoordsData[this.objCoordsScale + 1];
-                float f7 = this.objCoordsData[this.objCoordsScale + 2];
-                LLVector3 lLVector3 = new LLVector3(renderContext.frameCamera.x - f2, renderContext.frameCamera.y - f3, renderContext.frameCamera.z - f4);
-                lLVector3.normVec();
-                lLVector3.mul((Math.max(Math.max(f5, f6), f7) + 0.01f) / 2.0f);
-                f2 += lLVector3.x;
-                f3 += lLVector3.y;
-                f4 += lLVector3.z;
-                f = f7 / 2.0f;
-            } else {
-                f = 0.0f;
+    public void DrawHoverText(RenderContext rendercontext, boolean flag)
+    {
+        DrawableHoverText drawablehovertext = drawableHoverText;
+        HoverText hovertext = hoverText;
+        float af[] = objInfo.worldMatrix;
+        if (drawablehovertext != null && af != null && hovertext != null)
+        {
+            float f = objInfo.worldMatrix[12];
+            float f1 = objInfo.worldMatrix[13];
+            float f2 = objInfo.worldMatrix[14];
+            float f3;
+            MatrixStack matrixstack;
+            if (!flag)
+            {
+                float f4 = objCoordsData[objCoordsScale];
+                float f5 = objCoordsData[objCoordsScale + 1];
+                f3 = objCoordsData[objCoordsScale + 2];
+                f4 = (Math.max(Math.max(f4, f5), f3) + 0.01F) / 2.0F;
+                LLVector3 llvector3 = new LLVector3(rendercontext.frameCamera.x - f, rendercontext.frameCamera.y - f1, rendercontext.frameCamera.z - f2);
+                llvector3.normVec();
+                llvector3.mul(f4);
+                f += llvector3.x;
+                f1 += llvector3.y;
+                f2 += llvector3.z;
+                f3 /= 2.0F;
+            } else
+            {
+                f3 = 0.0F;
             }
-            drawableHoverText2.DrawAtWorld(renderContext, f2, f3, f4, f, z ? renderContext.projectionHUDMatrix : renderContext.projectionMatrix, true, hoverText2.color());
+            if (flag)
+            {
+                matrixstack = rendercontext.projectionHUDMatrix;
+            } else
+            {
+                matrixstack = rendercontext.projectionMatrix;
+            }
+            drawablehovertext.DrawAtWorld(rendercontext, f, f1, f2, f3, matrixstack, true, hovertext.color());
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public void DrawIfPicked(RenderContext renderContext, SLObjectInfo sLObjectInfo) {
-        if (this.objInfo == sLObjectInfo) {
-            DrawablePrim drawablePrim2 = this.drawablePrim;
-            float[] fArr = this.objInfo.worldMatrix;
-            PrimFlexibleInfo primFlexibleInfo = this.flexibleInfo;
-            if (drawablePrim2 != null && fArr != null) {
-                float f = this.objCoordsData[this.objCoordsScale];
-                float f2 = this.objCoordsData[this.objCoordsScale + 1];
-                float f3 = this.objCoordsData[this.objCoordsScale + 2];
-                renderContext.glObjWorldPushAndMultMatrixf(fArr, 0);
-                if (primFlexibleInfo != null) {
-                    primFlexibleInfo.doFlexibleUpdate(this.objInfo.getPrimDrawParams().getVolumeParams().FlexiParams, renderContext.objWorldMatrix.getMatrixData(), renderContext.objWorldMatrix.getMatrixDataOffset(), f, f2, f3);
+    void DrawIfPicked(RenderContext rendercontext, SLObjectInfo slobjectinfo)
+    {
+        if (objInfo == slobjectinfo)
+        {
+            slobjectinfo = drawablePrim;
+            float af[] = objInfo.worldMatrix;
+            PrimFlexibleInfo primflexibleinfo = flexibleInfo;
+            if (slobjectinfo != null && af != null)
+            {
+                float f = objCoordsData[objCoordsScale];
+                float f1 = objCoordsData[objCoordsScale + 1];
+                float f2 = objCoordsData[objCoordsScale + 2];
+                rendercontext.glObjWorldPushAndMultMatrixf(af, 0);
+                if (primflexibleinfo != null)
+                {
+                    primflexibleinfo.doFlexibleUpdate(objInfo.getPrimDrawParams().getVolumeParams().FlexiParams, rendercontext.objWorldMatrix.getMatrixData(), rendercontext.objWorldMatrix.getMatrixDataOffset(), f, f1, f2);
                 }
-                renderContext.glPushObjectScale(f, f2, f3);
+                rendercontext.glPushObjectScale(f, f1, f2);
                 GLES10.glDepthFunc(515);
-                drawablePrim2.Draw(renderContext, true, primFlexibleInfo, 3);
-                GLES10.glDepthFunc(InputDeviceCompat.SOURCE_DPAD);
-                renderContext.glPopObjectScale();
-                renderContext.glObjWorldPopMatrix();
+                slobjectinfo.Draw(rendercontext, true, primflexibleinfo, 3);
+                GLES10.glDepthFunc(513);
+                rendercontext.glPopObjectScale();
+                rendercontext.glObjWorldPopMatrix();
             }
         }
     }
 
-    public final int DrawRigged(RenderContext renderContext, AvatarSkeleton avatarSkeleton, int i) {
-        DrawablePrim drawablePrim2 = this.drawablePrim;
-        if (drawablePrim2 == null) {
+    public final int DrawRigged(RenderContext rendercontext, AvatarSkeleton avatarskeleton, int i)
+    {
+        DrawablePrim drawableprim = drawablePrim;
+        if (drawableprim != null)
+        {
+            if ((i & 1) != 0)
+            {
+                drawableprim.UpdateRigged(rendercontext, avatarskeleton);
+            }
+            if (rendercontext.hasGL20)
+            {
+                return drawableprim.DrawFast20(rendercontext, false, null, i);
+            } else
+            {
+                return drawableprim.Draw(rendercontext, false, null, i);
+            }
+        } else
+        {
             return 0;
         }
-        if ((i & 1) != 0) {
-            drawablePrim2.UpdateRigged(renderContext, avatarSkeleton);
-        }
-        return renderContext.hasGL20 ? drawablePrim2.DrawFast20(renderContext, false, (PrimFlexibleInfo) null, i) : drawablePrim2.Draw(renderContext, false, (PrimFlexibleInfo) null, i);
     }
 
-    public final int DrawRigged30(RenderContext renderContext, int i) {
-        DrawablePrim drawablePrim2 = this.drawablePrim;
-        if (drawablePrim2 == null || !drawablePrim2.isRiggedMesh()) {
+    public final int DrawRigged30(RenderContext rendercontext, int i)
+    {
+        DrawablePrim drawableprim = drawablePrim;
+        if (drawableprim != null && drawableprim.isRiggedMesh())
+        {
+            return drawableprim.DrawRigged30(rendercontext, i);
+        } else
+        {
             return 0;
         }
-        return drawablePrim2.DrawRigged30(renderContext, i);
     }
 
-    public void OnResourceReady(Object obj, boolean z) {
-        if (obj instanceof DrawablePrim) {
-            DrawablePrim drawablePrim2 = (DrawablePrim) obj;
-            this.drawablePrim = drawablePrim2;
-            if (drawablePrim2.isRiggedMesh() && this.attachedTo != null) {
-                this.attachedTo.onRiggedMeshReady(this);
+    public void OnResourceReady(Object obj, boolean flag)
+    {
+        if (obj instanceof DrawablePrim)
+        {
+            obj = (DrawablePrim)obj;
+            drawablePrim = ((DrawablePrim) (obj));
+            if (((DrawablePrim) (obj)).isRiggedMesh() && attachedTo != null)
+            {
+                attachedTo.onRiggedMeshReady(this);
             }
         }
     }
 
-    public ObjectIntersectInfo PickObject(RenderContext renderContext, float f, float f2, float f3) {
-        IntersectInfo IntersectRay;
-        DrawablePrim drawablePrim2 = this.drawablePrim;
-        float[] fArr = this.objInfo.worldMatrix;
-        if (drawablePrim2 == null || fArr == null) {
-            return null;
-        }
-        int[] iArr = renderContext.viewportRect;
-        float[] fArr2 = new float[32];
-        float[] fArr3 = new float[6];
-        float f4 = ((float) iArr[3]) - f2;
-        float f5 = this.objCoordsData[this.objCoordsScale];
-        float f6 = this.objCoordsData[this.objCoordsScale + 1];
-        float f7 = this.objCoordsData[this.objCoordsScale + 2];
-        renderContext.glObjWorldPushAndMultMatrixf(fArr, 0);
-        if (renderContext.hasGL20) {
-            Matrix.scaleM(fArr2, 0, renderContext.objWorldMatrix.getMatrixData(), renderContext.objWorldMatrix.getMatrixDataOffset(), f5, f6, f7);
-            RenderContext.gluUnProject(f, f4, 0.0f, fArr2, 0, renderContext.modelViewMatrix.getMatrixData(), renderContext.modelViewMatrix.getMatrixDataOffset(), iArr, 0, fArr3, 0);
-            RenderContext.gluUnProject(f, f4, 1.0f, fArr2, 0, renderContext.modelViewMatrix.getMatrixData(), renderContext.modelViewMatrix.getMatrixDataOffset(), iArr, 0, fArr3, 3);
-        } else {
-            Matrix.scaleM(fArr2, 16, renderContext.objWorldMatrix.getMatrixData(), renderContext.objWorldMatrix.getMatrixDataOffset(), f5, f6, f7);
-            Matrix.multiplyMM(fArr2, 0, renderContext.modelViewMatrix.getMatrixData(), renderContext.modelViewMatrix.getMatrixDataOffset(), fArr2, 16);
-            MatrixStack activeProjectionMatrix = renderContext.getActiveProjectionMatrix();
-            if (activeProjectionMatrix != null) {
-                RenderContext.gluUnProject(f, f4, 0.0f, fArr2, 0, activeProjectionMatrix.getMatrixData(), activeProjectionMatrix.getMatrixDataOffset(), iArr, 0, fArr3, 0);
-                RenderContext.gluUnProject(f, f4, 1.0f, fArr2, 0, activeProjectionMatrix.getMatrixData(), activeProjectionMatrix.getMatrixDataOffset(), iArr, 0, fArr3, 3);
+    public ObjectIntersectInfo PickObject(RenderContext rendercontext, float f, float f1, float f2)
+    {
+        Object obj;
+        Object aobj[];
+        obj = drawablePrim;
+        aobj = objInfo.worldMatrix;
+        if (obj == null || aobj == null) goto _L2; else goto _L1
+_L1:
+        float f3;
+        float f4;
+        float f5;
+        float af[];
+        float af1[];
+        int ai[];
+        ai = rendercontext.viewportRect;
+        af = new float[32];
+        af1 = new float[6];
+        f1 = (float)ai[3] - f1;
+        f3 = objCoordsData[objCoordsScale];
+        f4 = objCoordsData[objCoordsScale + 1];
+        f5 = objCoordsData[objCoordsScale + 2];
+        rendercontext.glObjWorldPushAndMultMatrixf(((float []) (aobj)), 0);
+        if (!rendercontext.hasGL20) goto _L4; else goto _L3
+_L3:
+        Matrix.scaleM(af, 0, rendercontext.objWorldMatrix.getMatrixData(), rendercontext.objWorldMatrix.getMatrixDataOffset(), f3, f4, f5);
+        RenderContext.gluUnProject(f, f1, 0.0F, af, 0, rendercontext.modelViewMatrix.getMatrixData(), rendercontext.modelViewMatrix.getMatrixDataOffset(), ai, 0, af1, 0);
+        RenderContext.gluUnProject(f, f1, 1.0F, af, 0, rendercontext.modelViewMatrix.getMatrixData(), rendercontext.modelViewMatrix.getMatrixDataOffset(), ai, 0, af1, 3);
+_L11:
+        int i;
+        boolean flag1;
+        rendercontext.glObjWorldPopMatrix();
+        ai = new LLVector3(af1[0], af1[1], af1[2]);
+        af1 = new LLVector3(af1[3], af1[4], af1[5]);
+        flag1 = false;
+        aobj = CollisionBox.getInstance().vertices;
+        i = 0;
+_L9:
+        boolean flag = flag1;
+        if (i >= 12) goto _L6; else goto _L5
+_L5:
+        if (GLRayTrace.intersect_RayTriangle(ai, af1, ((LLVector3 []) (aobj)), i * 3) == null) goto _L8; else goto _L7
+_L7:
+        flag = true;
+_L6:
+        if (flag)
+        {
+            obj = ((DrawablePrim) (obj)).IntersectRay(ai, af1);
+            if (obj != null)
+            {
+                f = GLRayTrace.getIntersectionDepth(rendercontext, ((IntersectInfo) (obj)).intersectPoint, af);
+                if (f >= f2)
+                {
+                    return new ObjectIntersectInfo(((IntersectInfo) (obj)), objInfo, f);
+                }
             }
         }
-        renderContext.glObjWorldPopMatrix();
-        LLVector3 lLVector3 = new LLVector3(fArr3[0], fArr3[1], fArr3[2]);
-        LLVector3 lLVector32 = new LLVector3(fArr3[3], fArr3[4], fArr3[5]);
-        boolean z = false;
-        LLVector3[] lLVector3Arr = CollisionBox.getInstance().vertices;
-        int i = 0;
-        while (true) {
-            if (i >= 12) {
-                break;
-            } else if (GLRayTrace.intersect_RayTriangle(lLVector3, lLVector32, lLVector3Arr, i * 3) != null) {
-                z = true;
-                break;
-            } else {
-                i++;
-            }
+        break; /* Loop/switch isn't completed */
+_L4:
+        Matrix.scaleM(af, 16, rendercontext.objWorldMatrix.getMatrixData(), rendercontext.objWorldMatrix.getMatrixDataOffset(), f3, f4, f5);
+        Matrix.multiplyMM(af, 0, rendercontext.modelViewMatrix.getMatrixData(), rendercontext.modelViewMatrix.getMatrixDataOffset(), af, 16);
+        MatrixStack matrixstack = rendercontext.getActiveProjectionMatrix();
+        if (matrixstack != null)
+        {
+            RenderContext.gluUnProject(f, f1, 0.0F, af, 0, matrixstack.getMatrixData(), matrixstack.getMatrixDataOffset(), ai, 0, af1, 0);
+            RenderContext.gluUnProject(f, f1, 1.0F, af, 0, matrixstack.getMatrixData(), matrixstack.getMatrixDataOffset(), ai, 0, af1, 3);
         }
-        if (!z || (IntersectRay = drawablePrim2.IntersectRay(lLVector3, lLVector32)) == null) {
-            return null;
-        }
-        float intersectionDepth = GLRayTrace.getIntersectionDepth(renderContext, IntersectRay.intersectPoint, fArr2);
-        if (intersectionDepth >= f3) {
-            return new ObjectIntersectInfo(IntersectRay, this.objInfo, intersectionDepth);
-        }
+        continue; /* Loop/switch isn't completed */
+_L8:
+        i++;
+        if (true) goto _L9; else goto _L2
+_L2:
         return null;
+        if (true) goto _L11; else goto _L10
+_L10:
     }
 
-    /* access modifiers changed from: package-private */
-    public final void TestOcclusion(RenderContext renderContext, float[] fArr) {
-        float[] fArr2 = this.objInfo.worldMatrix;
-        if (fArr2 != null) {
-            if (this.occlusionQuery == null) {
-                this.occlusionQuery = new GLQuery(renderContext.glResourceManager);
-            }
-            if (!this.isInvisible || this.invisibleFrames > 10) {
-                GLQuery.OcclusionQueryResult occlusionQueryResult = this.occlusionQuery.getOcclusionQueryResult();
-                if (occlusionQueryResult == GLQuery.OcclusionQueryResult.Invisible) {
-                    this.invisibleFrames = 0;
-                    if (!this.isInvisible) {
-                        this.invisibleCount++;
-                        if (this.invisibleCount > 10) {
-                            int checkFrustrumOcclusion = OpenJPEG.checkFrustrumOcclusion(fArr, fArr2, this.objCoordsData[this.objCoordsScale], this.objCoordsData[this.objCoordsScale + 1], this.objCoordsData[this.objCoordsScale + 2]);
-                            if (checkFrustrumOcclusion == 0) {
-                                this.invisibleCount = 0;
-                            } else {
-                                Debug.Printf("Occlusion: object seriously invisible %s (frustrumTest %d)", this, Integer.valueOf(checkFrustrumOcclusion));
-                                this.isInvisible = true;
-                            }
-                        }
-                    }
-                } else if (occlusionQueryResult == GLQuery.OcclusionQueryResult.Visible) {
-                    this.invisibleCount = 0;
-                    if (this.isInvisible) {
-                        Debug.Printf("Occlusion: object visible again %s", this);
-                        this.isInvisible = false;
-                    }
+    final void TestOcclusion(RenderContext rendercontext, float af[])
+    {
+        float af1[] = objInfo.worldMatrix;
+        if (af1 == null) goto _L2; else goto _L1
+_L1:
+        if (occlusionQuery == null)
+        {
+            occlusionQuery = new GLQuery(rendercontext.glResourceManager);
+        }
+        if (isInvisible && invisibleFrames <= 10) goto _L4; else goto _L3
+_L3:
+        com.lumiyaviewer.lumiya.render.glres.GLQuery.OcclusionQueryResult occlusionqueryresult = occlusionQuery.getOcclusionQueryResult();
+        if (occlusionqueryresult != com.lumiyaviewer.lumiya.render.glres.GLQuery.OcclusionQueryResult.Invisible) goto _L6; else goto _L5
+_L5:
+        invisibleFrames = 0;
+        if (!isInvisible)
+        {
+            invisibleCount = invisibleCount + 1;
+            if (invisibleCount > 10)
+            {
+                int i = OpenJPEG.checkFrustrumOcclusion(af, af1, objCoordsData[objCoordsScale], objCoordsData[objCoordsScale + 1], objCoordsData[objCoordsScale + 2]);
+                float f;
+                float f1;
+                float f2;
+                if (i == 0)
+                {
+                    invisibleCount = 0;
+                } else
+                {
+                    Debug.Printf("Occlusion: object seriously invisible %s (frustrumTest %d)", new Object[] {
+                        this, Integer.valueOf(i)
+                    });
+                    isInvisible = true;
                 }
-                if (!this.occlusionQuery.isQueryRunning()) {
-                    renderContext.glObjWorldPushAndMultMatrixf(fArr2, 0);
-                    renderContext.glPushObjectScale(this.objCoordsData[this.objCoordsScale] * 1.001f, this.objCoordsData[this.objCoordsScale + 1] * 1.001f, this.objCoordsData[this.objCoordsScale + 2] * 1.001f);
-                    renderContext.boundingBox.OcclusionQuery(renderContext, this.occlusionQuery);
-                    renderContext.glPopObjectScale();
-                    renderContext.glObjWorldPopMatrix();
-                    return;
-                }
-                return;
             }
-            this.invisibleFrames++;
         }
-    }
-
-    public SLObjectInfo getObjectInfo() {
-        return this.objInfo;
-    }
-
-    public final boolean hasExtendedBones() {
-        DrawablePrim drawablePrim2 = this.drawablePrim;
-        if (drawablePrim2 != null) {
-            return drawablePrim2.hasExtendedBones();
+_L7:
+        if (!occlusionQuery.isQueryRunning())
+        {
+            f = objCoordsData[objCoordsScale];
+            f1 = objCoordsData[objCoordsScale + 1];
+            f2 = objCoordsData[objCoordsScale + 2];
+            rendercontext.glObjWorldPushAndMultMatrixf(af1, 0);
+            rendercontext.glPushObjectScale(f * 1.001F, f1 * 1.001F, f2 * 1.001F);
+            rendercontext.boundingBox.OcclusionQuery(rendercontext, occlusionQuery);
+            rendercontext.glPopObjectScale();
+            rendercontext.glObjWorldPopMatrix();
         }
-        return false;
-    }
-
-    public final boolean isRiggedMesh() {
-        DrawablePrim drawablePrim2 = this.drawablePrim;
-        if (drawablePrim2 != null) {
-            return drawablePrim2.isRiggedMesh();
-        }
-        return false;
-    }
-
-    public void setHoverText(@Nullable HoverText hoverText2) {
-        if (!Objects.equal(this.hoverText, hoverText2)) {
-            if (hoverText2 == null) {
-                this.drawableHoverText = null;
-            } else if (!hoverText2.sameText(this.hoverText)) {
-                this.drawableHoverText = new DrawableHoverText(this.drawableStore.textTextureCache, hoverText2.text(), 0);
+_L2:
+        return;
+_L6:
+        if (occlusionqueryresult == com.lumiyaviewer.lumiya.render.glres.GLQuery.OcclusionQueryResult.Visible)
+        {
+            invisibleCount = 0;
+            if (isInvisible)
+            {
+                Debug.Printf("Occlusion: object visible again %s", new Object[] {
+                    this
+                });
+                isInvisible = false;
             }
-            this.hoverText = hoverText2;
+        }
+        if (true) goto _L7; else goto _L4
+_L4:
+        invisibleFrames = invisibleFrames + 1;
+        return;
+    }
+
+    public SLObjectInfo getObjectInfo()
+    {
+        return objInfo;
+    }
+
+    public final boolean hasExtendedBones()
+    {
+        DrawablePrim drawableprim = drawablePrim;
+        if (drawableprim != null)
+        {
+            return drawableprim.hasExtendedBones();
+        } else
+        {
+            return false;
         }
     }
 
-    public void setPrimDrawParams(PrimDrawParams primDrawParams) {
-        this.drawableStore.primCache.RequestResource(primDrawParams, this);
-        if (primDrawParams.getVolumeParams().isFlexible()) {
-            this.flexibleInfo = new PrimFlexibleInfo();
-        } else {
-            this.flexibleInfo = null;
+    public final boolean isRiggedMesh()
+    {
+        DrawablePrim drawableprim = drawablePrim;
+        if (drawableprim != null)
+        {
+            return drawableprim.isRiggedMesh();
+        } else
+        {
+            return false;
+        }
+    }
+
+    public void setHoverText(HoverText hovertext)
+    {
+        if (Objects.equal(hoverText, hovertext)) goto _L2; else goto _L1
+_L1:
+        if (hovertext != null) goto _L4; else goto _L3
+_L3:
+        drawableHoverText = null;
+_L6:
+        hoverText = hovertext;
+_L2:
+        return;
+_L4:
+        if (!hovertext.sameText(hoverText))
+        {
+            drawableHoverText = new DrawableHoverText(drawableStore.textTextureCache, hovertext.text(), 0);
+        }
+        if (true) goto _L6; else goto _L5
+_L5:
+    }
+
+    public void setPrimDrawParams(PrimDrawParams primdrawparams)
+    {
+        drawableStore.primCache.RequestResource(primdrawparams, this);
+        if (primdrawparams.getVolumeParams().isFlexible())
+        {
+            flexibleInfo = new PrimFlexibleInfo();
+            return;
+        } else
+        {
+            flexibleInfo = null;
+            return;
         }
     }
 }

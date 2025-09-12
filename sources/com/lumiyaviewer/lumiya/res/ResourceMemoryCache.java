@@ -1,41 +1,63 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.Set;
 
-public abstract class ResourceMemoryCache<ResourceParams, ResourceType> extends ResourceManager<ResourceParams, ResourceType> {
-    private final Cache<ResourceParams, ResourceType> finalResults = CacheBuilder.newBuilder().weakValues().build();
-    private final Cache<ResourceParams, ResourceType> intermediateResults = CacheBuilder.newBuilder().weakValues().build();
+// Referenced classes of package com.lumiyaviewer.lumiya.res:
+//            ResourceManager, ResourceConsumer
 
-    public void CompleteRequest(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
-        if (resourcetype != null) {
-            this.finalResults.put(resourceparams, resourcetype);
-        } else {
-            this.finalResults.invalidate(resourceparams);
-        }
-        super.CompleteRequest(resourceparams, resourcetype, set);
+public abstract class ResourceMemoryCache extends ResourceManager
+{
+
+    private final Cache finalResults = CacheBuilder.newBuilder().weakValues().build();
+    private final Cache intermediateResults = CacheBuilder.newBuilder().weakValues().build();
+
+    public ResourceMemoryCache()
+    {
     }
 
-    public void IntermediateResult(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
-        if (resourcetype != null) {
-            this.intermediateResults.put(resourceparams, resourcetype);
-        } else {
-            this.intermediateResults.invalidate(resourceparams);
+    public void CompleteRequest(Object obj, Object obj1, Set set)
+    {
+        if (obj1 != null)
+        {
+            finalResults.put(obj, obj1);
+        } else
+        {
+            finalResults.invalidate(obj);
         }
-        super.IntermediateResult(resourceparams, resourcetype, set);
+        super.CompleteRequest(obj, obj1, set);
     }
 
-    public void RequestResource(ResourceParams resourceparams, ResourceConsumer resourceConsumer) {
-        ResourceType ifPresent = this.finalResults.getIfPresent(resourceparams);
-        if (ifPresent != null) {
-            resourceConsumer.OnResourceReady(ifPresent, false);
+    public void IntermediateResult(Object obj, Object obj1, Set set)
+    {
+        if (obj1 != null)
+        {
+            intermediateResults.put(obj, obj1);
+        } else
+        {
+            intermediateResults.invalidate(obj);
+        }
+        super.IntermediateResult(obj, obj1, set);
+    }
+
+    public void RequestResource(Object obj, ResourceConsumer resourceconsumer)
+    {
+        Object obj1 = finalResults.getIfPresent(obj);
+        if (obj1 != null)
+        {
+            resourceconsumer.OnResourceReady(obj1, false);
             return;
         }
-        ResourceType ifPresent2 = this.intermediateResults.getIfPresent(resourceparams);
-        if (ifPresent2 != null) {
-            resourceConsumer.OnResourceReady(ifPresent2, true);
+        obj1 = intermediateResults.getIfPresent(obj);
+        if (obj1 != null)
+        {
+            resourceconsumer.OnResourceReady(obj1, true);
         }
-        super.RequestResource(resourceparams, resourceConsumer);
+        super.RequestResource(obj, resourceconsumer);
     }
 }

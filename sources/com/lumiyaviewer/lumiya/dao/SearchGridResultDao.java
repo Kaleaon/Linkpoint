@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import android.database.Cursor;
@@ -8,105 +12,212 @@ import de.greenrobot.dao.Property;
 import de.greenrobot.dao.internal.DaoConfig;
 import java.util.UUID;
 
-public class SearchGridResultDao extends AbstractDao<SearchGridResult, Long> {
+// Referenced classes of package com.lumiyaviewer.lumiya.dao:
+//            SearchGridResult, DaoSession
+
+public class SearchGridResultDao extends AbstractDao
+{
+    public static class Properties
+    {
+
+        public static final Property Id = new Property(0, java/lang/Long, "id", true, "_id");
+        public static final Property ItemName = new Property(4, java/lang/String, "itemName", false, "ITEM_NAME");
+        public static final Property ItemType;
+        public static final Property ItemUUID = new Property(3, java/util/UUID, "itemUUID", false, "ITEM_UUID");
+        public static final Property LevensteinDistance;
+        public static final Property MemberCount = new Property(6, java/lang/Integer, "memberCount", false, "MEMBER_COUNT");
+        public static final Property SearchUUID = new Property(1, java/util/UUID, "searchUUID", false, "SEARCH_UUID");
+
+        static 
+        {
+            ItemType = new Property(2, Integer.TYPE, "itemType", false, "ITEM_TYPE");
+            LevensteinDistance = new Property(5, Integer.TYPE, "levensteinDistance", false, "LEVENSTEIN_DISTANCE");
+        }
+
+        public Properties()
+        {
+        }
+    }
+
+
     public static final String TABLENAME = "SearchGridResults";
 
-    public static class Properties {
-        public static final Property Id = new Property(0, Long.class, "id", true, "_id");
-        public static final Property ItemName = new Property(4, String.class, "itemName", false, "ITEM_NAME");
-        public static final Property ItemType = new Property(2, Integer.TYPE, "itemType", false, "ITEM_TYPE");
-        public static final Property ItemUUID = new Property(3, UUID.class, "itemUUID", false, "ITEM_UUID");
-        public static final Property LevensteinDistance = new Property(5, Integer.TYPE, "levensteinDistance", false, "LEVENSTEIN_DISTANCE");
-        public static final Property MemberCount = new Property(6, Integer.class, "memberCount", false, "MEMBER_COUNT");
-        public static final Property SearchUUID = new Property(1, UUID.class, "searchUUID", false, "SEARCH_UUID");
+    public SearchGridResultDao(DaoConfig daoconfig)
+    {
+        super(daoconfig);
     }
 
-    public SearchGridResultDao(DaoConfig daoConfig) {
-        super(daoConfig);
+    public SearchGridResultDao(DaoConfig daoconfig, DaoSession daosession)
+    {
+        super(daoconfig, daosession);
     }
 
-    public SearchGridResultDao(DaoConfig daoConfig, DaoSession daoSession) {
-        super(daoConfig, daoSession);
-    }
-
-    public static void createTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        String str = z ? "IF NOT EXISTS " : "";
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'SearchGridResults' (" + "'_id' INTEGER PRIMARY KEY ," + "'SEARCH_UUID' TEXT NOT NULL ," + "'ITEM_TYPE' INTEGER NOT NULL ," + "'ITEM_UUID' TEXT NOT NULL ," + "'ITEM_NAME' TEXT NOT NULL ," + "'LEVENSTEIN_DISTANCE' INTEGER NOT NULL ," + "'MEMBER_COUNT' INTEGER);");
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_SearchGridResults_SEARCH_UUID ON SearchGridResults" + " (SEARCH_UUID);");
-    }
-
-    public static void dropTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'SearchGridResults'");
-    }
-
-    /* access modifiers changed from: protected */
-    public void bindValues(SQLiteStatement sQLiteStatement, SearchGridResult searchGridResult) {
-        sQLiteStatement.clearBindings();
-        Long id = searchGridResult.getId();
-        if (id != null) {
-            sQLiteStatement.bindLong(1, id.longValue());
+    public static void createTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        String s;
+        if (flag)
+        {
+            s = "IF NOT EXISTS ";
+        } else
+        {
+            s = "";
         }
-        sQLiteStatement.bindString(2, searchGridResult.getSearchUUID().toString());
-        sQLiteStatement.bindLong(3, (long) searchGridResult.getItemType());
-        sQLiteStatement.bindString(4, searchGridResult.getItemUUID().toString());
-        sQLiteStatement.bindString(5, searchGridResult.getItemName());
-        sQLiteStatement.bindLong(6, (long) searchGridResult.getLevensteinDistance());
-        Integer memberCount = searchGridResult.getMemberCount();
-        if (memberCount != null) {
-            sQLiteStatement.bindLong(7, (long) memberCount.intValue());
+        sqlitedatabase.execSQL((new StringBuilder()).append("CREATE TABLE ").append(s).append("'SearchGridResults' (").append("'_id' INTEGER PRIMARY KEY ,").append("'SEARCH_UUID' TEXT NOT NULL ,").append("'ITEM_TYPE' INTEGER NOT NULL ,").append("'ITEM_UUID' TEXT NOT NULL ,").append("'ITEM_NAME' TEXT NOT NULL ,").append("'LEVENSTEIN_DISTANCE' INTEGER NOT NULL ,").append("'MEMBER_COUNT' INTEGER);").toString());
+        sqlitedatabase.execSQL((new StringBuilder()).append("CREATE INDEX ").append(s).append("IDX_SearchGridResults_SEARCH_UUID ON SearchGridResults").append(" (SEARCH_UUID);").toString());
+    }
+
+    public static void dropTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        StringBuilder stringbuilder = (new StringBuilder()).append("DROP TABLE ");
+        String s;
+        if (flag)
+        {
+            s = "IF EXISTS ";
+        } else
+        {
+            s = "";
+        }
+        sqlitedatabase.execSQL(stringbuilder.append(s).append("'SearchGridResults'").toString());
+    }
+
+    protected void bindValues(SQLiteStatement sqlitestatement, SearchGridResult searchgridresult)
+    {
+        sqlitestatement.clearBindings();
+        Long long1 = searchgridresult.getId();
+        if (long1 != null)
+        {
+            sqlitestatement.bindLong(1, long1.longValue());
+        }
+        sqlitestatement.bindString(2, searchgridresult.getSearchUUID().toString());
+        sqlitestatement.bindLong(3, searchgridresult.getItemType());
+        sqlitestatement.bindString(4, searchgridresult.getItemUUID().toString());
+        sqlitestatement.bindString(5, searchgridresult.getItemName());
+        sqlitestatement.bindLong(6, searchgridresult.getLevensteinDistance());
+        searchgridresult = searchgridresult.getMemberCount();
+        if (searchgridresult != null)
+        {
+            sqlitestatement.bindLong(7, searchgridresult.intValue());
         }
     }
 
-    public Long getKey(SearchGridResult searchGridResult) {
-        if (searchGridResult != null) {
-            return searchGridResult.getId();
-        }
-        return null;
+    protected volatile void bindValues(SQLiteStatement sqlitestatement, Object obj)
+    {
+        bindValues(sqlitestatement, (SearchGridResult)obj);
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isEntityUpdateable() {
+    public Long getKey(SearchGridResult searchgridresult)
+    {
+        if (searchgridresult != null)
+        {
+            return searchgridresult.getId();
+        } else
+        {
+            return null;
+        }
+    }
+
+    public volatile Object getKey(Object obj)
+    {
+        return getKey((SearchGridResult)obj);
+    }
+
+    protected boolean isEntityUpdateable()
+    {
         return true;
     }
 
-    public SearchGridResult readEntity(Cursor cursor, int i) {
-        Integer num = null;
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0));
-        UUID fromString = UUID.fromString(cursor.getString(i + 1));
-        int i2 = cursor.getInt(i + 2);
-        UUID fromString2 = UUID.fromString(cursor.getString(i + 3));
-        String string = cursor.getString(i + 4);
-        int i3 = cursor.getInt(i + 5);
-        if (!cursor.isNull(i + 6)) {
-            num = Integer.valueOf(cursor.getInt(i + 6));
+    public SearchGridResult readEntity(Cursor cursor, int i)
+    {
+        Object obj = null;
+        Long long1;
+        UUID uuid;
+        UUID uuid1;
+        String s;
+        int j;
+        int k;
+        if (cursor.isNull(i + 0))
+        {
+            long1 = null;
+        } else
+        {
+            long1 = Long.valueOf(cursor.getLong(i + 0));
         }
-        return new SearchGridResult(valueOf, fromString, i2, fromString2, string, i3, num);
+        uuid = UUID.fromString(cursor.getString(i + 1));
+        j = cursor.getInt(i + 2);
+        uuid1 = UUID.fromString(cursor.getString(i + 3));
+        s = cursor.getString(i + 4);
+        k = cursor.getInt(i + 5);
+        if (cursor.isNull(i + 6))
+        {
+            cursor = obj;
+        } else
+        {
+            cursor = Integer.valueOf(cursor.getInt(i + 6));
+        }
+        return new SearchGridResult(long1, uuid, j, uuid1, s, k, cursor);
     }
 
-    public void readEntity(Cursor cursor, SearchGridResult searchGridResult, int i) {
-        Integer num = null;
-        searchGridResult.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)));
-        searchGridResult.setSearchUUID(UUID.fromString(cursor.getString(i + 1)));
-        searchGridResult.setItemType(cursor.getInt(i + 2));
-        searchGridResult.setItemUUID(UUID.fromString(cursor.getString(i + 3)));
-        searchGridResult.setItemName(cursor.getString(i + 4));
-        searchGridResult.setLevensteinDistance(cursor.getInt(i + 5));
-        if (!cursor.isNull(i + 6)) {
-            num = Integer.valueOf(cursor.getInt(i + 6));
-        }
-        searchGridResult.setMemberCount(num);
+    public volatile Object readEntity(Cursor cursor, int i)
+    {
+        return readEntity(cursor, i);
     }
 
-    public Long readKey(Cursor cursor, int i) {
-        if (cursor.isNull(i + 0)) {
+    public void readEntity(Cursor cursor, SearchGridResult searchgridresult, int i)
+    {
+        Object obj = null;
+        Long long1;
+        if (cursor.isNull(i + 0))
+        {
+            long1 = null;
+        } else
+        {
+            long1 = Long.valueOf(cursor.getLong(i + 0));
+        }
+        searchgridresult.setId(long1);
+        searchgridresult.setSearchUUID(UUID.fromString(cursor.getString(i + 1)));
+        searchgridresult.setItemType(cursor.getInt(i + 2));
+        searchgridresult.setItemUUID(UUID.fromString(cursor.getString(i + 3)));
+        searchgridresult.setItemName(cursor.getString(i + 4));
+        searchgridresult.setLevensteinDistance(cursor.getInt(i + 5));
+        if (cursor.isNull(i + 6))
+        {
+            cursor = obj;
+        } else
+        {
+            cursor = Integer.valueOf(cursor.getInt(i + 6));
+        }
+        searchgridresult.setMemberCount(cursor);
+    }
+
+    public volatile void readEntity(Cursor cursor, Object obj, int i)
+    {
+        readEntity(cursor, (SearchGridResult)obj, i);
+    }
+
+    public Long readKey(Cursor cursor, int i)
+    {
+        if (cursor.isNull(i + 0))
+        {
             return null;
+        } else
+        {
+            return Long.valueOf(cursor.getLong(i + 0));
         }
-        return Long.valueOf(cursor.getLong(i + 0));
     }
 
-    /* access modifiers changed from: protected */
-    public Long updateKeyAfterInsert(SearchGridResult searchGridResult, long j) {
-        searchGridResult.setId(Long.valueOf(j));
-        return Long.valueOf(j);
+    public volatile Object readKey(Cursor cursor, int i)
+    {
+        return readKey(cursor, i);
+    }
+
+    protected Long updateKeyAfterInsert(SearchGridResult searchgridresult, long l)
+    {
+        searchgridresult.setId(Long.valueOf(l));
+        return Long.valueOf(l);
+    }
+
+    protected volatile Object updateKeyAfterInsert(Object obj, long l)
+    {
+        return updateKeyAfterInsert((SearchGridResult)obj, l);
     }
 }

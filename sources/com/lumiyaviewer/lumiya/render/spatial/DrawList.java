@@ -1,59 +1,60 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.spatial;
 
-import com.lumiyaviewer.lumiya.render.DrawableObject;
 import com.lumiyaviewer.lumiya.render.DrawableStore;
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar;
-import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatarStub;
-import com.lumiyaviewer.lumiya.render.terrain.DrawableTerrainPatch;
 import java.util.ArrayList;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class DrawList {
+public class DrawList
+{
+
     public final int avatarCountLimit;
-    @Nonnull
-    public final ArrayList<DrawableAvatarStub> avatarStubs;
-    @Nonnull
-    public final ArrayList<DrawableAvatar> avatars;
-    @Nonnull
+    public final ArrayList avatarStubs;
+    public final ArrayList avatars;
     final DrawableStore drawableStore;
-    @Nullable
     public DrawableAvatar myAvatar;
-    @Nonnull
-    public final ArrayList<DrawableObject> objects;
-    public int[] renderPasses;
-    @Nonnull
-    public final ArrayList<DrawableTerrainPatch> terrain;
+    public final ArrayList objects;
+    public int renderPasses[];
+    public final ArrayList terrain;
 
-    private DrawList(@Nonnull DrawableStore drawableStore2, int i) {
-        this.drawableStore = drawableStore2;
-        this.myAvatar = null;
-        this.objects = new ArrayList<>();
-        this.avatars = new ArrayList<>();
-        this.avatarStubs = new ArrayList<>();
-        this.terrain = new ArrayList<>();
-        this.avatarCountLimit = i;
+    private DrawList(DrawableStore drawablestore, int i)
+    {
+        drawableStore = drawablestore;
+        myAvatar = null;
+        objects = new ArrayList();
+        avatars = new ArrayList();
+        avatarStubs = new ArrayList();
+        terrain = new ArrayList();
+        avatarCountLimit = i;
     }
 
-    private DrawList(@Nonnull DrawableStore drawableStore2, int i, int i2, int i3, int i4, int i5) {
-        this.drawableStore = drawableStore2;
-        this.myAvatar = null;
-        this.objects = new ArrayList<>(i);
-        this.avatars = new ArrayList<>(i2);
-        this.avatarStubs = new ArrayList<>(i3);
-        this.terrain = new ArrayList<>(i4);
-        this.avatarCountLimit = i5;
+    private DrawList(DrawableStore drawablestore, int i, int j, int k, int l, int i1)
+    {
+        drawableStore = drawablestore;
+        myAvatar = null;
+        objects = new ArrayList(i);
+        avatars = new ArrayList(j);
+        avatarStubs = new ArrayList(k);
+        terrain = new ArrayList(l);
+        avatarCountLimit = i1;
     }
 
-    public static DrawList create(@Nonnull DrawableStore drawableStore2, @Nullable DrawList drawList, int i) {
-        if (drawList == null) {
-            return new DrawList(drawableStore2, i);
+    public static DrawList create(DrawableStore drawablestore, DrawList drawlist, int i)
+    {
+        if (drawlist == null)
+        {
+            return new DrawList(drawablestore, i);
+        } else
+        {
+            return new DrawList(drawablestore, (drawlist.objects.size() * 4) / 3, (drawlist.avatars.size() * 4) / 3, (drawlist.avatarStubs.size() * 4) / 3, (drawlist.terrain.size() * 4) / 3, i);
         }
-        return new DrawList(drawableStore2, (drawList.objects.size() * 4) / 3, (drawList.avatars.size() * 4) / 3, (drawList.avatarStubs.size() * 4) / 3, (drawList.terrain.size() * 4) / 3, i);
     }
 
-    /* access modifiers changed from: package-private */
-    public void initRenderPasses() {
-        this.renderPasses = new int[this.objects.size()];
+    void initRenderPasses()
+    {
+        renderPasses = new int[objects.size()];
     }
 }

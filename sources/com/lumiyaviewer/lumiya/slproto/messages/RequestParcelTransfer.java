@@ -1,15 +1,21 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class RequestParcelTransfer extends SLMessage {
-    public Data Data_Field = new Data();
-    public RegionData RegionData_Field = new RegionData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class Data {
+public class RequestParcelTransfer extends SLMessage
+{
+    public static class Data
+    {
+
         public int ActualArea;
         public int Amount;
         public int BillableArea;
@@ -21,60 +27,81 @@ public class RequestParcelTransfer extends SLMessage {
         public UUID TransactionID;
         public int TransactionTime;
         public int TransactionType;
+
+        public Data()
+        {
+        }
     }
 
-    public static class RegionData {
+    public static class RegionData
+    {
+
         public int GridX;
         public int GridY;
         public UUID RegionID;
+
+        public RegionData()
+        {
+        }
     }
 
-    public RequestParcelTransfer() {
-        this.zeroCoded = true;
+
+    public Data Data_Field;
+    public RegionData RegionData_Field;
+
+    public RequestParcelTransfer()
+    {
+        zeroCoded = true;
+        Data_Field = new Data();
+        RegionData_Field = new RegionData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 114;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleRequestParcelTransfer(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleRequestParcelTransfer(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -36);
-        packUUID(byteBuffer, this.Data_Field.TransactionID);
-        packInt(byteBuffer, this.Data_Field.TransactionTime);
-        packUUID(byteBuffer, this.Data_Field.SourceID);
-        packUUID(byteBuffer, this.Data_Field.DestID);
-        packUUID(byteBuffer, this.Data_Field.OwnerID);
-        packByte(byteBuffer, (byte) this.Data_Field.Flags);
-        packInt(byteBuffer, this.Data_Field.TransactionType);
-        packInt(byteBuffer, this.Data_Field.Amount);
-        packInt(byteBuffer, this.Data_Field.BillableArea);
-        packInt(byteBuffer, this.Data_Field.ActualArea);
-        packBoolean(byteBuffer, this.Data_Field.Final);
-        packUUID(byteBuffer, this.RegionData_Field.RegionID);
-        packInt(byteBuffer, this.RegionData_Field.GridX);
-        packInt(byteBuffer, this.RegionData_Field.GridY);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-36);
+        packUUID(bytebuffer, Data_Field.TransactionID);
+        packInt(bytebuffer, Data_Field.TransactionTime);
+        packUUID(bytebuffer, Data_Field.SourceID);
+        packUUID(bytebuffer, Data_Field.DestID);
+        packUUID(bytebuffer, Data_Field.OwnerID);
+        packByte(bytebuffer, (byte)Data_Field.Flags);
+        packInt(bytebuffer, Data_Field.TransactionType);
+        packInt(bytebuffer, Data_Field.Amount);
+        packInt(bytebuffer, Data_Field.BillableArea);
+        packInt(bytebuffer, Data_Field.ActualArea);
+        packBoolean(bytebuffer, Data_Field.Final);
+        packUUID(bytebuffer, RegionData_Field.RegionID);
+        packInt(bytebuffer, RegionData_Field.GridX);
+        packInt(bytebuffer, RegionData_Field.GridY);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.Data_Field.TransactionID = unpackUUID(byteBuffer);
-        this.Data_Field.TransactionTime = unpackInt(byteBuffer);
-        this.Data_Field.SourceID = unpackUUID(byteBuffer);
-        this.Data_Field.DestID = unpackUUID(byteBuffer);
-        this.Data_Field.OwnerID = unpackUUID(byteBuffer);
-        this.Data_Field.Flags = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-        this.Data_Field.TransactionType = unpackInt(byteBuffer);
-        this.Data_Field.Amount = unpackInt(byteBuffer);
-        this.Data_Field.BillableArea = unpackInt(byteBuffer);
-        this.Data_Field.ActualArea = unpackInt(byteBuffer);
-        this.Data_Field.Final = unpackBoolean(byteBuffer);
-        this.RegionData_Field.RegionID = unpackUUID(byteBuffer);
-        this.RegionData_Field.GridX = unpackInt(byteBuffer);
-        this.RegionData_Field.GridY = unpackInt(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        Data_Field.TransactionID = unpackUUID(bytebuffer);
+        Data_Field.TransactionTime = unpackInt(bytebuffer);
+        Data_Field.SourceID = unpackUUID(bytebuffer);
+        Data_Field.DestID = unpackUUID(bytebuffer);
+        Data_Field.OwnerID = unpackUUID(bytebuffer);
+        Data_Field.Flags = unpackByte(bytebuffer) & 0xff;
+        Data_Field.TransactionType = unpackInt(bytebuffer);
+        Data_Field.Amount = unpackInt(bytebuffer);
+        Data_Field.BillableArea = unpackInt(bytebuffer);
+        Data_Field.ActualArea = unpackInt(bytebuffer);
+        Data_Field.Final = unpackBoolean(bytebuffer);
+        RegionData_Field.RegionID = unpackUUID(bytebuffer);
+        RegionData_Field.GridX = unpackInt(bytebuffer);
+        RegionData_Field.GridY = unpackInt(bytebuffer);
     }
 }

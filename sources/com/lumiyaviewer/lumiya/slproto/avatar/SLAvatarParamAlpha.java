@@ -1,41 +1,92 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.avatar;
 
-import javax.annotation.Nullable;
 
-public class SLAvatarParamAlpha {
+public class SLAvatarParamAlpha
+{
+
     public final float domain;
     public final boolean multiplyBlend;
     public final boolean skipIfZero;
-    @Nullable
     public final String tgaFile;
 
-    SLAvatarParamAlpha(float f, @Nullable String str, boolean z, boolean z2) {
-        this.domain = f;
-        this.tgaFile = str;
-        this.skipIfZero = z;
-        this.multiplyBlend = z2;
+    SLAvatarParamAlpha(float f, String s, boolean flag, boolean flag1)
+    {
+        domain = f;
+        tgaFile = s;
+        skipIfZero = flag;
+        multiplyBlend = flag1;
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object obj)
+    {
+        boolean flag = true;
+        if (this == obj)
+        {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass())
+        {
             return false;
         }
-        SLAvatarParamAlpha sLAvatarParamAlpha = (SLAvatarParamAlpha) obj;
-        if (Float.compare(sLAvatarParamAlpha.domain, this.domain) == 0 && this.skipIfZero == sLAvatarParamAlpha.skipIfZero && this.multiplyBlend == sLAvatarParamAlpha.multiplyBlend) {
-            return this.tgaFile != null ? this.tgaFile.equals(sLAvatarParamAlpha.tgaFile) : sLAvatarParamAlpha.tgaFile == null;
+        obj = (SLAvatarParamAlpha)obj;
+        if (Float.compare(((SLAvatarParamAlpha) (obj)).domain, domain) != 0)
+        {
+            return false;
         }
-        return false;
+        if (skipIfZero != ((SLAvatarParamAlpha) (obj)).skipIfZero)
+        {
+            return false;
+        }
+        if (multiplyBlend != ((SLAvatarParamAlpha) (obj)).multiplyBlend)
+        {
+            return false;
+        }
+        if (tgaFile != null)
+        {
+            flag = tgaFile.equals(((SLAvatarParamAlpha) (obj)).tgaFile);
+        } else
+        if (((SLAvatarParamAlpha) (obj)).tgaFile != null)
+        {
+            return false;
+        }
+        return flag;
     }
 
-    public int hashCode() {
-        int i = 1;
-        int hashCode = ((this.skipIfZero ? 1 : 0) + (((this.tgaFile != null ? this.tgaFile.hashCode() : 0) + ((this.domain != 0.0f ? Float.floatToIntBits(this.domain) : 0) * 31)) * 31)) * 31;
-        if (!this.multiplyBlend) {
+    public int hashCode()
+    {
+        int l = 1;
+        int i;
+        int j;
+        int k;
+        if (domain != 0.0F)
+        {
+            i = Float.floatToIntBits(domain);
+        } else
+        {
             i = 0;
         }
-        return hashCode + i;
+        if (tgaFile != null)
+        {
+            j = tgaFile.hashCode();
+        } else
+        {
+            j = 0;
+        }
+        if (skipIfZero)
+        {
+            k = 1;
+        } else
+        {
+            k = 0;
+        }
+        if (!multiplyBlend)
+        {
+            l = 0;
+        }
+        return (k + (j + i * 31) * 31) * 31 + l;
     }
 }

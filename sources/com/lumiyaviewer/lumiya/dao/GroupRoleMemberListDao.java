@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import android.database.Cursor;
@@ -8,79 +12,190 @@ import de.greenrobot.dao.Property;
 import de.greenrobot.dao.internal.DaoConfig;
 import java.util.UUID;
 
-public class GroupRoleMemberListDao extends AbstractDao<GroupRoleMemberList, UUID> {
+// Referenced classes of package com.lumiyaviewer.lumiya.dao:
+//            GroupRoleMemberList, DaoSession
+
+public class GroupRoleMemberListDao extends AbstractDao
+{
+    public static class Properties
+    {
+
+        public static final Property GroupID = new Property(0, java/util/UUID, "groupID", true, "GROUP_ID");
+        public static final Property MustRevalidate;
+        public static final Property RequestID = new Property(1, java/util/UUID, "requestID", false, "REQUEST_ID");
+
+        static 
+        {
+            MustRevalidate = new Property(2, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE");
+        }
+
+        public Properties()
+        {
+        }
+    }
+
+
     public static final String TABLENAME = "GroupRoleMemberLists";
 
-    public static class Properties {
-        public static final Property GroupID = new Property(0, UUID.class, "groupID", true, "GROUP_ID");
-        public static final Property MustRevalidate = new Property(2, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE");
-        public static final Property RequestID = new Property(1, UUID.class, "requestID", false, "REQUEST_ID");
+    public GroupRoleMemberListDao(DaoConfig daoconfig)
+    {
+        super(daoconfig);
     }
 
-    public GroupRoleMemberListDao(DaoConfig daoConfig) {
-        super(daoConfig);
+    public GroupRoleMemberListDao(DaoConfig daoconfig, DaoSession daosession)
+    {
+        super(daoconfig, daosession);
     }
 
-    public GroupRoleMemberListDao(DaoConfig daoConfig, DaoSession daoSession) {
-        super(daoConfig, daoSession);
-    }
-
-    public static void createTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'GroupRoleMemberLists' (" + "'GROUP_ID' TEXT PRIMARY KEY ," + "'REQUEST_ID' TEXT NOT NULL ," + "'MUST_REVALIDATE' INTEGER NOT NULL );");
-    }
-
-    public static void dropTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupRoleMemberLists'");
-    }
-
-    /* access modifiers changed from: protected */
-    public void bindValues(SQLiteStatement sQLiteStatement, GroupRoleMemberList groupRoleMemberList) {
-        sQLiteStatement.clearBindings();
-        UUID groupID = groupRoleMemberList.getGroupID();
-        if (groupID != null) {
-            sQLiteStatement.bindString(1, groupID.toString());
+    public static void createTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        String s;
+        if (flag)
+        {
+            s = "IF NOT EXISTS ";
+        } else
+        {
+            s = "";
         }
-        sQLiteStatement.bindString(2, groupRoleMemberList.getRequestID().toString());
-        sQLiteStatement.bindLong(3, groupRoleMemberList.getMustRevalidate() ? 1 : 0);
+        sqlitedatabase.execSQL((new StringBuilder()).append("CREATE TABLE ").append(s).append("'GroupRoleMemberLists' (").append("'GROUP_ID' TEXT PRIMARY KEY ,").append("'REQUEST_ID' TEXT NOT NULL ,").append("'MUST_REVALIDATE' INTEGER NOT NULL );").toString());
     }
 
-    public UUID getKey(GroupRoleMemberList groupRoleMemberList) {
-        if (groupRoleMemberList != null) {
-            return groupRoleMemberList.getGroupID();
+    public static void dropTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        StringBuilder stringbuilder = (new StringBuilder()).append("DROP TABLE ");
+        String s;
+        if (flag)
+        {
+            s = "IF EXISTS ";
+        } else
+        {
+            s = "";
         }
-        return null;
+        sqlitedatabase.execSQL(stringbuilder.append(s).append("'GroupRoleMemberLists'").toString());
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isEntityUpdateable() {
+    protected void bindValues(SQLiteStatement sqlitestatement, GroupRoleMemberList grouprolememberlist)
+    {
+        sqlitestatement.clearBindings();
+        UUID uuid = grouprolememberlist.getGroupID();
+        if (uuid != null)
+        {
+            sqlitestatement.bindString(1, uuid.toString());
+        }
+        sqlitestatement.bindString(2, grouprolememberlist.getRequestID().toString());
+        long l;
+        if (grouprolememberlist.getMustRevalidate())
+        {
+            l = 1L;
+        } else
+        {
+            l = 0L;
+        }
+        sqlitestatement.bindLong(3, l);
+    }
+
+    protected volatile void bindValues(SQLiteStatement sqlitestatement, Object obj)
+    {
+        bindValues(sqlitestatement, (GroupRoleMemberList)obj);
+    }
+
+    public volatile Object getKey(Object obj)
+    {
+        return getKey((GroupRoleMemberList)obj);
+    }
+
+    public UUID getKey(GroupRoleMemberList grouprolememberlist)
+    {
+        if (grouprolememberlist != null)
+        {
+            return grouprolememberlist.getGroupID();
+        } else
+        {
+            return null;
+        }
+    }
+
+    protected boolean isEntityUpdateable()
+    {
         return true;
     }
 
-    public GroupRoleMemberList readEntity(Cursor cursor, int i) {
-        boolean z = false;
-        UUID fromString = cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0));
-        UUID fromString2 = UUID.fromString(cursor.getString(i + 1));
-        if (cursor.getShort(i + 2) != 0) {
-            z = true;
+    public GroupRoleMemberList readEntity(Cursor cursor, int i)
+    {
+        boolean flag = false;
+        UUID uuid;
+        UUID uuid1;
+        if (cursor.isNull(i + 0))
+        {
+            uuid = null;
+        } else
+        {
+            uuid = UUID.fromString(cursor.getString(i + 0));
         }
-        return new GroupRoleMemberList(fromString, fromString2, z);
+        uuid1 = UUID.fromString(cursor.getString(i + 1));
+        if (cursor.getShort(i + 2) != 0)
+        {
+            flag = true;
+        }
+        return new GroupRoleMemberList(uuid, uuid1, flag);
     }
 
-    public void readEntity(Cursor cursor, GroupRoleMemberList groupRoleMemberList, int i) {
-        groupRoleMemberList.setGroupID(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)));
-        groupRoleMemberList.setRequestID(UUID.fromString(cursor.getString(i + 1)));
-        groupRoleMemberList.setMustRevalidate(cursor.getShort(i + 2) != 0);
+    public volatile Object readEntity(Cursor cursor, int i)
+    {
+        return readEntity(cursor, i);
     }
 
-    public UUID readKey(Cursor cursor, int i) {
-        if (cursor.isNull(i + 0)) {
+    public void readEntity(Cursor cursor, GroupRoleMemberList grouprolememberlist, int i)
+    {
+        UUID uuid;
+        boolean flag;
+        if (cursor.isNull(i + 0))
+        {
+            uuid = null;
+        } else
+        {
+            uuid = UUID.fromString(cursor.getString(i + 0));
+        }
+        grouprolememberlist.setGroupID(uuid);
+        grouprolememberlist.setRequestID(UUID.fromString(cursor.getString(i + 1)));
+        if (cursor.getShort(i + 2) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        grouprolememberlist.setMustRevalidate(flag);
+    }
+
+    public volatile void readEntity(Cursor cursor, Object obj, int i)
+    {
+        readEntity(cursor, (GroupRoleMemberList)obj, i);
+    }
+
+    public volatile Object readKey(Cursor cursor, int i)
+    {
+        return readKey(cursor, i);
+    }
+
+    public UUID readKey(Cursor cursor, int i)
+    {
+        if (cursor.isNull(i + 0))
+        {
             return null;
+        } else
+        {
+            return UUID.fromString(cursor.getString(i + 0));
         }
-        return UUID.fromString(cursor.getString(i + 0));
     }
 
-    /* access modifiers changed from: protected */
-    public UUID updateKeyAfterInsert(GroupRoleMemberList groupRoleMemberList, long j) {
-        return groupRoleMemberList.getGroupID();
+    protected volatile Object updateKeyAfterInsert(Object obj, long l)
+    {
+        return updateKeyAfterInsert((GroupRoleMemberList)obj, l);
+    }
+
+    protected UUID updateKeyAfterInsert(GroupRoleMemberList grouprolememberlist, long l)
+    {
+        return grouprolememberlist.getGroupID();
     }
 }

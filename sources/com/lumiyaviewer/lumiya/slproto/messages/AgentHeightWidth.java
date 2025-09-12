@@ -1,55 +1,83 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class AgentHeightWidth extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public HeightWidthBlock HeightWidthBlock_Field = new HeightWidthBlock();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class AgentHeightWidth extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public int CircuitCode;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class HeightWidthBlock {
+    public static class HeightWidthBlock
+    {
+
         public int GenCounter;
         public int Height;
         public int Width;
+
+        public HeightWidthBlock()
+        {
+        }
     }
 
-    public AgentHeightWidth() {
-        this.zeroCoded = false;
+
+    public AgentData AgentData_Field;
+    public HeightWidthBlock HeightWidthBlock_Field;
+
+    public AgentHeightWidth()
+    {
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
+        HeightWidthBlock_Field = new HeightWidthBlock();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 48;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleAgentHeightWidth(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleAgentHeightWidth(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 83);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packInt(byteBuffer, this.AgentData_Field.CircuitCode);
-        packInt(byteBuffer, this.HeightWidthBlock_Field.GenCounter);
-        packShort(byteBuffer, (short) this.HeightWidthBlock_Field.Height);
-        packShort(byteBuffer, (short) this.HeightWidthBlock_Field.Width);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)83);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packInt(bytebuffer, AgentData_Field.CircuitCode);
+        packInt(bytebuffer, HeightWidthBlock_Field.GenCounter);
+        packShort(bytebuffer, (short)HeightWidthBlock_Field.Height);
+        packShort(bytebuffer, (short)HeightWidthBlock_Field.Width);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.AgentData_Field.CircuitCode = unpackInt(byteBuffer);
-        this.HeightWidthBlock_Field.GenCounter = unpackInt(byteBuffer);
-        this.HeightWidthBlock_Field.Height = unpackShort(byteBuffer) & 65535;
-        this.HeightWidthBlock_Field.Width = unpackShort(byteBuffer) & 65535;
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        AgentData_Field.CircuitCode = unpackInt(bytebuffer);
+        HeightWidthBlock_Field.GenCounter = unpackInt(bytebuffer);
+        HeightWidthBlock_Field.Height = unpackShort(bytebuffer) & 0xffff;
+        HeightWidthBlock_Field.Width = unpackShort(bytebuffer) & 0xffff;
     }
 }

@@ -1,126 +1,180 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.notify;
 
 import android.content.Context;
-import android.os.Build;
 import android.support.v4.app.Fragment;
 import com.google.common.collect.ImmutableSet;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class NotificationChannels {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.notify:
+//            DummyNotificationChannelManager, OreoNotificationChannelManager, NotificationChannelManager
 
-    /* renamed from: -com-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues = null;
-    public static final String MESSAGE_NOTIFICATION_GROUP = "messageNotifications";
-    private final NotificationChannelManager channelManager;
+public class NotificationChannels
+{
+    public static final class Channel extends Enum
+    {
 
-    public enum Channel {
-        OnlineStatus("onlineStatus", R.string.notify_online_status_name, R.string.notify_online_status_desc, (int) null, R.id.online_notify_id),
-        Local("localChat", R.string.notify_local_chat_name, R.string.notify_local_chat_desc, NotificationType.LocalChat, R.id.unread_notify_local_id),
-        Group("groupChat", R.string.notify_group_chat_name, R.string.notify_group_chat_desc, NotificationType.Group, R.id.unread_notify_group_id),
-        IM("privateIM", R.string.notify_im_name, R.string.notify_im_desc, NotificationType.Private, R.id.unread_notify_im_id);
-        
-        @Nonnull
+        private static final Channel $VALUES[];
+        public static final Channel Group;
+        public static final Channel IM;
+        public static final Channel Local;
+        public static final Channel OnlineStatus;
         public final String channelId;
         public final int descriptionStringId;
         public final int nameStringId;
         public final int notificationId;
-        @Nullable
         public final NotificationType notificationType;
 
-        private Channel(String str, int i, @Nonnull int i2, NotificationType notificationType2, int i3) {
-            this.channelId = str;
-            this.nameStringId = i;
-            this.descriptionStringId = i2;
-            this.notificationType = notificationType2;
-            this.notificationId = i3;
+        public static Channel valueOf(String s)
+        {
+            return (Channel)Enum.valueOf(com/lumiyaviewer/lumiya/ui/notify/NotificationChannels$Channel, s);
+        }
+
+        public static Channel[] values()
+        {
+            return $VALUES;
+        }
+
+        static 
+        {
+            OnlineStatus = new Channel("OnlineStatus", 0, "onlineStatus", 0x7f09020d, 0x7f09020c, null, 0x7f100022);
+            Local = new Channel("Local", 1, "localChat", 0x7f09020b, 0x7f09020a, NotificationType.LocalChat, 0x7f10003f);
+            Group = new Channel("Group", 2, "groupChat", 0x7f090207, 0x7f090206, NotificationType.Group, 0x7f10003c);
+            IM = new Channel("IM", 3, "privateIM", 0x7f090209, 0x7f090208, NotificationType.Private, 0x7f10003e);
+            $VALUES = (new Channel[] {
+                OnlineStatus, Local, Group, IM
+            });
+        }
+
+        private Channel(String s, int i, String s1, int j, int k, NotificationType notificationtype, int l)
+        {
+            super(s, i);
+            channelId = s1;
+            nameStringId = j;
+            descriptionStringId = k;
+            notificationType = notificationtype;
+            notificationId = l;
         }
     }
 
-    private static class InstanceHolder {
-        /* access modifiers changed from: private */
-        public static final NotificationChannels Instance = new NotificationChannels((NotificationChannels) null);
+    private static class InstanceHolder
+    {
 
-        private InstanceHolder() {
+        private static final NotificationChannels Instance = new NotificationChannels(null);
+
+        static NotificationChannels _2D_get0()
+        {
+            return Instance;
+        }
+
+
+        private InstanceHolder()
+        {
         }
     }
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m666getcomlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues() {
-        if (f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues != null) {
-            return f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues;
+
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_settings_2D_NotificationTypeSwitchesValues[];
+    public static final String MESSAGE_NOTIFICATION_GROUP = "messageNotifications";
+    private final NotificationChannelManager channelManager;
+
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_settings_2D_NotificationTypeSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_settings_2D_NotificationTypeSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_settings_2D_NotificationTypeSwitchesValues;
         }
-        int[] iArr = new int[NotificationType.values().length];
-        try {
-            iArr[NotificationType.Group.ordinal()] = 1;
-        } catch (NoSuchFieldError e) {
+        int ai[] = new int[NotificationType.values().length];
+        try
+        {
+            ai[NotificationType.Group.ordinal()] = 1;
         }
-        try {
-            iArr[NotificationType.LocalChat.ordinal()] = 2;
-        } catch (NoSuchFieldError e2) {
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[NotificationType.LocalChat.ordinal()] = 2;
         }
-        try {
-            iArr[NotificationType.Private.ordinal()] = 3;
-        } catch (NoSuchFieldError e3) {
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[NotificationType.Private.ordinal()] = 3;
         }
-        f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues = iArr;
-        return iArr;
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_settings_2D_NotificationTypeSwitchesValues = ai;
+        return ai;
     }
 
-    private NotificationChannels() {
-        if (Build.VERSION.SDK_INT < 26) {
-            this.channelManager = new DummyNotificationChannelManager();
-        } else {
-            this.channelManager = new OreoNotificationChannelManager();
+    private NotificationChannels()
+    {
+        if (android.os.Build.VERSION.SDK_INT < 26)
+        {
+            channelManager = new DummyNotificationChannelManager();
+            return;
+        } else
+        {
+            channelManager = new OreoNotificationChannelManager();
+            return;
         }
     }
 
-    /* synthetic */ NotificationChannels(NotificationChannels notificationChannels) {
+    NotificationChannels(NotificationChannels notificationchannels)
+    {
         this();
     }
 
-    public static NotificationChannels getInstance() {
-        return InstanceHolder.Instance;
+    public static NotificationChannels getInstance()
+    {
+        return InstanceHolder._2D_get0();
     }
 
-    public boolean areNotificationsSystemControlled() {
-        return this.channelManager.areNotificationsSystemControlled();
+    public boolean areNotificationsSystemControlled()
+    {
+        return channelManager.areNotificationsSystemControlled();
     }
 
-    public Channel getChannelByType(@Nonnull NotificationType notificationType) {
-        switch (m666getcomlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues()[notificationType.ordinal()]) {
-            case 1:
-                return Channel.Group;
-            case 2:
-                return Channel.Local;
-            case 3:
-                return Channel.IM;
-            default:
-                return null;
+    public Channel getChannelByType(NotificationType notificationtype)
+    {
+        switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_settings_2D_NotificationTypeSwitchesValues()[notificationtype.ordinal()])
+        {
+        default:
+            return null;
+
+        case 2: // '\002'
+            return Channel.Local;
+
+        case 3: // '\003'
+            return Channel.IM;
+
+        case 1: // '\001'
+            return Channel.Group;
         }
     }
 
-    public String getChannelName(@Nonnull Channel channel) {
-        return this.channelManager.getNotificationChannelName(channel);
+    public String getChannelName(Channel channel)
+    {
+        return channelManager.getNotificationChannelName(channel);
     }
 
-    @Nonnull
-    public ImmutableSet<NotificationType> getEnabledTypes(Context context) {
-        return this.channelManager.getEnabledTypes(context);
+    public ImmutableSet getEnabledTypes(Context context)
+    {
+        return channelManager.getEnabledTypes(context);
     }
 
-    @Nullable
-    public String getNotificationSummary(Context context, @Nonnull Channel channel) {
-        return this.channelManager.getNotificationSummary(context, channel);
+    public String getNotificationSummary(Context context, Channel channel)
+    {
+        return channelManager.getNotificationSummary(context, channel);
     }
 
-    public boolean showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @Nonnull Channel channel) {
-        return this.channelManager.showSystemNotificationSettings(context, fragment, channel);
+    public boolean showSystemNotificationSettings(Context context, Fragment fragment, Channel channel)
+    {
+        return channelManager.showSystemNotificationSettings(context, fragment, channel);
     }
 
-    public boolean useNotificationGroups() {
-        return this.channelManager.useNotificationGroups();
+    public boolean useNotificationGroups()
+    {
+        return channelManager.useNotificationGroups();
     }
 }

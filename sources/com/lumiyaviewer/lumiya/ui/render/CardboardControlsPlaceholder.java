@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.render;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -8,67 +11,95 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
-public class CardboardControlsPlaceholder extends ViewGroup {
-    private int fixedHeight = 0;
-    private int fixedWidth = 0;
-    private OnViewInvalidateListener onViewInvalidateListener = null;
+public class CardboardControlsPlaceholder extends ViewGroup
+{
+    public static interface OnViewInvalidateListener
+    {
 
-    public interface OnViewInvalidateListener {
-        void onViewInvalidated();
+        public abstract void onViewInvalidated();
     }
 
-    public CardboardControlsPlaceholder(Context context) {
+
+    private int fixedHeight;
+    private int fixedWidth;
+    private OnViewInvalidateListener onViewInvalidateListener;
+
+    public CardboardControlsPlaceholder(Context context)
+    {
         super(context);
+        fixedWidth = 0;
+        fixedHeight = 0;
+        onViewInvalidateListener = null;
     }
 
-    public CardboardControlsPlaceholder(Context context, AttributeSet attributeSet) {
-        super(context, attributeSet);
+    public CardboardControlsPlaceholder(Context context, AttributeSet attributeset)
+    {
+        super(context, attributeset);
+        fixedWidth = 0;
+        fixedHeight = 0;
+        onViewInvalidateListener = null;
     }
 
-    public CardboardControlsPlaceholder(Context context, AttributeSet attributeSet, int i) {
-        super(context, attributeSet, i);
+    public CardboardControlsPlaceholder(Context context, AttributeSet attributeset, int i)
+    {
+        super(context, attributeset, i);
+        fixedWidth = 0;
+        fixedHeight = 0;
+        onViewInvalidateListener = null;
     }
 
-    @TargetApi(21)
-    public CardboardControlsPlaceholder(Context context, AttributeSet attributeSet, int i, int i2) {
-        super(context, attributeSet, i, i2);
+    public CardboardControlsPlaceholder(Context context, AttributeSet attributeset, int i, int j)
+    {
+        super(context, attributeset, i, j);
+        fixedWidth = 0;
+        fixedHeight = 0;
+        onViewInvalidateListener = null;
     }
 
-    public ViewParent invalidateChildInParent(int[] iArr, Rect rect) {
-        ViewParent invalidateChildInParent = super.invalidateChildInParent(iArr, rect);
-        if (this.onViewInvalidateListener != null) {
-            this.onViewInvalidateListener.onViewInvalidated();
+    public ViewParent invalidateChildInParent(int ai[], Rect rect)
+    {
+        ai = super.invalidateChildInParent(ai, rect);
+        if (onViewInvalidateListener != null)
+        {
+            onViewInvalidateListener.onViewInvalidated();
         }
-        return invalidateChildInParent;
+        return ai;
     }
 
-    /* access modifiers changed from: protected */
-    public void onLayout(boolean z, int i, int i2, int i3, int i4) {
-        int childCount = getChildCount();
-        for (int i5 = 0; i5 < childCount; i5++) {
-            getChildAt(i5).layout(0, 0, this.fixedWidth, this.fixedHeight);
+    protected void onLayout(boolean flag, int i, int j, int k, int l)
+    {
+        j = getChildCount();
+        for (i = 0; i < j; i++)
+        {
+            getChildAt(i).layout(0, 0, fixedWidth, fixedHeight);
         }
+
     }
 
-    /* access modifiers changed from: protected */
-    public void onMeasure(int i, int i2) {
-        int childCount = getChildCount();
-        for (int i3 = 0; i3 < childCount; i3++) {
-            View childAt = getChildAt(i3);
-            if (childAt.getVisibility() != 8) {
-                measureChild(childAt, View.MeasureSpec.makeMeasureSpec(this.fixedWidth, 1073741824), View.MeasureSpec.makeMeasureSpec(this.fixedHeight, 1073741824));
+    protected void onMeasure(int i, int j)
+    {
+        j = getChildCount();
+        for (i = 0; i < j; i++)
+        {
+            View view = getChildAt(i);
+            if (view.getVisibility() != 8)
+            {
+                measureChild(view, android.view.View.MeasureSpec.makeMeasureSpec(fixedWidth, 0x40000000), android.view.View.MeasureSpec.makeMeasureSpec(fixedHeight, 0x40000000));
             }
         }
+
         setMeasuredDimension(0, 0);
     }
 
-    public void setFixedSize(int i, int i2) {
-        this.fixedWidth = i;
-        this.fixedHeight = i2;
+    public void setFixedSize(int i, int j)
+    {
+        fixedWidth = i;
+        fixedHeight = j;
         requestLayout();
     }
 
-    public void setOnViewInvalidateListener(OnViewInvalidateListener onViewInvalidateListener2) {
-        this.onViewInvalidateListener = onViewInvalidateListener2;
+    public void setOnViewInvalidateListener(OnViewInvalidateListener onviewinvalidatelistener)
+    {
+        onViewInvalidateListener = onviewinvalidatelistener;
     }
 }

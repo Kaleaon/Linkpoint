@@ -1,11 +1,18 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.events;
 
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 
-public class SLChatEventUpdatedEvent {
+public class SLChatEventUpdatedEvent
+{
+
     public final SLChatEvent chatEvent;
 
-    public SLChatEventUpdatedEvent(SLChatEvent sLChatEvent) {
-        this.chatEvent = sLChatEvent;
+    public SLChatEventUpdatedEvent(SLChatEvent slchatevent)
+    {
+        chatEvent = slchatevent;
     }
 }

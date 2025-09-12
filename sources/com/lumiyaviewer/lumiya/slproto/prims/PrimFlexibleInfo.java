@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.prims;
 
 import android.opengl.Matrix;
@@ -8,218 +12,278 @@ import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer;
 
-public class PrimFlexibleInfo {
-    private static final float FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE = 0.99f;
-    private static final long MIN_UPDATE_INTERVAL = 200;
-    private int NumSections = 0;
-    private long lastUpdateMillis;
-    private volatile boolean needVertexBufferUpdate = false;
-    private float[] sectionData;
-    private float[] sectionMatrices;
-    private FlexibleSection[] sections;
-    private GLLoadableBuffer vertexBuffer = null;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.prims:
+//            PrimFlexibleParams
 
-    private static class FlexibleSection {
+public class PrimFlexibleInfo
+{
+    private static class FlexibleSection
+    {
+
         LLVector3 Direction;
         LLVector3 Position;
         LLQuaternion Rotation;
         LLVector3 Velocity;
 
-        private FlexibleSection() {
+        private FlexibleSection()
+        {
         }
 
-        /* synthetic */ FlexibleSection(FlexibleSection flexibleSection) {
+        FlexibleSection(FlexibleSection flexiblesection)
+        {
             this();
         }
     }
 
-    public boolean doFlexibleUpdate(PrimFlexibleParams primFlexibleParams, float[] fArr, int i, float f, float f2, float f3) {
-        long currentTimeMillis = System.currentTimeMillis();
-        if (currentTimeMillis < this.lastUpdateMillis + MIN_UPDATE_INTERVAL) {
+
+    private static final float FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE = 0.99F;
+    private static final long MIN_UPDATE_INTERVAL = 200L;
+    private int NumSections;
+    private long lastUpdateMillis;
+    private volatile boolean needVertexBufferUpdate;
+    private float sectionData[];
+    private float sectionMatrices[];
+    private FlexibleSection sections[];
+    private GLLoadableBuffer vertexBuffer;
+
+    public PrimFlexibleInfo()
+    {
+        NumSections = 0;
+        needVertexBufferUpdate = false;
+        vertexBuffer = null;
+    }
+
+    public boolean doFlexibleUpdate(PrimFlexibleParams primflexibleparams, float af[], int i, float f, float f1, float f2)
+    {
+        long l = System.currentTimeMillis();
+        if (l < lastUpdateMillis + 200L)
+        {
             return false;
         }
-        if (primFlexibleParams.NumFlexiSections != this.NumSections) {
-            this.sections = null;
-            this.sectionMatrices = null;
-            this.sectionData = null;
-            this.NumSections = primFlexibleParams.NumFlexiSections;
+        if (primflexibleparams.NumFlexiSections != NumSections)
+        {
+            sections = null;
+            sectionMatrices = null;
+            sectionData = null;
+            NumSections = primflexibleparams.NumFlexiSections;
         }
-        if (this.NumSections == 0) {
+        if (NumSections == 0)
+        {
             return false;
         }
-        this.lastUpdateMillis = currentTimeMillis;
-        float f4 = (((float) (currentTimeMillis - this.lastUpdateMillis)) / 1000.0f) * 5.0f;
-        boolean z = false;
-        if (this.sectionData == null) {
-            this.sectionData = new float[OpenJPEG.getFlexiDataSize(this.NumSections)];
-            this.sectionMatrices = new float[(this.NumSections * 16)];
-            z = true;
+        float f3 = (float)(l - lastUpdateMillis) / 1000F;
+        lastUpdateMillis = l;
+        boolean flag = false;
+        if (sectionData == null)
+        {
+            sectionData = new float[OpenJPEG.getFlexiDataSize(NumSections)];
+            sectionMatrices = new float[NumSections * 16];
+            flag = true;
         }
-        OpenJPEG.calcFlexiSections(this.sectionData, this.NumSections, this.sectionMatrices, fArr, i, f, f2, f3, f4, primFlexibleParams.Tension, primFlexibleParams.AirFriction, primFlexibleParams.Gravity, primFlexibleParams.UserForce.x, primFlexibleParams.UserForce.y, primFlexibleParams.UserForce.z, z);
-        this.needVertexBufferUpdate = true;
+        OpenJPEG.calcFlexiSections(sectionData, NumSections, sectionMatrices, af, i, f, f1, f2, f3 * 5F, primflexibleparams.Tension, primflexibleparams.AirFriction, primflexibleparams.Gravity, primflexibleparams.UserForce.x, primflexibleparams.UserForce.y, primflexibleparams.UserForce.z, flag);
+        needVertexBufferUpdate = true;
         return true;
     }
 
-    public boolean doFlexibleUpdateSlow(PrimFlexibleParams primFlexibleParams, float[] fArr, int i, float f, float f2, float f3) {
-        long currentTimeMillis = System.currentTimeMillis();
-        if (currentTimeMillis < this.lastUpdateMillis + MIN_UPDATE_INTERVAL) {
+    public boolean doFlexibleUpdateSlow(PrimFlexibleParams primflexibleparams, float af[], int i, float f, float f1, float f2)
+    {
+        long l = System.currentTimeMillis();
+        if (l < lastUpdateMillis + 200L)
+        {
             return false;
         }
-        LLVector3 lLVector3 = new LLVector3(fArr[i + 12], fArr[i + 13], fArr[i + 14]);
-        LLVector3 lLVector32 = new LLVector3(f, f2, f3);
-        float[] fArr2 = new float[32];
-        Matrix.invertM(fArr2, 0, fArr, i);
-        LLQuaternion lLQuaternion = new LLQuaternion(fArr2);
-        if (primFlexibleParams.NumFlexiSections != this.NumSections) {
-            this.sections = null;
-            this.sectionMatrices = null;
-            this.NumSections = primFlexibleParams.NumFlexiSections;
+        LLVector3 llvector3_1 = new LLVector3(af[i + 12], af[i + 13], af[i + 14]);
+        LLVector3 llvector3 = new LLVector3(f, f1, f2);
+        float af2[] = new float[32];
+        Matrix.invertM(af2, 0, af, i);
+        LLQuaternion llquaternion = new LLQuaternion(af2);
+        if (primflexibleparams.NumFlexiSections != NumSections)
+        {
+            sections = null;
+            sectionMatrices = null;
+            NumSections = primflexibleparams.NumFlexiSections;
         }
-        if (this.NumSections == 0) {
+        if (NumSections == 0)
+        {
             return false;
         }
-        this.lastUpdateMillis = currentTimeMillis;
-        float f4 = (((float) (currentTimeMillis - this.lastUpdateMillis)) / 1000.0f) * 5.0f;
-        LLQuaternion lLQuaternion2 = new LLQuaternion(lLQuaternion);
-        LLVector3 lLVector33 = new LLVector3(LLVector3.z_axis);
-        lLVector33.mul(lLQuaternion2);
-        float f5 = lLVector32.z / ((float) this.NumSections);
-        LLVector3 lLVector34 = new LLVector3(lLVector33);
-        lLVector34.mul(lLVector32.z / 2.0f);
-        LLVector3 sub = LLVector3.sub(lLVector3, lLVector34);
-        if (this.sections == null) {
-            this.sections = new FlexibleSection[this.NumSections];
-            for (int i2 = 0; i2 < this.NumSections; i2++) {
-                this.sections[i2] = new FlexibleSection((FlexibleSection) null);
-                this.sections[i2].Position = new LLVector3(sub);
-                this.sections[i2].Position.addMul(lLVector33, ((float) i2) * f5);
-                this.sections[i2].Direction = new LLVector3(lLVector33);
-                this.sections[i2].Rotation = new LLQuaternion(lLQuaternion);
-                this.sections[i2].Velocity = new LLVector3();
+        f = (float)(l - lastUpdateMillis) / 1000F;
+        lastUpdateMillis = l;
+        f2 = f * 5F;
+        LLQuaternion llquaternion1 = new LLQuaternion(llquaternion);
+        af = new LLVector3(LLVector3.z_axis);
+        af.mul(llquaternion1);
+        float f3 = llvector3.z / (float)NumSections;
+        LLVector3 llvector3_2 = new LLVector3(af);
+        llvector3_2.mul(llvector3.z / 2.0F);
+        llvector3_2 = LLVector3.sub(llvector3_1, llvector3_2);
+        if (sections == null)
+        {
+            sections = new FlexibleSection[NumSections];
+            for (i = 0; i < NumSections; i++)
+            {
+                sections[i] = new FlexibleSection(null);
+                sections[i].Position = new LLVector3(llvector3_2);
+                sections[i].Position.addMul(af, (float)i * f3);
+                sections[i].Direction = new LLVector3(af);
+                sections[i].Rotation = new LLQuaternion(llquaternion);
+                sections[i].Velocity = new LLVector3();
             }
+
         }
-        this.sections[0].Position.set(sub);
-        this.sections[0].Direction.set(lLVector33);
-        this.sections[0].Rotation.set(lLQuaternion);
-        float pow = primFlexibleParams.Tension * 0.1f * (1.0f - ((float) Math.pow(0.85d, ((double) f4) * 30.0d)));
-        if (pow > FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE) {
-            pow = FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE;
+        sections[0].Position.set(llvector3_2);
+        sections[0].Direction.set(af);
+        sections[0].Rotation.set(llquaternion);
+        f = primflexibleparams.Tension * 0.1F * (1.0F - (float)Math.pow(0.84999999999999998D, (double)f2 * 30D));
+        f1 = f;
+        if (f > 0.99F)
+        {
+            f1 = 0.99F;
         }
-        float pow2 = (float) Math.pow(10.0d, (double) (((primFlexibleParams.AirFriction * 2.0f) + 1.0f) * f4));
-        if (pow2 <= 1.0f) {
-            pow2 = 1.0f;
+        f = (float)Math.pow(10D, (primflexibleparams.AirFriction * 2.0F + 1.0F) * f2);
+        float f4;
+        float f5;
+        float f6;
+        LLVector3 llvector3_3;
+        LLQuaternion llquaternion2;
+        LLQuaternion llquaternion3;
+        LLQuaternion llquaternion4;
+        if (f <= 1.0F)
+        {
+            f = 1.0F;
         }
-        float f6 = 1.0f / pow2;
-        float atan = (float) Math.atan((double) (2.0f * f5));
-        float f7 = f5 * f4;
-        LLVector3 lLVector35 = new LLVector3();
-        LLVector3 lLVector36 = new LLVector3();
-        LLQuaternion lLQuaternion3 = new LLQuaternion();
-        LLQuaternion lLQuaternion4 = new LLQuaternion();
-        LLQuaternion lLQuaternion5 = new LLQuaternion();
-        int i3 = 1;
-        while (i3 < this.NumSections) {
-            lLVector35.set(this.sections[i3].Position);
-            this.sections[i3].Position.z -= primFlexibleParams.Gravity * f7;
-            this.sections[i3].Position.addMul(primFlexibleParams.UserForce, f7);
-            LLVector3 lLVector37 = this.sections[i3 - 1].Position;
-            LLVector3 lLVector38 = this.sections[i3 - 1].Direction;
-            LLVector3 lLVector39 = i3 == 1 ? this.sections[0].Direction : this.sections[i3 - 2].Direction;
-            LLVector3 sub2 = LLVector3.sub(this.sections[i3].Position, lLVector37);
-            LLVector3 lLVector310 = new LLVector3(lLVector39);
-            lLVector310.mul(f5);
-            lLVector310.sub(sub2);
-            this.sections[i3].Position.addMul(lLVector310, pow);
-            this.sections[i3].Position.addMul(this.sections[i3].Velocity, f6);
-            this.sections[i3].Direction.setSub(this.sections[i3].Position, lLVector37);
-            this.sections[i3].Direction.normVec();
-            LLQuaternion shortestArc = LLQuaternion.shortestArc(lLVector38, this.sections[i3].Direction);
-            float angleAxis = shortestArc.getAngleAxis(lLVector36);
-            if (angleAxis > 3.1415927f) {
-                angleAxis -= 6.2831855f;
+        f4 = 1.0F / f;
+        f5 = (float)Math.atan(2.0F * f3);
+        f6 = f3 * f2;
+        llvector3_2 = new LLVector3();
+        llvector3_3 = new LLVector3();
+        llquaternion2 = new LLQuaternion();
+        llquaternion3 = new LLQuaternion();
+        llquaternion4 = new LLQuaternion();
+        i = 1;
+        while (i < NumSections) 
+        {
+            llvector3_2.set(sections[i].Position);
+            af = sections[i].Position;
+            af.z = ((LLVector3) (af)).z - primflexibleparams.Gravity * f6;
+            sections[i].Position.addMul(primflexibleparams.UserForce, f6);
+            LLVector3 llvector3_4 = sections[i - 1].Position;
+            LLVector3 llvector3_5 = sections[i - 1].Direction;
+            LLVector3 llvector3_6;
+            if (i == 1)
+            {
+                af = sections[0].Direction;
+            } else
+            {
+                af = sections[i - 2].Direction;
             }
-            if (angleAxis < -3.1415927f) {
-                angleAxis += 6.2831855f;
+            llvector3_6 = LLVector3.sub(sections[i].Position, llvector3_4);
+            af = new LLVector3(af);
+            af.mul(f3);
+            af.sub(llvector3_6);
+            sections[i].Position.addMul(af, f1);
+            sections[i].Position.addMul(sections[i].Velocity, f4);
+            sections[i].Direction.setSub(sections[i].Position, llvector3_4);
+            sections[i].Direction.normVec();
+            af = LLQuaternion.shortestArc(llvector3_5, sections[i].Direction);
+            f2 = af.getAngleAxis(llvector3_3);
+            f = f2;
+            if (f2 > 3.141593F)
+            {
+                f = f2 - 6.283185F;
             }
-            if (angleAxis > atan) {
-                shortestArc.setQuat(atan, lLVector36);
-            } else if (angleAxis < (-atan)) {
-                shortestArc.setQuat(-atan, lLVector36);
+            f2 = f;
+            if (f < -3.141593F)
+            {
+                f2 = f + 6.283185F;
             }
-            lLQuaternion3.setMul(lLQuaternion2, shortestArc);
-            lLQuaternion2.set(lLQuaternion3);
-            this.sections[i3].Direction.set(lLVector38);
-            this.sections[i3].Direction.mul(shortestArc);
-            this.sections[i3].Position.set(lLVector37);
-            this.sections[i3].Position.addMul(this.sections[i3].Direction, f5);
-            this.sections[i3].Rotation.set(lLQuaternion3);
-            if (i3 > 1) {
-                lLQuaternion4.setQuat(angleAxis / 2.0f, lLVector36);
-                lLQuaternion5.setMul(this.sections[i3 - 1].Rotation, lLQuaternion4);
-                this.sections[i3 - 1].Rotation.set(lLQuaternion5);
+            if (f2 > f5)
+            {
+                af.setQuat(f5, llvector3_3);
+            } else
+            if (f2 < -f5)
+            {
+                af.setQuat(-f5, llvector3_3);
             }
-            this.sections[i3].Velocity.setSub(this.sections[i3].Position, lLVector35);
-            if (this.sections[i3].Velocity.magVecSquared() > 1.0f) {
-                this.sections[i3].Velocity.normVec();
+            llquaternion2.setMul(llquaternion1, af);
+            llquaternion1.set(llquaternion2);
+            sections[i].Direction.set(llvector3_5);
+            sections[i].Direction.mul(af);
+            sections[i].Position.set(llvector3_4);
+            sections[i].Position.addMul(sections[i].Direction, f3);
+            sections[i].Rotation.set(llquaternion2);
+            if (i > 1)
+            {
+                llquaternion3.setQuat(f2 / 2.0F, llvector3_3);
+                llquaternion4.setMul(sections[i - 1].Rotation, llquaternion3);
+                sections[i - 1].Rotation.set(llquaternion4);
             }
-            i3++;
+            sections[i].Velocity.setSub(sections[i].Position, llvector3_2);
+            if (sections[i].Velocity.magVecSquared() > 1.0F)
+            {
+                sections[i].Velocity.normVec();
+            }
+            i++;
         }
-        float[] fArr3 = new float[32];
-        Matrix.setIdentityM(fArr3, 16);
-        Matrix.scaleM(fArr3, 16, 1.0f / lLVector32.x, 1.0f / lLVector32.y, 1.0f / lLVector32.z);
-        Matrix.multiplyMM(fArr3, 0, fArr3, 16, lLQuaternion.getMatrix(), 0);
-        Matrix.translateM(fArr3, 0, -lLVector3.x, -lLVector3.y, -lLVector3.z);
-        if (this.sectionMatrices == null) {
-            this.sectionMatrices = new float[(this.NumSections * 16)];
+        primflexibleparams = new float[32];
+        Matrix.setIdentityM(primflexibleparams, 16);
+        Matrix.scaleM(primflexibleparams, 16, 1.0F / llvector3.x, 1.0F / llvector3.y, 1.0F / llvector3.z);
+        Matrix.multiplyMM(primflexibleparams, 0, primflexibleparams, 16, llquaternion.getMatrix(), 0);
+        Matrix.translateM(primflexibleparams, 0, -llvector3_1.x, -llvector3_1.y, -llvector3_1.z);
+        if (sectionMatrices == null)
+        {
+            sectionMatrices = new float[NumSections * 16];
         }
-        float[] fArr4 = new float[8];
-        int i4 = 0;
-        while (true) {
-            int i5 = i4;
-            if (i5 < this.NumSections) {
-                fArr4[0] = this.sections[i5].Position.x;
-                fArr4[1] = this.sections[i5].Position.y;
-                fArr4[2] = this.sections[i5].Position.z;
-                fArr4[3] = 1.0f;
-                Matrix.multiplyMV(fArr4, 4, fArr3, 0, fArr4, 0);
-                float f8 = (((float) i5) / ((float) this.NumSections)) - 0.5f;
-                float[] fArr5 = new float[32];
-                Matrix.setIdentityM(fArr5, 16);
-                Matrix.translateM(fArr5, 16, fArr4[4], fArr4[5], fArr4[6] - f8);
-                Matrix.translateM(fArr5, 16, 0.0f, 0.0f, f8);
-                Matrix.scaleM(fArr5, 16, 1.0f / lLVector32.x, 1.0f / lLVector32.y, 1.0f / lLVector32.z);
-                Matrix.multiplyMM(fArr5, 0, fArr5, 16, lLQuaternion.getMatrix(), 0);
-                Matrix.multiplyMM(fArr5, 16, fArr5, 0, this.sections[i5].Rotation.getInverseMatrix(), 0);
-                Matrix.scaleM(fArr5, 16, lLVector32.x, lLVector32.y, lLVector32.z);
-                Matrix.translateM(fArr5, 16, 0.0f, 0.0f, -f8);
-                System.arraycopy(fArr5, 16, this.sectionMatrices, i5 * 16, 16);
-                i4 = i5 + 1;
-            } else {
-                this.needVertexBufferUpdate = true;
-                return true;
-            }
+        af = new float[8];
+        for (i = 0; i < NumSections; i++)
+        {
+            af[0] = sections[i].Position.x;
+            af[1] = sections[i].Position.y;
+            af[2] = sections[i].Position.z;
+            af[3] = 1.0F;
+            Matrix.multiplyMV(af, 4, primflexibleparams, 0, af, 0);
+            f = (float)i / (float)NumSections - 0.5F;
+            float af1[] = new float[32];
+            Matrix.setIdentityM(af1, 16);
+            Matrix.translateM(af1, 16, af[4], af[5], af[6] - f);
+            Matrix.translateM(af1, 16, 0.0F, 0.0F, f);
+            Matrix.scaleM(af1, 16, 1.0F / llvector3.x, 1.0F / llvector3.y, 1.0F / llvector3.z);
+            Matrix.multiplyMM(af1, 0, af1, 16, llquaternion.getMatrix(), 0);
+            Matrix.multiplyMM(af1, 16, af1, 0, sections[i].Rotation.getInverseMatrix(), 0);
+            Matrix.scaleM(af1, 16, llvector3.x, llvector3.y, llvector3.z);
+            Matrix.translateM(af1, 16, 0.0F, 0.0F, -f);
+            System.arraycopy(af1, 16, sectionMatrices, i * 16, 16);
         }
+
+        needVertexBufferUpdate = true;
+        return true;
     }
 
-    public GLLoadableBuffer getFlexedVertexBuffer(RenderContext renderContext, GLLoadableBuffer gLLoadableBuffer, int i) {
-        if (this.sectionMatrices != null) {
-            if (this.needVertexBufferUpdate) {
-                DirectByteBuffer rawBuffer = gLLoadableBuffer.getRawBuffer();
-                if (this.vertexBuffer == null) {
-                    this.vertexBuffer = new GLLoadableBuffer(new DirectByteBuffer(rawBuffer));
+    public GLLoadableBuffer getFlexedVertexBuffer(RenderContext rendercontext, GLLoadableBuffer glloadablebuffer, int i)
+    {
+        if (sectionMatrices != null)
+        {
+            if (needVertexBufferUpdate)
+            {
+                DirectByteBuffer directbytebuffer = glloadablebuffer.getRawBuffer();
+                if (vertexBuffer == null)
+                {
+                    vertexBuffer = new GLLoadableBuffer(new DirectByteBuffer(directbytebuffer));
                 }
-                OpenJPEG.applyFlexibleMorph(this.vertexBuffer.getRawBuffer().asByteBuffer(), rawBuffer.asByteBuffer(), i, this.sectionMatrices);
-                this.vertexBuffer.Reload(renderContext);
-                this.needVertexBufferUpdate = false;
+                OpenJPEG.applyFlexibleMorph(vertexBuffer.getRawBuffer().asByteBuffer(), directbytebuffer.asByteBuffer(), i, sectionMatrices);
+                vertexBuffer.Reload(rendercontext);
+                needVertexBufferUpdate = false;
             }
-            if (this.vertexBuffer != null) {
-                return this.vertexBuffer;
+            if (vertexBuffer != null)
+            {
+                return vertexBuffer;
             }
         }
-        return gLLoadableBuffer;
+        return glloadablebuffer;
     }
 
-    public float[] getMatrices() {
-        return this.sectionMatrices;
+    public float[] getMatrices()
+    {
+        return sectionMatrices;
     }
 }

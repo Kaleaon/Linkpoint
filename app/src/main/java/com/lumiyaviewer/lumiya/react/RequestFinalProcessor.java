@@ -1,6 +1,5 @@
 package com.lumiyaviewer.lumiya.react;
 
-import com.lumiyaviewer.lumiya.react.-$Lambda$psFcS6-5kKyuCZBH4SbOZwtpXG8.AnonymousClass1;
 import java.util.concurrent.Executor;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,8 +19,9 @@ public abstract class RequestFinalProcessor<K, T> implements RequestHandler<K> {
     protected void handleRequestCancellation(@Nonnull K k) {
     }
 
-    /* renamed from: handleRequestProcessing */
-    /* synthetic */ void handleRequestProcessing(Object obj) {
+    /* access modifiers changed from: private */
+    /* renamed from: handleRequestProcessingInternal */
+    public /* synthetic */ void m24lambda$com_lumiyaviewer_lumiya_react_RequestFinalProcessor_673(Object obj) {
         try {
             this.resultHandler.onResultData(obj, processRequest(obj));
         } catch (Throwable th) {

@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
@@ -5,48 +9,65 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class SetStartLocation extends SLMessage {
-    public StartLocationData StartLocationData_Field = new StartLocationData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class StartLocationData {
+public class SetStartLocation extends SLMessage
+{
+    public static class StartLocationData
+    {
+
         public UUID AgentID;
         public int LocationID;
         public LLVector3 LocationLookAt;
         public LLVector3 LocationPos;
         public long RegionHandle;
         public UUID RegionID;
+
+        public StartLocationData()
+        {
+        }
     }
 
-    public SetStartLocation() {
-        this.zeroCoded = true;
+
+    public StartLocationData StartLocationData_Field;
+
+    public SetStartLocation()
+    {
+        zeroCoded = true;
+        StartLocationData_Field = new StartLocationData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 72;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleSetStartLocation(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleSetStartLocation(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 69);
-        packUUID(byteBuffer, this.StartLocationData_Field.AgentID);
-        packUUID(byteBuffer, this.StartLocationData_Field.RegionID);
-        packInt(byteBuffer, this.StartLocationData_Field.LocationID);
-        packLong(byteBuffer, this.StartLocationData_Field.RegionHandle);
-        packLLVector3(byteBuffer, this.StartLocationData_Field.LocationPos);
-        packLLVector3(byteBuffer, this.StartLocationData_Field.LocationLookAt);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)69);
+        packUUID(bytebuffer, StartLocationData_Field.AgentID);
+        packUUID(bytebuffer, StartLocationData_Field.RegionID);
+        packInt(bytebuffer, StartLocationData_Field.LocationID);
+        packLong(bytebuffer, StartLocationData_Field.RegionHandle);
+        packLLVector3(bytebuffer, StartLocationData_Field.LocationPos);
+        packLLVector3(bytebuffer, StartLocationData_Field.LocationLookAt);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.StartLocationData_Field.AgentID = unpackUUID(byteBuffer);
-        this.StartLocationData_Field.RegionID = unpackUUID(byteBuffer);
-        this.StartLocationData_Field.LocationID = unpackInt(byteBuffer);
-        this.StartLocationData_Field.RegionHandle = unpackLong(byteBuffer);
-        this.StartLocationData_Field.LocationPos = unpackLLVector3(byteBuffer);
-        this.StartLocationData_Field.LocationLookAt = unpackLLVector3(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        StartLocationData_Field.AgentID = unpackUUID(bytebuffer);
+        StartLocationData_Field.RegionID = unpackUUID(bytebuffer);
+        StartLocationData_Field.LocationID = unpackInt(bytebuffer);
+        StartLocationData_Field.RegionHandle = unpackLong(bytebuffer);
+        StartLocationData_Field.LocationPos = unpackLLVector3(bytebuffer);
+        StartLocationData_Field.LocationLookAt = unpackLLVector3(bytebuffer);
     }
 }

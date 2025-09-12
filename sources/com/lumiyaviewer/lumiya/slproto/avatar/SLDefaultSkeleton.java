@@ -1,353 +1,547 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.avatar;
 
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
+import java.util.Map;
 
-public class SLDefaultSkeleton extends SLSkeleton {
-    protected SLDefaultSkeleton() {
-        SLSkeletonBone sLSkeletonBone = new SLSkeletonBone(SLSkeletonBoneID.mSkull, new LLVector3(0.0f, 0.0f, 0.079f), new LLVector3(0.0f, 0.0f, 0.079f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mSkull, sLSkeletonBone);
-        SLSkeletonBone sLSkeletonBone2 = new SLSkeletonBone(SLSkeletonBoneID.mEyeRight, new LLVector3(0.098f, -0.036f, 0.079f), new LLVector3(0.098466f, -0.036f, 0.079f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mEyeRight, sLSkeletonBone2);
-        SLSkeletonBone sLSkeletonBone3 = new SLSkeletonBone(SLSkeletonBoneID.mEyeLeft, new LLVector3(0.098f, 0.036f, 0.079f), new LLVector3(0.098461f, 0.036f, 0.079f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mEyeLeft, sLSkeletonBone3);
-        SLSkeletonBone sLSkeletonBone4 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeAltRight, new LLVector3(0.073f, -0.036f, 0.034f), new LLVector3(0.073466f, -0.036f, 0.03393f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyeAltRight, sLSkeletonBone4);
-        SLSkeletonBone sLSkeletonBone5 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeAltLeft, new LLVector3(0.073f, 0.036f, 0.034f), new LLVector3(0.073461f, 0.036f, 0.03393f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyeAltLeft, sLSkeletonBone5);
-        SLSkeletonBone sLSkeletonBone6 = new SLSkeletonBone(SLSkeletonBoneID.mFaceForeheadLeft, new LLVector3(0.061f, 0.035f, 0.083f), new LLVector3(0.061f, 0.035f, 0.083f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceForeheadLeft, sLSkeletonBone6);
-        SLSkeletonBone sLSkeletonBone7 = new SLSkeletonBone(SLSkeletonBoneID.mFaceForeheadRight, new LLVector3(0.061f, -0.035f, 0.083f), new LLVector3(0.061f, -0.035f, 0.083f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceForeheadRight, sLSkeletonBone7);
-        SLSkeletonBone sLSkeletonBone8 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowOuterLeft, new LLVector3(0.064f, 0.051f, 0.048f), new LLVector3(0.064f, 0.051f, 0.048f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyebrowOuterLeft, sLSkeletonBone8);
-        SLSkeletonBone sLSkeletonBone9 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowCenterLeft, new LLVector3(0.07f, 0.043f, 0.056f), new LLVector3(0.07f, 0.043f, 0.056f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyebrowCenterLeft, sLSkeletonBone9);
-        SLSkeletonBone sLSkeletonBone10 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowInnerLeft, new LLVector3(0.075f, 0.022f, 0.051f), new LLVector3(0.075f, 0.022f, 0.051f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyebrowInnerLeft, sLSkeletonBone10);
-        SLSkeletonBone sLSkeletonBone11 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowOuterRight, new LLVector3(0.064f, -0.051f, 0.048f), new LLVector3(0.064f, -0.051f, 0.048f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyebrowOuterRight, sLSkeletonBone11);
-        SLSkeletonBone sLSkeletonBone12 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowCenterRight, new LLVector3(0.07f, -0.043f, 0.056f), new LLVector3(0.07f, -0.043f, 0.056f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyebrowCenterRight, sLSkeletonBone12);
-        SLSkeletonBone sLSkeletonBone13 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowInnerRight, new LLVector3(0.075f, -0.022f, 0.051f), new LLVector3(0.075f, -0.022f, 0.051f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyebrowInnerRight, sLSkeletonBone13);
-        SLSkeletonBone sLSkeletonBone14 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeLidUpperLeft, new LLVector3(0.073f, 0.036f, 0.034f), new LLVector3(0.073f, 0.036f, 0.034f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyeLidUpperLeft, sLSkeletonBone14);
-        SLSkeletonBone sLSkeletonBone15 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeLidLowerLeft, new LLVector3(0.073f, 0.036f, 0.034f), new LLVector3(0.073f, 0.036f, 0.034f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyeLidLowerLeft, sLSkeletonBone15);
-        SLSkeletonBone sLSkeletonBone16 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeLidUpperRight, new LLVector3(0.073f, -0.036f, 0.034f), new LLVector3(0.073f, -0.036f, 0.034f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyeLidUpperRight, sLSkeletonBone16);
-        SLSkeletonBone sLSkeletonBone17 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeLidLowerRight, new LLVector3(0.073f, -0.036f, 0.034f), new LLVector3(0.073f, -0.036f, 0.034f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyeLidLowerRight, sLSkeletonBone17);
-        SLSkeletonBone sLSkeletonBone18 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEar2Left, new LLVector3(-0.019f, 0.018f, 0.025f), new LLVector3(-0.019f, 0.018f, 0.025f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEar2Left, sLSkeletonBone18);
-        SLSkeletonBone sLSkeletonBone19 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEar1Left, new LLVector3(0.0f, 0.08f, 0.002f), new LLVector3(0.0f, 0.08f, 0.002f), new SLSkeletonBone[]{sLSkeletonBone18}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEar1Left, sLSkeletonBone19);
-        SLSkeletonBone sLSkeletonBone20 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEar2Right, new LLVector3(-0.019f, -0.018f, 0.025f), new LLVector3(-0.019f, -0.018f, 0.025f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEar2Right, sLSkeletonBone20);
-        SLSkeletonBone sLSkeletonBone21 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEar1Right, new LLVector3(0.0f, -0.08f, 0.002f), new LLVector3(0.0f, -0.08f, 0.002f), new SLSkeletonBone[]{sLSkeletonBone20}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEar1Right, sLSkeletonBone21);
-        SLSkeletonBone sLSkeletonBone22 = new SLSkeletonBone(SLSkeletonBoneID.mFaceNoseLeft, new LLVector3(0.086f, 0.015f, -0.004f), new LLVector3(0.086f, 0.015f, -0.004f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceNoseLeft, sLSkeletonBone22);
-        SLSkeletonBone sLSkeletonBone23 = new SLSkeletonBone(SLSkeletonBoneID.mFaceNoseCenter, new LLVector3(0.102f, 0.0f, 0.0f), new LLVector3(0.102f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceNoseCenter, sLSkeletonBone23);
-        SLSkeletonBone sLSkeletonBone24 = new SLSkeletonBone(SLSkeletonBoneID.mFaceNoseRight, new LLVector3(0.086f, -0.015f, -0.004f), new LLVector3(0.086f, -0.015f, -0.004f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceNoseRight, sLSkeletonBone24);
-        SLSkeletonBone sLSkeletonBone25 = new SLSkeletonBone(SLSkeletonBoneID.mFaceCheekLowerLeft, new LLVector3(0.05f, 0.034f, -0.031f), new LLVector3(0.05f, 0.034f, -0.031f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceCheekLowerLeft, sLSkeletonBone25);
-        SLSkeletonBone sLSkeletonBone26 = new SLSkeletonBone(SLSkeletonBoneID.mFaceCheekUpperLeft, new LLVector3(0.07f, 0.034f, -0.005f), new LLVector3(0.07f, 0.034f, -0.005f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceCheekUpperLeft, sLSkeletonBone26);
-        SLSkeletonBone sLSkeletonBone27 = new SLSkeletonBone(SLSkeletonBoneID.mFaceCheekLowerRight, new LLVector3(0.05f, -0.034f, -0.031f), new LLVector3(0.05f, -0.034f, -0.031f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceCheekLowerRight, sLSkeletonBone27);
-        SLSkeletonBone sLSkeletonBone28 = new SLSkeletonBone(SLSkeletonBoneID.mFaceCheekUpperRight, new LLVector3(0.07f, -0.034f, -0.005f), new LLVector3(0.07f, -0.034f, -0.005f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceCheekUpperRight, sLSkeletonBone28);
-        SLSkeletonBone sLSkeletonBone29 = new SLSkeletonBone(SLSkeletonBoneID.mFaceChin, new LLVector3(0.074f, 0.0f, -0.054f), new LLVector3(0.074f, 0.0f, -0.054f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceChin, sLSkeletonBone29);
-        SLSkeletonBone sLSkeletonBone30 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipLowerLeft, new LLVector3(0.045f, 0.0f, 0.0f), new LLVector3(0.045f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceLipLowerLeft, sLSkeletonBone30);
-        SLSkeletonBone sLSkeletonBone31 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipLowerRight, new LLVector3(0.045f, 0.0f, 0.0f), new LLVector3(0.045f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceLipLowerRight, sLSkeletonBone31);
-        SLSkeletonBone sLSkeletonBone32 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipLowerCenter, new LLVector3(0.045f, 0.0f, 0.0f), new LLVector3(0.045f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceLipLowerCenter, sLSkeletonBone32);
-        SLSkeletonBone sLSkeletonBone33 = new SLSkeletonBone(SLSkeletonBoneID.mFaceTongueTip, new LLVector3(0.022f, 0.0f, 0.007f), new LLVector3(0.022f, 0.0f, 0.007f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceTongueTip, sLSkeletonBone33);
-        SLSkeletonBone sLSkeletonBone34 = new SLSkeletonBone(SLSkeletonBoneID.mFaceTongueBase, new LLVector3(0.039f, 0.0f, 0.005f), new LLVector3(0.039f, 0.0f, 0.005f), new SLSkeletonBone[]{sLSkeletonBone33}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceTongueBase, sLSkeletonBone34);
-        SLSkeletonBone sLSkeletonBone35 = new SLSkeletonBone(SLSkeletonBoneID.mFaceTeethLower, new LLVector3(0.021f, 0.0f, -0.039f), new LLVector3(0.021f, 0.0f, -0.039f), new SLSkeletonBone[]{sLSkeletonBone30, sLSkeletonBone31, sLSkeletonBone32, sLSkeletonBone34}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceTeethLower, sLSkeletonBone35);
-        SLSkeletonBone sLSkeletonBone36 = new SLSkeletonBone(SLSkeletonBoneID.mFaceJaw, new LLVector3(-0.001f, 0.0f, -0.015f), new LLVector3(-0.001f, 0.0f, -0.015f), new SLSkeletonBone[]{sLSkeletonBone29, sLSkeletonBone35}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceJaw, sLSkeletonBone36);
-        SLSkeletonBone sLSkeletonBone37 = new SLSkeletonBone(SLSkeletonBoneID.mFaceJawShaper, new LLVector3(0.0f, 0.0f, 0.0f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceJawShaper, sLSkeletonBone37);
-        SLSkeletonBone sLSkeletonBone38 = new SLSkeletonBone(SLSkeletonBoneID.mFaceForeheadCenter, new LLVector3(0.069f, 0.0f, 0.065f), new LLVector3(0.069f, 0.0f, 0.065f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceForeheadCenter, sLSkeletonBone38);
-        SLSkeletonBone sLSkeletonBone39 = new SLSkeletonBone(SLSkeletonBoneID.mFaceNoseBase, new LLVector3(0.094f, 0.0f, -0.016f), new LLVector3(0.094f, 0.0f, -0.016f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceNoseBase, sLSkeletonBone39);
-        SLSkeletonBone sLSkeletonBone40 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipUpperLeft, new LLVector3(0.045f, 0.0f, -0.003f), new LLVector3(0.045f, 0.0f, -0.003f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceLipUpperLeft, sLSkeletonBone40);
-        SLSkeletonBone sLSkeletonBone41 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipUpperRight, new LLVector3(0.045f, 0.0f, -0.003f), new LLVector3(0.045f, 0.0f, -0.003f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceLipUpperRight, sLSkeletonBone41);
-        SLSkeletonBone sLSkeletonBone42 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipCornerLeft, new LLVector3(0.028f, -0.019f, -0.01f), new LLVector3(0.028f, -0.019f, -0.01f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceLipCornerLeft, sLSkeletonBone42);
-        SLSkeletonBone sLSkeletonBone43 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipCornerRight, new LLVector3(0.028f, 0.019f, -0.01f), new LLVector3(0.028f, 0.019f, -0.01f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceLipCornerRight, sLSkeletonBone43);
-        SLSkeletonBone sLSkeletonBone44 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipUpperCenter, new LLVector3(0.045f, 0.0f, -0.003f), new LLVector3(0.045f, 0.0f, -0.003f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceLipUpperCenter, sLSkeletonBone44);
-        SLSkeletonBone sLSkeletonBone45 = new SLSkeletonBone(SLSkeletonBoneID.mFaceTeethUpper, new LLVector3(0.02f, 0.0f, -0.03f), new LLVector3(0.02f, 0.0f, -0.03f), new SLSkeletonBone[]{sLSkeletonBone40, sLSkeletonBone41, sLSkeletonBone42, sLSkeletonBone43, sLSkeletonBone44}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceTeethUpper, sLSkeletonBone45);
-        SLSkeletonBone sLSkeletonBone46 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyecornerInnerLeft, new LLVector3(0.075f, 0.017f, 0.032f), new LLVector3(0.075f, 0.017f, 0.032f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyecornerInnerLeft, sLSkeletonBone46);
-        SLSkeletonBone sLSkeletonBone47 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyecornerInnerRight, new LLVector3(0.075f, -0.017f, 0.032f), new LLVector3(0.075f, -0.017f, 0.032f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceEyecornerInnerRight, sLSkeletonBone47);
-        SLSkeletonBone sLSkeletonBone48 = new SLSkeletonBone(SLSkeletonBoneID.mFaceNoseBridge, new LLVector3(0.091f, 0.0f, 0.02f), new LLVector3(0.091f, 0.0f, 0.02f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceNoseBridge, sLSkeletonBone48);
-        SLSkeletonBone sLSkeletonBone49 = new SLSkeletonBone(SLSkeletonBoneID.mFaceRoot, new LLVector3(0.025f, 0.0f, 0.045f), new LLVector3(0.025f, 0.0f, 0.045f), new SLSkeletonBone[]{sLSkeletonBone4, sLSkeletonBone5, sLSkeletonBone6, sLSkeletonBone7, sLSkeletonBone8, sLSkeletonBone9, sLSkeletonBone10, sLSkeletonBone11, sLSkeletonBone12, sLSkeletonBone13, sLSkeletonBone14, sLSkeletonBone15, sLSkeletonBone16, sLSkeletonBone17, sLSkeletonBone19, sLSkeletonBone21, sLSkeletonBone22, sLSkeletonBone23, sLSkeletonBone24, sLSkeletonBone25, sLSkeletonBone26, sLSkeletonBone27, sLSkeletonBone28, sLSkeletonBone36, sLSkeletonBone37, sLSkeletonBone38, sLSkeletonBone39, sLSkeletonBone45, sLSkeletonBone46, sLSkeletonBone47, sLSkeletonBone48}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFaceRoot, sLSkeletonBone49);
-        SLSkeletonBone sLSkeletonBone50 = new SLSkeletonBone(SLSkeletonBoneID.HEAD, new LLVector3(0.02f, 0.0f, 0.07f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone50.deform(new LLVector3(), new LLVector3(0.11f, 0.09f, 0.12f));
-        this.bones.put(SLSkeletonBoneID.HEAD, sLSkeletonBone50);
-        SLSkeletonBone sLSkeletonBone51 = new SLSkeletonBone(SLSkeletonBoneID.mHead, new LLVector3(0.0f, -0.0f, 0.076f), new LLVector3(0.0f, -0.0f, 0.07563f), new SLSkeletonBone[]{sLSkeletonBone, sLSkeletonBone2, sLSkeletonBone3, sLSkeletonBone49}, new SLSkeletonBone[]{sLSkeletonBone50});
-        this.bones.put(SLSkeletonBoneID.mHead, sLSkeletonBone51);
-        SLSkeletonBone sLSkeletonBone52 = new SLSkeletonBone(SLSkeletonBoneID.NECK, new LLVector3(0.0f, 0.0f, 0.02f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone52.deform(new LLVector3(), new LLVector3(0.05f, 0.06f, 0.08f));
-        this.bones.put(SLSkeletonBoneID.NECK, sLSkeletonBone52);
-        SLSkeletonBone sLSkeletonBone53 = new SLSkeletonBone(SLSkeletonBoneID.mNeck, new LLVector3(-0.01f, 0.0f, 0.251f), new LLVector3(-0.009507f, 0.0f, 0.251108f), new SLSkeletonBone[]{sLSkeletonBone51}, new SLSkeletonBone[]{sLSkeletonBone52});
-        this.bones.put(SLSkeletonBoneID.mNeck, sLSkeletonBone53);
-        SLSkeletonBone sLSkeletonBone54 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle3Left, new LLVector3(-0.001f, 0.049f, -0.008f), new LLVector3(-0.001f, 0.049f, -0.008f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandMiddle3Left, sLSkeletonBone54);
-        SLSkeletonBone sLSkeletonBone55 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle2Left, new LLVector3(-0.001f, 0.04f, -0.006f), new LLVector3(-0.001f, 0.04f, -0.006f), new SLSkeletonBone[]{sLSkeletonBone54}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandMiddle2Left, sLSkeletonBone55);
-        SLSkeletonBone sLSkeletonBone56 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle1Left, new LLVector3(0.013f, 0.101f, 0.015f), new LLVector3(0.013f, 0.101f, 0.015f), new SLSkeletonBone[]{sLSkeletonBone55}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandMiddle1Left, sLSkeletonBone56);
-        SLSkeletonBone sLSkeletonBone57 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex3Left, new LLVector3(0.014f, 0.032f, -0.006f), new LLVector3(0.014f, 0.032f, -0.006f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandIndex3Left, sLSkeletonBone57);
-        SLSkeletonBone sLSkeletonBone58 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex2Left, new LLVector3(0.017f, 0.036f, -0.006f), new LLVector3(0.017f, 0.036f, -0.006f), new SLSkeletonBone[]{sLSkeletonBone57}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandIndex2Left, sLSkeletonBone58);
-        SLSkeletonBone sLSkeletonBone59 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex1Left, new LLVector3(0.038f, 0.097f, 0.015f), new LLVector3(0.038f, 0.097f, 0.015f), new SLSkeletonBone[]{sLSkeletonBone58}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandIndex1Left, sLSkeletonBone59);
-        SLSkeletonBone sLSkeletonBone60 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing3Left, new LLVector3(-0.013f, 0.04f, -0.009f), new LLVector3(-0.013f, 0.04f, -0.009f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandRing3Left, sLSkeletonBone60);
-        SLSkeletonBone sLSkeletonBone61 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing2Left, new LLVector3(-0.013f, 0.038f, -0.008f), new LLVector3(-0.013f, 0.038f, -0.008f), new SLSkeletonBone[]{sLSkeletonBone60}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandRing2Left, sLSkeletonBone61);
-        SLSkeletonBone sLSkeletonBone62 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing1Left, new LLVector3(-0.01f, 0.099f, 0.009f), new LLVector3(-0.01f, 0.099f, 0.009f), new SLSkeletonBone[]{sLSkeletonBone61}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandRing1Left, sLSkeletonBone62);
-        SLSkeletonBone sLSkeletonBone63 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky3Left, new LLVector3(-0.015f, 0.018f, -0.004f), new LLVector3(-0.015f, 0.018f, -0.004f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandPinky3Left, sLSkeletonBone63);
-        SLSkeletonBone sLSkeletonBone64 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky2Left, new LLVector3(-0.024f, 0.025f, -0.006f), new LLVector3(-0.024f, 0.025f, -0.006f), new SLSkeletonBone[]{sLSkeletonBone63}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandPinky2Left, sLSkeletonBone64);
-        SLSkeletonBone sLSkeletonBone65 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky1Left, new LLVector3(-0.031f, 0.095f, 0.003f), new LLVector3(-0.031f, 0.095f, 0.003f), new SLSkeletonBone[]{sLSkeletonBone64}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandPinky1Left, sLSkeletonBone65);
-        SLSkeletonBone sLSkeletonBone66 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb3Left, new LLVector3(0.023f, 0.031f, -0.001f), new LLVector3(0.023f, 0.031f, -0.001f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandThumb3Left, sLSkeletonBone66);
-        SLSkeletonBone sLSkeletonBone67 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb2Left, new LLVector3(0.028f, 0.032f, -0.001f), new LLVector3(0.028f, 0.032f, -0.001f), new SLSkeletonBone[]{sLSkeletonBone66}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandThumb2Left, sLSkeletonBone67);
-        SLSkeletonBone sLSkeletonBone68 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb1Left, new LLVector3(0.031f, 0.026f, 0.004f), new LLVector3(0.031f, 0.026f, 0.004f), new SLSkeletonBone[]{sLSkeletonBone67}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandThumb1Left, sLSkeletonBone68);
-        SLSkeletonBone sLSkeletonBone69 = new SLSkeletonBone(SLSkeletonBoneID.L_HAND, new LLVector3(0.01f, 0.05f, 0.0f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone69.deform(new LLVector3(), new LLVector3(0.05f, 0.08f, 0.03f));
-        this.bones.put(SLSkeletonBoneID.L_HAND, sLSkeletonBone69);
-        SLSkeletonBone sLSkeletonBone70 = new SLSkeletonBone(SLSkeletonBoneID.mWristLeft, new LLVector3(-0.0f, 0.205f, 0.0f), new LLVector3(-0.0f, 0.204846f, 0.0f), new SLSkeletonBone[]{sLSkeletonBone56, sLSkeletonBone59, sLSkeletonBone62, sLSkeletonBone65, sLSkeletonBone68}, new SLSkeletonBone[]{sLSkeletonBone69});
-        this.bones.put(SLSkeletonBoneID.mWristLeft, sLSkeletonBone70);
-        SLSkeletonBone sLSkeletonBone71 = new SLSkeletonBone(SLSkeletonBoneID.L_LOWER_ARM, new LLVector3(0.0f, 0.1f, 0.0f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone71.deform(new LLVector3(), new LLVector3(0.04f, 0.14f, 0.04f));
-        this.bones.put(SLSkeletonBoneID.L_LOWER_ARM, sLSkeletonBone71);
-        SLSkeletonBone sLSkeletonBone72 = new SLSkeletonBone(SLSkeletonBoneID.mElbowLeft, new LLVector3(0.0f, 0.248f, 0.0f), new LLVector3(0.0f, 0.248f, 0.0f), new SLSkeletonBone[]{sLSkeletonBone70}, new SLSkeletonBone[]{sLSkeletonBone71});
-        this.bones.put(SLSkeletonBoneID.mElbowLeft, sLSkeletonBone72);
-        SLSkeletonBone sLSkeletonBone73 = new SLSkeletonBone(SLSkeletonBoneID.L_UPPER_ARM, new LLVector3(0.0f, 0.12f, 0.01f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone73.deform(new LLVector3(), new LLVector3(0.05f, 0.17f, 0.05f));
-        this.bones.put(SLSkeletonBoneID.L_UPPER_ARM, sLSkeletonBone73);
-        SLSkeletonBone sLSkeletonBone74 = new SLSkeletonBone(SLSkeletonBoneID.mShoulderLeft, new LLVector3(0.0f, 0.079f, -0.0f), new LLVector3(0.0f, 0.079f, -0.0f), new SLSkeletonBone[]{sLSkeletonBone72}, new SLSkeletonBone[]{sLSkeletonBone73});
-        this.bones.put(SLSkeletonBoneID.mShoulderLeft, sLSkeletonBone74);
-        SLSkeletonBone sLSkeletonBone75 = new SLSkeletonBone(SLSkeletonBoneID.L_CLAVICLE, new LLVector3(0.02f, 0.0f, 0.02f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone75.deform(new LLVector3(), new LLVector3(0.07f, 0.14f, 0.05f));
-        this.bones.put(SLSkeletonBoneID.L_CLAVICLE, sLSkeletonBone75);
-        SLSkeletonBone sLSkeletonBone76 = new SLSkeletonBone(SLSkeletonBoneID.mCollarLeft, new LLVector3(-0.021f, 0.085f, 0.165f), new LLVector3(-0.020927f, 0.084665f, 0.165396f), new SLSkeletonBone[]{sLSkeletonBone74}, new SLSkeletonBone[]{sLSkeletonBone75});
-        this.bones.put(SLSkeletonBoneID.mCollarLeft, sLSkeletonBone76);
-        SLSkeletonBone sLSkeletonBone77 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle3Right, new LLVector3(-0.001f, -0.049f, -0.008f), new LLVector3(-0.001f, -0.049f, -0.008f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandMiddle3Right, sLSkeletonBone77);
-        SLSkeletonBone sLSkeletonBone78 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle2Right, new LLVector3(-0.001f, -0.04f, -0.006f), new LLVector3(-0.001f, -0.04f, -0.006f), new SLSkeletonBone[]{sLSkeletonBone77}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandMiddle2Right, sLSkeletonBone78);
-        SLSkeletonBone sLSkeletonBone79 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle1Right, new LLVector3(0.013f, -0.101f, 0.015f), new LLVector3(0.013f, -0.101f, 0.015f), new SLSkeletonBone[]{sLSkeletonBone78}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandMiddle1Right, sLSkeletonBone79);
-        SLSkeletonBone sLSkeletonBone80 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex3Right, new LLVector3(0.014f, -0.032f, -0.006f), new LLVector3(0.014f, -0.032f, -0.006f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandIndex3Right, sLSkeletonBone80);
-        SLSkeletonBone sLSkeletonBone81 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex2Right, new LLVector3(0.017f, -0.036f, -0.006f), new LLVector3(0.017f, -0.036f, -0.006f), new SLSkeletonBone[]{sLSkeletonBone80}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandIndex2Right, sLSkeletonBone81);
-        SLSkeletonBone sLSkeletonBone82 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex1Right, new LLVector3(0.038f, -0.097f, 0.015f), new LLVector3(0.038f, -0.097f, 0.015f), new SLSkeletonBone[]{sLSkeletonBone81}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandIndex1Right, sLSkeletonBone82);
-        SLSkeletonBone sLSkeletonBone83 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing3Right, new LLVector3(-0.013f, -0.04f, -0.009f), new LLVector3(-0.013f, -0.04f, -0.009f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandRing3Right, sLSkeletonBone83);
-        SLSkeletonBone sLSkeletonBone84 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing2Right, new LLVector3(-0.013f, -0.038f, -0.008f), new LLVector3(-0.013f, -0.038f, -0.008f), new SLSkeletonBone[]{sLSkeletonBone83}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandRing2Right, sLSkeletonBone84);
-        SLSkeletonBone sLSkeletonBone85 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing1Right, new LLVector3(-0.01f, -0.099f, 0.009f), new LLVector3(-0.01f, -0.099f, 0.009f), new SLSkeletonBone[]{sLSkeletonBone84}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandRing1Right, sLSkeletonBone85);
-        SLSkeletonBone sLSkeletonBone86 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky3Right, new LLVector3(-0.015f, -0.018f, -0.004f), new LLVector3(-0.015f, -0.018f, -0.004f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandPinky3Right, sLSkeletonBone86);
-        SLSkeletonBone sLSkeletonBone87 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky2Right, new LLVector3(-0.024f, -0.025f, -0.006f), new LLVector3(-0.024f, -0.025f, -0.006f), new SLSkeletonBone[]{sLSkeletonBone86}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandPinky2Right, sLSkeletonBone87);
-        SLSkeletonBone sLSkeletonBone88 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky1Right, new LLVector3(-0.031f, -0.095f, 0.003f), new LLVector3(-0.031f, -0.095f, 0.003f), new SLSkeletonBone[]{sLSkeletonBone87}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandPinky1Right, sLSkeletonBone88);
-        SLSkeletonBone sLSkeletonBone89 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb3Right, new LLVector3(0.023f, -0.031f, -0.001f), new LLVector3(0.023f, -0.031f, -0.001f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandThumb3Right, sLSkeletonBone89);
-        SLSkeletonBone sLSkeletonBone90 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb2Right, new LLVector3(0.028f, -0.032f, -0.001f), new LLVector3(0.028f, -0.032f, -0.001f), new SLSkeletonBone[]{sLSkeletonBone89}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandThumb2Right, sLSkeletonBone90);
-        SLSkeletonBone sLSkeletonBone91 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb1Right, new LLVector3(0.031f, -0.026f, 0.004f), new LLVector3(0.031f, -0.026f, 0.004f), new SLSkeletonBone[]{sLSkeletonBone90}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHandThumb1Right, sLSkeletonBone91);
-        SLSkeletonBone sLSkeletonBone92 = new SLSkeletonBone(SLSkeletonBoneID.R_HAND, new LLVector3(0.01f, -0.05f, 0.0f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone92.deform(new LLVector3(), new LLVector3(0.05f, 0.08f, 0.03f));
-        this.bones.put(SLSkeletonBoneID.R_HAND, sLSkeletonBone92);
-        SLSkeletonBone sLSkeletonBone93 = new SLSkeletonBone(SLSkeletonBoneID.mWristRight, new LLVector3(0.0f, -0.205f, -0.0f), new LLVector3(-0.0f, -0.205f, -0.0f), new SLSkeletonBone[]{sLSkeletonBone79, sLSkeletonBone82, sLSkeletonBone85, sLSkeletonBone88, sLSkeletonBone91}, new SLSkeletonBone[]{sLSkeletonBone92});
-        this.bones.put(SLSkeletonBoneID.mWristRight, sLSkeletonBone93);
-        SLSkeletonBone sLSkeletonBone94 = new SLSkeletonBone(SLSkeletonBoneID.R_LOWER_ARM, new LLVector3(0.0f, -0.1f, 0.0f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone94.deform(new LLVector3(), new LLVector3(0.04f, 0.14f, 0.04f));
-        this.bones.put(SLSkeletonBoneID.R_LOWER_ARM, sLSkeletonBone94);
-        SLSkeletonBone sLSkeletonBone95 = new SLSkeletonBone(SLSkeletonBoneID.mElbowRight, new LLVector3(0.0f, -0.248f, -0.0f), new LLVector3(0.0f, -0.248f, -0.0f), new SLSkeletonBone[]{sLSkeletonBone93}, new SLSkeletonBone[]{sLSkeletonBone94});
-        this.bones.put(SLSkeletonBoneID.mElbowRight, sLSkeletonBone95);
-        SLSkeletonBone sLSkeletonBone96 = new SLSkeletonBone(SLSkeletonBoneID.R_UPPER_ARM, new LLVector3(0.0f, -0.12f, 0.01f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone96.deform(new LLVector3(), new LLVector3(0.05f, 0.17f, 0.05f));
-        this.bones.put(SLSkeletonBoneID.R_UPPER_ARM, sLSkeletonBone96);
-        SLSkeletonBone sLSkeletonBone97 = new SLSkeletonBone(SLSkeletonBoneID.mShoulderRight, new LLVector3(0.0f, -0.079f, -0.0f), new LLVector3(0.0f, -0.079418f, -0.0f), new SLSkeletonBone[]{sLSkeletonBone95}, new SLSkeletonBone[]{sLSkeletonBone96});
-        this.bones.put(SLSkeletonBoneID.mShoulderRight, sLSkeletonBone97);
-        SLSkeletonBone sLSkeletonBone98 = new SLSkeletonBone(SLSkeletonBoneID.R_CLAVICLE, new LLVector3(0.02f, 0.0f, 0.02f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone98.deform(new LLVector3(), new LLVector3(0.07f, 0.14f, 0.05f));
-        this.bones.put(SLSkeletonBoneID.R_CLAVICLE, sLSkeletonBone98);
-        SLSkeletonBone sLSkeletonBone99 = new SLSkeletonBone(SLSkeletonBoneID.mCollarRight, new LLVector3(-0.021f, -0.085f, 0.165f), new LLVector3(-0.020927f, -0.085f, 0.165396f), new SLSkeletonBone[]{sLSkeletonBone97}, new SLSkeletonBone[]{sLSkeletonBone98});
-        this.bones.put(SLSkeletonBoneID.mCollarRight, sLSkeletonBone99);
-        SLSkeletonBone sLSkeletonBone100 = new SLSkeletonBone(SLSkeletonBoneID.mWing4Left, new LLVector3(-0.171f, 0.173f, 0.0f), new LLVector3(-0.171f, 0.173f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWing4Left, sLSkeletonBone100);
-        SLSkeletonBone sLSkeletonBone101 = new SLSkeletonBone(SLSkeletonBoneID.mWing4FanLeft, new LLVector3(-0.171f, 0.173f, 0.0f), new LLVector3(-0.171f, 0.173f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWing4FanLeft, sLSkeletonBone101);
-        SLSkeletonBone sLSkeletonBone102 = new SLSkeletonBone(SLSkeletonBoneID.mWing3Left, new LLVector3(-0.181f, 0.183f, 0.0f), new LLVector3(-0.181f, 0.183f, 0.0f), new SLSkeletonBone[]{sLSkeletonBone100, sLSkeletonBone101}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWing3Left, sLSkeletonBone102);
-        SLSkeletonBone sLSkeletonBone103 = new SLSkeletonBone(SLSkeletonBoneID.mWing2Left, new LLVector3(-0.168f, 0.169f, 0.067f), new LLVector3(-0.168f, 0.169f, 0.067f), new SLSkeletonBone[]{sLSkeletonBone102}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWing2Left, sLSkeletonBone103);
-        SLSkeletonBone sLSkeletonBone104 = new SLSkeletonBone(SLSkeletonBoneID.mWing1Left, new LLVector3(-0.099f, 0.105f, 0.181f), new LLVector3(-0.099f, 0.105f, 0.181f), new SLSkeletonBone[]{sLSkeletonBone103}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWing1Left, sLSkeletonBone104);
-        SLSkeletonBone sLSkeletonBone105 = new SLSkeletonBone(SLSkeletonBoneID.mWing4Right, new LLVector3(-0.171f, -0.173f, 0.0f), new LLVector3(-0.171f, -0.173f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWing4Right, sLSkeletonBone105);
-        SLSkeletonBone sLSkeletonBone106 = new SLSkeletonBone(SLSkeletonBoneID.mWing4FanRight, new LLVector3(-0.171f, -0.173f, 0.0f), new LLVector3(-0.171f, -0.173f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWing4FanRight, sLSkeletonBone106);
-        SLSkeletonBone sLSkeletonBone107 = new SLSkeletonBone(SLSkeletonBoneID.mWing3Right, new LLVector3(-0.181f, -0.183f, 0.0f), new LLVector3(-0.181f, -0.183f, 0.0f), new SLSkeletonBone[]{sLSkeletonBone105, sLSkeletonBone106}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWing3Right, sLSkeletonBone107);
-        SLSkeletonBone sLSkeletonBone108 = new SLSkeletonBone(SLSkeletonBoneID.mWing2Right, new LLVector3(-0.168f, -0.169f, 0.067f), new LLVector3(-0.168f, -0.169f, 0.067f), new SLSkeletonBone[]{sLSkeletonBone107}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWing2Right, sLSkeletonBone108);
-        SLSkeletonBone sLSkeletonBone109 = new SLSkeletonBone(SLSkeletonBoneID.mWing1Right, new LLVector3(-0.099f, -0.105f, 0.181f), new LLVector3(-0.099f, -0.105f, 0.181f), new SLSkeletonBone[]{sLSkeletonBone108}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWing1Right, sLSkeletonBone109);
-        SLSkeletonBone sLSkeletonBone110 = new SLSkeletonBone(SLSkeletonBoneID.mWingsRoot, new LLVector3(-0.014f, 0.0f, 0.0f), new LLVector3(-0.014f, 0.0f, 0.0f), new SLSkeletonBone[]{sLSkeletonBone104, sLSkeletonBone109}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mWingsRoot, sLSkeletonBone110);
-        SLSkeletonBone sLSkeletonBone111 = new SLSkeletonBone(SLSkeletonBoneID.CHEST, new LLVector3(0.028f, 0.0f, 0.07f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone111.deform(new LLVector3(), new LLVector3(0.11f, 0.15f, 0.2f));
-        this.bones.put(SLSkeletonBoneID.CHEST, sLSkeletonBone111);
-        SLSkeletonBone sLSkeletonBone112 = new SLSkeletonBone(SLSkeletonBoneID.LEFT_PEC, new LLVector3(0.119f, 0.082f, 0.042f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone112.deform(new LLVector3(), new LLVector3(0.05f, 0.05f, 0.05f));
-        this.bones.put(SLSkeletonBoneID.LEFT_PEC, sLSkeletonBone112);
-        SLSkeletonBone sLSkeletonBone113 = new SLSkeletonBone(SLSkeletonBoneID.RIGHT_PEC, new LLVector3(0.119f, -0.082f, 0.042f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone113.deform(new LLVector3(), new LLVector3(0.05f, 0.05f, 0.05f));
-        this.bones.put(SLSkeletonBoneID.RIGHT_PEC, sLSkeletonBone113);
-        SLSkeletonBone sLSkeletonBone114 = new SLSkeletonBone(SLSkeletonBoneID.UPPER_BACK, new LLVector3(0.0f, 0.0f, 0.017f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone114.deform(new LLVector3(), new LLVector3(0.09f, 0.13f, 0.15f));
-        this.bones.put(SLSkeletonBoneID.UPPER_BACK, sLSkeletonBone114);
-        SLSkeletonBone sLSkeletonBone115 = new SLSkeletonBone(SLSkeletonBoneID.mChest, new LLVector3(-0.015f, 0.0f, 0.205f), new LLVector3(-0.015368f, 0.0f, 0.204877f), new SLSkeletonBone[]{sLSkeletonBone53, sLSkeletonBone76, sLSkeletonBone99, sLSkeletonBone110}, new SLSkeletonBone[]{sLSkeletonBone111, sLSkeletonBone112, sLSkeletonBone113, sLSkeletonBone114});
-        this.bones.put(SLSkeletonBoneID.mChest, sLSkeletonBone115);
-        SLSkeletonBone sLSkeletonBone116 = new SLSkeletonBone(SLSkeletonBoneID.mSpine4, new LLVector3(0.015f, 0.0f, -0.205f), new LLVector3(0.015368f, 0.0f, -0.204877f), new SLSkeletonBone[]{sLSkeletonBone115}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mSpine4, sLSkeletonBone116);
-        SLSkeletonBone sLSkeletonBone117 = new SLSkeletonBone(SLSkeletonBoneID.mSpine3, new LLVector3(-0.015f, 0.0f, 0.205f), new LLVector3(-0.015368f, 0.0f, 0.204877f), new SLSkeletonBone[]{sLSkeletonBone116}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mSpine3, sLSkeletonBone117);
-        SLSkeletonBone sLSkeletonBone118 = new SLSkeletonBone(SLSkeletonBoneID.BELLY, new LLVector3(0.028f, 0.0f, 0.04f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone118.deform(new LLVector3(), new LLVector3(0.09f, 0.13f, 0.15f));
-        this.bones.put(SLSkeletonBoneID.BELLY, sLSkeletonBone118);
-        SLSkeletonBone sLSkeletonBone119 = new SLSkeletonBone(SLSkeletonBoneID.LEFT_HANDLE, new LLVector3(0.0f, 0.1f, 0.058f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone119.deform(new LLVector3(), new LLVector3(0.05f, 0.05f, 0.05f));
-        this.bones.put(SLSkeletonBoneID.LEFT_HANDLE, sLSkeletonBone119);
-        SLSkeletonBone sLSkeletonBone120 = new SLSkeletonBone(SLSkeletonBoneID.RIGHT_HANDLE, new LLVector3(0.0f, -0.1f, 0.058f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone120.deform(new LLVector3(), new LLVector3(0.05f, 0.05f, 0.05f));
-        this.bones.put(SLSkeletonBoneID.RIGHT_HANDLE, sLSkeletonBone120);
-        SLSkeletonBone sLSkeletonBone121 = new SLSkeletonBone(SLSkeletonBoneID.LOWER_BACK, new LLVector3(0.0f, 0.0f, 0.023f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone121.deform(new LLVector3(), new LLVector3(0.09f, 0.13f, 0.15f));
-        this.bones.put(SLSkeletonBoneID.LOWER_BACK, sLSkeletonBone121);
-        SLSkeletonBone sLSkeletonBone122 = new SLSkeletonBone(SLSkeletonBoneID.mTorso, new LLVector3(0.0f, 0.0f, 0.084f), new LLVector3(0.0f, 0.0f, 0.084073f), new SLSkeletonBone[]{sLSkeletonBone117}, new SLSkeletonBone[]{sLSkeletonBone118, sLSkeletonBone119, sLSkeletonBone120, sLSkeletonBone121});
-        this.bones.put(SLSkeletonBoneID.mTorso, sLSkeletonBone122);
-        SLSkeletonBone sLSkeletonBone123 = new SLSkeletonBone(SLSkeletonBoneID.mSpine2, new LLVector3(0.0f, 0.0f, -0.084f), new LLVector3(0.0f, 0.0f, -0.084073f), new SLSkeletonBone[]{sLSkeletonBone122}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mSpine2, sLSkeletonBone123);
-        SLSkeletonBone sLSkeletonBone124 = new SLSkeletonBone(SLSkeletonBoneID.mSpine1, new LLVector3(0.0f, 0.0f, 0.084f), new LLVector3(0.0f, 0.0f, 0.084073f), new SLSkeletonBone[]{sLSkeletonBone123}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mSpine1, sLSkeletonBone124);
-        SLSkeletonBone sLSkeletonBone125 = new SLSkeletonBone(SLSkeletonBoneID.mToeRight, new LLVector3(0.109f, 0.0f, 0.0f), new LLVector3(0.105399f, -0.010408f, -1.04E-4f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mToeRight, sLSkeletonBone125);
-        SLSkeletonBone sLSkeletonBone126 = new SLSkeletonBone(SLSkeletonBoneID.mFootRight, new LLVector3(0.112f, -0.0f, -0.061f), new LLVector3(0.111956f, -0.0f, -0.060637f), new SLSkeletonBone[]{sLSkeletonBone125}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFootRight, sLSkeletonBone126);
-        SLSkeletonBone sLSkeletonBone127 = new SLSkeletonBone(SLSkeletonBoneID.R_FOOT, new LLVector3(0.077f, 0.0f, -0.041f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone127.deform(new LLVector3(), new LLVector3(0.13f, 0.05f, 0.05f));
-        this.bones.put(SLSkeletonBoneID.R_FOOT, sLSkeletonBone127);
-        SLSkeletonBone sLSkeletonBone128 = new SLSkeletonBone(SLSkeletonBoneID.mAnkleRight, new LLVector3(-0.029f, 0.0f, -0.468f), new LLVector3(-0.028869f, 0.0f, -0.468494f), new SLSkeletonBone[]{sLSkeletonBone126}, new SLSkeletonBone[]{sLSkeletonBone127});
-        this.bones.put(SLSkeletonBoneID.mAnkleRight, sLSkeletonBone128);
-        SLSkeletonBone sLSkeletonBone129 = new SLSkeletonBone(SLSkeletonBoneID.R_LOWER_LEG, new LLVector3(-0.02f, 0.0f, -0.2f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone129.deform(new LLVector3(), new LLVector3(0.06f, 0.06f, 0.25f));
-        this.bones.put(SLSkeletonBoneID.R_LOWER_LEG, sLSkeletonBone129);
-        SLSkeletonBone sLSkeletonBone130 = new SLSkeletonBone(SLSkeletonBoneID.mKneeRight, new LLVector3(-0.001f, 0.049f, -0.491f), new LLVector3(-7.8E-4f, 0.048635f, -0.490922f), new SLSkeletonBone[]{sLSkeletonBone128}, new SLSkeletonBone[]{sLSkeletonBone129});
-        this.bones.put(SLSkeletonBoneID.mKneeRight, sLSkeletonBone130);
-        SLSkeletonBone sLSkeletonBone131 = new SLSkeletonBone(SLSkeletonBoneID.R_UPPER_LEG, new LLVector3(-0.02f, 0.05f, -0.22f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone131.deform(new LLVector3(), new LLVector3(0.09f, 0.09f, 0.32f));
-        this.bones.put(SLSkeletonBoneID.R_UPPER_LEG, sLSkeletonBone131);
-        SLSkeletonBone sLSkeletonBone132 = new SLSkeletonBone(SLSkeletonBoneID.mHipRight, new LLVector3(0.034f, -0.129f, -0.041f), new LLVector3(0.03362f, -0.128806f, -0.041086f), new SLSkeletonBone[]{sLSkeletonBone130}, new SLSkeletonBone[]{sLSkeletonBone131});
-        this.bones.put(SLSkeletonBoneID.mHipRight, sLSkeletonBone132);
-        SLSkeletonBone sLSkeletonBone133 = new SLSkeletonBone(SLSkeletonBoneID.mToeLeft, new LLVector3(0.109f, 0.0f, 0.0f), new LLVector3(0.105387f, 0.00827f, 8.71E-4f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mToeLeft, sLSkeletonBone133);
-        SLSkeletonBone sLSkeletonBone134 = new SLSkeletonBone(SLSkeletonBoneID.mFootLeft, new LLVector3(0.112f, -0.0f, -0.061f), new LLVector3(0.111956f, -0.0f, -0.06062f), new SLSkeletonBone[]{sLSkeletonBone133}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mFootLeft, sLSkeletonBone134);
-        SLSkeletonBone sLSkeletonBone135 = new SLSkeletonBone(SLSkeletonBoneID.L_FOOT, new LLVector3(0.077f, 0.0f, -0.041f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone135.deform(new LLVector3(), new LLVector3(0.13f, 0.05f, 0.05f));
-        this.bones.put(SLSkeletonBoneID.L_FOOT, sLSkeletonBone135);
-        SLSkeletonBone sLSkeletonBone136 = new SLSkeletonBone(SLSkeletonBoneID.mAnkleLeft, new LLVector3(-0.029f, 0.001f, -0.468f), new LLVector3(-0.028887f, 0.001378f, -0.468449f), new SLSkeletonBone[]{sLSkeletonBone134}, new SLSkeletonBone[]{sLSkeletonBone135});
-        this.bones.put(SLSkeletonBoneID.mAnkleLeft, sLSkeletonBone136);
-        SLSkeletonBone sLSkeletonBone137 = new SLSkeletonBone(SLSkeletonBoneID.L_LOWER_LEG, new LLVector3(-0.02f, 0.0f, -0.2f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone137.deform(new LLVector3(), new LLVector3(0.06f, 0.06f, 0.25f));
-        this.bones.put(SLSkeletonBoneID.L_LOWER_LEG, sLSkeletonBone137);
-        SLSkeletonBone sLSkeletonBone138 = new SLSkeletonBone(SLSkeletonBoneID.mKneeLeft, new LLVector3(-0.001f, -0.046f, -0.491f), new LLVector3(-8.87E-4f, -0.045568f, -0.491053f), new SLSkeletonBone[]{sLSkeletonBone136}, new SLSkeletonBone[]{sLSkeletonBone137});
-        this.bones.put(SLSkeletonBoneID.mKneeLeft, sLSkeletonBone138);
-        SLSkeletonBone sLSkeletonBone139 = new SLSkeletonBone(SLSkeletonBoneID.L_UPPER_LEG, new LLVector3(-0.02f, -0.05f, -0.22f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone139.deform(new LLVector3(), new LLVector3(0.09f, 0.09f, 0.32f));
-        this.bones.put(SLSkeletonBoneID.L_UPPER_LEG, sLSkeletonBone139);
-        SLSkeletonBone sLSkeletonBone140 = new SLSkeletonBone(SLSkeletonBoneID.mHipLeft, new LLVector3(0.034f, 0.127f, -0.041f), new LLVector3(0.033757f, 0.126765f, -0.040998f), new SLSkeletonBone[]{sLSkeletonBone138}, new SLSkeletonBone[]{sLSkeletonBone139});
-        this.bones.put(SLSkeletonBoneID.mHipLeft, sLSkeletonBone140);
-        SLSkeletonBone sLSkeletonBone141 = new SLSkeletonBone(SLSkeletonBoneID.mTail6, new LLVector3(-0.094f, 0.0f, 0.0f), new LLVector3(-0.094f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mTail6, sLSkeletonBone141);
-        SLSkeletonBone sLSkeletonBone142 = new SLSkeletonBone(SLSkeletonBoneID.mTail5, new LLVector3(-0.112f, 0.0f, 0.0f), new LLVector3(-0.112f, 0.0f, 0.0f), new SLSkeletonBone[]{sLSkeletonBone141}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mTail5, sLSkeletonBone142);
-        SLSkeletonBone sLSkeletonBone143 = new SLSkeletonBone(SLSkeletonBoneID.mTail4, new LLVector3(-0.142f, 0.0f, 0.0f), new LLVector3(-0.142f, 0.0f, 0.0f), new SLSkeletonBone[]{sLSkeletonBone142}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mTail4, sLSkeletonBone143);
-        SLSkeletonBone sLSkeletonBone144 = new SLSkeletonBone(SLSkeletonBoneID.mTail3, new LLVector3(-0.168f, 0.0f, 0.0f), new LLVector3(-0.168f, 0.0f, 0.0f), new SLSkeletonBone[]{sLSkeletonBone143}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mTail3, sLSkeletonBone144);
-        SLSkeletonBone sLSkeletonBone145 = new SLSkeletonBone(SLSkeletonBoneID.mTail2, new LLVector3(-0.197f, 0.0f, 0.0f), new LLVector3(-0.197f, 0.0f, 0.0f), new SLSkeletonBone[]{sLSkeletonBone144}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mTail2, sLSkeletonBone145);
-        SLSkeletonBone sLSkeletonBone146 = new SLSkeletonBone(SLSkeletonBoneID.mTail1, new LLVector3(-0.116f, 0.0f, 0.047f), new LLVector3(-0.116f, 0.0f, 0.047f), new SLSkeletonBone[]{sLSkeletonBone145}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mTail1, sLSkeletonBone146);
-        SLSkeletonBone sLSkeletonBone147 = new SLSkeletonBone(SLSkeletonBoneID.mGroin, new LLVector3(0.064f, 0.0f, -0.097f), new LLVector3(0.064f, 0.0f, -0.097f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mGroin, sLSkeletonBone147);
-        SLSkeletonBone sLSkeletonBone148 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb4Left, new LLVector3(0.112f, 0.0f, -0.061f), new LLVector3(0.112f, 0.0f, -0.061f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHindLimb4Left, sLSkeletonBone148);
-        SLSkeletonBone sLSkeletonBone149 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb3Left, new LLVector3(-0.03f, -0.003f, -0.468f), new LLVector3(-0.03f, -0.003f, -0.468f), new SLSkeletonBone[]{sLSkeletonBone148}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHindLimb3Left, sLSkeletonBone149);
-        SLSkeletonBone sLSkeletonBone150 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb2Left, new LLVector3(0.002f, -0.046f, -0.491f), new LLVector3(0.002f, -0.046f, -0.491f), new SLSkeletonBone[]{sLSkeletonBone149}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHindLimb2Left, sLSkeletonBone150);
-        SLSkeletonBone sLSkeletonBone151 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb1Left, new LLVector3(-0.204f, 0.129f, -0.125f), new LLVector3(-0.204f, 0.129f, -0.125f), new SLSkeletonBone[]{sLSkeletonBone150}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHindLimb1Left, sLSkeletonBone151);
-        SLSkeletonBone sLSkeletonBone152 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb4Right, new LLVector3(0.112f, 0.0f, -0.061f), new LLVector3(0.112f, 0.0f, -0.061f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHindLimb4Right, sLSkeletonBone152);
-        SLSkeletonBone sLSkeletonBone153 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb3Right, new LLVector3(-0.03f, 0.003f, -0.468f), new LLVector3(-0.03f, 0.003f, -0.468f), new SLSkeletonBone[]{sLSkeletonBone152}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHindLimb3Right, sLSkeletonBone153);
-        SLSkeletonBone sLSkeletonBone154 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb2Right, new LLVector3(0.002f, 0.046f, -0.491f), new LLVector3(0.002f, 0.046f, -0.491f), new SLSkeletonBone[]{sLSkeletonBone153}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHindLimb2Right, sLSkeletonBone154);
-        SLSkeletonBone sLSkeletonBone155 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb1Right, new LLVector3(-0.204f, -0.129f, -0.125f), new LLVector3(-0.204f, -0.129f, -0.125f), new SLSkeletonBone[]{sLSkeletonBone154}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHindLimb1Right, sLSkeletonBone155);
-        SLSkeletonBone sLSkeletonBone156 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimbsRoot, new LLVector3(-0.2f, 0.0f, 0.084f), new LLVector3(-0.2f, 0.0f, 0.084f), new SLSkeletonBone[]{sLSkeletonBone151, sLSkeletonBone155}, (SLSkeletonBone[]) null);
-        this.bones.put(SLSkeletonBoneID.mHindLimbsRoot, sLSkeletonBone156);
-        SLSkeletonBone sLSkeletonBone157 = new SLSkeletonBone(SLSkeletonBoneID.PELVIS, new LLVector3(-0.01f, 0.0f, -0.02f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone157.deform(new LLVector3(), new LLVector3(0.12f, 0.16f, 0.17f));
-        this.bones.put(SLSkeletonBoneID.PELVIS, sLSkeletonBone157);
-        SLSkeletonBone sLSkeletonBone158 = new SLSkeletonBone(SLSkeletonBoneID.BUTT, new LLVector3(-0.06f, 0.0f, -0.1f), new LLVector3(0.0f, 0.0f, 0.0f), (SLSkeletonBone[]) null, (SLSkeletonBone[]) null);
-        sLSkeletonBone158.deform(new LLVector3(), new LLVector3(0.1f, 0.1f, 0.1f));
-        this.bones.put(SLSkeletonBoneID.BUTT, sLSkeletonBone158);
-        SLSkeletonBone sLSkeletonBone159 = new SLSkeletonBone(SLSkeletonBoneID.mPelvis, new LLVector3(0.0f, 0.0f, 1.067f), new LLVector3(0.0f, 0.0f, 1.067015f), new SLSkeletonBone[]{sLSkeletonBone124, sLSkeletonBone132, sLSkeletonBone140, sLSkeletonBone146, sLSkeletonBone147, sLSkeletonBone156}, new SLSkeletonBone[]{sLSkeletonBone157, sLSkeletonBone158});
-        this.rootBone = sLSkeletonBone159;
-        this.bones.put(SLSkeletonBoneID.mPelvis, sLSkeletonBone159);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.avatar:
+//            SLSkeleton, SLSkeletonBone, SLSkeletonBoneID
+
+public class SLDefaultSkeleton extends SLSkeleton
+{
+
+    protected SLDefaultSkeleton()
+    {
+        SLSkeletonBone slskeletonbone = new SLSkeletonBone(SLSkeletonBoneID.mSkull, new LLVector3(0.0F, 0.0F, 0.079F), new LLVector3(0.0F, 0.0F, 0.079F), null, null);
+        bones.put(SLSkeletonBoneID.mSkull, slskeletonbone);
+        SLSkeletonBone slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mEyeRight, new LLVector3(0.098F, -0.036F, 0.079F), new LLVector3(0.098466F, -0.036F, 0.079F), null, null);
+        bones.put(SLSkeletonBoneID.mEyeRight, slskeletonbone1);
+        SLSkeletonBone slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mEyeLeft, new LLVector3(0.098F, 0.036F, 0.079F), new LLVector3(0.098461F, 0.036F, 0.079F), null, null);
+        bones.put(SLSkeletonBoneID.mEyeLeft, slskeletonbone2);
+        SLSkeletonBone slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeAltRight, new LLVector3(0.073F, -0.036F, 0.034F), new LLVector3(0.073466F, -0.036F, 0.03393F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyeAltRight, slskeletonbone3);
+        SLSkeletonBone slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeAltLeft, new LLVector3(0.073F, 0.036F, 0.034F), new LLVector3(0.073461F, 0.036F, 0.03393F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyeAltLeft, slskeletonbone4);
+        SLSkeletonBone slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mFaceForeheadLeft, new LLVector3(0.061F, 0.035F, 0.083F), new LLVector3(0.061F, 0.035F, 0.083F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceForeheadLeft, slskeletonbone5);
+        SLSkeletonBone slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.mFaceForeheadRight, new LLVector3(0.061F, -0.035F, 0.083F), new LLVector3(0.061F, -0.035F, 0.083F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceForeheadRight, slskeletonbone6);
+        SLSkeletonBone slskeletonbone7 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowOuterLeft, new LLVector3(0.064F, 0.051F, 0.048F), new LLVector3(0.064F, 0.051F, 0.048F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyebrowOuterLeft, slskeletonbone7);
+        SLSkeletonBone slskeletonbone8 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowCenterLeft, new LLVector3(0.07F, 0.043F, 0.056F), new LLVector3(0.07F, 0.043F, 0.056F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyebrowCenterLeft, slskeletonbone8);
+        SLSkeletonBone slskeletonbone9 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowInnerLeft, new LLVector3(0.075F, 0.022F, 0.051F), new LLVector3(0.075F, 0.022F, 0.051F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyebrowInnerLeft, slskeletonbone9);
+        SLSkeletonBone slskeletonbone10 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowOuterRight, new LLVector3(0.064F, -0.051F, 0.048F), new LLVector3(0.064F, -0.051F, 0.048F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyebrowOuterRight, slskeletonbone10);
+        SLSkeletonBone slskeletonbone11 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowCenterRight, new LLVector3(0.07F, -0.043F, 0.056F), new LLVector3(0.07F, -0.043F, 0.056F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyebrowCenterRight, slskeletonbone11);
+        SLSkeletonBone slskeletonbone12 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyebrowInnerRight, new LLVector3(0.075F, -0.022F, 0.051F), new LLVector3(0.075F, -0.022F, 0.051F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyebrowInnerRight, slskeletonbone12);
+        SLSkeletonBone slskeletonbone13 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeLidUpperLeft, new LLVector3(0.073F, 0.036F, 0.034F), new LLVector3(0.073F, 0.036F, 0.034F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyeLidUpperLeft, slskeletonbone13);
+        SLSkeletonBone slskeletonbone14 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeLidLowerLeft, new LLVector3(0.073F, 0.036F, 0.034F), new LLVector3(0.073F, 0.036F, 0.034F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyeLidLowerLeft, slskeletonbone14);
+        SLSkeletonBone slskeletonbone15 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeLidUpperRight, new LLVector3(0.073F, -0.036F, 0.034F), new LLVector3(0.073F, -0.036F, 0.034F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyeLidUpperRight, slskeletonbone15);
+        SLSkeletonBone slskeletonbone16 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyeLidLowerRight, new LLVector3(0.073F, -0.036F, 0.034F), new LLVector3(0.073F, -0.036F, 0.034F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyeLidLowerRight, slskeletonbone16);
+        SLSkeletonBone slskeletonbone17 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEar2Left, new LLVector3(-0.019F, 0.018F, 0.025F), new LLVector3(-0.019F, 0.018F, 0.025F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEar2Left, slskeletonbone17);
+        slskeletonbone17 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEar1Left, new LLVector3(0.0F, 0.08F, 0.002F), new LLVector3(0.0F, 0.08F, 0.002F), new SLSkeletonBone[] {
+            slskeletonbone17
+        }, null);
+        bones.put(SLSkeletonBoneID.mFaceEar1Left, slskeletonbone17);
+        SLSkeletonBone slskeletonbone18 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEar2Right, new LLVector3(-0.019F, -0.018F, 0.025F), new LLVector3(-0.019F, -0.018F, 0.025F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEar2Right, slskeletonbone18);
+        slskeletonbone18 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEar1Right, new LLVector3(0.0F, -0.08F, 0.002F), new LLVector3(0.0F, -0.08F, 0.002F), new SLSkeletonBone[] {
+            slskeletonbone18
+        }, null);
+        bones.put(SLSkeletonBoneID.mFaceEar1Right, slskeletonbone18);
+        SLSkeletonBone slskeletonbone19 = new SLSkeletonBone(SLSkeletonBoneID.mFaceNoseLeft, new LLVector3(0.086F, 0.015F, -0.004F), new LLVector3(0.086F, 0.015F, -0.004F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceNoseLeft, slskeletonbone19);
+        SLSkeletonBone slskeletonbone20 = new SLSkeletonBone(SLSkeletonBoneID.mFaceNoseCenter, new LLVector3(0.102F, 0.0F, 0.0F), new LLVector3(0.102F, 0.0F, 0.0F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceNoseCenter, slskeletonbone20);
+        SLSkeletonBone slskeletonbone21 = new SLSkeletonBone(SLSkeletonBoneID.mFaceNoseRight, new LLVector3(0.086F, -0.015F, -0.004F), new LLVector3(0.086F, -0.015F, -0.004F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceNoseRight, slskeletonbone21);
+        SLSkeletonBone slskeletonbone22 = new SLSkeletonBone(SLSkeletonBoneID.mFaceCheekLowerLeft, new LLVector3(0.05F, 0.034F, -0.031F), new LLVector3(0.05F, 0.034F, -0.031F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceCheekLowerLeft, slskeletonbone22);
+        SLSkeletonBone slskeletonbone23 = new SLSkeletonBone(SLSkeletonBoneID.mFaceCheekUpperLeft, new LLVector3(0.07F, 0.034F, -0.005F), new LLVector3(0.07F, 0.034F, -0.005F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceCheekUpperLeft, slskeletonbone23);
+        SLSkeletonBone slskeletonbone24 = new SLSkeletonBone(SLSkeletonBoneID.mFaceCheekLowerRight, new LLVector3(0.05F, -0.034F, -0.031F), new LLVector3(0.05F, -0.034F, -0.031F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceCheekLowerRight, slskeletonbone24);
+        SLSkeletonBone slskeletonbone25 = new SLSkeletonBone(SLSkeletonBoneID.mFaceCheekUpperRight, new LLVector3(0.07F, -0.034F, -0.005F), new LLVector3(0.07F, -0.034F, -0.005F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceCheekUpperRight, slskeletonbone25);
+        SLSkeletonBone slskeletonbone26 = new SLSkeletonBone(SLSkeletonBoneID.mFaceChin, new LLVector3(0.074F, 0.0F, -0.054F), new LLVector3(0.074F, 0.0F, -0.054F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceChin, slskeletonbone26);
+        SLSkeletonBone slskeletonbone27 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipLowerLeft, new LLVector3(0.045F, 0.0F, 0.0F), new LLVector3(0.045F, 0.0F, 0.0F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceLipLowerLeft, slskeletonbone27);
+        SLSkeletonBone slskeletonbone28 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipLowerRight, new LLVector3(0.045F, 0.0F, 0.0F), new LLVector3(0.045F, 0.0F, 0.0F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceLipLowerRight, slskeletonbone28);
+        SLSkeletonBone slskeletonbone29 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipLowerCenter, new LLVector3(0.045F, 0.0F, 0.0F), new LLVector3(0.045F, 0.0F, 0.0F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceLipLowerCenter, slskeletonbone29);
+        SLSkeletonBone slskeletonbone30 = new SLSkeletonBone(SLSkeletonBoneID.mFaceTongueTip, new LLVector3(0.022F, 0.0F, 0.007F), new LLVector3(0.022F, 0.0F, 0.007F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceTongueTip, slskeletonbone30);
+        slskeletonbone30 = new SLSkeletonBone(SLSkeletonBoneID.mFaceTongueBase, new LLVector3(0.039F, 0.0F, 0.005F), new LLVector3(0.039F, 0.0F, 0.005F), new SLSkeletonBone[] {
+            slskeletonbone30
+        }, null);
+        bones.put(SLSkeletonBoneID.mFaceTongueBase, slskeletonbone30);
+        slskeletonbone27 = new SLSkeletonBone(SLSkeletonBoneID.mFaceTeethLower, new LLVector3(0.021F, 0.0F, -0.039F), new LLVector3(0.021F, 0.0F, -0.039F), new SLSkeletonBone[] {
+            slskeletonbone27, slskeletonbone28, slskeletonbone29, slskeletonbone30
+        }, null);
+        bones.put(SLSkeletonBoneID.mFaceTeethLower, slskeletonbone27);
+        slskeletonbone26 = new SLSkeletonBone(SLSkeletonBoneID.mFaceJaw, new LLVector3(-0.001F, 0.0F, -0.015F), new LLVector3(-0.001F, 0.0F, -0.015F), new SLSkeletonBone[] {
+            slskeletonbone26, slskeletonbone27
+        }, null);
+        bones.put(SLSkeletonBoneID.mFaceJaw, slskeletonbone26);
+        slskeletonbone27 = new SLSkeletonBone(SLSkeletonBoneID.mFaceJawShaper, new LLVector3(0.0F, 0.0F, 0.0F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceJawShaper, slskeletonbone27);
+        slskeletonbone28 = new SLSkeletonBone(SLSkeletonBoneID.mFaceForeheadCenter, new LLVector3(0.069F, 0.0F, 0.065F), new LLVector3(0.069F, 0.0F, 0.065F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceForeheadCenter, slskeletonbone28);
+        slskeletonbone29 = new SLSkeletonBone(SLSkeletonBoneID.mFaceNoseBase, new LLVector3(0.094F, 0.0F, -0.016F), new LLVector3(0.094F, 0.0F, -0.016F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceNoseBase, slskeletonbone29);
+        slskeletonbone30 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipUpperLeft, new LLVector3(0.045F, 0.0F, -0.003F), new LLVector3(0.045F, 0.0F, -0.003F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceLipUpperLeft, slskeletonbone30);
+        SLSkeletonBone slskeletonbone31 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipUpperRight, new LLVector3(0.045F, 0.0F, -0.003F), new LLVector3(0.045F, 0.0F, -0.003F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceLipUpperRight, slskeletonbone31);
+        SLSkeletonBone slskeletonbone32 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipCornerLeft, new LLVector3(0.028F, -0.019F, -0.01F), new LLVector3(0.028F, -0.019F, -0.01F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceLipCornerLeft, slskeletonbone32);
+        SLSkeletonBone slskeletonbone33 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipCornerRight, new LLVector3(0.028F, 0.019F, -0.01F), new LLVector3(0.028F, 0.019F, -0.01F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceLipCornerRight, slskeletonbone33);
+        SLSkeletonBone slskeletonbone34 = new SLSkeletonBone(SLSkeletonBoneID.mFaceLipUpperCenter, new LLVector3(0.045F, 0.0F, -0.003F), new LLVector3(0.045F, 0.0F, -0.003F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceLipUpperCenter, slskeletonbone34);
+        slskeletonbone30 = new SLSkeletonBone(SLSkeletonBoneID.mFaceTeethUpper, new LLVector3(0.02F, 0.0F, -0.03F), new LLVector3(0.02F, 0.0F, -0.03F), new SLSkeletonBone[] {
+            slskeletonbone30, slskeletonbone31, slskeletonbone32, slskeletonbone33, slskeletonbone34
+        }, null);
+        bones.put(SLSkeletonBoneID.mFaceTeethUpper, slskeletonbone30);
+        slskeletonbone31 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyecornerInnerLeft, new LLVector3(0.075F, 0.017F, 0.032F), new LLVector3(0.075F, 0.017F, 0.032F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyecornerInnerLeft, slskeletonbone31);
+        slskeletonbone32 = new SLSkeletonBone(SLSkeletonBoneID.mFaceEyecornerInnerRight, new LLVector3(0.075F, -0.017F, 0.032F), new LLVector3(0.075F, -0.017F, 0.032F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceEyecornerInnerRight, slskeletonbone32);
+        slskeletonbone33 = new SLSkeletonBone(SLSkeletonBoneID.mFaceNoseBridge, new LLVector3(0.091F, 0.0F, 0.02F), new LLVector3(0.091F, 0.0F, 0.02F), null, null);
+        bones.put(SLSkeletonBoneID.mFaceNoseBridge, slskeletonbone33);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mFaceRoot, new LLVector3(0.025F, 0.0F, 0.045F), new LLVector3(0.025F, 0.0F, 0.045F), new SLSkeletonBone[] {
+            slskeletonbone3, slskeletonbone4, slskeletonbone5, slskeletonbone6, slskeletonbone7, slskeletonbone8, slskeletonbone9, slskeletonbone10, slskeletonbone11, slskeletonbone12, 
+            slskeletonbone13, slskeletonbone14, slskeletonbone15, slskeletonbone16, slskeletonbone17, slskeletonbone18, slskeletonbone19, slskeletonbone20, slskeletonbone21, slskeletonbone22, 
+            slskeletonbone23, slskeletonbone24, slskeletonbone25, slskeletonbone26, slskeletonbone27, slskeletonbone28, slskeletonbone29, slskeletonbone30, slskeletonbone31, slskeletonbone32, 
+            slskeletonbone33
+        }, null);
+        bones.put(SLSkeletonBoneID.mFaceRoot, slskeletonbone3);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.HEAD, new LLVector3(0.02F, 0.0F, 0.07F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone4.deform(new LLVector3(), new LLVector3(0.11F, 0.09F, 0.12F));
+        bones.put(SLSkeletonBoneID.HEAD, slskeletonbone4);
+        slskeletonbone = new SLSkeletonBone(SLSkeletonBoneID.mHead, new LLVector3(0.0F, 0.0F, 0.076F), new LLVector3(0.0F, 0.0F, 0.07563F), new SLSkeletonBone[] {
+            slskeletonbone, slskeletonbone1, slskeletonbone2, slskeletonbone3
+        }, new SLSkeletonBone[] {
+            slskeletonbone4
+        });
+        bones.put(SLSkeletonBoneID.mHead, slskeletonbone);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.NECK, new LLVector3(0.0F, 0.0F, 0.02F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone1.deform(new LLVector3(), new LLVector3(0.05F, 0.06F, 0.08F));
+        bones.put(SLSkeletonBoneID.NECK, slskeletonbone1);
+        slskeletonbone = new SLSkeletonBone(SLSkeletonBoneID.mNeck, new LLVector3(-0.01F, 0.0F, 0.251F), new LLVector3(-0.009507F, 0.0F, 0.251108F), new SLSkeletonBone[] {
+            slskeletonbone
+        }, new SLSkeletonBone[] {
+            slskeletonbone1
+        });
+        bones.put(SLSkeletonBoneID.mNeck, slskeletonbone);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle3Left, new LLVector3(-0.001F, 0.049F, -0.008F), new LLVector3(-0.001F, 0.049F, -0.008F), null, null);
+        bones.put(SLSkeletonBoneID.mHandMiddle3Left, slskeletonbone1);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle2Left, new LLVector3(-0.001F, 0.04F, -0.006F), new LLVector3(-0.001F, 0.04F, -0.006F), new SLSkeletonBone[] {
+            slskeletonbone1
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandMiddle2Left, slskeletonbone1);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle1Left, new LLVector3(0.013F, 0.101F, 0.015F), new LLVector3(0.013F, 0.101F, 0.015F), new SLSkeletonBone[] {
+            slskeletonbone1
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandMiddle1Left, slskeletonbone1);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex3Left, new LLVector3(0.014F, 0.032F, -0.006F), new LLVector3(0.014F, 0.032F, -0.006F), null, null);
+        bones.put(SLSkeletonBoneID.mHandIndex3Left, slskeletonbone2);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex2Left, new LLVector3(0.017F, 0.036F, -0.006F), new LLVector3(0.017F, 0.036F, -0.006F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandIndex2Left, slskeletonbone2);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex1Left, new LLVector3(0.038F, 0.097F, 0.015F), new LLVector3(0.038F, 0.097F, 0.015F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandIndex1Left, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing3Left, new LLVector3(-0.013F, 0.04F, -0.009F), new LLVector3(-0.013F, 0.04F, -0.009F), null, null);
+        bones.put(SLSkeletonBoneID.mHandRing3Left, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing2Left, new LLVector3(-0.013F, 0.038F, -0.008F), new LLVector3(-0.013F, 0.038F, -0.008F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandRing2Left, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing1Left, new LLVector3(-0.01F, 0.099F, 0.009F), new LLVector3(-0.01F, 0.099F, 0.009F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandRing1Left, slskeletonbone3);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky3Left, new LLVector3(-0.015F, 0.018F, -0.004F), new LLVector3(-0.015F, 0.018F, -0.004F), null, null);
+        bones.put(SLSkeletonBoneID.mHandPinky3Left, slskeletonbone4);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky2Left, new LLVector3(-0.024F, 0.025F, -0.006F), new LLVector3(-0.024F, 0.025F, -0.006F), new SLSkeletonBone[] {
+            slskeletonbone4
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandPinky2Left, slskeletonbone4);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky1Left, new LLVector3(-0.031F, 0.095F, 0.003F), new LLVector3(-0.031F, 0.095F, 0.003F), new SLSkeletonBone[] {
+            slskeletonbone4
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandPinky1Left, slskeletonbone4);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb3Left, new LLVector3(0.023F, 0.031F, -0.001F), new LLVector3(0.023F, 0.031F, -0.001F), null, null);
+        bones.put(SLSkeletonBoneID.mHandThumb3Left, slskeletonbone5);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb2Left, new LLVector3(0.028F, 0.032F, -0.001F), new LLVector3(0.028F, 0.032F, -0.001F), new SLSkeletonBone[] {
+            slskeletonbone5
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandThumb2Left, slskeletonbone5);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb1Left, new LLVector3(0.031F, 0.026F, 0.004F), new LLVector3(0.031F, 0.026F, 0.004F), new SLSkeletonBone[] {
+            slskeletonbone5
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandThumb1Left, slskeletonbone5);
+        slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.L_HAND, new LLVector3(0.01F, 0.05F, 0.0F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone6.deform(new LLVector3(), new LLVector3(0.05F, 0.08F, 0.03F));
+        bones.put(SLSkeletonBoneID.L_HAND, slskeletonbone6);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mWristLeft, new LLVector3(0.0F, 0.205F, 0.0F), new LLVector3(0.0F, 0.204846F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone1, slskeletonbone2, slskeletonbone3, slskeletonbone4, slskeletonbone5
+        }, new SLSkeletonBone[] {
+            slskeletonbone6
+        });
+        bones.put(SLSkeletonBoneID.mWristLeft, slskeletonbone1);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.L_LOWER_ARM, new LLVector3(0.0F, 0.1F, 0.0F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone2.deform(new LLVector3(), new LLVector3(0.04F, 0.14F, 0.04F));
+        bones.put(SLSkeletonBoneID.L_LOWER_ARM, slskeletonbone2);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mElbowLeft, new LLVector3(0.0F, 0.248F, 0.0F), new LLVector3(0.0F, 0.248F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone1
+        }, new SLSkeletonBone[] {
+            slskeletonbone2
+        });
+        bones.put(SLSkeletonBoneID.mElbowLeft, slskeletonbone1);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.L_UPPER_ARM, new LLVector3(0.0F, 0.12F, 0.01F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone2.deform(new LLVector3(), new LLVector3(0.05F, 0.17F, 0.05F));
+        bones.put(SLSkeletonBoneID.L_UPPER_ARM, slskeletonbone2);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mShoulderLeft, new LLVector3(0.0F, 0.079F, 0.0F), new LLVector3(0.0F, 0.079F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone1
+        }, new SLSkeletonBone[] {
+            slskeletonbone2
+        });
+        bones.put(SLSkeletonBoneID.mShoulderLeft, slskeletonbone1);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.L_CLAVICLE, new LLVector3(0.02F, 0.0F, 0.02F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone2.deform(new LLVector3(), new LLVector3(0.07F, 0.14F, 0.05F));
+        bones.put(SLSkeletonBoneID.L_CLAVICLE, slskeletonbone2);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mCollarLeft, new LLVector3(-0.021F, 0.085F, 0.165F), new LLVector3(-0.020927F, 0.084665F, 0.165396F), new SLSkeletonBone[] {
+            slskeletonbone1
+        }, new SLSkeletonBone[] {
+            slskeletonbone2
+        });
+        bones.put(SLSkeletonBoneID.mCollarLeft, slskeletonbone1);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle3Right, new LLVector3(-0.001F, -0.049F, -0.008F), new LLVector3(-0.001F, -0.049F, -0.008F), null, null);
+        bones.put(SLSkeletonBoneID.mHandMiddle3Right, slskeletonbone2);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle2Right, new LLVector3(-0.001F, -0.04F, -0.006F), new LLVector3(-0.001F, -0.04F, -0.006F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandMiddle2Right, slskeletonbone2);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mHandMiddle1Right, new LLVector3(0.013F, -0.101F, 0.015F), new LLVector3(0.013F, -0.101F, 0.015F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandMiddle1Right, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex3Right, new LLVector3(0.014F, -0.032F, -0.006F), new LLVector3(0.014F, -0.032F, -0.006F), null, null);
+        bones.put(SLSkeletonBoneID.mHandIndex3Right, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex2Right, new LLVector3(0.017F, -0.036F, -0.006F), new LLVector3(0.017F, -0.036F, -0.006F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandIndex2Right, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mHandIndex1Right, new LLVector3(0.038F, -0.097F, 0.015F), new LLVector3(0.038F, -0.097F, 0.015F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandIndex1Right, slskeletonbone3);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing3Right, new LLVector3(-0.013F, -0.04F, -0.009F), new LLVector3(-0.013F, -0.04F, -0.009F), null, null);
+        bones.put(SLSkeletonBoneID.mHandRing3Right, slskeletonbone4);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing2Right, new LLVector3(-0.013F, -0.038F, -0.008F), new LLVector3(-0.013F, -0.038F, -0.008F), new SLSkeletonBone[] {
+            slskeletonbone4
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandRing2Right, slskeletonbone4);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mHandRing1Right, new LLVector3(-0.01F, -0.099F, 0.009F), new LLVector3(-0.01F, -0.099F, 0.009F), new SLSkeletonBone[] {
+            slskeletonbone4
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandRing1Right, slskeletonbone4);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky3Right, new LLVector3(-0.015F, -0.018F, -0.004F), new LLVector3(-0.015F, -0.018F, -0.004F), null, null);
+        bones.put(SLSkeletonBoneID.mHandPinky3Right, slskeletonbone5);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky2Right, new LLVector3(-0.024F, -0.025F, -0.006F), new LLVector3(-0.024F, -0.025F, -0.006F), new SLSkeletonBone[] {
+            slskeletonbone5
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandPinky2Right, slskeletonbone5);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHandPinky1Right, new LLVector3(-0.031F, -0.095F, 0.003F), new LLVector3(-0.031F, -0.095F, 0.003F), new SLSkeletonBone[] {
+            slskeletonbone5
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandPinky1Right, slskeletonbone5);
+        slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb3Right, new LLVector3(0.023F, -0.031F, -0.001F), new LLVector3(0.023F, -0.031F, -0.001F), null, null);
+        bones.put(SLSkeletonBoneID.mHandThumb3Right, slskeletonbone6);
+        slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb2Right, new LLVector3(0.028F, -0.032F, -0.001F), new LLVector3(0.028F, -0.032F, -0.001F), new SLSkeletonBone[] {
+            slskeletonbone6
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandThumb2Right, slskeletonbone6);
+        slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.mHandThumb1Right, new LLVector3(0.031F, -0.026F, 0.004F), new LLVector3(0.031F, -0.026F, 0.004F), new SLSkeletonBone[] {
+            slskeletonbone6
+        }, null);
+        bones.put(SLSkeletonBoneID.mHandThumb1Right, slskeletonbone6);
+        slskeletonbone7 = new SLSkeletonBone(SLSkeletonBoneID.R_HAND, new LLVector3(0.01F, -0.05F, 0.0F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone7.deform(new LLVector3(), new LLVector3(0.05F, 0.08F, 0.03F));
+        bones.put(SLSkeletonBoneID.R_HAND, slskeletonbone7);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mWristRight, new LLVector3(0.0F, -0.205F, 0.0F), new LLVector3(0.0F, -0.205F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone2, slskeletonbone3, slskeletonbone4, slskeletonbone5, slskeletonbone6
+        }, new SLSkeletonBone[] {
+            slskeletonbone7
+        });
+        bones.put(SLSkeletonBoneID.mWristRight, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.R_LOWER_ARM, new LLVector3(0.0F, -0.1F, 0.0F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone3.deform(new LLVector3(), new LLVector3(0.04F, 0.14F, 0.04F));
+        bones.put(SLSkeletonBoneID.R_LOWER_ARM, slskeletonbone3);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mElbowRight, new LLVector3(0.0F, -0.248F, 0.0F), new LLVector3(0.0F, -0.248F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, new SLSkeletonBone[] {
+            slskeletonbone3
+        });
+        bones.put(SLSkeletonBoneID.mElbowRight, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.R_UPPER_ARM, new LLVector3(0.0F, -0.12F, 0.01F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone3.deform(new LLVector3(), new LLVector3(0.05F, 0.17F, 0.05F));
+        bones.put(SLSkeletonBoneID.R_UPPER_ARM, slskeletonbone3);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mShoulderRight, new LLVector3(0.0F, -0.079F, 0.0F), new LLVector3(0.0F, -0.079418F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, new SLSkeletonBone[] {
+            slskeletonbone3
+        });
+        bones.put(SLSkeletonBoneID.mShoulderRight, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.R_CLAVICLE, new LLVector3(0.02F, 0.0F, 0.02F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone3.deform(new LLVector3(), new LLVector3(0.07F, 0.14F, 0.05F));
+        bones.put(SLSkeletonBoneID.R_CLAVICLE, slskeletonbone3);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mCollarRight, new LLVector3(-0.021F, -0.085F, 0.165F), new LLVector3(-0.020927F, -0.085F, 0.165396F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, new SLSkeletonBone[] {
+            slskeletonbone3
+        });
+        bones.put(SLSkeletonBoneID.mCollarRight, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mWing4Left, new LLVector3(-0.171F, 0.173F, 0.0F), new LLVector3(-0.171F, 0.173F, 0.0F), null, null);
+        bones.put(SLSkeletonBoneID.mWing4Left, slskeletonbone3);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mWing4FanLeft, new LLVector3(-0.171F, 0.173F, 0.0F), new LLVector3(-0.171F, 0.173F, 0.0F), null, null);
+        bones.put(SLSkeletonBoneID.mWing4FanLeft, slskeletonbone4);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mWing3Left, new LLVector3(-0.181F, 0.183F, 0.0F), new LLVector3(-0.181F, 0.183F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone3, slskeletonbone4
+        }, null);
+        bones.put(SLSkeletonBoneID.mWing3Left, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mWing2Left, new LLVector3(-0.168F, 0.169F, 0.067F), new LLVector3(-0.168F, 0.169F, 0.067F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mWing2Left, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mWing1Left, new LLVector3(-0.099F, 0.105F, 0.181F), new LLVector3(-0.099F, 0.105F, 0.181F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mWing1Left, slskeletonbone3);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mWing4Right, new LLVector3(-0.171F, -0.173F, 0.0F), new LLVector3(-0.171F, -0.173F, 0.0F), null, null);
+        bones.put(SLSkeletonBoneID.mWing4Right, slskeletonbone4);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mWing4FanRight, new LLVector3(-0.171F, -0.173F, 0.0F), new LLVector3(-0.171F, -0.173F, 0.0F), null, null);
+        bones.put(SLSkeletonBoneID.mWing4FanRight, slskeletonbone5);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mWing3Right, new LLVector3(-0.181F, -0.183F, 0.0F), new LLVector3(-0.181F, -0.183F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone4, slskeletonbone5
+        }, null);
+        bones.put(SLSkeletonBoneID.mWing3Right, slskeletonbone4);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mWing2Right, new LLVector3(-0.168F, -0.169F, 0.067F), new LLVector3(-0.168F, -0.169F, 0.067F), new SLSkeletonBone[] {
+            slskeletonbone4
+        }, null);
+        bones.put(SLSkeletonBoneID.mWing2Right, slskeletonbone4);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mWing1Right, new LLVector3(-0.099F, -0.105F, 0.181F), new LLVector3(-0.099F, -0.105F, 0.181F), new SLSkeletonBone[] {
+            slskeletonbone4
+        }, null);
+        bones.put(SLSkeletonBoneID.mWing1Right, slskeletonbone4);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mWingsRoot, new LLVector3(-0.014F, 0.0F, 0.0F), new LLVector3(-0.014F, 0.0F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone3, slskeletonbone4
+        }, null);
+        bones.put(SLSkeletonBoneID.mWingsRoot, slskeletonbone3);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.CHEST, new LLVector3(0.028F, 0.0F, 0.07F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone4.deform(new LLVector3(), new LLVector3(0.11F, 0.15F, 0.2F));
+        bones.put(SLSkeletonBoneID.CHEST, slskeletonbone4);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.LEFT_PEC, new LLVector3(0.119F, 0.082F, 0.042F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone5.deform(new LLVector3(), new LLVector3(0.05F, 0.05F, 0.05F));
+        bones.put(SLSkeletonBoneID.LEFT_PEC, slskeletonbone5);
+        slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.RIGHT_PEC, new LLVector3(0.119F, -0.082F, 0.042F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone6.deform(new LLVector3(), new LLVector3(0.05F, 0.05F, 0.05F));
+        bones.put(SLSkeletonBoneID.RIGHT_PEC, slskeletonbone6);
+        slskeletonbone7 = new SLSkeletonBone(SLSkeletonBoneID.UPPER_BACK, new LLVector3(0.0F, 0.0F, 0.017F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone7.deform(new LLVector3(), new LLVector3(0.09F, 0.13F, 0.15F));
+        bones.put(SLSkeletonBoneID.UPPER_BACK, slskeletonbone7);
+        slskeletonbone = new SLSkeletonBone(SLSkeletonBoneID.mChest, new LLVector3(-0.015F, 0.0F, 0.205F), new LLVector3(-0.015368F, 0.0F, 0.204877F), new SLSkeletonBone[] {
+            slskeletonbone, slskeletonbone1, slskeletonbone2, slskeletonbone3
+        }, new SLSkeletonBone[] {
+            slskeletonbone4, slskeletonbone5, slskeletonbone6, slskeletonbone7
+        });
+        bones.put(SLSkeletonBoneID.mChest, slskeletonbone);
+        slskeletonbone = new SLSkeletonBone(SLSkeletonBoneID.mSpine4, new LLVector3(0.015F, 0.0F, -0.205F), new LLVector3(0.015368F, 0.0F, -0.204877F), new SLSkeletonBone[] {
+            slskeletonbone
+        }, null);
+        bones.put(SLSkeletonBoneID.mSpine4, slskeletonbone);
+        slskeletonbone = new SLSkeletonBone(SLSkeletonBoneID.mSpine3, new LLVector3(-0.015F, 0.0F, 0.205F), new LLVector3(-0.015368F, 0.0F, 0.204877F), new SLSkeletonBone[] {
+            slskeletonbone
+        }, null);
+        bones.put(SLSkeletonBoneID.mSpine3, slskeletonbone);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.BELLY, new LLVector3(0.028F, 0.0F, 0.04F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone1.deform(new LLVector3(), new LLVector3(0.09F, 0.13F, 0.15F));
+        bones.put(SLSkeletonBoneID.BELLY, slskeletonbone1);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.LEFT_HANDLE, new LLVector3(0.0F, 0.1F, 0.058F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone2.deform(new LLVector3(), new LLVector3(0.05F, 0.05F, 0.05F));
+        bones.put(SLSkeletonBoneID.LEFT_HANDLE, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.RIGHT_HANDLE, new LLVector3(0.0F, -0.1F, 0.058F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone3.deform(new LLVector3(), new LLVector3(0.05F, 0.05F, 0.05F));
+        bones.put(SLSkeletonBoneID.RIGHT_HANDLE, slskeletonbone3);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.LOWER_BACK, new LLVector3(0.0F, 0.0F, 0.023F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone4.deform(new LLVector3(), new LLVector3(0.09F, 0.13F, 0.15F));
+        bones.put(SLSkeletonBoneID.LOWER_BACK, slskeletonbone4);
+        slskeletonbone = new SLSkeletonBone(SLSkeletonBoneID.mTorso, new LLVector3(0.0F, 0.0F, 0.084F), new LLVector3(0.0F, 0.0F, 0.084073F), new SLSkeletonBone[] {
+            slskeletonbone
+        }, new SLSkeletonBone[] {
+            slskeletonbone1, slskeletonbone2, slskeletonbone3, slskeletonbone4
+        });
+        bones.put(SLSkeletonBoneID.mTorso, slskeletonbone);
+        slskeletonbone = new SLSkeletonBone(SLSkeletonBoneID.mSpine2, new LLVector3(0.0F, 0.0F, -0.084F), new LLVector3(0.0F, 0.0F, -0.084073F), new SLSkeletonBone[] {
+            slskeletonbone
+        }, null);
+        bones.put(SLSkeletonBoneID.mSpine2, slskeletonbone);
+        slskeletonbone = new SLSkeletonBone(SLSkeletonBoneID.mSpine1, new LLVector3(0.0F, 0.0F, 0.084F), new LLVector3(0.0F, 0.0F, 0.084073F), new SLSkeletonBone[] {
+            slskeletonbone
+        }, null);
+        bones.put(SLSkeletonBoneID.mSpine1, slskeletonbone);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mToeRight, new LLVector3(0.109F, 0.0F, 0.0F), new LLVector3(0.105399F, -0.010408F, -0.000104F), null, null);
+        bones.put(SLSkeletonBoneID.mToeRight, slskeletonbone1);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mFootRight, new LLVector3(0.112F, 0.0F, -0.061F), new LLVector3(0.111956F, 0.0F, -0.060637F), new SLSkeletonBone[] {
+            slskeletonbone1
+        }, null);
+        bones.put(SLSkeletonBoneID.mFootRight, slskeletonbone1);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.R_FOOT, new LLVector3(0.077F, 0.0F, -0.041F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone2.deform(new LLVector3(), new LLVector3(0.13F, 0.05F, 0.05F));
+        bones.put(SLSkeletonBoneID.R_FOOT, slskeletonbone2);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mAnkleRight, new LLVector3(-0.029F, 0.0F, -0.468F), new LLVector3(-0.028869F, 0.0F, -0.468494F), new SLSkeletonBone[] {
+            slskeletonbone1
+        }, new SLSkeletonBone[] {
+            slskeletonbone2
+        });
+        bones.put(SLSkeletonBoneID.mAnkleRight, slskeletonbone1);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.R_LOWER_LEG, new LLVector3(-0.02F, 0.0F, -0.2F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone2.deform(new LLVector3(), new LLVector3(0.06F, 0.06F, 0.25F));
+        bones.put(SLSkeletonBoneID.R_LOWER_LEG, slskeletonbone2);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mKneeRight, new LLVector3(-0.001F, 0.049F, -0.491F), new LLVector3(-0.00078F, 0.048635F, -0.490922F), new SLSkeletonBone[] {
+            slskeletonbone1
+        }, new SLSkeletonBone[] {
+            slskeletonbone2
+        });
+        bones.put(SLSkeletonBoneID.mKneeRight, slskeletonbone1);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.R_UPPER_LEG, new LLVector3(-0.02F, 0.05F, -0.22F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone2.deform(new LLVector3(), new LLVector3(0.09F, 0.09F, 0.32F));
+        bones.put(SLSkeletonBoneID.R_UPPER_LEG, slskeletonbone2);
+        slskeletonbone1 = new SLSkeletonBone(SLSkeletonBoneID.mHipRight, new LLVector3(0.034F, -0.129F, -0.041F), new LLVector3(0.03362F, -0.128806F, -0.041086F), new SLSkeletonBone[] {
+            slskeletonbone1
+        }, new SLSkeletonBone[] {
+            slskeletonbone2
+        });
+        bones.put(SLSkeletonBoneID.mHipRight, slskeletonbone1);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mToeLeft, new LLVector3(0.109F, 0.0F, 0.0F), new LLVector3(0.105387F, 0.00827F, 0.000871F), null, null);
+        bones.put(SLSkeletonBoneID.mToeLeft, slskeletonbone2);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mFootLeft, new LLVector3(0.112F, 0.0F, -0.061F), new LLVector3(0.111956F, 0.0F, -0.06062F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, null);
+        bones.put(SLSkeletonBoneID.mFootLeft, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.L_FOOT, new LLVector3(0.077F, 0.0F, -0.041F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone3.deform(new LLVector3(), new LLVector3(0.13F, 0.05F, 0.05F));
+        bones.put(SLSkeletonBoneID.L_FOOT, slskeletonbone3);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mAnkleLeft, new LLVector3(-0.029F, 0.001F, -0.468F), new LLVector3(-0.028887F, 0.001378F, -0.468449F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, new SLSkeletonBone[] {
+            slskeletonbone3
+        });
+        bones.put(SLSkeletonBoneID.mAnkleLeft, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.L_LOWER_LEG, new LLVector3(-0.02F, 0.0F, -0.2F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone3.deform(new LLVector3(), new LLVector3(0.06F, 0.06F, 0.25F));
+        bones.put(SLSkeletonBoneID.L_LOWER_LEG, slskeletonbone3);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mKneeLeft, new LLVector3(-0.001F, -0.046F, -0.491F), new LLVector3(-0.000887F, -0.045568F, -0.491053F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, new SLSkeletonBone[] {
+            slskeletonbone3
+        });
+        bones.put(SLSkeletonBoneID.mKneeLeft, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.L_UPPER_LEG, new LLVector3(-0.02F, -0.05F, -0.22F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone3.deform(new LLVector3(), new LLVector3(0.09F, 0.09F, 0.32F));
+        bones.put(SLSkeletonBoneID.L_UPPER_LEG, slskeletonbone3);
+        slskeletonbone2 = new SLSkeletonBone(SLSkeletonBoneID.mHipLeft, new LLVector3(0.034F, 0.127F, -0.041F), new LLVector3(0.033757F, 0.126765F, -0.040998F), new SLSkeletonBone[] {
+            slskeletonbone2
+        }, new SLSkeletonBone[] {
+            slskeletonbone3
+        });
+        bones.put(SLSkeletonBoneID.mHipLeft, slskeletonbone2);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mTail6, new LLVector3(-0.094F, 0.0F, 0.0F), new LLVector3(-0.094F, 0.0F, 0.0F), null, null);
+        bones.put(SLSkeletonBoneID.mTail6, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mTail5, new LLVector3(-0.112F, 0.0F, 0.0F), new LLVector3(-0.112F, 0.0F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mTail5, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mTail4, new LLVector3(-0.142F, 0.0F, 0.0F), new LLVector3(-0.142F, 0.0F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mTail4, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mTail3, new LLVector3(-0.168F, 0.0F, 0.0F), new LLVector3(-0.168F, 0.0F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mTail3, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mTail2, new LLVector3(-0.197F, 0.0F, 0.0F), new LLVector3(-0.197F, 0.0F, 0.0F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mTail2, slskeletonbone3);
+        slskeletonbone3 = new SLSkeletonBone(SLSkeletonBoneID.mTail1, new LLVector3(-0.116F, 0.0F, 0.047F), new LLVector3(-0.116F, 0.0F, 0.047F), new SLSkeletonBone[] {
+            slskeletonbone3
+        }, null);
+        bones.put(SLSkeletonBoneID.mTail1, slskeletonbone3);
+        slskeletonbone4 = new SLSkeletonBone(SLSkeletonBoneID.mGroin, new LLVector3(0.064F, 0.0F, -0.097F), new LLVector3(0.064F, 0.0F, -0.097F), null, null);
+        bones.put(SLSkeletonBoneID.mGroin, slskeletonbone4);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb4Left, new LLVector3(0.112F, 0.0F, -0.061F), new LLVector3(0.112F, 0.0F, -0.061F), null, null);
+        bones.put(SLSkeletonBoneID.mHindLimb4Left, slskeletonbone5);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb3Left, new LLVector3(-0.03F, -0.003F, -0.468F), new LLVector3(-0.03F, -0.003F, -0.468F), new SLSkeletonBone[] {
+            slskeletonbone5
+        }, null);
+        bones.put(SLSkeletonBoneID.mHindLimb3Left, slskeletonbone5);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb2Left, new LLVector3(0.002F, -0.046F, -0.491F), new LLVector3(0.002F, -0.046F, -0.491F), new SLSkeletonBone[] {
+            slskeletonbone5
+        }, null);
+        bones.put(SLSkeletonBoneID.mHindLimb2Left, slskeletonbone5);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb1Left, new LLVector3(-0.204F, 0.129F, -0.125F), new LLVector3(-0.204F, 0.129F, -0.125F), new SLSkeletonBone[] {
+            slskeletonbone5
+        }, null);
+        bones.put(SLSkeletonBoneID.mHindLimb1Left, slskeletonbone5);
+        slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb4Right, new LLVector3(0.112F, 0.0F, -0.061F), new LLVector3(0.112F, 0.0F, -0.061F), null, null);
+        bones.put(SLSkeletonBoneID.mHindLimb4Right, slskeletonbone6);
+        slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb3Right, new LLVector3(-0.03F, 0.003F, -0.468F), new LLVector3(-0.03F, 0.003F, -0.468F), new SLSkeletonBone[] {
+            slskeletonbone6
+        }, null);
+        bones.put(SLSkeletonBoneID.mHindLimb3Right, slskeletonbone6);
+        slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb2Right, new LLVector3(0.002F, 0.046F, -0.491F), new LLVector3(0.002F, 0.046F, -0.491F), new SLSkeletonBone[] {
+            slskeletonbone6
+        }, null);
+        bones.put(SLSkeletonBoneID.mHindLimb2Right, slskeletonbone6);
+        slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimb1Right, new LLVector3(-0.204F, -0.129F, -0.125F), new LLVector3(-0.204F, -0.129F, -0.125F), new SLSkeletonBone[] {
+            slskeletonbone6
+        }, null);
+        bones.put(SLSkeletonBoneID.mHindLimb1Right, slskeletonbone6);
+        slskeletonbone5 = new SLSkeletonBone(SLSkeletonBoneID.mHindLimbsRoot, new LLVector3(-0.2F, 0.0F, 0.084F), new LLVector3(-0.2F, 0.0F, 0.084F), new SLSkeletonBone[] {
+            slskeletonbone5, slskeletonbone6
+        }, null);
+        bones.put(SLSkeletonBoneID.mHindLimbsRoot, slskeletonbone5);
+        slskeletonbone6 = new SLSkeletonBone(SLSkeletonBoneID.PELVIS, new LLVector3(-0.01F, 0.0F, -0.02F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone6.deform(new LLVector3(), new LLVector3(0.12F, 0.16F, 0.17F));
+        bones.put(SLSkeletonBoneID.PELVIS, slskeletonbone6);
+        slskeletonbone7 = new SLSkeletonBone(SLSkeletonBoneID.BUTT, new LLVector3(-0.06F, 0.0F, -0.1F), new LLVector3(0.0F, 0.0F, 0.0F), null, null);
+        slskeletonbone7.deform(new LLVector3(), new LLVector3(0.1F, 0.1F, 0.1F));
+        bones.put(SLSkeletonBoneID.BUTT, slskeletonbone7);
+        slskeletonbone = new SLSkeletonBone(SLSkeletonBoneID.mPelvis, new LLVector3(0.0F, 0.0F, 1.067F), new LLVector3(0.0F, 0.0F, 1.067015F), new SLSkeletonBone[] {
+            slskeletonbone, slskeletonbone1, slskeletonbone2, slskeletonbone3, slskeletonbone4, slskeletonbone5
+        }, new SLSkeletonBone[] {
+            slskeletonbone6, slskeletonbone7
+        });
+        rootBone = slskeletonbone;
+        bones.put(SLSkeletonBoneID.mPelvis, slskeletonbone);
     }
 }

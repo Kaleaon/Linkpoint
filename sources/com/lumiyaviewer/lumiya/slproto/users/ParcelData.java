@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users;
 
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDException;
@@ -6,78 +10,123 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.io.Serializable;
 import java.util.UUID;
 
-public class ParcelData implements Serializable {
+public class ParcelData
+    implements Serializable
+{
+
     private final int area;
     private final String description;
     private final boolean isGroupOwned;
     private final String mediaURL;
     private final String name;
     private final UUID ownerID;
-    private final boolean[] parcelBitmap = new boolean[4096];
+    private final boolean parcelBitmap[] = new boolean[4096];
     private final int parcelID;
     private final UUID snapshotUUID;
 
-    public ParcelData(LLSDNode lLSDNode) throws LLSDException {
-        UUID uuid = null;
-        this.parcelID = lLSDNode.byKey("LocalID").asInt();
-        this.name = lLSDNode.byKey("Name").asString();
-        this.description = lLSDNode.byKey("Desc").asString();
-        this.mediaURL = lLSDNode.byKey("MusicURL").asString();
-        UUID asUUID = lLSDNode.byKey("SnapshotID").asUUID();
-        if (asUUID != null && asUUID.equals(UUIDPool.ZeroUUID)) {
-            asUUID = null;
-        }
-        this.snapshotUUID = asUUID;
-        this.ownerID = lLSDNode.keyExists("OwnerID") ? lLSDNode.byKey("OwnerID").asUUID() : uuid;
-        this.isGroupOwned = lLSDNode.keyExists("IsGroupOwned") ? lLSDNode.byKey("IsGroupOwned").asBoolean() : false;
-        this.area = lLSDNode.keyExists("Area") ? lLSDNode.byKey("Area").asInt() : 0;
-        byte[] asBinary = lLSDNode.byKey("Bitmap").asBinary();
-        int i = 0;
-        while (i < asBinary.length && i < 512) {
-            byte b = asBinary[i];
-            for (int i2 = 0; i2 < 8; i2++) {
-                if ((b & 1) != 0) {
-                    this.parcelBitmap[(i * 8) + i2] = true;
-                }
-                b = (byte) (b >> 1);
+    public ParcelData(LLSDNode llsdnode)
+        throws LLSDException
+    {
+        Object obj = null;
+        super();
+        parcelID = llsdnode.byKey("LocalID").asInt();
+        name = llsdnode.byKey("Name").asString();
+        description = llsdnode.byKey("Desc").asString();
+        mediaURL = llsdnode.byKey("MusicURL").asString();
+        UUID uuid1 = llsdnode.byKey("SnapshotID").asUUID();
+        UUID uuid = uuid1;
+        if (uuid1 != null)
+        {
+            uuid = uuid1;
+            if (uuid1.equals(UUIDPool.ZeroUUID))
+            {
+                uuid = null;
             }
-            i++;
         }
+        snapshotUUID = uuid;
+        uuid = obj;
+        if (llsdnode.keyExists("OwnerID"))
+        {
+            uuid = llsdnode.byKey("OwnerID").asUUID();
+        }
+        ownerID = uuid;
+        int i;
+        boolean flag;
+        if (llsdnode.keyExists("IsGroupOwned"))
+        {
+            flag = llsdnode.byKey("IsGroupOwned").asBoolean();
+        } else
+        {
+            flag = false;
+        }
+        isGroupOwned = flag;
+        if (llsdnode.keyExists("Area"))
+        {
+            i = llsdnode.byKey("Area").asInt();
+        } else
+        {
+            i = 0;
+        }
+        area = i;
+        llsdnode = llsdnode.byKey("Bitmap").asBinary();
+        for (i = 0; i < llsdnode.length && i < 512; i++)
+        {
+            byte byte0 = llsdnode[i];
+            for (int j = 0; j < 8; j++)
+            {
+                if ((byte0 & 1) != 0)
+                {
+                    parcelBitmap[i * 8 + j] = true;
+                }
+                byte0 >>= 1;
+            }
+
+        }
+
     }
 
-    public int getArea() {
-        return this.area;
+    public int getArea()
+    {
+        return area;
     }
 
-    public String getDescription() {
-        return this.description;
+    public String getDescription()
+    {
+        return description;
     }
 
-    public String getMediaURL() {
-        return this.mediaURL;
+    public String getMediaURL()
+    {
+        return mediaURL;
     }
 
-    public String getName() {
-        return this.name;
+    public String getName()
+    {
+        return name;
     }
 
-    public UUID getOwnerID() {
-        return this.ownerID;
+    public UUID getOwnerID()
+    {
+        return ownerID;
     }
 
-    public boolean[] getParcelBitmap() {
-        return this.parcelBitmap;
+    public boolean[] getParcelBitmap()
+    {
+        return parcelBitmap;
     }
 
-    public int getParcelID() {
-        return this.parcelID;
+    public int getParcelID()
+    {
+        return parcelID;
     }
 
-    public UUID getSnapshotUUID() {
-        return this.snapshotUUID;
+    public UUID getSnapshotUUID()
+    {
+        return snapshotUUID;
     }
 
-    public boolean isGroupOwned() {
-        return this.isGroupOwned;
+    public boolean isGroupOwned()
+    {
+        return isGroupOwned;
     }
 }

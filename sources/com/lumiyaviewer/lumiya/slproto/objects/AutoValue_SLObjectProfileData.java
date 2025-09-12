@@ -1,18 +1,26 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.objects;
 
 import com.google.common.base.Optional;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
-final class AutoValue_SLObjectProfileData extends SLObjectProfileData {
-    private final Optional<String> description;
-    private final Optional<String> floatingText;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.objects:
+//            SLObjectProfileData, PayInfo
+
+final class AutoValue_SLObjectProfileData extends SLObjectProfileData
+{
+
+    private final Optional description;
+    private final Optional floatingText;
     private final boolean isCopyable;
     private final boolean isDead;
     private final boolean isModifiable;
     private final boolean isPayable;
     private final boolean isTouchable;
-    private final Optional<String> name;
+    private final Optional name;
     private final UUID objectUUID;
     private final UUID ownerUUID;
     private final PayInfo payInfo;
@@ -20,123 +28,215 @@ final class AutoValue_SLObjectProfileData extends SLObjectProfileData {
     private final byte saleType;
     private final String touchName;
 
-    AutoValue_SLObjectProfileData(@Nullable UUID uuid, Optional<String> optional, Optional<String> optional2, @Nullable UUID uuid2, boolean z, @Nullable String str, boolean z2, byte b, int i, boolean z3, boolean z4, Optional<String> optional3, @Nullable PayInfo payInfo2, boolean z5) {
-        this.objectUUID = uuid;
-        if (optional == null) {
+    AutoValue_SLObjectProfileData(UUID uuid, Optional optional, Optional optional1, UUID uuid1, boolean flag, String s, boolean flag1, 
+            byte byte0, int i, boolean flag2, boolean flag3, Optional optional2, PayInfo payinfo, boolean flag4)
+    {
+        objectUUID = uuid;
+        if (optional == null)
+        {
             throw new NullPointerException("Null name");
         }
-        this.name = optional;
-        if (optional2 == null) {
+        name = optional;
+        if (optional1 == null)
+        {
             throw new NullPointerException("Null description");
         }
-        this.description = optional2;
-        this.ownerUUID = uuid2;
-        this.isTouchable = z;
-        this.touchName = str;
-        this.isPayable = z2;
-        this.saleType = b;
-        this.salePrice = i;
-        this.isCopyable = z3;
-        this.isDead = z4;
-        if (optional3 == null) {
+        description = optional1;
+        ownerUUID = uuid1;
+        isTouchable = flag;
+        touchName = s;
+        isPayable = flag1;
+        saleType = byte0;
+        salePrice = i;
+        isCopyable = flag2;
+        isDead = flag3;
+        if (optional2 == null)
+        {
             throw new NullPointerException("Null floatingText");
+        } else
+        {
+            floatingText = optional2;
+            payInfo = payinfo;
+            isModifiable = flag4;
+            return;
         }
-        this.floatingText = optional3;
-        this.payInfo = payInfo2;
-        this.isModifiable = z5;
     }
 
-    public Optional<String> description() {
-        return this.description;
+    public Optional description()
+    {
+        return description;
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
             return true;
         }
-        if (!(obj instanceof SLObjectProfileData)) {
+        if (obj instanceof SLObjectProfileData)
+        {
+            obj = (SLObjectProfileData)obj;
+            if ((objectUUID != null ? objectUUID.equals(((SLObjectProfileData) (obj)).objectUUID()) : ((SLObjectProfileData) (obj)).objectUUID() == null) && (name.equals(((SLObjectProfileData) (obj)).name()) && description.equals(((SLObjectProfileData) (obj)).description())) && (ownerUUID != null ? ownerUUID.equals(((SLObjectProfileData) (obj)).ownerUUID()) : ((SLObjectProfileData) (obj)).ownerUUID() == null) && isTouchable == ((SLObjectProfileData) (obj)).isTouchable() && (touchName != null ? touchName.equals(((SLObjectProfileData) (obj)).touchName()) : ((SLObjectProfileData) (obj)).touchName() == null) && (isPayable == ((SLObjectProfileData) (obj)).isPayable() && saleType == ((SLObjectProfileData) (obj)).saleType() && salePrice == ((SLObjectProfileData) (obj)).salePrice() && isCopyable == ((SLObjectProfileData) (obj)).isCopyable() && isDead == ((SLObjectProfileData) (obj)).isDead() && floatingText.equals(((SLObjectProfileData) (obj)).floatingText())) && (payInfo != null ? payInfo.equals(((SLObjectProfileData) (obj)).payInfo()) : ((SLObjectProfileData) (obj)).payInfo() == null))
+            {
+                return isModifiable == ((SLObjectProfileData) (obj)).isModifiable();
+            } else
+            {
+                return false;
+            }
+        } else
+        {
             return false;
         }
-        SLObjectProfileData sLObjectProfileData = (SLObjectProfileData) obj;
-        if (this.objectUUID != null ? this.objectUUID.equals(sLObjectProfileData.objectUUID()) : sLObjectProfileData.objectUUID() == null) {
-            if (this.name.equals(sLObjectProfileData.name()) && this.description.equals(sLObjectProfileData.description()) && (this.ownerUUID != null ? this.ownerUUID.equals(sLObjectProfileData.ownerUUID()) : sLObjectProfileData.ownerUUID() == null) && this.isTouchable == sLObjectProfileData.isTouchable() && (this.touchName != null ? this.touchName.equals(sLObjectProfileData.touchName()) : sLObjectProfileData.touchName() == null) && this.isPayable == sLObjectProfileData.isPayable() && this.saleType == sLObjectProfileData.saleType() && this.salePrice == sLObjectProfileData.salePrice() && this.isCopyable == sLObjectProfileData.isCopyable() && this.isDead == sLObjectProfileData.isDead() && this.floatingText.equals(sLObjectProfileData.floatingText()) && (this.payInfo != null ? this.payInfo.equals(sLObjectProfileData.payInfo()) : sLObjectProfileData.payInfo() == null)) {
-                return this.isModifiable == sLObjectProfileData.isModifiable();
-            }
+    }
+
+    public Optional floatingText()
+    {
+        return floatingText;
+    }
+
+    public int hashCode()
+    {
+        int l = 0;
+        char c4 = '\u04CF';
+        int i;
+        int j;
+        char c;
+        int k;
+        char c1;
+        char c2;
+        char c3;
+        int i1;
+        int j1;
+        byte byte0;
+        int k1;
+        int l1;
+        if (objectUUID == null)
+        {
+            i = 0;
+        } else
+        {
+            i = objectUUID.hashCode();
         }
-        return false;
-    }
-
-    public Optional<String> floatingText() {
-        return this.floatingText;
-    }
-
-    public int hashCode() {
-        int i = 0;
-        int i2 = 1231;
-        int hashCode = ((((this.isDead ? 1231 : 1237) ^ (((this.isCopyable ? 1231 : 1237) ^ (((((((this.isPayable ? 1231 : 1237) ^ (((this.touchName == null ? 0 : this.touchName.hashCode()) ^ (((this.isTouchable ? 1231 : 1237) ^ (((this.ownerUUID == null ? 0 : this.ownerUUID.hashCode()) ^ (((((((this.objectUUID == null ? 0 : this.objectUUID.hashCode()) ^ 1000003) * 1000003) ^ this.name.hashCode()) * 1000003) ^ this.description.hashCode()) * 1000003)) * 1000003)) * 1000003)) * 1000003)) * 1000003) ^ this.saleType) * 1000003) ^ this.salePrice) * 1000003)) * 1000003)) * 1000003) ^ this.floatingText.hashCode()) * 1000003;
-        if (this.payInfo != null) {
-            i = this.payInfo.hashCode();
+        i1 = name.hashCode();
+        j1 = description.hashCode();
+        if (ownerUUID == null)
+        {
+            j = 0;
+        } else
+        {
+            j = ownerUUID.hashCode();
         }
-        int i3 = (hashCode ^ i) * 1000003;
-        if (!this.isModifiable) {
-            i2 = 1237;
+        if (isTouchable)
+        {
+            c = '\u04CF';
+        } else
+        {
+            c = '\u04D5';
         }
-        return i3 ^ i2;
+        if (touchName == null)
+        {
+            k = 0;
+        } else
+        {
+            k = touchName.hashCode();
+        }
+        if (isPayable)
+        {
+            c1 = '\u04CF';
+        } else
+        {
+            c1 = '\u04D5';
+        }
+        byte0 = saleType;
+        k1 = salePrice;
+        if (isCopyable)
+        {
+            c2 = '\u04CF';
+        } else
+        {
+            c2 = '\u04D5';
+        }
+        if (isDead)
+        {
+            c3 = '\u04CF';
+        } else
+        {
+            c3 = '\u04D5';
+        }
+        l1 = floatingText.hashCode();
+        if (payInfo != null)
+        {
+            l = payInfo.hashCode();
+        }
+        if (!isModifiable)
+        {
+            c4 = '\u04D5';
+        }
+        return (((c3 ^ (c2 ^ (((c1 ^ (k ^ (c ^ (j ^ (((i ^ 0xf4243) * 0xf4243 ^ i1) * 0xf4243 ^ j1) * 0xf4243) * 0xf4243) * 0xf4243) * 0xf4243) * 0xf4243 ^ byte0) * 0xf4243 ^ k1) * 0xf4243) * 0xf4243) * 0xf4243 ^ l1) * 0xf4243 ^ l) * 0xf4243 ^ c4;
     }
 
-    public boolean isCopyable() {
-        return this.isCopyable;
+    public boolean isCopyable()
+    {
+        return isCopyable;
     }
 
-    public boolean isDead() {
-        return this.isDead;
+    public boolean isDead()
+    {
+        return isDead;
     }
 
-    public boolean isModifiable() {
-        return this.isModifiable;
+    public boolean isModifiable()
+    {
+        return isModifiable;
     }
 
-    public boolean isPayable() {
-        return this.isPayable;
+    public boolean isPayable()
+    {
+        return isPayable;
     }
 
-    public boolean isTouchable() {
-        return this.isTouchable;
+    public boolean isTouchable()
+    {
+        return isTouchable;
     }
 
-    public Optional<String> name() {
-        return this.name;
+    public Optional name()
+    {
+        return name;
     }
 
-    @Nullable
-    public UUID objectUUID() {
-        return this.objectUUID;
+    public UUID objectUUID()
+    {
+        return objectUUID;
     }
 
-    @Nullable
-    public UUID ownerUUID() {
-        return this.ownerUUID;
+    public UUID ownerUUID()
+    {
+        return ownerUUID;
     }
 
-    @Nullable
-    public PayInfo payInfo() {
-        return this.payInfo;
+    public PayInfo payInfo()
+    {
+        return payInfo;
     }
 
-    public int salePrice() {
-        return this.salePrice;
+    public int salePrice()
+    {
+        return salePrice;
     }
 
-    public byte saleType() {
-        return this.saleType;
+    public byte saleType()
+    {
+        return saleType;
     }
 
-    public String toString() {
-        return "SLObjectProfileData{objectUUID=" + this.objectUUID + ", " + "name=" + this.name + ", " + "description=" + this.description + ", " + "ownerUUID=" + this.ownerUUID + ", " + "isTouchable=" + this.isTouchable + ", " + "touchName=" + this.touchName + ", " + "isPayable=" + this.isPayable + ", " + "saleType=" + this.saleType + ", " + "salePrice=" + this.salePrice + ", " + "isCopyable=" + this.isCopyable + ", " + "isDead=" + this.isDead + ", " + "floatingText=" + this.floatingText + ", " + "payInfo=" + this.payInfo + ", " + "isModifiable=" + this.isModifiable + "}";
+    public String toString()
+    {
+        return (new StringBuilder()).append("SLObjectProfileData{objectUUID=").append(objectUUID).append(", ").append("name=").append(name).append(", ").append("description=").append(description).append(", ").append("ownerUUID=").append(ownerUUID).append(", ").append("isTouchable=").append(isTouchable).append(", ").append("touchName=").append(touchName).append(", ").append("isPayable=").append(isPayable).append(", ").append("saleType=").append(saleType).append(", ").append("salePrice=").append(salePrice).append(", ").append("isCopyable=").append(isCopyable).append(", ").append("isDead=").append(isDead).append(", ").append("floatingText=").append(floatingText).append(", ").append("payInfo=").append(payInfo).append(", ").append("isModifiable=").append(isModifiable).append("}").toString();
     }
 
-    @Nullable
-    public String touchName() {
-        return this.touchName;
+    public String touchName()
+    {
+        return touchName;
     }
 }

@@ -1,20 +1,24 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class ViewerStats extends SLMessage {
-    public AgentData AgentData_Field;
-    public DownloadTotals DownloadTotals_Field;
-    public FailStats FailStats_Field;
-    public ArrayList<MiscStats> MiscStats_Fields = new ArrayList<>();
-    public NetStats[] NetStats_Fields = new NetStats[2];
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class ViewerStats extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public int AgentsInView;
         public float FPS;
@@ -26,135 +30,190 @@ public class ViewerStats extends SLMessage {
         public UUID SessionID;
         public float SimFPS;
         public int StartTime;
-        public byte[] SysCPU;
-        public byte[] SysGPU;
-        public byte[] SysOS;
+        public byte SysCPU[];
+        public byte SysGPU[];
+        public byte SysOS[];
         public int SysRAM;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class DownloadTotals {
+    public static class DownloadTotals
+    {
+
         public int Objects;
         public int Textures;
         public int World;
+
+        public DownloadTotals()
+        {
+        }
     }
 
-    public static class FailStats {
+    public static class FailStats
+    {
+
         public int Dropped;
         public int FailedResends;
         public int Invalid;
         public int OffCircuit;
         public int Resent;
         public int SendPacket;
+
+        public FailStats()
+        {
+        }
     }
 
-    public static class MiscStats {
+    public static class MiscStats
+    {
+
         public int Type;
         public double Value;
+
+        public MiscStats()
+        {
+        }
     }
 
-    public static class NetStats {
+    public static class NetStats
+    {
+
         public int Bytes;
         public int Compressed;
         public int Packets;
         public int Savings;
-    }
 
-    public ViewerStats() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-        this.DownloadTotals_Field = new DownloadTotals();
-        for (int i = 0; i < 2; i++) {
-            this.NetStats_Fields[i] = new NetStats();
-        }
-        this.FailStats_Field = new FailStats();
-    }
-
-    public int CalcPayloadSize() {
-        return this.AgentData_Field.SysOS.length + 74 + 1 + this.AgentData_Field.SysCPU.length + 1 + this.AgentData_Field.SysGPU.length + 4 + 12 + 32 + 24 + 1 + (this.MiscStats_Fields.size() * 12);
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleViewerStats(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -125);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packIPAddress(byteBuffer, this.AgentData_Field.IP);
-        packInt(byteBuffer, this.AgentData_Field.StartTime);
-        packFloat(byteBuffer, this.AgentData_Field.RunTime);
-        packFloat(byteBuffer, this.AgentData_Field.SimFPS);
-        packFloat(byteBuffer, this.AgentData_Field.FPS);
-        packByte(byteBuffer, (byte) this.AgentData_Field.AgentsInView);
-        packFloat(byteBuffer, this.AgentData_Field.Ping);
-        packDouble(byteBuffer, this.AgentData_Field.MetersTraveled);
-        packInt(byteBuffer, this.AgentData_Field.RegionsVisited);
-        packInt(byteBuffer, this.AgentData_Field.SysRAM);
-        packVariable(byteBuffer, this.AgentData_Field.SysOS, 1);
-        packVariable(byteBuffer, this.AgentData_Field.SysCPU, 1);
-        packVariable(byteBuffer, this.AgentData_Field.SysGPU, 1);
-        packInt(byteBuffer, this.DownloadTotals_Field.World);
-        packInt(byteBuffer, this.DownloadTotals_Field.Objects);
-        packInt(byteBuffer, this.DownloadTotals_Field.Textures);
-        for (int i = 0; i < 2; i++) {
-            packInt(byteBuffer, this.NetStats_Fields[i].Bytes);
-            packInt(byteBuffer, this.NetStats_Fields[i].Packets);
-            packInt(byteBuffer, this.NetStats_Fields[i].Compressed);
-            packInt(byteBuffer, this.NetStats_Fields[i].Savings);
-        }
-        packInt(byteBuffer, this.FailStats_Field.SendPacket);
-        packInt(byteBuffer, this.FailStats_Field.Dropped);
-        packInt(byteBuffer, this.FailStats_Field.Resent);
-        packInt(byteBuffer, this.FailStats_Field.FailedResends);
-        packInt(byteBuffer, this.FailStats_Field.OffCircuit);
-        packInt(byteBuffer, this.FailStats_Field.Invalid);
-        byteBuffer.put((byte) this.MiscStats_Fields.size());
-        for (MiscStats miscStats : this.MiscStats_Fields) {
-            packInt(byteBuffer, miscStats.Type);
-            packDouble(byteBuffer, miscStats.Value);
+        public NetStats()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.AgentData_Field.IP = unpackIPAddress(byteBuffer);
-        this.AgentData_Field.StartTime = unpackInt(byteBuffer);
-        this.AgentData_Field.RunTime = unpackFloat(byteBuffer);
-        this.AgentData_Field.SimFPS = unpackFloat(byteBuffer);
-        this.AgentData_Field.FPS = unpackFloat(byteBuffer);
-        this.AgentData_Field.AgentsInView = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-        this.AgentData_Field.Ping = unpackFloat(byteBuffer);
-        this.AgentData_Field.MetersTraveled = unpackDouble(byteBuffer);
-        this.AgentData_Field.RegionsVisited = unpackInt(byteBuffer);
-        this.AgentData_Field.SysRAM = unpackInt(byteBuffer);
-        this.AgentData_Field.SysOS = unpackVariable(byteBuffer, 1);
-        this.AgentData_Field.SysCPU = unpackVariable(byteBuffer, 1);
-        this.AgentData_Field.SysGPU = unpackVariable(byteBuffer, 1);
-        this.DownloadTotals_Field.World = unpackInt(byteBuffer);
-        this.DownloadTotals_Field.Objects = unpackInt(byteBuffer);
-        this.DownloadTotals_Field.Textures = unpackInt(byteBuffer);
-        for (int i = 0; i < 2; i++) {
-            this.NetStats_Fields[i].Bytes = unpackInt(byteBuffer);
-            this.NetStats_Fields[i].Packets = unpackInt(byteBuffer);
-            this.NetStats_Fields[i].Compressed = unpackInt(byteBuffer);
-            this.NetStats_Fields[i].Savings = unpackInt(byteBuffer);
+
+    public AgentData AgentData_Field;
+    public DownloadTotals DownloadTotals_Field;
+    public FailStats FailStats_Field;
+    public ArrayList MiscStats_Fields;
+    public NetStats NetStats_Fields[];
+
+    public ViewerStats()
+    {
+        NetStats_Fields = new NetStats[2];
+        MiscStats_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        DownloadTotals_Field = new DownloadTotals();
+        for (int i = 0; i < 2; i++)
+        {
+            NetStats_Fields[i] = new NetStats();
         }
-        this.FailStats_Field.SendPacket = unpackInt(byteBuffer);
-        this.FailStats_Field.Dropped = unpackInt(byteBuffer);
-        this.FailStats_Field.Resent = unpackInt(byteBuffer);
-        this.FailStats_Field.FailedResends = unpackInt(byteBuffer);
-        this.FailStats_Field.OffCircuit = unpackInt(byteBuffer);
-        this.FailStats_Field.Invalid = unpackInt(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < b; i2++) {
-            MiscStats miscStats = new MiscStats();
-            miscStats.Type = unpackInt(byteBuffer);
-            miscStats.Value = unpackDouble(byteBuffer);
-            this.MiscStats_Fields.add(miscStats);
+
+        FailStats_Field = new FailStats();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return AgentData_Field.SysOS.length + 74 + 1 + AgentData_Field.SysCPU.length + 1 + AgentData_Field.SysGPU.length + 4 + 12 + 32 + 24 + 1 + MiscStats_Fields.size() * 12;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleViewerStats(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        int i = 0;
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-125);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packIPAddress(bytebuffer, AgentData_Field.IP);
+        packInt(bytebuffer, AgentData_Field.StartTime);
+        packFloat(bytebuffer, AgentData_Field.RunTime);
+        packFloat(bytebuffer, AgentData_Field.SimFPS);
+        packFloat(bytebuffer, AgentData_Field.FPS);
+        packByte(bytebuffer, (byte)AgentData_Field.AgentsInView);
+        packFloat(bytebuffer, AgentData_Field.Ping);
+        packDouble(bytebuffer, AgentData_Field.MetersTraveled);
+        packInt(bytebuffer, AgentData_Field.RegionsVisited);
+        packInt(bytebuffer, AgentData_Field.SysRAM);
+        packVariable(bytebuffer, AgentData_Field.SysOS, 1);
+        packVariable(bytebuffer, AgentData_Field.SysCPU, 1);
+        packVariable(bytebuffer, AgentData_Field.SysGPU, 1);
+        packInt(bytebuffer, DownloadTotals_Field.World);
+        packInt(bytebuffer, DownloadTotals_Field.Objects);
+        packInt(bytebuffer, DownloadTotals_Field.Textures);
+        for (; i < 2; i++)
+        {
+            packInt(bytebuffer, NetStats_Fields[i].Bytes);
+            packInt(bytebuffer, NetStats_Fields[i].Packets);
+            packInt(bytebuffer, NetStats_Fields[i].Compressed);
+            packInt(bytebuffer, NetStats_Fields[i].Savings);
         }
+
+        packInt(bytebuffer, FailStats_Field.SendPacket);
+        packInt(bytebuffer, FailStats_Field.Dropped);
+        packInt(bytebuffer, FailStats_Field.Resent);
+        packInt(bytebuffer, FailStats_Field.FailedResends);
+        packInt(bytebuffer, FailStats_Field.OffCircuit);
+        packInt(bytebuffer, FailStats_Field.Invalid);
+        bytebuffer.put((byte)MiscStats_Fields.size());
+        MiscStats miscstats;
+        for (Iterator iterator = MiscStats_Fields.iterator(); iterator.hasNext(); packDouble(bytebuffer, miscstats.Value))
+        {
+            miscstats = (MiscStats)iterator.next();
+            packInt(bytebuffer, miscstats.Type);
+        }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        AgentData_Field.IP = unpackIPAddress(bytebuffer);
+        AgentData_Field.StartTime = unpackInt(bytebuffer);
+        AgentData_Field.RunTime = unpackFloat(bytebuffer);
+        AgentData_Field.SimFPS = unpackFloat(bytebuffer);
+        AgentData_Field.FPS = unpackFloat(bytebuffer);
+        AgentData_Field.AgentsInView = unpackByte(bytebuffer) & 0xff;
+        AgentData_Field.Ping = unpackFloat(bytebuffer);
+        AgentData_Field.MetersTraveled = unpackDouble(bytebuffer);
+        AgentData_Field.RegionsVisited = unpackInt(bytebuffer);
+        AgentData_Field.SysRAM = unpackInt(bytebuffer);
+        AgentData_Field.SysOS = unpackVariable(bytebuffer, 1);
+        AgentData_Field.SysCPU = unpackVariable(bytebuffer, 1);
+        AgentData_Field.SysGPU = unpackVariable(bytebuffer, 1);
+        DownloadTotals_Field.World = unpackInt(bytebuffer);
+        DownloadTotals_Field.Objects = unpackInt(bytebuffer);
+        DownloadTotals_Field.Textures = unpackInt(bytebuffer);
+        for (int i = 0; i < 2; i++)
+        {
+            NetStats_Fields[i].Bytes = unpackInt(bytebuffer);
+            NetStats_Fields[i].Packets = unpackInt(bytebuffer);
+            NetStats_Fields[i].Compressed = unpackInt(bytebuffer);
+            NetStats_Fields[i].Savings = unpackInt(bytebuffer);
+        }
+
+        FailStats_Field.SendPacket = unpackInt(bytebuffer);
+        FailStats_Field.Dropped = unpackInt(bytebuffer);
+        FailStats_Field.Resent = unpackInt(bytebuffer);
+        FailStats_Field.FailedResends = unpackInt(bytebuffer);
+        FailStats_Field.OffCircuit = unpackInt(bytebuffer);
+        FailStats_Field.Invalid = unpackInt(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int j = ((flag) ? 1 : 0); j < (byte0 & 0xff); j++)
+        {
+            MiscStats miscstats = new MiscStats();
+            miscstats.Type = unpackInt(bytebuffer);
+            miscstats.Value = unpackDouble(bytebuffer);
+            MiscStats_Fields.add(miscstats);
+        }
+
     }
 }

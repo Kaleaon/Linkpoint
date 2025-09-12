@@ -1,70 +1,106 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.avatar;
 
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance;
+import java.util.ArrayList;
 import java.util.Arrays;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class AvatarShapeParams {
-    @Nonnull
-    private final int[] visualParamValues;
+public class AvatarShapeParams
+{
 
-    private AvatarShapeParams(@Nonnull int[] iArr) {
-        this.visualParamValues = iArr;
+    private final int visualParamValues[];
+
+    private AvatarShapeParams(int ai[])
+    {
+        visualParamValues = ai;
     }
 
-    @Nonnull
-    public static AvatarShapeParams create(@Nullable AvatarShapeParams avatarShapeParams, AvatarAppearance avatarAppearance) {
-        Debug.Log("DrawableAvatar: new appearance for avatar " + avatarAppearance.Sender_Field.ID + ", numParams = " + avatarAppearance.VisualParam_Fields.size() + ", appData = " + avatarAppearance.AppearanceData_Fields.size());
-        for (int i = 0; i < avatarAppearance.AppearanceData_Fields.size(); i++) {
-            Debug.Printf("appData[%d]: appVer %d, cofVer %d, flags 0x%x", Integer.valueOf(i), Integer.valueOf(avatarAppearance.AppearanceData_Fields.get(i).AppearanceVersion), Integer.valueOf(avatarAppearance.AppearanceData_Fields.get(i).CofVersion), Integer.valueOf(avatarAppearance.AppearanceData_Fields.get(i).Flags));
+    public static AvatarShapeParams create(AvatarShapeParams avatarshapeparams, AvatarAppearance avatarappearance)
+    {
+        Debug.Log((new StringBuilder()).append("DrawableAvatar: new appearance for avatar ").append(avatarappearance.Sender_Field.ID).append(", numParams = ").append(avatarappearance.VisualParam_Fields.size()).append(", appData = ").append(avatarappearance.AppearanceData_Fields.size()).toString());
+        for (int i = 0; i < avatarappearance.AppearanceData_Fields.size(); i++)
+        {
+            Debug.Printf("appData[%d]: appVer %d, cofVer %d, flags 0x%x", new Object[] {
+                Integer.valueOf(i), Integer.valueOf(((com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance.AppearanceData)avatarappearance.AppearanceData_Fields.get(i)).AppearanceVersion), Integer.valueOf(((com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance.AppearanceData)avatarappearance.AppearanceData_Fields.get(i)).CofVersion), Integer.valueOf(((com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance.AppearanceData)avatarappearance.AppearanceData_Fields.get(i)).Flags)
+            });
         }
-        int[] iArr = new int[218];
-        for (int i2 = 0; i2 < 218; i2++) {
-            if (i2 < avatarAppearance.VisualParam_Fields.size()) {
-                iArr[i2] = avatarAppearance.VisualParam_Fields.get(i2).ParamValue;
-            } else {
-                iArr[i2] = avatarShapeParams != null ? avatarShapeParams.visualParamValues[i2] : 0;
+
+        int ai[] = new int[218];
+        int j = 0;
+        while (j < 218) 
+        {
+            if (j < avatarappearance.VisualParam_Fields.size())
+            {
+                ai[j] = ((com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance.VisualParam)avatarappearance.VisualParam_Fields.get(j)).ParamValue;
+            } else
+            {
+                int k;
+                if (avatarshapeparams != null)
+                {
+                    k = avatarshapeparams.visualParamValues[j];
+                } else
+                {
+                    k = 0;
+                }
+                ai[j] = k;
+            }
+            j++;
+        }
+        return new AvatarShapeParams(ai);
+    }
+
+    public static AvatarShapeParams create(AvatarShapeParams avatarshapeparams, int ai[])
+    {
+        if (ai.length != 218)
+        {
+            int ai1[] = new int[218];
+            System.arraycopy(ai, 0, ai1, 0, Math.min(ai.length, 218));
+            if (ai.length < 218 && avatarshapeparams != null)
+            {
+                int i = ai.length;
+                System.arraycopy(avatarshapeparams.visualParamValues, ai.length, ai1, ai.length, 218 - i);
+                ai = ai1;
+            } else
+            {
+                ai = ai1;
             }
         }
-        return new AvatarShapeParams(iArr);
+        return new AvatarShapeParams(ai);
     }
 
-    @Nonnull
-    public static AvatarShapeParams create(@Nullable AvatarShapeParams avatarShapeParams, int[] iArr) {
-        if (iArr.length != 218) {
-            int[] iArr2 = new int[218];
-            System.arraycopy(iArr, 0, iArr2, 0, Math.min(iArr.length, 218));
-            if (iArr.length >= 218 || avatarShapeParams == null) {
-                iArr = iArr2;
-            } else {
-                System.arraycopy(avatarShapeParams.visualParamValues, iArr.length, iArr2, iArr.length, 218 - iArr.length);
-                iArr = iArr2;
-            }
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof AvatarShapeParams)
+        {
+            return Arrays.equals(visualParamValues, ((AvatarShapeParams)obj).visualParamValues);
+        } else
+        {
+            return false;
         }
-        return new AvatarShapeParams(iArr);
     }
 
-    public boolean equals(Object obj) {
-        if (obj instanceof AvatarShapeParams) {
-            return Arrays.equals(this.visualParamValues, ((AvatarShapeParams) obj).visualParamValues);
-        }
-        return false;
-    }
-
-    public int getParamCount() {
+    public int getParamCount()
+    {
         return 218;
     }
 
-    public int getParamValue(int i) {
-        if (i < 0 || i >= 218) {
+    public int getParamValue(int i)
+    {
+        if (i >= 0 && i < 218)
+        {
+            return visualParamValues[i];
+        } else
+        {
             return 0;
         }
-        return this.visualParamValues[i];
     }
 
-    public int hashCode() {
-        return Arrays.hashCode(this.visualParamValues);
+    public int hashCode()
+    {
+        return Arrays.hashCode(visualParamValues);
     }
 }

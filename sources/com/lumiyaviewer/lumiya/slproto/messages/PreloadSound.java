@@ -1,51 +1,77 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class PreloadSound extends SLMessage {
-    public ArrayList<DataBlock> DataBlock_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class DataBlock {
+public class PreloadSound extends SLMessage
+{
+    public static class DataBlock
+    {
+
         public UUID ObjectID;
         public UUID OwnerID;
         public UUID SoundID;
-    }
 
-    public PreloadSound() {
-        this.zeroCoded = false;
-    }
-
-    public int CalcPayloadSize() {
-        return (this.DataBlock_Fields.size() * 48) + 3;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandlePreloadSound(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) -1);
-        byteBuffer.put((byte) 15);
-        byteBuffer.put((byte) this.DataBlock_Fields.size());
-        for (DataBlock dataBlock : this.DataBlock_Fields) {
-            packUUID(byteBuffer, dataBlock.ObjectID);
-            packUUID(byteBuffer, dataBlock.OwnerID);
-            packUUID(byteBuffer, dataBlock.SoundID);
+        public DataBlock()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            DataBlock dataBlock = new DataBlock();
-            dataBlock.ObjectID = unpackUUID(byteBuffer);
-            dataBlock.OwnerID = unpackUUID(byteBuffer);
-            dataBlock.SoundID = unpackUUID(byteBuffer);
-            this.DataBlock_Fields.add(dataBlock);
+
+    public ArrayList DataBlock_Fields;
+
+    public PreloadSound()
+    {
+        DataBlock_Fields = new ArrayList();
+        zeroCoded = false;
+    }
+
+    public int CalcPayloadSize()
+    {
+        return DataBlock_Fields.size() * 48 + 3;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandlePreloadSound(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.put((byte)-1);
+        bytebuffer.put((byte)15);
+        bytebuffer.put((byte)DataBlock_Fields.size());
+        DataBlock datablock;
+        for (Iterator iterator = DataBlock_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, datablock.SoundID))
+        {
+            datablock = (DataBlock)iterator.next();
+            packUUID(bytebuffer, datablock.ObjectID);
+            packUUID(bytebuffer, datablock.OwnerID);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            DataBlock datablock = new DataBlock();
+            datablock.ObjectID = unpackUUID(bytebuffer);
+            datablock.OwnerID = unpackUUID(bytebuffer);
+            datablock.SoundID = unpackUUID(bytebuffer);
+            DataBlock_Fields.add(datablock);
+        }
+
     }
 }

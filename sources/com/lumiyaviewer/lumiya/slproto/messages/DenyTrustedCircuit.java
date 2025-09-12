@@ -1,36 +1,57 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class DenyTrustedCircuit extends SLMessage {
-    public DataBlock DataBlock_Field = new DataBlock();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class DataBlock {
+public class DenyTrustedCircuit extends SLMessage
+{
+    public static class DataBlock
+    {
+
         public UUID EndPointID;
+
+        public DataBlock()
+        {
+        }
     }
 
-    public DenyTrustedCircuit() {
-        this.zeroCoded = false;
+
+    public DataBlock DataBlock_Field;
+
+    public DenyTrustedCircuit()
+    {
+        zeroCoded = false;
+        DataBlock_Field = new DataBlock();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 20;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDenyTrustedCircuit(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleDenyTrustedCircuit(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) -119);
-        packUUID(byteBuffer, this.DataBlock_Field.EndPointID);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)-119);
+        packUUID(bytebuffer, DataBlock_Field.EndPointID);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.DataBlock_Field.EndPointID = unpackUUID(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        DataBlock_Field.EndPointID = unpackUUID(bytebuffer);
     }
 }

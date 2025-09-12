@@ -1,7 +1,10 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,194 +15,259 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.ChatEventViewHolder;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.ChatMessageLoader;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-class ChatRecyclerAdapter extends RecyclerView.Adapter implements ChunkedListLoader.EventListener, HasUserPicClickHandler {
-    @Nullable
-    private ChatMessageLoader chatMessageLoader = null;
-    @Nonnull
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat:
+//            HasUserPicClickHandler, ChatEventTimestampUpdater, ChatterPicView
+
+class ChatRecyclerAdapter extends android.support.v7.widget.RecyclerView.Adapter
+    implements com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader.EventListener, HasUserPicClickHandler
+{
+    static interface OnAdapterDataChanged
+    {
+
+        public abstract void onAdapterDataAddedAtEnd();
+
+        public abstract void onAdapterDataChanged();
+
+        public abstract void onAdapterDataReloaded();
+    }
+
+    static interface OnUserPicClickedListener
+    {
+
+        public abstract void onUserPicClicked(ChatMessageSource chatmessagesource);
+    }
+
+
+    private ChatMessageLoader chatMessageLoader;
     private final ChatterID chatterID;
     private final LayoutInflater inflater;
-    private WeakReference<OnAdapterDataChanged> onAdapterDataChangedListener = new WeakReference<>((Object) null);
-    private WeakReference<OnUserPicClickedListener> onUserPicClickedListener = new WeakReference<>((Object) null);
+    private WeakReference onAdapterDataChangedListener;
+    private WeakReference onUserPicClickedListener;
     private final ChatEventTimestampUpdater timestampUpdater;
-    @Nonnull
     private final UserManager userManager;
-    private final View.OnClickListener userPicClickListener = new $Lambda$aLaDwVKcksSTh8O8aNFE_CFHRQc(this);
+    private final android.view.View.OnClickListener userPicClickListener = new _2D_.Lambda.aLaDwVKcksSTh8O8aNFE_CFHRQc(this);
 
-    interface OnAdapterDataChanged {
-        void onAdapterDataAddedAtEnd();
-
-        void onAdapterDataChanged();
-
-        void onAdapterDataReloaded();
-    }
-
-    interface OnUserPicClickedListener {
-        void onUserPicClicked(ChatMessageSource chatMessageSource);
-    }
-
-    ChatRecyclerAdapter(Context context, @Nonnull UserManager userManager2, @Nonnull ChatterID chatterID2) {
-        this.inflater = LayoutInflater.from(context);
-        this.timestampUpdater = new ChatEventTimestampUpdater(context);
-        this.userManager = userManager2;
-        this.chatterID = chatterID2;
+    ChatRecyclerAdapter(Context context, UserManager usermanager, ChatterID chatterid)
+    {
+        chatMessageLoader = null;
+        onAdapterDataChangedListener = new WeakReference(null);
+        onUserPicClickedListener = new WeakReference(null);
+        inflater = LayoutInflater.from(context);
+        timestampUpdater = new ChatEventTimestampUpdater(context);
+        userManager = usermanager;
+        chatterID = chatterid;
         setHasStableIds(true);
     }
 
-    public int getItemCount() {
-        if (this.chatMessageLoader != null) {
-            return this.chatMessageLoader.size();
+    public int getItemCount()
+    {
+        if (chatMessageLoader != null)
+        {
+            return chatMessageLoader.size();
+        } else
+        {
+            return 0;
         }
-        return 0;
     }
 
-    public long getItemId(int i) {
-        if (this.chatMessageLoader != null) {
-            return ((ChatMessage) this.chatMessageLoader.get(i)).getId().longValue();
+    public long getItemId(int i)
+    {
+        if (chatMessageLoader != null)
+        {
+            return ((ChatMessage)chatMessageLoader.get(i)).getId().longValue();
+        } else
+        {
+            return -1L;
         }
-        return -1;
     }
 
-    public int getItemViewType(int i) {
-        if (this.chatMessageLoader != null) {
-            return ((ChatMessage) this.chatMessageLoader.get(i)).getViewType();
+    public int getItemViewType(int i)
+    {
+        if (chatMessageLoader != null)
+        {
+            return ((ChatMessage)chatMessageLoader.get(i)).getViewType();
+        } else
+        {
+            return 0;
         }
-        return 0;
     }
 
-    @Nonnull
-    public Executor getListEventsExecutor() {
+    public Executor getListEventsExecutor()
+    {
         return UIThreadExecutor.getSerialInstance();
     }
 
-    public View.OnClickListener getUserPicClickListener() {
-        return this.userPicClickListener;
+    public android.view.View.OnClickListener getUserPicClickListener()
+    {
+        return userPicClickListener;
     }
 
-    /* access modifiers changed from: package-private */
-    public boolean hasMoreItemsAtBottom() {
-        if (this.chatMessageLoader != null) {
-            return this.chatMessageLoader.hasMoreItemsAtBottom();
-        }
-        return false;
-    }
-
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onUserPictureClicked(View view) {
-        ChatMessageSource attachedMessageSource;
-        OnUserPicClickedListener onUserPicClickedListener2 = (OnUserPicClickedListener) this.onUserPicClickedListener.get();
-        if (onUserPicClickedListener2 != null && (view instanceof ChatterPicView) && (attachedMessageSource = ((ChatterPicView) view).getAttachedMessageSource()) != null) {
-            onUserPicClickedListener2.onUserPicClicked(attachedMessageSource);
+    boolean hasMoreItemsAtBottom()
+    {
+        if (chatMessageLoader != null)
+        {
+            return chatMessageLoader.hasMoreItemsAtBottom();
+        } else
+        {
+            return false;
         }
     }
 
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-        SLChatEvent loadFromDatabaseObject;
-        if (this.chatMessageLoader != null && (loadFromDatabaseObject = SLChatEvent.loadFromDatabaseObject((ChatMessage) this.chatMessageLoader.get(i), this.userManager.getUserID())) != null && (viewHolder instanceof ChatEventViewHolder)) {
-            loadFromDatabaseObject.bindViewHolder((ChatEventViewHolder) viewHolder, this.userManager, this.timestampUpdater);
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_chat_ChatRecyclerAdapter_7040(View view)
+    {
+        OnUserPicClickedListener onuserpicclickedlistener = (OnUserPicClickedListener)onUserPicClickedListener.get();
+        if (onuserpicclickedlistener != null && (view instanceof ChatterPicView))
+        {
+            view = ((ChatterPicView)view).getAttachedMessageSource();
+            if (view != null)
+            {
+                onuserpicclickedlistener.onUserPicClicked(view);
+            }
         }
     }
 
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        return SLChatEvent.createViewHolder(this.inflater, i, viewGroup, this);
-    }
-
-    public void onListItemAddedAtEnd() {
-        OnAdapterDataChanged onAdapterDataChanged;
-        if (this.chatMessageLoader != null && (onAdapterDataChanged = (OnAdapterDataChanged) this.onAdapterDataChangedListener.get()) != null) {
-            onAdapterDataChanged.onAdapterDataAddedAtEnd();
+    public void onBindViewHolder(android.support.v7.widget.RecyclerView.ViewHolder viewholder, int i)
+    {
+        if (chatMessageLoader != null)
+        {
+            SLChatEvent slchatevent = SLChatEvent.loadFromDatabaseObject((ChatMessage)chatMessageLoader.get(i), userManager.getUserID());
+            if (slchatevent != null && (viewholder instanceof ChatEventViewHolder))
+            {
+                slchatevent.bindViewHolder((ChatEventViewHolder)viewholder, userManager, timestampUpdater);
+            }
         }
     }
 
-    public void onListItemChanged(int i) {
-        if (this.chatMessageLoader != null) {
-            Debug.Printf("ChatView: item changed: position %d", Integer.valueOf(i));
+    public android.support.v7.widget.RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewgroup, int i)
+    {
+        return SLChatEvent.createViewHolder(inflater, i, viewgroup, this);
+    }
+
+    public void onListItemAddedAtEnd()
+    {
+        if (chatMessageLoader != null)
+        {
+            OnAdapterDataChanged onadapterdatachanged = (OnAdapterDataChanged)onAdapterDataChangedListener.get();
+            if (onadapterdatachanged != null)
+            {
+                onadapterdatachanged.onAdapterDataAddedAtEnd();
+            }
+        }
+    }
+
+    public void onListItemChanged(int i)
+    {
+        if (chatMessageLoader != null)
+        {
+            Debug.Printf("ChatView: item changed: position %d", new Object[] {
+                Integer.valueOf(i)
+            });
             notifyItemChanged(i);
-            OnAdapterDataChanged onAdapterDataChanged = (OnAdapterDataChanged) this.onAdapterDataChangedListener.get();
-            if (onAdapterDataChanged != null) {
-                onAdapterDataChanged.onAdapterDataChanged();
+            OnAdapterDataChanged onadapterdatachanged = (OnAdapterDataChanged)onAdapterDataChangedListener.get();
+            if (onadapterdatachanged != null)
+            {
+                onadapterdatachanged.onAdapterDataChanged();
             }
         }
     }
 
-    public void onListItemsAdded(int i, int i2) {
-        if (this.chatMessageLoader != null) {
-            Debug.Printf("ChatView: items added: new size %d, position %d, count %d", Integer.valueOf(this.chatMessageLoader.size()), Integer.valueOf(i), Integer.valueOf(i2));
-            notifyItemRangeInserted(i, i2);
-            OnAdapterDataChanged onAdapterDataChanged = (OnAdapterDataChanged) this.onAdapterDataChangedListener.get();
-            if (onAdapterDataChanged != null) {
-                onAdapterDataChanged.onAdapterDataChanged();
+    public void onListItemsAdded(int i, int j)
+    {
+        if (chatMessageLoader != null)
+        {
+            Debug.Printf("ChatView: items added: new size %d, position %d, count %d", new Object[] {
+                Integer.valueOf(chatMessageLoader.size()), Integer.valueOf(i), Integer.valueOf(j)
+            });
+            notifyItemRangeInserted(i, j);
+            OnAdapterDataChanged onadapterdatachanged = (OnAdapterDataChanged)onAdapterDataChangedListener.get();
+            if (onadapterdatachanged != null)
+            {
+                onadapterdatachanged.onAdapterDataChanged();
             }
         }
     }
 
-    public void onListItemsRemoved(int i, int i2) {
-        if (this.chatMessageLoader != null) {
-            Debug.Printf("ChatView: items removed: new size %d, position %d, count %d", Integer.valueOf(this.chatMessageLoader.size()), Integer.valueOf(i), Integer.valueOf(i2));
-            notifyItemRangeRemoved(i, i2);
-            OnAdapterDataChanged onAdapterDataChanged = (OnAdapterDataChanged) this.onAdapterDataChangedListener.get();
-            if (onAdapterDataChanged != null) {
-                onAdapterDataChanged.onAdapterDataChanged();
+    public void onListItemsRemoved(int i, int j)
+    {
+        if (chatMessageLoader != null)
+        {
+            Debug.Printf("ChatView: items removed: new size %d, position %d, count %d", new Object[] {
+                Integer.valueOf(chatMessageLoader.size()), Integer.valueOf(i), Integer.valueOf(j)
+            });
+            notifyItemRangeRemoved(i, j);
+            OnAdapterDataChanged onadapterdatachanged = (OnAdapterDataChanged)onAdapterDataChangedListener.get();
+            if (onadapterdatachanged != null)
+            {
+                onadapterdatachanged.onAdapterDataChanged();
             }
         }
     }
 
-    public void onListReloaded() {
-        if (this.chatMessageLoader != null) {
+    public void onListReloaded()
+    {
+        if (chatMessageLoader != null)
+        {
             Debug.Printf("ChatView: list cleared", new Object[0]);
             notifyDataSetChanged();
-            OnAdapterDataChanged onAdapterDataChanged = (OnAdapterDataChanged) this.onAdapterDataChangedListener.get();
-            if (onAdapterDataChanged != null) {
-                onAdapterDataChanged.onAdapterDataReloaded();
+            OnAdapterDataChanged onadapterdatachanged = (OnAdapterDataChanged)onAdapterDataChangedListener.get();
+            if (onadapterdatachanged != null)
+            {
+                onadapterdatachanged.onAdapterDataReloaded();
             }
         }
     }
 
-    public void onViewRecycled(RecyclerView.ViewHolder viewHolder) {
-        if (viewHolder instanceof ChatEventViewHolder) {
-            this.timestampUpdater.removeViewHolder((ChatEventViewHolder) viewHolder);
+    public void onViewRecycled(android.support.v7.widget.RecyclerView.ViewHolder viewholder)
+    {
+        if (viewholder instanceof ChatEventViewHolder)
+        {
+            timestampUpdater.removeViewHolder((ChatEventViewHolder)viewholder);
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public void restartAtBottom() {
-        if (this.chatMessageLoader != null) {
-            this.chatMessageLoader.reload();
+    void restartAtBottom()
+    {
+        if (chatMessageLoader != null)
+        {
+            chatMessageLoader.reload();
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public void setOnUserPicClickedListener(OnUserPicClickedListener onUserPicClickedListener2) {
-        this.onUserPicClickedListener = new WeakReference<>(onUserPicClickedListener2);
+    void setOnUserPicClickedListener(OnUserPicClickedListener onuserpicclickedlistener)
+    {
+        onUserPicClickedListener = new WeakReference(onuserpicclickedlistener);
     }
 
-    /* access modifiers changed from: package-private */
-    public void setVisibleRange(int i, int i2) {
-        if (this.chatMessageLoader != null) {
-            Debug.Printf("ChatView: visible range from %d to %d", Integer.valueOf(i), Integer.valueOf(i2));
-            this.chatMessageLoader.setVisibleRange(i, i2);
+    void setVisibleRange(int i, int j)
+    {
+        if (chatMessageLoader != null)
+        {
+            Debug.Printf("ChatView: visible range from %d to %d", new Object[] {
+                Integer.valueOf(i), Integer.valueOf(j)
+            });
+            chatMessageLoader.setVisibleRange(i, j);
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public void startLoading(@Nonnull OnAdapterDataChanged onAdapterDataChanged) {
-        this.onAdapterDataChangedListener = new WeakReference<>(onAdapterDataChanged);
-        this.chatMessageLoader = this.userManager.getChatterList().getActiveChattersManager().getMessageLoader(this.chatterID, this);
+    void startLoading(OnAdapterDataChanged onadapterdatachanged)
+    {
+        onAdapterDataChangedListener = new WeakReference(onadapterdatachanged);
+        chatMessageLoader = userManager.getChatterList().getActiveChattersManager().getMessageLoader(chatterID, this);
         notifyDataSetChanged();
     }
 
-    /* access modifiers changed from: package-private */
-    public void stopLoading() {
-        this.userManager.getChatterList().getActiveChattersManager().releaseMessageLoader(this.chatterID, this.chatMessageLoader);
-        this.chatMessageLoader = null;
-        this.onAdapterDataChangedListener.clear();
+    void stopLoading()
+    {
+        userManager.getChatterList().getActiveChattersManager().releaseMessageLoader(chatterID, chatMessageLoader);
+        chatMessageLoader = null;
+        onAdapterDataChangedListener.clear();
         notifyDataSetChanged();
     }
 }

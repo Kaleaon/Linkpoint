@@ -1,75 +1,101 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class GroupTitlesReply extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<GroupData> GroupData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class GroupTitlesReply extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID GroupID;
         public UUID RequestID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class GroupData {
+    public static class GroupData
+    {
+
         public UUID RoleID;
         public boolean Selected;
-        public byte[] Title;
-    }
+        public byte Title[];
 
-    public GroupTitlesReply() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 53;
-        Iterator<T> it = this.GroupData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            i = ((GroupData) it.next()).Title.length + 1 + 16 + 1 + i2;
+        public GroupData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleGroupTitlesReply(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList GroupData_Fields;
+
+    public GroupTitlesReply()
+    {
+        GroupData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 120);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.GroupID);
-        packUUID(byteBuffer, this.AgentData_Field.RequestID);
-        byteBuffer.put((byte) this.GroupData_Fields.size());
-        for (GroupData groupData : this.GroupData_Fields) {
-            packVariable(byteBuffer, groupData.Title, 1);
-            packUUID(byteBuffer, groupData.RoleID);
-            packBoolean(byteBuffer, groupData.Selected);
-        }
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = GroupData_Fields.iterator();
+        int i;
+        for (i = 53; iterator.hasNext(); i = ((GroupData)iterator.next()).Title.length + 1 + 16 + 1 + i) { }
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.GroupID = unpackUUID(byteBuffer);
-        this.AgentData_Field.RequestID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            GroupData groupData = new GroupData();
-            groupData.Title = unpackVariable(byteBuffer, 1);
-            groupData.RoleID = unpackUUID(byteBuffer);
-            groupData.Selected = unpackBoolean(byteBuffer);
-            this.GroupData_Fields.add(groupData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleGroupTitlesReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)120);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.GroupID);
+        packUUID(bytebuffer, AgentData_Field.RequestID);
+        bytebuffer.put((byte)GroupData_Fields.size());
+        GroupData groupdata;
+        for (Iterator iterator = GroupData_Fields.iterator(); iterator.hasNext(); packBoolean(bytebuffer, groupdata.Selected))
+        {
+            groupdata = (GroupData)iterator.next();
+            packVariable(bytebuffer, groupdata.Title, 1);
+            packUUID(bytebuffer, groupdata.RoleID);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.GroupID = unpackUUID(bytebuffer);
+        AgentData_Field.RequestID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            GroupData groupdata = new GroupData();
+            groupdata.Title = unpackVariable(bytebuffer, 1);
+            groupdata.RoleID = unpackUUID(bytebuffer);
+            groupdata.Selected = unpackBoolean(bytebuffer);
+            GroupData_Fields.add(groupdata);
+        }
+
     }
 }

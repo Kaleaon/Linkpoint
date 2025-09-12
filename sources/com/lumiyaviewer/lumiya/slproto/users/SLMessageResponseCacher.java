@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -9,42 +13,65 @@ import com.lumiyaviewer.lumiya.slproto.messages.SLMessageFactory;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
 
-public class SLMessageResponseCacher<Key, MessageType extends SLMessage> extends ResponseCacher<Key, MessageType> {
-    public SLMessageResponseCacher(DaoSession daoSession, Executor executor, String str) {
-        super(daoSession, executor, str);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users:
+//            ResponseCacher
+
+public class SLMessageResponseCacher extends ResponseCacher
+{
+
+    public SLMessageResponseCacher(DaoSession daosession, Executor executor, String s)
+    {
+        super(daosession, executor, s);
     }
 
-    public /* bridge */ /* synthetic */ Subscribable getPool() {
+    public volatile Subscribable getPool()
+    {
         return super.getPool();
     }
 
-    public /* bridge */ /* synthetic */ RequestSource getRequestSource() {
+    public volatile RequestSource getRequestSource()
+    {
         return super.getRequestSource();
     }
 
-    /* access modifiers changed from: protected */
-    public MessageType loadCached(byte[] bArr) {
-        ByteBuffer order = ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder());
-        int DecodeMessageIDGeneric = SLMessage.DecodeMessageIDGeneric(order);
-        MessageType CreateByID = SLMessageFactory.CreateByID(DecodeMessageIDGeneric);
-        if (CreateByID != null) {
-            CreateByID.UnpackPayload(order);
-            return CreateByID;
+    protected SLMessage loadCached(byte abyte0[])
+    {
+        abyte0 = ByteBuffer.wrap(abyte0).order(ByteOrder.nativeOrder());
+        int i = SLMessage.DecodeMessageIDGeneric(abyte0);
+        SLMessage slmessage = SLMessageFactory.CreateByID(i);
+        if (slmessage != null)
+        {
+            slmessage.UnpackPayload(abyte0);
+            return slmessage;
+        } else
+        {
+            Debug.Printf("Failed to create message for id 0x%x", new Object[] {
+                Integer.valueOf(i)
+            });
+            return null;
         }
-        Debug.Printf("Failed to create message for id 0x%x", Integer.valueOf(DecodeMessageIDGeneric));
-        return null;
     }
 
-    public /* bridge */ /* synthetic */ void requestUpdate(Object obj) {
+    protected volatile Object loadCached(byte abyte0[])
+    {
+        return loadCached(abyte0);
+    }
+
+    public volatile void requestUpdate(Object obj)
+    {
         super.requestUpdate(obj);
     }
 
-    /* access modifiers changed from: protected */
-    public byte[] storeCached(@Nonnull MessageType messagetype) {
-        byte[] bArr = new byte[messagetype.CalcPayloadSize()];
-        messagetype.PackPayload(ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder()));
-        return bArr;
+    protected byte[] storeCached(SLMessage slmessage)
+    {
+        byte abyte0[] = new byte[slmessage.CalcPayloadSize()];
+        slmessage.PackPayload(ByteBuffer.wrap(abyte0).order(ByteOrder.nativeOrder()));
+        return abyte0;
+    }
+
+    protected volatile byte[] storeCached(Object obj)
+    {
+        return storeCached((SLMessage)obj);
     }
 }

@@ -36,7 +36,7 @@ public class TerrainTextureCache extends ResourceMemoryCache<TerrainPatchInfo, O
                 if (obj instanceof OpenJPEG) {
                     TerrainTextureRequest.this.onLayerReady(this.layer, (OpenJPEG) obj);
                 } else if (obj == null) {
-                    TerrainTextureRequest.this.onLayerReady(this.layer, null);
+                    TerrainTextureRequest.this.onLayerReady(this.layer, (OpenJPEG) null);
                 }
             }
         }
@@ -50,7 +50,7 @@ public class TerrainTextureCache extends ResourceMemoryCache<TerrainPatchInfo, O
                 for (int i = 0; i < 4; i++) {
                     this.rawRequests[i] = null;
                 }
-                Future future = this.bakingFuture;
+                Future<?> future = this.bakingFuture;
                 if (future != null) {
                     future.cancel(false);
                 }
@@ -59,16 +59,14 @@ public class TerrainTextureCache extends ResourceMemoryCache<TerrainPatchInfo, O
         }
 
         public void execute() {
-            int i = 0;
             this.layerNeededMask = ((TerrainPatchInfo) getParams()).getLayerMask();
             this.layerReadyMask = 0;
             if (this.layerNeededMask != 0) {
                 synchronized (this) {
-                    while (i < 4) {
+                    for (int i = 0; i < 4; i++) {
                         if (this.rawRequests[i] == null && (this.layerNeededMask & (1 << i)) != 0) {
                             this.rawRequests[i] = new TerrainRawTextureRequest(((TerrainPatchInfo) getParams()).getTextures().getTextureUUID(i), i);
                         }
-                        i++;
                     }
                 }
                 return;
@@ -80,29 +78,33 @@ public class TerrainTextureCache extends ResourceMemoryCache<TerrainPatchInfo, O
             return 0;
         }
 
-        protected synchronized void onLayerReady(int i, OpenJPEG openJPEG) {
-            int i2 = 0;
+        /* access modifiers changed from: protected */
+        public synchronized void onLayerReady(int i, OpenJPEG openJPEG) {
+            boolean z = false;
             synchronized (this) {
                 this.rawTextures[i] = openJPEG;
                 this.layerReadyMask |= 1 << i;
-                String str = "Terrain: onLayerReady (%d), rawTexture %s, layerNeededMask %d, layerReadyMask %d";
                 Object[] objArr = new Object[4];
                 objArr[0] = Integer.valueOf(i);
                 objArr[1] = openJPEG != null ? openJPEG.toString() : "null";
                 objArr[2] = Integer.valueOf(this.layerNeededMask);
                 objArr[3] = Integer.valueOf(this.layerReadyMask);
-                Debug.Printf(str, objArr);
+                Debug.Printf("Terrain: onLayerReady (%d), rawTexture %s, layerNeededMask %d, layerReadyMask %d", objArr);
                 if ((this.layerNeededMask & this.layerReadyMask) == this.layerNeededMask) {
-                    int i3 = 0;
-                    while (i3 < 4) {
-                        if ((this.layerNeededMask & (1 << i3)) != 0 && this.rawTextures[i3] == null) {
-                            Debug.Printf("Terrain: texture for layer %d is not ready", Integer.valueOf(i3));
+                    int i2 = 0;
+                    while (true) {
+                        if (i2 < 4) {
+                            if ((this.layerNeededMask & (1 << i2)) != 0 && this.rawTextures[i2] == null) {
+                                Debug.Printf("Terrain: texture for layer %d is not ready", Integer.valueOf(i2));
+                                break;
+                            }
+                            i2++;
+                        } else {
+                            z = true;
                             break;
                         }
-                        i3++;
                     }
-                    i2 = 1;
-                    if (i2 != 0) {
+                    if (z) {
                         this.bakingFuture = TextureCache.getInstance().getDecompressorExecutor().submit(this);
                     } else {
                         completeRequest(null);
@@ -117,14 +119,15 @@ public class TerrainTextureCache extends ResourceMemoryCache<TerrainPatchInfo, O
                 OpenJPEG bakeTerrain = OpenJPEG.bakeTerrain(256, 256, this.rawTextures, terrainPatchInfo.getTextureHeightMap(), terrainPatchInfo.getHeightMap().getMapWidth(), terrainPatchInfo.getHeightMap().getMapHeight());
                 Debug.Printf("Terrain: Baked texture producer: produced baked texture", new Object[0]);
                 completeRequest(bakeTerrain);
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 Debug.Warning(e);
                 completeRequest(null);
             }
         }
     }
 
-    protected ResourceRequest<TerrainPatchInfo, OpenJPEG> CreateNewRequest(TerrainPatchInfo terrainPatchInfo, ResourceManager<TerrainPatchInfo, OpenJPEG> resourceManager) {
+    /* access modifiers changed from: protected */
+    public ResourceRequest<TerrainPatchInfo, OpenJPEG> CreateNewRequest(TerrainPatchInfo terrainPatchInfo, ResourceManager<TerrainPatchInfo, OpenJPEG> resourceManager) {
         return new TerrainTextureRequest(terrainPatchInfo, resourceManager);
     }
 }

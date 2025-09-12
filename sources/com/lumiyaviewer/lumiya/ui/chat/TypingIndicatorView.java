@@ -1,64 +1,100 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import com.google.common.base.Objects;
+import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import java.util.UUID;
-import javax.annotation.Nullable;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
+import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 
-public class TypingIndicatorView extends ImageView {
-    @Nullable
-    private ChatterID chatterID = null;
-    @Nullable
-    private Subscription<UUID, Boolean> subscription = null;
+public class TypingIndicatorView extends ImageView
+{
 
-    public TypingIndicatorView(Context context) {
+    private ChatterID chatterID;
+    private Subscription subscription;
+
+    public TypingIndicatorView(Context context)
+    {
         super(context);
+        chatterID = null;
+        subscription = null;
     }
 
-    public TypingIndicatorView(Context context, AttributeSet attributeSet) {
-        super(context, attributeSet);
+    public TypingIndicatorView(Context context, AttributeSet attributeset)
+    {
+        super(context, attributeset);
+        chatterID = null;
+        subscription = null;
     }
 
-    public TypingIndicatorView(Context context, AttributeSet attributeSet, int i) {
-        super(context, attributeSet, i);
+    public TypingIndicatorView(Context context, AttributeSet attributeset, int i)
+    {
+        super(context, attributeset, i);
+        chatterID = null;
+        subscription = null;
     }
 
-    @TargetApi(21)
-    public TypingIndicatorView(Context context, AttributeSet attributeSet, int i, int i2) {
-        super(context, attributeSet, i, i2);
+    public TypingIndicatorView(Context context, AttributeSet attributeset, int i, int j)
+    {
+        super(context, attributeset, i, j);
+        chatterID = null;
+        subscription = null;
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onUserTypingStatus */
-    public void m425com_lumiyaviewer_lumiya_ui_chat_TypingIndicatorViewmthref0(Boolean bool) {
-        if (bool != null && this.subscription != null && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
-            if (bool.booleanValue() && getVisibility() != 0) {
-                ((AnimationDrawable) getDrawable()).start();
-            } else if (!bool.booleanValue() && getVisibility() == 0) {
-                ((AnimationDrawable) getDrawable()).stop();
+    private void onUserTypingStatus(Boolean boolean1)
+    {
+        if (boolean1 != null && subscription != null && (chatterID instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser))
+        {
+            int i;
+            if (boolean1.booleanValue() && getVisibility() != 0)
+            {
+                ((AnimationDrawable)getDrawable()).start();
+            } else
+            if (!boolean1.booleanValue() && getVisibility() == 0)
+            {
+                ((AnimationDrawable)getDrawable()).stop();
             }
-            setVisibility(bool.booleanValue() ? 0 : 4);
+            if (boolean1.booleanValue())
+            {
+                i = 0;
+            } else
+            {
+                i = 4;
+            }
+            setVisibility(i);
         }
     }
 
-    public void setChatterID(@Nullable ChatterID chatterID2) {
-        if (!Objects.equal(chatterID2, this.chatterID)) {
-            this.chatterID = chatterID2;
-            if (this.subscription != null) {
-                this.subscription.unsubscribe();
-                this.subscription = null;
+    void _2D_com_lumiyaviewer_lumiya_ui_chat_TypingIndicatorView_2D_mthref_2D_0(Boolean boolean1)
+    {
+        onUserTypingStatus(boolean1);
+    }
+
+    public void setChatterID(ChatterID chatterid)
+    {
+        if (!Objects.equal(chatterid, chatterID))
+        {
+            chatterID = chatterid;
+            if (subscription != null)
+            {
+                subscription.unsubscribe();
+                subscription = null;
             }
-            if ((chatterID2 instanceof ChatterID.ChatterIDUser) && chatterID2.getUserManager() != null) {
-                this.subscription = chatterID2.getUserManager().getChatterList().getUserTypingStatus().subscribe(((ChatterID.ChatterIDUser) chatterID2).getChatterUUID(), UIThreadExecutor.getInstance(), new $Lambda$XDRgkFjVFoS0WpW8v6lPNgts7Q(this));
+            if ((chatterid instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser) && chatterid.getUserManager() != null)
+            {
+                subscription = chatterid.getUserManager().getChatterList().getUserTypingStatus().subscribe(((com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser)chatterid).getChatterUUID(), UIThreadExecutor.getInstance(), new _2D_.Lambda.XDRgkFjV_2D_FoS0WpW8v6lPNgts7Q(this));
             }
-            if (this.subscription == null) {
+            if (subscription == null)
+            {
                 setVisibility(4);
             }
         }

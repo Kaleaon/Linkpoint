@@ -1,33 +1,49 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.events;
 
 import java.util.Set;
 
-public class SLInventoryUpdatedEvent {
+public class SLInventoryUpdatedEvent
+{
+
     private boolean needsReload;
-    private Set<Long> updatedFolders;
-    private Set<Long> updatedItems;
+    private Set updatedFolders;
+    private Set updatedItems;
 
-    public SLInventoryUpdatedEvent(Set<Long> set, Set<Long> set2, boolean z) {
-        this.updatedFolders = set;
-        this.updatedItems = set2;
-        this.needsReload = z;
+    public SLInventoryUpdatedEvent(Set set, Set set1, boolean flag)
+    {
+        updatedFolders = set;
+        updatedItems = set1;
+        needsReload = flag;
     }
 
-    public boolean isFolderUpdated(long j) {
-        if (this.updatedFolders == null) {
+    public boolean isFolderUpdated(long l)
+    {
+        if (updatedFolders == null)
+        {
             return false;
+        } else
+        {
+            return updatedFolders.contains(Long.valueOf(l));
         }
-        return this.updatedFolders.contains(Long.valueOf(j));
     }
 
-    public boolean isItemUpdated(long j) {
-        if (this.updatedItems == null) {
+    public boolean isItemUpdated(long l)
+    {
+        if (updatedItems == null)
+        {
             return false;
+        } else
+        {
+            return updatedItems.contains(Long.valueOf(l));
         }
-        return this.updatedItems.contains(Long.valueOf(j));
     }
 
-    public boolean isReloadNeeded() {
-        return this.needsReload;
+    public boolean isReloadNeeded()
+    {
+        return needsReload;
     }
 }

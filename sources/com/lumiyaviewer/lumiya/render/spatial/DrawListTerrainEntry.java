@@ -1,46 +1,61 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.spatial;
 
+import com.lumiyaviewer.lumiya.render.DrawableStore;
 import com.lumiyaviewer.lumiya.render.terrain.DrawableTerrainPatch;
 import com.lumiyaviewer.lumiya.slproto.terrain.TerrainPatchInfo;
 import java.lang.ref.WeakReference;
-import javax.annotation.Nonnull;
+import java.util.ArrayList;
 
-class DrawListTerrainEntry extends DrawListEntry {
-    private volatile WeakReference<DrawableTerrainPatch> drawablePatch;
-    @Nonnull
+// Referenced classes of package com.lumiyaviewer.lumiya.render.spatial:
+//            DrawListEntry, DrawList
+
+class DrawListTerrainEntry extends DrawListEntry
+{
+
+    private volatile WeakReference drawablePatch;
     private TerrainPatchInfo patchInfo;
     private final int patchX;
     private final int patchY;
 
-    DrawListTerrainEntry(@Nonnull TerrainPatchInfo terrainPatchInfo, int i, int i2) {
-        this.patchX = i;
-        this.patchY = i2;
-        updatePatchInfo(terrainPatchInfo);
+    DrawListTerrainEntry(TerrainPatchInfo terrainpatchinfo, int i, int j)
+    {
+        patchX = i;
+        patchY = j;
+        updatePatchInfo(terrainpatchinfo);
     }
 
-    public void addToDrawList(@Nonnull DrawList drawList) {
-        DrawableTerrainPatch drawableTerrainPatch = null;
-        WeakReference<DrawableTerrainPatch> weakReference = this.drawablePatch;
-        if (weakReference != null) {
-            drawableTerrainPatch = (DrawableTerrainPatch) weakReference.get();
+    public void addToDrawList(DrawList drawlist)
+    {
+        DrawableTerrainPatch drawableterrainpatch = null;
+        Object obj = drawablePatch;
+        if (obj != null)
+        {
+            drawableterrainpatch = (DrawableTerrainPatch)((WeakReference) (obj)).get();
         }
-        if (drawableTerrainPatch == null) {
-            drawableTerrainPatch = new DrawableTerrainPatch(drawList.drawableStore.terrainGeometryCache, drawList.drawableStore.glTerrainTextureCache, this.patchInfo, this.patchX, this.patchY);
-            this.drawablePatch = new WeakReference<>(drawableTerrainPatch);
+        obj = drawableterrainpatch;
+        if (drawableterrainpatch == null)
+        {
+            obj = new DrawableTerrainPatch(drawlist.drawableStore.terrainGeometryCache, drawlist.drawableStore.glTerrainTextureCache, patchInfo, patchX, patchY);
+            drawablePatch = new WeakReference(obj);
         }
-        drawList.terrain.add(drawableTerrainPatch);
+        drawlist.terrain.add(obj);
     }
 
-    public void updatePatchInfo(@Nonnull TerrainPatchInfo terrainPatchInfo) {
-        this.patchInfo = terrainPatchInfo;
-        float minHeight = terrainPatchInfo.getMinHeight();
-        float maxHeight = terrainPatchInfo.getMaxHeight();
-        this.boundingBox[0] = (float) (this.patchX * 16);
-        this.boundingBox[1] = (float) (this.patchY * 16);
-        this.boundingBox[2] = minHeight;
-        this.boundingBox[3] = (float) ((this.patchX + 1) * 16);
-        this.boundingBox[4] = (float) ((this.patchY + 1) * 16);
-        this.boundingBox[5] = maxHeight;
-        this.drawablePatch = null;
+    public void updatePatchInfo(TerrainPatchInfo terrainpatchinfo)
+    {
+        patchInfo = terrainpatchinfo;
+        float f = terrainpatchinfo.getMinHeight();
+        float f1 = terrainpatchinfo.getMaxHeight();
+        boundingBox[0] = patchX * 16;
+        boundingBox[1] = patchY * 16;
+        boundingBox[2] = f;
+        boundingBox[3] = (patchX + 1) * 16;
+        boundingBox[4] = (patchY + 1) * 16;
+        boundingBox[5] = f1;
+        drawablePatch = null;
     }
 }

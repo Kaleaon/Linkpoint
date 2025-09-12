@@ -1,83 +1,124 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class ParcelReturnObjects extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<OwnerIDs> OwnerIDs_Fields = new ArrayList<>();
-    public ParcelData ParcelData_Field;
-    public ArrayList<TaskIDs> TaskIDs_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class ParcelReturnObjects extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class OwnerIDs {
+    public static class OwnerIDs
+    {
+
         public UUID OwnerID;
+
+        public OwnerIDs()
+        {
+        }
     }
 
-    public static class ParcelData {
+    public static class ParcelData
+    {
+
         public int LocalID;
         public int ReturnType;
+
+        public ParcelData()
+        {
+        }
     }
 
-    public static class TaskIDs {
+    public static class TaskIDs
+    {
+
         public UUID TaskID;
-    }
 
-    public ParcelReturnObjects() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-        this.ParcelData_Field = new ParcelData();
-    }
-
-    public int CalcPayloadSize() {
-        return (this.TaskIDs_Fields.size() * 16) + 45 + 1 + (this.OwnerIDs_Fields.size() * 16);
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleParcelReturnObjects(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -57);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packInt(byteBuffer, this.ParcelData_Field.LocalID);
-        packInt(byteBuffer, this.ParcelData_Field.ReturnType);
-        byteBuffer.put((byte) this.TaskIDs_Fields.size());
-        for (TaskIDs taskIDs : this.TaskIDs_Fields) {
-            packUUID(byteBuffer, taskIDs.TaskID);
-        }
-        byteBuffer.put((byte) this.OwnerIDs_Fields.size());
-        for (OwnerIDs ownerIDs : this.OwnerIDs_Fields) {
-            packUUID(byteBuffer, ownerIDs.OwnerID);
+        public TaskIDs()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.ParcelData_Field.LocalID = unpackInt(byteBuffer);
-        this.ParcelData_Field.ReturnType = unpackInt(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            TaskIDs taskIDs = new TaskIDs();
-            taskIDs.TaskID = unpackUUID(byteBuffer);
-            this.TaskIDs_Fields.add(taskIDs);
+
+    public AgentData AgentData_Field;
+    public ArrayList OwnerIDs_Fields;
+    public ParcelData ParcelData_Field;
+    public ArrayList TaskIDs_Fields;
+
+    public ParcelReturnObjects()
+    {
+        TaskIDs_Fields = new ArrayList();
+        OwnerIDs_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        ParcelData_Field = new ParcelData();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return TaskIDs_Fields.size() * 16 + 45 + 1 + OwnerIDs_Fields.size() * 16;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleParcelReturnObjects(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-57);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packInt(bytebuffer, ParcelData_Field.LocalID);
+        packInt(bytebuffer, ParcelData_Field.ReturnType);
+        bytebuffer.put((byte)TaskIDs_Fields.size());
+        for (Iterator iterator = TaskIDs_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, ((TaskIDs)iterator.next()).TaskID)) { }
+        bytebuffer.put((byte)OwnerIDs_Fields.size());
+        for (Iterator iterator1 = OwnerIDs_Fields.iterator(); iterator1.hasNext(); packUUID(bytebuffer, ((OwnerIDs)iterator1.next()).OwnerID)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        ParcelData_Field.LocalID = unpackInt(bytebuffer);
+        ParcelData_Field.ReturnType = unpackInt(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            TaskIDs taskids = new TaskIDs();
+            taskids.TaskID = unpackUUID(bytebuffer);
+            TaskIDs_Fields.add(taskids);
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < b2; i2++) {
-            OwnerIDs ownerIDs = new OwnerIDs();
-            ownerIDs.OwnerID = unpackUUID(byteBuffer);
-            this.OwnerIDs_Fields.add(ownerIDs);
+
+        byte0 = bytebuffer.get();
+        for (int j = ((flag) ? 1 : 0); j < (byte0 & 0xff); j++)
+        {
+            OwnerIDs ownerids = new OwnerIDs();
+            ownerids.OwnerID = unpackUUID(bytebuffer);
+            OwnerIDs_Fields.add(ownerids);
         }
+
     }
 }

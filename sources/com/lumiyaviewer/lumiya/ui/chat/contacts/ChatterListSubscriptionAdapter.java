@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat.contacts;
 
 import android.content.Context;
@@ -6,71 +10,100 @@ import android.view.ViewGroup;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterDisplayData;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
 import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterListType;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.io.Closeable;
 import java.io.IOException;
 
-public class ChatterListSubscriptionAdapter extends ChatterListSimpleAdapter implements Subscription.OnData<ImmutableList<ChatterDisplayData>>, Closeable {
-    private final Predicate<ChatterDisplayData> predicate;
-    private final Subscription<ChatterListType, ImmutableList<ChatterDisplayData>> subscription;
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat.contacts:
+//            ChatterListSimpleAdapter
 
-    public ChatterListSubscriptionAdapter(Context context, UserManager userManager, ChatterListType chatterListType) {
-        super(context, userManager);
-        this.predicate = null;
-        this.subscription = userManager.getChatterList().getChatterList().subscribe(chatterListType, UIThreadExecutor.getInstance(), this);
+public class ChatterListSubscriptionAdapter extends ChatterListSimpleAdapter
+    implements com.lumiyaviewer.lumiya.react.Subscription.OnData, Closeable
+{
+
+    private final Predicate predicate;
+    private final Subscription subscription;
+
+    public ChatterListSubscriptionAdapter(Context context, UserManager usermanager, ChatterListType chatterlisttype)
+    {
+        super(context, usermanager);
+        predicate = null;
+        subscription = usermanager.getChatterList().getChatterList().subscribe(chatterlisttype, UIThreadExecutor.getInstance(), this);
     }
 
-    public ChatterListSubscriptionAdapter(Context context, UserManager userManager, ChatterListType chatterListType, Predicate<ChatterDisplayData> predicate2) {
-        super(context, userManager);
-        this.predicate = predicate2;
-        this.subscription = userManager.getChatterList().getChatterList().subscribe(chatterListType, UIThreadExecutor.getInstance(), this);
+    public ChatterListSubscriptionAdapter(Context context, UserManager usermanager, ChatterListType chatterlisttype, Predicate predicate1)
+    {
+        super(context, usermanager);
+        predicate = predicate1;
+        subscription = usermanager.getChatterList().getChatterList().subscribe(chatterlisttype, UIThreadExecutor.getInstance(), this);
     }
 
-    public /* bridge */ /* synthetic */ boolean areAllItemsEnabled() {
+    public volatile boolean areAllItemsEnabled()
+    {
         return super.areAllItemsEnabled();
     }
 
-    public void close() throws IOException {
-        this.subscription.unsubscribe();
+    public void close()
+        throws IOException
+    {
+        subscription.unsubscribe();
     }
 
-    public /* bridge */ /* synthetic */ int getCount() {
+    public volatile int getCount()
+    {
         return super.getCount();
     }
 
-    public /* bridge */ /* synthetic */ Object getItem(int i) {
+    public volatile Object getItem(int i)
+    {
         return super.getItem(i);
     }
 
-    public /* bridge */ /* synthetic */ long getItemId(int i) {
+    public volatile long getItemId(int i)
+    {
         return super.getItemId(i);
     }
 
-    public /* bridge */ /* synthetic */ View getView(int i, View view, ViewGroup viewGroup) {
-        return super.getView(i, view, viewGroup);
+    public volatile View getView(int i, View view, ViewGroup viewgroup)
+    {
+        return super.getView(i, view, viewgroup);
     }
 
-    public /* bridge */ /* synthetic */ boolean hasStableIds() {
+    public volatile boolean hasStableIds()
+    {
         return super.hasStableIds();
     }
 
-    public /* bridge */ /* synthetic */ boolean isEmpty() {
+    public volatile boolean isEmpty()
+    {
         return super.isEmpty();
     }
 
-    public /* bridge */ /* synthetic */ boolean isEnabled(int i) {
+    public volatile boolean isEnabled(int i)
+    {
         return super.isEnabled(i);
     }
 
-    public void onData(ImmutableList<ChatterDisplayData> immutableList) {
-        if (this.predicate == null) {
-            setData(immutableList);
-        } else {
-            setData(ImmutableList.copyOf(Iterables.filter(immutableList, this.predicate)));
+    public void onData(ImmutableList immutablelist)
+    {
+        if (predicate == null)
+        {
+            setData(immutablelist);
+            return;
+        } else
+        {
+            setData(ImmutableList.copyOf(Iterables.filter(immutablelist, predicate)));
+            return;
         }
+    }
+
+    public volatile void onData(Object obj)
+    {
+        onData((ImmutableList)obj);
     }
 }

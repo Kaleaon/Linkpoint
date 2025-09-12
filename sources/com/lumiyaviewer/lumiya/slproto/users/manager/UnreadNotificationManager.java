@@ -1,10 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import com.google.common.collect.ImmutableMap;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.GlobalOptions;
 import com.lumiyaviewer.lumiya.LumiyaApp;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.dao.ChatMessageDao;
@@ -12,415 +15,739 @@ import com.lumiyaviewer.lumiya.dao.Chatter;
 import com.lumiyaviewer.lumiya.dao.ChatterDao;
 import com.lumiyaviewer.lumiya.dao.DaoSession;
 import com.lumiyaviewer.lumiya.eventbus.EventBus;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
 import com.lumiyaviewer.lumiya.react.SimpleRequestHandler;
 import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.SubscriptionPool;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo;
 import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels;
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType;
+import de.greenrobot.dao.Property;
 import de.greenrobot.dao.query.QueryBuilder;
 import de.greenrobot.dao.query.WhereCondition;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class UnreadNotificationManager implements ChatterNameRetriever.OnChatterNameUpdated {
-    private static final long FRESH_MESSAGES_NOTIFICATION_INTERVAL = 3000;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            UserManager, UnreadNotificationInfo, ObjectPopupsManager, UnreadNotifications
+
+public class UnreadNotificationManager
+    implements com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever.OnChatterNameUpdated
+{
+    public static interface NotifyCapture
+    {
+
+        public abstract Intent onGetNotifyCaptureIntent(UnreadNotificationInfo unreadnotificationinfo, Intent intent);
+    }
+
+
+    private static final long FRESH_MESSAGES_NOTIFICATION_INTERVAL = 3000L;
     private static final int MASK_ENABLED_ALL = 7;
     private static final int MASK_ENABLED_GROUP = 2;
     private static final int MASK_ENABLED_IM = 4;
     private static final int MASK_ENABLED_LOCAL = 1;
     private static final int MAX_CHATTERS_PER_NOTIFICATION = 3;
     private static final int MAX_MESSAGES_PER_NOTIFICATION = 3;
-    public static final Boolean unreadNotificationKey = Boolean.FALSE;
-    @Nonnull
+    public static final Boolean unreadNotificationKey;
     private final ChatMessageDao chatMessageDao;
-    @Nonnull
     private final ChatterDao chatterDao;
-    private final Map<Long, ChatterNameRetriever> chatterSources = new ConcurrentHashMap(4, 0.75f, 2);
+    private final Map chatterSources = new ConcurrentHashMap(4, 0.75F, 2);
     private final UnreadNotificationInfo emptyNotification;
-    private final Map<Long, Integer> freshMessageCounts = new HashMap();
+    private final Map freshMessageCounts = new HashMap();
     private final Object freshMessageCountsLock = new Object();
-    private final AtomicLong lastFreshMessageNotification = new AtomicLong(0);
+    private final AtomicLong lastFreshMessageNotification = new AtomicLong(0L);
     private final AtomicInteger maskEnabled = new AtomicInteger(7);
-    private final AtomicReference<NotificationType> mostImportantNotificationType = new AtomicReference<>();
-    @Nullable
-    private WeakReference<NotifyCapture> notifyCapture = null;
+    private final AtomicReference mostImportantNotificationType = new AtomicReference();
+    private WeakReference notifyCapture;
     private final Object notifyCaptureLock = new Object();
     private final AtomicInteger totalSourcesCount = new AtomicInteger(0);
     private final AtomicInteger totalUnreadCount = new AtomicInteger(0);
-    /* access modifiers changed from: private */
-    public final SubscriptionPool<Boolean, UnreadNotifications> unreadNotificationInfoPool = new SubscriptionPool<>();
-    /* access modifiers changed from: private */
-    public final Runnable updateChatterDataRunnable = new Runnable() {
-        public void run() {
-            UnreadNotificationManager.this.updateUnreadChatterData();
-            UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateNotificationDataRunnable);
+    private final SubscriptionPool unreadNotificationInfoPool = new SubscriptionPool();
+    private final Runnable updateChatterDataRunnable = new Runnable() {
+
+        final UnreadNotificationManager this$0;
+
+        public void run()
+        {
+            UnreadNotificationManager._2D_wrap1(UnreadNotificationManager.this);
+            UnreadNotificationManager._2D_get2(UnreadNotificationManager.this).execute(UnreadNotificationManager._2D_get3(UnreadNotificationManager.this));
         }
+
+            
+            {
+                this$0 = UnreadNotificationManager.this;
+                super();
+            }
     };
-    /* access modifiers changed from: private */
-    public final Executor updateExecutor;
-    /* access modifiers changed from: private */
-    public final Runnable updateNotificationDataRunnable = new Runnable() {
-        public void run() {
-            UnreadNotificationManager.this.unreadNotificationInfoPool.onResultData(UnreadNotificationManager.unreadNotificationKey, UnreadNotificationManager.this.getUnreadNotification());
+    private final Executor updateExecutor;
+    private final Runnable updateNotificationDataRunnable = new Runnable() {
+
+        final UnreadNotificationManager this$0;
+
+        public void run()
+        {
+            UnreadNotificationManager._2D_get0(UnreadNotificationManager.this).onResultData(UnreadNotificationManager.unreadNotificationKey, UnreadNotificationManager._2D_wrap0(UnreadNotificationManager.this));
         }
+
+            
+            {
+                this$0 = UnreadNotificationManager.this;
+                super();
+            }
     };
-    @Nonnull
     private final UserManager userManager;
 
-    public interface NotifyCapture {
-        @Nullable
-        Intent onGetNotifyCaptureIntent(@Nonnull UnreadNotificationInfo unreadNotificationInfo, Intent intent);
+    static SubscriptionPool _2D_get0(UnreadNotificationManager unreadnotificationmanager)
+    {
+        return unreadnotificationmanager.unreadNotificationInfoPool;
     }
 
-    public UnreadNotificationManager(@Nonnull UserManager userManager2, @Nonnull DaoSession daoSession) {
-        this.userManager = userManager2;
-        this.chatterDao = daoSession.getChatterDao();
-        this.chatMessageDao = daoSession.getChatMessageDao();
-        this.updateExecutor = userManager2.getDatabaseRunOnceExecutor();
-        this.emptyNotification = UnreadNotificationInfo.create(userManager2.getUserID(), 0, (List<UnreadNotificationInfo.UnreadMessageSource>) null, (NotificationType) null, 0, (NotificationType) null, (UnreadNotificationInfo.UnreadMessageSource) null, UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null));
-        this.unreadNotificationInfoPool.attachRequestHandler(new SimpleRequestHandler<Boolean>() {
-            public void onRequest(@Nonnull Boolean bool) {
-                UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateChatterDataRunnable);
+    static Runnable _2D_get1(UnreadNotificationManager unreadnotificationmanager)
+    {
+        return unreadnotificationmanager.updateChatterDataRunnable;
+    }
+
+    static Executor _2D_get2(UnreadNotificationManager unreadnotificationmanager)
+    {
+        return unreadnotificationmanager.updateExecutor;
+    }
+
+    static Runnable _2D_get3(UnreadNotificationManager unreadnotificationmanager)
+    {
+        return unreadnotificationmanager.updateNotificationDataRunnable;
+    }
+
+    static UnreadNotifications _2D_wrap0(UnreadNotificationManager unreadnotificationmanager)
+    {
+        return unreadnotificationmanager.getUnreadNotification();
+    }
+
+    static void _2D_wrap1(UnreadNotificationManager unreadnotificationmanager)
+    {
+        unreadnotificationmanager.updateUnreadChatterData();
+    }
+
+    public UnreadNotificationManager(UserManager usermanager, DaoSession daosession)
+    {
+        notifyCapture = null;
+        userManager = usermanager;
+        chatterDao = daosession.getChatterDao();
+        chatMessageDao = daosession.getChatMessageDao();
+        updateExecutor = usermanager.getDatabaseRunOnceExecutor();
+        emptyNotification = UnreadNotificationInfo.create(usermanager.getUserID(), 0, null, null, 0, null, null, UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, null));
+        unreadNotificationInfoPool.attachRequestHandler(new SimpleRequestHandler() {
+
+            final UnreadNotificationManager this$0;
+
+            public void onRequest(Boolean boolean1)
+            {
+                UnreadNotificationManager._2D_get2(UnreadNotificationManager.this).execute(UnreadNotificationManager._2D_get1(UnreadNotificationManager.this));
+            }
+
+            public volatile void onRequest(Object obj)
+            {
+                onRequest((Boolean)obj);
+            }
+
+            
+            {
+                this$0 = UnreadNotificationManager.this;
+                super();
             }
         });
         updateTypesFromPreferences(LumiyaApp.getDefaultSharedPreferences());
-        EventBus.getInstance().subscribe((Object) this);
+        EventBus.getInstance().subscribe(this);
     }
 
-    /* access modifiers changed from: private */
-    @Nonnull
-    public UnreadNotifications getUnreadNotification() {
+    private UnreadNotifications getUnreadNotification()
+    {
+        Object obj;
+        Object obj1;
+        Object obj2;
+        HashMap hashmap;
+        com.google.common.collect.ImmutableMap.Builder builder;
+        NotificationType notificationtype1;
+        Object obj7;
         int i;
-        NotificationType notificationType;
-        ArrayList arrayList;
-        UnreadNotificationInfo.UnreadMessageSource unreadMessageSource;
-        int intValue;
-        boolean z = System.currentTimeMillis() >= this.lastFreshMessageNotification.get() + FRESH_MESSAGES_NOTIFICATION_INTERVAL;
-        ImmutableMap.Builder builder = ImmutableMap.builder();
-        for (NotificationType notificationType2 : NotificationType.VALUES) {
-            int i2 = 0;
-            int i3 = 0;
-            NotificationType notificationType3 = null;
-            NotificationType notificationType4 = null;
-            Long l = null;
-            boolean z2 = false;
-            if (!this.chatterSources.isEmpty()) {
-                HashMap hashMap = new HashMap();
-                Iterator<T> it = this.chatterSources.entrySet().iterator();
-                while (true) {
-                    int i4 = i3;
-                    int i5 = i2;
-                    NotificationType notificationType5 = notificationType4;
-                    NotificationType notificationType6 = notificationType3;
-                    boolean z3 = z2;
-                    Long l2 = l;
-                    if (it.hasNext()) {
-                        Map.Entry entry = (Map.Entry) it.next();
-                        ChatterNameRetriever chatterNameRetriever = (ChatterNameRetriever) entry.getValue();
-                        ChatterID chatterID = chatterNameRetriever.chatterID;
-                        NotificationType notificationType7 = chatterID.getChatterType().getNotificationType();
-                        if (notificationType7 == notificationType2) {
-                            if (chatterID.getChatterType() == ChatterID.ChatterType.Local || chatterNameRetriever.getResolvedName() != null) {
-                                Chatter chatter = (Chatter) this.chatterDao.load((Long) entry.getKey());
-                                if (chatter != null) {
-                                    int unreadCount = chatter.getUnreadCount();
-                                    int i6 = i5 + unreadCount;
-                                    hashMap.put(chatter.getId(), UnreadNotificationInfo.UnreadMessageSource.create(chatterID, chatterNameRetriever.getResolvedName(), (List<SLChatEvent>) null, unreadCount));
-                                    NotificationType notificationType8 = (notificationType6 == null || notificationType7.compareTo(notificationType6) > 0) ? notificationType7 : notificationType6;
-                                    if (z) {
-                                        synchronized (this.freshMessageCountsLock) {
-                                            Integer remove = this.freshMessageCounts.remove(chatter.getId());
-                                            intValue = remove != null ? remove.intValue() : 0;
-                                        }
-                                        i4 += intValue;
-                                        if (intValue != 0) {
-                                            if (l2 == null && (!z3)) {
-                                                l2 = chatter.getId();
-                                            } else if (l2 != null) {
-                                                l2 = null;
-                                                z3 = true;
-                                            }
-                                            if (notificationType5 == null || notificationType7.compareTo(notificationType5) > 0) {
-                                                z2 = z3;
-                                                l = l2;
-                                                i3 = i4;
-                                                i2 = i6;
-                                                notificationType4 = notificationType7;
-                                                notificationType3 = notificationType8;
-                                            } else {
-                                                z2 = z3;
-                                                l = l2;
-                                                i2 = i6;
-                                                notificationType3 = notificationType8;
-                                                notificationType4 = notificationType5;
-                                                i3 = i4;
-                                            }
-                                        }
-                                    }
-                                    z2 = z3;
-                                    l = l2;
-                                    i2 = i6;
-                                    notificationType3 = notificationType8;
-                                    notificationType4 = notificationType5;
-                                    i3 = i4;
-                                }
-                            } else {
-                                z2 = z3;
-                                l = l2;
-                                notificationType4 = notificationType5;
-                                notificationType3 = notificationType6;
-                                i3 = i4;
-                                i2 = i5;
-                            }
-                        }
-                        z2 = z3;
-                        l = l2;
-                        notificationType4 = notificationType5;
-                        notificationType3 = notificationType6;
-                        i3 = i4;
-                        i2 = i5;
-                    } else {
-                        int i7 = hashMap.size() <= 1 ? 3 : 1;
-                        ArrayList arrayList2 = new ArrayList(hashMap.size());
-                        UnreadNotificationInfo.UnreadMessageSource unreadMessageSource2 = null;
-                        for (Map.Entry entry2 : hashMap.entrySet()) {
-                            LinkedList linkedList = new LinkedList();
-                            int unreadMessagesCount = ((UnreadNotificationInfo.UnreadMessageSource) entry2.getValue()).unreadMessagesCount();
-                            if (unreadMessagesCount > i7) {
-                                unreadMessagesCount = i7;
-                            }
-                            for (ChatMessage loadFromDatabaseObject : this.chatMessageDao.queryBuilder().where(ChatMessageDao.Properties.ChatterID.eq(entry2.getKey()), new WhereCondition[0]).orderDesc(ChatMessageDao.Properties.Id).limit(unreadMessagesCount).list()) {
-                                SLChatEvent loadFromDatabaseObject2 = SLChatEvent.loadFromDatabaseObject(loadFromDatabaseObject, this.userManager.getUserID());
-                                if (loadFromDatabaseObject2 != null) {
-                                    linkedList.add(0, loadFromDatabaseObject2);
-                                }
-                            }
-                            UnreadNotificationInfo.UnreadMessageSource withMessages = ((UnreadNotificationInfo.UnreadMessageSource) entry2.getValue()).withMessages(linkedList);
-                            UnreadNotificationInfo.UnreadMessageSource unreadMessageSource3 = (l2 == null || !((Long) entry2.getKey()).equals(l2)) ? unreadMessageSource2 : withMessages;
-                            arrayList2.add(withMessages);
-                            unreadMessageSource2 = unreadMessageSource3;
-                        }
-                        arrayList = arrayList2;
-                        notificationType3 = notificationType6;
-                        i = i5;
-                        notificationType = notificationType5;
-                        i3 = i4;
-                        unreadMessageSource = unreadMessageSource2;
-                    }
-                }
-            } else {
-                i = 0;
-                notificationType = null;
-                arrayList = null;
-                unreadMessageSource = null;
-            }
-            UnreadNotificationInfo.ObjectPopupNotification notification = this.userManager.getObjectPopupsManager().getNotification(z);
-            if (z && !(i3 == 0 && notification.freshObjectPopupsCount() == 0)) {
-                this.lastFreshMessageNotification.set(System.currentTimeMillis());
-            }
-            boolean z4 = false;
-            if (arrayList != null && !arrayList.isEmpty()) {
-                z4 = true;
-            }
-            if (!((i == 0 && z4 && i3 == 0) ? notification.isEmpty() : false)) {
-                builder.put(notificationType2, UnreadNotificationInfo.create(this.userManager.getUserID(), i, arrayList, notificationType3, i3, notificationType, unreadMessageSource, notification));
+        int j;
+        int k;
+        int i1;
+        int k1;
+        boolean flag;
+        Object obj3;
+        NotificationType notificationtype;
+        Iterator iterator;
+        Iterator iterator1;
+        Object obj8;
+        if (System.currentTimeMillis() >= lastFreshMessageNotification.get() + 3000L)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        builder = ImmutableMap.builder();
+        iterator = NotificationType.VALUES.iterator();
+_L16:
+        if (!iterator.hasNext()) goto _L2; else goto _L1
+_L1:
+        notificationtype1 = (NotificationType)iterator.next();
+        j = 0;
+        obj2 = null;
+        if (chatterSources.isEmpty())
+        {
+            break MISSING_BLOCK_LABEL_979;
+        }
+        hashmap = new HashMap();
+        iterator1 = chatterSources.entrySet().iterator();
+        i = 0;
+        k = 0;
+        obj = null;
+        obj2 = null;
+        j = 0;
+        obj1 = null;
+_L15:
+        if (!iterator1.hasNext()) goto _L4; else goto _L3
+_L3:
+        obj3 = (java.util.Map.Entry)iterator1.next();
+        obj7 = (ChatterNameRetriever)((java.util.Map.Entry) (obj3)).getValue();
+        obj8 = ((ChatterNameRetriever) (obj7)).chatterID;
+        notificationtype = ((ChatterID) (obj8)).getChatterType().getNotificationType();
+        if (notificationtype != notificationtype1) goto _L6; else goto _L5
+_L5:
+        if (((ChatterID) (obj8)).getChatterType() != com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Local && ((ChatterNameRetriever) (obj7)).getResolvedName() == null) goto _L8; else goto _L7
+_L7:
+        obj3 = (Chatter)chatterDao.load((Long)((java.util.Map.Entry) (obj3)).getKey());
+        if (obj3 == null) goto _L6; else goto _L9
+_L9:
+        i1 = ((Chatter) (obj3)).getUnreadCount();
+        k += i1;
+        obj7 = UnreadNotificationInfo.UnreadMessageSource.create(((ChatterID) (obj8)), ((ChatterNameRetriever) (obj7)).getResolvedName(), null, i1);
+        hashmap.put(((Chatter) (obj3)).getId(), obj7);
+        if (obj2 == null || notificationtype.compareTo(((Enum) (obj2))) > 0)
+        {
+            obj2 = notificationtype;
+        }
+        i1 = i;
+        if (!flag) goto _L11; else goto _L10
+_L10:
+        obj7 = freshMessageCountsLock;
+        obj7;
+        JVM INSTR monitorenter ;
+        obj8 = (Integer)freshMessageCounts.remove(((Chatter) (obj3)).getId());
+        if (obj8 == null) goto _L13; else goto _L12
+_L12:
+        k1 = ((Integer) (obj8)).intValue();
+_L18:
+        obj7;
+        JVM INSTR monitorexit ;
+        i += k1;
+        i1 = i;
+        if (k1 == 0) goto _L11; else goto _L14
+_L14:
+        Object obj4;
+        if (obj1 == null && (j ^ 1) != 0)
+        {
+            obj4 = ((Chatter) (obj3)).getId();
+        } else
+        {
+            obj4 = obj1;
+            if (obj1 != null)
+            {
+                obj4 = null;
+                j = 1;
             }
         }
-        return UnreadNotifications.create(this.userManager.getUserID(), builder.build());
+        if (obj == null || notificationtype.compareTo(((Enum) (obj))) > 0)
+        {
+            i1 = j;
+            obj = obj4;
+            obj1 = notificationtype;
+            j = i;
+            i = i1;
+        } else
+        {
+            obj1 = obj;
+            i1 = i;
+            i = j;
+            obj = obj4;
+            j = i1;
+        }
+_L17:
+        i1 = j;
+        obj4 = obj1;
+        j = i;
+        obj1 = obj;
+        obj = obj4;
+        i = i1;
+          goto _L15
+_L8:
+        obj4 = obj;
+        i1 = i;
+        i = j;
+        obj = obj1;
+        obj1 = obj4;
+        j = i1;
+        break MISSING_BLOCK_LABEL_396;
+        obj;
+        throw obj;
+_L4:
+        Object obj5;
+        ArrayList arraylist;
+        Iterator iterator2;
+        if (hashmap.size() <= 1)
+        {
+            j = 3;
+        } else
+        {
+            j = 1;
+        }
+        arraylist = new ArrayList(hashmap.size());
+        iterator2 = hashmap.entrySet().iterator();
+        obj5 = null;
+        Object obj6;
+        for (; iterator2.hasNext(); arraylist.add(obj6))
+        {
+            java.util.Map.Entry entry = (java.util.Map.Entry)iterator2.next();
+            obj6 = new LinkedList();
+            k1 = ((UnreadNotificationInfo.UnreadMessageSource)entry.getValue()).unreadMessagesCount();
+            i1 = k1;
+            if (k1 > j)
+            {
+                i1 = j;
+            }
+            Iterator iterator3 = chatMessageDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.ChatMessageDao.Properties.ChatterID.eq(entry.getKey()), new WhereCondition[0]).orderDesc(new Property[] {
+                com.lumiyaviewer.lumiya.dao.ChatMessageDao.Properties.Id
+            }).limit(i1).list().iterator();
+            do
+            {
+                if (!iterator3.hasNext())
+                {
+                    break;
+                }
+                SLChatEvent slchatevent = SLChatEvent.loadFromDatabaseObject((ChatMessage)iterator3.next(), userManager.getUserID());
+                if (slchatevent != null)
+                {
+                    ((List) (obj6)).add(0, slchatevent);
+                }
+            } while (true);
+            obj6 = ((UnreadNotificationInfo.UnreadMessageSource)entry.getValue()).withMessages(((List) (obj6)));
+            if (obj1 != null && ((Long)entry.getKey()).equals(obj1))
+            {
+                obj5 = obj6;
+            }
+        }
+
+        obj1 = arraylist;
+        j = i;
+        i = k;
+_L19:
+        UnreadNotificationInfo.ObjectPopupNotification objectpopupnotification = userManager.getObjectPopupsManager().getNotification(flag);
+        if (flag && (j != 0 || objectpopupnotification.freshObjectPopupsCount() != 0))
+        {
+            lastFreshMessageNotification.set(System.currentTimeMillis());
+        }
+        i1 = 0;
+        int l = i1;
+        if (obj1 != null)
+        {
+            l = i1;
+            if (!((List) (obj1)).isEmpty())
+            {
+                l = 1;
+            }
+        }
+        boolean flag1;
+        if (i == 0 && l != 0 && j == 0)
+        {
+            flag1 = objectpopupnotification.isEmpty();
+        } else
+        {
+            flag1 = false;
+        }
+        if (!flag1)
+        {
+            builder.put(notificationtype1, UnreadNotificationInfo.create(userManager.getUserID(), i, ((List) (obj1)), ((NotificationType) (obj2)), j, ((NotificationType) (obj)), ((UnreadNotificationInfo.UnreadMessageSource) (obj5)), objectpopupnotification));
+        }
+          goto _L16
+_L2:
+        return UnreadNotifications.create(userManager.getUserID(), builder.build());
+_L11:
+        i = j;
+        obj5 = obj;
+        j = i1;
+        obj = obj1;
+        obj1 = obj5;
+          goto _L17
+_L13:
+        k1 = 0;
+          goto _L18
+_L6:
+        obj5 = obj;
+        int j1 = i;
+        i = j;
+        obj = obj1;
+        obj1 = obj5;
+        j = j1;
+          goto _L17
+        i = 0;
+        obj = null;
+        obj1 = null;
+        obj5 = null;
+          goto _L19
     }
 
-    private void setEnabledMask(int i) {
-        if (this.maskEnabled.getAndSet(i) != i) {
+    private void setEnabledMask(int i)
+    {
+        if (maskEnabled.getAndSet(i) != i)
+        {
             updateUnreadNotifications();
         }
     }
 
-    private void updateTypesFromPreferences(SharedPreferences sharedPreferences) {
-        int i = 0;
-        if (NotificationChannels.getInstance().areNotificationsSystemControlled()) {
-            i = 7;
-        } else {
-            if (sharedPreferences.getBoolean(NotificationType.LocalChat.getEnableKey(), true)) {
-                i = 1;
-            }
-            if (sharedPreferences.getBoolean(NotificationType.Group.getEnableKey(), true)) {
-                i |= 2;
-            }
-            if (sharedPreferences.getBoolean(NotificationType.Private.getEnableKey(), true)) {
-                i |= 4;
-            }
+    private void updateTypesFromPreferences(SharedPreferences sharedpreferences)
+    {
+        int j = 0;
+        if (!NotificationChannels.getInstance().areNotificationsSystemControlled()) goto _L2; else goto _L1
+_L1:
+        j = 7;
+_L4:
+        setEnabledMask(j);
+        return;
+_L2:
+        if (sharedpreferences.getBoolean(NotificationType.LocalChat.getEnableKey(), true))
+        {
+            j = 1;
         }
-        setEnabledMask(i);
+        int i = j;
+        if (sharedpreferences.getBoolean(NotificationType.Group.getEnableKey(), true))
+        {
+            i = j | 2;
+        }
+        j = i;
+        if (sharedpreferences.getBoolean(NotificationType.Private.getEnableKey(), true))
+        {
+            j = i | 4;
+        }
+        if (true) goto _L4; else goto _L3
+_L3:
     }
 
-    /* access modifiers changed from: private */
-    public void updateUnreadChatterData() {
-        int i = this.maskEnabled.get();
-        if (i == 0) {
-            this.totalUnreadCount.set(0);
-            this.totalSourcesCount.set(0);
-            Iterator<Map.Entry<Long, ChatterNameRetriever>> it = this.chatterSources.entrySet().iterator();
-            while (it.hasNext()) {
-                ((ChatterNameRetriever) it.next().getValue()).dispose();
-                it.remove();
-            }
-            this.mostImportantNotificationType.set((Object) null);
-            return;
+    private void updateUnreadChatterData()
+    {
+        int i = maskEnabled.get();
+        if (i != 0) goto _L2; else goto _L1
+_L1:
+        totalUnreadCount.set(0);
+        totalSourcesCount.set(0);
+        for (Iterator iterator = chatterSources.entrySet().iterator(); iterator.hasNext(); iterator.remove())
+        {
+            ((ChatterNameRetriever)((java.util.Map.Entry)iterator.next()).getValue()).dispose();
         }
-        QueryBuilder where = this.chatterDao.queryBuilder().where(ChatterDao.Properties.UnreadCount.gt(0), ChatterDao.Properties.Muted.notEq(true));
-        if (i != 7) {
-            ArrayList arrayList = new ArrayList(3);
-            if ((i & 1) != 0) {
-                arrayList.add(Integer.valueOf(ChatterID.ChatterType.Local.ordinal()));
+
+        mostImportantNotificationType.set(null);
+_L5:
+        return;
+_L2:
+        Object obj;
+        Object obj1;
+        Iterator iterator1;
+        int j;
+        obj1 = chatterDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.ChatterDao.Properties.UnreadCount.gt(Integer.valueOf(0)), new WhereCondition[] {
+            com.lumiyaviewer.lumiya.dao.ChatterDao.Properties.Muted.notEq(Boolean.valueOf(true))
+        });
+        obj = obj1;
+        if (i != 7)
+        {
+            obj = new ArrayList(3);
+            if ((i & 1) != 0)
+            {
+                ((List) (obj)).add(Integer.valueOf(com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Local.ordinal()));
             }
-            if ((i & 2) != 0) {
-                arrayList.add(Integer.valueOf(ChatterID.ChatterType.Group.ordinal()));
+            if ((i & 2) != 0)
+            {
+                ((List) (obj)).add(Integer.valueOf(com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Group.ordinal()));
             }
-            if ((i & 4) != 0) {
-                arrayList.add(Integer.valueOf(ChatterID.ChatterType.User.ordinal()));
+            if ((i & 4) != 0)
+            {
+                ((List) (obj)).add(Integer.valueOf(com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.User.ordinal()));
             }
-            where = where.where(ChatterDao.Properties.Type.in((Collection<?>) arrayList), new WhereCondition[0]);
+            obj = ((QueryBuilder) (obj1)).where(com.lumiyaviewer.lumiya.dao.ChatterDao.Properties.Type.in(((java.util.Collection) (obj))), new WhereCondition[0]);
         }
-        HashSet hashSet = null;
-        int i2 = 0;
-        int i3 = 0;
-        NotificationType notificationType = null;
-        for (Chatter chatter : where.orderDesc(ChatterDao.Properties.LastMessageID).listLazy()) {
-            ChatterID fromDatabaseObject = ChatterID.fromDatabaseObject(this.userManager.getUserID(), chatter);
-            if (fromDatabaseObject != null) {
-                if (hashSet == null) {
-                    hashSet = new HashSet();
+        iterator1 = ((QueryBuilder) (obj)).orderDesc(new Property[] {
+            com.lumiyaviewer.lumiya.dao.ChatterDao.Properties.LastMessageID
+        }).listLazy().iterator();
+        obj1 = null;
+        j = 0;
+        i = 0;
+        obj = null;
+_L4:
+        Object obj2;
+        Chatter chatter;
+label0:
+        {
+            if (!iterator1.hasNext())
+            {
+                break; /* Loop/switch isn't completed */
+            }
+            chatter = (Chatter)iterator1.next();
+            Object obj3 = ChatterID.fromDatabaseObject(userManager.getUserID(), chatter);
+            if (obj3 == null)
+            {
+                break MISSING_BLOCK_LABEL_560;
+            }
+            obj2 = obj1;
+            if (obj1 == null)
+            {
+                obj2 = new HashSet();
+            }
+            if (((Set) (obj2)).size() < 3)
+            {
+                ((Set) (obj2)).add(chatter.getId());
+                if (!chatterSources.containsKey(chatter.getId()))
+                {
+                    chatterSources.put(chatter.getId(), new ChatterNameRetriever(((ChatterID) (obj3)), this, null));
                 }
-                if (hashSet.size() < 3) {
-                    hashSet.add(chatter.getId());
-                    if (!this.chatterSources.containsKey(chatter.getId())) {
-                        this.chatterSources.put(chatter.getId(), new ChatterNameRetriever(fromDatabaseObject, this, (Executor) null));
-                    }
+            }
+            obj3 = ((ChatterID) (obj3)).getChatterType().getNotificationType();
+            if (obj != null)
+            {
+                obj1 = obj;
+                if (((NotificationType) (obj3)).compareTo(((Enum) (obj))) <= 0)
+                {
+                    break label0;
                 }
-                NotificationType notificationType2 = fromDatabaseObject.getChatterType().getNotificationType();
-                if (notificationType == null || notificationType2.compareTo(notificationType) > 0) {
-                    notificationType = notificationType2;
-                }
-                i3 += chatter.getUnreadCount();
-                i2++;
             }
-            NotificationType notificationType3 = notificationType;
-            i3 = i3;
-            i2 = i2;
-            hashSet = hashSet;
-            notificationType = notificationType3;
+            obj1 = obj3;
         }
-        this.totalUnreadCount.set(i3);
-        this.totalSourcesCount.set(i2);
-        this.mostImportantNotificationType.set(notificationType);
-        Iterator<Map.Entry<Long, ChatterNameRetriever>> it2 = this.chatterSources.entrySet().iterator();
-        while (it2.hasNext()) {
-            Map.Entry next = it2.next();
-            if (hashSet == null || (!hashSet.contains(next.getKey()))) {
-                ((ChatterNameRetriever) next.getValue()).dispose();
-                it2.remove();
-            }
-        }
-    }
-
-    public void addFreshMessage(@Nonnull Chatter chatter) {
-        ChatterID.ChatterType chatterType;
-        boolean z = true;
-        Long id = chatter.getId();
-        if (id != null) {
-            int i = this.maskEnabled.get();
-            if (i == 0) {
-                z = false;
-            } else if (i != 7 && (((chatterType = ChatterID.ChatterType.VALUES[chatter.getType()]) != ChatterID.ChatterType.User || (i & 4) == 0) && ((chatterType != ChatterID.ChatterType.Group || (i & 2) == 0) && (chatterType != ChatterID.ChatterType.Local || (i & 1) == 0)))) {
-                z = false;
-            }
-            if (z) {
-                synchronized (this.freshMessageCountsLock) {
-                    Integer num = this.freshMessageCounts.get(id);
-                    this.freshMessageCounts.put(id, Integer.valueOf((num != null ? num.intValue() : 0) + 1));
-                }
-                return;
-            }
-            synchronized (this.freshMessageCountsLock) {
-                this.freshMessageCounts.remove(id);
+        int j1 = chatter.getUnreadCount();
+        obj = obj1;
+        obj1 = obj2;
+        int k = j + 1;
+        j = i + j1;
+        i = k;
+_L6:
+        int l = j;
+        j = i;
+        i = l;
+        if (true) goto _L4; else goto _L3
+_L3:
+        totalUnreadCount.set(i);
+        totalSourcesCount.set(j);
+        mostImportantNotificationType.set(obj);
+        obj = chatterSources.entrySet().iterator();
+        while (((Iterator) (obj)).hasNext()) 
+        {
+            java.util.Map.Entry entry = (java.util.Map.Entry)((Iterator) (obj)).next();
+            if (obj1 == null || ((Set) (obj1)).contains(entry.getKey()) ^ true)
+            {
+                ((ChatterNameRetriever)entry.getValue()).dispose();
+                ((Iterator) (obj)).remove();
             }
         }
+          goto _L5
+        int i1 = i;
+        i = j;
+        j = i1;
+          goto _L6
     }
 
-    @Nullable
-    public Intent captureNotify(UnreadNotificationInfo unreadNotificationInfo, Intent intent) {
-        NotifyCapture notifyCapture2;
-        synchronized (this.notifyCaptureLock) {
-            notifyCapture2 = this.notifyCapture != null ? (NotifyCapture) this.notifyCapture.get() : null;
-        }
-        Debug.Printf("NotifyCapture: capture = %s", notifyCapture2);
-        if (notifyCapture2 != null) {
-            return notifyCapture2.onGetNotifyCaptureIntent(unreadNotificationInfo, intent);
-        }
-        return null;
-    }
-
-    public void clearFreshMessages(@Nonnull Chatter chatter) {
-        Long id = chatter.getId();
-        if (id != null) {
-            synchronized (this.freshMessageCountsLock) {
-                this.freshMessageCounts.remove(id);
+    public void addFreshMessage(Chatter chatter)
+    {
+        Object obj;
+        boolean flag;
+        flag = true;
+        obj = chatter.getId();
+        if (obj == null) goto _L2; else goto _L1
+_L1:
+        int j = maskEnabled.get();
+        if (j == 0) goto _L4; else goto _L3
+_L3:
+        if (j != 7) goto _L6; else goto _L5
+_L5:
+        int i = ((flag) ? 1 : 0);
+_L13:
+        if (i == 0) goto _L8; else goto _L7
+_L7:
+        chatter = ((Chatter) (freshMessageCountsLock));
+        chatter;
+        JVM INSTR monitorenter ;
+        Integer integer = (Integer)freshMessageCounts.get(obj);
+        if (integer == null) goto _L10; else goto _L9
+_L9:
+        i = integer.intValue();
+_L11:
+        freshMessageCounts.put(obj, Integer.valueOf(i + 1));
+        chatter;
+        JVM INSTR monitorexit ;
+_L2:
+        return;
+_L6:
+        chatter = com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.VALUES[chatter.getType()];
+        if (chatter == com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.User)
+        {
+            i = ((flag) ? 1 : 0);
+            if ((j & 4) != 0)
+            {
+                continue; /* Loop/switch isn't completed */
             }
         }
-    }
-
-    public void clearNotifyCapture(@Nullable NotifyCapture notifyCapture2) {
-        synchronized (this.notifyCaptureLock) {
-            if (this.notifyCapture != null && this.notifyCapture.get() == notifyCapture2) {
-                this.notifyCapture = null;
-                updateUnreadNotifications();
+        if (chatter == com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Group)
+        {
+            i = ((flag) ? 1 : 0);
+            if ((j & 2) != 0)
+            {
+                continue; /* Loop/switch isn't completed */
             }
         }
-    }
-
-    public Subscribable<Boolean, UnreadNotifications> getUnreadNotifications() {
-        return this.unreadNotificationInfoPool;
-    }
-
-    public void onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-        this.updateExecutor.execute(this.updateNotificationDataRunnable);
-    }
-
-    @EventHandler
-    public void onGlobalPreferencesChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
-        if (globalOptionsChangedEvent.preferences != null) {
-            updateTypesFromPreferences(globalOptionsChangedEvent.preferences);
+        if (chatter == com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Local)
+        {
+            i = ((flag) ? 1 : 0);
+            if ((j & 1) != 0)
+            {
+                continue; /* Loop/switch isn't completed */
+            }
         }
+        i = 0;
+        continue; /* Loop/switch isn't completed */
+_L10:
+        i = 0;
+          goto _L11
+        obj;
+        throw obj;
+_L8:
+        chatter = ((Chatter) (freshMessageCountsLock));
+        chatter;
+        JVM INSTR monitorenter ;
+        freshMessageCounts.remove(obj);
+        chatter;
+        JVM INSTR monitorexit ;
+        return;
+        Exception exception;
+        exception;
+        throw exception;
+_L4:
+        i = 0;
+        if (true) goto _L13; else goto _L12
+_L12:
     }
 
-    public void setNotifyCapture(@Nullable NotifyCapture notifyCapture2) {
-        synchronized (this.notifyCaptureLock) {
-            this.notifyCapture = new WeakReference<>(notifyCapture2);
+    public Intent captureNotify(UnreadNotificationInfo unreadnotificationinfo, Intent intent)
+    {
+        Object obj = notifyCaptureLock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (notifyCapture == null) goto _L2; else goto _L1
+_L1:
+        NotifyCapture notifycapture = (NotifyCapture)notifyCapture.get();
+_L4:
+        obj;
+        JVM INSTR monitorexit ;
+        Debug.Printf("NotifyCapture: capture = %s", new Object[] {
+            notifycapture
+        });
+        if (notifycapture != null)
+        {
+            return notifycapture.onGetNotifyCaptureIntent(unreadnotificationinfo, intent);
+        } else
+        {
+            return null;
+        }
+        unreadnotificationinfo;
+        throw unreadnotificationinfo;
+_L2:
+        notifycapture = null;
+        if (true) goto _L4; else goto _L3
+_L3:
+    }
+
+    public void clearFreshMessages(Chatter chatter)
+    {
+        Long long1 = chatter.getId();
+        if (long1 == null) goto _L2; else goto _L1
+_L1:
+        chatter = ((Chatter) (freshMessageCountsLock));
+        chatter;
+        JVM INSTR monitorenter ;
+        freshMessageCounts.remove(long1);
+        chatter;
+        JVM INSTR monitorexit ;
+_L2:
+        return;
+        Exception exception;
+        exception;
+        throw exception;
+    }
+
+    public void clearNotifyCapture(NotifyCapture notifycapture)
+    {
+        Object obj = notifyCaptureLock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (notifyCapture != null && notifyCapture.get() == notifycapture)
+        {
+            notifyCapture = null;
             updateUnreadNotifications();
         }
+        obj;
+        JVM INSTR monitorexit ;
+        return;
+        notifycapture;
+        throw notifycapture;
     }
 
-    /* access modifiers changed from: package-private */
-    public void updateUnreadNotifications() {
-        this.unreadNotificationInfoPool.requestUpdate(unreadNotificationKey);
+    public Subscribable getUnreadNotifications()
+    {
+        return unreadNotificationInfoPool;
+    }
+
+    public void onChatterNameUpdated(ChatterNameRetriever chatternameretriever)
+    {
+        updateExecutor.execute(updateNotificationDataRunnable);
+    }
+
+    public void onGlobalPreferencesChanged(com.lumiyaviewer.lumiya.GlobalOptions.GlobalOptionsChangedEvent globaloptionschangedevent)
+    {
+        if (globaloptionschangedevent.preferences != null)
+        {
+            updateTypesFromPreferences(globaloptionschangedevent.preferences);
+        }
+    }
+
+    public void setNotifyCapture(NotifyCapture notifycapture)
+    {
+        Object obj = notifyCaptureLock;
+        obj;
+        JVM INSTR monitorenter ;
+        notifyCapture = new WeakReference(notifycapture);
+        updateUnreadNotifications();
+        obj;
+        JVM INSTR monitorexit ;
+        return;
+        notifycapture;
+        throw notifycapture;
+    }
+
+    void updateUnreadNotifications()
+    {
+        unreadNotificationInfoPool.requestUpdate(unreadNotificationKey);
+    }
+
+    static 
+    {
+        unreadNotificationKey = Boolean.FALSE;
     }
 }

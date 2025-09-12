@@ -1,22 +1,34 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class GodUpdateRegionInfo extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<RegionInfo2> RegionInfo2_Fields = new ArrayList<>();
-    public RegionInfo RegionInfo_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class GodUpdateRegionInfo extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class RegionInfo {
+    public static class RegionInfo
+    {
+
         public float BillableFactor;
         public int EstateID;
         public int ParentEstateID;
@@ -24,63 +36,84 @@ public class GodUpdateRegionInfo extends SLMessage {
         public int RedirectGridX;
         public int RedirectGridY;
         public int RegionFlags;
-        public byte[] SimName;
+        public byte SimName[];
+
+        public RegionInfo()
+        {
+        }
     }
 
-    public static class RegionInfo2 {
+    public static class RegionInfo2
+    {
+
         public long RegionFlagsExtended;
-    }
 
-    public GodUpdateRegionInfo() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-        this.RegionInfo_Field = new RegionInfo();
-    }
-
-    public int CalcPayloadSize() {
-        return this.RegionInfo_Field.SimName.length + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 36 + 1 + (this.RegionInfo2_Fields.size() * 8);
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleGodUpdateRegionInfo(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -113);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packVariable(byteBuffer, this.RegionInfo_Field.SimName, 1);
-        packInt(byteBuffer, this.RegionInfo_Field.EstateID);
-        packInt(byteBuffer, this.RegionInfo_Field.ParentEstateID);
-        packInt(byteBuffer, this.RegionInfo_Field.RegionFlags);
-        packFloat(byteBuffer, this.RegionInfo_Field.BillableFactor);
-        packInt(byteBuffer, this.RegionInfo_Field.PricePerMeter);
-        packInt(byteBuffer, this.RegionInfo_Field.RedirectGridX);
-        packInt(byteBuffer, this.RegionInfo_Field.RedirectGridY);
-        byteBuffer.put((byte) this.RegionInfo2_Fields.size());
-        for (RegionInfo2 regionInfo2 : this.RegionInfo2_Fields) {
-            packLong(byteBuffer, regionInfo2.RegionFlagsExtended);
+        public RegionInfo2()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.RegionInfo_Field.SimName = unpackVariable(byteBuffer, 1);
-        this.RegionInfo_Field.EstateID = unpackInt(byteBuffer);
-        this.RegionInfo_Field.ParentEstateID = unpackInt(byteBuffer);
-        this.RegionInfo_Field.RegionFlags = unpackInt(byteBuffer);
-        this.RegionInfo_Field.BillableFactor = unpackFloat(byteBuffer);
-        this.RegionInfo_Field.PricePerMeter = unpackInt(byteBuffer);
-        this.RegionInfo_Field.RedirectGridX = unpackInt(byteBuffer);
-        this.RegionInfo_Field.RedirectGridY = unpackInt(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            RegionInfo2 regionInfo2 = new RegionInfo2();
-            regionInfo2.RegionFlagsExtended = unpackLong(byteBuffer);
-            this.RegionInfo2_Fields.add(regionInfo2);
+
+    public AgentData AgentData_Field;
+    public ArrayList RegionInfo2_Fields;
+    public RegionInfo RegionInfo_Field;
+
+    public GodUpdateRegionInfo()
+    {
+        RegionInfo2_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        RegionInfo_Field = new RegionInfo();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return RegionInfo_Field.SimName.length + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 36 + 1 + RegionInfo2_Fields.size() * 8;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleGodUpdateRegionInfo(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-113);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packVariable(bytebuffer, RegionInfo_Field.SimName, 1);
+        packInt(bytebuffer, RegionInfo_Field.EstateID);
+        packInt(bytebuffer, RegionInfo_Field.ParentEstateID);
+        packInt(bytebuffer, RegionInfo_Field.RegionFlags);
+        packFloat(bytebuffer, RegionInfo_Field.BillableFactor);
+        packInt(bytebuffer, RegionInfo_Field.PricePerMeter);
+        packInt(bytebuffer, RegionInfo_Field.RedirectGridX);
+        packInt(bytebuffer, RegionInfo_Field.RedirectGridY);
+        bytebuffer.put((byte)RegionInfo2_Fields.size());
+        for (Iterator iterator = RegionInfo2_Fields.iterator(); iterator.hasNext(); packLong(bytebuffer, ((RegionInfo2)iterator.next()).RegionFlagsExtended)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        RegionInfo_Field.SimName = unpackVariable(bytebuffer, 1);
+        RegionInfo_Field.EstateID = unpackInt(bytebuffer);
+        RegionInfo_Field.ParentEstateID = unpackInt(bytebuffer);
+        RegionInfo_Field.RegionFlags = unpackInt(bytebuffer);
+        RegionInfo_Field.BillableFactor = unpackFloat(bytebuffer);
+        RegionInfo_Field.PricePerMeter = unpackInt(bytebuffer);
+        RegionInfo_Field.RedirectGridX = unpackInt(bytebuffer);
+        RegionInfo_Field.RedirectGridY = unpackInt(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            RegionInfo2 regioninfo2 = new RegionInfo2();
+            regioninfo2.RegionFlagsExtended = unpackLong(bytebuffer);
+            RegionInfo2_Fields.add(regioninfo2);
         }
+
     }
 }

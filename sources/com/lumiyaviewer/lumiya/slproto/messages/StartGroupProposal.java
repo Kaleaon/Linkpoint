@@ -1,58 +1,86 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class StartGroupProposal extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public ProposalData ProposalData_Field = new ProposalData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class StartGroupProposal extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class ProposalData {
+    public static class ProposalData
+    {
+
         public int Duration;
         public UUID GroupID;
         public float Majority;
-        public byte[] ProposalText;
+        public byte ProposalText[];
         public int Quorum;
+
+        public ProposalData()
+        {
+        }
     }
 
-    public StartGroupProposal() {
-        this.zeroCoded = true;
+
+    public AgentData AgentData_Field;
+    public ProposalData ProposalData_Field;
+
+    public StartGroupProposal()
+    {
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        ProposalData_Field = new ProposalData();
     }
 
-    public int CalcPayloadSize() {
-        return this.ProposalData_Field.ProposalText.length + 29 + 36;
+    public int CalcPayloadSize()
+    {
+        return ProposalData_Field.ProposalText.length + 29 + 36;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleStartGroupProposal(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleStartGroupProposal(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 107);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packUUID(byteBuffer, this.ProposalData_Field.GroupID);
-        packInt(byteBuffer, this.ProposalData_Field.Quorum);
-        packFloat(byteBuffer, this.ProposalData_Field.Majority);
-        packInt(byteBuffer, this.ProposalData_Field.Duration);
-        packVariable(byteBuffer, this.ProposalData_Field.ProposalText, 1);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)107);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packUUID(bytebuffer, ProposalData_Field.GroupID);
+        packInt(bytebuffer, ProposalData_Field.Quorum);
+        packFloat(bytebuffer, ProposalData_Field.Majority);
+        packInt(bytebuffer, ProposalData_Field.Duration);
+        packVariable(bytebuffer, ProposalData_Field.ProposalText, 1);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.ProposalData_Field.GroupID = unpackUUID(byteBuffer);
-        this.ProposalData_Field.Quorum = unpackInt(byteBuffer);
-        this.ProposalData_Field.Majority = unpackFloat(byteBuffer);
-        this.ProposalData_Field.Duration = unpackInt(byteBuffer);
-        this.ProposalData_Field.ProposalText = unpackVariable(byteBuffer, 1);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        ProposalData_Field.GroupID = unpackUUID(bytebuffer);
+        ProposalData_Field.Quorum = unpackInt(bytebuffer);
+        ProposalData_Field.Majority = unpackFloat(bytebuffer);
+        ProposalData_Field.Duration = unpackInt(bytebuffer);
+        ProposalData_Field.ProposalText = unpackVariable(bytebuffer, 1);
     }
 }

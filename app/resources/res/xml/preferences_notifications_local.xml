@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:title="@string/prefs_category_notifications_local_chat">
-    <CheckBoxPreference android:title="Enable notification" android:key="enableNotifyLocalChat" android:summary="Notify for local chat messages" android:defaultValue="true"/>
-    <CheckBoxPreference android:title="Local chat sound" android:key="soundOnLocalChat" android:summary="Play sound on local chat message" android:dependency="enableNotifyLocalChat" android:defaultValue="true"/>
-    <com.lumiyaviewer.lumiya.ui.settings.RingtonePreference android:title="Sound for chat IMs" android:key="notifySoundLocalChat" android:summary="Sound to play when chat or group message is received" android:dependency="soundOnLocalChat" android:defaultValue="content://settings/system/notification_sound" android:ringtoneType="notification" android:showDefault="true" app:defaultRawResource="@raw/lumiya_local_chat_message"/>
-    <ListPreference android:entries="@array/pref_led_action" android:title="Blink LED for chat IMs" android:key="notifyLEDchatIMs" android:summary="%s" android:dependency="enableNotifyLocalChat" android:defaultValue="none" android:entryValues="@array/pref_led_action_values"/>
-    <ListPreference android:entries="@array/pref_led_color" android:title="LED color for chat IMs" android:key="notifyLEDColorChatIMs" android:summary="%s" android:dependency="enableNotifyLocalChat" android:defaultValue="00FF00" android:entryValues="@array/pref_led_color_values"/>
-</PreferenceScreen>

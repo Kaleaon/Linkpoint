@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat.contacts;
 
 import android.graphics.Typeface;
@@ -5,164 +9,269 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
 import com.lumiyaviewer.lumiya.ui.chat.TypingIndicatorView;
-import javax.annotation.Nullable;
 
-public class ChatterItemViewBuilder {
+public class ChatterItemViewBuilder
+{
+
     private float distance;
-    private boolean distanceSet = false;
+    private boolean distanceSet;
     private boolean isActiveGroup;
     private boolean isOnline;
     private String label;
     private String lastMessage;
-    private boolean onlineVisible = false;
+    private boolean onlineVisible;
     private ChatterID thumbnailChatterID;
     private int thumbnailDefaultIcon;
     private String thumbnailLabel;
     private int unreadCount;
     private boolean voiceActive;
 
-    public ChatterItemViewBuilder() {
+    public ChatterItemViewBuilder()
+    {
+        onlineVisible = false;
+        distanceSet = false;
         reset();
     }
 
-    @Nullable
-    public View getView(LayoutInflater layoutInflater, View view, ViewGroup viewGroup, boolean z) {
-        int i = R.id.userDistanceInlineTextView;
-        int i2 = 8;
-        View view2 = (view == null || view.getId() != R.id.contactListItemLayout) ? null : view;
-        View inflate = view2 == null ? layoutInflater.inflate(R.layout.contact_list_item, viewGroup, false) : view2;
-        if (inflate != null) {
-            ((TextView) inflate.findViewById(R.id.userNameTextView)).setText(this.label);
-            View findViewById = inflate.findViewById(R.id.onlineUserIcon);
-            if (findViewById != null) {
-                if (this.onlineVisible) {
-                    findViewById.setVisibility(0);
-                } else {
-                    findViewById.setVisibility(8);
-                }
-            }
-            View findViewById2 = inflate.findViewById(R.id.activeVoiceIcon);
-            if (findViewById2 != null) {
-                findViewById2.setVisibility(this.voiceActive ? 0 : 8);
-            }
-            TextView textView = (TextView) inflate.findViewById(z ? R.id.userDistanceInlineTextView : R.id.userDistanceTextView);
-            if (textView != null) {
-                if (this.distanceSet) {
-                    textView.setText((this.distance >= 9.5f ? Integer.toString(Math.round(this.distance)) : String.format("%.1f", new Object[]{Float.valueOf(this.distance)})) + " m");
-                    if (this.distance <= 20.0f) {
-                        textView.setTypeface(textView.getTypeface(), 1);
-                    } else {
-                        textView.setTypeface(Typeface.create(textView.getTypeface(), 0));
+    public View getView(LayoutInflater layoutinflater, View view, ViewGroup viewgroup, boolean flag)
+    {
+label0:
+        {
+label1:
+            {
+label2:
+                {
+                    int j = 0x7f100142;
+                    byte byte0 = 8;
+                    int i;
+                    if (view == null || view.getId() != 0x7f10013e)
+                    {
+                        view = null;
                     }
-                    textView.setVisibility(0);
-                } else {
-                    textView.setText((CharSequence) null);
-                    textView.setVisibility(z ? 8 : 4);
+                    if (view == null)
+                    {
+                        layoutinflater = layoutinflater.inflate(0x7f04002c, viewgroup, false);
+                    } else
+                    {
+                        layoutinflater = view;
+                    }
+                    if (layoutinflater == null)
+                    {
+                        break label0;
+                    }
+                    ((TextView)layoutinflater.findViewById(0x7f100140)).setText(label);
+                    view = layoutinflater.findViewById(0x7f100145);
+                    if (view != null)
+                    {
+                        if (onlineVisible)
+                        {
+                            view.setVisibility(0);
+                        } else
+                        {
+                            view.setVisibility(8);
+                        }
+                    }
+                    view = layoutinflater.findViewById(0x7f100143);
+                    if (view != null)
+                    {
+                        if (voiceActive)
+                        {
+                            i = 0;
+                        } else
+                        {
+                            i = 8;
+                        }
+                        view.setVisibility(i);
+                    }
+                    if (flag)
+                    {
+                        i = 0x7f100142;
+                    } else
+                    {
+                        i = 0x7f100147;
+                    }
+                    viewgroup = (TextView)layoutinflater.findViewById(i);
+                    if (viewgroup != null)
+                    {
+                        if (distanceSet)
+                        {
+                            if (distance >= 9.5F)
+                            {
+                                view = Integer.toString(Math.round(distance));
+                            } else
+                            {
+                                view = String.format("%.1f", new Object[] {
+                                    Float.valueOf(distance)
+                                });
+                            }
+                            viewgroup.setText((new StringBuilder()).append(view).append(" m").toString());
+                            if (distance <= 20F)
+                            {
+                                viewgroup.setTypeface(viewgroup.getTypeface(), 1);
+                            } else
+                            {
+                                viewgroup.setTypeface(Typeface.create(viewgroup.getTypeface(), 0));
+                            }
+                            viewgroup.setVisibility(0);
+                        } else
+                        {
+                            viewgroup.setText(null);
+                            if (flag)
+                            {
+                                i = 8;
+                            } else
+                            {
+                                i = 4;
+                            }
+                            viewgroup.setVisibility(i);
+                        }
+                    }
+                    if (!flag)
+                    {
+                        i = j;
+                    } else
+                    {
+                        i = 0x7f100147;
+                    }
+                    view = layoutinflater.findViewById(i);
+                    if (view != null)
+                    {
+                        view.setVisibility(8);
+                    }
+                    view = (TextView)layoutinflater.findViewById(0x7f100144);
+                    if (view != null)
+                    {
+                        view.setText(Integer.toString(unreadCount));
+                        if (unreadCount != 0)
+                        {
+                            view.setVisibility(0);
+                        } else
+                        {
+                            view.setVisibility(8);
+                        }
+                    }
+                    view = (TextView)layoutinflater.findViewById(0x7f100141);
+                    if (view != null)
+                    {
+                        if (lastMessage != null)
+                        {
+                            view.setText(lastMessage);
+                            view.setVisibility(0);
+                        } else
+                        {
+                            view.setVisibility(8);
+                        }
+                    }
+                    view = layoutinflater.findViewById(0x7f100146);
+                    if (view != null)
+                    {
+                        if (isActiveGroup)
+                        {
+                            i = 0;
+                        } else
+                        {
+                            i = 8;
+                        }
+                        view.setVisibility(i);
+                    }
+                    view = (ChatterPicView)layoutinflater.findViewById(0x7f10013f);
+                    if (view == null)
+                    {
+                        break label1;
+                    }
+                    view.setDefaultIcon(thumbnailDefaultIcon, false);
+                    view.setChatterID(thumbnailChatterID, thumbnailLabel);
+                    if (thumbnailChatterID == null)
+                    {
+                        i = byte0;
+                        if (thumbnailDefaultIcon == -1)
+                        {
+                            break label2;
+                        }
+                    }
+                    i = 0;
                 }
+                view.setVisibility(i);
             }
-            if (z) {
-                i = R.id.userDistanceTextView;
-            }
-            View findViewById3 = inflate.findViewById(i);
-            if (findViewById3 != null) {
-                findViewById3.setVisibility(8);
-            }
-            TextView textView2 = (TextView) inflate.findViewById(R.id.unreadCountTextView);
-            if (textView2 != null) {
-                textView2.setText(Integer.toString(this.unreadCount));
-                if (this.unreadCount != 0) {
-                    textView2.setVisibility(0);
-                } else {
-                    textView2.setVisibility(8);
-                }
-            }
-            TextView textView3 = (TextView) inflate.findViewById(R.id.lastMessageText);
-            if (textView3 != null) {
-                if (this.lastMessage != null) {
-                    textView3.setText(this.lastMessage);
-                    textView3.setVisibility(0);
-                } else {
-                    textView3.setVisibility(8);
-                }
-            }
-            View findViewById4 = inflate.findViewById(R.id.activeGroupIcon);
-            if (findViewById4 != null) {
-                findViewById4.setVisibility(this.isActiveGroup ? 0 : 8);
-            }
-            ChatterPicView chatterPicView = (ChatterPicView) inflate.findViewById(R.id.userPicView);
-            if (chatterPicView != null) {
-                chatterPicView.setDefaultIcon(this.thumbnailDefaultIcon, false);
-                chatterPicView.setChatterID(this.thumbnailChatterID, this.thumbnailLabel);
-                if (!(this.thumbnailChatterID == null && this.thumbnailDefaultIcon == -1)) {
-                    i2 = 0;
-                }
-                chatterPicView.setVisibility(i2);
-            }
-            TypingIndicatorView typingIndicatorView = (TypingIndicatorView) inflate.findViewById(R.id.typing_indicator);
-            if (typingIndicatorView != null) {
-                typingIndicatorView.setChatterID(this.thumbnailChatterID);
+            view = (TypingIndicatorView)layoutinflater.findViewById(0x7f100120);
+            if (view != null)
+            {
+                view.setChatterID(thumbnailChatterID);
             }
         }
-        return inflate;
+        return layoutinflater;
     }
 
-    public void reset() {
-        this.label = null;
-        this.onlineVisible = false;
-        this.distanceSet = false;
-        this.unreadCount = 0;
-        this.lastMessage = null;
-        this.isActiveGroup = false;
-        this.thumbnailChatterID = null;
-        this.thumbnailLabel = null;
-        this.thumbnailDefaultIcon = -1;
-        this.voiceActive = false;
+    public void reset()
+    {
+        label = null;
+        onlineVisible = false;
+        distanceSet = false;
+        unreadCount = 0;
+        lastMessage = null;
+        isActiveGroup = false;
+        thumbnailChatterID = null;
+        thumbnailLabel = null;
+        thumbnailDefaultIcon = -1;
+        voiceActive = false;
     }
 
-    public void setActiveGroup(boolean z) {
-        this.isActiveGroup = z;
+    public void setActiveGroup(boolean flag)
+    {
+        isActiveGroup = flag;
     }
 
-    public void setDistance(float f) {
-        if (Float.isNaN(f)) {
-            this.distanceSet = false;
+    public void setDistance(float f)
+    {
+        if (Float.isNaN(f))
+        {
+            distanceSet = false;
+            return;
+        } else
+        {
+            distanceSet = true;
+            distance = f;
             return;
         }
-        this.distanceSet = true;
-        this.distance = f;
     }
 
-    public void setLabel(String str) {
-        this.label = str;
+    public void setLabel(String s)
+    {
+        label = s;
     }
 
-    public void setLastMessage(String str) {
-        this.lastMessage = str;
+    public void setLastMessage(String s)
+    {
+        lastMessage = s;
     }
 
-    public void setOnlineStatusIcon(boolean z, boolean z2) {
-        this.onlineVisible = z;
-        this.isOnline = z2;
+    public void setOnlineStatusIcon(boolean flag, boolean flag1)
+    {
+        onlineVisible = flag;
+        isOnline = flag1;
     }
 
-    public void setThumbnailChatterID(ChatterID chatterID, String str) {
-        this.thumbnailChatterID = chatterID;
-        this.thumbnailLabel = str;
+    public void setThumbnailChatterID(ChatterID chatterid, String s)
+    {
+        thumbnailChatterID = chatterid;
+        thumbnailLabel = s;
     }
 
-    public void setThumbnailDefaultIcon(int i) {
-        this.thumbnailDefaultIcon = i;
+    public void setThumbnailDefaultIcon(int i)
+    {
+        thumbnailDefaultIcon = i;
     }
 
-    public void setUnreadCount(int i) {
-        this.unreadCount = i;
+    public void setUnreadCount(int i)
+    {
+        unreadCount = i;
     }
 
-    public void setVoiceActive(boolean z) {
-        this.voiceActive = z;
+    public void setVoiceActive(boolean flag)
+    {
+        voiceActive = flag;
     }
 }

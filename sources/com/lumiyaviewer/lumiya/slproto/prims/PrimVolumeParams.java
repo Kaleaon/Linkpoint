@@ -1,16 +1,24 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.prims;
 
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.UUID;
 
-public class PrimVolumeParams {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.prims:
+//            PrimPathParams, PrimParamsPool, PrimProfileParams, PrimFlexibleParams
+
+public class PrimVolumeParams
+{
+
     public static final byte LL_SCULPT_FLAG_INVERT = 64;
-    public static final byte LL_SCULPT_FLAG_MIRROR = Byte.MIN_VALUE;
+    public static final byte LL_SCULPT_FLAG_MIRROR = -128;
     public static final byte LL_SCULPT_TYPE_CYLINDER = 4;
     public static final byte LL_SCULPT_TYPE_MASK = 7;
     public static final byte LL_SCULPT_TYPE_MESH = 5;
@@ -30,102 +38,222 @@ public class PrimVolumeParams {
     public UUID SculptID;
     public byte SculptType;
 
-    public static PrimVolumeParams createFromObjectUpdate(ObjectUpdate.ObjectData objectData) {
-        PrimVolumeParams primVolumeParams = new PrimVolumeParams();
-        primVolumeParams.PathParams = PrimParamsPool.get(new PrimPathParams(objectData));
-        primVolumeParams.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromObjectUpdate(objectData));
-        return primVolumeParams;
+    public PrimVolumeParams()
+    {
     }
 
-    public static PrimVolumeParams createFromPackedData(ByteBuffer byteBuffer) {
-        PrimVolumeParams primVolumeParams = new PrimVolumeParams();
-        primVolumeParams.PathParams = PrimParamsPool.get(new PrimPathParams(byteBuffer));
-        primVolumeParams.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromPackedData(byteBuffer));
-        return primVolumeParams;
+    public static PrimVolumeParams createFromObjectUpdate(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate.ObjectData objectdata)
+    {
+        PrimVolumeParams primvolumeparams = new PrimVolumeParams();
+        primvolumeparams.PathParams = PrimParamsPool.get(new PrimPathParams(objectdata));
+        primvolumeparams.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromObjectUpdate(objectdata));
+        return primvolumeparams;
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public static PrimVolumeParams createFromPackedData(ByteBuffer bytebuffer)
+    {
+        PrimVolumeParams primvolumeparams = new PrimVolumeParams();
+        primvolumeparams.PathParams = PrimParamsPool.get(new PrimPathParams(bytebuffer));
+        primvolumeparams.ProfileParams = PrimParamsPool.get(PrimProfileParams.createFromPackedData(bytebuffer));
+        return primvolumeparams;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
             return true;
         }
-        if (!(obj instanceof PrimVolumeParams)) {
+        if (!(obj instanceof PrimVolumeParams))
+        {
             return false;
         }
-        PrimVolumeParams primVolumeParams = (PrimVolumeParams) obj;
-        if (this.SculptType != primVolumeParams.SculptType) {
+        obj = (PrimVolumeParams)obj;
+        if (SculptType != ((PrimVolumeParams) (obj)).SculptType)
+        {
             return false;
         }
-        if ((this.SculptID == null) != (primVolumeParams.SculptID == null)) {
+        boolean flag;
+        boolean flag1;
+        if (SculptID == null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (((PrimVolumeParams) (obj)).SculptID == null)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        if (flag != flag1)
+        {
             return false;
         }
-        if (this.SculptID != null && !this.SculptID.equals(primVolumeParams.SculptID)) {
+        if (SculptID != null && !SculptID.equals(((PrimVolumeParams) (obj)).SculptID))
+        {
             return false;
         }
-        if ((this.ProfileParams == null) != (primVolumeParams.ProfileParams == null)) {
+        if (ProfileParams == null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (((PrimVolumeParams) (obj)).ProfileParams == null)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        if (flag != flag1)
+        {
             return false;
         }
-        if (this.ProfileParams != null && !this.ProfileParams.equals(primVolumeParams.ProfileParams)) {
+        if (ProfileParams != null && !ProfileParams.equals(((PrimVolumeParams) (obj)).ProfileParams))
+        {
             return false;
         }
-        if ((this.PathParams == null) != (primVolumeParams.PathParams == null)) {
+        if (PathParams == null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (((PrimVolumeParams) (obj)).PathParams == null)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        if (flag != flag1)
+        {
             return false;
         }
-        if (this.PathParams != null && !this.PathParams.equals(primVolumeParams.PathParams)) {
+        if (PathParams != null && !PathParams.equals(((PrimVolumeParams) (obj)).PathParams))
+        {
             return false;
         }
-        if ((this.FlexiParams == null) != (primVolumeParams.FlexiParams == null)) {
+        if (FlexiParams == null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (((PrimVolumeParams) (obj)).FlexiParams == null)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        if (flag != flag1)
+        {
             return false;
         }
-        return this.FlexiParams == null || this.FlexiParams.equals(primVolumeParams.FlexiParams);
+        return FlexiParams == null || FlexiParams.equals(((PrimVolumeParams) (obj)).FlexiParams);
     }
 
-    public int hashCode() {
-        int i = (this.SculptType * 17) + 0;
-        if (this.SculptID != null) {
-            i += this.SculptID.hashCode() * 3;
+    public int hashCode()
+    {
+        int j = SculptType * 17 + 0;
+        int i = j;
+        if (SculptID != null)
+        {
+            i = j + SculptID.hashCode() * 3;
         }
-        int hashCode = i + (this.PathParams.hashCode() * 37) + this.ProfileParams.hashCode();
-        return this.FlexiParams != null ? hashCode + this.FlexiParams.hashCode() : hashCode;
+        j = i + PathParams.hashCode() * 37 + ProfileParams.hashCode();
+        i = j;
+        if (FlexiParams != null)
+        {
+            i = j + FlexiParams.hashCode();
+        }
+        return i;
     }
 
-    public boolean isFlexible() {
-        return this.FlexiParams != null;
+    public boolean isFlexible()
+    {
+        return FlexiParams != null;
     }
 
-    public boolean isMesh() {
-        return this.SculptID != null && (this.SculptType & 7) == 5;
-    }
-
-    public boolean isSculpt() {
-        return this.SculptID != null;
-    }
-
-    public String toString() {
-        return "{Volume: SculptType 0x" + Integer.toHexString(this.SculptType) + ", SculptID " + (this.SculptID != null ? this.SculptID.toString() : "null") + ", Path = (" + this.PathParams.toString() + "), Profile = (" + this.ProfileParams.toString() + ")}";
-    }
-
-    public void unpackExtraParams(ByteBuffer byteBuffer) {
-        try {
-            byte b = byteBuffer.get();
-            for (int i = 0; i < b; i++) {
-                short s = byteBuffer.getShort();
-                int i2 = byteBuffer.getInt() + byteBuffer.position();
-                switch (s) {
-                    case 16:
-                        this.FlexiParams = new PrimFlexibleParams(byteBuffer, i2);
-                        break;
-                    case 48:
-                    case 96:
-                        byteBuffer.order(ByteOrder.BIG_ENDIAN);
-                        this.SculptID = UUIDPool.getUUID(new UUID(byteBuffer.getLong(), byteBuffer.getLong()));
-                        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                        this.SculptType = byteBuffer.get();
-                        break;
-                }
-                byteBuffer.position(i2);
+    public boolean isMesh()
+    {
+        boolean flag1 = false;
+        boolean flag = flag1;
+        if (SculptID != null)
+        {
+            flag = flag1;
+            if ((SculptType & 7) == 5)
+            {
+                flag = true;
             }
-        } catch (BufferUnderflowException e) {
-            Debug.Warning(e);
         }
+        return flag;
+    }
+
+    public boolean isSculpt()
+    {
+        return SculptID != null;
+    }
+
+    public String toString()
+    {
+        StringBuilder stringbuilder = (new StringBuilder()).append("{Volume: SculptType 0x").append(Integer.toHexString(SculptType)).append(", SculptID ");
+        String s;
+        if (SculptID != null)
+        {
+            s = SculptID.toString();
+        } else
+        {
+            s = "null";
+        }
+        return stringbuilder.append(s).append(", Path = (").append(PathParams.toString()).append("), Profile = (").append(ProfileParams.toString()).append(")}").toString();
+    }
+
+    public void unpackExtraParams(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        int i = 0;
+_L6:
+        if (i >= byte0) goto _L2; else goto _L1
+_L1:
+        short word0;
+        int j;
+        word0 = bytebuffer.getShort();
+        j = bytebuffer.getInt() + bytebuffer.position();
+        word0;
+        JVM INSTR lookupswitch 3: default 150
+    //                   16: 133
+    //                   48: 78
+    //                   96: 78;
+           goto _L3 _L4 _L5 _L5
+_L3:
+        break; /* Loop/switch isn't completed */
+_L4:
+        break MISSING_BLOCK_LABEL_133;
+_L7:
+        bytebuffer.position(j);
+        i++;
+          goto _L6
+_L5:
+        bytebuffer.order(ByteOrder.BIG_ENDIAN);
+        SculptID = UUIDPool.getUUID(new UUID(bytebuffer.getLong(), bytebuffer.getLong()));
+        bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
+        SculptType = bytebuffer.get();
+          goto _L7
+        bytebuffer;
+        Debug.Warning(bytebuffer);
+_L2:
+        return;
+        FlexiParams = new PrimFlexibleParams(bytebuffer, j);
+          goto _L7
     }
 }

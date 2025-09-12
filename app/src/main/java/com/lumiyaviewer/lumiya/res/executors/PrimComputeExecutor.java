@@ -9,7 +9,8 @@ public class PrimComputeExecutor extends WeakExecutor {
     private Condition unpaused;
 
     private static class InstanceHolder {
-        private static final PrimComputeExecutor Instance = new PrimComputeExecutor();
+        /* access modifiers changed from: private */
+        public static final PrimComputeExecutor Instance = new PrimComputeExecutor((PrimComputeExecutor) null);
 
         private InstanceHolder() {
         }
@@ -29,7 +30,8 @@ public class PrimComputeExecutor extends WeakExecutor {
         return InstanceHolder.Instance;
     }
 
-    protected void beforeExecute(Thread thread, Runnable runnable) {
+    /* access modifiers changed from: protected */
+    public void beforeExecute(Thread thread, Runnable runnable) {
         super.beforeExecute(thread, runnable);
         this.pauseLock.lock();
         while (this.isPaused) {
@@ -37,6 +39,7 @@ public class PrimComputeExecutor extends WeakExecutor {
                 this.unpaused.await();
             } catch (InterruptedException e) {
                 thread.interrupt();
+                return;
             } finally {
                 this.pauseLock.unlock();
             }

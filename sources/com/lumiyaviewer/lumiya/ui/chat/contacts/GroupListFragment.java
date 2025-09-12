@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat.contacts;
 
 import android.content.Context;
@@ -7,9 +11,18 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterListType;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.common.UserListFragment;
 
-public class GroupListFragment extends UserListFragment {
-    /* access modifiers changed from: protected */
-    public ListAdapter createListAdapter(Context context, LoaderManager loaderManager, UserManager userManager) {
-        return new ChatterListSubscriptionAdapter(context, userManager, ChatterListType.Groups);
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat.contacts:
+//            ChatterListSubscriptionAdapter
+
+public class GroupListFragment extends UserListFragment
+{
+
+    public GroupListFragment()
+    {
+    }
+
+    protected ListAdapter createListAdapter(Context context, LoaderManager loadermanager, UserManager usermanager)
+    {
+        return new ChatterListSubscriptionAdapter(context, usermanager, ChatterListType.Groups);
     }
 }

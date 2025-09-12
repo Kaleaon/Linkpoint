@@ -1,88 +1,153 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public class SLChatBalanceChangedEvent extends SLChatEvent {
+public class SLChatBalanceChangedEvent extends SLChatEvent
+{
+
     private final int newBalance;
     private final int transactionAmount;
     private final boolean transactionAmountValid;
 
-    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    public SLChatBalanceChangedEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
-        super(chatMessage, uuid);
+    public SLChatBalanceChangedEvent(ChatMessage chatmessage, UUID uuid)
+    {
         int i = 0;
-        this.transactionAmountValid = chatMessage.getTransactionAmount() != null;
-        this.transactionAmount = chatMessage.getTransactionAmount() != null ? chatMessage.getTransactionAmount().intValue() : i;
-        this.newBalance = chatMessage.getNewBalance().intValue();
+        super(chatmessage, uuid);
+        boolean flag;
+        if (chatmessage.getTransactionAmount() != null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        transactionAmountValid = flag;
+        if (chatmessage.getTransactionAmount() != null)
+        {
+            i = chatmessage.getTransactionAmount().intValue();
+        }
+        transactionAmount = i;
+        newBalance = chatmessage.getNewBalance().intValue();
     }
 
-    public SLChatBalanceChangedEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, boolean z, int i, int i2) {
-        super(chatMessageSource, uuid);
-        this.transactionAmountValid = z;
-        this.transactionAmount = i;
-        this.newBalance = i2;
+    public SLChatBalanceChangedEvent(ChatMessageSource chatmessagesource, UUID uuid, boolean flag, int i, int j)
+    {
+        super(chatmessagesource, uuid);
+        transactionAmountValid = flag;
+        transactionAmount = i;
+        newBalance = j;
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.BalanceChanged;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.BalanceChanged;
     }
 
-    public int getNewBalance() {
-        return this.newBalance;
+    public int getNewBalance()
+    {
+        return newBalance;
     }
 
-    /* access modifiers changed from: protected */
-    public String getText(Context context, @Nonnull UserManager userManager) {
-        if (this.transactionAmountValid) {
-            String sourceName = this.source.getSourceName(userManager);
-            if (sourceName != null) {
-                if (this.transactionAmount >= 0) {
-                    return context.getString(R.string.you_were_paid_by_agent, new Object[]{Integer.valueOf(this.transactionAmount), Integer.valueOf(getNewBalance())});
+    protected String getText(Context context, UserManager usermanager)
+    {
+        if (transactionAmountValid)
+        {
+            usermanager = source.getSourceName(usermanager);
+            if (usermanager != null)
+            {
+                if (transactionAmount >= 0)
+                {
+                    return context.getString(0x7f090394, new Object[] {
+                        Integer.valueOf(transactionAmount), Integer.valueOf(getNewBalance())
+                    });
+                } else
+                {
+                    return context.getString(0x7f090392, new Object[] {
+                        Integer.valueOf(-transactionAmount), usermanager, Integer.valueOf(getNewBalance())
+                    });
                 }
-                return context.getString(R.string.you_have_paid_to_agent, new Object[]{Integer.valueOf(-this.transactionAmount), sourceName, Integer.valueOf(getNewBalance())});
-            } else if (this.transactionAmount >= 0) {
-                return context.getString(R.string.you_were_paid, new Object[]{Integer.valueOf(this.transactionAmount), Integer.valueOf(this.newBalance)});
-            } else {
-                return context.getString(R.string.you_have_paid, new Object[]{Integer.valueOf(-this.transactionAmount), Integer.valueOf(this.newBalance)});
             }
-        } else {
-            return context.getString(R.string.your_account_balance_is_now, new Object[]{Integer.valueOf(this.newBalance)});
+            if (transactionAmount >= 0)
+            {
+                return context.getString(0x7f090393, new Object[] {
+                    Integer.valueOf(transactionAmount), Integer.valueOf(newBalance)
+                });
+            } else
+            {
+                return context.getString(0x7f090391, new Object[] {
+                    Integer.valueOf(-transactionAmount), Integer.valueOf(newBalance)
+                });
+            }
+        } else
+        {
+            return context.getString(0x7f090395, new Object[] {
+                Integer.valueOf(newBalance)
+            });
         }
     }
 
-    public int getTransactionAmount() {
-        return this.transactionAmount;
+    public int getTransactionAmount()
+    {
+        return transactionAmount;
     }
 
-    public boolean getTransactionAmountValid() {
-        return this.transactionAmountValid;
+    public boolean getTransactionAmountValid()
+    {
+        return transactionAmountValid;
     }
 
-    public SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
+    public com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType getViewType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isActionMessage(@Nonnull UserManager userManager) {
-        return this.transactionAmountValid && this.source.getSourceName(userManager) != null && getTransactionAmount() >= 0;
+    protected boolean isActionMessage(UserManager usermanager)
+    {
+        boolean flag1 = false;
+        if (transactionAmountValid)
+        {
+            boolean flag = flag1;
+            if (source.getSourceName(usermanager) != null)
+            {
+                flag = flag1;
+                if (getTransactionAmount() >= 0)
+                {
+                    flag = true;
+                }
+            }
+            return flag;
+        } else
+        {
+            return false;
+        }
     }
 
-    public boolean opensNewChatter() {
+    public boolean opensNewChatter()
+    {
         return false;
     }
 
-    public void serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage);
-        chatMessage.setTransactionAmount(this.transactionAmountValid ? Integer.valueOf(this.transactionAmount) : null);
-        chatMessage.setNewBalance(Integer.valueOf(this.newBalance));
+    public void serializeToDatabaseObject(ChatMessage chatmessage)
+    {
+        super.serializeToDatabaseObject(chatmessage);
+        Integer integer;
+        if (transactionAmountValid)
+        {
+            integer = Integer.valueOf(transactionAmount);
+        } else
+        {
+            integer = null;
+        }
+        chatmessage.setTransactionAmount(integer);
+        chatmessage.setNewBalance(Integer.valueOf(newBalance));
     }
 }

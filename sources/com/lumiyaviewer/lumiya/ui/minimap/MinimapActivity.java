@@ -1,6 +1,11 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.minimap;
 
-import android.app.Activity;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -9,9 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
@@ -20,106 +23,134 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.ConnectedActivity;
-import java.util.UUID;
-import javax.annotation.Nullable;
 
-public class MinimapActivity extends ConnectedActivity {
-    private final SubscriptionData<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new $Lambda$HQUtmVzLYkemE78mCklVmVxMXms(this));
-    @BindView(2131755653)
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.minimap:
+//            MinimapFragment, NearbyPeopleMinimapFragment
+
+public class MinimapActivity extends ConnectedActivity
+{
+
+    private final SubscriptionData currentLocationInfo = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.HQUtmVzLYkemE78mCklVmVxMXms(this));
     ViewGroup detailsLayout;
-    @BindView(2131755654)
     FrameLayout selectorLayout;
-    @BindView(2131755652)
     LinearLayout splitMainLayout;
-    @BindView(2131755657)
     View splitObjectPopupsLeftSpacer;
 
-    /* access modifiers changed from: private */
-    /* renamed from: onCurrentLocationInfo */
-    public void m639com_lumiyaviewer_lumiya_ui_minimap_MinimapActivitymthref0(CurrentLocationInfo currentLocationInfo2) {
-        String str = null;
-        if (currentLocationInfo2 != null) {
-            ParcelData parcelData = currentLocationInfo2.parcelData();
-            if (parcelData != null) {
-                str = parcelData.getName();
+    public MinimapActivity()
+    {
+    }
+
+    private void onCurrentLocationInfo(CurrentLocationInfo currentlocationinfo)
+    {
+        String s = null;
+        if (currentlocationinfo != null)
+        {
+            Object obj = currentlocationinfo.parcelData();
+            if (obj != null)
+            {
+                s = ((ParcelData) (obj)).getName();
             }
-            if (str == null) {
-                str = getString(R.string.name_loading_title);
+            obj = s;
+            if (s == null)
+            {
+                obj = getString(0x7f0901c8);
             }
-            setActivityTitle(str, getString(R.string.nearby_users_format, new Object[]{Integer.valueOf(currentLocationInfo2.nearbyUsers())}));
+            setActivityTitle(((String) (obj)), getString(0x7f0901d5, new Object[] {
+                Integer.valueOf(currentlocationinfo.nearbyUsers())
+            }));
         }
     }
 
-    private void setActivityTitle(@Nullable String str, @Nullable String str2) {
-        ActionBar supportActionBar = getSupportActionBar();
-        if (supportActionBar != null) {
-            supportActionBar.setTitle((CharSequence) str);
-            supportActionBar.setSubtitle((CharSequence) str2);
+    private void setActivityTitle(String s, String s1)
+    {
+        ActionBar actionbar = getSupportActionBar();
+        if (actionbar != null)
+        {
+            actionbar.setTitle(s);
+            actionbar.setSubtitle(s1);
         }
-        setTitle(str);
+        setTitle(s);
     }
 
-    /* access modifiers changed from: protected */
-    public void onCreate(Bundle bundle) {
+    void _2D_com_lumiyaviewer_lumiya_ui_minimap_MinimapActivity_2D_mthref_2D_0(CurrentLocationInfo currentlocationinfo)
+    {
+        onCurrentLocationInfo(currentlocationinfo);
+    }
+
+    protected void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
-        setContentView((int) R.layout.split_two_panels);
-        ButterKnife.bind((Activity) this);
-        if (getResources().getConfiguration().orientation == 2) {
-            this.splitMainLayout.setOrientation(0);
-            LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) this.selectorLayout.getLayoutParams();
-            layoutParams.width = -2;
-            layoutParams.height = -1;
-            layoutParams.weight = 0.0f;
-            this.selectorLayout.setLayoutParams(layoutParams);
-            LinearLayout.LayoutParams layoutParams2 = (LinearLayout.LayoutParams) this.detailsLayout.getLayoutParams();
-            layoutParams2.width = -1;
-            layoutParams2.height = -1;
-            layoutParams2.weight = 1.0f;
-            this.detailsLayout.setLayoutParams(layoutParams2);
-        } else {
-            this.splitMainLayout.setOrientation(1);
-            LinearLayout.LayoutParams layoutParams3 = (LinearLayout.LayoutParams) this.selectorLayout.getLayoutParams();
-            layoutParams3.width = -1;
-            layoutParams3.height = -2;
-            layoutParams3.weight = 0.0f;
-            this.selectorLayout.setLayoutParams(layoutParams3);
-            LinearLayout.LayoutParams layoutParams4 = (LinearLayout.LayoutParams) this.detailsLayout.getLayoutParams();
-            layoutParams4.width = -1;
-            layoutParams4.height = -1;
-            layoutParams4.weight = 1.0f;
-            this.detailsLayout.setLayoutParams(layoutParams4);
-            this.splitObjectPopupsLeftSpacer.setVisibility(8);
+        setContentView(0x7f0400a4);
+        ButterKnife.bind(this);
+        FragmentManager fragmentmanager;
+        if (getResources().getConfiguration().orientation == 2)
+        {
+            splitMainLayout.setOrientation(0);
+            bundle = (android.widget.LinearLayout.LayoutParams)selectorLayout.getLayoutParams();
+            bundle.width = -2;
+            bundle.height = -1;
+            bundle.weight = 0.0F;
+            selectorLayout.setLayoutParams(bundle);
+            bundle = (android.widget.LinearLayout.LayoutParams)detailsLayout.getLayoutParams();
+            bundle.width = -1;
+            bundle.height = -1;
+            bundle.weight = 1.0F;
+            detailsLayout.setLayoutParams(bundle);
+        } else
+        {
+            splitMainLayout.setOrientation(1);
+            bundle = (android.widget.LinearLayout.LayoutParams)selectorLayout.getLayoutParams();
+            bundle.width = -1;
+            bundle.height = -2;
+            bundle.weight = 0.0F;
+            selectorLayout.setLayoutParams(bundle);
+            bundle = (android.widget.LinearLayout.LayoutParams)detailsLayout.getLayoutParams();
+            bundle.width = -1;
+            bundle.height = -1;
+            bundle.weight = 1.0F;
+            detailsLayout.setLayoutParams(bundle);
+            splitObjectPopupsLeftSpacer.setVisibility(8);
         }
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getIntent());
-        FragmentManager supportFragmentManager = getSupportFragmentManager();
-        if (supportFragmentManager == null || activeAgentID == null) {
+        bundle = ActivityUtils.getActiveAgentID(getIntent());
+        fragmentmanager = getSupportFragmentManager();
+        if (fragmentmanager != null && bundle != null)
+        {
+            FragmentTransaction fragmenttransaction = fragmentmanager.beginTransaction();
+            if (fragmentmanager.findFragmentById(0x7f100286) == null)
+            {
+                fragmenttransaction.add(0x7f100286, MinimapFragment.newInstance(bundle));
+            }
+            if (fragmentmanager.findFragmentById(0x7f100114) == null)
+            {
+                fragmenttransaction.add(0x7f100114, NearbyPeopleMinimapFragment.newInstance(bundle));
+            }
+            fragmenttransaction.commit();
+            return;
+        } else
+        {
             finish();
             return;
         }
-        FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction();
-        if (supportFragmentManager.findFragmentById(R.id.selector) == null) {
-            beginTransaction.add((int) R.id.selector, MinimapFragment.newInstance(activeAgentID));
-        }
-        if (supportFragmentManager.findFragmentById(R.id.details) == null) {
-            beginTransaction.add((int) R.id.details, NearbyPeopleMinimapFragment.newInstance(activeAgentID));
-        }
-        beginTransaction.commit();
     }
 
-    /* access modifiers changed from: protected */
-    public void onStart() {
+    protected void onStart()
+    {
         super.onStart();
-        UserManager userManager = ActivityUtils.getUserManager(getIntent());
-        if (userManager != null) {
-            this.currentLocationInfo.subscribe(userManager.getCurrentLocationInfo(), SubscriptionSingleKey.Value);
-        } else {
-            this.currentLocationInfo.unsubscribe();
+        UserManager usermanager = ActivityUtils.getUserManager(getIntent());
+        if (usermanager != null)
+        {
+            currentLocationInfo.subscribe(usermanager.getCurrentLocationInfo(), SubscriptionSingleKey.Value);
+            return;
+        } else
+        {
+            currentLocationInfo.unsubscribe();
+            return;
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onStop() {
-        this.currentLocationInfo.unsubscribe();
+    protected void onStop()
+    {
+        currentLocationInfo.unsubscribe();
         super.onStop();
     }
 }

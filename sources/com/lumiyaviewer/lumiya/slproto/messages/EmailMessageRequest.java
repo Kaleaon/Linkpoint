@@ -1,42 +1,63 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class EmailMessageRequest extends SLMessage {
-    public DataBlock DataBlock_Field = new DataBlock();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class DataBlock {
-        public byte[] FromAddress;
+public class EmailMessageRequest extends SLMessage
+{
+    public static class DataBlock
+    {
+
+        public byte FromAddress[];
         public UUID ObjectID;
-        public byte[] Subject;
+        public byte Subject[];
+
+        public DataBlock()
+        {
+        }
     }
 
-    public EmailMessageRequest() {
-        this.zeroCoded = false;
+
+    public DataBlock DataBlock_Field;
+
+    public EmailMessageRequest()
+    {
+        zeroCoded = false;
+        DataBlock_Field = new DataBlock();
     }
 
-    public int CalcPayloadSize() {
-        return this.DataBlock_Field.FromAddress.length + 17 + 1 + this.DataBlock_Field.Subject.length + 4;
+    public int CalcPayloadSize()
+    {
+        return DataBlock_Field.FromAddress.length + 17 + 1 + DataBlock_Field.Subject.length + 4;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleEmailMessageRequest(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleEmailMessageRequest(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 79);
-        packUUID(byteBuffer, this.DataBlock_Field.ObjectID);
-        packVariable(byteBuffer, this.DataBlock_Field.FromAddress, 1);
-        packVariable(byteBuffer, this.DataBlock_Field.Subject, 1);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)79);
+        packUUID(bytebuffer, DataBlock_Field.ObjectID);
+        packVariable(bytebuffer, DataBlock_Field.FromAddress, 1);
+        packVariable(bytebuffer, DataBlock_Field.Subject, 1);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.DataBlock_Field.ObjectID = unpackUUID(byteBuffer);
-        this.DataBlock_Field.FromAddress = unpackVariable(byteBuffer, 1);
-        this.DataBlock_Field.Subject = unpackVariable(byteBuffer, 1);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        DataBlock_Field.ObjectID = unpackUUID(bytebuffer);
+        DataBlock_Field.FromAddress = unpackVariable(bytebuffer, 1);
+        DataBlock_Field.Subject = unpackVariable(bytebuffer, 1);
     }
 }

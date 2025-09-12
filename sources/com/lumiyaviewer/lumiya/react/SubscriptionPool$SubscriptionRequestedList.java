@@ -1,0 +1,25 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
+package com.lumiyaviewer.lumiya.react;
+
+
+// Referenced classes of package com.lumiyaviewer.lumiya.react:
+//            SubscriptionList, SubscriptionPool
+
+private static class <init> extends SubscriptionList
+{
+
+    boolean requested;
+
+    private ()
+    {
+        requested = false;
+    }
+
+    requested(requested requested1)
+    {
+        this();
+    }
+}

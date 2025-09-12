@@ -1,66 +1,97 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class SimulatorLoad extends SLMessage {
-    public ArrayList<AgentList> AgentList_Fields = new ArrayList<>();
-    public SimulatorLoadData SimulatorLoadData_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentList {
+public class SimulatorLoad extends SLMessage
+{
+    public static class AgentList
+    {
+
         public int CircuitCode;
         public int X;
         public int Y;
+
+        public AgentList()
+        {
+        }
     }
 
-    public static class SimulatorLoadData {
+    public static class SimulatorLoadData
+    {
+
         public int AgentCount;
         public boolean CanAcceptAgents;
         public float TimeDilation;
-    }
 
-    public SimulatorLoad() {
-        this.zeroCoded = false;
-        this.SimulatorLoadData_Field = new SimulatorLoadData();
-    }
-
-    public int CalcPayloadSize() {
-        return (this.AgentList_Fields.size() * 6) + 14;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleSimulatorLoad(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put(Ascii.FF);
-        packFloat(byteBuffer, this.SimulatorLoadData_Field.TimeDilation);
-        packInt(byteBuffer, this.SimulatorLoadData_Field.AgentCount);
-        packBoolean(byteBuffer, this.SimulatorLoadData_Field.CanAcceptAgents);
-        byteBuffer.put((byte) this.AgentList_Fields.size());
-        for (AgentList agentList : this.AgentList_Fields) {
-            packInt(byteBuffer, agentList.CircuitCode);
-            packByte(byteBuffer, (byte) agentList.X);
-            packByte(byteBuffer, (byte) agentList.Y);
+        public SimulatorLoadData()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.SimulatorLoadData_Field.TimeDilation = unpackFloat(byteBuffer);
-        this.SimulatorLoadData_Field.AgentCount = unpackInt(byteBuffer);
-        this.SimulatorLoadData_Field.CanAcceptAgents = unpackBoolean(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            AgentList agentList = new AgentList();
-            agentList.CircuitCode = unpackInt(byteBuffer);
-            agentList.X = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            agentList.Y = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            this.AgentList_Fields.add(agentList);
+
+    public ArrayList AgentList_Fields;
+    public SimulatorLoadData SimulatorLoadData_Field;
+
+    public SimulatorLoad()
+    {
+        AgentList_Fields = new ArrayList();
+        zeroCoded = false;
+        SimulatorLoadData_Field = new SimulatorLoadData();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return AgentList_Fields.size() * 6 + 14;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleSimulatorLoad(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)12);
+        packFloat(bytebuffer, SimulatorLoadData_Field.TimeDilation);
+        packInt(bytebuffer, SimulatorLoadData_Field.AgentCount);
+        packBoolean(bytebuffer, SimulatorLoadData_Field.CanAcceptAgents);
+        bytebuffer.put((byte)AgentList_Fields.size());
+        AgentList agentlist;
+        for (Iterator iterator = AgentList_Fields.iterator(); iterator.hasNext(); packByte(bytebuffer, (byte)agentlist.Y))
+        {
+            agentlist = (AgentList)iterator.next();
+            packInt(bytebuffer, agentlist.CircuitCode);
+            packByte(bytebuffer, (byte)agentlist.X);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        SimulatorLoadData_Field.TimeDilation = unpackFloat(bytebuffer);
+        SimulatorLoadData_Field.AgentCount = unpackInt(bytebuffer);
+        SimulatorLoadData_Field.CanAcceptAgents = unpackBoolean(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            AgentList agentlist = new AgentList();
+            agentlist.CircuitCode = unpackInt(bytebuffer);
+            agentlist.X = unpackByte(bytebuffer) & 0xff;
+            agentlist.Y = unpackByte(bytebuffer) & 0xff;
+            AgentList_Fields.add(agentlist);
+        }
+
     }
 }

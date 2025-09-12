@@ -1,86 +1,129 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatYesNoEvent;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectPopupsManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public final class SLVoiceUpgradeEvent extends SLChatYesNoEvent {
+public final class SLVoiceUpgradeEvent extends SLChatYesNoEvent
+{
+
     private final boolean isInstall;
     private final String upgradeURL;
 
-    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    public SLVoiceUpgradeEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
-        super(chatMessage, uuid);
-        boolean z = false;
-        this.upgradeURL = chatMessage.getItemName();
-        this.isInstall = chatMessage.getAssetType().intValue() != 0 ? true : z;
+    public SLVoiceUpgradeEvent(ChatMessage chatmessage, UUID uuid)
+    {
+        boolean flag = false;
+        super(chatmessage, uuid);
+        upgradeURL = chatmessage.getItemName();
+        if (chatmessage.getAssetType().intValue() != 0)
+        {
+            flag = true;
+        }
+        isInstall = flag;
     }
 
-    public SLVoiceUpgradeEvent(@Nonnull UUID uuid, String str, boolean z, String str2) {
-        super(ChatMessageSourceUnknown.getInstance(), uuid, str);
-        this.upgradeURL = str2;
-        this.isInstall = z;
+    public SLVoiceUpgradeEvent(UUID uuid, String s, boolean flag, String s1)
+    {
+        super(ChatMessageSourceUnknown.getInstance(), uuid, s);
+        upgradeURL = s1;
+        isInstall = flag;
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.VoiceUpgrade;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.VoiceUpgrade;
     }
 
-    public String getNoButton(Context context) {
-        return context.getString(R.string.voice_upgrade_no);
+    public String getNoButton(Context context)
+    {
+        return context.getString(0x7f090386);
     }
 
-    public String getNoMessage(Context context) {
-        return this.isInstall ? context.getString(R.string.voice_install_declined) : context.getString(R.string.voice_upgrade_declined);
+    public String getNoMessage(Context context)
+    {
+        if (isInstall)
+        {
+            return context.getString(0x7f09037b);
+        } else
+        {
+            return context.getString(0x7f090385);
+        }
     }
 
-    public String getQuestion(Context context) {
-        return this.isInstall ? context.getString(R.string.install_now_question) : context.getString(R.string.upgrade_now_question);
+    public String getQuestion(Context context)
+    {
+        if (isInstall)
+        {
+            return context.getString(0x7f09015d);
+        } else
+        {
+            return context.getString(0x7f090365);
+        }
     }
 
-    public String getText(Context context, @Nonnull UserManager userManager) {
-        return this.text;
+    public String getText(Context context, UserManager usermanager)
+    {
+        return text;
     }
 
-    public String getYesButton(Context context) {
-        return this.isInstall ? context.getString(R.string.voice_install_yes) : context.getString(R.string.voice_upgrade_yes);
+    public String getYesButton(Context context)
+    {
+        if (isInstall)
+        {
+            return context.getString(0x7f09037c);
+        } else
+        {
+            return context.getString(0x7f090387);
+        }
     }
 
-    public String getYesMessage(Context context) {
+    public String getYesMessage(Context context)
+    {
         return "";
     }
 
-    public boolean isObjectPopup() {
+    public boolean isObjectPopup()
+    {
         return false;
     }
 
-    /* access modifiers changed from: protected */
-    public void onNoAction(Context context, UserManager userManager) {
-        super.onNoAction(context, userManager);
-        userManager.getObjectPopupsManager().cancelObjectPopup(this);
+    protected void onNoAction(Context context, UserManager usermanager)
+    {
+        super.onNoAction(context, usermanager);
+        usermanager.getObjectPopupsManager().cancelObjectPopup(this);
     }
 
-    public void onYesAction(Context context, UserManager userManager) {
-        super.onYesAction(context, userManager);
-        userManager.getObjectPopupsManager().cancelObjectPopup(this);
-        Intent intent = new Intent("android.intent.action.VIEW");
-        intent.setData(Uri.parse(this.upgradeURL));
-        context.startActivity(intent);
+    public void onYesAction(Context context, UserManager usermanager)
+    {
+        super.onYesAction(context, usermanager);
+        usermanager.getObjectPopupsManager().cancelObjectPopup(this);
+        usermanager = new Intent("android.intent.action.VIEW");
+        usermanager.setData(Uri.parse(upgradeURL));
+        context.startActivity(usermanager);
     }
 
-    public void serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage);
-        chatMessage.setItemName(this.upgradeURL);
-        chatMessage.setAssetType(Integer.valueOf(this.isInstall ? 1 : 0));
+    public void serializeToDatabaseObject(ChatMessage chatmessage)
+    {
+        super.serializeToDatabaseObject(chatmessage);
+        chatmessage.setItemName(upgradeURL);
+        int i;
+        if (isInstall)
+        {
+            i = 1;
+        } else
+        {
+            i = 0;
+        }
+        chatmessage.setAssetType(Integer.valueOf(i));
     }
 }

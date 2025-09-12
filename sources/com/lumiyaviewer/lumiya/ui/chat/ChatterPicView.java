@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -16,210 +19,344 @@ import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
-public class ChatterPicView extends View {
-    @Nullable
-    private ChatMessageSource attachedMessageSource = null;
-    private final Rect bitmapDestRect = new Rect();
-    private final Paint bitmapPaint = new Paint();
-    private final Rect bitmapSrcRect = new Rect();
-    @Nullable
-    private ChatterID chatterID = null;
-    @Nullable
-    private String chatterName = null;
-    @Nullable
-    private Drawable defaultIconDrawable = null;
-    @Nullable
-    private Drawable forceIcon = null;
-    @Nullable
-    private ChatterThumbnailData thumbnailData = null;
-    private int thumbnailDefaultIcon = -1;
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat:
+//            ChatterThumbnailData
 
-    public ChatterPicView(Context context) {
+public class ChatterPicView extends View
+{
+
+    private ChatMessageSource attachedMessageSource;
+    private final Rect bitmapDestRect;
+    private final Paint bitmapPaint;
+    private final Rect bitmapSrcRect;
+    private ChatterID chatterID;
+    private String chatterName;
+    private Drawable defaultIconDrawable;
+    private Drawable forceIcon;
+    private ChatterThumbnailData thumbnailData;
+    private int thumbnailDefaultIcon;
+
+    public ChatterPicView(Context context)
+    {
         super(context);
+        thumbnailData = null;
+        chatterID = null;
+        attachedMessageSource = null;
+        chatterName = null;
+        thumbnailDefaultIcon = -1;
+        defaultIconDrawable = null;
+        forceIcon = null;
+        bitmapPaint = new Paint();
+        bitmapSrcRect = new Rect();
+        bitmapDestRect = new Rect();
     }
 
-    public ChatterPicView(Context context, AttributeSet attributeSet) {
-        super(context, attributeSet);
+    public ChatterPicView(Context context, AttributeSet attributeset)
+    {
+        super(context, attributeset);
+        thumbnailData = null;
+        chatterID = null;
+        attachedMessageSource = null;
+        chatterName = null;
+        thumbnailDefaultIcon = -1;
+        defaultIconDrawable = null;
+        forceIcon = null;
+        bitmapPaint = new Paint();
+        bitmapSrcRect = new Rect();
+        bitmapDestRect = new Rect();
     }
 
-    public ChatterPicView(Context context, AttributeSet attributeSet, int i) {
-        super(context, attributeSet, i);
+    public ChatterPicView(Context context, AttributeSet attributeset, int i)
+    {
+        super(context, attributeset, i);
+        thumbnailData = null;
+        chatterID = null;
+        attachedMessageSource = null;
+        chatterName = null;
+        thumbnailDefaultIcon = -1;
+        defaultIconDrawable = null;
+        forceIcon = null;
+        bitmapPaint = new Paint();
+        bitmapSrcRect = new Rect();
+        bitmapDestRect = new Rect();
     }
 
-    @TargetApi(21)
-    public ChatterPicView(Context context, AttributeSet attributeSet, int i, int i2) {
-        super(context, attributeSet, i, i2);
+    public ChatterPicView(Context context, AttributeSet attributeset, int i, int j)
+    {
+        super(context, attributeset, i, j);
+        thumbnailData = null;
+        chatterID = null;
+        attachedMessageSource = null;
+        chatterName = null;
+        thumbnailDefaultIcon = -1;
+        defaultIconDrawable = null;
+        forceIcon = null;
+        bitmapPaint = new Paint();
+        bitmapSrcRect = new Rect();
+        bitmapDestRect = new Rect();
     }
 
-    @Nullable
-    public ChatMessageSource getAttachedMessageSource() {
-        return this.attachedMessageSource;
+    public ChatMessageSource getAttachedMessageSource()
+    {
+        return attachedMessageSource;
     }
 
-    /* access modifiers changed from: protected */
-    public void onAttachedToWindow() {
+    protected void onAttachedToWindow()
+    {
         super.onAttachedToWindow();
-        if (this.thumbnailData == null && this.chatterID != null) {
-            this.thumbnailData = new ChatterThumbnailData(this.chatterID, this);
+        if (thumbnailData == null && chatterID != null)
+        {
+            thumbnailData = new ChatterThumbnailData(chatterID, this);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onDetachedFromWindow() {
+    protected void onDetachedFromWindow()
+    {
         super.onDetachedFromWindow();
-        if (this.thumbnailData != null) {
-            this.thumbnailData.dispose();
-            this.thumbnailData = null;
+        if (thumbnailData != null)
+        {
+            thumbnailData.dispose();
+            thumbnailData = null;
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onDraw(Canvas canvas) {
+    protected void onDraw(Canvas canvas)
+    {
+        char c1;
+        char c6;
+        int j;
+        int k;
+        c6 = '\300';
+        c1 = '@';
+        j = getWidth();
+        k = getHeight();
+        bitmapPaint.setStyle(android.graphics.Paint.Style.STROKE);
+        bitmapPaint.setARGB(255, 255, 255, 255);
+        bitmapPaint.setTextAlign(android.graphics.Paint.Align.CENTER);
+        bitmapPaint.setTextSize((float)k / 2.0F);
+        bitmapPaint.setAntiAlias(true);
+        if (forceIcon == null) goto _L2; else goto _L1
+_L1:
+        forceIcon.setBounds(0, 0, j, k);
+        forceIcon.draw(canvas);
+_L6:
+        return;
+_L2:
+        if (thumbnailData == null) goto _L4; else goto _L3
+_L3:
+        Object obj;
         int i;
-        String str;
-        int i2 = 192;
-        int i3 = 64;
-        int width = getWidth();
-        int height = getHeight();
-        this.bitmapPaint.setStyle(Paint.Style.STROKE);
-        this.bitmapPaint.setARGB(255, 255, 255, 255);
-        this.bitmapPaint.setTextAlign(Paint.Align.CENTER);
-        this.bitmapPaint.setTextSize(((float) height) / 2.0f);
-        this.bitmapPaint.setAntiAlias(true);
-        if (this.forceIcon != null) {
-            this.forceIcon.setBounds(0, 0, width, height);
-            this.forceIcon.draw(canvas);
-        } else if (this.thumbnailData != null) {
-            Bitmap bitmapData = this.thumbnailData.getBitmapData();
-            if (bitmapData != null) {
-                this.bitmapSrcRect.left = 0;
-                this.bitmapSrcRect.top = 0;
-                this.bitmapSrcRect.right = bitmapData.getWidth();
-                this.bitmapSrcRect.bottom = bitmapData.getHeight();
-                this.bitmapDestRect.left = 0;
-                this.bitmapDestRect.top = 0;
-                this.bitmapDestRect.right = width;
-                this.bitmapDestRect.bottom = height;
-                canvas.drawBitmap(bitmapData, this.bitmapSrcRect, this.bitmapDestRect, this.bitmapPaint);
-            } else if (this.defaultIconDrawable != null) {
-                this.defaultIconDrawable.setBounds(0, 0, width, height);
-                this.defaultIconDrawable.draw(canvas);
-            } else {
-                UUID optionalChatterUUID = this.chatterID != null ? this.chatterID.getOptionalChatterUUID() : null;
-                if (optionalChatterUUID != null) {
-                    int abs = Math.abs(optionalChatterUUID.hashCode()) % 6;
-                    if (abs < 3) {
-                        int i4 = abs == 0 ? 192 : 32;
-                        int i5 = abs == 1 ? 192 : 32;
-                        if (abs == 2) {
-                            i = i5;
-                            i3 = i4;
-                        } else {
-                            i2 = 32;
-                            i = i5;
-                            i3 = i4;
-                        }
-                    } else {
-                        int i6 = abs != 3 ? 192 : 32;
-                        int i7 = abs != 4 ? 192 : 32;
-                        if (abs != 5) {
-                            i = i7;
-                            i3 = i6;
-                        } else {
-                            i2 = 32;
-                            i = i7;
-                            i3 = i6;
-                        }
-                    }
-                    Debug.Printf("colorize: uuid %s, hash %x, comp %d, rgb %d, %d, %d", optionalChatterUUID.toString(), Integer.valueOf(optionalChatterUUID.hashCode()), Integer.valueOf(abs), Integer.valueOf(i3), Integer.valueOf(i), Integer.valueOf(i2));
-                } else {
-                    i2 = 64;
-                    i = 64;
+        obj = thumbnailData.getBitmapData();
+        if (obj != null)
+        {
+            bitmapSrcRect.left = 0;
+            bitmapSrcRect.top = 0;
+            bitmapSrcRect.right = ((Bitmap) (obj)).getWidth();
+            bitmapSrcRect.bottom = ((Bitmap) (obj)).getHeight();
+            bitmapDestRect.left = 0;
+            bitmapDestRect.top = 0;
+            bitmapDestRect.right = j;
+            bitmapDestRect.bottom = k;
+            canvas.drawBitmap(((Bitmap) (obj)), bitmapSrcRect, bitmapDestRect, bitmapPaint);
+            return;
+        }
+        if (defaultIconDrawable != null)
+        {
+            defaultIconDrawable.setBounds(0, 0, j, k);
+            defaultIconDrawable.draw(canvas);
+            return;
+        }
+        char c2;
+        if (chatterID != null)
+        {
+            obj = chatterID.getOptionalChatterUUID();
+        } else
+        {
+            obj = null;
+        }
+        if (obj != null)
+        {
+            int l = Math.abs(((UUID) (obj)).hashCode()) % 6;
+            if (l < 3)
+            {
+                char c;
+                if (l == 0)
+                {
+                    i = 192;
+                } else
+                {
+                    i = 32;
                 }
-                canvas.drawRGB(i3, i, i2);
-                if (this.chatterName != null) {
-                    int i8 = 0;
-                    while (true) {
-                        if (i8 >= this.chatterName.length()) {
-                            str = null;
-                            break;
-                        }
-                        char charAt = this.chatterName.charAt(i8);
-                        if (Character.isLetter(charAt)) {
-                            str = String.valueOf(charAt);
-                            break;
-                        }
-                        i8++;
-                    }
-                    if (str != null) {
-                        canvas.drawText(str.toUpperCase(), ((float) width) / 2.0f, (((float) height) / 2.0f) - ((this.bitmapPaint.descent() + this.bitmapPaint.ascent()) / 2.0f), this.bitmapPaint);
-                    }
+                if (l == 1)
+                {
+                    c1 = '\300';
+                } else
+                {
+                    c1 = ' ';
+                }
+                if (l == 2)
+                {
+                    c2 = c1;
+                    c1 = i;
+                    i = c2;
+                    c2 = c6;
+                } else
+                {
+                    c2 = ' ';
+                    char c3 = i;
+                    i = c1;
+                    c1 = c3;
+                }
+            } else
+            {
+                if (l != 3)
+                {
+                    i = 192;
+                } else
+                {
+                    i = 32;
+                }
+                if (l != 4)
+                {
+                    c1 = '\300';
+                } else
+                {
+                    c1 = ' ';
+                }
+                if (l != 5)
+                {
+                    char c4 = i;
+                    c2 = c6;
+                    i = c1;
+                    c1 = c4;
+                } else
+                {
+                    c2 = ' ';
+                    char c5 = i;
+                    i = c1;
+                    c1 = c5;
                 }
             }
-        } else {
-            canvas.drawRGB(64, 64, 64);
+            Debug.Printf("colorize: uuid %s, hash %x, comp %d, rgb %d, %d, %d", new Object[] {
+                ((UUID) (obj)).toString(), Integer.valueOf(((UUID) (obj)).hashCode()), Integer.valueOf(l), Integer.valueOf(c1), Integer.valueOf(i), Integer.valueOf(c2)
+            });
+        } else
+        {
+            c2 = '@';
+            i = 64;
         }
+        canvas.drawRGB(c1, i, c2);
+        if (chatterName == null) goto _L6; else goto _L5
+_L5:
+        i = 0;
+_L9:
+        if (i >= chatterName.length())
+        {
+            break MISSING_BLOCK_LABEL_634;
+        }
+        c = chatterName.charAt(i);
+        if (!Character.isLetter(c)) goto _L8; else goto _L7
+_L7:
+        obj = String.valueOf(c);
+_L10:
+        if (obj != null)
+        {
+            canvas.drawText(((String) (obj)).toUpperCase(), (float)j / 2.0F, (float)k / 2.0F - (bitmapPaint.descent() + bitmapPaint.ascent()) / 2.0F, bitmapPaint);
+            return;
+        }
+          goto _L6
+_L8:
+        i++;
+          goto _L9
+_L4:
+        canvas.drawRGB(64, 64, 64);
+        return;
+        obj = null;
+          goto _L10
     }
 
-    public void setAttachedMessageSource(@Nullable ChatMessageSource chatMessageSource) {
-        this.attachedMessageSource = chatMessageSource;
+    public void setAttachedMessageSource(ChatMessageSource chatmessagesource)
+    {
+        attachedMessageSource = chatmessagesource;
     }
 
-    public void setChatterID(@Nullable ChatterID chatterID2, @Nullable String str) {
-        boolean z = true;
-        boolean z2 = false;
-        if (!(this.forceIcon == null || chatterID2 == null)) {
-            this.forceIcon = null;
-            z2 = true;
-        }
-        if (!Objects.equal(this.chatterID, chatterID2)) {
-            this.chatterID = chatterID2;
-            if (chatterID2 != null) {
-                this.thumbnailData = new ChatterThumbnailData(chatterID2, this);
-            } else {
-                if (this.thumbnailData != null) {
-                    this.thumbnailData.dispose();
-                }
-                this.thumbnailData = null;
+    public void setChatterID(ChatterID chatterid, String s)
+    {
+        boolean flag1 = true;
+        boolean flag2 = false;
+        boolean flag = flag2;
+        if (forceIcon != null)
+        {
+            flag = flag2;
+            if (chatterid != null)
+            {
+                forceIcon = null;
+                flag = true;
             }
-            z2 = true;
         }
-        if (!Objects.equal(this.chatterName, str)) {
-            this.chatterName = str;
-        } else {
-            z = z2;
+        if (!Objects.equal(chatterID, chatterid))
+        {
+            chatterID = chatterid;
+            if (chatterid != null)
+            {
+                thumbnailData = new ChatterThumbnailData(chatterid, this);
+            } else
+            {
+                if (thumbnailData != null)
+                {
+                    thumbnailData.dispose();
+                }
+                thumbnailData = null;
+            }
+            flag = true;
         }
-        if (z) {
+        if (!Objects.equal(chatterName, s))
+        {
+            chatterName = s;
+            flag = flag1;
+        }
+        if (flag)
+        {
             postInvalidate();
         }
     }
 
-    public void setDefaultIcon(int i, boolean z) {
-        if (this.thumbnailDefaultIcon != i) {
-            this.thumbnailDefaultIcon = i;
-            if (this.thumbnailDefaultIcon == -1) {
-                this.defaultIconDrawable = null;
-            } else if (z) {
-                this.defaultIconDrawable = ContextCompat.getDrawable(getContext(), i);
-            } else {
-                TypedValue typedValue = new TypedValue();
-                getContext().getTheme().resolveAttribute(i, typedValue, true);
-                this.defaultIconDrawable = ContextCompat.getDrawable(getContext(), typedValue.resourceId);
+    public void setDefaultIcon(int i, boolean flag)
+    {
+        if (thumbnailDefaultIcon != i)
+        {
+            thumbnailDefaultIcon = i;
+            if (thumbnailDefaultIcon == -1)
+            {
+                defaultIconDrawable = null;
+            } else
+            if (flag)
+            {
+                defaultIconDrawable = ContextCompat.getDrawable(getContext(), i);
+            } else
+            {
+                TypedValue typedvalue = new TypedValue();
+                getContext().getTheme().resolveAttribute(i, typedvalue, true);
+                defaultIconDrawable = ContextCompat.getDrawable(getContext(), typedvalue.resourceId);
             }
             postInvalidate();
         }
     }
 
-    public void setForceIcon(int i) {
-        if (i != -1) {
-            this.forceIcon = ContextCompat.getDrawable(getContext(), i);
-            setChatterID((ChatterID) null, (String) null);
+    public void setForceIcon(int i)
+    {
+        if (i != -1)
+        {
+            forceIcon = ContextCompat.getDrawable(getContext(), i);
+            setChatterID(null, null);
+            postInvalidate();
+            return;
+        } else
+        {
+            forceIcon = null;
             postInvalidate();
             return;
         }
-        this.forceIcon = null;
-        postInvalidate();
     }
 }

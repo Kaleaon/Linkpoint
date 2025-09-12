@@ -1,52 +1,80 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class GroupProposalBallot extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public ProposalData ProposalData_Field = new ProposalData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class GroupProposalBallot extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class ProposalData {
+    public static class ProposalData
+    {
+
         public UUID GroupID;
         public UUID ProposalID;
-        public byte[] VoteCast;
+        public byte VoteCast[];
+
+        public ProposalData()
+        {
+        }
     }
 
-    public GroupProposalBallot() {
-        this.zeroCoded = false;
+
+    public AgentData AgentData_Field;
+    public ProposalData ProposalData_Field;
+
+    public GroupProposalBallot()
+    {
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
+        ProposalData_Field = new ProposalData();
     }
 
-    public int CalcPayloadSize() {
-        return this.ProposalData_Field.VoteCast.length + 33 + 36;
+    public int CalcPayloadSize()
+    {
+        return ProposalData_Field.VoteCast.length + 33 + 36;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleGroupProposalBallot(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleGroupProposalBallot(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 108);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packUUID(byteBuffer, this.ProposalData_Field.ProposalID);
-        packUUID(byteBuffer, this.ProposalData_Field.GroupID);
-        packVariable(byteBuffer, this.ProposalData_Field.VoteCast, 1);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)108);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packUUID(bytebuffer, ProposalData_Field.ProposalID);
+        packUUID(bytebuffer, ProposalData_Field.GroupID);
+        packVariable(bytebuffer, ProposalData_Field.VoteCast, 1);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.ProposalData_Field.ProposalID = unpackUUID(byteBuffer);
-        this.ProposalData_Field.GroupID = unpackUUID(byteBuffer);
-        this.ProposalData_Field.VoteCast = unpackVariable(byteBuffer, 1);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        ProposalData_Field.ProposalID = unpackUUID(bytebuffer);
+        ProposalData_Field.GroupID = unpackUUID(bytebuffer);
+        ProposalData_Field.VoteCast = unpackVariable(bytebuffer, 1);
     }
 }

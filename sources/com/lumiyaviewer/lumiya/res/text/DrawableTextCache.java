@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.text;
 
 import com.lumiyaviewer.lumiya.res.ResourceManager;
@@ -5,32 +9,49 @@ import com.lumiyaviewer.lumiya.res.ResourceMemoryCache;
 import com.lumiyaviewer.lumiya.res.ResourceRequest;
 import com.lumiyaviewer.lumiya.res.executors.PrimComputeExecutor;
 
-public class DrawableTextCache extends ResourceMemoryCache<DrawableTextParams, DrawableTextBitmap> {
-    private final int fontSize;
+// Referenced classes of package com.lumiyaviewer.lumiya.res.text:
+//            DrawableTextParams, DrawableTextBitmap
 
-    private static class TextGenRequest extends ResourceRequest<DrawableTextParams, DrawableTextBitmap> implements Runnable {
+public class DrawableTextCache extends ResourceMemoryCache
+{
+    private static class TextGenRequest extends ResourceRequest
+        implements Runnable
+    {
+
         private final int fontSize;
 
-        TextGenRequest(DrawableTextParams drawableTextParams, int i, ResourceManager<DrawableTextParams, DrawableTextBitmap> resourceManager) {
-            super(drawableTextParams, resourceManager);
-            this.fontSize = i;
-        }
-
-        public void execute() {
+        public void execute()
+        {
             PrimComputeExecutor.getInstance().execute(this);
         }
 
-        public void run() {
-            completeRequest(new DrawableTextBitmap((DrawableTextParams) getParams(), this.fontSize));
+        public void run()
+        {
+            completeRequest(new DrawableTextBitmap((DrawableTextParams)getParams(), fontSize));
+        }
+
+        TextGenRequest(DrawableTextParams drawabletextparams, int i, ResourceManager resourcemanager)
+        {
+            super(drawabletextparams, resourcemanager);
+            fontSize = i;
         }
     }
 
-    public DrawableTextCache(int i) {
-        this.fontSize = i;
+
+    private final int fontSize;
+
+    public DrawableTextCache(int i)
+    {
+        fontSize = i;
     }
 
-    /* access modifiers changed from: protected */
-    public ResourceRequest<DrawableTextParams, DrawableTextBitmap> CreateNewRequest(DrawableTextParams drawableTextParams, ResourceManager<DrawableTextParams, DrawableTextBitmap> resourceManager) {
-        return new TextGenRequest(drawableTextParams, this.fontSize, resourceManager);
+    protected ResourceRequest CreateNewRequest(DrawableTextParams drawabletextparams, ResourceManager resourcemanager)
+    {
+        return new TextGenRequest(drawabletextparams, fontSize, resourcemanager);
+    }
+
+    protected volatile ResourceRequest CreateNewRequest(Object obj, ResourceManager resourcemanager)
+    {
+        return CreateNewRequest((DrawableTextParams)obj, resourcemanager);
     }
 }

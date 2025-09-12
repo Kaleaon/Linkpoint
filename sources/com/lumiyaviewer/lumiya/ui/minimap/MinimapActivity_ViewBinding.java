@@ -1,42 +1,54 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.minimap;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.UiThread;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import butterknife.Unbinder;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
 
-public class MinimapActivity_ViewBinding implements Unbinder {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.minimap:
+//            MinimapActivity
+
+public class MinimapActivity_ViewBinding
+    implements Unbinder
+{
+
     private MinimapActivity target;
 
-    @UiThread
-    public MinimapActivity_ViewBinding(MinimapActivity minimapActivity) {
-        this(minimapActivity, minimapActivity.getWindow().getDecorView());
+    public MinimapActivity_ViewBinding(MinimapActivity minimapactivity)
+    {
+        this(minimapactivity, minimapactivity.getWindow().getDecorView());
     }
 
-    @UiThread
-    public MinimapActivity_ViewBinding(MinimapActivity minimapActivity, View view) {
-        this.target = minimapActivity;
-        minimapActivity.selectorLayout = (FrameLayout) Utils.findRequiredViewAsType(view, R.id.selector, "field 'selectorLayout'", FrameLayout.class);
-        minimapActivity.splitMainLayout = (LinearLayout) Utils.findRequiredViewAsType(view, R.id.splitMainLayout, "field 'splitMainLayout'", LinearLayout.class);
-        minimapActivity.splitObjectPopupsLeftSpacer = Utils.findRequiredView(view, R.id.split_object_popups_left_spacer, "field 'splitObjectPopupsLeftSpacer'");
-        minimapActivity.detailsLayout = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.detailsWithOnlineStatus, "field 'detailsLayout'", ViewGroup.class);
+    public MinimapActivity_ViewBinding(MinimapActivity minimapactivity, View view)
+    {
+        target = minimapactivity;
+        minimapactivity.selectorLayout = (FrameLayout)Utils.findRequiredViewAsType(view, 0x7f100286, "field 'selectorLayout'", android/widget/FrameLayout);
+        minimapactivity.splitMainLayout = (LinearLayout)Utils.findRequiredViewAsType(view, 0x7f100284, "field 'splitMainLayout'", android/widget/LinearLayout);
+        minimapactivity.splitObjectPopupsLeftSpacer = Utils.findRequiredView(view, 0x7f100289, "field 'splitObjectPopupsLeftSpacer'");
+        minimapactivity.detailsLayout = (ViewGroup)Utils.findRequiredViewAsType(view, 0x7f100285, "field 'detailsLayout'", android/view/ViewGroup);
     }
 
-    @CallSuper
-    public void unbind() {
-        MinimapActivity minimapActivity = this.target;
-        if (minimapActivity == null) {
+    public void unbind()
+    {
+        MinimapActivity minimapactivity = target;
+        if (minimapactivity == null)
+        {
             throw new IllegalStateException("Bindings already cleared.");
+        } else
+        {
+            target = null;
+            minimapactivity.selectorLayout = null;
+            minimapactivity.splitMainLayout = null;
+            minimapactivity.splitObjectPopupsLeftSpacer = null;
+            minimapactivity.detailsLayout = null;
+            return;
         }
-        this.target = null;
-        minimapActivity.selectorLayout = null;
-        minimapActivity.splitMainLayout = null;
-        minimapActivity.splitObjectPopupsLeftSpacer = null;
-        minimapActivity.detailsLayout = null;
     }
 }

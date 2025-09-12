@@ -1,9 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules;
 
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
+import com.lumiyaviewer.lumiya.slproto.SLCircuitInfo;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.caps.SLCaps;
-import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler;
 import com.lumiyaviewer.lumiya.slproto.https.LLSDXMLRequest;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDException;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode;
@@ -22,216 +26,331 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SLUserNameFetcher extends SLModule implements RequestListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.modules:
+//            SLModule
+
+public class SLUserNameFetcher extends SLModule
+    implements RequestListener
+{
+
     private static final int MAX_BATCH_SIZE = 4;
-    private static final long REPLY_TIMEOUT = 10000;
+    private static final long REPLY_TIMEOUT = 10000L;
     private final SLCaps caps;
-    /* access modifiers changed from: private */
-    public final Condition hasNamesToFetch = this.lock.newCondition();
+    private final Condition hasNamesToFetch;
     private boolean isWaitingReply;
-    /* access modifiers changed from: private */
-    public final Lock lock = new ReentrantLock();
-    /* access modifiers changed from: private */
-    public volatile boolean threadMustExit;
+    private final Lock lock = new ReentrantLock();
+    private volatile boolean threadMustExit;
     private final Runnable threadRunnable = new Runnable() {
-        /* JADX WARNING: No exception handlers in catch block: Catch:{  } */
-        /* Code decompiled incorrectly, please refer to instructions dump. */
-        public void run() {
-            /*
-                r2 = this;
-            L_0x0000:
-                com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher r0 = com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher.this
-                boolean r0 = r0.threadMustExit
-                if (r0 != 0) goto L_0x002d
-            L_0x0008:
-                com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher r0 = com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher.this     // Catch:{ InterruptedException -> 0x002c }
-                boolean r0 = r0.FetchSomeNamesOverHTTP()     // Catch:{ InterruptedException -> 0x002c }
-                if (r0 != 0) goto L_0x0008
-                com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher r0 = com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher.this     // Catch:{ InterruptedException -> 0x002c }
-                java.util.concurrent.locks.Lock r0 = r0.lock     // Catch:{ InterruptedException -> 0x002c }
-                r0.lock()     // Catch:{ InterruptedException -> 0x002c }
-                com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher r0 = com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher.this     // Catch:{ all -> 0x002e }
-                java.util.concurrent.locks.Condition r0 = r0.hasNamesToFetch     // Catch:{ all -> 0x002e }
-                r0.await()     // Catch:{ all -> 0x002e }
-                com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher r0 = com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher.this     // Catch:{ InterruptedException -> 0x002c }
-                java.util.concurrent.locks.Lock r0 = r0.lock     // Catch:{ InterruptedException -> 0x002c }
-                r0.unlock()     // Catch:{ InterruptedException -> 0x002c }
-                goto L_0x0000
-            L_0x002c:
-                r0 = move-exception
-            L_0x002d:
-                return
-            L_0x002e:
-                r0 = move-exception
-                com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher r1 = com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher.this     // Catch:{ InterruptedException -> 0x002c }
-                java.util.concurrent.locks.Lock r1 = r1.lock     // Catch:{ InterruptedException -> 0x002c }
-                r1.unlock()     // Catch:{ InterruptedException -> 0x002c }
-                throw r0     // Catch:{ InterruptedException -> 0x002c }
-            */
-            throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.modules.SLUserNameFetcher.AnonymousClass1.run():void");
+
+        final SLUserNameFetcher this$0;
+
+        public void run()
+        {
+_L2:
+            if (SLUserNameFetcher._2D_get2(SLUserNameFetcher.this))
+            {
+                break; /* Loop/switch isn't completed */
+            }
+            while (SLUserNameFetcher._2D_wrap0(SLUserNameFetcher.this)) ;
+            SLUserNameFetcher._2D_get1(SLUserNameFetcher.this).lock();
+            SLUserNameFetcher._2D_get0(SLUserNameFetcher.this).await();
+            SLUserNameFetcher._2D_get1(SLUserNameFetcher.this).unlock();
+            if (true) goto _L2; else goto _L1
+            Exception exception;
+            exception;
+            try
+            {
+                SLUserNameFetcher._2D_get1(SLUserNameFetcher.this).unlock();
+                throw exception;
+            }
+            catch (InterruptedException interruptedexception) { }
+_L1:
         }
+
+            
+            {
+                this$0 = SLUserNameFetcher.this;
+                super();
+            }
     };
     private final Object udpLock = new Object();
     private final UserManager userManager;
-    private final WeakPriorityRequestSet<UUID> userNameRequests;
-    private long waitingReplySince = 0;
+    private final WeakPriorityRequestSet userNameRequests;
+    private long waitingReplySince;
     private final Thread workingThread;
     private final LLSDXMLRequest xmlReq;
 
-    public SLUserNameFetcher(SLAgentCircuit sLAgentCircuit, SLCaps sLCaps) {
-        super(sLAgentCircuit);
-        this.userManager = UserManager.getUserManager(sLAgentCircuit.circuitInfo.agentID);
-        this.caps = sLCaps;
-        this.threadMustExit = false;
-        if (sLCaps.getCapability(SLCaps.SLCapability.GetDisplayNames) != null) {
-            this.xmlReq = new LLSDXMLRequest();
-            this.workingThread = new Thread(this.threadRunnable, "DisplayNameFetcher");
-            this.workingThread.start();
-        } else {
-            this.workingThread = null;
-            this.xmlReq = null;
-        }
-        if (this.userManager != null) {
-            this.userNameRequests = this.userManager.getUserNameRequests();
-            this.userNameRequests.addListener(this);
-            return;
-        }
-        this.userNameRequests = null;
+    static Condition _2D_get0(SLUserNameFetcher slusernamefetcher)
+    {
+        return slusernamefetcher.hasNamesToFetch;
     }
 
-    /* access modifiers changed from: private */
-    public boolean FetchSomeNamesOverHTTP() {
-        String str;
-        LLSDNode lLSDNode;
-        List<UUID> uUIDsToFetch = getUUIDsToFetch(4);
-        if (uUIDsToFetch.isEmpty()) {
+    static Lock _2D_get1(SLUserNameFetcher slusernamefetcher)
+    {
+        return slusernamefetcher.lock;
+    }
+
+    static boolean _2D_get2(SLUserNameFetcher slusernamefetcher)
+    {
+        return slusernamefetcher.threadMustExit;
+    }
+
+    static boolean _2D_wrap0(SLUserNameFetcher slusernamefetcher)
+    {
+        return slusernamefetcher.FetchSomeNamesOverHTTP();
+    }
+
+    public SLUserNameFetcher(SLAgentCircuit slagentcircuit, SLCaps slcaps)
+    {
+        super(slagentcircuit);
+        hasNamesToFetch = lock.newCondition();
+        waitingReplySince = 0L;
+        userManager = UserManager.getUserManager(slagentcircuit.circuitInfo.agentID);
+        caps = slcaps;
+        threadMustExit = false;
+        if (slcaps.getCapability(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.GetDisplayNames) != null)
+        {
+            xmlReq = new LLSDXMLRequest();
+            workingThread = new Thread(threadRunnable, "DisplayNameFetcher");
+            workingThread.start();
+        } else
+        {
+            workingThread = null;
+            xmlReq = null;
+        }
+        if (userManager != null)
+        {
+            userNameRequests = userManager.getUserNameRequests();
+            userNameRequests.addListener(this);
+            return;
+        } else
+        {
+            userNameRequests = null;
+            return;
+        }
+    }
+
+    private boolean FetchSomeNamesOverHTTP()
+    {
+        Object obj;
+        boolean flag1;
+        flag1 = false;
+        Object obj1 = getUUIDsToFetch(4);
+        if (((List) (obj1)).isEmpty())
+        {
             return false;
         }
-        String str2 = this.caps.getCapability(SLCaps.SLCapability.GetDisplayNames) + "/";
-        Iterator<T> it = uUIDsToFetch.iterator();
-        boolean z = true;
-        while (true) {
-            str = str2;
-            if (it.hasNext()) {
-                str2 = (z ? str + "?" : str + "&") + "ids=" + ((UUID) it.next()).toString();
-                z = false;
-            } else {
-                try {
-                    break;
-                } catch (LLSDXMLException e) {
-                    e.printStackTrace();
-                    lLSDNode = null;
-                } catch (IOException e2) {
-                    e2.printStackTrace();
-                    lLSDNode = null;
-                }
+        obj = (new StringBuilder()).append(caps.getCapability(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.GetDisplayNames)).append("/").toString();
+        obj1 = ((Iterable) (obj1)).iterator();
+        boolean flag = true;
+        while (((Iterator) (obj1)).hasNext()) 
+        {
+            UUID uuid1 = (UUID)((Iterator) (obj1)).next();
+            if (flag)
+            {
+                obj = (new StringBuilder()).append(((String) (obj))).append("?").toString();
+            } else
+            {
+                obj = (new StringBuilder()).append(((String) (obj))).append("&").toString();
             }
+            obj = (new StringBuilder()).append(((String) (obj))).append("ids=").append(uuid1.toString()).toString();
+            flag = false;
         }
-        lLSDNode = this.xmlReq.PerformRequest(str, (LLSDNode) null);
-        if (lLSDNode != null) {
-            try {
-                if (lLSDNode.keyExists("agents")) {
-                    LLSDNode byKey = lLSDNode.byKey("agents");
-                    for (int i = 0; i < byKey.getCount(); i++) {
-                        LLSDNode byIndex = byKey.byIndex(i);
-                        UUID asUUID = byIndex.byKey("id").asUUID();
-                        String asString = byIndex.byKey("display_name").asString();
-                        String asString2 = byIndex.byKey("username").asString();
-                        if (this.userManager != null) {
-                            this.userManager.updateUserNames(asUUID, asString2, asString);
-                            this.userNameRequests.completeRequest(asUUID);
-                        }
-                    }
-                }
-                if (lLSDNode.keyExists("bad_ids")) {
-                    LLSDNode byKey2 = lLSDNode.byKey("bad_ids");
-                    for (int i2 = 0; i2 < byKey2.getCount(); i2++) {
-                        UUID fromString = UUID.fromString(byKey2.byIndex(i2).asString());
-                        if (this.userManager != null) {
-                            this.userManager.setUserBadUUID(fromString);
-                            this.userNameRequests.completeRequest(fromString);
-                        }
-                    }
-                }
-            } catch (LLSDException e3) {
-                e3.printStackTrace();
-            }
+        UUID uuid2;
+        String s;
+        Object obj2;
+        int i;
+        try
+        {
+            obj = xmlReq.PerformRequest(((String) (obj)), null);
         }
+        // Misplaced declaration of an exception variable
+        catch (Object obj)
+        {
+            ((LLSDXMLException) (obj)).printStackTrace();
+            obj = null;
+        }
+        // Misplaced declaration of an exception variable
+        catch (Object obj)
+        {
+            ((IOException) (obj)).printStackTrace();
+            obj = null;
+        }
+        if (obj == null) goto _L2; else goto _L1
+_L1:
+        if (!((LLSDNode) (obj)).keyExists("agents")) goto _L4; else goto _L3
+_L3:
+        obj1 = ((LLSDNode) (obj)).byKey("agents");
+        i = 0;
+_L5:
+        if (i >= ((LLSDNode) (obj1)).getCount())
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        obj2 = ((LLSDNode) (obj1)).byIndex(i);
+        uuid2 = ((LLSDNode) (obj2)).byKey("id").asUUID();
+        s = ((LLSDNode) (obj2)).byKey("display_name").asString();
+        obj2 = ((LLSDNode) (obj2)).byKey("username").asString();
+        if (userManager != null)
+        {
+            userManager.updateUserNames(uuid2, ((String) (obj2)), s);
+            userNameRequests.completeRequest(uuid2);
+        }
+        i++;
+        if (true) goto _L5; else goto _L4
+_L4:
+        if (!((LLSDNode) (obj)).keyExists("bad_ids")) goto _L2; else goto _L6
+_L6:
+        obj = ((LLSDNode) (obj)).byKey("bad_ids");
+        int j = ((flag1) ? 1 : 0);
+_L7:
+        if (j >= ((LLSDNode) (obj)).getCount())
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        UUID uuid = UUID.fromString(((LLSDNode) (obj)).byIndex(j).asString());
+        if (userManager != null)
+        {
+            userManager.setUserBadUUID(uuid);
+            userNameRequests.completeRequest(uuid);
+        }
+        j++;
+        if (true) goto _L7; else goto _L2
+        LLSDException llsdexception;
+        llsdexception;
+        llsdexception.printStackTrace();
+_L2:
         return true;
     }
 
-    private void FetchSomeNamesOverUDP() {
-        List<UUID> uUIDsToFetch = getUUIDsToFetch(4);
-        if (uUIDsToFetch.isEmpty()) {
-            this.isWaitingReply = false;
+    private void FetchSomeNamesOverUDP()
+    {
+        Object obj = getUUIDsToFetch(4);
+        if (((List) (obj)).isEmpty())
+        {
+            isWaitingReply = false;
             return;
         }
-        UUIDNameRequest uUIDNameRequest = new UUIDNameRequest();
-        for (UUID uuid : uUIDsToFetch) {
-            UUIDNameRequest.UUIDNameBlock uUIDNameBlock = new UUIDNameRequest.UUIDNameBlock();
-            uUIDNameBlock.ID = uuid;
-            uUIDNameRequest.UUIDNameBlock_Fields.add(uUIDNameBlock);
+        UUIDNameRequest uuidnamerequest = new UUIDNameRequest();
+        com.lumiyaviewer.lumiya.slproto.messages.UUIDNameRequest.UUIDNameBlock uuidnameblock;
+        for (obj = ((Iterable) (obj)).iterator(); ((Iterator) (obj)).hasNext(); uuidnamerequest.UUIDNameBlock_Fields.add(uuidnameblock))
+        {
+            UUID uuid = (UUID)((Iterator) (obj)).next();
+            uuidnameblock = new com.lumiyaviewer.lumiya.slproto.messages.UUIDNameRequest.UUIDNameBlock();
+            uuidnameblock.ID = uuid;
         }
-        this.isWaitingReply = true;
-        this.waitingReplySince = System.currentTimeMillis();
-        uUIDNameRequest.isReliable = true;
-        SendMessage(uUIDNameRequest);
+
+        isWaitingReply = true;
+        waitingReplySince = System.currentTimeMillis();
+        uuidnamerequest.isReliable = true;
+        SendMessage(uuidnamerequest);
     }
 
-    private List<UUID> getUUIDsToFetch(int i) {
-        UUID request;
-        ArrayList arrayList = new ArrayList(i);
-        if (this.userNameRequests != null) {
-            while (arrayList.size() < i && (request = this.userNameRequests.getRequest()) != null) {
-                arrayList.add(request);
+    private List getUUIDsToFetch(int i)
+    {
+        ArrayList arraylist = new ArrayList(i);
+        if (userNameRequests != null)
+        {
+            do
+            {
+                if (arraylist.size() >= i)
+                {
+                    break;
+                }
+                UUID uuid = (UUID)userNameRequests.getRequest();
+                if (uuid == null)
+                {
+                    break;
+                }
+                arraylist.add(uuid);
+            } while (true);
+        }
+        return arraylist;
+    }
+
+    public void HandleCloseCircuit()
+    {
+        threadMustExit = true;
+        if (xmlReq != null)
+        {
+            xmlReq.InterruptRequest();
+        }
+        if (workingThread != null)
+        {
+            workingThread.interrupt();
+        }
+        if (userNameRequests != null)
+        {
+            userNameRequests.removeListener(this);
+        }
+    }
+
+    public void HandleUUIDNameReply(UUIDNameReply uuidnamereply)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        uuidnamereply = uuidnamereply.UUIDNameBlock_Fields.iterator();
+        do
+        {
+            if (!uuidnamereply.hasNext())
+            {
+                break;
             }
-        }
-        return arrayList;
-    }
-
-    public void HandleCloseCircuit() {
-        this.threadMustExit = true;
-        if (this.xmlReq != null) {
-            this.xmlReq.InterruptRequest();
-        }
-        if (this.workingThread != null) {
-            this.workingThread.interrupt();
-        }
-        if (this.userNameRequests != null) {
-            this.userNameRequests.removeListener(this);
-        }
-    }
-
-    @SLMessageHandler
-    public synchronized void HandleUUIDNameReply(UUIDNameReply uUIDNameReply) {
-        for (UUIDNameReply.UUIDNameBlock uUIDNameBlock : uUIDNameReply.UUIDNameBlock_Fields) {
-            UUID uuid = uUIDNameBlock.ID;
-            String str = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName);
-            if (this.userManager != null) {
-                this.userManager.updateUserNames(uuid, str, str);
-                this.userNameRequests.completeRequest(uuid);
+            Object obj = (com.lumiyaviewer.lumiya.slproto.messages.UUIDNameReply.UUIDNameBlock)uuidnamereply.next();
+            UUID uuid = ((com.lumiyaviewer.lumiya.slproto.messages.UUIDNameReply.UUIDNameBlock) (obj)).ID;
+            obj = (new StringBuilder()).append(SLMessage.stringFromVariableOEM(((com.lumiyaviewer.lumiya.slproto.messages.UUIDNameReply.UUIDNameBlock) (obj)).FirstName)).append(" ").append(SLMessage.stringFromVariableOEM(((com.lumiyaviewer.lumiya.slproto.messages.UUIDNameReply.UUIDNameBlock) (obj)).LastName)).toString();
+            if (userManager != null)
+            {
+                userManager.updateUserNames(uuid, ((String) (obj)), ((String) (obj)));
+                userNameRequests.completeRequest(uuid);
             }
+        } while (true);
+        break MISSING_BLOCK_LABEL_106;
+        uuidnamereply;
+        throw uuidnamereply;
+        uuidnamereply = ((UUIDNameReply) (udpLock));
+        uuidnamereply;
+        JVM INSTR monitorenter ;
+        isWaitingReply = false;
+        FetchSomeNamesOverUDP();
+        uuidnamereply;
+        JVM INSTR monitorexit ;
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        Exception exception;
+        exception;
+        uuidnamereply;
+        JVM INSTR monitorexit ;
+        throw exception;
+    }
+
+    public void onNewRequest()
+    {
+        if (workingThread == null)
+        {
+            break MISSING_BLOCK_LABEL_47;
         }
-        synchronized (this.udpLock) {
-            this.isWaitingReply = false;
+        lock.lock();
+        hasNamesToFetch.signal();
+        lock.unlock();
+        return;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
+        Object obj = udpLock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (!isWaitingReply || System.currentTimeMillis() > waitingReplySince + 10000L)
+        {
             FetchSomeNamesOverUDP();
         }
-    }
-
-    public void onNewRequest() {
-        if (this.workingThread != null) {
-            this.lock.lock();
-            try {
-                this.hasNamesToFetch.signal();
-            } finally {
-                this.lock.unlock();
-            }
-        } else {
-            synchronized (this.udpLock) {
-                if (!this.isWaitingReply || System.currentTimeMillis() > this.waitingReplySince + REPLY_TIMEOUT) {
-                    FetchSomeNamesOverUDP();
-                }
-            }
-        }
+        obj;
+        JVM INSTR monitorexit ;
+        return;
+        Exception exception1;
+        exception1;
+        throw exception1;
     }
 }

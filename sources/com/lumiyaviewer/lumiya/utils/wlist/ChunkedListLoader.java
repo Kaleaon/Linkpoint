@@ -1,9 +1,12 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.utils.wlist;
 
 import com.google.common.collect.Lists;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.utils.Identifiable;
-import com.lumiyaviewer.lumiya.utils.wlist.ChunkedList;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -13,583 +16,792 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.RandomAccess;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class ChunkedListLoader<E extends Identifiable<Long>> extends AbstractList<E> implements ChunkedList.ChunkFactory<E>, RandomAccess {
-    /* access modifiers changed from: private */
-    public final Queue<E> addedElements = new ConcurrentLinkedQueue();
-    /* access modifiers changed from: private */
-    public final Comparator<E> chatMessageComparator = new $Lambda$QDlX9uefQr1Wq8gtt1O6M2wUNME();
-    @Nonnull
-    private final Executor executor;
-    /* access modifiers changed from: private */
-    public boolean hasAbove;
-    /* access modifiers changed from: private */
-    public boolean hasBelow;
-    /* access modifiers changed from: private */
-    @Nonnull
-    public ChunkedList<E> items;
-    /* access modifiers changed from: private */
-    @Nonnull
-    public final EventListener listener;
-    @Nonnull
-    private final Executor listenerExecutor;
-    /* access modifiers changed from: private */
-    @Nullable
-    public LoadResult<E> loadAboveResult = null;
-    /* access modifiers changed from: private */
-    public long loadAboveTopmostId;
-    /* access modifiers changed from: private */
-    public boolean loadAboveWanted = false;
-    /* access modifiers changed from: private */
-    public long loadBelowLastId;
-    /* access modifiers changed from: private */
-    @Nullable
-    public LoadResult<E> loadBelowResult = null;
-    /* access modifiers changed from: private */
-    public boolean loadBelowWanted = false;
-    private final Runnable loadMoreData = new Runnable() {
-        public void run() {
-            boolean z;
-            long r4;
-            boolean z2;
-            boolean z3;
-            long r6;
-            boolean z4 = true;
-            Debug.Printf("ChatView: processing loadMoreData(), reloadRequested %b", Boolean.valueOf(ChunkedListLoader.this.reloadRequested.get()));
-            ChunkedListLoader.this.loadRequested.set(false);
-            synchronized (ChunkedListLoader.this.lock) {
-                z = (!ChunkedListLoader.this.loadAboveWanted || ChunkedListLoader.this.loadAboveResult != null) ? false : !ChunkedListLoader.this.reloadRequested.get();
-                r4 = ChunkedListLoader.this.loadAboveTopmostId;
-            }
-            if (z) {
-                LoadResult loadInBackground = ChunkedListLoader.this.loadInBackground(ChunkedListLoader.this.windowSize, r4, false);
-                synchronized (ChunkedListLoader.this.lock) {
-                    LoadResult unused = ChunkedListLoader.this.loadAboveResult = loadInBackground;
-                }
-                z2 = true;
-            } else {
-                z2 = false;
-            }
-            synchronized (ChunkedListLoader.this.lock) {
-                z3 = (!ChunkedListLoader.this.loadBelowWanted || ChunkedListLoader.this.loadBelowResult != null) ? false : !ChunkedListLoader.this.reloadRequested.get();
-                r6 = ChunkedListLoader.this.loadBelowLastId;
-            }
-            if (z3) {
-                LoadResult loadInBackground2 = ChunkedListLoader.this.loadInBackground(ChunkedListLoader.this.windowSize, r6, true);
-                synchronized (ChunkedListLoader.this.lock) {
-                    LoadResult unused2 = ChunkedListLoader.this.loadBelowResult = loadInBackground2;
-                }
-                z2 = true;
-            }
-            if (ChunkedListLoader.this.reloadRequested.getAndSet(false)) {
-                ChunkedListLoader.this.reloadAccepted.set(true);
-            } else {
-                z4 = z2;
-            }
-            if (z4) {
-                ChunkedListLoader.this.postUpdate();
-            }
-        }
-    };
-    /* access modifiers changed from: private */
-    public final AtomicBoolean loadRequested = new AtomicBoolean();
-    /* access modifiers changed from: private */
-    public final Object lock = new Object();
-    private final Runnable processUpdate = new Runnable() {
-        public void run() {
-            LoadResult r3;
-            int i;
-            LoadResult r32;
-            int i2;
-            Identifiable identifiable;
-            boolean z;
-            ChunkedListLoader.this.updatePosted.set(false);
-            Debug.Printf("ChatView: processUpdate, reloadAccepted: %b", Boolean.valueOf(ChunkedListLoader.this.reloadAccepted.get()));
-            if (ChunkedListLoader.this.reloadAccepted.getAndSet(false)) {
-                synchronized (ChunkedListLoader.this.lock) {
-                    boolean unused = ChunkedListLoader.this.loadAboveWanted = false;
-                    LoadResult unused2 = ChunkedListLoader.this.loadAboveResult = null;
-                    LoadResult unused3 = ChunkedListLoader.this.loadBelowResult = null;
-                    boolean unused4 = ChunkedListLoader.this.loadBelowWanted = false;
-                }
-                boolean unused5 = ChunkedListLoader.this.hasAbove = true;
-                boolean unused6 = ChunkedListLoader.this.hasBelow = true;
-                ChunkedListLoader.this.addedElements.clear();
-                ChunkedListLoader.this.items.clear();
-                ChunkedListLoader.this.listener.onListReloaded();
-                return;
-            }
-            synchronized (ChunkedListLoader.this.lock) {
-                r3 = ChunkedListLoader.this.loadAboveResult;
-                if (r3 != null) {
-                    LoadResult unused7 = ChunkedListLoader.this.loadAboveResult = null;
-                    boolean unused8 = ChunkedListLoader.this.loadAboveWanted = false;
-                }
-            }
-            if (r3 != null) {
-                i = r3.entries.size() + 0;
-                ChunkedListLoader.this.items.addChunkAtStart(Lists.reverse(r3.entries));
-                boolean unused9 = ChunkedListLoader.this.hasAbove = r3.hasMore;
-                if (r3.fromId == Long.MAX_VALUE) {
-                    boolean unused10 = ChunkedListLoader.this.hasBelow = false;
-                }
-            } else {
-                i = 0;
-            }
-            if (i != 0) {
-                ChunkedListLoader.this.listener.onListItemsAdded(0, i);
-            }
-            int size = ChunkedListLoader.this.items.size();
-            synchronized (ChunkedListLoader.this.lock) {
-                r32 = ChunkedListLoader.this.loadBelowResult;
-                if (r32 != null) {
-                    LoadResult unused11 = ChunkedListLoader.this.loadBelowResult = null;
-                    boolean unused12 = ChunkedListLoader.this.loadBelowWanted = false;
-                }
-            }
-            if (r32 != null) {
-                i2 = r32.entries.size();
-                ChunkedListLoader.this.items.addChunkAtEnd(r32.entries);
-                boolean unused13 = ChunkedListLoader.this.hasBelow = r32.hasMore;
-                if (r32.fromId == 0) {
-                    boolean unused14 = ChunkedListLoader.this.hasAbove = false;
-                }
-            } else {
-                i2 = 0;
-            }
-            boolean z2 = false;
-            int i3 = i2;
-            while (true) {
-                Identifiable identifiable2 = (Identifiable) ChunkedListLoader.this.addedElements.poll();
-                if (identifiable2 == null) {
-                    break;
-                }
-                long longValue = ChunkedListLoader.this.items.size() > 0 ? ((Long) ((Identifiable) ChunkedListLoader.this.items.get(ChunkedListLoader.this.items.size() - 1)).getId()).longValue() : -1;
-                Debug.Printf("ChatView: added element: id %d, lastId %d, hasBelow %b", identifiable2.getId(), Long.valueOf(longValue), Boolean.valueOf(ChunkedListLoader.this.hasBelow));
-                if (ChunkedListLoader.this.hasBelow || ((Long) identifiable2.getId()).longValue() <= longValue) {
-                    z = z2;
-                } else {
-                    ChunkedListLoader.this.items.addElement(identifiable2, ChunkedListLoader.this.windowSize, ChunkedListLoader.this);
-                    i3++;
-                    z = true;
-                }
-                z2 = z;
-                i3 = i3;
-            }
-            if (i3 != 0) {
-                ChunkedListLoader.this.listener.onListItemsAdded(size, i3);
-            }
-            if (z2) {
-                ChunkedListLoader.this.listener.onListItemAddedAtEnd();
-            }
-            while (true) {
-                synchronized (ChunkedListLoader.this.lock) {
-                    Iterator it = ChunkedListLoader.this.updatedElements.entrySet().iterator();
-                    if (it.hasNext()) {
-                        identifiable = (Identifiable) ((Map.Entry) it.next()).getValue();
-                        it.remove();
-                    } else {
-                        identifiable = null;
-                    }
-                }
-                if (identifiable != null) {
-                    int replaceElement = ChunkedListLoader.this.items.replaceElement(identifiable, ChunkedListLoader.this.chatMessageComparator);
-                    Debug.Printf("ChunkedListLoader: replace: replacedIndex is %d", Integer.valueOf(replaceElement));
-                    if (replaceElement >= 0) {
-                        ChunkedListLoader.this.listener.onListItemChanged(replaceElement);
-                    }
-                } else {
-                    return;
-                }
-            }
-        }
-    };
-    /* access modifiers changed from: private */
-    public final AtomicBoolean reloadAccepted = new AtomicBoolean();
-    /* access modifiers changed from: private */
-    public final AtomicBoolean reloadRequested = new AtomicBoolean();
-    private final boolean startFromStart;
-    /* access modifiers changed from: private */
-    public final AtomicBoolean updatePosted = new AtomicBoolean();
-    /* access modifiers changed from: private */
-    public final Map<Long, E> updatedElements = new HashMap();
-    /* access modifiers changed from: private */
-    public final int windowSize;
+// Referenced classes of package com.lumiyaviewer.lumiya.utils.wlist:
+//            ChunkedList
 
-    public interface EventListener {
-        @Nonnull
-        Executor getListEventsExecutor();
+public class ChunkedListLoader extends AbstractList
+    implements ChunkedList.ChunkFactory, RandomAccess
+{
+    public static interface EventListener
+    {
 
-        void onListItemAddedAtEnd();
+        public abstract Executor getListEventsExecutor();
 
-        void onListItemChanged(int i);
+        public abstract void onListItemAddedAtEnd();
 
-        void onListItemsAdded(int i, int i2);
+        public abstract void onListItemChanged(int i);
 
-        void onListItemsRemoved(int i, int i2);
+        public abstract void onListItemsAdded(int i, int j);
 
-        void onListReloaded();
+        public abstract void onListItemsRemoved(int i, int j);
+
+        public abstract void onListReloaded();
     }
 
-    protected static class LoadResult<E> {
-        public final List<E> entries;
+    protected static class LoadResult
+    {
+
+        public final List entries;
         final long fromId;
         final boolean hasMore;
 
-        public LoadResult(List<E> list, boolean z, long j) {
-            this.entries = list;
-            this.hasMore = z;
-            this.fromId = j;
+        public LoadResult(List list, boolean flag, long l)
+        {
+            entries = list;
+            hasMore = flag;
+            fromId = l;
         }
     }
 
-    public ChunkedListLoader(int i, @Nonnull Executor executor2, boolean z, @Nonnull EventListener eventListener) {
-        this.windowSize = i;
-        this.executor = executor2;
-        this.startFromStart = z;
-        this.listener = eventListener;
-        this.listenerExecutor = eventListener.getListEventsExecutor();
-        this.items = new ChunkedList<>();
-        this.hasAbove = true;
-        this.hasBelow = true;
+
+    private final Queue addedElements = new ConcurrentLinkedQueue();
+    private final Comparator chatMessageComparator = new _2D_.Lambda.QDlX9uefQr1Wq8gtt1O6M2wUNME();
+    private final Executor executor;
+    private boolean hasAbove;
+    private boolean hasBelow;
+    private ChunkedList items;
+    private final EventListener listener;
+    private final Executor listenerExecutor;
+    private LoadResult loadAboveResult;
+    private long loadAboveTopmostId;
+    private boolean loadAboveWanted;
+    private long loadBelowLastId;
+    private LoadResult loadBelowResult;
+    private boolean loadBelowWanted;
+    private final Runnable loadMoreData = new Runnable() {
+
+        final ChunkedListLoader this$0;
+
+        public void run()
+        {
+            boolean flag3;
+            flag3 = true;
+            Debug.Printf("ChatView: processing loadMoreData(), reloadRequested %b", new Object[] {
+                Boolean.valueOf(ChunkedListLoader._2D_get14(ChunkedListLoader.this).get())
+            });
+            ChunkedListLoader._2D_get11(ChunkedListLoader.this).set(false);
+            Object obj = ChunkedListLoader._2D_get12(ChunkedListLoader.this);
+            obj;
+            JVM INSTR monitorenter ;
+            if (!ChunkedListLoader._2D_get7(ChunkedListLoader.this) || ChunkedListLoader._2D_get5(ChunkedListLoader.this) != null) goto _L2; else goto _L1
+_L1:
+            boolean flag1 = ChunkedListLoader._2D_get14(ChunkedListLoader.this).get() ^ true;
+_L5:
+            long l = ChunkedListLoader._2D_get6(ChunkedListLoader.this);
+            obj;
+            JVM INSTR monitorexit ;
+            LoadResult loadresult;
+            if (!flag1)
+            {
+                break MISSING_BLOCK_LABEL_313;
+            }
+            loadresult = loadInBackground(ChunkedListLoader._2D_get17(ChunkedListLoader.this), l, false);
+            obj = ChunkedListLoader._2D_get12(ChunkedListLoader.this);
+            obj;
+            JVM INSTR monitorenter ;
+            ChunkedListLoader._2D_set2(ChunkedListLoader.this, loadresult);
+            obj;
+            JVM INSTR monitorexit ;
+            flag1 = true;
+_L7:
+            obj = ChunkedListLoader._2D_get12(ChunkedListLoader.this);
+            obj;
+            JVM INSTR monitorenter ;
+            if (!ChunkedListLoader._2D_get10(ChunkedListLoader.this) || ChunkedListLoader._2D_get9(ChunkedListLoader.this) != null) goto _L4; else goto _L3
+_L3:
+            boolean flag2 = ChunkedListLoader._2D_get14(ChunkedListLoader.this).get() ^ true;
+_L6:
+            l = ChunkedListLoader._2D_get8(ChunkedListLoader.this);
+            obj;
+            JVM INSTR monitorexit ;
+            if (!flag2)
+            {
+                break MISSING_BLOCK_LABEL_239;
+            }
+            loadresult = loadInBackground(ChunkedListLoader._2D_get17(ChunkedListLoader.this), l, true);
+            obj = ChunkedListLoader._2D_get12(ChunkedListLoader.this);
+            obj;
+            JVM INSTR monitorenter ;
+            ChunkedListLoader._2D_set4(ChunkedListLoader.this, loadresult);
+            obj;
+            JVM INSTR monitorexit ;
+            flag1 = true;
+            if (ChunkedListLoader._2D_get14(ChunkedListLoader.this).getAndSet(false))
+            {
+                ChunkedListLoader._2D_get13(ChunkedListLoader.this).set(true);
+                flag1 = flag3;
+            }
+            if (flag1)
+            {
+                ChunkedListLoader._2D_wrap0(ChunkedListLoader.this);
+            }
+            return;
+_L2:
+            flag1 = false;
+              goto _L5
+            Exception exception;
+            exception;
+            throw exception;
+            exception;
+            throw exception;
+_L4:
+            flag2 = false;
+              goto _L6
+            exception;
+            throw exception;
+            exception;
+            throw exception;
+            flag1 = false;
+              goto _L7
+        }
+
+            
+            {
+                this$0 = ChunkedListLoader.this;
+                super();
+            }
+    };
+    private final AtomicBoolean loadRequested = new AtomicBoolean();
+    private final Object lock = new Object();
+    private final Runnable processUpdate = new Runnable() {
+
+        final ChunkedListLoader this$0;
+
+        public void run()
+        {
+            ChunkedListLoader._2D_get15(ChunkedListLoader.this).set(false);
+            Debug.Printf("ChatView: processUpdate, reloadAccepted: %b", new Object[] {
+                Boolean.valueOf(ChunkedListLoader._2D_get13(ChunkedListLoader.this).get())
+            });
+            if (!ChunkedListLoader._2D_get13(ChunkedListLoader.this).getAndSet(false)) goto _L2; else goto _L1
+_L1:
+            Object obj = ChunkedListLoader._2D_get12(ChunkedListLoader.this);
+            obj;
+            JVM INSTR monitorenter ;
+            ChunkedListLoader._2D_set3(ChunkedListLoader.this, false);
+            ChunkedListLoader._2D_set2(ChunkedListLoader.this, null);
+            ChunkedListLoader._2D_set4(ChunkedListLoader.this, null);
+            ChunkedListLoader._2D_set5(ChunkedListLoader.this, false);
+            obj;
+            JVM INSTR monitorexit ;
+            ChunkedListLoader._2D_set0(ChunkedListLoader.this, true);
+            ChunkedListLoader._2D_set1(ChunkedListLoader.this, true);
+            ChunkedListLoader._2D_get0(ChunkedListLoader.this).clear();
+            ChunkedListLoader._2D_get3(ChunkedListLoader.this).clear();
+            ChunkedListLoader._2D_get4(ChunkedListLoader.this).onListReloaded();
+_L4:
+            return;
+            Exception exception;
+            exception;
+            throw exception;
+_L2:
+            obj = ChunkedListLoader._2D_get12(ChunkedListLoader.this);
+            obj;
+            JVM INSTR monitorenter ;
+            Object obj1 = ChunkedListLoader._2D_get5(ChunkedListLoader.this);
+            if (obj1 == null)
+            {
+                break MISSING_BLOCK_LABEL_196;
+            }
+            ChunkedListLoader._2D_set2(ChunkedListLoader.this, null);
+            ChunkedListLoader._2D_set3(ChunkedListLoader.this, false);
+            obj;
+            JVM INSTR monitorexit ;
+            Exception exception1;
+            Iterator iterator;
+            int j;
+            int l;
+            boolean flag1;
+            int i1;
+            long l1;
+            if (obj1 != null)
+            {
+                int k = ((LoadResult) (obj1)).entries.size() + 0;
+                ChunkedListLoader._2D_get3(ChunkedListLoader.this).addChunkAtStart(Lists.reverse(((LoadResult) (obj1)).entries));
+                ChunkedListLoader._2D_set0(ChunkedListLoader.this, ((LoadResult) (obj1)).hasMore);
+                j = k;
+                if (((LoadResult) (obj1)).fromId == 0x7fffffffffffffffL)
+                {
+                    ChunkedListLoader._2D_set1(ChunkedListLoader.this, false);
+                    j = k;
+                }
+            } else
+            {
+                j = 0;
+            }
+            if (j != 0)
+            {
+                ChunkedListLoader._2D_get4(ChunkedListLoader.this).onListItemsAdded(0, j);
+            }
+            i1 = ChunkedListLoader._2D_get3(ChunkedListLoader.this).size();
+            obj = ChunkedListLoader._2D_get12(ChunkedListLoader.this);
+            obj;
+            JVM INSTR monitorenter ;
+            obj1 = ChunkedListLoader._2D_get9(ChunkedListLoader.this);
+            if (obj1 == null)
+            {
+                break MISSING_BLOCK_LABEL_344;
+            }
+            ChunkedListLoader._2D_set4(ChunkedListLoader.this, null);
+            ChunkedListLoader._2D_set5(ChunkedListLoader.this, false);
+            obj;
+            JVM INSTR monitorexit ;
+            if (obj1 != null)
+            {
+                l = ((LoadResult) (obj1)).entries.size();
+                ChunkedListLoader._2D_get3(ChunkedListLoader.this).addChunkAtEnd(((LoadResult) (obj1)).entries);
+                ChunkedListLoader._2D_set1(ChunkedListLoader.this, ((LoadResult) (obj1)).hasMore);
+                j = l;
+                if (((LoadResult) (obj1)).fromId == 0L)
+                {
+                    ChunkedListLoader._2D_set0(ChunkedListLoader.this, false);
+                    j = l;
+                }
+            } else
+            {
+                j = 0;
+            }
+            flag1 = false;
+            do
+            {
+                obj = (Identifiable)ChunkedListLoader._2D_get0(ChunkedListLoader.this).poll();
+                if (obj == null)
+                {
+                    break;
+                }
+                if (ChunkedListLoader._2D_get3(ChunkedListLoader.this).size() > 0)
+                {
+                    l1 = ((Long)((Identifiable)ChunkedListLoader._2D_get3(ChunkedListLoader.this).get(ChunkedListLoader._2D_get3(ChunkedListLoader.this).size() - 1)).getId()).longValue();
+                } else
+                {
+                    l1 = -1L;
+                }
+                Debug.Printf("ChatView: added element: id %d, lastId %d, hasBelow %b", new Object[] {
+                    ((Identifiable) (obj)).getId(), Long.valueOf(l1), Boolean.valueOf(ChunkedListLoader._2D_get2(ChunkedListLoader.this))
+                });
+                if (!ChunkedListLoader._2D_get2(ChunkedListLoader.this) && ((Long)((Identifiable) (obj)).getId()).longValue() > l1)
+                {
+                    ChunkedListLoader._2D_get3(ChunkedListLoader.this).addElement(obj, ChunkedListLoader._2D_get17(ChunkedListLoader.this), ChunkedListLoader.this);
+                    flag1 = true;
+                    j++;
+                }
+            } while (true);
+            break MISSING_BLOCK_LABEL_609;
+            exception1;
+            throw exception1;
+            exception1;
+            throw exception1;
+            if (j != 0)
+            {
+                ChunkedListLoader._2D_get4(ChunkedListLoader.this).onListItemsAdded(i1, j);
+            }
+            if (flag1)
+            {
+                ChunkedListLoader._2D_get4(ChunkedListLoader.this).onListItemAddedAtEnd();
+            }
+_L5:
+            exception1 = ((Exception) (ChunkedListLoader._2D_get12(ChunkedListLoader.this)));
+            exception1;
+            JVM INSTR monitorenter ;
+            iterator = ChunkedListLoader._2D_get16(ChunkedListLoader.this).entrySet().iterator();
+            if (!iterator.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_778;
+            }
+            obj = (Identifiable)((java.util.Map.Entry)iterator.next()).getValue();
+            iterator.remove();
+_L6:
+            exception1;
+            JVM INSTR monitorexit ;
+            if (obj == null) goto _L4; else goto _L3
+_L3:
+            j = ChunkedListLoader._2D_get3(ChunkedListLoader.this).replaceElement(obj, ChunkedListLoader._2D_get1(ChunkedListLoader.this));
+            Debug.Printf("ChunkedListLoader: replace: replacedIndex is %d", new Object[] {
+                Integer.valueOf(j)
+            });
+            if (j >= 0)
+            {
+                ChunkedListLoader._2D_get4(ChunkedListLoader.this).onListItemChanged(j);
+            }
+              goto _L5
+            obj;
+            throw obj;
+            obj = null;
+              goto _L6
+        }
+
+            
+            {
+                this$0 = ChunkedListLoader.this;
+                super();
+            }
+    };
+    private final AtomicBoolean reloadAccepted = new AtomicBoolean();
+    private final AtomicBoolean reloadRequested = new AtomicBoolean();
+    private final boolean startFromStart;
+    private final AtomicBoolean updatePosted = new AtomicBoolean();
+    private final Map updatedElements = new HashMap();
+    private final int windowSize;
+
+    static Queue _2D_get0(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.addedElements;
     }
 
-    /* access modifiers changed from: private */
-    public void postUpdate() {
-        if (this.updatePosted.compareAndSet(false, true)) {
+    static Comparator _2D_get1(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.chatMessageComparator;
+    }
+
+    static boolean _2D_get10(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.loadBelowWanted;
+    }
+
+    static AtomicBoolean _2D_get11(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.loadRequested;
+    }
+
+    static Object _2D_get12(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.lock;
+    }
+
+    static AtomicBoolean _2D_get13(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.reloadAccepted;
+    }
+
+    static AtomicBoolean _2D_get14(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.reloadRequested;
+    }
+
+    static AtomicBoolean _2D_get15(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.updatePosted;
+    }
+
+    static Map _2D_get16(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.updatedElements;
+    }
+
+    static int _2D_get17(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.windowSize;
+    }
+
+    static boolean _2D_get2(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.hasBelow;
+    }
+
+    static ChunkedList _2D_get3(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.items;
+    }
+
+    static EventListener _2D_get4(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.listener;
+    }
+
+    static LoadResult _2D_get5(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.loadAboveResult;
+    }
+
+    static long _2D_get6(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.loadAboveTopmostId;
+    }
+
+    static boolean _2D_get7(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.loadAboveWanted;
+    }
+
+    static long _2D_get8(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.loadBelowLastId;
+    }
+
+    static LoadResult _2D_get9(ChunkedListLoader chunkedlistloader)
+    {
+        return chunkedlistloader.loadBelowResult;
+    }
+
+    static boolean _2D_set0(ChunkedListLoader chunkedlistloader, boolean flag)
+    {
+        chunkedlistloader.hasAbove = flag;
+        return flag;
+    }
+
+    static boolean _2D_set1(ChunkedListLoader chunkedlistloader, boolean flag)
+    {
+        chunkedlistloader.hasBelow = flag;
+        return flag;
+    }
+
+    static LoadResult _2D_set2(ChunkedListLoader chunkedlistloader, LoadResult loadresult)
+    {
+        chunkedlistloader.loadAboveResult = loadresult;
+        return loadresult;
+    }
+
+    static boolean _2D_set3(ChunkedListLoader chunkedlistloader, boolean flag)
+    {
+        chunkedlistloader.loadAboveWanted = flag;
+        return flag;
+    }
+
+    static LoadResult _2D_set4(ChunkedListLoader chunkedlistloader, LoadResult loadresult)
+    {
+        chunkedlistloader.loadBelowResult = loadresult;
+        return loadresult;
+    }
+
+    static boolean _2D_set5(ChunkedListLoader chunkedlistloader, boolean flag)
+    {
+        chunkedlistloader.loadBelowWanted = flag;
+        return flag;
+    }
+
+    static void _2D_wrap0(ChunkedListLoader chunkedlistloader)
+    {
+        chunkedlistloader.postUpdate();
+    }
+
+    public ChunkedListLoader(int i, Executor executor1, boolean flag, EventListener eventlistener)
+    {
+        loadAboveWanted = false;
+        loadAboveResult = null;
+        loadBelowWanted = false;
+        loadBelowResult = null;
+        windowSize = i;
+        executor = executor1;
+        startFromStart = flag;
+        listener = eventlistener;
+        listenerExecutor = eventlistener.getListEventsExecutor();
+        items = new ChunkedList();
+        hasAbove = true;
+        hasBelow = true;
+    }
+
+    static int lambda$_2D_com_lumiyaviewer_lumiya_utils_wlist_ChunkedListLoader_13028(Identifiable identifiable, Identifiable identifiable1)
+    {
+        return Long.signum(((Long)identifiable.getId()).longValue() - ((Long)identifiable1.getId()).longValue());
+    }
+
+    private void postUpdate()
+    {
+        if (updatePosted.compareAndSet(false, true))
+        {
             Debug.Printf("ChatView: requesting processUpdate ()", new Object[0]);
-            this.listenerExecutor.execute(this.processUpdate);
+            listenerExecutor.execute(processUpdate);
+            return;
+        } else
+        {
+            Debug.Printf("ChatView: processUpdate () already requested", new Object[0]);
             return;
         }
-        Debug.Printf("ChatView: processUpdate () already requested", new Object[0]);
     }
 
-    public void addElement(E e) {
-        Debug.Printf("ChatView: addElement: adding element with id %d", e.getId());
-        this.addedElements.add(e);
+    public void addElement(Identifiable identifiable)
+    {
+        Debug.Printf("ChatView: addElement: adding element with id %d", new Object[] {
+            identifiable.getId()
+        });
+        addedElements.add(identifiable);
         postUpdate();
     }
 
-    public List<E> createEmptyChunk() {
-        return new ArrayList(this.windowSize);
+    public List createEmptyChunk()
+    {
+        return new ArrayList(windowSize);
     }
 
-    public E get(int i) {
-        return (Identifiable) this.items.get(i);
+    public Identifiable get(int i)
+    {
+        return (Identifiable)items.get(i);
     }
 
-    public boolean hasMoreItemsAtBottom() {
-        return this.hasBelow;
+    public volatile Object get(int i)
+    {
+        return get(i);
     }
 
-    /* access modifiers changed from: protected */
-    public LoadResult<E> loadInBackground(int i, long j, boolean z) {
-        return new LoadResult<>(new ArrayList(0), false, j);
+    public boolean hasMoreItemsAtBottom()
+    {
+        return hasBelow;
     }
 
-    public void reload() {
-        this.reloadRequested.set(true);
-        if (this.loadRequested.compareAndSet(false, true)) {
-            this.executor.execute(this.loadMoreData);
+    protected LoadResult loadInBackground(int i, long l, boolean flag)
+    {
+        return new LoadResult(new ArrayList(0), false, l);
+    }
+
+    public void reload()
+    {
+        reloadRequested.set(true);
+        if (loadRequested.compareAndSet(false, true))
+        {
+            executor.execute(loadMoreData);
         }
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:135:? A[RETURN, SYNTHETIC] */
-    /* JADX WARNING: Removed duplicated region for block: B:46:0x00d9  */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public void setVisibleRange(int r9, int r10) {
-        /*
-            r8 = this;
-            r1 = 1
-            r2 = 0
-            java.lang.Object r3 = r8.lock
-            monitor-enter(r3)
-            java.lang.String r4 = "ChatView: new visible range %d, %d size %d above possible %s below possible %s"
-            r0 = 5
-            java.lang.Object[] r5 = new java.lang.Object[r0]     // Catch:{ all -> 0x00fb }
-            java.lang.Integer r0 = java.lang.Integer.valueOf(r9)     // Catch:{ all -> 0x00fb }
-            r6 = 0
-            r5[r6] = r0     // Catch:{ all -> 0x00fb }
-            java.lang.Integer r0 = java.lang.Integer.valueOf(r10)     // Catch:{ all -> 0x00fb }
-            r6 = 1
-            r5[r6] = r0     // Catch:{ all -> 0x00fb }
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r0 = r8.items     // Catch:{ all -> 0x00fb }
-            int r0 = r0.size()     // Catch:{ all -> 0x00fb }
-            java.lang.Integer r0 = java.lang.Integer.valueOf(r0)     // Catch:{ all -> 0x00fb }
-            r6 = 2
-            r5[r6] = r0     // Catch:{ all -> 0x00fb }
-            boolean r0 = r8.loadAboveWanted     // Catch:{ all -> 0x00fb }
-            if (r0 != 0) goto L_0x00f1
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadAboveResult     // Catch:{ all -> 0x00fb }
-            if (r0 != 0) goto L_0x00f1
-            java.lang.String r0 = "yes"
-        L_0x0031:
-            r6 = 3
-            r5[r6] = r0     // Catch:{ all -> 0x00fb }
-            boolean r0 = r8.loadBelowWanted     // Catch:{ all -> 0x00fb }
-            if (r0 != 0) goto L_0x00f6
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadBelowResult     // Catch:{ all -> 0x00fb }
-            if (r0 != 0) goto L_0x00f6
-            java.lang.String r0 = "yes"
-        L_0x003f:
-            r6 = 4
-            r5[r6] = r0     // Catch:{ all -> 0x00fb }
-            com.lumiyaviewer.lumiya.Debug.Printf(r4, r5)     // Catch:{ all -> 0x00fb }
-            monitor-exit(r3)
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r0 = r8.items
-            int r0 = r0.size()
-            if (r0 <= 0) goto L_0x0166
-            if (r9 > 0) goto L_0x0103
-            boolean r0 = r8.hasAbove
-            if (r0 == 0) goto L_0x0103
-            java.lang.Object r3 = r8.lock
-            monitor-enter(r3)
-            boolean r0 = r8.loadAboveWanted     // Catch:{ all -> 0x0100 }
-            if (r0 != 0) goto L_0x00fe
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadAboveResult     // Catch:{ all -> 0x0100 }
-            if (r0 != 0) goto L_0x00fe
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r0 = r8.items     // Catch:{ all -> 0x0100 }
-            r4 = 0
-            java.lang.Object r0 = r0.get(r4)     // Catch:{ all -> 0x0100 }
-            com.lumiyaviewer.lumiya.utils.Identifiable r0 = (com.lumiyaviewer.lumiya.utils.Identifiable) r0     // Catch:{ all -> 0x0100 }
-            java.lang.Object r0 = r0.getId()     // Catch:{ all -> 0x0100 }
-            java.lang.Long r0 = (java.lang.Long) r0     // Catch:{ all -> 0x0100 }
-            long r4 = r0.longValue()     // Catch:{ all -> 0x0100 }
-            r8.loadAboveTopmostId = r4     // Catch:{ all -> 0x0100 }
-            r0 = 1
-            r8.loadAboveWanted = r0     // Catch:{ all -> 0x0100 }
-            java.lang.String r0 = "ChatView: requesting load above id %d"
-            r4 = 1
-            java.lang.Object[] r4 = new java.lang.Object[r4]     // Catch:{ all -> 0x0100 }
-            long r6 = r8.loadAboveTopmostId     // Catch:{ all -> 0x0100 }
-            java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x0100 }
-            r6 = 0
-            r4[r6] = r5     // Catch:{ all -> 0x0100 }
-            com.lumiyaviewer.lumiya.Debug.Printf(r0, r4)     // Catch:{ all -> 0x0100 }
-            r0 = r1
-        L_0x008a:
-            monitor-exit(r3)
-        L_0x008b:
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r3 = r8.items
-            int r3 = r3.size()
-            int r3 = r3 + -1
-            if (r10 < r3) goto L_0x012e
-            boolean r3 = r8.hasBelow
-            if (r3 == 0) goto L_0x012e
-            java.lang.Object r3 = r8.lock
-            monitor-enter(r3)
-            boolean r4 = r8.loadBelowWanted     // Catch:{ all -> 0x012b }
-            if (r4 != 0) goto L_0x00d6
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r4 = r8.loadBelowResult     // Catch:{ all -> 0x012b }
-            if (r4 != 0) goto L_0x00d6
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r0 = r8.items     // Catch:{ all -> 0x012b }
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r4 = r8.items     // Catch:{ all -> 0x012b }
-            int r4 = r4.size()     // Catch:{ all -> 0x012b }
-            int r4 = r4 + -1
-            java.lang.Object r0 = r0.get(r4)     // Catch:{ all -> 0x012b }
-            com.lumiyaviewer.lumiya.utils.Identifiable r0 = (com.lumiyaviewer.lumiya.utils.Identifiable) r0     // Catch:{ all -> 0x012b }
-            java.lang.Object r0 = r0.getId()     // Catch:{ all -> 0x012b }
-            java.lang.Long r0 = (java.lang.Long) r0     // Catch:{ all -> 0x012b }
-            long r4 = r0.longValue()     // Catch:{ all -> 0x012b }
-            r8.loadBelowLastId = r4     // Catch:{ all -> 0x012b }
-            r0 = 1
-            r8.loadBelowWanted = r0     // Catch:{ all -> 0x012b }
-            java.lang.String r0 = "ChatView: requesting load below id %d"
-            r4 = 1
-            java.lang.Object[] r4 = new java.lang.Object[r4]     // Catch:{ all -> 0x012b }
-            long r6 = r8.loadBelowLastId     // Catch:{ all -> 0x012b }
-            java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x012b }
-            r6 = 0
-            r4[r6] = r5     // Catch:{ all -> 0x012b }
-            com.lumiyaviewer.lumiya.Debug.Printf(r0, r4)     // Catch:{ all -> 0x012b }
-            r0 = r1
-        L_0x00d6:
-            monitor-exit(r3)
-        L_0x00d7:
-            if (r0 == 0) goto L_0x00f0
-            java.util.concurrent.atomic.AtomicBoolean r0 = r8.loadRequested
-            boolean r0 = r0.compareAndSet(r2, r1)
-            if (r0 == 0) goto L_0x01cf
-            java.lang.String r0 = "ChatView: requesting loadMoreData ()"
-            java.lang.Object[] r1 = new java.lang.Object[r2]
-            com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
-            java.util.concurrent.Executor r0 = r8.executor
-            java.lang.Runnable r1 = r8.loadMoreData
-            r0.execute(r1)
-        L_0x00f0:
-            return
-        L_0x00f1:
-            java.lang.String r0 = "no"
-            goto L_0x0031
-        L_0x00f6:
-            java.lang.String r0 = "no"
-            goto L_0x003f
-        L_0x00fb:
-            r0 = move-exception
-            monitor-exit(r3)
-            throw r0
-        L_0x00fe:
-            r0 = r2
-            goto L_0x008a
-        L_0x0100:
-            r0 = move-exception
-            monitor-exit(r3)
-            throw r0
-        L_0x0103:
-            if (r9 <= 0) goto L_0x01dc
-            java.lang.Object r3 = r8.lock
-            monitor-enter(r3)
-            boolean r0 = r8.loadAboveWanted     // Catch:{ all -> 0x0128 }
-            if (r0 != 0) goto L_0x0126
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadAboveResult     // Catch:{ all -> 0x0128 }
-            if (r0 != 0) goto L_0x0126
-            r0 = r1
-        L_0x0111:
-            monitor-exit(r3)
-            if (r0 == 0) goto L_0x01dc
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r0 = r8.items
-            int r0 = r0.removeElementsBefore(r9)
-            if (r0 == 0) goto L_0x01dc
-            r8.hasAbove = r1
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$EventListener r3 = r8.listener
-            r3.onListItemsRemoved(r2, r0)
-            r0 = r2
-            goto L_0x008b
-        L_0x0126:
-            r0 = r2
-            goto L_0x0111
-        L_0x0128:
-            r0 = move-exception
-            monitor-exit(r3)
-            throw r0
-        L_0x012b:
-            r0 = move-exception
-            monitor-exit(r3)
-            throw r0
-        L_0x012e:
-            if (r10 < 0) goto L_0x00d7
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r3 = r8.items
-            int r3 = r3.size()
-            int r3 = r3 + -1
-            if (r10 >= r3) goto L_0x00d7
-            java.lang.Object r4 = r8.lock
-            monitor-enter(r4)
-            boolean r3 = r8.loadBelowWanted     // Catch:{ all -> 0x0163 }
-            if (r3 != 0) goto L_0x0161
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r3 = r8.loadBelowResult     // Catch:{ all -> 0x0163 }
-            if (r3 != 0) goto L_0x0161
-            r3 = r1
-        L_0x0146:
-            monitor-exit(r4)
-            if (r3 == 0) goto L_0x00d7
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r3 = r8.items
-            int r3 = r3.size()
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedList<E> r4 = r8.items
-            int r4 = r4.removeElementsAfter(r10)
-            if (r4 == 0) goto L_0x00d7
-            r8.hasBelow = r1
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$EventListener r5 = r8.listener
-            int r3 = r3 - r4
-            r5.onListItemsRemoved(r3, r4)
-            goto L_0x00d7
-        L_0x0161:
-            r3 = r2
-            goto L_0x0146
-        L_0x0163:
-            r0 = move-exception
-            monitor-exit(r4)
-            throw r0
-        L_0x0166:
-            boolean r0 = r8.startFromStart
-            if (r0 == 0) goto L_0x019b
-            boolean r0 = r8.hasBelow
-            if (r0 == 0) goto L_0x01d9
-            java.lang.Object r3 = r8.lock
-            monitor-enter(r3)
-            boolean r0 = r8.loadBelowWanted     // Catch:{ all -> 0x0198 }
-            if (r0 != 0) goto L_0x0195
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadBelowResult     // Catch:{ all -> 0x0198 }
-            if (r0 != 0) goto L_0x0195
-            r4 = 0
-            r8.loadBelowLastId = r4     // Catch:{ all -> 0x0198 }
-            r0 = 1
-            r8.loadBelowWanted = r0     // Catch:{ all -> 0x0198 }
-            java.lang.String r0 = "ChatView: requesting load below id %d"
-            r4 = 1
-            java.lang.Object[] r4 = new java.lang.Object[r4]     // Catch:{ all -> 0x0198 }
-            long r6 = r8.loadBelowLastId     // Catch:{ all -> 0x0198 }
-            java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x0198 }
-            r6 = 0
-            r4[r6] = r5     // Catch:{ all -> 0x0198 }
-            com.lumiyaviewer.lumiya.Debug.Printf(r0, r4)     // Catch:{ all -> 0x0198 }
-            r0 = r1
-            goto L_0x00d6
-        L_0x0195:
-            r0 = r2
-            goto L_0x00d6
-        L_0x0198:
-            r0 = move-exception
-            monitor-exit(r3)
-            throw r0
-        L_0x019b:
-            boolean r0 = r8.hasAbove
-            if (r0 == 0) goto L_0x01d9
-            java.lang.Object r3 = r8.lock
-            monitor-enter(r3)
-            boolean r0 = r8.loadAboveWanted     // Catch:{ all -> 0x01cc }
-            if (r0 != 0) goto L_0x01c9
-            com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader$LoadResult<E> r0 = r8.loadAboveResult     // Catch:{ all -> 0x01cc }
-            if (r0 != 0) goto L_0x01c9
-            r4 = 9223372036854775807(0x7fffffffffffffff, double:NaN)
-            r8.loadAboveTopmostId = r4     // Catch:{ all -> 0x01cc }
-            r0 = 1
-            r8.loadAboveWanted = r0     // Catch:{ all -> 0x01cc }
-            java.lang.String r0 = "ChatView: requesting load above id %d"
-            r4 = 1
-            java.lang.Object[] r4 = new java.lang.Object[r4]     // Catch:{ all -> 0x01cc }
-            long r6 = r8.loadAboveTopmostId     // Catch:{ all -> 0x01cc }
-            java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ all -> 0x01cc }
-            r6 = 0
-            r4[r6] = r5     // Catch:{ all -> 0x01cc }
-            com.lumiyaviewer.lumiya.Debug.Printf(r0, r4)     // Catch:{ all -> 0x01cc }
-            r0 = r1
-            goto L_0x00d6
-        L_0x01c9:
-            r0 = r2
-            goto L_0x00d6
-        L_0x01cc:
-            r0 = move-exception
-            monitor-exit(r3)
-            throw r0
-        L_0x01cf:
-            java.lang.String r0 = "ChatView: loadMoreData() already requested"
-            java.lang.Object[] r1 = new java.lang.Object[r2]
-            com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
-            goto L_0x00f0
-        L_0x01d9:
-            r0 = r2
-            goto L_0x00d7
-        L_0x01dc:
-            r0 = r2
-            goto L_0x008b
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader.setVisibleRange(int, int):void");
-    }
-
-    public int size() {
-        return this.items.size();
-    }
-
-    public void updateElement(E e) {
-        Debug.Printf("ChatView: addElement: updated element with id %d", e.getId());
-        synchronized (this.lock) {
-            this.updatedElements.put((Long) e.getId(), e);
+    public void setVisibleRange(int i, int j)
+    {
+        Object obj2 = lock;
+        obj2;
+        JVM INSTR monitorenter ;
+        int k = items.size();
+        Object obj;
+        Object obj1;
+        if (!loadAboveWanted && loadAboveResult == null)
+        {
+            obj = "yes";
+        } else
+        {
+            obj = "no";
         }
+        if (!loadBelowWanted && loadBelowResult == null)
+        {
+            obj1 = "yes";
+        } else
+        {
+            obj1 = "no";
+        }
+        Debug.Printf("ChatView: new visible range %d, %d size %d above possible %s below possible %s", new Object[] {
+            Integer.valueOf(i), Integer.valueOf(j), Integer.valueOf(k), obj, obj1
+        });
+        obj2;
+        JVM INSTR monitorexit ;
+        if (items.size() <= 0) goto _L2; else goto _L1
+_L1:
+        if (i > 0 || !hasAbove) goto _L4; else goto _L3
+_L3:
+        obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (loadAboveWanted || loadAboveResult != null) goto _L6; else goto _L5
+_L5:
+        loadAboveTopmostId = ((Long)((Identifiable)items.get(0)).getId()).longValue();
+        loadAboveWanted = true;
+        Debug.Printf("ChatView: requesting load above id %d", new Object[] {
+            Long.valueOf(loadAboveTopmostId)
+        });
+        k = 1;
+_L13:
+        obj;
+        JVM INSTR monitorexit ;
+_L14:
+        if (j < items.size() - 1 || !hasBelow) goto _L8; else goto _L7
+_L7:
+        obj1 = lock;
+        obj1;
+        JVM INSTR monitorenter ;
+        i = k;
+        obj = obj1;
+        if (loadBelowWanted)
+        {
+            break MISSING_BLOCK_LABEL_316;
+        }
+        i = k;
+        obj = obj1;
+        if (loadBelowResult != null)
+        {
+            break MISSING_BLOCK_LABEL_316;
+        }
+        loadBelowLastId = ((Long)((Identifiable)items.get(items.size() - 1)).getId()).longValue();
+        loadBelowWanted = true;
+        Debug.Printf("ChatView: requesting load below id %d", new Object[] {
+            Long.valueOf(loadBelowLastId)
+        });
+        i = 1;
+        obj = obj1;
+_L24:
+        obj;
+        JVM INSTR monitorexit ;
+_L17:
+        if (i == 0) goto _L10; else goto _L9
+_L9:
+        if (!loadRequested.compareAndSet(false, true)) goto _L12; else goto _L11
+_L11:
+        Debug.Printf("ChatView: requesting loadMoreData ()", new Object[0]);
+        executor.execute(loadMoreData);
+_L10:
+        return;
+        obj;
+        throw obj;
+_L6:
+        k = 0;
+          goto _L13
+        obj1;
+        throw obj1;
+_L4:
+        if (i <= 0)
+        {
+            break MISSING_BLOCK_LABEL_784;
+        }
+        obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (loadAboveWanted)
+        {
+            break MISSING_BLOCK_LABEL_466;
+        }
+        obj1 = loadAboveResult;
+        if (obj1 != null)
+        {
+            break MISSING_BLOCK_LABEL_466;
+        }
+        k = 1;
+_L15:
+        obj;
+        JVM INSTR monitorexit ;
+        if (!k)
+        {
+            break MISSING_BLOCK_LABEL_784;
+        }
+        i = items.removeElementsBefore(i);
+        if (i == 0)
+        {
+            break MISSING_BLOCK_LABEL_784;
+        }
+        hasAbove = true;
+        listener.onListItemsRemoved(0, i);
+        k = 0;
+          goto _L14
+        k = 0;
+          goto _L15
+        obj1;
+        throw obj1;
+        obj;
+        throw obj;
+_L8:
+        i = k;
+        if (j < 0) goto _L17; else goto _L16
+_L16:
+        i = k;
+        if (j >= items.size() - 1) goto _L17; else goto _L18
+_L18:
+        obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (loadBelowWanted)
+        {
+            break MISSING_BLOCK_LABEL_596;
+        }
+        obj1 = loadBelowResult;
+        int l;
+        if (obj1 != null)
+        {
+            break MISSING_BLOCK_LABEL_596;
+        }
+        l = 1;
+_L19:
+        obj;
+        JVM INSTR monitorexit ;
+        i = k;
+        if (l != 0)
+        {
+            l = items.size();
+            j = items.removeElementsAfter(j);
+            i = k;
+            if (j != 0)
+            {
+                hasBelow = true;
+                listener.onListItemsRemoved(l - j, j);
+                i = k;
+            }
+        }
+          goto _L17
+        l = 0;
+          goto _L19
+        Exception exception;
+        exception;
+        throw exception;
+_L2:
+        if (!startFromStart) goto _L21; else goto _L20
+_L20:
+        if (!hasBelow) goto _L23; else goto _L22
+_L22:
+        obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (loadBelowWanted || loadBelowResult != null)
+        {
+            break MISSING_BLOCK_LABEL_679;
+        }
+        loadBelowLastId = 0L;
+        loadBelowWanted = true;
+        Debug.Printf("ChatView: requesting load below id %d", new Object[] {
+            Long.valueOf(loadBelowLastId)
+        });
+        i = 1;
+          goto _L24
+        i = 0;
+          goto _L24
+        exception;
+        throw exception;
+_L21:
+        if (!hasAbove) goto _L23; else goto _L25
+_L25:
+        obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (loadAboveWanted || loadAboveResult != null)
+        {
+            break MISSING_BLOCK_LABEL_756;
+        }
+        loadAboveTopmostId = 0x7fffffffffffffffL;
+        loadAboveWanted = true;
+        Debug.Printf("ChatView: requesting load above id %d", new Object[] {
+            Long.valueOf(loadAboveTopmostId)
+        });
+        i = 1;
+          goto _L24
+        i = 0;
+          goto _L24
+        exception;
+        throw exception;
+_L12:
+        Debug.Printf("ChatView: loadMoreData() already requested", new Object[0]);
+        return;
+_L23:
+        i = 0;
+          goto _L17
+        k = 0;
+          goto _L14
+    }
+
+    public int size()
+    {
+        return items.size();
+    }
+
+    public void updateElement(Identifiable identifiable)
+    {
+        Debug.Printf("ChatView: addElement: updated element with id %d", new Object[] {
+            identifiable.getId()
+        });
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        updatedElements.put((Long)identifiable.getId(), identifiable);
+        obj;
+        JVM INSTR monitorexit ;
         postUpdate();
+        return;
+        identifiable;
+        throw identifiable;
     }
 }

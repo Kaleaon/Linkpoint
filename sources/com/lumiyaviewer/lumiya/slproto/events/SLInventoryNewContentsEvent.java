@@ -1,32 +1,65 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.events;
 
 import java.util.UUID;
 
-public class SLInventoryNewContentsEvent {
-    public boolean firstIsFolder = false;
-    public String firstItemName = null;
-    public UUID firstParentUUID = null;
-    public int newFolderCount = 0;
-    public int newItemCount = 0;
+public class SLInventoryNewContentsEvent
+{
 
-    public void AddItem(boolean z, UUID uuid, String str) {
-        if (z) {
-            this.newFolderCount++;
-        } else {
-            this.newItemCount++;
+    public boolean firstIsFolder;
+    public String firstItemName;
+    public UUID firstParentUUID;
+    public int newFolderCount;
+    public int newItemCount;
+
+    public SLInventoryNewContentsEvent()
+    {
+        newFolderCount = 0;
+        newItemCount = 0;
+        firstParentUUID = null;
+        firstItemName = null;
+        firstIsFolder = false;
+    }
+
+    public void AddItem(boolean flag, UUID uuid, String s)
+    {
+        if (flag)
+        {
+            newFolderCount = newFolderCount + 1;
+        } else
+        {
+            newItemCount = newItemCount + 1;
         }
-        if (this.firstParentUUID == null) {
-            this.firstIsFolder = z;
-            this.firstParentUUID = uuid;
-            this.firstItemName = str;
-        } else if (z && (!this.firstIsFolder)) {
-            this.firstIsFolder = z;
-            this.firstParentUUID = uuid;
-            this.firstItemName = str;
+        if (firstParentUUID == null)
+        {
+            firstIsFolder = flag;
+            firstParentUUID = uuid;
+            firstItemName = s;
+        } else
+        if (flag && firstIsFolder ^ true)
+        {
+            firstIsFolder = flag;
+            firstParentUUID = uuid;
+            firstItemName = s;
+            return;
         }
     }
 
-    public boolean isEmpty() {
-        return this.newFolderCount == 0 && this.newItemCount == 0;
+    public boolean isEmpty()
+    {
+        boolean flag1 = false;
+        boolean flag = flag1;
+        if (newFolderCount == 0)
+        {
+            flag = flag1;
+            if (newItemCount == 0)
+            {
+                flag = true;
+            }
+        }
+        return flag;
     }
 }

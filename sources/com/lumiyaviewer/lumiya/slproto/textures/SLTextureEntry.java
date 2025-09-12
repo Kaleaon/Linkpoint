@@ -1,8 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.textures;
 
-import android.support.v4.internal.view.SupportMenu;
-import com.google.common.base.Ascii;
-import com.google.common.logging.nano.Vr;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.utils.InternPool;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
@@ -10,490 +11,699 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.UUID;
 
-public class SLTextureEntry {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.textures:
+//            SLTextureEntryFace, MutableSLTextureEntryFace
+
+public class SLTextureEntry
+{
+
     public static final int MAX_FACES = 32;
-    private static final SLTextureEntryFace[] emptyFaces = new SLTextureEntryFace[0];
-    private static final InternPool<SLTextureEntry> pool = new InternPool<>();
+    private static final SLTextureEntryFace emptyFaces[] = new SLTextureEntryFace[0];
+    private static final InternPool pool = new InternPool();
     private final SLTextureEntryFace DefaultTexture;
-    private final SLTextureEntryFace[] FaceTextures;
+    private final SLTextureEntryFace FaceTextures[];
     private final int faceMask;
     private final int hashValue;
 
-    private SLTextureEntry(SLTextureEntryFace sLTextureEntryFace, SLTextureEntryFace[] sLTextureEntryFaceArr) {
-        this.DefaultTexture = sLTextureEntryFace;
-        this.FaceTextures = sLTextureEntryFaceArr;
+    private SLTextureEntry(SLTextureEntryFace sltextureentryface, SLTextureEntryFace asltextureentryface[])
+    {
         int i = 0;
-        for (int i2 = 0; i2 < sLTextureEntryFaceArr.length; i2++) {
-            if (sLTextureEntryFaceArr[i2] != null) {
-                i |= 1 << i2;
+        super();
+        DefaultTexture = sltextureentryface;
+        FaceTextures = asltextureentryface;
+        int j;
+        int k;
+        for (j = 0; i < asltextureentryface.length; j = k)
+        {
+            k = j;
+            if (asltextureentryface[i] != null)
+            {
+                k = j | 1 << i;
             }
+            i++;
         }
-        this.faceMask = i;
-        this.hashValue = getHashValue();
+
+        faceMask = j;
+        hashValue = getHashValue();
     }
 
-    private SLTextureEntry(ByteBuffer byteBuffer, int i) {
-        MutableSLTextureEntryFace mutableSLTextureEntryFace = new MutableSLTextureEntryFace(-1);
-        if (byteBuffer.limit() - byteBuffer.position() < 16) {
-            this.DefaultTexture = SLTextureEntryFace.create(mutableSLTextureEntryFace);
-            this.FaceTextures = emptyFaces;
-            this.faceMask = 0;
-            this.hashValue = getHashValue();
+    private SLTextureEntry(ByteBuffer bytebuffer, int i)
+    {
+        MutableSLTextureEntryFace mutablesltextureentryface;
+        MutableSLTextureEntryFace amutablesltextureentryface[];
+        int l2;
+        boolean flag;
+        flag = false;
+        super();
+        mutablesltextureentryface = new MutableSLTextureEntryFace(-1);
+        if (bytebuffer.limit() - bytebuffer.position() < 16)
+        {
+            DefaultTexture = SLTextureEntryFace.create(mutablesltextureentryface);
+            FaceTextures = emptyFaces;
+            faceMask = 0;
+            hashValue = getHashValue();
             return;
         }
-        MutableSLTextureEntryFace[] mutableSLTextureEntryFaceArr = new MutableSLTextureEntryFace[32];
-        int[] iArr = new int[1];
-        int[] iArr2 = new int[1];
-        mutableSLTextureEntryFace.setTextureID(UUIDPool.getUUID(getUUID(byteBuffer)));
-        while (true) {
-            int ReadFaceBitfield = ReadFaceBitfield(byteBuffer, iArr2);
-            if (ReadFaceBitfield == 0) {
+        amutablesltextureentryface = new MutableSLTextureEntryFace[32];
+        int ai[] = new int[1];
+        int ai1[] = new int[1];
+        mutablesltextureentryface.setTextureID(UUIDPool.getUUID(getUUID(bytebuffer)));
+        do
+        {
+            int j3 = ReadFaceBitfield(bytebuffer, ai1);
+            if (j3 == 0)
+            {
                 break;
             }
-            UUID uuid = UUIDPool.getUUID(getUUID(byteBuffer));
-            int i2 = 1;
-            int i3 = 0;
-            while (i3 < iArr2[0]) {
-                if ((ReadFaceBitfield & i2) != 0) {
-                    CreateFace(mutableSLTextureEntryFaceArr, i3, iArr).setTextureID(uuid);
+            UUID uuid = UUIDPool.getUUID(getUUID(bytebuffer));
+            i = 1;
+            int j = 0;
+            while (j < ai1[0]) 
+            {
+                if ((j3 & i) != 0)
+                {
+                    CreateFace(amutablesltextureentryface, j, ai).setTextureID(uuid);
                 }
+                j++;
+                i <<= 1;
+            }
+        } while (true);
+        mutablesltextureentryface.setRGBA(bytebuffer.getInt());
+        do
+        {
+            int k3 = ReadFaceBitfield(bytebuffer, ai1);
+            if (k3 == 0)
+            {
+                break;
+            }
+            int l5 = bytebuffer.getInt();
+            i = 1;
+            int k = 0;
+            while (k < ai1[0]) 
+            {
+                if ((k3 & i) != 0)
+                {
+                    CreateFace(amutablesltextureentryface, k, ai).setRGBA(l5);
+                }
+                k++;
+                i <<= 1;
+            }
+        } while (true);
+        mutablesltextureentryface.setRepeatU(bytebuffer.getFloat());
+        do
+        {
+            int l3 = ReadFaceBitfield(bytebuffer, ai1);
+            if (l3 == 0)
+            {
+                break;
+            }
+            float f = bytebuffer.getFloat();
+            i = 1;
+            int l = 0;
+            while (l < ai1[0]) 
+            {
+                if ((l3 & i) != 0)
+                {
+                    CreateFace(amutablesltextureentryface, l, ai).setRepeatU(f);
+                }
+                l++;
+                i <<= 1;
+            }
+        } while (true);
+        mutablesltextureentryface.setRepeatV(bytebuffer.getFloat());
+        do
+        {
+            int i4 = ReadFaceBitfield(bytebuffer, ai1);
+            if (i4 == 0)
+            {
+                break;
+            }
+            float f1 = bytebuffer.getFloat();
+            i = 1;
+            int i1 = 0;
+            while (i1 < ai1[0]) 
+            {
+                if ((i4 & i) != 0)
+                {
+                    CreateFace(amutablesltextureentryface, i1, ai).setRepeatV(f1);
+                }
+                i1++;
+                i <<= 1;
+            }
+        } while (true);
+        mutablesltextureentryface.setOffsetU(getOffset(bytebuffer));
+        do
+        {
+            int j4 = ReadFaceBitfield(bytebuffer, ai1);
+            if (j4 == 0)
+            {
+                break;
+            }
+            float f2 = getOffset(bytebuffer);
+            i = 1;
+            int j1 = 0;
+            while (j1 < ai1[0]) 
+            {
+                if ((j4 & i) != 0)
+                {
+                    CreateFace(amutablesltextureentryface, j1, ai).setOffsetU(f2);
+                }
+                j1++;
+                i <<= 1;
+            }
+        } while (true);
+        mutablesltextureentryface.setOffsetV(getOffset(bytebuffer));
+        do
+        {
+            int k4 = ReadFaceBitfield(bytebuffer, ai1);
+            if (k4 == 0)
+            {
+                break;
+            }
+            float f3 = getOffset(bytebuffer);
+            i = 1;
+            int k1 = 0;
+            while (k1 < ai1[0]) 
+            {
+                if ((k4 & i) != 0)
+                {
+                    CreateFace(amutablesltextureentryface, k1, ai).setOffsetV(f3);
+                }
+                k1++;
+                i <<= 1;
+            }
+        } while (true);
+        mutablesltextureentryface.setRotation(getRotation(bytebuffer));
+        do
+        {
+            int l4 = ReadFaceBitfield(bytebuffer, ai1);
+            if (l4 == 0)
+            {
+                break;
+            }
+            float f4 = getRotation(bytebuffer);
+            i = 1;
+            int l1 = 0;
+            while (l1 < ai1[0]) 
+            {
+                if ((l4 & i) != 0)
+                {
+                    CreateFace(amutablesltextureentryface, l1, ai).setRotation(f4);
+                }
+                l1++;
+                i <<= 1;
+            }
+        } while (true);
+        mutablesltextureentryface.setMaterial(bytebuffer.get());
+        do
+        {
+            int i5 = ReadFaceBitfield(bytebuffer, ai1);
+            if (i5 == 0)
+            {
+                break;
+            }
+            byte byte0 = bytebuffer.get();
+            i = 1;
+            int i2 = 0;
+            while (i2 < ai1[0]) 
+            {
+                if ((i5 & i) != 0)
+                {
+                    CreateFace(amutablesltextureentryface, i2, ai).setMaterial(byte0);
+                }
+                i2++;
+                i <<= 1;
+            }
+        } while (true);
+        mutablesltextureentryface.setMedia(bytebuffer.get());
+        do
+        {
+            int j5 = ReadFaceBitfield(bytebuffer, ai1);
+            if (j5 == 0)
+            {
+                break;
+            }
+            byte byte1 = bytebuffer.get();
+            i = 1;
+            int j2 = 0;
+            while (j2 < ai1[0]) 
+            {
+                if ((j5 & i) != 0)
+                {
+                    CreateFace(amutablesltextureentryface, j2, ai).setMedia(byte1);
+                }
+                j2++;
+                i <<= 1;
+            }
+        } while (true);
+        mutablesltextureentryface.setGlow(getGlow(bytebuffer));
+        do
+        {
+            int k5 = ReadFaceBitfield(bytebuffer, ai1);
+            if (k5 == 0)
+            {
+                break;
+            }
+            float f5 = getGlow(bytebuffer);
+            i = 1;
+            int k2 = 0;
+            while (k2 < ai1[0]) 
+            {
+                if ((k5 & i) != 0)
+                {
+                    CreateFace(amutablesltextureentryface, k2, ai).setGlow(f5);
+                }
+                k2++;
+                i <<= 1;
+            }
+        } while (true);
+        faceMask = ai[0];
+        i = 0;
+        l2 = -1;
+_L3:
+        if (i >= 33)
+        {
+            break MISSING_BLOCK_LABEL_955;
+        }
+        if ((faceMask & l2) != 0) goto _L2; else goto _L1
+_L1:
+        DefaultTexture = SLTextureEntryFace.create(mutablesltextureentryface);
+        if (i == 0)
+        {
+            FaceTextures = emptyFaces;
+        } else
+        {
+            FaceTextures = new SLTextureEntryFace[i];
+            int i3 = ((flag) ? 1 : 0);
+            while (i3 < i) 
+            {
+                FaceTextures[i3] = SLTextureEntryFace.create(amutablesltextureentryface[i3]);
                 i3++;
-                i2 <<= 1;
             }
         }
-        mutableSLTextureEntryFace.setRGBA(byteBuffer.getInt());
-        while (true) {
-            int ReadFaceBitfield2 = ReadFaceBitfield(byteBuffer, iArr2);
-            if (ReadFaceBitfield2 == 0) {
-                break;
-            }
-            int i4 = byteBuffer.getInt();
-            int i5 = 1;
-            int i6 = 0;
-            while (i6 < iArr2[0]) {
-                if ((ReadFaceBitfield2 & i5) != 0) {
-                    CreateFace(mutableSLTextureEntryFaceArr, i6, iArr).setRGBA(i4);
-                }
-                i6++;
-                i5 <<= 1;
-            }
-        }
-        mutableSLTextureEntryFace.setRepeatU(byteBuffer.getFloat());
-        while (true) {
-            int ReadFaceBitfield3 = ReadFaceBitfield(byteBuffer, iArr2);
-            if (ReadFaceBitfield3 == 0) {
-                break;
-            }
-            float f = byteBuffer.getFloat();
-            int i7 = 1;
-            int i8 = 0;
-            while (i8 < iArr2[0]) {
-                if ((ReadFaceBitfield3 & i7) != 0) {
-                    CreateFace(mutableSLTextureEntryFaceArr, i8, iArr).setRepeatU(f);
-                }
-                i8++;
-                i7 <<= 1;
-            }
-        }
-        mutableSLTextureEntryFace.setRepeatV(byteBuffer.getFloat());
-        while (true) {
-            int ReadFaceBitfield4 = ReadFaceBitfield(byteBuffer, iArr2);
-            if (ReadFaceBitfield4 == 0) {
-                break;
-            }
-            float f2 = byteBuffer.getFloat();
-            int i9 = 1;
-            int i10 = 0;
-            while (i10 < iArr2[0]) {
-                if ((ReadFaceBitfield4 & i9) != 0) {
-                    CreateFace(mutableSLTextureEntryFaceArr, i10, iArr).setRepeatV(f2);
-                }
-                i10++;
-                i9 <<= 1;
-            }
-        }
-        mutableSLTextureEntryFace.setOffsetU(getOffset(byteBuffer));
-        while (true) {
-            int ReadFaceBitfield5 = ReadFaceBitfield(byteBuffer, iArr2);
-            if (ReadFaceBitfield5 == 0) {
-                break;
-            }
-            float offset = getOffset(byteBuffer);
-            int i11 = 1;
-            int i12 = 0;
-            while (i12 < iArr2[0]) {
-                if ((ReadFaceBitfield5 & i11) != 0) {
-                    CreateFace(mutableSLTextureEntryFaceArr, i12, iArr).setOffsetU(offset);
-                }
-                i12++;
-                i11 <<= 1;
-            }
-        }
-        mutableSLTextureEntryFace.setOffsetV(getOffset(byteBuffer));
-        while (true) {
-            int ReadFaceBitfield6 = ReadFaceBitfield(byteBuffer, iArr2);
-            if (ReadFaceBitfield6 == 0) {
-                break;
-            }
-            float offset2 = getOffset(byteBuffer);
-            int i13 = 1;
-            int i14 = 0;
-            while (i14 < iArr2[0]) {
-                if ((ReadFaceBitfield6 & i13) != 0) {
-                    CreateFace(mutableSLTextureEntryFaceArr, i14, iArr).setOffsetV(offset2);
-                }
-                i14++;
-                i13 <<= 1;
-            }
-        }
-        mutableSLTextureEntryFace.setRotation(getRotation(byteBuffer));
-        while (true) {
-            int ReadFaceBitfield7 = ReadFaceBitfield(byteBuffer, iArr2);
-            if (ReadFaceBitfield7 == 0) {
-                break;
-            }
-            float rotation = getRotation(byteBuffer);
-            int i15 = 1;
-            int i16 = 0;
-            while (i16 < iArr2[0]) {
-                if ((ReadFaceBitfield7 & i15) != 0) {
-                    CreateFace(mutableSLTextureEntryFaceArr, i16, iArr).setRotation(rotation);
-                }
-                i16++;
-                i15 <<= 1;
-            }
-        }
-        mutableSLTextureEntryFace.setMaterial(byteBuffer.get());
-        while (true) {
-            int ReadFaceBitfield8 = ReadFaceBitfield(byteBuffer, iArr2);
-            if (ReadFaceBitfield8 == 0) {
-                break;
-            }
-            byte b = byteBuffer.get();
-            int i17 = 1;
-            int i18 = 0;
-            while (i18 < iArr2[0]) {
-                if ((ReadFaceBitfield8 & i17) != 0) {
-                    CreateFace(mutableSLTextureEntryFaceArr, i18, iArr).setMaterial(b);
-                }
-                i18++;
-                i17 <<= 1;
-            }
-        }
-        mutableSLTextureEntryFace.setMedia(byteBuffer.get());
-        while (true) {
-            int ReadFaceBitfield9 = ReadFaceBitfield(byteBuffer, iArr2);
-            if (ReadFaceBitfield9 == 0) {
-                break;
-            }
-            byte b2 = byteBuffer.get();
-            int i19 = 1;
-            int i20 = 0;
-            while (i20 < iArr2[0]) {
-                if ((ReadFaceBitfield9 & i19) != 0) {
-                    CreateFace(mutableSLTextureEntryFaceArr, i20, iArr).setMedia(b2);
-                }
-                i20++;
-                i19 <<= 1;
-            }
-        }
-        mutableSLTextureEntryFace.setGlow(getGlow(byteBuffer));
-        while (true) {
-            int ReadFaceBitfield10 = ReadFaceBitfield(byteBuffer, iArr2);
-            if (ReadFaceBitfield10 == 0) {
-                break;
-            }
-            float glow = getGlow(byteBuffer);
-            int i21 = 1;
-            int i22 = 0;
-            while (i22 < iArr2[0]) {
-                if ((ReadFaceBitfield10 & i21) != 0) {
-                    CreateFace(mutableSLTextureEntryFaceArr, i22, iArr).setGlow(glow);
-                }
-                i22++;
-                i21 <<= 1;
-            }
-        }
-        this.faceMask = iArr[0];
-        int i23 = 0;
-        int i24 = -1;
-        while (true) {
-            if (i23 >= 33) {
-                i23 = 0;
-                break;
-            } else if ((this.faceMask & i24) == 0) {
-                break;
-            } else {
-                i24 <<= 1;
-                i23++;
-            }
-        }
-        this.DefaultTexture = SLTextureEntryFace.create(mutableSLTextureEntryFace);
-        if (i23 == 0) {
-            this.FaceTextures = emptyFaces;
-        } else {
-            this.FaceTextures = new SLTextureEntryFace[i23];
-            for (int i25 = 0; i25 < i23; i25++) {
-                this.FaceTextures[i25] = SLTextureEntryFace.create(mutableSLTextureEntryFaceArr[i25]);
-            }
-        }
-        this.hashValue = getHashValue();
+        hashValue = getHashValue();
+        return;
+_L2:
+        l2 <<= 1;
+        i++;
+          goto _L3
+        i = 0;
+          goto _L1
     }
 
-    private static MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutableSLTextureEntryFaceArr, int i, int[] iArr) {
-        if (i >= 32) {
+    private static MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace amutablesltextureentryface[], int i, int ai[])
+    {
+        if (i >= 32)
+        {
             return null;
         }
-        if (mutableSLTextureEntryFaceArr[i] != null) {
-            return mutableSLTextureEntryFaceArr[i];
+        if (amutablesltextureentryface[i] != null)
+        {
+            return amutablesltextureentryface[i];
+        } else
+        {
+            ai[0] = ai[0] | 1 << i;
+            amutablesltextureentryface[i] = new MutableSLTextureEntryFace(0);
+            return amutablesltextureentryface[i];
         }
-        iArr[0] = iArr[0] | (1 << i);
-        mutableSLTextureEntryFaceArr[i] = new MutableSLTextureEntryFace(0);
-        return mutableSLTextureEntryFaceArr[i];
     }
 
-    private int ReadFaceBitfield(ByteBuffer byteBuffer, int[] iArr) {
-        byte b;
-        iArr[0] = 0;
-        if (byteBuffer.position() >= byteBuffer.limit()) {
+    private int ReadFaceBitfield(ByteBuffer bytebuffer, int ai[])
+    {
+        ai[0] = 0;
+        if (bytebuffer.position() >= bytebuffer.limit())
+        {
             return 0;
         }
-        byte b2 = 0;
-        do {
-            b = byteBuffer.get();
-            b2 = (b2 << 7) | (b & Ascii.DEL);
-            iArr[0] = iArr[0] + 7;
-        } while ((b & 128) != 0);
-        return b2;
+        int i = 0;
+        int j;
+        byte byte0;
+        do
+        {
+            byte0 = bytebuffer.get();
+            j = i << 7 | byte0 & 0x7f;
+            ai[0] = ai[0] + 7;
+            i = j;
+        } while ((byte0 & 0x80) != 0);
+        return j;
     }
 
-    private void WriteFaceBitfield(ByteBuffer byteBuffer, int i) {
-        int i2;
-        int i3 = 0;
-        int i4 = i;
-        while (true) {
-            if (i3 >= 6) {
-                i2 = 0;
-                break;
-            } else if ((i4 & -128) == 0) {
-                i2 = i3 + 1;
-                break;
-            } else {
-                i4 = (i4 >> 7) & 33554431;
-                i3++;
+    private void WriteFaceBitfield(ByteBuffer bytebuffer, int i)
+    {
+        int j;
+        j = 0;
+        int k = i;
+        do
+        {
+            if (j >= 6)
+            {
+                break MISSING_BLOCK_LABEL_180;
             }
-        }
-        Debug.Log(String.format("WriteFaceBitfield: faceBits = 0x%08x, count %d", new Object[]{Integer.valueOf(i), Integer.valueOf(i2)}));
-        int i5 = (i2 - 1) * 7;
-        for (int i6 = 0; i6 < i2; i6++) {
-            byte b = (byte) ((i >> i5) & Vr.VREvent.VrCore.ErrorCode.CONTROLLER_UNSTUCK);
-            if (i6 != i2 - 1) {
-                b = (byte) (b | 128);
+            byte byte0;
+            byte byte1;
+            int l;
+            if ((k & 0xffffff80) == 0)
+            {
+                j++;
+                break MISSING_BLOCK_LABEL_27;
             }
-            Debug.Log(String.format("WriteFaceBitfield: i = %d, shift = %d, byte 0x%02x", new Object[]{Integer.valueOf(i6), Integer.valueOf(i5), Byte.valueOf(b)}));
-            byteBuffer.put(b);
-            i5 -= 7;
-        }
-    }
-
-    public static SLTextureEntry create(SLTextureEntryFace sLTextureEntryFace, SLTextureEntryFace[] sLTextureEntryFaceArr) {
-        return pool.intern(new SLTextureEntry(sLTextureEntryFace, sLTextureEntryFaceArr));
-    }
-
-    public static SLTextureEntry create(ByteBuffer byteBuffer, int i) {
-        return pool.intern(new SLTextureEntry(byteBuffer, i));
-    }
-
-    private static float getGlow(ByteBuffer byteBuffer) {
-        return ((float) byteBuffer.get()) / 255.0f;
-    }
-
-    private int getHashValue() {
-        int length = this.FaceTextures.length + this.faceMask + this.DefaultTexture.hashCode();
-        int i = 1;
-        for (int i2 = 0; i2 < this.FaceTextures.length; i2++) {
-            if ((this.faceMask & i) != 0) {
-                length += this.FaceTextures[i2].hashCode();
+            k = k >> 7 & 0x1ffffff;
+            j++;
+        } while (true);
+_L2:
+        Debug.Log(String.format("WriteFaceBitfield: faceBits = 0x%08x, count %d", new Object[] {
+            Integer.valueOf(i), Integer.valueOf(j)
+        }));
+        k = 0;
+        l = (j - 1) * 7;
+        for (; k < j; k++)
+        {
+            byte1 = (byte)(i >> l & 0x7f);
+            byte0 = byte1;
+            if (k != j - 1)
+            {
+                byte0 = (byte)(byte1 | 0x80);
             }
-            i <<= 1;
+            Debug.Log(String.format("WriteFaceBitfield: i = %d, shift = %d, byte 0x%02x", new Object[] {
+                Integer.valueOf(k), Integer.valueOf(l), Byte.valueOf(byte0)
+            }));
+            bytebuffer.put(byte0);
+            l -= 7;
         }
-        return length;
+
+        return;
+        j = 0;
+        if (true) goto _L2; else goto _L1
+_L1:
     }
 
-    private static float getOffset(ByteBuffer byteBuffer) {
-        return ((float) byteBuffer.getShort()) / 32767.0f;
+    public static SLTextureEntry create(SLTextureEntryFace sltextureentryface, SLTextureEntryFace asltextureentryface[])
+    {
+        return (SLTextureEntry)pool.intern(new SLTextureEntry(sltextureentryface, asltextureentryface));
     }
 
-    private static float getRotation(ByteBuffer byteBuffer) {
-        return (((float) byteBuffer.getShort()) / 32767.0f) * 3.1415927f * 2.0f;
+    public static SLTextureEntry create(ByteBuffer bytebuffer, int i)
+    {
+        return (SLTextureEntry)pool.intern(new SLTextureEntry(bytebuffer, i));
     }
 
-    private static UUID getUUID(ByteBuffer byteBuffer) {
-        byteBuffer.order(ByteOrder.BIG_ENDIAN);
-        UUID uuid = new UUID(byteBuffer.getLong(), byteBuffer.getLong());
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+    private static float getGlow(ByteBuffer bytebuffer)
+    {
+        return (float)bytebuffer.get() / 255F;
+    }
+
+    private int getHashValue()
+    {
+        int i = 0;
+        int j = faceMask;
+        int k = DefaultTexture.hashCode();
+        k = FaceTextures.length + (j + k);
+        j = 1;
+        while (i < FaceTextures.length) 
+        {
+            int l = k;
+            if ((faceMask & j) != 0)
+            {
+                l = k + FaceTextures[i].hashCode();
+            }
+            j <<= 1;
+            i++;
+            k = l;
+        }
+        return k;
+    }
+
+    private static float getOffset(ByteBuffer bytebuffer)
+    {
+        return (float)bytebuffer.getShort() / 32767F;
+    }
+
+    private static float getRotation(ByteBuffer bytebuffer)
+    {
+        return ((float)bytebuffer.getShort() / 32767F) * 3.141593F * 2.0F;
+    }
+
+    private static UUID getUUID(ByteBuffer bytebuffer)
+    {
+        bytebuffer.order(ByteOrder.BIG_ENDIAN);
+        UUID uuid = new UUID(bytebuffer.getLong(), bytebuffer.getLong());
+        bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
         return uuid;
     }
 
-    private static void putGlow(ByteBuffer byteBuffer, float f) {
-        byteBuffer.put((byte) ((int) (255.0f * f)));
+    private static void putGlow(ByteBuffer bytebuffer, float f)
+    {
+        bytebuffer.put((byte)(int)(255F * f));
     }
 
-    private static void putOffset(ByteBuffer byteBuffer, float f) {
-        byteBuffer.putShort((short) ((int) (32767.0f * f)));
+    private static void putOffset(ByteBuffer bytebuffer, float f)
+    {
+        bytebuffer.putShort((short)(int)(32767F * f));
     }
 
-    private static void putRotation(ByteBuffer byteBuffer, float f) {
-        byteBuffer.putShort((short) ((int) ((f / 6.2831855f) * 32767.0f)));
+    private static void putRotation(ByteBuffer bytebuffer, float f)
+    {
+        bytebuffer.putShort((short)(int)((f / 6.283185F) * 32767F));
     }
 
-    private static void putUUID(ByteBuffer byteBuffer, UUID uuid) {
-        long j;
-        long j2 = 0;
-        byteBuffer.order(ByteOrder.BIG_ENDIAN);
-        if (uuid != null) {
-            j = uuid.getMostSignificantBits();
-            j2 = uuid.getLeastSignificantBits();
-        } else {
-            j = 0;
+    private static void putUUID(ByteBuffer bytebuffer, UUID uuid)
+    {
+        long l = 0L;
+        bytebuffer.order(ByteOrder.BIG_ENDIAN);
+        long l1;
+        if (uuid != null)
+        {
+            l1 = uuid.getMostSignificantBits();
+            l = uuid.getLeastSignificantBits();
+        } else
+        {
+            l1 = 0L;
         }
-        byteBuffer.putLong(j);
-        byteBuffer.putLong(j2);
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        bytebuffer.putLong(l1);
+        bytebuffer.putLong(l);
+        bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
     }
 
-    public final SLTextureEntryFace GetDefaultTexture() {
-        return this.DefaultTexture;
+    public final SLTextureEntryFace GetDefaultTexture()
+    {
+        return DefaultTexture;
     }
 
-    public final SLTextureEntryFace GetFace(int i) {
-        if (i >= 32) {
+    public final SLTextureEntryFace GetFace(int i)
+    {
+        if (i >= 32)
+        {
             return null;
         }
-        return i >= this.FaceTextures.length ? this.DefaultTexture : this.FaceTextures[i] != null ? this.FaceTextures[i] : this.DefaultTexture;
+        if (i >= FaceTextures.length)
+        {
+            return DefaultTexture;
+        }
+        if (FaceTextures[i] != null)
+        {
+            return FaceTextures[i];
+        } else
+        {
+            return DefaultTexture;
+        }
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
             return true;
         }
-        if (obj == null || !(obj instanceof SLTextureEntry)) {
+        if (obj == null)
+        {
             return false;
         }
-        SLTextureEntry sLTextureEntry = (SLTextureEntry) obj;
-        if (this.faceMask != sLTextureEntry.faceMask || this.FaceTextures.length != sLTextureEntry.FaceTextures.length || !this.DefaultTexture.equals(sLTextureEntry.DefaultTexture)) {
+        if (!(obj instanceof SLTextureEntry))
+        {
             return false;
         }
-        int i = 1;
-        for (int i2 = 0; i2 < this.FaceTextures.length; i2++) {
-            if ((this.faceMask & i) != 0 && !this.FaceTextures[i2].equals(sLTextureEntry.FaceTextures[i2])) {
+        obj = (SLTextureEntry)obj;
+        if (faceMask != ((SLTextureEntry) (obj)).faceMask)
+        {
+            return false;
+        }
+        if (FaceTextures.length != ((SLTextureEntry) (obj)).FaceTextures.length)
+        {
+            return false;
+        }
+        if (!DefaultTexture.equals(((SLTextureEntry) (obj)).DefaultTexture))
+        {
+            return false;
+        }
+        int i = 0;
+        int j = 1;
+        for (; i < FaceTextures.length; i++)
+        {
+            if ((faceMask & j) != 0 && !FaceTextures[i].equals(((SLTextureEntry) (obj)).FaceTextures[i]))
+            {
                 return false;
             }
-            i <<= 1;
+            j <<= 1;
         }
+
         return true;
     }
 
-    public int getFaceMask() {
-        return this.faceMask;
+    public int getFaceMask()
+    {
+        return faceMask;
     }
 
-    public final int hashCode() {
-        return this.hashValue;
+    public final int hashCode()
+    {
+        return hashValue;
     }
 
-    public boolean isSingleFace() {
-        return this.faceMask == 0;
+    public boolean isSingleFace()
+    {
+        boolean flag = false;
+        if (faceMask == 0)
+        {
+            flag = true;
+        }
+        return flag;
     }
 
-    public byte[] packByteArray() {
-        ByteBuffer allocate = ByteBuffer.allocate(SupportMenu.USER_MASK);
-        putUUID(allocate, this.DefaultTexture.textureID());
-        for (int i = 0; i < this.FaceTextures.length; i++) {
-            if (this.FaceTextures[i] != null) {
-                if (this.DefaultTexture.textureID() == null ? true : !this.FaceTextures[i].getTextureID(this.DefaultTexture).equals(this.DefaultTexture.textureID())) {
-                    WriteFaceBitfield(allocate, 1 << i);
-                    putUUID(allocate, this.FaceTextures[i].getTextureID(this.DefaultTexture));
+    public byte[] packByteArray()
+    {
+        ByteBuffer bytebuffer = ByteBuffer.allocate(65535);
+        putUUID(bytebuffer, DefaultTexture.textureID());
+        int j = 0;
+        while (j < FaceTextures.length) 
+        {
+            if (FaceTextures[j] != null)
+            {
+                byte abyte0[];
+                int i;
+                if (DefaultTexture.textureID() == null)
+                {
+                    i = 1;
+                } else
+                if (!FaceTextures[j].getTextureID(DefaultTexture).equals(DefaultTexture.textureID()))
+                {
+                    i = 1;
+                } else
+                {
+                    i = 0;
+                }
+                if (i != 0)
+                {
+                    WriteFaceBitfield(bytebuffer, 1 << j);
+                    putUUID(bytebuffer, FaceTextures[j].getTextureID(DefaultTexture));
                 }
             }
+            j++;
         }
-        WriteFaceBitfield(allocate, 0);
-        allocate.putInt(this.DefaultTexture.rgba());
-        for (int i2 = 0; i2 < this.FaceTextures.length; i2++) {
-            if (!(this.FaceTextures[i2] == null || this.FaceTextures[i2].getRGBA(this.DefaultTexture) == this.DefaultTexture.rgba())) {
-                WriteFaceBitfield(allocate, 1 << i2);
-                allocate.putInt(this.FaceTextures[i2].getRGBA(this.DefaultTexture));
+        WriteFaceBitfield(bytebuffer, 0);
+        bytebuffer.putInt(DefaultTexture.rgba());
+        for (i = 0; i < FaceTextures.length; i++)
+        {
+            if (FaceTextures[i] != null && FaceTextures[i].getRGBA(DefaultTexture) != DefaultTexture.rgba())
+            {
+                WriteFaceBitfield(bytebuffer, 1 << i);
+                bytebuffer.putInt(FaceTextures[i].getRGBA(DefaultTexture));
             }
         }
-        WriteFaceBitfield(allocate, 0);
-        allocate.putFloat(this.DefaultTexture.repeatU());
-        for (int i3 = 0; i3 < this.FaceTextures.length; i3++) {
-            if (!(this.FaceTextures[i3] == null || this.FaceTextures[i3].getRepeatU(this.DefaultTexture) == this.DefaultTexture.repeatU())) {
-                WriteFaceBitfield(allocate, 1 << i3);
-                allocate.putFloat(this.FaceTextures[i3].getRepeatU(this.DefaultTexture));
+
+        WriteFaceBitfield(bytebuffer, 0);
+        bytebuffer.putFloat(DefaultTexture.repeatU());
+        for (i = 0; i < FaceTextures.length; i++)
+        {
+            if (FaceTextures[i] != null && FaceTextures[i].getRepeatU(DefaultTexture) != DefaultTexture.repeatU())
+            {
+                WriteFaceBitfield(bytebuffer, 1 << i);
+                bytebuffer.putFloat(FaceTextures[i].getRepeatU(DefaultTexture));
             }
         }
-        WriteFaceBitfield(allocate, 0);
-        allocate.putFloat(this.DefaultTexture.repeatV());
-        for (int i4 = 0; i4 < this.FaceTextures.length; i4++) {
-            if (!(this.FaceTextures[i4] == null || this.FaceTextures[i4].getRepeatV(this.DefaultTexture) == this.DefaultTexture.repeatV())) {
-                WriteFaceBitfield(allocate, 1 << i4);
-                allocate.putFloat(this.FaceTextures[i4].getRepeatV(this.DefaultTexture));
+
+        WriteFaceBitfield(bytebuffer, 0);
+        bytebuffer.putFloat(DefaultTexture.repeatV());
+        for (i = 0; i < FaceTextures.length; i++)
+        {
+            if (FaceTextures[i] != null && FaceTextures[i].getRepeatV(DefaultTexture) != DefaultTexture.repeatV())
+            {
+                WriteFaceBitfield(bytebuffer, 1 << i);
+                bytebuffer.putFloat(FaceTextures[i].getRepeatV(DefaultTexture));
             }
         }
-        WriteFaceBitfield(allocate, 0);
-        putOffset(allocate, this.DefaultTexture.offsetU());
-        for (int i5 = 0; i5 < this.FaceTextures.length; i5++) {
-            if (!(this.FaceTextures[i5] == null || this.FaceTextures[i5].getOffsetU(this.DefaultTexture) == this.DefaultTexture.offsetU())) {
-                WriteFaceBitfield(allocate, 1 << i5);
-                putOffset(allocate, this.FaceTextures[i5].getOffsetU(this.DefaultTexture));
+
+        WriteFaceBitfield(bytebuffer, 0);
+        putOffset(bytebuffer, DefaultTexture.offsetU());
+        for (i = 0; i < FaceTextures.length; i++)
+        {
+            if (FaceTextures[i] != null && FaceTextures[i].getOffsetU(DefaultTexture) != DefaultTexture.offsetU())
+            {
+                WriteFaceBitfield(bytebuffer, 1 << i);
+                putOffset(bytebuffer, FaceTextures[i].getOffsetU(DefaultTexture));
             }
         }
-        WriteFaceBitfield(allocate, 0);
-        putOffset(allocate, this.DefaultTexture.offsetV());
-        for (int i6 = 0; i6 < this.FaceTextures.length; i6++) {
-            if (!(this.FaceTextures[i6] == null || this.FaceTextures[i6].getOffsetV(this.DefaultTexture) == this.DefaultTexture.offsetV())) {
-                WriteFaceBitfield(allocate, 1 << i6);
-                putOffset(allocate, this.FaceTextures[i6].getOffsetV(this.DefaultTexture));
+
+        WriteFaceBitfield(bytebuffer, 0);
+        putOffset(bytebuffer, DefaultTexture.offsetV());
+        for (i = 0; i < FaceTextures.length; i++)
+        {
+            if (FaceTextures[i] != null && FaceTextures[i].getOffsetV(DefaultTexture) != DefaultTexture.offsetV())
+            {
+                WriteFaceBitfield(bytebuffer, 1 << i);
+                putOffset(bytebuffer, FaceTextures[i].getOffsetV(DefaultTexture));
             }
         }
-        WriteFaceBitfield(allocate, 0);
-        putRotation(allocate, this.DefaultTexture.rotation());
-        for (int i7 = 0; i7 < this.FaceTextures.length; i7++) {
-            if (!(this.FaceTextures[i7] == null || this.FaceTextures[i7].getRotation(this.DefaultTexture) == this.DefaultTexture.rotation())) {
-                WriteFaceBitfield(allocate, 1 << i7);
-                putRotation(allocate, this.FaceTextures[i7].getRotation(this.DefaultTexture));
+
+        WriteFaceBitfield(bytebuffer, 0);
+        putRotation(bytebuffer, DefaultTexture.rotation());
+        for (i = 0; i < FaceTextures.length; i++)
+        {
+            if (FaceTextures[i] != null && FaceTextures[i].getRotation(DefaultTexture) != DefaultTexture.rotation())
+            {
+                WriteFaceBitfield(bytebuffer, 1 << i);
+                putRotation(bytebuffer, FaceTextures[i].getRotation(DefaultTexture));
             }
         }
-        WriteFaceBitfield(allocate, 0);
-        allocate.put(this.DefaultTexture.materialb());
-        for (int i8 = 0; i8 < this.FaceTextures.length; i8++) {
-            if (!(this.FaceTextures[i8] == null || this.FaceTextures[i8].getMaterial(this.DefaultTexture) == this.DefaultTexture.materialb())) {
-                WriteFaceBitfield(allocate, 1 << i8);
-                allocate.put(this.FaceTextures[i8].getMaterial(this.DefaultTexture));
+
+        WriteFaceBitfield(bytebuffer, 0);
+        bytebuffer.put(DefaultTexture.materialb());
+        for (i = 0; i < FaceTextures.length; i++)
+        {
+            if (FaceTextures[i] != null && FaceTextures[i].getMaterial(DefaultTexture) != DefaultTexture.materialb())
+            {
+                WriteFaceBitfield(bytebuffer, 1 << i);
+                bytebuffer.put(FaceTextures[i].getMaterial(DefaultTexture));
             }
         }
-        WriteFaceBitfield(allocate, 0);
-        allocate.put(this.DefaultTexture.mediab());
-        for (int i9 = 0; i9 < this.FaceTextures.length; i9++) {
-            if (!(this.FaceTextures[i9] == null || this.FaceTextures[i9].getMedia(this.DefaultTexture) == this.DefaultTexture.mediab())) {
-                WriteFaceBitfield(allocate, 1 << i9);
-                allocate.put(this.FaceTextures[i9].getMedia(this.DefaultTexture));
+
+        WriteFaceBitfield(bytebuffer, 0);
+        bytebuffer.put(DefaultTexture.mediab());
+        for (i = 0; i < FaceTextures.length; i++)
+        {
+            if (FaceTextures[i] != null && FaceTextures[i].getMedia(DefaultTexture) != DefaultTexture.mediab())
+            {
+                WriteFaceBitfield(bytebuffer, 1 << i);
+                bytebuffer.put(FaceTextures[i].getMedia(DefaultTexture));
             }
         }
-        WriteFaceBitfield(allocate, 0);
-        putGlow(allocate, this.DefaultTexture.glow());
-        for (int i10 = 0; i10 < this.FaceTextures.length; i10++) {
-            if (!(this.FaceTextures[i10] == null || this.FaceTextures[i10].getGlow(this.DefaultTexture) == this.DefaultTexture.glow())) {
-                WriteFaceBitfield(allocate, 1 << i10);
-                putGlow(allocate, this.FaceTextures[i10].getGlow(this.DefaultTexture));
+
+        WriteFaceBitfield(bytebuffer, 0);
+        putGlow(bytebuffer, DefaultTexture.glow());
+        for (i = 0; i < FaceTextures.length; i++)
+        {
+            if (FaceTextures[i] != null && FaceTextures[i].getGlow(DefaultTexture) != DefaultTexture.glow())
+            {
+                WriteFaceBitfield(bytebuffer, 1 << i);
+                putGlow(bytebuffer, FaceTextures[i].getGlow(DefaultTexture));
             }
         }
-        WriteFaceBitfield(allocate, 0);
-        byte[] bArr = new byte[allocate.position()];
-        allocate.position(0);
-        allocate.get(bArr);
-        Debug.DumpBuffer("Baking: TEpacked: ", bArr);
-        return bArr;
+
+        WriteFaceBitfield(bytebuffer, 0);
+        abyte0 = new byte[bytebuffer.position()];
+        bytebuffer.position(0);
+        bytebuffer.get(abyte0);
+        Debug.DumpBuffer("Baking: TEpacked: ", abyte0);
+        return abyte0;
     }
+
 }

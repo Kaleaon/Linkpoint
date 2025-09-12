@@ -1,71 +1,109 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class CopyInventoryFromNotecard extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<InventoryData> InventoryData_Fields = new ArrayList<>();
-    public NotecardData NotecardData_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class CopyInventoryFromNotecard extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class InventoryData {
+    public static class InventoryData
+    {
+
         public UUID FolderID;
         public UUID ItemID;
+
+        public InventoryData()
+        {
+        }
     }
 
-    public static class NotecardData {
+    public static class NotecardData
+    {
+
         public UUID NotecardItemID;
         public UUID ObjectID;
-    }
 
-    public CopyInventoryFromNotecard() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-        this.NotecardData_Field = new NotecardData();
-    }
-
-    public int CalcPayloadSize() {
-        return (this.InventoryData_Fields.size() * 32) + 69;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCopyInventoryFromNotecard(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 9);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packUUID(byteBuffer, this.NotecardData_Field.NotecardItemID);
-        packUUID(byteBuffer, this.NotecardData_Field.ObjectID);
-        byteBuffer.put((byte) this.InventoryData_Fields.size());
-        for (InventoryData inventoryData : this.InventoryData_Fields) {
-            packUUID(byteBuffer, inventoryData.ItemID);
-            packUUID(byteBuffer, inventoryData.FolderID);
+        public NotecardData()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.NotecardData_Field.NotecardItemID = unpackUUID(byteBuffer);
-        this.NotecardData_Field.ObjectID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            InventoryData inventoryData = new InventoryData();
-            inventoryData.ItemID = unpackUUID(byteBuffer);
-            inventoryData.FolderID = unpackUUID(byteBuffer);
-            this.InventoryData_Fields.add(inventoryData);
+
+    public AgentData AgentData_Field;
+    public ArrayList InventoryData_Fields;
+    public NotecardData NotecardData_Field;
+
+    public CopyInventoryFromNotecard()
+    {
+        InventoryData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        NotecardData_Field = new NotecardData();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return InventoryData_Fields.size() * 32 + 69;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleCopyInventoryFromNotecard(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)9);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packUUID(bytebuffer, NotecardData_Field.NotecardItemID);
+        packUUID(bytebuffer, NotecardData_Field.ObjectID);
+        bytebuffer.put((byte)InventoryData_Fields.size());
+        InventoryData inventorydata;
+        for (Iterator iterator = InventoryData_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, inventorydata.FolderID))
+        {
+            inventorydata = (InventoryData)iterator.next();
+            packUUID(bytebuffer, inventorydata.ItemID);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        NotecardData_Field.NotecardItemID = unpackUUID(bytebuffer);
+        NotecardData_Field.ObjectID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            InventoryData inventorydata = new InventoryData();
+            inventorydata.ItemID = unpackUUID(bytebuffer);
+            inventorydata.FolderID = unpackUUID(bytebuffer);
+            InventoryData_Fields.add(inventorydata);
+        }
+
     }
 }

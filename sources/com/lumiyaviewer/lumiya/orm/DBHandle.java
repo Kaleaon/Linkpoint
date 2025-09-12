@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.orm;
 
 import android.database.Cursor;
@@ -6,24 +10,36 @@ import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQuery;
 
-public final class DBHandle implements SQLiteDatabase.CursorFactory {
-    private final SQLiteDatabase sqliteDB;
+public final class DBHandle
+    implements android.database.sqlite.SQLiteDatabase.CursorFactory
+{
+    private class DBHandleCursor extends SQLiteCursor
+    {
 
-    private class DBHandleCursor extends SQLiteCursor {
-        public DBHandleCursor(SQLiteDatabase sQLiteDatabase, SQLiteCursorDriver sQLiteCursorDriver, String str, SQLiteQuery sQLiteQuery) {
-            super(sQLiteDatabase, sQLiteCursorDriver, str, sQLiteQuery);
+        final DBHandle this$0;
+
+        public DBHandleCursor(SQLiteDatabase sqlitedatabase, SQLiteCursorDriver sqlitecursordriver, String s, SQLiteQuery sqlitequery)
+        {
+            this$0 = DBHandle.this;
+            super(sqlitedatabase, sqlitecursordriver, s, sqlitequery);
         }
     }
 
-    public DBHandle(SQLiteDatabase sQLiteDatabase) {
-        this.sqliteDB = sQLiteDatabase;
+
+    private final SQLiteDatabase sqliteDB;
+
+    public DBHandle(SQLiteDatabase sqlitedatabase)
+    {
+        sqliteDB = sqlitedatabase;
     }
 
-    public final SQLiteDatabase getDB() {
-        return this.sqliteDB;
+    public final SQLiteDatabase getDB()
+    {
+        return sqliteDB;
     }
 
-    public Cursor newCursor(SQLiteDatabase sQLiteDatabase, SQLiteCursorDriver sQLiteCursorDriver, String str, SQLiteQuery sQLiteQuery) {
-        return new DBHandleCursor(sQLiteDatabase, sQLiteCursorDriver, str, sQLiteQuery);
+    public Cursor newCursor(SQLiteDatabase sqlitedatabase, SQLiteCursorDriver sqlitecursordriver, String s, SQLiteQuery sqlitequery)
+    {
+        return new DBHandleCursor(sqlitedatabase, sqlitecursordriver, s, sqlitequery);
     }
 }

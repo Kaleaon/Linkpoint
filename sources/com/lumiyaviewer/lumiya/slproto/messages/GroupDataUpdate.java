@@ -1,64 +1,84 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class GroupDataUpdate extends SLMessage {
-    public ArrayList<AgentGroupData> AgentGroupData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentGroupData {
+public class GroupDataUpdate extends SLMessage
+{
+    public static class AgentGroupData
+    {
+
         public UUID AgentID;
         public long AgentPowers;
         public UUID GroupID;
-        public byte[] GroupTitle;
-    }
+        public byte GroupTitle[];
 
-    public GroupDataUpdate() {
-        this.zeroCoded = true;
-    }
-
-    public int CalcPayloadSize() {
-        int i = 5;
-        Iterator<T> it = this.AgentGroupData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            i = ((AgentGroupData) it.next()).GroupTitle.length + 41 + i2;
+        public AgentGroupData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleGroupDataUpdate(this);
+
+    public ArrayList AgentGroupData_Fields;
+
+    public GroupDataUpdate()
+    {
+        AgentGroupData_Fields = new ArrayList();
+        zeroCoded = true;
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) -124);
-        byteBuffer.put((byte) this.AgentGroupData_Fields.size());
-        for (AgentGroupData agentGroupData : this.AgentGroupData_Fields) {
-            packUUID(byteBuffer, agentGroupData.AgentID);
-            packUUID(byteBuffer, agentGroupData.GroupID);
-            packLong(byteBuffer, agentGroupData.AgentPowers);
-            packVariable(byteBuffer, agentGroupData.GroupTitle, 1);
-        }
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = AgentGroupData_Fields.iterator();
+        int i;
+        for (i = 5; iterator.hasNext(); i = ((AgentGroupData)iterator.next()).GroupTitle.length + 41 + i) { }
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            AgentGroupData agentGroupData = new AgentGroupData();
-            agentGroupData.AgentID = unpackUUID(byteBuffer);
-            agentGroupData.GroupID = unpackUUID(byteBuffer);
-            agentGroupData.AgentPowers = unpackLong(byteBuffer);
-            agentGroupData.GroupTitle = unpackVariable(byteBuffer, 1);
-            this.AgentGroupData_Fields.add(agentGroupData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleGroupDataUpdate(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)-124);
+        bytebuffer.put((byte)AgentGroupData_Fields.size());
+        AgentGroupData agentgroupdata;
+        for (Iterator iterator = AgentGroupData_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, agentgroupdata.GroupTitle, 1))
+        {
+            agentgroupdata = (AgentGroupData)iterator.next();
+            packUUID(bytebuffer, agentgroupdata.AgentID);
+            packUUID(bytebuffer, agentgroupdata.GroupID);
+            packLong(bytebuffer, agentgroupdata.AgentPowers);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            AgentGroupData agentgroupdata = new AgentGroupData();
+            agentgroupdata.AgentID = unpackUUID(bytebuffer);
+            agentgroupdata.GroupID = unpackUUID(bytebuffer);
+            agentgroupdata.AgentPowers = unpackLong(bytebuffer);
+            agentgroupdata.GroupTitle = unpackVariable(bytebuffer, 1);
+            AgentGroupData_Fields.add(agentgroupdata);
+        }
+
     }
 }

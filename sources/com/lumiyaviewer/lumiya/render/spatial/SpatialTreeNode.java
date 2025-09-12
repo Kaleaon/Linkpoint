@@ -1,273 +1,430 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.spatial;
 
 import com.lumiyaviewer.lumiya.utils.InlineList;
+import com.lumiyaviewer.lumiya.utils.InlineListEntry;
 
-public class SpatialTreeNode extends InlineList<DrawListEntry> {
-    private static final float MIN_SIZE = 2.0f;
-    private SpatialTreeNode[] children = null;
-    int depthBin = -1;
+// Referenced classes of package com.lumiyaviewer.lumiya.render.spatial:
+//            SpatialTree, DrawListEntry, SpatialObjectIndex, FrustrumPlanes, 
+//            DrawList
+
+public class SpatialTreeNode extends InlineList
+{
+
+    private static final float MIN_SIZE = 2F;
+    private SpatialTreeNode children[];
+    int depthBin;
     private final int indexInParent;
     private final boolean leaf;
-    SpatialTreeNode nextDepth = null;
+    SpatialTreeNode nextDepth;
     private final SpatialTreeNode parent;
-    final float[] position;
-    SpatialTreeNode prevDepth = null;
-    private SpatialTreeNode singleChild = null;
+    final float position[];
+    SpatialTreeNode prevDepth;
+    private SpatialTreeNode singleChild;
     private final SpatialTree spatialTree;
     private final int splitAxis;
 
-    public SpatialTreeNode(SpatialTree spatialTree2, float f, float f2, float f3) {
-        this.spatialTree = spatialTree2;
-        this.position = new float[]{0.0f, 0.0f, 0.0f, f, f2, f3, 0.0f, 0.0f, 0.0f, f, f2, f3};
-        this.leaf = false;
-        this.parent = null;
-        this.indexInParent = 0;
-        this.splitAxis = longestAxis();
+    public SpatialTreeNode(SpatialTree spatialtree, float f, float f1, float f2)
+    {
+        children = null;
+        singleChild = null;
+        depthBin = -1;
+        prevDepth = null;
+        nextDepth = null;
+        spatialTree = spatialtree;
+        position = (new float[] {
+            0.0F, 0.0F, 0.0F, f, f1, f2, 0.0F, 0.0F, 0.0F, f, 
+            f1, f2
+        });
+        leaf = false;
+        parent = null;
+        indexInParent = 0;
+        splitAxis = longestAxis();
     }
 
-    public SpatialTreeNode(SpatialTreeNode spatialTreeNode, int i) {
-        this.spatialTree = spatialTreeNode.spatialTree;
-        this.position = new float[12];
-        this.parent = spatialTreeNode;
-        this.indexInParent = i;
-        boolean z = true;
-        int i2 = 0;
-        while (i2 < 3) {
-            float f = spatialTreeNode.position[i2 + 6];
-            float f2 = spatialTreeNode.position[i2 + 9] - f;
-            if (i2 == spatialTreeNode.splitAxis) {
-                f2 /= MIN_SIZE;
-                f += (f2 / MIN_SIZE) * ((float) i);
+    public SpatialTreeNode(SpatialTreeNode spatialtreenode, int i)
+    {
+        children = null;
+        singleChild = null;
+        depthBin = -1;
+        prevDepth = null;
+        nextDepth = null;
+        spatialTree = spatialtreenode.spatialTree;
+        position = new float[12];
+        parent = spatialtreenode;
+        indexInParent = i;
+        boolean flag = true;
+        int j = 0;
+        while (j < 3) 
+        {
+            float f1 = spatialtreenode.position[j + 6];
+            float f = spatialtreenode.position[j + 9] - f1;
+            if (j == spatialtreenode.splitAxis)
+            {
+                f /= 2.0F;
+                f1 += (f / 2.0F) * (float)i;
             }
-            this.position[i2 + 6] = f;
-            this.position[i2 + 9] = f + f2;
-            this.position[i2] = (f2 / MIN_SIZE) + f;
-            this.position[i2 + 3] = f + (f2 / MIN_SIZE);
-            i2++;
-            z = f2 > MIN_SIZE ? false : z;
+            position[j + 6] = f1;
+            position[j + 9] = f1 + f;
+            position[j] = f / 2.0F + f1;
+            position[j + 3] = f1 + f / 2.0F;
+            if (f > 2.0F)
+            {
+                flag = false;
+            }
+            j++;
         }
-        this.leaf = z;
-        this.splitAxis = longestAxis();
+        leaf = flag;
+        splitAxis = longestAxis();
     }
 
-    private void enlargeForBoundingBox(boolean z, float[] fArr) {
-        if (this.parent != null) {
-            boolean z2 = false;
-            for (int i = 0; i < 3; i++) {
-                if (z || fArr[i] < this.position[i]) {
-                    this.position[i] = fArr[i];
-                    z2 = true;
+    private void enlargeForBoundingBox(boolean flag, float af[])
+    {
+        if (parent != null)
+        {
+            int i = 0;
+            boolean flag1 = false;
+            for (; i < 3; i++)
+            {
+                if (flag || af[i] < position[i])
+                {
+                    position[i] = af[i];
+                    flag1 = true;
                 }
-                if (z || fArr[i + 3] > this.position[i + 3]) {
-                    this.position[i + 3] = fArr[i + 3];
-                    z2 = true;
+                if (flag || af[i + 3] > position[i + 3])
+                {
+                    position[i + 3] = af[i + 3];
+                    flag1 = true;
                 }
             }
-            if (z2) {
-                this.spatialTree.setTreeWalkNeeded();
-                this.parent.enlargeForBoundingBox(false, this.position);
+
+            if (flag1)
+            {
+                spatialTree.setTreeWalkNeeded();
+                parent.enlargeForBoundingBox(false, position);
             }
         }
     }
 
-    private boolean isEmpty() {
-        return getFirst() == null && this.children == null;
+    private boolean isEmpty()
+    {
+        boolean flag1 = false;
+        boolean flag = flag1;
+        if (getFirst() == null)
+        {
+            flag = flag1;
+            if (children == null)
+            {
+                flag = true;
+            }
+        }
+        return flag;
     }
 
-    private int longestAxis() {
+    private int longestAxis()
+    {
         int i = 0;
-        float f = 0.0f;
-        int i2 = 0;
-        while (i < 3) {
-            float f2 = this.position[i + 9] - this.position[i + 6];
-            if (f2 > f) {
-                i2 = i;
-            } else {
-                f2 = f;
+        float f = 0.0F;
+        int j = 0;
+        for (; i < 3; i++)
+        {
+            float f1 = position[i + 9] - position[i + 6];
+            if (f1 > f)
+            {
+                j = i;
+                f = f1;
             }
-            i++;
-            f = f2;
         }
-        return i2;
+
+        return j;
     }
 
-    private void removeFromParent() {
-        this.spatialTree.removeEntry(this);
-        if (this.parent != null && this.parent.children != null) {
-            this.parent.children[this.indexInParent] = null;
-            if (this.parent.singleChild == this) {
-                this.parent.singleChild = null;
-                this.parent.children = null;
-                if (this.parent.isEmpty()) {
-                    this.parent.removeFromParent();
-                } else {
-                    this.parent.shrinkBoundingBox();
-                }
-            } else {
-                int i = 0;
-                SpatialTreeNode spatialTreeNode = null;
-                while (true) {
-                    if (i >= 3) {
-                        break;
+    private void removeFromParent()
+    {
+label0:
+        {
+label1:
+            {
+                spatialTree.removeEntry(this);
+                if (parent != null && parent.children != null)
+                {
+                    parent.children[indexInParent] = null;
+                    if (parent.singleChild != this)
+                    {
+                        break label0;
                     }
-                    if (this.parent.children[i] != null) {
-                        if (spatialTreeNode != null) {
-                            spatialTreeNode = null;
-                            break;
-                        }
-                        spatialTreeNode = this.parent.children[i];
+                    parent.singleChild = null;
+                    parent.children = null;
+                    if (!parent.isEmpty())
+                    {
+                        break label1;
                     }
-                    i++;
+                    parent.removeFromParent();
                 }
-                this.parent.singleChild = spatialTreeNode;
-                if (this.parent.getFirst() == null) {
-                    this.spatialTree.removeEntry(this.parent);
-                }
-                this.parent.shrinkBoundingBox();
-            }
-        }
-    }
-
-    private void shrinkBoundingBox() {
-        boolean z;
-        boolean z2 = true;
-        if (this.parent != null) {
-            float[] fArr = new float[6];
-            DrawListEntry drawListEntry = (DrawListEntry) getFirst();
-            boolean z3 = false;
-            while (drawListEntry != null) {
-                for (int i = 0; i < 3; i++) {
-                    fArr[i] = z3 ? Math.min(fArr[i], drawListEntry.boundingBox[i]) : drawListEntry.boundingBox[i];
-                    fArr[i + 3] = z3 ? Math.max(fArr[i + 3], drawListEntry.boundingBox[i + 3]) : drawListEntry.boundingBox[i + 3];
-                }
-                drawListEntry = drawListEntry.getNext();
-                z3 = true;
-            }
-            if (this.children != null) {
-                SpatialTreeNode[] spatialTreeNodeArr = this.children;
-                int length = spatialTreeNodeArr.length;
-                int i2 = 0;
-                while (i2 < length) {
-                    SpatialTreeNode spatialTreeNode = spatialTreeNodeArr[i2];
-                    if (spatialTreeNode != null) {
-                        for (int i3 = 0; i3 < 3; i3++) {
-                            fArr[i3] = z3 ? Math.min(fArr[i3], spatialTreeNode.position[i3]) : spatialTreeNode.position[i3];
-                            fArr[i3 + 3] = z3 ? Math.max(fArr[i3 + 3], spatialTreeNode.position[i3 + 3]) : spatialTreeNode.position[i3 + 3];
-                        }
-                        z = true;
-                    } else {
-                        z = z3;
-                    }
-                    i2++;
-                    z3 = z;
-                }
-            }
-            if (z3) {
-                int i4 = 0;
-                while (true) {
-                    if (i4 >= 6) {
-                        z2 = false;
-                        break;
-                    } else if (this.position[i4] != fArr[i4]) {
-                        break;
-                    } else {
-                        i4++;
-                    }
-                }
-                if (z2) {
-                    System.arraycopy(fArr, 0, this.position, 0, 6);
-                    this.parent.shrinkBoundingBox();
-                    this.spatialTree.setTreeWalkNeeded();
-                }
-            }
-        }
-    }
-
-    public void addDrawables(DrawList drawList) {
-        for (DrawListEntry drawListEntry = (DrawListEntry) getFirst(); drawListEntry != null; drawListEntry = drawListEntry.getNext()) {
-            drawListEntry.addToDrawList(drawList);
-        }
-    }
-
-    public void addEntry(DrawListEntry drawListEntry) {
-        boolean z = true;
-        boolean z2 = getFirst() == null && this.children == null;
-        if (this.singleChild == null) {
-            z = false;
-        }
-        if (drawListEntry.getList() != this) {
-            super.addEntry(drawListEntry);
-            enlargeForBoundingBox(z2, drawListEntry.boundingBox);
-            if (z2 || z) {
-                this.spatialTree.setTreeWalkNeeded();
-            }
-            if (this.depthBin != -1) {
-                this.spatialTree.setDrawListChanged();
                 return;
             }
+            parent.shrinkBoundingBox();
             return;
         }
-        shrinkBoundingBox();
+        SpatialTreeNode spatialtreenode1;
+label2:
+        {
+            int i = 0;
+            SpatialTreeNode spatialtreenode = null;
+            do
+            {
+                spatialtreenode1 = spatialtreenode;
+                if (i >= 3)
+                {
+                    break label2;
+                }
+                spatialtreenode1 = spatialtreenode;
+                if (parent.children[i] != null)
+                {
+                    if (spatialtreenode != null)
+                    {
+                        break;
+                    }
+                    spatialtreenode1 = parent.children[i];
+                }
+                i++;
+                spatialtreenode = spatialtreenode1;
+            } while (true);
+            spatialtreenode1 = null;
+        }
+        parent.singleChild = spatialtreenode1;
+        if (parent.getFirst() == null)
+        {
+            spatialTree.removeEntry(parent);
+        }
+        parent.shrinkBoundingBox();
     }
 
-    /* access modifiers changed from: protected */
-    public SpatialTreeNode findNode(float[] fArr) {
-        boolean z;
-        float f;
-        int i;
-        if (this.leaf) {
+    private void shrinkBoundingBox()
+    {
+        boolean flag1 = true;
+        if (parent == null) goto _L2; else goto _L1
+_L1:
+        float af[];
+        int l;
+        af = new float[6];
+        DrawListEntry drawlistentry = (DrawListEntry)getFirst();
+        boolean flag;
+        for (flag = false; drawlistentry != null; flag = true)
+        {
+            int j = 0;
+            while (j < 3) 
+            {
+                float f;
+                if (flag)
+                {
+                    f = Math.min(af[j], drawlistentry.boundingBox[j]);
+                } else
+                {
+                    f = drawlistentry.boundingBox[j];
+                }
+                af[j] = f;
+                if (flag)
+                {
+                    f = Math.max(af[j + 3], drawlistentry.boundingBox[j + 3]);
+                } else
+                {
+                    f = drawlistentry.boundingBox[j + 3];
+                }
+                af[j + 3] = f;
+                j++;
+            }
+            drawlistentry = drawlistentry.getNext();
+        }
+
+        l = ((flag) ? 1 : 0);
+        if (children != null)
+        {
+            SpatialTreeNode aspatialtreenode[] = children;
+            int i1 = aspatialtreenode.length;
+            int k = 0;
+            do
+            {
+                l = ((flag) ? 1 : 0);
+                if (k >= i1)
+                {
+                    break;
+                }
+                SpatialTreeNode spatialtreenode = aspatialtreenode[k];
+                if (spatialtreenode != null)
+                {
+                    l = 0;
+                    while (l < 3) 
+                    {
+                        float f1;
+                        if (flag)
+                        {
+                            f1 = Math.min(af[l], spatialtreenode.position[l]);
+                        } else
+                        {
+                            f1 = spatialtreenode.position[l];
+                        }
+                        af[l] = f1;
+                        if (flag)
+                        {
+                            f1 = Math.max(af[l + 3], spatialtreenode.position[l + 3]);
+                        } else
+                        {
+                            f1 = spatialtreenode.position[l + 3];
+                        }
+                        af[l + 3] = f1;
+                        l++;
+                    }
+                    flag = true;
+                }
+                k++;
+            } while (true);
+        }
+        if (l == 0) goto _L2; else goto _L3
+_L3:
+        int i = 0;
+_L6:
+        if (i >= 6)
+        {
+            break MISSING_BLOCK_LABEL_373;
+        }
+        if (position[i] == af[i]) goto _L5; else goto _L4
+_L4:
+        i = ((flag1) ? 1 : 0);
+_L7:
+        if (i != 0)
+        {
+            System.arraycopy(af, 0, position, 0, 6);
+            parent.shrinkBoundingBox();
+            spatialTree.setTreeWalkNeeded();
+        }
+_L2:
+        return;
+_L5:
+        i++;
+          goto _L6
+        i = 0;
+          goto _L7
+    }
+
+    public void addDrawables(DrawList drawlist)
+    {
+        for (DrawListEntry drawlistentry = (DrawListEntry)getFirst(); drawlistentry != null; drawlistentry = drawlistentry.getNext())
+        {
+            drawlistentry.addToDrawList(drawlist);
+        }
+
+    }
+
+    public void addEntry(DrawListEntry drawlistentry)
+    {
+        boolean flag = true;
+        boolean flag1;
+        if (getFirst() == null && children == null)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        if (singleChild == null)
+        {
+            flag = false;
+        }
+        if (drawlistentry.getList() != this)
+        {
+            super.addEntry(drawlistentry);
+            enlargeForBoundingBox(flag1, drawlistentry.boundingBox);
+            if (flag1 || flag)
+            {
+                spatialTree.setTreeWalkNeeded();
+            }
+            if (depthBin != -1)
+            {
+                spatialTree.setDrawListChanged();
+            }
+            return;
+        } else
+        {
+            shrinkBoundingBox();
+            return;
+        }
+    }
+
+    public volatile void addEntry(InlineListEntry inlinelistentry)
+    {
+        addEntry((DrawListEntry)inlinelistentry);
+    }
+
+    protected SpatialTreeNode findNode(float af[])
+    {
+        if (leaf)
+        {
             return this;
         }
-        float f2 = Float.POSITIVE_INFINITY;
-        int i2 = 0;
-        int i3 = -1;
-        while (i2 < 3) {
-            float f3 = (this.position[(this.splitAxis + 6) + 3] - this.position[this.splitAxis + 6]) / MIN_SIZE;
-            float f4 = this.position[this.splitAxis + 6] + ((f3 / MIN_SIZE) * ((float) i2));
-            if (fArr[this.splitAxis] < f4 || fArr[this.splitAxis + 3] > f4 + f3) {
-                f = f2;
-                i = i3;
-            } else {
-                f = Math.abs(((f3 / MIN_SIZE) + f4) - ((fArr[this.splitAxis] + fArr[this.splitAxis + 3]) / MIN_SIZE));
-                if (f < f2) {
-                    i = i2;
-                } else {
-                    f = f2;
-                    i = i3;
+        float f = (1.0F / 0.0F);
+        int j = 0;
+        int i = -1;
+        for (; j < 3; j++)
+        {
+            float f1 = (position[splitAxis + 6 + 3] - position[splitAxis + 6]) / 2.0F;
+            float f2 = position[splitAxis + 6] + (f1 / 2.0F) * (float)j;
+            if (af[splitAxis] < f2 || af[splitAxis + 3] > f2 + f1)
+            {
+                continue;
+            }
+            f1 = Math.abs((f1 / 2.0F + f2) - (af[splitAxis] + af[splitAxis + 3]) / 2.0F);
+            if (f1 < f)
+            {
+                i = j;
+                f = f1;
+            }
+        }
+
+        if (i != -1)
+        {
+            boolean flag;
+            if (children == null)
+            {
+                children = new SpatialTreeNode[3];
+                flag = true;
+            } else
+            {
+                flag = false;
+            }
+            if (children[i] == null)
+            {
+                children[i] = new SpatialTreeNode(this, i);
+                if (flag)
+                {
+                    singleChild = children[i];
+                } else
+                {
+                    singleChild = null;
                 }
             }
-            i2++;
-            i3 = i;
-            f2 = f;
-        }
-        if (i3 == -1) {
+            return children[i].findNode(af);
+        } else
+        {
             return this;
         }
-        if (this.children == null) {
-            this.children = new SpatialTreeNode[3];
-            z = true;
-        } else {
-            z = false;
-        }
-        if (this.children[i3] == null) {
-            this.children[i3] = new SpatialTreeNode(this, i3);
-            if (z) {
-                this.singleChild = this.children[i3];
-            } else {
-                this.singleChild = null;
-            }
-        }
-        return this.children[i3].findNode(fArr);
     }
 
-    public void removeEntry(DrawListEntry drawListEntry) {
-        super.removeEntry(drawListEntry);
-        if (this.depthBin != -1) {
-            this.spatialTree.setDrawListChanged();
+    public void removeEntry(DrawListEntry drawlistentry)
+    {
+        super.removeEntry(drawlistentry);
+        if (depthBin != -1)
+        {
+            spatialTree.setDrawListChanged();
         }
-        if (getFirst() == null) {
-            this.spatialTree.removeEntry(this);
-            if (isEmpty()) {
+        if (getFirst() == null)
+        {
+            spatialTree.removeEntry(this);
+            if (isEmpty())
+            {
                 removeFromParent();
                 return;
             }
@@ -275,36 +432,71 @@ public class SpatialTreeNode extends InlineList<DrawListEntry> {
         shrinkBoundingBox();
     }
 
-    public void requestEntryRemoval(DrawListEntry drawListEntry) {
-        this.spatialTree.spatialObjectIndex.requestEntryRemoval(drawListEntry);
+    public volatile void removeEntry(InlineListEntry inlinelistentry)
+    {
+        removeEntry((DrawListEntry)inlinelistentry);
     }
 
-    public int walkTree(FrustrumPlanes frustrumPlanes, int i, float[] fArr) {
-        int i2;
-        if (this.singleChild != null && getFirst() == null) {
-            return this.singleChild.walkTree(frustrumPlanes, i, fArr);
+    public void requestEntryRemoval(DrawListEntry drawlistentry)
+    {
+        spatialTree.spatialObjectIndex.requestEntryRemoval(drawlistentry);
+    }
+
+    public volatile void requestEntryRemoval(InlineListEntry inlinelistentry)
+    {
+        requestEntryRemoval((DrawListEntry)inlinelistentry);
+    }
+
+    public int walkTree(FrustrumPlanes frustrumplanes, int i, float af[])
+    {
+        int k = 0;
+        if (singleChild != null && getFirst() == null)
+        {
+            return singleChild.walkTree(frustrumplanes, i, af);
         }
-        if (i != -1) {
-            i = frustrumPlanes.testBoundingBox(this.position, fArr);
+        int j = i;
+        if (i != -1)
+        {
+            j = frustrumplanes.testBoundingBox(position, af);
         }
-        if (i == -1) {
-            this.spatialTree.removeEntry(this);
-            i2 = 0;
-        } else {
-            i2 = 1;
-            if (getFirst() != null) {
-                this.spatialTree.setEntryDepth(this, fArr[0]);
-            } else {
-                this.spatialTree.removeEntry(this);
+        int l;
+        if (j == -1)
+        {
+            spatialTree.removeEntry(this);
+            i = 0;
+        } else
+        {
+            i = 1;
+            if (getFirst() != null)
+            {
+                spatialTree.setEntryDepth(this, af[0]);
+            } else
+            {
+                spatialTree.removeEntry(this);
             }
         }
-        if (this.children != null) {
-            for (SpatialTreeNode spatialTreeNode : this.children) {
-                if (spatialTreeNode != null) {
-                    i2 += spatialTreeNode.walkTree(frustrumPlanes, i, fArr);
+        l = i;
+        if (children != null)
+        {
+            SpatialTreeNode aspatialtreenode[] = children;
+            int i1 = aspatialtreenode.length;
+            do
+            {
+                l = i;
+                if (k >= i1)
+                {
+                    break;
                 }
-            }
+                SpatialTreeNode spatialtreenode = aspatialtreenode[k];
+                l = i;
+                if (spatialtreenode != null)
+                {
+                    l = i + spatialtreenode.walkTree(frustrumplanes, j, af);
+                }
+                k++;
+                i = l;
+            } while (true);
         }
-        return i2;
+        return l;
     }
 }

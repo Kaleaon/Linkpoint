@@ -1,7 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.inventory;
 
-import android.graphics.Bitmap;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,203 +14,287 @@ import android.widget.TextView;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.orm.InventoryDB;
 import com.lumiyaviewer.lumiya.orm.InventoryEntryList;
-import com.lumiyaviewer.lumiya.slproto.assets.SLWearable;
 import com.lumiyaviewer.lumiya.slproto.assets.SLWearableType;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryType;
 import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class InventoryFolderAdapter extends BaseAdapter implements View.OnClickListener {
-    @Nullable
-    private SLAvatarAppearance avatarAppearance = null;
-    @Nonnull
-    private InventoryEntryList data = new InventoryEntryList();
+public class InventoryFolderAdapter extends BaseAdapter
+    implements android.view.View.OnClickListener
+{
+    public static interface OnItemCheckboxClickListener
+    {
+
+        public abstract void onItemCheckboxClicked(SLInventoryEntry slinventoryentry);
+    }
+
+
+    private SLAvatarAppearance avatarAppearance;
+    private InventoryEntryList data;
     private InventoryDB database;
     private final LayoutInflater inflater;
-    @Nullable
-    private OnItemCheckboxClickListener onItemCheckboxClickListener = null;
-    @Nullable
-    private ImmutableMap<UUID, String> wornAttachments = null;
+    private OnItemCheckboxClickListener onItemCheckboxClickListener;
+    private ImmutableMap wornAttachments;
     private final boolean wornCheckboxes;
-    @Nullable
     private UUID wornOutfitFolder;
-    @Nullable
-    private Table<SLWearableType, UUID, SLWearable> wornWearables = null;
+    private Table wornWearables;
 
-    public interface OnItemCheckboxClickListener {
-        void onItemCheckboxClicked(SLInventoryEntry sLInventoryEntry);
+    public InventoryFolderAdapter(LayoutInflater layoutinflater, boolean flag)
+    {
+        data = new InventoryEntryList();
+        wornWearables = null;
+        wornAttachments = null;
+        onItemCheckboxClickListener = null;
+        avatarAppearance = null;
+        inflater = layoutinflater;
+        wornCheckboxes = flag;
     }
 
-    public InventoryFolderAdapter(LayoutInflater layoutInflater, boolean z) {
-        this.inflater = layoutInflater;
-        this.wornCheckboxes = z;
-    }
-
-    private boolean isItemWorn(SLInventoryEntry sLInventoryEntry) {
-        return sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, false) != null;
-    }
-
-    public int getCount() {
-        return this.data.size();
-    }
-
-    public SLInventoryEntry getItem(int i) {
-        return this.data.get(i);
-    }
-
-    public long getItemId(int i) {
-        SLInventoryEntry item = getItem(i);
-        if (item != null) {
-            return item.getId();
+    private boolean isItemWorn(SLInventoryEntry slinventoryentry)
+    {
+        boolean flag = false;
+        if (slinventoryentry.whatIsItemWornOn(wornAttachments, wornWearables, false) != null)
+        {
+            flag = true;
         }
-        return -1;
+        return flag;
     }
 
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        SLInventoryEntry sLInventoryEntry;
-        int i2;
-        int i3;
-        boolean z = true;
-        int i4 = 0;
-        if (view == null) {
-            view = this.inflater.inflate(R.layout.inventory_item, viewGroup, false);
+    public int getCount()
+    {
+        return data.size();
+    }
+
+    public SLInventoryEntry getItem(int i)
+    {
+        return data.get(i);
+    }
+
+    public volatile Object getItem(int i)
+    {
+        return getItem(i);
+    }
+
+    public long getItemId(int i)
+    {
+        SLInventoryEntry slinventoryentry = getItem(i);
+        if (slinventoryentry != null)
+        {
+            return slinventoryentry.getId();
+        } else
+        {
+            return -1L;
         }
-        SLInventoryEntry item = getItem(i);
-        if (item != null) {
-            TextView textView = (TextView) view.findViewById(R.id.itemNameTextView);
-            textView.setText(item.name);
-            int i5 = -1;
-            int i6 = -1;
-            if (item.assetType != SLAssetType.AT_LINK.getTypeCode() || this.database == null) {
-                sLInventoryEntry = item;
-            } else {
-                SLInventoryEntry resolveLink = this.database.resolveLink(item);
-                if (resolveLink != null) {
-                    i5 = resolveLink.getDrawableResource();
-                    i6 = R.drawable.inv_link;
-                    sLInventoryEntry = resolveLink;
-                } else {
-                    sLInventoryEntry = item;
-                }
+    }
+
+    public View getView(int i, View view, ViewGroup viewgroup)
+    {
+label0:
+        {
+            boolean flag4 = true;
+            boolean flag = false;
+            View view1 = view;
+            if (view == null)
+            {
+                view1 = inflater.inflate(0x7f040053, viewgroup, false);
             }
-            if (i5 < 0) {
-                i2 = item.getDrawableResource();
-                i3 = item.getSubtypeDrawableResource();
-            } else {
-                i2 = i5;
-                i3 = i6;
-            }
-            if (i2 >= 0) {
-                ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageResource(i2);
-                if (i3 >= 0) {
-                    ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageResource(i3);
-                } else {
-                    ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null);
-                }
-            } else {
-                ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageBitmap((Bitmap) null);
-                ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null);
-            }
-            if (this.wornOutfitFolder == null || !Objects.equal(this.wornOutfitFolder, item.uuid)) {
-                textView.setTypeface((Typeface) null, 0);
-            } else {
-                textView.setTypeface((Typeface) null, 1);
-            }
-            if (this.wornCheckboxes) {
-                if ((item.assetType == SLAssetType.AT_OBJECT.getTypeCode() || (item.isLink() && item.invType == SLInventoryType.IT_OBJECT.getTypeCode()) || item.isWearable() || sLInventoryEntry.assetType == SLAssetType.AT_OBJECT.getTypeCode()) ? true : sLInventoryEntry.isWearable()) {
-                    Object whatIsItemWornOn = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, false);
-                    boolean z2 = whatIsItemWornOn != null;
-                    boolean isBodyPart = whatIsItemWornOn instanceof SLWearableType ? ((SLWearableType) whatIsItemWornOn).isBodyPart() : false;
-                    if (this.avatarAppearance != null) {
-                        if (z2) {
-                            if (!sLInventoryEntry.isWearable()) {
-                                z = this.avatarAppearance.canDetachItem(sLInventoryEntry);
-                            } else if (this.avatarAppearance.canTakeItemOff(sLInventoryEntry)) {
-                                z = !isBodyPart;
-                            }
-                        }
-                        view.findViewById(R.id.item_worn_checkbox).setVisibility(0);
-                        view.findViewById(R.id.item_worn_checkbox).setTag(R.id.tag_outfit_object, item);
-                        ((CheckBox) view.findViewById(R.id.item_worn_checkbox)).setChecked(z2);
-                        view.findViewById(R.id.item_worn_checkbox).setEnabled(z);
-                        view.findViewById(R.id.item_worn_checkbox).setOnClickListener(this);
+            viewgroup = getItem(i);
+            if (viewgroup != null)
+            {
+                Object obj = (TextView)view1.findViewById(0x7f1001bf);
+                ((TextView) (obj)).setText(((SLInventoryEntry) (viewgroup)).name);
+                int j = -1;
+                i = -1;
+                int k;
+                boolean flag1;
+                boolean flag2;
+                boolean flag3;
+                if (((SLInventoryEntry) (viewgroup)).assetType == SLAssetType.AT_LINK.getTypeCode() && database != null)
+                {
+                    view = database.resolveLink(viewgroup);
+                    if (view != null)
+                    {
+                        j = view.getDrawableResource();
+                        i = 0x7f0200c4;
+                    } else
+                    {
+                        view = viewgroup;
                     }
-                    z = false;
-                    view.findViewById(R.id.item_worn_checkbox).setVisibility(0);
-                    view.findViewById(R.id.item_worn_checkbox).setTag(R.id.tag_outfit_object, item);
-                    ((CheckBox) view.findViewById(R.id.item_worn_checkbox)).setChecked(z2);
-                    view.findViewById(R.id.item_worn_checkbox).setEnabled(z);
-                    view.findViewById(R.id.item_worn_checkbox).setOnClickListener(this);
-                } else {
-                    view.findViewById(R.id.item_worn_checkbox).setVisibility(8);
-                    view.findViewById(R.id.item_worn_checkbox).setTag(R.id.tag_outfit_object, (Object) null);
+                } else
+                {
+                    view = viewgroup;
                 }
-            } else {
-                view.findViewById(R.id.item_worn_checkbox).setVisibility(8);
-                View findViewById = view.findViewById(R.id.itemWornIcon);
-                if (!isItemWorn(item)) {
-                    i4 = 8;
+                if (j < 0)
+                {
+                    i = viewgroup.getDrawableResource();
+                    j = viewgroup.getSubtypeDrawableResource();
+                    k = i;
+                    i = j;
+                } else
+                {
+                    k = j;
                 }
-                findViewById.setVisibility(i4);
+                if (k >= 0)
+                {
+                    ((ImageView)view1.findViewById(0x7f1001bd)).setImageResource(k);
+                    if (i >= 0)
+                    {
+                        ((ImageView)view1.findViewById(0x7f1001be)).setImageResource(i);
+                    } else
+                    {
+                        ((ImageView)view1.findViewById(0x7f1001be)).setImageBitmap(null);
+                    }
+                } else
+                {
+                    ((ImageView)view1.findViewById(0x7f1001bd)).setImageBitmap(null);
+                    ((ImageView)view1.findViewById(0x7f1001be)).setImageBitmap(null);
+                }
+                if (wornOutfitFolder != null && Objects.equal(wornOutfitFolder, ((SLInventoryEntry) (viewgroup)).uuid))
+                {
+                    ((TextView) (obj)).setTypeface(null, 1);
+                } else
+                {
+                    ((TextView) (obj)).setTypeface(null, 0);
+                }
+                if (!wornCheckboxes)
+                {
+                    break MISSING_BLOCK_LABEL_542;
+                }
+                if (((SLInventoryEntry) (viewgroup)).assetType == SLAssetType.AT_OBJECT.getTypeCode() || viewgroup.isLink() && ((SLInventoryEntry) (viewgroup)).invType == SLInventoryType.IT_OBJECT.getTypeCode() || viewgroup.isWearable() || ((SLInventoryEntry) (view)).assetType == SLAssetType.AT_OBJECT.getTypeCode())
+                {
+                    flag1 = true;
+                } else
+                {
+                    flag1 = view.isWearable();
+                }
+                break label0;
             }
         }
-        return view;
+          goto _L1
+        if (!flag1)
+        {
+            break MISSING_BLOCK_LABEL_514;
+        }
+        obj = view.whatIsItemWornOn(wornAttachments, wornWearables, false);
+        if (obj != null)
+        {
+            flag2 = true;
+        } else
+        {
+            flag2 = false;
+        }
+        if (obj instanceof SLWearableType)
+        {
+            flag3 = ((SLWearableType)obj).isBodyPart();
+        } else
+        {
+            flag3 = false;
+        }
+        if (avatarAppearance == null) goto _L3; else goto _L2
+_L2:
+        flag1 = flag4;
+        if (!flag2) goto _L5; else goto _L4
+_L4:
+        if (!view.isWearable())
+        {
+            break MISSING_BLOCK_LABEL_501;
+        }
+        if (!avatarAppearance.canTakeItemOff(view)) goto _L3; else goto _L6
+_L6:
+        flag1 = flag3 ^ true;
+_L5:
+        view1.findViewById(0x7f1001c1).setVisibility(0);
+        view1.findViewById(0x7f1001c1).setTag(0x7f10002d, viewgroup);
+        ((CheckBox)view1.findViewById(0x7f1001c1)).setChecked(flag2);
+        view1.findViewById(0x7f1001c1).setEnabled(flag1);
+        view1.findViewById(0x7f1001c1).setOnClickListener(this);
+_L1:
+        return view1;
+_L3:
+        flag1 = false;
+        continue; /* Loop/switch isn't completed */
+        flag1 = avatarAppearance.canDetachItem(view);
+        if (true) goto _L5; else goto _L7
+_L7:
+        view1.findViewById(0x7f1001c1).setVisibility(8);
+        view1.findViewById(0x7f1001c1).setTag(0x7f10002d, null);
+        return view1;
+        view1.findViewById(0x7f1001c1).setVisibility(8);
+        view = view1.findViewById(0x7f1001c0);
+        if (isItemWorn(viewgroup))
+        {
+            i = ((flag) ? 1 : 0);
+        } else
+        {
+            i = 8;
+        }
+        view.setVisibility(i);
+        return view1;
     }
 
-    public boolean hasStableIds() {
+    public boolean hasStableIds()
+    {
         return true;
     }
 
-    public void onClick(View view) {
-        if (this.onItemCheckboxClickListener != null) {
-            Object tag = view.getTag(R.id.tag_outfit_object);
-            if (tag instanceof SLInventoryEntry) {
-                this.onItemCheckboxClickListener.onItemCheckboxClicked((SLInventoryEntry) tag);
+    public void onClick(View view)
+    {
+        if (onItemCheckboxClickListener != null)
+        {
+            view = ((View) (view.getTag(0x7f10002d)));
+            if (view instanceof SLInventoryEntry)
+            {
+                onItemCheckboxClickListener.onItemCheckboxClicked((SLInventoryEntry)view);
             }
         }
     }
 
-    public void setAvatarAppearance(@Nullable SLAvatarAppearance sLAvatarAppearance) {
-        this.avatarAppearance = sLAvatarAppearance;
+    public void setAvatarAppearance(SLAvatarAppearance slavatarappearance)
+    {
+        avatarAppearance = slavatarappearance;
         notifyDataSetChanged();
     }
 
-    public void setData(@Nullable InventoryEntryList inventoryEntryList) {
-        if (inventoryEntryList == null) {
-            inventoryEntryList = new InventoryEntryList();
+    public void setData(InventoryEntryList inventoryentrylist)
+    {
+        if (inventoryentrylist == null)
+        {
+            inventoryentrylist = new InventoryEntryList();
         }
-        this.data = inventoryEntryList;
+        data = inventoryentrylist;
         notifyDataSetChanged();
     }
 
-    public void setDatabase(InventoryDB inventoryDB) {
-        this.database = inventoryDB;
+    public void setDatabase(InventoryDB inventorydb)
+    {
+        database = inventorydb;
         notifyDataSetChanged();
     }
 
-    public void setOnItemCheckboxClickListener(@Nullable OnItemCheckboxClickListener onItemCheckboxClickListener2) {
-        this.onItemCheckboxClickListener = onItemCheckboxClickListener2;
+    public void setOnItemCheckboxClickListener(OnItemCheckboxClickListener onitemcheckboxclicklistener)
+    {
+        onItemCheckboxClickListener = onitemcheckboxclicklistener;
     }
 
-    public void setWornAttachments(@Nullable ImmutableMap<UUID, String> immutableMap) {
-        this.wornAttachments = immutableMap;
+    public void setWornAttachments(ImmutableMap immutablemap)
+    {
+        wornAttachments = immutablemap;
         notifyDataSetChanged();
     }
 
-    public void setWornOutfitFolder(@Nullable UUID uuid) {
-        this.wornOutfitFolder = uuid;
+    public void setWornOutfitFolder(UUID uuid)
+    {
+        wornOutfitFolder = uuid;
         notifyDataSetChanged();
     }
 
-    public void setWornWearables(@Nullable Table<SLWearableType, UUID, SLWearable> table) {
-        this.wornWearables = table;
+    public void setWornWearables(Table table)
+    {
+        wornWearables = table;
         notifyDataSetChanged();
     }
 }

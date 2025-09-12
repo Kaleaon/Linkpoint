@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.minimap;
 
 import android.content.Context;
@@ -11,14 +15,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
+import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterDisplayData;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
 import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterListType;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.chat.ChatFragment;
@@ -26,253 +30,343 @@ import com.lumiyaviewer.lumiya.ui.chat.contacts.ChatFragmentActivityFactory;
 import com.lumiyaviewer.lumiya.ui.chat.contacts.ChatterItemViewBuilder;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
-import com.lumiyaviewer.lumiya.ui.minimap.MinimapView;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class NearbyPeopleMinimapFragment extends Fragment {
-    private NearbyUserRecyclerAdapter adapter = null;
-    /* access modifiers changed from: private */
-    public int cardSelectedColor = 0;
-    private final SubscriptionData<ChatterListType, ImmutableList<ChatterDisplayData>> chatterList = new SubscriptionData<>(UIThreadExecutor.getInstance(), new $Lambda$0SrW7eOJ5Pm_SVTDQOmxGjUXtco(this));
-    @BindView(16908292)
-    View emptyView;
-    @BindView(2131755490)
-    RecyclerView userListView;
+public class NearbyPeopleMinimapFragment extends Fragment
+{
+    private class NearbyUserRecyclerAdapter extends android.support.v7.widget.RecyclerView.Adapter
+    {
 
-    private class NearbyUserRecyclerAdapter extends RecyclerView.Adapter<NearbyUserViewHolder> {
-        @Nonnull
-        private ImmutableList<ChatterDisplayData> chatters = ImmutableList.of();
+        private ImmutableList chatters;
         private final Context context;
         private final LayoutInflater layoutInflater;
-        private long nextStableId = 1;
-        private int selectedPosition = -1;
-        @Nullable
+        private long nextStableId;
+        private int selectedPosition;
         private UUID selectedUUID;
-        private final Map<UUID, Long> stableIds = new HashMap();
+        private final Map stableIds = new HashMap();
+        final NearbyPeopleMinimapFragment this$0;
         private final UserManager userManager;
 
-        NearbyUserRecyclerAdapter(Context context2, UserManager userManager2) {
-            this.context = context2;
-            this.userManager = userManager2;
-            this.layoutInflater = LayoutInflater.from(context2);
-            setHasStableIds(true);
+        public int getItemCount()
+        {
+            return chatters.size();
         }
 
-        public int getItemCount() {
-            return this.chatters.size();
-        }
-
-        public long getItemId(int i) {
-            UUID optionalChatterUUID;
-            Long l;
-            if (i < 0 || i >= this.chatters.size() || (optionalChatterUUID = ((ChatterDisplayData) this.chatters.get(i)).chatterID.getOptionalChatterUUID()) == null || (l = this.stableIds.get(optionalChatterUUID)) == null) {
-                return -1;
-            }
-            return l.longValue();
-        }
-
-        public void onBindViewHolder(NearbyUserViewHolder nearbyUserViewHolder, int i) {
-            boolean z = false;
-            if (i >= 0 && i < this.chatters.size()) {
-                Context context2 = this.context;
-                LayoutInflater layoutInflater2 = this.layoutInflater;
-                UserManager userManager2 = this.userManager;
-                ChatterDisplayData chatterDisplayData = (ChatterDisplayData) this.chatters.get(i);
-                if (i == this.selectedPosition) {
-                    z = true;
-                }
-                nearbyUserViewHolder.bindToData(context2, layoutInflater2, userManager2, chatterDisplayData, z);
-            }
-        }
-
-        public NearbyUserViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            return new NearbyUserViewHolder(this.layoutInflater.inflate(R.layout.minimap_user_item, viewGroup, false));
-        }
-
-        public void setChatters(@Nullable ImmutableList<ChatterDisplayData> immutableList) {
-            if (immutableList == null) {
-                immutableList = ImmutableList.of();
-            }
-            this.chatters = immutableList;
-            this.selectedPosition = -1;
-            HashSet hashSet = new HashSet();
-            int i = 0;
-            while (true) {
-                int i2 = i;
-                if (i2 < this.chatters.size()) {
-                    UUID optionalChatterUUID = ((ChatterDisplayData) this.chatters.get(i2)).chatterID.getOptionalChatterUUID();
-                    if (optionalChatterUUID != null) {
-                        hashSet.add(optionalChatterUUID);
-                        if (!this.stableIds.containsKey(optionalChatterUUID)) {
-                            this.stableIds.put(optionalChatterUUID, Long.valueOf(this.nextStableId));
-                            this.nextStableId++;
-                        }
-                        if (Objects.equal(optionalChatterUUID, this.selectedUUID)) {
-                            this.selectedPosition = i2;
-                        }
+        public long getItemId(int i)
+        {
+            if (i >= 0 && i < chatters.size())
+            {
+                Object obj = ((ChatterDisplayData)chatters.get(i)).chatterID.getOptionalChatterUUID();
+                if (obj != null)
+                {
+                    obj = (Long)stableIds.get(obj);
+                    if (obj != null)
+                    {
+                        return ((Long) (obj)).longValue();
                     }
-                    i = i2 + 1;
-                } else {
-                    this.stableIds.keySet().retainAll(hashSet);
-                    notifyDataSetChanged();
-                    return;
                 }
+            }
+            return -1L;
+        }
+
+        public volatile void onBindViewHolder(android.support.v7.widget.RecyclerView.ViewHolder viewholder, int i)
+        {
+            onBindViewHolder((NearbyUserViewHolder)viewholder, i);
+        }
+
+        public void onBindViewHolder(NearbyUserViewHolder nearbyuserviewholder, int i)
+        {
+            boolean flag = false;
+            if (i >= 0 && i < chatters.size())
+            {
+                Context context1 = context;
+                LayoutInflater layoutinflater = layoutInflater;
+                UserManager usermanager = userManager;
+                ChatterDisplayData chatterdisplaydata = (ChatterDisplayData)chatters.get(i);
+                if (i == selectedPosition)
+                {
+                    flag = true;
+                }
+                nearbyuserviewholder.bindToData(context1, layoutinflater, usermanager, chatterdisplaydata, flag);
             }
         }
 
-        public void setSelected(UUID uuid) {
+        public volatile android.support.v7.widget.RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewgroup, int i)
+        {
+            return onCreateViewHolder(viewgroup, i);
+        }
+
+        public NearbyUserViewHolder onCreateViewHolder(ViewGroup viewgroup, int i)
+        {
+            viewgroup = layoutInflater.inflate(0x7f04005f, viewgroup, false);
+            return new NearbyUserViewHolder(viewgroup);
+        }
+
+        public void setChatters(ImmutableList immutablelist)
+        {
+            if (immutablelist == null)
+            {
+                immutablelist = ImmutableList.of();
+            }
+            chatters = immutablelist;
+            selectedPosition = -1;
+            immutablelist = new HashSet();
+            for (int i = 0; i < chatters.size(); i++)
+            {
+                UUID uuid = ((ChatterDisplayData)chatters.get(i)).chatterID.getOptionalChatterUUID();
+                if (uuid == null)
+                {
+                    continue;
+                }
+                immutablelist.add(uuid);
+                if (!stableIds.containsKey(uuid))
+                {
+                    stableIds.put(uuid, Long.valueOf(nextStableId));
+                    nextStableId = nextStableId + 1L;
+                }
+                if (Objects.equal(uuid, selectedUUID))
+                {
+                    selectedPosition = i;
+                }
+            }
+
+            stableIds.keySet().retainAll(immutablelist);
+            notifyDataSetChanged();
+        }
+
+        public void setSelected(UUID uuid)
+        {
             int i;
-            this.selectedUUID = uuid;
-            if (uuid != null) {
-                int i2 = 0;
-                while (true) {
-                    i = i2;
-                    if (i >= this.chatters.size()) {
-                        break;
-                    }
-                    UUID optionalChatterUUID = ((ChatterDisplayData) this.chatters.get(i)).chatterID.getOptionalChatterUUID();
-                    if (optionalChatterUUID != null && Objects.equal(uuid, optionalChatterUUID)) {
-                        break;
-                    }
-                    i2 = i + 1;
-                }
+            selectedUUID = uuid;
+            if (uuid == null)
+            {
+                break MISSING_BLOCK_LABEL_93;
             }
+            i = 0;
+_L3:
+            UUID uuid1;
+            if (i >= chatters.size())
+            {
+                break MISSING_BLOCK_LABEL_93;
+            }
+            uuid1 = ((ChatterDisplayData)chatters.get(i)).chatterID.getOptionalChatterUUID();
+            if (uuid1 == null || !Objects.equal(uuid, uuid1)) goto _L2; else goto _L1
+_L1:
+            if (i != selectedPosition)
+            {
+                int j = selectedPosition;
+                selectedPosition = i;
+                notifyItemChanged(selectedPosition);
+                notifyItemChanged(j);
+            }
+            return;
+_L2:
+            i++;
+              goto _L3
             i = -1;
-            if (i != this.selectedPosition) {
-                int i3 = this.selectedPosition;
-                this.selectedPosition = i;
-                notifyItemChanged(this.selectedPosition);
-                notifyItemChanged(i3);
-            }
+              goto _L1
+        }
+
+        NearbyUserRecyclerAdapter(Context context1, UserManager usermanager)
+        {
+            this$0 = NearbyPeopleMinimapFragment.this;
+            super();
+            nextStableId = 1L;
+            chatters = ImmutableList.of();
+            selectedPosition = -1;
+            context = context1;
+            userManager = usermanager;
+            layoutInflater = LayoutInflater.from(context1);
+            setHasStableIds(true);
         }
     }
 
-    private class NearbyUserViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    private class NearbyUserViewHolder extends android.support.v7.widget.RecyclerView.ViewHolder
+        implements android.view.View.OnClickListener
+    {
+
         private final float cardSelectedElevation;
         private final CardView cardView;
-        private ChatterDisplayData chatterDisplayData = null;
+        private ChatterDisplayData chatterDisplayData;
         private final View selectedLayout;
+        final NearbyPeopleMinimapFragment this$0;
         private final FrameLayout userItemViewHolder;
         private final ChatterItemViewBuilder viewBuilder = new ChatterItemViewBuilder();
 
-        public NearbyUserViewHolder(View view) {
-            super(view);
-            this.userItemViewHolder = (FrameLayout) view.findViewById(R.id.user_item_view_holder);
-            this.cardView = (CardView) view.findViewById(R.id.user_card_view);
-            this.cardSelectedElevation = this.cardView.getCardElevation();
-            this.selectedLayout = view.findViewById(R.id.user_item_selected_layout);
-            this.userItemViewHolder.setOnClickListener(this);
-            view.findViewById(R.id.user_item_chat_button).setOnClickListener(this);
-        }
-
-        public void bindToData(Context context, LayoutInflater layoutInflater, UserManager userManager, ChatterDisplayData chatterDisplayData2, boolean z) {
-            this.viewBuilder.reset();
-            chatterDisplayData2.buildView(context, this.viewBuilder, userManager);
-            View childAt = this.userItemViewHolder.getChildAt(0);
-            View view = this.viewBuilder.getView(layoutInflater, childAt, this.userItemViewHolder, true);
-            if (view != childAt) {
-                if (childAt != null) {
-                    this.userItemViewHolder.removeView(childAt);
+        public void bindToData(Context context, LayoutInflater layoutinflater, UserManager usermanager, ChatterDisplayData chatterdisplaydata, boolean flag)
+        {
+            viewBuilder.reset();
+            chatterdisplaydata.buildView(context, viewBuilder, usermanager);
+            context = userItemViewHolder.getChildAt(0);
+            layoutinflater = viewBuilder.getView(layoutinflater, context, userItemViewHolder, true);
+            if (layoutinflater != context)
+            {
+                if (context != null)
+                {
+                    userItemViewHolder.removeView(context);
                 }
-                this.userItemViewHolder.addView(view);
+                userItemViewHolder.addView(layoutinflater);
             }
-            if (z) {
-                this.cardView.setCardElevation(this.cardSelectedElevation);
-                this.cardView.setCardBackgroundColor(NearbyPeopleMinimapFragment.this.cardSelectedColor);
-                this.selectedLayout.setVisibility(0);
-            } else {
-                this.cardView.setCardElevation(0.0f);
-                this.cardView.setCardBackgroundColor(0);
-                this.selectedLayout.setVisibility(8);
+            if (flag)
+            {
+                cardView.setCardElevation(cardSelectedElevation);
+                cardView.setCardBackgroundColor(NearbyPeopleMinimapFragment._2D_get0(NearbyPeopleMinimapFragment.this));
+                selectedLayout.setVisibility(0);
+            } else
+            {
+                cardView.setCardElevation(0.0F);
+                cardView.setCardBackgroundColor(0);
+                selectedLayout.setVisibility(8);
             }
-            this.chatterDisplayData = chatterDisplayData2;
+            chatterDisplayData = chatterdisplaydata;
         }
 
-        public void onClick(View view) {
-            switch (view.getId()) {
-                case R.id.user_item_view_holder:
-                    FragmentManager fragmentManager = NearbyPeopleMinimapFragment.this.getFragmentManager();
-                    if (fragmentManager != null) {
-                        Fragment findFragmentById = fragmentManager.findFragmentById(R.id.selector);
-                        if (findFragmentById instanceof MinimapView.OnUserClickListener) {
-                            ((MinimapView.OnUserClickListener) findFragmentById).onUserClick(this.chatterDisplayData.chatterID.getOptionalChatterUUID());
-                            return;
-                        }
-                        return;
-                    }
-                    return;
-                case R.id.user_item_chat_button:
-                    if (this.chatterDisplayData != null) {
-                        DetailsActivity.showDetails(NearbyPeopleMinimapFragment.this.getActivity(), ChatFragmentActivityFactory.getInstance(), ChatFragment.makeSelection(this.chatterDisplayData.chatterID));
-                        return;
-                    }
-                    return;
-                default:
-                    return;
+        public void onClick(View view)
+        {
+            view.getId();
+            JVM INSTR tableswitch 2131755487 2131755489: default 32
+        //                       2131755487 33
+        //                       2131755488 32
+        //                       2131755489 79;
+               goto _L1 _L2 _L1 _L3
+_L1:
+            return;
+_L2:
+            if ((view = getFragmentManager()) != null && ((view = view.findFragmentById(0x7f100286)) instanceof MinimapView.OnUserClickListener))
+            {
+                ((MinimapView.OnUserClickListener)view).onUserClick(chatterDisplayData.chatterID.getOptionalChatterUUID());
+                return;
             }
+            continue; /* Loop/switch isn't completed */
+_L3:
+            if (chatterDisplayData != null)
+            {
+                DetailsActivity.showDetails(getActivity(), ChatFragmentActivityFactory.getInstance(), ChatFragment.makeSelection(chatterDisplayData.chatterID));
+                return;
+            }
+            if (true) goto _L1; else goto _L4
+_L4:
+        }
+
+        public NearbyUserViewHolder(View view)
+        {
+            this$0 = NearbyPeopleMinimapFragment.this;
+            super(view);
+            chatterDisplayData = null;
+            userItemViewHolder = (FrameLayout)view.findViewById(0x7f1001df);
+            cardView = (CardView)view.findViewById(0x7f1001de);
+            cardSelectedElevation = cardView.getCardElevation();
+            selectedLayout = view.findViewById(0x7f1001e0);
+            userItemViewHolder.setOnClickListener(this);
+            view.findViewById(0x7f1001e1).setOnClickListener(this);
         }
     }
 
-    static Fragment newInstance(UUID uuid) {
-        NearbyPeopleMinimapFragment nearbyPeopleMinimapFragment = new NearbyPeopleMinimapFragment();
-        nearbyPeopleMinimapFragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, (Bundle) null));
-        return nearbyPeopleMinimapFragment;
+
+    private NearbyUserRecyclerAdapter adapter;
+    private int cardSelectedColor;
+    private final SubscriptionData chatterList = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda._cls0SrW7eOJ5Pm_SVTDQOmxGjUXtco(this));
+    View emptyView;
+    RecyclerView userListView;
+
+    static int _2D_get0(NearbyPeopleMinimapFragment nearbypeopleminimapfragment)
+    {
+        return nearbypeopleminimapfragment.cardSelectedColor;
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onChatterList */
-    public void m645com_lumiyaviewer_lumiya_ui_minimap_NearbyPeopleMinimapFragmentmthref0(ImmutableList<ChatterDisplayData> immutableList) {
-        int i = 8;
-        if (this.adapter != null) {
-            this.adapter.setChatters(immutableList);
+    public NearbyPeopleMinimapFragment()
+    {
+        adapter = null;
+        cardSelectedColor = 0;
+    }
+
+    static Fragment newInstance(UUID uuid)
+    {
+        NearbyPeopleMinimapFragment nearbypeopleminimapfragment = new NearbyPeopleMinimapFragment();
+        nearbypeopleminimapfragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, null));
+        return nearbypeopleminimapfragment;
+    }
+
+    private void onChatterList(ImmutableList immutablelist)
+    {
+        byte byte0 = 8;
+        if (adapter != null)
+        {
+            adapter.setChatters(immutablelist);
         }
-        if (getView() != null) {
-            boolean isEmpty = immutableList.isEmpty();
-            this.emptyView.setVisibility(isEmpty ? 0 : 8);
-            RecyclerView recyclerView = this.userListView;
-            if (!isEmpty) {
+        if (getView() != null)
+        {
+            boolean flag = immutablelist.isEmpty();
+            immutablelist = emptyView;
+            int i;
+            if (flag)
+            {
+                i = 0;
+            } else
+            {
+                i = 8;
+            }
+            immutablelist.setVisibility(i);
+            immutablelist = userListView;
+            if (flag)
+            {
+                i = byte0;
+            } else
+            {
                 i = 0;
             }
-            recyclerView.setVisibility(i);
+            immutablelist.setVisibility(i);
         }
     }
 
-    @Nullable
-    public View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
-        super.onCreateView(layoutInflater, viewGroup, bundle);
-        View inflate = layoutInflater.inflate(R.layout.minimap_users, viewGroup, false);
-        ButterKnife.bind((Object) this, inflate);
-        TypedValue typedValue = new TypedValue();
-        layoutInflater.getContext().getTheme().resolveAttribute(R.attr.CardViewDetailsBackground, typedValue, true);
-        this.cardSelectedColor = typedValue.data;
-        this.adapter = new NearbyUserRecyclerAdapter(getContext(), ActivityUtils.getUserManager(getArguments()));
-        this.userListView.setAdapter(this.adapter);
-        return inflate;
+    void _2D_com_lumiyaviewer_lumiya_ui_minimap_NearbyPeopleMinimapFragment_2D_mthref_2D_0(ImmutableList immutablelist)
+    {
+        onChatterList(immutablelist);
     }
 
-    public void onStart() {
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        super.onCreateView(layoutinflater, viewgroup, bundle);
+        viewgroup = layoutinflater.inflate(0x7f040060, viewgroup, false);
+        ButterKnife.bind(this, viewgroup);
+        bundle = new TypedValue();
+        layoutinflater.getContext().getTheme().resolveAttribute(0x7f010002, bundle, true);
+        cardSelectedColor = ((TypedValue) (bundle)).data;
+        adapter = new NearbyUserRecyclerAdapter(getContext(), ActivityUtils.getUserManager(getArguments()));
+        userListView.setAdapter(adapter);
+        return viewgroup;
+    }
+
+    public void onStart()
+    {
         super.onStart();
-        UserManager userManager = ActivityUtils.getUserManager(getArguments());
-        if (userManager != null) {
-            this.chatterList.subscribe(userManager.getChatterList().getChatterList(), ChatterListType.Nearby);
-        } else {
-            this.chatterList.unsubscribe();
+        UserManager usermanager = ActivityUtils.getUserManager(getArguments());
+        if (usermanager != null)
+        {
+            chatterList.subscribe(usermanager.getChatterList().getChatterList(), ChatterListType.Nearby);
+            return;
+        } else
+        {
+            chatterList.unsubscribe();
+            return;
         }
     }
 
-    public void onStop() {
-        this.chatterList.unsubscribe();
+    public void onStop()
+    {
+        chatterList.unsubscribe();
         super.onStop();
     }
 
-    public void setSelectedUser(UUID uuid) {
-        if (this.adapter != null) {
-            this.adapter.setSelected(uuid);
+    public void setSelectedUser(UUID uuid)
+    {
+        if (adapter != null)
+        {
+            adapter.setSelected(uuid);
         }
     }
 }

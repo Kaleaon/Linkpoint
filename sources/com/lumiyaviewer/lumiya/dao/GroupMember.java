@@ -1,8 +1,14 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import java.util.UUID;
 
-public class GroupMember {
+public class GroupMember
+{
+
     private long agentPowers;
     private int contribution;
     private UUID groupID;
@@ -12,81 +18,100 @@ public class GroupMember {
     private String title;
     private UUID userID;
 
-    public GroupMember() {
+    public GroupMember()
+    {
     }
 
-    public GroupMember(UUID uuid, UUID uuid2, UUID uuid3, int i, String str, long j, String str2, boolean z) {
-        this.groupID = uuid;
-        this.requestID = uuid2;
-        this.userID = uuid3;
-        this.contribution = i;
-        this.onlineStatus = str;
-        this.agentPowers = j;
-        this.title = str2;
-        this.isOwner = z;
+    public GroupMember(UUID uuid, UUID uuid1, UUID uuid2, int i, String s, long l, 
+            String s1, boolean flag)
+    {
+        groupID = uuid;
+        requestID = uuid1;
+        userID = uuid2;
+        contribution = i;
+        onlineStatus = s;
+        agentPowers = l;
+        title = s1;
+        isOwner = flag;
     }
 
-    public long getAgentPowers() {
-        return this.agentPowers;
+    public long getAgentPowers()
+    {
+        return agentPowers;
     }
 
-    public int getContribution() {
-        return this.contribution;
+    public int getContribution()
+    {
+        return contribution;
     }
 
-    public UUID getGroupID() {
-        return this.groupID;
+    public UUID getGroupID()
+    {
+        return groupID;
     }
 
-    public boolean getIsOwner() {
-        return this.isOwner;
+    public boolean getIsOwner()
+    {
+        return isOwner;
     }
 
-    public String getOnlineStatus() {
-        return this.onlineStatus;
+    public String getOnlineStatus()
+    {
+        return onlineStatus;
     }
 
-    public UUID getRequestID() {
-        return this.requestID;
+    public UUID getRequestID()
+    {
+        return requestID;
     }
 
-    public String getTitle() {
-        return this.title;
+    public String getTitle()
+    {
+        return title;
     }
 
-    public UUID getUserID() {
-        return this.userID;
+    public UUID getUserID()
+    {
+        return userID;
     }
 
-    public void setAgentPowers(long j) {
-        this.agentPowers = j;
+    public void setAgentPowers(long l)
+    {
+        agentPowers = l;
     }
 
-    public void setContribution(int i) {
-        this.contribution = i;
+    public void setContribution(int i)
+    {
+        contribution = i;
     }
 
-    public void setGroupID(UUID uuid) {
-        this.groupID = uuid;
+    public void setGroupID(UUID uuid)
+    {
+        groupID = uuid;
     }
 
-    public void setIsOwner(boolean z) {
-        this.isOwner = z;
+    public void setIsOwner(boolean flag)
+    {
+        isOwner = flag;
     }
 
-    public void setOnlineStatus(String str) {
-        this.onlineStatus = str;
+    public void setOnlineStatus(String s)
+    {
+        onlineStatus = s;
     }
 
-    public void setRequestID(UUID uuid) {
-        this.requestID = uuid;
+    public void setRequestID(UUID uuid)
+    {
+        requestID = uuid;
     }
 
-    public void setTitle(String str) {
-        this.title = str;
+    public void setTitle(String s)
+    {
+        title = s;
     }
 
-    public void setUserID(UUID uuid) {
-        this.userID = uuid;
+    public void setUserID(UUID uuid)
+    {
+        userID = uuid;
     }
 }

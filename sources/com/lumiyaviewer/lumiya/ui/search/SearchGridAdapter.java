@@ -1,175 +1,215 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.search;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.support.annotation.CallSuper;
-import android.support.annotation.UiThread;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.Unbinder;
-import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.SearchGridResult;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.modules.search.SearchGridQuery;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
 import de.greenrobot.dao.query.LazyList;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
-class SearchGridAdapter extends RecyclerView.Adapter<SearchViewHolder> {
-    /* access modifiers changed from: private */
-    public final UUID agentUUID;
-    private final Context context;
-    @Nullable
-    private LazyList<SearchGridResult> data;
-    private final LayoutInflater inflater;
-    /* access modifiers changed from: private */
-    public final OnSearchResultClickListener onSearchResultClickListener;
+class SearchGridAdapter extends android.support.v7.widget.RecyclerView.Adapter
+{
+    static interface OnSearchResultClickListener
+    {
 
-    interface OnSearchResultClickListener {
-        void onSearchResultClicked(SearchGridResult searchGridResult);
+        public abstract void onSearchResultClicked(SearchGridResult searchgridresult);
     }
 
-    class SearchViewHolder extends RecyclerView.ViewHolder implements ChatterNameRetriever.OnChatterNameUpdated, View.OnClickListener {
-        private ChatterNameRetriever chatterNameRetriever = null;
-        @BindView(2131755647)
+    class SearchViewHolder extends android.support.v7.widget.RecyclerView.ViewHolder
+        implements com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever.OnChatterNameUpdated, android.view.View.OnClickListener
+    {
+
+        private ChatterNameRetriever chatterNameRetriever;
         TextView resultItemName;
-        @BindView(2131755648)
         TextView resultMemberCount;
         private SearchGridResult searchGridResult;
-        @BindView(2131755327)
+        final SearchGridAdapter this$0;
         ChatterPicView userPicView;
 
-        SearchViewHolder(View view) {
+        void bindToData(SearchGridResult searchgridresult)
+        {
+            searchGridResult = searchgridresult;
+            resultItemName.setText(searchgridresult.getItemName());
+            if (searchgridresult.getItemType() == com.lumiyaviewer.lumiya.slproto.modules.search.SearchGridQuery.SearchType.Groups.ordinal())
+            {
+                Integer integer = searchgridresult.getMemberCount();
+                resultMemberCount.setVisibility(0);
+                TextView textview = resultMemberCount;
+                int i;
+                if (integer != null)
+                {
+                    i = integer.intValue();
+                } else
+                {
+                    i = 0;
+                }
+                textview.setText(Integer.toString(i));
+            } else
+            {
+                resultMemberCount.setVisibility(8);
+            }
+            if (chatterNameRetriever != null)
+            {
+                chatterNameRetriever.dispose();
+                chatterNameRetriever = null;
+            }
+            if (searchgridresult.getItemType() == com.lumiyaviewer.lumiya.slproto.modules.search.SearchGridQuery.SearchType.Groups.ordinal())
+            {
+                userPicView.setChatterID(ChatterID.getGroupChatterID(SearchGridAdapter._2D_get0(SearchGridAdapter.this), searchgridresult.getItemUUID()), searchgridresult.getItemName());
+                userPicView.setVisibility(0);
+                return;
+            }
+            if (searchgridresult.getItemType() == com.lumiyaviewer.lumiya.slproto.modules.search.SearchGridQuery.SearchType.People.ordinal())
+            {
+                com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser chatteriduser = ChatterID.getUserChatterID(SearchGridAdapter._2D_get0(SearchGridAdapter.this), searchgridresult.getItemUUID());
+                userPicView.setChatterID(chatteriduser, searchgridresult.getItemName());
+                userPicView.setVisibility(0);
+                chatterNameRetriever = new ChatterNameRetriever(chatteriduser, this, UIThreadExecutor.getInstance(), false);
+                chatterNameRetriever.subscribe();
+                return;
+            } else
+            {
+                userPicView.setVisibility(8);
+                return;
+            }
+        }
+
+        public void onChatterNameUpdated(ChatterNameRetriever chatternameretriever)
+        {
+            if (chatternameretriever == chatterNameRetriever)
+            {
+                chatternameretriever = chatternameretriever.getResolvedName();
+                if (chatternameretriever != null)
+                {
+                    resultItemName.setText(chatternameretriever);
+                }
+            }
+        }
+
+        public void onClick(View view)
+        {
+            if (SearchGridAdapter._2D_get1(SearchGridAdapter.this) != null && searchGridResult != null)
+            {
+                SearchGridAdapter._2D_get1(SearchGridAdapter.this).onSearchResultClicked(searchGridResult);
+            }
+        }
+
+        void onRecycled()
+        {
+            userPicView.setChatterID(null, null);
+            if (chatterNameRetriever != null)
+            {
+                chatterNameRetriever.dispose();
+                chatterNameRetriever = null;
+            }
+            searchGridResult = null;
+        }
+
+        SearchViewHolder(View view)
+        {
+            this$0 = SearchGridAdapter.this;
             super(view);
-            ButterKnife.bind((Object) this, view);
+            chatterNameRetriever = null;
+            ButterKnife.bind(this, view);
             view.setOnClickListener(this);
         }
-
-        /* access modifiers changed from: package-private */
-        @SuppressLint({"DefaultLocale", "SetTextI18n"})
-        public void bindToData(SearchGridResult searchGridResult2) {
-            this.searchGridResult = searchGridResult2;
-            this.resultItemName.setText(searchGridResult2.getItemName());
-            if (searchGridResult2.getItemType() == SearchGridQuery.SearchType.Groups.ordinal()) {
-                Integer memberCount = searchGridResult2.getMemberCount();
-                this.resultMemberCount.setVisibility(0);
-                this.resultMemberCount.setText(Integer.toString(memberCount != null ? memberCount.intValue() : 0));
-            } else {
-                this.resultMemberCount.setVisibility(8);
-            }
-            if (this.chatterNameRetriever != null) {
-                this.chatterNameRetriever.dispose();
-                this.chatterNameRetriever = null;
-            }
-            if (searchGridResult2.getItemType() == SearchGridQuery.SearchType.Groups.ordinal()) {
-                this.userPicView.setChatterID(ChatterID.getGroupChatterID(SearchGridAdapter.this.agentUUID, searchGridResult2.getItemUUID()), searchGridResult2.getItemName());
-                this.userPicView.setVisibility(0);
-            } else if (searchGridResult2.getItemType() == SearchGridQuery.SearchType.People.ordinal()) {
-                ChatterID.ChatterIDUser userChatterID = ChatterID.getUserChatterID(SearchGridAdapter.this.agentUUID, searchGridResult2.getItemUUID());
-                this.userPicView.setChatterID(userChatterID, searchGridResult2.getItemName());
-                this.userPicView.setVisibility(0);
-                this.chatterNameRetriever = new ChatterNameRetriever(userChatterID, this, UIThreadExecutor.getInstance(), false);
-                this.chatterNameRetriever.subscribe();
-            } else {
-                this.userPicView.setVisibility(8);
-            }
-        }
-
-        public void onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
-            String resolvedName;
-            if (chatterNameRetriever2 == this.chatterNameRetriever && (resolvedName = chatterNameRetriever2.getResolvedName()) != null) {
-                this.resultItemName.setText(resolvedName);
-            }
-        }
-
-        public void onClick(View view) {
-            if (SearchGridAdapter.this.onSearchResultClickListener != null && this.searchGridResult != null) {
-                SearchGridAdapter.this.onSearchResultClickListener.onSearchResultClicked(this.searchGridResult);
-            }
-        }
-
-        /* access modifiers changed from: package-private */
-        public void onRecycled() {
-            this.userPicView.setChatterID((ChatterID) null, (String) null);
-            if (this.chatterNameRetriever != null) {
-                this.chatterNameRetriever.dispose();
-                this.chatterNameRetriever = null;
-            }
-            this.searchGridResult = null;
-        }
     }
 
-    public class SearchViewHolder_ViewBinding implements Unbinder {
-        private SearchViewHolder target;
 
-        @UiThread
-        public SearchViewHolder_ViewBinding(SearchViewHolder searchViewHolder, View view) {
-            this.target = searchViewHolder;
-            searchViewHolder.resultItemName = (TextView) Utils.findRequiredViewAsType(view, R.id.result_item_name, "field 'resultItemName'", TextView.class);
-            searchViewHolder.userPicView = (ChatterPicView) Utils.findRequiredViewAsType(view, R.id.userPicView, "field 'userPicView'", ChatterPicView.class);
-            searchViewHolder.resultMemberCount = (TextView) Utils.findRequiredViewAsType(view, R.id.result_member_count, "field 'resultMemberCount'", TextView.class);
-        }
+    private final UUID agentUUID;
+    private final Context context;
+    private LazyList data;
+    private final LayoutInflater inflater;
+    private final OnSearchResultClickListener onSearchResultClickListener;
 
-        @CallSuper
-        public void unbind() {
-            SearchViewHolder searchViewHolder = this.target;
-            if (searchViewHolder == null) {
-                throw new IllegalStateException("Bindings already cleared.");
-            }
-            this.target = null;
-            searchViewHolder.resultItemName = null;
-            searchViewHolder.userPicView = null;
-            searchViewHolder.resultMemberCount = null;
-        }
+    static UUID _2D_get0(SearchGridAdapter searchgridadapter)
+    {
+        return searchgridadapter.agentUUID;
     }
 
-    SearchGridAdapter(Context context2, UUID uuid, OnSearchResultClickListener onSearchResultClickListener2) {
-        this.context = context2;
-        this.agentUUID = uuid;
-        this.inflater = LayoutInflater.from(context2);
-        this.onSearchResultClickListener = onSearchResultClickListener2;
+    static OnSearchResultClickListener _2D_get1(SearchGridAdapter searchgridadapter)
+    {
+        return searchgridadapter.onSearchResultClickListener;
+    }
+
+    SearchGridAdapter(Context context1, UUID uuid, OnSearchResultClickListener onsearchresultclicklistener)
+    {
+        context = context1;
+        agentUUID = uuid;
+        inflater = LayoutInflater.from(context1);
+        onSearchResultClickListener = onsearchresultclicklistener;
         setHasStableIds(true);
     }
 
-    public int getItemCount() {
-        if (this.data != null) {
-            return this.data.size();
-        }
-        return 0;
-    }
-
-    public long getItemId(int i) {
-        if (this.data == null || i < 0 || i >= this.data.size()) {
-            return -1;
-        }
-        return this.data.get(i).getId().longValue();
-    }
-
-    public void onBindViewHolder(SearchViewHolder searchViewHolder, int i) {
-        if (this.data != null && i >= 0 && i < this.data.size()) {
-            searchViewHolder.bindToData(this.data.get(i));
+    public int getItemCount()
+    {
+        if (data != null)
+        {
+            return data.size();
+        } else
+        {
+            return 0;
         }
     }
 
-    public SearchViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        return new SearchViewHolder(this.inflater.inflate(R.layout.search_result_item, viewGroup, false));
+    public long getItemId(int i)
+    {
+        if (data != null && i >= 0 && i < data.size())
+        {
+            return ((SearchGridResult)data.get(i)).getId().longValue();
+        } else
+        {
+            return -1L;
+        }
     }
 
-    public void onViewRecycled(SearchViewHolder searchViewHolder) {
-        searchViewHolder.onRecycled();
+    public volatile void onBindViewHolder(android.support.v7.widget.RecyclerView.ViewHolder viewholder, int i)
+    {
+        onBindViewHolder((SearchViewHolder)viewholder, i);
     }
 
-    public void setData(@Nullable LazyList<SearchGridResult> lazyList) {
-        this.data = lazyList;
+    public void onBindViewHolder(SearchViewHolder searchviewholder, int i)
+    {
+        if (data != null && i >= 0 && i < data.size())
+        {
+            searchviewholder.bindToData((SearchGridResult)data.get(i));
+        }
+    }
+
+    public volatile android.support.v7.widget.RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewgroup, int i)
+    {
+        return onCreateViewHolder(viewgroup, i);
+    }
+
+    public SearchViewHolder onCreateViewHolder(ViewGroup viewgroup, int i)
+    {
+        return new SearchViewHolder(inflater.inflate(0x7f04009a, viewgroup, false));
+    }
+
+    public volatile void onViewRecycled(android.support.v7.widget.RecyclerView.ViewHolder viewholder)
+    {
+        onViewRecycled((SearchViewHolder)viewholder);
+    }
+
+    public void onViewRecycled(SearchViewHolder searchviewholder)
+    {
+        searchviewholder.onRecycled();
+    }
+
+    public void setData(LazyList lazylist)
+    {
+        data = lazylist;
         notifyDataSetChanged();
     }
 }

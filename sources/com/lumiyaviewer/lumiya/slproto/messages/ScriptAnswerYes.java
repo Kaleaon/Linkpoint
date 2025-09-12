@@ -1,52 +1,80 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class ScriptAnswerYes extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public Data Data_Field = new Data();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class ScriptAnswerYes extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class Data {
+    public static class Data
+    {
+
         public UUID ItemID;
         public int Questions;
         public UUID TaskID;
+
+        public Data()
+        {
+        }
     }
 
-    public ScriptAnswerYes() {
-        this.zeroCoded = false;
+
+    public AgentData AgentData_Field;
+    public Data Data_Field;
+
+    public ScriptAnswerYes()
+    {
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
+        Data_Field = new Data();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 72;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleScriptAnswerYes(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleScriptAnswerYes(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -124);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packUUID(byteBuffer, this.Data_Field.TaskID);
-        packUUID(byteBuffer, this.Data_Field.ItemID);
-        packInt(byteBuffer, this.Data_Field.Questions);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-124);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packUUID(bytebuffer, Data_Field.TaskID);
+        packUUID(bytebuffer, Data_Field.ItemID);
+        packInt(bytebuffer, Data_Field.Questions);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.Data_Field.TaskID = unpackUUID(byteBuffer);
-        this.Data_Field.ItemID = unpackUUID(byteBuffer);
-        this.Data_Field.Questions = unpackInt(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        Data_Field.TaskID = unpackUUID(bytebuffer);
+        Data_Field.ItemID = unpackUUID(bytebuffer);
+        Data_Field.Questions = unpackInt(bytebuffer);
     }
 }

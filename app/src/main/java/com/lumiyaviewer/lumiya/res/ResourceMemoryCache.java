@@ -8,34 +8,34 @@ public abstract class ResourceMemoryCache<ResourceParams, ResourceType> extends 
     private final Cache<ResourceParams, ResourceType> finalResults = CacheBuilder.newBuilder().weakValues().build();
     private final Cache<ResourceParams, ResourceType> intermediateResults = CacheBuilder.newBuilder().weakValues().build();
 
-    public void CompleteRequest(ResourceParams resourceParams, ResourceType resourceType, Set<ResourceConsumer> set) {
-        if (resourceType != null) {
-            this.finalResults.put(resourceParams, resourceType);
+    public void CompleteRequest(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
+        if (resourcetype != null) {
+            this.finalResults.put(resourceparams, resourcetype);
         } else {
-            this.finalResults.invalidate(resourceParams);
+            this.finalResults.invalidate(resourceparams);
         }
-        super.CompleteRequest(resourceParams, resourceType, set);
+        super.CompleteRequest(resourceparams, resourcetype, set);
     }
 
-    public void IntermediateResult(ResourceParams resourceParams, ResourceType resourceType, Set<ResourceConsumer> set) {
-        if (resourceType != null) {
-            this.intermediateResults.put(resourceParams, resourceType);
+    public void IntermediateResult(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
+        if (resourcetype != null) {
+            this.intermediateResults.put(resourceparams, resourcetype);
         } else {
-            this.intermediateResults.invalidate(resourceParams);
+            this.intermediateResults.invalidate(resourceparams);
         }
-        super.IntermediateResult(resourceParams, resourceType, set);
+        super.IntermediateResult(resourceparams, resourcetype, set);
     }
 
-    public void RequestResource(ResourceParams resourceParams, ResourceConsumer resourceConsumer) {
-        Object ifPresent = this.finalResults.getIfPresent(resourceParams);
+    public void RequestResource(ResourceParams resourceparams, ResourceConsumer resourceConsumer) {
+        ResourceType ifPresent = this.finalResults.getIfPresent(resourceparams);
         if (ifPresent != null) {
             resourceConsumer.OnResourceReady(ifPresent, false);
             return;
         }
-        ifPresent = this.intermediateResults.getIfPresent(resourceParams);
-        if (ifPresent != null) {
-            resourceConsumer.OnResourceReady(ifPresent, true);
+        ResourceType ifPresent2 = this.intermediateResults.getIfPresent(resourceparams);
+        if (ifPresent2 != null) {
+            resourceConsumer.OnResourceReady(ifPresent2, true);
         }
-        super.RequestResource(resourceParams, resourceConsumer);
+        super.RequestResource(resourceparams, resourceConsumer);
     }
 }

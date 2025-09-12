@@ -1,35 +1,56 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 
-public class NetTest extends SLMessage {
-    public NetBlock NetBlock_Field = new NetBlock();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class NetBlock {
+public class NetTest extends SLMessage
+{
+    public static class NetBlock
+    {
+
         public int Port;
+
+        public NetBlock()
+        {
+        }
     }
 
-    public NetTest() {
-        this.zeroCoded = false;
+
+    public NetBlock NetBlock_Field;
+
+    public NetTest()
+    {
+        zeroCoded = false;
+        NetBlock_Field = new NetBlock();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 6;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleNetTest(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleNetTest(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 70);
-        packShort(byteBuffer, (short) this.NetBlock_Field.Port);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)70);
+        packShort(bytebuffer, (short)NetBlock_Field.Port);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.NetBlock_Field.Port = unpackShort(byteBuffer) & 65535;
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        NetBlock_Field.Port = unpackShort(bytebuffer) & 0xffff;
     }
 }

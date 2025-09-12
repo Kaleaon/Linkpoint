@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.media;
 
 import android.content.Intent;
@@ -5,34 +9,47 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.StreamingMediaService;
 import com.lumiyaviewer.lumiya.slproto.users.ParcelData;
-import com.lumiyaviewer.lumiya.ui.chat.profiles.ParcelPropertiesFragment;
 
-public class StreamingMediaActivity extends AppCompatActivity implements View.OnClickListener {
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.parcel_media_stop_button:
-                Intent intent = new Intent(getIntent());
-                intent.setAction("com.lumiyaviewer.lumiya.ACTION_STOP_MEDIA");
-                intent.setClass(this, StreamingMediaService.class);
-                startService(intent);
-                finish();
-                return;
-            default:
-                return;
-        }
+public class StreamingMediaActivity extends AppCompatActivity
+    implements android.view.View.OnClickListener
+{
+
+    public StreamingMediaActivity()
+    {
     }
 
-    public void onCreate(Bundle bundle) {
-        ParcelData parcelData;
-        super.onCreate(bundle);
-        setContentView((int) R.layout.streaming_media);
-        Intent intent = getIntent();
-        if (intent.hasExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY) && (parcelData = (ParcelData) intent.getSerializableExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY)) != null) {
-            ((TextView) findViewById(R.id.locationNameView)).setText(parcelData.getName());
+    public void onClick(View view)
+    {
+        switch (view.getId())
+        {
+        default:
+            return;
+
+        case 2131755615: 
+            view = new Intent(getIntent());
+            break;
         }
-        findViewById(R.id.parcel_media_stop_button).setOnClickListener(this);
+        view.setAction("com.lumiyaviewer.lumiya.ACTION_STOP_MEDIA");
+        view.setClass(this, com/lumiyaviewer/lumiya/StreamingMediaService);
+        startService(view);
+        finish();
+    }
+
+    public void onCreate(Bundle bundle)
+    {
+        super.onCreate(bundle);
+        setContentView(0x7f0400a5);
+        bundle = getIntent();
+        if (bundle.hasExtra("parcelData"))
+        {
+            bundle = (ParcelData)bundle.getSerializableExtra("parcelData");
+            if (bundle != null)
+            {
+                ((TextView)findViewById(0x7f10028b)).setText(bundle.getName());
+            }
+        }
+        findViewById(0x7f10025f).setOnClickListener(this);
     }
 }

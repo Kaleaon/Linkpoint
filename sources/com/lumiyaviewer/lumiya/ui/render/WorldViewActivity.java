@@ -1,37 +1,38 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.render;
 
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
-import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsoluteLayout;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -40,27 +41,28 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.eventbus.Subscribe;
+import com.google.common.eventbus.EventBus;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.GlobalOptions;
 import com.lumiyaviewer.lumiya.LumiyaApp;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
-import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
+import com.lumiyaviewer.lumiya.render.picking.IntersectInfo;
 import com.lumiyaviewer.lumiya.render.picking.ObjectIntersectInfo;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
+import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
+import com.lumiyaviewer.lumiya.slproto.SLParcelInfo;
 import com.lumiyaviewer.lumiya.slproto.avatar.SLAttachmentPoint;
 import com.lumiyaviewer.lumiya.slproto.events.SLBakingProgressEvent;
 import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarControl;
 import com.lumiyaviewer.lumiya.slproto.modules.SLDrawDistance;
+import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
+import com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVController;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData;
@@ -69,8 +71,10 @@ import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
 import com.lumiyaviewer.lumiya.slproto.users.ParcelData;
 import com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
 import com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo;
 import com.lumiyaviewer.lumiya.slproto.users.manager.MyAvatarState;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectsManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
@@ -80,7 +84,6 @@ import com.lumiyaviewer.lumiya.ui.chat.ContactsFragment;
 import com.lumiyaviewer.lumiya.ui.chat.profiles.UserProfileFragment;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
-import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
 import com.lumiyaviewer.lumiya.ui.common.ScriptDialogHandler;
 import com.lumiyaviewer.lumiya.ui.objects.ObjectDetailsFragment;
 import com.lumiyaviewer.lumiya.ui.objects.ObjectPayDialog;
@@ -93,3165 +96,2405 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class WorldViewActivity extends DetailsActivity implements View.OnTouchListener, ThemeMapper, ScriptDialogHandler, UnreadNotificationManager.NotifyCapture {
-    private static final long BUTTONS_FADE_TIMEOUT_MILLIS = 7500;
-    private static final String FROM_NOTIFICATION_TAG = "fromNotification";
-    private static final long OBJECT_DESELECT_TIMEOUT_MILLIS = 6000;
-    private static final int PERMISSION_AUDIO_REQUEST_CODE = 100;
-    private static final float TURNING_SPEED = 50.0f;
-    /* access modifiers changed from: private */
-    public final SubscriptionData<UUID, SLAgentCircuit> agentCircuit = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.render:
+//            WorldSurfaceView, CardboardTransitionActivity, FadingTextViewLog, RenderSettings
 
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f535$f0;
+public class WorldViewActivity extends DetailsActivity
+    implements android.view.View.OnTouchListener, ThemeMapper, ScriptDialogHandler, com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationManager.NotifyCapture
+{
+    private static class SelectableAttachment
+    {
 
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.3.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.3.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.3.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.3.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    private boolean arrowsToTurn = false;
-    /* access modifiers changed from: private */
-    @Nullable
-    public SLAvatarControl avatarControl;
-    @BindView(2131755576)
-    ImageView avatarIconView;
-    @BindView(2131755762)
-    ImageButton buttonCamOff;
-    @BindView(2131755761)
-    ImageButton buttonCamOn;
-    @BindView(2131755757)
-    ImageButton buttonFlyDownward;
-    @BindView(2131755756)
-    ImageButton buttonFlyUpward;
-    @BindView(2131755763)
-    Button buttonHUD;
-    @BindView(2131755262)
-    ImageButton buttonMoveBackward;
-    @BindView(2131755260)
-    ImageButton buttonMoveForward;
-    @BindView(2131755264)
-    ImageButton buttonStandUp;
-    @BindView(2131755758)
-    ImageButton buttonStopFlying;
-    @BindView(2131755261)
-    ImageButton buttonTurnLeft;
-    @BindView(2131755263)
-    ImageButton buttonTurnRight;
-    /* access modifiers changed from: private */
-    public ValueAnimator buttonsFadeAnimator = null;
-    /* access modifiers changed from: private */
-    public final Runnable buttonsFadeTask = new Runnable() {
-        public void run() {
-            boolean unused = WorldViewActivity.this.buttonsFadeTimerStarted = false;
-            if (!WorldViewActivity.this.detailsVisible() && (!WorldViewActivity.this.isDragging) && WorldViewActivity.this.agentCircuit.hasData()) {
-                VoiceChatInfo voiceChatInfo = (VoiceChatInfo) WorldViewActivity.this.voiceChatInfo.getData();
-                if (!((voiceChatInfo == null || voiceChatInfo.state != VoiceChatInfo.VoiceChatState.Active) ? false : voiceChatInfo.localMicActive)) {
-                    long r2 = (WorldViewActivity.this.lastActivityTime + WorldViewActivity.BUTTONS_FADE_TIMEOUT_MILLIS) - SystemClock.uptimeMillis();
-                    Debug.Printf("ButtonsFade: remaining %d", Long.valueOf(r2));
-                    if (r2 <= 0) {
-                        WorldViewActivity.this.startFadingButtons();
-                        return;
-                    }
-                    boolean unused2 = WorldViewActivity.this.buttonsFadeTimerStarted = true;
-                    WorldViewActivity.this.mHandler.postDelayed(WorldViewActivity.this.buttonsFadeTask, r2);
-                }
-            }
-        }
-    };
-    /* access modifiers changed from: private */
-    public boolean buttonsFadeTimerStarted = false;
-    private final Runnable buttonsRestoreTask = new Runnable() {
-        public void run() {
-            if (Build.VERSION.SDK_INT >= 11) {
-                if (WorldViewActivity.this.buttonsFadeAnimator != null) {
-                    WorldViewActivity.this.buttonsFadeAnimator.cancel();
-                }
-                WorldViewActivity.this.insetsBackground.setAlpha(1.0f);
-            }
-        }
-    };
-    private boolean camButtonEnabled = false;
-    private final Object chatEventHandler = new Object() {
-        /* synthetic */ void handleChatMessageEvent(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
-            WorldViewActivity.this.handleChatEvent(chatMessageEvent);
-        }
-
-        @Subscribe
-        public void onChatMessage(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
-            WorldViewActivity.this.mHandler.post(new Runnable(this, chatMessageEvent) {
-
-                /* renamed from: -$f0 */
-                private final /* synthetic */ Object f532$f0;
-
-                /* renamed from: -$f1 */
-                private final /* synthetic */ Object f533$f1;
-
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.11.$m$0():void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.11.$m$0():void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.11.run():void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.11.run():void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-            });
-        }
-    };
-    private boolean chatOver3D = false;
-    @BindView(2131755759)
-    LinearLayout chatsOverlayLayout;
-    private final SubscriptionData<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f538$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.6.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.6.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.6.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.6.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    @BindView(2131755284)
-    View detailsContainer;
-    /* access modifiers changed from: private */
-    public int displayedHUDid = 0;
-    @BindView(2131755748)
-    View dragPointer;
-    @BindView(2131755747)
-    ViewGroup dragPointerLayout;
-    @Nullable
-    private SLDrawDistance drawDistance;
-    private FadingTextViewLog fadingTextViewLog;
-    @BindView(2131755755)
-    LinearLayout flyButtonsLayout;
-    /* access modifiers changed from: private */
-    public GestureDetectorCompat gestureDetector;
-    private final GestureDetector.OnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener() {
-        public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent2, float f, float f2) {
-            if (WorldViewActivity.this.isInScaling || !(!WorldViewActivity.this.wasInScaling) || !(!WorldViewActivity.this.isDragging)) {
-                return false;
-            }
-            float height = (f * 60.0f) / ((float) WorldViewActivity.this.worldViewHolder.getHeight());
-            float height2 = ((-f2) * 60.0f) / ((float) WorldViewActivity.this.worldViewHolder.getHeight());
-            if (WorldViewActivity.this.avatarControl == null) {
-                return true;
-            }
-            WorldViewActivity.this.avatarControl.processCameraFling(height / 1.5f, height2 / 2.5f);
-            return true;
-        }
-
-        public void onLongPress(MotionEvent motionEvent) {
-            float rawX = motionEvent.getRawX();
-            float rawY = motionEvent.getRawY();
-            if (WorldViewActivity.this.isDragging) {
-                WorldViewActivity.this.dragSelectorSetRawPosition((int) rawX, (int) rawY);
-            } else if (!WorldViewActivity.this.isInScaling && (!WorldViewActivity.this.wasInScaling)) {
-                int[] iArr = new int[2];
-                WorldViewActivity.this.worldViewHolder.getLocationOnScreen(iArr);
-                WorldViewActivity.this.mGLView.pickObjectHover(rawX - ((float) iArr[0]), rawY - ((float) iArr[1]));
-            }
-        }
-
-        public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float f, float f2) {
-            if (WorldViewActivity.this.isDragging) {
-                AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) WorldViewActivity.this.dragPointer.getLayoutParams();
-                if (layoutParams != null) {
-                    layoutParams.x = Math.max(Math.min((int) (((float) layoutParams.x) - f), WorldViewActivity.this.dragPointerLayout.getWidth() - WorldViewActivity.this.dragPointer.getWidth()), 0);
-                    layoutParams.y = Math.max(Math.min((int) (((float) layoutParams.y) - f2), WorldViewActivity.this.dragPointerLayout.getHeight() - WorldViewActivity.this.dragPointer.getHeight()), 0);
-                    WorldViewActivity.this.dragPointer.setLayoutParams(layoutParams);
-                    WorldViewActivity.this.selectByDragPointer(layoutParams.x, layoutParams.y);
-                }
-                return true;
-            } else if (WorldViewActivity.this.isInScaling || !(!WorldViewActivity.this.wasInScaling)) {
-                return false;
-            } else {
-                if (WorldViewActivity.this.displayedHUDid != 0) {
-                    WorldViewActivity worldViewActivity = WorldViewActivity.this;
-                    float unused = worldViewActivity.hudOffsetX = worldViewActivity.hudOffsetX + ((f / ((float) WorldViewActivity.this.worldViewHolder.getHeight())) / 2.0f);
-                    WorldViewActivity worldViewActivity2 = WorldViewActivity.this;
-                    float unused2 = worldViewActivity2.hudOffsetY = worldViewActivity2.hudOffsetY + ((f2 / ((float) WorldViewActivity.this.worldViewHolder.getHeight())) / 2.0f);
-                    WorldViewActivity.this.mGLView.setHUDOffset(WorldViewActivity.this.hudOffsetX, WorldViewActivity.this.hudOffsetY);
-                } else {
-                    float height = ((-f) * 60.0f) / ((float) WorldViewActivity.this.worldViewHolder.getHeight());
-                    float height2 = (f2 * 60.0f) / ((float) WorldViewActivity.this.worldViewHolder.getHeight());
-                    if (WorldViewActivity.this.avatarControl != null) {
-                        WorldViewActivity.this.avatarControl.processCameraRotate(height, height2);
-                    }
-                }
-                return true;
-            }
-        }
-
-        public boolean onSingleTapUp(MotionEvent motionEvent) {
-            if (WorldViewActivity.this.isDragging) {
-                WorldViewActivity.this.dragSelectorSetRawPosition((int) motionEvent.getRawX(), (int) motionEvent.getRawY());
-            } else if (WorldViewActivity.this.displayedHUDid != 0) {
-                int[] iArr = new int[2];
-                WorldViewActivity.this.worldViewHolder.getLocationOnScreen(iArr);
-                WorldViewActivity.this.mGLView.touchHUD(motionEvent.getRawX() - ((float) iArr[0]), motionEvent.getRawY() - ((float) iArr[1]));
-            } else {
-                WorldViewActivity.this.handlePickedObject((ObjectIntersectInfo) null);
-            }
-            return true;
-        }
-    };
-    /* access modifiers changed from: private */
-    public float hudOffsetX = 0.0f;
-    /* access modifiers changed from: private */
-    public float hudOffsetY = 0.0f;
-    /* access modifiers changed from: private */
-    public float hudScaleFactor = 1.0f;
-    @BindView(2131755744)
-    FrameLayout insetsBackground;
-    /* access modifiers changed from: private */
-    public boolean isDragging = false;
-    /* access modifiers changed from: private */
-    public boolean isInScaling = false;
-    /* access modifiers changed from: private */
-    public boolean isInteracting = false;
-    private boolean isSplitScreen;
-    /* access modifiers changed from: private */
-    public long lastActivityTime = SystemClock.uptimeMillis();
-    /* access modifiers changed from: private */
-    public long lastObjectActivityTime = SystemClock.uptimeMillis();
-    private UUID lastTouchUUID = null;
-    private boolean localDrawingEnabled = false;
-    /* access modifiers changed from: private */
-    public WorldSurfaceView mGLView;
-    /* access modifiers changed from: private */
-    public Handler mHandler = new Handler();
-    private boolean manualCamMode = false;
-    @BindView(2131755259)
-    View moveButtonsLayout;
-    private final SubscriptionData<SubscriptionSingleKey, MyAvatarState> myAvatarState = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f536$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.4.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.4.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.4.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.4.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    @BindView(2131755270)
-    ImageButton objectChatButton;
-    @BindView(2131755753)
-    View objectControlsPanel;
-    /* access modifiers changed from: private */
-    public boolean objectDeselectTimerStarted = false;
-    /* access modifiers changed from: private */
-    public final Runnable objectDeselectTimerTask = new Runnable() {
-        public void run() {
-            boolean unused = WorldViewActivity.this.objectDeselectTimerStarted = false;
-            if (!WorldViewActivity.this.detailsVisible() && (!WorldViewActivity.this.isDragging)) {
-                long r0 = (WorldViewActivity.this.lastObjectActivityTime + WorldViewActivity.OBJECT_DESELECT_TIMEOUT_MILLIS) - SystemClock.uptimeMillis();
-                Debug.Printf("ObjectDeselect: remaining %d", Long.valueOf(r0));
-                if (r0 <= 0) {
-                    WorldViewActivity.this.handlePickedObject((ObjectIntersectInfo) null);
-                    return;
-                }
-                boolean unused2 = WorldViewActivity.this.objectDeselectTimerStarted = true;
-                WorldViewActivity.this.mHandler.postDelayed(WorldViewActivity.this.objectDeselectTimerTask, r0);
-            }
-        }
-    };
-    @BindView(2131755754)
-    ImageButton objectMoreButton;
-    @BindView(2131755577)
-    TextView objectNameTextView;
-    @BindView(2131755554)
-    ImageButton objectPayButton;
-    @BindView(2131755764)
-    View objectPopupLeftSpacer;
-    @BindView(2131755269)
-    ImageButton objectSitButton;
-    @BindView(2131755538)
-    ImageButton objectStandButton;
-    @BindView(2131755268)
-    ImageButton objectTouchButton;
-    /* access modifiers changed from: private */
-    public float oldScaleFocusX = Float.NaN;
-    /* access modifiers changed from: private */
-    public float oldScaleFocusY = Float.NaN;
-    private ChatterNameRetriever pickedAvatarNameRetriever = null;
-    private ObjectIntersectInfo pickedIntersectInfo = null;
-    private SLObjectInfo pickedObject = null;
-    private int prefDrawDistance = 20;
-    private int prevDisplayedHUDid = 0;
-    /* access modifiers changed from: private */
-    public ScaleGestureDetector scaleGestureDetector;
-    private final ScaleGestureDetector.OnScaleGestureListener scaleGestureListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-        public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
-            Debug.Printf("Gesture: scale factor: %f", Float.valueOf(scaleGestureDetector.getScaleFactor()));
-            if (WorldViewActivity.this.displayedHUDid != 0) {
-                float unused = WorldViewActivity.this.hudScaleFactor = Math.max(0.1f, Math.min(WorldViewActivity.this.hudScaleFactor * scaleGestureDetector.getScaleFactor(), 10.0f));
-                WorldViewActivity.this.mGLView.setHUDScaleFactor(WorldViewActivity.this.hudScaleFactor);
-            } else {
-                float width = (float) WorldViewActivity.this.worldViewTouchReceiver.getWidth();
-                float height = (float) WorldViewActivity.this.worldViewTouchReceiver.getHeight();
-                float focusX = scaleGestureDetector.getFocusX();
-                float focusY = scaleGestureDetector.getFocusY();
-                float f = ((focusX / width) - 0.5f) * (height / width);
-                float f2 = (focusY / height) - 0.5f;
-                float r4 = (focusX - WorldViewActivity.this.oldScaleFocusX) / height;
-                float r5 = (focusY - WorldViewActivity.this.oldScaleFocusY) / height;
-                float unused2 = WorldViewActivity.this.oldScaleFocusX = focusX;
-                float unused3 = WorldViewActivity.this.oldScaleFocusY = focusY;
-                if (WorldViewActivity.this.avatarControl != null) {
-                    WorldViewActivity.this.avatarControl.processCameraZoom(scaleGestureDetector.getScaleFactor(), (-f) * 2.0f, (-f2) * 2.0f, r4, r5);
-                }
-            }
-            return true;
-        }
-
-        public boolean onScaleBegin(ScaleGestureDetector scaleGestureDetector) {
-            boolean unused = WorldViewActivity.this.isInScaling = true;
-            float unused2 = WorldViewActivity.this.oldScaleFocusX = scaleGestureDetector.getFocusX();
-            float unused3 = WorldViewActivity.this.oldScaleFocusY = scaleGestureDetector.getFocusY();
-            return true;
-        }
-
-        public void onScaleEnd(ScaleGestureDetector scaleGestureDetector) {
-            boolean unused = WorldViewActivity.this.isInScaling = false;
-        }
-    };
-    private final SubscriptionData<Integer, SLObjectProfileData> selectedObjectProfile = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f537$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.5.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.5.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.5.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.5.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    private UserManager userManager;
-    private final SubscriptionData<SubscriptionSingleKey, ChatterID> voiceActiveChatter = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f539$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.7.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.7.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.7.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.7.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    /* access modifiers changed from: private */
-    public final SubscriptionData<ChatterID, VoiceChatInfo> voiceChatInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f540$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.8.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.8.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.8.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.8.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    @BindView(2131755752)
-    VoiceStatusView voiceStatusView;
-    /* access modifiers changed from: private */
-    public boolean wasInScaling = false;
-    @BindView(2131755750)
-    ViewGroup worldOverlaysContainer;
-    @BindView(2131755743)
-    FrameLayout worldViewHolder;
-    private final View.OnTouchListener worldViewTouchListener = new View.OnTouchListener() {
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            boolean z;
-            boolean r3 = WorldViewActivity.this.isInteracting;
-            switch (motionEvent.getActionMasked()) {
-                case 0:
-                    boolean unused = WorldViewActivity.this.isInteracting = true;
-                    z = true;
-                    break;
-                case 1:
-                    boolean unused2 = WorldViewActivity.this.isInteracting = false;
-                    z = true;
-                    break;
-                default:
-                    z = false;
-                    break;
-            }
-            if (WorldViewActivity.this.isInteracting && (!r3)) {
-                WorldViewActivity.this.mGLView.setIsInteracting(true);
-            }
-            boolean unused3 = WorldViewActivity.this.wasInScaling = WorldViewActivity.this.isInScaling;
-            boolean onTouchEvent = z | WorldViewActivity.this.scaleGestureDetector.onTouchEvent(motionEvent) | WorldViewActivity.this.gestureDetector.onTouchEvent(motionEvent);
-            if (r3 && (!WorldViewActivity.this.isInteracting)) {
-                WorldViewActivity.this.mGLView.setIsInteracting(false);
-            }
-            return onTouchEvent;
-        }
-    };
-    @BindView(2131755746)
-    View worldViewTouchReceiver;
-
-    private static class SelectableAttachment {
         private String attachmentName;
         private int localID;
 
-        public SelectableAttachment(int i, String str) {
-            this.localID = i;
-            this.attachmentName = str;
+        public int getLocalID()
+        {
+            return localID;
         }
 
-        public int getLocalID() {
-            return this.localID;
+        public String toString()
+        {
+            return attachmentName;
         }
 
-        public String toString() {
-            return this.attachmentName;
+        public SelectableAttachment(int i, String s)
+        {
+            localID = i;
+            attachmentName = s;
         }
     }
 
-    private void beginCountingButtonsFade() {
-        this.lastActivityTime = SystemClock.uptimeMillis();
-        this.lastObjectActivityTime = this.lastActivityTime;
+
+    private static final long BUTTONS_FADE_TIMEOUT_MILLIS = 7500L;
+    private static final String FROM_NOTIFICATION_TAG = "fromNotification";
+    private static final long OBJECT_DESELECT_TIMEOUT_MILLIS = 6000L;
+    private static final int PERMISSION_AUDIO_REQUEST_CODE = 100;
+    private static final float TURNING_SPEED = 50F;
+    private final SubscriptionData agentCircuit = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls3(this));
+    private boolean arrowsToTurn;
+    private SLAvatarControl avatarControl;
+    ImageView avatarIconView;
+    ImageButton buttonCamOff;
+    ImageButton buttonCamOn;
+    ImageButton buttonFlyDownward;
+    ImageButton buttonFlyUpward;
+    Button buttonHUD;
+    ImageButton buttonMoveBackward;
+    ImageButton buttonMoveForward;
+    ImageButton buttonStandUp;
+    ImageButton buttonStopFlying;
+    ImageButton buttonTurnLeft;
+    ImageButton buttonTurnRight;
+    private ValueAnimator buttonsFadeAnimator;
+    private final Runnable buttonsFadeTask = new Runnable() {
+
+        final WorldViewActivity this$0;
+
+        public void run()
+        {
+            long l;
+label0:
+            {
+                WorldViewActivity._2D_set0(WorldViewActivity.this, false);
+                if (!WorldViewActivity._2D_wrap0(WorldViewActivity.this) && WorldViewActivity._2D_get9(WorldViewActivity.this) ^ true && WorldViewActivity._2D_get0(WorldViewActivity.this).hasData())
+                {
+                    VoiceChatInfo voicechatinfo = (VoiceChatInfo)WorldViewActivity._2D_get20(WorldViewActivity.this).getData();
+                    boolean flag;
+                    if (voicechatinfo != null && voicechatinfo.state == com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo.VoiceChatState.Active)
+                    {
+                        flag = voicechatinfo.localMicActive;
+                    } else
+                    {
+                        flag = false;
+                    }
+                    if (!flag)
+                    {
+                        l = SystemClock.uptimeMillis();
+                        l = (WorldViewActivity._2D_get12(WorldViewActivity.this) + 7500L) - l;
+                        Debug.Printf("ButtonsFade: remaining %d", new Object[] {
+                            Long.valueOf(l)
+                        });
+                        if (l > 0L)
+                        {
+                            break label0;
+                        }
+                        WorldViewActivity._2D_wrap3(WorldViewActivity.this);
+                    }
+                }
+                return;
+            }
+            WorldViewActivity._2D_set0(WorldViewActivity.this, true);
+            WorldViewActivity._2D_get15(WorldViewActivity.this).postDelayed(WorldViewActivity._2D_get3(WorldViewActivity.this), l);
+        }
+
+            
+            {
+                this$0 = WorldViewActivity.this;
+                super();
+            }
+    };
+    private boolean buttonsFadeTimerStarted;
+    private final Runnable buttonsRestoreTask = new Runnable() {
+
+        final WorldViewActivity this$0;
+
+        public void run()
+        {
+            if (android.os.Build.VERSION.SDK_INT >= 11)
+            {
+                if (WorldViewActivity._2D_get2(WorldViewActivity.this) != null)
+                {
+                    WorldViewActivity._2D_get2(WorldViewActivity.this).cancel();
+                }
+                insetsBackground.setAlpha(1.0F);
+            }
+        }
+
+            
+            {
+                this$0 = WorldViewActivity.this;
+                super();
+            }
+    };
+    private boolean camButtonEnabled;
+    private final Object chatEventHandler = new Object() {
+
+        final WorldViewActivity this$0;
+
+        void lambda$_2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity$1_50098(com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.ChatMessageEvent chatmessageevent)
+        {
+            handleChatEvent(chatmessageevent);
+        }
+
+        public void onChatMessage(com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.ChatMessageEvent chatmessageevent)
+        {
+            WorldViewActivity._2D_get15(WorldViewActivity.this).post(new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls11(this, chatmessageevent));
+        }
+
+            
+            {
+                this$0 = WorldViewActivity.this;
+                super();
+            }
+    };
+    private boolean chatOver3D;
+    LinearLayout chatsOverlayLayout;
+    private final SubscriptionData currentLocationInfo = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls6(this));
+    View detailsContainer;
+    private int displayedHUDid;
+    View dragPointer;
+    ViewGroup dragPointerLayout;
+    private SLDrawDistance drawDistance;
+    private FadingTextViewLog fadingTextViewLog;
+    LinearLayout flyButtonsLayout;
+    private GestureDetectorCompat gestureDetector;
+    private final android.view.GestureDetector.OnGestureListener gestureListener = new android.view.GestureDetector.SimpleOnGestureListener() {
+
+        final WorldViewActivity this$0;
+
+        public boolean onFling(MotionEvent motionevent, MotionEvent motionevent1, float f, float f1)
+        {
+            if (!WorldViewActivity._2D_get10(WorldViewActivity.this) && WorldViewActivity._2D_get21(WorldViewActivity.this) ^ true && WorldViewActivity._2D_get9(WorldViewActivity.this) ^ true)
+            {
+                f = (f * 60F) / (float)worldViewHolder.getHeight();
+                f1 = (-f1 * 60F) / (float)worldViewHolder.getHeight();
+                if (WorldViewActivity._2D_get1(WorldViewActivity.this) != null)
+                {
+                    WorldViewActivity._2D_get1(WorldViewActivity.this).processCameraFling(f / 1.5F, f1 / 2.5F);
+                }
+                return true;
+            } else
+            {
+                return false;
+            }
+        }
+
+        public void onLongPress(MotionEvent motionevent)
+        {
+            float f = motionevent.getRawX();
+            float f1 = motionevent.getRawY();
+            if (WorldViewActivity._2D_get9(WorldViewActivity.this))
+            {
+                WorldViewActivity._2D_wrap1(WorldViewActivity.this, (int)f, (int)f1);
+            } else
+            if (!WorldViewActivity._2D_get10(WorldViewActivity.this) && WorldViewActivity._2D_get21(WorldViewActivity.this) ^ true)
+            {
+                motionevent = new int[2];
+                worldViewHolder.getLocationOnScreen(motionevent);
+                WorldViewActivity._2D_get14(WorldViewActivity.this).pickObjectHover(f - (float)motionevent[0], f1 - (float)motionevent[1]);
+                return;
+            }
+        }
+
+        public boolean onScroll(MotionEvent motionevent, MotionEvent motionevent1, float f, float f1)
+        {
+            if (WorldViewActivity._2D_get9(WorldViewActivity.this))
+            {
+                motionevent = (android.widget.AbsoluteLayout.LayoutParams)dragPointer.getLayoutParams();
+                if (motionevent != null)
+                {
+                    motionevent.x = Math.max(Math.min((int)((float)((android.widget.AbsoluteLayout.LayoutParams) (motionevent)).x - f), dragPointerLayout.getWidth() - dragPointer.getWidth()), 0);
+                    motionevent.y = Math.max(Math.min((int)((float)((android.widget.AbsoluteLayout.LayoutParams) (motionevent)).y - f1), dragPointerLayout.getHeight() - dragPointer.getHeight()), 0);
+                    dragPointer.setLayoutParams(motionevent);
+                    WorldViewActivity._2D_wrap2(WorldViewActivity.this, ((android.widget.AbsoluteLayout.LayoutParams) (motionevent)).x, ((android.widget.AbsoluteLayout.LayoutParams) (motionevent)).y);
+                }
+                return true;
+            }
+            if (WorldViewActivity._2D_get10(WorldViewActivity.this) || !(WorldViewActivity._2D_get21(WorldViewActivity.this) ^ true))
+            {
+                break MISSING_BLOCK_LABEL_318;
+            }
+            if (WorldViewActivity._2D_get4(WorldViewActivity.this) == 0) goto _L2; else goto _L1
+_L1:
+            motionevent = WorldViewActivity.this;
+            WorldViewActivity._2D_set1(motionevent, WorldViewActivity._2D_get6(motionevent) + f / (float)worldViewHolder.getHeight() / 2.0F);
+            motionevent = WorldViewActivity.this;
+            WorldViewActivity._2D_set2(motionevent, WorldViewActivity._2D_get7(motionevent) + f1 / (float)worldViewHolder.getHeight() / 2.0F);
+            WorldViewActivity._2D_get14(WorldViewActivity.this).setHUDOffset(WorldViewActivity._2D_get6(WorldViewActivity.this), WorldViewActivity._2D_get7(WorldViewActivity.this));
+_L4:
+            return true;
+_L2:
+            f = (-f * 60F) / (float)worldViewHolder.getHeight();
+            f1 = (f1 * 60F) / (float)worldViewHolder.getHeight();
+            if (WorldViewActivity._2D_get1(WorldViewActivity.this) == null) goto _L4; else goto _L3
+_L3:
+            WorldViewActivity._2D_get1(WorldViewActivity.this).processCameraRotate(f, f1);
+            return true;
+            return false;
+        }
+
+        public boolean onSingleTapUp(MotionEvent motionevent)
+        {
+            if (WorldViewActivity._2D_get9(WorldViewActivity.this))
+            {
+                WorldViewActivity._2D_wrap1(WorldViewActivity.this, (int)motionevent.getRawX(), (int)motionevent.getRawY());
+                return true;
+            }
+            if (WorldViewActivity._2D_get4(WorldViewActivity.this) != 0)
+            {
+                int ai[] = new int[2];
+                worldViewHolder.getLocationOnScreen(ai);
+                WorldViewActivity._2D_get14(WorldViewActivity.this).touchHUD(motionevent.getRawX() - (float)ai[0], motionevent.getRawY() - (float)ai[1]);
+                return true;
+            } else
+            {
+                handlePickedObject(null);
+                return true;
+            }
+        }
+
+            
+            {
+                this$0 = WorldViewActivity.this;
+                super();
+            }
+    };
+    private float hudOffsetX;
+    private float hudOffsetY;
+    private float hudScaleFactor;
+    FrameLayout insetsBackground;
+    private boolean isDragging;
+    private boolean isInScaling;
+    private boolean isInteracting;
+    private boolean isSplitScreen;
+    private long lastActivityTime;
+    private long lastObjectActivityTime;
+    private UUID lastTouchUUID;
+    private boolean localDrawingEnabled;
+    private WorldSurfaceView mGLView;
+    private Handler mHandler;
+    private boolean manualCamMode;
+    View moveButtonsLayout;
+    private final SubscriptionData myAvatarState = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls4(this));
+    ImageButton objectChatButton;
+    View objectControlsPanel;
+    private boolean objectDeselectTimerStarted;
+    private final Runnable objectDeselectTimerTask = new Runnable() {
+
+        final WorldViewActivity this$0;
+
+        public void run()
+        {
+            long l;
+label0:
+            {
+                WorldViewActivity._2D_set6(WorldViewActivity.this, false);
+                if (!WorldViewActivity._2D_wrap0(WorldViewActivity.this) && WorldViewActivity._2D_get9(WorldViewActivity.this) ^ true)
+                {
+                    l = SystemClock.uptimeMillis();
+                    l = (WorldViewActivity._2D_get13(WorldViewActivity.this) + 6000L) - l;
+                    Debug.Printf("ObjectDeselect: remaining %d", new Object[] {
+                        Long.valueOf(l)
+                    });
+                    if (l > 0L)
+                    {
+                        break label0;
+                    }
+                    handlePickedObject(null);
+                }
+                return;
+            }
+            WorldViewActivity._2D_set6(WorldViewActivity.this, true);
+            WorldViewActivity._2D_get15(WorldViewActivity.this).postDelayed(WorldViewActivity._2D_get16(WorldViewActivity.this), l);
+        }
+
+            
+            {
+                this$0 = WorldViewActivity.this;
+                super();
+            }
+    };
+    ImageButton objectMoreButton;
+    TextView objectNameTextView;
+    ImageButton objectPayButton;
+    View objectPopupLeftSpacer;
+    ImageButton objectSitButton;
+    ImageButton objectStandButton;
+    ImageButton objectTouchButton;
+    private float oldScaleFocusX;
+    private float oldScaleFocusY;
+    private ChatterNameRetriever pickedAvatarNameRetriever;
+    private ObjectIntersectInfo pickedIntersectInfo;
+    private SLObjectInfo pickedObject;
+    private int prefDrawDistance;
+    private int prevDisplayedHUDid;
+    private ScaleGestureDetector scaleGestureDetector;
+    private final android.view.ScaleGestureDetector.OnScaleGestureListener scaleGestureListener = new android.view.ScaleGestureDetector.SimpleOnScaleGestureListener() {
+
+        final WorldViewActivity this$0;
+
+        public boolean onScale(ScaleGestureDetector scalegesturedetector)
+        {
+            Debug.Printf("Gesture: scale factor: %f", new Object[] {
+                Float.valueOf(scalegesturedetector.getScaleFactor())
+            });
+            if (WorldViewActivity._2D_get4(WorldViewActivity.this) != 0)
+            {
+                WorldViewActivity._2D_set3(WorldViewActivity.this, Math.max(0.1F, Math.min(WorldViewActivity._2D_get8(WorldViewActivity.this) * scalegesturedetector.getScaleFactor(), 10F)));
+                WorldViewActivity._2D_get14(WorldViewActivity.this).setHUDScaleFactor(WorldViewActivity._2D_get8(WorldViewActivity.this));
+            } else
+            {
+                float f4 = worldViewTouchReceiver.getWidth();
+                float f3 = worldViewTouchReceiver.getHeight();
+                float f = scalegesturedetector.getFocusX();
+                float f1 = scalegesturedetector.getFocusY();
+                float f2 = f / f4;
+                f4 = f3 / f4;
+                float f5 = f1 / f3;
+                float f6 = (f - WorldViewActivity._2D_get17(WorldViewActivity.this)) / f3;
+                f3 = (f1 - WorldViewActivity._2D_get18(WorldViewActivity.this)) / f3;
+                WorldViewActivity._2D_set7(WorldViewActivity.this, f);
+                WorldViewActivity._2D_set8(WorldViewActivity.this, f1);
+                if (WorldViewActivity._2D_get1(WorldViewActivity.this) != null)
+                {
+                    WorldViewActivity._2D_get1(WorldViewActivity.this).processCameraZoom(scalegesturedetector.getScaleFactor(), -((f2 - 0.5F) * f4) * 2.0F, -(f5 - 0.5F) * 2.0F, f6, f3);
+                    return true;
+                }
+            }
+            return true;
+        }
+
+        public boolean onScaleBegin(ScaleGestureDetector scalegesturedetector)
+        {
+            WorldViewActivity._2D_set4(WorldViewActivity.this, true);
+            WorldViewActivity._2D_set7(WorldViewActivity.this, scalegesturedetector.getFocusX());
+            WorldViewActivity._2D_set8(WorldViewActivity.this, scalegesturedetector.getFocusY());
+            return true;
+        }
+
+        public void onScaleEnd(ScaleGestureDetector scalegesturedetector)
+        {
+            WorldViewActivity._2D_set4(WorldViewActivity.this, false);
+        }
+
+            
+            {
+                this$0 = WorldViewActivity.this;
+                super();
+            }
+    };
+    private final SubscriptionData selectedObjectProfile = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls5(this));
+    private UserManager userManager;
+    private final SubscriptionData voiceActiveChatter = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls7(this));
+    private final SubscriptionData voiceChatInfo = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls8(this));
+    VoiceStatusView voiceStatusView;
+    private boolean wasInScaling;
+    ViewGroup worldOverlaysContainer;
+    FrameLayout worldViewHolder;
+    private final android.view.View.OnTouchListener worldViewTouchListener = new android.view.View.OnTouchListener() {
+
+        final WorldViewActivity this$0;
+
+        public boolean onTouch(View view, MotionEvent motionevent)
+        {
+            boolean flag1 = WorldViewActivity._2D_get11(WorldViewActivity.this);
+            motionevent.getActionMasked();
+            JVM INSTR tableswitch 0 1: default 36
+        //                       0 143
+        //                       1 157;
+               goto _L1 _L2 _L3
+_L1:
+            boolean flag = false;
+_L5:
+            if (WorldViewActivity._2D_get11(WorldViewActivity.this) && flag1 ^ true)
+            {
+                WorldViewActivity._2D_get14(WorldViewActivity.this).setIsInteracting(true);
+            }
+            WorldViewActivity._2D_set9(WorldViewActivity.this, WorldViewActivity._2D_get10(WorldViewActivity.this));
+            boolean flag2 = WorldViewActivity._2D_get19(WorldViewActivity.this).onTouchEvent(motionevent);
+            boolean flag3 = WorldViewActivity._2D_get5(WorldViewActivity.this).onTouchEvent(motionevent);
+            if (flag1 && WorldViewActivity._2D_get11(WorldViewActivity.this) ^ true)
+            {
+                WorldViewActivity._2D_get14(WorldViewActivity.this).setIsInteracting(false);
+            }
+            return flag | flag2 | flag3;
+_L2:
+            WorldViewActivity._2D_set5(WorldViewActivity.this, true);
+            flag = true;
+            continue; /* Loop/switch isn't completed */
+_L3:
+            WorldViewActivity._2D_set5(WorldViewActivity.this, false);
+            flag = true;
+            if (true) goto _L5; else goto _L4
+_L4:
+        }
+
+            
+            {
+                this$0 = WorldViewActivity.this;
+                super();
+            }
+    };
+    View worldViewTouchReceiver;
+
+    static SubscriptionData _2D_get0(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.agentCircuit;
+    }
+
+    static SLAvatarControl _2D_get1(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.avatarControl;
+    }
+
+    static boolean _2D_get10(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.isInScaling;
+    }
+
+    static boolean _2D_get11(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.isInteracting;
+    }
+
+    static long _2D_get12(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.lastActivityTime;
+    }
+
+    static long _2D_get13(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.lastObjectActivityTime;
+    }
+
+    static WorldSurfaceView _2D_get14(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.mGLView;
+    }
+
+    static Handler _2D_get15(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.mHandler;
+    }
+
+    static Runnable _2D_get16(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.objectDeselectTimerTask;
+    }
+
+    static float _2D_get17(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.oldScaleFocusX;
+    }
+
+    static float _2D_get18(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.oldScaleFocusY;
+    }
+
+    static ScaleGestureDetector _2D_get19(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.scaleGestureDetector;
+    }
+
+    static ValueAnimator _2D_get2(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.buttonsFadeAnimator;
+    }
+
+    static SubscriptionData _2D_get20(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.voiceChatInfo;
+    }
+
+    static boolean _2D_get21(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.wasInScaling;
+    }
+
+    static Runnable _2D_get3(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.buttonsFadeTask;
+    }
+
+    static int _2D_get4(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.displayedHUDid;
+    }
+
+    static GestureDetectorCompat _2D_get5(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.gestureDetector;
+    }
+
+    static float _2D_get6(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.hudOffsetX;
+    }
+
+    static float _2D_get7(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.hudOffsetY;
+    }
+
+    static float _2D_get8(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.hudScaleFactor;
+    }
+
+    static boolean _2D_get9(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.isDragging;
+    }
+
+    static boolean _2D_set0(WorldViewActivity worldviewactivity, boolean flag)
+    {
+        worldviewactivity.buttonsFadeTimerStarted = flag;
+        return flag;
+    }
+
+    static float _2D_set1(WorldViewActivity worldviewactivity, float f)
+    {
+        worldviewactivity.hudOffsetX = f;
+        return f;
+    }
+
+    static float _2D_set2(WorldViewActivity worldviewactivity, float f)
+    {
+        worldviewactivity.hudOffsetY = f;
+        return f;
+    }
+
+    static float _2D_set3(WorldViewActivity worldviewactivity, float f)
+    {
+        worldviewactivity.hudScaleFactor = f;
+        return f;
+    }
+
+    static boolean _2D_set4(WorldViewActivity worldviewactivity, boolean flag)
+    {
+        worldviewactivity.isInScaling = flag;
+        return flag;
+    }
+
+    static boolean _2D_set5(WorldViewActivity worldviewactivity, boolean flag)
+    {
+        worldviewactivity.isInteracting = flag;
+        return flag;
+    }
+
+    static boolean _2D_set6(WorldViewActivity worldviewactivity, boolean flag)
+    {
+        worldviewactivity.objectDeselectTimerStarted = flag;
+        return flag;
+    }
+
+    static float _2D_set7(WorldViewActivity worldviewactivity, float f)
+    {
+        worldviewactivity.oldScaleFocusX = f;
+        return f;
+    }
+
+    static float _2D_set8(WorldViewActivity worldviewactivity, float f)
+    {
+        worldviewactivity.oldScaleFocusY = f;
+        return f;
+    }
+
+    static boolean _2D_set9(WorldViewActivity worldviewactivity, boolean flag)
+    {
+        worldviewactivity.wasInScaling = flag;
+        return flag;
+    }
+
+    static boolean _2D_wrap0(WorldViewActivity worldviewactivity)
+    {
+        return worldviewactivity.detailsVisible();
+    }
+
+    static void _2D_wrap1(WorldViewActivity worldviewactivity, int i, int j)
+    {
+        worldviewactivity.dragSelectorSetRawPosition(i, j);
+    }
+
+    static void _2D_wrap2(WorldViewActivity worldviewactivity, int i, int j)
+    {
+        worldviewactivity.selectByDragPointer(i, j);
+    }
+
+    static void _2D_wrap3(WorldViewActivity worldviewactivity)
+    {
+        worldviewactivity.startFadingButtons();
+    }
+
+    public WorldViewActivity()
+    {
+        pickedObject = null;
+        pickedIntersectInfo = null;
+        pickedAvatarNameRetriever = null;
+        mHandler = new Handler();
+        prefDrawDistance = 20;
+        chatOver3D = false;
+        lastTouchUUID = null;
+        displayedHUDid = 0;
+        prevDisplayedHUDid = 0;
+        hudScaleFactor = 1.0F;
+        hudOffsetX = 0.0F;
+        hudOffsetY = 0.0F;
+        arrowsToTurn = false;
+        camButtonEnabled = false;
+        manualCamMode = false;
+        localDrawingEnabled = false;
+        lastActivityTime = SystemClock.uptimeMillis();
+        buttonsFadeTimerStarted = false;
+        buttonsFadeAnimator = null;
+        lastObjectActivityTime = SystemClock.uptimeMillis();
+        objectDeselectTimerStarted = false;
+        isInScaling = false;
+        oldScaleFocusX = (0.0F / 0.0F);
+        oldScaleFocusY = (0.0F / 0.0F);
+        wasInScaling = false;
+        isInteracting = false;
+        isDragging = false;
+    }
+
+    private void beginCountingButtonsFade()
+    {
+        lastActivityTime = SystemClock.uptimeMillis();
+        lastObjectActivityTime = lastActivityTime;
         startFadingButtonsTimer();
     }
 
-    private void beginCountingObjectDeselect() {
-        if (this.pickedObject != null) {
-            this.lastObjectActivityTime = SystemClock.uptimeMillis();
-            if (!this.objectDeselectTimerStarted) {
-                this.objectDeselectTimerStarted = true;
-                this.mHandler.postDelayed(this.objectDeselectTimerTask, OBJECT_DESELECT_TIMEOUT_MILLIS);
+    private void beginCountingObjectDeselect()
+    {
+        if (pickedObject != null)
+        {
+            lastObjectActivityTime = SystemClock.uptimeMillis();
+            if (!objectDeselectTimerStarted)
+            {
+                objectDeselectTimerStarted = true;
+                mHandler.postDelayed(objectDeselectTimerTask, 6000L);
             }
         }
     }
 
-    private void beginDragSelection() {
-        this.isDragging = true;
+    private void beginDragSelection()
+    {
+        isDragging = true;
         removeAllDetails();
-        AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) this.dragPointer.getLayoutParams();
-        layoutParams.x = (this.dragPointerLayout.getWidth() - this.dragPointer.getWidth()) / 2;
-        layoutParams.y = (this.dragPointerLayout.getHeight() - this.dragPointer.getHeight()) / 2;
-        this.dragPointer.setLayoutParams(layoutParams);
-        selectByDragPointer(layoutParams.x, layoutParams.y);
-        this.mGLView.setOwnAvatarHidden(true);
+        android.widget.AbsoluteLayout.LayoutParams layoutparams = (android.widget.AbsoluteLayout.LayoutParams)dragPointer.getLayoutParams();
+        layoutparams.x = (dragPointerLayout.getWidth() - dragPointer.getWidth()) / 2;
+        layoutparams.y = (dragPointerLayout.getHeight() - dragPointer.getHeight()) / 2;
+        dragPointer.setLayoutParams(layoutparams);
+        selectByDragPointer(layoutparams.x, layoutparams.y);
+        mGLView.setOwnAvatarHidden(true);
         updateObjectPanel();
     }
 
-    private void chatWithObject(SLObjectInfo sLObjectInfo) {
-        if ((sLObjectInfo instanceof SLObjectAvatarInfo) && !((SLObjectAvatarInfo) sLObjectInfo).isMyAvatar() && sLObjectInfo.getId() != null) {
-            DetailsActivity.showEmbeddedDetails(this, ChatFragment.class, ChatFragment.makeSelection(ChatterID.getUserChatterID(this.userManager.getUserID(), sLObjectInfo.getId())));
+    private void chatWithObject(SLObjectInfo slobjectinfo)
+    {
+        if ((slobjectinfo instanceof SLObjectAvatarInfo) && !((SLObjectAvatarInfo)slobjectinfo).isMyAvatar() && slobjectinfo.getId() != null)
+        {
+            DetailsActivity.showEmbeddedDetails(this, com/lumiyaviewer/lumiya/ui/chat/ChatFragment, ChatFragment.makeSelection(ChatterID.getUserChatterID(userManager.getUserID(), slobjectinfo.getId())));
         }
     }
 
-    /* access modifiers changed from: private */
-    /* JADX WARNING: Code restructure failed: missing block: B:2:0x0006, code lost:
-        r0 = r0.findFragmentById(com.lumiyaviewer.lumiya.R.id.details);
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public boolean detailsVisible() {
-        /*
-            r2 = this;
-            android.support.v4.app.FragmentManager r0 = r2.getSupportFragmentManager()
-            if (r0 == 0) goto L_0x0017
-            r1 = 2131755284(0x7f100114, float:1.9141443E38)
-            android.support.v4.app.Fragment r0 = r0.findFragmentById(r1)
-            if (r0 == 0) goto L_0x0017
-            boolean r0 = r0.isVisible()
-            if (r0 == 0) goto L_0x0017
-            r0 = 1
-            return r0
-        L_0x0017:
-            r0 = 0
-            return r0
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.render.WorldViewActivity.detailsVisible():boolean");
+    private boolean detailsVisible()
+    {
+        Object obj = getSupportFragmentManager();
+        if (obj != null)
+        {
+            obj = ((FragmentManager) (obj)).findFragmentById(0x7f100114);
+            if (obj != null && ((Fragment) (obj)).isVisible())
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private void displayHUD(int i) {
-        Debug.Printf("Displaying HUD with ID %d", Integer.valueOf(i));
-        this.displayedHUDid = i;
-        this.mGLView.setDisplayedHUDid(i);
-        if (this.displayedHUDid != this.prevDisplayedHUDid) {
-            this.hudScaleFactor = 1.0f;
-            this.hudOffsetX = 0.0f;
-            this.hudOffsetY = 0.0f;
-            this.prevDisplayedHUDid = this.displayedHUDid;
+    private void displayHUD(int i)
+    {
+        Debug.Printf("Displaying HUD with ID %d", new Object[] {
+            Integer.valueOf(i)
+        });
+        displayedHUDid = i;
+        mGLView.setDisplayedHUDid(i);
+        if (displayedHUDid != prevDisplayedHUDid)
+        {
+            hudScaleFactor = 1.0F;
+            hudOffsetX = 0.0F;
+            hudOffsetY = 0.0F;
+            prevDisplayedHUDid = displayedHUDid;
         }
-        this.mGLView.setHUDScaleFactor(this.hudScaleFactor);
-        this.mGLView.setHUDOffset(this.hudOffsetX, this.hudOffsetY);
-        if (this.displayedHUDid != 0) {
-            handlePickedObject((ObjectIntersectInfo) null);
+        mGLView.setHUDScaleFactor(hudScaleFactor);
+        mGLView.setHUDOffset(hudOffsetX, hudOffsetY);
+        if (displayedHUDid != 0)
+        {
+            handlePickedObject(null);
         }
         updateObjectPanel();
     }
 
-    /* access modifiers changed from: private */
-    public void dragSelectorSetRawPosition(int i, int i2) {
-        int[] iArr = new int[2];
-        this.dragPointerLayout.getLocationOnScreen(iArr);
-        int width = i - (this.dragPointer.getWidth() / 2);
-        int height = i2 - (this.dragPointer.getHeight() / 2);
-        AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) this.dragPointer.getLayoutParams();
-        if (layoutParams != null) {
-            layoutParams.x = Math.max(Math.min(width - iArr[0], this.dragPointerLayout.getWidth() - this.dragPointer.getWidth()), 0);
-            layoutParams.y = Math.max(Math.min(height - iArr[1], this.dragPointerLayout.getHeight() - this.dragPointer.getHeight()), 0);
-            this.dragPointer.setLayoutParams(layoutParams);
-            selectByDragPointer(layoutParams.x, layoutParams.y);
+    private void dragSelectorSetRawPosition(int i, int j)
+    {
+        int ai[] = new int[2];
+        dragPointerLayout.getLocationOnScreen(ai);
+        int k = dragPointer.getWidth() / 2;
+        int l = dragPointer.getHeight() / 2;
+        android.widget.AbsoluteLayout.LayoutParams layoutparams = (android.widget.AbsoluteLayout.LayoutParams)dragPointer.getLayoutParams();
+        if (layoutparams != null)
+        {
+            layoutparams.x = Math.max(Math.min(i - k - ai[0], dragPointerLayout.getWidth() - dragPointer.getWidth()), 0);
+            layoutparams.y = Math.max(Math.min(j - l - ai[1], dragPointerLayout.getHeight() - dragPointer.getHeight()), 0);
+            dragPointer.setLayoutParams(layoutparams);
+            selectByDragPointer(layoutparams.x, layoutparams.y);
         }
     }
 
-    private void endDragSelection() {
-        this.isDragging = false;
-        this.mGLView.setOwnAvatarHidden(false);
+    private void endDragSelection()
+    {
+        isDragging = false;
+        mGLView.setOwnAvatarHidden(false);
         updateObjectPanel();
         beginCountingButtonsFade();
         beginCountingObjectDeselect();
     }
 
-    private void enterCardboardView() {
-        if (ContextCompat.checkSelfPermission(this, "android.permission.RECORD_AUDIO") != 0) {
+    private void enterCardboardView()
+    {
+        if (ContextCompat.checkSelfPermission(this, "android.permission.RECORD_AUDIO") != 0)
+        {
             Debug.Printf("Cardboard: audio permission not yet granted", new Object[0]);
-            ActivityCompat.requestPermissions(this, new String[]{"android.permission.RECORD_AUDIO"}, 100);
+            ActivityCompat.requestPermissions(this, new String[] {
+                "android.permission.RECORD_AUDIO"
+            }, 100);
+            return;
+        } else
+        {
+            Debug.Printf("Cardboard: audio permission already granted", new Object[0]);
+            startCardboardActivity();
             return;
         }
-        Debug.Printf("Cardboard: audio permission already granted", new Object[0]);
-        startCardboardActivity();
     }
 
-    private void initContentView() {
-        setContentView((int) R.layout.world_view);
-        ButterKnife.bind((Activity) this);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        this.mGLView = new WorldSurfaceView(this, this.userManager);
-        this.worldViewHolder.addView(this.mGLView);
-        this.buttonMoveForward.setOnTouchListener(this);
-        this.buttonMoveBackward.setOnTouchListener(this);
-        this.buttonTurnLeft.setOnTouchListener(this);
-        this.buttonTurnRight.setOnTouchListener(this);
-        this.buttonMoveForward.setFocusable(false);
-        this.buttonMoveBackward.setFocusable(false);
-        this.buttonTurnLeft.setFocusable(false);
-        this.buttonTurnRight.setFocusable(false);
-        this.buttonFlyUpward.setOnTouchListener(this);
-        this.buttonFlyDownward.setOnTouchListener(this);
-        this.buttonFlyUpward.setFocusable(false);
-        this.buttonFlyDownward.setFocusable(false);
-        this.voiceStatusView.setShowActiveChatterName(true);
-        this.worldViewTouchReceiver.setOnTouchListener(this.worldViewTouchListener);
-        this.objectControlsPanel.setVisibility(8);
-        View findViewById = findViewById(R.id.offline_notify_status_layout);
-        if (findViewById != null) {
-            findViewById.setBackgroundColor(Color.argb(128, 0, 0, 0));
-            int applyDimension = (int) TypedValue.applyDimension(1, 10.0f, getResources().getDisplayMetrics());
-            findViewById.setPadding(applyDimension, applyDimension, applyDimension, applyDimension);
+    private void initContentView()
+    {
+        setContentView(0x7f0400bd);
+        ButterKnife.bind(this);
+        setSupportActionBar((Toolbar)findViewById(0x7f1002e1));
+        mGLView = new WorldSurfaceView(this, userManager);
+        worldViewHolder.addView(mGLView);
+        buttonMoveForward.setOnTouchListener(this);
+        buttonMoveBackward.setOnTouchListener(this);
+        buttonTurnLeft.setOnTouchListener(this);
+        buttonTurnRight.setOnTouchListener(this);
+        buttonMoveForward.setFocusable(false);
+        buttonMoveBackward.setFocusable(false);
+        buttonTurnLeft.setFocusable(false);
+        buttonTurnRight.setFocusable(false);
+        buttonFlyUpward.setOnTouchListener(this);
+        buttonFlyDownward.setOnTouchListener(this);
+        buttonFlyUpward.setFocusable(false);
+        buttonFlyDownward.setFocusable(false);
+        voiceStatusView.setShowActiveChatterName(true);
+        worldViewTouchReceiver.setOnTouchListener(worldViewTouchListener);
+        objectControlsPanel.setVisibility(8);
+        View view = findViewById(0x7f100242);
+        if (view != null)
+        {
+            view.setBackgroundColor(Color.argb(128, 0, 0, 0));
+            int i = (int)TypedValue.applyDimension(1, 10F, getResources().getDisplayMetrics());
+            view.setPadding(i, i, i, i);
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onAgentCircuit */
-    public void m836com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref0(SLAgentCircuit sLAgentCircuit) {
-        if (sLAgentCircuit != null) {
-            this.avatarControl = sLAgentCircuit.getModules().avatarControl;
-            this.drawDistance = sLAgentCircuit.getModules().drawDistance;
-            if (this.localDrawingEnabled) {
-                this.drawDistance.Enable3DView(this.prefDrawDistance);
+    static void lambda$_2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_43728(DialogInterface dialoginterface, int i)
+    {
+        dialoginterface.cancel();
+    }
+
+    private void onAgentCircuit(SLAgentCircuit slagentcircuit)
+    {
+        if (slagentcircuit != null)
+        {
+            avatarControl = slagentcircuit.getModules().avatarControl;
+            drawDistance = slagentcircuit.getModules().drawDistance;
+            if (localDrawingEnabled)
+            {
+                drawDistance.Enable3DView(prefDrawDistance);
             }
-            if (this.camButtonEnabled) {
-                this.manualCamMode = this.avatarControl.getIsManualCamming();
+            if (camButtonEnabled)
+            {
+                manualCamMode = avatarControl.getIsManualCamming();
             }
-        } else {
-            handlePickedObject((ObjectIntersectInfo) null);
-            this.avatarControl = null;
-            this.drawDistance = null;
+        } else
+        {
+            handlePickedObject(null);
+            avatarControl = null;
+            drawDistance = null;
         }
-        this.mHandler.post(this.buttonsRestoreTask);
+        mHandler.post(buttonsRestoreTask);
         beginCountingButtonsFade();
         beginCountingObjectDeselect();
         updateObjectPanel();
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onCurrentLocation */
-    public void m839com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref3(CurrentLocationInfo currentLocationInfo2) {
-        ParcelData parcelData = currentLocationInfo2 != null ? currentLocationInfo2.parcelData() : null;
-        String name = parcelData != null ? parcelData.getName() : null;
-        if (name == null) {
-            name = getString(R.string.name_loading_title);
+    private void onCurrentLocation(CurrentLocationInfo currentlocationinfo)
+    {
+        if (currentlocationinfo != null)
+        {
+            currentlocationinfo = currentlocationinfo.parcelData();
+        } else
+        {
+            currentlocationinfo = null;
         }
-        setDefaultTitle(name, (String) null);
+        if (currentlocationinfo != null)
+        {
+            currentlocationinfo = currentlocationinfo.getName();
+        } else
+        {
+            currentlocationinfo = null;
+        }
+        if (currentlocationinfo == null)
+        {
+            currentlocationinfo = getString(0x7f0901c8);
+        }
+        setDefaultTitle(currentlocationinfo, null);
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onMyAvatarState */
-    public void m837com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref1(MyAvatarState myAvatarState2) {
+    private void onMyAvatarState(MyAvatarState myavatarstate)
+    {
         updateObjectPanel();
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onPickedAvatarNameUpdated */
-    public void m842com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref6(ChatterNameRetriever chatterNameRetriever) {
-        if (chatterNameRetriever == this.pickedAvatarNameRetriever) {
+    private void onPickedAvatarNameUpdated(ChatterNameRetriever chatternameretriever)
+    {
+        if (chatternameretriever == pickedAvatarNameRetriever)
+        {
             updateObjectPanel();
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onSelectedObjectProfile */
-    public void m838com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref2(SLObjectProfileData sLObjectProfileData) {
-        Debug.Printf("got selected object profile: %s", sLObjectProfileData);
+    private void onSelectedObjectProfile(SLObjectProfileData slobjectprofiledata)
+    {
+        Debug.Printf("got selected object profile: %s", new Object[] {
+            slobjectprofiledata
+        });
         updateObjectPanel();
-        if (sLObjectProfileData != null) {
-            SLAgentCircuit data = this.agentCircuit.getData();
-            if (sLObjectProfileData.isPayable() && sLObjectProfileData.payInfo() == null && data != null) {
-                data.DoRequestPayPrice(sLObjectProfileData.objectUUID());
+        if (slobjectprofiledata != null)
+        {
+            SLAgentCircuit slagentcircuit = (SLAgentCircuit)agentCircuit.getData();
+            if (slobjectprofiledata.isPayable() && slobjectprofiledata.payInfo() == null && slagentcircuit != null)
+            {
+                slagentcircuit.DoRequestPayPrice(slobjectprofiledata.objectUUID());
             }
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onVoiceActiveChatter */
-    public void m840com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref4(ChatterID chatterID) {
-        if (this.voiceStatusView != null) {
-            this.voiceStatusView.setChatterID(chatterID);
+    private void onVoiceActiveChatter(ChatterID chatterid)
+    {
+        if (voiceStatusView != null)
+        {
+            voiceStatusView.setChatterID(chatterid);
         }
-        if (chatterID == null || this.userManager == null) {
-            this.voiceChatInfo.unsubscribe();
-        } else {
-            this.voiceChatInfo.subscribe(this.userManager.getVoiceChatInfo(), chatterID);
+        if (chatterid != null && userManager != null)
+        {
+            voiceChatInfo.subscribe(userManager.getVoiceChatInfo(), chatterid);
+            return;
+        } else
+        {
+            voiceChatInfo.unsubscribe();
+            return;
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onVoiceChatInfo */
-    public void m841com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref5(VoiceChatInfo voiceChatInfo2) {
+    private void onVoiceChatInfo(VoiceChatInfo voicechatinfo)
+    {
     }
 
-    /* access modifiers changed from: private */
-    public void selectByDragPointer(int i, int i2) {
-        int[] iArr = new int[2];
-        this.dragPointerLayout.getLocationOnScreen(iArr);
-        int[] iArr2 = new int[2];
-        this.worldViewHolder.getLocationOnScreen(iArr2);
-        this.mGLView.pickObjectHover((float) (((iArr[0] + (this.dragPointer.getWidth() / 2)) + i) - iArr2[0]), (float) (((iArr[1] + (this.dragPointer.getHeight() / 2)) + i2) - iArr2[1]));
+    private void selectByDragPointer(int i, int j)
+    {
+        int ai[] = new int[2];
+        dragPointerLayout.getLocationOnScreen(ai);
+        int k = ai[0];
+        int l = dragPointer.getWidth() / 2;
+        int i1 = ai[1];
+        int j1 = dragPointer.getHeight() / 2;
+        ai = new int[2];
+        worldViewHolder.getLocationOnScreen(ai);
+        mGLView.pickObjectHover((k + l + i) - ai[0], (i1 + j1 + j) - ai[1]);
     }
 
-    private void selectHUDtoDisplay() {
+    private void selectHUDtoDisplay()
+    {
+        ArrayList arraylist;
+        Object obj;
+        arraylist = new ArrayList();
+        obj = (SLAgentCircuit)agentCircuit.getData();
+        if (obj == null)
+        {
+            break MISSING_BLOCK_LABEL_188;
+        }
+        obj = ((SLAgentCircuit) (obj)).getGridConnection().parcelInfo.getAgentAvatar();
+        if (obj == null)
+        {
+            break MISSING_BLOCK_LABEL_152;
+        }
+        obj = ((SLObjectAvatarInfo) (obj)).treeNode.iterator();
+_L2:
+        SLObjectInfo slobjectinfo;
         int i;
-        SLAttachmentPoint sLAttachmentPoint;
-        ArrayList arrayList = new ArrayList();
-        SLAgentCircuit data = this.agentCircuit.getData();
-        if (data != null) {
-            SLObjectAvatarInfo agentAvatar = data.getGridConnection().parcelInfo.getAgentAvatar();
-            if (agentAvatar != null) {
-                try {
-                    for (SLObjectInfo sLObjectInfo : agentAvatar.treeNode) {
-                        if (!Strings.nullToEmpty(sLObjectInfo.getName()).startsWith("#") && (i = sLObjectInfo.attachmentID) >= 0 && i < 56 && (sLAttachmentPoint = SLAttachmentPoint.attachmentPoints[i]) != null && sLAttachmentPoint.isHUD) {
-                            arrayList.add(new SelectableAttachment(sLObjectInfo.localID, sLObjectInfo.name));
-                        }
-                    }
-                } catch (NoSuchElementException e) {
-                    Debug.Warning(e);
+        do
+        {
+            do
+            {
+                if (!((Iterator) (obj)).hasNext())
+                {
+                    break MISSING_BLOCK_LABEL_152;
                 }
+                slobjectinfo = (SLObjectInfo)((Iterator) (obj)).next();
+            } while (Strings.nullToEmpty(slobjectinfo.getName()).startsWith("#"));
+            i = slobjectinfo.attachmentID;
+        } while (i < 0 || i >= 56);
+        SLAttachmentPoint slattachmentpoint = SLAttachmentPoint.attachmentPoints[i];
+        if (slattachmentpoint == null) goto _L2; else goto _L1
+_L1:
+        if (!slattachmentpoint.isHUD) goto _L2; else goto _L3
+_L3:
+        arraylist.add(new SelectableAttachment(slobjectinfo.localID, slobjectinfo.name));
+          goto _L2
+        NoSuchElementException nosuchelementexception;
+        nosuchelementexception;
+        Debug.Warning(nosuchelementexception);
+        if (!arraylist.isEmpty())
+        {
+            if (arraylist.size() != 1)
+            {
+                break MISSING_BLOCK_LABEL_189;
             }
-            if (arrayList.isEmpty()) {
-                return;
-            }
-            if (arrayList.size() == 1) {
-                displayHUD(((SelectableAttachment) arrayList.get(0)).getLocalID());
-                return;
-            }
-            ArrayAdapter arrayAdapter = new ArrayAdapter(this, 17367043, arrayList);
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle((int) R.string.select_hud_title);
-            builder.setAdapter(arrayAdapter, new DialogInterface.OnClickListener(this, arrayList) {
-
-                /* renamed from: -$f0 */
-                private final /* synthetic */ Object f530$f0;
-
-                /* renamed from: -$f1 */
-                private final /* synthetic */ Object f531$f1;
-
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.10.$m$0(android.content.DialogInterface, int):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.10.$m$0(android.content.DialogInterface, int):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.10.onClick(android.content.DialogInterface, int):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.10.onClick(android.content.DialogInterface, int):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-            });
-            builder.create().show();
+            displayHUD(((SelectableAttachment)arraylist.get(0)).getLocalID());
         }
+        return;
+        ArrayAdapter arrayadapter = new ArrayAdapter(this, 0x1090003, arraylist);
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+        builder.setTitle(0x7f0902f3);
+        builder.setAdapter(arrayadapter, new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls10(this, arraylist));
+        builder.create().show();
+        return;
     }
 
-    private void showObjectInfo(SLObjectInfo sLObjectInfo) {
-        if (sLObjectInfo.getId() != null && this.userManager != null) {
-            if (!sLObjectInfo.isAvatar()) {
-                DetailsActivity.showEmbeddedDetails(this, ObjectDetailsFragment.class, ObjectDetailsFragment.makeSelection(this.userManager.getUserID(), sLObjectInfo.localID));
-            } else if (sLObjectInfo instanceof SLObjectAvatarInfo) {
-                DetailsActivity.showEmbeddedDetails(this, UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(this.userManager.getUserID(), sLObjectInfo.getId())));
+    private void showObjectInfo(SLObjectInfo slobjectinfo)
+    {
+        if (slobjectinfo.getId() != null && userManager != null)
+        {
+            if (!slobjectinfo.isAvatar())
+            {
+                DetailsActivity.showEmbeddedDetails(this, com/lumiyaviewer/lumiya/ui/objects/ObjectDetailsFragment, ObjectDetailsFragment.makeSelection(userManager.getUserID(), slobjectinfo.localID));
+            } else
+            if (slobjectinfo instanceof SLObjectAvatarInfo)
+            {
+                DetailsActivity.showEmbeddedDetails(this, com/lumiyaviewer/lumiya/ui/chat/profiles/UserProfileFragment, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(userManager.getUserID(), slobjectinfo.getId())));
+                return;
             }
         }
     }
 
-    private void startCardboardActivity() {
-        if (this.userManager != null) {
-            Intent intent = new Intent(this, CardboardTransitionActivity.class);
-            ActivityUtils.setActiveAgentID(intent, this.userManager.getUserID());
-            intent.addFlags(16777216);
+    private void startCardboardActivity()
+    {
+        if (userManager != null)
+        {
+            Intent intent = new Intent(this, com/lumiyaviewer/lumiya/ui/render/CardboardTransitionActivity);
+            ActivityUtils.setActiveAgentID(intent, userManager.getUserID());
+            intent.addFlags(0x1000000);
             startActivity(intent);
         }
         finish();
     }
 
-    /* access modifiers changed from: private */
-    public void startFadingButtons() {
-        if (Build.VERSION.SDK_INT >= 11 && this.buttonsFadeAnimator != null) {
-            this.buttonsFadeAnimator.start();
+    private void startFadingButtons()
+    {
+        if (android.os.Build.VERSION.SDK_INT >= 11 && buttonsFadeAnimator != null)
+        {
+            buttonsFadeAnimator.start();
         }
     }
 
-    private void startFadingButtonsTimer() {
-        if (!this.buttonsFadeTimerStarted) {
+    private void startFadingButtonsTimer()
+    {
+        if (!buttonsFadeTimerStarted)
+        {
             Debug.Printf("ButtonsFade: starting timer", new Object[0]);
-            this.buttonsFadeTimerStarted = true;
-            this.mHandler.postDelayed(this.buttonsFadeTask, BUTTONS_FADE_TIMEOUT_MILLIS);
+            buttonsFadeTimerStarted = true;
+            mHandler.postDelayed(buttonsFadeTask, 7500L);
         }
     }
 
-    private void stopAvatarAnimations() {
-        if (this.avatarControl != null) {
-            this.avatarControl.StopAvatarAnimations();
+    private void stopAvatarAnimations()
+    {
+        if (avatarControl != null)
+        {
+            avatarControl.StopAvatarAnimations();
         }
     }
 
-    private void takeScreenshot() {
-        Toast.makeText(this, R.string.taking_screenshot, 0).show();
-        this.mGLView.takeScreenshot();
+    private void takeScreenshot()
+    {
+        Toast.makeText(this, 0x7f090338, 0).show();
+        mGLView.takeScreenshot();
     }
 
-    private void touchObject(SLObjectInfo sLObjectInfo, ObjectIntersectInfo objectIntersectInfo) {
-        SLAgentCircuit data = this.agentCircuit.getData();
-        if (data != null && sLObjectInfo != null) {
-            if (!sLObjectInfo.isAvatar()) {
-                this.lastTouchUUID = sLObjectInfo.getId();
-                boolean z = false;
-                if (objectIntersectInfo != null) {
-                    z = objectIntersectInfo.intersectInfo.faceKnown;
+    private void touchObject(SLObjectInfo slobjectinfo, ObjectIntersectInfo objectintersectinfo)
+    {
+        SLAgentCircuit slagentcircuit = (SLAgentCircuit)agentCircuit.getData();
+        if (slagentcircuit == null || slobjectinfo == null) goto _L2; else goto _L1
+_L1:
+        if (slobjectinfo.isAvatar()) goto _L4; else goto _L3
+_L3:
+        boolean flag;
+        lastTouchUUID = slobjectinfo.getId();
+        flag = false;
+        if (objectintersectinfo != null)
+        {
+            flag = objectintersectinfo.intersectInfo.faceKnown;
+        }
+        if (!flag) goto _L6; else goto _L5
+_L5:
+        LLVector3 llvector3 = slobjectinfo.getAbsolutePosition();
+        slagentcircuit.TouchObjectFace(slobjectinfo, objectintersectinfo.intersectInfo.faceID, llvector3.x, llvector3.y, llvector3.z, objectintersectinfo.intersectInfo.u, objectintersectinfo.intersectInfo.v, objectintersectinfo.intersectInfo.s, objectintersectinfo.intersectInfo.t);
+_L2:
+        return;
+_L6:
+        slagentcircuit.TouchObject(slobjectinfo.localID);
+        return;
+_L4:
+        if (slobjectinfo.hasTouchableChildren())
+        {
+            DetailsActivity.showEmbeddedDetails(this, com/lumiyaviewer/lumiya/ui/objects/TouchableObjectsFragment, TouchableObjectsFragment.makeSelection(userManager.getUserID(), slobjectinfo.getId()));
+            return;
+        }
+        if (true) goto _L2; else goto _L7
+_L7:
+    }
+
+    private void updateObjectPanel()
+    {
+        Object obj;
+        int j;
+        int l;
+        boolean flag1;
+        boolean flag2;
+        boolean flag3;
+        boolean flag4;
+        boolean flag8;
+        obj = (MyAvatarState)myAvatarState.getData();
+        Object obj1 = (SLAgentCircuit)agentCircuit.getData();
+        boolean flag;
+        boolean flag6;
+        if (obj1 != null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (obj != null)
+        {
+            flag1 = ((MyAvatarState) (obj)).isSitting();
+        } else
+        {
+            flag1 = false;
+        }
+        if (obj != null)
+        {
+            flag4 = ((MyAvatarState) (obj)).hasHUDs();
+        } else
+        {
+            flag4 = false;
+        }
+        if (obj != null)
+        {
+            flag6 = ((MyAvatarState) (obj)).isFlying();
+        } else
+        {
+            flag6 = false;
+        }
+        if (obj1 != null)
+        {
+            flag2 = ((SLAgentCircuit) (obj1)).getModules().rlvController.canStandUp();
+        } else
+        {
+            flag2 = false;
+        }
+        if (obj1 != null)
+        {
+            flag3 = ((SLAgentCircuit) (obj1)).getModules().rlvController.canSit();
+        } else
+        {
+            flag3 = false;
+        }
+        if (pickedObject != null)
+        {
+            j = 1;
+        } else
+        {
+            j = 0;
+        }
+        Debug.Printf("isSitting %b, isFlying %b, hasHUDs %b, isDragging %b", new Object[] {
+            Boolean.valueOf(flag1), Boolean.valueOf(flag6), Boolean.valueOf(flag4), Boolean.valueOf(isDragging)
+        });
+        obj1 = dragPointerLayout;
+        if (isDragging)
+        {
+            l = 0;
+        } else
+        {
+            l = 4;
+        }
+        ((ViewGroup) (obj1)).setVisibility(l);
+        obj1 = dragPointer;
+        if (isDragging)
+        {
+            l = 0;
+        } else
+        {
+            l = 4;
+        }
+        ((View) (obj1)).setVisibility(l);
+        obj1 = flyButtonsLayout;
+        if (!flag1 && !(flag ^ true)) goto _L2; else goto _L1
+_L1:
+        if (camButtonEnabled)
+        {
+            flag8 = manualCamMode;
+        } else
+        {
+            flag8 = false;
+        }
+        if (flag8 ^ true) goto _L3; else goto _L2
+_L2:
+        if (!isDragging && j == 0) goto _L4; else goto _L3
+_L3:
+        l = 8;
+_L10:
+        ((LinearLayout) (obj1)).setVisibility(l);
+        obj1 = moveButtonsLayout;
+        if (!flag1 && !(flag ^ true)) goto _L6; else goto _L5
+_L5:
+        if (camButtonEnabled)
+        {
+            flag8 = manualCamMode;
+        } else
+        {
+            flag8 = false;
+        }
+        if (flag8 ^ true) goto _L7; else goto _L6
+_L6:
+        if (!isDragging && j == 0) goto _L8; else goto _L7
+_L7:
+        l = 4;
+        break MISSING_BLOCK_LABEL_295;
+_L4:
+        l = 0;
+        continue; /* Loop/switch isn't completed */
+_L8:
+        l = 0;
+        ((View) (obj1)).setVisibility(l);
+        obj1 = buttonStandUp;
+        if (flag2 && flag1 && isDragging ^ true)
+        {
+            l = 0;
+        } else
+        {
+            l = 8;
+        }
+        ((ImageButton) (obj1)).setVisibility(l);
+        obj1 = buttonHUD;
+        if (flag4 && isDragging ^ true && flag)
+        {
+            l = 0;
+        } else
+        {
+            l = 8;
+        }
+        ((Button) (obj1)).setVisibility(l);
+        obj1 = buttonFlyDownward;
+        if (flag6 && flag || camButtonEnabled && manualCamMode)
+        {
+            l = 0;
+        } else
+        {
+            l = 8;
+        }
+        ((ImageButton) (obj1)).setVisibility(l);
+        obj1 = buttonStopFlying;
+        if (flag6 && flag)
+        {
+label0:
+            {
+                if (camButtonEnabled)
+                {
+                    flag4 = manualCamMode;
+                } else
+                {
+                    flag4 = false;
                 }
-                if (z) {
-                    LLVector3 absolutePosition = sLObjectInfo.getAbsolutePosition();
-                    data.TouchObjectFace(sLObjectInfo, objectIntersectInfo.intersectInfo.faceID, absolutePosition.x, absolutePosition.y, absolutePosition.z, objectIntersectInfo.intersectInfo.u, objectIntersectInfo.intersectInfo.v, objectIntersectInfo.intersectInfo.s, objectIntersectInfo.intersectInfo.t);
-                    return;
+                if (flag4 ^ true)
+                {
+                    l = 0;
+                    break label0;
                 }
-                data.TouchObject(sLObjectInfo.localID);
-            } else if (sLObjectInfo.hasTouchableChildren()) {
-                DetailsActivity.showEmbeddedDetails(this, TouchableObjectsFragment.class, TouchableObjectsFragment.makeSelection(this.userManager.getUserID(), sLObjectInfo.getId()));
             }
         }
+        l = 8;
+        ((ImageButton) (obj1)).setVisibility(l);
+        obj1 = buttonCamOn;
+        if (camButtonEnabled && manualCamMode ^ true && isDragging ^ true && j ^ true)
+        {
+            l = 0;
+        } else
+        {
+            l = 8;
+        }
+        ((ImageButton) (obj1)).setVisibility(l);
+        obj1 = buttonCamOff;
+        if (camButtonEnabled && manualCamMode && isDragging ^ true && j ^ true)
+        {
+            j = 0;
+        } else
+        {
+            j = 8;
+        }
+        ((ImageButton) (obj1)).setVisibility(j);
+        if (pickedObject == null || flag ^ true)
+        {
+            objectControlsPanel.setVisibility(8);
+            return;
+        }
+label1:
+        {
+            {
+                objectControlsPanel.setVisibility(0);
+                boolean flag7 = pickedObject.isTouchable();
+                boolean flag5 = flag7;
+                if (pickedObject.isAvatar())
+                {
+                    flag5 = flag7 | pickedObject.hasTouchableChildren();
+                }
+                Object obj2 = objectTouchButton;
+                int i;
+                int k;
+                if (flag5)
+                {
+                    i = 0;
+                } else
+                {
+                    i = 8;
+                }
+                ((ImageButton) (obj2)).setVisibility(i);
+                flag5 = pickedObject.isAvatar();
+                if (flag1 && pickedObject.localID == ((MyAvatarState) (obj)).sittingOn())
+                {
+                    i = 1;
+                } else
+                {
+                    i = 0;
+                }
+                if (!flag5)
+                {
+                    k = i ^ true;
+                } else
+                {
+                    k = 0;
+                }
+                if (flag5)
+                {
+                    i = 0;
+                }
+                obj = objectSitButton;
+                if (k != 0 && flag3)
+                {
+                    k = 0;
+                } else
+                {
+                    k = 8;
+                }
+                ((ImageButton) (obj)).setVisibility(k);
+                obj = objectStandButton;
+                if (i != 0 && flag2)
+                {
+                    i = 0;
+                } else
+                {
+                    i = 8;
+                }
+                ((ImageButton) (obj)).setVisibility(i);
+                obj = objectChatButton;
+                if (flag5)
+                {
+                    i = 0;
+                } else
+                {
+                    i = 8;
+                }
+                ((ImageButton) (obj)).setVisibility(i);
+                obj = avatarIconView;
+                if (flag5)
+                {
+                    i = 0;
+                } else
+                {
+                    i = 8;
+                }
+                ((ImageView) (obj)).setVisibility(i);
+                obj = objectPayButton;
+                if (pickedObject.isPayable() || pickedObject.saleType != 0)
+                {
+                    i = 0;
+                } else
+                {
+                    i = 8;
+                }
+                ((ImageButton) (obj)).setVisibility(i);
+                if (!pickedObject.isAvatar())
+                {
+                    break label1;
+                }
+                if (pickedAvatarNameRetriever != null)
+                {
+                    obj = pickedAvatarNameRetriever.getResolvedName();
+                } else
+                {
+                    obj = null;
+                }
+            }
+            obj2 = obj;
+            if (obj == null)
+            {
+                obj2 = getString(0x7f090239);
+            }
+            objectNameTextView.setText(((CharSequence) (obj2)));
+            return;
+        }
+        obj = (SLObjectProfileData)selectedObjectProfile.getData();
+        if (obj != null && Objects.equal(((SLObjectProfileData) (obj)).objectUUID(), pickedObject.getId()))
+        {
+            obj2 = (String)((SLObjectProfileData) (obj)).name().orNull();
+        } else
+        {
+            obj2 = null;
+        }
+        obj = obj2;
+        if (obj2 == null)
+        {
+            obj = pickedObject.name;
+        }
+        if (false)
+        {
+        } else
+        {
+            break MISSING_BLOCK_LABEL_925;
+        }
+        if (true) goto _L10; else goto _L9
+_L9:
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:30:0x0092, code lost:
-        if ((!(r12.camButtonEnabled ? r12.manualCamMode : false)) == false) goto L_0x0094;
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:43:0x00af, code lost:
-        if ((!(!r12.camButtonEnabled ? r12.manualCamMode : false)) != false) goto L_0x00b7;
-     */
-    /* JADX WARNING: Removed duplicated region for block: B:111:0x0169  */
-    /* JADX WARNING: Removed duplicated region for block: B:116:0x017b  */
-    /* JADX WARNING: Removed duplicated region for block: B:118:0x0182  */
-    /* JADX WARNING: Removed duplicated region for block: B:119:0x0185  */
-    /* JADX WARNING: Removed duplicated region for block: B:120:0x0188  */
-    /* JADX WARNING: Removed duplicated region for block: B:41:0x00ab  */
-    /* JADX WARNING: Removed duplicated region for block: B:73:0x00f7  */
-    /* JADX WARNING: Removed duplicated region for block: B:76:0x00fd  */
-    /* JADX WARNING: Removed duplicated region for block: B:85:0x0117  */
-    /* JADX WARNING: Removed duplicated region for block: B:94:0x012f  */
-    /* JADX WARNING: Removed duplicated region for block: B:99:0x013b  */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    private void updateObjectPanel() {
-        /*
-            r12 = this;
-            com.lumiyaviewer.lumiya.react.SubscriptionData<com.lumiyaviewer.lumiya.react.SubscriptionSingleKey, com.lumiyaviewer.lumiya.slproto.users.manager.MyAvatarState> r0 = r12.myAvatarState
-            java.lang.Object r0 = r0.getData()
-            com.lumiyaviewer.lumiya.slproto.users.manager.MyAvatarState r0 = (com.lumiyaviewer.lumiya.slproto.users.manager.MyAvatarState) r0
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.util.UUID, com.lumiyaviewer.lumiya.slproto.SLAgentCircuit> r1 = r12.agentCircuit
-            java.lang.Object r1 = r1.getData()
-            com.lumiyaviewer.lumiya.slproto.SLAgentCircuit r1 = (com.lumiyaviewer.lumiya.slproto.SLAgentCircuit) r1
-            if (r1 == 0) goto L_0x0143
-            r2 = 1
-            r8 = r2
-        L_0x0014:
-            if (r0 == 0) goto L_0x0147
-            boolean r2 = r0.isSitting()
-            r7 = r2
-        L_0x001b:
-            if (r0 == 0) goto L_0x014b
-            boolean r2 = r0.hasHUDs()
-            r6 = r2
-        L_0x0022:
-            if (r0 == 0) goto L_0x014f
-            boolean r2 = r0.isFlying()
-            r5 = r2
-        L_0x0029:
-            if (r1 == 0) goto L_0x0153
-            com.lumiyaviewer.lumiya.slproto.modules.SLModules r2 = r1.getModules()
-            com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVController r2 = r2.rlvController
-            boolean r2 = r2.canStandUp()
-            r4 = r2
-        L_0x0036:
-            if (r1 == 0) goto L_0x0157
-            com.lumiyaviewer.lumiya.slproto.modules.SLModules r1 = r1.getModules()
-            com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVController r1 = r1.rlvController
-            boolean r1 = r1.canSit()
-        L_0x0042:
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            if (r2 == 0) goto L_0x015a
-            r2 = 1
-        L_0x0047:
-            java.lang.String r3 = "isSitting %b, isFlying %b, hasHUDs %b, isDragging %b"
-            r9 = 4
-            java.lang.Object[] r9 = new java.lang.Object[r9]
-            java.lang.Boolean r10 = java.lang.Boolean.valueOf(r7)
-            r11 = 0
-            r9[r11] = r10
-            java.lang.Boolean r10 = java.lang.Boolean.valueOf(r5)
-            r11 = 1
-            r9[r11] = r10
-            java.lang.Boolean r10 = java.lang.Boolean.valueOf(r6)
-            r11 = 2
-            r9[r11] = r10
-            boolean r10 = r12.isDragging
-            java.lang.Boolean r10 = java.lang.Boolean.valueOf(r10)
-            r11 = 3
-            r9[r11] = r10
-            com.lumiyaviewer.lumiya.Debug.Printf(r3, r9)
-            android.view.ViewGroup r9 = r12.dragPointerLayout
-            boolean r3 = r12.isDragging
-            if (r3 == 0) goto L_0x015d
-            r3 = 0
-        L_0x0075:
-            r9.setVisibility(r3)
-            android.view.View r9 = r12.dragPointer
-            boolean r3 = r12.isDragging
-            if (r3 == 0) goto L_0x0160
-            r3 = 0
-        L_0x007f:
-            r9.setVisibility(r3)
-            android.widget.LinearLayout r9 = r12.flyButtonsLayout
-            if (r7 != 0) goto L_0x008a
-            r3 = r8 ^ 1
-            if (r3 == 0) goto L_0x0094
-        L_0x008a:
-            boolean r3 = r12.camButtonEnabled
-            if (r3 == 0) goto L_0x0163
-            boolean r3 = r12.manualCamMode
-        L_0x0090:
-            r3 = r3 ^ 1
-            if (r3 != 0) goto L_0x009a
-        L_0x0094:
-            boolean r3 = r12.isDragging
-            if (r3 != 0) goto L_0x009a
-            if (r2 == 0) goto L_0x0166
-        L_0x009a:
-            r3 = 8
-        L_0x009c:
-            r9.setVisibility(r3)
-            android.view.View r9 = r12.moveButtonsLayout
-            if (r7 != 0) goto L_0x00a7
-            r3 = r8 ^ 1
-            if (r3 == 0) goto L_0x00b1
-        L_0x00a7:
-            boolean r3 = r12.camButtonEnabled
-            if (r3 == 0) goto L_0x0169
-            boolean r3 = r12.manualCamMode
-        L_0x00ad:
-            r3 = r3 ^ 1
-            if (r3 != 0) goto L_0x00b7
-        L_0x00b1:
-            boolean r3 = r12.isDragging
-            if (r3 != 0) goto L_0x00b7
-            if (r2 == 0) goto L_0x016c
-        L_0x00b7:
-            r3 = 4
-        L_0x00b8:
-            r9.setVisibility(r3)
-            android.widget.ImageButton r9 = r12.buttonStandUp
-            if (r4 == 0) goto L_0x016f
-            if (r7 == 0) goto L_0x016f
-            boolean r3 = r12.isDragging
-            r3 = r3 ^ 1
-            if (r3 == 0) goto L_0x016f
-            r3 = 0
-        L_0x00c8:
-            r9.setVisibility(r3)
-            android.widget.Button r9 = r12.buttonHUD
-            if (r6 == 0) goto L_0x0173
-            boolean r3 = r12.isDragging
-            r3 = r3 ^ 1
-            if (r3 == 0) goto L_0x0173
-            if (r8 == 0) goto L_0x0173
-            r3 = 0
-        L_0x00d8:
-            r9.setVisibility(r3)
-            android.widget.ImageButton r6 = r12.buttonFlyDownward
-            if (r5 == 0) goto L_0x00e1
-            if (r8 != 0) goto L_0x00e9
-        L_0x00e1:
-            boolean r3 = r12.camButtonEnabled
-            if (r3 == 0) goto L_0x0177
-            boolean r3 = r12.manualCamMode
-            if (r3 == 0) goto L_0x0177
-        L_0x00e9:
-            r3 = 0
-        L_0x00ea:
-            r6.setVisibility(r3)
-            android.widget.ImageButton r6 = r12.buttonStopFlying
-            if (r5 == 0) goto L_0x017e
-            if (r8 == 0) goto L_0x017e
-            boolean r3 = r12.camButtonEnabled
-            if (r3 == 0) goto L_0x017b
-            boolean r3 = r12.manualCamMode
-        L_0x00f9:
-            r3 = r3 ^ 1
-            if (r3 == 0) goto L_0x017e
-            r3 = 0
-        L_0x00fe:
-            r6.setVisibility(r3)
-            android.widget.ImageButton r5 = r12.buttonCamOn
-            boolean r3 = r12.camButtonEnabled
-            if (r3 == 0) goto L_0x0182
-            boolean r3 = r12.manualCamMode
-            r3 = r3 ^ 1
-            if (r3 == 0) goto L_0x0182
-            boolean r3 = r12.isDragging
-            r3 = r3 ^ 1
-            if (r3 == 0) goto L_0x0182
-            r3 = r2 ^ 1
-            if (r3 == 0) goto L_0x0182
-            r3 = 0
-        L_0x0118:
-            r5.setVisibility(r3)
-            android.widget.ImageButton r3 = r12.buttonCamOff
-            boolean r5 = r12.camButtonEnabled
-            if (r5 == 0) goto L_0x0185
-            boolean r5 = r12.manualCamMode
-            if (r5 == 0) goto L_0x0185
-            boolean r5 = r12.isDragging
-            r5 = r5 ^ 1
-            if (r5 == 0) goto L_0x0185
-            r2 = r2 ^ 1
-            if (r2 == 0) goto L_0x0185
-            r2 = 0
-        L_0x0130:
-            r3.setVisibility(r2)
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            if (r2 == 0) goto L_0x013b
-            r2 = r8 ^ 1
-            if (r2 == 0) goto L_0x0188
-        L_0x013b:
-            android.view.View r0 = r12.objectControlsPanel
-            r1 = 8
-            r0.setVisibility(r1)
-        L_0x0142:
-            return
-        L_0x0143:
-            r2 = 0
-            r8 = r2
-            goto L_0x0014
-        L_0x0147:
-            r2 = 0
-            r7 = r2
-            goto L_0x001b
-        L_0x014b:
-            r2 = 0
-            r6 = r2
-            goto L_0x0022
-        L_0x014f:
-            r2 = 0
-            r5 = r2
-            goto L_0x0029
-        L_0x0153:
-            r2 = 0
-            r4 = r2
-            goto L_0x0036
-        L_0x0157:
-            r1 = 0
-            goto L_0x0042
-        L_0x015a:
-            r2 = 0
-            goto L_0x0047
-        L_0x015d:
-            r3 = 4
-            goto L_0x0075
-        L_0x0160:
-            r3 = 4
-            goto L_0x007f
-        L_0x0163:
-            r3 = 0
-            goto L_0x0090
-        L_0x0166:
-            r3 = 0
-            goto L_0x009c
-        L_0x0169:
-            r3 = 0
-            goto L_0x00ad
-        L_0x016c:
-            r3 = 0
-            goto L_0x00b8
-        L_0x016f:
-            r3 = 8
-            goto L_0x00c8
-        L_0x0173:
-            r3 = 8
-            goto L_0x00d8
-        L_0x0177:
-            r3 = 8
-            goto L_0x00ea
-        L_0x017b:
-            r3 = 0
-            goto L_0x00f9
-        L_0x017e:
-            r3 = 8
-            goto L_0x00fe
-        L_0x0182:
-            r3 = 8
-            goto L_0x0118
-        L_0x0185:
-            r2 = 8
-            goto L_0x0130
-        L_0x0188:
-            android.view.View r2 = r12.objectControlsPanel
-            r3 = 0
-            r2.setVisibility(r3)
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            boolean r2 = r2.isTouchable()
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r3 = r12.pickedObject
-            boolean r3 = r3.isAvatar()
-            if (r3 == 0) goto L_0x01a3
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r3 = r12.pickedObject
-            boolean r3 = r3.hasTouchableChildren()
-            r2 = r2 | r3
-        L_0x01a3:
-            android.widget.ImageButton r3 = r12.objectTouchButton
-            if (r2 == 0) goto L_0x021f
-            r2 = 0
-        L_0x01a8:
-            r3.setVisibility(r2)
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            boolean r3 = r2.isAvatar()
-            if (r7 == 0) goto L_0x0222
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r2 = r12.pickedObject
-            int r2 = r2.localID
-            int r0 = r0.sittingOn()
-            if (r2 != r0) goto L_0x0222
-            r0 = 1
-        L_0x01be:
-            if (r3 != 0) goto L_0x0224
-            r2 = r0 ^ 1
-        L_0x01c2:
-            if (r3 != 0) goto L_0x0226
-        L_0x01c4:
-            android.widget.ImageButton r5 = r12.objectSitButton
-            if (r2 == 0) goto L_0x0228
-            if (r1 == 0) goto L_0x0228
-            r1 = 0
-        L_0x01cb:
-            r5.setVisibility(r1)
-            android.widget.ImageButton r1 = r12.objectStandButton
-            if (r0 == 0) goto L_0x022b
-            if (r4 == 0) goto L_0x022b
-            r0 = 0
-        L_0x01d5:
-            r1.setVisibility(r0)
-            android.widget.ImageButton r1 = r12.objectChatButton
-            if (r3 == 0) goto L_0x022e
-            r0 = 0
-        L_0x01dd:
-            r1.setVisibility(r0)
-            android.widget.ImageView r1 = r12.avatarIconView
-            if (r3 == 0) goto L_0x0231
-            r0 = 0
-        L_0x01e5:
-            r1.setVisibility(r0)
-            android.widget.ImageButton r1 = r12.objectPayButton
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            boolean r0 = r0.isPayable()
-            if (r0 != 0) goto L_0x01f8
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            byte r0 = r0.saleType
-            if (r0 == 0) goto L_0x0234
-        L_0x01f8:
-            r0 = 0
-        L_0x01f9:
-            r1.setVisibility(r0)
-            r1 = 0
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            boolean r0 = r0.isAvatar()
-            if (r0 == 0) goto L_0x0237
-            com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever r0 = r12.pickedAvatarNameRetriever
-            if (r0 == 0) goto L_0x0264
-            com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever r0 = r12.pickedAvatarNameRetriever
-            java.lang.String r0 = r0.getResolvedName()
-        L_0x020f:
-            if (r0 != 0) goto L_0x0218
-            r0 = 2131296825(0x7f090239, float:1.8211578E38)
-            java.lang.String r0 = r12.getString(r0)
-        L_0x0218:
-            android.widget.TextView r1 = r12.objectNameTextView
-            r1.setText(r0)
-            goto L_0x0142
-        L_0x021f:
-            r2 = 8
-            goto L_0x01a8
-        L_0x0222:
-            r0 = 0
-            goto L_0x01be
-        L_0x0224:
-            r2 = 0
-            goto L_0x01c2
-        L_0x0226:
-            r0 = 0
-            goto L_0x01c4
-        L_0x0228:
-            r1 = 8
-            goto L_0x01cb
-        L_0x022b:
-            r0 = 8
-            goto L_0x01d5
-        L_0x022e:
-            r0 = 8
-            goto L_0x01dd
-        L_0x0231:
-            r0 = 8
-            goto L_0x01e5
-        L_0x0234:
-            r0 = 8
-            goto L_0x01f9
-        L_0x0237:
-            com.lumiyaviewer.lumiya.react.SubscriptionData<java.lang.Integer, com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData> r0 = r12.selectedObjectProfile
-            java.lang.Object r0 = r0.getData()
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData r0 = (com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData) r0
-            if (r0 == 0) goto L_0x0262
-            java.util.UUID r2 = r0.objectUUID()
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r3 = r12.pickedObject
-            java.util.UUID r3 = r3.getId()
-            boolean r2 = com.google.common.base.Objects.equal(r2, r3)
-            if (r2 == 0) goto L_0x0262
-            com.google.common.base.Optional r0 = r0.name()
-            java.lang.Object r0 = r0.orNull()
-            java.lang.String r0 = (java.lang.String) r0
-        L_0x025b:
-            if (r0 != 0) goto L_0x020f
-            com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo r0 = r12.pickedObject
-            java.lang.String r0 = r0.name
-            goto L_0x020f
-        L_0x0262:
-            r0 = r1
-            goto L_0x025b
-        L_0x0264:
-            r0 = r1
-            goto L_0x020f
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.render.WorldViewActivity.updateObjectPanel():void");
-    }
-
-    private void updateSimTimeOverride() {
-        if (this.mGLView != null) {
-            GlobalOptions instance = GlobalOptions.getInstance();
-            this.mGLView.setForcedTime(instance.getForceDaylightTime(), instance.getForceDaylightHour());
+    private void updateSimTimeOverride()
+    {
+        if (mGLView != null)
+        {
+            GlobalOptions globaloptions = GlobalOptions.getInstance();
+            boolean flag = globaloptions.getForceDaylightTime();
+            float f = globaloptions.getForceDaylightHour();
+            mGLView.setForcedTime(flag, f);
         }
     }
 
-    private void updateSplitScreenLayout() {
-        int i = 0;
-        Fragment findFragmentById = getSupportFragmentManager().findFragmentById(R.id.details);
-        Object[] objArr = new Object[3];
-        objArr[0] = Boolean.valueOf(this.isSplitScreen);
-        objArr[1] = Boolean.valueOf(findFragmentById != null);
-        objArr[2] = Boolean.valueOf(findFragmentById != null ? findFragmentById.isDetached() : false);
-        Debug.Printf("updateSplitScreenLayout: isSplitScreen now %b details has %b detached %b", objArr);
-        if (findFragmentById == null || !(!findFragmentById.isDetached())) {
-            this.worldOverlaysContainer.setVisibility(0);
-        } else {
-            this.detailsContainer.setVisibility(0);
-            this.worldOverlaysContainer.setVisibility(this.isSplitScreen ? 0 : 8);
+    private void updateSplitScreenLayout()
+    {
+        boolean flag = false;
+        Fragment fragment = getSupportFragmentManager().findFragmentById(0x7f100114);
+        boolean flag3 = isSplitScreen;
+        int i;
+        boolean flag1;
+        boolean flag2;
+        if (fragment != null)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
         }
-        View view = this.objectPopupLeftSpacer;
-        if (!this.isSplitScreen) {
+        if (fragment != null)
+        {
+            flag2 = fragment.isDetached();
+        } else
+        {
+            flag2 = false;
+        }
+        Debug.Printf("updateSplitScreenLayout: isSplitScreen now %b details has %b detached %b", new Object[] {
+            Boolean.valueOf(flag3), Boolean.valueOf(flag1), Boolean.valueOf(flag2)
+        });
+        if (fragment != null && fragment.isDetached() ^ true)
+        {
+            detailsContainer.setVisibility(0);
+            Object obj = worldOverlaysContainer;
+            if (isSplitScreen)
+            {
+                i = 0;
+            } else
+            {
+                i = 8;
+            }
+            ((ViewGroup) (obj)).setVisibility(i);
+        } else
+        {
+            worldOverlaysContainer.setVisibility(0);
+        }
+        obj = objectPopupLeftSpacer;
+        if (isSplitScreen)
+        {
+            i = ((flag) ? 1 : 0);
+        } else
+        {
             i = 8;
         }
-        view.setVisibility(i);
+        ((View) (obj)).setVisibility(i);
     }
 
-    public boolean dispatchKeyEvent(KeyEvent keyEvent) {
-        if (this.detailsContainer.getVisibility() == 0) {
-            return super.dispatchKeyEvent(keyEvent);
-        }
-        switch (keyEvent.getKeyCode()) {
-            case 19:
-                if (this.avatarControl != null) {
-                    if (keyEvent.getAction() == 0) {
-                        this.avatarControl.stopCamming();
-                        this.avatarControl.StartAgentMotion(2);
-                    } else if (keyEvent.getAction() == 1) {
-                        this.avatarControl.StopAgentMotion();
-                    }
-                }
-                return true;
-            case 20:
-                if (this.avatarControl != null) {
-                    if (keyEvent.getAction() == 0) {
-                        this.avatarControl.stopCamming();
-                        this.avatarControl.StartAgentMotion(4);
-                    } else if (keyEvent.getAction() == 1) {
-                        this.avatarControl.StopAgentMotion();
-                    }
-                }
-                return true;
-            case 21:
-                if (this.avatarControl != null) {
-                    if (keyEvent.getAction() == 0) {
-                        this.avatarControl.startTurning(TURNING_SPEED);
-                    } else if (keyEvent.getAction() == 1) {
-                        this.avatarControl.stopTurning();
-                    }
-                }
-                return true;
-            case 22:
-                if (this.avatarControl != null) {
-                    if (keyEvent.getAction() == 0) {
-                        this.avatarControl.startTurning(-50.0f);
-                    } else if (keyEvent.getAction() == 1) {
-                        this.avatarControl.stopTurning();
-                    }
-                }
-                return true;
-            case 92:
-                if (this.avatarControl != null) {
-                    if (keyEvent.getAction() == 0) {
-                        this.avatarControl.stopCamming();
-                        this.avatarControl.StartAgentMotion(8);
-                    } else if (keyEvent.getAction() == 1) {
-                        this.avatarControl.StopAgentMotion();
-                    }
-                }
-                return true;
-            case 93:
-                if (this.avatarControl != null) {
-                    if (keyEvent.getAction() == 0) {
-                        this.avatarControl.stopCamming();
-                        this.avatarControl.StartAgentMotion(16);
-                    } else if (keyEvent.getAction() == 1) {
-                        this.avatarControl.StopAgentMotion();
-                    }
-                }
-                return true;
-            default:
-                return super.dispatchKeyEvent(keyEvent);
-        }
+    void _2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_2D_mthref_2D_0(SLAgentCircuit slagentcircuit)
+    {
+        onAgentCircuit(slagentcircuit);
     }
 
-    @EventHandler
-    public void handleBakingProgressEvent(SLBakingProgressEvent sLBakingProgressEvent) {
-        if (sLBakingProgressEvent.first) {
+    void _2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_2D_mthref_2D_1(MyAvatarState myavatarstate)
+    {
+        onMyAvatarState(myavatarstate);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_2D_mthref_2D_2(SLObjectProfileData slobjectprofiledata)
+    {
+        onSelectedObjectProfile(slobjectprofiledata);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_2D_mthref_2D_3(CurrentLocationInfo currentlocationinfo)
+    {
+        onCurrentLocation(currentlocationinfo);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_2D_mthref_2D_4(ChatterID chatterid)
+    {
+        onVoiceActiveChatter(chatterid);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_2D_mthref_2D_5(VoiceChatInfo voicechatinfo)
+    {
+        onVoiceChatInfo(voicechatinfo);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_2D_mthref_2D_6(ChatterNameRetriever chatternameretriever)
+    {
+        onPickedAvatarNameUpdated(chatternameretriever);
+    }
+
+    public boolean dispatchKeyEvent(KeyEvent keyevent)
+    {
+        if (detailsContainer.getVisibility() == 0)
+        {
+            return super.dispatchKeyEvent(keyevent);
+        }
+        keyevent.getKeyCode();
+        JVM INSTR lookupswitch 6: default 80
+    //                   19: 171
+    //                   20: 219
+    //                   21: 86
+    //                   22: 128
+    //                   92: 267
+    //                   93: 316;
+           goto _L1 _L2 _L3 _L4 _L5 _L6 _L7
+_L1:
+        return super.dispatchKeyEvent(keyevent);
+_L4:
+        if (avatarControl == null) goto _L9; else goto _L8
+_L8:
+        if (keyevent.getAction() != 0) goto _L11; else goto _L10
+_L10:
+        avatarControl.startTurning(50F);
+_L9:
+        return true;
+_L11:
+        if (keyevent.getAction() != 1) goto _L9; else goto _L12
+_L12:
+        avatarControl.stopTurning();
+        return true;
+_L5:
+        if (avatarControl == null) goto _L14; else goto _L13
+_L13:
+        if (keyevent.getAction() != 0) goto _L16; else goto _L15
+_L15:
+        avatarControl.startTurning(-50F);
+_L14:
+        return true;
+_L16:
+        if (keyevent.getAction() != 1) goto _L14; else goto _L17
+_L17:
+        avatarControl.stopTurning();
+        return true;
+_L2:
+        if (avatarControl == null) goto _L19; else goto _L18
+_L18:
+        if (keyevent.getAction() != 0) goto _L21; else goto _L20
+_L20:
+        avatarControl.stopCamming();
+        avatarControl.StartAgentMotion(2);
+_L19:
+        return true;
+_L21:
+        if (keyevent.getAction() != 1) goto _L19; else goto _L22
+_L22:
+        avatarControl.StopAgentMotion();
+        return true;
+_L3:
+        if (avatarControl == null) goto _L24; else goto _L23
+_L23:
+        if (keyevent.getAction() != 0) goto _L26; else goto _L25
+_L25:
+        avatarControl.stopCamming();
+        avatarControl.StartAgentMotion(4);
+_L24:
+        return true;
+_L26:
+        if (keyevent.getAction() != 1) goto _L24; else goto _L27
+_L27:
+        avatarControl.StopAgentMotion();
+        return true;
+_L6:
+        if (avatarControl == null) goto _L29; else goto _L28
+_L28:
+        if (keyevent.getAction() != 0) goto _L31; else goto _L30
+_L30:
+        avatarControl.stopCamming();
+        avatarControl.StartAgentMotion(8);
+_L29:
+        return true;
+_L31:
+        if (keyevent.getAction() != 1) goto _L29; else goto _L32
+_L32:
+        avatarControl.StopAgentMotion();
+        return true;
+_L7:
+        if (avatarControl != null)
+        {
+            if (keyevent.getAction() == 0)
+            {
+                avatarControl.stopCamming();
+                avatarControl.StartAgentMotion(16);
+            } else
+            if (keyevent.getAction() == 1)
+            {
+                avatarControl.StopAgentMotion();
+                return true;
+            }
+        }
+        return true;
+    }
+
+    public void handleBakingProgressEvent(SLBakingProgressEvent slbakingprogressevent)
+    {
+        if (slbakingprogressevent.first)
+        {
             Toast.makeText(this, "Updating avatar appearance...", 0).show();
         }
     }
 
-    public void handleChatEvent(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
-        if (this.chatOver3D && !detailsVisible() && this.userManager != null && this.chatsOverlayLayout != null && this.fadingTextViewLog != null) {
-            this.fadingTextViewLog.handleChatEvent(chatMessageEvent);
-        }
-    }
-
-    public void handlePickedObject(ObjectIntersectInfo objectIntersectInfo) {
-        this.pickedIntersectInfo = objectIntersectInfo;
-        this.pickedObject = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null;
-        if (this.pickedObject != null) {
-            if (this.pickedObject.isAvatar()) {
-                ChatterID.ChatterIDUser userChatterID = ChatterID.getUserChatterID(this.userManager.getUserID(), this.pickedObject.getId());
-                if (!Objects.equal(this.pickedAvatarNameRetriever != null ? this.pickedAvatarNameRetriever.chatterID : null, userChatterID)) {
-                    if (this.pickedAvatarNameRetriever != null) {
-                        this.pickedAvatarNameRetriever.dispose();
-                        this.pickedAvatarNameRetriever = null;
-                    }
-                    this.pickedAvatarNameRetriever = new ChatterNameRetriever(userChatterID, new ChatterNameRetriever.OnChatterNameUpdated(this) {
-
-                        /* renamed from: -$f0 */
-                        private final /* synthetic */ Object f541$f0;
-
-                        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.9.$m$0(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, dex: classes.dex
-                        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.9.$m$0(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, class status: UNLOADED
-                        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                        	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                        	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                        
-*/
-
-                        public final void onChatterNameUpdated(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.9.onChatterNameUpdated(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, dex: classes.dex
-                        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.9.onChatterNameUpdated(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, class status: UNLOADED
-                        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                        	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                        	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                        
-*/
-                    }, UIThreadExecutor.getInstance());
-                }
-            } else {
-                Debug.Printf("ObjectPick: picked object %d", Integer.valueOf(this.pickedObject.localID));
-                this.selectedObjectProfile.subscribe(this.userManager.getObjectsManager().getObjectProfile(), Integer.valueOf(this.pickedObject.localID));
-            }
-            updateObjectPanel();
-            beginCountingObjectDeselect();
-        } else {
-            this.selectedObjectProfile.unsubscribe();
-            if (this.pickedAvatarNameRetriever != null) {
-                this.pickedAvatarNameRetriever.dispose();
-                this.pickedAvatarNameRetriever = null;
-            }
-        }
-        this.mGLView.setDrawPickedObject(this.pickedObject);
-        updateObjectPanel();
-    }
-
-    /* access modifiers changed from: protected */
-    public boolean isRootDetailsFragment(Class<? extends Fragment> cls) {
-        return cls == ContactsFragment.class || cls == ChatFragment.class || cls == ObjectDetailsFragment.class || cls == OutfitsFragment.class || cls == UserProfileFragment.class;
-    }
-
-    /* synthetic */ void animateInsetsBackground(ValueAnimator valueAnimator) {
-        this.insetsBackground.setAlpha(1.0f - valueAnimator.getAnimatedFraction());
-    }
-
-    /* synthetic */ void handleBuyObjectDialog(DialogInterface dialogInterface, int i) {
-        SLAgentCircuit activeAgentCircuit;
-        if (!(this.userManager == null || (activeAgentCircuit = this.userManager.getActiveAgentCircuit()) == null || this.pickedObject == null)) {
-            activeAgentCircuit.BuyObject(this.pickedObject.localID, this.pickedObject.saleType, this.pickedObject.salePrice);
-        }
-        dialogInterface.dismiss();
-    }
-
-    /* synthetic */ void handleHUDSelection(List list, DialogInterface dialogInterface, int i) {
-        if (i >= 0 && i < list.size()) {
-            displayHUD(((SelectableAttachment) list.get(i)).getLocalID());
-        }
-    }
-
-    public int mapThemeResourceId(int i) {
-        return i == 2131427372 ? R.style.Theme_Lumiya_Light_NoActionBar : i == 2131427375 ? R.style.Theme_Lumiya_Pink_NoActionBar : R.style.Theme_Lumiya_NoActionBar;
-    }
-
-    public void moveTouchEvent(int i, MotionEvent motionEvent) {
-        float f = 1.0f;
-        float f2 = -1.0f;
-        if (this.avatarControl == null) {
+    public void handleChatEvent(com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager.ChatMessageEvent chatmessageevent)
+    {
+        while (!chatOver3D || detailsVisible() || userManager == null || chatsOverlayLayout == null || fadingTextViewLog == null) 
+        {
             return;
         }
-        if (motionEvent.getAction() == 0) {
-            if (!this.manualCamMode || !this.camButtonEnabled) {
-                this.avatarControl.stopCamming();
-                this.avatarControl.StartAgentMotion(i);
-                if ((i & 8) != 0 || (i & 16) != 0) {
-                    updateObjectPanel();
-                    return;
+        fadingTextViewLog.handleChatEvent(chatmessageevent);
+    }
+
+    public void handlePickedObject(ObjectIntersectInfo objectintersectinfo)
+    {
+        pickedIntersectInfo = objectintersectinfo;
+        com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser chatteriduser;
+        if (objectintersectinfo != null)
+        {
+            objectintersectinfo = objectintersectinfo.objInfo;
+        } else
+        {
+            objectintersectinfo = null;
+        }
+        pickedObject = objectintersectinfo;
+        if (pickedObject == null) goto _L2; else goto _L1
+_L1:
+        if (pickedObject.isAvatar())
+        {
+            chatteriduser = ChatterID.getUserChatterID(userManager.getUserID(), pickedObject.getId());
+            if (pickedAvatarNameRetriever != null)
+            {
+                objectintersectinfo = pickedAvatarNameRetriever.chatterID;
+            } else
+            {
+                objectintersectinfo = null;
+            }
+            if (!Objects.equal(objectintersectinfo, chatteriduser))
+            {
+                if (pickedAvatarNameRetriever != null)
+                {
+                    pickedAvatarNameRetriever.dispose();
+                    pickedAvatarNameRetriever = null;
                 }
+                pickedAvatarNameRetriever = new ChatterNameRetriever(chatteriduser, new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls9(this), UIThreadExecutor.getInstance());
+            }
+        } else
+        {
+            Debug.Printf("ObjectPick: picked object %d", new Object[] {
+                Integer.valueOf(pickedObject.localID)
+            });
+            selectedObjectProfile.subscribe(userManager.getObjectsManager().getObjectProfile(), Integer.valueOf(pickedObject.localID));
+        }
+        updateObjectPanel();
+        beginCountingObjectDeselect();
+_L4:
+        mGLView.setDrawPickedObject(pickedObject);
+        updateObjectPanel();
+        return;
+_L2:
+        selectedObjectProfile.unsubscribe();
+        if (pickedAvatarNameRetriever != null)
+        {
+            pickedAvatarNameRetriever.dispose();
+            pickedAvatarNameRetriever = null;
+        }
+        if (true) goto _L4; else goto _L3
+_L3:
+    }
+
+    protected boolean isRootDetailsFragment(Class class1)
+    {
+        while (class1 == com/lumiyaviewer/lumiya/ui/chat/ContactsFragment || class1 == com/lumiyaviewer/lumiya/ui/chat/ChatFragment || class1 == com/lumiyaviewer/lumiya/ui/objects/ObjectDetailsFragment || class1 == com/lumiyaviewer/lumiya/ui/outfits/OutfitsFragment || class1 == com/lumiyaviewer/lumiya/ui/chat/profiles/UserProfileFragment) 
+        {
+            return true;
+        }
+        return false;
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_10269(ValueAnimator valueanimator)
+    {
+        insetsBackground.setAlpha(1.0F - valueanimator.getAnimatedFraction());
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_43183(DialogInterface dialoginterface, int i)
+    {
+        if (userManager != null)
+        {
+            SLAgentCircuit slagentcircuit = userManager.getActiveAgentCircuit();
+            if (slagentcircuit != null && pickedObject != null)
+            {
+                slagentcircuit.BuyObject(pickedObject.localID, pickedObject.saleType, pickedObject.salePrice);
+            }
+        }
+        dialoginterface.dismiss();
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_render_WorldViewActivity_48476(List list, DialogInterface dialoginterface, int i)
+    {
+        if (i >= 0 && i < list.size())
+        {
+            displayHUD(((SelectableAttachment)list.get(i)).getLocalID());
+        }
+    }
+
+    public int mapThemeResourceId(int i)
+    {
+        if (i == 0x7f0b002c)
+        {
+            return 0x7f0b002d;
+        }
+        return i != 0x7f0b002f ? 0x7f0b002e : 0x7f0b0030;
+    }
+
+    public void moveTouchEvent(int i, MotionEvent motionevent)
+    {
+        float f3;
+        float f4;
+        f4 = 1.0F;
+        f3 = -1F;
+        if (avatarControl == null) goto _L2; else goto _L1
+_L1:
+        if (motionevent.getAction() != 0) goto _L4; else goto _L3
+_L3:
+        if (!manualCamMode || !camButtonEnabled) goto _L6; else goto _L5
+_L5:
+        float f;
+        float f1;
+        float f2;
+        if ((i & 8) != 0)
+        {
+            f = 1.0F;
+        } else
+        {
+            f = 0.0F;
+        }
+        if ((i & 0x10) != 0)
+        {
+            f1 = -1F;
+        } else
+        {
+            f1 = f;
+        }
+        if ((i & 2) != 0)
+        {
+            f = 1.0F;
+        } else
+        {
+            f = 0.0F;
+        }
+        f2 = f;
+        if ((i & 4) != 0)
+        {
+            f2 = -1F;
+        }
+        if ((i & 0x20) != 0)
+        {
+            f = f4;
+        } else
+        {
+            f = 0.0F;
+        }
+        if ((i & 0x40) != 0)
+        {
+            f = f3;
+        }
+        avatarControl.startCameraManualControl(0.0F, f2, f1, f);
+_L2:
+        return;
+_L6:
+        avatarControl.stopCamming();
+        avatarControl.StartAgentMotion(i);
+        if ((i & 8) != 0 || (i & 0x10) != 0)
+        {
+            updateObjectPanel();
+            return;
+        }
+        continue; /* Loop/switch isn't completed */
+_L4:
+        if (motionevent.getAction() == 1)
+        {
+            if (manualCamMode && camButtonEnabled)
+            {
+                avatarControl.stopCameraManualControl();
+                return;
+            } else
+            {
+                avatarControl.StopAgentMotion();
                 return;
             }
-            float f3 = (i & 16) != 0 ? -1.0f : (i & 8) != 0 ? 1.0f : 0.0f;
-            float f4 = (i & 2) != 0 ? 1.0f : 0.0f;
-            if ((i & 4) != 0) {
-                f4 = -1.0f;
-            }
-            if ((i & 32) == 0) {
-                f = 0.0f;
-            }
-            if ((i & 64) == 0) {
-                f2 = f;
-            }
-            this.avatarControl.startCameraManualControl(0.0f, f4, f3, f2);
-        } else if (motionEvent.getAction() != 1) {
-        } else {
-            if (!this.manualCamMode || !this.camButtonEnabled) {
-                this.avatarControl.StopAgentMotion();
-            } else {
-                this.avatarControl.stopCameraManualControl();
-            }
         }
+        if (true) goto _L2; else goto _L7
+_L7:
     }
 
-    @OnClick({2131755762})
-    public void onCamOffButton() {
-        if (this.camButtonEnabled) {
-            this.manualCamMode = false;
-            if (this.avatarControl != null) {
-                this.avatarControl.setCameraManualControl(false);
+    public void onCamOffButton()
+    {
+        if (camButtonEnabled)
+        {
+            manualCamMode = false;
+            if (avatarControl != null)
+            {
+                avatarControl.setCameraManualControl(false);
             }
             updateObjectPanel();
         }
     }
 
-    @OnClick({2131755761})
-    public void onCamOnButton() {
-        if (this.camButtonEnabled) {
-            this.manualCamMode = true;
-            if (this.avatarControl != null) {
-                this.avatarControl.setCameraManualControl(true);
+    public void onCamOnButton()
+    {
+        if (camButtonEnabled)
+        {
+            manualCamMode = true;
+            if (avatarControl != null)
+            {
+                avatarControl.setCameraManualControl(true);
             }
             updateObjectPanel();
         }
     }
 
-    public void onConfigurationChanged(Configuration configuration) {
+    public void onConfigurationChanged(Configuration configuration)
+    {
         super.onConfigurationChanged(configuration);
-        this.isSplitScreen = LumiyaApp.isSplitScreenNeeded(this);
+        isSplitScreen = LumiyaApp.isSplitScreenNeeded(this);
         updateSplitScreenLayout();
     }
 
-    public void onCreate(Bundle bundle) {
+    public void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
-        this.userManager = ActivityUtils.getUserManager(getIntent());
-        if (this.userManager == null) {
+        userManager = ActivityUtils.getUserManager(getIntent());
+        if (userManager == null)
+        {
             finish();
             return;
         }
-        this.isSplitScreen = LumiyaApp.isSplitScreenNeeded(this);
-        this.scaleGestureDetector = new ScaleGestureDetector(this, this.scaleGestureListener);
-        if (Build.VERSION.SDK_INT >= 19) {
-            this.scaleGestureDetector.setQuickScaleEnabled(true);
+        isSplitScreen = LumiyaApp.isSplitScreenNeeded(this);
+        scaleGestureDetector = new ScaleGestureDetector(this, scaleGestureListener);
+        if (android.os.Build.VERSION.SDK_INT >= 19)
+        {
+            scaleGestureDetector.setQuickScaleEnabled(true);
         }
-        this.gestureDetector = new GestureDetectorCompat(this, this.gestureListener);
+        gestureDetector = new GestureDetectorCompat(this, gestureListener);
         initContentView();
-        this.fadingTextViewLog = new FadingTextViewLog(this.userManager, this, this.chatsOverlayLayout, Color.rgb(192, 192, 192), Color.argb(160, 0, 0, 0));
-        if (Build.VERSION.SDK_INT >= 12) {
-            this.buttonsFadeAnimator = ValueAnimator.ofFloat(new float[]{0.0f, 1.0f});
-            this.buttonsFadeAnimator.setDuration(1000);
-            this.buttonsFadeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener(this) {
-
-                /* renamed from: -$f0 */
-                private final /* synthetic */ Object f529$f0;
-
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.1.$m$0(android.animation.ValueAnimator):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.1.$m$0(android.animation.ValueAnimator):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void onAnimationUpdate(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.1.onAnimationUpdate(android.animation.ValueAnimator):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.1.onAnimationUpdate(android.animation.ValueAnimator):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
+        fadingTextViewLog = new FadingTextViewLog(userManager, this, chatsOverlayLayout, Color.rgb(192, 192, 192), Color.argb(160, 0, 0, 0));
+        if (android.os.Build.VERSION.SDK_INT >= 12)
+        {
+            buttonsFadeAnimator = ValueAnimator.ofFloat(new float[] {
+                0.0F, 1.0F
             });
+            buttonsFadeAnimator.setDuration(1000L);
+            buttonsFadeAnimator.addUpdateListener(new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls1(this));
         }
         updateSplitScreenLayout();
         startFadingButtonsTimer();
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.world_view_menu, menu);
+        getMenuInflater().inflate(0x7f120027, menu);
         return true;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean onDetailsStackEmpty() {
-        if (super.onDetailsStackEmpty()) {
+    protected boolean onDetailsStackEmpty()
+    {
+        if (!super.onDetailsStackEmpty())
+        {
+            detailsContainer.setVisibility(8);
+            if (!isSplitScreen)
+            {
+                worldOverlaysContainer.setVisibility(0);
+            }
+            beginCountingButtonsFade();
+            beginCountingObjectDeselect();
+            return false;
+        } else
+        {
             return true;
         }
-        this.detailsContainer.setVisibility(8);
-        if (!this.isSplitScreen) {
-            this.worldOverlaysContainer.setVisibility(0);
-        }
-        beginCountingButtonsFade();
-        beginCountingObjectDeselect();
-        return false;
     }
 
-    @Nullable
-    public Intent onGetNotifyCaptureIntent(@Nonnull UnreadNotificationInfo unreadNotificationInfo, Intent intent) {
+    public Intent onGetNotifyCaptureIntent(UnreadNotificationInfo unreadnotificationinfo, Intent intent)
+    {
         Debug.Printf("NotifyCapture: returning new intent", new Object[0]);
-        Intent intent2 = new Intent(this, WorldViewActivity.class);
-        intent2.putExtras(intent);
-        intent2.putExtra(FROM_NOTIFICATION_TAG, true);
-        intent2.addFlags(536870912);
-        return intent2;
+        unreadnotificationinfo = new Intent(this, com/lumiyaviewer/lumiya/ui/render/WorldViewActivity);
+        unreadnotificationinfo.putExtras(intent);
+        unreadnotificationinfo.putExtra("fromNotification", true);
+        unreadnotificationinfo.addFlags(0x20000000);
+        return unreadnotificationinfo;
     }
 
-    @EventHandler
-    public void onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
+    public void onGlobalOptionsChanged(com.lumiyaviewer.lumiya.GlobalOptions.GlobalOptionsChangedEvent globaloptionschangedevent)
+    {
         updateSimTimeOverride();
     }
 
-    @OnClick({2131755763})
-    public void onHUDButton() {
-        if (this.displayedHUDid != 0) {
-            this.displayedHUDid = 0;
-            this.mGLView.setDisplayedHUDid(this.displayedHUDid);
+    public void onHUDButton()
+    {
+        if (displayedHUDid != 0)
+        {
+            displayedHUDid = 0;
+            mGLView.setDisplayedHUDid(displayedHUDid);
             updateObjectPanel();
             return;
+        } else
+        {
+            selectHUDtoDisplay();
+            return;
         }
-        selectHUDtoDisplay();
     }
 
-    /* access modifiers changed from: protected */
-    public void onNewIntent(Intent intent) {
+    protected void onNewIntent(Intent intent)
+    {
         super.onNewIntent(intent);
-        Debug.Printf("NotifyCapture: got newIntent: %s", intent);
-        this.mHandler.post(this.buttonsRestoreTask);
+        Debug.Printf("NotifyCapture: got newIntent: %s", new Object[] {
+            intent
+        });
+        mHandler.post(buttonsRestoreTask);
         beginCountingButtonsFade();
         beginCountingObjectDeselect();
-        if (intent.hasExtra(FROM_NOTIFICATION_TAG)) {
-            Bundle bundleExtra = intent.hasExtra(MasterDetailsActivity.INTENT_SELECTION_KEY) ? intent.getBundleExtra(MasterDetailsActivity.INTENT_SELECTION_KEY) : null;
-            if (bundleExtra != null) {
-                DetailsActivity.showEmbeddedDetails(this, ChatFragment.class, bundleExtra);
-            } else if (this.userManager != null) {
-                DetailsActivity.showEmbeddedDetails(this, ContactsFragment.class, ActivityUtils.makeFragmentArguments(this.userManager.getUserID(), (Bundle) null));
+        if (intent.hasExtra("fromNotification"))
+        {
+            if (intent.hasExtra("selection"))
+            {
+                intent = intent.getBundleExtra("selection");
+            } else
+            {
+                intent = null;
+            }
+            if (intent != null)
+            {
+                DetailsActivity.showEmbeddedDetails(this, com/lumiyaviewer/lumiya/ui/chat/ChatFragment, intent);
+            } else
+            if (userManager != null)
+            {
+                DetailsActivity.showEmbeddedDetails(this, com/lumiyaviewer/lumiya/ui/chat/ContactsFragment, ActivityUtils.makeFragmentArguments(userManager.getUserID(), null));
+                return;
             }
         }
     }
 
-    @OnClick({2131755270})
-    public void onObjectChatButton() {
-        if (this.pickedObject != null) {
-            chatWithObject(this.pickedObject);
+    public void onObjectChatButton()
+    {
+        if (pickedObject != null)
+        {
+            chatWithObject(pickedObject);
         }
     }
 
-    @OnClick({2131755754})
-    public void onObjectMoreButton() {
-        if (this.pickedObject != null) {
-            showObjectInfo(this.pickedObject);
+    public void onObjectMoreButton()
+    {
+        if (pickedObject != null)
+        {
+            showObjectInfo(pickedObject);
         }
     }
 
-    @OnClick({2131755554})
-    public void onObjectPayButton() {
-        SLObjectProfileData data;
-        if (this.pickedObject != null) {
-            String name = this.pickedObject.getName();
-            if (Strings.isNullOrEmpty(name)) {
-                name = getString(R.string.object_name_loading);
+    public void onObjectPayButton()
+    {
+        if (pickedObject != null)
+        {
+            String s1 = pickedObject.getName();
+            String s = s1;
+            if (Strings.isNullOrEmpty(s1))
+            {
+                s = getString(0x7f090239);
             }
-            if (this.pickedObject.saleType != 0) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage((CharSequence) String.format(getString(R.string.object_buy_confirm), new Object[]{name, Integer.valueOf(this.pickedObject.salePrice)})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener(this) {
-
-                    /* renamed from: -$f0 */
-                    private final /* synthetic */ Object f534$f0;
-
-                    private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.2.$m$0(android.content.DialogInterface, int):void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.2.$m$0(android.content.DialogInterface, int):void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
-
-                    public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.2.onClick(android.content.DialogInterface, int):void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8.2.onClick(android.content.DialogInterface, int):void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
-                }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new $Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8());
+            if (pickedObject.saleType != 0)
+            {
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+                builder.setMessage(String.format(getString(0x7f090213), new Object[] {
+                    s, Integer.valueOf(pickedObject.salePrice)
+                })).setCancelable(false).setPositiveButton("Yes", new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8._cls2(this)).setNegativeButton("No", new _2D_.Lambda.YnTWxJEMPymM_sHfAdAKQ7gcDf8());
                 builder.show();
-            } else if (this.pickedObject.isPayable() && (data = this.selectedObjectProfile.getData()) != null && this.userManager != null) {
-                ObjectPayDialog.show(this, this.userManager, data);
-            }
-        }
-    }
-
-    @OnClick({2131755269})
-    public void onObjectSitButton() {
-        if (this.pickedObject != null && this.avatarControl != null) {
-            this.avatarControl.SitOnObject(this.pickedObject.getId());
-        }
-    }
-
-    @OnClick({2131755264, 2131755538})
-    public void onObjectStandButton() {
-        if (this.avatarControl != null) {
-            this.avatarControl.Stand();
-        }
-    }
-
-    @OnClick({2131755268})
-    public void onObjectTouchButton() {
-        if (this.pickedObject != null) {
-            touchObject(this.pickedObject, this.pickedIntersectInfo);
-        }
-    }
-
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.item_chat:
-                DetailsActivity.showEmbeddedDetails(this, ContactsFragment.class, ActivityUtils.makeFragmentArguments(this.userManager.getUserID(), (Bundle) null));
-                return true;
-            case R.id.item_outfits:
-                DetailsActivity.showEmbeddedDetails(this, OutfitsFragment.class, OutfitsFragment.makeSelection(this.userManager.getUserID(), (UUID) null));
-                return true;
-            case R.id.item_select_object:
-                if (!this.isDragging) {
-                    beginDragSelection();
-                } else {
-                    endDragSelection();
+            } else
+            if (pickedObject.isPayable())
+            {
+                SLObjectProfileData slobjectprofiledata = (SLObjectProfileData)selectedObjectProfile.getData();
+                if (slobjectprofiledata != null && userManager != null)
+                {
+                    ObjectPayDialog.show(this, userManager, slobjectprofiledata);
+                    return;
                 }
-                return true;
-            case R.id.item_cardboard_view:
-                enterCardboardView();
-                return true;
-            case R.id.item_take_screenshot:
-                takeScreenshot();
-                return true;
-            case R.id.item_stop_animations:
-                stopAvatarAnimations();
-                return true;
-            default:
-                return super.onOptionsItemSelected(menuItem);
+            }
         }
     }
 
-    public void onPause() {
+    public void onObjectSitButton()
+    {
+        if (pickedObject != null && avatarControl != null)
+        {
+            avatarControl.SitOnObject(pickedObject.getId());
+        }
+    }
+
+    public void onObjectStandButton()
+    {
+        if (avatarControl != null)
+        {
+            avatarControl.Stand();
+        }
+    }
+
+    public void onObjectTouchButton()
+    {
+        if (pickedObject != null)
+        {
+            touchObject(pickedObject, pickedIntersectInfo);
+        }
+    }
+
+    public boolean onOptionsItemSelected(MenuItem menuitem)
+    {
+        switch (menuitem.getItemId())
+        {
+        default:
+            return super.onOptionsItemSelected(menuitem);
+
+        case 2131755881: 
+            DetailsActivity.showEmbeddedDetails(this, com/lumiyaviewer/lumiya/ui/chat/ContactsFragment, ActivityUtils.makeFragmentArguments(userManager.getUserID(), null));
+            return true;
+
+        case 2131755882: 
+            DetailsActivity.showEmbeddedDetails(this, com/lumiyaviewer/lumiya/ui/outfits/OutfitsFragment, OutfitsFragment.makeSelection(userManager.getUserID(), null));
+            return true;
+
+        case 2131755886: 
+            stopAvatarAnimations();
+            return true;
+
+        case 2131755883: 
+            if (!isDragging)
+            {
+                beginDragSelection();
+                return true;
+            } else
+            {
+                endDragSelection();
+                return true;
+            }
+
+        case 2131755885: 
+            takeScreenshot();
+            return true;
+
+        case 2131755884: 
+            enterCardboardView();
+            return true;
+        }
+    }
+
+    public void onPause()
+    {
         Debug.Printf("WorldViewActivity: onPause", new Object[0]);
-        if (this.userManager != null) {
-            this.userManager.getUnreadNotificationManager().clearNotifyCapture(this);
-            try {
-                this.userManager.getChatterList().getActiveChattersManager().getChatEventBus().unregister(this.chatEventHandler);
-            } catch (IllegalArgumentException e) {
+        if (userManager != null)
+        {
+            userManager.getUnreadNotificationManager().clearNotifyCapture(this);
+            try
+            {
+                userManager.getChatterList().getActiveChattersManager().getChatEventBus().unregister(chatEventHandler);
             }
-            if (this.fadingTextViewLog != null) {
-                this.fadingTextViewLog.clearChatEvents();
+            catch (IllegalArgumentException illegalargumentexception) { }
+            if (fadingTextViewLog != null)
+            {
+                fadingTextViewLog.clearChatEvents();
             }
         }
-        this.localDrawingEnabled = false;
-        if (this.drawDistance != null) {
-            this.drawDistance.Disable3DView();
+        localDrawingEnabled = false;
+        if (drawDistance != null)
+        {
+            drawDistance.Disable3DView();
         }
-        this.mGLView.onPause();
-        this.mHandler.removeCallbacks(this.objectDeselectTimerTask);
-        this.mHandler.removeCallbacks(this.buttonsFadeTask);
-        this.objectDeselectTimerStarted = false;
-        this.buttonsFadeTimerStarted = false;
-        this.myAvatarState.unsubscribe();
-        this.selectedObjectProfile.unsubscribe();
-        this.currentLocationInfo.unsubscribe();
+        mGLView.onPause();
+        mHandler.removeCallbacks(objectDeselectTimerTask);
+        mHandler.removeCallbacks(buttonsFadeTask);
+        objectDeselectTimerStarted = false;
+        buttonsFadeTimerStarted = false;
+        myAvatarState.unsubscribe();
+        selectedObjectProfile.unsubscribe();
+        currentLocationInfo.unsubscribe();
         System.gc();
         super.onPause();
     }
 
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem findItem = menu.findItem(R.id.item_cardboard_view);
-        if (findItem != null) {
-            findItem.setVisible(Build.VERSION.SDK_INT >= 23);
+    public boolean onPrepareOptionsMenu(Menu menu)
+    {
+        MenuItem menuitem = menu.findItem(0x7f10036c);
+        if (menuitem != null)
+        {
+            boolean flag;
+            if (android.os.Build.VERSION.SDK_INT >= 23)
+            {
+                flag = true;
+            } else
+            {
+                flag = false;
+            }
+            menuitem.setVisible(flag);
         }
         return super.onPrepareOptionsMenu(menu);
     }
 
-    public void onRequestPermissionsResult(int i, @Nonnull String[] strArr, @Nonnull int[] iArr) {
-        Debug.Printf("Cardboard: onRequestPermissionResult, code %d", Integer.valueOf(i));
-        if (i == 100) {
+    public void onRequestPermissionsResult(int i, String as[], int ai[])
+    {
+        Debug.Printf("Cardboard: onRequestPermissionResult, code %d", new Object[] {
+            Integer.valueOf(i)
+        });
+        if (i == 100)
+        {
             startCardboardActivity();
         }
     }
 
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
         Debug.Printf("WorldViewActivity: onResume", new Object[0]);
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        this.chatOver3D = defaultSharedPreferences.getBoolean("chat_over_3d", true);
-        this.arrowsToTurn = defaultSharedPreferences.getBoolean("arrows_rotate_avatar", false);
-        this.camButtonEnabled = defaultSharedPreferences.getBoolean("cam_button_enabled", false);
-        if (this.userManager != null) {
-            this.userManager.getUnreadNotificationManager().setNotifyCapture(this);
-            this.myAvatarState.subscribe(this.userManager.getObjectsManager().myAvatarState(), SubscriptionSingleKey.Value);
-            this.currentLocationInfo.subscribe(this.userManager.getCurrentLocationInfo(), SubscriptionSingleKey.Value);
-            this.userManager.getChatterList().getActiveChattersManager().getChatEventBus().register(this.chatEventHandler);
+        Object obj = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        chatOver3D = ((SharedPreferences) (obj)).getBoolean("chat_over_3d", true);
+        arrowsToTurn = ((SharedPreferences) (obj)).getBoolean("arrows_rotate_avatar", false);
+        camButtonEnabled = ((SharedPreferences) (obj)).getBoolean("cam_button_enabled", false);
+        if (userManager != null)
+        {
+            userManager.getUnreadNotificationManager().setNotifyCapture(this);
+            myAvatarState.subscribe(userManager.getObjectsManager().myAvatarState(), SubscriptionSingleKey.Value);
+            currentLocationInfo.subscribe(userManager.getCurrentLocationInfo(), SubscriptionSingleKey.Value);
+            userManager.getChatterList().getActiveChattersManager().getChatEventBus().register(chatEventHandler);
         }
-        RenderSettings renderSettings = new RenderSettings(defaultSharedPreferences);
-        this.prefDrawDistance = renderSettings.drawDistance;
-        this.localDrawingEnabled = true;
-        if (this.drawDistance != null) {
-            this.drawDistance.Enable3DView(this.prefDrawDistance);
+        obj = new RenderSettings(((SharedPreferences) (obj)));
+        prefDrawDistance = ((RenderSettings) (obj)).drawDistance;
+        localDrawingEnabled = true;
+        if (drawDistance != null)
+        {
+            drawDistance.Enable3DView(prefDrawDistance);
         }
-        if (this.camButtonEnabled && this.avatarControl != null) {
-            this.manualCamMode = this.avatarControl.getIsManualCamming();
+        if (camButtonEnabled && avatarControl != null)
+        {
+            manualCamMode = avatarControl.getIsManualCamming();
         }
-        this.mGLView.setDrawDistance(this.prefDrawDistance);
-        this.mGLView.setAvatarCountLimit(renderSettings.avatarCountLimit);
-        this.mGLView.onResume();
+        mGLView.setDrawDistance(prefDrawDistance);
+        mGLView.setAvatarCountLimit(((RenderSettings) (obj)).avatarCountLimit);
+        mGLView.onResume();
         updateObjectPanel();
-        if (this.fadingTextViewLog != null) {
-            this.fadingTextViewLog.postRemovingStaleChats();
+        if (fadingTextViewLog != null)
+        {
+            fadingTextViewLog.postRemovingStaleChats();
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onStart() {
+    protected void onStart()
+    {
         super.onStart();
-        if (this.userManager != null) {
-            this.agentCircuit.subscribe(UserManager.agentCircuits(), this.userManager.getUserID());
-            this.voiceActiveChatter.subscribe(this.userManager.getVoiceActiveChatter(), SubscriptionSingleKey.Value);
+        if (userManager != null)
+        {
+            agentCircuit.subscribe(UserManager.agentCircuits(), userManager.getUserID());
+            voiceActiveChatter.subscribe(userManager.getVoiceActiveChatter(), SubscriptionSingleKey.Value);
         }
         updateSimTimeOverride();
     }
 
-    /* access modifiers changed from: protected */
-    public void onStop() {
-        this.agentCircuit.unsubscribe();
-        this.voiceActiveChatter.unsubscribe();
-        this.voiceChatInfo.unsubscribe();
-        this.voiceStatusView.setChatterID((ChatterID) null);
+    protected void onStop()
+    {
+        agentCircuit.unsubscribe();
+        voiceActiveChatter.unsubscribe();
+        voiceChatInfo.unsubscribe();
+        voiceStatusView.setChatterID(null);
         super.onStop();
     }
 
-    @OnClick({2131755758})
-    public void onStopFlyingButton() {
-        if (this.avatarControl != null) {
-            this.avatarControl.stopFlying();
+    public void onStopFlyingButton()
+    {
+        if (avatarControl != null)
+        {
+            avatarControl.stopFlying();
             updateObjectPanel();
         }
     }
 
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        switch (view.getId()) {
-            case R.id.button_move_forward:
-                moveTouchEvent(2, motionEvent);
-                break;
-            case R.id.button_turn_left:
-                if (this.arrowsToTurn) {
-                    if (this.avatarControl != null) {
-                        if (this.manualCamMode && this.camButtonEnabled) {
-                            if (motionEvent.getActionMasked() != 0) {
-                                if (motionEvent.getActionMasked() == 1) {
-                                    this.avatarControl.stopCameraManualControl();
-                                    break;
-                                }
-                            } else {
-                                this.avatarControl.startCameraManualControl(TURNING_SPEED, 0.0f, 0.0f, 0.0f);
-                                break;
-                            }
-                        } else if (motionEvent.getActionMasked() != 0) {
-                            if (motionEvent.getActionMasked() == 1) {
-                                this.avatarControl.stopTurning();
-                                break;
-                            }
-                        } else {
-                            this.avatarControl.startTurning(TURNING_SPEED);
-                            break;
-                        }
-                    }
-                } else {
-                    moveTouchEvent(32, motionEvent);
-                    break;
-                }
-                break;
-            case R.id.button_move_backward:
-                moveTouchEvent(4, motionEvent);
-                break;
-            case R.id.button_turn_right:
-                if (this.arrowsToTurn) {
-                    if (this.avatarControl != null) {
-                        if (this.manualCamMode && this.camButtonEnabled) {
-                            if (motionEvent.getActionMasked() != 0) {
-                                if (motionEvent.getActionMasked() == 1) {
-                                    this.avatarControl.stopCameraManualControl();
-                                    break;
-                                }
-                            } else {
-                                this.avatarControl.startCameraManualControl(-50.0f, 0.0f, 0.0f, 0.0f);
-                                break;
-                            }
-                        } else if (motionEvent.getActionMasked() != 0) {
-                            if (motionEvent.getActionMasked() == 1) {
-                                this.avatarControl.stopTurning();
-                                break;
-                            }
-                        } else {
-                            this.avatarControl.startTurning(-50.0f);
-                            break;
-                        }
-                    }
-                } else {
-                    moveTouchEvent(64, motionEvent);
-                    break;
-                }
-                break;
-            case R.id.button_fly_upward:
-                moveTouchEvent(8, motionEvent);
-                break;
-            case R.id.button_fly_downward:
-                moveTouchEvent(16, motionEvent);
-                break;
-        }
+    public boolean onTouch(View view, MotionEvent motionevent)
+    {
+        view.getId();
+        JVM INSTR lookupswitch 6: default 64
+    //                   2131755260: 66
+    //                   2131755261: 100
+    //                   2131755262: 74
+    //                   2131755263: 210
+    //                   2131755756: 82
+    //                   2131755757: 91;
+           goto _L1 _L2 _L3 _L4 _L5 _L6 _L7
+_L1:
         return false;
+_L2:
+        moveTouchEvent(2, motionevent);
+        return false;
+_L4:
+        moveTouchEvent(4, motionevent);
+        return false;
+_L6:
+        moveTouchEvent(8, motionevent);
+        return false;
+_L7:
+        moveTouchEvent(16, motionevent);
+        return false;
+_L3:
+        if (arrowsToTurn)
+        {
+            if (avatarControl != null)
+            {
+                if (manualCamMode && camButtonEnabled)
+                {
+                    if (motionevent.getActionMasked() == 0)
+                    {
+                        avatarControl.startCameraManualControl(50F, 0.0F, 0.0F, 0.0F);
+                        return false;
+                    }
+                    if (motionevent.getActionMasked() == 1)
+                    {
+                        avatarControl.stopCameraManualControl();
+                        return false;
+                    }
+                } else
+                {
+                    if (motionevent.getActionMasked() == 0)
+                    {
+                        avatarControl.startTurning(50F);
+                        return false;
+                    }
+                    if (motionevent.getActionMasked() == 1)
+                    {
+                        avatarControl.stopTurning();
+                        return false;
+                    }
+                }
+            }
+        } else
+        {
+            moveTouchEvent(32, motionevent);
+            return false;
+        }
+        continue; /* Loop/switch isn't completed */
+_L5:
+        if (arrowsToTurn)
+        {
+            if (avatarControl != null)
+            {
+                if (manualCamMode && camButtonEnabled)
+                {
+                    if (motionevent.getActionMasked() == 0)
+                    {
+                        avatarControl.startCameraManualControl(-50F, 0.0F, 0.0F, 0.0F);
+                        return false;
+                    }
+                    if (motionevent.getActionMasked() == 1)
+                    {
+                        avatarControl.stopCameraManualControl();
+                        return false;
+                    }
+                } else
+                {
+                    if (motionevent.getActionMasked() == 0)
+                    {
+                        avatarControl.startTurning(-50F);
+                        return false;
+                    }
+                    if (motionevent.getActionMasked() == 1)
+                    {
+                        avatarControl.stopTurning();
+                        return false;
+                    }
+                }
+            }
+        } else
+        {
+            moveTouchEvent(64, motionevent);
+            return false;
+        }
+        if (true) goto _L1; else goto _L8
+_L8:
     }
 
-    public void onUserInteraction() {
+    public void onUserInteraction()
+    {
         super.onUserInteraction();
         Debug.Printf("ButtonsFade: some user interaction", new Object[0]);
-        this.mHandler.post(this.buttonsRestoreTask);
+        mHandler.post(buttonsRestoreTask);
         beginCountingButtonsFade();
         beginCountingObjectDeselect();
     }
 
-    public void processScreenshot(Bitmap bitmap) {
-        try {
-            File file = new File(getCacheDir(), "screenshots");
-            file.mkdirs();
-            File file2 = new File(file, "Lumiya-" + new SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US).format(new Date()) + ".jpg");
-            FileOutputStream fileOutputStream = new FileOutputStream(file2);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fileOutputStream);
-            fileOutputStream.close();
-            Uri uriForFile = FileProvider.getUriForFile(this, "com.lumiyaviewer.files", file2);
-            SLAgentCircuit data = this.agentCircuit.getData();
-            String agentSLURL = data != null ? data.getAgentSLURL() : null;
-            String string = agentSLURL != null ? getString(R.string.screenshot_taken_slurl, new Object[]{agentSLURL}) : getString(R.string.screenshot_taken_lumiya);
-            Intent intent = new Intent();
-            intent.setAction("android.intent.action.SEND");
-            intent.putExtra("android.intent.extra.TEXT", string);
-            intent.putExtra("android.intent.extra.STREAM", uriForFile);
-            intent.putExtra("android.intent.extra.SUBJECT", "Screenshot from Lumiya");
-            intent.setType("image/jpeg");
-            intent.setFlags(1);
-            startActivity(Intent.createChooser(intent, getString(R.string.export_screenshot_to)));
-        } catch (Exception e) {
-            Toast.makeText(this, R.string.failed_to_make_screenshot, 0).show();
+    public void processScreenshot(Bitmap bitmap)
+    {
+        Object obj;
+        try
+        {
+            obj = new File(getCacheDir(), "screenshots");
+            ((File) (obj)).mkdirs();
+            Object obj1 = new SimpleDateFormat("yyyy-MM-dd-HHmmss", Locale.US);
+            obj = new File(((File) (obj)), (new StringBuilder()).append("Lumiya-").append(((SimpleDateFormat) (obj1)).format(new Date())).append(".jpg").toString());
+            obj1 = new FileOutputStream(((File) (obj)));
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, ((java.io.OutputStream) (obj1)));
+            ((FileOutputStream) (obj1)).close();
+            obj = FileProvider.getUriForFile(this, "com.lumiyaviewer.files", ((File) (obj)));
+            bitmap = (SLAgentCircuit)agentCircuit.getData();
         }
+        // Misplaced declaration of an exception variable
+        catch (Bitmap bitmap)
+        {
+            Toast.makeText(this, 0x7f09011e, 0).show();
+            return;
+        }
+        if (bitmap == null) goto _L2; else goto _L1
+_L1:
+        bitmap = bitmap.getAgentSLURL();
+_L5:
+        if (bitmap == null)
+        {
+            break MISSING_BLOCK_LABEL_227;
+        }
+        bitmap = getString(0x7f0902e4, new Object[] {
+            bitmap
+        });
+_L3:
+        Intent intent = new Intent();
+        intent.setAction("android.intent.action.SEND");
+        intent.putExtra("android.intent.extra.TEXT", bitmap);
+        intent.putExtra("android.intent.extra.STREAM", ((android.os.Parcelable) (obj)));
+        intent.putExtra("android.intent.extra.SUBJECT", "Screenshot from Lumiya");
+        intent.setType("image/jpeg");
+        intent.setFlags(1);
+        startActivity(Intent.createChooser(intent, getString(0x7f090118)));
+        return;
+        bitmap = getString(0x7f0902e3);
+        if (true) goto _L3; else goto _L2
+_L2:
+        bitmap = null;
+        if (true) goto _L5; else goto _L4
+_L4:
     }
 
-    public void rendererAdvancedRenderingChanged() {
+    public void rendererAdvancedRenderingChanged()
+    {
         Intent intent = getIntent();
         finish();
         startActivity(intent);
     }
 
-    /* access modifiers changed from: package-private */
-    @SuppressLint({"CommitPrefEdits"})
-    public void rendererShaderCompileError() {
+    void rendererShaderCompileError()
+    {
         Toast.makeText(this, "Advanced rendering is not available on your hardware. Falling back to basic rendering.", 1).show();
-        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
-        edit.putBoolean("advanced_rendering", false);
-        edit.commit();
+        android.content.SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+        editor.putBoolean("advanced_rendering", false);
+        editor.commit();
         finish();
         startActivity(new Intent(this, getClass()));
     }
 
-    /* access modifiers changed from: package-private */
-    public void rendererSurfaceCreated() {
-        if (this.drawDistance != null) {
-            this.drawDistance.Enable3DView(this.prefDrawDistance);
+    void rendererSurfaceCreated()
+    {
+        if (drawDistance != null)
+        {
+            drawDistance.Enable3DView(prefDrawDistance);
         }
     }
 
-    public void setLastTouchUUID(UUID uuid) {
-        this.lastTouchUUID = uuid;
+    public void setLastTouchUUID(UUID uuid)
+    {
+        lastTouchUUID = uuid;
     }
 
-    public void setTouchedObject(SLObjectInfo sLObjectInfo) {
-        if (sLObjectInfo != null) {
-            this.lastTouchUUID = sLObjectInfo.getId();
-            if (this.lastTouchUUID != null) {
-                Debug.Log("Touch: Last touched object set to " + this.lastTouchUUID);
+    public void setTouchedObject(SLObjectInfo slobjectinfo)
+    {
+        if (slobjectinfo != null)
+        {
+            lastTouchUUID = slobjectinfo.getId();
+            if (lastTouchUUID != null)
+            {
+                Debug.Log((new StringBuilder()).append("Touch: Last touched object set to ").append(lastTouchUUID).toString());
             }
         }
     }
 
-    @Nullable
-    public Fragment showDetailsFragment(Class<? extends Fragment> cls, Intent intent, Bundle bundle) {
-        this.detailsContainer.setVisibility(0);
-        if (!this.isSplitScreen) {
-            this.worldOverlaysContainer.setVisibility(8);
-            this.voiceStatusView.disableMic();
+    public Fragment showDetailsFragment(Class class1, Intent intent, Bundle bundle)
+    {
+        detailsContainer.setVisibility(0);
+        if (!isSplitScreen)
+        {
+            worldOverlaysContainer.setVisibility(8);
+            voiceStatusView.disableMic();
         }
-        if (this.fadingTextViewLog != null) {
-            this.fadingTextViewLog.clearChatEvents();
+        if (fadingTextViewLog != null)
+        {
+            fadingTextViewLog.clearChatEvents();
         }
-        return super.showDetailsFragment(cls, intent, bundle);
+        return super.showDetailsFragment(class1, intent, bundle);
     }
 }

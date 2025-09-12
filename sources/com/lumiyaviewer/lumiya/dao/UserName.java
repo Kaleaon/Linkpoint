@@ -1,88 +1,127 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import java.util.UUID;
 
-public class UserName {
+public class UserName
+{
+
     private String displayName;
     private boolean isBadUUID;
     private String userName;
     private UUID uuid;
 
-    public UserName() {
+    public UserName()
+    {
     }
 
-    public UserName(UUID uuid2) {
-        this.uuid = uuid2;
+    public UserName(UUID uuid1)
+    {
+        uuid = uuid1;
     }
 
-    public UserName(UUID uuid2, String str, String str2, boolean z) {
-        this.uuid = uuid2;
-        this.userName = str;
-        this.displayName = str2;
-        this.isBadUUID = z;
+    public UserName(UUID uuid1, String s, String s1, boolean flag)
+    {
+        uuid = uuid1;
+        userName = s;
+        displayName = s1;
+        isBadUUID = flag;
     }
 
-    public String getDisplayName() {
-        return this.displayName;
+    public String getDisplayName()
+    {
+        return displayName;
     }
 
-    public boolean getIsBadUUID() {
-        return this.isBadUUID;
+    public boolean getIsBadUUID()
+    {
+        return isBadUUID;
     }
 
-    public String getUserName() {
-        return this.userName;
+    public String getUserName()
+    {
+        return userName;
     }
 
-    public UUID getUuid() {
-        return this.uuid;
+    public UUID getUuid()
+    {
+        return uuid;
     }
 
-    public boolean isComplete() {
-        if (this.isBadUUID) {
+    public boolean isComplete()
+    {
+        if (!isBadUUID)
+        {
+            if (!Strings.isNullOrEmpty(userName))
+            {
+                return Strings.isNullOrEmpty(displayName) ^ true;
+            } else
+            {
+                return false;
+            }
+        } else
+        {
             return true;
         }
-        if (!Strings.isNullOrEmpty(this.userName)) {
-            return !Strings.isNullOrEmpty(this.displayName);
-        }
-        return false;
     }
 
-    public boolean mergeWith(UserName userName2) {
-        boolean z = false;
-        if (userName2.isBadUUID && (!this.isBadUUID)) {
-            this.isBadUUID = true;
+    public boolean mergeWith(UserName username)
+    {
+        boolean flag1 = false;
+        if (username.isBadUUID && isBadUUID ^ true)
+        {
+            isBadUUID = true;
             return true;
-        } else if (this.isBadUUID) {
+        }
+        if (isBadUUID)
+        {
             return false;
-        } else {
-            if (!Strings.isNullOrEmpty(userName2.userName) && (!Objects.equal(this.userName, userName2.userName))) {
-                this.userName = userName2.userName;
-                z = true;
-            }
-            if (Strings.isNullOrEmpty(userName2.displayName) || !(!Objects.equal(this.displayName, userName2.displayName))) {
-                return z;
-            }
-            this.displayName = userName2.displayName;
-            return true;
         }
+        boolean flag = flag1;
+        if (!Strings.isNullOrEmpty(username.userName))
+        {
+            flag = flag1;
+            if (Objects.equal(userName, username.userName) ^ true)
+            {
+                userName = username.userName;
+                flag = true;
+            }
+        }
+        flag1 = flag;
+        if (!Strings.isNullOrEmpty(username.displayName))
+        {
+            flag1 = flag;
+            if (Objects.equal(displayName, username.displayName) ^ true)
+            {
+                displayName = username.displayName;
+                flag1 = true;
+            }
+        }
+        return flag1;
     }
 
-    public void setDisplayName(String str) {
-        this.displayName = str;
+    public void setDisplayName(String s)
+    {
+        displayName = s;
     }
 
-    public void setIsBadUUID(boolean z) {
-        this.isBadUUID = z;
+    public void setIsBadUUID(boolean flag)
+    {
+        isBadUUID = flag;
     }
 
-    public void setUserName(String str) {
-        this.userName = str;
+    public void setUserName(String s)
+    {
+        userName = s;
     }
 
-    public void setUuid(UUID uuid2) {
-        this.uuid = uuid2;
+    public void setUuid(UUID uuid1)
+    {
+        uuid = uuid1;
     }
 }

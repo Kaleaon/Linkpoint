@@ -1,111 +1,185 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules;
 
 import com.google.common.collect.ImmutableList;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.react.AsyncRequestHandler;
 import com.lumiyaviewer.lumiya.react.RequestHandler;
+import com.lumiyaviewer.lumiya.react.RequestSource;
 import com.lumiyaviewer.lumiya.react.ResultHandler;
 import com.lumiyaviewer.lumiya.react.SimpleRequestHandler;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
+import com.lumiyaviewer.lumiya.slproto.SLCircuitInfo;
+import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
-import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler;
+import com.lumiyaviewer.lumiya.slproto.SLParcelInfo;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLTaskInventory;
 import com.lumiyaviewer.lumiya.slproto.messages.ReplyTaskInventory;
 import com.lumiyaviewer.lumiya.slproto.messages.RequestTaskInventory;
 import com.lumiyaviewer.lumiya.slproto.modules.xfer.ELLPath;
-import com.lumiyaviewer.lumiya.slproto.modules.xfer.SLXfer;
+import com.lumiyaviewer.lumiya.slproto.modules.xfer.SLXferManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectsManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.utils.SimpleStringParser;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public class SLTaskInventories extends SLModule implements SLXfer.SLXferCompletionListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.modules:
+//            SLModule, SLModules
+
+public class SLTaskInventories extends SLModule
+    implements com.lumiyaviewer.lumiya.slproto.modules.xfer.SLXfer.SLXferCompletionListener
+{
+
     private static final String DELIM_ANY = " \t\n";
     private static final String DELIM_EOL = "\n";
-    private final RequestHandler<Integer> requestHandler;
-    private final ResultHandler<Integer, SLTaskInventory> resultHandler;
+    private final RequestHandler requestHandler;
+    private final ResultHandler resultHandler;
     private final UserManager userManager;
 
-    public SLTaskInventories(SLAgentCircuit sLAgentCircuit) {
-        super(sLAgentCircuit);
-        this.requestHandler = new AsyncRequestHandler(sLAgentCircuit, new SimpleRequestHandler<Integer>() {
-            public void onRequest(@Nonnull Integer num) {
-                SLTaskInventories.this.RequestTaskInventory(num.intValue());
+    static void _2D_wrap0(SLTaskInventories sltaskinventories, int i)
+    {
+        sltaskinventories.RequestTaskInventory(i);
+    }
+
+    public SLTaskInventories(SLAgentCircuit slagentcircuit)
+    {
+        super(slagentcircuit);
+        requestHandler = new AsyncRequestHandler(slagentcircuit, new SimpleRequestHandler() {
+
+            final SLTaskInventories this$0;
+
+            public void onRequest(Integer integer)
+            {
+                SLTaskInventories._2D_wrap0(SLTaskInventories.this, integer.intValue());
+            }
+
+            public volatile void onRequest(Object obj)
+            {
+                onRequest((Integer)obj);
+            }
+
+            
+            {
+                this$0 = SLTaskInventories.this;
+                super();
             }
         });
-        this.userManager = UserManager.getUserManager(sLAgentCircuit.getAgentUUID());
-        if (this.userManager != null) {
-            this.resultHandler = this.userManager.getObjectsManager().getTaskInventoryRequestSource().attachRequestHandler(this.requestHandler);
-        } else {
-            this.resultHandler = null;
+        userManager = UserManager.getUserManager(slagentcircuit.getAgentUUID());
+        if (userManager != null)
+        {
+            resultHandler = userManager.getObjectsManager().getTaskInventoryRequestSource().attachRequestHandler(requestHandler);
+            return;
+        } else
+        {
+            resultHandler = null;
+            return;
         }
     }
 
-    /* access modifiers changed from: private */
-    public void RequestTaskInventory(int i) {
-        Debug.Printf("taskID = %d", Integer.valueOf(i));
-        RequestTaskInventory requestTaskInventory = new RequestTaskInventory();
-        requestTaskInventory.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        requestTaskInventory.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        requestTaskInventory.InventoryData_Field.LocalID = i;
-        requestTaskInventory.isReliable = true;
-        SendMessage(requestTaskInventory);
+    private void RequestTaskInventory(int i)
+    {
+        Debug.Printf("taskID = %d", new Object[] {
+            Integer.valueOf(i)
+        });
+        RequestTaskInventory requesttaskinventory = new RequestTaskInventory();
+        requesttaskinventory.AgentData_Field.AgentID = circuitInfo.agentID;
+        requesttaskinventory.AgentData_Field.SessionID = circuitInfo.sessionID;
+        requesttaskinventory.InventoryData_Field.LocalID = i;
+        requesttaskinventory.isReliable = true;
+        SendMessage(requesttaskinventory);
     }
 
-    private SLTaskInventory parseTaskInventory(byte[] bArr) {
-        if (bArr == null) {
+    private SLTaskInventory parseTaskInventory(byte abyte0[])
+    {
+        if (abyte0 == null)
+        {
             return new SLTaskInventory();
         }
-        try {
-            ImmutableList.Builder builder = ImmutableList.builder();
-            SimpleStringParser simpleStringParser = new SimpleStringParser(SLMessage.stringFromVariableUTF(bArr), DELIM_ANY);
-            while (!simpleStringParser.endOfString()) {
-                String nextToken = simpleStringParser.nextToken(DELIM_ANY);
-                Debug.Printf("TaskInventory: got token: '%s'", nextToken);
-                if (nextToken.equalsIgnoreCase("inv_object")) {
-                    simpleStringParser.nextToken(DELIM_EOL);
-                    simpleStringParser.expectToken("{", DELIM_EOL);
-                    while (!simpleStringParser.nextToken(DELIM_EOL).equals("}")) {
-                    }
-                } else if (nextToken.equalsIgnoreCase("inv_item")) {
-                    simpleStringParser.getIntToken(DELIM_EOL);
-                    builder.add((Object) SLInventoryEntry.parseString(simpleStringParser));
-                }
-            }
-            return new SLTaskInventory(builder.build());
-        } catch (SimpleStringParser.StringParsingException e) {
-            Debug.Warning(e);
+        com.google.common.collect.ImmutableList.Builder builder;
+        builder = ImmutableList.builder();
+        abyte0 = new SimpleStringParser(SLMessage.stringFromVariableUTF(abyte0), " \t\n");
+_L3:
+        String s;
+        if (abyte0.endOfString())
+        {
+            break MISSING_BLOCK_LABEL_140;
+        }
+        s = abyte0.nextToken(" \t\n");
+        Debug.Printf("TaskInventory: got token: '%s'", new Object[] {
+            s
+        });
+        if (!s.equalsIgnoreCase("inv_object")) goto _L2; else goto _L1
+_L1:
+        abyte0.nextToken("\n");
+        abyte0.expectToken("{", "\n");
+        while (!abyte0.nextToken("\n").equals("}")) ;
+          goto _L3
+_L2:
+        if (!s.equalsIgnoreCase("inv_item")) goto _L3; else goto _L4
+_L4:
+        abyte0.getIntToken("\n");
+        builder.add(SLInventoryEntry.parseString(abyte0));
+          goto _L3
+        try
+        {
+            abyte0 = new SLTaskInventory(builder.build());
+        }
+        // Misplaced declaration of an exception variable
+        catch (byte abyte0[])
+        {
+            Debug.Warning(abyte0);
             return new SLTaskInventory();
         }
+        return abyte0;
     }
 
-    public void HandleCloseCircuit() {
-        if (this.userManager != null) {
-            this.userManager.getObjectsManager().getTaskInventoryRequestSource().detachRequestHandler(this.requestHandler);
+    public void HandleCloseCircuit()
+    {
+        if (userManager != null)
+        {
+            userManager.getObjectsManager().getTaskInventoryRequestSource().detachRequestHandler(requestHandler);
         }
         super.HandleCloseCircuit();
     }
 
-    @SLMessageHandler
-    public void HandleReplyTaskInventory(ReplyTaskInventory replyTaskInventory) {
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(replyTaskInventory.InventoryData_Field.Filename);
-        Debug.Printf("taskID = %s, serial = %d, filename = '%s'", replyTaskInventory.InventoryData_Field.TaskID.toString(), Integer.valueOf(replyTaskInventory.InventoryData_Field.Serial), stringFromVariableOEM);
-        if (!stringFromVariableOEM.equals("")) {
-            this.agentCircuit.getModules().xferManager.RequestXfer(stringFromVariableOEM, ELLPath.LL_PATH_CACHE, true, this, replyTaskInventory.InventoryData_Field.TaskID);
-        } else if (this.resultHandler != null) {
-            this.resultHandler.onResultData(Integer.valueOf(this.agentCircuit.getGridConnection().parcelInfo.getObjectLocalID(replyTaskInventory.InventoryData_Field.TaskID)), new SLTaskInventory());
+    public void HandleReplyTaskInventory(ReplyTaskInventory replytaskinventory)
+    {
+        String s = SLMessage.stringFromVariableOEM(replytaskinventory.InventoryData_Field.Filename);
+        Debug.Printf("taskID = %s, serial = %d, filename = '%s'", new Object[] {
+            replytaskinventory.InventoryData_Field.TaskID.toString(), Integer.valueOf(replytaskinventory.InventoryData_Field.Serial), s
+        });
+        if (!s.equals(""))
+        {
+            agentCircuit.getModules().xferManager.RequestXfer(s, ELLPath.LL_PATH_CACHE, true, this, replytaskinventory.InventoryData_Field.TaskID);
+        } else
+        if (resultHandler != null)
+        {
+            int i = agentCircuit.getGridConnection().parcelInfo.getObjectLocalID(replytaskinventory.InventoryData_Field.TaskID);
+            resultHandler.onResultData(Integer.valueOf(i), new SLTaskInventory());
+            return;
         }
     }
 
-    public void onXferComplete(Object obj, String str, byte[] bArr) {
-        if (obj instanceof UUID) {
-            UUID uuid = (UUID) obj;
-            Debug.Printf("onXferComplete with file = '%s', data length = %d", str, Integer.valueOf(bArr.length));
-            SLTaskInventory parseTaskInventory = parseTaskInventory(bArr);
-            Debug.Printf("task inventory count = %d", Integer.valueOf(parseTaskInventory.entries.size()));
-            if (this.resultHandler != null) {
-                this.resultHandler.onResultData(Integer.valueOf(this.agentCircuit.getGridConnection().parcelInfo.getObjectLocalID(uuid)), parseTaskInventory);
+    public void onXferComplete(Object obj, String s, byte abyte0[])
+    {
+        if (obj instanceof UUID)
+        {
+            obj = (UUID)obj;
+            Debug.Printf("onXferComplete with file = '%s', data length = %d", new Object[] {
+                s, Integer.valueOf(abyte0.length)
+            });
+            s = parseTaskInventory(abyte0);
+            Debug.Printf("task inventory count = %d", new Object[] {
+                Integer.valueOf(((SLTaskInventory) (s)).entries.size())
+            });
+            if (resultHandler != null)
+            {
+                int i = agentCircuit.getGridConnection().parcelInfo.getObjectLocalID(((UUID) (obj)));
+                resultHandler.onResultData(Integer.valueOf(i), s);
             }
         }
     }

@@ -13,19 +13,23 @@ public class GLTextureCache extends GLResourceCache<DrawableTextureParams, OpenJ
         super(gLLoadQueue);
     }
 
-    protected void CancelRawResource(ResourceConsumer resourceConsumer) {
+    /* access modifiers changed from: protected */
+    public void CancelRawResource(ResourceConsumer resourceConsumer) {
         TextureCache.getInstance().CancelRequest(resourceConsumer);
     }
 
-    protected int GetResourceSize(OpenJPEG openJPEG) {
+    /* access modifiers changed from: protected */
+    public int GetResourceSize(OpenJPEG openJPEG) {
         return openJPEG.getLoadedSize();
     }
 
-    protected GLLoadedTexture LoadResource(DrawableTextureParams drawableTextureParams, OpenJPEG openJPEG, RenderContext renderContext) {
+    /* access modifiers changed from: protected */
+    public GLLoadedTexture LoadResource(DrawableTextureParams drawableTextureParams, OpenJPEG openJPEG, RenderContext renderContext) {
         return new GLLoadedTexture(renderContext, openJPEG);
     }
 
-    protected void RequestRawResource(DrawableTextureParams drawableTextureParams, ResourceConsumer resourceConsumer) {
+    /* access modifiers changed from: protected */
+    public void RequestRawResource(DrawableTextureParams drawableTextureParams, ResourceConsumer resourceConsumer) {
         TextureCache.getInstance().RequestResource(drawableTextureParams, resourceConsumer);
     }
 }

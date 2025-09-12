@@ -1,8 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat;
 
 import android.graphics.Bitmap;
 import android.view.View;
 import com.google.common.base.Objects;
+import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleDataPool;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
@@ -11,238 +16,132 @@ import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ParcelData;
 import com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.UserPicBitmapCache;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.lang.ref.WeakReference;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class ChatterThumbnailData implements ResourceConsumer {
-    private final AtomicReference<Bitmap> bitmapData = new AtomicReference<>();
+public class ChatterThumbnailData
+    implements ResourceConsumer
+{
+
+    private final AtomicReference bitmapData = new AtomicReference();
     private final Subscription subscription;
-    @Nullable
-    private final WeakReference<View> updateView;
-    @Nullable
+    private final WeakReference updateView;
     private final UserManager userManager;
 
-    public ChatterThumbnailData(@Nonnull ChatterID chatterID, @Nullable View view) {
-        this.userManager = chatterID.getUserManager();
-        this.updateView = view != null ? new WeakReference<>(view) : null;
-        if (this.userManager == null) {
-            this.subscription = null;
-        } else if (chatterID.getChatterType() == ChatterID.ChatterType.Local) {
-            this.subscription = this.userManager.getCurrentLocationInfo().subscribe(SubscriptionSingleDataPool.getSingleDataKey(), UIThreadExecutor.getInstance(), new $Lambda$4TRyU3GIOc1CH0v3ewFouMG3lk(this));
-        } else if (chatterID.isValidUUID()) {
-            this.subscription = chatterID.getPictureID(this.userManager, UIThreadExecutor.getInstance(), new ChatterID.OnChatterPictureIDListener(this) {
-
-                /* renamed from: -$f0 */
-                private final /* synthetic */ Object f241$f0;
-
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$4T-RyU3GIOc1CH0v3ewFouMG3lk.1.$m$0(java.util.UUID):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$4T-RyU3GIOc1CH0v3ewFouMG3lk.1.$m$0(java.util.UUID):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.connectElseIf(RegionGen.java:175)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:152)
-                	at jadx.core.codegen.RegionGen.connectElseIf(RegionGen.java:175)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:152)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void onChatterPictureID(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$4T-RyU3GIOc1CH0v3ewFouMG3lk.1.onChatterPictureID(java.util.UUID):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$4T-RyU3GIOc1CH0v3ewFouMG3lk.1.onChatterPictureID(java.util.UUID):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.connectElseIf(RegionGen.java:175)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:152)
-                	at jadx.core.codegen.RegionGen.connectElseIf(RegionGen.java:175)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:152)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-            });
-        } else {
-            this.subscription = null;
+    public ChatterThumbnailData(ChatterID chatterid, View view)
+    {
+        userManager = chatterid.getUserManager();
+        if (view != null)
+        {
+            view = new WeakReference(view);
+        } else
+        {
+            view = null;
         }
-    }
-
-    /* access modifiers changed from: private */
-    /* renamed from: onCurrentLocationInfo */
-    public void m416com_lumiyaviewer_lumiya_ui_chat_ChatterThumbnailDatamthref0(CurrentLocationInfo currentLocationInfo) {
-        View view;
-        ParcelData parcelData = currentLocationInfo.parcelData();
-        UUID snapshotUUID = parcelData != null ? parcelData.getSnapshotUUID() : null;
-        if (snapshotUUID == null || !(!Objects.equal(snapshotUUID, UUIDPool.ZeroUUID)) || this.userManager == null) {
-            this.bitmapData.set((Object) null);
-            if (this.updateView != null && (view = (View) this.updateView.get()) != null) {
-                view.postInvalidate();
+        updateView = view;
+        if (userManager != null)
+        {
+            if (chatterid.getChatterType() == com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Local)
+            {
+                subscription = userManager.getCurrentLocationInfo().subscribe(SubscriptionSingleDataPool.getSingleDataKey(), UIThreadExecutor.getInstance(), new _2D_.Lambda._cls4T_2D_RyU3GIOc1CH0v3ewFouMG3lk(this));
                 return;
             }
+            if (chatterid.isValidUUID())
+            {
+                subscription = chatterid.getPictureID(userManager, UIThreadExecutor.getInstance(), new _2D_.Lambda._cls4T_2D_RyU3GIOc1CH0v3ewFouMG3lk._cls1(this));
+                return;
+            } else
+            {
+                subscription = null;
+                return;
+            }
+        } else
+        {
+            subscription = null;
             return;
         }
-        this.userManager.getUserPicBitmapCache().RequestResource(snapshotUUID, this);
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: requestBitmap */
-    public void m417com_lumiyaviewer_lumiya_ui_chat_ChatterThumbnailDatamthref1(UUID uuid) {
-        if (uuid != null && (!Objects.equal(uuid, UUIDPool.ZeroUUID)) && this.userManager != null) {
-            this.userManager.getUserPicBitmapCache().RequestResource(uuid, this);
+    private void onCurrentLocationInfo(CurrentLocationInfo currentlocationinfo)
+    {
+        currentlocationinfo = currentlocationinfo.parcelData();
+        if (currentlocationinfo != null)
+        {
+            currentlocationinfo = currentlocationinfo.getSnapshotUUID();
+        } else
+        {
+            currentlocationinfo = null;
         }
-    }
-
-    public void OnResourceReady(Object obj, boolean z) {
-        View view;
-        if (obj instanceof Bitmap) {
-            this.bitmapData.set((Bitmap) obj);
-            if (this.updateView != null && (view = (View) this.updateView.get()) != null) {
-                view.postInvalidate();
+        if (currentlocationinfo != null && Objects.equal(currentlocationinfo, UUIDPool.ZeroUUID) ^ true && userManager != null)
+        {
+            userManager.getUserPicBitmapCache().RequestResource(currentlocationinfo, this);
+        } else
+        {
+            bitmapData.set(null);
+            if (updateView != null)
+            {
+                currentlocationinfo = (View)updateView.get();
+                if (currentlocationinfo != null)
+                {
+                    currentlocationinfo.postInvalidate();
+                    return;
+                }
             }
         }
     }
 
-    public void dispose() {
-        if (this.subscription != null) {
-            this.subscription.unsubscribe();
+    private void requestBitmap(UUID uuid)
+    {
+        if (uuid != null && Objects.equal(uuid, UUIDPool.ZeroUUID) ^ true && userManager != null)
+        {
+            userManager.getUserPicBitmapCache().RequestResource(uuid, this);
         }
-        if (this.userManager != null) {
-            this.userManager.getUserPicBitmapCache().CancelRequest(this);
-        }
-        this.bitmapData.set((Object) null);
     }
 
-    @Nullable
-    public Bitmap getBitmapData() {
-        return this.bitmapData.get();
+    void _2D_com_lumiyaviewer_lumiya_ui_chat_ChatterThumbnailData_2D_mthref_2D_0(CurrentLocationInfo currentlocationinfo)
+    {
+        onCurrentLocationInfo(currentlocationinfo);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_chat_ChatterThumbnailData_2D_mthref_2D_1(UUID uuid)
+    {
+        requestBitmap(uuid);
+    }
+
+    public void OnResourceReady(Object obj, boolean flag)
+    {
+        if (obj instanceof Bitmap)
+        {
+            bitmapData.set((Bitmap)obj);
+            if (updateView != null)
+            {
+                obj = (View)updateView.get();
+                if (obj != null)
+                {
+                    ((View) (obj)).postInvalidate();
+                }
+            }
+        }
+    }
+
+    public void dispose()
+    {
+        if (subscription != null)
+        {
+            subscription.unsubscribe();
+        }
+        if (userManager != null)
+        {
+            userManager.getUserPicBitmapCache().CancelRequest(this);
+        }
+        bitmapData.set(null);
+    }
+
+    public Bitmap getBitmapData()
+    {
+        return (Bitmap)bitmapData.get();
     }
 }

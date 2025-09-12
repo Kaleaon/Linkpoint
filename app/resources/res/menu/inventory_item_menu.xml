@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
-    <item android:icon="?attr/MenuIconTrash" android:id="@+id/inventory_item_delete_item" android:title="@string/inventory_delete_item" app:showAsAction="ifRoom"/>
-    <item android:icon="?attr/MenuIconEdit" android:id="@+id/inventory_item_rename_item" android:title="@string/inventory_rename_item" app:showAsAction="ifRoom"/>
-    <item android:icon="?attr/MenuIconItemShare" android:id="@+id/inventory_item_share_item" android:title="@string/inventory_share_item" app:showAsAction="ifRoom"/>
-    <item android:icon="?attr/MenuIconClipboardCut" android:id="@+id/inventory_item_cut_item" android:title="@string/inventory_cut" app:showAsAction="ifRoom"/>
-    <item android:icon="?attr/MenuIconClipboardCopy" android:id="@+id/inventory_item_copy_item" android:title="@string/inventory_copy" app:showAsAction="ifRoom"/>
-</menu>

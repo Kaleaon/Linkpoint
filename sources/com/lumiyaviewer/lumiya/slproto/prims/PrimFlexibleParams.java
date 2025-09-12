@@ -1,11 +1,15 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.prims;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import java.nio.ByteBuffer;
 
-public class PrimFlexibleParams {
+public class PrimFlexibleParams
+{
+
     public float AirFriction;
     public float Gravity;
     public int NumFlexiSections;
@@ -13,35 +17,57 @@ public class PrimFlexibleParams {
     public LLVector3 UserForce;
     public float WindSensitivity;
 
-    public PrimFlexibleParams(ByteBuffer byteBuffer, int i) {
-        int i2 = 0;
-        byte b = byteBuffer.get();
-        byte b2 = byteBuffer.get();
-        this.Tension = ((float) (b & Ascii.DEL)) / 10.0f;
-        this.AirFriction = ((float) (b2 & Ascii.DEL)) / 10.0f;
-        i2 = (b & 128) != 0 ? 2 : i2;
-        this.NumFlexiSections = (1 << ((b2 & 128) != 0 ? i2 | 1 : i2)) + 1;
-        this.Gravity = (((float) (byteBuffer.get() & UnsignedBytes.MAX_VALUE)) / 10.0f) - 10.0f;
-        this.WindSensitivity = ((float) (byteBuffer.get() & UnsignedBytes.MAX_VALUE)) / 10.0f;
-        if (byteBuffer.position() < i) {
-            this.UserForce = LLVector3.parseFloatVec(byteBuffer);
-        } else {
-            this.UserForce = LLVector3.Zero;
+    public PrimFlexibleParams(ByteBuffer bytebuffer, int i)
+    {
+        byte byte0 = 0;
+        super();
+        int j = bytebuffer.get();
+        byte byte1 = bytebuffer.get();
+        Tension = (float)(j & 0x7f) / 10F;
+        AirFriction = (float)(byte1 & 0x7f) / 10F;
+        if ((j & 0x80) != 0)
+        {
+            byte0 = 2;
+        }
+        j = byte0;
+        if ((byte1 & 0x80) != 0)
+        {
+            j = byte0 | 1;
+        }
+        NumFlexiSections = (1 << j) + 1;
+        Gravity = (float)(bytebuffer.get() & 0xff) / 10F - 10F;
+        WindSensitivity = (float)(bytebuffer.get() & 0xff) / 10F;
+        if (bytebuffer.position() < i)
+        {
+            UserForce = LLVector3.parseFloatVec(bytebuffer);
+            return;
+        } else
+        {
+            UserForce = LLVector3.Zero;
+            return;
         }
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
             return true;
         }
-        if (!(obj instanceof PrimFlexibleParams)) {
+        if (!(obj instanceof PrimFlexibleParams))
+        {
             return false;
         }
-        PrimFlexibleParams primFlexibleParams = (PrimFlexibleParams) obj;
-        return this.Tension == primFlexibleParams.Tension && this.AirFriction == primFlexibleParams.AirFriction && this.Gravity == primFlexibleParams.Gravity && this.WindSensitivity == primFlexibleParams.WindSensitivity && this.NumFlexiSections == primFlexibleParams.NumFlexiSections && !(this.UserForce.equals(primFlexibleParams.UserForce) ^ true);
+        for (obj = (PrimFlexibleParams)obj; Tension != ((PrimFlexibleParams) (obj)).Tension || AirFriction != ((PrimFlexibleParams) (obj)).AirFriction || Gravity != ((PrimFlexibleParams) (obj)).Gravity || WindSensitivity != ((PrimFlexibleParams) (obj)).WindSensitivity || NumFlexiSections != ((PrimFlexibleParams) (obj)).NumFlexiSections || UserForce.equals(((PrimFlexibleParams) (obj)).UserForce) ^ true;)
+        {
+            return false;
+        }
+
+        return true;
     }
 
-    public int hashCode() {
-        return Float.floatToRawIntBits(this.Tension) + 0 + Float.floatToRawIntBits(this.AirFriction) + Float.floatToRawIntBits(this.Gravity) + Float.floatToRawIntBits(this.WindSensitivity) + this.NumFlexiSections + this.UserForce.hashCode();
+    public int hashCode()
+    {
+        return Float.floatToRawIntBits(Tension) + 0 + Float.floatToRawIntBits(AirFriction) + Float.floatToRawIntBits(Gravity) + Float.floatToRawIntBits(WindSensitivity) + NumFlexiSections + UserForce.hashCode();
     }
 }

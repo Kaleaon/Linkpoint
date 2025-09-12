@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.utils;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -14,391 +18,521 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class PriorityBinQueue<T> implements BlockingQueue<T> {
-    private final Map<T, Integer> allItems = new IdentityHashMap();
+// Referenced classes of package com.lumiyaviewer.lumiya.utils:
+//            HasPriority
+
+public class PriorityBinQueue
+    implements BlockingQueue
+{
+
+    private final Map allItems = new IdentityHashMap();
     private final Lock lock = new ReentrantLock();
-    private final Condition notEmpty = this.lock.newCondition();
+    private final Condition notEmpty;
     private final int numBins;
-    private final Set<T>[] queues;
+    private final Set queues[];
 
-    public PriorityBinQueue(int i) {
-        this.numBins = i;
-        this.queues = new Set[i];
-        for (int i2 = 0; i2 < i; i2++) {
-            this.queues[i2] = new HashSet();
+    public PriorityBinQueue(int i)
+    {
+        notEmpty = lock.newCondition();
+        numBins = i;
+        queues = new Set[i];
+        for (int j = 0; j < i; j++)
+        {
+            queues[j] = new HashSet();
         }
+
     }
 
-    public boolean add(T t) {
+    public boolean add(Object obj)
+    {
+        lock.lock();
+        if (!(obj instanceof HasPriority)) goto _L2; else goto _L1
+_L1:
+        int j = ((HasPriority)obj).getPriority();
+        if (j >= 0) goto _L4; else goto _L3
+_L3:
+        int i = 0;
+_L6:
+        boolean flag;
+        flag = queues[i].add(obj);
+        allItems.put(obj, Integer.valueOf(i));
+        Debug.Printf("Thread %s added item to the queue, bin %d/%d", new Object[] {
+            Thread.currentThread().getName(), Integer.valueOf(i), Integer.valueOf(numBins)
+        });
+        notEmpty.signalAll();
+        lock.unlock();
+        return flag;
+_L4:
+        i = j;
+        if (j <= numBins - 1) goto _L6; else goto _L5
+_L5:
+        i = numBins - 1;
+          goto _L6
+_L2:
+        Debug.Printf("Thread %s added item %s without a priority", new Object[] {
+            Thread.currentThread().getName(), obj.toString()
+        });
+        i = 0;
+          goto _L6
+        obj;
+        lock.unlock();
+        throw obj;
+    }
+
+    public boolean addAll(Collection collection)
+    {
+        boolean flag = false;
+        for (collection = collection.iterator(); collection.hasNext();)
+        {
+            flag |= add(collection.next());
+        }
+
+        return flag;
+    }
+
+    public void clear()
+    {
         int i;
-        this.lock.lock();
-        try {
-            if (t instanceof HasPriority) {
-                i = ((HasPriority) t).getPriority();
-                if (i < 0) {
-                    i = 0;
-                } else if (i > this.numBins - 1) {
-                    i = this.numBins - 1;
-                }
-            } else {
-                Debug.Printf("Thread %s added item %s without a priority", Thread.currentThread().getName(), t.toString());
-                i = 0;
-            }
-            boolean add = this.queues[i].add(t);
-            this.allItems.put(t, Integer.valueOf(i));
-            Debug.Printf("Thread %s added item to the queue, bin %d/%d", Thread.currentThread().getName(), Integer.valueOf(i), Integer.valueOf(this.numBins));
-            this.notEmpty.signalAll();
-            return add;
-        } finally {
-            this.lock.unlock();
+        lock.lock();
+        i = 0;
+_L2:
+        if (i >= numBins)
+        {
+            break; /* Loop/switch isn't completed */
         }
+        queues[i].clear();
+        i++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        allItems.clear();
+        lock.unlock();
+        return;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public boolean addAll(Collection<? extends T> collection) {
-        boolean z = false;
-        for (T add : collection) {
-            z |= add(add);
-        }
-        return z;
+    public boolean contains(Object obj)
+    {
+        lock.lock();
+        boolean flag = allItems.containsKey(obj);
+        lock.unlock();
+        return flag;
+        obj;
+        lock.unlock();
+        throw obj;
     }
 
-    public void clear() {
-        this.lock.lock();
-        int i = 0;
-        while (i < this.numBins) {
-            try {
-                this.queues[i].clear();
-                i++;
-            } finally {
-                this.lock.unlock();
-            }
+    public boolean containsAll(Collection collection)
+    {
+        boolean flag1;
+        lock.lock();
+        flag1 = true;
+        collection = collection.iterator();
+_L2:
+        boolean flag = flag1;
+        if (!collection.hasNext())
+        {
+            break; /* Loop/switch isn't completed */
         }
-        this.allItems.clear();
+        flag = contains(collection.next());
+        if (flag)
+        {
+            continue; /* Loop/switch isn't completed */
+        }
+        flag = false;
+        break; /* Loop/switch isn't completed */
+        if (true) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
+        return flag;
+        collection;
+        lock.unlock();
+        throw collection;
     }
 
-    public boolean contains(Object obj) {
-        this.lock.lock();
-        try {
-            return this.allItems.containsKey(obj);
-        } finally {
-            this.lock.unlock();
+    public int drainTo(Collection collection)
+    {
+        int i;
+        int j;
+        i = 0;
+        lock.lock();
+        j = 0;
+_L2:
+        if (i >= numBins)
+        {
+            break; /* Loop/switch isn't completed */
         }
+        j += queues[i].size();
+        collection.addAll(queues[i]);
+        queues[i].clear();
+        i++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        allItems.clear();
+        lock.unlock();
+        return j;
+        collection;
+        lock.unlock();
+        throw collection;
     }
 
-    public boolean containsAll(Collection<?> collection) {
-        this.lock.lock();
-        boolean z = true;
-        try {
-            Iterator<T> it = collection.iterator();
-            while (true) {
-                if (it.hasNext()) {
-                    if (!contains(it.next())) {
-                        z = false;
-                        break;
-                    }
-                } else {
-                    break;
-                }
-            }
-            return z;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public int drainTo(Collection<? super T> collection) {
-        int i = 0;
-        this.lock.lock();
-        int i2 = 0;
-        while (i < this.numBins) {
-            try {
-                i2 += this.queues[i].size();
-                collection.addAll(this.queues[i]);
-                this.queues[i].clear();
-                i++;
-            } finally {
-                this.lock.unlock();
-            }
-        }
-        this.allItems.clear();
-        return i2;
-    }
-
-    public int drainTo(Collection<? super T> collection, int i) {
+    public int drainTo(Collection collection, int i)
+    {
         throw new UnsupportedOperationException();
     }
 
-    public T element() {
-        T peek = peek();
-        if (peek != null) {
-            return peek;
-        }
-        throw new NoSuchElementException();
-    }
-
-    public boolean isEmpty() {
-        this.lock.lock();
-        try {
-            return this.allItems.isEmpty();
-        } finally {
-            this.lock.unlock();
+    public Object element()
+    {
+        Object obj = peek();
+        if (obj == null)
+        {
+            throw new NoSuchElementException();
+        } else
+        {
+            return obj;
         }
     }
 
-    public Iterator<T> iterator() {
+    public boolean isEmpty()
+    {
+        lock.lock();
+        boolean flag = allItems.isEmpty();
+        lock.unlock();
+        return flag;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
+    }
+
+    public Iterator iterator()
+    {
         throw new UnsupportedOperationException("Iterator not supported");
     }
 
-    public boolean offer(T t) {
-        return add(t);
+    public boolean offer(Object obj)
+    {
+        return add(obj);
     }
 
-    public boolean offer(T t, long j, TimeUnit timeUnit) throws InterruptedException {
-        return add(t);
+    public boolean offer(Object obj, long l, TimeUnit timeunit)
+        throws InterruptedException
+    {
+        return add(obj);
     }
 
-    public T peek() {
-        T next;
-        this.lock.lock();
-        int i = 0;
-        while (i < this.numBins) {
-            try {
-                if (!this.queues[i].isEmpty() && (next = this.queues[i].iterator().next()) != null) {
-                    return next;
-                }
-                i++;
-            } finally {
-                this.lock.unlock();
-            }
+    public Object peek()
+    {
+        int i;
+        lock.lock();
+        i = 0;
+_L2:
+        Object obj;
+        if (i >= numBins)
+        {
+            break; /* Loop/switch isn't completed */
         }
-        this.lock.unlock();
+        if (queues[i].isEmpty())
+        {
+            break MISSING_BLOCK_LABEL_65;
+        }
+        obj = queues[i].iterator().next();
+        if (obj != null)
+        {
+            lock.unlock();
+            return obj;
+        }
+        i++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
         return null;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:6:0x0015, code lost:
-        r1 = r4.queues[r0].iterator();
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public T poll() {
-        /*
-            r4 = this;
-            r3 = 0
-            java.util.concurrent.locks.Lock r0 = r4.lock
-            r0.lock()
-            r0 = 0
-        L_0x0007:
-            int r1 = r4.numBins     // Catch:{ all -> 0x003a }
-            if (r0 >= r1) goto L_0x0034
-            java.util.Set<T>[] r1 = r4.queues     // Catch:{ all -> 0x003a }
-            r1 = r1[r0]     // Catch:{ all -> 0x003a }
-            boolean r1 = r1.isEmpty()     // Catch:{ all -> 0x003a }
-            if (r1 != 0) goto L_0x0031
-            java.util.Set<T>[] r1 = r4.queues     // Catch:{ all -> 0x003a }
-            r1 = r1[r0]     // Catch:{ all -> 0x003a }
-            java.util.Iterator r1 = r1.iterator()     // Catch:{ all -> 0x003a }
-            java.lang.Object r2 = r1.next()     // Catch:{ all -> 0x003a }
-            if (r2 == 0) goto L_0x0031
-            r1.remove()     // Catch:{ all -> 0x003a }
-            java.util.Map<T, java.lang.Integer> r0 = r4.allItems     // Catch:{ all -> 0x003a }
-            r0.remove(r2)     // Catch:{ all -> 0x003a }
-            java.util.concurrent.locks.Lock r0 = r4.lock
-            r0.unlock()
-            return r2
-        L_0x0031:
-            int r0 = r0 + 1
-            goto L_0x0007
-        L_0x0034:
-            java.util.concurrent.locks.Lock r0 = r4.lock
-            r0.unlock()
-            return r3
-        L_0x003a:
-            r0 = move-exception
-            java.util.concurrent.locks.Lock r1 = r4.lock
-            r1.unlock()
-            throw r0
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.utils.PriorityBinQueue.poll():java.lang.Object");
-    }
-
-    /* JADX WARNING: Code restructure failed: missing block: B:8:0x001d, code lost:
-        r2 = r7.queues[r1].iterator();
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public T poll(long r8, java.util.concurrent.TimeUnit r10) throws java.lang.InterruptedException {
-        /*
-            r7 = this;
-            r0 = 0
-            r1 = 0
-            java.util.concurrent.locks.Lock r2 = r7.lock
-            r2.lock()
-            java.util.concurrent.locks.Condition r2 = r7.notEmpty     // Catch:{ all -> 0x0057 }
-            boolean r2 = r2.await(r8, r10)     // Catch:{ all -> 0x0057 }
-            if (r2 == 0) goto L_0x004e
-        L_0x000f:
-            int r2 = r7.numBins     // Catch:{ all -> 0x0057 }
-            if (r1 >= r2) goto L_0x004e
-            java.util.Set<T>[] r2 = r7.queues     // Catch:{ all -> 0x0057 }
-            r2 = r2[r1]     // Catch:{ all -> 0x0057 }
-            boolean r2 = r2.isEmpty()     // Catch:{ all -> 0x0057 }
-            if (r2 != 0) goto L_0x0054
-            java.util.Set<T>[] r0 = r7.queues     // Catch:{ all -> 0x0057 }
-            r0 = r0[r1]     // Catch:{ all -> 0x0057 }
-            java.util.Iterator r2 = r0.iterator()     // Catch:{ all -> 0x0057 }
-            java.lang.Object r0 = r2.next()     // Catch:{ all -> 0x0057 }
-            if (r0 == 0) goto L_0x0054
-            r2.remove()     // Catch:{ all -> 0x0057 }
-            java.util.Map<T, java.lang.Integer> r2 = r7.allItems     // Catch:{ all -> 0x0057 }
-            r2.remove(r0)     // Catch:{ all -> 0x0057 }
-            java.lang.String r2 = "Thread %s got item with priority %d"
-            r3 = 2
-            java.lang.Object[] r3 = new java.lang.Object[r3]     // Catch:{ all -> 0x0057 }
-            java.lang.Thread r4 = java.lang.Thread.currentThread()     // Catch:{ all -> 0x0057 }
-            java.lang.String r4 = r4.getName()     // Catch:{ all -> 0x0057 }
-            r5 = 0
-            r3[r5] = r4     // Catch:{ all -> 0x0057 }
-            java.lang.Integer r1 = java.lang.Integer.valueOf(r1)     // Catch:{ all -> 0x0057 }
-            r4 = 1
-            r3[r4] = r1     // Catch:{ all -> 0x0057 }
-            com.lumiyaviewer.lumiya.Debug.Printf(r2, r3)     // Catch:{ all -> 0x0057 }
-        L_0x004e:
-            java.util.concurrent.locks.Lock r1 = r7.lock
-            r1.unlock()
-            return r0
-        L_0x0054:
-            int r1 = r1 + 1
-            goto L_0x000f
-        L_0x0057:
-            r0 = move-exception
-            java.util.concurrent.locks.Lock r1 = r7.lock
-            r1.unlock()
-            throw r0
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.utils.PriorityBinQueue.poll(long, java.util.concurrent.TimeUnit):java.lang.Object");
-    }
-
-    public void put(T t) throws InterruptedException {
-        add(t);
-    }
-
-    public int remainingCapacity() {
-        return Integer.MAX_VALUE;
-    }
-
-    public T remove() {
-        T poll = poll();
-        if (poll != null) {
-            return poll;
+    public Object poll()
+    {
+        int i;
+        lock.lock();
+        i = 0;
+_L2:
+        Iterator iterator1;
+        Object obj;
+        if (i >= numBins)
+        {
+            break; /* Loop/switch isn't completed */
         }
-        throw new NoSuchElementException();
+        if (queues[i].isEmpty())
+        {
+            break MISSING_BLOCK_LABEL_84;
+        }
+        iterator1 = queues[i].iterator();
+        obj = iterator1.next();
+        if (obj == null)
+        {
+            break MISSING_BLOCK_LABEL_84;
+        }
+        iterator1.remove();
+        allItems.remove(obj);
+        lock.unlock();
+        return obj;
+        i++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
+        return null;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public boolean remove(Object obj) {
+    public Object poll(long l, TimeUnit timeunit)
+        throws InterruptedException
+    {
+        Object obj;
+        Iterator iterator1;
+        int i;
+        obj = null;
+        iterator1 = null;
+        i = 0;
+        lock.lock();
+        if (!notEmpty.await(l, timeunit)) goto _L2; else goto _L1
+_L1:
+        timeunit = iterator1;
+_L8:
+        obj = timeunit;
+        if (i >= numBins) goto _L2; else goto _L3
+_L3:
+        if (queues[i].isEmpty()) goto _L5; else goto _L4
+_L4:
+        iterator1 = queues[i].iterator();
+        obj = iterator1.next();
+        timeunit = ((TimeUnit) (obj));
+        if (obj == null) goto _L5; else goto _L6
+_L6:
+        iterator1.remove();
+        allItems.remove(obj);
+        Debug.Printf("Thread %s got item with priority %d", new Object[] {
+            Thread.currentThread().getName(), Integer.valueOf(i)
+        });
+_L2:
+        lock.unlock();
+        return obj;
+_L5:
+        i++;
+        if (true) goto _L8; else goto _L7
+_L7:
+        timeunit;
+        lock.unlock();
+        throw timeunit;
+    }
+
+    public void put(Object obj)
+        throws InterruptedException
+    {
+        add(obj);
+    }
+
+    public int remainingCapacity()
+    {
+        return 0x7fffffff;
+    }
+
+    public Object remove()
+    {
+        Object obj = poll();
+        if (obj == null)
+        {
+            throw new NoSuchElementException();
+        } else
+        {
+            return obj;
+        }
+    }
+
+    public boolean remove(Object obj)
+    {
+        int i;
+        boolean flag;
+        i = 0;
+        lock.lock();
+        flag = false;
+_L2:
+        if (i >= numBins)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        flag |= queues[i].remove(obj);
+        i++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        allItems.remove(obj);
+        lock.unlock();
+        return flag;
+        obj;
+        lock.unlock();
+        throw obj;
+    }
+
+    public boolean removeAll(Collection collection)
+    {
+        boolean flag = false;
+        for (collection = collection.iterator(); collection.hasNext();)
+        {
+            flag |= remove(collection.next());
+        }
+
+        return flag;
+    }
+
+    public boolean retainAll(Collection collection)
+    {
+        int i;
+        boolean flag;
+        i = 0;
+        lock.lock();
+        flag = false;
+_L2:
+        if (i >= numBins)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        flag |= queues[i].retainAll(collection);
+        i++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        allItems.keySet().retainAll(collection);
+        lock.unlock();
+        return flag;
+        collection;
+        lock.unlock();
+        throw collection;
+    }
+
+    public int size()
+    {
+        int i;
+        int j;
+        i = 0;
+        lock.lock();
+        j = 0;
+_L2:
+        int k;
+        if (i >= numBins)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        k = queues[i].size();
+        j += k;
+        i++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
+        return j;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
+    }
+
+    public Object take()
+        throws InterruptedException
+    {
+        lock.lock();
+_L4:
         int i = 0;
-        this.lock.lock();
-        boolean z = false;
-        while (i < this.numBins) {
-            try {
-                z |= this.queues[i].remove(obj);
-                i++;
-            } finally {
-                this.lock.unlock();
-            }
+_L2:
+        Iterator iterator1;
+        Object obj;
+        if (i >= numBins)
+        {
+            break; /* Loop/switch isn't completed */
         }
-        this.allItems.remove(obj);
-        return z;
+        if (queues[i].isEmpty())
+        {
+            break MISSING_BLOCK_LABEL_109;
+        }
+        iterator1 = queues[i].iterator();
+        obj = iterator1.next();
+        if (obj == null)
+        {
+            break MISSING_BLOCK_LABEL_109;
+        }
+        iterator1.remove();
+        allItems.remove(obj);
+        Debug.Printf("Thread %s got item with priority %d", new Object[] {
+            Thread.currentThread().getName(), Integer.valueOf(i)
+        });
+        lock.unlock();
+        return obj;
+        i++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        Debug.Printf("Thread %s waiting on the queue", new Object[] {
+            Thread.currentThread().getName()
+        });
+        notEmpty.await();
+        if (true) goto _L4; else goto _L3
+_L3:
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public boolean removeAll(Collection<?> collection) {
-        boolean z = false;
-        Iterator<T> it = collection.iterator();
-        while (it.hasNext()) {
-            z |= remove(it.next());
-        }
-        return z;
-    }
-
-    public boolean retainAll(Collection<?> collection) {
-        int i = 0;
-        this.lock.lock();
-        boolean z = false;
-        while (i < this.numBins) {
-            try {
-                z |= this.queues[i].retainAll(collection);
-                i++;
-            } finally {
-                this.lock.unlock();
-            }
-        }
-        this.allItems.keySet().retainAll(collection);
-        return z;
-    }
-
-    public int size() {
-        int i = 0;
-        this.lock.lock();
-        int i2 = 0;
-        while (i < this.numBins) {
-            try {
-                i2 += this.queues[i].size();
-                i++;
-            } finally {
-                this.lock.unlock();
-            }
-        }
-        return i2;
-    }
-
-    public T take() throws InterruptedException {
-        Iterator<T> it;
-        T next;
-        this.lock.lock();
-        while (true) {
-            int i = 0;
-            while (i < this.numBins) {
-                try {
-                    if (this.queues[i].isEmpty() || (next = it.next()) == null) {
-                        i++;
-                    } else {
-                        (it = this.queues[i].iterator()).remove();
-                        this.allItems.remove(next);
-                        Debug.Printf("Thread %s got item with priority %d", Thread.currentThread().getName(), Integer.valueOf(i));
-                        return next;
-                    }
-                } finally {
-                    this.lock.unlock();
-                }
-            }
-            Debug.Printf("Thread %s waiting on the queue", Thread.currentThread().getName());
-            this.notEmpty.await();
-        }
-    }
-
-    public Object[] toArray() {
+    public Object[] toArray()
+    {
         throw new UnsupportedOperationException();
     }
 
-    public <T> T[] toArray(T[] tArr) {
+    public Object[] toArray(Object aobj[])
+    {
         throw new UnsupportedOperationException();
     }
 
-    public void updatePriority(T t) {
-        int intValue;
-        int i = 0;
-        this.lock.lock();
-        try {
-            if (t instanceof HasPriority) {
-                int priority = ((HasPriority) t).getPriority();
-                if (priority >= 0) {
-                    i = priority > this.numBins + -1 ? this.numBins - 1 : priority;
-                }
-                Integer num = this.allItems.get(t);
-                if (!(num == null || (intValue = num.intValue()) == i || !this.queues[intValue].remove(t))) {
-                    this.queues[i].add(t);
-                    this.allItems.put(t, Integer.valueOf(i));
-                }
-            }
-        } finally {
-            this.lock.unlock();
+    public void updatePriority(Object obj)
+    {
+        int i;
+        i = 0;
+        lock.lock();
+        if (!(obj instanceof HasPriority)) goto _L2; else goto _L1
+_L1:
+        int j = ((HasPriority)obj).getPriority();
+        if (j >= 0) goto _L4; else goto _L3
+_L3:
+        Integer integer = (Integer)allItems.get(obj);
+        if (integer == null) goto _L2; else goto _L5
+_L5:
+        j = integer.intValue();
+        if (j == i) goto _L2; else goto _L6
+_L6:
+        if (queues[j].remove(obj))
+        {
+            queues[i].add(obj);
+            allItems.put(obj, Integer.valueOf(i));
         }
+_L2:
+        lock.unlock();
+        return;
+_L4:
+        if (j <= numBins - 1)
+        {
+            break MISSING_BLOCK_LABEL_153;
+        }
+        i = numBins;
+        i--;
+        continue; /* Loop/switch isn't completed */
+        obj;
+        lock.unlock();
+        throw obj;
+        i = j;
+        if (true) goto _L3; else goto _L7
+_L7:
     }
 }

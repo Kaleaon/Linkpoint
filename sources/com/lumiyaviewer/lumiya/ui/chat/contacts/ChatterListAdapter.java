@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat.contacts;
 
 import android.content.Context;
@@ -9,31 +13,43 @@ import android.widget.ListAdapter;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo;
 
-abstract class ChatterListAdapter extends BaseAdapter implements ListAdapter {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat.contacts:
+//            ChatterItemViewBuilder
+
+abstract class ChatterListAdapter extends BaseAdapter
+    implements ListAdapter
+{
+
     protected final Context context;
     private final LayoutInflater inflater;
-    private boolean userDistanceInline = true;
+    private boolean userDistanceInline;
     protected final UserManager userManager;
     private final ChatterItemViewBuilder viewBuilder = new ChatterItemViewBuilder();
 
-    ChatterListAdapter(Context context2, UserManager userManager2) {
-        this.context = context2;
-        this.userManager = userManager2;
-        this.inflater = LayoutInflater.from(context2);
+    ChatterListAdapter(Context context1, UserManager usermanager)
+    {
+        userDistanceInline = true;
+        context = context1;
+        userManager = usermanager;
+        inflater = LayoutInflater.from(context1);
     }
 
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        Object item = getItem(i);
-        if (!(item instanceof ChatterDisplayInfo)) {
+    public View getView(int i, View view, ViewGroup viewgroup)
+    {
+        Object obj = getItem(i);
+        if (obj instanceof ChatterDisplayInfo)
+        {
+            viewBuilder.reset();
+            ((ChatterDisplayInfo)obj).buildView(context, viewBuilder, userManager);
+            return viewBuilder.getView(inflater, view, viewgroup, userDistanceInline);
+        } else
+        {
             return null;
         }
-        this.viewBuilder.reset();
-        ((ChatterDisplayInfo) item).buildView(this.context, this.viewBuilder, this.userManager);
-        return this.viewBuilder.getView(this.inflater, view, viewGroup, this.userDistanceInline);
     }
 
-    /* access modifiers changed from: package-private */
-    public void setUserDistanceInline(boolean z) {
-        this.userDistanceInline = z;
+    void setUserDistanceInline(boolean flag)
+    {
+        userDistanceInline = flag;
     }
 }

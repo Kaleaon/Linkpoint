@@ -1,86 +1,132 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class AvatarAppearance extends SLMessage {
-    public ArrayList<AppearanceData> AppearanceData_Fields = new ArrayList<>();
-    public ObjectData ObjectData_Field;
-    public Sender Sender_Field;
-    public ArrayList<VisualParam> VisualParam_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AppearanceData {
+public class AvatarAppearance extends SLMessage
+{
+    public static class AppearanceData
+    {
+
         public int AppearanceVersion;
         public int CofVersion;
         public int Flags;
+
+        public AppearanceData()
+        {
+        }
     }
 
-    public static class ObjectData {
-        public byte[] TextureEntry;
+    public static class ObjectData
+    {
+
+        public byte TextureEntry[];
+
+        public ObjectData()
+        {
+        }
     }
 
-    public static class Sender {
+    public static class Sender
+    {
+
         public UUID ID;
         public boolean IsTrial;
+
+        public Sender()
+        {
+        }
     }
 
-    public static class VisualParam {
+    public static class VisualParam
+    {
+
         public int ParamValue;
-    }
 
-    public AvatarAppearance() {
-        this.zeroCoded = true;
-        this.Sender_Field = new Sender();
-        this.ObjectData_Field = new ObjectData();
-    }
-
-    public int CalcPayloadSize() {
-        return this.ObjectData_Field.TextureEntry.length + 2 + 21 + 1 + (this.VisualParam_Fields.size() * 1) + 1 + (this.AppearanceData_Fields.size() * 9);
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleAvatarAppearance(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -98);
-        packUUID(byteBuffer, this.Sender_Field.ID);
-        packBoolean(byteBuffer, this.Sender_Field.IsTrial);
-        packVariable(byteBuffer, this.ObjectData_Field.TextureEntry, 2);
-        byteBuffer.put((byte) this.VisualParam_Fields.size());
-        for (VisualParam visualParam : this.VisualParam_Fields) {
-            packByte(byteBuffer, (byte) visualParam.ParamValue);
-        }
-        byteBuffer.put((byte) this.AppearanceData_Fields.size());
-        for (AppearanceData appearanceData : this.AppearanceData_Fields) {
-            packByte(byteBuffer, (byte) appearanceData.AppearanceVersion);
-            packInt(byteBuffer, appearanceData.CofVersion);
-            packInt(byteBuffer, appearanceData.Flags);
+        public VisualParam()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.Sender_Field.ID = unpackUUID(byteBuffer);
-        this.Sender_Field.IsTrial = unpackBoolean(byteBuffer);
-        this.ObjectData_Field.TextureEntry = unpackVariable(byteBuffer, 2);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            VisualParam visualParam = new VisualParam();
-            visualParam.ParamValue = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            this.VisualParam_Fields.add(visualParam);
+
+    public ArrayList AppearanceData_Fields;
+    public ObjectData ObjectData_Field;
+    public Sender Sender_Field;
+    public ArrayList VisualParam_Fields;
+
+    public AvatarAppearance()
+    {
+        VisualParam_Fields = new ArrayList();
+        AppearanceData_Fields = new ArrayList();
+        zeroCoded = true;
+        Sender_Field = new Sender();
+        ObjectData_Field = new ObjectData();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return ObjectData_Field.TextureEntry.length + 2 + 21 + 1 + VisualParam_Fields.size() * 1 + 1 + AppearanceData_Fields.size() * 9;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleAvatarAppearance(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-98);
+        packUUID(bytebuffer, Sender_Field.ID);
+        packBoolean(bytebuffer, Sender_Field.IsTrial);
+        packVariable(bytebuffer, ObjectData_Field.TextureEntry, 2);
+        bytebuffer.put((byte)VisualParam_Fields.size());
+        for (Iterator iterator = VisualParam_Fields.iterator(); iterator.hasNext(); packByte(bytebuffer, (byte)((VisualParam)iterator.next()).ParamValue)) { }
+        bytebuffer.put((byte)AppearanceData_Fields.size());
+        AppearanceData appearancedata;
+        for (Iterator iterator1 = AppearanceData_Fields.iterator(); iterator1.hasNext(); packInt(bytebuffer, appearancedata.Flags))
+        {
+            appearancedata = (AppearanceData)iterator1.next();
+            packByte(bytebuffer, (byte)appearancedata.AppearanceVersion);
+            packInt(bytebuffer, appearancedata.CofVersion);
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < b2; i2++) {
-            AppearanceData appearanceData = new AppearanceData();
-            appearanceData.AppearanceVersion = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            appearanceData.CofVersion = unpackInt(byteBuffer);
-            appearanceData.Flags = unpackInt(byteBuffer);
-            this.AppearanceData_Fields.add(appearanceData);
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        Sender_Field.ID = unpackUUID(bytebuffer);
+        Sender_Field.IsTrial = unpackBoolean(bytebuffer);
+        ObjectData_Field.TextureEntry = unpackVariable(bytebuffer, 2);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            VisualParam visualparam = new VisualParam();
+            visualparam.ParamValue = unpackByte(bytebuffer) & 0xff;
+            VisualParam_Fields.add(visualparam);
         }
+
+        byte0 = bytebuffer.get();
+        for (int j = ((flag) ? 1 : 0); j < (byte0 & 0xff); j++)
+        {
+            AppearanceData appearancedata = new AppearanceData();
+            appearancedata.AppearanceVersion = unpackByte(bytebuffer) & 0xff;
+            appearancedata.CofVersion = unpackInt(bytebuffer);
+            appearancedata.Flags = unpackInt(bytebuffer);
+            AppearanceData_Fields.add(appearancedata);
+        }
+
     }
 }

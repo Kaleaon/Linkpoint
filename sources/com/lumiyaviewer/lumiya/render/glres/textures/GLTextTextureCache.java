@@ -1,38 +1,64 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.glres.textures;
 
 import com.lumiyaviewer.lumiya.render.RenderContext;
 import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue;
 import com.lumiyaviewer.lumiya.render.glres.GLResourceCache;
+import com.lumiyaviewer.lumiya.render.glres.GLSizedResource;
 import com.lumiyaviewer.lumiya.res.ResourceConsumer;
 import com.lumiyaviewer.lumiya.res.text.DrawableTextBitmap;
 import com.lumiyaviewer.lumiya.res.text.DrawableTextCache;
 import com.lumiyaviewer.lumiya.res.text.DrawableTextParams;
 
-public class GLTextTextureCache extends GLResourceCache<DrawableTextParams, DrawableTextBitmap, GLLoadedTextTexture> {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.glres.textures:
+//            GLLoadedTextTexture
+
+public class GLTextTextureCache extends GLResourceCache
+{
+
     private final DrawableTextCache drawableTextCache;
 
-    public GLTextTextureCache(GLLoadQueue gLLoadQueue, DrawableTextCache drawableTextCache2) {
-        super(gLLoadQueue);
-        this.drawableTextCache = drawableTextCache2;
+    public GLTextTextureCache(GLLoadQueue glloadqueue, DrawableTextCache drawabletextcache)
+    {
+        super(glloadqueue);
+        drawableTextCache = drawabletextcache;
     }
 
-    /* access modifiers changed from: protected */
-    public void CancelRawResource(ResourceConsumer resourceConsumer) {
-        this.drawableTextCache.CancelRequest(resourceConsumer);
+    protected void CancelRawResource(ResourceConsumer resourceconsumer)
+    {
+        drawableTextCache.CancelRequest(resourceconsumer);
     }
 
-    /* access modifiers changed from: protected */
-    public int GetResourceSize(DrawableTextBitmap drawableTextBitmap) {
+    protected int GetResourceSize(DrawableTextBitmap drawabletextbitmap)
+    {
         return 0;
     }
 
-    /* access modifiers changed from: protected */
-    public GLLoadedTextTexture LoadResource(DrawableTextParams drawableTextParams, DrawableTextBitmap drawableTextBitmap, RenderContext renderContext) {
-        return new GLLoadedTextTexture(renderContext, drawableTextBitmap.getBitmap(), drawableTextBitmap.getBaselineOffset());
+    protected volatile int GetResourceSize(Object obj)
+    {
+        return GetResourceSize((DrawableTextBitmap)obj);
     }
 
-    /* access modifiers changed from: protected */
-    public void RequestRawResource(DrawableTextParams drawableTextParams, ResourceConsumer resourceConsumer) {
-        this.drawableTextCache.RequestResource(drawableTextParams, resourceConsumer);
+    protected volatile GLSizedResource LoadResource(Object obj, Object obj1, RenderContext rendercontext)
+    {
+        return LoadResource((DrawableTextParams)obj, (DrawableTextBitmap)obj1, rendercontext);
+    }
+
+    protected GLLoadedTextTexture LoadResource(DrawableTextParams drawabletextparams, DrawableTextBitmap drawabletextbitmap, RenderContext rendercontext)
+    {
+        return new GLLoadedTextTexture(rendercontext, drawabletextbitmap.getBitmap(), drawabletextbitmap.getBaselineOffset());
+    }
+
+    protected void RequestRawResource(DrawableTextParams drawabletextparams, ResourceConsumer resourceconsumer)
+    {
+        drawableTextCache.RequestResource(drawabletextparams, resourceconsumer);
+    }
+
+    protected volatile void RequestRawResource(Object obj, ResourceConsumer resourceconsumer)
+    {
+        RequestRawResource((DrawableTextParams)obj, resourceconsumer);
     }
 }

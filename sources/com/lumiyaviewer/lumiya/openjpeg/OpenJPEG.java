@@ -1,14 +1,14 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.openjpeg;
 
-import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.opengl.ETC1;
 import android.opengl.GLES10;
 import android.opengl.GLES20;
 import android.opengl.GLES30;
-import android.os.Build;
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.render.GLTexture;
 import com.lumiyaviewer.lumiya.render.TextureMemoryTracker;
@@ -18,486 +18,763 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
-public class OpenJPEG implements GLTexture {
+public class OpenJPEG
+    implements GLTexture
+{
+    public static final class ImageFormat extends Enum
+    {
 
-    /* renamed from: -com-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f5comlumiyaviewerlumiyaopenjpegOpenJPEG$ImageFormatSwitchesValues = null;
+        private static final ImageFormat $VALUES[];
+        public static final ImageFormat JPEG2000;
+        public static final ImageFormat Raw;
+        public static final ImageFormat TGA;
+
+        public static ImageFormat valueOf(String s)
+        {
+            return (ImageFormat)Enum.valueOf(com/lumiyaviewer/lumiya/openjpeg/OpenJPEG$ImageFormat, s);
+        }
+
+        public static ImageFormat[] values()
+        {
+            return $VALUES;
+        }
+
+        static 
+        {
+            Raw = new ImageFormat("Raw", 0);
+            JPEG2000 = new ImageFormat("JPEG2000", 1);
+            TGA = new ImageFormat("TGA", 2);
+            $VALUES = (new ImageFormat[] {
+                Raw, JPEG2000, TGA
+            });
+        }
+
+        private ImageFormat(String s, int i)
+        {
+            super(s, i);
+        }
+    }
+
+
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_openjpeg_2D_OpenJPEG$ImageFormatSwitchesValues[];
     private static final int ETC1_BYTES_PER_PIXEL = 888;
     public int bytes_per_pixel;
     public int error_code;
     public int height;
-    private boolean mmapped = false;
-    private long mmappedAddr = 0;
-    private long mmappedSize = 0;
+    private boolean mmapped;
+    private long mmappedAddr;
+    private long mmappedSize;
     public int num_components;
     public int num_extra_components;
     private ByteBuffer rawBuffer;
     public int width;
 
-    public enum ImageFormat {
-        Raw,
-        JPEG2000,
-        TGA
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_openjpeg_2D_OpenJPEG$ImageFormatSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_openjpeg_2D_OpenJPEG$ImageFormatSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_openjpeg_2D_OpenJPEG$ImageFormatSwitchesValues;
+        }
+        int ai[] = new int[ImageFormat.values().length];
+        try
+        {
+            ai[ImageFormat.JPEG2000.ordinal()] = 1;
+        }
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[ImageFormat.Raw.ordinal()] = 2;
+        }
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[ImageFormat.TGA.ordinal()] = 3;
+        }
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_openjpeg_2D_OpenJPEG$ImageFormatSwitchesValues = ai;
+        return ai;
     }
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m12getcomlumiyaviewerlumiyaopenjpegOpenJPEG$ImageFormatSwitchesValues() {
-        if (f5comlumiyaviewerlumiyaopenjpegOpenJPEG$ImageFormatSwitchesValues != null) {
-            return f5comlumiyaviewerlumiyaopenjpegOpenJPEG$ImageFormatSwitchesValues;
-        }
-        int[] iArr = new int[ImageFormat.values().length];
-        try {
-            iArr[ImageFormat.JPEG2000.ordinal()] = 1;
-        } catch (NoSuchFieldError e) {
-        }
-        try {
-            iArr[ImageFormat.Raw.ordinal()] = 2;
-        } catch (NoSuchFieldError e2) {
-        }
-        try {
-            iArr[ImageFormat.TGA.ordinal()] = 3;
-        } catch (NoSuchFieldError e3) {
-        }
-        f5comlumiyaviewerlumiyaopenjpegOpenJPEG$ImageFormatSwitchesValues = iArr;
-        return iArr;
-    }
-
-    static {
-        System.loadLibrary("openjpeg");
-    }
-
-    public OpenJPEG(int i, int i2, int i3, int i4, int i5, int i6) throws OutOfMemoryError {
-        this.width = i;
-        this.height = i2;
-        this.num_components = i3;
-        this.num_extra_components = i5;
-        this.bytes_per_pixel = i4;
-        this.rawBuffer = allocateNew(i, i2, i3, i4, i5, i6);
-        if (this.rawBuffer == null) {
+    public OpenJPEG(int i, int j, int k, int l, int i1, int j1)
+        throws OutOfMemoryError
+    {
+        mmapped = false;
+        mmappedAddr = 0L;
+        mmappedSize = 0L;
+        width = i;
+        height = j;
+        num_components = k;
+        num_extra_components = i1;
+        bytes_per_pixel = l;
+        rawBuffer = allocateNew(i, j, k, l, i1, j1);
+        if (rawBuffer == null)
+        {
             throw new OutOfMemoryError("allocateNew() returned NULL");
-        }
-        TextureMemoryTracker.allocOpenJpegMemory(this.rawBuffer.capacity(), this.mmapped);
-    }
-
-    public OpenJPEG(File file, int i, int i2, boolean z) throws IOException {
-        if (file == null) {
-            throw new IOException("Null source file");
-        }
-        this.rawBuffer = decompress(file.getAbsolutePath(), 0, 0, z, i, i2);
-        if (this.rawBuffer == null) {
-            throw new IOException("Failed to decompress texture (" + this.error_code + ") " + file.getAbsolutePath());
-        }
-        TextureMemoryTracker.allocOpenJpegMemory(this.rawBuffer.capacity(), this.mmapped);
-    }
-
-    public OpenJPEG(File file, TextureClass textureClass, ImageFormat imageFormat, boolean z) throws IOException {
-        boolean z2 = true;
-        if (file == null) {
-            throw new IOException("Null source file");
-        }
-        Debug.Log("OpenJPEG: decompressing " + file.getName() + " class " + textureClass + " format " + imageFormat);
-        boolean z3 = textureClass == TextureClass.Prim ? !z : false;
-        switch (m12getcomlumiyaviewerlumiyaopenjpegOpenJPEG$ImageFormatSwitchesValues()[imageFormat.ordinal()]) {
-            case 1:
-                this.rawBuffer = decompress(file.getAbsolutePath(), z3 ? 1 : 0, z3 ? 6 : 0, textureClass != TextureClass.Prim ? false : z2, 0, 0);
-                if (this.rawBuffer == null) {
-                    throw new IOException("Failed to decompress texture (" + this.error_code + ") " + file.getAbsolutePath());
-                }
-                break;
-            case 2:
-                this.rawBuffer = readRaw(file.getAbsolutePath());
-                if (this.rawBuffer == null) {
-                    throw new IOException("Failed to read raw texture " + file.getAbsolutePath());
-                }
-                break;
-            case 3:
-                throw new IOException("TGA not supported for non-asset files");
-        }
-        TextureMemoryTracker.allocOpenJpegMemory(this.rawBuffer.capacity(), this.mmapped);
-    }
-
-    public OpenJPEG(InputStream inputStream, ImageFormat imageFormat, boolean z, boolean z2, float f, float f2, boolean z3) throws IOException {
-        if (imageFormat == ImageFormat.TGA) {
-            byte[] bArr = new byte[inputStream.available()];
-            inputStream.read(bArr);
-            this.rawBuffer = decompressTGA(bArr, z, z2, f, f2, z3);
-            if (this.rawBuffer == null) {
-                throw new IOException("Failed to decompress TGA texture.");
-            }
-            TextureMemoryTracker.allocOpenJpegMemory(this.rawBuffer.capacity(), this.mmapped);
+        } else
+        {
+            TextureMemoryTracker.allocOpenJpegMemory(rawBuffer.capacity(), mmapped);
             return;
         }
-        throw new IOException("Unsupported format for image stream.");
     }
 
-    private native ByteBuffer allocateNew(int i, int i2, int i3, int i4, int i5, int i6);
+    public OpenJPEG(File file, int i, int j, boolean flag)
+        throws IOException
+    {
+        mmapped = false;
+        mmappedAddr = 0L;
+        mmappedSize = 0L;
+        if (file == null)
+        {
+            throw new IOException("Null source file");
+        }
+        rawBuffer = decompress(file.getAbsolutePath(), 0, 0, flag, i, j);
+        if (rawBuffer == null)
+        {
+            throw new IOException((new StringBuilder()).append("Failed to decompress texture (").append(error_code).append(") ").append(file.getAbsolutePath()).toString());
+        } else
+        {
+            TextureMemoryTracker.allocOpenJpegMemory(rawBuffer.capacity(), mmapped);
+            return;
+        }
+    }
+
+    public OpenJPEG(File file, TextureClass textureclass, ImageFormat imageformat, boolean flag)
+        throws IOException
+    {
+        boolean flag1;
+        boolean flag2;
+        flag2 = true;
+        super();
+        mmapped = false;
+        mmappedAddr = 0L;
+        mmappedSize = 0L;
+        if (file == null)
+        {
+            throw new IOException("Null source file");
+        }
+        Debug.Log((new StringBuilder()).append("OpenJPEG: decompressing ").append(file.getName()).append(" class ").append(textureclass).append(" format ").append(imageformat).toString());
+        if (textureclass == TextureClass.Prim)
+        {
+            flag1 = flag ^ true;
+        } else
+        {
+            flag1 = false;
+        }
+        _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_openjpeg_2D_OpenJPEG$ImageFormatSwitchesValues()[imageformat.ordinal()];
+        JVM INSTR tableswitch 1 3: default 128
+    //                   1 198
+    //                   2 149
+    //                   3 315;
+           goto _L1 _L2 _L3 _L4
+_L1:
+        TextureMemoryTracker.allocOpenJpegMemory(rawBuffer.capacity(), mmapped);
+        return;
+_L3:
+        rawBuffer = readRaw(file.getAbsolutePath());
+        if (rawBuffer == null)
+        {
+            throw new IOException((new StringBuilder()).append("Failed to read raw texture ").append(file.getAbsolutePath()).toString());
+        }
+        continue; /* Loop/switch isn't completed */
+_L2:
+        imageformat = file.getAbsolutePath();
+        int i;
+        byte byte0;
+        if (flag1)
+        {
+            i = 1;
+        } else
+        {
+            i = 0;
+        }
+        if (flag1)
+        {
+            byte0 = 6;
+        } else
+        {
+            byte0 = 0;
+        }
+        if (textureclass == TextureClass.Prim)
+        {
+            flag = flag2;
+        } else
+        {
+            flag = false;
+        }
+        rawBuffer = decompress(imageformat, i, byte0, flag, 0, 0);
+        if (rawBuffer == null)
+        {
+            throw new IOException((new StringBuilder()).append("Failed to decompress texture (").append(error_code).append(") ").append(file.getAbsolutePath()).toString());
+        }
+        if (true) goto _L1; else goto _L4
+_L4:
+        throw new IOException("TGA not supported for non-asset files");
+    }
+
+    public OpenJPEG(InputStream inputstream, ImageFormat imageformat, boolean flag, boolean flag1, float f, float f1, boolean flag2)
+        throws IOException
+    {
+        mmapped = false;
+        mmappedAddr = 0L;
+        mmappedSize = 0L;
+        if (imageformat == ImageFormat.TGA)
+        {
+            imageformat = new byte[inputstream.available()];
+            inputstream.read(imageformat);
+            rawBuffer = decompressTGA(imageformat, flag, flag1, f, f1, flag2);
+            if (rawBuffer == null)
+            {
+                throw new IOException("Failed to decompress TGA texture.");
+            } else
+            {
+                TextureMemoryTracker.allocOpenJpegMemory(rawBuffer.capacity(), mmapped);
+                return;
+            }
+        } else
+        {
+            throw new IOException("Unsupported format for image stream.");
+        }
+    }
+
+    private native ByteBuffer allocateNew(int i, int j, int k, int l, int i1, int j1);
 
     private native ByteBuffer allocateRaw(int i);
 
-    public static native void applyFlexibleMorph(ByteBuffer byteBuffer, ByteBuffer byteBuffer2, int i, float[] fArr);
+    public static native void applyFlexibleMorph(ByteBuffer bytebuffer, ByteBuffer bytebuffer1, int i, float af[]);
 
-    public static native void applyMeshMorph(float f, ByteBuffer byteBuffer, ByteBuffer byteBuffer2, int i, ByteBuffer byteBuffer3, ByteBuffer byteBuffer4, ByteBuffer byteBuffer5, int i2, int i3, int i4, ByteBuffer byteBuffer6);
+    public static native void applyMeshMorph(float f, ByteBuffer bytebuffer, ByteBuffer bytebuffer1, int i, ByteBuffer bytebuffer2, ByteBuffer bytebuffer3, ByteBuffer bytebuffer4, int j, 
+            int k, int l, ByteBuffer bytebuffer5);
 
-    public static native void applyMorphingTransform(int i, ByteBuffer byteBuffer, ByteBuffer byteBuffer2, ByteBuffer byteBuffer3, int[] iArr, float[] fArr);
+    public static native void applyMorphingTransform(int i, ByteBuffer bytebuffer, ByteBuffer bytebuffer1, ByteBuffer bytebuffer2, int ai[], float af[]);
 
-    public static native void applyRiggedMeshMorph(ByteBuffer byteBuffer, int i, float[] fArr, float[] fArr2, ByteBuffer byteBuffer2, ByteBuffer byteBuffer3, int i2);
+    public static native void applyRiggedMeshMorph(ByteBuffer bytebuffer, int i, float af[], float af1[], ByteBuffer bytebuffer1, ByteBuffer bytebuffer2, int j);
 
-    public static OpenJPEG bakeTerrain(int i, int i2, OpenJPEG[] openJPEGArr, float[] fArr, int i3, int i4) {
-        OpenJPEG openJPEG = new OpenJPEG(i, i2, 3, 2, 0, 0);
-        ByteBuffer[] byteBufferArr = new ByteBuffer[openJPEGArr.length];
-        int[] iArr = new int[openJPEGArr.length];
-        int[] iArr2 = new int[openJPEGArr.length];
-        int[] iArr3 = new int[openJPEGArr.length];
-        for (int i5 = 0; i5 < openJPEGArr.length; i5++) {
-            if (openJPEGArr[i5] != null) {
-                byteBufferArr[i5] = openJPEGArr[i5].rawBuffer;
-                iArr[i5] = openJPEGArr[i5].width;
-                iArr2[i5] = openJPEGArr[i5].height;
-                iArr3[i5] = openJPEGArr[i5].num_components;
-            } else {
-                byteBufferArr[i5] = null;
-                iArr[i5] = 0;
-                iArr2[i5] = 0;
-                iArr3[i5] = 0;
+    public static OpenJPEG bakeTerrain(int i, int j, OpenJPEG aopenjpeg[], float af[], int k, int l)
+    {
+        OpenJPEG openjpeg = new OpenJPEG(i, j, 3, 2, 0, 0);
+        ByteBuffer abytebuffer[] = new ByteBuffer[aopenjpeg.length];
+        int ai[] = new int[aopenjpeg.length];
+        int ai1[] = new int[aopenjpeg.length];
+        int ai2[] = new int[aopenjpeg.length];
+        int i1 = 0;
+        while (i1 < aopenjpeg.length) 
+        {
+            if (aopenjpeg[i1] != null)
+            {
+                abytebuffer[i1] = aopenjpeg[i1].rawBuffer;
+                ai[i1] = aopenjpeg[i1].width;
+                ai1[i1] = aopenjpeg[i1].height;
+                ai2[i1] = aopenjpeg[i1].num_components;
+            } else
+            {
+                abytebuffer[i1] = null;
+                ai[i1] = 0;
+                ai1[i1] = 0;
+                ai2[i1] = 0;
             }
+            i1++;
         }
-        openJPEG.bakeTerrainRaw(openJPEG.rawBuffer, i, i2, byteBufferArr, iArr, iArr2, iArr3, fArr, i3, i4);
-        return openJPEG;
+        openjpeg.bakeTerrainRaw(openjpeg.rawBuffer, i, j, abytebuffer, ai, ai1, ai2, af, k, l);
+        return openjpeg;
     }
 
-    private native void bakeTerrainRaw(ByteBuffer byteBuffer, int i, int i2, ByteBuffer[] byteBufferArr, int[] iArr, int[] iArr2, int[] iArr3, float[] fArr, int i3, int i4);
+    private native void bakeTerrainRaw(ByteBuffer bytebuffer, int i, int j, ByteBuffer abytebuffer[], int ai[], int ai1[], int ai2[], 
+            float af[], int k, int l);
 
-    public static native void calcFlexiSections(float[] fArr, int i, float[] fArr2, float[] fArr3, int i2, float f, float f2, float f3, float f4, float f5, float f6, float f7, float f8, float f9, float f10, boolean z);
+    public static native void calcFlexiSections(float af[], int i, float af1[], float af2[], int j, float f, float f1, float f2, 
+            float f3, float f4, float f5, float f6, float f7, float f8, float f9, 
+            boolean flag);
 
-    public static native int checkFrustrumOcclusion(float[] fArr, float[] fArr2, float f, float f2, float f3);
+    public static native int checkFrustrumOcclusion(float af[], float af1[], float f, float f1, float f2);
 
-    private native ByteBuffer decompress(String str, int i, int i2, boolean z, int i3, int i4);
+    private native ByteBuffer decompress(String s, int i, int j, boolean flag, int k, int l);
 
-    private native ByteBuffer decompressTGA(byte[] bArr, boolean z, boolean z2, float f, float f2, boolean z3);
+    private native ByteBuffer decompressTGA(byte abyte0[], boolean flag, boolean flag1, float f, float f1, boolean flag2);
 
-    private native void drawBuf(ByteBuffer byteBuffer, int i, int i2, int i3, ByteBuffer byteBuffer2, int i4, int i5, int i6, int i7, boolean z, boolean z2, boolean z3, boolean z4);
+    private native void drawBuf(ByteBuffer bytebuffer, int i, int j, int k, ByteBuffer bytebuffer1, int l, int i1, 
+            int j1, int k1, boolean flag, boolean flag1, boolean flag2, boolean flag3);
 
     public static native int getFlexiDataSize(int i);
 
-    public static native void meshPrepareInfluenceBuffer(ByteBuffer byteBuffer, int i, ByteBuffer byteBuffer2, int i2);
+    public static native void meshPrepareInfluenceBuffer(ByteBuffer bytebuffer, int i, ByteBuffer bytebuffer1, int j);
 
-    public static native void meshPrepareSeparateInfluenceBuffer(ByteBuffer byteBuffer, int i, ByteBuffer byteBuffer2, ByteBuffer byteBuffer3, int i2);
+    public static native void meshPrepareSeparateInfluenceBuffer(ByteBuffer bytebuffer, int i, ByteBuffer bytebuffer1, ByteBuffer bytebuffer2, int j);
 
-    private native ByteBuffer readRaw(String str);
+    private native ByteBuffer readRaw(String s);
 
-    private native void release(ByteBuffer byteBuffer);
+    private native void release(ByteBuffer bytebuffer);
 
-    private native void setComponentBuf(ByteBuffer byteBuffer, int i, int i2, int i3, int i4, int i5, byte b);
+    private native void setComponentBuf(ByteBuffer bytebuffer, int i, int j, int k, int l, int i1, byte byte0);
 
-    private native int writeJPEG2K(String str, ByteBuffer byteBuffer, int i, int i2, int i3, int i4);
+    private native int writeJPEG2K(String s, ByteBuffer bytebuffer, int i, int j, int k, int l);
 
-    private native void writeRaw(ByteBuffer byteBuffer, String str);
+    private native void writeRaw(ByteBuffer bytebuffer, String s);
 
-    public boolean CompressETC1() throws IOException {
-        if (Build.VERSION.SDK_INT < 8 || this.rawBuffer == null || this.num_components != 3 || this.num_extra_components != 0 || (this.bytes_per_pixel != 2 && this.bytes_per_pixel != 3)) {
+    public boolean CompressETC1()
+        throws IOException
+    {
+        if (android.os.Build.VERSION.SDK_INT >= 8 && rawBuffer != null && num_components == 3 && num_extra_components == 0 && (bytes_per_pixel == 2 || bytes_per_pixel == 3))
+        {
+            int i = ETC1.getEncodedDataSize(width, height);
+            ByteBuffer bytebuffer = allocateRaw(i);
+            if (bytebuffer == null)
+            {
+                throw new IOException((new StringBuilder()).append("Out of memory for ").append(Integer.toString(i)).append(" allocation").toString());
+            } else
+            {
+                ETC1.encodeImage(rawBuffer, width, height, bytes_per_pixel, width * bytes_per_pixel, bytebuffer);
+                TextureMemoryTracker.releaseOpenJpegMemory(rawBuffer.capacity(), mmapped);
+                release(rawBuffer);
+                rawBuffer = bytebuffer;
+                TextureMemoryTracker.allocOpenJpegMemory(bytebuffer.capacity(), mmapped);
+                bytes_per_pixel = 888;
+                return true;
+            }
+        } else
+        {
             return false;
         }
-        int encodedDataSize = ETC1.getEncodedDataSize(this.width, this.height);
-        ByteBuffer allocateRaw = allocateRaw(encodedDataSize);
-        if (allocateRaw == null) {
-            throw new IOException("Out of memory for " + Integer.toString(encodedDataSize) + " allocation");
-        }
-        ETC1.encodeImage(this.rawBuffer, this.width, this.height, this.bytes_per_pixel, this.width * this.bytes_per_pixel, allocateRaw);
-        TextureMemoryTracker.releaseOpenJpegMemory(this.rawBuffer.capacity(), this.mmapped);
-        release(this.rawBuffer);
-        this.rawBuffer = allocateRaw;
-        TextureMemoryTracker.allocOpenJpegMemory(allocateRaw.capacity(), this.mmapped);
-        this.bytes_per_pixel = ETC1_BYTES_PER_PIXEL;
-        return true;
     }
 
-    public void SaveJPEG2K(File file) throws IOException {
-        if (this.rawBuffer != null) {
-            if (writeJPEG2K(file.getAbsolutePath(), this.rawBuffer, this.width, this.height, this.num_components, this.num_extra_components) != 0) {
-                throw new IOException("Failed to save JPEG2k to " + file.getAbsolutePath());
-            }
+    public void SaveJPEG2K(File file)
+        throws IOException
+    {
+        if (rawBuffer != null && writeJPEG2K(file.getAbsolutePath(), rawBuffer, width, height, num_components, num_extra_components) != 0)
+        {
+            throw new IOException((new StringBuilder()).append("Failed to save JPEG2k to ").append(file.getAbsolutePath()).toString());
+        } else
+        {
+            return;
         }
     }
 
-    public void SaveRaw(File file) {
-        if (this.rawBuffer != null) {
-            writeRaw(this.rawBuffer, file.getAbsolutePath());
+    public void SaveRaw(File file)
+    {
+        if (rawBuffer != null)
+        {
+            writeRaw(rawBuffer, file.getAbsolutePath());
         }
     }
 
-    public void SaveToFile(File file) {
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(file, false);
-            fileOutputStream.getChannel().write(this.rawBuffer);
-            fileOutputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public void SaveToFile(File file)
+    {
+        try
+        {
+            file = new FileOutputStream(file, false);
+            file.getChannel().write(rawBuffer);
+            file.close();
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (File file)
+        {
+            file.printStackTrace();
         }
     }
 
-    @TargetApi(18)
-    public int SetAsImmutableTexture() {
-        int i;
-        int i2;
-        if (this.rawBuffer != null) {
-            if (this.bytes_per_pixel == ETC1_BYTES_PER_PIXEL) {
-                GLES30.glTexStorage2D(3553, 1, 37492, this.width, this.height);
-                GLES30.glCompressedTexSubImage2D(3553, 0, 0, 0, this.width, this.height, 37492, this.rawBuffer.capacity(), this.rawBuffer);
-            } else {
-                int i3 = 5121;
-                switch (this.num_components) {
-                    case 1:
-                        i = 33321;
-                        i2 = 6403;
-                        break;
-                    case 3:
-                        i = this.bytes_per_pixel == 2 ? 36194 : 32849;
-                        i2 = 6407;
-                        if (this.bytes_per_pixel == 2) {
-                            i3 = 33635;
-                            break;
-                        }
-                        break;
-                    case 4:
-                        i = 32856;
-                        i2 = 6408;
-                        break;
-                    default:
-                        return SetAsTexture();
-                }
-                int i4 = (this.bytes_per_pixel == 2 && this.num_components == 3) ? 33635 : i3;
-                GLES30.glTexStorage2D(3553, 1, i, this.width, this.height);
-                GLES30.glTexSubImage2D(3553, 0, 0, 0, this.width, this.height, i2, i4, this.rawBuffer);
-                if (this.num_components == 1) {
-                    GLES30.glTexParameteri(3553, 36418, 1);
-                    GLES30.glTexParameteri(3553, 36419, 1);
-                    GLES30.glTexParameteri(3553, 36420, 1);
-                    GLES30.glTexParameteri(3553, 36421, 6403);
-                }
-            }
-        }
+    public int SetAsImmutableTexture()
+    {
+        if (rawBuffer == null) goto _L2; else goto _L1
+_L1:
+        if (bytes_per_pixel != 888) goto _L4; else goto _L3
+_L3:
+        GLES30.glTexStorage2D(3553, 1, 37492, width, height);
+        GLES30.glCompressedTexSubImage2D(3553, 0, 0, 0, width, height, 37492, rawBuffer.capacity(), rawBuffer);
+_L2:
         return getLoadedSize();
+_L4:
+        int i;
+        char c;
+        int j;
+        j = 5121;
+        switch (num_components)
+        {
+        case 2: // '\002'
+        default:
+            return SetAsTexture();
+
+        case 1: // '\001'
+            break MISSING_BLOCK_LABEL_286;
+
+        case 3: // '\003'
+            break; /* Loop/switch isn't completed */
+
+        case 4: // '\004'
+            i = 32856;
+            c = '\u1908';
+            break;
+        }
+_L6:
+        if (bytes_per_pixel == 2 && num_components == 3)
+        {
+            j = 33635;
+        }
+        GLES30.glTexStorage2D(3553, 1, i, width, height);
+        GLES30.glTexSubImage2D(3553, 0, 0, 0, width, height, c, j, rawBuffer);
+        if (num_components == 1)
+        {
+            GLES30.glTexParameteri(3553, 36418, 1);
+            GLES30.glTexParameteri(3553, 36419, 1);
+            GLES30.glTexParameteri(3553, 36420, 1);
+            GLES30.glTexParameteri(3553, 36421, 6403);
+        }
+        if (true) goto _L2; else goto _L5
+_L5:
+        int k;
+        char c1;
+        if (bytes_per_pixel == 2)
+        {
+            k = 36194;
+        } else
+        {
+            k = 32849;
+        }
+        c1 = '\u1907';
+        i = k;
+        c = c1;
+        if (bytes_per_pixel == 2)
+        {
+            j = 33635;
+            i = k;
+            c = c1;
+        }
+          goto _L6
+        i = 33321;
+        c = '\u1903';
+          goto _L6
     }
 
-    public int SetAsTexture() {
-        int i;
-        if (this.rawBuffer != null) {
-            if (this.bytes_per_pixel == ETC1_BYTES_PER_PIXEL) {
-                GLES10.glCompressedTexImage2D(3553, 0, 36196, this.width, this.height, 0, this.rawBuffer.capacity(), this.rawBuffer);
-            } else {
-                int i2 = 5121;
-                switch (this.num_components) {
-                    case 1:
-                        i = 6406;
-                        break;
-                    case 3:
-                        i = 6407;
-                        break;
-                    case 4:
-                        i = 6408;
-                        break;
-                    default:
-                        i = this.num_components;
-                        break;
-                }
-                if (this.bytes_per_pixel == 2 && this.num_components == 3) {
-                    i2 = 33635;
-                }
-                GLES10.glTexImage2D(3553, 0, i, this.width, this.height, 0, i, i2, this.rawBuffer);
+    public int SetAsTexture()
+    {
+        if (rawBuffer == null) goto _L2; else goto _L1
+_L1:
+        if (bytes_per_pixel != 888) goto _L4; else goto _L3
+_L3:
+        GLES10.glCompressedTexImage2D(3553, 0, 36196, width, height, 0, rawBuffer.capacity(), rawBuffer);
+_L2:
+        return getLoadedSize();
+_L4:
+        char c = '\u1401';
+        num_components;
+        JVM INSTR tableswitch 1 4: default 92
+    //                   1 161
+    //                   2 92
+    //                   3 154
+    //                   4 147;
+           goto _L5 _L6 _L5 _L7 _L8
+_L6:
+        break MISSING_BLOCK_LABEL_161;
+_L8:
+        break; /* Loop/switch isn't completed */
+_L5:
+        int i = num_components;
+_L10:
+        int j = c;
+        if (bytes_per_pixel == 2)
+        {
+            j = c;
+            if (num_components == 3)
+            {
+                j = 33635;
             }
         }
-        return getLoadedSize();
+        GLES10.glTexImage2D(3553, 0, i, width, height, 0, i, j, rawBuffer);
+        if (true) goto _L2; else goto _L9
+_L9:
+        i = 6408;
+          goto _L10
+_L7:
+        i = 6407;
+          goto _L10
+        i = 6406;
+          goto _L10
     }
 
-    public int SetAsTextureTarget(int i) {
-        int i2;
-        if (this.rawBuffer == null) {
-            return 0;
+    public int SetAsTextureTarget(int i)
+    {
+        if (rawBuffer == null) goto _L2; else goto _L1
+_L1:
+        char c;
+        if (bytes_per_pixel == 888)
+        {
+            int j = rawBuffer.capacity();
+            GLES20.glCompressedTexImage2D(i, 0, 36196, width, height, 0, j, rawBuffer);
+            return j;
         }
-        if (this.bytes_per_pixel == ETC1_BYTES_PER_PIXEL) {
-            int capacity = this.rawBuffer.capacity();
-            GLES20.glCompressedTexImage2D(i, 0, 36196, this.width, this.height, 0, capacity, this.rawBuffer);
-            return capacity;
+        c = '\u1401';
+        num_components;
+        JVM INSTR tableswitch 1 4: default 88
+    //                   1 169
+    //                   2 88
+    //                   3 162
+    //                   4 155;
+           goto _L3 _L4 _L3 _L5 _L6
+_L3:
+        int k = num_components;
+_L7:
+        int l = c;
+        if (bytes_per_pixel == 2)
+        {
+            l = c;
+            if (num_components == 3)
+            {
+                l = 33635;
+            }
         }
-        int i3 = 5121;
-        switch (this.num_components) {
-            case 1:
-                i2 = 6406;
-                break;
-            case 3:
-                i2 = 6407;
-                break;
-            case 4:
-                i2 = 6408;
-                break;
-            default:
-                i2 = this.num_components;
-                break;
-        }
-        if (this.bytes_per_pixel == 2 && this.num_components == 3) {
-            i3 = 33635;
-        }
-        GLES20.glTexImage2D(i, 0, i2, this.width, this.height, 0, i2, i3, this.rawBuffer);
-        return this.width * this.height * this.bytes_per_pixel;
+        GLES20.glTexImage2D(i, 0, k, width, height, 0, k, l, rawBuffer);
+        return width * height * bytes_per_pixel;
+_L6:
+        k = 6408;
+        continue; /* Loop/switch isn't completed */
+_L5:
+        k = 6407;
+        continue; /* Loop/switch isn't completed */
+_L4:
+        k = 6406;
+        if (true) goto _L7; else goto _L2
+_L2:
+        return 0;
     }
 
-    public void blendAlpha(OpenJPEG openJPEG, boolean z) {
-        if (this.rawBuffer != null && openJPEG.rawBuffer != null && this.num_components >= 4 && openJPEG.num_components >= 4) {
-            drawBuf(this.rawBuffer, this.width, this.height, this.num_components, openJPEG.rawBuffer, openJPEG.width, openJPEG.height, openJPEG.num_components, 0, false, true, z, false);
+    public void blendAlpha(OpenJPEG openjpeg, boolean flag)
+    {
+        if (rawBuffer != null && openjpeg.rawBuffer != null && num_components >= 4 && openjpeg.num_components >= 4)
+        {
+            drawBuf(rawBuffer, width, height, num_components, openjpeg.rawBuffer, openjpeg.width, openjpeg.height, openjpeg.num_components, 0, false, true, flag, false);
         }
     }
 
-    public void draw(OpenJPEG openJPEG, int i, boolean z) {
-        if (this.rawBuffer != null && openJPEG.rawBuffer != null) {
-            drawBuf(this.rawBuffer, this.width, this.height, this.num_components, openJPEG.rawBuffer, openJPEG.width, openJPEG.height, openJPEG.num_components, i, z, false, false, false);
+    public void draw(OpenJPEG openjpeg, int i, boolean flag)
+    {
+        if (rawBuffer != null && openjpeg.rawBuffer != null)
+        {
+            drawBuf(rawBuffer, width, height, num_components, openjpeg.rawBuffer, openjpeg.width, openjpeg.height, openjpeg.num_components, i, flag, false, false, false);
         }
     }
 
-    public void drawBump(OpenJPEG openJPEG, int i, boolean z, boolean z2) {
-        if (this.rawBuffer != null && openJPEG.rawBuffer != null && this.num_extra_components >= 1 && openJPEG.num_components >= 4) {
-            drawBuf(this.rawBuffer, this.width, this.height, this.num_components, openJPEG.rawBuffer, openJPEG.width, openJPEG.height, openJPEG.num_components, 0, false, false, z2, true);
+    public void drawBump(OpenJPEG openjpeg, int i, boolean flag, boolean flag1)
+    {
+        if (rawBuffer != null && openjpeg.rawBuffer != null && num_extra_components >= 1 && openjpeg.num_components >= 4)
+        {
+            drawBuf(rawBuffer, width, height, num_components, openjpeg.rawBuffer, openjpeg.width, openjpeg.height, openjpeg.num_components, 0, false, false, flag1, true);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void finalize() throws Throwable {
-        if (this.rawBuffer != null) {
-            TextureMemoryTracker.releaseOpenJpegMemory(this.rawBuffer.capacity(), this.mmapped);
-            release(this.rawBuffer);
-            this.rawBuffer = null;
+    protected void finalize()
+        throws Throwable
+    {
+        if (rawBuffer != null)
+        {
+            TextureMemoryTracker.releaseOpenJpegMemory(rawBuffer.capacity(), mmapped);
+            release(rawBuffer);
+            rawBuffer = null;
         }
         super.finalize();
     }
 
-    public Bitmap getAsBitmap() {
-        byte b;
-        Bitmap createBitmap = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888);
-        if (createBitmap == null) {
+    public Bitmap getAsBitmap()
+    {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+        if (bitmap == null)
+        {
             return null;
         }
-        for (int i = 0; i < this.height; i++) {
-            for (int i2 = 0; i2 < this.width; i2++) {
-                if (this.num_components == 1) {
-                    byte b2 = getByte(((this.width * i) + i2) * this.num_components) & UnsignedBytes.MAX_VALUE;
-                    b = b2 | (b2 << 16) | -16777216 | (b2 << 8);
-                } else {
-                    byte b3 = getByte((((this.width * i) + i2) * this.num_components) + 0) & UnsignedBytes.MAX_VALUE;
-                    byte b4 = getByte((((this.width * i) + i2) * this.num_components) + 1) & UnsignedBytes.MAX_VALUE;
-                    byte b5 = getByte((((this.width * i) + i2) * this.num_components) + 2) & UnsignedBytes.MAX_VALUE;
-                    byte b6 = UnsignedBytes.MAX_VALUE;
-                    if (this.num_components >= 4) {
-                        b6 = getByte((((this.width * i) + i2) * this.num_components) + 3) & UnsignedBytes.MAX_VALUE;
+        for (int i = 0; i < height; i++)
+        {
+            int j = 0;
+            while (j < width) 
+            {
+                int k;
+                if (num_components == 1)
+                {
+                    k = getByte((width * i + j) * num_components) & 0xff;
+                    k |= k << 16 | 0xff000000 | k << 8;
+                } else
+                {
+                    byte byte0 = getByte((width * i + j) * num_components + 0);
+                    byte byte1 = getByte((width * i + j) * num_components + 1);
+                    byte byte2 = getByte((width * i + j) * num_components + 2);
+                    k = 255;
+                    if (num_components >= 4)
+                    {
+                        k = getByte((width * i + j) * num_components + 3) & 0xff;
                     }
-                    b = (b6 << Ascii.CAN) | (b3 << 16) | (b4 << 8) | b5;
+                    k = k << 24 | (byte0 & 0xff) << 16 | (byte1 & 0xff) << 8 | byte2 & 0xff;
                 }
-                createBitmap.setPixel(i2, (this.height - 1) - i, b);
+                bitmap.setPixel(j, height - 1 - i, k);
+                j++;
             }
         }
-        return createBitmap;
+
+        return bitmap;
     }
 
-    public byte getByte(int i) {
-        if (this.rawBuffer != null) {
-            return this.rawBuffer.get(i);
+    public byte getByte(int i)
+    {
+        if (rawBuffer != null)
+        {
+            return rawBuffer.get(i);
+        } else
+        {
+            return 0;
         }
-        return 0;
     }
 
-    public Bitmap getExtraAsBitmap() {
-        byte b;
-        Bitmap createBitmap = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888);
-        for (int i = 0; i < this.height; i++) {
-            for (int i2 = 0; i2 < this.width; i2++) {
-                if (this.num_extra_components == 1) {
-                    byte b2 = getByte((this.width * this.height * this.num_components) + (this.width * i) + i2) & UnsignedBytes.MAX_VALUE;
-                    b = b2 | (b2 << 16) | -16777216 | (b2 << 8);
-                } else {
-                    b = 0;
+    public Bitmap getExtraAsBitmap()
+    {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+        int i = 0;
+        while (i < height) 
+        {
+            int j = 0;
+            while (j < width) 
+            {
+                int k;
+                if (num_extra_components == 1)
+                {
+                    k = getByte(width * height * num_components + width * i + j) & 0xff;
+                    k |= k << 16 | 0xff000000 | k << 8;
+                } else
+                {
+                    k = 0;
                 }
-                createBitmap.setPixel(i2, (this.height - 1) - i, b);
+                bitmap.setPixel(j, height - 1 - i, k);
+                j++;
             }
+            i++;
         }
-        return createBitmap;
+        return bitmap;
     }
 
-    public ByteBuffer getExtraComponentsBuffer() {
-        if (!(this.num_extra_components == 0 || this.rawBuffer == null)) {
-            ByteBuffer asReadOnlyBuffer = this.rawBuffer.asReadOnlyBuffer();
-            int i = this.width * this.height * this.num_components;
-            if (i >= 0 && i <= asReadOnlyBuffer.limit()) {
-                asReadOnlyBuffer.position(i);
-                return asReadOnlyBuffer;
+    public ByteBuffer getExtraComponentsBuffer()
+    {
+        if (num_extra_components != 0 && rawBuffer != null)
+        {
+            ByteBuffer bytebuffer = rawBuffer.asReadOnlyBuffer();
+            int i = width * height * num_components;
+            if (i >= 0 && i <= bytebuffer.limit())
+            {
+                bytebuffer.position(i);
+                return bytebuffer;
             }
         }
         return null;
     }
 
-    public int getHeight() {
-        return this.height;
+    public int getHeight()
+    {
+        return height;
     }
 
-    public int getLoadedSize() {
-        if (this.rawBuffer != null) {
-            return this.bytes_per_pixel == ETC1_BYTES_PER_PIXEL ? this.rawBuffer.capacity() : (this.bytes_per_pixel == 3 && this.num_components == 3) ? this.width * this.height * (this.bytes_per_pixel + 1) : this.width * this.height * this.bytes_per_pixel;
-        }
-        return 0;
-    }
-
-    public int getNumComponents() {
-        return this.num_components;
-    }
-
-    public int getRGB(int i) {
-        if (this.rawBuffer != null) {
-            return ((this.rawBuffer.get(i) << 16) & 16711680) | ((this.rawBuffer.get(i + 1) << 8) & 65280) | (this.rawBuffer.get(i + 2) & UnsignedBytes.MAX_VALUE);
-        }
-        return 0;
-    }
-
-    public int getWidth() {
-        return this.width;
-    }
-
-    public boolean hasAlphaLayer() {
-        return this.bytes_per_pixel != ETC1_BYTES_PER_PIXEL && (this.num_components >= 4 || this.num_components == 1);
-    }
-
-    public void putPixelRow(int i, int[] iArr, int i2) {
-        int i3 = 0;
-        if (this.rawBuffer != null) {
-            int i4 = this.width * this.num_components * i;
-            if (this.num_components == 3) {
-                while (i3 < i2) {
-                    int i5 = iArr[i3];
-                    int i6 = i4 + 1;
-                    this.rawBuffer.put(i4, (byte) (i5 >> 16));
-                    int i7 = i6 + 1;
-                    this.rawBuffer.put(i6, (byte) (i5 >> 8));
-                    i4 = i7 + 1;
-                    this.rawBuffer.put(i7, (byte) i5);
-                    i3++;
+    public int getLoadedSize()
+    {
+label0:
+        {
+            int i = 0;
+            if (rawBuffer != null)
+            {
+                if (bytes_per_pixel != 888)
+                {
+                    break label0;
                 }
-            } else if (this.num_components == 4) {
-                while (i3 < i2) {
-                    int i8 = iArr[i3];
-                    int i9 = i4 + 1;
-                    this.rawBuffer.put(i4, (byte) (i8 >> 16));
-                    int i10 = i9 + 1;
-                    this.rawBuffer.put(i9, (byte) (i8 >> 8));
-                    int i11 = i10 + 1;
-                    this.rawBuffer.put(i10, (byte) i8);
-                    i4 = i11 + 1;
-                    this.rawBuffer.put(i11, (byte) (i8 >> 24));
-                    i3++;
+                i = rawBuffer.capacity();
+            }
+            return i;
+        }
+        if (bytes_per_pixel == 3 && num_components == 3)
+        {
+            return width * height * (bytes_per_pixel + 1);
+        } else
+        {
+            return width * height * bytes_per_pixel;
+        }
+    }
+
+    public int getNumComponents()
+    {
+        return num_components;
+    }
+
+    public int getRGB(int i)
+    {
+        if (rawBuffer != null)
+        {
+            return rawBuffer.get(i) << 16 & 0xff0000 | rawBuffer.get(i + 1) << 8 & 0xff00 | rawBuffer.get(i + 2) & 0xff;
+        } else
+        {
+            return 0;
+        }
+    }
+
+    public int getWidth()
+    {
+        return width;
+    }
+
+    public boolean hasAlphaLayer()
+    {
+        return bytes_per_pixel != 888 && (num_components >= 4 || num_components == 1);
+    }
+
+    public void putPixelRow(int i, int ai[], int j)
+    {
+        int j1 = 0;
+        boolean flag = false;
+        if (rawBuffer != null)
+        {
+            int k = width * num_components * i;
+            if (num_components == 3)
+            {
+                for (i = ((flag) ? 1 : 0); i < j; i++)
+                {
+                    int l = ai[i];
+                    ByteBuffer bytebuffer = rawBuffer;
+                    j1 = k + 1;
+                    bytebuffer.put(k, (byte)(l >> 16));
+                    bytebuffer = rawBuffer;
+                    int l1 = j1 + 1;
+                    bytebuffer.put(j1, (byte)(l >> 8));
+                    bytebuffer = rawBuffer;
+                    k = l1 + 1;
+                    bytebuffer.put(l1, (byte)l);
                 }
+
+            } else
+            if (num_components == 4)
+            {
+                for (i = j1; i < j; i++)
+                {
+                    int i1 = ai[i];
+                    ByteBuffer bytebuffer1 = rawBuffer;
+                    int k1 = k + 1;
+                    bytebuffer1.put(k, (byte)(i1 >> 16));
+                    bytebuffer1 = rawBuffer;
+                    k = k1 + 1;
+                    bytebuffer1.put(k1, (byte)(i1 >> 8));
+                    bytebuffer1 = rawBuffer;
+                    k1 = k + 1;
+                    bytebuffer1.put(k, (byte)i1);
+                    bytebuffer1 = rawBuffer;
+                    k = k1 + 1;
+                    bytebuffer1.put(k1, (byte)(i1 >> 24));
+                }
+
             }
         }
     }
 
-    public void setComponent(int i, byte b) {
-        if (this.rawBuffer != null) {
-            setComponentBuf(this.rawBuffer, this.width, this.height, this.num_components, this.num_extra_components, i, b);
+    public void setComponent(int i, byte byte0)
+    {
+        if (rawBuffer != null)
+        {
+            setComponentBuf(rawBuffer, width, height, num_components, num_extra_components, i, byte0);
         }
+    }
+
+    static 
+    {
+        System.loadLibrary("openjpeg");
     }
 }

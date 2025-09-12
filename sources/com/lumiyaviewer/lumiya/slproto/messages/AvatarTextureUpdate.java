@@ -1,87 +1,121 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class AvatarTextureUpdate extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<TextureData> TextureData_Fields = new ArrayList<>();
-    public ArrayList<WearableData> WearableData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class AvatarTextureUpdate extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public boolean TexturesChanged;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class TextureData {
+    public static class TextureData
+    {
+
         public UUID TextureID;
+
+        public TextureData()
+        {
+        }
     }
 
-    public static class WearableData {
+    public static class WearableData
+    {
+
         public UUID CacheID;
-        public byte[] HostName;
+        public byte HostName[];
         public int TextureIndex;
-    }
 
-    public AvatarTextureUpdate() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 22;
-        Iterator<T> it = this.WearableData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2 + 1 + (this.TextureData_Fields.size() * 16);
-            }
-            i = ((WearableData) it.next()).HostName.length + 18 + i2;
+        public WearableData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleAvatarTextureUpdate(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList TextureData_Fields;
+    public ArrayList WearableData_Fields;
+
+    public AvatarTextureUpdate()
+    {
+        WearableData_Fields = new ArrayList();
+        TextureData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 4);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packBoolean(byteBuffer, this.AgentData_Field.TexturesChanged);
-        byteBuffer.put((byte) this.WearableData_Fields.size());
-        for (WearableData wearableData : this.WearableData_Fields) {
-            packUUID(byteBuffer, wearableData.CacheID);
-            packByte(byteBuffer, (byte) wearableData.TextureIndex);
-            packVariable(byteBuffer, wearableData.HostName, 1);
-        }
-        byteBuffer.put((byte) this.TextureData_Fields.size());
-        for (TextureData textureData : this.TextureData_Fields) {
-            packUUID(byteBuffer, textureData.TextureID);
-        }
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = WearableData_Fields.iterator();
+        int i;
+        for (i = 22; iterator.hasNext(); i = ((WearableData)iterator.next()).HostName.length + 18 + i) { }
+        return i + 1 + TextureData_Fields.size() * 16;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.TexturesChanged = unpackBoolean(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            WearableData wearableData = new WearableData();
-            wearableData.CacheID = unpackUUID(byteBuffer);
-            wearableData.TextureIndex = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            wearableData.HostName = unpackVariable(byteBuffer, 1);
-            this.WearableData_Fields.add(wearableData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleAvatarTextureUpdate(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)4);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packBoolean(bytebuffer, AgentData_Field.TexturesChanged);
+        bytebuffer.put((byte)WearableData_Fields.size());
+        WearableData wearabledata;
+        for (Iterator iterator = WearableData_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, wearabledata.HostName, 1))
+        {
+            wearabledata = (WearableData)iterator.next();
+            packUUID(bytebuffer, wearabledata.CacheID);
+            packByte(bytebuffer, (byte)wearabledata.TextureIndex);
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < b2; i2++) {
-            TextureData textureData = new TextureData();
-            textureData.TextureID = unpackUUID(byteBuffer);
-            this.TextureData_Fields.add(textureData);
+
+        bytebuffer.put((byte)TextureData_Fields.size());
+        for (Iterator iterator1 = TextureData_Fields.iterator(); iterator1.hasNext(); packUUID(bytebuffer, ((TextureData)iterator1.next()).TextureID)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.TexturesChanged = unpackBoolean(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            WearableData wearabledata = new WearableData();
+            wearabledata.CacheID = unpackUUID(bytebuffer);
+            wearabledata.TextureIndex = unpackByte(bytebuffer) & 0xff;
+            wearabledata.HostName = unpackVariable(bytebuffer, 1);
+            WearableData_Fields.add(wearabledata);
         }
+
+        byte0 = bytebuffer.get();
+        for (int j = ((flag) ? 1 : 0); j < (byte0 & 0xff); j++)
+        {
+            TextureData texturedata = new TextureData();
+            texturedata.TextureID = unpackUUID(bytebuffer);
+            TextureData_Fields.add(texturedata);
+        }
+
     }
 }

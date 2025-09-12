@@ -1,8 +1,11 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.settings;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,39 +14,58 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
 
-public class SettingsSelectionFragment extends Fragment implements AdapterView.OnItemClickListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.settings:
+//            SettingsPage, SettingsFragment
 
-    private class SettingPagesAdapter extends ArrayAdapter<SettingsPage> {
-        public SettingPagesAdapter(Context context) {
-            super(context, 17367043, SettingsPage.values());
-        }
+public class SettingsSelectionFragment extends Fragment
+    implements android.widget.AdapterView.OnItemClickListener
+{
+    private class SettingPagesAdapter extends ArrayAdapter
+    {
 
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            View view2 = super.getView(i, view, viewGroup);
-            SettingsPage settingsPage = (SettingsPage) getItem(i);
-            if ((view2 instanceof TextView) && settingsPage != null) {
-                ((TextView) view2).setText(settingsPage.getPageTitle());
+        final SettingsSelectionFragment this$0;
+
+        public View getView(int i, View view, ViewGroup viewgroup)
+        {
+            view = super.getView(i, view, viewgroup);
+            viewgroup = (SettingsPage)getItem(i);
+            if ((view instanceof TextView) && viewgroup != null)
+            {
+                ((TextView)view).setText(viewgroup.getPageTitle());
             }
-            return view2;
+            return view;
+        }
+
+        public SettingPagesAdapter(Context context)
+        {
+            this$0 = SettingsSelectionFragment.this;
+            super(context, 0x1090003, SettingsPage.values());
         }
     }
 
-    @Nullable
-    public View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.settings_page_selector, viewGroup, false);
-        ListView listView = (ListView) inflate.findViewById(R.id.settings_page_list);
-        listView.setAdapter(new SettingPagesAdapter(getContext()));
-        listView.setOnItemClickListener(this);
-        return inflate;
+
+    public SettingsSelectionFragment()
+    {
     }
 
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-        SettingsPage[] values = SettingsPage.values();
-        if (i >= 0 && i < values.length) {
-            DetailsActivity.showEmbeddedDetails(getActivity(), SettingsFragment.class, SettingsFragment.makeSelection(values[i].getPageResourceId()));
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        layoutinflater = layoutinflater.inflate(0x7f04009f, viewgroup, false);
+        viewgroup = (ListView)layoutinflater.findViewById(0x7f100281);
+        viewgroup.setAdapter(new SettingPagesAdapter(getContext()));
+        viewgroup.setOnItemClickListener(this);
+        return layoutinflater;
+    }
+
+    public void onItemClick(AdapterView adapterview, View view, int i, long l)
+    {
+        adapterview = SettingsPage.values();
+        if (i >= 0 && i < adapterview.length)
+        {
+            adapterview = adapterview[i];
+            DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/settings/SettingsFragment, SettingsFragment.makeSelection(adapterview.getPageResourceId()));
         }
     }
 }

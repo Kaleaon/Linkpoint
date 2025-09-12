@@ -1,10 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.inventory;
 
 import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,20 +26,22 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.assets.SLWearable;
 import com.lumiyaviewer.lumiya.slproto.assets.SLWearableType;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventory;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryType;
+import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance;
+import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarControl;
+import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
 import com.lumiyaviewer.lumiya.slproto.users.manager.InventoryManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectsManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
 import com.lumiyaviewer.lumiya.ui.chat.profiles.UserProfileFragment;
@@ -45,880 +50,816 @@ import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
 import com.lumiyaviewer.lumiya.ui.common.FragmentWithTitle;
 import com.lumiyaviewer.lumiya.ui.common.LoadingLayout;
 import com.lumiyaviewer.lumiya.ui.common.ReloadableFragment;
+import com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable;
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class AssetInfoFragment extends FragmentWithTitle implements ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.inventory:
+//            InventoryFragmentHelper
+
+public class AssetInfoFragment extends FragmentWithTitle
+    implements ReloadableFragment, android.view.View.OnClickListener, com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor.OnLoadableDataChangedListener
+{
+
     private static final String ITEM_UUID_KEY = "itemUUID";
-    private final SubscriptionData<UUID, SLAgentCircuit> agentCircuit = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    private ChatterNameRetriever creatorNameRetriever = null;
-    private final SubscriptionData<UUID, SLInventoryEntry> entrySubscription = new SubscriptionData<>(UIThreadExecutor.getInstance());
+    private final SubscriptionData agentCircuit = new SubscriptionData(UIThreadExecutor.getInstance());
+    private ChatterNameRetriever creatorNameRetriever;
+    private final SubscriptionData entrySubscription = new SubscriptionData(UIThreadExecutor.getInstance());
     private final InventoryFragmentHelper inventoryFragmentHelper = new InventoryFragmentHelper(this);
-    private ChatterNameRetriever lastOwnerNameRetriever = null;
-    private final LoadableMonitor loadableMonitor = new LoadableMonitor(this.entrySubscription).withOptionalLoadables(this.wornAttachments, this.wornWearables, this.agentCircuit, this.runningAnimations).withDataChangedListener(this);
+    private ChatterNameRetriever lastOwnerNameRetriever;
+    private final LoadableMonitor loadableMonitor;
     private MenuItem menuItemCopy;
     private MenuItem menuItemCut;
     private MenuItem menuItemDelete;
     private MenuItem menuItemRename;
     private MenuItem menuItemShare;
-    private final ChatterNameRetriever.OnChatterNameUpdated onNameUpdated = new ChatterNameRetriever.OnChatterNameUpdated(this) {
+    private final com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever.OnChatterNameUpdated onNameUpdated = new _2D_.Lambda.OIe5MtmKyVPF26gruCQoZkxXroQ._cls1(this);
+    private ChatterNameRetriever ownerNameRetriever;
+    private final SubscriptionData runningAnimations = new SubscriptionData(UIThreadExecutor.getInstance());
+    private final SubscriptionData wornAttachments = new SubscriptionData(UIThreadExecutor.getInstance());
+    private final SubscriptionData wornWearables = new SubscriptionData(UIThreadExecutor.getInstance());
 
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f430$f0;
+    public AssetInfoFragment()
+    {
+        loadableMonitor = (new LoadableMonitor(new Loadable[] {
+            entrySubscription
+        })).withOptionalLoadables(new Loadable[] {
+            wornAttachments, wornWearables, agentCircuit, runningAnimations
+        }).withDataChangedListener(this);
+        ownerNameRetriever = null;
+        creatorNameRetriever = null;
+        lastOwnerNameRetriever = null;
+    }
 
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.1.$m$0(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.1.$m$0(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onChatterNameUpdated(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.1.onChatterNameUpdated(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.1.onChatterNameUpdated(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    };
-    private ChatterNameRetriever ownerNameRetriever = null;
-    private final SubscriptionData<SubscriptionSingleKey, ImmutableSet<UUID>> runningAnimations = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    private final SubscriptionData<SubscriptionSingleKey, ImmutableMap<UUID, String>> wornAttachments = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    private final SubscriptionData<SubscriptionSingleKey, Table<SLWearableType, UUID, SLWearable>> wornWearables = new SubscriptionData<>(UIThreadExecutor.getInstance());
-
-    private void applyEditedPermissions(Dialog dialog) {
-        SLInventory inventory;
-        SLInventoryEntry data = this.entrySubscription.getData();
-        if (data != null && (inventory = this.inventoryFragmentHelper.getInventory()) != null) {
-            data.nextOwnerMask = data.ownerMask & getCheckboxes(dialog, R.id.asset_permission_cb_next_owner_copy, R.id.asset_permission_cb_next_owner_modify, R.id.asset_permission_cb_next_owner_transfer);
-            data.groupMask = data.ownerMask & getCheckboxes(dialog, R.id.asset_permission_cb_group_copy, R.id.asset_permission_cb_group_modify, R.id.asset_permission_cb_group_transfer);
-            data.everyoneMask = data.ownerMask & getCheckboxes(dialog, R.id.asset_permission_cb_everyone_copy, R.id.asset_permission_cb_everyone_modify, R.id.asset_permission_cb_everyone_transfer);
-            inventory.UpdateStoreInventoryItem(data);
-            showEntryInfo(data);
+    private void applyEditedPermissions(Dialog dialog)
+    {
+        SLInventoryEntry slinventoryentry = (SLInventoryEntry)entrySubscription.getData();
+        if (slinventoryentry != null)
+        {
+            SLInventory slinventory = inventoryFragmentHelper.getInventory();
+            if (slinventory != null)
+            {
+                slinventoryentry.nextOwnerMask = slinventoryentry.ownerMask & getCheckboxes(dialog, 0x7f1000e9, 0x7f1000ea, 0x7f1000eb);
+                slinventoryentry.groupMask = slinventoryentry.ownerMask & getCheckboxes(dialog, 0x7f1000ec, 0x7f1000ed, 0x7f1000ee);
+                slinventoryentry.everyoneMask = slinventoryentry.ownerMask & getCheckboxes(dialog, 0x7f1000ef, 0x7f1000f0, 0x7f1000f1);
+                slinventory.UpdateStoreInventoryItem(slinventoryentry);
+                showEntryInfo(slinventoryentry);
+            }
         }
     }
 
-    private void attachObject(SLInventoryEntry sLInventoryEntry) {
-        try {
-            this.agentCircuit.get().getModules().avatarAppearance.AttachInventoryItem(sLInventoryEntry, 0, false);
-        } catch (SubscriptionData.DataNotReadyException e) {
-            Debug.Warning(e);
+    private void attachObject(SLInventoryEntry slinventoryentry)
+    {
+        try
+        {
+            ((SLAgentCircuit)agentCircuit.get()).getModules().avatarAppearance.AttachInventoryItem(slinventoryentry, 0, false);
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (SLInventoryEntry slinventoryentry)
+        {
+            Debug.Warning(slinventoryentry);
         }
     }
 
-    private void detachObject(SLInventoryEntry sLInventoryEntry) {
-        try {
-            this.agentCircuit.get().getModules().avatarAppearance.DetachInventoryItem(sLInventoryEntry);
-        } catch (SubscriptionData.DataNotReadyException e) {
-            Debug.Warning(e);
+    private void detachObject(SLInventoryEntry slinventoryentry)
+    {
+        try
+        {
+            ((SLAgentCircuit)agentCircuit.get()).getModules().avatarAppearance.DetachInventoryItem(slinventoryentry);
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (SLInventoryEntry slinventoryentry)
+        {
+            Debug.Warning(slinventoryentry);
         }
     }
 
-    private int getCheckboxes(Dialog dialog, int i, int i2, int i3) {
-        int i4 = 0;
-        if (((CheckBox) dialog.findViewById(i)).isChecked()) {
-            i4 = 32768;
+    private int getCheckboxes(Dialog dialog, int i, int j, int k)
+    {
+        int l = 0;
+        if (((CheckBox)dialog.findViewById(i)).isChecked())
+        {
+            l = 32768;
         }
-        if (((CheckBox) dialog.findViewById(i2)).isChecked()) {
-            i4 |= 16384;
+        i = l;
+        if (((CheckBox)dialog.findViewById(j)).isChecked())
+        {
+            i = l | 0x4000;
         }
-        return ((CheckBox) dialog.findViewById(i3)).isChecked() ? i4 | 8192 : i4;
+        j = i;
+        if (((CheckBox)dialog.findViewById(k)).isChecked())
+        {
+            j = i | 0x2000;
+        }
+        return j;
     }
 
-    public static Bundle makeSelection(UUID uuid, UUID uuid2) {
+    static void lambda$_2D_com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_26901(Dialog dialog, View view)
+    {
+        dialog.dismiss();
+    }
+
+    public static Bundle makeSelection(UUID uuid, UUID uuid1)
+    {
         Bundle bundle = new Bundle();
-        if (uuid != null) {
+        if (uuid != null)
+        {
             bundle.putString("activeAgentUUID", uuid.toString());
         }
-        if (uuid2 != null) {
-            bundle.putString(ITEM_UUID_KEY, uuid2.toString());
+        if (uuid1 != null)
+        {
+            bundle.putString("itemUUID", uuid1.toString());
         }
         return bundle;
     }
 
-    private void playAnimation(SLInventoryEntry sLInventoryEntry, boolean z) {
-        SLAgentCircuit data = this.agentCircuit.getData();
-        if (data != null) {
-            data.getModules().avatarControl.playAnimation(sLInventoryEntry.assetUUID, z);
+    private void playAnimation(SLInventoryEntry slinventoryentry, boolean flag)
+    {
+        SLAgentCircuit slagentcircuit = (SLAgentCircuit)agentCircuit.getData();
+        if (slagentcircuit != null)
+        {
+            slagentcircuit.getModules().avatarControl.playAnimation(slinventoryentry.assetUUID, flag);
         }
     }
 
-    private void setCheckboxes(Dialog dialog, int i, int i2, int i3, int i4, int i5, boolean z) {
-        boolean z2 = false;
-        ((CheckBox) dialog.findViewById(i3)).setChecked((i & 32768) != 0);
-        ((CheckBox) dialog.findViewById(i4)).setChecked((i & 16384) != 0);
-        ((CheckBox) dialog.findViewById(i5)).setChecked((i & 8192) != 0);
-        dialog.findViewById(i3).setEnabled(z && (i2 & 32768) != 0);
-        dialog.findViewById(i4).setEnabled(z && (i2 & 16384) != 0);
-        View findViewById = dialog.findViewById(i5);
-        if (z && (i2 & 8192) != 0) {
-            z2 = true;
+    private void setCheckboxes(Dialog dialog, int i, int j, int k, int l, int i1, boolean flag)
+    {
+        boolean flag2 = false;
+        Object obj = (CheckBox)dialog.findViewById(k);
+        boolean flag1;
+        if ((i & 0x8000) != 0)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
         }
-        findViewById.setEnabled(z2);
+        ((CheckBox) (obj)).setChecked(flag1);
+        obj = (CheckBox)dialog.findViewById(l);
+        if ((i & 0x4000) != 0)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        ((CheckBox) (obj)).setChecked(flag1);
+        obj = (CheckBox)dialog.findViewById(i1);
+        if ((i & 0x2000) != 0)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        ((CheckBox) (obj)).setChecked(flag1);
+        obj = dialog.findViewById(k);
+        if (flag && (j & 0x8000) != 0)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        ((View) (obj)).setEnabled(flag1);
+        obj = dialog.findViewById(l);
+        if (flag && (j & 0x4000) != 0)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        ((View) (obj)).setEnabled(flag1);
+        dialog = dialog.findViewById(i1);
+        flag1 = flag2;
+        if (flag)
+        {
+            flag1 = flag2;
+            if ((j & 0x2000) != 0)
+            {
+                flag1 = true;
+            }
+        }
+        dialog.setEnabled(flag1);
     }
 
-    private void showEditPermissionsDialog() {
-        SLInventoryEntry data = this.entrySubscription.getData();
-        if (data != null) {
+    private void showEditPermissionsDialog()
+    {
+        SLInventoryEntry slinventoryentry = (SLInventoryEntry)entrySubscription.getData();
+        if (slinventoryentry != null)
+        {
             Dialog dialog = new Dialog(getActivity());
-            dialog.setContentView(R.layout.asset_permissions);
-            dialog.setTitle(R.string.edit_permissions_title);
-            setCheckboxes(dialog, data.ownerMask, data.ownerMask, R.id.asset_permission_cb_owner_copy, R.id.asset_permission_cb_owner_modify, R.id.asset_permission_cb_owner_transfer, false);
-            setCheckboxes(dialog, data.nextOwnerMask, data.ownerMask, R.id.asset_permission_cb_next_owner_copy, R.id.asset_permission_cb_next_owner_modify, R.id.asset_permission_cb_next_owner_transfer, true);
-            setCheckboxes(dialog, data.groupMask, data.ownerMask, R.id.asset_permission_cb_group_copy, R.id.asset_permission_cb_group_modify, R.id.asset_permission_cb_group_transfer, true);
-            setCheckboxes(dialog, data.everyoneMask, data.ownerMask, R.id.asset_permission_cb_everyone_copy, R.id.asset_permission_cb_everyone_modify, R.id.asset_permission_cb_everyone_transfer, true);
-            ((CheckBox) dialog.findViewById(R.id.asset_permission_cb_everyone_modify)).setChecked(false);
-            dialog.findViewById(R.id.asset_permission_cb_everyone_modify).setEnabled(false);
-            dialog.findViewById(R.id.okButton).setOnClickListener(new View.OnClickListener(this, dialog) {
-
-                /* renamed from: -$f0 */
-                private final /* synthetic */ Object f432$f0;
-
-                /* renamed from: -$f1 */
-                private final /* synthetic */ Object f433$f1;
-
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.3.$m$0(android.view.View):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.3.$m$0(android.view.View):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.3.onClick(android.view.View):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.3.onClick(android.view.View):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-            });
-            dialog.findViewById(R.id.cancelButton).setOnClickListener(new $Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ(dialog));
+            dialog.setContentView(0x7f04001e);
+            dialog.setTitle(0x7f09010a);
+            setCheckboxes(dialog, slinventoryentry.ownerMask, slinventoryentry.ownerMask, 0x7f1000e6, 0x7f1000e7, 0x7f1000e8, false);
+            setCheckboxes(dialog, slinventoryentry.nextOwnerMask, slinventoryentry.ownerMask, 0x7f1000e9, 0x7f1000ea, 0x7f1000eb, true);
+            setCheckboxes(dialog, slinventoryentry.groupMask, slinventoryentry.ownerMask, 0x7f1000ec, 0x7f1000ed, 0x7f1000ee, true);
+            setCheckboxes(dialog, slinventoryentry.everyoneMask, slinventoryentry.ownerMask, 0x7f1000ef, 0x7f1000f0, 0x7f1000f1, true);
+            ((CheckBox)dialog.findViewById(0x7f1000f0)).setChecked(false);
+            dialog.findViewById(0x7f1000f0).setEnabled(false);
+            dialog.findViewById(0x7f1000b6).setOnClickListener(new _2D_.Lambda.OIe5MtmKyVPF26gruCQoZkxXroQ._cls3(this, dialog));
+            dialog.findViewById(0x7f1000b7).setOnClickListener(new _2D_.Lambda.OIe5MtmKyVPF26gruCQoZkxXroQ(dialog));
             dialog.show();
         }
     }
 
-    private void showEntry(@Nullable UUID uuid) {
-        this.loadableMonitor.unsubscribeAll();
-        UserManager userManager = ActivityUtils.getUserManager(getArguments());
-        if (uuid == null || userManager == null) {
-            if (this.creatorNameRetriever != null) {
-                this.creatorNameRetriever.dispose();
+    private void showEntry(UUID uuid)
+    {
+        loadableMonitor.unsubscribeAll();
+        UserManager usermanager = ActivityUtils.getUserManager(getArguments());
+        if (uuid != null && usermanager != null)
+        {
+            agentCircuit.subscribe(UserManager.agentCircuits(), usermanager.getUserID());
+            entrySubscription.subscribe(usermanager.getInventoryManager().getFolderEntryPool(), uuid);
+            wornAttachments.subscribe(usermanager.getWornAttachmentsPool(), SubscriptionSingleKey.Value);
+            wornWearables.subscribe(usermanager.getWornWearablesPool(), SubscriptionSingleKey.Value);
+            runningAnimations.subscribe(usermanager.getObjectsManager().runningAnimations(), SubscriptionSingleKey.Value);
+        } else
+        {
+            if (creatorNameRetriever != null)
+            {
+                creatorNameRetriever.dispose();
             }
-            if (this.ownerNameRetriever != null) {
-                this.ownerNameRetriever.dispose();
+            if (ownerNameRetriever != null)
+            {
+                ownerNameRetriever.dispose();
             }
-            if (this.lastOwnerNameRetriever != null) {
-                this.lastOwnerNameRetriever.dispose();
+            if (lastOwnerNameRetriever != null)
+            {
+                lastOwnerNameRetriever.dispose();
                 return;
             }
-            return;
         }
-        this.agentCircuit.subscribe(UserManager.agentCircuits(), userManager.getUserID());
-        this.entrySubscription.subscribe(userManager.getInventoryManager().getFolderEntryPool(), uuid);
-        this.wornAttachments.subscribe(userManager.getWornAttachmentsPool(), SubscriptionSingleKey.Value);
-        this.wornWearables.subscribe(userManager.getWornWearablesPool(), SubscriptionSingleKey.Value);
-        this.runningAnimations.subscribe(userManager.getObjectsManager().runningAnimations(), SubscriptionSingleKey.Value);
     }
 
-    private void showEntryInfo(@Nonnull SLInventoryEntry sLInventoryEntry) {
-        int i = 0;
-        int i2 = 8;
+    private void showEntryInfo(SLInventoryEntry slinventoryentry)
+    {
+        boolean flag = false;
+        byte byte0 = 8;
         View view = getView();
-        if (view != null) {
-            ((TextView) view.findViewById(R.id.asset_info_name)).setText(sLInventoryEntry.name);
-            ((TextView) view.findViewById(R.id.asset_info_description)).setText(!Strings.isNullOrEmpty(sLInventoryEntry.description) ? sLInventoryEntry.description : getResources().getString(R.string.asset_no_description));
-            ((TextView) view.findViewById(R.id.asset_info_type)).setText(sLInventoryEntry.getTypeDescriptionResId());
-            int drawableResource = sLInventoryEntry.getDrawableResource();
-            if (drawableResource >= 0) {
-                ((ImageView) view.findViewById(R.id.asset_info_icon)).setImageResource(drawableResource);
-            } else {
-                ((ImageView) view.findViewById(R.id.asset_info_icon)).setImageBitmap((Bitmap) null);
+        if (view != null)
+        {
+            ((TextView)view.findViewById(0x7f1000c0)).setText(slinventoryentry.name);
+            TextView textview = (TextView)view.findViewById(0x7f1000cb);
+            Object obj;
+            int i;
+            int k;
+            if (!Strings.isNullOrEmpty(slinventoryentry.description))
+            {
+                obj = slinventoryentry.description;
+            } else
+            {
+                obj = getResources().getString(0x7f09005b);
             }
-            int actionDescriptionResId = sLInventoryEntry.getActionDescriptionResId();
-            if (actionDescriptionResId >= 0) {
-                ((Button) view.findViewById(R.id.asset_action_button)).setText(actionDescriptionResId);
-                view.findViewById(R.id.asset_action_button).setVisibility(0);
-                view.findViewById(R.id.asset_action_button).setEnabled(this.inventoryFragmentHelper.isActionAllowed(sLInventoryEntry, actionDescriptionResId));
-            } else {
-                view.findViewById(R.id.asset_action_button).setVisibility(8);
+            textview.setText(((CharSequence) (obj)));
+            ((TextView)view.findViewById(0x7f1000bf)).setText(slinventoryentry.getTypeDescriptionResId());
+            i = slinventoryentry.getDrawableResource();
+            if (i >= 0)
+            {
+                ((ImageView)view.findViewById(0x7f1000c1)).setImageResource(i);
+            } else
+            {
+                ((ImageView)view.findViewById(0x7f1000c1)).setImageBitmap(null);
             }
-            view.findViewById(R.id.edit_permissions_button).setVisibility((sLInventoryEntry.ownerMask & 16384) != 0 ? 0 : 8);
-            showPermissions(sLInventoryEntry.ownerMask, R.id.asset_permission_owner_copy, R.id.asset_permission_owner_modify, R.id.asset_permission_owner_transfer);
-            showPermissions(sLInventoryEntry.groupMask, R.id.asset_permission_group_copy, R.id.asset_permission_group_modify, R.id.asset_permission_group_transfer);
-            showPermissions(sLInventoryEntry.everyoneMask, R.id.asset_permission_everyone_copy, R.id.asset_permission_everyone_modify, R.id.asset_permission_everyone_transfer);
-            showPermissions(sLInventoryEntry.nextOwnerMask, R.id.asset_permission_next_owner_copy, R.id.asset_permission_next_owner_modify, R.id.asset_permission_next_owner_transfer);
-            SLAgentCircuit data = this.agentCircuit.getData();
-            boolean z = data != null;
-            if (!z || !(sLInventoryEntry.assetType == SLAssetType.AT_OBJECT.getTypeCode() || (sLInventoryEntry.assetType == SLAssetType.AT_LINK.getTypeCode() && sLInventoryEntry.invType == SLInventoryType.IT_OBJECT.getTypeCode()))) {
-                view.findViewById(R.id.asset_attach_button).setVisibility(8);
-                view.findViewById(R.id.asset_detach_button).setVisibility(8);
-            } else {
-                boolean z2 = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments.getData(), this.wornWearables.getData(), false) != null;
-                boolean canDetachItem = z2 ? data.getModules().avatarAppearance.canDetachItem(sLInventoryEntry) : false;
-                view.findViewById(R.id.asset_attach_button).setVisibility(z2 ? 8 : 0);
-                view.findViewById(R.id.asset_detach_button).setVisibility(canDetachItem ? 0 : 8);
+            i = slinventoryentry.getActionDescriptionResId();
+            if (i >= 0)
+            {
+                ((Button)view.findViewById(0x7f1000c2)).setText(i);
+                view.findViewById(0x7f1000c2).setVisibility(0);
+                view.findViewById(0x7f1000c2).setEnabled(inventoryFragmentHelper.isActionAllowed(slinventoryentry, i));
+            } else
+            {
+                view.findViewById(0x7f1000c2).setVisibility(8);
             }
-            if (!z || !sLInventoryEntry.isAnimation()) {
-                view.findViewById(R.id.asset_play_anim_button).setVisibility(8);
-                view.findViewById(R.id.asset_stop_anim_button).setVisibility(8);
-            } else {
-                ImmutableSet data2 = this.runningAnimations.getData();
-                view.findViewById(R.id.asset_play_anim_button).setVisibility((data2 == null || !(data2.contains(sLInventoryEntry.assetUUID) ^ true)) ? 8 : 0);
-                view.findViewById(R.id.asset_stop_anim_button).setVisibility((data2 == null || !data2.contains(sLInventoryEntry.assetUUID)) ? 8 : 0);
+            obj = view.findViewById(0x7f1000d9);
+            if ((slinventoryentry.ownerMask & 0x4000) != 0)
+            {
+                i = 0;
+            } else
+            {
+                i = 8;
             }
-            if (!z || !sLInventoryEntry.isWearable()) {
-                view.findViewById(R.id.asset_wear_button).setVisibility(8);
-                view.findViewById(R.id.asset_take_off_button).setVisibility(8);
-                view.findViewById(R.id.asset_worn_text).setVisibility(8);
-            } else {
-                Object whatIsItemWornOn = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments.getData(), this.wornWearables.getData(), false);
-                if (whatIsItemWornOn instanceof SLWearableType) {
-                    view.findViewById(R.id.asset_wear_button).setVisibility(8);
-                    if (((SLWearableType) whatIsItemWornOn).isBodyPart()) {
-                        view.findViewById(R.id.asset_take_off_button).setVisibility(8);
-                    } else {
-                        view.findViewById(R.id.asset_take_off_button).setVisibility(data.getModules().avatarAppearance.canTakeItemOff((SLWearableType) whatIsItemWornOn) ? 0 : 8);
-                    }
-                    View findViewById = view.findViewById(R.id.asset_worn_text);
-                    if (view.findViewById(R.id.asset_take_off_button).getVisibility() != 0) {
-                        i2 = 0;
-                    }
-                    findViewById.setVisibility(i2);
-                } else {
-                    view.findViewById(R.id.asset_take_off_button).setVisibility(8);
-                    boolean canWearItem = data.getModules().avatarAppearance.canWearItem(sLInventoryEntry);
-                    View findViewById2 = view.findViewById(R.id.asset_wear_button);
-                    if (!canWearItem) {
-                        i = 8;
-                    }
-                    findViewById2.setVisibility(i);
-                    view.findViewById(R.id.asset_worn_text).setVisibility(8);
+            ((View) (obj)).setVisibility(i);
+            showPermissions(slinventoryentry.ownerMask, 0x7f1000cd, 0x7f1000ce, 0x7f1000cf);
+            showPermissions(slinventoryentry.groupMask, 0x7f1000d3, 0x7f1000d4, 0x7f1000d5);
+            showPermissions(slinventoryentry.everyoneMask, 0x7f1000d6, 0x7f1000d7, 0x7f1000d8);
+            showPermissions(slinventoryentry.nextOwnerMask, 0x7f1000d0, 0x7f1000d1, 0x7f1000d2);
+            obj = (SLAgentCircuit)agentCircuit.getData();
+            if (obj != null)
+            {
+                i = 1;
+            } else
+            {
+                i = 0;
+            }
+            if (i != 0 && (slinventoryentry.assetType == SLAssetType.AT_OBJECT.getTypeCode() || slinventoryentry.assetType == SLAssetType.AT_LINK.getTypeCode() && slinventoryentry.invType == SLInventoryType.IT_OBJECT.getTypeCode()))
+            {
+                Object obj1;
+                View view1;
+                boolean flag1;
+                if (slinventoryentry.whatIsItemWornOn((ImmutableMap)wornAttachments.getData(), (Table)wornWearables.getData(), false) != null)
+                {
+                    k = 1;
+                } else
+                {
+                    k = 0;
                 }
+                if (k != 0)
+                {
+                    flag1 = ((SLAgentCircuit) (obj)).getModules().avatarAppearance.canDetachItem(slinventoryentry);
+                } else
+                {
+                    flag1 = false;
+                }
+                obj1 = view.findViewById(0x7f1000c3);
+                if (k != 0)
+                {
+                    k = 8;
+                } else
+                {
+                    k = 0;
+                }
+                ((View) (obj1)).setVisibility(k);
+                obj1 = view.findViewById(0x7f1000c4);
+                if (flag1)
+                {
+                    k = 0;
+                } else
+                {
+                    k = 8;
+                }
+                ((View) (obj1)).setVisibility(k);
+            } else
+            {
+                view.findViewById(0x7f1000c3).setVisibility(8);
+                view.findViewById(0x7f1000c4).setVisibility(8);
+            }
+            if (i != 0 && slinventoryentry.isAnimation())
+            {
+                obj1 = (ImmutableSet)runningAnimations.getData();
+                view1 = view.findViewById(0x7f1000c7);
+                if (obj1 != null && ((ImmutableSet) (obj1)).contains(slinventoryentry.assetUUID) ^ true)
+                {
+                    k = 0;
+                } else
+                {
+                    k = 8;
+                }
+                view1.setVisibility(k);
+                view1 = view.findViewById(0x7f1000c8);
+                if (obj1 != null && ((ImmutableSet) (obj1)).contains(slinventoryentry.assetUUID))
+                {
+                    k = 0;
+                } else
+                {
+                    k = 8;
+                }
+                view1.setVisibility(k);
+            } else
+            {
+                view.findViewById(0x7f1000c7).setVisibility(8);
+                view.findViewById(0x7f1000c8).setVisibility(8);
+            }
+            if (i != 0 && slinventoryentry.isWearable())
+            {
+                Object obj2 = slinventoryentry.whatIsItemWornOn((ImmutableMap)wornAttachments.getData(), (Table)wornWearables.getData(), false);
+                if (obj2 instanceof SLWearableType)
+                {
+                    view.findViewById(0x7f1000c5).setVisibility(8);
+                    if (((SLWearableType)obj2).isBodyPart())
+                    {
+                        view.findViewById(0x7f1000c6).setVisibility(8);
+                    } else
+                    {
+                        boolean flag2 = ((SLAgentCircuit) (obj)).getModules().avatarAppearance.canTakeItemOff((SLWearableType)obj2);
+                        slinventoryentry = view.findViewById(0x7f1000c6);
+                        if (flag2)
+                        {
+                            i = 0;
+                        } else
+                        {
+                            i = 8;
+                        }
+                        slinventoryentry.setVisibility(i);
+                    }
+                    slinventoryentry = view.findViewById(0x7f1000c9);
+                    if (view.findViewById(0x7f1000c6).getVisibility() == 0)
+                    {
+                        i = byte0;
+                    } else
+                    {
+                        i = 0;
+                    }
+                    slinventoryentry.setVisibility(i);
+                } else
+                {
+                    view.findViewById(0x7f1000c6).setVisibility(8);
+                    boolean flag3 = ((SLAgentCircuit) (obj)).getModules().avatarAppearance.canWearItem(slinventoryentry);
+                    slinventoryentry = view.findViewById(0x7f1000c5);
+                    int j;
+                    if (flag3)
+                    {
+                        j = ((flag) ? 1 : 0);
+                    } else
+                    {
+                        j = 8;
+                    }
+                    slinventoryentry.setVisibility(j);
+                    view.findViewById(0x7f1000c9).setVisibility(8);
+                }
+            } else
+            {
+                view.findViewById(0x7f1000c5).setVisibility(8);
+                view.findViewById(0x7f1000c6).setVisibility(8);
+                view.findViewById(0x7f1000c9).setVisibility(8);
             }
         }
         updateMenuItems();
     }
 
-    private void showPermissions(int i, int i2, int i3, int i4) {
-        View view = getView();
-        if (view != null) {
-            TextView textView = (TextView) view.findViewById(i2);
-            TextView textView2 = (TextView) view.findViewById(i3);
-            TextView textView3 = (TextView) view.findViewById(i4);
-            if ((32768 & i) != 0) {
-                textView.setPaintFlags(textView.getPaintFlags() & -17);
-            } else {
-                textView.setPaintFlags(textView.getPaintFlags() | 16);
+    private void showPermissions(int i, int j, int k, int l)
+    {
+        Object obj;
+label0:
+        {
+            obj = getView();
+            if (obj != null)
+            {
+                TextView textview = (TextView)((View) (obj)).findViewById(j);
+                TextView textview1 = (TextView)((View) (obj)).findViewById(k);
+                obj = (TextView)((View) (obj)).findViewById(l);
+                if ((0x8000 & i) != 0)
+                {
+                    textview.setPaintFlags(textview.getPaintFlags() & 0xffffffef);
+                } else
+                {
+                    textview.setPaintFlags(textview.getPaintFlags() | 0x10);
+                }
+                if ((i & 0x4000) != 0)
+                {
+                    textview1.setPaintFlags(textview1.getPaintFlags() & 0xffffffef);
+                } else
+                {
+                    textview1.setPaintFlags(textview1.getPaintFlags() | 0x10);
+                }
+                if ((i & 0x2000) == 0)
+                {
+                    break label0;
+                }
+                ((TextView) (obj)).setPaintFlags(((TextView) (obj)).getPaintFlags() & 0xffffffef);
             }
-            if ((i & 16384) != 0) {
-                textView2.setPaintFlags(textView2.getPaintFlags() & -17);
-            } else {
-                textView2.setPaintFlags(textView2.getPaintFlags() | 16);
-            }
-            if ((i & 8192) != 0) {
-                textView3.setPaintFlags(textView3.getPaintFlags() & -17);
-            } else {
-                textView3.setPaintFlags(textView3.getPaintFlags() | 16);
-            }
-        }
-    }
-
-    private void showProfile(UUID uuid) {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments());
-        if (uuid != null && (!Objects.equal(uuid, UUIDPool.ZeroUUID)) && userManager != null) {
-            DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(userManager.getUserID(), uuid)));
-        }
-    }
-
-    private void showUserInfo(UUID uuid, ChatterNameRetriever chatterNameRetriever, int i, int i2, int i3) {
-        View view = getView();
-        if (view == null) {
             return;
         }
-        if (uuid == null || Objects.equal(uuid, UUIDPool.ZeroUUID) || chatterNameRetriever == null) {
-            view.findViewById(i).setVisibility(8);
+        ((TextView) (obj)).setPaintFlags(((TextView) (obj)).getPaintFlags() | 0x10);
+    }
+
+    private void showProfile(UUID uuid)
+    {
+        UserManager usermanager = ActivityUtils.getUserManager(getArguments());
+        if (uuid != null && Objects.equal(uuid, UUIDPool.ZeroUUID) ^ true && usermanager != null)
+        {
+            uuid = ChatterID.getUserChatterID(usermanager.getUserID(), uuid);
+            DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/chat/profiles/UserProfileFragment, UserProfileFragment.makeSelection(uuid));
+        }
+    }
+
+    private void showUserInfo(UUID uuid, ChatterNameRetriever chatternameretriever, int i, int j, int k)
+    {
+        View view;
+label0:
+        {
+            view = getView();
+            if (view != null)
+            {
+                if (uuid != null && !Objects.equal(uuid, UUIDPool.ZeroUUID) && chatternameretriever != null)
+                {
+                    break label0;
+                }
+                view.findViewById(i).setVisibility(8);
+            }
             return;
         }
         view.findViewById(i).setVisibility(0);
-        String resolvedName = chatterNameRetriever.getResolvedName();
-        ((TextView) view.findViewById(i2)).setText(resolvedName != null ? resolvedName : getString(R.string.name_loading_title));
-        ((ChatterPicView) view.findViewById(i3)).setChatterID(chatterNameRetriever.chatterID, resolvedName);
+        String s = chatternameretriever.getResolvedName();
+        TextView textview = (TextView)view.findViewById(j);
+        if (s != null)
+        {
+            uuid = s;
+        } else
+        {
+            uuid = getString(0x7f0901c8);
+        }
+        textview.setText(uuid);
+        ((ChatterPicView)view.findViewById(k)).setChatterID(chatternameretriever.chatterID, s);
     }
 
-    private void takeOffObject(SLInventoryEntry sLInventoryEntry) {
-        try {
-            this.agentCircuit.get().getModules().avatarAppearance.TakeItemOff(sLInventoryEntry);
-        } catch (SubscriptionData.DataNotReadyException e) {
-            Debug.Warning(e);
+    private void takeOffObject(SLInventoryEntry slinventoryentry)
+    {
+        try
+        {
+            ((SLAgentCircuit)agentCircuit.get()).getModules().avatarAppearance.TakeItemOff(slinventoryentry);
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (SLInventoryEntry slinventoryentry)
+        {
+            Debug.Warning(slinventoryentry);
         }
     }
 
-    private void updateMenuItems() {
-        if (this.menuItemCopy != null && this.menuItemCut != null && this.menuItemShare != null && this.menuItemRename != null && this.menuItemDelete != null) {
-            try {
-                this.agentCircuit.assertHasData();
-                SLInventoryEntry sLInventoryEntry = this.entrySubscription.get();
-                this.menuItemDelete.setVisible(true);
-                this.menuItemRename.setVisible(((sLInventoryEntry.baseMask & sLInventoryEntry.ownerMask) & 16384) != 0);
-                this.menuItemShare.setVisible(((sLInventoryEntry.ownerMask & sLInventoryEntry.baseMask) & 8192) != 0);
-                this.menuItemCut.setVisible(true);
-                this.menuItemCopy.setVisible(true);
-            } catch (SubscriptionData.DataNotReadyException e) {
-                this.menuItemDelete.setVisible(false);
-                this.menuItemRename.setVisible(false);
-                this.menuItemShare.setVisible(false);
-                this.menuItemCut.setVisible(false);
-                this.menuItemCopy.setVisible(false);
-            }
+    private void updateMenuItems()
+    {
+        if (menuItemCopy == null || menuItemCut == null || menuItemShare == null || menuItemRename == null || menuItemDelete == null)
+        {
+            break MISSING_BLOCK_LABEL_154;
+        }
+        SLInventoryEntry slinventoryentry;
+        MenuItem menuitem;
+        agentCircuit.assertHasData();
+        slinventoryentry = (SLInventoryEntry)entrySubscription.get();
+        menuItemDelete.setVisible(true);
+        menuitem = menuItemRename;
+        int i;
+        boolean flag;
+        if ((slinventoryentry.baseMask & slinventoryentry.ownerMask & 0x4000) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        menuitem.setVisible(flag);
+        menuitem = menuItemShare;
+        i = slinventoryentry.baseMask;
+        if ((slinventoryentry.ownerMask & i & 0x2000) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        menuitem.setVisible(flag);
+        menuItemCut.setVisible(true);
+        menuItemCopy.setVisible(true);
+        return;
+        com.lumiyaviewer.lumiya.react.SubscriptionData.DataNotReadyException datanotreadyexception;
+        datanotreadyexception;
+        menuItemDelete.setVisible(false);
+        menuItemRename.setVisible(false);
+        menuItemShare.setVisible(false);
+        menuItemCut.setVisible(false);
+        menuItemCopy.setVisible(false);
+        return;
+    }
+
+    private void wearObject(SLInventoryEntry slinventoryentry)
+    {
+        try
+        {
+            ((SLAgentCircuit)agentCircuit.get()).getModules().avatarAppearance.WearItem(slinventoryentry, false);
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (SLInventoryEntry slinventoryentry)
+        {
+            Debug.Warning(slinventoryentry);
         }
     }
 
-    private void wearObject(SLInventoryEntry sLInventoryEntry) {
-        try {
-            this.agentCircuit.get().getModules().avatarAppearance.WearItem(sLInventoryEntry, false);
-        } catch (SubscriptionData.DataNotReadyException e) {
-            Debug.Warning(e);
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_10987(ChatterNameRetriever chatternameretriever)
+    {
+        chatternameretriever = (SLInventoryEntry)entrySubscription.getData();
+        if (chatternameretriever != null)
+        {
+            showUserInfo(((SLInventoryEntry) (chatternameretriever)).ownerUUID, ownerNameRetriever, 0x7f1000da, 0x7f1000db, 0x7f1000dc);
+            showUserInfo(((SLInventoryEntry) (chatternameretriever)).creatorUUID, creatorNameRetriever, 0x7f1000de, 0x7f1000df, 0x7f1000e0);
+            showUserInfo(((SLInventoryEntry) (chatternameretriever)).lastOwnerUUID, lastOwnerNameRetriever, 0x7f1000e2, 0x7f1000e3, 0x7f1000e4);
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onAssetNameRetrieved(ChatterNameRetriever chatterNameRetriever) {
-        SLInventoryEntry data = this.entrySubscription.getData();
-        if (data != null) {
-            showUserInfo(data.ownerUUID, this.ownerNameRetriever, R.id.asset_owner_card_view, R.id.asset_owner_name, R.id.asset_owner_pic);
-            showUserInfo(data.creatorUUID, this.creatorNameRetriever, R.id.asset_creator_card_view, R.id.asset_creator_name, R.id.asset_creator_pic);
-            showUserInfo(data.lastOwnerUUID, this.lastOwnerNameRetriever, R.id.asset_last_owner_card_view, R.id.asset_last_owner_name, R.id.asset_last_owner_pic);
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_20027()
+    {
+        android.support.v4.app.FragmentActivity fragmentactivity = getActivity();
+        if (fragmentactivity instanceof DetailsActivity)
+        {
+            ((DetailsActivity)fragmentactivity).closeDetailsFragment(this);
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void closeDetailsFragment() {
-        FragmentActivity activity = getActivity();
-        if (activity instanceof DetailsActivity) {
-            ((DetailsActivity) activity).closeDetailsFragment(this);
-        }
-    }
-
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onPermissionsApplyClicked(Dialog dialog, View view) {
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_inventory_AssetInfoFragment_26713(Dialog dialog, View view)
+    {
         applyEditedPermissions(dialog);
         dialog.dismiss();
     }
 
-    public void onClick(View view) {
-        SLInventoryEntry data = this.entrySubscription.getData();
-        if (data != null) {
-            switch (view.getId()) {
-                case R.id.asset_action_button:
-                    int actionDescriptionResId = data.getActionDescriptionResId();
-                    if (actionDescriptionResId >= 0 && this.inventoryFragmentHelper.isActionAllowed(data, actionDescriptionResId)) {
-                        this.inventoryFragmentHelper.PerformInventoryAction(data, actionDescriptionResId);
-                        return;
-                    }
-                    return;
-                case R.id.asset_attach_button:
-                    attachObject(data);
-                    return;
-                case R.id.asset_detach_button:
-                    detachObject(data);
-                    return;
-                case R.id.asset_wear_button:
-                    wearObject(data);
-                    return;
-                case R.id.asset_take_off_button:
-                    takeOffObject(data);
-                    return;
-                case R.id.asset_play_anim_button:
-                    playAnimation(data, true);
-                    return;
-                case R.id.asset_stop_anim_button:
-                    playAnimation(data, false);
-                    return;
-                case R.id.edit_permissions_button:
-                    showEditPermissionsDialog();
-                    return;
-                case R.id.asset_owner_button:
-                    showProfile(data.ownerUUID);
-                    return;
-                case R.id.asset_creator_button:
-                    showProfile(data.creatorUUID);
-                    return;
-                case R.id.asset_last_owner_button:
-                    showProfile(data.lastOwnerUUID);
-                    return;
-                default:
-                    return;
-            }
+    public void onClick(View view)
+    {
+        SLInventoryEntry slinventoryentry = (SLInventoryEntry)entrySubscription.getData();
+        if (slinventoryentry == null) goto _L2; else goto _L1
+_L1:
+        view.getId();
+        JVM INSTR lookupswitch 11: default 116
+    //                   2131755202: 144
+    //                   2131755203: 175
+    //                   2131755204: 195
+    //                   2131755205: 201
+    //                   2131755206: 207
+    //                   2131755207: 181
+    //                   2131755208: 188
+    //                   2131755225: 213
+    //                   2131755229: 117
+    //                   2131755233: 126
+    //                   2131755237: 135;
+           goto _L3 _L4 _L5 _L6 _L7 _L8 _L9 _L10 _L11 _L12 _L13 _L14
+_L9:
+        break MISSING_BLOCK_LABEL_181;
+_L10:
+        break MISSING_BLOCK_LABEL_188;
+_L6:
+        break MISSING_BLOCK_LABEL_195;
+_L7:
+        break MISSING_BLOCK_LABEL_201;
+_L8:
+        break MISSING_BLOCK_LABEL_207;
+_L3:
+        break; /* Loop/switch isn't completed */
+_L11:
+        break MISSING_BLOCK_LABEL_213;
+_L2:
+        return;
+_L12:
+        showProfile(slinventoryentry.ownerUUID);
+        return;
+_L13:
+        showProfile(slinventoryentry.creatorUUID);
+        return;
+_L14:
+        int i;
+        showProfile(slinventoryentry.lastOwnerUUID);
+        return;
+_L4:
+        if ((i = slinventoryentry.getActionDescriptionResId()) >= 0 && inventoryFragmentHelper.isActionAllowed(slinventoryentry, i))
+        {
+            inventoryFragmentHelper.PerformInventoryAction(slinventoryentry, i);
+            return;
         }
+        if (true) goto _L2; else goto _L5
+_L5:
+        attachObject(slinventoryentry);
+        return;
+        playAnimation(slinventoryentry, true);
+        return;
+        playAnimation(slinventoryentry, false);
+        return;
+        detachObject(slinventoryentry);
+        return;
+        wearObject(slinventoryentry);
+        return;
+        takeOffObject(slinventoryentry);
+        return;
+        showEditPermissionsDialog();
+        return;
     }
 
-    public void onCreate(@Nullable Bundle bundle) {
+    public void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
         setHasOptionsMenu(true);
     }
 
-    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        menuInflater.inflate(R.menu.inventory_item_menu, menu);
-        this.menuItemDelete = menu.findItem(R.id.inventory_item_delete_item);
-        this.menuItemRename = menu.findItem(R.id.inventory_item_rename_item);
-        this.menuItemShare = menu.findItem(R.id.inventory_item_share_item);
-        this.menuItemCut = menu.findItem(R.id.inventory_item_cut_item);
-        this.menuItemCopy = menu.findItem(R.id.inventory_item_copy_item);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuinflater)
+    {
+        menuinflater.inflate(0x7f12000c, menu);
+        menuItemDelete = menu.findItem(0x7f100325);
+        menuItemRename = menu.findItem(0x7f100326);
+        menuItemShare = menu.findItem(0x7f100327);
+        menuItemCut = menu.findItem(0x7f100328);
+        menuItemCopy = menu.findItem(0x7f100329);
         updateMenuItems();
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        super.onCreateView(layoutInflater, viewGroup, bundle);
-        View inflate = layoutInflater.inflate(R.layout.asset_info, viewGroup, false);
-        ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout));
-        this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_item_selected), getString(R.string.inventorY_item_loading_fail));
-        this.loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout));
-        inflate.findViewById(R.id.asset_creator_button).setOnClickListener(this);
-        inflate.findViewById(R.id.asset_owner_button).setOnClickListener(this);
-        inflate.findViewById(R.id.asset_last_owner_button).setOnClickListener(this);
-        inflate.findViewById(R.id.asset_action_button).setOnClickListener(this);
-        inflate.findViewById(R.id.edit_permissions_button).setOnClickListener(this);
-        inflate.findViewById(R.id.edit_permissions_button).setVisibility(8);
-        inflate.findViewById(R.id.asset_attach_button).setOnClickListener(this);
-        inflate.findViewById(R.id.asset_detach_button).setOnClickListener(this);
-        inflate.findViewById(R.id.asset_wear_button).setOnClickListener(this);
-        inflate.findViewById(R.id.asset_take_off_button).setOnClickListener(this);
-        inflate.findViewById(R.id.asset_play_anim_button).setOnClickListener(this);
-        inflate.findViewById(R.id.asset_stop_anim_button).setOnClickListener(this);
-        return inflate;
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        super.onCreateView(layoutinflater, viewgroup, bundle);
+        layoutinflater = layoutinflater.inflate(0x7f04001d, viewgroup, false);
+        ((LoadingLayout)layoutinflater.findViewById(0x7f1000bd)).setSwipeRefreshLayout((SwipeRefreshLayout)layoutinflater.findViewById(0x7f1000bb));
+        loadableMonitor.setLoadingLayout((LoadingLayout)layoutinflater.findViewById(0x7f1000bd), getString(0x7f0901e8), getString(0x7f090164));
+        loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout)layoutinflater.findViewById(0x7f1000bb));
+        layoutinflater.findViewById(0x7f1000e1).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f1000dd).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f1000e5).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f1000c2).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f1000d9).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f1000d9).setVisibility(8);
+        layoutinflater.findViewById(0x7f1000c3).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f1000c4).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f1000c5).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f1000c6).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f1000c7).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f1000c8).setOnClickListener(this);
+        return layoutinflater;
     }
 
-    public void onLoadableDataChanged() {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments());
-        try {
-            showEntryInfo(this.entrySubscription.get());
-            if (userManager != null) {
-                this.creatorNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(userManager.getUserID(), this.entrySubscription.get().creatorUUID), this.onNameUpdated, UIThreadExecutor.getInstance());
-                this.ownerNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(userManager.getUserID(), this.entrySubscription.get().ownerUUID), this.onNameUpdated, UIThreadExecutor.getInstance());
-                this.lastOwnerNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(userManager.getUserID(), this.entrySubscription.get().lastOwnerUUID), this.onNameUpdated, UIThreadExecutor.getInstance());
-            }
-        } catch (SubscriptionData.DataNotReadyException e) {
-            Debug.Warning(e);
+    public void onLoadableDataChanged()
+    {
+        UserManager usermanager = ActivityUtils.getUserManager(getArguments());
+        try
+        {
+            showEntryInfo((SLInventoryEntry)entrySubscription.get());
         }
-    }
-
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments());
-        if (userManager != null) {
-            try {
-                SLInventoryEntry sLInventoryEntry = this.entrySubscription.get();
-                switch (menuItem.getItemId()) {
-                    case R.id.inventory_item_delete_item:
-                        this.inventoryFragmentHelper.DeleteInventoryEntry(sLInventoryEntry, new Runnable(this) {
-
-                            /* renamed from: -$f0 */
-                            private final /* synthetic */ Object f431$f0;
-
-                            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.2.$m$0():void, dex: classes.dex
-                            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.2.$m$0():void, class status: UNLOADED
-                            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeSwitch(RegionGen.java:298)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:64)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeTryCatch(RegionGen.java:311)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:68)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                            
-*/
-
-                            public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.2.run():void, dex: classes.dex
-                            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ.2.run():void, class status: UNLOADED
-                            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeSwitch(RegionGen.java:298)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:64)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeTryCatch(RegionGen.java:311)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:68)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                            
-*/
-                        });
-                        return true;
-                    case R.id.inventory_item_rename_item:
-                        this.inventoryFragmentHelper.RenameInventoryEntry(sLInventoryEntry);
-                        return true;
-                    case R.id.inventory_item_share_item:
-                        this.inventoryFragmentHelper.ShareInventoryEntry(sLInventoryEntry);
-                        return true;
-                    case R.id.inventory_item_cut_item:
-                        userManager.getInventoryManager().copyToClipboard(new InventoryManager.InventoryClipboardEntry(true, sLInventoryEntry));
-                        Toast.makeText(getContext(), R.string.copied_to_clipboard, 1).show();
-                        return true;
-                    case R.id.inventory_item_copy_item:
-                        userManager.getInventoryManager().copyToClipboard(new InventoryManager.InventoryClipboardEntry(false, sLInventoryEntry));
-                        Toast.makeText(getContext(), R.string.copied_to_clipboard, 1).show();
-                        return true;
-                }
-            } catch (SubscriptionData.DataNotReadyException e) {
-                Debug.Warning(e);
-            }
+        catch (com.lumiyaviewer.lumiya.react.SubscriptionData.DataNotReadyException datanotreadyexception)
+        {
+            Debug.Warning(datanotreadyexception);
+            return;
         }
-        return super.onOptionsItemSelected(menuItem);
+        if (usermanager == null)
+        {
+            break MISSING_BLOCK_LABEL_140;
+        }
+        creatorNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(usermanager.getUserID(), ((SLInventoryEntry)entrySubscription.get()).creatorUUID), onNameUpdated, UIThreadExecutor.getInstance());
+        ownerNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(usermanager.getUserID(), ((SLInventoryEntry)entrySubscription.get()).ownerUUID), onNameUpdated, UIThreadExecutor.getInstance());
+        lastOwnerNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(usermanager.getUserID(), ((SLInventoryEntry)entrySubscription.get()).lastOwnerUUID), onNameUpdated, UIThreadExecutor.getInstance());
     }
 
-    public void onPrepareOptionsMenu(Menu menu) {
+    public boolean onOptionsItemSelected(MenuItem menuitem)
+    {
+        UserManager usermanager = ActivityUtils.getUserManager(getArguments());
+        if (usermanager == null) goto _L2; else goto _L1
+_L1:
+        SLInventoryEntry slinventoryentry;
+        int i;
+        slinventoryentry = (SLInventoryEntry)entrySubscription.get();
+        i = menuitem.getItemId();
+        i;
+        JVM INSTR tableswitch 2131755813 2131755817: default 68
+    //                   2131755813 74
+    //                   2131755814 92
+    //                   2131755815 102
+    //                   2131755816 112
+    //                   2131755817 144;
+           goto _L2 _L3 _L4 _L5 _L6 _L7
+_L2:
+        return super.onOptionsItemSelected(menuitem);
+_L3:
+        inventoryFragmentHelper.DeleteInventoryEntry(slinventoryentry, new _2D_.Lambda.OIe5MtmKyVPF26gruCQoZkxXroQ._cls2(this));
+        return true;
+_L4:
+        inventoryFragmentHelper.RenameInventoryEntry(slinventoryentry);
+        return true;
+_L5:
+        inventoryFragmentHelper.ShareInventoryEntry(slinventoryentry);
+        return true;
+_L6:
+        usermanager.getInventoryManager().copyToClipboard(new com.lumiyaviewer.lumiya.slproto.users.manager.InventoryManager.InventoryClipboardEntry(true, slinventoryentry));
+        Toast.makeText(getContext(), 0x7f0900cd, 1).show();
+        return true;
+_L7:
+        usermanager.getInventoryManager().copyToClipboard(new com.lumiyaviewer.lumiya.slproto.users.manager.InventoryManager.InventoryClipboardEntry(false, slinventoryentry));
+        Toast.makeText(getContext(), 0x7f0900cd, 1).show();
+        return true;
+        com.lumiyaviewer.lumiya.react.SubscriptionData.DataNotReadyException datanotreadyexception;
+        datanotreadyexception;
+        Debug.Warning(datanotreadyexception);
+        if (true) goto _L2; else goto _L8
+_L8:
+    }
+
+    public void onPrepareOptionsMenu(Menu menu)
+    {
         super.onPrepareOptionsMenu(menu);
         updateMenuItems();
     }
 
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        showEntry(UUIDPool.getUUID(getArguments().getString(ITEM_UUID_KEY)));
+        showEntry(UUIDPool.getUUID(getArguments().getString("itemUUID")));
     }
 
-    public void onStop() {
-        showEntry((UUID) null);
+    public void onStop()
+    {
+        showEntry(null);
         super.onStop();
     }
 
-    public void setFragmentArgs(Intent intent, Bundle bundle) {
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(intent);
-        if (activeAgentID != null) {
-            getArguments().putString("activeAgentUUID", activeAgentID.toString());
+    public void setFragmentArgs(Intent intent, Bundle bundle)
+    {
+        intent = ActivityUtils.getActiveAgentID(intent);
+        if (intent != null)
+        {
+            getArguments().putString("activeAgentUUID", intent.toString());
         }
-        if (bundle != null) {
+        if (bundle != null)
+        {
             getArguments().putAll(bundle);
         }
-        if (isFragmentStarted()) {
-            showEntry(UUIDPool.getUUID(getArguments().getString(ITEM_UUID_KEY)));
+        if (isFragmentStarted())
+        {
+            showEntry(UUIDPool.getUUID(getArguments().getString("itemUUID")));
         }
     }
 }

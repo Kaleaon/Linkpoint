@@ -1,51 +1,78 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class ImageData extends SLMessage {
-    public ImageDataData ImageDataData_Field = new ImageDataData();
-    public ImageID ImageID_Field = new ImageID();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class ImageDataData {
-        public byte[] Data;
+public class ImageData extends SLMessage
+{
+    public static class ImageDataData
+    {
+
+        public byte Data[];
+
+        public ImageDataData()
+        {
+        }
     }
 
-    public static class ImageID {
+    public static class ImageID
+    {
+
         public int Codec;
         public UUID ID;
         public int Packets;
         public int Size;
+
+        public ImageID()
+        {
+        }
     }
 
-    public ImageData() {
-        this.zeroCoded = false;
+
+    public ImageDataData ImageDataData_Field;
+    public ImageID ImageID_Field;
+
+    public ImageData()
+    {
+        zeroCoded = false;
+        ImageID_Field = new ImageID();
+        ImageDataData_Field = new ImageDataData();
     }
 
-    public int CalcPayloadSize() {
-        return this.ImageDataData_Field.Data.length + 2 + 24;
+    public int CalcPayloadSize()
+    {
+        return ImageDataData_Field.Data.length + 2 + 24;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleImageData(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleImageData(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) 9);
-        packUUID(byteBuffer, this.ImageID_Field.ID);
-        packByte(byteBuffer, (byte) this.ImageID_Field.Codec);
-        packInt(byteBuffer, this.ImageID_Field.Size);
-        packShort(byteBuffer, (short) this.ImageID_Field.Packets);
-        packVariable(byteBuffer, this.ImageDataData_Field.Data, 2);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.put((byte)9);
+        packUUID(bytebuffer, ImageID_Field.ID);
+        packByte(bytebuffer, (byte)ImageID_Field.Codec);
+        packInt(bytebuffer, ImageID_Field.Size);
+        packShort(bytebuffer, (short)ImageID_Field.Packets);
+        packVariable(bytebuffer, ImageDataData_Field.Data, 2);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.ImageID_Field.ID = unpackUUID(byteBuffer);
-        this.ImageID_Field.Codec = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-        this.ImageID_Field.Size = unpackInt(byteBuffer);
-        this.ImageID_Field.Packets = unpackShort(byteBuffer) & 65535;
-        this.ImageDataData_Field.Data = unpackVariable(byteBuffer, 2);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        ImageID_Field.ID = unpackUUID(bytebuffer);
+        ImageID_Field.Codec = unpackByte(bytebuffer) & 0xff;
+        ImageID_Field.Size = unpackInt(bytebuffer);
+        ImageID_Field.Packets = unpackShort(bytebuffer) & 0xffff;
+        ImageDataData_Field.Data = unpackVariable(bytebuffer, 2);
     }
 }

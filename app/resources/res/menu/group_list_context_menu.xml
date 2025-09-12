@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
-    <item android:id="@+id/item_activate_group" android:title="Activate group"/>
-    <item android:id="@+id/item_deactivate_group" android:title="Deactivate group"/>
-</menu>

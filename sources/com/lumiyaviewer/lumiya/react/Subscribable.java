@@ -1,16 +1,22 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
-import com.lumiyaviewer.lumiya.react.Subscription;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public interface Subscribable<K, T> {
-    Subscription<K, T> subscribe(@Nonnull K k, @Nonnull Subscription.OnData<T> onData);
+// Referenced classes of package com.lumiyaviewer.lumiya.react:
+//            Subscription
 
-    Subscription<K, T> subscribe(@Nonnull K k, @Nonnull Subscription.OnData<T> onData, @Nullable Subscription.OnError onError);
+public interface Subscribable
+{
 
-    Subscription<K, T> subscribe(@Nonnull K k, @Nullable Executor executor, @Nonnull Subscription.OnData<T> onData);
+    public abstract Subscription subscribe(Object obj, Subscription.OnData ondata);
 
-    Subscription<K, T> subscribe(@Nonnull K k, @Nullable Executor executor, @Nonnull Subscription.OnData<T> onData, @Nullable Subscription.OnError onError);
+    public abstract Subscription subscribe(Object obj, Subscription.OnData ondata, Subscription.OnError onerror);
+
+    public abstract Subscription subscribe(Object obj, Executor executor, Subscription.OnData ondata);
+
+    public abstract Subscription subscribe(Object obj, Executor executor, Subscription.OnData ondata, Subscription.OnError onerror);
 }

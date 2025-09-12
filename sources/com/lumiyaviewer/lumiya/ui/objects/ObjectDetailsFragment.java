@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.objects;
 
 import android.content.DialogInterface;
@@ -17,24 +21,31 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.OnChatEventListener;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
+import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarControl;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
+import com.lumiyaviewer.lumiya.slproto.modules.finance.SLFinancialInfo;
 import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteListEntry;
 import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteType;
+import com.lumiyaviewer.lumiya.slproto.modules.mutelist.SLMuteList;
+import com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVController;
 import com.lumiyaviewer.lumiya.slproto.objects.PayInfo;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.BalanceManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
 import com.lumiyaviewer.lumiya.slproto.users.manager.MyAvatarState;
 import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectsManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
@@ -45,1382 +56,821 @@ import com.lumiyaviewer.lumiya.ui.common.ChatterNameDisplayer;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
 import com.lumiyaviewer.lumiya.ui.common.FragmentWithTitle;
 import com.lumiyaviewer.lumiya.ui.common.ReloadableFragment;
+import com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable;
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor;
-import com.lumiyaviewer.lumiya.ui.objects.ObjectDerezDialog;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
-public class ObjectDetailsFragment extends FragmentWithTitle implements ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.objects:
+//            TaskInventoryFragment, ObjectDerezDialog
+
+public class ObjectDetailsFragment extends FragmentWithTitle
+    implements ReloadableFragment, android.view.View.OnClickListener, com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor.OnLoadableDataChangedListener
+{
+
     private static final String LOCAL_ID_KEY = "localID";
-    private static final int[] objectPayButtons = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4};
-    private final SubscriptionData<SubscriptionSingleKey, Integer> balanceSubscription = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    private final OnChatEventListener chatEventListener = new OnChatEventListener(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f474$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.3.$m$0(com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.3.$m$0(com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onChatEvent(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.3.onChatEvent(com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.3.onChatEvent(com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
+    private static final int objectPayButtons[] = {
+        0x7f100224, 0x7f100225, 0x7f100226, 0x7f100227
     };
-    private final LoadableMonitor loadableMonitor = new LoadableMonitor(this.objectProfile).withOptionalLoadables(this.balanceSubscription, this.myAvatarState).withDataChangedListener(this);
-    @Nullable
-    private MenuItem menuItemObjectBlock = null;
-    @Nullable
-    private MenuItem menuItemObjectDelete = null;
-    @Nullable
-    private MenuItem menuItemObjectTake = null;
-    @Nullable
-    private MenuItem menuItemObjectTakeCopy = null;
-    private final SubscriptionData<SubscriptionSingleKey, MyAvatarState> myAvatarState = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    private int objectLocalID = 0;
-    private final SubscriptionData<Integer, SLObjectProfileData> objectProfile = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    @Nullable
-    private SLObjectProfileData objectProfileData = null;
+    private final SubscriptionData balanceSubscription = new SubscriptionData(UIThreadExecutor.getInstance());
+    private final OnChatEventListener chatEventListener = new _2D_.Lambda.IbcMrpWxKnmu4WU7ZN8rETVfqs8._cls3(this);
+    private final LoadableMonitor loadableMonitor;
+    private MenuItem menuItemObjectBlock;
+    private MenuItem menuItemObjectDelete;
+    private MenuItem menuItemObjectTake;
+    private MenuItem menuItemObjectTakeCopy;
+    private final SubscriptionData myAvatarState = new SubscriptionData(UIThreadExecutor.getInstance());
+    private int objectLocalID;
+    private final SubscriptionData objectProfile = new SubscriptionData(UIThreadExecutor.getInstance());
+    private SLObjectProfileData objectProfileData;
     private final ChatterNameDisplayer ownerNameDisplayer = new ChatterNameDisplayer();
 
-    private void buyObject() {
-        SLObjectProfileData sLObjectProfileData = this.objectProfileData;
-        UserManager userManager = getUserManager();
-        int i = this.objectLocalID;
-        if (sLObjectProfileData != null && userManager != null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage((CharSequence) String.format(getString(R.string.object_buy_confirm), new Object[]{sLObjectProfileData.name().or(getString(R.string.object_name_loading)), Integer.valueOf(sLObjectProfileData.salePrice())})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener(i, userManager, sLObjectProfileData) {
+    public ObjectDetailsFragment()
+    {
+        objectProfileData = null;
+        menuItemObjectTake = null;
+        menuItemObjectTakeCopy = null;
+        menuItemObjectDelete = null;
+        menuItemObjectBlock = null;
+        objectLocalID = 0;
+        loadableMonitor = (new LoadableMonitor(new Loadable[] {
+            objectProfile
+        })).withOptionalLoadables(new Loadable[] {
+            balanceSubscription, myAvatarState
+        }).withDataChangedListener(this);
+    }
 
-                /* renamed from: -$f0 */
-                private final /* synthetic */ int f478$f0;
-
-                /* renamed from: -$f1 */
-                private final /* synthetic */ Object f479$f1;
-
-                /* renamed from: -$f2 */
-                private final /* synthetic */ Object f480$f2;
-
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.5.$m$0(android.content.DialogInterface, int):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.5.$m$0(android.content.DialogInterface, int):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.5.onClick(android.content.DialogInterface, int):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.5.onClick(android.content.DialogInterface, int):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-            }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new $Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8());
+    private void buyObject()
+    {
+        SLObjectProfileData slobjectprofiledata = objectProfileData;
+        UserManager usermanager = getUserManager();
+        int i = objectLocalID;
+        if (slobjectprofiledata != null && usermanager != null)
+        {
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
+            builder.setMessage(String.format(getString(0x7f090213), new Object[] {
+                slobjectprofiledata.name().or(getString(0x7f090239)), Integer.valueOf(slobjectprofiledata.salePrice())
+            })).setCancelable(false).setPositiveButton("Yes", new _2D_.Lambda.IbcMrpWxKnmu4WU7ZN8rETVfqs8._cls5(i, usermanager, slobjectprofiledata)).setNegativeButton("No", new _2D_.Lambda.IbcMrpWxKnmu4WU7ZN8rETVfqs8());
             builder.show();
         }
     }
 
-    @Nullable
-    private UserManager getUserManager() {
+    private UserManager getUserManager()
+    {
         return ActivityUtils.getUserManager(getArguments());
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_11291  reason: not valid java name */
-    static /* synthetic */ void m669lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_11291(SLAgentCircuit sLAgentCircuit, SLObjectProfileData sLObjectProfileData, String str, DialogInterface dialogInterface, int i) {
-        sLAgentCircuit.getModules().muteList.Block(new MuteListEntry(MuteType.OBJECT, sLObjectProfileData.objectUUID(), str, 15));
-        dialogInterface.dismiss();
+    static void lambda$_2D_com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_11291(SLAgentCircuit slagentcircuit, SLObjectProfileData slobjectprofiledata, String s, DialogInterface dialoginterface, int i)
+    {
+        slagentcircuit.getModules().muteList.Block(new MuteListEntry(MuteType.OBJECT, slobjectprofiledata.objectUUID(), s, 15));
+        dialoginterface.dismiss();
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_24012  reason: not valid java name */
-    static /* synthetic */ void m671lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_24012(UserManager userManager, int i, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface, int i2) {
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit();
-        if (activeAgentCircuit != null) {
-            activeAgentCircuit.BuyObject(i, sLObjectProfileData.saleType(), sLObjectProfileData.salePrice());
+    static void lambda$_2D_com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_11639(DialogInterface dialoginterface, int i)
+    {
+        dialoginterface.cancel();
+    }
+
+    static void lambda$_2D_com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_24012(UserManager usermanager, int i, SLObjectProfileData slobjectprofiledata, DialogInterface dialoginterface, int j)
+    {
+        usermanager = usermanager.getActiveAgentCircuit();
+        if (usermanager != null)
+        {
+            usermanager.BuyObject(i, slobjectprofiledata.saleType(), slobjectprofiledata.salePrice());
         }
-        dialogInterface.dismiss();
+        dialoginterface.dismiss();
     }
 
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_25106  reason: not valid java name */
-    static /* synthetic */ void m673lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_25106(UserManager userManager, SLObjectProfileData sLObjectProfileData, int i, DialogInterface dialogInterface, int i2) {
-        SLModules modules;
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit();
-        if (!(activeAgentCircuit == null || (modules = activeAgentCircuit.getModules()) == null)) {
-            modules.financialInfo.DoPayObject(sLObjectProfileData.objectUUID(), i);
+    static void lambda$_2D_com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_24413(DialogInterface dialoginterface, int i)
+    {
+        dialoginterface.cancel();
+    }
+
+    static void lambda$_2D_com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_25106(UserManager usermanager, SLObjectProfileData slobjectprofiledata, int i, DialogInterface dialoginterface, int j)
+    {
+        usermanager = usermanager.getActiveAgentCircuit();
+        if (usermanager != null)
+        {
+            usermanager = usermanager.getModules();
+            if (usermanager != null)
+            {
+                ((SLModules) (usermanager)).financialInfo.DoPayObject(slobjectprofiledata.objectUUID(), i);
+            }
         }
-        dialogInterface.dismiss();
+        dialoginterface.dismiss();
     }
 
-    public static Bundle makeSelection(UUID uuid, int i) {
+    static void lambda$_2D_com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_25649(DialogInterface dialoginterface, int i)
+    {
+        dialoginterface.cancel();
+    }
+
+    public static Bundle makeSelection(UUID uuid, int i)
+    {
         Bundle bundle = new Bundle();
         ActivityUtils.setActiveAgentID(bundle, uuid);
-        bundle.putInt(LOCAL_ID_KEY, i);
+        bundle.putInt("localID", i);
         return bundle;
     }
 
-    private void openObjectContents() {
-        UserManager userManager = getUserManager();
-        if (this.objectProfileData != null && this.objectLocalID != 0 && userManager != null) {
-            DetailsActivity.showEmbeddedDetails(getActivity(), TaskInventoryFragment.class, TaskInventoryFragment.makeSelection(userManager.getUserID(), this.objectProfileData.objectUUID(), this.objectLocalID));
+    private void openObjectContents()
+    {
+        UserManager usermanager = getUserManager();
+        if (objectProfileData != null && objectLocalID != 0 && usermanager != null)
+        {
+            DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/objects/TaskInventoryFragment, TaskInventoryFragment.makeSelection(usermanager.getUserID(), objectProfileData.objectUUID(), objectLocalID));
         }
     }
 
-    private void payObject(int i) {
-        SLObjectProfileData sLObjectProfileData = this.objectProfileData;
-        UserManager userManager = getUserManager();
-        if (sLObjectProfileData != null && userManager != null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setMessage((CharSequence) String.format(getString(R.string.object_pay_confirm), new Object[]{sLObjectProfileData.name().or(getString(R.string.object_name_loading)), Integer.valueOf(i)})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener(i, userManager, sLObjectProfileData) {
-
-                /* renamed from: -$f0 */
-                private final /* synthetic */ int f481$f0;
-
-                /* renamed from: -$f1 */
-                private final /* synthetic */ Object f482$f1;
-
-                /* renamed from: -$f2 */
-                private final /* synthetic */ Object f483$f2;
-
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.6.$m$0(android.content.DialogInterface, int):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.6.$m$0(android.content.DialogInterface, int):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.6.onClick(android.content.DialogInterface, int):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.6.onClick(android.content.DialogInterface, int):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-            }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener() {
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.2.$m$0(android.content.DialogInterface, int):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.2.$m$0(android.content.DialogInterface, int):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.2.onClick(android.content.DialogInterface, int):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.2.onClick(android.content.DialogInterface, int):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-            });
+    private void payObject(int i)
+    {
+        SLObjectProfileData slobjectprofiledata = objectProfileData;
+        UserManager usermanager = getUserManager();
+        if (slobjectprofiledata != null && usermanager != null)
+        {
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
+            builder.setMessage(String.format(getString(0x7f090240), new Object[] {
+                slobjectprofiledata.name().or(getString(0x7f090239)), Integer.valueOf(i)
+            })).setCancelable(false).setPositiveButton("Yes", new _2D_.Lambda.IbcMrpWxKnmu4WU7ZN8rETVfqs8._cls6(i, usermanager, slobjectprofiledata)).setNegativeButton("No", new _2D_.Lambda.IbcMrpWxKnmu4WU7ZN8rETVfqs8._cls2());
             builder.show();
         }
     }
 
-    private void payObjectQuick(int i) {
-        PayInfo payInfo;
-        ImmutableList<Integer> payPrices;
-        int intValue;
-        if (this.objectProfileData != null && (payInfo = this.objectProfileData.payInfo()) != null && (payPrices = payInfo.payPrices()) != null && i >= 0 && i < payPrices.size() && (intValue = ((Integer) payPrices.get(i)).intValue()) != 0) {
-            payObject(intValue);
-        }
-    }
-
-    private void showDeadObject() {
-        View view = getView();
-        if (view != null) {
-            view.findViewById(R.id.no_object_selected).setVisibility(8);
-            view.findViewById(R.id.object_fail_to_load).setVisibility(0);
-            ((TextView) view.findViewById(R.id.object_fail_to_load)).setText(R.string.object_deleted);
-            view.findViewById(R.id.object_details).setVisibility(8);
-        }
-    }
-
-    private void showObject(int i) {
-        this.objectLocalID = i;
-        UserManager userManager = getUserManager();
-        if (userManager != null) {
-            this.objectProfile.subscribe(userManager.getObjectsManager().getObjectProfile(), Integer.valueOf(i));
-            this.myAvatarState.subscribe(userManager.getObjectsManager().myAvatarState(), SubscriptionSingleKey.Value);
-            this.balanceSubscription.subscribe(userManager.getBalanceManager().getBalance(), SubscriptionSingleKey.Value);
-        }
-    }
-
-    private void showObjectNotLoaded() {
-        View view = getView();
-        if (view != null) {
-            view.findViewById(R.id.no_object_selected).setVisibility(8);
-            view.findViewById(R.id.object_fail_to_load).setVisibility(0);
-            ((TextView) view.findViewById(R.id.object_fail_to_load)).setText(R.string.object_profile_cannot_be_loaded);
-            view.findViewById(R.id.object_details).setVisibility(8);
-        }
-    }
-
-    private void showObjectOwnerInfo() {
-        UUID ownerUUID;
-        UserManager userManager = getUserManager();
-        if (this.objectProfileData != null && userManager != null && (ownerUUID = this.objectProfileData.ownerUUID()) != null) {
-            DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(userManager.getUserID(), ownerUUID)));
-        }
-    }
-
-    private void showObjectProfile(SLObjectProfileData sLObjectProfileData) {
-        boolean z;
-        SLAgentCircuit activeAgentCircuit;
-        SLModules modules;
-        this.objectProfileData = sLObjectProfileData;
-        View view = getView();
-        UserManager userManager = getUserManager();
-        if (view != null) {
-            view.findViewById(R.id.no_object_selected).setVisibility(8);
-            if (sLObjectProfileData.isDead()) {
-                view.findViewById(R.id.object_fail_to_load).setVisibility(0);
-                view.findViewById(R.id.object_details).setVisibility(8);
-                ((TextView) view.findViewById(R.id.object_fail_to_load)).setText(R.string.object_deleted);
-            } else {
-                view.findViewById(R.id.object_details).setVisibility(0);
-                view.findViewById(R.id.object_fail_to_load).setVisibility(8);
-                view.findViewById(R.id.object_touch_button).setVisibility(sLObjectProfileData.isTouchable() ? 0 : 8);
-                ((Button) view.findViewById(R.id.object_touch_button)).setText(Strings.isNullOrEmpty(sLObjectProfileData.touchName()) ? getString(R.string.object_touch_button) : sLObjectProfileData.touchName());
-                boolean canSit = (userManager == null || (activeAgentCircuit = userManager.getActiveAgentCircuit()) == null || (modules = activeAgentCircuit.getModules()) == null) ? false : modules.rlvController.canSit();
-                MyAvatarState data = this.myAvatarState.getData();
-                if (data == null) {
-                    z = false;
-                } else if (!data.isSitting() || data.sittingOn() != this.objectLocalID) {
-                    z = false;
-                } else {
-                    z = true;
-                    canSit = false;
-                }
-                view.findViewById(R.id.object_sit_button).setVisibility(canSit ? 0 : 8);
-                view.findViewById(R.id.object_stand_button).setVisibility(z ? 0 : 8);
-                ((TextView) view.findViewById(R.id.object_details_name)).setText(sLObjectProfileData.name().or(getString(R.string.object_name_loading)));
-                ((TextView) view.findViewById(R.id.object_details_desc)).setText(sLObjectProfileData.description().or(""));
-                view.findViewById(R.id.object_owner_card_view).setVisibility(sLObjectProfileData.ownerUUID() != null ? 0 : 8);
-                view.findViewById(R.id.floating_text_card_view).setVisibility(sLObjectProfileData.floatingText().isPresent() ? 0 : 8);
-                ((TextView) view.findViewById(R.id.object_hover_text)).setText(sLObjectProfileData.floatingText().or(""));
-                view.findViewById(R.id.buy_object_card_view).setVisibility(sLObjectProfileData.saleType() != 0 ? 0 : 8);
-                ((TextView) view.findViewById(R.id.object_buy_details)).setText(getString(R.string.object_buy_price_format, Integer.valueOf(sLObjectProfileData.salePrice())));
-                Integer data2 = this.balanceSubscription.getData();
-                if (data2 != null) {
-                    ((TextView) view.findViewById(R.id.object_buy_details_balance)).setText(getString(R.string.object_balance_format, data2));
-                } else {
-                    ((TextView) view.findViewById(R.id.object_buy_details_balance)).setText("");
-                }
-                PayInfo payInfo = sLObjectProfileData.isPayable() ? sLObjectProfileData.payInfo() : null;
-                if (payInfo != null) {
-                    ImmutableList<Integer> payPrices = payInfo.payPrices();
-                    if (payPrices != null) {
-                        int i = 0;
-                        int i2 = 0;
-                        while (i < objectPayButtons.length && i < payPrices.size()) {
-                            int intValue = ((Integer) payPrices.get(i)).intValue();
-                            int defaultPayPrice = intValue == -2 ? payInfo.defaultPayPrice() : intValue;
-                            if (defaultPayPrice <= 0) {
-                                view.findViewById(objectPayButtons[i]).setVisibility(8);
-                                view.findViewById(objectPayButtons[i]).setTag(R.id.object_pay_price_tag, 0);
-                            } else {
-                                ((Button) view.findViewById(objectPayButtons[i])).setText(String.format(getString(R.string.pay_button_format), new Object[]{Integer.valueOf(defaultPayPrice)}));
-                                view.findViewById(objectPayButtons[i]).setVisibility(0);
-                                view.findViewById(objectPayButtons[i]).setTag(R.id.object_pay_price_tag, Integer.valueOf(defaultPayPrice));
-                                i2++;
-                            }
-                            i++;
-                        }
-                        view.findViewById(R.id.object_quick_pay_layout).setVisibility(i2 != 0 ? 0 : 8);
-                    } else {
-                        view.findViewById(R.id.object_quick_pay_layout).setVisibility(8);
+    private void payObjectQuick(int i)
+    {
+        if (objectProfileData != null)
+        {
+            Object obj = objectProfileData.payInfo();
+            if (obj != null)
+            {
+                obj = ((PayInfo) (obj)).payPrices();
+                if (obj != null && i >= 0 && i < ((ImmutableList) (obj)).size())
+                {
+                    i = ((Integer)((ImmutableList) (obj)).get(i)).intValue();
+                    if (i != 0)
+                    {
+                        payObject(i);
                     }
-                    if (payInfo.defaultPayPrice() != -1) {
-                        if (((EditText) view.findViewById(R.id.object_pay_amount)).getText().toString().equals("")) {
-                            if (payInfo.defaultPayPrice() > 0) {
-                                ((EditText) view.findViewById(R.id.object_pay_amount)).setText(getString(R.string.object_pay_amount_format, Integer.valueOf(payInfo.defaultPayPrice())));
-                            } else {
-                                ((EditText) view.findViewById(R.id.object_pay_amount)).setText("");
-                            }
-                        }
-                        view.findViewById(R.id.object_normal_pay_layout).setVisibility(0);
-                    } else {
-                        view.findViewById(R.id.object_normal_pay_layout).setVisibility(8);
-                    }
-                    view.findViewById(R.id.pay_object_card_view).setVisibility(0);
-                } else {
-                    view.findViewById(R.id.pay_object_card_view).setVisibility(8);
                 }
             }
         }
-        if (userManager != null && (!sLObjectProfileData.isDead())) {
-            if (sLObjectProfileData.isPayable() && sLObjectProfileData.payInfo() == null) {
-                UUID objectUUID = sLObjectProfileData.objectUUID();
-                SLAgentCircuit activeAgentCircuit2 = userManager.getActiveAgentCircuit();
-                if (!(activeAgentCircuit2 == null || objectUUID == null)) {
-                    activeAgentCircuit2.DoRequestPayPrice(objectUUID);
+    }
+
+    private void showDeadObject()
+    {
+        View view = getView();
+        if (view != null)
+        {
+            view.findViewById(0x7f10020c).setVisibility(8);
+            view.findViewById(0x7f10020d).setVisibility(0);
+            ((TextView)view.findViewById(0x7f10020d)).setText(0x7f09021e);
+            view.findViewById(0x7f10020e).setVisibility(8);
+        }
+    }
+
+    private void showObject(int i)
+    {
+        objectLocalID = i;
+        UserManager usermanager = getUserManager();
+        if (usermanager != null)
+        {
+            objectProfile.subscribe(usermanager.getObjectsManager().getObjectProfile(), Integer.valueOf(i));
+            myAvatarState.subscribe(usermanager.getObjectsManager().myAvatarState(), SubscriptionSingleKey.Value);
+            balanceSubscription.subscribe(usermanager.getBalanceManager().getBalance(), SubscriptionSingleKey.Value);
+        }
+    }
+
+    private void showObjectNotLoaded()
+    {
+        View view = getView();
+        if (view != null)
+        {
+            view.findViewById(0x7f10020c).setVisibility(8);
+            view.findViewById(0x7f10020d).setVisibility(0);
+            ((TextView)view.findViewById(0x7f10020d)).setText(0x7f090242);
+            view.findViewById(0x7f10020e).setVisibility(8);
+        }
+    }
+
+    private void showObjectOwnerInfo()
+    {
+        Object obj = getUserManager();
+        if (objectProfileData != null && obj != null)
+        {
+            UUID uuid = objectProfileData.ownerUUID();
+            if (uuid != null)
+            {
+                obj = ChatterID.getUserChatterID(((UserManager) (obj)).getUserID(), uuid);
+                DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/chat/profiles/UserProfileFragment, UserProfileFragment.makeSelection(((ChatterID) (obj))));
+            }
+        }
+    }
+
+    private void showObjectProfile(SLObjectProfileData slobjectprofiledata)
+    {
+        UserManager usermanager;
+        Object obj1;
+        objectProfileData = slobjectprofiledata;
+        obj1 = getView();
+        usermanager = getUserManager();
+        if (obj1 == null) goto _L2; else goto _L1
+_L1:
+        ((View) (obj1)).findViewById(0x7f10020c).setVisibility(8);
+        if (!slobjectprofiledata.isDead()) goto _L4; else goto _L3
+_L3:
+        ((View) (obj1)).findViewById(0x7f10020d).setVisibility(0);
+        ((View) (obj1)).findViewById(0x7f10020e).setVisibility(8);
+        ((TextView)((View) (obj1)).findViewById(0x7f10020d)).setText(0x7f09021e);
+_L2:
+        if (usermanager != null && slobjectprofiledata.isDead() ^ true)
+        {
+            if (slobjectprofiledata.isPayable() && slobjectprofiledata.payInfo() == null)
+            {
+                UUID uuid = slobjectprofiledata.objectUUID();
+                obj1 = usermanager.getActiveAgentCircuit();
+                if (obj1 != null && uuid != null)
+                {
+                    ((SLAgentCircuit) (obj1)).DoRequestPayPrice(uuid);
                 }
             }
-            UUID ownerUUID = sLObjectProfileData.ownerUUID();
-            if (ownerUUID != null) {
-                this.ownerNameDisplayer.setChatterID(ChatterID.getUserChatterID(userManager.getUserID(), ownerUUID));
+            slobjectprofiledata = slobjectprofiledata.ownerUUID();
+            if (slobjectprofiledata != null)
+            {
+                slobjectprofiledata = ChatterID.getUserChatterID(usermanager.getUserID(), slobjectprofiledata);
+                ownerNameDisplayer.setChatterID(slobjectprofiledata);
             }
         }
         updateOptionsMenu();
-    }
-
-    private void sitOnObject() {
-        SLAgentCircuit activeAgentCircuit;
-        SLModules modules;
-        UserManager userManager = getUserManager();
-        if (userManager != null && this.objectProfileData != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && (modules = activeAgentCircuit.getModules()) != null) {
-            modules.avatarControl.SitOnObject(this.objectProfileData.objectUUID());
+        return;
+_L4:
+        Object obj;
+        int i;
+        int j;
+        boolean flag;
+        ((View) (obj1)).findViewById(0x7f10020e).setVisibility(0);
+        ((View) (obj1)).findViewById(0x7f10020d).setVisibility(8);
+        obj = ((View) (obj1)).findViewById(0x7f100104);
+        Object obj2;
+        if (slobjectprofiledata.isTouchable())
+        {
+            i = 0;
+        } else
+        {
+            i = 8;
         }
-    }
-
-    private void standUp() {
-        SLAgentCircuit activeAgentCircuit;
-        SLModules modules;
-        UserManager userManager = getUserManager();
-        if (userManager != null && this.objectProfileData != null && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && (modules = activeAgentCircuit.getModules()) != null) {
-            modules.avatarControl.Stand();
+        ((View) (obj)).setVisibility(i);
+        obj2 = (Button)((View) (obj1)).findViewById(0x7f100104);
+        if (Strings.isNullOrEmpty(slobjectprofiledata.touchName()))
+        {
+            obj = getString(0x7f09024a);
+        } else
+        {
+            obj = slobjectprofiledata.touchName();
         }
-    }
-
-    private void touchObject() {
-        SLAgentCircuit activeAgentCircuit;
-        UserManager userManager = getUserManager();
-        if (userManager != null && this.objectLocalID != 0 && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null) {
-            activeAgentCircuit.TouchObject(this.objectLocalID);
+        ((Button) (obj2)).setText(((CharSequence) (obj)));
+        if (usermanager == null)
+        {
+            break; /* Loop/switch isn't completed */
         }
-    }
-
-    private void updateOptionsMenu() {
-        boolean z;
-        boolean z2;
-        boolean z3;
-        boolean z4 = false;
-        UserManager userManager = getUserManager();
-        if (userManager == null || this.objectProfileData == null) {
-            z = false;
-            z2 = false;
-            z3 = false;
-        } else if (!this.objectProfileData.isDead()) {
-            z3 = userManager.getUserID().equals(this.objectProfileData.ownerUUID());
-            if (userManager.getUserID().equals(this.objectProfileData.ownerUUID())) {
-                z4 = this.objectProfileData.isCopyable();
+        obj = usermanager.getActiveAgentCircuit();
+        if (obj == null)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        obj = ((SLAgentCircuit) (obj)).getModules();
+        if (obj == null)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        flag = ((SLModules) (obj)).rlvController.canSit();
+_L6:
+        obj = (MyAvatarState)myAvatarState.getData();
+        if (obj != null)
+        {
+            if (((MyAvatarState) (obj)).isSitting() && ((MyAvatarState) (obj)).sittingOn() == objectLocalID)
+            {
+                i = 1;
+                flag = false;
+            } else
+            {
+                i = 0;
             }
-            z = userManager.getUserID().equals(this.objectProfileData.ownerUUID());
-            z2 = z4;
-            z4 = true;
-        } else {
-            z = false;
-            z2 = false;
-            z3 = false;
+        } else
+        {
+            i = 0;
         }
-        if (this.menuItemObjectTake != null) {
-            this.menuItemObjectTake.setVisible(z3);
+        obj = ((View) (obj1)).findViewById(0x7f100105);
+        if (flag)
+        {
+            j = 0;
+        } else
+        {
+            j = 8;
         }
-        if (this.menuItemObjectTakeCopy != null) {
-            this.menuItemObjectTakeCopy.setVisible(z2);
+        ((View) (obj)).setVisibility(j);
+        obj = ((View) (obj1)).findViewById(0x7f100212);
+        if (i != 0)
+        {
+            i = 0;
+        } else
+        {
+            i = 8;
         }
-        if (this.menuItemObjectDelete != null) {
-            this.menuItemObjectDelete.setVisible(z);
+        ((View) (obj)).setVisibility(i);
+        ((TextView)((View) (obj1)).findViewById(0x7f100210)).setText((CharSequence)slobjectprofiledata.name().or(getString(0x7f090239)));
+        ((TextView)((View) (obj1)).findViewById(0x7f100211)).setText((CharSequence)slobjectprofiledata.description().or(""));
+        obj = ((View) (obj1)).findViewById(0x7f100214);
+        if (slobjectprofiledata.ownerUUID() != null)
+        {
+            i = 0;
+        } else
+        {
+            i = 8;
         }
-        if (this.menuItemObjectBlock != null) {
-            this.menuItemObjectBlock.setVisible(z4);
+        ((View) (obj)).setVisibility(i);
+        obj = ((View) (obj1)).findViewById(0x7f100217);
+        if (slobjectprofiledata.floatingText().isPresent())
+        {
+            i = 0;
+        } else
+        {
+            i = 8;
         }
+        ((View) (obj)).setVisibility(i);
+        ((TextView)((View) (obj1)).findViewById(0x7f100218)).setText((CharSequence)slobjectprofiledata.floatingText().or(""));
+        obj = ((View) (obj1)).findViewById(0x7f100219);
+        if (slobjectprofiledata.saleType() != 0)
+        {
+            i = 0;
+        } else
+        {
+            i = 8;
+        }
+        ((View) (obj)).setVisibility(i);
+        ((TextView)((View) (obj1)).findViewById(0x7f10021a)).setText(getString(0x7f090215, new Object[] {
+            Integer.valueOf(slobjectprofiledata.salePrice())
+        }));
+        obj = (Integer)balanceSubscription.getData();
+        if (obj != null)
+        {
+            ((TextView)((View) (obj1)).findViewById(0x7f10021c)).setText(getString(0x7f09020f, new Object[] {
+                obj
+            }));
+        } else
+        {
+            ((TextView)((View) (obj1)).findViewById(0x7f10021c)).setText("");
+        }
+        if (slobjectprofiledata.isPayable())
+        {
+            obj = slobjectprofiledata.payInfo();
+        } else
+        {
+            obj = null;
+        }
+        if (obj != null)
+        {
+            obj2 = ((PayInfo) (obj)).payPrices();
+            if (obj2 != null)
+            {
+                i = 0;
+                j = 0;
+                while (i < objectPayButtons.length && i < ((ImmutableList) (obj2)).size()) 
+                {
+                    int k = ((Integer)((ImmutableList) (obj2)).get(i)).intValue();
+                    if (k == -2)
+                    {
+                        k = ((PayInfo) (obj)).defaultPayPrice();
+                    }
+                    if (k <= 0)
+                    {
+                        ((View) (obj1)).findViewById(objectPayButtons[i]).setVisibility(8);
+                        ((View) (obj1)).findViewById(objectPayButtons[i]).setTag(0x7f100020, Integer.valueOf(0));
+                    } else
+                    {
+                        ((Button)((View) (obj1)).findViewById(objectPayButtons[i])).setText(String.format(getString(0x7f090263), new Object[] {
+                            Integer.valueOf(k)
+                        }));
+                        ((View) (obj1)).findViewById(objectPayButtons[i]).setVisibility(0);
+                        ((View) (obj1)).findViewById(objectPayButtons[i]).setTag(0x7f100020, Integer.valueOf(k));
+                        j++;
+                    }
+                    i++;
+                }
+                View view = ((View) (obj1)).findViewById(0x7f100223);
+                if (j != 0)
+                {
+                    i = 0;
+                } else
+                {
+                    i = 8;
+                }
+                view.setVisibility(i);
+            } else
+            {
+                ((View) (obj1)).findViewById(0x7f100223).setVisibility(8);
+            }
+            if (((PayInfo) (obj)).defaultPayPrice() != -1)
+            {
+                if (((EditText)((View) (obj1)).findViewById(0x7f100221)).getText().toString().equals(""))
+                {
+                    if (((PayInfo) (obj)).defaultPayPrice() > 0)
+                    {
+                        ((EditText)((View) (obj1)).findViewById(0x7f100221)).setText(getString(0x7f09023d, new Object[] {
+                            Integer.valueOf(((PayInfo) (obj)).defaultPayPrice())
+                        }));
+                    } else
+                    {
+                        ((EditText)((View) (obj1)).findViewById(0x7f100221)).setText("");
+                    }
+                }
+                ((View) (obj1)).findViewById(0x7f10021f).setVisibility(0);
+            } else
+            {
+                ((View) (obj1)).findViewById(0x7f10021f).setVisibility(8);
+            }
+            ((View) (obj1)).findViewById(0x7f10021d).setVisibility(0);
+        } else
+        {
+            ((View) (obj1)).findViewById(0x7f10021d).setVisibility(8);
+        }
+        if (true) goto _L2; else goto _L5
+_L5:
+        flag = false;
+          goto _L6
+        if (true) goto _L2; else goto _L7
+_L7:
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_6633  reason: not valid java name */
-    public /* synthetic */ void m675lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_6633(SLChatEvent sLChatEvent) {
-        if (isFragmentVisible()) {
-            UserManager userManager = getUserManager();
-            ChatMessageSource source = sLChatEvent.getSource();
-            if ((source instanceof ChatMessageSourceObject) && this.objectProfileData != null && userManager != null && Objects.equal(source.getSourceUUID(), this.objectProfileData.objectUUID())) {
-                Toast.makeText(getContext(), sLChatEvent.getPlainTextMessage(getContext(), userManager, false), 1).show();
+    private void sitOnObject()
+    {
+        Object obj = getUserManager();
+        if (obj != null && objectProfileData != null)
+        {
+            obj = ((UserManager) (obj)).getActiveAgentCircuit();
+            if (obj != null)
+            {
+                obj = ((SLAgentCircuit) (obj)).getModules();
+                if (obj != null)
+                {
+                    ((SLModules) (obj)).avatarControl.SitOnObject(objectProfileData.objectUUID());
+                }
             }
         }
     }
 
-    public void onClick(View view) {
-        int id = view.getId();
-        for (int i = 0; i < objectPayButtons.length; i++) {
-            if (objectPayButtons[i] == id) {
+    private void standUp()
+    {
+        Object obj = getUserManager();
+        if (obj != null && objectProfileData != null)
+        {
+            obj = ((UserManager) (obj)).getActiveAgentCircuit();
+            if (obj != null)
+            {
+                obj = ((SLAgentCircuit) (obj)).getModules();
+                if (obj != null)
+                {
+                    ((SLModules) (obj)).avatarControl.Stand();
+                }
+            }
+        }
+    }
+
+    private void touchObject()
+    {
+        Object obj = getUserManager();
+        if (obj != null && objectLocalID != 0)
+        {
+            obj = ((UserManager) (obj)).getActiveAgentCircuit();
+            if (obj != null)
+            {
+                ((SLAgentCircuit) (obj)).TouchObject(objectLocalID);
+            }
+        }
+    }
+
+    private void updateOptionsMenu()
+    {
+        boolean flag3 = false;
+        boolean flag = false;
+        UserManager usermanager = getUserManager();
+        boolean flag1;
+        boolean flag2;
+        if (usermanager != null && objectProfileData != null)
+        {
+            if (objectProfileData.isDead() ^ true)
+            {
+                flag2 = usermanager.getUserID().equals(objectProfileData.ownerUUID());
+                if (usermanager.getUserID().equals(objectProfileData.ownerUUID()))
+                {
+                    flag = objectProfileData.isCopyable();
+                }
+                flag3 = usermanager.getUserID().equals(objectProfileData.ownerUUID());
+                boolean flag4 = true;
+                flag1 = flag;
+                flag = flag3;
+                flag3 = flag4;
+            } else
+            {
+                flag = false;
+                flag1 = false;
+                flag2 = false;
+            }
+        } else
+        {
+            flag = false;
+            flag1 = false;
+            flag2 = false;
+        }
+        if (menuItemObjectTake != null)
+        {
+            menuItemObjectTake.setVisible(flag2);
+        }
+        if (menuItemObjectTakeCopy != null)
+        {
+            menuItemObjectTakeCopy.setVisible(flag1);
+        }
+        if (menuItemObjectDelete != null)
+        {
+            menuItemObjectDelete.setVisible(flag);
+        }
+        if (menuItemObjectBlock != null)
+        {
+            menuItemObjectBlock.setVisible(flag3);
+        }
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_objects_ObjectDetailsFragment_6633(SLChatEvent slchatevent)
+    {
+        if (isFragmentVisible())
+        {
+            UserManager usermanager = getUserManager();
+            ChatMessageSource chatmessagesource = slchatevent.getSource();
+            if ((chatmessagesource instanceof ChatMessageSourceObject) && objectProfileData != null && usermanager != null && Objects.equal(chatmessagesource.getSourceUUID(), objectProfileData.objectUUID()))
+            {
+                Toast.makeText(getContext(), slchatevent.getPlainTextMessage(getContext(), usermanager, false), 1).show();
+            }
+        }
+    }
+
+    public void onClick(View view)
+    {
+        int j;
+        j = view.getId();
+        for (int i = 0; i < objectPayButtons.length; i++)
+        {
+            if (objectPayButtons[i] == j)
+            {
                 payObjectQuick(i);
                 return;
             }
         }
-        switch (id) {
-            case R.id.object_touch_button:
-                touchObject();
+
+        j;
+        JVM INSTR lookupswitch 7: default 104
+    //                   2131755268: 105
+    //                   2131755269: 110
+    //                   2131755538: 115
+    //                   2131755539: 171
+    //                   2131755542: 120
+    //                   2131755547: 125
+    //                   2131755554: 130;
+           goto _L1 _L2 _L3 _L4 _L5 _L6 _L7 _L8
+_L1:
+        return;
+_L2:
+        touchObject();
+        return;
+_L3:
+        sitOnObject();
+        return;
+_L4:
+        standUp();
+        return;
+_L6:
+        showObjectOwnerInfo();
+        return;
+_L7:
+        buyObject();
+        return;
+_L8:
+        view = getView();
+        if (view != null)
+        {
+            try
+            {
+                payObject(Integer.parseInt(((EditText)view.findViewById(0x7f100221)).getText().toString()));
                 return;
-            case R.id.object_sit_button:
-                sitOnObject();
-                return;
-            case R.id.object_stand_button:
-                standUp();
-                return;
-            case R.id.object_contents_button:
-                openObjectContents();
-                return;
-            case R.id.object_owner_button:
-                showObjectOwnerInfo();
-                return;
-            case R.id.object_button_buy:
-                buyObject();
-                return;
-            case R.id.object_pay_button:
-                try {
-                    View view2 = getView();
-                    if (view2 != null) {
-                        payObject(Integer.parseInt(((EditText) view2.findViewById(R.id.object_pay_amount)).getText().toString()));
-                        return;
-                    }
-                    return;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return;
-                }
-            default:
-                return;
+            }
+            // Misplaced declaration of an exception variable
+            catch (View view)
+            {
+                view.printStackTrace();
+            }
+            return;
         }
+          goto _L1
+_L5:
+        openObjectContents();
+        return;
     }
 
-    public void onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    public void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
         setHasOptionsMenu(true);
     }
 
-    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        super.onCreateOptionsMenu(menu, menuInflater);
-        menuInflater.inflate(R.menu.object_details_menu, menu);
-        this.menuItemObjectTake = menu.findItem(R.id.item_object_take);
-        this.menuItemObjectTakeCopy = menu.findItem(R.id.item_object_take_copy);
-        this.menuItemObjectDelete = menu.findItem(R.id.item_object_delete);
-        this.menuItemObjectBlock = menu.findItem(R.id.item_object_block);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuinflater)
+    {
+        super.onCreateOptionsMenu(menu, menuinflater);
+        menuinflater.inflate(0x7f120015, menu);
+        menuItemObjectTake = menu.findItem(0x7f100333);
+        menuItemObjectTakeCopy = menu.findItem(0x7f100334);
+        menuItemObjectDelete = menu.findItem(0x7f100335);
+        menuItemObjectBlock = menu.findItem(0x7f100336);
         updateOptionsMenu();
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        super.onCreateView(layoutInflater, viewGroup, bundle);
+    public View onCreateView(LayoutInflater layoutinflater, final ViewGroup objectPayButton, Bundle bundle)
+    {
+        super.onCreateView(layoutinflater, objectPayButton, bundle);
         Debug.Log("ObjectDetailsFragment: onCreateView called");
-        View inflate = layoutInflater.inflate(R.layout.object_details, viewGroup, false);
-        this.ownerNameDisplayer.bindViews((TextView) inflate.findViewById(R.id.object_details_owner), (ChatterPicView) inflate.findViewById(R.id.userPicView));
-        inflate.findViewById(R.id.no_object_selected).setVisibility(0);
-        inflate.findViewById(R.id.object_fail_to_load).setVisibility(8);
-        inflate.findViewById(R.id.object_details).setVisibility(8);
-        inflate.findViewById(R.id.object_touch_button).setOnClickListener(this);
-        inflate.findViewById(R.id.object_sit_button).setOnClickListener(this);
-        inflate.findViewById(R.id.object_stand_button).setOnClickListener(this);
-        inflate.findViewById(R.id.object_owner_button).setOnClickListener(this);
-        inflate.findViewById(R.id.object_button_buy).setOnClickListener(this);
-        inflate.findViewById(R.id.object_pay_button).setOnClickListener(this);
-        inflate.findViewById(R.id.object_contents_button).setOnClickListener(this);
-        for (int findViewById : objectPayButtons) {
-            inflate.findViewById(findViewById).setOnClickListener(this);
+        layoutinflater = layoutinflater.inflate(0x7f040075, objectPayButton, false);
+        ownerNameDisplayer.bindViews((TextView)layoutinflater.findViewById(0x7f100215), (ChatterPicView)layoutinflater.findViewById(0x7f10013f));
+        layoutinflater.findViewById(0x7f10020c).setVisibility(0);
+        layoutinflater.findViewById(0x7f10020d).setVisibility(8);
+        layoutinflater.findViewById(0x7f10020e).setVisibility(8);
+        layoutinflater.findViewById(0x7f100104).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f100105).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f100212).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f100216).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f10021b).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f100222).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f100213).setOnClickListener(this);
+        objectPayButton = objectPayButtons;
+        int j = objectPayButton.length;
+        for (int i = 0; i < j; i++)
+        {
+            layoutinflater.findViewById(objectPayButton[i]).setOnClickListener(this);
         }
-        final Button button = (Button) inflate.findViewById(R.id.object_pay_button);
-        ((EditText) inflate.findViewById(R.id.object_pay_amount)).addTextChangedListener(new TextWatcher() {
-            public void afterTextChanged(Editable editable) {
-                try {
+
+        objectPayButton = (Button)layoutinflater.findViewById(0x7f100222);
+        ((EditText)layoutinflater.findViewById(0x7f100221)).addTextChangedListener(new TextWatcher() {
+
+            final ObjectDetailsFragment this$0;
+            final Button val$objectPayButton;
+
+            public void afterTextChanged(Editable editable)
+            {
+                try
+                {
                     Integer.parseInt(editable.toString());
-                    button.setEnabled(true);
-                } catch (NumberFormatException e) {
-                    button.setEnabled(false);
+                    objectPayButton.setEnabled(true);
+                    return;
+                }
+                // Misplaced declaration of an exception variable
+                catch (Editable editable)
+                {
+                    objectPayButton.setEnabled(false);
                 }
             }
 
-            public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+            public void beforeTextChanged(CharSequence charsequence, int k, int l, int i1)
+            {
             }
 
-            public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+            public void onTextChanged(CharSequence charsequence, int k, int l, int i1)
+            {
+            }
+
+            
+            {
+                this$0 = ObjectDetailsFragment.this;
+                objectPayButton = button;
+                super();
             }
         });
-        return inflate;
+        return layoutinflater;
     }
 
-    public void onDestroyView() {
-        this.ownerNameDisplayer.unbindViews();
+    public void onDestroyView()
+    {
+        ownerNameDisplayer.unbindViews();
         super.onDestroyView();
     }
 
-    public void onLoadableDataChanged() {
-        Throwable error = this.objectProfile.getError();
-        SLObjectProfileData data = this.objectProfile.getData();
-        if (error instanceof ObjectsManager.ObjectDoesNotExistException) {
+    public void onLoadableDataChanged()
+    {
+        Throwable throwable = objectProfile.getError();
+        SLObjectProfileData slobjectprofiledata = (SLObjectProfileData)objectProfile.getData();
+        if (throwable instanceof com.lumiyaviewer.lumiya.slproto.users.manager.ObjectsManager.ObjectDoesNotExistException)
+        {
             showDeadObject();
-        } else if (error != null || data == null) {
+            return;
+        }
+        if (throwable != null || slobjectprofiledata == null)
+        {
             showObjectNotLoaded();
-        } else {
-            showObjectProfile(data);
+            return;
+        } else
+        {
+            showObjectProfile(slobjectprofiledata);
+            return;
         }
     }
 
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        String str = null;
-        UserManager userManager = getUserManager();
-        int i = getArguments().getInt(LOCAL_ID_KEY);
-        if (!(userManager == null || this.objectLocalID == 0)) {
-            switch (menuItem.getItemId()) {
-                case R.id.item_object_take:
-                    ObjectDerezDialog.askForObjectDerez(getContext(), ObjectDerezDialog.DerezAction.Take, userManager.getUserID(), i);
-                    return true;
-                case R.id.item_object_take_copy:
-                    ObjectDerezDialog.askForObjectDerez(getContext(), ObjectDerezDialog.DerezAction.TakeCopy, userManager.getUserID(), i);
-                    return true;
-                case R.id.item_object_delete:
-                    ObjectDerezDialog.askForObjectDerez(getContext(), ObjectDerezDialog.DerezAction.Delete, userManager.getUserID(), i);
-                    return true;
-                case R.id.item_object_block:
-                    SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit();
-                    SLObjectProfileData data = this.objectProfile.getData();
-                    if (data != null) {
-                        str = data.name().orNull();
-                    }
-                    if (!(activeAgentCircuit == null || data == null || str == null)) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                        builder.setMessage((int) R.string.object_block_question);
-                        builder.setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener(activeAgentCircuit, data, str) {
-
-                            /* renamed from: -$f0 */
-                            private final /* synthetic */ Object f475$f0;
-
-                            /* renamed from: -$f1 */
-                            private final /* synthetic */ Object f476$f1;
-
-                            /* renamed from: -$f2 */
-                            private final /* synthetic */ Object f477$f2;
-
-                            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.4.$m$0(android.content.DialogInterface, int):void, dex: classes.dex
-                            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.4.$m$0(android.content.DialogInterface, int):void, class status: UNLOADED
-                            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeSwitch(RegionGen.java:298)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:64)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                            
-*/
-
-                            public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.4.onClick(android.content.DialogInterface, int):void, dex: classes.dex
-                            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.4.onClick(android.content.DialogInterface, int):void, class status: UNLOADED
-                            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeSwitch(RegionGen.java:298)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:64)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                            
-*/
-                        });
-                        builder.setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener() {
-                            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.1.$m$0(android.content.DialogInterface, int):void, dex: classes.dex
-                            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.1.$m$0(android.content.DialogInterface, int):void, class status: UNLOADED
-                            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeSwitch(RegionGen.java:298)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:64)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                            
-*/
-
-                            public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.1.onClick(android.content.DialogInterface, int):void, dex: classes.dex
-                            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8.1.onClick(android.content.DialogInterface, int):void, class status: UNLOADED
-                            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeSwitch(RegionGen.java:298)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:64)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                            
-*/
-                        });
-                        builder.setCancelable(true);
-                        builder.create().show();
-                    }
-                    return true;
-            }
+    public boolean onOptionsItemSelected(MenuItem menuitem)
+    {
+        Object obj;
+        Object obj1;
+        int i;
+        obj = null;
+        obj1 = getUserManager();
+        i = getArguments().getInt("localID");
+        if (obj1 == null || objectLocalID == 0) goto _L2; else goto _L1
+_L1:
+        menuitem.getItemId();
+        JVM INSTR tableswitch 2131755827 2131755830: default 64
+    //                   2131755827 70
+    //                   2131755828 88
+    //                   2131755829 106
+    //                   2131755830 124;
+           goto _L2 _L3 _L4 _L5 _L6
+_L2:
+        return super.onOptionsItemSelected(menuitem);
+_L3:
+        ObjectDerezDialog.askForObjectDerez(getContext(), ObjectDerezDialog.DerezAction.Take, ((UserManager) (obj1)).getUserID(), i);
+        return true;
+_L4:
+        ObjectDerezDialog.askForObjectDerez(getContext(), ObjectDerezDialog.DerezAction.TakeCopy, ((UserManager) (obj1)).getUserID(), i);
+        return true;
+_L5:
+        ObjectDerezDialog.askForObjectDerez(getContext(), ObjectDerezDialog.DerezAction.Delete, ((UserManager) (obj1)).getUserID(), i);
+        return true;
+_L6:
+        obj1 = ((UserManager) (obj1)).getActiveAgentCircuit();
+        SLObjectProfileData slobjectprofiledata = (SLObjectProfileData)objectProfile.getData();
+        menuitem = obj;
+        if (slobjectprofiledata != null)
+        {
+            menuitem = (String)slobjectprofiledata.name().orNull();
         }
-        return super.onOptionsItemSelected(menuItem);
+        if (obj1 != null && slobjectprofiledata != null && menuitem != null)
+        {
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getContext());
+            builder.setMessage(0x7f090210);
+            builder.setPositiveButton("Yes", new _2D_.Lambda.IbcMrpWxKnmu4WU7ZN8rETVfqs8._cls4(obj1, slobjectprofiledata, menuitem));
+            builder.setNegativeButton("No", new _2D_.Lambda.IbcMrpWxKnmu4WU7ZN8rETVfqs8._cls1());
+            builder.setCancelable(true);
+            builder.create().show();
+        }
+        return true;
     }
 
-    public void onPause() {
-        UserManager userManager = getUserManager();
-        if (userManager != null) {
-            userManager.getChatterList().getActiveChattersManager().removeObjectMessageListener(this.chatEventListener);
+    public void onPause()
+    {
+        UserManager usermanager = getUserManager();
+        if (usermanager != null)
+        {
+            usermanager.getChatterList().getActiveChattersManager().removeObjectMessageListener(chatEventListener);
         }
         super.onPause();
     }
 
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
-        UserManager userManager = getUserManager();
-        if (userManager != null) {
-            userManager.getChatterList().getActiveChattersManager().addObjectMessageListener(this.chatEventListener, UIThreadExecutor.getInstance());
+        UserManager usermanager = getUserManager();
+        if (usermanager != null)
+        {
+            usermanager.getChatterList().getActiveChattersManager().addObjectMessageListener(chatEventListener, UIThreadExecutor.getInstance());
         }
     }
 
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        setTitle(getString(R.string.object_details_caption), (String) null);
-        showObject(getArguments().getInt(LOCAL_ID_KEY));
+        setTitle(getString(0x7f090224), null);
+        showObject(getArguments().getInt("localID"));
     }
 
-    public void onStop() {
-        this.loadableMonitor.unsubscribeAll();
-        this.ownerNameDisplayer.setChatterID((ChatterID) null);
+    public void onStop()
+    {
+        loadableMonitor.unsubscribeAll();
+        ownerNameDisplayer.setChatterID(null);
         super.onStop();
     }
 
-    public void setFragmentArgs(Intent intent, Bundle bundle) {
-        if (bundle != null) {
+    public void setFragmentArgs(Intent intent, Bundle bundle)
+    {
+        if (bundle != null)
+        {
             getArguments().putAll(bundle);
-            int i = bundle.getInt(LOCAL_ID_KEY);
-            if (isFragmentStarted()) {
+            int i = bundle.getInt("localID");
+            if (isFragmentStarted())
+            {
                 showObject(i);
             }
         }
     }
+
 }

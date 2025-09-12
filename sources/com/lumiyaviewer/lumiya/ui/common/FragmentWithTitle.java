@@ -1,73 +1,98 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import com.lumiyaviewer.lumiya.Debug;
-import javax.annotation.Nullable;
 
-public class FragmentWithTitle extends StateAwareFragment implements FragmentHasTitle {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.common:
+//            StateAwareFragment, FragmentHasTitle, DetailsActivity
+
+public class FragmentWithTitle extends StateAwareFragment
+    implements FragmentHasTitle
+{
+
     private static final String FRAGMENT_SUBTITLE_TAG = "FragmentWithTitle:fragmentSubTitle";
     private static final String FRAGMENT_TITLE_TAG = "FragmentWithTitle:fragmentTitle";
-    @Nullable
-    private String fragmentSubTitle = null;
-    @Nullable
-    private String fragmentTitle = null;
+    private String fragmentSubTitle;
+    private String fragmentTitle;
 
-    @Nullable
-    public String getSubTitle() {
-        return this.fragmentSubTitle;
+    public FragmentWithTitle()
+    {
+        fragmentTitle = null;
+        fragmentSubTitle = null;
     }
 
-    @Nullable
-    public String getTitle() {
-        return this.fragmentTitle;
+    public String getSubTitle()
+    {
+        return fragmentSubTitle;
     }
 
-    public void onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    public String getTitle()
+    {
+        return fragmentTitle;
+    }
+
+    public void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
-        if (bundle != null) {
-            this.fragmentTitle = bundle.getString(FRAGMENT_TITLE_TAG);
-            this.fragmentSubTitle = bundle.getString(FRAGMENT_SUBTITLE_TAG);
+        if (bundle != null)
+        {
+            fragmentTitle = bundle.getString("FragmentWithTitle:fragmentTitle");
+            fragmentSubTitle = bundle.getString("FragmentWithTitle:fragmentSubTitle");
         }
     }
 
-    public void onDetach() {
+    public void onDetach()
+    {
         super.onDetach();
-        FragmentActivity activity = getActivity();
-        if (activity instanceof DetailsActivity) {
-            ((DetailsActivity) activity).onFragmentTitleUpdated();
+        android.support.v4.app.FragmentActivity fragmentactivity = getActivity();
+        if (fragmentactivity instanceof DetailsActivity)
+        {
+            ((DetailsActivity)fragmentactivity).onFragmentTitleUpdated();
         }
     }
 
-    public void onHiddenChanged(boolean z) {
-        super.onHiddenChanged(z);
-        FragmentActivity activity = getActivity();
-        if (activity instanceof DetailsActivity) {
-            ((DetailsActivity) activity).onFragmentTitleUpdated();
+    public void onHiddenChanged(boolean flag)
+    {
+        super.onHiddenChanged(flag);
+        android.support.v4.app.FragmentActivity fragmentactivity = getActivity();
+        if (fragmentactivity instanceof DetailsActivity)
+        {
+            ((DetailsActivity)fragmentactivity).onFragmentTitleUpdated();
         }
     }
 
-    public void onSaveInstanceState(Bundle bundle) {
+    public void onSaveInstanceState(Bundle bundle)
+    {
         super.onSaveInstanceState(bundle);
-        bundle.putString(FRAGMENT_TITLE_TAG, this.fragmentTitle);
-        bundle.putString(FRAGMENT_SUBTITLE_TAG, this.fragmentSubTitle);
+        bundle.putString("FragmentWithTitle:fragmentTitle", fragmentTitle);
+        bundle.putString("FragmentWithTitle:fragmentSubTitle", fragmentSubTitle);
     }
 
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        FragmentActivity activity = getActivity();
-        if (activity instanceof DetailsActivity) {
-            ((DetailsActivity) activity).onFragmentTitleUpdated();
+        android.support.v4.app.FragmentActivity fragmentactivity = getActivity();
+        if (fragmentactivity instanceof DetailsActivity)
+        {
+            ((DetailsActivity)fragmentactivity).onFragmentTitleUpdated();
         }
     }
 
-    public void setTitle(@Nullable String str, @Nullable String str2) {
-        this.fragmentTitle = str;
-        this.fragmentSubTitle = str2;
-        FragmentActivity activity = getActivity();
-        Debug.Printf("updateTitle: title '%s', subTitle '%s', activity %s, fragment %s", str, str2, activity, this);
-        if (activity instanceof DetailsActivity) {
-            ((DetailsActivity) activity).onFragmentTitleUpdated();
+    public void setTitle(String s, String s1)
+    {
+        fragmentTitle = s;
+        fragmentSubTitle = s1;
+        android.support.v4.app.FragmentActivity fragmentactivity = getActivity();
+        Debug.Printf("updateTitle: title '%s', subTitle '%s', activity %s, fragment %s", new Object[] {
+            s, s1, fragmentactivity, this
+        });
+        if (fragmentactivity instanceof DetailsActivity)
+        {
+            ((DetailsActivity)fragmentactivity).onFragmentTitleUpdated();
         }
     }
 }

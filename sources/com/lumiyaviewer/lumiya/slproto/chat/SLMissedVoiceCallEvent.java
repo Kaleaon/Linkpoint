@@ -1,62 +1,78 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatYesNoEvent;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
+import com.lumiyaviewer.lumiya.slproto.modules.voice.SLVoice;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public final class SLMissedVoiceCallEvent extends SLChatYesNoEvent {
-    public SLMissedVoiceCallEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
-        super(chatMessage, uuid);
+public final class SLMissedVoiceCallEvent extends SLChatYesNoEvent
+{
+
+    public SLMissedVoiceCallEvent(ChatMessage chatmessage, UUID uuid)
+    {
+        super(chatmessage, uuid);
     }
 
-    public SLMissedVoiceCallEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, String str) {
-        super(chatMessageSource, uuid, str);
+    public SLMissedVoiceCallEvent(ChatMessageSource chatmessagesource, UUID uuid, String s)
+    {
+        super(chatmessagesource, uuid, s);
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.MissedVoiceCall;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.MissedVoiceCall;
     }
 
-    public String getNoButton(Context context) {
-        return context.getString(R.string.missed_voice_call_no);
+    public String getNoButton(Context context)
+    {
+        return context.getString(0x7f0901bc);
     }
 
-    public String getNoMessage(Context context) {
-        return context.getString(R.string.missed_voice_call_declined);
+    public String getNoMessage(Context context)
+    {
+        return context.getString(0x7f0901bb);
     }
 
-    public String getQuestion(Context context) {
-        return context.getString(R.string.missed_voice_call_question);
+    public String getQuestion(Context context)
+    {
+        return context.getString(0x7f0901bd);
     }
 
-    public String getYesButton(Context context) {
-        return context.getString(R.string.missed_voice_call_yes);
+    public String getYesButton(Context context)
+    {
+        return context.getString(0x7f0901be);
     }
 
-    public String getYesMessage(Context context) {
+    public String getYesMessage(Context context)
+    {
         return "";
     }
 
-    public void onYesAction(Context context, UserManager userManager) {
-        SLModules modules;
-        super.onYesAction(context, userManager);
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit();
-        if (activeAgentCircuit != null && (modules = activeAgentCircuit.getModules()) != null) {
-            modules.voice.userVoiceChatRequest(this.source.getSourceUUID());
+    public void onYesAction(Context context, UserManager usermanager)
+    {
+        super.onYesAction(context, usermanager);
+        context = usermanager.getActiveAgentCircuit();
+        if (context != null)
+        {
+            context = context.getModules();
+            if (context != null)
+            {
+                ((SLModules) (context)).voice.userVoiceChatRequest(source.getSourceUUID());
+            }
         }
     }
 
-    public void serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage);
+    public void serializeToDatabaseObject(ChatMessage chatmessage)
+    {
+        super.serializeToDatabaseObject(chatmessage);
     }
 }

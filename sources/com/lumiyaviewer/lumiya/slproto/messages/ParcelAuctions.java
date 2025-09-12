@@ -1,49 +1,75 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class ParcelAuctions extends SLMessage {
-    public ArrayList<ParcelData> ParcelData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class ParcelData {
+public class ParcelAuctions extends SLMessage
+{
+    public static class ParcelData
+    {
+
         public UUID ParcelID;
         public UUID WinnerID;
-    }
 
-    public ParcelAuctions() {
-        this.zeroCoded = false;
-    }
-
-    public int CalcPayloadSize() {
-        return (this.ParcelData_Fields.size() * 32) + 5;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleParcelAuctions(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -22);
-        byteBuffer.put((byte) this.ParcelData_Fields.size());
-        for (ParcelData parcelData : this.ParcelData_Fields) {
-            packUUID(byteBuffer, parcelData.ParcelID);
-            packUUID(byteBuffer, parcelData.WinnerID);
+        public ParcelData()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            ParcelData parcelData = new ParcelData();
-            parcelData.ParcelID = unpackUUID(byteBuffer);
-            parcelData.WinnerID = unpackUUID(byteBuffer);
-            this.ParcelData_Fields.add(parcelData);
+
+    public ArrayList ParcelData_Fields;
+
+    public ParcelAuctions()
+    {
+        ParcelData_Fields = new ArrayList();
+        zeroCoded = false;
+    }
+
+    public int CalcPayloadSize()
+    {
+        return ParcelData_Fields.size() * 32 + 5;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleParcelAuctions(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-22);
+        bytebuffer.put((byte)ParcelData_Fields.size());
+        ParcelData parceldata;
+        for (Iterator iterator = ParcelData_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, parceldata.WinnerID))
+        {
+            parceldata = (ParcelData)iterator.next();
+            packUUID(bytebuffer, parceldata.ParcelID);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            ParcelData parceldata = new ParcelData();
+            parceldata.ParcelID = unpackUUID(bytebuffer);
+            parceldata.WinnerID = unpackUUID(bytebuffer);
+            ParcelData_Fields.add(parceldata);
+        }
+
     }
 }

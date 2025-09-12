@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.orm;
 
 import android.content.ContentValues;
@@ -6,22 +10,43 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Parcel;
 import android.os.Parcelable;
-import com.google.common.logging.nano.Vr;
-import com.lumiyaviewer.lumiya.orm.DBObject;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class InventoryEntryDBObject extends DBObject implements Parcelable {
-    public static final Parcelable.Creator<InventoryEntryDBObject> CREATOR = new Parcelable.Creator<InventoryEntryDBObject>() {
-        public InventoryEntryDBObject createFromParcel(Parcel parcel) {
+// Referenced classes of package com.lumiyaviewer.lumiya.orm:
+//            DBObject, DBHandle
+
+public class InventoryEntryDBObject extends DBObject
+    implements Parcelable
+{
+
+    public static final android.os.Parcelable.Creator CREATOR = new android.os.Parcelable.Creator() {
+
+        public InventoryEntryDBObject createFromParcel(Parcel parcel)
+        {
             return new InventoryEntryDBObject(parcel);
         }
 
-        public InventoryEntryDBObject[] newArray(int i) {
+        public volatile Object createFromParcel(Parcel parcel)
+        {
+            return createFromParcel(parcel);
+        }
+
+        public InventoryEntryDBObject[] newArray(int i)
+        {
             return new InventoryEntryDBObject[i];
         }
+
+        public volatile Object[] newArray(int i)
+        {
+            return newArray(i);
+        }
+
     };
-    protected static final String[] fieldNames = {"_id", "parent_id", "uuid_high", "uuid_low", "parentUUID_high", "parentUUID_low", "name", "isFolder", "typeDefault", "version", "sessionID_high", "sessionID_low", "fetchFailed", "description", "flags", "invType", "assetType", "creationDate", "_blobField"};
+    protected static final String fieldNames[] = {
+        "_id", "parent_id", "uuid_high", "uuid_low", "parentUUID_high", "parentUUID_low", "name", "isFolder", "typeDefault", "version", 
+        "sessionID_high", "sessionID_low", "fetchFailed", "description", "flags", "invType", "assetType", "creationDate", "_blobField"
+    };
     public static final String insertQuery = "INSERT INTO Entries (parent_id,uuid_high,uuid_low,parentUUID_high,parentUUID_low,name,isFolder,typeDefault,version,sessionID_high,sessionID_low,fetchFailed,description,flags,invType,assetType,creationDate,_blobField) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
     public static final int insertUpdateParamCount = 18;
     public static final String tableName = "Entries";
@@ -55,392 +80,566 @@ public class InventoryEntryDBObject extends DBObject implements Parcelable {
     public UUID uuid;
     public int version;
 
-    public InventoryEntryDBObject() {
+    public InventoryEntryDBObject()
+    {
     }
 
-    public InventoryEntryDBObject(Cursor cursor) {
+    public InventoryEntryDBObject(Cursor cursor)
+    {
         super(cursor);
     }
 
-    public InventoryEntryDBObject(SQLiteDatabase sQLiteDatabase, long j) throws DBObject.DatabaseBindingException {
-        super(sQLiteDatabase, j);
+    public InventoryEntryDBObject(SQLiteDatabase sqlitedatabase, long l)
+        throws DBObject.DatabaseBindingException
+    {
+        super(sqlitedatabase, l);
     }
 
-    protected InventoryEntryDBObject(Parcel parcel) {
-        boolean z = true;
-        this._id = parcel.readLong();
-        this.parent_id = parcel.readLong();
-        this.uuid = new UUID(parcel.readLong(), parcel.readLong());
-        this.agentUUID = new UUID(parcel.readLong(), parcel.readLong());
-        this.parentUUID = new UUID(parcel.readLong(), parcel.readLong());
-        this.name = parcel.readString();
-        this.isFolder = parcel.readByte() != 0;
-        this.typeDefault = parcel.readInt();
-        this.version = parcel.readInt();
-        this.sessionID = new UUID(parcel.readLong(), parcel.readLong());
-        this.fetchFailed = parcel.readByte() != 0;
-        this.description = parcel.readString();
-        this.flags = parcel.readInt();
-        this.invType = parcel.readInt();
-        this.assetType = parcel.readInt();
-        this.assetUUID = new UUID(parcel.readLong(), parcel.readLong());
-        this.creationDate = parcel.readInt();
-        this.creatorUUID = new UUID(parcel.readLong(), parcel.readLong());
-        this.ownerUUID = new UUID(parcel.readLong(), parcel.readLong());
-        this.groupUUID = new UUID(parcel.readLong(), parcel.readLong());
-        this.lastOwnerUUID = new UUID(parcel.readLong(), parcel.readLong());
-        this.isGroupOwned = parcel.readByte() == 0 ? false : z;
-        this.baseMask = parcel.readInt();
-        this.groupMask = parcel.readInt();
-        this.ownerMask = parcel.readInt();
-        this.nextOwnerMask = parcel.readInt();
-        this.everyoneMask = parcel.readInt();
-        this.saleType = parcel.readInt();
-        this.salePrice = parcel.readInt();
+    protected InventoryEntryDBObject(Parcel parcel)
+    {
+        boolean flag1 = true;
+        super();
+        _id = parcel.readLong();
+        parent_id = parcel.readLong();
+        uuid = new UUID(parcel.readLong(), parcel.readLong());
+        agentUUID = new UUID(parcel.readLong(), parcel.readLong());
+        parentUUID = new UUID(parcel.readLong(), parcel.readLong());
+        name = parcel.readString();
+        boolean flag;
+        if (parcel.readByte() != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        isFolder = flag;
+        typeDefault = parcel.readInt();
+        version = parcel.readInt();
+        sessionID = new UUID(parcel.readLong(), parcel.readLong());
+        if (parcel.readByte() != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        fetchFailed = flag;
+        description = parcel.readString();
+        flags = parcel.readInt();
+        invType = parcel.readInt();
+        assetType = parcel.readInt();
+        assetUUID = new UUID(parcel.readLong(), parcel.readLong());
+        creationDate = parcel.readInt();
+        creatorUUID = new UUID(parcel.readLong(), parcel.readLong());
+        ownerUUID = new UUID(parcel.readLong(), parcel.readLong());
+        groupUUID = new UUID(parcel.readLong(), parcel.readLong());
+        lastOwnerUUID = new UUID(parcel.readLong(), parcel.readLong());
+        if (parcel.readByte() != 0)
+        {
+            flag = flag1;
+        } else
+        {
+            flag = false;
+        }
+        isGroupOwned = flag;
+        baseMask = parcel.readInt();
+        groupMask = parcel.readInt();
+        ownerMask = parcel.readInt();
+        nextOwnerMask = parcel.readInt();
+        everyoneMask = parcel.readInt();
+        saleType = parcel.readInt();
+        salePrice = parcel.readInt();
     }
 
-    public static String[] getCreateTableStatements() {
-        return new String[]{"DROP TABLE IF EXISTS Entries;", "CREATE TABLE Entries (_id INTEGER PRIMARY KEY,parent_id BIGINT,uuid_high BIGINT,uuid_low BIGINT,parentUUID_high BIGINT,parentUUID_low BIGINT,name TEXT,isFolder BOOLEAN,typeDefault INTEGER,version INTEGER,sessionID_high BIGINT,sessionID_low BIGINT,fetchFailed BOOLEAN,description TEXT,flags INTEGER,invType INTEGER,assetType INTEGER,creationDate INTEGER,_blobField BLOB);", "CREATE INDEX Entries_parent_id ON Entries (parent_id);", "CREATE INDEX Entries_uuid ON Entries (uuid_high, uuid_low);"};
+    public static String[] getCreateTableStatements()
+    {
+        return (new String[] {
+            "DROP TABLE IF EXISTS Entries;", "CREATE TABLE Entries (_id INTEGER PRIMARY KEY,parent_id BIGINT,uuid_high BIGINT,uuid_low BIGINT,parentUUID_high BIGINT,parentUUID_low BIGINT,name TEXT,isFolder BOOLEAN,typeDefault INTEGER,version INTEGER,sessionID_high BIGINT,sessionID_low BIGINT,fetchFailed BOOLEAN,description TEXT,flags INTEGER,invType INTEGER,assetType INTEGER,creationDate INTEGER,_blobField BLOB);", "CREATE INDEX Entries_parent_id ON Entries (parent_id);", "CREATE INDEX Entries_uuid ON Entries (uuid_high, uuid_low);"
+        });
     }
 
-    public static Cursor query(SQLiteDatabase sQLiteDatabase, String str, String[] strArr, String str2) throws DBObject.DatabaseBindingException {
-        if (sQLiteDatabase == null) {
+    public static Cursor query(SQLiteDatabase sqlitedatabase, String s, String as[], String s1)
+        throws DBObject.DatabaseBindingException
+    {
+        if (sqlitedatabase == null)
+        {
             throw new DBObject.DatabaseBindingException("Database not opened");
+        } else
+        {
+            return sqlitedatabase.query("Entries", fieldNames, s, as, null, null, s1);
         }
-        return sQLiteDatabase.query(tableName, fieldNames, str, strArr, (String) null, (String) null, str2);
     }
 
-    public static Cursor query(DBHandle dBHandle, String str, String[] strArr, String str2) throws DBObject.DatabaseBindingException {
-        if (dBHandle == null) {
+    public static Cursor query(DBHandle dbhandle, String s, String as[], String s1)
+        throws DBObject.DatabaseBindingException
+    {
+        if (dbhandle == null)
+        {
             throw new DBObject.DatabaseBindingException("Database not opened");
+        } else
+        {
+            return dbhandle.getDB().queryWithFactory(dbhandle, false, "Entries", fieldNames, s, as, null, null, s1, null);
         }
-        return dBHandle.getDB().queryWithFactory(dBHandle, false, tableName, fieldNames, str, strArr, (String) null, (String) null, str2, (String) null);
     }
 
-    public void bindInsertOrUpdate(SQLiteStatement sQLiteStatement) {
-        int i = 1;
-        sQLiteStatement.bindLong(1, this.parent_id);
-        if (this.uuid != null) {
-            sQLiteStatement.bindLong(2, this.uuid.getMostSignificantBits());
-            sQLiteStatement.bindLong(3, this.uuid.getLeastSignificantBits());
-        } else {
-            sQLiteStatement.bindLong(2, 0);
-            sQLiteStatement.bindLong(3, 0);
+    public void bindInsertOrUpdate(SQLiteStatement sqlitestatement)
+    {
+        boolean flag = true;
+        sqlitestatement.bindLong(1, parent_id);
+        ByteBuffer bytebuffer;
+        int i;
+        if (uuid != null)
+        {
+            sqlitestatement.bindLong(2, uuid.getMostSignificantBits());
+            sqlitestatement.bindLong(3, uuid.getLeastSignificantBits());
+        } else
+        {
+            sqlitestatement.bindLong(2, 0L);
+            sqlitestatement.bindLong(3, 0L);
         }
-        if (this.parentUUID != null) {
-            sQLiteStatement.bindLong(4, this.parentUUID.getMostSignificantBits());
-            sQLiteStatement.bindLong(5, this.parentUUID.getLeastSignificantBits());
-        } else {
-            sQLiteStatement.bindLong(4, 0);
-            sQLiteStatement.bindLong(5, 0);
+        if (parentUUID != null)
+        {
+            sqlitestatement.bindLong(4, parentUUID.getMostSignificantBits());
+            sqlitestatement.bindLong(5, parentUUID.getLeastSignificantBits());
+        } else
+        {
+            sqlitestatement.bindLong(4, 0L);
+            sqlitestatement.bindLong(5, 0L);
         }
-        if (this.name != null) {
-            sQLiteStatement.bindString(6, this.name);
-        } else {
-            sQLiteStatement.bindNull(6);
+        if (name != null)
+        {
+            sqlitestatement.bindString(6, name);
+        } else
+        {
+            sqlitestatement.bindNull(6);
         }
-        sQLiteStatement.bindLong(7, (long) (this.isFolder ? 1 : 0));
-        sQLiteStatement.bindLong(8, (long) this.typeDefault);
-        sQLiteStatement.bindLong(9, (long) this.version);
-        if (this.sessionID != null) {
-            sQLiteStatement.bindLong(10, this.sessionID.getMostSignificantBits());
-            sQLiteStatement.bindLong(11, this.sessionID.getLeastSignificantBits());
-        } else {
-            sQLiteStatement.bindLong(10, 0);
-            sQLiteStatement.bindLong(11, 0);
-        }
-        sQLiteStatement.bindLong(12, (long) (this.fetchFailed ? 1 : 0));
-        if (this.description != null) {
-            sQLiteStatement.bindString(13, this.description);
-        } else {
-            sQLiteStatement.bindNull(13);
-        }
-        sQLiteStatement.bindLong(14, (long) this.flags);
-        sQLiteStatement.bindLong(15, (long) this.invType);
-        sQLiteStatement.bindLong(16, (long) this.assetType);
-        sQLiteStatement.bindLong(17, (long) this.creationDate);
-        ByteBuffer wrap = ByteBuffer.wrap(new byte[Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED]);
-        if (this.agentUUID != null) {
-            wrap.putLong(this.agentUUID.getMostSignificantBits());
-            wrap.putLong(this.agentUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
-        }
-        if (this.assetUUID != null) {
-            wrap.putLong(this.assetUUID.getMostSignificantBits());
-            wrap.putLong(this.assetUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
-        }
-        if (this.creatorUUID != null) {
-            wrap.putLong(this.creatorUUID.getMostSignificantBits());
-            wrap.putLong(this.creatorUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
-        }
-        if (this.ownerUUID != null) {
-            wrap.putLong(this.ownerUUID.getMostSignificantBits());
-            wrap.putLong(this.ownerUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
-        }
-        if (this.groupUUID != null) {
-            wrap.putLong(this.groupUUID.getMostSignificantBits());
-            wrap.putLong(this.groupUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
-        }
-        if (this.lastOwnerUUID != null) {
-            wrap.putLong(this.lastOwnerUUID.getMostSignificantBits());
-            wrap.putLong(this.lastOwnerUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
-        }
-        if (!this.isGroupOwned) {
+        if (isFolder)
+        {
+            i = 1;
+        } else
+        {
             i = 0;
         }
-        wrap.put((byte) i);
-        wrap.putInt(this.baseMask);
-        wrap.putInt(this.groupMask);
-        wrap.putInt(this.ownerMask);
-        wrap.putInt(this.nextOwnerMask);
-        wrap.putInt(this.everyoneMask);
-        wrap.putInt(this.saleType);
-        wrap.putInt(this.salePrice);
-        sQLiteStatement.bindBlob(18, wrap.array());
+        sqlitestatement.bindLong(7, i);
+        sqlitestatement.bindLong(8, typeDefault);
+        sqlitestatement.bindLong(9, version);
+        if (sessionID != null)
+        {
+            sqlitestatement.bindLong(10, sessionID.getMostSignificantBits());
+            sqlitestatement.bindLong(11, sessionID.getLeastSignificantBits());
+        } else
+        {
+            sqlitestatement.bindLong(10, 0L);
+            sqlitestatement.bindLong(11, 0L);
+        }
+        if (fetchFailed)
+        {
+            i = 1;
+        } else
+        {
+            i = 0;
+        }
+        sqlitestatement.bindLong(12, i);
+        if (description != null)
+        {
+            sqlitestatement.bindString(13, description);
+        } else
+        {
+            sqlitestatement.bindNull(13);
+        }
+        sqlitestatement.bindLong(14, flags);
+        sqlitestatement.bindLong(15, invType);
+        sqlitestatement.bindLong(16, assetType);
+        sqlitestatement.bindLong(17, creationDate);
+        bytebuffer = ByteBuffer.wrap(new byte[125]);
+        if (agentUUID != null)
+        {
+            bytebuffer.putLong(agentUUID.getMostSignificantBits());
+            bytebuffer.putLong(agentUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
+        }
+        if (assetUUID != null)
+        {
+            bytebuffer.putLong(assetUUID.getMostSignificantBits());
+            bytebuffer.putLong(assetUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
+        }
+        if (creatorUUID != null)
+        {
+            bytebuffer.putLong(creatorUUID.getMostSignificantBits());
+            bytebuffer.putLong(creatorUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
+        }
+        if (ownerUUID != null)
+        {
+            bytebuffer.putLong(ownerUUID.getMostSignificantBits());
+            bytebuffer.putLong(ownerUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
+        }
+        if (groupUUID != null)
+        {
+            bytebuffer.putLong(groupUUID.getMostSignificantBits());
+            bytebuffer.putLong(groupUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
+        }
+        if (lastOwnerUUID != null)
+        {
+            bytebuffer.putLong(lastOwnerUUID.getMostSignificantBits());
+            bytebuffer.putLong(lastOwnerUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
+        }
+        if (isGroupOwned)
+        {
+            i = ((flag) ? 1 : 0);
+        } else
+        {
+            i = 0;
+        }
+        bytebuffer.put((byte)i);
+        bytebuffer.putInt(baseMask);
+        bytebuffer.putInt(groupMask);
+        bytebuffer.putInt(ownerMask);
+        bytebuffer.putInt(nextOwnerMask);
+        bytebuffer.putInt(everyoneMask);
+        bytebuffer.putInt(saleType);
+        bytebuffer.putInt(salePrice);
+        sqlitestatement.bindBlob(18, bytebuffer.array());
     }
 
-    public int describeContents() {
+    public int describeContents()
+    {
         return 0;
     }
 
-    public ContentValues getContentValues() {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("parent_id", Long.valueOf(this.parent_id));
-        if (this.uuid != null) {
-            contentValues.put("uuid_high", Long.valueOf(this.uuid.getMostSignificantBits()));
-            contentValues.put("uuid_low", Long.valueOf(this.uuid.getLeastSignificantBits()));
-        } else {
-            contentValues.put("uuid_high", 0L);
-            contentValues.put("uuid_low", 0L);
+    public ContentValues getContentValues()
+    {
+        ContentValues contentvalues = new ContentValues();
+        contentvalues.put("parent_id", Long.valueOf(parent_id));
+        ByteBuffer bytebuffer;
+        int i;
+        if (uuid != null)
+        {
+            contentvalues.put("uuid_high", Long.valueOf(uuid.getMostSignificantBits()));
+            contentvalues.put("uuid_low", Long.valueOf(uuid.getLeastSignificantBits()));
+        } else
+        {
+            contentvalues.put("uuid_high", Long.valueOf(0L));
+            contentvalues.put("uuid_low", Long.valueOf(0L));
         }
-        if (this.parentUUID != null) {
-            contentValues.put("parentUUID_high", Long.valueOf(this.parentUUID.getMostSignificantBits()));
-            contentValues.put("parentUUID_low", Long.valueOf(this.parentUUID.getLeastSignificantBits()));
-        } else {
-            contentValues.put("parentUUID_high", 0L);
-            contentValues.put("parentUUID_low", 0L);
+        if (parentUUID != null)
+        {
+            contentvalues.put("parentUUID_high", Long.valueOf(parentUUID.getMostSignificantBits()));
+            contentvalues.put("parentUUID_low", Long.valueOf(parentUUID.getLeastSignificantBits()));
+        } else
+        {
+            contentvalues.put("parentUUID_high", Long.valueOf(0L));
+            contentvalues.put("parentUUID_low", Long.valueOf(0L));
         }
-        contentValues.put("name", this.name);
-        contentValues.put("isFolder", Boolean.valueOf(this.isFolder));
-        contentValues.put("typeDefault", Integer.valueOf(this.typeDefault));
-        contentValues.put("version", Integer.valueOf(this.version));
-        if (this.sessionID != null) {
-            contentValues.put("sessionID_high", Long.valueOf(this.sessionID.getMostSignificantBits()));
-            contentValues.put("sessionID_low", Long.valueOf(this.sessionID.getLeastSignificantBits()));
-        } else {
-            contentValues.put("sessionID_high", 0L);
-            contentValues.put("sessionID_low", 0L);
+        contentvalues.put("name", name);
+        contentvalues.put("isFolder", Boolean.valueOf(isFolder));
+        contentvalues.put("typeDefault", Integer.valueOf(typeDefault));
+        contentvalues.put("version", Integer.valueOf(version));
+        if (sessionID != null)
+        {
+            contentvalues.put("sessionID_high", Long.valueOf(sessionID.getMostSignificantBits()));
+            contentvalues.put("sessionID_low", Long.valueOf(sessionID.getLeastSignificantBits()));
+        } else
+        {
+            contentvalues.put("sessionID_high", Long.valueOf(0L));
+            contentvalues.put("sessionID_low", Long.valueOf(0L));
         }
-        contentValues.put("fetchFailed", Boolean.valueOf(this.fetchFailed));
-        contentValues.put("description", this.description);
-        contentValues.put("flags", Integer.valueOf(this.flags));
-        contentValues.put("invType", Integer.valueOf(this.invType));
-        contentValues.put("assetType", Integer.valueOf(this.assetType));
-        contentValues.put("creationDate", Integer.valueOf(this.creationDate));
-        ByteBuffer wrap = ByteBuffer.wrap(new byte[Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED]);
-        if (this.agentUUID != null) {
-            wrap.putLong(this.agentUUID.getMostSignificantBits());
-            wrap.putLong(this.agentUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
+        contentvalues.put("fetchFailed", Boolean.valueOf(fetchFailed));
+        contentvalues.put("description", description);
+        contentvalues.put("flags", Integer.valueOf(flags));
+        contentvalues.put("invType", Integer.valueOf(invType));
+        contentvalues.put("assetType", Integer.valueOf(assetType));
+        contentvalues.put("creationDate", Integer.valueOf(creationDate));
+        bytebuffer = ByteBuffer.wrap(new byte[125]);
+        if (agentUUID != null)
+        {
+            bytebuffer.putLong(agentUUID.getMostSignificantBits());
+            bytebuffer.putLong(agentUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
         }
-        if (this.assetUUID != null) {
-            wrap.putLong(this.assetUUID.getMostSignificantBits());
-            wrap.putLong(this.assetUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
+        if (assetUUID != null)
+        {
+            bytebuffer.putLong(assetUUID.getMostSignificantBits());
+            bytebuffer.putLong(assetUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
         }
-        if (this.creatorUUID != null) {
-            wrap.putLong(this.creatorUUID.getMostSignificantBits());
-            wrap.putLong(this.creatorUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
+        if (creatorUUID != null)
+        {
+            bytebuffer.putLong(creatorUUID.getMostSignificantBits());
+            bytebuffer.putLong(creatorUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
         }
-        if (this.ownerUUID != null) {
-            wrap.putLong(this.ownerUUID.getMostSignificantBits());
-            wrap.putLong(this.ownerUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
+        if (ownerUUID != null)
+        {
+            bytebuffer.putLong(ownerUUID.getMostSignificantBits());
+            bytebuffer.putLong(ownerUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
         }
-        if (this.groupUUID != null) {
-            wrap.putLong(this.groupUUID.getMostSignificantBits());
-            wrap.putLong(this.groupUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
+        if (groupUUID != null)
+        {
+            bytebuffer.putLong(groupUUID.getMostSignificantBits());
+            bytebuffer.putLong(groupUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
         }
-        if (this.lastOwnerUUID != null) {
-            wrap.putLong(this.lastOwnerUUID.getMostSignificantBits());
-            wrap.putLong(this.lastOwnerUUID.getLeastSignificantBits());
-        } else {
-            wrap.putLong(0);
-            wrap.putLong(0);
+        if (lastOwnerUUID != null)
+        {
+            bytebuffer.putLong(lastOwnerUUID.getMostSignificantBits());
+            bytebuffer.putLong(lastOwnerUUID.getLeastSignificantBits());
+        } else
+        {
+            bytebuffer.putLong(0L);
+            bytebuffer.putLong(0L);
         }
-        wrap.put((byte) (this.isGroupOwned ? 1 : 0));
-        wrap.putInt(this.baseMask);
-        wrap.putInt(this.groupMask);
-        wrap.putInt(this.ownerMask);
-        wrap.putInt(this.nextOwnerMask);
-        wrap.putInt(this.everyoneMask);
-        wrap.putInt(this.saleType);
-        wrap.putInt(this.salePrice);
-        contentValues.put("_blobField", wrap.array());
-        return contentValues;
+        if (isGroupOwned)
+        {
+            i = 1;
+        } else
+        {
+            i = 0;
+        }
+        bytebuffer.put((byte)i);
+        bytebuffer.putInt(baseMask);
+        bytebuffer.putInt(groupMask);
+        bytebuffer.putInt(ownerMask);
+        bytebuffer.putInt(nextOwnerMask);
+        bytebuffer.putInt(everyoneMask);
+        bytebuffer.putInt(saleType);
+        bytebuffer.putInt(salePrice);
+        contentvalues.put("_blobField", bytebuffer.array());
+        return contentvalues;
     }
 
-    public String[] getFieldNames() {
+    public String[] getFieldNames()
+    {
         return fieldNames;
     }
 
-    public String getTableName() {
-        return tableName;
+    public String getTableName()
+    {
+        return "Entries";
     }
 
-    public void loadFromCursor(Cursor cursor) {
-        boolean z = true;
-        this._id = cursor.getLong(0);
-        this.parent_id = cursor.getLong(1);
-        this.uuid = new UUID(cursor.getLong(2), cursor.getLong(3));
-        this.parentUUID = new UUID(cursor.getLong(4), cursor.getLong(5));
-        this.name = cursor.getString(6);
-        this.isFolder = cursor.getInt(7) != 0;
-        this.typeDefault = cursor.getInt(8);
-        this.version = cursor.getInt(9);
-        this.sessionID = new UUID(cursor.getLong(10), cursor.getLong(11));
-        this.fetchFailed = cursor.getInt(12) != 0;
-        this.description = cursor.getString(13);
-        this.flags = cursor.getInt(14);
-        this.invType = cursor.getInt(15);
-        this.assetType = cursor.getInt(16);
-        this.creationDate = cursor.getInt(17);
-        ByteBuffer wrap = ByteBuffer.wrap(cursor.getBlob(18));
-        this.agentUUID = new UUID(wrap.getLong(), wrap.getLong());
-        this.assetUUID = new UUID(wrap.getLong(), wrap.getLong());
-        this.creatorUUID = new UUID(wrap.getLong(), wrap.getLong());
-        this.ownerUUID = new UUID(wrap.getLong(), wrap.getLong());
-        this.groupUUID = new UUID(wrap.getLong(), wrap.getLong());
-        this.lastOwnerUUID = new UUID(wrap.getLong(), wrap.getLong());
-        if (wrap.get() == 0) {
-            z = false;
+    public void loadFromCursor(Cursor cursor)
+    {
+        boolean flag1 = true;
+        _id = cursor.getLong(0);
+        parent_id = cursor.getLong(1);
+        uuid = new UUID(cursor.getLong(2), cursor.getLong(3));
+        parentUUID = new UUID(cursor.getLong(4), cursor.getLong(5));
+        name = cursor.getString(6);
+        boolean flag;
+        if (cursor.getInt(7) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
         }
-        this.isGroupOwned = z;
-        this.baseMask = wrap.getInt();
-        this.groupMask = wrap.getInt();
-        this.ownerMask = wrap.getInt();
-        this.nextOwnerMask = wrap.getInt();
-        this.everyoneMask = wrap.getInt();
-        this.saleType = wrap.getInt();
-        this.salePrice = wrap.getInt();
+        isFolder = flag;
+        typeDefault = cursor.getInt(8);
+        version = cursor.getInt(9);
+        sessionID = new UUID(cursor.getLong(10), cursor.getLong(11));
+        if (cursor.getInt(12) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        fetchFailed = flag;
+        description = cursor.getString(13);
+        flags = cursor.getInt(14);
+        invType = cursor.getInt(15);
+        assetType = cursor.getInt(16);
+        creationDate = cursor.getInt(17);
+        cursor = ByteBuffer.wrap(cursor.getBlob(18));
+        agentUUID = new UUID(cursor.getLong(), cursor.getLong());
+        assetUUID = new UUID(cursor.getLong(), cursor.getLong());
+        creatorUUID = new UUID(cursor.getLong(), cursor.getLong());
+        ownerUUID = new UUID(cursor.getLong(), cursor.getLong());
+        groupUUID = new UUID(cursor.getLong(), cursor.getLong());
+        lastOwnerUUID = new UUID(cursor.getLong(), cursor.getLong());
+        if (cursor.get() != 0)
+        {
+            flag = flag1;
+        } else
+        {
+            flag = false;
+        }
+        isGroupOwned = flag;
+        baseMask = cursor.getInt();
+        groupMask = cursor.getInt();
+        ownerMask = cursor.getInt();
+        nextOwnerMask = cursor.getInt();
+        everyoneMask = cursor.getInt();
+        saleType = cursor.getInt();
+        salePrice = cursor.getInt();
     }
 
-    public void writeToParcel(Parcel parcel, int i) {
-        int i2 = 1;
-        parcel.writeLong(this._id);
-        parcel.writeLong(this.parent_id);
-        if (this.uuid != null) {
-            parcel.writeLong(this.uuid.getMostSignificantBits());
-            parcel.writeLong(this.uuid.getLeastSignificantBits());
-        } else {
-            parcel.writeLong(0);
-            parcel.writeLong(0);
+    public void writeToParcel(Parcel parcel, int i)
+    {
+        boolean flag = true;
+        parcel.writeLong(_id);
+        parcel.writeLong(parent_id);
+        int j;
+        if (uuid != null)
+        {
+            parcel.writeLong(uuid.getMostSignificantBits());
+            parcel.writeLong(uuid.getLeastSignificantBits());
+        } else
+        {
+            parcel.writeLong(0L);
+            parcel.writeLong(0L);
         }
-        if (this.agentUUID != null) {
-            parcel.writeLong(this.agentUUID.getMostSignificantBits());
-            parcel.writeLong(this.agentUUID.getLeastSignificantBits());
-        } else {
-            parcel.writeLong(0);
-            parcel.writeLong(0);
+        if (agentUUID != null)
+        {
+            parcel.writeLong(agentUUID.getMostSignificantBits());
+            parcel.writeLong(agentUUID.getLeastSignificantBits());
+        } else
+        {
+            parcel.writeLong(0L);
+            parcel.writeLong(0L);
         }
-        if (this.parentUUID != null) {
-            parcel.writeLong(this.parentUUID.getMostSignificantBits());
-            parcel.writeLong(this.parentUUID.getLeastSignificantBits());
-        } else {
-            parcel.writeLong(0);
-            parcel.writeLong(0);
+        if (parentUUID != null)
+        {
+            parcel.writeLong(parentUUID.getMostSignificantBits());
+            parcel.writeLong(parentUUID.getLeastSignificantBits());
+        } else
+        {
+            parcel.writeLong(0L);
+            parcel.writeLong(0L);
         }
-        parcel.writeString(this.name);
-        parcel.writeByte((byte) (this.isFolder ? 1 : 0));
-        parcel.writeInt(this.typeDefault);
-        parcel.writeInt(this.version);
-        if (this.sessionID != null) {
-            parcel.writeLong(this.sessionID.getMostSignificantBits());
-            parcel.writeLong(this.sessionID.getLeastSignificantBits());
-        } else {
-            parcel.writeLong(0);
-            parcel.writeLong(0);
+        parcel.writeString(name);
+        if (isFolder)
+        {
+            j = 1;
+        } else
+        {
+            j = 0;
         }
-        parcel.writeByte((byte) (this.fetchFailed ? 1 : 0));
-        parcel.writeString(this.description);
+        parcel.writeByte((byte)j);
+        parcel.writeInt(typeDefault);
+        parcel.writeInt(version);
+        if (sessionID != null)
+        {
+            parcel.writeLong(sessionID.getMostSignificantBits());
+            parcel.writeLong(sessionID.getLeastSignificantBits());
+        } else
+        {
+            parcel.writeLong(0L);
+            parcel.writeLong(0L);
+        }
+        if (fetchFailed)
+        {
+            j = 1;
+        } else
+        {
+            j = 0;
+        }
+        parcel.writeByte((byte)j);
+        parcel.writeString(description);
         parcel.writeInt(i);
-        parcel.writeInt(this.invType);
-        parcel.writeInt(this.assetType);
-        if (this.assetUUID != null) {
-            parcel.writeLong(this.assetUUID.getMostSignificantBits());
-            parcel.writeLong(this.assetUUID.getLeastSignificantBits());
-        } else {
-            parcel.writeLong(0);
-            parcel.writeLong(0);
+        parcel.writeInt(invType);
+        parcel.writeInt(assetType);
+        if (assetUUID != null)
+        {
+            parcel.writeLong(assetUUID.getMostSignificantBits());
+            parcel.writeLong(assetUUID.getLeastSignificantBits());
+        } else
+        {
+            parcel.writeLong(0L);
+            parcel.writeLong(0L);
         }
-        parcel.writeInt(this.creationDate);
-        if (this.creatorUUID != null) {
-            parcel.writeLong(this.creatorUUID.getMostSignificantBits());
-            parcel.writeLong(this.creatorUUID.getLeastSignificantBits());
-        } else {
-            parcel.writeLong(0);
-            parcel.writeLong(0);
+        parcel.writeInt(creationDate);
+        if (creatorUUID != null)
+        {
+            parcel.writeLong(creatorUUID.getMostSignificantBits());
+            parcel.writeLong(creatorUUID.getLeastSignificantBits());
+        } else
+        {
+            parcel.writeLong(0L);
+            parcel.writeLong(0L);
         }
-        if (this.ownerUUID != null) {
-            parcel.writeLong(this.ownerUUID.getMostSignificantBits());
-            parcel.writeLong(this.ownerUUID.getLeastSignificantBits());
-        } else {
-            parcel.writeLong(0);
-            parcel.writeLong(0);
+        if (ownerUUID != null)
+        {
+            parcel.writeLong(ownerUUID.getMostSignificantBits());
+            parcel.writeLong(ownerUUID.getLeastSignificantBits());
+        } else
+        {
+            parcel.writeLong(0L);
+            parcel.writeLong(0L);
         }
-        if (this.groupUUID != null) {
-            parcel.writeLong(this.groupUUID.getMostSignificantBits());
-            parcel.writeLong(this.groupUUID.getLeastSignificantBits());
-        } else {
-            parcel.writeLong(0);
-            parcel.writeLong(0);
+        if (groupUUID != null)
+        {
+            parcel.writeLong(groupUUID.getMostSignificantBits());
+            parcel.writeLong(groupUUID.getLeastSignificantBits());
+        } else
+        {
+            parcel.writeLong(0L);
+            parcel.writeLong(0L);
         }
-        if (this.lastOwnerUUID != null) {
-            parcel.writeLong(this.lastOwnerUUID.getMostSignificantBits());
-            parcel.writeLong(this.lastOwnerUUID.getLeastSignificantBits());
-        } else {
-            parcel.writeLong(0);
-            parcel.writeLong(0);
+        if (lastOwnerUUID != null)
+        {
+            parcel.writeLong(lastOwnerUUID.getMostSignificantBits());
+            parcel.writeLong(lastOwnerUUID.getLeastSignificantBits());
+        } else
+        {
+            parcel.writeLong(0L);
+            parcel.writeLong(0L);
         }
-        if (!this.isGroupOwned) {
-            i2 = 0;
+        if (isGroupOwned)
+        {
+            i = ((flag) ? 1 : 0);
+        } else
+        {
+            i = 0;
         }
-        parcel.writeByte((byte) i2);
-        parcel.writeInt(this.baseMask);
-        parcel.writeInt(this.groupMask);
-        parcel.writeInt(this.ownerMask);
-        parcel.writeInt(this.nextOwnerMask);
-        parcel.writeInt(this.everyoneMask);
-        parcel.writeInt(this.saleType);
-        parcel.writeInt(this.salePrice);
+        parcel.writeByte((byte)i);
+        parcel.writeInt(baseMask);
+        parcel.writeInt(groupMask);
+        parcel.writeInt(ownerMask);
+        parcel.writeInt(nextOwnerMask);
+        parcel.writeInt(everyoneMask);
+        parcel.writeInt(saleType);
+        parcel.writeInt(salePrice);
     }
+
 }

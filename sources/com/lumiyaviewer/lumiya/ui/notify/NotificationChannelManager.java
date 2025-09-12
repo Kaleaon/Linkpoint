@@ -1,26 +1,25 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.notify;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import com.google.common.collect.ImmutableSet;
-import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels;
-import com.lumiyaviewer.lumiya.ui.settings.NotificationType;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public interface NotificationChannelManager {
-    boolean areNotificationsSystemControlled();
+public interface NotificationChannelManager
+{
 
-    @Nonnull
-    ImmutableSet<NotificationType> getEnabledTypes(Context context);
+    public abstract boolean areNotificationsSystemControlled();
 
-    @Nonnull
-    String getNotificationChannelName(@Nonnull NotificationChannels.Channel channel);
+    public abstract ImmutableSet getEnabledTypes(Context context);
 
-    @Nullable
-    String getNotificationSummary(Context context, @Nonnull NotificationChannels.Channel channel);
+    public abstract String getNotificationChannelName(NotificationChannels.Channel channel);
 
-    boolean showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @Nonnull NotificationChannels.Channel channel);
+    public abstract String getNotificationSummary(Context context, NotificationChannels.Channel channel);
 
-    boolean useNotificationGroups();
+    public abstract boolean showSystemNotificationSettings(Context context, Fragment fragment, NotificationChannels.Channel channel);
+
+    public abstract boolean useNotificationGroups();
 }

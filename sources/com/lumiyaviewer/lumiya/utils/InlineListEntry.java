@@ -1,19 +1,27 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.utils;
 
-import com.lumiyaviewer.lumiya.utils.InlineListEntry;
 
-public interface InlineListEntry<T extends InlineListEntry<T>> {
-    InlineList<T> getList();
+// Referenced classes of package com.lumiyaviewer.lumiya.utils:
+//            InlineList
 
-    T getNext();
+public interface InlineListEntry
+{
 
-    T getPrev();
+    public abstract InlineList getList();
 
-    void requestEntryRemoval();
+    public abstract InlineListEntry getNext();
 
-    void setList(InlineList<T> inlineList);
+    public abstract InlineListEntry getPrev();
 
-    void setNext(T t);
+    public abstract void requestEntryRemoval();
 
-    void setPrev(T t);
+    public abstract void setList(InlineList inlinelist);
+
+    public abstract void setNext(InlineListEntry inlinelistentry);
+
+    public abstract void setPrev(InlineListEntry inlinelistentry);
 }

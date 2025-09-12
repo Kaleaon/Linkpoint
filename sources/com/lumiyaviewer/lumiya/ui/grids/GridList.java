@@ -1,194 +1,255 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.grids;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.widget.ArrayAdapter;
-import com.lumiyaviewer.lumiya.R;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-public class GridList {
-    private Context context;
-    private ArrayList<GridInfo> customGrids;
-    private ArrayList<GridInfo> predefGrids = new ArrayList<>();
+public class GridList
+{
+    public static class GridArrayAdapter extends ArrayAdapter
+    {
 
-    public static class GridArrayAdapter extends ArrayAdapter<GridInfo> {
-        public GridArrayAdapter(Context context, List<GridInfo> list) {
-            super(context, 17367048, list);
-            setDropDownViewResource(17367049);
+        public GridArrayAdapter(Context context1, List list)
+        {
+            super(context1, 0x1090008, list);
+            setDropDownViewResource(0x1090009);
         }
     }
 
-    public static class GridInfo {
+    public static class GridInfo
+    {
+
         private String GridName;
         private UUID GridUUID;
         private String LoginURL;
         private boolean predefinedGrid;
 
-        public GridInfo(SharedPreferences sharedPreferences, String str) {
-            this.GridName = sharedPreferences.getString(str + "_grid_name", "");
-            this.LoginURL = sharedPreferences.getString(str + "_login_url", "");
-            this.predefinedGrid = false;
-            this.GridUUID = UUID.fromString(sharedPreferences.getString(str + "_grid", ""));
+        public String getGridName()
+        {
+            return GridName;
         }
 
-        public GridInfo(String str, String str2, boolean z, UUID uuid) {
-            this.GridName = str;
-            this.LoginURL = str2;
-            this.predefinedGrid = z;
-            this.GridUUID = uuid;
+        public UUID getGridUUID()
+        {
+            return GridUUID;
         }
 
-        public String getGridName() {
-            return this.GridName;
+        public String getLoginURL()
+        {
+            return LoginURL;
         }
 
-        public UUID getGridUUID() {
-            return this.GridUUID;
+        public boolean isLindenGrid()
+        {
+            return GridUUID.equals(UUID.fromString("f14c5be7-0849-402c-946a-c80a52e9eccf"));
         }
 
-        public String getLoginURL() {
-            return this.LoginURL;
+        public boolean isPredefinedGrid()
+        {
+            return predefinedGrid;
         }
 
-        public boolean isLindenGrid() {
-            return this.GridUUID.equals(UUID.fromString("f14c5be7-0849-402c-946a-c80a52e9eccf"));
+        public void saveToPreferences(android.content.SharedPreferences.Editor editor, String s)
+        {
+            editor.putString((new StringBuilder()).append(s).append("_grid_name").toString(), GridName);
+            editor.putString((new StringBuilder()).append(s).append("_login_url").toString(), LoginURL);
+            editor.putString((new StringBuilder()).append(s).append("_grid").toString(), GridUUID.toString());
         }
 
-        public boolean isPredefinedGrid() {
-            return this.predefinedGrid;
+        public void setGridName(String s)
+        {
+            GridName = s;
         }
 
-        public void saveToPreferences(SharedPreferences.Editor editor, String str) {
-            editor.putString(str + "_grid_name", this.GridName);
-            editor.putString(str + "_login_url", this.LoginURL);
-            editor.putString(str + "_grid", this.GridUUID.toString());
+        public void setLoginURL(String s)
+        {
+            LoginURL = s;
         }
 
-        public void setGridName(String str) {
-            this.GridName = str;
+        public String toString()
+        {
+            return GridName;
         }
 
-        public void setLoginURL(String str) {
-            this.LoginURL = str;
+        public GridInfo(SharedPreferences sharedpreferences, String s)
+        {
+            GridName = sharedpreferences.getString((new StringBuilder()).append(s).append("_grid_name").toString(), "");
+            LoginURL = sharedpreferences.getString((new StringBuilder()).append(s).append("_login_url").toString(), "");
+            predefinedGrid = false;
+            GridUUID = UUID.fromString(sharedpreferences.getString((new StringBuilder()).append(s).append("_grid").toString(), ""));
         }
 
-        public String toString() {
-            return this.GridName;
+        public GridInfo(String s, String s1, boolean flag, UUID uuid)
+        {
+            GridName = s;
+            LoginURL = s1;
+            predefinedGrid = flag;
+            GridUUID = uuid;
         }
     }
 
-    public GridList(Context context2) {
-        this.context = context2;
-        for (String split : context2.getResources().getStringArray(R.array.grids)) {
-            String[] split2 = split.split(";");
-            this.predefGrids.add(new GridInfo(split2[0], split2[1], true, UUID.fromString(split2[2])));
+
+    private Context context;
+    private ArrayList customGrids;
+    private ArrayList predefGrids;
+
+    public GridList(Context context1)
+    {
+        context = context1;
+        predefGrids = new ArrayList();
+        context1 = context1.getResources().getStringArray(0x7f0f0009);
+        int j = context1.length;
+        for (int i = 0; i < j; i++)
+        {
+            String as[] = context1[i].split(";");
+            predefGrids.add(new GridInfo(as[0], as[1], true, UUID.fromString(as[2])));
         }
-        this.customGrids = new ArrayList<>();
+
+        customGrids = new ArrayList();
         loadGrids();
     }
 
-    public void addNewGrid(GridInfo gridInfo) {
-        this.customGrids.add(gridInfo);
+    public void addNewGrid(GridInfo gridinfo)
+    {
+        customGrids.add(gridinfo);
         savePreferences();
     }
 
-    public void deleteGrid(GridInfo gridInfo) {
-        this.customGrids.remove(gridInfo);
+    public void deleteGrid(GridInfo gridinfo)
+    {
+        customGrids.remove(gridinfo);
         savePreferences();
     }
 
-    public GridInfo getDefaultGrid() {
-        return this.predefGrids.get(0);
+    public GridInfo getDefaultGrid()
+    {
+        return (GridInfo)predefGrids.get(0);
     }
 
-    public GridInfo getGridByName(String str) {
-        for (GridInfo gridInfo : this.predefGrids) {
-            if (gridInfo.getGridName().equals(str)) {
-                return gridInfo;
+    public GridInfo getGridByName(String s)
+    {
+        for (Iterator iterator = predefGrids.iterator(); iterator.hasNext();)
+        {
+            GridInfo gridinfo = (GridInfo)iterator.next();
+            if (gridinfo.getGridName().equals(s))
+            {
+                return gridinfo;
             }
         }
-        for (GridInfo gridInfo2 : this.customGrids) {
-            if (gridInfo2.getGridName().equals(str)) {
-                return gridInfo2;
+
+        for (Iterator iterator1 = customGrids.iterator(); iterator1.hasNext();)
+        {
+            GridInfo gridinfo1 = (GridInfo)iterator1.next();
+            if (gridinfo1.getGridName().equals(s))
+            {
+                return gridinfo1;
             }
         }
+
         return null;
     }
 
-    public GridInfo getGridByUUID(UUID uuid) {
-        for (GridInfo gridInfo : this.predefGrids) {
-            if (gridInfo.getGridUUID().equals(uuid)) {
-                return gridInfo;
+    public GridInfo getGridByUUID(UUID uuid)
+    {
+        for (Iterator iterator = predefGrids.iterator(); iterator.hasNext();)
+        {
+            GridInfo gridinfo = (GridInfo)iterator.next();
+            if (gridinfo.getGridUUID().equals(uuid))
+            {
+                return gridinfo;
             }
         }
-        for (GridInfo gridInfo2 : this.customGrids) {
-            if (gridInfo2.getGridUUID().equals(uuid)) {
-                return gridInfo2;
+
+        for (Iterator iterator1 = customGrids.iterator(); iterator1.hasNext();)
+        {
+            GridInfo gridinfo1 = (GridInfo)iterator1.next();
+            if (gridinfo1.getGridUUID().equals(uuid))
+            {
+                return gridinfo1;
             }
         }
+
         return null;
     }
 
-    public int getGridIndex(UUID uuid) {
-        int i = 0;
-        for (GridInfo gridUUID : this.predefGrids) {
-            if (gridUUID.getGridUUID().equals(uuid)) {
+    public int getGridIndex(UUID uuid)
+    {
+        Iterator iterator = predefGrids.iterator();
+        int i;
+        for (i = 0; iterator.hasNext(); i++)
+        {
+            if (((GridInfo)iterator.next()).getGridUUID().equals(uuid))
+            {
+                return i;
+            }
+        }
+
+        for (Iterator iterator1 = customGrids.iterator(); iterator1.hasNext();)
+        {
+            if (((GridInfo)iterator1.next()).getGridUUID().equals(uuid))
+            {
                 return i;
             }
             i++;
         }
-        for (GridInfo gridUUID2 : this.customGrids) {
-            if (gridUUID2.getGridUUID().equals(uuid)) {
-                return i;
-            }
-            i++;
-        }
+
         return 0;
     }
 
-    public List<GridInfo> getGridList(List<GridInfo> list) {
-        if (list == null) {
-            list = new ArrayList<>();
+    public List getGridList(List list)
+    {
+        Object obj = list;
+        if (list == null)
+        {
+            obj = new ArrayList();
         }
-        list.clear();
-        list.addAll(this.predefGrids);
-        list.addAll(this.customGrids);
+        ((List) (obj)).clear();
+        ((List) (obj)).addAll(predefGrids);
+        ((List) (obj)).addAll(customGrids);
+        return ((List) (obj));
+    }
+
+    public List getGridList(List list, boolean flag)
+    {
+        list = getGridList(list);
+        if (flag)
+        {
+            list.add(new GridInfo("Add another grid", null, false, null));
+        }
         return list;
     }
 
-    public List<GridInfo> getGridList(List<GridInfo> list, boolean z) {
-        List<GridInfo> gridList = getGridList(list);
-        if (z) {
-            gridList.add(new GridInfo("Add another grid", (String) null, false, (UUID) null));
-        }
-        return gridList;
-    }
-
-    public void loadGrids() {
-        this.customGrids.clear();
-        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext());
-        int i = defaultSharedPreferences.getInt("custom_grid_1_count", 0);
-        for (int i2 = 0; i2 < i; i2++) {
-            this.customGrids.add(new GridInfo(defaultSharedPreferences, "custom_grid_1_" + i2));
-        }
-    }
-
-    public void savePreferences() {
-        SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext()).edit();
-        edit.putInt("custom_grid_1_count", this.customGrids.size());
+    public void loadGrids()
+    {
         int i = 0;
-        while (true) {
-            int i2 = i;
-            if (i2 < this.customGrids.size()) {
-                this.customGrids.get(i2).saveToPreferences(edit, "custom_grid_1_" + i2);
-                i = i2 + 1;
-            } else {
-                edit.commit();
-                return;
-            }
+        customGrids.clear();
+        SharedPreferences sharedpreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+        for (int j = sharedpreferences.getInt("custom_grid_1_count", 0); i < j; i++)
+        {
+            customGrids.add(new GridInfo(sharedpreferences, (new StringBuilder()).append("custom_grid_1_").append(i).toString()));
         }
+
+    }
+
+    public void savePreferences()
+    {
+        android.content.SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext()).edit();
+        editor.putInt("custom_grid_1_count", customGrids.size());
+        for (int i = 0; i < customGrids.size(); i++)
+        {
+            ((GridInfo)customGrids.get(i)).saveToPreferences(editor, (new StringBuilder()).append("custom_grid_1_").append(i).toString());
+        }
+
+        editor.commit();
     }
 }

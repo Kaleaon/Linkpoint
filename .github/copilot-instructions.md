@@ -1,3 +1,4 @@
+copilot/fix-16
 # Linkpoint (Lumiya Second Life Viewer)
 
 Linkpoint is an Android application for connecting to Second Life virtual worlds. It's a mobile client with 3D rendering, native C++ components, and complex resource management systems.
@@ -203,3 +204,160 @@ grep -r "class.*Activity" app/src/main/java/  # Code exploration
 3. Compare with documented fixes in `docs/Broken_Code_Analysis_and_Fixes.md`
 
 **Remember: This project has documented build failures. Focus on applying the comprehensive fixes in the documentation rather than expecting immediate build success.**
+                     # Capabilities system
+│   │   ├── chat/                     # Chat protocols
+│   │   ├── inventory/                # Inventory system
+│   │   ├── llsd/                     # LLSD data format
+│   │   └── [15+ more modules]
+│   ├── ui/                           # User interface components
+│   └── openjpeg/                     # JPEG2000 + Basis Universal integration
+├── cpp/                              # Native C++ code
+│   ├── CMakeLists.txt               # CMake build configuration  
+│   ├── basis_universal/             # Basis Universal texture codec
+│   └── jni/                         # JNI wrapper functions
+└── resources/                       # Android resources and manifest
+    ├── AndroidManifest.xml          # App manifest (has known issues)
+    └── res/                         # UI resources (conflicting with AndroidX)
+```
+
+## Development Workflow
+
+### Code Exploration and Navigation
+Since builds fail, use these approaches for code analysis:
+
+- **Search specific functionality**: `grep -r "TextureCache" app/src/main/java/`
+- **Find protocol handlers**: `find app/src/main/java -name "*SLAgent*"`
+- **Locate rendering code**: `ls app/src/main/java/com/lumiyaviewer/lumiya/render/`
+- **Check native integration**: `find app/src/main/cpp -name "*.cpp" -o -name "*.h"`
+
+### Key Classes and Components
+Focus on these core systems when making changes:
+
+- `ResourceManager` - Central resource management system
+- `SLAgentCircuit` - Main Second Life protocol handler
+- `TextureCache`, `GeometryCache`, `AnimationCache` - Asset caching systems  
+- `TerrainPatchGeometry` - Terrain rendering
+- `ModernTextureManager` - Basis Universal texture integration
+- `OpenJPEG` class - JPEG2000 and KTX2 texture decoding
+
+### Native Code (C++)
+The project includes Basis Universal integration:
+- **Build requirements**: NDK with C++17 support, CMake 3.10.2+
+- **Location**: `app/src/main/cpp/`
+- **JNI integration**: Functions in `jni/openjpeg_basis_integration.cpp`
+- **Texture conversion**: Use `scripts/convert_textures.sh` for asset pipeline
+
+## Validation and Testing
+
+### Manual Validation Approaches
+Since automated testing fails, use these manual validation methods:
+
+**Code Quality Checks:**
+- Review Java files for proper null checks and exception handling
+- Check JNI function signatures match Java native method declarations  
+- Verify resource references in XML files are valid
+- Look for potential memory leaks in native code
+
+**Architecture Validation:**
+- Ensure new classes follow existing package structure
+- Check that protocol handlers extend appropriate base classes
+- Verify texture management code integrates with existing cache systems
+- Confirm UI components use proper Android lifecycle methods
+
+### Documentation Validation
+The project includes extensive documentation in `docs/`:
+- Check `docs/CPP_Integration_Guide.md` for native code requirements
+- Review `docs/Lumiya_Modernization_Guide.md` for architecture patterns
+- Reference `CONTRIBUTING.md` for code style guidelines
+
+## Common Development Tasks
+
+### Adding New Features
+When implementing new functionality:
+
+1. **Find the relevant subsystem** in the directory structure above
+2. **Check existing patterns** by examining similar classes in the same package
+3. **Follow the protocol architecture** - most features integrate with `slproto/` modules
+4. **Consider resource management** - use existing cache systems where appropriate
+5. **Test manually** by code review since builds fail
+
+### Texture and Asset Work
+For texture-related changes:
+
+- **Modern textures**: Work with `ModernTextureManager` class
+- **Legacy textures**: Check `TextureCache` and related systems
+- **Asset conversion**: Use the working `scripts/convert_textures.sh`
+- **Native integration**: JNI functions in `cpp/jni/` directory
+
+### Protocol and Network Changes
+For Second Life protocol work:
+
+- **Start with**: `slproto/` package - contains all protocol modules
+- **Authentication**: Check `slproto/auth/` 
+- **Object management**: Look at `slproto/objects/`
+- **Chat/messaging**: Review `slproto/chat/`
+
+## Known Limitations and Workarounds
+
+### Resource Conflicts (Critical Issue)
+The project contains pre-AndroidX Android Support Library resources that conflict with modern AndroidX dependencies. This prevents all build operations.
+
+**Affected areas:**
+- All build commands fail
+- Cannot run automated tests
+- Cannot generate APK files
+- Cannot use Android lint tools
+
+**Workarounds:**
+- Use code analysis and manual review instead of builds
+- Reference the extensive documentation for validation
+- Use search and grep commands for code exploration
+
+### Development Environment
+**Working environment requirements:**
+- Java 17+ (confirmed working with Eclipse Adoptium 17.0.16+8)
+- Gradle 8.0 (auto-downloads via wrapper)
+- Android SDK with API 34 support
+- NDK for native builds (if fixing C++ components)
+
+**Commands that work reliably:**
+- All `grep`, `find`, and file exploration commands
+- `./gradlew clean` and `./gradlew tasks`
+- Asset conversion scripts
+- Documentation and file editing
+
+## Critical Reminders
+
+- **NEVER attempt builds** - they will always fail due to resource conflicts
+- **Use manual validation** - rely on code review and documentation
+- **Focus on architecture** - the extensive documentation provides implementation guidance  
+- **Test logic, not compilation** - validate code correctness through review
+- **Follow existing patterns** - the codebase has consistent architectural approaches
+
+## Quick Reference Commands
+
+```bash
+# Environment check
+./gradlew --version
+
+# Clean workspace  
+./gradlew clean
+
+# Explore codebase structure
+find app/src/main/java -name "*.java" | head -20
+ls -la app/src/main/java/com/lumiyaviewer/lumiya/
+
+# Search for specific functionality
+grep -r "class.*Manager" app/src/main/java/
+find app/src/main/java -name "*Cache*"
+
+# Asset pipeline (this works)
+chmod +x scripts/convert_textures.sh
+./scripts/convert_textures.sh
+
+# Documentation review
+ls docs/
+cat CONTRIBUTING.md
+```
+
+Remember: This is a sophisticated 3D graphics application with complex architecture. The build issues do not reflect code quality - focus on the architectural patterns and extensive documentation for development guidance.

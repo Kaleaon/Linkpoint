@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.avatar;
 
 import android.opengl.Matrix;
@@ -5,55 +9,73 @@ import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import java.util.Arrays;
 
-public class AnimationSkeletonData {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.avatar:
+//            AvatarAnimationList, AvatarSkeleton
+
+public class AnimationSkeletonData
+{
+
     private static final int numAnimatedBones = 133;
-    private float[] animMatrix = new float[2128];
-    private float[] animMatrix_Swap = new float[2128];
-    private float[] animOffsets = new float[532];
-    private float[] animOffsets_Swap = new float[532];
-    private final LLVector3[] animPosArray = new LLVector3[133];
-    private final float[] animPriorityPosArray = new float[133];
-    private final float[] animPriorityRotArray = new float[133];
-    private final LLQuaternion[] animRotArray = new LLQuaternion[133];
+    private float animMatrix[];
+    private float animMatrix_Swap[];
+    private float animOffsets[];
+    private float animOffsets_Swap[];
+    private final LLVector3 animPosArray[] = new LLVector3[133];
+    private final float animPriorityPosArray[] = new float[133];
+    private final float animPriorityRotArray[] = new float[133];
+    private final LLQuaternion animRotArray[] = new LLQuaternion[133];
 
-    AnimationSkeletonData() {
-        for (int i = 0; i < 133; i++) {
-            Matrix.setIdentityM(this.animMatrix, i * 16);
-            this.animPosArray[i] = new LLVector3();
-            this.animRotArray[i] = new LLQuaternion();
+    AnimationSkeletonData()
+    {
+        animMatrix = new float[2128];
+        animMatrix_Swap = new float[2128];
+        animOffsets = new float[532];
+        animOffsets_Swap = new float[532];
+        for (int i = 0; i < 133; i++)
+        {
+            Matrix.setIdentityM(animMatrix, i * 16);
+            animPosArray[i] = new LLVector3();
+            animRotArray[i] = new LLQuaternion();
         }
-        Arrays.fill(this.animOffsets, 0.0f);
+
+        Arrays.fill(animOffsets, 0.0F);
     }
 
-    /* access modifiers changed from: package-private */
-    public void animate(AvatarSkeleton avatarSkeleton, AvatarAnimationList avatarAnimationList) {
-        Arrays.fill(this.animPriorityRotArray, 1.0f);
-        Arrays.fill(this.animPriorityPosArray, 1.0f);
-        for (int i = 0; i < 133; i++) {
-            this.animRotArray[i].setZero();
-            this.animPosArray[i].set(0.0f, 0.0f, 0.0f);
+    void animate(AvatarSkeleton avatarskeleton, AvatarAnimationList avataranimationlist)
+    {
+        Arrays.fill(animPriorityRotArray, 1.0F);
+        Arrays.fill(animPriorityPosArray, 1.0F);
+        for (int i = 0; i < 133; i++)
+        {
+            animRotArray[i].setZero();
+            animPosArray[i].set(0.0F, 0.0F, 0.0F);
         }
-        avatarAnimationList.animate(avatarSkeleton, this.animPriorityRotArray, this.animPriorityPosArray, this.animRotArray, this.animPosArray);
-        for (int i2 = 0; i2 < 133; i2++) {
-            this.animRotArray[i2].getInverseMatrix(this.animMatrix_Swap, i2 * 16);
-            this.animOffsets_Swap[(i2 * 4) + 0] = this.animPosArray[i2].x;
-            this.animOffsets_Swap[(i2 * 4) + 1] = this.animPosArray[i2].y;
-            this.animOffsets_Swap[(i2 * 4) + 2] = this.animPosArray[i2].z;
-            this.animOffsets_Swap[(i2 * 4) + 3] = 1.0f - this.animPriorityPosArray[i2];
+
+        avataranimationlist.animate(avatarskeleton, animPriorityRotArray, animPriorityPosArray, animRotArray, animPosArray);
+        for (int j = 0; j < 133; j++)
+        {
+            animRotArray[j].getInverseMatrix(animMatrix_Swap, j * 16);
+            animOffsets_Swap[j * 4 + 0] = animPosArray[j].x;
+            animOffsets_Swap[j * 4 + 1] = animPosArray[j].y;
+            animOffsets_Swap[j * 4 + 2] = animPosArray[j].z;
+            animOffsets_Swap[j * 4 + 3] = 1.0F - animPriorityPosArray[j];
         }
-        float[] fArr = this.animMatrix;
-        this.animMatrix = this.animMatrix_Swap;
-        this.animMatrix_Swap = fArr;
-        float[] fArr2 = this.animOffsets;
-        this.animOffsets = this.animOffsets_Swap;
-        this.animOffsets_Swap = fArr2;
+
+        avatarskeleton = animMatrix;
+        animMatrix = animMatrix_Swap;
+        animMatrix_Swap = avatarskeleton;
+        avatarskeleton = animOffsets;
+        animOffsets = animOffsets_Swap;
+        animOffsets_Swap = avatarskeleton;
     }
 
-    public final float[] getAnimMatrix() {
-        return this.animMatrix;
+    public final float[] getAnimMatrix()
+    {
+        return animMatrix;
     }
 
-    public final float[] getAnimOffsets() {
-        return this.animOffsets;
+    public final float[] getAnimOffsets()
+    {
+        return animOffsets;
     }
 }

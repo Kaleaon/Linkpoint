@@ -1,71 +1,93 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo;
-import javax.annotation.Nonnull;
 
-final class AutoValue_UnreadNotificationInfo_UnreadMessageSource extends UnreadNotificationInfo.UnreadMessageSource {
+final class AutoValue_UnreadNotificationInfo_UnreadMessageSource extends UnreadNotificationInfo.UnreadMessageSource
+{
+
     private final ChatterID chatterID;
-    private final Optional<String> chatterName;
-    private final ImmutableList<SLChatEvent> unreadMessages;
+    private final Optional chatterName;
+    private final ImmutableList unreadMessages;
     private final int unreadMessagesCount;
 
-    AutoValue_UnreadNotificationInfo_UnreadMessageSource(ChatterID chatterID2, Optional<String> optional, ImmutableList<SLChatEvent> immutableList, int i) {
-        if (chatterID2 == null) {
+    AutoValue_UnreadNotificationInfo_UnreadMessageSource(ChatterID chatterid, Optional optional, ImmutableList immutablelist, int i)
+    {
+        if (chatterid == null)
+        {
             throw new NullPointerException("Null chatterID");
         }
-        this.chatterID = chatterID2;
-        if (optional == null) {
+        chatterID = chatterid;
+        if (optional == null)
+        {
             throw new NullPointerException("Null chatterName");
         }
-        this.chatterName = optional;
-        if (immutableList == null) {
+        chatterName = optional;
+        if (immutablelist == null)
+        {
             throw new NullPointerException("Null unreadMessages");
+        } else
+        {
+            unreadMessages = immutablelist;
+            unreadMessagesCount = i;
+            return;
         }
-        this.unreadMessages = immutableList;
-        this.unreadMessagesCount = i;
     }
 
-    @Nonnull
-    public ChatterID chatterID() {
-        return this.chatterID;
+    public ChatterID chatterID()
+    {
+        return chatterID;
     }
 
-    public Optional<String> chatterName() {
-        return this.chatterName;
+    public Optional chatterName()
+    {
+        return chatterName;
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
             return true;
         }
-        if (!(obj instanceof UnreadNotificationInfo.UnreadMessageSource)) {
+        if (obj instanceof UnreadNotificationInfo.UnreadMessageSource)
+        {
+            obj = (UnreadNotificationInfo.UnreadMessageSource)obj;
+            if (chatterID.equals(((UnreadNotificationInfo.UnreadMessageSource) (obj)).chatterID()) && chatterName.equals(((UnreadNotificationInfo.UnreadMessageSource) (obj)).chatterName()) && unreadMessages.equals(((UnreadNotificationInfo.UnreadMessageSource) (obj)).unreadMessages()))
+            {
+                return unreadMessagesCount == ((UnreadNotificationInfo.UnreadMessageSource) (obj)).unreadMessagesCount();
+            } else
+            {
+                return false;
+            }
+        } else
+        {
             return false;
         }
-        UnreadNotificationInfo.UnreadMessageSource unreadMessageSource = (UnreadNotificationInfo.UnreadMessageSource) obj;
-        if (!this.chatterID.equals(unreadMessageSource.chatterID()) || !this.chatterName.equals(unreadMessageSource.chatterName()) || !this.unreadMessages.equals(unreadMessageSource.unreadMessages())) {
-            return false;
-        }
-        return this.unreadMessagesCount == unreadMessageSource.unreadMessagesCount();
     }
 
-    public int hashCode() {
-        return ((((((this.chatterID.hashCode() ^ 1000003) * 1000003) ^ this.chatterName.hashCode()) * 1000003) ^ this.unreadMessages.hashCode()) * 1000003) ^ this.unreadMessagesCount;
+    public int hashCode()
+    {
+        return (((chatterID.hashCode() ^ 0xf4243) * 0xf4243 ^ chatterName.hashCode()) * 0xf4243 ^ unreadMessages.hashCode()) * 0xf4243 ^ unreadMessagesCount;
     }
 
-    public String toString() {
-        return "UnreadMessageSource{chatterID=" + this.chatterID + ", " + "chatterName=" + this.chatterName + ", " + "unreadMessages=" + this.unreadMessages + ", " + "unreadMessagesCount=" + this.unreadMessagesCount + "}";
+    public String toString()
+    {
+        return (new StringBuilder()).append("UnreadMessageSource{chatterID=").append(chatterID).append(", ").append("chatterName=").append(chatterName).append(", ").append("unreadMessages=").append(unreadMessages).append(", ").append("unreadMessagesCount=").append(unreadMessagesCount).append("}").toString();
     }
 
-    @Nonnull
-    public ImmutableList<SLChatEvent> unreadMessages() {
-        return this.unreadMessages;
+    public ImmutableList unreadMessages()
+    {
+        return unreadMessages;
     }
 
-    public int unreadMessagesCount() {
-        return this.unreadMessagesCount;
+    public int unreadMessagesCount()
+    {
+        return unreadMessagesCount;
     }
 }

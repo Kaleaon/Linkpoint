@@ -1,36 +1,55 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya;
 
 import android.util.Log;
 import java.nio.ByteBuffer;
 
-public class Debug {
+public class Debug
+{
+
     private static final String LOG_TAG = "Lumiya";
 
-    public static void AlwaysPrintf(String str, Object... objArr) {
-        StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3];
-        String className = stackTraceElement.getClassName();
-        Log.d(LOG_TAG, "[" + className.substring(className.lastIndexOf(46) + 1) + "::" + stackTraceElement.getMethodName() + "] " + String.format(str, objArr));
+    public Debug()
+    {
     }
 
-    public static void DumpBuffer(String str, ByteBuffer byteBuffer) {
+    public static transient void AlwaysPrintf(String s, Object aobj[])
+    {
+        StackTraceElement stacktraceelement = Thread.currentThread().getStackTrace()[3];
+        String s1 = stacktraceelement.getClassName();
+        s1 = s1.substring(s1.lastIndexOf('.') + 1);
+        android.util.Log.d("Lumiya", (new StringBuilder()).append("[").append(s1).append("::").append(stacktraceelement.getMethodName()).append("] ").append(String.format(s, aobj)).toString());
     }
 
-    public static void DumpBuffer(String str, byte[] bArr) {
+    public static void DumpBuffer(String s, ByteBuffer bytebuffer)
+    {
     }
 
-    public static void DumpBuffer(String str, byte[] bArr, int i) {
+    public static void DumpBuffer(String s, byte abyte0[])
+    {
     }
 
-    public static void Log(String str) {
+    public static void DumpBuffer(String s, byte abyte0[], int i)
+    {
     }
 
-    public static void Printf(String str, Object... objArr) {
+    public static void Log(String s)
+    {
     }
 
-    public static void Warning(Throwable th) {
+    public static transient void Printf(String s, Object aobj[])
+    {
     }
 
-    public static boolean isDebugBuild() {
+    public static void Warning(Throwable throwable)
+    {
+    }
+
+    public static boolean isDebugBuild()
+    {
         return false;
     }
 }

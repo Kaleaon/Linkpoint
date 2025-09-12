@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.inventory;
 
 import android.graphics.Bitmap;
@@ -8,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
 import com.lumiyaviewer.lumiya.render.tex.DrawableTextureParams;
 import com.lumiyaviewer.lumiya.render.tex.TextureClass;
@@ -18,123 +21,206 @@ import com.lumiyaviewer.lumiya.ui.common.LoadingLayout;
 import com.lumiyaviewer.lumiya.ui.common.StateAwareFragment;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
-public class TextureViewFragment extends StateAwareFragment {
-    private static final String ASSET_UUID_KEY = "assetUUID";
-    /* access modifiers changed from: private */
-    @Nullable
-    public LoadAssetImageTask loadAssetImageTask = null;
-    /* access modifiers changed from: private */
-    public LoadingLayout loadingLayout;
-    /* access modifiers changed from: private */
-    public PhotoViewAttacher photoViewAttacher;
-    /* access modifiers changed from: private */
-    public ImageView textureImageView;
+public class TextureViewFragment extends StateAwareFragment
+{
+    private class LoadAssetImageTask extends AsyncTask
+        implements ResourceConsumer
+    {
 
-    private class LoadAssetImageTask extends AsyncTask<UUID, Void, Bitmap> implements ResourceConsumer {
         private volatile OpenJPEG texture;
         private final Object textureReady;
+        final TextureViewFragment this$0;
 
-        private LoadAssetImageTask() {
-            this.textureReady = new Object();
+        public void OnResourceReady(Object obj, boolean flag)
+        {
+            if (obj instanceof OpenJPEG)
+            {
+                texture = (OpenJPEG)obj;
+            }
+            obj = textureReady;
+            obj;
+            JVM INSTR monitorenter ;
+            textureReady.notify();
+            obj;
+            JVM INSTR monitorexit ;
+            return;
+            Exception exception;
+            exception;
+            throw exception;
         }
 
-        /* synthetic */ LoadAssetImageTask(TextureViewFragment textureViewFragment, LoadAssetImageTask loadAssetImageTask) {
-            this();
-        }
-
-        public void OnResourceReady(Object obj, boolean z) {
-            if (obj instanceof OpenJPEG) {
-                this.texture = (OpenJPEG) obj;
+        protected transient Bitmap doInBackground(UUID auuid[])
+        {
+            Debug.Printf("loading asset ID %s", new Object[] {
+                auuid[0].toString()
+            });
+            TextureCache.getInstance().RequestResource(DrawableTextureParams.create(auuid[0], TextureClass.Asset), this);
+            Object obj = textureReady;
+            obj;
+            JVM INSTR monitorenter ;
+            if (texture != null) goto _L2; else goto _L1
+_L1:
+            Debug.Printf("asset ID %s is not available, waiting", new Object[] {
+                auuid[0].toString()
+            });
+            textureReady.wait();
+            Debug.Printf("done waiting for asset ID %s", new Object[] {
+                auuid[0].toString()
+            });
+_L4:
+            obj;
+            JVM INSTR monitorexit ;
+            InterruptedException interruptedexception;
+            if (texture != null)
+            {
+                return texture.getAsBitmap();
+            } else
+            {
+                return null;
             }
-            synchronized (this.textureReady) {
-                this.textureReady.notify();
-            }
-        }
-
-        /* access modifiers changed from: protected */
-        public Bitmap doInBackground(UUID... uuidArr) {
-            Debug.Printf("loading asset ID %s", uuidArr[0].toString());
-            TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuidArr[0], TextureClass.Asset), this);
-            synchronized (this.textureReady) {
-                if (this.texture == null) {
-                    Debug.Printf("asset ID %s is not available, waiting", uuidArr[0].toString());
-                    try {
-                        this.textureReady.wait();
-                        Debug.Printf("done waiting for asset ID %s", uuidArr[0].toString());
-                    } catch (InterruptedException e) {
-                        Debug.Printf("interrupted while waiting for asset ID %s", uuidArr[0].toString());
-                        return null;
-                    }
-                } else {
-                    Debug.Printf("asset ID %s is already available", uuidArr[0].toString());
-                }
-            }
-            if (this.texture != null) {
-                return this.texture.getAsBitmap();
-            }
+            interruptedexception;
+            Debug.Printf("interrupted while waiting for asset ID %s", new Object[] {
+                auuid[0].toString()
+            });
+            obj;
+            JVM INSTR monitorexit ;
             return null;
+_L2:
+            Debug.Printf("asset ID %s is already available", new Object[] {
+                auuid[0].toString()
+            });
+            if (true) goto _L4; else goto _L3
+_L3:
+            auuid;
+            throw auuid;
         }
 
-        /* access modifiers changed from: protected */
-        public void onPostExecute(Bitmap bitmap) {
-            if (!(!TextureViewFragment.this.isFragmentStarted() || TextureViewFragment.this.textureImageView == null || TextureViewFragment.this.loadingLayout == null)) {
-                if (bitmap != null) {
-                    TextureViewFragment.this.loadingLayout.showContent((String) null);
-                    TextureViewFragment.this.textureImageView.setImageBitmap(bitmap);
-                    TextureViewFragment.this.photoViewAttacher.update();
-                } else {
-                    TextureViewFragment.this.loadingLayout.showMessage(TextureViewFragment.this.getString(R.string.failed_to_download_texture));
-                    TextureViewFragment.this.textureImageView.setImageBitmap((Bitmap) null);
-                    TextureViewFragment.this.photoViewAttacher.update();
+        protected volatile Object doInBackground(Object aobj[])
+        {
+            return doInBackground((UUID[])aobj);
+        }
+
+        protected void onPostExecute(Bitmap bitmap)
+        {
+            if (isFragmentStarted() && TextureViewFragment._2D_get2(TextureViewFragment.this) != null && TextureViewFragment._2D_get0(TextureViewFragment.this) != null)
+            {
+                if (bitmap != null)
+                {
+                    TextureViewFragment._2D_get0(TextureViewFragment.this).showContent(null);
+                    TextureViewFragment._2D_get2(TextureViewFragment.this).setImageBitmap(bitmap);
+                    TextureViewFragment._2D_get1(TextureViewFragment.this).update();
+                } else
+                {
+                    TextureViewFragment._2D_get0(TextureViewFragment.this).showMessage(getString(0x7f09011c));
+                    TextureViewFragment._2D_get2(TextureViewFragment.this).setImageBitmap(null);
+                    TextureViewFragment._2D_get1(TextureViewFragment.this).update();
                 }
             }
-            LoadAssetImageTask unused = TextureViewFragment.this.loadAssetImageTask = null;
+            TextureViewFragment._2D_set0(TextureViewFragment.this, null);
         }
 
-        /* access modifiers changed from: protected */
-        public void onPreExecute() {
-            if (TextureViewFragment.this.isFragmentStarted() && TextureViewFragment.this.loadingLayout != null) {
-                TextureViewFragment.this.loadingLayout.showLoading();
+        protected volatile void onPostExecute(Object obj)
+        {
+            onPostExecute((Bitmap)obj);
+        }
+
+        protected void onPreExecute()
+        {
+            if (isFragmentStarted() && TextureViewFragment._2D_get0(TextureViewFragment.this) != null)
+            {
+                TextureViewFragment._2D_get0(TextureViewFragment.this).showLoading();
             }
+        }
+
+        private LoadAssetImageTask()
+        {
+            this$0 = TextureViewFragment.this;
+            super();
+            textureReady = new Object();
+        }
+
+        LoadAssetImageTask(LoadAssetImageTask loadassetimagetask)
+        {
+            this();
         }
     }
 
-    public static Bundle makeArguments(UUID uuid, UUID uuid2) {
+
+    private static final String ASSET_UUID_KEY = "assetUUID";
+    private LoadAssetImageTask loadAssetImageTask;
+    private LoadingLayout loadingLayout;
+    private PhotoViewAttacher photoViewAttacher;
+    private ImageView textureImageView;
+
+    static LoadingLayout _2D_get0(TextureViewFragment textureviewfragment)
+    {
+        return textureviewfragment.loadingLayout;
+    }
+
+    static PhotoViewAttacher _2D_get1(TextureViewFragment textureviewfragment)
+    {
+        return textureviewfragment.photoViewAttacher;
+    }
+
+    static ImageView _2D_get2(TextureViewFragment textureviewfragment)
+    {
+        return textureviewfragment.textureImageView;
+    }
+
+    static LoadAssetImageTask _2D_set0(TextureViewFragment textureviewfragment, LoadAssetImageTask loadassetimagetask)
+    {
+        textureviewfragment.loadAssetImageTask = loadassetimagetask;
+        return loadassetimagetask;
+    }
+
+    public TextureViewFragment()
+    {
+        loadAssetImageTask = null;
+    }
+
+    public static Bundle makeArguments(UUID uuid, UUID uuid1)
+    {
         Bundle bundle = new Bundle();
         bundle.putString("activeAgentUUID", uuid.toString());
-        bundle.putString(ASSET_UUID_KEY, uuid2.toString());
+        bundle.putString("assetUUID", uuid1.toString());
         return bundle;
     }
 
-    @Nullable
-    public View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.texture_view_fragment, viewGroup, false);
-        this.loadingLayout = (LoadingLayout) inflate.findViewById(R.id.loading_layout);
-        this.textureImageView = (ImageView) inflate.findViewById(R.id.texture_image_view);
-        this.photoViewAttacher = new PhotoViewAttacher(this.textureImageView);
-        return inflate;
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        layoutinflater = layoutinflater.inflate(0x7f0400aa, viewgroup, false);
+        loadingLayout = (LoadingLayout)layoutinflater.findViewById(0x7f1000bd);
+        textureImageView = (ImageView)layoutinflater.findViewById(0x7f100293);
+        photoViewAttacher = new PhotoViewAttacher(textureImageView);
+        return layoutinflater;
     }
 
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        UUID uuid = UUIDPool.getUUID(getArguments().getString(ASSET_UUID_KEY));
-        if (uuid != null) {
-            if (this.loadAssetImageTask != null) {
-                this.loadAssetImageTask.cancel(true);
-                this.loadAssetImageTask = null;
+        UUID uuid = UUIDPool.getUUID(getArguments().getString("assetUUID"));
+        if (uuid != null)
+        {
+            if (loadAssetImageTask != null)
+            {
+                loadAssetImageTask.cancel(true);
+                loadAssetImageTask = null;
             }
-            this.loadAssetImageTask = new LoadAssetImageTask(this, (LoadAssetImageTask) null);
-            this.loadAssetImageTask.execute(new UUID[]{uuid});
+            loadAssetImageTask = new LoadAssetImageTask(null);
+            loadAssetImageTask.execute(new UUID[] {
+                uuid
+            });
         }
     }
 
-    public void onStop() {
-        if (this.loadAssetImageTask != null) {
-            this.loadAssetImageTask.cancel(true);
-            this.loadAssetImageTask = null;
+    public void onStop()
+    {
+        if (loadAssetImageTask != null)
+        {
+            loadAssetImageTask.cancel(true);
+            loadAssetImageTask = null;
         }
         super.onStop();
     }

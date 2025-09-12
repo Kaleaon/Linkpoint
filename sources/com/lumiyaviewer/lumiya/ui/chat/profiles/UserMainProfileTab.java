@@ -1,9 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat.profiles;
 
 import android.content.ClipData;
-import android.graphics.Typeface;
-import android.os.Build;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.ClipboardManager;
 import android.text.util.Linkify;
@@ -13,13 +17,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.Unbinder;
 import com.google.common.base.Objects;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
@@ -28,11 +29,16 @@ import com.lumiyaviewer.lumiya.slproto.messages.AvatarNotesReply;
 import com.lumiyaviewer.lumiya.slproto.messages.AvatarPropertiesReply;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
+import com.lumiyaviewer.lumiya.slproto.users.SLMessageResponseCacher;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
+import com.lumiyaviewer.lumiya.slproto.users.manager.FriendManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
 import com.lumiyaviewer.lumiya.ui.common.ChatterReloadableFragment;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
 import com.lumiyaviewer.lumiya.ui.common.ImageAssetView;
 import com.lumiyaviewer.lumiya.ui.common.LoadingLayout;
+import com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable;
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor;
 import com.lumiyaviewer.lumiya.ui.inventory.InventoryActivity;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
@@ -40,232 +46,313 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
-public class UserMainProfileTab extends ChatterReloadableFragment implements LoadableMonitor.OnLoadableDataChangedListener {
-    @BindView(2131755706)
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat.profiles:
+//            UserAboutTextEditFragment, UserNotesEditFragment, UserProfileFragment
+
+public class UserMainProfileTab extends ChatterReloadableFragment
+    implements com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor.OnLoadableDataChangedListener
+{
+
     Button aboutEditButton;
-    private final SubscriptionData<UUID, AvatarNotesReply> avatarNotes = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    private final SubscriptionData<UUID, AvatarPropertiesReply> avatarProperties = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    @BindView(2131755698)
+    private final SubscriptionData avatarNotes = new SubscriptionData(UIThreadExecutor.getInstance());
+    private final SubscriptionData avatarProperties = new SubscriptionData(UIThreadExecutor.getInstance());
     Button changePicButton;
-    private final LoadableMonitor loadableMonitor = new LoadableMonitor(this.avatarProperties, this.avatarNotes, this.onlineStatus).withDataChangedListener(this);
-    @BindView(2131755197)
+    private final LoadableMonitor loadableMonitor;
     LoadingLayout loadingLayout;
-    private final ChatterNameRetriever.OnChatterNameUpdated onPartnerNameReady = new $Lambda$wqoLfTfjESd1OUBLJEQMKRim4S0(this);
-    private final SubscriptionData<UUID, Boolean> onlineStatus = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    private ChatterNameRetriever partnerNameRetriever = null;
-    @BindView(2131755195)
+    private final com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever.OnChatterNameUpdated onPartnerNameReady = new _2D_.Lambda.wqoLfTfjESd1OUBLJEQMKRim4S0(this);
+    private final SubscriptionData onlineStatus = new SubscriptionData(UIThreadExecutor.getInstance());
+    private ChatterNameRetriever partnerNameRetriever;
     SwipeRefreshLayout swipeRefreshLayout;
-    @BindView(2131755711)
     TextView textProfileAge;
-    @BindView(2131755719)
     TextView textProfileAgentKey;
-    @BindView(2131755723)
     TextView textProfileNotesText;
-    @BindView(2131755710)
     TextView textProfileOnline;
-    @BindView(2131755708)
     TextView textProfilePrimaryName;
-    @BindView(2131755709)
     TextView textProfileSecondaryName;
     private Unbinder unbinder;
-    @BindView(2131755712)
     View userPartnerCardView;
-    @BindView(2131755702)
     ImageAssetView userPicView;
-    @BindView(2131755705)
     TextView userProfileAboutText;
-    @BindView(2131755722)
     View userProfileNotesCaption;
-    @BindView(2131755713)
     TextView userProfilePartnerName;
-    @BindView(2131755714)
     ChatterPicView userProfilePartnerPic;
-    @BindView(2131755716)
     View userWebProfileCardView;
-    @BindView(2131755717)
     TextView userWebProfileLink;
 
-    private String getAge(AvatarPropertiesReply avatarPropertiesReply) {
-        String trim = SLMessage.stringFromVariableOEM(avatarPropertiesReply.PropertiesData_Field.BornOn).trim();
-        if (trim.equals("")) {
-            return trim;
-        }
-        String format = String.format(getString(R.string.born_since), new Object[]{trim});
-        try {
-            Date parse = new SimpleDateFormat("MM/dd/yyyy").parse(trim);
-            return String.format(getString(R.string.age_days), new Object[]{Long.valueOf((new Date().getTime() - parse.getTime()) / 86400000)});
-        } catch (ParseException e) {
-            return format;
+    public UserMainProfileTab()
+    {
+        loadableMonitor = (new LoadableMonitor(new Loadable[] {
+            avatarProperties, avatarNotes, onlineStatus
+        })).withDataChangedListener(this);
+        partnerNameRetriever = null;
+    }
+
+    private String getAge(AvatarPropertiesReply avatarpropertiesreply)
+    {
+        Object obj = SLMessage.stringFromVariableOEM(avatarpropertiesreply.PropertiesData_Field.BornOn).trim();
+        if (!((String) (obj)).equals(""))
+        {
+            avatarpropertiesreply = String.format(getString(0x7f090086), new Object[] {
+                obj
+            });
+            try
+            {
+                obj = (new SimpleDateFormat("MM/dd/yyyy")).parse(((String) (obj)));
+                obj = String.format(getString(0x7f090042), new Object[] {
+                    Long.valueOf(((new Date()).getTime() - ((Date) (obj)).getTime()) / 0x5265c00L)
+                });
+            }
+            // Misplaced declaration of an exception variable
+            catch (Object obj)
+            {
+                return avatarpropertiesreply;
+            }
+            return ((String) (obj));
+        } else
+        {
+            return ((String) (obj));
         }
     }
 
-    /* synthetic */ void updatePartnerProfile(ChatterNameRetriever chatterNameRetriever) {
-        if (getView() != null) {
-            this.userProfilePartnerName.setText(chatterNameRetriever.getResolvedName());
-            this.userProfilePartnerPic.setChatterID(chatterNameRetriever.chatterID, chatterNameRetriever.getResolvedName());
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_chat_profiles_UserMainProfileTab_9585(ChatterNameRetriever chatternameretriever)
+    {
+        if (getView() != null)
+        {
+            userProfilePartnerName.setText(chatternameretriever.getResolvedName());
+            userProfilePartnerPic.setChatterID(chatternameretriever.chatterID, chatternameretriever.getResolvedName());
         }
     }
 
-    /* access modifiers changed from: protected */
-    @OnClick({2131755706})
-    public void onAboutEditClicked(View view) {
-        if (this.chatterID != null) {
-            DetailsActivity.showEmbeddedDetails(getActivity(), UserAboutTextEditFragment.class, UserAboutTextEditFragment.makeSelection(this.chatterID, false));
+    protected void onAboutEditClicked(View view)
+    {
+        if (chatterID != null)
+        {
+            DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/chat/profiles/UserAboutTextEditFragment, UserAboutTextEditFragment.makeSelection(chatterID, false));
         }
     }
 
-    /* access modifiers changed from: protected */
-    @OnClick({2131755698})
-    public void onChangePicClicked(View view) {
-        AvatarPropertiesReply data = this.avatarProperties.getData();
-        if (this.chatterID != null && data != null) {
+    protected void onChangePicClicked(View view)
+    {
+        view = (AvatarPropertiesReply)avatarProperties.getData();
+        if (chatterID != null && view != null)
+        {
             Bundle bundle = new Bundle();
-            bundle.putParcelable("oldProfileData", data);
-            getContext().startActivity(InventoryActivity.makeSelectActionIntent(getContext(), this.chatterID.agentUUID, InventoryActivity.SelectAction.applyUserProfile, bundle, SLAssetType.AT_TEXTURE));
+            bundle.putParcelable("oldProfileData", view);
+            view = InventoryActivity.makeSelectActionIntent(getContext(), chatterID.agentUUID, com.lumiyaviewer.lumiya.ui.inventory.InventoryActivity.SelectAction.applyUserProfile, bundle, SLAssetType.AT_TEXTURE);
+            getContext().startActivity(view);
         }
     }
 
-    public void onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-        super.onChatterNameUpdated(chatterNameRetriever);
+    public void onChatterNameUpdated(ChatterNameRetriever chatternameretriever)
+    {
+        super.onChatterNameUpdated(chatternameretriever);
         View view = getView();
-        if (this.chatterID != null && Objects.equal(chatterNameRetriever.chatterID, this.chatterID) && view != null) {
-            this.textProfilePrimaryName.setText(chatterNameRetriever.getResolvedName());
-            this.textProfileSecondaryName.setText(chatterNameRetriever.getResolvedSecondaryName());
+        if (chatterID != null && Objects.equal(chatternameretriever.chatterID, chatterID) && view != null)
+        {
+            textProfilePrimaryName.setText(chatternameretriever.getResolvedName());
+            textProfileSecondaryName.setText(chatternameretriever.getResolvedSecondaryName());
         }
     }
 
-    /* access modifiers changed from: protected */
-    @OnClick({2131755720})
-    public void onCopyAgentKeyClicked(View view) {
-        if (this.chatterID instanceof ChatterID.ChatterIDUser) {
-            String uuid = ((ChatterID.ChatterIDUser) this.chatterID).getChatterUUID().toString();
-            if (Build.VERSION.SDK_INT < 11) {
-                ((ClipboardManager) getActivity().getSystemService("clipboard")).setText(uuid);
-            } else {
-                ((android.content.ClipboardManager) getActivity().getSystemService("clipboard")).setPrimaryClip(ClipData.newPlainText("Agent key", uuid));
+    protected void onCopyAgentKeyClicked(View view)
+    {
+        if (chatterID instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser)
+        {
+            view = ((com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser)chatterID).getChatterUUID().toString();
+            if (android.os.Build.VERSION.SDK_INT < 11)
+            {
+                ((ClipboardManager)getActivity().getSystemService("clipboard")).setText(view);
+            } else
+            {
+                ((android.content.ClipboardManager)getActivity().getSystemService("clipboard")).setPrimaryClip(ClipData.newPlainText("Agent key", view));
             }
             Toast.makeText(getActivity(), "Agent key copied to clipboard", 0).show();
         }
     }
 
-    @Nullable
-    public View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.user_profile_tab_main, viewGroup, false);
-        this.unbinder = ButterKnife.bind((Object) this, inflate);
-        this.userPicView.setAlignTop(true);
-        this.userPicView.setVerticalFit(true);
-        this.loadingLayout.setSwipeRefreshLayout(this.swipeRefreshLayout);
-        this.loadableMonitor.setLoadingLayout(this.loadingLayout, getString(R.string.no_user_selected), getString(R.string.user_profile_fail));
-        this.loadableMonitor.setSwipeRefreshLayout(this.swipeRefreshLayout);
-        return inflate;
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        layoutinflater = layoutinflater.inflate(0x7f0400b8, viewgroup, false);
+        unbinder = ButterKnife.bind(this, layoutinflater);
+        userPicView.setAlignTop(true);
+        userPicView.setVerticalFit(true);
+        loadingLayout.setSwipeRefreshLayout(swipeRefreshLayout);
+        loadableMonitor.setLoadingLayout(loadingLayout, getString(0x7f0901f1), getString(0x7f090374));
+        loadableMonitor.setSwipeRefreshLayout(swipeRefreshLayout);
+        return layoutinflater;
     }
 
-    public void onDestroyView() {
-        if (this.unbinder != null) {
-            this.unbinder.unbind();
-            this.unbinder = null;
+    public void onDestroyView()
+    {
+        if (unbinder != null)
+        {
+            unbinder.unbind();
+            unbinder = null;
         }
         super.onDestroyView();
     }
 
-    /* access modifiers changed from: protected */
-    @OnClick({2131755724})
-    public void onEditNotesClicked(View view) {
-        if (this.chatterID != null) {
-            DetailsActivity.showEmbeddedDetails(getActivity(), UserNotesEditFragment.class, UserNotesEditFragment.makeSelection(this.chatterID));
+    protected void onEditNotesClicked(View view)
+    {
+        if (chatterID != null)
+        {
+            DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/chat/profiles/UserNotesEditFragment, UserNotesEditFragment.makeSelection(chatterID));
         }
     }
 
-    public void onLoadableDataChanged() {
-        if (getView() != null) {
-            try {
-                AvatarPropertiesReply avatarPropertiesReply = this.avatarProperties.get();
-                this.userPicView.setAssetID(avatarPropertiesReply.PropertiesData_Field.ImageID);
-                this.userProfileAboutText.setText(SLMessage.stringFromVariableUTF(avatarPropertiesReply.PropertiesData_Field.AboutText));
-                this.textProfileAge.setText(getAge(avatarPropertiesReply));
-                if (this.partnerNameRetriever != null) {
-                    this.partnerNameRetriever.dispose();
-                    this.partnerNameRetriever = null;
-                }
-                UUID uuid = avatarPropertiesReply.PropertiesData_Field.PartnerID;
-                if (uuid == null || !(!uuid.equals(UUIDPool.ZeroUUID)) || this.chatterID == null) {
-                    this.userPartnerCardView.setVisibility(8);
-                    this.userProfilePartnerPic.setChatterID((ChatterID) null, (String) null);
-                } else {
-                    ChatterID.ChatterIDUser userChatterID = ChatterID.getUserChatterID(this.chatterID.agentUUID, uuid);
-                    this.userPartnerCardView.setVisibility(0);
-                    this.partnerNameRetriever = new ChatterNameRetriever(userChatterID, this.onPartnerNameReady, UIThreadExecutor.getInstance());
-                }
-                String trim = SLMessage.stringFromVariableOEM(avatarPropertiesReply.PropertiesData_Field.ProfileURL).trim();
-                if (!trim.isEmpty()) {
-                    this.userWebProfileLink.setText(trim);
-                    Linkify.addLinks(this.userWebProfileLink, 15);
-                    this.userWebProfileCardView.setVisibility(0);
-                } else {
-                    this.userWebProfileCardView.setVisibility(8);
-                }
-                String trim2 = SLMessage.stringFromVariableUTF(this.avatarNotes.get().Data_Field.Notes).trim();
-                if (trim2.isEmpty()) {
-                    this.textProfileNotesText.setText(R.string.user_notes_no_notes);
-                    this.textProfileNotesText.setTypeface((Typeface) null, 2);
-                    this.userProfileNotesCaption.setVisibility(8);
-                } else {
-                    this.textProfileNotesText.setText(trim2);
-                    this.textProfileNotesText.setTypeface((Typeface) null, 0);
-                    this.userProfileNotesCaption.setVisibility(0);
-                }
-                this.textProfileOnline.setText(getString(this.onlineStatus.get().booleanValue() ? R.string.profile_user_online : R.string.profile_user_offline));
-            } catch (SubscriptionData.DataNotReadyException e) {
-                Debug.Warning(e);
-            }
+    public void onLoadableDataChanged()
+    {
+        if (getView() == null) goto _L2; else goto _L1
+_L1:
+        Object obj;
+        Object obj1;
+        obj = (AvatarPropertiesReply)avatarProperties.get();
+        userPicView.setAssetID(((AvatarPropertiesReply) (obj)).PropertiesData_Field.ImageID);
+        userProfileAboutText.setText(SLMessage.stringFromVariableUTF(((AvatarPropertiesReply) (obj)).PropertiesData_Field.AboutText));
+        textProfileAge.setText(getAge(((AvatarPropertiesReply) (obj))));
+        if (partnerNameRetriever != null)
+        {
+            partnerNameRetriever.dispose();
+            partnerNameRetriever = null;
         }
+        obj1 = ((AvatarPropertiesReply) (obj)).PropertiesData_Field.PartnerID;
+        if (obj1 == null) goto _L4; else goto _L3
+_L3:
+        if (!(((UUID) (obj1)).equals(UUIDPool.ZeroUUID) ^ true) || chatterID == null) goto _L4; else goto _L5
+_L5:
+        obj1 = ChatterID.getUserChatterID(chatterID.agentUUID, ((UUID) (obj1)));
+        userPartnerCardView.setVisibility(0);
+        partnerNameRetriever = new ChatterNameRetriever(((ChatterID) (obj1)), onPartnerNameReady, UIThreadExecutor.getInstance());
+_L14:
+        obj = SLMessage.stringFromVariableOEM(((AvatarPropertiesReply) (obj)).PropertiesData_Field.ProfileURL).trim();
+        if (((String) (obj)).isEmpty()) goto _L7; else goto _L6
+_L6:
+        userWebProfileLink.setText(((CharSequence) (obj)));
+        Linkify.addLinks(userWebProfileLink, 15);
+        userWebProfileCardView.setVisibility(0);
+_L11:
+        obj = SLMessage.stringFromVariableUTF(((AvatarNotesReply)avatarNotes.get()).Data_Field.Notes).trim();
+        if (!((String) (obj)).isEmpty()) goto _L9; else goto _L8
+_L8:
+        textProfileNotesText.setText(0x7f09036b);
+        textProfileNotesText.setTypeface(null, 2);
+        userProfileNotesCaption.setVisibility(8);
+_L12:
+        obj = textProfileOnline;
+          goto _L10
+_L4:
+        userPartnerCardView.setVisibility(8);
+        userProfilePartnerPic.setChatterID(null, null);
+        continue; /* Loop/switch isn't completed */
+_L10:
+        int i;
+        if (((Boolean)onlineStatus.get()).booleanValue())
+        {
+            i = 0x7f09029c;
+        } else
+        {
+            i = 0x7f09029b;
+        }
+        try
+        {
+            ((TextView) (obj)).setText(getString(i));
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (Object obj)
+        {
+            Debug.Warning(((Throwable) (obj)));
+        }
+        return;
+_L7:
+        userWebProfileCardView.setVisibility(8);
+          goto _L11
+_L9:
+        textProfileNotesText.setText(((CharSequence) (obj)));
+        textProfileNotesText.setTypeface(null, 0);
+        userProfileNotesCaption.setVisibility(0);
+          goto _L12
+_L2:
+        return;
+        if (true) goto _L14; else goto _L13
+_L13:
     }
 
-    /* access modifiers changed from: protected */
-    public void onShowUser(@Nullable ChatterID chatterID) {
-        int i = 0;
+    protected void onShowUser(ChatterID chatterid)
+    {
+        boolean flag = false;
         View view = getView();
-        this.loadableMonitor.unsubscribeAll();
-        if (this.partnerNameRetriever != null) {
-            this.partnerNameRetriever.dispose();
-            this.partnerNameRetriever = null;
+        loadableMonitor.unsubscribeAll();
+        if (partnerNameRetriever != null)
+        {
+            partnerNameRetriever.dispose();
+            partnerNameRetriever = null;
         }
-        if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDUser)) {
-            UUID chatterUUID = ((ChatterID.ChatterIDUser) chatterID).getChatterUUID();
-            this.avatarProperties.subscribe(this.userManager.getAvatarProperties().getPool(), chatterUUID);
-            this.onlineStatus.subscribe(this.userManager.getChatterList().getFriendManager().getOnlineStatus(), chatterUUID);
-            this.avatarNotes.subscribe(this.userManager.getAvatarNotes().getPool(), chatterUUID);
-            if (view != null) {
-                this.textProfileAgentKey.setText(chatterUUID.toString());
-                boolean equals = chatterUUID.equals(this.userManager.getUserID());
-                this.aboutEditButton.setVisibility(equals ? 0 : 8);
-                Button button = this.changePicButton;
-                if (!equals) {
+        if (userManager != null && (chatterid instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser))
+        {
+            chatterid = ((com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser)chatterid).getChatterUUID();
+            avatarProperties.subscribe(userManager.getAvatarProperties().getPool(), chatterid);
+            onlineStatus.subscribe(userManager.getChatterList().getFriendManager().getOnlineStatus(), chatterid);
+            avatarNotes.subscribe(userManager.getAvatarNotes().getPool(), chatterid);
+            if (view != null)
+            {
+                textProfileAgentKey.setText(chatterid.toString());
+                boolean flag1 = chatterid.equals(userManager.getUserID());
+                chatterid = aboutEditButton;
+                int i;
+                if (flag1)
+                {
+                    i = 0;
+                } else
+                {
                     i = 8;
                 }
-                button.setVisibility(i);
+                chatterid.setVisibility(i);
+                chatterid = changePicButton;
+                if (flag1)
+                {
+                    i = ((flag) ? 1 : 0);
+                } else
+                {
+                    i = 8;
+                }
+                chatterid.setVisibility(i);
             }
-        } else if (view != null) {
-            this.textProfileAgentKey.setText("");
-            this.aboutEditButton.setVisibility(8);
-            this.changePicButton.setVisibility(8);
+        } else
+        if (view != null)
+        {
+            textProfileAgentKey.setText("");
+            aboutEditButton.setVisibility(8);
+            changePicButton.setVisibility(8);
+            return;
         }
     }
 
-    /* access modifiers changed from: protected */
-    @OnClick({2131755715})
-    public void onViewProfileClicked(View view) {
-        if (this.chatterID != null) {
-            try {
-                UUID uuid = this.avatarProperties.get().PropertiesData_Field.PartnerID;
-                if (uuid != null && (!uuid.equals(UUIDPool.ZeroUUID)) && this.chatterID != null) {
-                    DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(this.chatterID.agentUUID, uuid)));
-                }
-            } catch (SubscriptionData.DataNotReadyException e) {
-                Debug.Warning(e);
-            }
+    protected void onViewProfileClicked(View view)
+    {
+        if (chatterID == null)
+        {
+            break MISSING_BLOCK_LABEL_74;
+        }
+        try
+        {
+            view = ((AvatarPropertiesReply)avatarProperties.get()).PropertiesData_Field.PartnerID;
+        }
+        // Misplaced declaration of an exception variable
+        catch (View view)
+        {
+            Debug.Warning(view);
+            return;
+        }
+        if (view == null)
+        {
+            break MISSING_BLOCK_LABEL_74;
+        }
+        if (view.equals(UUIDPool.ZeroUUID) ^ true && chatterID != null)
+        {
+            view = ChatterID.getUserChatterID(chatterID.agentUUID, view);
+            DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/chat/profiles/UserProfileFragment, UserProfileFragment.makeSelection(view));
         }
     }
 }

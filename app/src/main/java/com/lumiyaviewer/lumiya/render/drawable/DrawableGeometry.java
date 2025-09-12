@@ -1,23 +1,17 @@
 package com.lumiyaviewer.lumiya.render.drawable;
 
-import android.support.v4.internal.view.SupportMenu;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
 import com.lumiyaviewer.lumiya.render.RenderContext;
 import com.lumiyaviewer.lumiya.render.avatar.AvatarSkeleton;
 import com.lumiyaviewer.lumiya.render.glres.GLCleanable;
 import com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer;
 import com.lumiyaviewer.lumiya.render.glres.buffers.GLVertexArrayObject;
 import com.lumiyaviewer.lumiya.render.picking.GLRayTrace;
-import com.lumiyaviewer.lumiya.render.picking.GLRayTrace.RayIntersectInfo;
 import com.lumiyaviewer.lumiya.render.picking.IntersectInfo;
 import com.lumiyaviewer.lumiya.slproto.mesh.MeshData;
 import com.lumiyaviewer.lumiya.slproto.mesh.MeshFace;
 import com.lumiyaviewer.lumiya.slproto.mesh.MeshJointTranslations;
 import com.lumiyaviewer.lumiya.slproto.prims.PrimFlexibleInfo;
-import com.lumiyaviewer.lumiya.slproto.prims.PrimVolume;
-import com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace;
-import com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector2;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import com.lumiyaviewer.lumiya.utils.CreateFailureException;
@@ -39,70 +33,67 @@ public final class DrawableGeometry implements GLCleanable {
     private final MeshData meshData;
     private GLVertexArrayObject vertexArrayObject = null;
 
-    public DrawableGeometry(MeshData meshData) throws CreateFailureException {
-        int i;
-        this.isRiggedMesh = meshData.isRiggedMesh();
-        this.FaceCount = meshData.getFaceCount();
+    public DrawableGeometry(MeshData meshData2) throws CreateFailureException {
+        this.isRiggedMesh = meshData2.isRiggedMesh();
+        this.FaceCount = meshData2.getFaceCount();
+        int i = 0;
         int i2 = 0;
-        int i3 = 0;
-        for (i = 0; i < this.FaceCount; i++) {
-            MeshFace face = meshData.getFace(i);
+        for (int i3 = 0; i3 < this.FaceCount; i3++) {
+            MeshFace face = meshData2.getFace(i3);
             if (face.getVertices() != null) {
-                i2 += face.getNumVertices();
-                i3 += face.getNumIndices();
+                i += face.getNumVertices();
+                i2 += face.getNumIndices();
             }
         }
-        this.IndexCount = i3;
-        this.VertexCount = i2;
-        if (i3 == 0 || i2 == 0) {
+        this.IndexCount = i2;
+        this.VertexCount = i;
+        if (i2 == 0 || i == 0) {
             throw new CreateFailureException("Mesh data has zero indices or vertices");
         }
         this.FaceIndexStartsCounts = new int[(this.FaceCount * 3)];
         this.FaceVertexStartsCounts = new int[(this.FaceCount * 2)];
-        this.VertexSizeBytes = (i2 * 4) * 6;
-        this.IndexSizeBytes = i3 * 2;
-        i = (i2 * 4) * 2;
+        this.VertexSizeBytes = i * 4 * 6;
+        this.IndexSizeBytes = i2 * 2;
         DirectByteBuffer directByteBuffer = new DirectByteBuffer(this.VertexSizeBytes);
         DirectByteBuffer directByteBuffer2 = new DirectByteBuffer(this.IndexSizeBytes);
-        DirectByteBuffer directByteBuffer3 = new DirectByteBuffer(i);
+        DirectByteBuffer directByteBuffer3 = new DirectByteBuffer(i * 4 * 2);
         int i4 = 0;
         int i5 = 0;
-        i2 = 0;
-        i3 = 0;
+        int i6 = 0;
+        int i7 = 0;
         this.facesCombined = false;
-        for (i = 0; i < this.FaceCount; i++) {
-            MeshFace face2 = meshData.getFace(i);
+        for (int i8 = 0; i8 < this.FaceCount; i8++) {
+            MeshFace face2 = meshData2.getFace(i8);
             DirectByteBuffer vertices = face2.getVertices();
             DirectByteBuffer texCoords = face2.getTexCoords();
             int numVertices = face2.getNumVertices();
             if (face2.getNumVertices() == 0 || face2.getNumIndices() == 0) {
                 throw new CreateFailureException("Empty mesh");
             }
-            int i6;
             if (vertices != null) {
                 directByteBuffer.copyFromFloat(i5 * 6, vertices, 0, numVertices * 6);
                 if (texCoords != null) {
                     directByteBuffer3.copyFromFloat(i5 * 2, texCoords, 0, numVertices * 2);
                 }
-                texCoords = face2.getIndices();
+                DirectByteBuffer indices = face2.getIndices();
                 int numIndices = face2.getNumIndices();
-                for (i6 = 0; i6 < numIndices; i6++) {
-                    if ((texCoords.getShort(i6) & SupportMenu.USER_MASK) >= numVertices) {
+                for (int i9 = 0; i9 < numIndices; i9++) {
+                    if ((indices.getShort(i9) & 65535) >= numVertices) {
                         throw new CreateFailureException("Too many vertices");
                     }
                 }
                 directByteBuffer2.copyFromShort(i4, face2.getIndices(), 0, face2.getNumIndices());
             }
-            int i7 = i2 + 1;
-            this.FaceIndexStartsCounts[i2] = i;
-            i6 = i7 + 1;
-            this.FaceIndexStartsCounts[i7] = i4;
-            i2 = i6 + 1;
-            this.FaceIndexStartsCounts[i6] = face2.getNumIndices();
-            i7 = i3 + 1;
-            this.FaceVertexStartsCounts[i3] = i5;
-            i3 = i7 + 1;
-            this.FaceVertexStartsCounts[i7] = numVertices;
+            int i10 = i6 + 1;
+            this.FaceIndexStartsCounts[i6] = i8;
+            int i11 = i10 + 1;
+            this.FaceIndexStartsCounts[i10] = i4;
+            i6 = i11 + 1;
+            this.FaceIndexStartsCounts[i11] = face2.getNumIndices();
+            int i12 = i7 + 1;
+            this.FaceVertexStartsCounts[i7] = i5;
+            i7 = i12 + 1;
+            this.FaceVertexStartsCounts[i12] = numVertices;
             i5 += numVertices;
             i4 += face2.getNumIndices();
         }
@@ -114,108 +105,230 @@ public final class DrawableGeometry implements GLCleanable {
         this.TexCoordsBuffer = new GLLoadableBuffer(directByteBuffer3);
         Debug.Printf("Mesh drawable created,  index count %d, vertex count %d", Integer.valueOf(this.IndexCount), Integer.valueOf(this.VertexCount));
         if (this.isRiggedMesh) {
-            this.meshData = meshData;
+            this.meshData = meshData2;
         } else {
             this.meshData = null;
         }
     }
 
-    public DrawableGeometry(PrimVolumeParams primVolumeParams, OpenJPEG openJPEG) throws CreateFailureException {
-        PrimVolume create = PrimVolume.create(primVolumeParams, 4.0f, false, false, openJPEG);
-        if (create == null) {
-            throw new CreateFailureException("Failed to create volume");
-        }
-        this.isRiggedMesh = false;
-        this.meshData = null;
-        int i = 0;
-        int i2 = 0;
-        for (PrimVolumeFace primVolumeFace : create.VolumeFaces) {
-            i2 += primVolumeFace.NumVertices;
-            i = primVolumeFace.NumIndices + i;
-        }
-        this.IndexCount = i;
-        this.VertexCount = i2;
-        if (i == 0 || i2 == 0) {
-            throw new CreateFailureException("Prim data has zero indices or vertices");
-        }
-        this.FaceCount = create.VolumeFaces.size();
-        this.FaceIndexStartsCounts = new int[(this.FaceCount * 3)];
-        this.FaceVertexStartsCounts = new int[(this.FaceCount * 2)];
-        this.VertexSizeBytes = (i2 * 4) * 6;
-        this.IndexSizeBytes = i * 2;
-        int i3 = (i2 * 4) * 2;
-        DirectByteBuffer directByteBuffer = new DirectByteBuffer(this.VertexSizeBytes);
-        DirectByteBuffer directByteBuffer2 = new DirectByteBuffer(this.IndexSizeBytes);
-        DirectByteBuffer directByteBuffer3 = new DirectByteBuffer(i3);
-        boolean z = i2 < 32767 && i < 32767;
-        this.facesCombined = z;
-        int i4;
-        int i5;
-        if (this.facesCombined) {
-            short s = (short) 0;
-            int i6 = 0;
-            i4 = 0;
-            i = 0;
-            for (PrimVolumeFace primVolumeFace2 : create.VolumeFaces) {
-                directByteBuffer.loadFromFloatArray(s * 6, primVolumeFace2.vertexArray.getData(), 0, primVolumeFace2.NumVertices * 6);
-                directByteBuffer3.loadFromFloatArray(s * 2, primVolumeFace2.vertexArray.getTexCoordsData(), 0, primVolumeFace2.NumVertices * 2);
-                directByteBuffer2.loadFromShortArrayOffset(i, primVolumeFace2.Indices, 0, primVolumeFace2.NumIndices, s);
-                i5 = i4 + 1;
-                this.FaceIndexStartsCounts[i4] = primVolumeFace2.ID;
-                i4 = i5 + 1;
-                this.FaceIndexStartsCounts[i5] = i;
-                i5 = i4 + 1;
-                this.FaceIndexStartsCounts[i4] = primVolumeFace2.NumIndices;
-                i4 = i6 + 1;
-                this.FaceVertexStartsCounts[i6] = s;
-                i2 = i4 + 1;
-                this.FaceVertexStartsCounts[i4] = primVolumeFace2.NumVertices;
-                s = (short) (s + primVolumeFace2.NumVertices);
-                i += primVolumeFace2.NumIndices;
-                i6 = i2;
-                i4 = i5;
-            }
-        } else {
-            i2 = 0;
-            i5 = 0;
-            i3 = 0;
-            int i7 = 0;
-            for (PrimVolumeFace primVolumeFace3 : create.VolumeFaces) {
-                directByteBuffer.loadFromFloatArray(i2 * 6, primVolumeFace3.vertexArray.getData(), 0, primVolumeFace3.NumVertices * 6);
-                directByteBuffer3.loadFromFloatArray(i2 * 2, primVolumeFace3.vertexArray.getTexCoordsData(), 0, primVolumeFace3.NumVertices * 2);
-                directByteBuffer2.loadFromShortArray(i7, primVolumeFace3.Indices, 0, primVolumeFace3.NumIndices);
-                int i8 = i3 + 1;
-                this.FaceIndexStartsCounts[i3] = primVolumeFace3.ID;
-                i4 = i8 + 1;
-                this.FaceIndexStartsCounts[i8] = i7;
-                i3 = i4 + 1;
-                this.FaceIndexStartsCounts[i4] = primVolumeFace3.NumIndices;
-                i8 = i5 + 1;
-                this.FaceVertexStartsCounts[i5] = i2;
-                i5 = i8 + 1;
-                this.FaceVertexStartsCounts[i8] = primVolumeFace3.NumVertices;
-                i2 += primVolumeFace3.NumVertices;
-                i7 = primVolumeFace3.NumIndices + i7;
-            }
-        }
-        directByteBuffer.position(0);
-        directByteBuffer2.position(0);
-        directByteBuffer3.position(0);
-        this.VertexBuffer = new GLLoadableBuffer(directByteBuffer);
-        this.IndexBuffer = new GLLoadableBuffer(directByteBuffer2);
-        this.TexCoordsBuffer = new GLLoadableBuffer(directByteBuffer3);
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v13, resolved type: int[]} */
+    /* JADX WARNING: type inference failed for: r5v6 */
+    /* JADX WARNING: type inference failed for: r5v7, types: [short, int] */
+    /* JADX WARNING: type inference failed for: r5v10 */
+    /* JADX WARNING: Multi-variable type inference failed */
+    /* Code decompiled incorrectly, please refer to instructions dump. */
+    public DrawableGeometry(com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams r14, com.lumiyaviewer.lumiya.openjpeg.OpenJPEG r15) throws com.lumiyaviewer.lumiya.utils.CreateFailureException {
+        /*
+            r13 = this;
+            r7 = 32767(0x7fff, float:4.5916E-41)
+            r1 = 0
+            r3 = 0
+            r13.<init>()
+            r13.vertexArrayObject = r1
+            r0 = 1082130432(0x40800000, float:4.0)
+            com.lumiyaviewer.lumiya.slproto.prims.PrimVolume r4 = com.lumiyaviewer.lumiya.slproto.prims.PrimVolume.create(r14, r0, r3, r3, r15)
+            if (r4 != 0) goto L_0x001a
+            com.lumiyaviewer.lumiya.utils.CreateFailureException r0 = new com.lumiyaviewer.lumiya.utils.CreateFailureException
+            java.lang.String r1 = "Failed to create volume"
+            r0.<init>(r1)
+            throw r0
+        L_0x001a:
+            r13.isRiggedMesh = r3
+            r13.meshData = r1
+            java.util.ArrayList<com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace> r0 = r4.VolumeFaces
+            java.util.Iterator r5 = r0.iterator()
+            r1 = r3
+            r2 = r3
+        L_0x0026:
+            boolean r0 = r5.hasNext()
+            if (r0 == 0) goto L_0x003a
+            java.lang.Object r0 = r5.next()
+            com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace r0 = (com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace) r0
+            int r6 = r0.NumVertices
+            int r2 = r2 + r6
+            int r0 = r0.NumIndices
+            int r0 = r0 + r1
+            r1 = r0
+            goto L_0x0026
+        L_0x003a:
+            r13.IndexCount = r1
+            r13.VertexCount = r2
+            if (r1 == 0) goto L_0x0042
+            if (r2 != 0) goto L_0x004b
+        L_0x0042:
+            com.lumiyaviewer.lumiya.utils.CreateFailureException r0 = new com.lumiyaviewer.lumiya.utils.CreateFailureException
+            java.lang.String r1 = "Prim data has zero indices or vertices"
+            r0.<init>(r1)
+            throw r0
+        L_0x004b:
+            java.util.ArrayList<com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace> r0 = r4.VolumeFaces
+            int r0 = r0.size()
+            r13.FaceCount = r0
+            int r0 = r13.FaceCount
+            int r0 = r0 * 3
+            int[] r0 = new int[r0]
+            r13.FaceIndexStartsCounts = r0
+            int r0 = r13.FaceCount
+            int r0 = r0 * 2
+            int[] r0 = new int[r0]
+            r13.FaceVertexStartsCounts = r0
+            int r0 = r2 * 4
+            int r0 = r0 * 6
+            r13.VertexSizeBytes = r0
+            int r0 = r1 * 2
+            r13.IndexSizeBytes = r0
+            int r0 = r2 * 4
+            int r5 = r0 * 2
+            com.lumiyaviewer.rawbuffers.DirectByteBuffer r9 = new com.lumiyaviewer.rawbuffers.DirectByteBuffer
+            int r0 = r13.VertexSizeBytes
+            r9.<init>((int) r0)
+            com.lumiyaviewer.rawbuffers.DirectByteBuffer r0 = new com.lumiyaviewer.rawbuffers.DirectByteBuffer
+            int r6 = r13.IndexSizeBytes
+            r0.<init>((int) r6)
+            com.lumiyaviewer.rawbuffers.DirectByteBuffer r10 = new com.lumiyaviewer.rawbuffers.DirectByteBuffer
+            r10.<init>((int) r5)
+            if (r2 >= r7) goto L_0x00f9
+            if (r1 >= r7) goto L_0x00f9
+            r1 = 1
+        L_0x0089:
+            r13.facesCombined = r1
+            boolean r1 = r13.facesCombined
+            if (r1 == 0) goto L_0x00fb
+            java.util.ArrayList<com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace> r1 = r4.VolumeFaces
+            java.util.Iterator r11 = r1.iterator()
+            r5 = r3
+            r7 = r3
+            r8 = r3
+            r1 = r3
+        L_0x0099:
+            boolean r2 = r11.hasNext()
+            if (r2 == 0) goto L_0x0162
+            java.lang.Object r2 = r11.next()
+            r6 = r2
+            com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace r6 = (com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace) r6
+            int r2 = r5 * 6
+            com.lumiyaviewer.lumiya.slproto.types.VertexArray r4 = r6.vertexArray
+            float[] r4 = r4.getData()
+            int r12 = r6.NumVertices
+            int r12 = r12 * 6
+            r9.loadFromFloatArray(r2, r4, r3, r12)
+            int r2 = r5 * 2
+            com.lumiyaviewer.lumiya.slproto.types.VertexArray r4 = r6.vertexArray
+            float[] r4 = r4.getTexCoordsData()
+            int r12 = r6.NumVertices
+            int r12 = r12 * 2
+            r10.loadFromFloatArray(r2, r4, r3, r12)
+            short[] r2 = r6.Indices
+            int r4 = r6.NumIndices
+            r0.loadFromShortArrayOffset(r1, r2, r3, r4, r5)
+            int[] r2 = r13.FaceIndexStartsCounts
+            int r4 = r8 + 1
+            int r12 = r6.ID
+            r2[r8] = r12
+            int[] r2 = r13.FaceIndexStartsCounts
+            int r8 = r4 + 1
+            r2[r4] = r1
+            int[] r2 = r13.FaceIndexStartsCounts
+            int r4 = r8 + 1
+            int r12 = r6.NumIndices
+            r2[r8] = r12
+            int[] r2 = r13.FaceVertexStartsCounts
+            int r8 = r7 + 1
+            r2[r7] = r5
+            int[] r7 = r13.FaceVertexStartsCounts
+            int r2 = r8 + 1
+            int r12 = r6.NumVertices
+            r7[r8] = r12
+            int r7 = r6.NumVertices
+            int r5 = r5 + r7
+            short r5 = (short) r5
+            int r6 = r6.NumIndices
+            int r1 = r1 + r6
+            r7 = r2
+            r8 = r4
+            goto L_0x0099
+        L_0x00f9:
+            r1 = r3
+            goto L_0x0089
+        L_0x00fb:
+            java.util.ArrayList<com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace> r1 = r4.VolumeFaces
+            java.util.Iterator r7 = r1.iterator()
+            r2 = r3
+            r4 = r3
+            r5 = r3
+            r6 = r3
+        L_0x0105:
+            boolean r1 = r7.hasNext()
+            if (r1 == 0) goto L_0x0162
+            java.lang.Object r1 = r7.next()
+            com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace r1 = (com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace) r1
+            int r8 = r2 * 6
+            com.lumiyaviewer.lumiya.slproto.types.VertexArray r11 = r1.vertexArray
+            float[] r11 = r11.getData()
+            int r12 = r1.NumVertices
+            int r12 = r12 * 6
+            r9.loadFromFloatArray(r8, r11, r3, r12)
+            int r8 = r2 * 2
+            com.lumiyaviewer.lumiya.slproto.types.VertexArray r11 = r1.vertexArray
+            float[] r11 = r11.getTexCoordsData()
+            int r12 = r1.NumVertices
+            int r12 = r12 * 2
+            r10.loadFromFloatArray(r8, r11, r3, r12)
+            short[] r8 = r1.Indices
+            int r11 = r1.NumIndices
+            r0.loadFromShortArray(r6, r8, r3, r11)
+            int[] r8 = r13.FaceIndexStartsCounts
+            int r11 = r5 + 1
+            int r12 = r1.ID
+            r8[r5] = r12
+            int[] r5 = r13.FaceIndexStartsCounts
+            int r8 = r11 + 1
+            r5[r11] = r6
+            int[] r11 = r13.FaceIndexStartsCounts
+            int r5 = r8 + 1
+            int r12 = r1.NumIndices
+            r11[r8] = r12
+            int[] r8 = r13.FaceVertexStartsCounts
+            int r11 = r4 + 1
+            r8[r4] = r2
+            int[] r8 = r13.FaceVertexStartsCounts
+            int r4 = r11 + 1
+            int r12 = r1.NumVertices
+            r8[r11] = r12
+            int r8 = r1.NumVertices
+            int r2 = r2 + r8
+            int r1 = r1.NumIndices
+            int r1 = r1 + r6
+            r6 = r1
+            goto L_0x0105
+        L_0x0162:
+            r9.position(r3)
+            r0.position(r3)
+            r10.position(r3)
+            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer r1 = new com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer
+            r1.<init>(r9)
+            r13.VertexBuffer = r1
+            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer r1 = new com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer
+            r1.<init>(r0)
+            r13.IndexBuffer = r1
+            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer r0 = new com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer
+            r0.<init>(r10)
+            r13.TexCoordsBuffer = r0
+            return
+        */
+        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.render.drawable.DrawableGeometry.<init>(com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams, com.lumiyaviewer.lumiya.openjpeg.OpenJPEG):void");
     }
 
-    final void ApplyJointTranslations(MeshJointTranslations meshJointTranslations) {
-        if (isRiggedMesh()) {
-            MeshData meshData = this.meshData;
-            if (meshData != null && meshData.isRiggedMesh()) {
-                meshData.ApplyJointTranslations(meshJointTranslations);
-            }
+    /* access modifiers changed from: package-private */
+    public final void ApplyJointTranslations(MeshJointTranslations meshJointTranslations) {
+        MeshData meshData2;
+        if (isRiggedMesh() && (meshData2 = this.meshData) != null && meshData2.isRiggedMesh()) {
+            meshData2.ApplyJointTranslations(meshJointTranslations);
         }
     }
 
-    final GLLoadableBuffer GLBindBuffers10(RenderContext renderContext, PrimFlexibleInfo primFlexibleInfo) {
+    /* access modifiers changed from: package-private */
+    public final GLLoadableBuffer GLBindBuffers10(RenderContext renderContext, PrimFlexibleInfo primFlexibleInfo) {
         GLLoadableBuffer flexedVertexBuffer = primFlexibleInfo != null ? primFlexibleInfo.getFlexedVertexBuffer(renderContext, this.VertexBuffer, this.VertexCount) : this.VertexBuffer;
         if (this.facesCombined) {
             flexedVertexBuffer.Bind(renderContext, 32884, 3, 5126, 24, 0);
@@ -226,7 +339,8 @@ public final class DrawableGeometry implements GLCleanable {
         return flexedVertexBuffer;
     }
 
-    final GLLoadableBuffer GLBindBuffers20(RenderContext renderContext) {
+    /* access modifiers changed from: package-private */
+    public final GLLoadableBuffer GLBindBuffers20(RenderContext renderContext) {
         if (renderContext.hasGL30) {
             if (this.vertexArrayObject == null) {
                 if (this.facesCombined) {
@@ -250,7 +364,7 @@ public final class DrawableGeometry implements GLCleanable {
                         this.vertexArrayObject.Bind(i2);
                         this.VertexBuffer.Bind20(renderContext, renderContext.curPrimProgram.vPosition, 3, 5126, 24, this.FaceVertexStartsCounts[i2 * 2] * 24);
                         this.VertexBuffer.Bind20(renderContext, renderContext.curPrimProgram.vNormal, 3, 5126, 24, (this.FaceVertexStartsCounts[i2 * 2] * 24) + 12);
-                        this.TexCoordsBuffer.Bind20(renderContext, renderContext.curPrimProgram.vTexCoord, 2, 5126, 8, (this.FaceVertexStartsCounts[i2 * 2] * 4) * 2);
+                        this.TexCoordsBuffer.Bind20(renderContext, renderContext.curPrimProgram.vTexCoord, 2, 5126, 8, this.FaceVertexStartsCounts[i2 * 2] * 4 * 2);
                         if (this.isRiggedMesh && this.meshData != null) {
                             this.meshData.PrepareInfluencesForFace(renderContext, this.FaceVertexStartsCounts[i2 * 2]);
                         }
@@ -271,7 +385,8 @@ public final class DrawableGeometry implements GLCleanable {
         return this.VertexBuffer;
     }
 
-    final void GLBindBuffersRigged30(RenderContext renderContext) {
+    /* access modifiers changed from: package-private */
+    public final void GLBindBuffersRigged30(RenderContext renderContext) {
         if (this.isRiggedMesh && this.meshData != null) {
             this.meshData.SetupBuffers30(renderContext);
             if (this.vertexArrayObject == null) {
@@ -284,7 +399,7 @@ public final class DrawableGeometry implements GLCleanable {
                         this.vertexArrayObject.Bind(i2);
                         this.VertexBuffer.Bind20(renderContext, renderContext.curPrimProgram.vPosition, 3, 5126, 24, this.FaceVertexStartsCounts[i2 * 2] * 24);
                         this.VertexBuffer.Bind20(renderContext, renderContext.curPrimProgram.vNormal, 3, 5126, 24, (this.FaceVertexStartsCounts[i2 * 2] * 24) + 12);
-                        this.TexCoordsBuffer.Bind20(renderContext, renderContext.curPrimProgram.vTexCoord, 2, 5126, 8, (this.FaceVertexStartsCounts[i2 * 2] * 4) * 2);
+                        this.TexCoordsBuffer.Bind20(renderContext, renderContext.curPrimProgram.vTexCoord, 2, 5126, 8, this.FaceVertexStartsCounts[i2 * 2] * 4 * 2);
                         this.meshData.SetupFace30(renderContext, this.FaceVertexStartsCounts[i2 * 2]);
                         this.IndexBuffer.BindElements20(renderContext);
                         this.vertexArrayObject.Unbind();
@@ -301,11 +416,13 @@ public final class DrawableGeometry implements GLCleanable {
         this.vertexArrayObject = null;
     }
 
-    final void GLDrawAll10(RenderContext renderContext) {
+    /* access modifiers changed from: package-private */
+    public final void GLDrawAll10(RenderContext renderContext) {
         this.IndexBuffer.DrawElements(renderContext, 4, this.IndexCount, 5123, 0);
     }
 
-    final void GLDrawAll20(RenderContext renderContext) {
+    /* access modifiers changed from: package-private */
+    public final void GLDrawAll20(RenderContext renderContext) {
         if (!renderContext.hasGL30) {
             this.IndexBuffer.DrawElements20(4, this.IndexCount, 5123, 0);
         } else if (this.vertexArrayObject != null) {
@@ -315,23 +432,25 @@ public final class DrawableGeometry implements GLCleanable {
         }
     }
 
-    final void GLDrawFace10(RenderContext renderContext, int i, GLLoadableBuffer gLLoadableBuffer) {
+    /* access modifiers changed from: package-private */
+    public final void GLDrawFace10(RenderContext renderContext, int i, GLLoadableBuffer gLLoadableBuffer) {
         int i2 = i * 3;
         if (!this.facesCombined) {
             gLLoadableBuffer.Bind(renderContext, 32884, 3, 5126, 24, this.FaceVertexStartsCounts[i * 2] * 24);
             gLLoadableBuffer.Bind(renderContext, 32885, 3, 5126, 24, (this.FaceVertexStartsCounts[i * 2] * 24) + 12);
-            this.TexCoordsBuffer.Bind(renderContext, 32888, 2, 5126, 8, (this.FaceVertexStartsCounts[i * 2] * 4) * 2);
+            this.TexCoordsBuffer.Bind(renderContext, 32888, 2, 5126, 8, this.FaceVertexStartsCounts[i * 2] * 4 * 2);
         }
         this.IndexBuffer.DrawElements(renderContext, 4, this.FaceIndexStartsCounts[i2 + 2], 5123, this.FaceIndexStartsCounts[i2 + 1] * 2);
     }
 
-    final void GLDrawFace20(RenderContext renderContext, int i) {
+    /* access modifiers changed from: package-private */
+    public final void GLDrawFace20(RenderContext renderContext, int i) {
         int i2 = i * 3;
         if (!renderContext.hasGL30) {
             if (!this.facesCombined) {
                 this.VertexBuffer.Bind20(renderContext, renderContext.curPrimProgram.vPosition, 3, 5126, 24, this.FaceVertexStartsCounts[i * 2] * 24);
                 this.VertexBuffer.Bind20(renderContext, renderContext.curPrimProgram.vNormal, 3, 5126, 24, (this.FaceVertexStartsCounts[i * 2] * 24) + 12);
-                this.TexCoordsBuffer.Bind20(renderContext, renderContext.curPrimProgram.vTexCoord, 2, 5126, 8, (this.FaceVertexStartsCounts[i * 2] * 4) * 2);
+                this.TexCoordsBuffer.Bind20(renderContext, renderContext.curPrimProgram.vTexCoord, 2, 5126, 8, this.FaceVertexStartsCounts[i * 2] * 4 * 2);
                 if (this.isRiggedMesh && this.meshData != null) {
                     this.meshData.PrepareInfluencesForFace(renderContext, this.FaceVertexStartsCounts[i * 2]);
                 }
@@ -348,7 +467,8 @@ public final class DrawableGeometry implements GLCleanable {
         }
     }
 
-    final void GLDrawRiggedFace30(RenderContext renderContext, int i) {
+    /* access modifiers changed from: package-private */
+    public final void GLDrawRiggedFace30(RenderContext renderContext, int i) {
         if (this.vertexArrayObject != null) {
             int i2 = i * 3;
             this.vertexArrayObject.Bind(i);
@@ -356,39 +476,38 @@ public final class DrawableGeometry implements GLCleanable {
         }
     }
 
-    IntersectInfo IntersectRay(LLVector3 lLVector3, LLVector3 lLVector32) {
-        int i;
-        int i2;
-        RayIntersectInfo rayIntersectInfo = null;
-        int i3 = -1;
-        int i4 = 0;
+    /* access modifiers changed from: package-private */
+    public IntersectInfo IntersectRay(LLVector3 lLVector3, LLVector3 lLVector32) {
+        GLRayTrace.RayIntersectInfo rayIntersectInfo = null;
+        int i = -1;
+        int i2 = 0;
         float f = 0.0f;
         LLVector3[] lLVector3Arr = new LLVector3[3];
-        for (i = 0; i < 3; i++) {
-            lLVector3Arr[i] = new LLVector3();
+        for (int i3 = 0; i3 < 3; i3++) {
+            lLVector3Arr[i3] = new LLVector3();
         }
-        for (i = 0; i < this.FaceCount; i++) {
-            i2 = i * 3;
-            int i5 = this.FaceIndexStartsCounts[i2 + 1];
-            int i6 = this.FaceIndexStartsCounts[i2 + 2];
-            for (int i7 = 0; i7 < i6; i7 += 3) {
-                i2 = 0;
+        for (int i4 = 0; i4 < this.FaceCount; i4++) {
+            int i5 = i4 * 3;
+            int i6 = this.FaceIndexStartsCounts[i5 + 1];
+            int i7 = this.FaceIndexStartsCounts[i5 + 2];
+            for (int i8 = 0; i8 < i7; i8 += 3) {
+                int i9 = 0;
                 while (true) {
-                    int i8 = i2;
-                    if (i8 >= 3) {
+                    int i10 = i9;
+                    if (i10 >= 3) {
                         break;
                     }
-                    i2 = (this.facesCombined ? this.IndexBuffer.getShort((i5 + i7) + i8) : this.IndexBuffer.getShort((i5 + i7) + i8) + this.FaceVertexStartsCounts[i * 2]) * 6;
-                    lLVector3Arr[i8].set(this.VertexBuffer.getFloat(i2 + 0), this.VertexBuffer.getFloat(i2 + 1), this.VertexBuffer.getFloat(i2 + 2));
-                    i2 = i8 + 1;
+                    int i11 = (this.facesCombined ? this.IndexBuffer.getShort(i6 + i8 + i10) : this.IndexBuffer.getShort(i6 + i8 + i10) + this.FaceVertexStartsCounts[i4 * 2]) * 6;
+                    lLVector3Arr[i10].set(this.VertexBuffer.getFloat(i11 + 0), this.VertexBuffer.getFloat(i11 + 1), this.VertexBuffer.getFloat(i11 + 2));
+                    i9 = i10 + 1;
                 }
-                RayIntersectInfo intersect_RayTriangle = GLRayTrace.intersect_RayTriangle(lLVector3, lLVector32, lLVector3Arr, 0);
+                GLRayTrace.RayIntersectInfo intersect_RayTriangle = GLRayTrace.intersect_RayTriangle(lLVector3, lLVector32, lLVector3Arr, 0);
                 if (intersect_RayTriangle != null) {
                     float f2 = intersect_RayTriangle.intersectPoint.w;
                     if (rayIntersectInfo == null || f2 < f) {
                         f = f2;
-                        i4 = i;
-                        i3 = i7;
+                        i2 = i4;
+                        i = i8;
                         rayIntersectInfo = intersect_RayTriangle;
                     }
                 }
@@ -397,43 +516,42 @@ public final class DrawableGeometry implements GLCleanable {
         if (rayIntersectInfo == null) {
             return null;
         }
-        i2 = this.FaceIndexStartsCounts[(i4 * 3) + 1];
+        int i12 = this.FaceIndexStartsCounts[(i2 * 3) + 1];
         LLVector2[] lLVector2Arr = new LLVector2[3];
-        i = 0;
+        int i13 = 0;
         while (true) {
-            int i9 = i;
-            if (i9 < 3) {
-                i = (this.facesCombined ? this.IndexBuffer.getShort((i2 + i3) + i9) : this.IndexBuffer.getShort((i2 + i3) + i9) + this.FaceVertexStartsCounts[i4 * 2]) * 2;
-                lLVector2Arr[i9] = new LLVector2(this.TexCoordsBuffer.getFloat(i), this.TexCoordsBuffer.getFloat(i + 1));
-                i = i9 + 1;
+            int i14 = i13;
+            if (i14 < 3) {
+                int i15 = (this.facesCombined ? this.IndexBuffer.getShort(i12 + i + i14) : this.IndexBuffer.getShort(i12 + i + i14) + this.FaceVertexStartsCounts[i2 * 2]) * 2;
+                lLVector2Arr[i14] = new LLVector2(this.TexCoordsBuffer.getFloat(i15), this.TexCoordsBuffer.getFloat(i15 + 1));
+                i13 = i14 + 1;
             } else {
-                return new IntersectInfo(rayIntersectInfo.intersectPoint, i4, (((lLVector2Arr[1].x - lLVector2Arr[0].x) * rayIntersectInfo.s) + ((lLVector2Arr[2].x - lLVector2Arr[0].x) * rayIntersectInfo.t)) + lLVector2Arr[0].x, (((lLVector2Arr[1].y - lLVector2Arr[0].y) * rayIntersectInfo.s) + ((lLVector2Arr[2].y - lLVector2Arr[0].y) * rayIntersectInfo.t)) + lLVector2Arr[0].y);
+                return new IntersectInfo(rayIntersectInfo.intersectPoint, i2, ((lLVector2Arr[1].x - lLVector2Arr[0].x) * rayIntersectInfo.s) + ((lLVector2Arr[2].x - lLVector2Arr[0].x) * rayIntersectInfo.t) + lLVector2Arr[0].x, ((lLVector2Arr[1].y - lLVector2Arr[0].y) * rayIntersectInfo.s) + ((lLVector2Arr[2].y - lLVector2Arr[0].y) * rayIntersectInfo.t) + lLVector2Arr[0].y);
             }
         }
     }
 
-    final boolean UpdateRigged(RenderContext renderContext, AvatarSkeleton avatarSkeleton) {
-        if (!this.isRiggedMesh) {
+    /* access modifiers changed from: package-private */
+    public final boolean UpdateRigged(RenderContext renderContext, AvatarSkeleton avatarSkeleton) {
+        MeshData meshData2;
+        if (!this.isRiggedMesh || (meshData2 = this.meshData) == null || !meshData2.isRiggedMesh()) {
             return false;
         }
-        MeshData meshData = this.meshData;
-        if (meshData == null || !meshData.isRiggedMesh()) {
+        meshData2.UpdateRiggedMatrices(avatarSkeleton);
+        if (!renderContext.hasGL20 || (!meshData2.riggingFitsGL20())) {
+            DirectByteBuffer rawBuffer = this.VertexBuffer.getRawBuffer();
+            for (int i = 0; i < this.FaceCount; i++) {
+                meshData2.UpdateRigged(i, rawBuffer, this.FaceVertexStartsCounts[i * 2]);
+            }
+            this.VertexBuffer.Reload(renderContext);
             return false;
         }
-        meshData.UpdateRiggedMatrices(avatarSkeleton);
-        if (renderContext.hasGL20 && (meshData.riggingFitsGL20() ^ 1) == 0) {
-            meshData.PrepareInfluenceBuffers(renderContext);
-            return true;
-        }
-        DirectByteBuffer rawBuffer = this.VertexBuffer.getRawBuffer();
-        for (int i = 0; i < this.FaceCount; i++) {
-            meshData.UpdateRigged(i, rawBuffer, this.FaceVertexStartsCounts[i * 2]);
-        }
-        this.VertexBuffer.Reload(renderContext);
-        return false;
+        meshData2.PrepareInfluenceBuffers(renderContext);
+        return true;
     }
 
-    final int getFaceCount() {
+    /* access modifiers changed from: package-private */
+    public final int getFaceCount() {
         return this.FaceCount;
     }
 
@@ -441,7 +559,8 @@ public final class DrawableGeometry implements GLCleanable {
         return this.FaceVertexStartsCounts[i * 2];
     }
 
-    final int getFaceID(int i) {
+    /* access modifiers changed from: package-private */
+    public final int getFaceID(int i) {
         return this.FaceIndexStartsCounts[i * 3];
     }
 
@@ -453,19 +572,29 @@ public final class DrawableGeometry implements GLCleanable {
         return this.VertexCount;
     }
 
-    final boolean hasExtendedBones() {
-        return this.meshData != null ? this.meshData.hasExtendedBones() : false;
+    /* access modifiers changed from: package-private */
+    public final boolean hasExtendedBones() {
+        if (this.meshData != null) {
+            return this.meshData.hasExtendedBones();
+        }
+        return false;
     }
 
-    final boolean isFacesCombined() {
+    /* access modifiers changed from: package-private */
+    public final boolean isFacesCombined() {
         return this.facesCombined;
     }
 
-    final boolean isRiggedMesh() {
+    /* access modifiers changed from: package-private */
+    public final boolean isRiggedMesh() {
         return this.isRiggedMesh;
     }
 
-    final boolean riggingFitsGL20() {
-        return (!this.isRiggedMesh || this.meshData == null) ? false : this.meshData.riggingFitsGL20();
+    /* access modifiers changed from: package-private */
+    public final boolean riggingFitsGL20() {
+        if (!this.isRiggedMesh || this.meshData == null) {
+            return false;
+        }
+        return this.meshData.riggingFitsGL20();
     }
 }

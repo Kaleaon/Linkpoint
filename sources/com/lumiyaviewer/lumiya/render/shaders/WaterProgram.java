@@ -1,8 +1,17 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.shaders;
 
 import android.opengl.GLES20;
 
-public class WaterProgram extends ShaderProgram {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.shaders:
+//            ShaderProgram, Shader, ShaderPreprocessor
+
+public class WaterProgram extends ShaderProgram
+{
+
     public int uAmplitude;
     public int uDirection;
     public int uFrequency;
@@ -13,28 +22,31 @@ public class WaterProgram extends ShaderProgram {
     public int vColor;
     public int vPosition;
 
-    public WaterProgram() {
+    public WaterProgram()
+    {
         super(Shader.WaterVertexShader, Shader.WaterFragmentShader);
     }
 
-    public /* bridge */ /* synthetic */ int Compile(ShaderPreprocessor shaderPreprocessor) {
-        return super.Compile(shaderPreprocessor);
+    public volatile int Compile(ShaderPreprocessor shaderpreprocessor)
+    {
+        return super.Compile(shaderpreprocessor);
     }
 
-    /* access modifiers changed from: protected */
-    public void bindVariables() {
-        this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition");
-        this.vColor = GLES20.glGetUniformLocation(this.handle, "vColor");
-        this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix");
-        this.uObjWorldMatrix = GLES20.glGetUniformLocation(this.handle, "uObjWorldMatrix");
-        this.uTime = GLES20.glGetUniformLocation(this.handle, "time");
-        this.uFrequency = GLES20.glGetUniformLocation(this.handle, "frequency");
-        this.uPhase = GLES20.glGetUniformLocation(this.handle, "phase");
-        this.uAmplitude = GLES20.glGetUniformLocation(this.handle, "amplitude");
-        this.uDirection = GLES20.glGetUniformLocation(this.handle, "direction");
+    protected void bindVariables()
+    {
+        vPosition = GLES20.glGetAttribLocation(handle, "vPosition");
+        vColor = GLES20.glGetUniformLocation(handle, "vColor");
+        uMVPMatrix = GLES20.glGetUniformLocation(handle, "uMVPMatrix");
+        uObjWorldMatrix = GLES20.glGetUniformLocation(handle, "uObjWorldMatrix");
+        uTime = GLES20.glGetUniformLocation(handle, "time");
+        uFrequency = GLES20.glGetUniformLocation(handle, "frequency");
+        uPhase = GLES20.glGetUniformLocation(handle, "phase");
+        uAmplitude = GLES20.glGetUniformLocation(handle, "amplitude");
+        uDirection = GLES20.glGetUniformLocation(handle, "direction");
     }
 
-    public /* bridge */ /* synthetic */ int getHandle() {
+    public volatile int getHandle()
+    {
         return super.getHandle();
     }
 }

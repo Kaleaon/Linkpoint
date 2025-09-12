@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.terrain;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -9,125 +13,208 @@ import com.lumiyaviewer.lumiya.res.ResourceManager;
 import com.lumiyaviewer.lumiya.res.ResourceMemoryCache;
 import com.lumiyaviewer.lumiya.res.ResourceRequest;
 import com.lumiyaviewer.lumiya.res.textures.TextureCache;
+import com.lumiyaviewer.lumiya.slproto.terrain.TerrainPatchHeightMap;
 import com.lumiyaviewer.lumiya.slproto.terrain.TerrainPatchInfo;
+import com.lumiyaviewer.lumiya.slproto.terrain.TerrainTextures;
 import com.lumiyaviewer.lumiya.utils.HasPriority;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
-public class TerrainTextureCache extends ResourceMemoryCache<TerrainPatchInfo, OpenJPEG> {
-    public static final int TextureResolution = 256;
+public class TerrainTextureCache extends ResourceMemoryCache
+{
+    private static class TerrainTextureRequest extends ResourceRequest
+        implements Runnable, HasPriority
+    {
 
-    private static class TerrainTextureRequest extends ResourceRequest<TerrainPatchInfo, OpenJPEG> implements Runnable, HasPriority {
-        private volatile Future<?> bakingFuture = null;
+        private volatile Future bakingFuture;
         private int layerNeededMask;
         private int layerReadyMask;
-        private final TerrainRawTextureRequest[] rawRequests = new TerrainRawTextureRequest[4];
-        private final OpenJPEG[] rawTextures = new OpenJPEG[4];
+        private final TerrainRawTextureRequest rawRequests[] = new TerrainRawTextureRequest[4];
+        private final OpenJPEG rawTextures[] = new OpenJPEG[4];
 
-        private class TerrainRawTextureRequest implements ResourceConsumer {
-            private final int layer;
-
-            public TerrainRawTextureRequest(UUID uuid, int i) {
-                this.layer = i;
-                TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuid, TextureClass.Terrain), this);
+        public void cancelRequest()
+        {
+            int i = 0;
+            this;
+            JVM INSTR monitorenter ;
+_L2:
+            if (i >= 4)
+            {
+                break; /* Loop/switch isn't completed */
             }
-
-            public void OnResourceReady(Object obj, boolean z) {
-                if (obj instanceof OpenJPEG) {
-                    TerrainTextureRequest.this.onLayerReady(this.layer, (OpenJPEG) obj);
-                } else if (obj == null) {
-                    TerrainTextureRequest.this.onLayerReady(this.layer, (OpenJPEG) null);
-                }
+            rawRequests[i] = null;
+            i++;
+            if (true) goto _L2; else goto _L1
+_L1:
+            Future future = bakingFuture;
+            if (future == null)
+            {
+                break MISSING_BLOCK_LABEL_40;
             }
-        }
-
-        public TerrainTextureRequest(TerrainPatchInfo terrainPatchInfo, ResourceManager<TerrainPatchInfo, OpenJPEG> resourceManager) {
-            super(terrainPatchInfo, resourceManager);
-        }
-
-        public void cancelRequest() {
-            synchronized (this) {
-                for (int i = 0; i < 4; i++) {
-                    this.rawRequests[i] = null;
-                }
-                Future<?> future = this.bakingFuture;
-                if (future != null) {
-                    future.cancel(false);
-                }
-            }
+            future.cancel(false);
+            this;
+            JVM INSTR monitorexit ;
             super.cancelRequest();
+            return;
+            Exception exception;
+            exception;
+            throw exception;
         }
 
-        public void execute() {
-            this.layerNeededMask = ((TerrainPatchInfo) getParams()).getLayerMask();
-            this.layerReadyMask = 0;
-            if (this.layerNeededMask != 0) {
-                synchronized (this) {
-                    for (int i = 0; i < 4; i++) {
-                        if (this.rawRequests[i] == null && (this.layerNeededMask & (1 << i)) != 0) {
-                            this.rawRequests[i] = new TerrainRawTextureRequest(((TerrainPatchInfo) getParams()).getTextures().getTextureUUID(i), i);
-                        }
-                    }
-                }
-                return;
+        public void execute()
+        {
+            int i;
+            i = 0;
+            layerNeededMask = ((TerrainPatchInfo)getParams()).getLayerMask();
+            layerReadyMask = 0;
+            if (layerNeededMask == 0)
+            {
+                break MISSING_BLOCK_LABEL_99;
             }
-            this.bakingFuture = TextureCache.getInstance().getDecompressorExecutor().submit(this);
+            this;
+            JVM INSTR monitorenter ;
+_L3:
+            if (i >= 4) goto _L2; else goto _L1
+_L1:
+            if (rawRequests[i] == null && (layerNeededMask & 1 << i) != 0)
+            {
+                rawRequests[i] = new TerrainRawTextureRequest(((TerrainPatchInfo)getParams()).getTextures().getTextureUUID(i), i);
+            }
+            i++;
+              goto _L3
+_L2:
+            return;
+            Exception exception;
+            exception;
+            throw exception;
+            bakingFuture = TextureCache.getInstance().getDecompressorExecutor().submit(this);
+            return;
         }
 
-        public int getPriority() {
+        public int getPriority()
+        {
             return 0;
         }
 
-        /* access modifiers changed from: protected */
-        public synchronized void onLayerReady(int i, OpenJPEG openJPEG) {
-            boolean z = false;
-            synchronized (this) {
-                this.rawTextures[i] = openJPEG;
-                this.layerReadyMask |= 1 << i;
-                Object[] objArr = new Object[4];
-                objArr[0] = Integer.valueOf(i);
-                objArr[1] = openJPEG != null ? openJPEG.toString() : "null";
-                objArr[2] = Integer.valueOf(this.layerNeededMask);
-                objArr[3] = Integer.valueOf(this.layerReadyMask);
-                Debug.Printf("Terrain: onLayerReady (%d), rawTexture %s, layerNeededMask %d, layerReadyMask %d", objArr);
-                if ((this.layerNeededMask & this.layerReadyMask) == this.layerNeededMask) {
-                    int i2 = 0;
-                    while (true) {
-                        if (i2 < 4) {
-                            if ((this.layerNeededMask & (1 << i2)) != 0 && this.rawTextures[i2] == null) {
-                                Debug.Printf("Terrain: texture for layer %d is not ready", Integer.valueOf(i2));
-                                break;
-                            }
-                            i2++;
-                        } else {
-                            z = true;
-                            break;
-                        }
-                    }
-                    if (z) {
-                        this.bakingFuture = TextureCache.getInstance().getDecompressorExecutor().submit(this);
-                    } else {
-                        completeRequest(null);
-                    }
-                }
+        protected void onLayerReady(int i, OpenJPEG openjpeg)
+        {
+            boolean flag = false;
+            this;
+            JVM INSTR monitorenter ;
+            rawTextures[i] = openjpeg;
+            layerReadyMask = layerReadyMask | 1 << i;
+            if (openjpeg == null) goto _L2; else goto _L1
+_L1:
+            openjpeg = openjpeg.toString();
+_L9:
+            Debug.Printf("Terrain: onLayerReady (%d), rawTexture %s, layerNeededMask %d, layerReadyMask %d", new Object[] {
+                Integer.valueOf(i), openjpeg, Integer.valueOf(layerNeededMask), Integer.valueOf(layerReadyMask)
+            });
+            if ((layerNeededMask & layerReadyMask) != layerNeededMask) goto _L4; else goto _L3
+_L3:
+            i = 0;
+_L11:
+            if (i >= 4) goto _L6; else goto _L5
+_L5:
+            if ((layerNeededMask & 1 << i) == 0 || rawTextures[i] != null)
+            {
+                break MISSING_BLOCK_LABEL_180;
             }
+            Debug.Printf("Terrain: texture for layer %d is not ready", new Object[] {
+                Integer.valueOf(i)
+            });
+            i = ((flag) ? 1 : 0);
+_L10:
+            if (i == 0) goto _L8; else goto _L7
+_L7:
+            bakingFuture = TextureCache.getInstance().getDecompressorExecutor().submit(this);
+_L4:
+            this;
+            JVM INSTR monitorexit ;
+            return;
+_L2:
+            openjpeg = "null";
+              goto _L9
+_L8:
+            completeRequest(null);
+              goto _L4
+            openjpeg;
+            throw openjpeg;
+_L6:
+            i = 1;
+              goto _L10
+            i++;
+              goto _L11
         }
 
-        public void run() {
-            try {
-                TerrainPatchInfo terrainPatchInfo = (TerrainPatchInfo) getParams();
-                OpenJPEG bakeTerrain = OpenJPEG.bakeTerrain(256, 256, this.rawTextures, terrainPatchInfo.getTextureHeightMap(), terrainPatchInfo.getHeightMap().getMapWidth(), terrainPatchInfo.getHeightMap().getMapHeight());
+        public void run()
+        {
+            try
+            {
+                Object obj = (TerrainPatchInfo)getParams();
+                obj = OpenJPEG.bakeTerrain(256, 256, rawTextures, ((TerrainPatchInfo) (obj)).getTextureHeightMap(), ((TerrainPatchInfo) (obj)).getHeightMap().getMapWidth(), ((TerrainPatchInfo) (obj)).getHeightMap().getMapHeight());
                 Debug.Printf("Terrain: Baked texture producer: produced baked texture", new Object[0]);
-                completeRequest(bakeTerrain);
-            } catch (Exception e) {
-                Debug.Warning(e);
-                completeRequest(null);
+                completeRequest(obj);
+                return;
             }
+            catch (Exception exception)
+            {
+                Debug.Warning(exception);
+            }
+            completeRequest(null);
+        }
+
+        public TerrainTextureRequest(TerrainPatchInfo terrainpatchinfo, ResourceManager resourcemanager)
+        {
+            super(terrainpatchinfo, resourcemanager);
+            bakingFuture = null;
         }
     }
 
-    /* access modifiers changed from: protected */
-    public ResourceRequest<TerrainPatchInfo, OpenJPEG> CreateNewRequest(TerrainPatchInfo terrainPatchInfo, ResourceManager<TerrainPatchInfo, OpenJPEG> resourceManager) {
-        return new TerrainTextureRequest(terrainPatchInfo, resourceManager);
+    private class TerrainTextureRequest.TerrainRawTextureRequest
+        implements ResourceConsumer
+    {
+
+        private final int layer;
+        final TerrainTextureRequest this$1;
+
+        public void OnResourceReady(Object obj, boolean flag)
+        {
+            if (obj instanceof OpenJPEG)
+            {
+                onLayerReady(layer, (OpenJPEG)obj);
+            } else
+            if (obj == null)
+            {
+                onLayerReady(layer, null);
+                return;
+            }
+        }
+
+        public TerrainTextureRequest.TerrainRawTextureRequest(UUID uuid, int i)
+        {
+            this$1 = TerrainTextureRequest.this;
+            super();
+            layer = i;
+            TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuid, TextureClass.Terrain), this);
+        }
+    }
+
+
+    public static final int TextureResolution = 256;
+
+    public TerrainTextureCache()
+    {
+    }
+
+    protected ResourceRequest CreateNewRequest(TerrainPatchInfo terrainpatchinfo, ResourceManager resourcemanager)
+    {
+        return new TerrainTextureRequest(terrainpatchinfo, resourcemanager);
+    }
+
+    protected volatile ResourceRequest CreateNewRequest(Object obj, ResourceManager resourcemanager)
+    {
+        return CreateNewRequest((TerrainPatchInfo)obj, resourcemanager);
     }
 }

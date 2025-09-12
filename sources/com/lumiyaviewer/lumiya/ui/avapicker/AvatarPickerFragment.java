@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.avapicker;
 
 import android.content.Context;
@@ -13,7 +17,6 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import com.astuetz.PagerSlidingTabStrip;
 import com.google.common.base.Predicate;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterDisplayData;
 import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterListType;
@@ -22,143 +25,217 @@ import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo;
 import com.lumiyaviewer.lumiya.ui.chat.contacts.ChatterListSubscriptionAdapter;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.FragmentWithTitle;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public abstract class AvatarPickerFragment extends FragmentWithTitle implements AdapterView.OnItemClickListener {
+public abstract class AvatarPickerFragment extends FragmentWithTitle
+    implements android.widget.AdapterView.OnItemClickListener
+{
+    public class AvatarPickerPagerAdapter extends PagerAdapter
+    {
 
-    /* renamed from: -com-lumiyaviewer-lumiya-ui-avapicker-AvatarPickerFragment$ContactListTypeSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues = null;
-
-    public class AvatarPickerPagerAdapter extends PagerAdapter {
         private final Context context;
+        final AvatarPickerFragment this$0;
 
-        public AvatarPickerPagerAdapter(Context context2) {
-            this.context = context2;
-        }
-
-        public void destroyItem(ViewGroup viewGroup, int i, Object obj) {
-            if (obj instanceof View) {
-                if (obj instanceof ListView) {
-                    ((ListView) obj).setAdapter((ListAdapter) null);
+        public void destroyItem(ViewGroup viewgroup, int i, Object obj)
+        {
+            if (obj instanceof View)
+            {
+                if (obj instanceof ListView)
+                {
+                    ((ListView)obj).setAdapter(null);
                 }
-                viewGroup.removeView((View) obj);
+                viewgroup.removeView((View)obj);
             }
         }
 
-        public int getCount() {
+        public int getCount()
+        {
             return ContactListType.values().length;
         }
 
-        public CharSequence getPageTitle(int i) {
-            if (i < 0 || i >= ContactListType.values().length) {
+        public CharSequence getPageTitle(int i)
+        {
+            if (i >= 0 && i < ContactListType.values().length)
+            {
+                return ContactListType.values()[i].toString();
+            } else
+            {
                 return null;
             }
-            return ContactListType.values()[i].toString();
         }
 
-        public Object instantiateItem(ViewGroup viewGroup, int i) {
-            if (i < 0 || i >= ContactListType.values().length) {
+        public Object instantiateItem(ViewGroup viewgroup, int i)
+        {
+            if (i >= 0 && i < ContactListType.values().length)
+            {
+                ContactListType contactlisttype = ContactListType.values()[i];
+                ListView listview = new ListView(context);
+                listview.setOnItemClickListener(AvatarPickerFragment.this);
+                listview.setAdapter(AvatarPickerFragment._2D_wrap0(AvatarPickerFragment.this, getContext(), ActivityUtils.getUserManager(getArguments()), contactlisttype));
+                viewgroup.addView(listview);
+                return listview;
+            } else
+            {
                 return null;
             }
-            ContactListType contactListType = ContactListType.values()[i];
-            ListView listView = new ListView(this.context);
-            listView.setOnItemClickListener(AvatarPickerFragment.this);
-            listView.setAdapter(AvatarPickerFragment.this.createListAdapter(AvatarPickerFragment.this.getContext(), ActivityUtils.getUserManager(AvatarPickerFragment.this.getArguments()), contactListType));
-            viewGroup.addView(listView);
-            return listView;
         }
 
-        public boolean isViewFromObject(View view, Object obj) {
+        public boolean isViewFromObject(View view, Object obj)
+        {
             return view == obj;
         }
+
+        public AvatarPickerPagerAdapter(Context context1)
+        {
+            this$0 = AvatarPickerFragment.this;
+            super();
+            context = context1;
+        }
     }
 
-    private enum ContactListType {
-        Recent(R.drawable.ic_tab_card),
-        Friends(R.drawable.ic_tab_contacts),
-        Nearby(R.drawable.ic_tab_target);
-        
+    private static final class ContactListType extends Enum
+    {
+
+        private static final ContactListType $VALUES[];
+        public static final ContactListType Friends;
+        public static final ContactListType Nearby;
+        public static final ContactListType Recent;
         public final int drawableId;
 
-        private ContactListType(int i) {
-            this.drawableId = i;
+        public static ContactListType valueOf(String s)
+        {
+            return (ContactListType)Enum.valueOf(com/lumiyaviewer/lumiya/ui/avapicker/AvatarPickerFragment$ContactListType, s);
+        }
+
+        public static ContactListType[] values()
+        {
+            return $VALUES;
+        }
+
+        static 
+        {
+            Recent = new ContactListType("Recent", 0, 0x7f02007d);
+            Friends = new ContactListType("Friends", 1, 0x7f02007e);
+            Nearby = new ContactListType("Nearby", 2, 0x7f020083);
+            $VALUES = (new ContactListType[] {
+                Recent, Friends, Nearby
+            });
+        }
+
+        private ContactListType(String s, int i, int j)
+        {
+            super(s, i);
+            drawableId = j;
         }
     }
 
-    private static class UsersOnlyPredicate implements Predicate<ChatterDisplayData> {
-        private UsersOnlyPredicate() {
+    private static class UsersOnlyPredicate
+        implements Predicate
+    {
+
+        public boolean apply(ChatterDisplayData chatterdisplaydata)
+        {
+            return chatterdisplaydata != null && (chatterdisplaydata.chatterID instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser) && chatterdisplaydata.chatterID.isValidUUID();
         }
 
-        /* synthetic */ UsersOnlyPredicate(UsersOnlyPredicate usersOnlyPredicate) {
+        public volatile boolean apply(Object obj)
+        {
+            return apply((ChatterDisplayData)obj);
+        }
+
+        private UsersOnlyPredicate()
+        {
+        }
+
+        UsersOnlyPredicate(UsersOnlyPredicate usersonlypredicate)
+        {
             this();
         }
+    }
 
-        public boolean apply(@Nullable ChatterDisplayData chatterDisplayData) {
-            return chatterDisplayData != null && (chatterDisplayData.chatterID instanceof ChatterID.ChatterIDUser) && chatterDisplayData.chatterID.isValidUUID();
+
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_avapicker_2D_AvatarPickerFragment$ContactListTypeSwitchesValues[];
+
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_avapicker_2D_AvatarPickerFragment$ContactListTypeSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_avapicker_2D_AvatarPickerFragment$ContactListTypeSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_avapicker_2D_AvatarPickerFragment$ContactListTypeSwitchesValues;
+        }
+        int ai[] = new int[ContactListType.values().length];
+        try
+        {
+            ai[ContactListType.Friends.ordinal()] = 1;
+        }
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[ContactListType.Nearby.ordinal()] = 2;
+        }
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[ContactListType.Recent.ordinal()] = 3;
+        }
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_avapicker_2D_AvatarPickerFragment$ContactListTypeSwitchesValues = ai;
+        return ai;
+    }
+
+    static ListAdapter _2D_wrap0(AvatarPickerFragment avatarpickerfragment, Context context, UserManager usermanager, ContactListType contactlisttype)
+    {
+        return avatarpickerfragment.createListAdapter(context, usermanager, contactlisttype);
+    }
+
+    public AvatarPickerFragment()
+    {
+    }
+
+    private ListAdapter createListAdapter(Context context, UserManager usermanager, ContactListType contactlisttype)
+    {
+        switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_ui_2D_avapicker_2D_AvatarPickerFragment$ContactListTypeSwitchesValues()[contactlisttype.ordinal()])
+        {
+        default:
+            throw new IllegalArgumentException("Unknown contact list type");
+
+        case 3: // '\003'
+            return new ChatterListSubscriptionAdapter(context, usermanager, ChatterListType.Active, new UsersOnlyPredicate(null));
+
+        case 1: // '\001'
+            return new ChatterListSubscriptionAdapter(context, usermanager, ChatterListType.Friends);
+
+        case 2: // '\002'
+            return new ChatterListSubscriptionAdapter(context, usermanager, ChatterListType.Nearby);
         }
     }
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-ui-avapicker-AvatarPickerFragment$ContactListTypeSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m388getcomlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues() {
-        if (f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues != null) {
-            return f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues;
-        }
-        int[] iArr = new int[ContactListType.values().length];
-        try {
-            iArr[ContactListType.Friends.ordinal()] = 1;
-        } catch (NoSuchFieldError e) {
-        }
-        try {
-            iArr[ContactListType.Nearby.ordinal()] = 2;
-        } catch (NoSuchFieldError e2) {
-        }
-        try {
-            iArr[ContactListType.Recent.ordinal()] = 3;
-        } catch (NoSuchFieldError e3) {
-        }
-        f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues = iArr;
-        return iArr;
-    }
-
-    /* access modifiers changed from: private */
-    @Nonnull
-    public ListAdapter createListAdapter(Context context, UserManager userManager, @Nonnull ContactListType contactListType) {
-        switch (m388getcomlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues()[contactListType.ordinal()]) {
-            case 1:
-                return new ChatterListSubscriptionAdapter(context, userManager, ChatterListType.Friends);
-            case 2:
-                return new ChatterListSubscriptionAdapter(context, userManager, ChatterListType.Nearby);
-            case 3:
-                return new ChatterListSubscriptionAdapter(context, userManager, ChatterListType.Active, new UsersOnlyPredicate((UsersOnlyPredicate) null));
-            default:
-                throw new IllegalArgumentException("Unknown contact list type");
-        }
-    }
-
-    /* access modifiers changed from: protected */
-    public void createExtraView(LayoutInflater layoutInflater, FrameLayout frameLayout) {
+    protected void createExtraView(LayoutInflater layoutinflater, FrameLayout framelayout)
+    {
     }
 
     public abstract String getTitle();
 
-    /* access modifiers changed from: protected */
-    public abstract void onAvatarSelected(ChatterID chatterID, @Nullable String str);
+    protected abstract void onAvatarSelected(ChatterID chatterid, String s);
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.avatar_picker, viewGroup, false);
-        ViewPager viewPager = (ViewPager) inflate.findViewById(R.id.avatar_picker_pager);
-        viewPager.setAdapter(new AvatarPickerPagerAdapter(layoutInflater.getContext()));
-        ((PagerSlidingTabStrip) inflate.findViewById(R.id.avatar_picker_tabs)).setViewPager(viewPager);
-        createExtraView(layoutInflater, (FrameLayout) inflate.findViewById(R.id.avatar_picker_extra_content));
-        return inflate;
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        viewgroup = layoutinflater.inflate(0x7f04001f, viewgroup, false);
+        bundle = (ViewPager)viewgroup.findViewById(0x7f1000f3);
+        bundle.setAdapter(new AvatarPickerPagerAdapter(layoutinflater.getContext()));
+        ((PagerSlidingTabStrip)viewgroup.findViewById(0x7f1000f2)).setViewPager(bundle);
+        createExtraView(layoutinflater, (FrameLayout)viewgroup.findViewById(0x7f1000f4));
+        return viewgroup;
     }
 
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-        ChatterID chatterID;
-        Object itemAtPosition = adapterView.getItemAtPosition(i);
-        if ((itemAtPosition instanceof ChatterDisplayInfo) && (chatterID = ((ChatterDisplayInfo) itemAtPosition).getChatterID(ActivityUtils.getUserManager(getArguments()))) != null) {
-            onAvatarSelected(chatterID, ((ChatterDisplayInfo) itemAtPosition).getDisplayName());
+    public void onItemClick(AdapterView adapterview, View view, int i, long l)
+    {
+        adapterview = ((AdapterView) (adapterview.getItemAtPosition(i)));
+        if (adapterview instanceof ChatterDisplayInfo)
+        {
+            view = ((ChatterDisplayInfo)adapterview).getChatterID(ActivityUtils.getUserManager(getArguments()));
+            if (view != null)
+            {
+                onAvatarSelected(view, ((ChatterDisplayInfo)adapterview).getDisplayName());
+            }
         }
     }
 }

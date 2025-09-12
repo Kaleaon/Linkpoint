@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.mesh;
 
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
@@ -9,9 +13,13 @@ import com.lumiyaviewer.rawbuffers.DirectByteBuffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
-import javax.annotation.Nonnull;
 
-public class MeshFace {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.mesh:
+//            MeshWeightsBuffer
+
+public class MeshFace
+{
+
     private final DirectByteBuffer indexBuffer;
     private final int numIndices;
     private final int numVertices;
@@ -19,131 +27,207 @@ public class MeshFace {
     private final DirectByteBuffer vertexBuffer;
     private final DirectByteBuffer weightBuffer;
 
-    MeshFace(LLSDNode lLSDNode) throws LLSDException {
-        if (lLSDNode.keyExists("NoGeometry") || (!lLSDNode.keyExists("Position")) || (!lLSDNode.keyExists("TriangleList"))) {
-            this.vertexBuffer = null;
-            this.indexBuffer = null;
-            this.weightBuffer = null;
-            this.texCoordsBuffer = null;
-            this.numIndices = 0;
-            this.numVertices = 0;
+    MeshFace(LLSDNode llsdnode)
+        throws LLSDException
+    {
+        if (llsdnode.keyExists("NoGeometry") || llsdnode.keyExists("Position") ^ true || llsdnode.keyExists("TriangleList") ^ true)
+        {
+            vertexBuffer = null;
+            indexBuffer = null;
+            weightBuffer = null;
+            texCoordsBuffer = null;
+            numIndices = 0;
+            numVertices = 0;
             return;
         }
-        byte[] asBinary = lLSDNode.byKey("Position").asBinary();
-        byte[] asBinary2 = lLSDNode.keyExists("Normal") ? lLSDNode.byKey("Normal").asBinary() : null;
-        byte[] asBinary3 = lLSDNode.keyExists("TexCoord0") ? lLSDNode.byKey("TexCoord0").asBinary() : null;
-        this.numVertices = asBinary.length / 6;
-        this.vertexBuffer = new DirectByteBuffer(this.numVertices * 6 * 4);
-        LLVector3 lLVector3 = new LLVector3(-0.5f, -0.5f, -0.5f);
-        LLVector3 lLVector32 = new LLVector3(0.5f, 0.5f, 0.5f);
-        if (lLSDNode.keyExists("PositionDomain")) {
-            if (lLSDNode.byKey("PositionDomain").keyExists("Min")) {
-                LLSDNode byKey = lLSDNode.byKey("PositionDomain").byKey("Min");
-                lLVector3.set((float) byKey.byIndex(0).asDouble(), (float) byKey.byIndex(1).asDouble(), (float) byKey.byIndex(2).asDouble());
+        byte abyte1[] = llsdnode.byKey("Position").asBinary();
+        Object obj;
+        Object obj1;
+        Object obj2;
+        LLVector2 llvector2;
+        ShortBuffer shortbuffer;
+        LLVector3 llvector3;
+        LLVector3 llvector3_1;
+        int i;
+        if (llsdnode.keyExists("Normal"))
+        {
+            obj1 = llsdnode.byKey("Normal").asBinary();
+        } else
+        {
+            obj1 = null;
+        }
+        if (llsdnode.keyExists("TexCoord0"))
+        {
+            obj = llsdnode.byKey("TexCoord0").asBinary();
+        } else
+        {
+            obj = null;
+        }
+        numVertices = abyte1.length / 6;
+        vertexBuffer = new DirectByteBuffer(numVertices * 6 * 4);
+        llvector3 = new LLVector3(-0.5F, -0.5F, -0.5F);
+        llvector3_1 = new LLVector3(0.5F, 0.5F, 0.5F);
+        if (llsdnode.keyExists("PositionDomain"))
+        {
+            if (llsdnode.byKey("PositionDomain").keyExists("Min"))
+            {
+                LLSDNode llsdnode1 = llsdnode.byKey("PositionDomain").byKey("Min");
+                llvector3.set((float)llsdnode1.byIndex(0).asDouble(), (float)llsdnode1.byIndex(1).asDouble(), (float)llsdnode1.byIndex(2).asDouble());
             }
-            if (lLSDNode.byKey("PositionDomain").keyExists("Max")) {
-                LLSDNode byKey2 = lLSDNode.byKey("PositionDomain").byKey("Max");
-                lLVector32.set((float) byKey2.byIndex(0).asDouble(), (float) byKey2.byIndex(1).asDouble(), (float) byKey2.byIndex(2).asDouble());
+            if (llsdnode.byKey("PositionDomain").keyExists("Max"))
+            {
+                LLSDNode llsdnode2 = llsdnode.byKey("PositionDomain").byKey("Max");
+                llvector3_1.set((float)llsdnode2.byIndex(0).asDouble(), (float)llsdnode2.byIndex(1).asDouble(), (float)llsdnode2.byIndex(2).asDouble());
             }
         }
-        LLVector2 lLVector2 = null;
-        LLVector2 lLVector22 = null;
-        if (asBinary3 != null) {
-            lLVector2 = new LLVector2(0.0f, 0.0f);
-            lLVector22 = new LLVector2(0.0f, 0.0f);
-            if (lLSDNode.keyExists("TexCoord0Domain")) {
-                if (lLSDNode.byKey("TexCoord0Domain").keyExists("Min")) {
-                    LLSDNode byKey3 = lLSDNode.byKey("TexCoord0Domain").byKey("Min");
-                    lLVector2.set((float) byKey3.byIndex(0).asDouble(), (float) byKey3.byIndex(1).asDouble());
+        llvector2 = null;
+        obj2 = null;
+        if (obj != null)
+        {
+            LLVector2 llvector2_1 = new LLVector2(0.0F, 0.0F);
+            LLVector2 llvector2_2 = new LLVector2(0.0F, 0.0F);
+            obj2 = llvector2_2;
+            llvector2 = llvector2_1;
+            if (llsdnode.keyExists("TexCoord0Domain"))
+            {
+                if (llsdnode.byKey("TexCoord0Domain").keyExists("Min"))
+                {
+                    obj2 = llsdnode.byKey("TexCoord0Domain").byKey("Min");
+                    llvector2_1.set((float)((LLSDNode) (obj2)).byIndex(0).asDouble(), (float)((LLSDNode) (obj2)).byIndex(1).asDouble());
                 }
-                if (lLSDNode.byKey("TexCoord0Domain").keyExists("Max")) {
-                    LLSDNode byKey4 = lLSDNode.byKey("TexCoord0Domain").byKey("Max");
-                    lLVector22.set((float) byKey4.byIndex(0).asDouble(), (float) byKey4.byIndex(1).asDouble());
+                obj2 = llvector2_2;
+                llvector2 = llvector2_1;
+                if (llsdnode.byKey("TexCoord0Domain").keyExists("Max"))
+                {
+                    obj2 = llsdnode.byKey("TexCoord0Domain").byKey("Max");
+                    llvector2_2.set((float)((LLSDNode) (obj2)).byIndex(0).asDouble(), (float)((LLSDNode) (obj2)).byIndex(1).asDouble());
+                    llvector2 = llvector2_1;
+                    obj2 = llvector2_2;
                 }
             }
         }
-        ShortBuffer asShortBuffer = ByteBuffer.wrap(asBinary).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
-        ShortBuffer asShortBuffer2 = asBinary2 != null ? ByteBuffer.wrap(asBinary2).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer() : null;
-        ShortBuffer asShortBuffer3 = asBinary3 != null ? ByteBuffer.wrap(asBinary3).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer() : null;
-        this.vertexBuffer.position(0);
-        for (int i = 0; i < this.numVertices; i++) {
-            float f = ((((float) (asShortBuffer.get() & 65535)) * (lLVector32.x - lLVector3.x)) / 65535.0f) + lLVector3.x;
-            float f2 = ((((float) (asShortBuffer.get() & 65535)) * (lLVector32.y - lLVector3.y)) / 65535.0f) + lLVector3.y;
-            float f3 = ((((float) (asShortBuffer.get() & 65535)) * (lLVector32.z - lLVector3.z)) / 65535.0f) + lLVector3.z;
-            this.vertexBuffer.putFloat(f);
-            this.vertexBuffer.putFloat(f2);
-            this.vertexBuffer.putFloat(f3);
-            if (asShortBuffer2 != null) {
-                this.vertexBuffer.putFloat(((((float) (asShortBuffer2.get() & 65535)) * 2.0f) / 65535.0f) - 1.0f);
-                this.vertexBuffer.putFloat(((((float) (asShortBuffer2.get() & 65535)) * 2.0f) / 65535.0f) - 1.0f);
-                this.vertexBuffer.putFloat(((((float) (asShortBuffer2.get() & 65535)) * 2.0f) / 65535.0f) - 1.0f);
-            } else {
-                this.vertexBuffer.putFloat(0.0f);
-                this.vertexBuffer.putFloat(0.0f);
-                this.vertexBuffer.putFloat(0.0f);
-            }
+        shortbuffer = ByteBuffer.wrap(abyte1).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+        if (obj1 != null)
+        {
+            obj1 = ByteBuffer.wrap(((byte []) (obj1))).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+        } else
+        {
+            obj1 = null;
         }
-        if (asShortBuffer3 != null) {
-            this.texCoordsBuffer = new DirectByteBuffer(this.numVertices * 2 * 4);
-            this.texCoordsBuffer.position(0);
-            for (int i2 = 0; i2 < this.numVertices; i2++) {
-                float f4 = ((((float) (asShortBuffer3.get() & 65535)) * (lLVector22.x - lLVector2.x)) / 65535.0f) + lLVector2.x;
-                float f5 = ((((float) (asShortBuffer3.get() & 65535)) * (lLVector22.y - lLVector2.y)) / 65535.0f) + lLVector2.y;
-                this.texCoordsBuffer.putFloat(f4);
-                this.texCoordsBuffer.putFloat(f5);
-            }
-        } else {
-            this.texCoordsBuffer = null;
+        if (obj != null)
+        {
+            obj = ByteBuffer.wrap(((byte []) (obj))).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer();
+        } else
+        {
+            obj = null;
         }
-        byte[] asBinary4 = lLSDNode.byKey("TriangleList").asBinary();
-        this.numIndices = asBinary4.length / 2;
-        this.indexBuffer = new DirectByteBuffer(this.numIndices * 2);
-        this.indexBuffer.loadFromByteArray(0, asBinary4, 0, this.numIndices * 2);
-        if (lLSDNode.keyExists("Weights")) {
-            byte[] asBinary5 = lLSDNode.byKey("Weights").asBinary();
-            this.weightBuffer = new DirectByteBuffer(asBinary5.length);
-            this.weightBuffer.loadFromByteArray(0, asBinary5, 0, asBinary5.length);
+        vertexBuffer.position(0);
+        i = 0;
+        while (i < numVertices) 
+        {
+            float f = ((float)(shortbuffer.get() & 0xffff) * (llvector3_1.x - llvector3.x)) / 65535F;
+            float f3 = llvector3.x;
+            float f6 = ((float)(shortbuffer.get() & 0xffff) * (llvector3_1.y - llvector3.y)) / 65535F;
+            float f9 = llvector3.y;
+            float f11 = ((float)(shortbuffer.get() & 0xffff) * (llvector3_1.z - llvector3.z)) / 65535F;
+            float f12 = llvector3.z;
+            vertexBuffer.putFloat(f + f3);
+            vertexBuffer.putFloat(f6 + f9);
+            vertexBuffer.putFloat(f11 + f12);
+            if (obj1 != null)
+            {
+                float f1 = ((float)(((ShortBuffer) (obj1)).get() & 0xffff) * 2.0F) / 65535F;
+                float f4 = ((float)(((ShortBuffer) (obj1)).get() & 0xffff) * 2.0F) / 65535F;
+                float f7 = ((float)(((ShortBuffer) (obj1)).get() & 0xffff) * 2.0F) / 65535F;
+                vertexBuffer.putFloat(f1 - 1.0F);
+                vertexBuffer.putFloat(f4 - 1.0F);
+                vertexBuffer.putFloat(f7 - 1.0F);
+            } else
+            {
+                vertexBuffer.putFloat(0.0F);
+                vertexBuffer.putFloat(0.0F);
+                vertexBuffer.putFloat(0.0F);
+            }
+            i++;
+        }
+        if (obj != null)
+        {
+            texCoordsBuffer = new DirectByteBuffer(numVertices * 2 * 4);
+            texCoordsBuffer.position(0);
+            for (int j = 0; j < numVertices; j++)
+            {
+                float f2 = ((float)(((ShortBuffer) (obj)).get() & 0xffff) * (((LLVector2) (obj2)).x - llvector2.x)) / 65535F;
+                float f5 = llvector2.x;
+                float f8 = ((float)(((ShortBuffer) (obj)).get() & 0xffff) * (((LLVector2) (obj2)).y - llvector2.y)) / 65535F;
+                float f10 = llvector2.y;
+                texCoordsBuffer.putFloat(f2 + f5);
+                texCoordsBuffer.putFloat(f8 + f10);
+            }
+
+        } else
+        {
+            texCoordsBuffer = null;
+        }
+        byte abyte0[] = llsdnode.byKey("TriangleList").asBinary();
+        numIndices = abyte0.length / 2;
+        indexBuffer = new DirectByteBuffer(numIndices * 2);
+        indexBuffer.loadFromByteArray(0, abyte0, 0, numIndices * 2);
+        if (llsdnode.keyExists("Weights"))
+        {
+            llsdnode = llsdnode.byKey("Weights").asBinary();
+            weightBuffer = new DirectByteBuffer(llsdnode.length);
+            weightBuffer.loadFromByteArray(0, llsdnode, 0, llsdnode.length);
+            return;
+        } else
+        {
+            weightBuffer = null;
             return;
         }
-        this.weightBuffer = null;
     }
 
-    /* access modifiers changed from: package-private */
-    public void PrepareInfluenceBuffer(@Nonnull MeshWeightsBuffer meshWeightsBuffer, int i) {
-        OpenJPEG.meshPrepareSeparateInfluenceBuffer(this.weightBuffer.asByteBuffer(), this.numVertices, meshWeightsBuffer.jointIndexBuffer.asByteBuffer(), meshWeightsBuffer.weightsBuffer.asByteBuffer(), i);
+    void PrepareInfluenceBuffer(MeshWeightsBuffer meshweightsbuffer, int i)
+    {
+        OpenJPEG.meshPrepareSeparateInfluenceBuffer(weightBuffer.asByteBuffer(), numVertices, meshweightsbuffer.jointIndexBuffer.asByteBuffer(), meshweightsbuffer.weightsBuffer.asByteBuffer(), i);
     }
 
-    /* access modifiers changed from: package-private */
-    public void PrepareInfluenceBuffer(DirectByteBuffer directByteBuffer, int i) {
-        if (this.weightBuffer != null) {
-            OpenJPEG.meshPrepareInfluenceBuffer(this.weightBuffer.asByteBuffer(), this.numVertices, directByteBuffer.asByteBuffer(), i);
+    void PrepareInfluenceBuffer(DirectByteBuffer directbytebuffer, int i)
+    {
+        if (weightBuffer != null)
+        {
+            OpenJPEG.meshPrepareInfluenceBuffer(weightBuffer.asByteBuffer(), numVertices, directbytebuffer.asByteBuffer(), i);
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public final void UpdateRigged(DirectByteBuffer directByteBuffer, int i, float[] fArr, float[] fArr2) {
-        if (this.weightBuffer != null && this.vertexBuffer != null && directByteBuffer != null) {
-            OpenJPEG.applyRiggedMeshMorph(directByteBuffer.asByteBuffer(), i, fArr, fArr2, this.vertexBuffer.asByteBuffer(), this.weightBuffer.asByteBuffer(), this.numVertices);
+    final void UpdateRigged(DirectByteBuffer directbytebuffer, int i, float af[], float af1[])
+    {
+        if (weightBuffer != null && vertexBuffer != null && directbytebuffer != null)
+        {
+            OpenJPEG.applyRiggedMeshMorph(directbytebuffer.asByteBuffer(), i, af, af1, vertexBuffer.asByteBuffer(), weightBuffer.asByteBuffer(), numVertices);
         }
     }
 
-    public final DirectByteBuffer getIndices() {
-        return this.indexBuffer;
+    public final DirectByteBuffer getIndices()
+    {
+        return indexBuffer;
     }
 
-    public final int getNumIndices() {
-        return this.numIndices;
+    public final int getNumIndices()
+    {
+        return numIndices;
     }
 
-    public final int getNumVertices() {
-        return this.numVertices;
+    public final int getNumVertices()
+    {
+        return numVertices;
     }
 
-    public final DirectByteBuffer getTexCoords() {
-        return this.texCoordsBuffer;
+    public final DirectByteBuffer getTexCoords()
+    {
+        return texCoordsBuffer;
     }
 
-    public final DirectByteBuffer getVertices() {
-        return this.vertexBuffer;
+    public final DirectByteBuffer getVertices()
+    {
+        return vertexBuffer;
     }
 }

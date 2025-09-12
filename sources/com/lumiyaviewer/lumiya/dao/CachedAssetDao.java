@@ -1,100 +1,221 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.support.v4.app.NotificationCompat;
 import de.greenrobot.dao.AbstractDao;
 import de.greenrobot.dao.Property;
 import de.greenrobot.dao.internal.DaoConfig;
 
-public class CachedAssetDao extends AbstractDao<CachedAsset, String> {
+// Referenced classes of package com.lumiyaviewer.lumiya.dao:
+//            CachedAsset, DaoSession
+
+public class CachedAssetDao extends AbstractDao
+{
+    public static class Properties
+    {
+
+        public static final Property Data = new Property(2, [B, "data", false, "DATA");
+        public static final Property Key = new Property(0, java/lang/String, "key", true, "KEY");
+        public static final Property MustRevalidate;
+        public static final Property Status;
+
+        static 
+        {
+            Status = new Property(1, Integer.TYPE, "status", false, "STATUS");
+            MustRevalidate = new Property(3, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE");
+        }
+
+        public Properties()
+        {
+        }
+    }
+
+
     public static final String TABLENAME = "CachedAssets";
 
-    public static class Properties {
-        public static final Property Data = new Property(2, byte[].class, "data", false, "DATA");
-        public static final Property Key = new Property(0, String.class, "key", true, "KEY");
-        public static final Property MustRevalidate = new Property(3, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE");
-        public static final Property Status = new Property(1, Integer.TYPE, NotificationCompat.CATEGORY_STATUS, false, "STATUS");
+    public CachedAssetDao(DaoConfig daoconfig)
+    {
+        super(daoconfig);
     }
 
-    public CachedAssetDao(DaoConfig daoConfig) {
-        super(daoConfig);
+    public CachedAssetDao(DaoConfig daoconfig, DaoSession daosession)
+    {
+        super(daoconfig, daosession);
     }
 
-    public CachedAssetDao(DaoConfig daoConfig, DaoSession daoSession) {
-        super(daoConfig, daoSession);
-    }
-
-    public static void createTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'CachedAssets' (" + "'KEY' TEXT PRIMARY KEY NOT NULL ," + "'STATUS' INTEGER NOT NULL ," + "'DATA' BLOB," + "'MUST_REVALIDATE' INTEGER NOT NULL );");
-    }
-
-    public static void dropTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CachedAssets'");
-    }
-
-    /* access modifiers changed from: protected */
-    public void bindValues(SQLiteStatement sQLiteStatement, CachedAsset cachedAsset) {
-        sQLiteStatement.clearBindings();
-        String key = cachedAsset.getKey();
-        if (key != null) {
-            sQLiteStatement.bindString(1, key);
+    public static void createTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        String s;
+        if (flag)
+        {
+            s = "IF NOT EXISTS ";
+        } else
+        {
+            s = "";
         }
-        sQLiteStatement.bindLong(2, (long) cachedAsset.getStatus());
-        byte[] data = cachedAsset.getData();
-        if (data != null) {
-            sQLiteStatement.bindBlob(3, data);
-        }
-        sQLiteStatement.bindLong(4, cachedAsset.getMustRevalidate() ? 1 : 0);
+        sqlitedatabase.execSQL((new StringBuilder()).append("CREATE TABLE ").append(s).append("'CachedAssets' (").append("'KEY' TEXT PRIMARY KEY NOT NULL ,").append("'STATUS' INTEGER NOT NULL ,").append("'DATA' BLOB,").append("'MUST_REVALIDATE' INTEGER NOT NULL );").toString());
     }
 
-    public String getKey(CachedAsset cachedAsset) {
-        if (cachedAsset != null) {
-            return cachedAsset.getKey();
+    public static void dropTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        StringBuilder stringbuilder = (new StringBuilder()).append("DROP TABLE ");
+        String s;
+        if (flag)
+        {
+            s = "IF EXISTS ";
+        } else
+        {
+            s = "";
         }
-        return null;
+        sqlitedatabase.execSQL(stringbuilder.append(s).append("'CachedAssets'").toString());
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isEntityUpdateable() {
+    protected void bindValues(SQLiteStatement sqlitestatement, CachedAsset cachedasset)
+    {
+        sqlitestatement.clearBindings();
+        String s = cachedasset.getKey();
+        if (s != null)
+        {
+            sqlitestatement.bindString(1, s);
+        }
+        sqlitestatement.bindLong(2, cachedasset.getStatus());
+        byte abyte0[] = cachedasset.getData();
+        if (abyte0 != null)
+        {
+            sqlitestatement.bindBlob(3, abyte0);
+        }
+        long l;
+        if (cachedasset.getMustRevalidate())
+        {
+            l = 1L;
+        } else
+        {
+            l = 0L;
+        }
+        sqlitestatement.bindLong(4, l);
+    }
+
+    protected volatile void bindValues(SQLiteStatement sqlitestatement, Object obj)
+    {
+        bindValues(sqlitestatement, (CachedAsset)obj);
+    }
+
+    public volatile Object getKey(Object obj)
+    {
+        return getKey((CachedAsset)obj);
+    }
+
+    public String getKey(CachedAsset cachedasset)
+    {
+        if (cachedasset != null)
+        {
+            return cachedasset.getKey();
+        } else
+        {
+            return null;
+        }
+    }
+
+    protected boolean isEntityUpdateable()
+    {
         return true;
     }
 
-    public CachedAsset readEntity(Cursor cursor, int i) {
-        byte[] bArr = null;
-        boolean z = false;
-        String string = cursor.isNull(i + 0) ? null : cursor.getString(i + 0);
-        int i2 = cursor.getInt(i + 1);
-        if (!cursor.isNull(i + 2)) {
-            bArr = cursor.getBlob(i + 2);
+    public CachedAsset readEntity(Cursor cursor, int i)
+    {
+        byte abyte0[] = null;
+        boolean flag = false;
+        String s;
+        int j;
+        if (cursor.isNull(i + 0))
+        {
+            s = null;
+        } else
+        {
+            s = cursor.getString(i + 0);
         }
-        if (cursor.getShort(i + 3) != 0) {
-            z = true;
+        j = cursor.getInt(i + 1);
+        if (!cursor.isNull(i + 2))
+        {
+            abyte0 = cursor.getBlob(i + 2);
         }
-        return new CachedAsset(string, i2, bArr, z);
+        if (cursor.getShort(i + 3) != 0)
+        {
+            flag = true;
+        }
+        return new CachedAsset(s, j, abyte0, flag);
     }
 
-    public void readEntity(Cursor cursor, CachedAsset cachedAsset, int i) {
-        byte[] bArr = null;
-        cachedAsset.setKey(cursor.isNull(i + 0) ? null : cursor.getString(i + 0));
-        cachedAsset.setStatus(cursor.getInt(i + 1));
-        if (!cursor.isNull(i + 2)) {
-            bArr = cursor.getBlob(i + 2);
-        }
-        cachedAsset.setData(bArr);
-        cachedAsset.setMustRevalidate(cursor.getShort(i + 3) != 0);
+    public volatile Object readEntity(Cursor cursor, int i)
+    {
+        return readEntity(cursor, i);
     }
 
-    public String readKey(Cursor cursor, int i) {
-        if (cursor.isNull(i + 0)) {
+    public void readEntity(Cursor cursor, CachedAsset cachedasset, int i)
+    {
+        Object obj1 = null;
+        Object obj;
+        boolean flag;
+        if (cursor.isNull(i + 0))
+        {
+            obj = null;
+        } else
+        {
+            obj = cursor.getString(i + 0);
+        }
+        cachedasset.setKey(((String) (obj)));
+        cachedasset.setStatus(cursor.getInt(i + 1));
+        if (cursor.isNull(i + 2))
+        {
+            obj = obj1;
+        } else
+        {
+            obj = cursor.getBlob(i + 2);
+        }
+        cachedasset.setData(((byte []) (obj)));
+        if (cursor.getShort(i + 3) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        cachedasset.setMustRevalidate(flag);
+    }
+
+    public volatile void readEntity(Cursor cursor, Object obj, int i)
+    {
+        readEntity(cursor, (CachedAsset)obj, i);
+    }
+
+    public volatile Object readKey(Cursor cursor, int i)
+    {
+        return readKey(cursor, i);
+    }
+
+    public String readKey(Cursor cursor, int i)
+    {
+        if (cursor.isNull(i + 0))
+        {
             return null;
+        } else
+        {
+            return cursor.getString(i + 0);
         }
-        return cursor.getString(i + 0);
     }
 
-    /* access modifiers changed from: protected */
-    public String updateKeyAfterInsert(CachedAsset cachedAsset, long j) {
-        return cachedAsset.getKey();
+    protected volatile Object updateKeyAfterInsert(Object obj, long l)
+    {
+        return updateKeyAfterInsert((CachedAsset)obj, l);
+    }
+
+    protected String updateKeyAfterInsert(CachedAsset cachedasset, long l)
+    {
+        return cachedasset.getKey();
     }
 }

@@ -1,48 +1,65 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class GPUDetection {
+public class GPUDetection
+{
+
     public static final String GPU_FAMILY_ADRENO = "Adreno";
     public static final String GPU_FAMILY_TEGRA = "Tegra";
     public static final int INVALID_VERSION = -1;
-    @Nonnull
-    public final Optional<String> detectedFamily;
+    public final Optional detectedFamily;
     public final int detectedNumericVersion;
-    @Nonnull
-    public final Optional<String> detectedVersion;
+    public final Optional detectedVersion;
 
-    public GPUDetection(@Nullable String str) {
-        int i;
-        String nullToEmpty = Strings.nullToEmpty(str);
-        if (nullToEmpty.toLowerCase().contains("adreno")) {
-            this.detectedFamily = Optional.of(GPU_FAMILY_ADRENO);
-            Matcher matcher = Pattern.compile(".*?Adreno.*?([0-9]+).*?", 2).matcher(nullToEmpty);
-            if (matcher.matches()) {
-                this.detectedVersion = Optional.fromNullable(Strings.emptyToNull(matcher.group(1)));
-                try {
-                    i = Integer.parseInt(this.detectedVersion.or(""));
-                } catch (NumberFormatException e) {
+    public GPUDetection(String s)
+    {
+        s = Strings.nullToEmpty(s);
+        if (s.toLowerCase().contains("adreno"))
+        {
+            detectedFamily = Optional.of("Adreno");
+            s = Pattern.compile(".*?Adreno.*?([0-9]+).*?", 2).matcher(s);
+            if (s.matches())
+            {
+                detectedVersion = Optional.fromNullable(Strings.emptyToNull(s.group(1)));
+                int i;
+                try
+                {
+                    i = Integer.parseInt((String)detectedVersion.or(""));
+                }
+                // Misplaced declaration of an exception variable
+                catch (String s)
+                {
                     i = -1;
                 }
-                this.detectedNumericVersion = i;
+                detectedNumericVersion = i;
+                return;
+            } else
+            {
+                detectedVersion = Optional.absent();
+                detectedNumericVersion = -1;
                 return;
             }
-            this.detectedVersion = Optional.absent();
-            this.detectedNumericVersion = -1;
-        } else if (nullToEmpty.toLowerCase().contains("tegra")) {
-            this.detectedFamily = Optional.of(GPU_FAMILY_TEGRA);
-            this.detectedVersion = Optional.absent();
-            this.detectedNumericVersion = -1;
-        } else {
-            this.detectedFamily = Optional.absent();
-            this.detectedVersion = Optional.absent();
-            this.detectedNumericVersion = -1;
+        }
+        if (s.toLowerCase().contains("tegra"))
+        {
+            detectedFamily = Optional.of("Tegra");
+            detectedVersion = Optional.absent();
+            detectedNumericVersion = -1;
+            return;
+        } else
+        {
+            detectedFamily = Optional.absent();
+            detectedVersion = Optional.absent();
+            detectedNumericVersion = -1;
+            return;
         }
     }
 }

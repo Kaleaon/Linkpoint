@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.avatar;
 
 import android.opengl.Matrix;
@@ -13,125 +17,213 @@ import java.nio.FloatBuffer;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class SLPolyMesh extends SLMeshData {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.avatar:
+//            SLMeshData, SLVisualParamID, SLPolyMorphData, SLAnimatedMeshData
+
+public class SLPolyMesh extends SLMeshData
+{
+
     protected boolean hasWeights;
-    public int[] jointMap;
-    private Map<SLVisualParamID, Integer> morphIndices = new EnumMap(SLVisualParamID.class);
-    private SLPolyMorphData[] morphs;
+    public int jointMap[];
+    private Map morphIndices;
+    private SLPolyMorphData morphs[];
     protected DirectByteBuffer weightsBuffer;
 
-    public SLPolyMesh(DataInputStream dataInputStream, DataInputStream dataInputStream2) throws IOException {
-        this.position = new LLVector3(dataInputStream.readFloat(), dataInputStream.readFloat(), dataInputStream.readFloat());
-        this.scale = new LLVector3(dataInputStream.readFloat(), dataInputStream.readFloat(), dataInputStream.readFloat());
-        this.rotation = new LLQuaternion(dataInputStream.readFloat(), dataInputStream.readFloat(), dataInputStream.readFloat(), dataInputStream.readFloat());
-        this.hasWeights = dataInputStream.readByte() != 0;
-        this.numVertices = dataInputStream.readInt();
-        this.vertexBuffer = new DirectByteBuffer(this.numVertices * 24);
-        this.texCoordsBuffer = new DirectByteBuffer(this.numVertices * 8);
-        this.vertexBuffer.read(dataInputStream);
-        this.texCoordsBuffer.read(dataInputStream);
-        if (this.hasWeights) {
-            this.weightsBuffer = new DirectByteBuffer(this.numVertices * 4);
-            this.weightsBuffer.read(dataInputStream);
+    public SLPolyMesh(DataInputStream datainputstream, DataInputStream datainputstream1)
+        throws IOException
+    {
+        boolean flag = false;
+        super();
+        morphIndices = new EnumMap(com/lumiyaviewer/lumiya/slproto/avatar/SLVisualParamID);
+        position = new LLVector3(datainputstream.readFloat(), datainputstream.readFloat(), datainputstream.readFloat());
+        scale = new LLVector3(datainputstream.readFloat(), datainputstream.readFloat(), datainputstream.readFloat());
+        rotation = new LLQuaternion(datainputstream.readFloat(), datainputstream.readFloat(), datainputstream.readFloat(), datainputstream.readFloat());
+        Object obj;
+        int i;
+        int k;
+        int i1;
+        boolean flag1;
+        if (datainputstream.readByte() != 0)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
         }
-        this.numFaces = dataInputStream.readInt();
-        this.indexBuffer = new DirectByteBuffer(this.numFaces * 2 * 3);
-        this.indexBuffer.read(dataInputStream);
-        int readInt = dataInputStream.readInt();
-        this.morphs = new SLPolyMorphData[readInt];
-        int i = 0;
-        int i2 = 0;
-        DataInputStream dataInputStream3 = dataInputStream;
-        while (i < readInt) {
-            if (i2 >= 50 && dataInputStream2 != null) {
-                i2 = 0;
-                dataInputStream3 = dataInputStream2;
-            }
-            SLVisualParamID sLVisualParamID = SLVisualParamID.values()[dataInputStream3.readInt()];
-            this.morphs[i] = new SLPolyMorphData(sLVisualParamID, this, dataInputStream3);
-            this.morphIndices.put(sLVisualParamID, Integer.valueOf(i));
-            i++;
-            i2++;
+        hasWeights = flag1;
+        numVertices = datainputstream.readInt();
+        vertexBuffer = new DirectByteBuffer(numVertices * 24);
+        texCoordsBuffer = new DirectByteBuffer(numVertices * 8);
+        vertexBuffer.read(datainputstream);
+        texCoordsBuffer.read(datainputstream);
+        if (hasWeights)
+        {
+            weightsBuffer = new DirectByteBuffer(numVertices * 4);
+            weightsBuffer.read(datainputstream);
         }
-        int readInt2 = dataInputStream3.readInt();
-        this.jointMap = new int[readInt2];
-        for (int i3 = 0; i3 < readInt2; i3++) {
-            this.jointMap[i3] = dataInputStream3.readInt();
-        }
-        Debug.Log("SLPolyMesh: Loaded, numVerts = " + this.numVertices + ", faces = " + this.numFaces + ", morphs = " + this.morphs.length);
-    }
-
-    public void applyMorphData(SLMeshData sLMeshData, float[] fArr, GLTexture gLTexture) {
-        for (int i = 0; i < fArr.length; i++) {
-            this.morphs[i].applyMorphData(sLMeshData, fArr[i], gLTexture);
-        }
-    }
-
-    public void applySkeleton(SLAnimatedMeshData sLAnimatedMeshData, float[] fArr) {
-        DirectByteBuffer animatedVertexData;
-        if (this.hasWeights && this.jointMap != null && (animatedVertexData = sLAnimatedMeshData.getAnimatedVertexData()) != null) {
-            OpenJPEG.applyMorphingTransform(this.numVertices, sLAnimatedMeshData.vertexBuffer.asByteBuffer(), animatedVertexData.asByteBuffer(), this.weightsBuffer.asByteBuffer(), this.jointMap, fArr);
-        }
-    }
-
-    public void applySkeletonSlow(SLAnimatedMeshData sLAnimatedMeshData, float[] fArr) {
-        DirectByteBuffer animatedVertexData;
-        double d;
-        if (this.hasWeights && this.jointMap != null && (animatedVertexData = sLAnimatedMeshData.getAnimatedVertexData()) != null) {
-            FloatBuffer asFloatBuffer = this.weightsBuffer.asFloatBuffer();
-            FloatBuffer asFloatBuffer2 = sLAnimatedMeshData.vertexBuffer.asFloatBuffer();
-            FloatBuffer asFloatBuffer3 = animatedVertexData.asFloatBuffer();
-            float[] fArr2 = new float[16];
-            float[] fArr3 = new float[16];
-            double d2 = -1.0d;
-            int i = 0;
-            while (i < this.numVertices) {
-                float f = asFloatBuffer.get(i);
-                if (((double) f) != d2) {
-                    float floor = (float) Math.floor((double) f);
-                    float f2 = f - floor;
-                    int i2 = ((int) floor) - 1;
-                    int i3 = 0;
-                    if (i2 >= 0 && i2 < this.jointMap.length) {
-                        i3 = this.jointMap[i2];
-                    }
-                    int i4 = (i2 + 1 < 0 || i2 + 1 >= this.jointMap.length) ? i3 : this.jointMap[i2 + 1];
-                    d = (double) f;
-                    int i5 = i3 * 16;
-                    int i6 = i4 * 16;
-                    if (i5 == i6) {
-                        System.arraycopy(fArr, i5, fArr3, 0, 16);
-                    } else {
-                        for (int i7 = 0; i7 < 16; i7++) {
-                            fArr3[i7] = (fArr[i5 + i7] * (1.0f - f2)) + (fArr[i6 + i7] * f2);
-                        }
-                    }
-                } else {
-                    d = d2;
+        numFaces = datainputstream.readInt();
+        indexBuffer = new DirectByteBuffer(numFaces * 2 * 3);
+        indexBuffer.read(datainputstream);
+        i1 = datainputstream.readInt();
+        morphs = new SLPolyMorphData[i1];
+        k = 0;
+        i = 0;
+        for (obj = datainputstream; k < i1; obj = datainputstream)
+        {
+            int l = i;
+            datainputstream = ((DataInputStream) (obj));
+            if (i >= 50)
+            {
+                l = i;
+                datainputstream = ((DataInputStream) (obj));
+                if (datainputstream1 != null)
+                {
+                    l = 0;
+                    datainputstream = datainputstream1;
                 }
-                fArr2[0] = asFloatBuffer2.get((i * 6) + 0);
-                fArr2[1] = asFloatBuffer2.get((i * 6) + 1);
-                fArr2[2] = asFloatBuffer2.get((i * 6) + 2);
-                fArr2[3] = 1.0f;
-                Matrix.multiplyMV(fArr2, 4, fArr3, 0, fArr2, 0);
-                asFloatBuffer3.put((i * 6) + 0, fArr2[4]);
-                asFloatBuffer3.put((i * 6) + 1, fArr2[5]);
-                asFloatBuffer3.put((i * 6) + 2, fArr2[6]);
-                i++;
-                d2 = d;
+            }
+            obj = SLVisualParamID.values()[datainputstream.readInt()];
+            SLPolyMorphData slpolymorphdata = new SLPolyMorphData(((SLVisualParamID) (obj)), this, datainputstream);
+            morphs[k] = slpolymorphdata;
+            morphIndices.put(obj, Integer.valueOf(k));
+            k++;
+            i = l + 1;
+        }
+
+        k = ((DataInputStream) (obj)).readInt();
+        jointMap = new int[k];
+        for (int j = ((flag) ? 1 : 0); j < k; j++)
+        {
+            jointMap[j] = ((DataInputStream) (obj)).readInt();
+        }
+
+        Debug.Log((new StringBuilder()).append("SLPolyMesh: Loaded, numVerts = ").append(numVertices).append(", faces = ").append(numFaces).append(", morphs = ").append(morphs.length).toString());
+    }
+
+    public void applyMorphData(SLMeshData slmeshdata, float af[], GLTexture gltexture)
+    {
+        for (int i = 0; i < af.length; i++)
+        {
+            morphs[i].applyMorphData(slmeshdata, af[i], gltexture);
+        }
+
+    }
+
+    public void applySkeleton(SLAnimatedMeshData slanimatedmeshdata, float af[])
+    {
+        if (hasWeights && jointMap != null)
+        {
+            DirectByteBuffer directbytebuffer = slanimatedmeshdata.getAnimatedVertexData();
+            if (directbytebuffer != null)
+            {
+                OpenJPEG.applyMorphingTransform(numVertices, slanimatedmeshdata.vertexBuffer.asByteBuffer(), directbytebuffer.asByteBuffer(), weightsBuffer.asByteBuffer(), jointMap, af);
             }
         }
     }
 
-    public int getMorphIndex(SLVisualParamID sLVisualParamID) {
-        Integer num = this.morphIndices.get(sLVisualParamID);
-        if (num == null) {
-            return -1;
+    public void applySkeletonSlow(SLAnimatedMeshData slanimatedmeshdata, float af[])
+    {
+        double d;
+        FloatBuffer floatbuffer;
+        Object obj;
+        float af1[];
+        float af2[];
+        int k;
+        if (!hasWeights || jointMap == null)
+        {
+            break MISSING_BLOCK_LABEL_402;
         }
-        return num.intValue();
+        obj = slanimatedmeshdata.getAnimatedVertexData();
+        if (obj == null)
+        {
+            break MISSING_BLOCK_LABEL_402;
+        }
+        floatbuffer = weightsBuffer.asFloatBuffer();
+        slanimatedmeshdata = slanimatedmeshdata.vertexBuffer.asFloatBuffer();
+        obj = ((DirectByteBuffer) (obj)).asFloatBuffer();
+        af1 = new float[16];
+        af2 = new float[16];
+        d = -1D;
+        k = 0;
+_L2:
+        double d1;
+        float f2;
+        int l;
+        int i1;
+        if (k >= numVertices)
+        {
+            break MISSING_BLOCK_LABEL_402;
+        }
+        float f = floatbuffer.get(k);
+        if ((double)f != d)
+        {
+            float f1 = (float)Math.floor(f);
+            f2 = f - f1;
+            i1 = (int)f1 - 1;
+            l = 0;
+            int i = l;
+            if (i1 >= 0)
+            {
+                i = l;
+                if (i1 < jointMap.length)
+                {
+                    i = jointMap[i1];
+                }
+            }
+            if (i1 + 1 >= 0 && i1 + 1 < jointMap.length)
+            {
+                l = jointMap[i1 + 1];
+            } else
+            {
+                l = i;
+            }
+            d1 = f;
+            i1 = i * 16;
+            l *= 16;
+            if (i1 != l)
+            {
+                break; /* Loop/switch isn't completed */
+            }
+            System.arraycopy(af, i1, af2, 0, 16);
+            d = d1;
+        }
+_L4:
+        af1[0] = slanimatedmeshdata.get(k * 6 + 0);
+        af1[1] = slanimatedmeshdata.get(k * 6 + 1);
+        af1[2] = slanimatedmeshdata.get(k * 6 + 2);
+        af1[3] = 1.0F;
+        Matrix.multiplyMV(af1, 4, af2, 0, af1, 0);
+        ((FloatBuffer) (obj)).put(k * 6 + 0, af1[4]);
+        ((FloatBuffer) (obj)).put(k * 6 + 1, af1[5]);
+        ((FloatBuffer) (obj)).put(k * 6 + 2, af1[6]);
+        k++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        int j = 0;
+_L5:
+        d = d1;
+        if (j >= 16) goto _L4; else goto _L3
+_L3:
+        af2[j] = af[i1 + j] * (1.0F - f2) + af[l + j] * f2;
+        j++;
+          goto _L5
+          goto _L4
     }
 
-    public int getNumMorphs() {
-        return this.morphs.length;
+    public int getMorphIndex(SLVisualParamID slvisualparamid)
+    {
+        slvisualparamid = (Integer)morphIndices.get(slvisualparamid);
+        if (slvisualparamid == null)
+        {
+            return -1;
+        } else
+        {
+            return slvisualparamid.intValue();
+        }
+    }
+
+    public int getNumMorphs()
+    {
+        return morphs.length;
     }
 }

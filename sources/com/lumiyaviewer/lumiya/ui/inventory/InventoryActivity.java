@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.inventory;
 
 import android.app.AlertDialog;
@@ -6,28 +10,71 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.eventbus.EventBus;
+import com.lumiyaviewer.lumiya.orm.InventoryDB;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
+import com.lumiyaviewer.lumiya.slproto.users.manager.InventoryManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory;
 import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
-public class InventoryActivity extends MasterDetailsActivity {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.inventory:
+//            InventoryFragmentHelper, InventoryFragment, InventorySortOrderChangedEvent, InventorySaveInfo
+
+public class InventoryActivity extends MasterDetailsActivity
+{
+    public static final class SelectAction extends Enum
+    {
+
+        private static final SelectAction $VALUES[];
+        public static final SelectAction applyFirstLife;
+        public static final SelectAction applyPickImage;
+        public static final SelectAction applyUserProfile;
+        public final int subtitleResourceId;
+
+        public static SelectAction valueOf(String s)
+        {
+            return (SelectAction)Enum.valueOf(com/lumiyaviewer/lumiya/ui/inventory/InventoryActivity$SelectAction, s);
+        }
+
+        public static SelectAction[] values()
+        {
+            return $VALUES;
+        }
+
+        static 
+        {
+            applyUserProfile = new SelectAction("applyUserProfile", 0, 0x7f0902f8);
+            applyFirstLife = new SelectAction("applyFirstLife", 1, 0x7f0902f8);
+            applyPickImage = new SelectAction("applyPickImage", 2, 0x7f0902f8);
+            $VALUES = (new SelectAction[] {
+                applyUserProfile, applyFirstLife, applyPickImage
+            });
+        }
+
+        private SelectAction(String s, int i, int j)
+        {
+            super(s, i);
+            subtitleResourceId = j;
+        }
+    }
+
+
     private static final String INITIAL_FOLDER_ID_TAG = "folderID";
     private static final String NAME_FILTER_TAG = "nameFilter";
     static final String SAVE_INFO_INTENT_TAG = "forSaveInfo";
@@ -39,233 +86,339 @@ public class InventoryActivity extends MasterDetailsActivity {
     static final String TRANSFER_TO_INTENT_TAG = "transferToID";
     static final String TRANSFER_TO_NAME_TAG = "transferToName";
     private final FragmentActivityFactory InventoryDetailsFragmentFactory = new FragmentActivityFactory() {
-        public Intent createIntent(Context context, Bundle bundle) {
-            Intent intent = new Intent(context, InventoryActivity.class);
-            intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, bundle);
-            return intent;
+
+        final InventoryActivity this$0;
+
+        public Intent createIntent(Context context, Bundle bundle)
+        {
+            context = new Intent(context, com/lumiyaviewer/lumiya/ui/inventory/InventoryActivity);
+            context.putExtra("selection", bundle);
+            return context;
         }
 
-        public Class<? extends Fragment> getFragmentClass() {
-            return InventoryFragment.class;
+        public Class getFragmentClass()
+        {
+            return com/lumiyaviewer/lumiya/ui/inventory/InventoryFragment;
         }
+
+            
+            {
+                this$0 = InventoryActivity.this;
+                super();
+            }
     };
-    private boolean activityStarted = false;
-    private String fragmentSearchString = null;
-    /* access modifiers changed from: private */
-    public String nameFilter = null;
-    /* access modifiers changed from: private */
-    public boolean searchActive = false;
-    private MenuItem searchMenuItem = null;
-    private final SubscriptionData<SubscriptionSingleKey, Boolean> searchProcess = new SubscriptionData<>(UIThreadExecutor.getInstance());
+    private boolean activityStarted;
+    private String fragmentSearchString;
+    private String nameFilter;
+    private boolean searchActive;
+    private MenuItem searchMenuItem;
+    private final SubscriptionData searchProcess = new SubscriptionData(UIThreadExecutor.getInstance());
 
-    public enum SelectAction {
-        applyUserProfile(R.string.select_picture_subtitle),
-        applyFirstLife(R.string.select_picture_subtitle),
-        applyPickImage(R.string.select_picture_subtitle);
-        
-        public final int subtitleResourceId;
+    static String _2D_set0(InventoryActivity inventoryactivity, String s)
+    {
+        inventoryactivity.nameFilter = s;
+        return s;
+    }
 
-        private SelectAction(int i) {
-            this.subtitleResourceId = i;
+    static boolean _2D_set1(InventoryActivity inventoryactivity, boolean flag)
+    {
+        inventoryactivity.searchActive = flag;
+        return flag;
+    }
+
+    static void _2D_wrap0(InventoryActivity inventoryactivity)
+    {
+        inventoryactivity.updateSearchAction();
+    }
+
+    public InventoryActivity()
+    {
+        searchMenuItem = null;
+        searchActive = false;
+        activityStarted = false;
+        nameFilter = null;
+        fragmentSearchString = null;
+    }
+
+    public static Intent makeFolderIntent(Context context, UUID uuid, UUID uuid1)
+    {
+        context = new Intent(context, com/lumiyaviewer/lumiya/ui/inventory/InventoryActivity);
+        context.putExtra("activeAgentUUID", uuid.toString());
+        context.putExtra("folderID", uuid1.toString());
+        return context;
+    }
+
+    public static Intent makeSaveItemIntent(Context context, UUID uuid, InventorySaveInfo inventorysaveinfo)
+    {
+        context = new Intent(context, com/lumiyaviewer/lumiya/ui/inventory/InventoryActivity);
+        context.putExtra("activeAgentUUID", uuid.toString());
+        context.putExtra("forSaveInfo", inventorysaveinfo);
+        return context;
+    }
+
+    public static Intent makeSelectActionIntent(Context context, UUID uuid, SelectAction selectaction, Bundle bundle, SLAssetType slassettype)
+    {
+        context = new Intent(context, com/lumiyaviewer/lumiya/ui/inventory/InventoryActivity);
+        context.putExtra("activeAgentUUID", uuid.toString());
+        context.putExtra("forSelectItem", true);
+        context.putExtra("selectAction", selectaction.toString());
+        context.putExtra("selectActionParams", bundle);
+        if (slassettype != null)
+        {
+            context.putExtra("selectActionAssetType", slassettype.getTypeCode());
         }
+        return context;
     }
 
-    public static Intent makeFolderIntent(Context context, UUID uuid, UUID uuid2) {
-        Intent intent = new Intent(context, InventoryActivity.class);
-        intent.putExtra("activeAgentUUID", uuid.toString());
-        intent.putExtra(INITIAL_FOLDER_ID_TAG, uuid2.toString());
-        return intent;
+    public static Intent makeSelectIntent(Context context, UUID uuid)
+    {
+        context = new Intent(context, com/lumiyaviewer/lumiya/ui/inventory/InventoryActivity);
+        context.putExtra("activeAgentUUID", uuid.toString());
+        context.putExtra("forSelectItem", true);
+        return context;
     }
 
-    public static Intent makeSaveItemIntent(Context context, UUID uuid, InventorySaveInfo inventorySaveInfo) {
-        Intent intent = new Intent(context, InventoryActivity.class);
-        intent.putExtra("activeAgentUUID", uuid.toString());
-        intent.putExtra(SAVE_INFO_INTENT_TAG, inventorySaveInfo);
-        return intent;
-    }
-
-    public static Intent makeSelectActionIntent(Context context, UUID uuid, SelectAction selectAction, Bundle bundle, @Nullable SLAssetType sLAssetType) {
-        Intent intent = new Intent(context, InventoryActivity.class);
-        intent.putExtra("activeAgentUUID", uuid.toString());
-        intent.putExtra(SELECT_ITEM_INTENT_TAG, true);
-        intent.putExtra(SELECT_ACTION_INTENT_TAG, selectAction.toString());
-        intent.putExtra(SELECT_ACTION_PARAMS_TAG, bundle);
-        if (sLAssetType != null) {
-            intent.putExtra(SELECT_ACTION_ASSET_TYPE, sLAssetType.getTypeCode());
+    public static Intent makeTransferIntent(Context context, UUID uuid, UUID uuid1, String s)
+    {
+        context = new Intent(context, com/lumiyaviewer/lumiya/ui/inventory/InventoryActivity);
+        context.putExtra("activeAgentUUID", uuid.toString());
+        context.putExtra("forSelectItem", true);
+        context.putExtra("transferToID", uuid1.toString());
+        if (s != null)
+        {
+            context.putExtra("transferToName", s);
         }
-        return intent;
+        return context;
     }
 
-    public static Intent makeSelectIntent(Context context, UUID uuid) {
-        Intent intent = new Intent(context, InventoryActivity.class);
-        intent.putExtra("activeAgentUUID", uuid.toString());
-        intent.putExtra(SELECT_ITEM_INTENT_TAG, true);
-        return intent;
-    }
-
-    public static Intent makeTransferIntent(Context context, UUID uuid, UUID uuid2, String str) {
-        Intent intent = new Intent(context, InventoryActivity.class);
-        intent.putExtra("activeAgentUUID", uuid.toString());
-        intent.putExtra(SELECT_ITEM_INTENT_TAG, true);
-        intent.putExtra(TRANSFER_TO_INTENT_TAG, uuid2.toString());
-        if (str != null) {
-            intent.putExtra(TRANSFER_TO_NAME_TAG, str);
-        }
-        return intent;
-    }
-
-    private void selectSortOrder() {
-        int sortOrder = InventoryFragmentHelper.getSortOrder(this);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.sort_order_caption);
-        builder.setSingleChoiceItems(new CharSequence[]{"Newest first", "Alphabetical"}, sortOrder, new $Lambda$Tc22ivDU79Y83KauKGybv49CW7A(sortOrder, this));
+    private void selectSortOrder()
+    {
+        int i = InventoryFragmentHelper.getSortOrder(this);
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle(0x7f090311);
+        _2D_.Lambda.Tc22ivDU79Y83KauKGybv49CW7A tc22ivdu79y83kaukgybv49cw7a = new _2D_.Lambda.Tc22ivDU79Y83KauKGybv49CW7A(i, this);
+        builder.setSingleChoiceItems(new CharSequence[] {
+            "Newest first", "Alphabetical"
+        }, i, tc22ivdu79y83kaukgybv49cw7a);
         builder.create().show();
     }
 
-    /* access modifiers changed from: private */
-    public void updateSearchAction() {
-        String str;
-        if (!this.activityStarted || !this.searchActive) {
-            this.searchProcess.unsubscribe();
-            str = "";
-        } else {
-            UserManager userManager = ActivityUtils.getUserManager(getIntent());
-            if (userManager != null) {
-                this.searchProcess.subscribe(userManager.getInventoryManager().getSearchProcess(), SubscriptionSingleKey.Value);
+    private void updateSearchAction()
+    {
+        Object obj;
+        if (activityStarted && searchActive)
+        {
+            obj = ActivityUtils.getUserManager(getIntent());
+            if (obj != null)
+            {
+                searchProcess.subscribe(((UserManager) (obj)).getInventoryManager().getSearchProcess(), SubscriptionSingleKey.Value);
             }
-            str = Strings.nullToEmpty(this.nameFilter).trim();
+            obj = Strings.nullToEmpty(nameFilter).trim();
+        } else
+        {
+            searchProcess.unsubscribe();
+            obj = "";
         }
-        if (!Objects.equal(this.fragmentSearchString, str)) {
-            this.fragmentSearchString = str;
-            Fragment findFragmentById = getSupportFragmentManager().findFragmentById(R.id.selector);
-            if (findFragmentById instanceof InventoryFragment) {
-                ((InventoryFragment) findFragmentById).setSearchString(Strings.emptyToNull(str));
+        if (!Objects.equal(fragmentSearchString, obj))
+        {
+            fragmentSearchString = ((String) (obj));
+            Fragment fragment = getSupportFragmentManager().findFragmentById(0x7f100286);
+            if (fragment instanceof InventoryFragment)
+            {
+                ((InventoryFragment)fragment).setSearchString(Strings.emptyToNull(((String) (obj))));
             }
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public void clearSearchMode() {
-        this.searchActive = false;
-        if (this.searchMenuItem != null) {
-            MenuItemCompat.collapseActionView(this.searchMenuItem);
+    void clearSearchMode()
+    {
+        searchActive = false;
+        if (searchMenuItem != null)
+        {
+            MenuItemCompat.collapseActionView(searchMenuItem);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public FragmentActivityFactory getDetailsFragmentFactory() {
-        return this.InventoryDetailsFragmentFactory;
+    protected FragmentActivityFactory getDetailsFragmentFactory()
+    {
+        return InventoryDetailsFragmentFactory;
     }
 
-    /* access modifiers changed from: protected */
-    public Bundle getNewDetailsFragmentArguments(@Nullable Bundle bundle, @Nullable Bundle bundle2) {
-        return bundle != null ? InventoryFragment.makeDetailsArguments(bundle) : super.getNewDetailsFragmentArguments((Bundle) null, bundle2);
-    }
-
-    /* access modifiers changed from: protected */
-    public boolean isAlwaysImplicitFragment(Class<? extends Fragment> cls) {
-        return cls.equals(InventoryFragment.class);
-    }
-
-    /* synthetic */ void handleSortOrderChange(int i, DialogInterface dialogInterface, int i2) {
-        if (i != i2) {
-            InventoryFragmentHelper.setSortOrder(this, i2);
-            EventBus.getInstance().publish(new InventorySortOrderChangedEvent(i2));
+    protected Bundle getNewDetailsFragmentArguments(Bundle bundle, Bundle bundle1)
+    {
+        if (bundle != null)
+        {
+            return InventoryFragment.makeDetailsArguments(bundle);
+        } else
+        {
+            return super.getNewDetailsFragmentArguments(null, bundle1);
         }
-        dialogInterface.dismiss();
     }
 
-    /* access modifiers changed from: protected */
-    public void onCreate(@Nullable Bundle bundle) {
+    protected boolean isAlwaysImplicitFragment(Class class1)
+    {
+        return class1.equals(com/lumiyaviewer/lumiya/ui/inventory/InventoryFragment);
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_inventory_InventoryActivity_10944(int i, DialogInterface dialoginterface, int j)
+    {
+        if (i != j)
+        {
+            InventoryFragmentHelper.setSortOrder(this, j);
+            EventBus.getInstance().publish(new InventorySortOrderChangedEvent(j));
+        }
+        dialoginterface.dismiss();
+    }
+
+    protected void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
-        if (bundle != null) {
-            this.searchActive = bundle.getBoolean(SEARCH_ACTIVE_TAG);
-            this.nameFilter = bundle.getString(NAME_FILTER_TAG);
+        if (bundle != null)
+        {
+            searchActive = bundle.getBoolean("searchActive");
+            nameFilter = bundle.getString("nameFilter");
         }
     }
 
-    /* access modifiers changed from: protected */
-    public Fragment onCreateMasterFragment(Intent intent, @Nullable Bundle bundle) {
-        InventorySaveInfo inventorySaveInfo;
-        SLInventoryEntry findSpecialFolder;
-        if (bundle == null || bundle.isEmpty()) {
-            if (getIntent().hasExtra(INITIAL_FOLDER_ID_TAG)) {
-                bundle = InventoryFragment.makeSelection(UUIDPool.getUUID(getIntent().getStringExtra(INITIAL_FOLDER_ID_TAG)), (String) null);
-            } else if (!(!getIntent().hasExtra(SAVE_INFO_INTENT_TAG) || (inventorySaveInfo = (InventorySaveInfo) getIntent().getParcelableExtra(SAVE_INFO_INTENT_TAG)) == null || inventorySaveInfo.assetType == null || inventorySaveInfo.assetType == SLAssetType.AT_UNKNOWN)) {
-                int specialFolderType = inventorySaveInfo.assetType.getSpecialFolderType();
-                UserManager userManager = ActivityUtils.getUserManager(getIntent());
-                if (!(userManager == null || (findSpecialFolder = userManager.getInventoryManager().getDatabase().findSpecialFolder(userManager.getInventoryManager().getRootFolder(), specialFolderType)) == null)) {
-                    bundle = InventoryFragment.makeSelection(findSpecialFolder.uuid, (String) null);
+    protected Fragment onCreateMasterFragment(Intent intent, Bundle bundle)
+    {
+        if (bundle == null) goto _L2; else goto _L1
+_L1:
+        intent = bundle;
+        if (!bundle.isEmpty()) goto _L3; else goto _L2
+_L2:
+        if (!getIntent().hasExtra("folderID")) goto _L5; else goto _L4
+_L4:
+        intent = InventoryFragment.makeSelection(UUIDPool.getUUID(getIntent().getStringExtra("folderID")), null);
+_L3:
+        return InventoryFragment.newInstance(intent, true);
+_L5:
+        intent = bundle;
+        if (getIntent().hasExtra("forSaveInfo"))
+        {
+            Object obj = (InventorySaveInfo)getIntent().getParcelableExtra("forSaveInfo");
+            intent = bundle;
+            if (obj != null)
+            {
+                intent = bundle;
+                if (((InventorySaveInfo) (obj)).assetType != null)
+                {
+                    intent = bundle;
+                    if (((InventorySaveInfo) (obj)).assetType != SLAssetType.AT_UNKNOWN)
+                    {
+                        int i = ((InventorySaveInfo) (obj)).assetType.getSpecialFolderType();
+                        obj = ActivityUtils.getUserManager(getIntent());
+                        intent = bundle;
+                        if (obj != null)
+                        {
+                            obj = ((UserManager) (obj)).getInventoryManager().getDatabase().findSpecialFolder(((UserManager) (obj)).getInventoryManager().getRootFolder(), i);
+                            intent = bundle;
+                            if (obj != null)
+                            {
+                                intent = InventoryFragment.makeSelection(((SLInventoryEntry) (obj)).uuid, null);
+                            }
+                        }
+                    }
                 }
             }
         }
-        return InventoryFragment.newInstance(bundle, true);
+        if (true) goto _L3; else goto _L6
+_L6:
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.inventory_menu, menu);
-        this.searchMenuItem = menu.findItem(R.id.inventory_search_item);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(this.searchMenuItem);
-        if (this.searchActive) {
-            MenuItemCompat.expandActionView(this.searchMenuItem);
-            searchView.setQuery(this.nameFilter, false);
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(0x7f12000d, menu);
+        searchMenuItem = menu.findItem(0x7f10032a);
+        menu = (SearchView)MenuItemCompat.getActionView(searchMenuItem);
+        if (searchActive)
+        {
+            MenuItemCompat.expandActionView(searchMenuItem);
+            menu.setQuery(nameFilter, false);
         }
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            public boolean onQueryTextChange(String str) {
-                String unused = InventoryActivity.this.nameFilter = str;
-                InventoryActivity.this.updateSearchAction();
+        menu.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+
+            final InventoryActivity this$0;
+
+            public boolean onQueryTextChange(String s)
+            {
+                InventoryActivity._2D_set0(InventoryActivity.this, s);
+                InventoryActivity._2D_wrap0(InventoryActivity.this);
                 return true;
             }
 
-            public boolean onQueryTextSubmit(String str) {
+            public boolean onQueryTextSubmit(String s)
+            {
                 return true;
+            }
+
+            
+            {
+                this$0 = InventoryActivity.this;
+                super();
             }
         });
-        MenuItemCompat.setOnActionExpandListener(this.searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
-            public boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                boolean unused = InventoryActivity.this.searchActive = false;
-                InventoryActivity.this.updateSearchAction();
+        MenuItemCompat.setOnActionExpandListener(searchMenuItem, new android.support.v4.view.MenuItemCompat.OnActionExpandListener() {
+
+            final InventoryActivity this$0;
+
+            public boolean onMenuItemActionCollapse(MenuItem menuitem)
+            {
+                InventoryActivity._2D_set1(InventoryActivity.this, false);
+                InventoryActivity._2D_wrap0(InventoryActivity.this);
                 return true;
             }
 
-            public boolean onMenuItemActionExpand(MenuItem menuItem) {
-                boolean unused = InventoryActivity.this.searchActive = true;
-                InventoryActivity.this.updateSearchAction();
+            public boolean onMenuItemActionExpand(MenuItem menuitem)
+            {
+                InventoryActivity._2D_set1(InventoryActivity.this, true);
+                InventoryActivity._2D_wrap0(InventoryActivity.this);
                 return true;
+            }
+
+            
+            {
+                this$0 = InventoryActivity.this;
+                super();
             }
         });
         return true;
     }
 
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.item_sort_order:
-                selectSortOrder();
-                return true;
-            default:
-                return super.onOptionsItemSelected(menuItem);
+    public boolean onOptionsItemSelected(MenuItem menuitem)
+    {
+        switch (menuitem.getItemId())
+        {
+        default:
+            return super.onOptionsItemSelected(menuitem);
+
+        case 2131755796: 
+            selectSortOrder();
+            break;
         }
+        return true;
     }
 
-    /* access modifiers changed from: protected */
-    public void onSaveInstanceState(Bundle bundle) {
+    protected void onSaveInstanceState(Bundle bundle)
+    {
         super.onSaveInstanceState(bundle);
-        if (bundle != null) {
-            bundle.putBoolean(SEARCH_ACTIVE_TAG, this.searchActive);
-            bundle.putString(NAME_FILTER_TAG, this.nameFilter);
+        if (bundle != null)
+        {
+            bundle.putBoolean("searchActive", searchActive);
+            bundle.putString("nameFilter", nameFilter);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onStart() {
+    protected void onStart()
+    {
         super.onStart();
-        this.activityStarted = true;
+        activityStarted = true;
         updateSearchAction();
     }
 
-    /* access modifiers changed from: protected */
-    public void onStop() {
-        this.activityStarted = false;
+    protected void onStop()
+    {
+        activityStarted = false;
         updateSearchAction();
         super.onStop();
     }

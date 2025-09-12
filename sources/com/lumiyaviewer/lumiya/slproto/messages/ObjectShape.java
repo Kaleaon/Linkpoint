@@ -1,21 +1,34 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class ObjectShape extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<ObjectData> ObjectData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class ObjectShape extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class ObjectData {
+    public static class ObjectData
+    {
+
         public int ObjectLocalID;
         public int PathBegin;
         public int PathCurve;
@@ -35,77 +48,96 @@ public class ObjectShape extends SLMessage {
         public int ProfileCurve;
         public int ProfileEnd;
         public int ProfileHollow;
-    }
 
-    public ObjectShape() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        return (this.ObjectData_Fields.size() * 27) + 37;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleObjectShape(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 98);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        byteBuffer.put((byte) this.ObjectData_Fields.size());
-        for (ObjectData objectData : this.ObjectData_Fields) {
-            packInt(byteBuffer, objectData.ObjectLocalID);
-            packByte(byteBuffer, (byte) objectData.PathCurve);
-            packByte(byteBuffer, (byte) objectData.ProfileCurve);
-            packShort(byteBuffer, (short) objectData.PathBegin);
-            packShort(byteBuffer, (short) objectData.PathEnd);
-            packByte(byteBuffer, (byte) objectData.PathScaleX);
-            packByte(byteBuffer, (byte) objectData.PathScaleY);
-            packByte(byteBuffer, (byte) objectData.PathShearX);
-            packByte(byteBuffer, (byte) objectData.PathShearY);
-            packByte(byteBuffer, (byte) objectData.PathTwist);
-            packByte(byteBuffer, (byte) objectData.PathTwistBegin);
-            packByte(byteBuffer, (byte) objectData.PathRadiusOffset);
-            packByte(byteBuffer, (byte) objectData.PathTaperX);
-            packByte(byteBuffer, (byte) objectData.PathTaperY);
-            packByte(byteBuffer, (byte) objectData.PathRevolutions);
-            packByte(byteBuffer, (byte) objectData.PathSkew);
-            packShort(byteBuffer, (short) objectData.ProfileBegin);
-            packShort(byteBuffer, (short) objectData.ProfileEnd);
-            packShort(byteBuffer, (short) objectData.ProfileHollow);
+        public ObjectData()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            ObjectData objectData = new ObjectData();
-            objectData.ObjectLocalID = unpackInt(byteBuffer);
-            objectData.PathCurve = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            objectData.ProfileCurve = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            objectData.PathBegin = unpackShort(byteBuffer) & 65535;
-            objectData.PathEnd = unpackShort(byteBuffer) & 65535;
-            objectData.PathScaleX = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            objectData.PathScaleY = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            objectData.PathShearX = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            objectData.PathShearY = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            objectData.PathTwist = unpackByte(byteBuffer);
-            objectData.PathTwistBegin = unpackByte(byteBuffer);
-            objectData.PathRadiusOffset = unpackByte(byteBuffer);
-            objectData.PathTaperX = unpackByte(byteBuffer);
-            objectData.PathTaperY = unpackByte(byteBuffer);
-            objectData.PathRevolutions = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            objectData.PathSkew = unpackByte(byteBuffer);
-            objectData.ProfileBegin = unpackShort(byteBuffer) & 65535;
-            objectData.ProfileEnd = unpackShort(byteBuffer) & 65535;
-            objectData.ProfileHollow = unpackShort(byteBuffer) & 65535;
-            this.ObjectData_Fields.add(objectData);
+
+    public AgentData AgentData_Field;
+    public ArrayList ObjectData_Fields;
+
+    public ObjectShape()
+    {
+        ObjectData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return ObjectData_Fields.size() * 27 + 37;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleObjectShape(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)98);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        bytebuffer.put((byte)ObjectData_Fields.size());
+        ObjectData objectdata;
+        for (Iterator iterator = ObjectData_Fields.iterator(); iterator.hasNext(); packShort(bytebuffer, (short)objectdata.ProfileHollow))
+        {
+            objectdata = (ObjectData)iterator.next();
+            packInt(bytebuffer, objectdata.ObjectLocalID);
+            packByte(bytebuffer, (byte)objectdata.PathCurve);
+            packByte(bytebuffer, (byte)objectdata.ProfileCurve);
+            packShort(bytebuffer, (short)objectdata.PathBegin);
+            packShort(bytebuffer, (short)objectdata.PathEnd);
+            packByte(bytebuffer, (byte)objectdata.PathScaleX);
+            packByte(bytebuffer, (byte)objectdata.PathScaleY);
+            packByte(bytebuffer, (byte)objectdata.PathShearX);
+            packByte(bytebuffer, (byte)objectdata.PathShearY);
+            packByte(bytebuffer, (byte)objectdata.PathTwist);
+            packByte(bytebuffer, (byte)objectdata.PathTwistBegin);
+            packByte(bytebuffer, (byte)objectdata.PathRadiusOffset);
+            packByte(bytebuffer, (byte)objectdata.PathTaperX);
+            packByte(bytebuffer, (byte)objectdata.PathTaperY);
+            packByte(bytebuffer, (byte)objectdata.PathRevolutions);
+            packByte(bytebuffer, (byte)objectdata.PathSkew);
+            packShort(bytebuffer, (short)objectdata.ProfileBegin);
+            packShort(bytebuffer, (short)objectdata.ProfileEnd);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            ObjectData objectdata = new ObjectData();
+            objectdata.ObjectLocalID = unpackInt(bytebuffer);
+            objectdata.PathCurve = unpackByte(bytebuffer) & 0xff;
+            objectdata.ProfileCurve = unpackByte(bytebuffer) & 0xff;
+            objectdata.PathBegin = unpackShort(bytebuffer) & 0xffff;
+            objectdata.PathEnd = unpackShort(bytebuffer) & 0xffff;
+            objectdata.PathScaleX = unpackByte(bytebuffer) & 0xff;
+            objectdata.PathScaleY = unpackByte(bytebuffer) & 0xff;
+            objectdata.PathShearX = unpackByte(bytebuffer) & 0xff;
+            objectdata.PathShearY = unpackByte(bytebuffer) & 0xff;
+            objectdata.PathTwist = unpackByte(bytebuffer);
+            objectdata.PathTwistBegin = unpackByte(bytebuffer);
+            objectdata.PathRadiusOffset = unpackByte(bytebuffer);
+            objectdata.PathTaperX = unpackByte(bytebuffer);
+            objectdata.PathTaperY = unpackByte(bytebuffer);
+            objectdata.PathRevolutions = unpackByte(bytebuffer) & 0xff;
+            objectdata.PathSkew = unpackByte(bytebuffer);
+            objectdata.ProfileBegin = unpackShort(bytebuffer) & 0xffff;
+            objectdata.ProfileEnd = unpackShort(bytebuffer) & 0xffff;
+            objectdata.ProfileHollow = unpackShort(bytebuffer) & 0xffff;
+            ObjectData_Fields.add(objectdata);
+        }
+
     }
 }

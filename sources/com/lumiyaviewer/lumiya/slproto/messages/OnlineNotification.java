@@ -1,46 +1,67 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class OnlineNotification extends SLMessage {
-    public ArrayList<AgentBlock> AgentBlock_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentBlock {
+public class OnlineNotification extends SLMessage
+{
+    public static class AgentBlock
+    {
+
         public UUID AgentID;
-    }
 
-    public OnlineNotification() {
-        this.zeroCoded = false;
-    }
-
-    public int CalcPayloadSize() {
-        return (this.AgentBlock_Fields.size() * 16) + 5;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleOnlineNotification(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 66);
-        byteBuffer.put((byte) this.AgentBlock_Fields.size());
-        for (AgentBlock agentBlock : this.AgentBlock_Fields) {
-            packUUID(byteBuffer, agentBlock.AgentID);
+        public AgentBlock()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            AgentBlock agentBlock = new AgentBlock();
-            agentBlock.AgentID = unpackUUID(byteBuffer);
-            this.AgentBlock_Fields.add(agentBlock);
+
+    public ArrayList AgentBlock_Fields;
+
+    public OnlineNotification()
+    {
+        AgentBlock_Fields = new ArrayList();
+        zeroCoded = false;
+    }
+
+    public int CalcPayloadSize()
+    {
+        return AgentBlock_Fields.size() * 16 + 5;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleOnlineNotification(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)66);
+        bytebuffer.put((byte)AgentBlock_Fields.size());
+        for (Iterator iterator = AgentBlock_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, ((AgentBlock)iterator.next()).AgentID)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            AgentBlock agentblock = new AgentBlock();
+            agentblock.AgentID = unpackUUID(bytebuffer);
+            AgentBlock_Fields.add(agentblock);
         }
+
     }
 }

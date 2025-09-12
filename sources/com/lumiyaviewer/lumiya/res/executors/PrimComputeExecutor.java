@@ -1,67 +1,103 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.executors;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class PrimComputeExecutor extends WeakExecutor {
+// Referenced classes of package com.lumiyaviewer.lumiya.res.executors:
+//            WeakExecutor
+
+public class PrimComputeExecutor extends WeakExecutor
+{
+    private static class InstanceHolder
+    {
+
+        private static final PrimComputeExecutor Instance = new PrimComputeExecutor(null);
+
+        static PrimComputeExecutor _2D_get0()
+        {
+            return Instance;
+        }
+
+
+        private InstanceHolder()
+        {
+        }
+    }
+
+
     private boolean isPaused;
     private ReentrantLock pauseLock;
     private Condition unpaused;
 
-    private static class InstanceHolder {
-        /* access modifiers changed from: private */
-        public static final PrimComputeExecutor Instance = new PrimComputeExecutor((PrimComputeExecutor) null);
-
-        private InstanceHolder() {
-        }
-    }
-
-    private PrimComputeExecutor() {
+    private PrimComputeExecutor()
+    {
         super("PrimCompute", 1);
-        this.pauseLock = new ReentrantLock();
-        this.unpaused = this.pauseLock.newCondition();
+        pauseLock = new ReentrantLock();
+        unpaused = pauseLock.newCondition();
     }
 
-    /* synthetic */ PrimComputeExecutor(PrimComputeExecutor primComputeExecutor) {
+    PrimComputeExecutor(PrimComputeExecutor primcomputeexecutor)
+    {
         this();
     }
 
-    public static PrimComputeExecutor getInstance() {
-        return InstanceHolder.Instance;
+    public static PrimComputeExecutor getInstance()
+    {
+        return InstanceHolder._2D_get0();
     }
 
-    /* access modifiers changed from: protected */
-    public void beforeExecute(Thread thread, Runnable runnable) {
+    protected void beforeExecute(Thread thread, Runnable runnable)
+    {
         super.beforeExecute(thread, runnable);
-        this.pauseLock.lock();
-        while (this.isPaused) {
-            try {
-                this.unpaused.await();
-            } catch (InterruptedException e) {
-                thread.interrupt();
-                return;
-            } finally {
-                this.pauseLock.unlock();
+        pauseLock.lock();
+        try
+        {
+            while (isPaused) 
+            {
+                unpaused.await();
             }
+            break MISSING_BLOCK_LABEL_45;
         }
+        // Misplaced declaration of an exception variable
+        catch (Runnable runnable) { }
+        finally
+        {
+            pauseLock.unlock();
+            throw thread;
+        }
+        thread.interrupt();
+        pauseLock.unlock();
+        return;
+        pauseLock.unlock();
+        return;
     }
 
-    public void pause() {
-        this.pauseLock.lock();
-        try {
-            this.isPaused = true;
-        } finally {
-            this.pauseLock.unlock();
-        }
+    public void pause()
+    {
+        pauseLock.lock();
+        isPaused = true;
+        pauseLock.unlock();
+        return;
+        Exception exception;
+        exception;
+        pauseLock.unlock();
+        throw exception;
     }
 
-    public void resume() {
-        this.pauseLock.lock();
-        try {
-            this.isPaused = false;
-            this.unpaused.signalAll();
-        } finally {
-            this.pauseLock.unlock();
-        }
+    public void resume()
+    {
+        pauseLock.lock();
+        isPaused = false;
+        unpaused.signalAll();
+        pauseLock.unlock();
+        return;
+        Exception exception;
+        exception;
+        pauseLock.unlock();
+        throw exception;
     }
 }

@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.llsd.types;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
@@ -7,36 +11,49 @@ import java.io.IOException;
 import java.net.URI;
 import org.xmlpull.v1.XmlSerializer;
 
-public class LLSDURI extends LLSDNode {
+public class LLSDURI extends LLSDNode
+{
+
     private URI value;
 
-    public LLSDURI(String str) {
-        this.value = URI.create("");
+    public LLSDURI(String s)
+    {
+        value = URI.create("");
     }
 
-    public LLSDURI(URI uri) {
-        this.value = uri;
+    public LLSDURI(URI uri)
+    {
+        value = uri;
     }
 
-    public URI asURI() {
-        return this.value;
+    public URI asURI()
+    {
+        return value;
     }
 
-    public void toBinary(DataOutputStream dataOutputStream) throws IOException {
-        String uri = this.value.toString();
-        dataOutputStream.writeByte(108);
-        if (uri.isEmpty()) {
-            dataOutputStream.writeInt(0);
+    public void toBinary(DataOutputStream dataoutputstream)
+        throws IOException
+    {
+        String s = value.toString();
+        dataoutputstream.writeByte(108);
+        if (s.isEmpty())
+        {
+            dataoutputstream.writeInt(0);
+            return;
+        } else
+        {
+            byte abyte0[] = SLMessage.stringToVariableUTF(s);
+            dataoutputstream.writeInt(abyte0.length);
+            dataoutputstream.write(abyte0);
             return;
         }
-        byte[] stringToVariableUTF = SLMessage.stringToVariableUTF(uri);
-        dataOutputStream.writeInt(stringToVariableUTF.length);
-        dataOutputStream.write(stringToVariableUTF);
     }
 
-    public void toXML(XmlSerializer xmlSerializer) throws IOException {
-        xmlSerializer.startTag("", "uri");
-        xmlSerializer.text(this.value.toString());
-        xmlSerializer.endTag("", "uri");
+    public void toXML(XmlSerializer xmlserializer)
+        throws IOException
+    {
+        xmlserializer.startTag("", "uri");
+        xmlserializer.text(value.toString());
+        xmlserializer.endTag("", "uri");
     }
 }

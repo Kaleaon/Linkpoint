@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -12,46 +16,73 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
 
-public class LLSDResponseCacher<Key> extends ResponseCacher<Key, LLSDNode> {
-    public LLSDResponseCacher(DaoSession daoSession, Executor executor, String str) {
-        super(daoSession, executor, str);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users:
+//            ResponseCacher
+
+public class LLSDResponseCacher extends ResponseCacher
+{
+
+    public LLSDResponseCacher(DaoSession daosession, Executor executor, String s)
+    {
+        super(daosession, executor, s);
     }
 
-    public /* bridge */ /* synthetic */ Subscribable getPool() {
+    public volatile Subscribable getPool()
+    {
         return super.getPool();
     }
 
-    public /* bridge */ /* synthetic */ RequestSource getRequestSource() {
+    public volatile RequestSource getRequestSource()
+    {
         return super.getRequestSource();
     }
 
-    /* access modifiers changed from: protected */
-    public LLSDNode loadCached(byte[] bArr) {
-        try {
-            return LLSDNode.fromBinary(new DataInputStream(new ByteArrayInputStream(bArr)));
-        } catch (LLSDException e) {
-            Debug.Warning(e);
+    protected LLSDNode loadCached(byte abyte0[])
+    {
+        try
+        {
+            abyte0 = LLSDNode.fromBinary(new DataInputStream(new ByteArrayInputStream(abyte0)));
+        }
+        // Misplaced declaration of an exception variable
+        catch (byte abyte0[])
+        {
+            Debug.Warning(abyte0);
             return null;
         }
+        return abyte0;
     }
 
-    public /* bridge */ /* synthetic */ void requestUpdate(Object obj) {
+    protected volatile Object loadCached(byte abyte0[])
+    {
+        return loadCached(abyte0);
+    }
+
+    public volatile void requestUpdate(Object obj)
+    {
         super.requestUpdate(obj);
     }
 
-    /* access modifiers changed from: protected */
-    public byte[] storeCached(@Nonnull LLSDNode lLSDNode) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-        try {
-            lLSDNode.toBinary(dataOutputStream);
-            dataOutputStream.flush();
-            return byteArrayOutputStream.toByteArray();
-        } catch (IOException e) {
-            Debug.Warning(e);
+    protected byte[] storeCached(LLSDNode llsdnode)
+    {
+        ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
+        DataOutputStream dataoutputstream = new DataOutputStream(bytearrayoutputstream);
+        try
+        {
+            llsdnode.toBinary(dataoutputstream);
+            dataoutputstream.flush();
+        }
+        // Misplaced declaration of an exception variable
+        catch (LLSDNode llsdnode)
+        {
+            Debug.Warning(llsdnode);
             return null;
         }
+        return bytearrayoutputstream.toByteArray();
+    }
+
+    protected volatile byte[] storeCached(Object obj)
+    {
+        return storeCached((LLSDNode)obj);
     }
 }

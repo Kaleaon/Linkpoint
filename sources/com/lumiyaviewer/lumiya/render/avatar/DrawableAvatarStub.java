@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.avatar;
 
 import android.opengl.Matrix;
@@ -7,60 +11,85 @@ import com.lumiyaviewer.lumiya.render.DrawableStore;
 import com.lumiyaviewer.lumiya.render.RenderContext;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo;
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion;
+import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 
-public class DrawableAvatarStub implements ChatterNameRetriever.OnChatterNameUpdated {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.avatar:
+//            DrawableHoverText
+
+public class DrawableAvatarStub
+    implements com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever.OnChatterNameUpdated
+{
+
     final SLObjectAvatarInfo avatarObject;
     private final ChatterNameRetriever chatterNameRetriever;
     volatile DrawableHoverText drawableNameTag;
     protected final DrawableStore drawableStore;
     private volatile String nameTag;
 
-    DrawableAvatarStub(DrawableStore drawableStore2, UUID uuid, SLObjectAvatarInfo sLObjectAvatarInfo) {
-        this.drawableStore = drawableStore2;
-        this.avatarObject = sLObjectAvatarInfo;
-        this.chatterNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(uuid, sLObjectAvatarInfo.getId()), this, (Executor) null);
+    DrawableAvatarStub(DrawableStore drawablestore, UUID uuid, SLObjectAvatarInfo slobjectavatarinfo)
+    {
+        drawableStore = drawablestore;
+        avatarObject = slobjectavatarinfo;
+        chatterNameRetriever = new ChatterNameRetriever(ChatterID.getUserChatterID(uuid, slobjectavatarinfo.getId()), this, null);
     }
 
-    private void setNameTag(String str) {
-        if (!Objects.equal(this.nameTag, str)) {
-            this.nameTag = str;
-            Object[] objArr = new Object[1];
-            objArr[0] = str != null ? str : "null";
-            Debug.Printf("DrawableAvatar: setting: nameTag = %s", objArr);
-            if (str != null) {
-                this.drawableNameTag = new DrawableHoverText(this.drawableStore.textTextureCache, str, Integer.MIN_VALUE);
+    private void setNameTag(String s)
+    {
+        if (!Objects.equal(nameTag, s))
+        {
+            nameTag = s;
+            String s1;
+            if (s != null)
+            {
+                s1 = s;
+            } else
+            {
+                s1 = "null";
+            }
+            Debug.Printf("DrawableAvatar: setting: nameTag = %s", new Object[] {
+                s1
+            });
+            if (s != null)
+            {
+                drawableNameTag = new DrawableHoverText(drawableStore.textTextureCache, s, 0x80000000);
             }
         }
     }
 
-    public void DrawNameTag(RenderContext renderContext) {
-        DrawableHoverText drawableHoverText = this.drawableNameTag;
-        float[] worldMatrix = getWorldMatrix(renderContext);
-        if (drawableHoverText != null && worldMatrix != null) {
-            drawableHoverText.DrawAtWorld(renderContext, worldMatrix[12], worldMatrix[13], 0.75f + worldMatrix[14], 0.5f, renderContext.projectionMatrix, false, 0);
+    public void DrawNameTag(RenderContext rendercontext)
+    {
+        DrawableHoverText drawablehovertext = drawableNameTag;
+        float af[] = getWorldMatrix(rendercontext);
+        if (drawablehovertext != null && af != null)
+        {
+            drawablehovertext.DrawAtWorld(rendercontext, af[12], af[13], 0.75F + af[14], 0.5F, rendercontext.projectionMatrix, false, 0);
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public float[] getWorldMatrix(RenderContext renderContext) {
-        if (!this.avatarObject.isMyAvatar() || this.avatarObject.parentID != 0) {
-            return this.avatarObject.worldMatrix;
+    float[] getWorldMatrix(RenderContext rendercontext)
+    {
+        if (avatarObject.isMyAvatar() && avatarObject.parentID == 0)
+        {
+            float af[] = new float[32];
+            LLQuaternion llquaternion = avatarObject.getRotation();
+            if (llquaternion != null)
+            {
+                Matrix.setIdentityM(af, 16);
+                Matrix.translateM(af, 16, rendercontext.myAviPosition.x, rendercontext.myAviPosition.y, rendercontext.myAviPosition.z);
+                Matrix.multiplyMM(af, 0, af, 16, llquaternion.getInverseMatrix(), 0);
+            }
+            return af;
+        } else
+        {
+            return avatarObject.worldMatrix;
         }
-        float[] fArr = new float[32];
-        LLQuaternion rotation = this.avatarObject.getRotation();
-        if (rotation != null) {
-            Matrix.setIdentityM(fArr, 16);
-            Matrix.translateM(fArr, 16, renderContext.myAviPosition.x, renderContext.myAviPosition.y, renderContext.myAviPosition.z);
-            Matrix.multiplyMM(fArr, 0, fArr, 16, rotation.getInverseMatrix(), 0);
-        }
-        return fArr;
     }
 
-    public void onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
-        setNameTag(chatterNameRetriever2.getResolvedName());
+    public void onChatterNameUpdated(ChatterNameRetriever chatternameretriever)
+    {
+        setNameTag(chatternameretriever.getResolvedName());
     }
 }

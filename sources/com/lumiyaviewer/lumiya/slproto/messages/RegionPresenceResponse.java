@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
@@ -8,67 +11,84 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class RegionPresenceResponse extends SLMessage {
-    public ArrayList<RegionData> RegionData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class RegionData {
+public class RegionPresenceResponse extends SLMessage
+{
+    public static class RegionData
+    {
+
         public Inet4Address ExternalRegionIP;
         public Inet4Address InternalRegionIP;
-        public byte[] Message;
+        public byte Message[];
         public long RegionHandle;
         public UUID RegionID;
         public int RegionPort;
         public double ValidUntil;
-    }
 
-    public RegionPresenceResponse() {
-        this.zeroCoded = true;
-    }
-
-    public int CalcPayloadSize() {
-        int i = 5;
-        Iterator<T> it = this.RegionData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            i = ((RegionData) it.next()).Message.length + 43 + i2;
+        public RegionData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleRegionPresenceResponse(this);
+
+    public ArrayList RegionData_Fields;
+
+    public RegionPresenceResponse()
+    {
+        RegionData_Fields = new ArrayList();
+        zeroCoded = true;
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 16);
-        byteBuffer.put((byte) this.RegionData_Fields.size());
-        for (RegionData regionData : this.RegionData_Fields) {
-            packUUID(byteBuffer, regionData.RegionID);
-            packLong(byteBuffer, regionData.RegionHandle);
-            packIPAddress(byteBuffer, regionData.InternalRegionIP);
-            packIPAddress(byteBuffer, regionData.ExternalRegionIP);
-            packShort(byteBuffer, (short) regionData.RegionPort);
-            packDouble(byteBuffer, regionData.ValidUntil);
-            packVariable(byteBuffer, regionData.Message, 1);
-        }
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = RegionData_Fields.iterator();
+        int i;
+        for (i = 5; iterator.hasNext(); i = ((RegionData)iterator.next()).Message.length + 43 + i) { }
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            RegionData regionData = new RegionData();
-            regionData.RegionID = unpackUUID(byteBuffer);
-            regionData.RegionHandle = unpackLong(byteBuffer);
-            regionData.InternalRegionIP = unpackIPAddress(byteBuffer);
-            regionData.ExternalRegionIP = unpackIPAddress(byteBuffer);
-            regionData.RegionPort = unpackShort(byteBuffer) & 65535;
-            regionData.ValidUntil = unpackDouble(byteBuffer);
-            regionData.Message = unpackVariable(byteBuffer, 1);
-            this.RegionData_Fields.add(regionData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleRegionPresenceResponse(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)16);
+        bytebuffer.put((byte)RegionData_Fields.size());
+        RegionData regiondata;
+        for (Iterator iterator = RegionData_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, regiondata.Message, 1))
+        {
+            regiondata = (RegionData)iterator.next();
+            packUUID(bytebuffer, regiondata.RegionID);
+            packLong(bytebuffer, regiondata.RegionHandle);
+            packIPAddress(bytebuffer, regiondata.InternalRegionIP);
+            packIPAddress(bytebuffer, regiondata.ExternalRegionIP);
+            packShort(bytebuffer, (short)regiondata.RegionPort);
+            packDouble(bytebuffer, regiondata.ValidUntil);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            RegionData regiondata = new RegionData();
+            regiondata.RegionID = unpackUUID(bytebuffer);
+            regiondata.RegionHandle = unpackLong(bytebuffer);
+            regiondata.InternalRegionIP = unpackIPAddress(bytebuffer);
+            regiondata.ExternalRegionIP = unpackIPAddress(bytebuffer);
+            regiondata.RegionPort = unpackShort(bytebuffer) & 0xffff;
+            regiondata.ValidUntil = unpackDouble(bytebuffer);
+            regiondata.Message = unpackVariable(bytebuffer, 1);
+            RegionData_Fields.add(regiondata);
+        }
+
     }
 }

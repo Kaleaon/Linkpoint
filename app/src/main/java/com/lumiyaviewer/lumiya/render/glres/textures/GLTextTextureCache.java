@@ -11,24 +11,28 @@ import com.lumiyaviewer.lumiya.res.text.DrawableTextParams;
 public class GLTextTextureCache extends GLResourceCache<DrawableTextParams, DrawableTextBitmap, GLLoadedTextTexture> {
     private final DrawableTextCache drawableTextCache;
 
-    public GLTextTextureCache(GLLoadQueue gLLoadQueue, DrawableTextCache drawableTextCache) {
+    public GLTextTextureCache(GLLoadQueue gLLoadQueue, DrawableTextCache drawableTextCache2) {
         super(gLLoadQueue);
-        this.drawableTextCache = drawableTextCache;
+        this.drawableTextCache = drawableTextCache2;
     }
 
-    protected void CancelRawResource(ResourceConsumer resourceConsumer) {
+    /* access modifiers changed from: protected */
+    public void CancelRawResource(ResourceConsumer resourceConsumer) {
         this.drawableTextCache.CancelRequest(resourceConsumer);
     }
 
-    protected int GetResourceSize(DrawableTextBitmap drawableTextBitmap) {
+    /* access modifiers changed from: protected */
+    public int GetResourceSize(DrawableTextBitmap drawableTextBitmap) {
         return 0;
     }
 
-    protected GLLoadedTextTexture LoadResource(DrawableTextParams drawableTextParams, DrawableTextBitmap drawableTextBitmap, RenderContext renderContext) {
+    /* access modifiers changed from: protected */
+    public GLLoadedTextTexture LoadResource(DrawableTextParams drawableTextParams, DrawableTextBitmap drawableTextBitmap, RenderContext renderContext) {
         return new GLLoadedTextTexture(renderContext, drawableTextBitmap.getBitmap(), drawableTextBitmap.getBaselineOffset());
     }
 
-    protected void RequestRawResource(DrawableTextParams drawableTextParams, ResourceConsumer resourceConsumer) {
+    /* access modifiers changed from: protected */
+    public void RequestRawResource(DrawableTextParams drawableTextParams, ResourceConsumer resourceConsumer) {
         this.drawableTextCache.RequestResource(drawableTextParams, resourceConsumer);
     }
 }

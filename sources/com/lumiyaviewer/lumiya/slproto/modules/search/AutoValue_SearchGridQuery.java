@@ -1,59 +1,91 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.search;
 
-import com.lumiyaviewer.lumiya.slproto.modules.search.SearchGridQuery;
 import java.util.UUID;
 
-final class AutoValue_SearchGridQuery extends SearchGridQuery {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.modules.search:
+//            SearchGridQuery
+
+final class AutoValue_SearchGridQuery extends SearchGridQuery
+{
+
     private final String searchText;
     private final SearchGridQuery.SearchType searchType;
     private final UUID searchUUID;
 
-    AutoValue_SearchGridQuery(UUID uuid, String str, SearchGridQuery.SearchType searchType2) {
-        if (uuid == null) {
+    AutoValue_SearchGridQuery(UUID uuid, String s, SearchGridQuery.SearchType searchtype)
+    {
+        if (uuid == null)
+        {
             throw new NullPointerException("Null searchUUID");
         }
-        this.searchUUID = uuid;
-        if (str == null) {
+        searchUUID = uuid;
+        if (s == null)
+        {
             throw new NullPointerException("Null searchText");
         }
-        this.searchText = str;
-        if (searchType2 == null) {
+        searchText = s;
+        if (searchtype == null)
+        {
             throw new NullPointerException("Null searchType");
+        } else
+        {
+            searchType = searchtype;
+            return;
         }
-        this.searchType = searchType2;
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object obj)
+    {
+        boolean flag1 = false;
+        if (obj == this)
+        {
             return true;
         }
-        if (!(obj instanceof SearchGridQuery)) {
+        if (obj instanceof SearchGridQuery)
+        {
+            obj = (SearchGridQuery)obj;
+            boolean flag = flag1;
+            if (searchUUID.equals(((SearchGridQuery) (obj)).searchUUID()))
+            {
+                flag = flag1;
+                if (searchText.equals(((SearchGridQuery) (obj)).searchText()))
+                {
+                    flag = searchType.equals(((SearchGridQuery) (obj)).searchType());
+                }
+            }
+            return flag;
+        } else
+        {
             return false;
         }
-        SearchGridQuery searchGridQuery = (SearchGridQuery) obj;
-        if (!this.searchUUID.equals(searchGridQuery.searchUUID()) || !this.searchText.equals(searchGridQuery.searchText())) {
-            return false;
-        }
-        return this.searchType.equals(searchGridQuery.searchType());
     }
 
-    public int hashCode() {
-        return ((((this.searchUUID.hashCode() ^ 1000003) * 1000003) ^ this.searchText.hashCode()) * 1000003) ^ this.searchType.hashCode();
+    public int hashCode()
+    {
+        return ((searchUUID.hashCode() ^ 0xf4243) * 0xf4243 ^ searchText.hashCode()) * 0xf4243 ^ searchType.hashCode();
     }
 
-    public String searchText() {
-        return this.searchText;
+    public String searchText()
+    {
+        return searchText;
     }
 
-    public SearchGridQuery.SearchType searchType() {
-        return this.searchType;
+    public SearchGridQuery.SearchType searchType()
+    {
+        return searchType;
     }
 
-    public UUID searchUUID() {
-        return this.searchUUID;
+    public UUID searchUUID()
+    {
+        return searchUUID;
     }
 
-    public String toString() {
-        return "SearchGridQuery{searchUUID=" + this.searchUUID + ", " + "searchText=" + this.searchText + ", " + "searchType=" + this.searchType + "}";
+    public String toString()
+    {
+        return (new StringBuilder()).append("SearchGridQuery{searchUUID=").append(searchUUID).append(", ").append("searchText=").append(searchText).append(", ").append("searchType=").append(searchType).append("}").toString();
     }
 }

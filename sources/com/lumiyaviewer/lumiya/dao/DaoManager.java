@@ -1,31 +1,52 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
-import android.database.sqlite.SQLiteDatabase;
 import com.lumiyaviewer.lumiya.GlobalOptions;
 import com.lumiyaviewer.lumiya.LumiyaApp;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
-public class DaoManager {
+// Referenced classes of package com.lumiyaviewer.lumiya.dao:
+//            DaoSession, DaoMaster, DBOpenHelper
+
+public class DaoManager
+{
+
     private static final Object lock = new Object();
-    private static final Map<UUID, DaoSession> userDaoSessions = new HashMap();
+    private static final Map userDaoSessions = new HashMap();
 
-    @Nullable
-    public static DaoSession getUserDaoSession(@Nullable UUID uuid) {
-        DaoSession daoSession;
-        if (uuid == null) {
+    public DaoManager()
+    {
+    }
+
+    public static DaoSession getUserDaoSession(UUID uuid)
+    {
+        if (uuid == null)
+        {
             return null;
         }
-        synchronized (lock) {
-            daoSession = userDaoSessions.get(uuid);
-            if (daoSession == null) {
-                daoSession = new DaoMaster(new DBOpenHelper(LumiyaApp.getContext(), new File(GlobalOptions.getInstance().getCacheDir("database"), "userdb-" + uuid.toString() + ".db").getAbsolutePath(), (SQLiteDatabase.CursorFactory) null).getWritableDatabase()).newSession();
-                userDaoSessions.put(uuid, daoSession);
-            }
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        DaoSession daosession1 = (DaoSession)userDaoSessions.get(uuid);
+        DaoSession daosession;
+        daosession = daosession1;
+        if (daosession1 != null)
+        {
+            break MISSING_BLOCK_LABEL_112;
         }
-        return daoSession;
+        daosession = (new DaoMaster((new DBOpenHelper(LumiyaApp.getContext(), (new File(GlobalOptions.getInstance().getCacheDir("database"), (new StringBuilder()).append("userdb-").append(uuid.toString()).append(".db").toString())).getAbsolutePath(), null)).getWritableDatabase())).newSession();
+        userDaoSessions.put(uuid, daosession);
+        obj;
+        JVM INSTR monitorexit ;
+        return daosession;
+        uuid;
+        throw uuid;
     }
+
 }

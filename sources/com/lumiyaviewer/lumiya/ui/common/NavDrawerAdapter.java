@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.app.Activity;
@@ -11,7 +15,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.ui.chat.ChatNewActivity;
 import com.lumiyaviewer.lumiya.ui.inventory.InventoryActivity;
 import com.lumiyaviewer.lumiya.ui.login.LogoutDialog;
@@ -23,78 +26,114 @@ import com.lumiyaviewer.lumiya.ui.search.SearchGridActivity;
 import com.lumiyaviewer.lumiya.ui.settings.SettingsActivity;
 import java.util.UUID;
 
-class NavDrawerAdapter extends ArrayAdapter<NavDrawerItem> implements AdapterView.OnItemClickListener {
-    private static NavDrawerItem[] items = {new NavDrawerActivityItem(R.id.item_chat, R.attr.MenuIconLocalChatThemed, R.string.nav_chat, ChatNewActivity.class), new NavDrawerActivityItem(R.id.item_3d_view, R.attr.MenuIconWorldViewThemed, R.string.nav_3d_view, WorldViewActivity.class), new NavDrawerActivityItem(R.id.item_objects, R.attr.MenuIconObjectsThemed, R.string.nav_objects, ObjectListNewActivity.class), new NavDrawerActivityItem(R.id.item_inventory, R.attr.MenuIconInventoryThemed, R.string.nav_inventory, InventoryActivity.class), new NavDrawerActivityItem(R.id.item_minimap, R.attr.MenuIconMinimapThemed, R.string.nav_minimap, MinimapActivity.class), new NavDrawerItem(R.id.item_teleport_home, R.attr.MenuIconHomeThemed, R.string.nav_teleport_home) {
-        public void onClick(Context context) {
-            if (context instanceof Activity) {
-                TeleportHomeDialog.show((Activity) context);
-            }
-        }
-    }, new NavDrawerActivityItem(R.id.item_my_avatar, R.attr.MenuIconCardThemed, R.string.nav_my_avatar, MyAvatarActivity.class), new NavDrawerActivityItem(R.id.item_people_search, R.attr.MenuIconSearchThemed, R.string.nav_search, SearchGridActivity.class), new NavDrawerActivityItem(R.id.item_settings, R.attr.MenuIconSettingsThemed, R.string.nav_settings, SettingsActivity.class), new NavDrawerItem(R.id.item_signout, R.attr.MenuIconSignOffThemed, R.string.nav_signout) {
-        public void onClick(Context context) {
-            if (context instanceof Activity) {
-                LogoutDialog.show((Activity) context);
-            }
-        }
-    }};
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.common:
+//            ActivityUtils, TeleportHomeDialog
 
-    private static class NavDrawerActivityItem extends NavDrawerItem {
-        final Class<?> activityClass;
+class NavDrawerAdapter extends ArrayAdapter
+    implements android.widget.AdapterView.OnItemClickListener
+{
+    private static class NavDrawerActivityItem extends NavDrawerItem
+    {
 
-        NavDrawerActivityItem(int i, int i2, int i3, Class<?> cls) {
-            super(i, i2, i3);
-            this.activityClass = cls;
-        }
+        final Class activityClass;
 
-        public void onClick(Context context) {
-            UUID activeAgentID;
-            Intent intent = new Intent(context, this.activityClass);
-            intent.addFlags(131072);
-            if ((context instanceof Activity) && (activeAgentID = ActivityUtils.getActiveAgentID(((Activity) context).getIntent())) != null) {
-                intent.putExtra("activeAgentUUID", activeAgentID.toString());
+        public void onClick(Context context)
+        {
+            Intent intent = new Intent(context, activityClass);
+            intent.addFlags(0x20000);
+            if (context instanceof Activity)
+            {
+                UUID uuid = ActivityUtils.getActiveAgentID(((Activity)context).getIntent());
+                if (uuid != null)
+                {
+                    intent.putExtra("activeAgentUUID", uuid.toString());
+                }
             }
             context.startActivity(intent);
         }
+
+        NavDrawerActivityItem(int i, int j, int k, Class class1)
+        {
+            super(i, j, k);
+            activityClass = class1;
+        }
     }
 
-    static class NavDrawerItem {
+    static class NavDrawerItem
+    {
+
         final int iconId;
         final int itemId;
         final int labelId;
 
-        NavDrawerItem(int i, int i2, int i3) {
-            this.itemId = i;
-            this.iconId = i2;
-            this.labelId = i3;
+        public void onClick(Context context)
+        {
         }
 
-        public void onClick(Context context) {
+        NavDrawerItem(int i, int j, int k)
+        {
+            itemId = i;
+            iconId = j;
+            labelId = k;
         }
     }
 
-    NavDrawerAdapter(Context context) {
-        super(context, R.layout.nav_drawer_list_item, items);
+
+    private static NavDrawerItem items[] = {
+        new NavDrawerActivityItem(0x7f100369, 0x7f010033, 0x7f0901ca, com/lumiyaviewer/lumiya/ui/chat/ChatNewActivity), new NavDrawerActivityItem(0x7f100347, 0x7f010055, 0x7f0901c9, com/lumiyaviewer/lumiya/ui/render/WorldViewActivity), new NavDrawerActivityItem(0x7f100348, 0x7f01003c, 0x7f0901cf, com/lumiyaviewer/lumiya/ui/objects/ObjectListNewActivity), new NavDrawerActivityItem(0x7f100309, 0x7f01002f, 0x7f0901cb, com/lumiyaviewer/lumiya/ui/inventory/InventoryActivity), new NavDrawerActivityItem(0x7f100349, 0x7f010035, 0x7f0901cd, com/lumiyaviewer/lumiya/ui/minimap/MinimapActivity), new NavDrawerItem(0x7f10034a, 0x7f01002d, 0x7f0901d4) {
+
+            public void onClick(Context context)
+            {
+                if (context instanceof Activity)
+                {
+                    TeleportHomeDialog.show((Activity)context);
+                }
+            }
+
+        }, new NavDrawerActivityItem(0x7f10034b, 0x7f01001b, 0x7f0901ce, com/lumiyaviewer/lumiya/ui/myava/MyAvatarActivity), new NavDrawerActivityItem(0x7f10034c, 0x7f010043, 0x7f0901d1, com/lumiyaviewer/lumiya/ui/search/SearchGridActivity), new NavDrawerActivityItem(0x7f10030b, 0x7f010045, 0x7f0901d2, com/lumiyaviewer/lumiya/ui/settings/SettingsActivity), new NavDrawerItem(0x7f100351, 0x7f010049, 0x7f0901d3) {
+
+            public void onClick(Context context)
+            {
+                if (context instanceof Activity)
+                {
+                    LogoutDialog.show((Activity)context);
+                }
+            }
+
+        }
+    };
+
+    NavDrawerAdapter(Context context)
+    {
+        super(context, 0x7f040064, items);
     }
 
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        NavDrawerItem navDrawerItem = (NavDrawerItem) getItem(i);
-        if (navDrawerItem == null) {
+    public View getView(int i, View view, ViewGroup viewgroup)
+    {
+        NavDrawerItem navdraweritem = (NavDrawerItem)getItem(i);
+        if (navdraweritem == null)
+        {
             return null;
         }
-        if (view == null) {
-            view = ((LayoutInflater) getContext().getSystemService("layout_inflater")).inflate(R.layout.nav_drawer_list_item, viewGroup, false);
+        View view1 = view;
+        if (view == null)
+        {
+            view1 = ((LayoutInflater)getContext().getSystemService("layout_inflater")).inflate(0x7f040064, viewgroup, false);
         }
-        TypedValue typedValue = new TypedValue();
-        getContext().getTheme().resolveAttribute(navDrawerItem.iconId, typedValue, true);
-        ((TextView) view.findViewById(R.id.navDrawerItemName)).setText(getContext().getString(navDrawerItem.labelId));
-        ((ImageView) view.findViewById(R.id.navDrawerItemIcon)).setImageResource(typedValue.resourceId);
-        return view;
+        view = new TypedValue();
+        getContext().getTheme().resolveAttribute(navdraweritem.iconId, view, true);
+        ((TextView)view1.findViewById(0x7f1001ed)).setText(getContext().getString(navdraweritem.labelId));
+        ((ImageView)view1.findViewById(0x7f1001ec)).setImageResource(((TypedValue) (view)).resourceId);
+        return view1;
     }
 
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-        NavDrawerItem navDrawerItem = (NavDrawerItem) getItem(i);
-        if (navDrawerItem != null) {
-            navDrawerItem.onClick(adapterView.getContext());
+    public void onItemClick(AdapterView adapterview, View view, int i, long l)
+    {
+        view = (NavDrawerItem)getItem(i);
+        if (view != null)
+        {
+            view.onClick(adapterview.getContext());
         }
     }
+
 }

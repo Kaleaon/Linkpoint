@@ -1,7 +1,10 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.mesh;
 
 import com.google.common.io.ByteStreams;
-import com.google.common.net.HttpHeaders;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.GlobalOptions;
 import com.lumiyaviewer.lumiya.res.ResourceFileCache;
@@ -14,138 +17,243 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.UUID;
 import java.util.concurrent.Future;
-import okhttp3.Request;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
-public class MeshCache extends ResourceFileCache<UUID, MeshData> {
-    private static final int MAX_ATTEMPTS = 2;
-    private static volatile File baseDir;
-    /* access modifiers changed from: private */
-    public volatile String capURL = null;
-    /* access modifiers changed from: private */
-    public final Object capURLlock = new Object();
+public class MeshCache extends ResourceFileCache
+{
+    private class MeshDownloadRequest extends ResourceRequest
+        implements Runnable
+    {
 
-    private class MeshDownloadRequest extends ResourceRequest<UUID, MeshData> implements Runnable {
-        private volatile Future<?> downloadTask;
+        private volatile Future downloadTask;
         private final File outputFile;
+        final MeshCache this$0;
 
-        public MeshDownloadRequest(UUID uuid, ResourceManager<UUID, MeshData> resourceManager, File file) {
-            super(uuid, resourceManager);
-            this.outputFile = file;
-        }
-
-        public void cancelRequest() {
-            Future<?> future = this.downloadTask;
-            if (future != null) {
+        public void cancelRequest()
+        {
+            Future future = downloadTask;
+            if (future != null)
+            {
                 future.cancel(true);
             }
             super.cancelRequest();
         }
 
-        public void execute() {
-            this.downloadTask = HTTPFetchExecutor.getInstance().submit(this);
+        public void execute()
+        {
+            downloadTask = HTTPFetchExecutor.getInstance().submit(this);
         }
 
-        public void run() {
-            String str;
-            Response execute;
-            synchronized (MeshCache.this.capURLlock) {
-                str = null;
-                while (str == null) {
-                    str = MeshCache.this.capURL;
-                    if (str == null) {
-                        try {
-                            MeshCache.this.capURLlock.wait();
-                        } catch (InterruptedException e) {
-                        }
+        public void run()
+        {
+            Object obj1 = MeshCache._2D_get1(MeshCache.this);
+            obj1;
+            JVM INSTR monitorenter ;
+            Object obj = null;
+_L2:
+            String s;
+            s = ((String) (obj));
+            if (obj != null)
+            {
+                break MISSING_BLOCK_LABEL_48;
+            }
+            s = MeshCache._2D_get0(MeshCache.this);
+            obj = s;
+            if (s == null)
+            {
+label0:
+                {
+                    try
+                    {
+                        MeshCache._2D_get1(MeshCache.this).wait();
                     }
+                    catch (InterruptedException interruptedexception)
+                    {
+                        if (s == null)
+                        {
+                            completeRequest(null);
+                            return;
+                        }
+                        break label0;
+                    }
+                    finally
+                    {
+                        throw exception;
+                    }
+                    obj = s;
                 }
             }
-            if (str == null) {
-                completeRequest(null);
-                return;
+            if (true) goto _L2; else goto _L1
+_L1:
+            int i;
+            exception = new File((new StringBuilder()).append(outputFile.getAbsolutePath()).append(".tmp").toString());
+            s = (new StringBuilder()).append(s).append("/?mesh_id=").append(((UUID)getParams()).toString()).toString();
+            Debug.Printf("Fetching mesh: %s", new Object[] {
+                s
+            });
+            i = 0;
+_L4:
+            if (i >= 2)
+            {
+                break MISSING_BLOCK_LABEL_207;
             }
-            File file = new File(this.outputFile.getAbsolutePath() + ".tmp");
-            String str2 = str + "/?mesh_id=" + ((UUID) getParams()).toString();
-            Debug.Printf("Fetching mesh: %s", str2);
-            int i = 0;
-            while (i < 2) {
-                try {
-                    execute = SLHTTPSConnection.getOkHttpClient().newCall(new Request.Builder().url(str2).header(HttpHeaders.ACCEPT, "application/octet-stream").build()).execute();
-                    if (execute == null) {
-                        throw new IOException("Null response");
-                    } else if (!execute.isSuccessful()) {
-                        throw new IOException("Error response code " + execute.code());
-                    } else {
-                        File parentFile = file.getParentFile();
-                        if (parentFile != null) {
-                            parentFile.mkdirs();
-                        }
-                        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file));
-                        long copy = ByteStreams.copy(execute.body().byteStream(), (OutputStream) bufferedOutputStream);
-                        bufferedOutputStream.flush();
-                        bufferedOutputStream.close();
-                        File parentFile2 = this.outputFile.getParentFile();
-                        if (parentFile2 != null) {
-                            parentFile2.mkdirs();
-                        }
-                        file.renameTo(this.outputFile);
-                        Debug.Printf("MeshFetch: Saved %d bytes to %s", Long.valueOf(copy), this.outputFile.toString());
-                        completeRequest(new MeshData(this.outputFile));
-                        execute.close();
-                        i++;
-                    }
-                } catch (IOException e2) {
-                    Debug.Warning(e2);
-                } catch (Throwable th) {
-                    execute.close();
-                    throw th;
-                }
+            obj1 = (new okhttp3.Request.Builder()).url(s).header("Accept", "application/octet-stream").build();
+            obj1 = SLHTTPSConnection.getOkHttpClient().newCall(((okhttp3.Request) (obj1))).execute();
+            if (obj1 != null)
+            {
+                break MISSING_BLOCK_LABEL_225;
             }
-            if (!this.downloadTask.isCancelled()) {
+            try
+            {
+                throw new IOException("Null response");
+            }
+            // Misplaced declaration of an exception variable
+            catch (Exception exception)
+            {
+                Debug.Warning(exception);
+            }
+            if (!downloadTask.isCancelled())
+            {
                 completeRequest(null);
             }
+            return;
+            if (!((Response) (obj1)).isSuccessful())
+            {
+                throw new IOException((new StringBuilder()).append("Error response code ").append(((Response) (obj1)).code()).toString());
+            }
+            break MISSING_BLOCK_LABEL_269;
+            exception;
+            ((Response) (obj1)).close();
+            throw exception;
+            Object obj2 = exception.getParentFile();
+            if (obj2 == null)
+            {
+                break MISSING_BLOCK_LABEL_286;
+            }
+            ((File) (obj2)).mkdirs();
+            long l;
+            obj2 = new BufferedOutputStream(new FileOutputStream(exception));
+            l = ByteStreams.copy(((Response) (obj1)).body().byteStream(), ((java.io.OutputStream) (obj2)));
+            ((BufferedOutputStream) (obj2)).flush();
+            ((BufferedOutputStream) (obj2)).close();
+            obj2 = outputFile.getParentFile();
+            if (obj2 == null)
+            {
+                break MISSING_BLOCK_LABEL_347;
+            }
+            ((File) (obj2)).mkdirs();
+            exception.renameTo(outputFile);
+            Debug.Printf("MeshFetch: Saved %d bytes to %s", new Object[] {
+                Long.valueOf(l), outputFile.toString()
+            });
+            completeRequest(new MeshData(outputFile));
+            ((Response) (obj1)).close();
+            i++;
+            if (true) goto _L4; else goto _L3
+_L3:
+        }
+
+        public MeshDownloadRequest(UUID uuid, ResourceManager resourcemanager, File file)
+        {
+            this$0 = MeshCache.this;
+            super(uuid, resourcemanager);
+            outputFile = file;
         }
     }
 
-    private static File getBaseDir() {
-        if (baseDir == null) {
+
+    private static final int MAX_ATTEMPTS = 2;
+    private static volatile File baseDir;
+    private volatile String capURL;
+    private final Object capURLlock = new Object();
+
+    static String _2D_get0(MeshCache meshcache)
+    {
+        return meshcache.capURL;
+    }
+
+    static Object _2D_get1(MeshCache meshcache)
+    {
+        return meshcache.capURLlock;
+    }
+
+    public MeshCache()
+    {
+        capURL = null;
+    }
+
+    private static File getBaseDir()
+    {
+        if (baseDir == null)
+        {
             baseDir = GlobalOptions.getInstance().getCacheDir("mesh");
         }
         return baseDir;
     }
 
-    public static void onCacheDirChanged() {
+    public static void onCacheDirChanged()
+    {
         baseDir = null;
     }
 
-    /* access modifiers changed from: protected */
-    public MeshData createResourceFromFile(UUID uuid, File file) {
-        try {
-            return new MeshData(file);
-        } catch (IOException e) {
+    protected MeshData createResourceFromFile(UUID uuid, File file)
+    {
+        try
+        {
+            uuid = new MeshData(file);
+        }
+        // Misplaced declaration of an exception variable
+        catch (UUID uuid)
+        {
             return null;
         }
+        return uuid;
     }
 
-    /* access modifiers changed from: protected */
-    public ResourceRequest<UUID, MeshData> createResourceGenRequest(UUID uuid, ResourceManager<UUID, MeshData> resourceManager, File file) {
-        return new MeshDownloadRequest(uuid, resourceManager, file);
+    protected volatile Object createResourceFromFile(Object obj, File file)
+    {
+        return createResourceFromFile((UUID)obj, file);
     }
 
-    /* access modifiers changed from: protected */
-    public File getResourceFile(UUID uuid) {
-        int hashCode = uuid.hashCode();
-        return new File(getBaseDir(), String.format("%02x/%s.mesh", new Object[]{Integer.valueOf(((hashCode >> 24) ^ (((hashCode >> 8) ^ hashCode) ^ (hashCode >> 16))) & 255), uuid.toString()}));
+    protected volatile ResourceRequest createResourceGenRequest(Object obj, ResourceManager resourcemanager, File file)
+    {
+        return createResourceGenRequest((UUID)obj, resourcemanager, file);
     }
 
-    public void setCapURL(String str) {
-        synchronized (this.capURLlock) {
-            this.capURL = str;
-            this.capURLlock.notifyAll();
-        }
+    protected ResourceRequest createResourceGenRequest(UUID uuid, ResourceManager resourcemanager, File file)
+    {
+        return new MeshDownloadRequest(uuid, resourcemanager, file);
+    }
+
+    protected volatile File getResourceFile(Object obj)
+    {
+        return getResourceFile((UUID)obj);
+    }
+
+    protected File getResourceFile(UUID uuid)
+    {
+        int i = uuid.hashCode();
+        return new File(getBaseDir(), String.format("%02x/%s.mesh", new Object[] {
+            Integer.valueOf((i >> 24 ^ (i >> 8 ^ i ^ i >> 16)) & 0xff), uuid.toString()
+        }));
+    }
+
+    public void setCapURL(String s)
+    {
+        Object obj = capURLlock;
+        obj;
+        JVM INSTR monitorenter ;
+        capURL = s;
+        capURLlock.notifyAll();
+        obj;
+        JVM INSTR monitorexit ;
+        return;
+        s;
+        throw s;
     }
 }

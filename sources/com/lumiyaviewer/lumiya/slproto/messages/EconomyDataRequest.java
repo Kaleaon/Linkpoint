@@ -1,28 +1,41 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 
-public class EconomyDataRequest extends SLMessage {
-    public EconomyDataRequest() {
-        this.zeroCoded = false;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
+
+public class EconomyDataRequest extends SLMessage
+{
+
+    public EconomyDataRequest()
+    {
+        zeroCoded = false;
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 4;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleEconomyDataRequest(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleEconomyDataRequest(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put(Ascii.CAN);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)24);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
     }
 }
