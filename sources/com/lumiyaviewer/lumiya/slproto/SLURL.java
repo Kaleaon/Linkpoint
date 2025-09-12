@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto;
 
 import android.content.Intent;
@@ -7,108 +11,158 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import java.util.List;
 
-public class SLURL implements Parcelable {
-    public static final Parcelable.Creator<SLURL> CREATOR = new Parcelable.Creator<SLURL>() {
-        public SLURL createFromParcel(Parcel parcel) {
-            return new SLURL(parcel, (SLURL) null);
+public class SLURL
+    implements Parcelable
+{
+
+    public static final android.os.Parcelable.Creator CREATOR = new android.os.Parcelable.Creator() {
+
+        public SLURL createFromParcel(Parcel parcel)
+        {
+            return new SLURL(parcel, null);
         }
 
-        public SLURL[] newArray(int i) {
+        public volatile Object createFromParcel(Parcel parcel)
+        {
+            return createFromParcel(parcel);
+        }
+
+        public SLURL[] newArray(int i)
+        {
             return new SLURL[i];
         }
+
+        public volatile Object[] newArray(int i)
+        {
+            return newArray(i);
+        }
+
     };
     private String locationName;
     private int locationX;
     private int locationY;
     private int locationZ;
 
-    public SLURL(Intent intent) throws Exception {
-        List<String> pathSegments;
-        this.locationX = 128;
-        this.locationY = 128;
-        this.locationZ = 0;
-        Uri data = intent.getData();
-        if (!(data == null || data.getScheme() == null || data.getHost() == null)) {
-            if (data.getScheme().equalsIgnoreCase("http")) {
-                if (data.getHost().equalsIgnoreCase("maps.secondlife.com") && (pathSegments = data.getPathSegments()) != null && pathSegments.size() >= 2 && pathSegments.get(0).equalsIgnoreCase("secondlife")) {
-                    this.locationName = pathSegments.get(1);
-                    if (!this.locationName.equals("")) {
-                        if (pathSegments.size() >= 3) {
-                            this.locationX = Integer.parseInt(pathSegments.get(2));
+    public SLURL(Intent intent)
+        throws Exception
+    {
+        locationX = 128;
+        locationY = 128;
+        locationZ = 0;
+        intent = intent.getData();
+        if (intent != null && intent.getScheme() != null && intent.getHost() != null)
+        {
+            if (intent.getScheme().equalsIgnoreCase("http"))
+            {
+                if (intent.getHost().equalsIgnoreCase("maps.secondlife.com"))
+                {
+                    intent = intent.getPathSegments();
+                    if (intent != null && intent.size() >= 2 && ((String)intent.get(0)).equalsIgnoreCase("secondlife"))
+                    {
+                        locationName = (String)intent.get(1);
+                        if (!locationName.equals(""))
+                        {
+                            if (intent.size() >= 3)
+                            {
+                                locationX = Integer.parseInt((String)intent.get(2));
+                            }
+                            if (intent.size() >= 4)
+                            {
+                                locationY = Integer.parseInt((String)intent.get(3));
+                            }
+                            if (intent.size() >= 5)
+                            {
+                                locationZ = Integer.parseInt((String)intent.get(4));
+                            }
+                        } else
+                        {
+                            locationName = null;
                         }
-                        if (pathSegments.size() >= 4) {
-                            this.locationY = Integer.parseInt(pathSegments.get(3));
-                        }
-                        if (pathSegments.size() >= 5) {
-                            this.locationZ = Integer.parseInt(pathSegments.get(4));
-                        }
-                    } else {
-                        this.locationName = null;
                     }
                 }
-            } else if (data.getScheme().equalsIgnoreCase("secondlife")) {
-                this.locationName = data.getHost();
-                List<String> pathSegments2 = data.getPathSegments();
-                if (pathSegments2 != null) {
-                    if (pathSegments2.size() >= 1) {
-                        this.locationX = Integer.parseInt(pathSegments2.get(0));
+            } else
+            if (intent.getScheme().equalsIgnoreCase("secondlife"))
+            {
+                locationName = intent.getHost();
+                intent = intent.getPathSegments();
+                if (intent != null)
+                {
+                    if (intent.size() >= 1)
+                    {
+                        locationX = Integer.parseInt((String)intent.get(0));
                     }
-                    if (pathSegments2.size() >= 2) {
-                        this.locationY = Integer.parseInt(pathSegments2.get(1));
+                    if (intent.size() >= 2)
+                    {
+                        locationY = Integer.parseInt((String)intent.get(1));
                     }
-                    if (pathSegments2.size() >= 3) {
-                        this.locationZ = Integer.parseInt(pathSegments2.get(2));
+                    if (intent.size() >= 3)
+                    {
+                        locationZ = Integer.parseInt((String)intent.get(2));
                     }
                 }
             }
         }
-        if (this.locationName == null) {
+        if (locationName == null)
+        {
             throw new Exception("No SLURL data in the given intent");
+        } else
+        {
+            return;
         }
     }
 
-    private SLURL(Parcel parcel) {
-        this.locationX = 128;
-        this.locationY = 128;
-        this.locationZ = 0;
-        this.locationName = parcel.readString();
-        this.locationX = parcel.readInt();
-        this.locationY = parcel.readInt();
-        this.locationZ = parcel.readInt();
+    private SLURL(Parcel parcel)
+    {
+        locationX = 128;
+        locationY = 128;
+        locationZ = 0;
+        locationName = parcel.readString();
+        locationX = parcel.readInt();
+        locationY = parcel.readInt();
+        locationZ = parcel.readInt();
     }
 
-    /* synthetic */ SLURL(Parcel parcel, SLURL slurl) {
+    SLURL(Parcel parcel, SLURL slurl)
+    {
         this(parcel);
     }
 
-    public int describeContents() {
+    public int describeContents()
+    {
         return 0;
     }
 
-    public String getLocationName() {
-        return this.locationName;
+    public String getLocationName()
+    {
+        return locationName;
     }
 
-    public int getLocationX() {
-        return this.locationX;
+    public int getLocationX()
+    {
+        return locationX;
     }
 
-    public int getLocationY() {
-        return this.locationY;
+    public int getLocationY()
+    {
+        return locationY;
     }
 
-    public int getLocationZ() {
-        return this.locationZ;
+    public int getLocationZ()
+    {
+        return locationZ;
     }
 
-    public String getLoginStartLocation() {
-        return "uri:" + TextUtils.htmlEncode(this.locationName) + "&amp;" + Integer.toString(this.locationX) + "&amp;" + Integer.toString(this.locationY) + "&amp;" + Integer.toString(this.locationZ);
+    public String getLoginStartLocation()
+    {
+        return (new StringBuilder()).append("uri:").append(TextUtils.htmlEncode(locationName)).append("&amp;").append(Integer.toString(locationX)).append("&amp;").append(Integer.toString(locationY)).append("&amp;").append(Integer.toString(locationZ)).toString();
     }
 
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(this.locationName);
-        parcel.writeInt(this.locationX);
-        parcel.writeInt(this.locationY);
-        parcel.writeInt(this.locationZ);
+    public void writeToParcel(Parcel parcel, int i)
+    {
+        parcel.writeString(locationName);
+        parcel.writeInt(locationX);
+        parcel.writeInt(locationY);
+        parcel.writeInt(locationZ);
     }
+
 }

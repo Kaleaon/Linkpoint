@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.terrain;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -8,34 +12,55 @@ import com.lumiyaviewer.lumiya.res.ResourceRequest;
 import com.lumiyaviewer.lumiya.res.executors.PrimComputeExecutor;
 import com.lumiyaviewer.lumiya.slproto.terrain.TerrainPatchHeightMap;
 
-public class TerrainGeometryCache extends ResourceMemoryCache<TerrainPatchHeightMap, TerrainPatchGeometry> {
+public class TerrainGeometryCache extends ResourceMemoryCache
+{
+    private static class TerrainGeometryRequest extends ResourceRequest
+        implements Runnable
+    {
 
-    private static class TerrainGeometryRequest extends ResourceRequest<TerrainPatchHeightMap, TerrainPatchGeometry> implements Runnable {
-        public TerrainGeometryRequest(TerrainPatchHeightMap terrainPatchHeightMap, ResourceManager<TerrainPatchHeightMap, TerrainPatchGeometry> resourceManager) {
-            super(terrainPatchHeightMap, resourceManager);
-        }
-
-        public void cancelRequest() {
+        public void cancelRequest()
+        {
             PrimComputeExecutor.getInstance().remove(this);
             super.cancelRequest();
         }
 
-        public void execute() {
+        public void execute()
+        {
             PrimComputeExecutor.getInstance().execute(this);
         }
 
-        public void run() {
-            try {
-                completeRequest(new TerrainPatchGeometry((TerrainPatchHeightMap) getParams()));
-            } catch (Exception e) {
-                Debug.Warning(e);
-                completeRequest(null);
+        public void run()
+        {
+            try
+            {
+                completeRequest(new TerrainPatchGeometry((TerrainPatchHeightMap)getParams()));
+                return;
             }
+            catch (Exception exception)
+            {
+                Debug.Warning(exception);
+            }
+            completeRequest(null);
+        }
+
+        public TerrainGeometryRequest(TerrainPatchHeightMap terrainpatchheightmap, ResourceManager resourcemanager)
+        {
+            super(terrainpatchheightmap, resourcemanager);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public ResourceRequest<TerrainPatchHeightMap, TerrainPatchGeometry> CreateNewRequest(TerrainPatchHeightMap terrainPatchHeightMap, ResourceManager<TerrainPatchHeightMap, TerrainPatchGeometry> resourceManager) {
-        return new TerrainGeometryRequest(terrainPatchHeightMap, resourceManager);
+
+    public TerrainGeometryCache()
+    {
+    }
+
+    protected ResourceRequest CreateNewRequest(TerrainPatchHeightMap terrainpatchheightmap, ResourceManager resourcemanager)
+    {
+        return new TerrainGeometryRequest(terrainpatchheightmap, resourcemanager);
+    }
+
+    protected volatile ResourceRequest CreateNewRequest(Object obj, ResourceManager resourcemanager)
+    {
+        return CreateNewRequest((TerrainPatchHeightMap)obj, resourcemanager);
     }
 }

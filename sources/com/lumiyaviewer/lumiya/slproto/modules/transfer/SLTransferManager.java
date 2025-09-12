@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.transfer;
 
 import com.google.common.collect.BiMap;
@@ -6,10 +10,11 @@ import com.google.common.collect.Maps;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.react.AsyncRequestHandler;
 import com.lumiyaviewer.lumiya.react.RequestHandler;
+import com.lumiyaviewer.lumiya.react.RequestSource;
 import com.lumiyaviewer.lumiya.react.ResultHandler;
 import com.lumiyaviewer.lumiya.res.anim.AnimationCache;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler;
+import com.lumiyaviewer.lumiya.slproto.SLCircuitInfo;
 import com.lumiyaviewer.lumiya.slproto.messages.TransferAbort;
 import com.lumiyaviewer.lumiya.slproto.messages.TransferInfo;
 import com.lumiyaviewer.lumiya.slproto.messages.TransferPacket;
@@ -22,93 +27,170 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public class SLTransferManager extends SLModule {
-    private static final float DEFAULT_PRIORITY = 10000.0f;
-    /* access modifiers changed from: private */
-    public final BiMap<AssetKey, UUID> activeTransferIds = Maps.synchronizedBiMap(HashBiMap.create());
-    /* access modifiers changed from: private */
-    public final Map<UUID, SLTransfer> activeTransfers = Collections.synchronizedMap(new HashMap());
-    private final RequestHandler<AssetKey> assetRequestHandler = new AsyncRequestHandler(this.agentCircuit, new RequestHandler<AssetKey>() {
-        public void onRequest(@Nonnull AssetKey assetKey) {
-            Debug.Printf("Transfer: Requested asset download for %s", assetKey);
-            SLTransfer sLTransfer = new SLTransfer(SLTransferManager.this.circuitInfo.agentID, SLTransferManager.this.circuitInfo.sessionID, assetKey, SLTransferManager.DEFAULT_PRIORITY);
-            SLTransferManager.this.activeTransferIds.forcePut(assetKey, sLTransfer.getTransferUUID());
-            SLTransferManager.this.BeginTransfer(sLTransfer);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.modules.transfer:
+//            SLTransfer
+
+public class SLTransferManager extends SLModule
+{
+
+    private static final float DEFAULT_PRIORITY = 10000F;
+    private final BiMap activeTransferIds = Maps.synchronizedBiMap(HashBiMap.create());
+    private final Map activeTransfers = Collections.synchronizedMap(new HashMap());
+    private final RequestHandler assetRequestHandler;
+    private final ResultHandler assetResultHandler;
+    private final UserManager userManager;
+
+    static BiMap _2D_get0(SLTransferManager sltransfermanager)
+    {
+        return sltransfermanager.activeTransferIds;
+    }
+
+    static Map _2D_get1(SLTransferManager sltransfermanager)
+    {
+        return sltransfermanager.activeTransfers;
+    }
+
+    static SLCircuitInfo _2D_get2(SLTransferManager sltransfermanager)
+    {
+        return sltransfermanager.circuitInfo;
+    }
+
+    static void _2D_wrap0(SLTransferManager sltransfermanager, SLTransfer sltransfer)
+    {
+        sltransfermanager.BeginTransfer(sltransfer);
+    }
+
+    static void _2D_wrap1(SLTransferManager sltransfermanager, SLTransfer sltransfer)
+    {
+        sltransfermanager.CancelTransfer(sltransfer);
+    }
+
+    public SLTransferManager(SLAgentCircuit slagentcircuit)
+    {
+        Object obj = null;
+        super(slagentcircuit);
+        assetRequestHandler = new AsyncRequestHandler(agentCircuit, new RequestHandler() {
+
+            final SLTransferManager this$0;
+
+            public void onRequest(AssetKey assetkey)
+            {
+                Debug.Printf("Transfer: Requested asset download for %s", new Object[] {
+                    assetkey
+                });
+                SLTransfer sltransfer = new SLTransfer(SLTransferManager._2D_get2(SLTransferManager.this).agentID, SLTransferManager._2D_get2(SLTransferManager.this).sessionID, assetkey, 10000F);
+                SLTransferManager._2D_get0(SLTransferManager.this).forcePut(assetkey, sltransfer.getTransferUUID());
+                SLTransferManager._2D_wrap0(SLTransferManager.this, sltransfer);
+            }
+
+            public volatile void onRequest(Object obj1)
+            {
+                onRequest((AssetKey)obj1);
+            }
+
+            public void onRequestCancelled(AssetKey assetkey)
+            {
+                assetkey = (UUID)SLTransferManager._2D_get0(SLTransferManager.this).remove(assetkey);
+                if (assetkey != null)
+                {
+                    assetkey = (SLTransfer)SLTransferManager._2D_get1(SLTransferManager.this).get(assetkey);
+                    if (assetkey != null)
+                    {
+                        SLTransferManager._2D_wrap1(SLTransferManager.this, assetkey);
+                    }
+                }
+            }
+
+            public volatile void onRequestCancelled(Object obj1)
+            {
+                onRequestCancelled((AssetKey)obj1);
+            }
+
+            
+            {
+                this$0 = SLTransferManager.this;
+                super();
+            }
+        });
+        userManager = UserManager.getUserManager(agentCircuit.circuitInfo.agentID);
+        if (userManager != null)
+        {
+            AnimationCache.getInstance().setAssetResponseCacher(userManager.getAssetResponseCacher());
         }
+        slagentcircuit = obj;
+        if (userManager != null)
+        {
+            slagentcircuit = userManager.getAssetResponseCacher().getRequestSource().attachRequestHandler(assetRequestHandler);
+        }
+        assetResultHandler = slagentcircuit;
+    }
 
-        public void onRequestCancelled(@Nonnull AssetKey assetKey) {
-            SLTransfer sLTransfer;
-            UUID uuid = (UUID) SLTransferManager.this.activeTransferIds.remove(assetKey);
-            if (uuid != null && (sLTransfer = (SLTransfer) SLTransferManager.this.activeTransfers.get(uuid)) != null) {
-                SLTransferManager.this.CancelTransfer(sLTransfer);
+    private void BeginTransfer(SLTransfer sltransfer)
+    {
+        Debug.Printf("Transfer: Starting transfer: assetUUID %s, assetType %d", new Object[] {
+            sltransfer.getAssetUUID().toString(), Integer.valueOf(sltransfer.getAssetType())
+        });
+        activeTransfers.put(sltransfer.getTransferUUID(), sltransfer);
+        sltransfer = sltransfer.makeTransferRequest();
+        agentCircuit.SendMessage(sltransfer);
+    }
+
+    private void CancelTransfer(SLTransfer sltransfer)
+    {
+        activeTransfers.remove(sltransfer.getTransferUUID());
+        TransferAbort transferabort = new TransferAbort();
+        transferabort.TransferInfo_Field.TransferID = sltransfer.getTransferUUID();
+        transferabort.TransferInfo_Field.ChannelType = sltransfer.getChannelType();
+        transferabort.isReliable = true;
+        agentCircuit.SendMessage(transferabort);
+    }
+
+    void EndTransfer(SLTransfer sltransfer)
+    {
+        activeTransfers.remove(sltransfer.getTransferUUID());
+        AssetKey assetkey = (AssetKey)activeTransferIds.inverse().remove(sltransfer.getTransferUUID());
+        if (assetkey != null && assetResultHandler != null)
+        {
+            int i = sltransfer.getStatus();
+            if (i != 3 && i != 0)
+            {
+                assetResultHandler.onResultData(assetkey, new AssetData(i, sltransfer.getData()));
             }
         }
-    });
-    private final ResultHandler<AssetKey, AssetData> assetResultHandler;
-    private final UserManager userManager = UserManager.getUserManager(this.agentCircuit.circuitInfo.agentID);
-
-    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    public SLTransferManager(SLAgentCircuit sLAgentCircuit) {
-        super(sLAgentCircuit);
-        ResultHandler<AssetKey, AssetData> resultHandler = null;
-        if (this.userManager != null) {
-            AnimationCache.getInstance().setAssetResponseCacher(this.userManager.getAssetResponseCacher());
-        }
-        this.assetResultHandler = this.userManager != null ? this.userManager.getAssetResponseCacher().getRequestSource().attachRequestHandler(this.assetRequestHandler) : resultHandler;
     }
 
-    /* access modifiers changed from: private */
-    public void BeginTransfer(SLTransfer sLTransfer) {
-        Debug.Printf("Transfer: Starting transfer: assetUUID %s, assetType %d", sLTransfer.getAssetUUID().toString(), Integer.valueOf(sLTransfer.getAssetType()));
-        this.activeTransfers.put(sLTransfer.getTransferUUID(), sLTransfer);
-        this.agentCircuit.SendMessage(sLTransfer.makeTransferRequest());
-    }
-
-    /* access modifiers changed from: private */
-    public void CancelTransfer(SLTransfer sLTransfer) {
-        this.activeTransfers.remove(sLTransfer.getTransferUUID());
-        TransferAbort transferAbort = new TransferAbort();
-        transferAbort.TransferInfo_Field.TransferID = sLTransfer.getTransferUUID();
-        transferAbort.TransferInfo_Field.ChannelType = sLTransfer.getChannelType();
-        transferAbort.isReliable = true;
-        this.agentCircuit.SendMessage(transferAbort);
-    }
-
-    /* access modifiers changed from: package-private */
-    public void EndTransfer(SLTransfer sLTransfer) {
-        int status;
-        this.activeTransfers.remove(sLTransfer.getTransferUUID());
-        AssetKey assetKey = (AssetKey) this.activeTransferIds.inverse().remove(sLTransfer.getTransferUUID());
-        if (assetKey != null && this.assetResultHandler != null && (status = sLTransfer.getStatus()) != 3 && status != 0) {
-            this.assetResultHandler.onResultData(assetKey, new AssetData(status, sLTransfer.getData()));
-        }
-    }
-
-    public void HandleCloseCircuit() {
-        AnimationCache.getInstance().setAssetResponseCacher((AssetResponseCacher) null);
-        if (this.userManager != null) {
-            this.userManager.getAssetResponseCacher().getRequestSource().detachRequestHandler(this.assetRequestHandler);
+    public void HandleCloseCircuit()
+    {
+        AnimationCache.getInstance().setAssetResponseCacher(null);
+        if (userManager != null)
+        {
+            userManager.getAssetResponseCacher().getRequestSource().detachRequestHandler(assetRequestHandler);
         }
         super.HandleCloseCircuit();
     }
 
-    @SLMessageHandler
-    public void HandleTransferInfo(TransferInfo transferInfo) {
-        SLTransfer sLTransfer = this.activeTransfers.get(transferInfo.TransferInfoData_Field.TransferID);
-        if (sLTransfer != null) {
-            Debug.Log(String.format("Transfer: Info recd, status %d, size %d", new Object[]{Integer.valueOf(transferInfo.TransferInfoData_Field.Status), Integer.valueOf(transferInfo.TransferInfoData_Field.Size)}));
-            sLTransfer.HandleTransferInfo(this, transferInfo);
+    public void HandleTransferInfo(TransferInfo transferinfo)
+    {
+        SLTransfer sltransfer = (SLTransfer)activeTransfers.get(transferinfo.TransferInfoData_Field.TransferID);
+        if (sltransfer != null)
+        {
+            Debug.Log(String.format("Transfer: Info recd, status %d, size %d", new Object[] {
+                Integer.valueOf(transferinfo.TransferInfoData_Field.Status), Integer.valueOf(transferinfo.TransferInfoData_Field.Size)
+            }));
+            sltransfer.HandleTransferInfo(this, transferinfo);
         }
     }
 
-    @SLMessageHandler
-    public void HandleTransferPacket(TransferPacket transferPacket) {
-        SLTransfer sLTransfer = this.activeTransfers.get(transferPacket.TransferData_Field.TransferID);
-        if (sLTransfer != null) {
-            Debug.Log(String.format("Transfer: data recd, packet %d, status %d, size %d.", new Object[]{Integer.valueOf(transferPacket.TransferData_Field.Packet), Integer.valueOf(transferPacket.TransferData_Field.Status), Integer.valueOf(transferPacket.TransferData_Field.Data.length)}));
-            sLTransfer.HandleTransferPacket(this, transferPacket);
+    public void HandleTransferPacket(TransferPacket transferpacket)
+    {
+        SLTransfer sltransfer = (SLTransfer)activeTransfers.get(transferpacket.TransferData_Field.TransferID);
+        if (sltransfer != null)
+        {
+            Debug.Log(String.format("Transfer: data recd, packet %d, status %d, size %d.", new Object[] {
+                Integer.valueOf(transferpacket.TransferData_Field.Packet), Integer.valueOf(transferpacket.TransferData_Field.Status), Integer.valueOf(transferpacket.TransferData_Field.Data.length)
+            }));
+            sltransfer.HandleTransferPacket(this, transferpacket);
         }
     }
 }

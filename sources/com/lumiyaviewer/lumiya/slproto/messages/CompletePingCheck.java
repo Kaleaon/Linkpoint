@@ -1,34 +1,54 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 
-public class CompletePingCheck extends SLMessage {
-    public PingID PingID_Field = new PingID();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class PingID {
+public class CompletePingCheck extends SLMessage
+{
+    public static class PingID
+    {
+
         public int PingID;
+
+        public PingID()
+        {
+        }
     }
 
-    public CompletePingCheck() {
-        this.zeroCoded = false;
+
+    public PingID PingID_Field;
+
+    public CompletePingCheck()
+    {
+        zeroCoded = false;
+        PingID_Field = new PingID();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 2;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCompletePingCheck(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleCompletePingCheck(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) 2);
-        packByte(byteBuffer, (byte) this.PingID_Field.PingID);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.put((byte)2);
+        packByte(bytebuffer, (byte)PingID_Field.PingID);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.PingID_Field.PingID = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        PingID_Field.PingID = unpackByte(bytebuffer) & 0xff;
     }
 }

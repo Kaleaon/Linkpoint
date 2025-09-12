@@ -1,88 +1,147 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.types;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
 
-@ThreadSafe
-public class AgentPosition {
-    private boolean isValid = false;
-    private long lastAgentDataMillis = 0;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.types:
+//            LLVector3, ImmutableVector
+
+public class AgentPosition
+{
+
+    private boolean isValid;
+    private long lastAgentDataMillis;
     private final Object lock = new Object();
     private final LLVector3 position = new LLVector3();
     private final LLVector3 velocity = new LLVector3();
 
-    @Nullable
-    public ImmutableVector getImmutablePosition() {
-        ImmutableVector immutableVector = null;
-        synchronized (this.lock) {
-            if (this.isValid) {
-                immutableVector = new ImmutableVector(this.position);
-            }
-        }
-        return immutableVector;
+    public AgentPosition()
+    {
+        isValid = false;
+        lastAgentDataMillis = 0L;
     }
 
-    public boolean getInterpolatedPosition(@Nonnull LLVector3 lLVector3) {
-        boolean z;
-        synchronized (this.lock) {
-            if (this.isValid) {
-                if (this.velocity.x == 0.0f && this.velocity.y == 0.0f && this.velocity.z == 0.0f) {
-                    lLVector3.set(this.position);
-                } else {
-                    lLVector3.setMul(this.velocity, ((float) (System.currentTimeMillis() - this.lastAgentDataMillis)) / 1000.0f);
-                    lLVector3.add(this.position);
-                }
-                z = true;
-            } else {
-                z = false;
-            }
+    public ImmutableVector getImmutablePosition()
+    {
+        ImmutableVector immutablevector = null;
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (isValid)
+        {
+            immutablevector = new ImmutableVector(position);
         }
-        return z;
+        obj;
+        JVM INSTR monitorexit ;
+        return immutablevector;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    @Nonnull
-    public LLVector3 getPosition() {
-        LLVector3 lLVector3 = new LLVector3();
-        synchronized (this.lock) {
-            if (this.isValid) {
-                lLVector3.set(this.position);
-            }
+    public boolean getInterpolatedPosition(LLVector3 llvector3)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (!isValid)
+        {
+            break MISSING_BLOCK_LABEL_100;
         }
-        return lLVector3;
+        if (velocity.x != 0.0F || velocity.y != 0.0F || velocity.z != 0.0F) goto _L2; else goto _L1
+_L1:
+        llvector3.set(position);
+_L3:
+        boolean flag = true;
+_L4:
+        obj;
+        JVM INSTR monitorexit ;
+        return flag;
+_L2:
+        llvector3.setMul(velocity, (float)(System.currentTimeMillis() - lastAgentDataMillis) / 1000F);
+        llvector3.add(position);
+          goto _L3
+        llvector3;
+        throw llvector3;
+        flag = false;
+          goto _L4
     }
 
-    public boolean getPosition(@Nonnull LLVector3 lLVector3) {
-        boolean z;
-        synchronized (this.lock) {
-            if (this.isValid) {
-                lLVector3.set(this.position);
-                z = true;
-            } else {
-                z = false;
-            }
+    public LLVector3 getPosition()
+    {
+        LLVector3 llvector3 = new LLVector3();
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (isValid)
+        {
+            llvector3.set(position);
         }
-        return z;
+        obj;
+        JVM INSTR monitorexit ;
+        return llvector3;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public boolean isValid() {
-        boolean z;
-        synchronized (this.lock) {
-            z = this.isValid;
-        }
-        return z;
+    public boolean getPosition(LLVector3 llvector3)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (!isValid) goto _L2; else goto _L1
+_L1:
+        llvector3.set(position);
+        boolean flag = true;
+_L4:
+        obj;
+        JVM INSTR monitorexit ;
+        return flag;
+_L2:
+        flag = false;
+        if (true) goto _L4; else goto _L3
+_L3:
+        llvector3;
+        throw llvector3;
     }
 
-    public void set(@Nonnull LLVector3 lLVector3, @Nullable LLVector3 lLVector32) {
-        synchronized (this.lock) {
-            this.position.set(lLVector3);
-            LLVector3 lLVector33 = this.velocity;
-            if (lLVector32 == null) {
-                lLVector32 = LLVector3.Zero;
-            }
-            lLVector33.set(lLVector32);
-            this.lastAgentDataMillis = System.currentTimeMillis();
-            this.isValid = true;
-        }
+    public boolean isValid()
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        boolean flag = isValid;
+        obj;
+        JVM INSTR monitorexit ;
+        return flag;
+        Exception exception;
+        exception;
+        throw exception;
+    }
+
+    public void set(LLVector3 llvector3, LLVector3 llvector3_1)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        position.set(llvector3);
+        llvector3 = velocity;
+        if (llvector3_1 == null) goto _L2; else goto _L1
+_L1:
+        llvector3.set(llvector3_1);
+        lastAgentDataMillis = System.currentTimeMillis();
+        isValid = true;
+        obj;
+        JVM INSTR monitorexit ;
+        return;
+_L2:
+        llvector3_1 = LLVector3.Zero;
+        if (true) goto _L1; else goto _L3
+_L3:
+        llvector3;
+        throw llvector3;
     }
 }

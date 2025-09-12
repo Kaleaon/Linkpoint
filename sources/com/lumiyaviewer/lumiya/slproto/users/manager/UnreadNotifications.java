@@ -1,116 +1,203 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationInfo;
+import com.google.common.collect.UnmodifiableIterator;
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public abstract class UnreadNotifications {
-    public static UnreadNotifications create(@Nonnull UUID uuid, @Nonnull ImmutableMap<NotificationType, UnreadNotificationInfo> immutableMap) {
-        return new AutoValue_UnreadNotifications(uuid, immutableMap);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            AutoValue_UnreadNotifications, UnreadNotificationInfo
+
+public abstract class UnreadNotifications
+{
+
+    public UnreadNotifications()
+    {
     }
 
-    @Nonnull
+    public static UnreadNotifications create(UUID uuid, ImmutableMap immutablemap)
+    {
+        return new AutoValue_UnreadNotifications(uuid, immutablemap);
+    }
+
     public abstract UUID agentUUID();
 
-    public UnreadNotifications filter(@Nonnull ImmutableSet<NotificationType> immutableSet) {
-        if (immutableSet.containsAll(notificationGroups().keySet())) {
+    public UnreadNotifications filter(ImmutableSet immutableset)
+    {
+        if (immutableset.containsAll(notificationGroups().keySet()))
+        {
             return this;
         }
-        ImmutableMap.Builder builder = ImmutableMap.builder();
-        for (Map.Entry entry : notificationGroups().entrySet()) {
-            if (immutableSet.contains(entry.getKey())) {
+        com.google.common.collect.ImmutableMap.Builder builder = ImmutableMap.builder();
+        Iterator iterator = notificationGroups().entrySet().iterator();
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break;
+            }
+            java.util.Map.Entry entry = (java.util.Map.Entry)iterator.next();
+            if (immutableset.contains(entry.getKey()))
+            {
                 builder.put(entry);
             }
-        }
+        } while (true);
         return create(agentUUID(), builder.build());
     }
 
-    public UnreadNotificationInfo merge() {
-        UnreadNotificationInfo.ObjectPopupNotification objectPopupNotification;
-        ImmutableList.Builder builder;
+    public UnreadNotificationInfo merge()
+    {
+        Object obj;
+        Object obj1;
+        Object obj4;
+        Object obj5;
+        Object obj7;
+        ImmutableMap immutablemap;
+        Iterator iterator;
+        boolean flag;
         int i;
-        ImmutableMap<NotificationType, UnreadNotificationInfo> notificationGroups = notificationGroups();
-        if (notificationGroups.isEmpty()) {
-            return UnreadNotificationInfo.create(agentUUID(), 0, (List<UnreadNotificationInfo.UnreadMessageSource>) null, (NotificationType) null, 0, (NotificationType) null, (UnreadNotificationInfo.UnreadMessageSource) null, UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null));
+        int j;
+        immutablemap = notificationGroups();
+        if (immutablemap.isEmpty())
+        {
+            return UnreadNotificationInfo.create(agentUUID(), 0, null, null, 0, null, null, UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, null));
         }
-        if (notificationGroups.size() == 1) {
-            return (UnreadNotificationInfo) ((Map.Entry) notificationGroups.entrySet().iterator().next()).getValue();
+        if (immutablemap.size() == 1)
+        {
+            return (UnreadNotificationInfo)((java.util.Map.Entry)immutablemap.entrySet().iterator().next()).getValue();
         }
-        UnreadNotificationInfo.ObjectPopupNotification objectPopupNotification2 = null;
-        NotificationType notificationType = null;
-        NotificationType notificationType2 = null;
-        UnreadNotificationInfo.UnreadMessageSource unreadMessageSource = null;
-        int i2 = 0;
-        int i3 = 0;
-        ImmutableList.Builder builder2 = null;
-        boolean z = false;
-        Iterator<T> it = NotificationType.VALUES_BY_DESCENDING_PRIORITY.iterator();
-        while (true) {
-            objectPopupNotification = objectPopupNotification2;
-            builder = builder2;
-            i = i2;
-            boolean z2 = z;
-            if (!it.hasNext()) {
-                break;
+        obj7 = null;
+        obj5 = null;
+        obj4 = null;
+        j = 0;
+        iterator = NotificationType.VALUES_BY_DESCENDING_PRIORITY.iterator();
+        obj = null;
+        obj1 = null;
+        i = 0;
+        flag = false;
+_L2:
+        Object obj6;
+        Object obj2;
+        UnreadNotificationInfo unreadnotificationinfo;
+label0:
+        {
+            if (!iterator.hasNext())
+            {
+                break; /* Loop/switch isn't completed */
             }
-            UnreadNotificationInfo unreadNotificationInfo = notificationGroups.get((NotificationType) it.next());
-            if (unreadNotificationInfo != null) {
-                int i4 = unreadNotificationInfo.totalUnreadCount() + i;
-                if (!unreadNotificationInfo.unreadSources().isEmpty()) {
-                    if (builder == null) {
-                        builder = ImmutableList.builder();
-                    }
-                    builder.addAll((Iterable) unreadNotificationInfo.unreadSources());
-                }
-                NotificationType orNull = unreadNotificationInfo.mostImportantType().orNull();
-                if (orNull != null && (notificationType == null || orNull.compareTo(notificationType) > 0)) {
-                    notificationType = orNull;
-                }
-                NotificationType orNull2 = unreadNotificationInfo.mostImportantFreshType().orNull();
-                if (orNull2 != null && (notificationType2 == null || orNull2.compareTo(notificationType2) > 0)) {
-                    notificationType2 = orNull2;
-                }
-                i3 += unreadNotificationInfo.freshMessagesCount();
-                UnreadNotificationInfo.UnreadMessageSource orNull3 = unreadNotificationInfo.singleFreshSource().orNull();
-                if (orNull3 != null) {
-                    if (unreadMessageSource != null || !(!z2)) {
-                        orNull3 = null;
-                    }
-                    z2 = true;
-                } else {
-                    orNull3 = unreadMessageSource;
-                }
-                UnreadNotificationInfo.ObjectPopupNotification objectPopupInfo = unreadNotificationInfo.objectPopupInfo();
-                if (!objectPopupInfo.isEmpty()) {
-                    unreadMessageSource = orNull3;
-                    builder2 = builder;
-                    objectPopupNotification2 = objectPopupInfo;
-                    z = z2;
-                    i2 = i4;
-                } else {
-                    z = z2;
-                    unreadMessageSource = orNull3;
-                    i2 = i4;
-                    builder2 = builder;
-                    objectPopupNotification2 = objectPopupNotification;
-                }
-            } else {
-                z = z2;
-                i2 = i;
-                builder2 = builder;
-                objectPopupNotification2 = objectPopupNotification;
+            unreadnotificationinfo = (UnreadNotificationInfo)immutablemap.get((NotificationType)iterator.next());
+            if (unreadnotificationinfo == null)
+            {
+                break MISSING_BLOCK_LABEL_420;
             }
+            i = unreadnotificationinfo.totalUnreadCount() + i;
+            obj2 = obj1;
+            if (!unreadnotificationinfo.unreadSources().isEmpty())
+            {
+                obj2 = obj1;
+                if (obj1 == null)
+                {
+                    obj2 = ImmutableList.builder();
+                }
+                ((com.google.common.collect.ImmutableList.Builder) (obj2)).addAll(unreadnotificationinfo.unreadSources());
+            }
+            obj1 = (NotificationType)unreadnotificationinfo.mostImportantType().orNull();
+            obj6 = obj7;
+            if (obj1 == null)
+            {
+                break label0;
+            }
+            if (obj7 != null)
+            {
+                obj6 = obj7;
+                if (((NotificationType) (obj1)).compareTo(((Enum) (obj7))) <= 0)
+                {
+                    break label0;
+                }
+            }
+            obj6 = obj1;
         }
-        return UnreadNotificationInfo.create(agentUUID(), i, builder != null ? builder.build() : null, notificationType, i3, notificationType2, unreadMessageSource, objectPopupNotification != null ? objectPopupNotification : UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null));
+label1:
+        {
+            obj1 = (NotificationType)unreadnotificationinfo.mostImportantFreshType().orNull();
+            obj7 = obj5;
+            if (obj1 == null)
+            {
+                break label1;
+            }
+            if (obj5 != null)
+            {
+                obj7 = obj5;
+                if (((NotificationType) (obj1)).compareTo(((Enum) (obj5))) <= 0)
+                {
+                    break label1;
+                }
+            }
+            obj7 = obj1;
+        }
+        j += unreadnotificationinfo.freshMessagesCount();
+        obj1 = (UnreadNotificationInfo.UnreadMessageSource)unreadnotificationinfo.singleFreshSource().orNull();
+        if (obj1 != null)
+        {
+            if (obj4 != null || !(flag ^ true))
+            {
+                obj1 = null;
+            }
+            flag = true;
+        } else
+        {
+            obj1 = obj4;
+        }
+        obj5 = unreadnotificationinfo.objectPopupInfo();
+        if (!((UnreadNotificationInfo.ObjectPopupNotification) (obj5)).isEmpty())
+        {
+            obj4 = obj1;
+            obj = obj2;
+            obj1 = obj5;
+            obj5 = obj7;
+        } else
+        {
+            obj4 = obj2;
+            obj2 = obj;
+            obj = obj4;
+            obj5 = obj7;
+            obj4 = obj1;
+            obj1 = obj2;
+        }
+_L3:
+        obj2 = obj1;
+        obj7 = obj6;
+        obj1 = obj;
+        obj = obj2;
+        if (true) goto _L2; else goto _L1
+_L1:
+        obj2 = agentUUID();
+        if (obj1 != null)
+        {
+            obj1 = ((com.google.common.collect.ImmutableList.Builder) (obj1)).build();
+        } else
+        {
+            obj1 = null;
+        }
+        if (obj == null)
+        {
+            obj = UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, null);
+        }
+        return UnreadNotificationInfo.create(((UUID) (obj2)), i, ((java.util.List) (obj1)), ((NotificationType) (obj7)), j, ((NotificationType) (obj5)), ((UnreadNotificationInfo.UnreadMessageSource) (obj4)), ((UnreadNotificationInfo.ObjectPopupNotification) (obj)));
+        Object obj3 = obj1;
+        obj1 = obj;
+        obj = obj3;
+        obj6 = obj7;
+          goto _L3
     }
 
-    @Nonnull
-    public abstract ImmutableMap<NotificationType, UnreadNotificationInfo> notificationGroups();
+    public abstract ImmutableMap notificationGroups();
 }

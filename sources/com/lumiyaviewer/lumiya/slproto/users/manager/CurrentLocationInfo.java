@@ -1,21 +1,32 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.lumiyaviewer.lumiya.slproto.users.ParcelData;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChannelInfo;
-import javax.annotation.Nullable;
 
-public abstract class CurrentLocationInfo {
-    public static CurrentLocationInfo create(@Nullable ParcelData parcelData, int i, int i2, @Nullable VoiceChannelInfo voiceChannelInfo) {
-        return new AutoValue_CurrentLocationInfo(parcelData, i, i2, voiceChannelInfo);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            AutoValue_CurrentLocationInfo
+
+public abstract class CurrentLocationInfo
+{
+
+    public CurrentLocationInfo()
+    {
+    }
+
+    public static CurrentLocationInfo create(ParcelData parceldata, int i, int j, VoiceChannelInfo voicechannelinfo)
+    {
+        return new AutoValue_CurrentLocationInfo(parceldata, i, j, voicechannelinfo);
     }
 
     public abstract int inChatRangeUsers();
 
     public abstract int nearbyUsers();
 
-    @Nullable
     public abstract ParcelData parcelData();
 
-    @Nullable
     public abstract VoiceChannelInfo parcelVoiceChannel();
 }

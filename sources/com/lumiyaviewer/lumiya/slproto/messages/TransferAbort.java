@@ -1,39 +1,60 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class TransferAbort extends SLMessage {
-    public TransferInfo TransferInfo_Field = new TransferInfo();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class TransferInfo {
+public class TransferAbort extends SLMessage
+{
+    public static class TransferInfo
+    {
+
         public int ChannelType;
         public UUID TransferID;
+
+        public TransferInfo()
+        {
+        }
     }
 
-    public TransferAbort() {
-        this.zeroCoded = true;
+
+    public TransferInfo TransferInfo_Field;
+
+    public TransferAbort()
+    {
+        zeroCoded = true;
+        TransferInfo_Field = new TransferInfo();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 24;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleTransferAbort(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleTransferAbort(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -101);
-        packUUID(byteBuffer, this.TransferInfo_Field.TransferID);
-        packInt(byteBuffer, this.TransferInfo_Field.ChannelType);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-101);
+        packUUID(bytebuffer, TransferInfo_Field.TransferID);
+        packInt(bytebuffer, TransferInfo_Field.ChannelType);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.TransferInfo_Field.TransferID = unpackUUID(byteBuffer);
-        this.TransferInfo_Field.ChannelType = unpackInt(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        TransferInfo_Field.TransferID = unpackUUID(bytebuffer);
+        TransferInfo_Field.ChannelType = unpackInt(bytebuffer);
     }
 }

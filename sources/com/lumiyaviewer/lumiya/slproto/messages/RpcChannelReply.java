@@ -1,42 +1,63 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class RpcChannelReply extends SLMessage {
-    public DataBlock DataBlock_Field = new DataBlock();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class DataBlock {
+public class RpcChannelReply extends SLMessage
+{
+    public static class DataBlock
+    {
+
         public UUID ChannelID;
         public UUID ItemID;
         public UUID TaskID;
+
+        public DataBlock()
+        {
+        }
     }
 
-    public RpcChannelReply() {
-        this.zeroCoded = false;
+
+    public DataBlock DataBlock_Field;
+
+    public RpcChannelReply()
+    {
+        zeroCoded = false;
+        DataBlock_Field = new DataBlock();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 52;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleRpcChannelReply(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleRpcChannelReply(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) -98);
-        packUUID(byteBuffer, this.DataBlock_Field.TaskID);
-        packUUID(byteBuffer, this.DataBlock_Field.ItemID);
-        packUUID(byteBuffer, this.DataBlock_Field.ChannelID);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)-98);
+        packUUID(bytebuffer, DataBlock_Field.TaskID);
+        packUUID(bytebuffer, DataBlock_Field.ItemID);
+        packUUID(bytebuffer, DataBlock_Field.ChannelID);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.DataBlock_Field.TaskID = unpackUUID(byteBuffer);
-        this.DataBlock_Field.ItemID = unpackUUID(byteBuffer);
-        this.DataBlock_Field.ChannelID = unpackUUID(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        DataBlock_Field.TaskID = unpackUUID(bytebuffer);
+        DataBlock_Field.ItemID = unpackUUID(bytebuffer);
+        DataBlock_Field.ChannelID = unpackUUID(bytebuffer);
     }
 }

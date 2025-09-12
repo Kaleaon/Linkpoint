@@ -1,42 +1,63 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class ReplyTaskInventory extends SLMessage {
-    public InventoryData InventoryData_Field = new InventoryData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class InventoryData {
-        public byte[] Filename;
+public class ReplyTaskInventory extends SLMessage
+{
+    public static class InventoryData
+    {
+
+        public byte Filename[];
         public int Serial;
         public UUID TaskID;
+
+        public InventoryData()
+        {
+        }
     }
 
-    public ReplyTaskInventory() {
-        this.zeroCoded = true;
+
+    public InventoryData InventoryData_Field;
+
+    public ReplyTaskInventory()
+    {
+        zeroCoded = true;
+        InventoryData_Field = new InventoryData();
     }
 
-    public int CalcPayloadSize() {
-        return this.InventoryData_Field.Filename.length + 19 + 4;
+    public int CalcPayloadSize()
+    {
+        return InventoryData_Field.Filename.length + 19 + 4;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleReplyTaskInventory(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleReplyTaskInventory(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 34);
-        packUUID(byteBuffer, this.InventoryData_Field.TaskID);
-        packShort(byteBuffer, (short) this.InventoryData_Field.Serial);
-        packVariable(byteBuffer, this.InventoryData_Field.Filename, 1);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)34);
+        packUUID(bytebuffer, InventoryData_Field.TaskID);
+        packShort(bytebuffer, (short)InventoryData_Field.Serial);
+        packVariable(bytebuffer, InventoryData_Field.Filename, 1);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.InventoryData_Field.TaskID = unpackUUID(byteBuffer);
-        this.InventoryData_Field.Serial = unpackShort(byteBuffer);
-        this.InventoryData_Field.Filename = unpackVariable(byteBuffer, 1);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        InventoryData_Field.TaskID = unpackUUID(bytebuffer);
+        InventoryData_Field.Serial = unpackShort(bytebuffer);
+        InventoryData_Field.Filename = unpackVariable(bytebuffer, 1);
     }
 }

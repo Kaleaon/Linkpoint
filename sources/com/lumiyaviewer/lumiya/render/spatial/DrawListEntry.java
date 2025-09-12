@@ -1,46 +1,86 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.spatial;
 
 import com.lumiyaviewer.lumiya.utils.InlineList;
 import com.lumiyaviewer.lumiya.utils.InlineListEntry;
-import javax.annotation.Nonnull;
 
-public abstract class DrawListEntry implements InlineListEntry<DrawListEntry> {
-    @Nonnull
-    final float[] boundingBox = new float[6];
-    private volatile InlineList<DrawListEntry> list;
+// Referenced classes of package com.lumiyaviewer.lumiya.render.spatial:
+//            DrawList
+
+public abstract class DrawListEntry
+    implements InlineListEntry
+{
+
+    final float boundingBox[] = new float[6];
+    private volatile InlineList list;
     private DrawListEntry next;
     private DrawListEntry prev;
 
-    public abstract void addToDrawList(@Nonnull DrawList drawList);
-
-    public InlineList<DrawListEntry> getList() {
-        return this.list;
+    public DrawListEntry()
+    {
     }
 
-    public DrawListEntry getNext() {
-        return this.next;
+    public abstract void addToDrawList(DrawList drawlist);
+
+    public InlineList getList()
+    {
+        return list;
     }
 
-    public DrawListEntry getPrev() {
-        return this.prev;
+    public DrawListEntry getNext()
+    {
+        return next;
     }
 
-    public void requestEntryRemoval() {
-        InlineList<DrawListEntry> inlineList = this.list;
-        if (inlineList != null) {
-            inlineList.requestEntryRemoval(this);
+    public volatile InlineListEntry getNext()
+    {
+        return getNext();
+    }
+
+    public DrawListEntry getPrev()
+    {
+        return prev;
+    }
+
+    public volatile InlineListEntry getPrev()
+    {
+        return getPrev();
+    }
+
+    public void requestEntryRemoval()
+    {
+        InlineList inlinelist = list;
+        if (inlinelist != null)
+        {
+            inlinelist.requestEntryRemoval(this);
         }
     }
 
-    public void setList(InlineList<DrawListEntry> inlineList) {
-        this.list = inlineList;
+    public void setList(InlineList inlinelist)
+    {
+        list = inlinelist;
     }
 
-    public void setNext(DrawListEntry drawListEntry) {
-        this.next = drawListEntry;
+    public void setNext(DrawListEntry drawlistentry)
+    {
+        next = drawlistentry;
     }
 
-    public void setPrev(DrawListEntry drawListEntry) {
-        this.prev = drawListEntry;
+    public volatile void setNext(InlineListEntry inlinelistentry)
+    {
+        setNext((DrawListEntry)inlinelistentry);
+    }
+
+    public void setPrev(DrawListEntry drawlistentry)
+    {
+        prev = drawlistentry;
+    }
+
+    public volatile void setPrev(InlineListEntry inlinelistentry)
+    {
+        setPrev((DrawListEntry)inlinelistentry);
     }
 }

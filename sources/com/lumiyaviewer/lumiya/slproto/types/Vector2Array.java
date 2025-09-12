@@ -1,95 +1,130 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.types;
 
-public class Vector2Array extends VectorArray {
-    public Vector2Array(int i) {
+
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.types:
+//            VectorArray, LLVector2
+
+public class Vector2Array extends VectorArray
+{
+
+    public Vector2Array(int i)
+    {
         super(2, i);
     }
 
-    public Vector2Array(VectorArray vectorArray, int i) {
-        super(vectorArray, i);
+    public Vector2Array(VectorArray vectorarray, int i)
+    {
+        super(vectorarray, i);
     }
 
-    public final void add(int i, LLVector2 lLVector2) {
-        int i2 = this.offset + (this.numComponents * i);
-        float[] fArr = this.data;
-        int i3 = i2 + 0;
-        fArr[i3] = fArr[i3] + lLVector2.x;
-        float[] fArr2 = this.data;
-        int i4 = i2 + 1;
-        fArr2[i4] = fArr2[i4] + lLVector2.y;
+    public final void add(int i, LLVector2 llvector2)
+    {
+        i = offset + numComponents * i;
+        float af[] = data;
+        int j = i + 0;
+        af[j] = af[j] + llvector2.x;
+        af = data;
+        i++;
+        af[i] = af[i] + llvector2.y;
     }
 
-    public final void addToVector(int i, LLVector2 lLVector2) {
-        int i2 = this.offset + (this.numComponents * i);
-        lLVector2.x += this.data[i2 + 0];
-        lLVector2.y = this.data[i2 + 1] + lLVector2.y;
+    public final void addToVector(int i, LLVector2 llvector2)
+    {
+        i = offset + numComponents * i;
+        llvector2.x = llvector2.x + data[i + 0];
+        float f = llvector2.y;
+        llvector2.y = data[i + 1] + f;
     }
 
-    public final void get(int i, LLVector2 lLVector2) {
-        int i2 = this.offset + (this.numComponents * i);
-        lLVector2.x = this.data[i2 + 0];
-        lLVector2.y = this.data[i2 + 1];
+    public final void get(int i, LLVector2 llvector2)
+    {
+        i = offset + numComponents * i;
+        llvector2.x = data[i + 0];
+        llvector2.y = data[i + 1];
     }
 
-    public final void getSub(int i, Vector2Array vector2Array, int i2, LLVector2 lLVector2) {
-        int i3 = this.offset + (this.numComponents * i);
-        int i4 = vector2Array.offset + (vector2Array.numComponents * i2);
-        lLVector2.x = this.data[i3 + 0] - vector2Array.data[i4 + 0];
-        lLVector2.y = this.data[i3 + 1] - vector2Array.data[i4 + 1];
+    public final void getSub(int i, Vector2Array vector2array, int j, LLVector2 llvector2)
+    {
+        i = offset + numComponents * i;
+        j = vector2array.offset + vector2array.numComponents * j;
+        llvector2.x = data[i + 0] - vector2array.data[j + 0];
+        llvector2.y = data[i + 1] - vector2array.data[j + 1];
     }
 
-    public final void minMaxVector(int i, LLVector2 lLVector2, LLVector2 lLVector22) {
-        int i2 = this.offset + (this.numComponents * i);
-        float f = this.data[i2 + 0];
-        float f2 = this.data[i2 + 1];
-        if (lLVector2.x > f) {
-            lLVector2.x = f;
+    public final void minMaxVector(int i, LLVector2 llvector2, LLVector2 llvector2_1)
+    {
+        i = offset + numComponents * i;
+        float f = data[i + 0];
+        float f1 = data[i + 1];
+        if (llvector2.x > f)
+        {
+            llvector2.x = f;
         }
-        if (lLVector22.x < f) {
-            lLVector22.x = f;
+        if (llvector2_1.x < f)
+        {
+            llvector2_1.x = f;
         }
-        if (lLVector2.y > f2) {
-            lLVector2.y = f2;
+        if (llvector2.y > f1)
+        {
+            llvector2.y = f1;
         }
-        if (lLVector22.y < f2) {
-            lLVector22.y = f2;
+        if (llvector2_1.y < f1)
+        {
+            llvector2_1.y = f1;
         }
     }
 
-    public final void minMaxVector(LLVector2 lLVector2, LLVector2 lLVector22) {
-        int i = this.offset;
-        for (int i2 = 0; i2 < this.length; i2++) {
-            float f = this.data[i + 0];
-            float f2 = this.data[i + 1];
-            if (lLVector2.x > f) {
-                lLVector2.x = f;
+    public final void minMaxVector(LLVector2 llvector2, LLVector2 llvector2_1)
+    {
+        int j = offset;
+        for (int i = 0; i < length; i++)
+        {
+            float f = data[j + 0];
+            float f1 = data[j + 1];
+            if (llvector2.x > f)
+            {
+                llvector2.x = f;
             }
-            if (lLVector22.x < f) {
-                lLVector22.x = f;
+            if (llvector2_1.x < f)
+            {
+                llvector2_1.x = f;
             }
-            if (lLVector2.y > f2) {
-                lLVector2.y = f2;
+            if (llvector2.y > f1)
+            {
+                llvector2.y = f1;
             }
-            if (lLVector22.y < f2) {
-                lLVector22.y = f2;
+            if (llvector2_1.y < f1)
+            {
+                llvector2_1.y = f1;
             }
-            i += this.numComponents;
+            j += numComponents;
         }
+
     }
 
-    public final void set(int i, float f, float f2) {
-        int i2 = this.offset + (this.numComponents * i);
-        this.data[i2 + 0] = f;
-        this.data[i2 + 1] = f2;
+    public final void set(int i, float f, float f1)
+    {
+        i = offset + numComponents * i;
+        data[i + 0] = f;
+        data[i + 1] = f1;
     }
 
-    public void swap(int i, int i2) {
-        int i3 = (this.numComponents * i) + this.offset;
-        int i4 = (this.numComponents * i2) + this.offset;
-        for (int i5 = 0; i5 < 2; i5++) {
-            float f = this.data[i3 + i5];
-            this.data[i3 + i5] = this.data[i4 + i5];
-            this.data[i4 + i5] = f;
+    public void swap(int i, int j)
+    {
+        int k = offset;
+        k = numComponents * i + k;
+        i = offset;
+        j = numComponents * j + i;
+        for (i = 0; i < 2; i++)
+        {
+            float f = data[k + i];
+            data[k + i] = data[j + i];
+            data[j + i] = f;
         }
+
     }
 }

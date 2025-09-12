@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.google.common.collect.ImmutableList;
@@ -6,120 +10,215 @@ import com.lumiyaviewer.lumiya.dao.DaoSession;
 import com.lumiyaviewer.lumiya.dao.Friend;
 import com.lumiyaviewer.lumiya.dao.FriendDao;
 import com.lumiyaviewer.lumiya.react.RequestFinalProcessor;
+import com.lumiyaviewer.lumiya.react.RequestSource;
 import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.SubscriptionPool;
-import com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.concurrent.Executor;
 
-public class FriendManager {
-    /* access modifiers changed from: private */
-    @Nonnull
-    public final ChatterList chatterList;
-    /* access modifiers changed from: private */
-    @Nonnull
-    public final FriendDao friendDao;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            UserManager, ChatterListType, ChatterList, FriendDisplayDataList, 
+//            OnListUpdated, ChatterDisplayDataList
+
+public class FriendManager
+{
+
+    private final ChatterList chatterList;
+    private final FriendDao friendDao;
     private final OnListUpdated onFriendListUpdated = new OnListUpdated() {
-        public void onListUpdated() {
-            FriendManager.this.chatterList.notifyListUpdated(ChatterListType.Friends);
+
+        final FriendManager this$0;
+
+        public void onListUpdated()
+        {
+            FriendManager._2D_get0(FriendManager.this).notifyListUpdated(ChatterListType.Friends);
         }
+
+            
+            {
+                this$0 = FriendManager.this;
+                super();
+            }
     };
     private final OnListUpdated onFriendsOnlineListUpdated = new OnListUpdated() {
-        public void onListUpdated() {
-            FriendManager.this.chatterList.notifyListUpdated(ChatterListType.FriendsOnline);
+
+        final FriendManager this$0;
+
+        public void onListUpdated()
+        {
+            FriendManager._2D_get0(FriendManager.this).notifyListUpdated(ChatterListType.FriendsOnline);
         }
+
+            
+            {
+                this$0 = FriendManager.this;
+                super();
+            }
     };
-    private final SubscriptionPool<UUID, Boolean> onlineStatus = new SubscriptionPool<>();
-    @Nonnull
+    private final SubscriptionPool onlineStatus = new SubscriptionPool();
     private final UserManager userManager;
 
-    public FriendManager(@Nonnull UserManager userManager2, @Nonnull DaoSession daoSession, @Nonnull ChatterList chatterList2) {
-        this.userManager = userManager2;
-        this.friendDao = daoSession.getFriendDao();
-        this.chatterList = chatterList2;
-        new RequestFinalProcessor<UUID, Boolean>(this.onlineStatus, userManager2.getDatabaseExecutor()) {
-            /* access modifiers changed from: protected */
-            public Boolean processRequest(@Nonnull UUID uuid) {
-                Friend friend = (Friend) FriendManager.this.friendDao.load(uuid);
-                if (friend != null) {
-                    return Boolean.valueOf(friend.getIsOnline());
+    static ChatterList _2D_get0(FriendManager friendmanager)
+    {
+        return friendmanager.chatterList;
+    }
+
+    static FriendDao _2D_get1(FriendManager friendmanager)
+    {
+        return friendmanager.friendDao;
+    }
+
+    public FriendManager(UserManager usermanager, DaoSession daosession, ChatterList chatterlist)
+    {
+        userManager = usermanager;
+        friendDao = daosession.getFriendDao();
+        chatterList = chatterlist;
+        new RequestFinalProcessor(onlineStatus, usermanager.getDatabaseExecutor()) {
+
+            final FriendManager this$0;
+
+            protected Boolean processRequest(UUID uuid)
+            {
+                uuid = (Friend)FriendManager._2D_get1(FriendManager.this).load(uuid);
+                if (uuid != null)
+                {
+                    return Boolean.valueOf(uuid.getIsOnline());
+                } else
+                {
+                    return Boolean.valueOf(false);
                 }
-                return false;
+            }
+
+            protected volatile Object processRequest(Object obj)
+                throws Throwable
+            {
+                return processRequest((UUID)obj);
+            }
+
+            
+            {
+                this$0 = FriendManager.this;
+                super(requestsource, executor);
             }
         };
     }
 
-    public void addFriend(UUID uuid) {
-        if (((Friend) this.friendDao.load(uuid)) == null) {
-            this.friendDao.insert(new Friend(uuid, 1, 1, false));
+    public void addFriend(UUID uuid)
+    {
+        if ((Friend)friendDao.load(uuid) == null)
+        {
+            uuid = new Friend(uuid, 1, 1, false);
+            friendDao.insert(uuid);
         }
-        this.chatterList.updateList(ChatterListType.Friends);
-        this.chatterList.updateList(ChatterListType.FriendsOnline);
+        chatterList.updateList(ChatterListType.Friends);
+        chatterList.updateList(ChatterListType.FriendsOnline);
     }
 
-    public Friend getFriend(@Nullable UUID uuid) {
-        if (uuid != null) {
-            return (Friend) this.friendDao.load(uuid);
+    public Friend getFriend(UUID uuid)
+    {
+        if (uuid != null)
+        {
+            return (Friend)friendDao.load(uuid);
+        } else
+        {
+            return null;
         }
-        return null;
     }
 
-    public ChatterDisplayDataList getFriendList() {
-        return new FriendDisplayDataList(this.userManager, this.onFriendListUpdated, false);
+    public ChatterDisplayDataList getFriendList()
+    {
+        return new FriendDisplayDataList(userManager, onFriendListUpdated, false);
     }
 
-    public ChatterDisplayDataList getFriendsOnlineList() {
-        return new FriendDisplayDataList(this.userManager, this.onFriendsOnlineListUpdated, true);
+    public ChatterDisplayDataList getFriendsOnlineList()
+    {
+        return new FriendDisplayDataList(userManager, onFriendsOnlineListUpdated, true);
     }
 
-    public Subscribable<UUID, Boolean> getOnlineStatus() {
-        return this.onlineStatus;
+    public Subscribable getOnlineStatus()
+    {
+        return onlineStatus;
     }
 
-    public void removeFriend(UUID uuid) {
-        this.friendDao.deleteByKey(uuid);
-        this.chatterList.updateList(ChatterListType.Friends);
-        this.chatterList.updateList(ChatterListType.FriendsOnline);
+    public void removeFriend(UUID uuid)
+    {
+        friendDao.deleteByKey(uuid);
+        chatterList.updateList(ChatterListType.Friends);
+        chatterList.updateList(ChatterListType.FriendsOnline);
     }
 
-    public void setUsersOnline(List<UUID> list, boolean z) {
-        for (UUID uuid : list) {
-            Friend friend = (Friend) this.friendDao.load(uuid);
-            if (friend != null) {
-                friend.setIsOnline(z);
-                this.friendDao.update(friend);
-            }
-            this.onlineStatus.requestUpdate(uuid);
-        }
-        this.chatterList.updateList(ChatterListType.FriendsOnline);
-    }
-
-    public void updateFriendList(ImmutableList<SLAuthReply.Friend> immutableList) {
-        HashSet hashSet = new HashSet();
-        for (SLAuthReply.Friend friend : immutableList) {
-            UUID uuid = friend.uuid;
-            Friend friend2 = (Friend) this.friendDao.load(uuid);
-            if (friend2 == null) {
-                this.friendDao.insertOrReplace(new Friend(uuid, friend.rightsGiven, friend.rightsHas, false));
-            } else if (friend2.getRightsGiven() != friend.rightsGiven || friend2.getRightsHas() != friend.rightsHas || friend2.getIsOnline()) {
-                friend2.setRightsGiven(friend.rightsGiven);
-                friend2.setRightsHas(friend.rightsHas);
-                friend2.setIsOnline(false);
-                this.friendDao.update(friend2);
-            }
-            hashSet.add(uuid);
-        }
-        List<Friend> loadAll = this.friendDao.loadAll();
-        Debug.Printf("FriendList: update[1], got %d friends", Integer.valueOf(loadAll.size()));
-        for (Friend friend3 : loadAll) {
-            if (!hashSet.contains(friend3.getUuid())) {
-                this.friendDao.delete(friend3);
+    public void setUsersOnline(List list, boolean flag)
+    {
+        UUID uuid;
+        for (list = list.iterator(); list.hasNext(); onlineStatus.requestUpdate(uuid))
+        {
+            uuid = (UUID)list.next();
+            Friend friend = (Friend)friendDao.load(uuid);
+            if (friend != null)
+            {
+                friend.setIsOnline(flag);
+                friendDao.update(friend);
             }
         }
-        this.chatterList.updateList(ChatterListType.Friends);
-        this.chatterList.updateList(ChatterListType.FriendsOnline);
+
+        chatterList.updateList(ChatterListType.FriendsOnline);
+    }
+
+    public void updateFriendList(ImmutableList immutablelist)
+    {
+        HashSet hashset;
+        hashset = new HashSet();
+        immutablelist = immutablelist.iterator();
+_L4:
+        UUID uuid;
+        Object obj;
+        Friend friend1;
+        if (!immutablelist.hasNext())
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        obj = (com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply.Friend)immutablelist.next();
+        uuid = ((com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply.Friend) (obj)).uuid;
+        friend1 = (Friend)friendDao.load(uuid);
+        if (friend1 != null) goto _L2; else goto _L1
+_L1:
+        obj = new Friend(uuid, ((com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply.Friend) (obj)).rightsGiven, ((com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply.Friend) (obj)).rightsHas, false);
+        friendDao.insertOrReplace(obj);
+_L5:
+        hashset.add(uuid);
+        if (true) goto _L4; else goto _L3
+_L6:
+        friend1.setRightsGiven(((com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply.Friend) (obj)).rightsGiven);
+        friend1.setRightsHas(((com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply.Friend) (obj)).rightsHas);
+        friend1.setIsOnline(false);
+        friendDao.update(friend1);
+          goto _L5
+_L2:
+        if (friend1.getRightsGiven() == ((com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply.Friend) (obj)).rightsGiven && friend1.getRightsHas() == ((com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply.Friend) (obj)).rightsHas && !friend1.getIsOnline()) goto _L5; else goto _L6
+_L3:
+        immutablelist = friendDao.loadAll();
+        Debug.Printf("FriendList: update[1], got %d friends", new Object[] {
+            Integer.valueOf(immutablelist.size())
+        });
+        immutablelist = immutablelist.iterator();
+        do
+        {
+            if (!immutablelist.hasNext())
+            {
+                break;
+            }
+            Friend friend = (Friend)immutablelist.next();
+            if (!hashset.contains(friend.getUuid()))
+            {
+                friendDao.delete(friend);
+            }
+        } while (true);
+        chatterList.updateList(ChatterListType.Friends);
+        chatterList.updateList(ChatterListType.FriendsOnline);
+        return;
     }
 }

@@ -1,39 +1,60 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class ConfirmAuctionStart extends SLMessage {
-    public AuctionData AuctionData_Field = new AuctionData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AuctionData {
+public class ConfirmAuctionStart extends SLMessage
+{
+    public static class AuctionData
+    {
+
         public int AuctionID;
         public UUID ParcelID;
+
+        public AuctionData()
+        {
+        }
     }
 
-    public ConfirmAuctionStart() {
-        this.zeroCoded = false;
+
+    public AuctionData AuctionData_Field;
+
+    public ConfirmAuctionStart()
+    {
+        zeroCoded = false;
+        AuctionData_Field = new AuctionData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 24;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleConfirmAuctionStart(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleConfirmAuctionStart(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -26);
-        packUUID(byteBuffer, this.AuctionData_Field.ParcelID);
-        packInt(byteBuffer, this.AuctionData_Field.AuctionID);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-26);
+        packUUID(bytebuffer, AuctionData_Field.ParcelID);
+        packInt(bytebuffer, AuctionData_Field.AuctionID);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AuctionData_Field.ParcelID = unpackUUID(byteBuffer);
-        this.AuctionData_Field.AuctionID = unpackInt(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AuctionData_Field.ParcelID = unpackUUID(bytebuffer);
+        AuctionData_Field.AuctionID = unpackInt(bytebuffer);
     }
 }

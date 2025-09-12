@@ -1,35 +1,55 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector4;
 import java.nio.ByteBuffer;
 
-public class CameraConstraint extends SLMessage {
-    public CameraCollidePlane CameraCollidePlane_Field = new CameraCollidePlane();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class CameraCollidePlane {
+public class CameraConstraint extends SLMessage
+{
+    public static class CameraCollidePlane
+    {
+
         public LLVector4 Plane;
+
+        public CameraCollidePlane()
+        {
+        }
     }
 
-    public CameraConstraint() {
-        this.zeroCoded = true;
+
+    public CameraCollidePlane CameraCollidePlane_Field;
+
+    public CameraConstraint()
+    {
+        zeroCoded = true;
+        CameraCollidePlane_Field = new CameraCollidePlane();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 17;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleCameraConstraint(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleCameraConstraint(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put(Ascii.SYN);
-        packLLVector4(byteBuffer, this.CameraCollidePlane_Field.Plane);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.put((byte)22);
+        packLLVector4(bytebuffer, CameraCollidePlane_Field.Plane);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.CameraCollidePlane_Field.Plane = unpackLLVector4(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        CameraCollidePlane_Field.Plane = unpackLLVector4(bytebuffer);
     }
 }

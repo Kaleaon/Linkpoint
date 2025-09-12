@@ -1,24 +1,31 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.groups;
 
 import com.google.common.base.Strings;
 import com.google.common.primitives.UnsignedLong;
 import com.lumiyaviewer.lumiya.Debug;
+import com.lumiyaviewer.lumiya.dao.DaoSession;
 import com.lumiyaviewer.lumiya.dao.GroupMember;
 import com.lumiyaviewer.lumiya.dao.GroupMemberDao;
 import com.lumiyaviewer.lumiya.dao.GroupRoleMember;
 import com.lumiyaviewer.lumiya.dao.GroupRoleMemberDao;
+import com.lumiyaviewer.lumiya.eventbus.EventBus;
 import com.lumiyaviewer.lumiya.react.AsyncCancellableRequestHandler;
 import com.lumiyaviewer.lumiya.react.AsyncLimitsRequestHandler;
 import com.lumiyaviewer.lumiya.react.RequestHandler;
+import com.lumiyaviewer.lumiya.react.RequestSource;
 import com.lumiyaviewer.lumiya.react.ResultHandler;
 import com.lumiyaviewer.lumiya.react.SimpleRequestHandler;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
+import com.lumiyaviewer.lumiya.slproto.SLCircuitInfo;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.SLMessageEventListener;
 import com.lumiyaviewer.lumiya.slproto.caps.SLCaps;
 import com.lumiyaviewer.lumiya.slproto.chat.SLChatGroupInvitationSentEvent;
 import com.lumiyaviewer.lumiya.slproto.events.SLJoinLeaveGroupEvent;
-import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler;
 import com.lumiyaviewer.lumiya.slproto.https.GenericHTTPExecutor;
 import com.lumiyaviewer.lumiya.slproto.https.LLSDXMLRequest;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
@@ -52,538 +59,939 @@ import com.lumiyaviewer.lumiya.slproto.messages.LeaveGroupRequest;
 import com.lumiyaviewer.lumiya.slproto.messages.SetGroupAcceptNotices;
 import com.lumiyaviewer.lumiya.slproto.messages.SetGroupContribution;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModule;
+import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
+import com.lumiyaviewer.lumiya.slproto.modules.SLUserProfiles;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
+import com.lumiyaviewer.lumiya.slproto.users.SLMessageResponseCacher;
+import com.lumiyaviewer.lumiya.slproto.users.SerializableResponseCacher;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
+import com.lumiyaviewer.lumiya.slproto.users.manager.GroupManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import de.greenrobot.dao.Property;
+import de.greenrobot.dao.query.QueryBuilder;
+import de.greenrobot.dao.query.WhereCondition;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class SLGroupManager extends SLModule {
+public class SLGroupManager extends SLModule
+{
+
     private static final int RoleMemberChange_Add = 0;
     private static final int RoleMemberChange_Remove = 1;
     private static final int Role_Update_All = 3;
     private static final int Role_Update_Create = 4;
     private static final int Role_Update_Delete = 5;
-    private volatile UUID activeGroupID = null;
-    /* access modifiers changed from: private */
-    public final GroupMemberDao groupMemberDao;
-    /* access modifiers changed from: private */
-    public final String groupMemberDataURL;
-    private final RequestHandler<UUID> groupMemberListHTTPRequestHandler = new AsyncCancellableRequestHandler(GenericHTTPExecutor.getInstance(), new SimpleRequestHandler<UUID>() {
-        public void onRequest(@Nonnull UUID uuid) {
-            int i;
-            Debug.Printf("GroupMemberList: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString());
-            try {
-                UUID randomUUID = UUID.randomUUID();
-                LLSDNode PerformRequest = new LLSDXMLRequest().PerformRequest(SLGroupManager.this.groupMemberDataURL, new LLSDMap(new LLSDMap.LLSDMapEntry("group_id", new LLSDUUID(uuid))));
-                if (PerformRequest != null) {
-                    LLSDNode byKey = PerformRequest.byKey("titles");
-                    LLSDNode byKey2 = PerformRequest.byKey("defaults");
-                    LLSDNode byKey3 = PerformRequest.byKey("members");
-                    long j = 0;
-                    if (byKey2.keyExists("default_powers")) {
-                        try {
-                            String asString = byKey2.byKey("default_powers").asString();
-                            j = asString.startsWith("0x") ? Long.decode(asString).longValue() : UnsignedLong.valueOf(asString, 16).longValue();
-                        } catch (NumberFormatException e) {
-                            Debug.Warning(e);
-                        }
-                    }
-                    if (byKey3 instanceof LLSDMap) {
-                        int i2 = 0;
-                        for (Map.Entry entry : ((LLSDMap) byKey3).entrySet()) {
-                            UUID uuid2 = UUIDPool.getUUID((String) entry.getKey());
-                            LLSDNode lLSDNode = (LLSDNode) entry.getValue();
-                            boolean z = false;
-                            String asString2 = lLSDNode.keyExists("title") ? byKey.byIndex(lLSDNode.byKey("title").asInt()).asString() : byKey.byIndex(0).asString();
-                            long longValue = lLSDNode.keyExists("powers") ? UnsignedLong.valueOf(lLSDNode.byKey("powers").asString(), 16).longValue() : j;
-                            String asString3 = lLSDNode.keyExists("last_login") ? lLSDNode.byKey("last_login").asString() : "Unknown";
-                            int asInt = lLSDNode.keyExists("donated_square_meters") ? lLSDNode.byKey("donated_square_meters").asInt() : 0;
-                            if (lLSDNode.keyExists("owner")) {
-                                if (lLSDNode.byKey("owner").isString()) {
-                                    String asString4 = lLSDNode.byKey("owner").asString();
-                                    if (asString4.equalsIgnoreCase("y") || asString4.equalsIgnoreCase("yes") || asString4.equalsIgnoreCase("true") || asString4.equalsIgnoreCase("1")) {
-                                        z = true;
-                                    }
-                                } else if (lLSDNode.byKey("owner").isBoolean()) {
-                                    z = lLSDNode.byKey("owner").asBoolean();
-                                }
-                            }
-                            i2++;
-                            if (SLGroupManager.this.groupMemberDao != null) {
-                                SLGroupManager.this.groupMemberDao.insert(new GroupMember(uuid, randomUUID, uuid2, asInt, asString3, longValue, asString2, z));
-                            }
-                        }
-                        i = i2;
-                    } else {
-                        i = 0;
-                    }
-                    Debug.Printf("GroupMemberList: parsed list for group: %s requestID %s memberCount %d", uuid, randomUUID, Integer.valueOf(i));
-                    SLGroupManager.this.groupMemberListResultHandler.onResultData(uuid, randomUUID);
-                    return;
-                }
-                SLGroupManager.this.groupMemberListResultHandler.onResultError(uuid, new LLSDException("No data"));
-            } catch (Exception e2) {
-                Debug.Warning(e2);
-                SLGroupManager.this.groupMemberListResultHandler.onResultError(uuid, e2);
-            }
-        }
-    });
-    private final RequestHandler<UUID> groupMemberListRequestHandler = new AsyncLimitsRequestHandler(this.agentCircuit, new SimpleRequestHandler<UUID>() {
-        public void onRequest(@Nonnull UUID uuid) {
-            Debug.Printf("GroupMemberList: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString());
-            GroupMembersRequest groupMembersRequest = new GroupMembersRequest();
-            groupMembersRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID;
-            groupMembersRequest.AgentData_Field.SessionID = SLGroupManager.this.circuitInfo.sessionID;
-            groupMembersRequest.GroupData_Field.GroupID = uuid;
-            groupMembersRequest.GroupData_Field.RequestID = UUID.randomUUID();
-            groupMembersRequest.isReliable = true;
-            SLGroupManager.this.SendMessage(groupMembersRequest);
-        }
-    }, false, 3, 15000);
-    /* access modifiers changed from: private */
-    public ResultHandler<UUID, UUID> groupMemberListResultHandler;
-    private final RequestHandler<UUID> groupProfileRequestHandler = new AsyncLimitsRequestHandler(this.agentCircuit, new SimpleRequestHandler<UUID>() {
-        public void onRequest(@Nonnull UUID uuid) {
-            Debug.Printf("GroupManager: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString());
-            SLGroupManager.this.RequestGroupProfileData(uuid);
-        }
-    }, false, 3, 15000);
-    private ResultHandler<UUID, GroupProfileReply> groupProfileResultHandler;
-    private final GroupRoleMemberDao groupRoleMemberDao;
-    private final RequestHandler<UUID> groupRoleMemberListRequestHandler = new AsyncLimitsRequestHandler(this.agentCircuit, new SimpleRequestHandler<UUID>() {
-        public void onRequest(@Nonnull UUID uuid) {
-            Debug.Printf("GroupRoleMemberList: [%s] network requesting for %s", Thread.currentThread().getName(), uuid.toString());
-            GroupRoleMembersRequest groupRoleMembersRequest = new GroupRoleMembersRequest();
-            groupRoleMembersRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID;
-            groupRoleMembersRequest.AgentData_Field.SessionID = SLGroupManager.this.circuitInfo.sessionID;
-            groupRoleMembersRequest.GroupData_Field.GroupID = uuid;
-            groupRoleMembersRequest.GroupData_Field.RequestID = UUID.randomUUID();
-            groupRoleMembersRequest.isReliable = true;
-            SLGroupManager.this.SendMessage(groupRoleMembersRequest);
-        }
-    }, false, 3, 15000);
-    private ResultHandler<UUID, UUID> groupRoleMemberListResultHandler;
-    private final RequestHandler<UUID> groupRolesRequestHandler = new AsyncLimitsRequestHandler(this.agentCircuit, new SimpleRequestHandler<UUID>() {
-        public void onRequest(@Nonnull UUID uuid) {
-            Debug.Printf("GroupRoles: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString());
-            GroupRoleDataRequest groupRoleDataRequest = new GroupRoleDataRequest();
-            groupRoleDataRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID;
-            groupRoleDataRequest.AgentData_Field.SessionID = SLGroupManager.this.circuitInfo.sessionID;
-            groupRoleDataRequest.GroupData_Field.GroupID = uuid;
-            groupRoleDataRequest.GroupData_Field.RequestID = UUID.randomUUID();
-            groupRoleDataRequest.isReliable = true;
-            SLGroupManager.this.SendMessage(groupRoleDataRequest);
-        }
-    }, false, 3, 15000);
-    private ResultHandler<UUID, GroupRoleDataReply> groupRolesResultHandler;
-    private final RequestHandler<UUID> groupTitlesRequestHandler = new AsyncLimitsRequestHandler(this.agentCircuit, new SimpleRequestHandler<UUID>() {
-        public void onRequest(@Nonnull UUID uuid) {
-            Debug.Printf("GroupTitles: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString());
-            SLGroupManager.this.requestGroupTitles(uuid);
-        }
-    }, false, 3, 15000);
-    private ResultHandler<UUID, GroupTitlesReply> groupTitlesResultHandler;
-    /* access modifiers changed from: private */
-    public final UserManager userManager;
+    private volatile UUID activeGroupID;
+    private final GroupMemberDao groupMemberDao;
+    private final String groupMemberDataURL;
+    private final RequestHandler groupMemberListHTTPRequestHandler = new AsyncCancellableRequestHandler(GenericHTTPExecutor.getInstance(), new SimpleRequestHandler() {
 
-    public SLGroupManager(SLAgentCircuit sLAgentCircuit) {
-        super(sLAgentCircuit);
-        this.groupMemberDataURL = sLAgentCircuit.getCaps().getCapability(SLCaps.SLCapability.GroupMemberData);
-        this.userManager = UserManager.getUserManager(sLAgentCircuit.circuitInfo.agentID);
-        if (this.userManager != null) {
-            this.groupMemberDao = this.userManager.getDaoSession().getGroupMemberDao();
-            this.groupRoleMemberDao = this.userManager.getDaoSession().getGroupRoleMemberDao();
+        final SLGroupManager this$0;
+
+        public volatile void onRequest(Object obj)
+        {
+            onRequest((UUID)obj);
+        }
+
+        public void onRequest(UUID uuid)
+        {
+            Object obj;
+            Object obj1;
+            UUID uuid1;
+            LLSDNode llsdnode;
+            Object obj2;
+            int i;
+            int j;
+            long l;
+            long l1;
+            boolean flag;
+            boolean flag1;
+            Debug.Printf("GroupMemberList: [%s] network requesting for group %s", new Object[] {
+                Thread.currentThread().getName(), uuid.toString()
+            });
+            Iterator iterator;
+            UUID uuid2;
+            int k;
+            try
+            {
+                uuid1 = UUID.randomUUID();
+                obj = (new LLSDXMLRequest()).PerformRequest(SLGroupManager._2D_get2(SLGroupManager.this), new LLSDMap(new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[] {
+                    new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry("group_id", new LLSDUUID(uuid))
+                }));
+            }
+            // Misplaced declaration of an exception variable
+            catch (Object obj)
+            {
+                Debug.Warning(((Throwable) (obj)));
+                SLGroupManager._2D_get3(SLGroupManager.this).onResultError(uuid, ((Throwable) (obj)));
+                return;
+            }
+            if (obj == null) goto _L2; else goto _L1
+_L1:
+            llsdnode = ((LLSDNode) (obj)).byKey("titles");
+            obj1 = ((LLSDNode) (obj)).byKey("defaults");
+            obj = ((LLSDNode) (obj)).byKey("members");
+            l1 = 0L;
+            flag = ((LLSDNode) (obj1)).keyExists("default_powers");
+            l = l1;
+            if (!flag) goto _L4; else goto _L3
+_L3:
+            obj1 = ((LLSDNode) (obj1)).byKey("default_powers").asString();
+            if (!((String) (obj1)).startsWith("0x")) goto _L6; else goto _L5
+_L5:
+            l = Long.decode(((String) (obj1))).longValue();
+_L4:
+            if (!(obj instanceof LLSDMap)) goto _L8; else goto _L7
+_L7:
+            iterator = ((LLSDMap)obj).entrySet().iterator();
+            i = 0;
+_L24:
+            if (!iterator.hasNext()) goto _L10; else goto _L9
+_L9:
+            obj = (java.util.Map.Entry)iterator.next();
+            uuid2 = UUIDPool.getUUID((String)((java.util.Map.Entry) (obj)).getKey());
+            obj2 = (LLSDNode)((java.util.Map.Entry) (obj)).getValue();
+            flag1 = false;
+            if (!((LLSDNode) (obj2)).keyExists("title")) goto _L12; else goto _L11
+_L11:
+            obj = llsdnode.byIndex(((LLSDNode) (obj2)).byKey("title").asInt()).asString();
+_L25:
+            if (!((LLSDNode) (obj2)).keyExists("powers")) goto _L14; else goto _L13
+_L13:
+            l1 = UnsignedLong.valueOf(((LLSDNode) (obj2)).byKey("powers").asString(), 16).longValue();
+_L27:
+            if (!((LLSDNode) (obj2)).keyExists("last_login")) goto _L16; else goto _L15
+_L15:
+            obj1 = ((LLSDNode) (obj2)).byKey("last_login").asString();
+_L28:
+            if (!((LLSDNode) (obj2)).keyExists("donated_square_meters"))
+            {
+                break MISSING_BLOCK_LABEL_655;
+            }
+            j = ((LLSDNode) (obj2)).byKey("donated_square_meters").asInt();
+_L29:
+            flag = flag1;
+            if (!((LLSDNode) (obj2)).keyExists("owner")) goto _L18; else goto _L17
+_L17:
+            if (!((LLSDNode) (obj2)).byKey("owner").isString()) goto _L20; else goto _L19
+_L19:
+            obj2 = ((LLSDNode) (obj2)).byKey("owner").asString();
+            if (((String) (obj2)).equalsIgnoreCase("y") || ((String) (obj2)).equalsIgnoreCase("yes") || ((String) (obj2)).equalsIgnoreCase("true")) goto _L22; else goto _L21
+_L21:
+            flag = flag1;
+            if (!((String) (obj2)).equalsIgnoreCase("1")) goto _L18; else goto _L22
+_L18:
+            k = i + 1;
+            i = k;
+            if (SLGroupManager._2D_get1(SLGroupManager.this) == null) goto _L24; else goto _L23
+_L23:
+            obj = new GroupMember(uuid, uuid1, uuid2, j, ((String) (obj1)), l1, ((String) (obj)), flag);
+            SLGroupManager._2D_get1(SLGroupManager.this).insert(obj);
+            i = k;
+              goto _L24
+_L6:
+            l = UnsignedLong.valueOf(((String) (obj1)), 16).longValue();
+              goto _L4
+            obj1;
+            Debug.Warning(((Throwable) (obj1)));
+            l = l1;
+              goto _L4
+_L12:
+            obj = llsdnode.byIndex(0).asString();
+              goto _L25
+_L20:
+            flag = flag1;
+            if (!((LLSDNode) (obj2)).byKey("owner").isBoolean()) goto _L18; else goto _L26
+_L26:
+            flag = ((LLSDNode) (obj2)).byKey("owner").asBoolean();
+              goto _L18
+_L10:
+            Debug.Printf("GroupMemberList: parsed list for group: %s requestID %s memberCount %d", new Object[] {
+                uuid, uuid1, Integer.valueOf(i)
+            });
+            SLGroupManager._2D_get3(SLGroupManager.this).onResultData(uuid, uuid1);
+            return;
+_L2:
+            SLGroupManager._2D_get3(SLGroupManager.this).onResultError(uuid, new LLSDException("No data"));
+            return;
+_L8:
+            i = 0;
+            if (true) goto _L10; else goto _L22
+_L22:
+            flag = true;
+              goto _L18
+_L14:
+            l1 = l;
+              goto _L27
+_L16:
+            obj1 = "Unknown";
+              goto _L28
+            j = 0;
+              goto _L29
+        }
+
+            
+            {
+                this$0 = SLGroupManager.this;
+                super();
+            }
+    });
+    private final RequestHandler groupMemberListRequestHandler;
+    private ResultHandler groupMemberListResultHandler;
+    private final RequestHandler groupProfileRequestHandler;
+    private ResultHandler groupProfileResultHandler;
+    private final GroupRoleMemberDao groupRoleMemberDao;
+    private final RequestHandler groupRoleMemberListRequestHandler;
+    private ResultHandler groupRoleMemberListResultHandler;
+    private final RequestHandler groupRolesRequestHandler;
+    private ResultHandler groupRolesResultHandler;
+    private final RequestHandler groupTitlesRequestHandler;
+    private ResultHandler groupTitlesResultHandler;
+    private final UserManager userManager;
+
+    static SLCircuitInfo _2D_get0(SLGroupManager slgroupmanager)
+    {
+        return slgroupmanager.circuitInfo;
+    }
+
+    static GroupMemberDao _2D_get1(SLGroupManager slgroupmanager)
+    {
+        return slgroupmanager.groupMemberDao;
+    }
+
+    static String _2D_get2(SLGroupManager slgroupmanager)
+    {
+        return slgroupmanager.groupMemberDataURL;
+    }
+
+    static ResultHandler _2D_get3(SLGroupManager slgroupmanager)
+    {
+        return slgroupmanager.groupMemberListResultHandler;
+    }
+
+    static UserManager _2D_get4(SLGroupManager slgroupmanager)
+    {
+        return slgroupmanager.userManager;
+    }
+
+    static void _2D_wrap0(SLGroupManager slgroupmanager, UUID uuid)
+    {
+        slgroupmanager.RequestGroupProfileData(uuid);
+    }
+
+    static void _2D_wrap1(SLGroupManager slgroupmanager, UUID uuid)
+    {
+        slgroupmanager.requestGroupTitles(uuid);
+    }
+
+    public SLGroupManager(SLAgentCircuit slagentcircuit)
+    {
+        super(slagentcircuit);
+        activeGroupID = null;
+        groupProfileRequestHandler = new AsyncLimitsRequestHandler(agentCircuit, new SimpleRequestHandler() {
+
+            final SLGroupManager this$0;
+
+            public volatile void onRequest(Object obj)
+            {
+                onRequest((UUID)obj);
+            }
+
+            public void onRequest(UUID uuid)
+            {
+                Debug.Printf("GroupManager: [%s] network requesting for group %s", new Object[] {
+                    Thread.currentThread().getName(), uuid.toString()
+                });
+                SLGroupManager._2D_wrap0(SLGroupManager.this, uuid);
+            }
+
+            
+            {
+                this$0 = SLGroupManager.this;
+                super();
+            }
+        }, false, 3, 15000L);
+        groupTitlesRequestHandler = new AsyncLimitsRequestHandler(agentCircuit, new SimpleRequestHandler() {
+
+            final SLGroupManager this$0;
+
+            public volatile void onRequest(Object obj)
+            {
+                onRequest((UUID)obj);
+            }
+
+            public void onRequest(UUID uuid)
+            {
+                Debug.Printf("GroupTitles: [%s] network requesting for group %s", new Object[] {
+                    Thread.currentThread().getName(), uuid.toString()
+                });
+                SLGroupManager._2D_wrap1(SLGroupManager.this, uuid);
+            }
+
+            
+            {
+                this$0 = SLGroupManager.this;
+                super();
+            }
+        }, false, 3, 15000L);
+        groupRolesRequestHandler = new AsyncLimitsRequestHandler(agentCircuit, new SimpleRequestHandler() {
+
+            final SLGroupManager this$0;
+
+            public volatile void onRequest(Object obj)
+            {
+                onRequest((UUID)obj);
+            }
+
+            public void onRequest(UUID uuid)
+            {
+                Debug.Printf("GroupRoles: [%s] network requesting for group %s", new Object[] {
+                    Thread.currentThread().getName(), uuid.toString()
+                });
+                GroupRoleDataRequest grouproledatarequest = new GroupRoleDataRequest();
+                grouproledatarequest.AgentData_Field.AgentID = SLGroupManager._2D_get0(SLGroupManager.this).agentID;
+                grouproledatarequest.AgentData_Field.SessionID = SLGroupManager._2D_get0(SLGroupManager.this).sessionID;
+                grouproledatarequest.GroupData_Field.GroupID = uuid;
+                grouproledatarequest.GroupData_Field.RequestID = UUID.randomUUID();
+                grouproledatarequest.isReliable = true;
+                SendMessage(grouproledatarequest);
+            }
+
+            
+            {
+                this$0 = SLGroupManager.this;
+                super();
+            }
+        }, false, 3, 15000L);
+        groupRoleMemberListRequestHandler = new AsyncLimitsRequestHandler(agentCircuit, new SimpleRequestHandler() {
+
+            final SLGroupManager this$0;
+
+            public volatile void onRequest(Object obj)
+            {
+                onRequest((UUID)obj);
+            }
+
+            public void onRequest(UUID uuid)
+            {
+                Debug.Printf("GroupRoleMemberList: [%s] network requesting for %s", new Object[] {
+                    Thread.currentThread().getName(), uuid.toString()
+                });
+                GroupRoleMembersRequest grouprolemembersrequest = new GroupRoleMembersRequest();
+                grouprolemembersrequest.AgentData_Field.AgentID = SLGroupManager._2D_get0(SLGroupManager.this).agentID;
+                grouprolemembersrequest.AgentData_Field.SessionID = SLGroupManager._2D_get0(SLGroupManager.this).sessionID;
+                grouprolemembersrequest.GroupData_Field.GroupID = uuid;
+                grouprolemembersrequest.GroupData_Field.RequestID = UUID.randomUUID();
+                grouprolemembersrequest.isReliable = true;
+                SendMessage(grouprolemembersrequest);
+            }
+
+            
+            {
+                this$0 = SLGroupManager.this;
+                super();
+            }
+        }, false, 3, 15000L);
+        groupMemberListRequestHandler = new AsyncLimitsRequestHandler(agentCircuit, new SimpleRequestHandler() {
+
+            final SLGroupManager this$0;
+
+            public volatile void onRequest(Object obj)
+            {
+                onRequest((UUID)obj);
+            }
+
+            public void onRequest(UUID uuid)
+            {
+                Debug.Printf("GroupMemberList: [%s] network requesting for group %s", new Object[] {
+                    Thread.currentThread().getName(), uuid.toString()
+                });
+                GroupMembersRequest groupmembersrequest = new GroupMembersRequest();
+                groupmembersrequest.AgentData_Field.AgentID = SLGroupManager._2D_get0(SLGroupManager.this).agentID;
+                groupmembersrequest.AgentData_Field.SessionID = SLGroupManager._2D_get0(SLGroupManager.this).sessionID;
+                groupmembersrequest.GroupData_Field.GroupID = uuid;
+                groupmembersrequest.GroupData_Field.RequestID = UUID.randomUUID();
+                groupmembersrequest.isReliable = true;
+                SendMessage(groupmembersrequest);
+            }
+
+            
+            {
+                this$0 = SLGroupManager.this;
+                super();
+            }
+        }, false, 3, 15000L);
+        groupMemberDataURL = slagentcircuit.getCaps().getCapability(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.GroupMemberData);
+        userManager = UserManager.getUserManager(slagentcircuit.circuitInfo.agentID);
+        if (userManager != null)
+        {
+            groupMemberDao = userManager.getDaoSession().getGroupMemberDao();
+            groupRoleMemberDao = userManager.getDaoSession().getGroupRoleMemberDao();
+            return;
+        } else
+        {
+            groupMemberDao = null;
+            groupRoleMemberDao = null;
             return;
         }
-        this.groupMemberDao = null;
-        this.groupRoleMemberDao = null;
     }
 
-    /* access modifiers changed from: private */
-    public void RequestGroupProfileData(UUID uuid) {
-        GroupProfileRequest groupProfileRequest = new GroupProfileRequest();
-        groupProfileRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        groupProfileRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        groupProfileRequest.GroupData_Field.GroupID = uuid;
-        groupProfileRequest.isReliable = true;
-        SendMessage(groupProfileRequest);
+    private void RequestGroupProfileData(UUID uuid)
+    {
+        GroupProfileRequest groupprofilerequest = new GroupProfileRequest();
+        groupprofilerequest.AgentData_Field.AgentID = circuitInfo.agentID;
+        groupprofilerequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+        groupprofilerequest.GroupData_Field.GroupID = uuid;
+        groupprofilerequest.isReliable = true;
+        SendMessage(groupprofilerequest);
     }
 
-    private void RequestRoleMemberChange(final UUID uuid, UUID uuid2, UUID uuid3, int i) {
-        GroupRoleChanges groupRoleChanges = new GroupRoleChanges();
-        groupRoleChanges.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        groupRoleChanges.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        groupRoleChanges.AgentData_Field.GroupID = uuid;
-        GroupRoleChanges.RoleChange roleChange = new GroupRoleChanges.RoleChange();
-        roleChange.RoleID = uuid2;
-        roleChange.MemberID = uuid3;
-        roleChange.Change = i;
-        groupRoleChanges.RoleChange_Fields.add(roleChange);
-        groupRoleChanges.isReliable = true;
-        groupRoleChanges.setEventListener(new SLMessageEventListener() {
-            public void onMessageAcknowledged(SLMessage sLMessage) {
-                SLGroupManager.this.userManager.getChatterList().getGroupManager().requestGroupRoleMembersRefresh(uuid);
+    private void RequestRoleMemberChange(final UUID groupID, UUID uuid, UUID uuid1, int i)
+    {
+        GroupRoleChanges grouprolechanges = new GroupRoleChanges();
+        grouprolechanges.AgentData_Field.AgentID = circuitInfo.agentID;
+        grouprolechanges.AgentData_Field.SessionID = circuitInfo.sessionID;
+        grouprolechanges.AgentData_Field.GroupID = groupID;
+        com.lumiyaviewer.lumiya.slproto.messages.GroupRoleChanges.RoleChange rolechange = new com.lumiyaviewer.lumiya.slproto.messages.GroupRoleChanges.RoleChange();
+        rolechange.RoleID = uuid;
+        rolechange.MemberID = uuid1;
+        rolechange.Change = i;
+        grouprolechanges.RoleChange_Fields.add(rolechange);
+        grouprolechanges.isReliable = true;
+        grouprolechanges.setEventListener(new SLMessageEventListener() {
+
+            final SLGroupManager this$0;
+            final UUID val$groupID;
+
+            public void onMessageAcknowledged(SLMessage slmessage)
+            {
+                SLGroupManager._2D_get4(SLGroupManager.this).getChatterList().getGroupManager().requestGroupRoleMembersRefresh(groupID);
             }
 
-            public void onMessageTimeout(SLMessage sLMessage) {
+            public void onMessageTimeout(SLMessage slmessage)
+            {
             }
-        });
-        SendMessage(groupRoleChanges);
-    }
 
-    /* access modifiers changed from: private */
-    public void requestGroupTitles(UUID uuid) {
-        GroupTitlesRequest groupTitlesRequest = new GroupTitlesRequest();
-        groupTitlesRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        groupTitlesRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        groupTitlesRequest.AgentData_Field.GroupID = uuid;
-        groupTitlesRequest.AgentData_Field.RequestID = UUID.randomUUID();
-        groupTitlesRequest.isReliable = true;
-        SendMessage(groupTitlesRequest);
-    }
-
-    public void AcceptGroupInvite(UUID uuid, UUID uuid2, boolean z) {
-        ImprovedInstantMessage improvedInstantMessage = new ImprovedInstantMessage();
-        improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        improvedInstantMessage.MessageBlock_Field.FromGroup = false;
-        improvedInstantMessage.MessageBlock_Field.ToAgentID = uuid;
-        improvedInstantMessage.MessageBlock_Field.ParentEstateID = 0;
-        improvedInstantMessage.MessageBlock_Field.RegionID = new UUID(0, 0);
-        improvedInstantMessage.MessageBlock_Field.Position = new LLVector3();
-        improvedInstantMessage.MessageBlock_Field.Offline = 0;
-        improvedInstantMessage.MessageBlock_Field.Dialog = z ? 35 : 36;
-        improvedInstantMessage.MessageBlock_Field.ID = uuid2;
-        improvedInstantMessage.MessageBlock_Field.Timestamp = 0;
-        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
-        improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("todo");
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = new byte[0];
-        improvedInstantMessage.isReliable = true;
-        SendMessage(improvedInstantMessage);
-    }
-
-    public void ActivateGroup(UUID uuid) {
-        ActivateGroup activateGroup = new ActivateGroup();
-        activateGroup.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        activateGroup.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        activateGroup.AgentData_Field.GroupID = uuid;
-        activateGroup.isReliable = true;
-        SendMessage(activateGroup);
-    }
-
-    public void AddMemberToRole(UUID uuid, UUID uuid2, UUID uuid3) {
-        RequestRoleMemberChange(uuid, uuid2, uuid3, 0);
-    }
-
-    public void DeleteRole(final UUID uuid, UUID uuid2) {
-        GroupRoleUpdate groupRoleUpdate = new GroupRoleUpdate();
-        groupRoleUpdate.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        groupRoleUpdate.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        groupRoleUpdate.AgentData_Field.GroupID = uuid;
-        GroupRoleUpdate.RoleData roleData = new GroupRoleUpdate.RoleData();
-        roleData.RoleID = uuid2;
-        roleData.Name = SLMessage.stringToVariableOEM("");
-        roleData.Title = SLMessage.stringToVariableOEM("");
-        roleData.Description = SLMessage.stringToVariableOEM("");
-        roleData.Powers = 0;
-        roleData.UpdateType = 5;
-        groupRoleUpdate.RoleData_Fields.add(roleData);
-        groupRoleUpdate.isReliable = true;
-        groupRoleUpdate.setEventListener(new SLMessageEventListener.SLMessageBaseEventListener() {
-            public void onMessageAcknowledged(SLMessage sLMessage) {
-                SLGroupManager.this.userManager.getGroupRoles().requestUpdate(uuid);
+            
+            {
+                this$0 = SLGroupManager.this;
+                groupID = uuid;
+                super();
             }
         });
-        SendMessage(groupRoleUpdate);
+        SendMessage(grouprolechanges);
     }
 
-    public void HandleCircuitReady() {
-        if (this.userManager != null) {
-            this.groupProfileResultHandler = this.userManager.getCachedGroupProfiles().getRequestSource().attachRequestHandler(this.groupProfileRequestHandler);
-            this.groupTitlesResultHandler = this.userManager.getGroupTitles().getRequestSource().attachRequestHandler(this.groupTitlesRequestHandler);
-            this.groupRolesResultHandler = this.userManager.getGroupRoles().getRequestSource().attachRequestHandler(this.groupRolesRequestHandler);
-            this.groupMemberListResultHandler = this.userManager.getChatterList().getGroupManager().getGroupMemberDataSetRequestSource().attachRequestHandler(Strings.isNullOrEmpty(this.groupMemberDataURL) ? this.groupMemberListRequestHandler : this.groupMemberListHTTPRequestHandler);
-            this.groupRoleMemberListResultHandler = this.userManager.getChatterList().getGroupManager().getGroupRoleMemberDataSetRequestSource().attachRequestHandler(this.groupRoleMemberListRequestHandler);
+    private void requestGroupTitles(UUID uuid)
+    {
+        GroupTitlesRequest grouptitlesrequest = new GroupTitlesRequest();
+        grouptitlesrequest.AgentData_Field.AgentID = circuitInfo.agentID;
+        grouptitlesrequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+        grouptitlesrequest.AgentData_Field.GroupID = uuid;
+        grouptitlesrequest.AgentData_Field.RequestID = UUID.randomUUID();
+        grouptitlesrequest.isReliable = true;
+        SendMessage(grouptitlesrequest);
+    }
+
+    public void AcceptGroupInvite(UUID uuid, UUID uuid1, boolean flag)
+    {
+        ImprovedInstantMessage improvedinstantmessage = new ImprovedInstantMessage();
+        improvedinstantmessage.AgentData_Field.AgentID = circuitInfo.agentID;
+        improvedinstantmessage.AgentData_Field.SessionID = circuitInfo.sessionID;
+        improvedinstantmessage.MessageBlock_Field.FromGroup = false;
+        improvedinstantmessage.MessageBlock_Field.ToAgentID = uuid;
+        improvedinstantmessage.MessageBlock_Field.ParentEstateID = 0;
+        improvedinstantmessage.MessageBlock_Field.RegionID = new UUID(0L, 0L);
+        improvedinstantmessage.MessageBlock_Field.Position = new LLVector3();
+        improvedinstantmessage.MessageBlock_Field.Offline = 0;
+        uuid = improvedinstantmessage.MessageBlock_Field;
+        int i;
+        if (flag)
+        {
+            i = 35;
+        } else
+        {
+            i = 36;
+        }
+        uuid.Dialog = i;
+        improvedinstantmessage.MessageBlock_Field.ID = uuid1;
+        improvedinstantmessage.MessageBlock_Field.Timestamp = 0;
+        improvedinstantmessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
+        improvedinstantmessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("todo");
+        improvedinstantmessage.MessageBlock_Field.BinaryBucket = new byte[0];
+        improvedinstantmessage.isReliable = true;
+        SendMessage(improvedinstantmessage);
+    }
+
+    public void ActivateGroup(UUID uuid)
+    {
+        ActivateGroup activategroup = new ActivateGroup();
+        activategroup.AgentData_Field.AgentID = circuitInfo.agentID;
+        activategroup.AgentData_Field.SessionID = circuitInfo.sessionID;
+        activategroup.AgentData_Field.GroupID = uuid;
+        activategroup.isReliable = true;
+        SendMessage(activategroup);
+    }
+
+    public void AddMemberToRole(UUID uuid, UUID uuid1, UUID uuid2)
+    {
+        RequestRoleMemberChange(uuid, uuid1, uuid2, 0);
+    }
+
+    public void DeleteRole(final UUID groupID, UUID uuid)
+    {
+        GroupRoleUpdate grouproleupdate = new GroupRoleUpdate();
+        grouproleupdate.AgentData_Field.AgentID = circuitInfo.agentID;
+        grouproleupdate.AgentData_Field.SessionID = circuitInfo.sessionID;
+        grouproleupdate.AgentData_Field.GroupID = groupID;
+        com.lumiyaviewer.lumiya.slproto.messages.GroupRoleUpdate.RoleData roledata = new com.lumiyaviewer.lumiya.slproto.messages.GroupRoleUpdate.RoleData();
+        roledata.RoleID = uuid;
+        roledata.Name = SLMessage.stringToVariableOEM("");
+        roledata.Title = SLMessage.stringToVariableOEM("");
+        roledata.Description = SLMessage.stringToVariableOEM("");
+        roledata.Powers = 0L;
+        roledata.UpdateType = 5;
+        grouproleupdate.RoleData_Fields.add(roledata);
+        grouproleupdate.isReliable = true;
+        grouproleupdate.setEventListener(new com.lumiyaviewer.lumiya.slproto.SLMessageEventListener.SLMessageBaseEventListener() {
+
+            final SLGroupManager this$0;
+            final UUID val$groupID;
+
+            public void onMessageAcknowledged(SLMessage slmessage)
+            {
+                SLGroupManager._2D_get4(SLGroupManager.this).getGroupRoles().requestUpdate(groupID);
+            }
+
+            
+            {
+                this$0 = SLGroupManager.this;
+                groupID = uuid;
+                super();
+            }
+        });
+        SendMessage(grouproleupdate);
+    }
+
+    public void HandleCircuitReady()
+    {
+        if (userManager != null)
+        {
+            groupProfileResultHandler = userManager.getCachedGroupProfiles().getRequestSource().attachRequestHandler(groupProfileRequestHandler);
+            groupTitlesResultHandler = userManager.getGroupTitles().getRequestSource().attachRequestHandler(groupTitlesRequestHandler);
+            groupRolesResultHandler = userManager.getGroupRoles().getRequestSource().attachRequestHandler(groupRolesRequestHandler);
+            RequestSource requestsource = userManager.getChatterList().getGroupManager().getGroupMemberDataSetRequestSource();
+            RequestHandler requesthandler;
+            if (Strings.isNullOrEmpty(groupMemberDataURL))
+            {
+                requesthandler = groupMemberListRequestHandler;
+            } else
+            {
+                requesthandler = groupMemberListHTTPRequestHandler;
+            }
+            groupMemberListResultHandler = requestsource.attachRequestHandler(requesthandler);
+            groupRoleMemberListResultHandler = userManager.getChatterList().getGroupManager().getGroupRoleMemberDataSetRequestSource().attachRequestHandler(groupRoleMemberListRequestHandler);
         }
     }
 
-    public void HandleCloseCircuit() {
-        if (this.userManager != null) {
-            this.userManager.getCachedGroupProfiles().getRequestSource().detachRequestHandler(this.groupProfileRequestHandler);
-            this.userManager.getGroupTitles().getRequestSource().detachRequestHandler(this.groupTitlesRequestHandler);
-            this.userManager.getGroupRoles().getRequestSource().detachRequestHandler(this.groupRolesRequestHandler);
-            this.userManager.getChatterList().getGroupManager().getGroupMemberDataSetRequestSource().detachRequestHandler(this.groupMemberListRequestHandler);
+    public void HandleCloseCircuit()
+    {
+        if (userManager != null)
+        {
+            userManager.getCachedGroupProfiles().getRequestSource().detachRequestHandler(groupProfileRequestHandler);
+            userManager.getGroupTitles().getRequestSource().detachRequestHandler(groupTitlesRequestHandler);
+            userManager.getGroupRoles().getRequestSource().detachRequestHandler(groupRolesRequestHandler);
+            userManager.getChatterList().getGroupManager().getGroupMemberDataSetRequestSource().detachRequestHandler(groupMemberListRequestHandler);
         }
     }
 
-    @SLMessageHandler
-    public void HandleEjectGroupMemberReply(EjectGroupMemberReply ejectGroupMemberReply) {
-        this.userManager.getChatterList().getGroupManager().requestRefreshMemberList(ejectGroupMemberReply.GroupData_Field.GroupID);
+    public void HandleEjectGroupMemberReply(EjectGroupMemberReply ejectgroupmemberreply)
+    {
+        userManager.getChatterList().getGroupManager().requestRefreshMemberList(ejectgroupmemberreply.GroupData_Field.GroupID);
     }
 
-    @SLMessageHandler
-    public void HandleGroupMembersReply(GroupMembersReply groupMembersReply) {
-        Debug.Printf("GroupMember: got reply, %d members, memberCount %d", Integer.valueOf(groupMembersReply.MemberData_Fields.size()), Integer.valueOf(groupMembersReply.GroupData_Field.MemberCount));
-        for (GroupMembersReply.MemberData memberData : groupMembersReply.MemberData_Fields) {
-            this.groupMemberDao.insert(new GroupMember(groupMembersReply.GroupData_Field.GroupID, groupMembersReply.GroupData_Field.RequestID, memberData.AgentID, memberData.Contribution, SLMessage.stringFromVariableOEM(memberData.OnlineStatus), memberData.AgentPowers, SLMessage.stringFromVariableOEM(memberData.Title), memberData.IsOwner));
-            Debug.Printf("GroupMember: userID = %s", memberData.AgentID);
+    public void HandleGroupMembersReply(GroupMembersReply groupmembersreply)
+    {
+        Debug.Printf("GroupMember: got reply, %d members, memberCount %d", new Object[] {
+            Integer.valueOf(groupmembersreply.MemberData_Fields.size()), Integer.valueOf(groupmembersreply.GroupData_Field.MemberCount)
+        });
+        com.lumiyaviewer.lumiya.slproto.messages.GroupMembersReply.MemberData memberdata;
+        for (Iterator iterator = groupmembersreply.MemberData_Fields.iterator(); iterator.hasNext(); Debug.Printf("GroupMember: userID = %s", new Object[] {
+    memberdata.AgentID
+}))
+        {
+            memberdata = (com.lumiyaviewer.lumiya.slproto.messages.GroupMembersReply.MemberData)iterator.next();
+            GroupMember groupmember = new GroupMember(groupmembersreply.GroupData_Field.GroupID, groupmembersreply.GroupData_Field.RequestID, memberdata.AgentID, memberdata.Contribution, SLMessage.stringFromVariableOEM(memberdata.OnlineStatus), memberdata.AgentPowers, SLMessage.stringFromVariableOEM(memberdata.Title), memberdata.IsOwner);
+            groupMemberDao.insert(groupmember);
         }
-        long count = this.groupMemberDao.queryBuilder().where(GroupMemberDao.Properties.GroupID.eq(groupMembersReply.GroupData_Field.GroupID), GroupMemberDao.Properties.RequestID.eq(groupMembersReply.GroupData_Field.RequestID)).count();
-        Debug.Printf("GroupMemberList: count = %d", Long.valueOf(count));
-        if (count >= ((long) groupMembersReply.GroupData_Field.MemberCount)) {
-            this.groupMemberListResultHandler.onResultData(groupMembersReply.GroupData_Field.GroupID, groupMembersReply.GroupData_Field.RequestID);
-        }
-    }
 
-    @SLMessageHandler
-    public void HandleGroupProfileReply(GroupProfileReply groupProfileReply) {
-        if (this.groupProfileResultHandler != null) {
-            this.groupProfileResultHandler.onResultData(groupProfileReply.GroupData_Field.GroupID, groupProfileReply);
-        }
-    }
-
-    @SLMessageHandler
-    public void HandleGroupRoleDataReply(GroupRoleDataReply groupRoleDataReply) {
-        if (this.groupRolesResultHandler != null) {
-            this.groupRolesResultHandler.onResultData(groupRoleDataReply.GroupData_Field.GroupID, groupRoleDataReply);
-        }
-    }
-
-    @SLMessageHandler
-    public void HandleGroupRoleMembersReply(GroupRoleMembersReply groupRoleMembersReply) {
-        Debug.Printf("GroupRoleMember: got reply, %d members, total pairs %d", Integer.valueOf(groupRoleMembersReply.MemberData_Fields.size()), Integer.valueOf(groupRoleMembersReply.AgentData_Field.TotalPairs));
-        for (GroupRoleMembersReply.MemberData memberData : groupRoleMembersReply.MemberData_Fields) {
-            this.groupRoleMemberDao.insert(new GroupRoleMember(groupRoleMembersReply.AgentData_Field.GroupID, groupRoleMembersReply.AgentData_Field.RequestID, memberData.RoleID, memberData.MemberID));
-        }
-        long count = this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupRoleMembersReply.AgentData_Field.GroupID), GroupRoleMemberDao.Properties.RequestID.eq(groupRoleMembersReply.AgentData_Field.RequestID)).count();
-        Debug.Printf("GroupRoleMemberList: count = %d", Long.valueOf(count));
-        if (count >= ((long) groupRoleMembersReply.AgentData_Field.TotalPairs)) {
-            this.groupRoleMemberListResultHandler.onResultData(groupRoleMembersReply.AgentData_Field.GroupID, groupRoleMembersReply.AgentData_Field.RequestID);
+        long l = groupMemberDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.GroupMemberDao.Properties.GroupID.eq(groupmembersreply.GroupData_Field.GroupID), new WhereCondition[] {
+            com.lumiyaviewer.lumiya.dao.GroupMemberDao.Properties.RequestID.eq(groupmembersreply.GroupData_Field.RequestID)
+        }).count();
+        Debug.Printf("GroupMemberList: count = %d", new Object[] {
+            Long.valueOf(l)
+        });
+        if (l >= (long)groupmembersreply.GroupData_Field.MemberCount)
+        {
+            groupMemberListResultHandler.onResultData(groupmembersreply.GroupData_Field.GroupID, groupmembersreply.GroupData_Field.RequestID);
         }
     }
 
-    @SLMessageHandler
-    public void HandleGroupTitlesReply(GroupTitlesReply groupTitlesReply) {
-        if (this.groupTitlesResultHandler != null) {
-            this.groupTitlesResultHandler.onResultData(groupTitlesReply.AgentData_Field.GroupID, groupTitlesReply);
+    public void HandleGroupProfileReply(GroupProfileReply groupprofilereply)
+    {
+        if (groupProfileResultHandler != null)
+        {
+            groupProfileResultHandler.onResultData(groupprofilereply.GroupData_Field.GroupID, groupprofilereply);
         }
     }
 
-    @SLMessageHandler
-    public void HandleJoinGroupReply(JoinGroupReply joinGroupReply) {
-        AgentDataUpdateRequest agentDataUpdateRequest = new AgentDataUpdateRequest();
-        agentDataUpdateRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        agentDataUpdateRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        agentDataUpdateRequest.isReliable = true;
-        SendMessage(agentDataUpdateRequest);
-        this.eventBus.publish(new SLJoinLeaveGroupEvent(joinGroupReply.GroupData_Field.GroupID, true, joinGroupReply.GroupData_Field.Success));
-    }
-
-    @SLMessageHandler
-    public void HandleLeaveGroupReply(LeaveGroupReply leaveGroupReply) {
-        AgentDataUpdateRequest agentDataUpdateRequest = new AgentDataUpdateRequest();
-        agentDataUpdateRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        agentDataUpdateRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        agentDataUpdateRequest.isReliable = true;
-        SendMessage(agentDataUpdateRequest);
-        this.eventBus.publish(new SLJoinLeaveGroupEvent(leaveGroupReply.GroupData_Field.GroupID, false, leaveGroupReply.GroupData_Field.Success));
-    }
-
-    public void RemoveMemberFromRole(UUID uuid, UUID uuid2, UUID uuid3) {
-        RequestRoleMemberChange(uuid, uuid2, uuid3, 1);
-    }
-
-    public void RequestEjectFromGroup(UUID uuid, UUID uuid2) {
-        EjectGroupMemberRequest ejectGroupMemberRequest = new EjectGroupMemberRequest();
-        ejectGroupMemberRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        ejectGroupMemberRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        ejectGroupMemberRequest.GroupData_Field.GroupID = uuid;
-        EjectGroupMemberRequest.EjectData ejectData = new EjectGroupMemberRequest.EjectData();
-        ejectData.EjecteeID = uuid2;
-        ejectGroupMemberRequest.EjectData_Fields.add(ejectData);
-        ejectGroupMemberRequest.isReliable = true;
-        SendMessage(ejectGroupMemberRequest);
-    }
-
-    public void RequestJoinGroup(UUID uuid) {
-        JoinGroupRequest joinGroupRequest = new JoinGroupRequest();
-        joinGroupRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        joinGroupRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        joinGroupRequest.GroupData_Field.GroupID = uuid;
-        joinGroupRequest.isReliable = true;
-        SendMessage(joinGroupRequest);
-    }
-
-    public void RequestLeaveGroup(UUID uuid) {
-        LeaveGroupRequest leaveGroupRequest = new LeaveGroupRequest();
-        leaveGroupRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        leaveGroupRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        leaveGroupRequest.GroupData_Field.GroupID = uuid;
-        leaveGroupRequest.isReliable = true;
-        SendMessage(leaveGroupRequest);
-    }
-
-    public void RequestMemberRoleChanges(final UUID uuid, final UUID uuid2, Collection<UUID> collection, Collection<UUID> collection2) {
-        final boolean equals = this.circuitInfo.agentID.equals(uuid2);
-        GroupRoleChanges groupRoleChanges = new GroupRoleChanges();
-        groupRoleChanges.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        groupRoleChanges.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        groupRoleChanges.AgentData_Field.GroupID = uuid;
-        for (UUID uuid3 : collection) {
-            Debug.Printf("GroupRoleChange: groupID %s memberID %s add %s", uuid, uuid2, uuid3);
-            GroupRoleChanges.RoleChange roleChange = new GroupRoleChanges.RoleChange();
-            roleChange.RoleID = uuid3;
-            roleChange.MemberID = uuid2;
-            roleChange.Change = 0;
-            groupRoleChanges.RoleChange_Fields.add(roleChange);
+    public void HandleGroupRoleDataReply(GroupRoleDataReply grouproledatareply)
+    {
+        if (groupRolesResultHandler != null)
+        {
+            groupRolesResultHandler.onResultData(grouproledatareply.GroupData_Field.GroupID, grouproledatareply);
         }
-        for (UUID uuid4 : collection2) {
-            Debug.Printf("GroupRoleChange: groupID %s memberID %s remove %s", uuid, uuid2, uuid4);
-            GroupRoleChanges.RoleChange roleChange2 = new GroupRoleChanges.RoleChange();
-            roleChange2.RoleID = uuid4;
-            roleChange2.MemberID = uuid2;
-            roleChange2.Change = 1;
-            groupRoleChanges.RoleChange_Fields.add(roleChange2);
+    }
+
+    public void HandleGroupRoleMembersReply(GroupRoleMembersReply grouprolemembersreply)
+    {
+        Debug.Printf("GroupRoleMember: got reply, %d members, total pairs %d", new Object[] {
+            Integer.valueOf(grouprolemembersreply.MemberData_Fields.size()), Integer.valueOf(grouprolemembersreply.AgentData_Field.TotalPairs)
+        });
+        Object obj;
+        for (Iterator iterator = grouprolemembersreply.MemberData_Fields.iterator(); iterator.hasNext(); groupRoleMemberDao.insert(obj))
+        {
+            obj = (com.lumiyaviewer.lumiya.slproto.messages.GroupRoleMembersReply.MemberData)iterator.next();
+            obj = new GroupRoleMember(grouprolemembersreply.AgentData_Field.GroupID, grouprolemembersreply.AgentData_Field.RequestID, ((com.lumiyaviewer.lumiya.slproto.messages.GroupRoleMembersReply.MemberData) (obj)).RoleID, ((com.lumiyaviewer.lumiya.slproto.messages.GroupRoleMembersReply.MemberData) (obj)).MemberID);
         }
-        groupRoleChanges.isReliable = true;
-        groupRoleChanges.setEventListener(new SLMessageEventListener() {
-            public void onMessageAcknowledged(SLMessage sLMessage) {
-                SLGroupManager.this.userManager.getChatterList().getGroupManager().requestGroupRoleMembersRefresh(uuid);
-                if (equals) {
-                    SLGroupManager.this.userManager.getCachedGroupProfiles().requestUpdate(uuid);
-                    SLGroupManager.this.userManager.getGroupTitles().requestUpdate(uuid);
-                    SLGroupManager.this.userManager.getAvatarGroupLists().requestUpdate(uuid2);
+
+        long l = groupRoleMemberDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.GroupRoleMemberDao.Properties.GroupID.eq(grouprolemembersreply.AgentData_Field.GroupID), new WhereCondition[] {
+            com.lumiyaviewer.lumiya.dao.GroupRoleMemberDao.Properties.RequestID.eq(grouprolemembersreply.AgentData_Field.RequestID)
+        }).count();
+        Debug.Printf("GroupRoleMemberList: count = %d", new Object[] {
+            Long.valueOf(l)
+        });
+        if (l >= (long)grouprolemembersreply.AgentData_Field.TotalPairs)
+        {
+            groupRoleMemberListResultHandler.onResultData(grouprolemembersreply.AgentData_Field.GroupID, grouprolemembersreply.AgentData_Field.RequestID);
+        }
+    }
+
+    public void HandleGroupTitlesReply(GroupTitlesReply grouptitlesreply)
+    {
+        if (groupTitlesResultHandler != null)
+        {
+            groupTitlesResultHandler.onResultData(grouptitlesreply.AgentData_Field.GroupID, grouptitlesreply);
+        }
+    }
+
+    public void HandleJoinGroupReply(JoinGroupReply joingroupreply)
+    {
+        AgentDataUpdateRequest agentdataupdaterequest = new AgentDataUpdateRequest();
+        agentdataupdaterequest.AgentData_Field.AgentID = circuitInfo.agentID;
+        agentdataupdaterequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+        agentdataupdaterequest.isReliable = true;
+        SendMessage(agentdataupdaterequest);
+        eventBus.publish(new SLJoinLeaveGroupEvent(joingroupreply.GroupData_Field.GroupID, true, joingroupreply.GroupData_Field.Success));
+    }
+
+    public void HandleLeaveGroupReply(LeaveGroupReply leavegroupreply)
+    {
+        AgentDataUpdateRequest agentdataupdaterequest = new AgentDataUpdateRequest();
+        agentdataupdaterequest.AgentData_Field.AgentID = circuitInfo.agentID;
+        agentdataupdaterequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+        agentdataupdaterequest.isReliable = true;
+        SendMessage(agentdataupdaterequest);
+        eventBus.publish(new SLJoinLeaveGroupEvent(leavegroupreply.GroupData_Field.GroupID, false, leavegroupreply.GroupData_Field.Success));
+    }
+
+    public void RemoveMemberFromRole(UUID uuid, UUID uuid1, UUID uuid2)
+    {
+        RequestRoleMemberChange(uuid, uuid1, uuid2, 1);
+    }
+
+    public void RequestEjectFromGroup(UUID uuid, UUID uuid1)
+    {
+        EjectGroupMemberRequest ejectgroupmemberrequest = new EjectGroupMemberRequest();
+        ejectgroupmemberrequest.AgentData_Field.AgentID = circuitInfo.agentID;
+        ejectgroupmemberrequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+        ejectgroupmemberrequest.GroupData_Field.GroupID = uuid;
+        uuid = new com.lumiyaviewer.lumiya.slproto.messages.EjectGroupMemberRequest.EjectData();
+        uuid.EjecteeID = uuid1;
+        ejectgroupmemberrequest.EjectData_Fields.add(uuid);
+        ejectgroupmemberrequest.isReliable = true;
+        SendMessage(ejectgroupmemberrequest);
+    }
+
+    public void RequestJoinGroup(UUID uuid)
+    {
+        JoinGroupRequest joingrouprequest = new JoinGroupRequest();
+        joingrouprequest.AgentData_Field.AgentID = circuitInfo.agentID;
+        joingrouprequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+        joingrouprequest.GroupData_Field.GroupID = uuid;
+        joingrouprequest.isReliable = true;
+        SendMessage(joingrouprequest);
+    }
+
+    public void RequestLeaveGroup(UUID uuid)
+    {
+        LeaveGroupRequest leavegrouprequest = new LeaveGroupRequest();
+        leavegrouprequest.AgentData_Field.AgentID = circuitInfo.agentID;
+        leavegrouprequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+        leavegrouprequest.GroupData_Field.GroupID = uuid;
+        leavegrouprequest.isReliable = true;
+        SendMessage(leavegrouprequest);
+    }
+
+    public void RequestMemberRoleChanges(final UUID groupUUID, final UUID memberID, Collection collection, Collection collection1)
+    {
+        final boolean isMyRoles = circuitInfo.agentID.equals(memberID);
+        GroupRoleChanges grouprolechanges = new GroupRoleChanges();
+        grouprolechanges.AgentData_Field.AgentID = circuitInfo.agentID;
+        grouprolechanges.AgentData_Field.SessionID = circuitInfo.sessionID;
+        grouprolechanges.AgentData_Field.GroupID = groupUUID;
+        com.lumiyaviewer.lumiya.slproto.messages.GroupRoleChanges.RoleChange rolechange1;
+        for (collection = collection.iterator(); collection.hasNext(); grouprolechanges.RoleChange_Fields.add(rolechange1))
+        {
+            UUID uuid = (UUID)collection.next();
+            Debug.Printf("GroupRoleChange: groupID %s memberID %s add %s", new Object[] {
+                groupUUID, memberID, uuid
+            });
+            rolechange1 = new com.lumiyaviewer.lumiya.slproto.messages.GroupRoleChanges.RoleChange();
+            rolechange1.RoleID = uuid;
+            rolechange1.MemberID = memberID;
+            rolechange1.Change = 0;
+        }
+
+        com.lumiyaviewer.lumiya.slproto.messages.GroupRoleChanges.RoleChange rolechange;
+        for (collection = collection1.iterator(); collection.hasNext(); grouprolechanges.RoleChange_Fields.add(rolechange))
+        {
+            collection1 = (UUID)collection.next();
+            Debug.Printf("GroupRoleChange: groupID %s memberID %s remove %s", new Object[] {
+                groupUUID, memberID, collection1
+            });
+            rolechange = new com.lumiyaviewer.lumiya.slproto.messages.GroupRoleChanges.RoleChange();
+            rolechange.RoleID = collection1;
+            rolechange.MemberID = memberID;
+            rolechange.Change = 1;
+        }
+
+        grouprolechanges.isReliable = true;
+        grouprolechanges.setEventListener(new SLMessageEventListener() {
+
+            final SLGroupManager this$0;
+            final UUID val$groupUUID;
+            final boolean val$isMyRoles;
+            final UUID val$memberID;
+
+            public void onMessageAcknowledged(SLMessage slmessage)
+            {
+                SLGroupManager._2D_get4(SLGroupManager.this).getChatterList().getGroupManager().requestGroupRoleMembersRefresh(groupUUID);
+                if (isMyRoles)
+                {
+                    SLGroupManager._2D_get4(SLGroupManager.this).getCachedGroupProfiles().requestUpdate(groupUUID);
+                    SLGroupManager._2D_get4(SLGroupManager.this).getGroupTitles().requestUpdate(groupUUID);
+                    SLGroupManager._2D_get4(SLGroupManager.this).getAvatarGroupLists().requestUpdate(memberID);
                 }
             }
 
-            public void onMessageTimeout(SLMessage sLMessage) {
+            public void onMessageTimeout(SLMessage slmessage)
+            {
+            }
+
+            
+            {
+                this$0 = SLGroupManager.this;
+                groupUUID = uuid;
+                isMyRoles = flag;
+                memberID = uuid1;
+                super();
             }
         });
-        SendMessage(groupRoleChanges);
+        SendMessage(grouprolechanges);
     }
 
-    public void SendGroupInvite(UUID uuid, UUID uuid2, UUID uuid3) {
-        InviteGroupRequest inviteGroupRequest = new InviteGroupRequest();
-        inviteGroupRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        inviteGroupRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        inviteGroupRequest.GroupData_Field.GroupID = uuid2;
-        InviteGroupRequest.InviteData inviteData = new InviteGroupRequest.InviteData();
-        inviteData.InviteeID = uuid;
-        inviteData.RoleID = uuid3;
-        inviteGroupRequest.InviteData_Fields.add(inviteData);
-        inviteGroupRequest.isReliable = true;
-        SendMessage(inviteGroupRequest);
-        this.agentCircuit.HandleChatEvent(ChatterID.getGroupChatterID(this.agentCircuit.getAgentUUID(), uuid2), new SLChatGroupInvitationSentEvent((ChatMessageSource) new ChatMessageSourceUser(uuid), this.agentCircuit.getAgentUUID()), true);
+    public void SendGroupInvite(UUID uuid, UUID uuid1, UUID uuid2)
+    {
+        InviteGroupRequest invitegrouprequest = new InviteGroupRequest();
+        invitegrouprequest.AgentData_Field.AgentID = circuitInfo.agentID;
+        invitegrouprequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+        invitegrouprequest.GroupData_Field.GroupID = uuid1;
+        com.lumiyaviewer.lumiya.slproto.messages.InviteGroupRequest.InviteData invitedata = new com.lumiyaviewer.lumiya.slproto.messages.InviteGroupRequest.InviteData();
+        invitedata.InviteeID = uuid;
+        invitedata.RoleID = uuid2;
+        invitegrouprequest.InviteData_Fields.add(invitedata);
+        invitegrouprequest.isReliable = true;
+        SendMessage(invitegrouprequest);
+        agentCircuit.HandleChatEvent(ChatterID.getGroupChatterID(agentCircuit.getAgentUUID(), uuid1), new SLChatGroupInvitationSentEvent(new ChatMessageSourceUser(uuid), agentCircuit.getAgentUUID()), true);
     }
 
-    public void SendGroupNotice(UUID uuid, String str, String str2, SLInventoryEntry sLInventoryEntry) {
-        ImprovedInstantMessage improvedInstantMessage = new ImprovedInstantMessage();
-        improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        improvedInstantMessage.MessageBlock_Field.FromGroup = false;
-        improvedInstantMessage.MessageBlock_Field.ToAgentID = uuid;
-        improvedInstantMessage.MessageBlock_Field.ParentEstateID = 0;
-        improvedInstantMessage.MessageBlock_Field.RegionID = UUIDPool.ZeroUUID;
-        improvedInstantMessage.MessageBlock_Field.Position = new LLVector3();
-        improvedInstantMessage.MessageBlock_Field.Offline = 0;
-        improvedInstantMessage.MessageBlock_Field.Dialog = 32;
-        improvedInstantMessage.MessageBlock_Field.ID = UUIDPool.ZeroUUID;
-        improvedInstantMessage.MessageBlock_Field.Timestamp = 0;
-        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
-        improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str + "|" + str2);
-        if (sLInventoryEntry != null) {
-            try {
-                String serializeToXML = new LLSDMap(new LLSDMap.LLSDMapEntry("item_id", new LLSDUUID(sLInventoryEntry.uuid)), new LLSDMap.LLSDMapEntry("owner_id", new LLSDUUID(sLInventoryEntry.ownerUUID))).serializeToXML();
-                improvedInstantMessage.MessageBlock_Field.BinaryBucket = SLMessage.stringToVariableOEM(serializeToXML);
-            } catch (IOException e) {
-                e.printStackTrace();
-                improvedInstantMessage.MessageBlock_Field.BinaryBucket = new byte[0];
+    public void SendGroupNotice(UUID uuid, String s, String s1, SLInventoryEntry slinventoryentry)
+    {
+        ImprovedInstantMessage improvedinstantmessage = new ImprovedInstantMessage();
+        improvedinstantmessage.AgentData_Field.AgentID = circuitInfo.agentID;
+        improvedinstantmessage.AgentData_Field.SessionID = circuitInfo.sessionID;
+        improvedinstantmessage.MessageBlock_Field.FromGroup = false;
+        improvedinstantmessage.MessageBlock_Field.ToAgentID = uuid;
+        improvedinstantmessage.MessageBlock_Field.ParentEstateID = 0;
+        improvedinstantmessage.MessageBlock_Field.RegionID = UUIDPool.ZeroUUID;
+        improvedinstantmessage.MessageBlock_Field.Position = new LLVector3();
+        improvedinstantmessage.MessageBlock_Field.Offline = 0;
+        improvedinstantmessage.MessageBlock_Field.Dialog = 32;
+        improvedinstantmessage.MessageBlock_Field.ID = UUIDPool.ZeroUUID;
+        improvedinstantmessage.MessageBlock_Field.Timestamp = 0;
+        improvedinstantmessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
+        improvedinstantmessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF((new StringBuilder()).append(s).append("|").append(s1).toString());
+        if (slinventoryentry != null)
+        {
+            uuid = new LLSDMap(new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[] {
+                new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry("item_id", new LLSDUUID(slinventoryentry.uuid)), new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry("owner_id", new LLSDUUID(slinventoryentry.ownerUUID))
+            });
+            try
+            {
+                uuid = uuid.serializeToXML();
+                improvedinstantmessage.MessageBlock_Field.BinaryBucket = SLMessage.stringToVariableOEM(uuid);
             }
-        } else {
-            improvedInstantMessage.MessageBlock_Field.BinaryBucket = new byte[0];
+            // Misplaced declaration of an exception variable
+            catch (UUID uuid)
+            {
+                uuid.printStackTrace();
+                improvedinstantmessage.MessageBlock_Field.BinaryBucket = new byte[0];
+            }
+        } else
+        {
+            improvedinstantmessage.MessageBlock_Field.BinaryBucket = new byte[0];
         }
-        improvedInstantMessage.isReliable = true;
-        SendMessage(improvedInstantMessage);
+        improvedinstantmessage.isReliable = true;
+        SendMessage(improvedinstantmessage);
     }
 
-    public void SetGroupContribution(UUID uuid, int i) {
-        SetGroupContribution setGroupContribution = new SetGroupContribution();
-        setGroupContribution.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        setGroupContribution.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        setGroupContribution.Data_Field.GroupID = uuid;
-        setGroupContribution.Data_Field.Contribution = i;
-        setGroupContribution.isReliable = true;
-        setGroupContribution.setEventListener(new SLMessageEventListener() {
-            public void onMessageAcknowledged(SLMessage sLMessage) {
-                AgentDataUpdateRequest agentDataUpdateRequest = new AgentDataUpdateRequest();
-                agentDataUpdateRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID;
-                agentDataUpdateRequest.AgentData_Field.SessionID = SLGroupManager.this.circuitInfo.sessionID;
-                agentDataUpdateRequest.isReliable = true;
-                SLGroupManager.this.SendMessage(agentDataUpdateRequest);
+    public void SetGroupContribution(UUID uuid, int i)
+    {
+        SetGroupContribution setgroupcontribution = new SetGroupContribution();
+        setgroupcontribution.AgentData_Field.AgentID = circuitInfo.agentID;
+        setgroupcontribution.AgentData_Field.SessionID = circuitInfo.sessionID;
+        setgroupcontribution.Data_Field.GroupID = uuid;
+        setgroupcontribution.Data_Field.Contribution = i;
+        setgroupcontribution.isReliable = true;
+        setgroupcontribution.setEventListener(new SLMessageEventListener() {
+
+            final SLGroupManager this$0;
+
+            public void onMessageAcknowledged(SLMessage slmessage)
+            {
+                slmessage = new AgentDataUpdateRequest();
+                ((AgentDataUpdateRequest) (slmessage)).AgentData_Field.AgentID = SLGroupManager._2D_get0(SLGroupManager.this).agentID;
+                ((AgentDataUpdateRequest) (slmessage)).AgentData_Field.SessionID = SLGroupManager._2D_get0(SLGroupManager.this).sessionID;
+                slmessage.isReliable = true;
+                SendMessage(slmessage);
             }
 
-            public void onMessageTimeout(SLMessage sLMessage) {
+            public void onMessageTimeout(SLMessage slmessage)
+            {
+            }
+
+            
+            {
+                this$0 = SLGroupManager.this;
+                super();
             }
         });
-        SendMessage(setGroupContribution);
+        SendMessage(setgroupcontribution);
     }
 
-    public void SetGroupOptions(UUID uuid, boolean z, boolean z2) {
-        SetGroupAcceptNotices setGroupAcceptNotices = new SetGroupAcceptNotices();
-        setGroupAcceptNotices.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        setGroupAcceptNotices.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        setGroupAcceptNotices.Data_Field.GroupID = uuid;
-        setGroupAcceptNotices.Data_Field.AcceptNotices = z;
-        setGroupAcceptNotices.NewData_Field.ListInProfile = z2;
-        setGroupAcceptNotices.isReliable = true;
-        SendMessage(setGroupAcceptNotices);
-        this.agentCircuit.getModules().userProfiles.requestAgentDataUpdate();
+    public void SetGroupOptions(UUID uuid, boolean flag, boolean flag1)
+    {
+        SetGroupAcceptNotices setgroupacceptnotices = new SetGroupAcceptNotices();
+        setgroupacceptnotices.AgentData_Field.AgentID = circuitInfo.agentID;
+        setgroupacceptnotices.AgentData_Field.SessionID = circuitInfo.sessionID;
+        setgroupacceptnotices.Data_Field.GroupID = uuid;
+        setgroupacceptnotices.Data_Field.AcceptNotices = flag;
+        setgroupacceptnotices.NewData_Field.ListInProfile = flag1;
+        setgroupacceptnotices.isReliable = true;
+        SendMessage(setgroupacceptnotices);
+        agentCircuit.getModules().userProfiles.requestAgentDataUpdate();
     }
 
-    public void SetGroupRole(UUID uuid, UUID uuid2) {
-        GroupTitleUpdate groupTitleUpdate = new GroupTitleUpdate();
-        groupTitleUpdate.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        groupTitleUpdate.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        groupTitleUpdate.AgentData_Field.GroupID = uuid;
-        groupTitleUpdate.AgentData_Field.TitleRoleID = uuid2;
-        groupTitleUpdate.isReliable = true;
-        SendMessage(groupTitleUpdate);
+    public void SetGroupRole(UUID uuid, UUID uuid1)
+    {
+        GroupTitleUpdate grouptitleupdate = new GroupTitleUpdate();
+        grouptitleupdate.AgentData_Field.AgentID = circuitInfo.agentID;
+        grouptitleupdate.AgentData_Field.SessionID = circuitInfo.sessionID;
+        grouptitleupdate.AgentData_Field.GroupID = uuid;
+        grouptitleupdate.AgentData_Field.TitleRoleID = uuid1;
+        grouptitleupdate.isReliable = true;
+        SendMessage(grouptitleupdate);
         requestGroupTitles(uuid);
     }
 
-    public void SetRoleProperties(final UUID uuid, @Nullable final UUID uuid2, String str, String str2, String str3, long j) {
-        Debug.Printf("GroupRole: setting role properties for role %s", uuid2);
-        GroupRoleUpdate groupRoleUpdate = new GroupRoleUpdate();
-        groupRoleUpdate.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        groupRoleUpdate.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        groupRoleUpdate.AgentData_Field.GroupID = uuid;
-        GroupRoleUpdate.RoleData roleData = new GroupRoleUpdate.RoleData();
-        roleData.RoleID = uuid2 != null ? uuid2 : UUID.randomUUID();
-        roleData.Name = SLMessage.stringToVariableOEM(str);
-        roleData.Title = SLMessage.stringToVariableOEM(str2);
-        roleData.Description = SLMessage.stringToVariableOEM(str3);
-        roleData.Powers = j;
-        roleData.UpdateType = uuid2 != null ? 3 : 4;
-        groupRoleUpdate.RoleData_Fields.add(roleData);
-        groupRoleUpdate.isReliable = true;
-        groupRoleUpdate.setEventListener(new SLMessageEventListener.SLMessageBaseEventListener() {
-            public void onMessageAcknowledged(SLMessage sLMessage) {
-                Debug.Printf("GroupRole: ack set properties for role %s", uuid2);
-                SLGroupManager.this.userManager.getGroupRoles().requestUpdate(uuid);
+    public void SetRoleProperties(final UUID groupID, final UUID roleID, String s, String s1, String s2, long l)
+    {
+        Debug.Printf("GroupRole: setting role properties for role %s", new Object[] {
+            roleID
+        });
+        GroupRoleUpdate grouproleupdate = new GroupRoleUpdate();
+        grouproleupdate.AgentData_Field.AgentID = circuitInfo.agentID;
+        grouproleupdate.AgentData_Field.SessionID = circuitInfo.sessionID;
+        grouproleupdate.AgentData_Field.GroupID = groupID;
+        com.lumiyaviewer.lumiya.slproto.messages.GroupRoleUpdate.RoleData roledata = new com.lumiyaviewer.lumiya.slproto.messages.GroupRoleUpdate.RoleData();
+        UUID uuid;
+        int i;
+        if (roleID != null)
+        {
+            uuid = roleID;
+        } else
+        {
+            uuid = UUID.randomUUID();
+        }
+        roledata.RoleID = uuid;
+        roledata.Name = SLMessage.stringToVariableOEM(s);
+        roledata.Title = SLMessage.stringToVariableOEM(s1);
+        roledata.Description = SLMessage.stringToVariableOEM(s2);
+        roledata.Powers = l;
+        if (roleID != null)
+        {
+            i = 3;
+        } else
+        {
+            i = 4;
+        }
+        roledata.UpdateType = i;
+        grouproleupdate.RoleData_Fields.add(roledata);
+        grouproleupdate.isReliable = true;
+        grouproleupdate.setEventListener(new com.lumiyaviewer.lumiya.slproto.SLMessageEventListener.SLMessageBaseEventListener() {
+
+            final SLGroupManager this$0;
+            final UUID val$groupID;
+            final UUID val$roleID;
+
+            public void onMessageAcknowledged(SLMessage slmessage)
+            {
+                Debug.Printf("GroupRole: ack set properties for role %s", new Object[] {
+                    roleID
+                });
+                SLGroupManager._2D_get4(SLGroupManager.this).getGroupRoles().requestUpdate(groupID);
+            }
+
+            
+            {
+                this$0 = SLGroupManager.this;
+                roleID = uuid;
+                groupID = uuid1;
+                super();
             }
         });
-        SendMessage(groupRoleUpdate);
+        SendMessage(grouproleupdate);
     }
 
-    public UUID getActiveGroupID() {
-        return this.activeGroupID;
+    public UUID getActiveGroupID()
+    {
+        return activeGroupID;
     }
 }

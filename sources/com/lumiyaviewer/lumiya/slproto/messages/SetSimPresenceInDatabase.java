@@ -1,58 +1,78 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class SetSimPresenceInDatabase extends SLMessage {
-    public SimData SimData_Field = new SimData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class SimData {
+public class SetSimPresenceInDatabase extends SLMessage
+{
+    public static class SimData
+    {
+
         public int AgentCount;
         public int GridX;
         public int GridY;
-        public byte[] HostName;
+        public byte HostName[];
         public int PID;
         public UUID RegionID;
-        public byte[] Status;
+        public byte Status[];
         public int TimeToLive;
+
+        public SimData()
+        {
+        }
     }
 
-    public SetSimPresenceInDatabase() {
-        this.zeroCoded = false;
+
+    public SimData SimData_Field;
+
+    public SetSimPresenceInDatabase()
+    {
+        zeroCoded = false;
+        SimData_Field = new SimData();
     }
 
-    public int CalcPayloadSize() {
-        return this.SimData_Field.HostName.length + 17 + 4 + 4 + 4 + 4 + 4 + 1 + this.SimData_Field.Status.length + 4;
+    public int CalcPayloadSize()
+    {
+        return SimData_Field.HostName.length + 17 + 4 + 4 + 4 + 4 + 4 + 1 + SimData_Field.Status.length + 4;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleSetSimPresenceInDatabase(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleSetSimPresenceInDatabase(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put(Ascii.ETB);
-        packUUID(byteBuffer, this.SimData_Field.RegionID);
-        packVariable(byteBuffer, this.SimData_Field.HostName, 1);
-        packInt(byteBuffer, this.SimData_Field.GridX);
-        packInt(byteBuffer, this.SimData_Field.GridY);
-        packInt(byteBuffer, this.SimData_Field.PID);
-        packInt(byteBuffer, this.SimData_Field.AgentCount);
-        packInt(byteBuffer, this.SimData_Field.TimeToLive);
-        packVariable(byteBuffer, this.SimData_Field.Status, 1);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)23);
+        packUUID(bytebuffer, SimData_Field.RegionID);
+        packVariable(bytebuffer, SimData_Field.HostName, 1);
+        packInt(bytebuffer, SimData_Field.GridX);
+        packInt(bytebuffer, SimData_Field.GridY);
+        packInt(bytebuffer, SimData_Field.PID);
+        packInt(bytebuffer, SimData_Field.AgentCount);
+        packInt(bytebuffer, SimData_Field.TimeToLive);
+        packVariable(bytebuffer, SimData_Field.Status, 1);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.SimData_Field.RegionID = unpackUUID(byteBuffer);
-        this.SimData_Field.HostName = unpackVariable(byteBuffer, 1);
-        this.SimData_Field.GridX = unpackInt(byteBuffer);
-        this.SimData_Field.GridY = unpackInt(byteBuffer);
-        this.SimData_Field.PID = unpackInt(byteBuffer);
-        this.SimData_Field.AgentCount = unpackInt(byteBuffer);
-        this.SimData_Field.TimeToLive = unpackInt(byteBuffer);
-        this.SimData_Field.Status = unpackVariable(byteBuffer, 1);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        SimData_Field.RegionID = unpackUUID(bytebuffer);
+        SimData_Field.HostName = unpackVariable(bytebuffer, 1);
+        SimData_Field.GridX = unpackInt(bytebuffer);
+        SimData_Field.GridY = unpackInt(bytebuffer);
+        SimData_Field.PID = unpackInt(bytebuffer);
+        SimData_Field.AgentCount = unpackInt(bytebuffer);
+        SimData_Field.TimeToLive = unpackInt(bytebuffer);
+        SimData_Field.Status = unpackVariable(bytebuffer, 1);
     }
 }

@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.google.common.collect.ImmutableList;
@@ -5,79 +9,119 @@ import com.lumiyaviewer.lumiya.Debug;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
 
-@ThreadSafe
-class SortedChatterList {
-    private final SortedSet<ChatterDisplayData> chatters;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            ChatterDisplayData, OnListUpdated
+
+class SortedChatterList
+{
+
+    private final SortedSet chatters;
     private final Object lock = new Object();
     private final OnListUpdated onListUpdatedListener;
-    private ImmutableList<ChatterDisplayData> sortedList = null;
+    private ImmutableList sortedList;
 
-    SortedChatterList(OnListUpdated onListUpdated, @Nullable Comparator<? super ChatterDisplayData> comparator) {
-        this.chatters = new TreeSet(comparator);
-        this.onListUpdatedListener = onListUpdated;
+    SortedChatterList(OnListUpdated onlistupdated, Comparator comparator)
+    {
+        sortedList = null;
+        chatters = new TreeSet(comparator);
+        onListUpdatedListener = onlistupdated;
     }
 
-    /* access modifiers changed from: package-private */
-    public void addChatter(ChatterDisplayData chatterDisplayData) {
-        boolean add;
-        synchronized (this.lock) {
-            add = this.chatters.add(chatterDisplayData);
-            Debug.Printf("FriendList: added chatter data %s, needUpdate %s, count %d", chatterDisplayData.displayName, Boolean.toString(add), Integer.valueOf(this.chatters.size()));
-            if (this.sortedList != null) {
-                Debug.Printf("FriendList: dropping instance because of addChatter", new Object[0]);
-            }
-            this.sortedList = null;
+    void addChatter(ChatterDisplayData chatterdisplaydata)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        boolean flag;
+        flag = chatters.add(chatterdisplaydata);
+        Debug.Printf("FriendList: added chatter data %s, needUpdate %s, count %d", new Object[] {
+            chatterdisplaydata.displayName, Boolean.toString(flag), Integer.valueOf(chatters.size())
+        });
+        if (sortedList != null)
+        {
+            Debug.Printf("FriendList: dropping instance because of addChatter", new Object[0]);
         }
-        if (add && this.onListUpdatedListener != null) {
-            this.onListUpdatedListener.onListUpdated();
+        sortedList = null;
+        obj;
+        JVM INSTR monitorexit ;
+        if (flag && onListUpdatedListener != null)
+        {
+            onListUpdatedListener.onListUpdated();
         }
+        return;
+        chatterdisplaydata;
+        throw chatterdisplaydata;
     }
 
-    public ImmutableList<ChatterDisplayData> getChatterList() {
-        ImmutableList<ChatterDisplayData> immutableList;
-        synchronized (this.lock) {
-            if (this.sortedList == null) {
-                Debug.Printf("FriendList: creating new list instance", new Object[0]);
-                this.sortedList = ImmutableList.copyOf(this.chatters);
-            }
-            immutableList = this.sortedList;
+    public ImmutableList getChatterList()
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        ImmutableList immutablelist;
+        if (sortedList == null)
+        {
+            Debug.Printf("FriendList: creating new list instance", new Object[0]);
+            sortedList = ImmutableList.copyOf(chatters);
         }
-        return immutableList;
+        immutablelist = sortedList;
+        obj;
+        JVM INSTR monitorexit ;
+        return immutablelist;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    /* access modifiers changed from: package-private */
-    public void removeChatter(ChatterDisplayData chatterDisplayData) {
-        boolean remove;
-        synchronized (this.lock) {
-            remove = this.chatters.remove(chatterDisplayData);
-            if (this.sortedList != null) {
-                Debug.Printf("FriendList: dropping instance because of removeChatter", new Object[0]);
-            }
-            this.sortedList = null;
+    void removeChatter(ChatterDisplayData chatterdisplaydata)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        boolean flag;
+        flag = chatters.remove(chatterdisplaydata);
+        if (sortedList != null)
+        {
+            Debug.Printf("FriendList: dropping instance because of removeChatter", new Object[0]);
         }
-        if (remove && this.onListUpdatedListener != null) {
-            this.onListUpdatedListener.onListUpdated();
+        sortedList = null;
+        obj;
+        JVM INSTR monitorexit ;
+        if (flag && onListUpdatedListener != null)
+        {
+            onListUpdatedListener.onListUpdated();
         }
+        return;
+        chatterdisplaydata;
+        throw chatterdisplaydata;
     }
 
-    /* access modifiers changed from: package-private */
-    public void replaceChatter(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2) {
-        boolean z = false;
-        synchronized (this.lock) {
-            if (this.chatters.remove(chatterDisplayData)) {
-                z = true;
-                this.chatters.add(chatterDisplayData2);
-            }
-            if (this.sortedList != null) {
-                Debug.Printf("FriendList: dropping instance because of replaceChatter", new Object[0]);
-            }
-            this.sortedList = null;
+    void replaceChatter(ChatterDisplayData chatterdisplaydata, ChatterDisplayData chatterdisplaydata1)
+    {
+        boolean flag = false;
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (!chatters.remove(chatterdisplaydata))
+        {
+            break MISSING_BLOCK_LABEL_37;
         }
-        if (z && this.onListUpdatedListener != null) {
-            this.onListUpdatedListener.onListUpdated();
+        flag = true;
+        chatters.add(chatterdisplaydata1);
+        if (sortedList != null)
+        {
+            Debug.Printf("FriendList: dropping instance because of replaceChatter", new Object[0]);
         }
+        sortedList = null;
+        obj;
+        JVM INSTR monitorexit ;
+        if (flag && onListUpdatedListener != null)
+        {
+            onListUpdatedListener.onListUpdated();
+        }
+        return;
+        chatterdisplaydata;
+        throw chatterdisplaydata;
     }
 }

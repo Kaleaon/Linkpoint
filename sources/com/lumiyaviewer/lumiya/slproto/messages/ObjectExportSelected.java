@@ -1,60 +1,87 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class ObjectExportSelected extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<ObjectData> ObjectData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class ObjectExportSelected extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID RequestID;
         public int VolumeDetail;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class ObjectData {
+    public static class ObjectData
+    {
+
         public UUID ObjectID;
-    }
 
-    public ObjectExportSelected() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        return (this.ObjectData_Fields.size() * 16) + 39;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleObjectExportSelected(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 123);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.RequestID);
-        packShort(byteBuffer, (short) this.AgentData_Field.VolumeDetail);
-        byteBuffer.put((byte) this.ObjectData_Fields.size());
-        for (ObjectData objectData : this.ObjectData_Fields) {
-            packUUID(byteBuffer, objectData.ObjectID);
+        public ObjectData()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.RequestID = unpackUUID(byteBuffer);
-        this.AgentData_Field.VolumeDetail = unpackShort(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            ObjectData objectData = new ObjectData();
-            objectData.ObjectID = unpackUUID(byteBuffer);
-            this.ObjectData_Fields.add(objectData);
+
+    public AgentData AgentData_Field;
+    public ArrayList ObjectData_Fields;
+
+    public ObjectExportSelected()
+    {
+        ObjectData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return ObjectData_Fields.size() * 16 + 39;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleObjectExportSelected(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)123);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.RequestID);
+        packShort(bytebuffer, (short)AgentData_Field.VolumeDetail);
+        bytebuffer.put((byte)ObjectData_Fields.size());
+        for (Iterator iterator = ObjectData_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, ((ObjectData)iterator.next()).ObjectID)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.RequestID = unpackUUID(bytebuffer);
+        AgentData_Field.VolumeDetail = unpackShort(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            ObjectData objectdata = new ObjectData();
+            objectdata.ObjectID = unpackUUID(bytebuffer);
+            ObjectData_Fields.add(objectdata);
         }
+
     }
 }

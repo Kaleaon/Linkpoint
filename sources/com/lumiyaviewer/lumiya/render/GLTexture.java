@@ -1,22 +1,28 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render;
 
 import android.graphics.Bitmap;
 import java.nio.ByteBuffer;
 
-public interface GLTexture {
-    int SetAsTexture();
+public interface GLTexture
+{
 
-    Bitmap getAsBitmap();
+    public abstract int SetAsTexture();
 
-    byte getByte(int i);
+    public abstract Bitmap getAsBitmap();
 
-    ByteBuffer getExtraComponentsBuffer();
+    public abstract byte getByte(int i);
 
-    int getHeight();
+    public abstract ByteBuffer getExtraComponentsBuffer();
 
-    int getNumComponents();
+    public abstract int getHeight();
 
-    int getRGB(int i);
+    public abstract int getNumComponents();
 
-    int getWidth();
+    public abstract int getRGB(int i);
+
+    public abstract int getWidth();
 }

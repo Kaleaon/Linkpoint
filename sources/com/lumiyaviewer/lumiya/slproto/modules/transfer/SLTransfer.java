@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.transfer;
 
 import com.lumiyaviewer.lumiya.slproto.messages.TransferInfo;
@@ -10,7 +14,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SLTransfer {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.modules.transfer:
+//            SLTransferManager
+
+public class SLTransfer
+{
+
     public static final int AT_ANIMATION = 20;
     public static final int AT_BODYPART = 13;
     public static final int AT_CALLINGCARD = 2;
@@ -57,144 +66,157 @@ public class SLTransfer {
     private final UUID assetUUID;
     private final int channelType;
     private int currentSize;
-    private byte[] data;
+    private byte data[];
     private final UUID itemUUID;
     private int nextPacket;
     private final UUID ownerUUID;
     private final float priority;
-    private final Map<Integer, TransferPacket> queuedPackets = new ConcurrentHashMap();
+    private final Map queuedPackets = new ConcurrentHashMap();
     private final UUID sessionID;
     private int size;
     private final int sourceType;
     private int status;
     private boolean statusKnown;
     private final UUID taskUUID;
-    private final UUID transferUUID;
+    private final UUID transferUUID = UUID.randomUUID();
 
-    SLTransfer(UUID uuid, UUID uuid2, AssetKey assetKey, float f) {
-        this.agentID = uuid;
-        this.sessionID = uuid2;
-        this.channelType = assetKey.channelType();
-        this.sourceType = assetKey.sourceType();
-        this.priority = f;
-        this.assetUUID = assetKey.assetUUID();
-        this.assetType = assetKey.assetType();
-        this.ownerUUID = assetKey.ownerUUID();
-        this.itemUUID = assetKey.itemUUID();
-        this.taskUUID = assetKey.taskUUID();
-        this.transferUUID = UUID.randomUUID();
-        this.statusKnown = false;
-        this.status = -1;
-        this.size = 0;
-        this.nextPacket = 0;
-        this.currentSize = 0;
+    SLTransfer(UUID uuid, UUID uuid1, AssetKey assetkey, float f)
+    {
+        agentID = uuid;
+        sessionID = uuid1;
+        channelType = assetkey.channelType();
+        sourceType = assetkey.sourceType();
+        priority = f;
+        assetUUID = assetkey.assetUUID();
+        assetType = assetkey.assetType();
+        ownerUUID = assetkey.ownerUUID();
+        itemUUID = assetkey.itemUUID();
+        taskUUID = assetkey.taskUUID();
+        statusKnown = false;
+        status = -1;
+        size = 0;
+        nextPacket = 0;
+        currentSize = 0;
     }
 
-    private void RunQueuedPackets(SLTransferManager sLTransferManager) {
-        TransferPacket transferPacket;
-        if (this.statusKnown && this.status == 0) {
-            while (!this.queuedPackets.isEmpty() && (transferPacket = this.queuedPackets.get(Integer.valueOf(this.nextPacket))) != null) {
-                this.queuedPackets.remove(Integer.valueOf(this.nextPacket));
-                this.nextPacket++;
-                int length = transferPacket.TransferData_Field.Data.length;
-                System.arraycopy(transferPacket.TransferData_Field.Data, 0, this.data, this.currentSize, length);
-                this.currentSize = length + this.currentSize;
-                if (transferPacket.TransferData_Field.Status != 0) {
-                    this.status = transferPacket.TransferData_Field.Status;
-                }
+    private void RunQueuedPackets(SLTransferManager sltransfermanager)
+    {
+        if (!statusKnown || status != 0) goto _L2; else goto _L1
+_L1:
+        if (queuedPackets.isEmpty()) goto _L2; else goto _L3
+_L3:
+        TransferPacket transferpacket = (TransferPacket)queuedPackets.get(Integer.valueOf(nextPacket));
+        if (transferpacket != null) goto _L4; else goto _L2
+_L2:
+        if (statusKnown && status != 0)
+        {
+            sltransfermanager.EndTransfer(this);
+        }
+        return;
+_L4:
+        queuedPackets.remove(Integer.valueOf(nextPacket));
+        nextPacket = nextPacket + 1;
+        int i = transferpacket.TransferData_Field.Data.length;
+        System.arraycopy(transferpacket.TransferData_Field.Data, 0, data, currentSize, i);
+        currentSize = i + currentSize;
+        if (transferpacket.TransferData_Field.Status != 0)
+        {
+            status = transferpacket.TransferData_Field.Status;
+        }
+        if (true) goto _L1; else goto _L5
+_L5:
+    }
+
+    void HandleTransferInfo(SLTransferManager sltransfermanager, TransferInfo transferinfo)
+    {
+        statusKnown = true;
+        status = transferinfo.TransferInfoData_Field.Status;
+        size = transferinfo.TransferInfoData_Field.Size;
+        if (status == 0)
+        {
+            data = new byte[size];
+        }
+        RunQueuedPackets(sltransfermanager);
+    }
+
+    void HandleTransferPacket(SLTransferManager sltransfermanager, TransferPacket transferpacket)
+    {
+        queuedPackets.put(Integer.valueOf(transferpacket.TransferData_Field.Packet), transferpacket);
+        RunQueuedPackets(sltransfermanager);
+    }
+
+    int getAssetType()
+    {
+        return assetType;
+    }
+
+    UUID getAssetUUID()
+    {
+        return assetUUID;
+    }
+
+    int getChannelType()
+    {
+        return channelType;
+    }
+
+    byte[] getData()
+    {
+        return data;
+    }
+
+    float getPriority()
+    {
+        return priority;
+    }
+
+    int getStatus()
+    {
+        return status;
+    }
+
+    UUID getTransferUUID()
+    {
+        return transferUUID;
+    }
+
+    TransferRequest makeTransferRequest()
+    {
+        TransferRequest transferrequest = new TransferRequest();
+        transferrequest.TransferInfo_Field.TransferID = transferUUID;
+        transferrequest.TransferInfo_Field.ChannelType = channelType;
+        transferrequest.TransferInfo_Field.SourceType = sourceType;
+        transferrequest.TransferInfo_Field.Priority = priority;
+        ByteBuffer bytebuffer = ByteBuffer.allocate(1024);
+        bytebuffer.order(ByteOrder.BIG_ENDIAN);
+        if (sourceType == 3)
+        {
+            bytebuffer.putLong(agentID.getMostSignificantBits());
+            bytebuffer.putLong(agentID.getLeastSignificantBits());
+            bytebuffer.putLong(sessionID.getMostSignificantBits());
+            bytebuffer.putLong(sessionID.getLeastSignificantBits());
+            bytebuffer.putLong(ownerUUID.getMostSignificantBits());
+            bytebuffer.putLong(ownerUUID.getLeastSignificantBits());
+            if (taskUUID != null)
+            {
+                bytebuffer.putLong(taskUUID.getMostSignificantBits());
+                bytebuffer.putLong(taskUUID.getLeastSignificantBits());
+            } else
+            {
+                bytebuffer.putLong(0L);
+                bytebuffer.putLong(0L);
             }
+            bytebuffer.putLong(itemUUID.getMostSignificantBits());
+            bytebuffer.putLong(itemUUID.getLeastSignificantBits());
         }
-        if (this.statusKnown && this.status != 0) {
-            sLTransferManager.EndTransfer(this);
-        }
-    }
-
-    /* access modifiers changed from: package-private */
-    public void HandleTransferInfo(SLTransferManager sLTransferManager, TransferInfo transferInfo) {
-        this.statusKnown = true;
-        this.status = transferInfo.TransferInfoData_Field.Status;
-        this.size = transferInfo.TransferInfoData_Field.Size;
-        if (this.status == 0) {
-            this.data = new byte[this.size];
-        }
-        RunQueuedPackets(sLTransferManager);
-    }
-
-    /* access modifiers changed from: package-private */
-    public void HandleTransferPacket(SLTransferManager sLTransferManager, TransferPacket transferPacket) {
-        this.queuedPackets.put(Integer.valueOf(transferPacket.TransferData_Field.Packet), transferPacket);
-        RunQueuedPackets(sLTransferManager);
-    }
-
-    /* access modifiers changed from: package-private */
-    public int getAssetType() {
-        return this.assetType;
-    }
-
-    /* access modifiers changed from: package-private */
-    public UUID getAssetUUID() {
-        return this.assetUUID;
-    }
-
-    /* access modifiers changed from: package-private */
-    public int getChannelType() {
-        return this.channelType;
-    }
-
-    /* access modifiers changed from: package-private */
-    public byte[] getData() {
-        return this.data;
-    }
-
-    /* access modifiers changed from: package-private */
-    public float getPriority() {
-        return this.priority;
-    }
-
-    /* access modifiers changed from: package-private */
-    public int getStatus() {
-        return this.status;
-    }
-
-    /* access modifiers changed from: package-private */
-    public UUID getTransferUUID() {
-        return this.transferUUID;
-    }
-
-    /* access modifiers changed from: package-private */
-    public TransferRequest makeTransferRequest() {
-        TransferRequest transferRequest = new TransferRequest();
-        transferRequest.TransferInfo_Field.TransferID = this.transferUUID;
-        transferRequest.TransferInfo_Field.ChannelType = this.channelType;
-        transferRequest.TransferInfo_Field.SourceType = this.sourceType;
-        transferRequest.TransferInfo_Field.Priority = this.priority;
-        ByteBuffer allocate = ByteBuffer.allocate(1024);
-        allocate.order(ByteOrder.BIG_ENDIAN);
-        if (this.sourceType == 3) {
-            allocate.putLong(this.agentID.getMostSignificantBits());
-            allocate.putLong(this.agentID.getLeastSignificantBits());
-            allocate.putLong(this.sessionID.getMostSignificantBits());
-            allocate.putLong(this.sessionID.getLeastSignificantBits());
-            allocate.putLong(this.ownerUUID.getMostSignificantBits());
-            allocate.putLong(this.ownerUUID.getLeastSignificantBits());
-            if (this.taskUUID != null) {
-                allocate.putLong(this.taskUUID.getMostSignificantBits());
-                allocate.putLong(this.taskUUID.getLeastSignificantBits());
-            } else {
-                allocate.putLong(0);
-                allocate.putLong(0);
-            }
-            allocate.putLong(this.itemUUID.getMostSignificantBits());
-            allocate.putLong(this.itemUUID.getLeastSignificantBits());
-        }
-        allocate.putLong(this.assetUUID.getMostSignificantBits());
-        allocate.putLong(this.assetUUID.getLeastSignificantBits());
-        allocate.order(ByteOrder.LITTLE_ENDIAN);
-        allocate.putInt(this.assetType);
-        allocate.flip();
-        transferRequest.TransferInfo_Field.Params = new byte[allocate.limit()];
-        allocate.get(transferRequest.TransferInfo_Field.Params, 0, allocate.limit());
-        transferRequest.isReliable = true;
-        return transferRequest;
+        bytebuffer.putLong(assetUUID.getMostSignificantBits());
+        bytebuffer.putLong(assetUUID.getLeastSignificantBits());
+        bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
+        bytebuffer.putInt(assetType);
+        bytebuffer.flip();
+        transferrequest.TransferInfo_Field.Params = new byte[bytebuffer.limit()];
+        bytebuffer.get(transferrequest.TransferInfo_Field.Params, 0, bytebuffer.limit());
+        transferrequest.isReliable = true;
+        return transferrequest;
     }
 }

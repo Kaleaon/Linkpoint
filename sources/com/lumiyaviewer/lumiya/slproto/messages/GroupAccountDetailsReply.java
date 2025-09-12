@@ -1,86 +1,118 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class GroupAccountDetailsReply extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<HistoryData> HistoryData_Fields = new ArrayList<>();
-    public MoneyData MoneyData_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class GroupAccountDetailsReply extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID GroupID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class HistoryData {
+    public static class HistoryData
+    {
+
         public int Amount;
-        public byte[] Description;
+        public byte Description[];
+
+        public HistoryData()
+        {
+        }
     }
 
-    public static class MoneyData {
+    public static class MoneyData
+    {
+
         public int CurrentInterval;
         public int IntervalDays;
         public UUID RequestID;
-        public byte[] StartDate;
-    }
+        public byte StartDate[];
 
-    public GroupAccountDetailsReply() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-        this.MoneyData_Field = new MoneyData();
-    }
-
-    public int CalcPayloadSize() {
-        int length = this.MoneyData_Field.StartDate.length + 25 + 36 + 1;
-        Iterator<T> it = this.HistoryData_Fields.iterator();
-        while (true) {
-            int i = length;
-            if (!it.hasNext()) {
-                return i;
-            }
-            length = ((HistoryData) it.next()).Description.length + 1 + 4 + i;
+        public MoneyData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleGroupAccountDetailsReply(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList HistoryData_Fields;
+    public MoneyData MoneyData_Field;
+
+    public GroupAccountDetailsReply()
+    {
+        HistoryData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        MoneyData_Field = new MoneyData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 100);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.GroupID);
-        packUUID(byteBuffer, this.MoneyData_Field.RequestID);
-        packInt(byteBuffer, this.MoneyData_Field.IntervalDays);
-        packInt(byteBuffer, this.MoneyData_Field.CurrentInterval);
-        packVariable(byteBuffer, this.MoneyData_Field.StartDate, 1);
-        byteBuffer.put((byte) this.HistoryData_Fields.size());
-        for (HistoryData historyData : this.HistoryData_Fields) {
-            packVariable(byteBuffer, historyData.Description, 1);
-            packInt(byteBuffer, historyData.Amount);
-        }
+    public int CalcPayloadSize()
+    {
+        int i = MoneyData_Field.StartDate.length;
+        Iterator iterator = HistoryData_Fields.iterator();
+        for (i = i + 25 + 36 + 1; iterator.hasNext(); i = ((HistoryData)iterator.next()).Description.length + 1 + 4 + i) { }
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.GroupID = unpackUUID(byteBuffer);
-        this.MoneyData_Field.RequestID = unpackUUID(byteBuffer);
-        this.MoneyData_Field.IntervalDays = unpackInt(byteBuffer);
-        this.MoneyData_Field.CurrentInterval = unpackInt(byteBuffer);
-        this.MoneyData_Field.StartDate = unpackVariable(byteBuffer, 1);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            HistoryData historyData = new HistoryData();
-            historyData.Description = unpackVariable(byteBuffer, 1);
-            historyData.Amount = unpackInt(byteBuffer);
-            this.HistoryData_Fields.add(historyData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleGroupAccountDetailsReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)100);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.GroupID);
+        packUUID(bytebuffer, MoneyData_Field.RequestID);
+        packInt(bytebuffer, MoneyData_Field.IntervalDays);
+        packInt(bytebuffer, MoneyData_Field.CurrentInterval);
+        packVariable(bytebuffer, MoneyData_Field.StartDate, 1);
+        bytebuffer.put((byte)HistoryData_Fields.size());
+        HistoryData historydata;
+        for (Iterator iterator = HistoryData_Fields.iterator(); iterator.hasNext(); packInt(bytebuffer, historydata.Amount))
+        {
+            historydata = (HistoryData)iterator.next();
+            packVariable(bytebuffer, historydata.Description, 1);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.GroupID = unpackUUID(bytebuffer);
+        MoneyData_Field.RequestID = unpackUUID(bytebuffer);
+        MoneyData_Field.IntervalDays = unpackInt(bytebuffer);
+        MoneyData_Field.CurrentInterval = unpackInt(bytebuffer);
+        MoneyData_Field.StartDate = unpackVariable(bytebuffer, 1);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            HistoryData historydata = new HistoryData();
+            historydata.Description = unpackVariable(bytebuffer, 1);
+            historydata.Amount = unpackInt(bytebuffer);
+            HistoryData_Fields.add(historydata);
+        }
+
     }
 }

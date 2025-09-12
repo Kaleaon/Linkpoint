@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules;
 
 import com.lumiyaviewer.lumiya.eventbus.EventBus;
@@ -6,36 +10,41 @@ import com.lumiyaviewer.lumiya.slproto.SLCircuitInfo;
 import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 
-public class SLModule {
-    /* access modifiers changed from: protected */
-    public SLAgentCircuit agentCircuit;
-    /* access modifiers changed from: protected */
-    public SLCircuitInfo circuitInfo;
-    /* access modifiers changed from: protected */
-    public final EventBus eventBus = EventBus.getInstance();
+public class SLModule
+{
+
+    protected SLAgentCircuit agentCircuit;
+    protected SLCircuitInfo circuitInfo;
+    protected final EventBus eventBus = EventBus.getInstance();
     protected SLGridConnection gridConn;
 
-    public SLModule(SLAgentCircuit sLAgentCircuit) {
-        this.agentCircuit = sLAgentCircuit;
-        this.circuitInfo = sLAgentCircuit.circuitInfo;
-        this.gridConn = sLAgentCircuit.getGridConnection();
-        sLAgentCircuit.RegisterMessageHandler(this);
+    public SLModule(SLAgentCircuit slagentcircuit)
+    {
+        agentCircuit = slagentcircuit;
+        circuitInfo = slagentcircuit.circuitInfo;
+        gridConn = slagentcircuit.getGridConnection();
+        slagentcircuit.RegisterMessageHandler(this);
     }
 
-    public void HandleCircuitReady() {
+    public void HandleCircuitReady()
+    {
     }
 
-    public void HandleCloseCircuit() {
+    public void HandleCloseCircuit()
+    {
     }
 
-    public void HandleGlobalOptionsChange() {
+    public void HandleGlobalOptionsChange()
+    {
     }
 
-    public void SendMessage(SLMessage sLMessage) {
-        this.agentCircuit.SendMessage(sLMessage);
+    public void SendMessage(SLMessage slmessage)
+    {
+        agentCircuit.SendMessage(slmessage);
     }
 
-    public SLCircuitInfo getCircuitInfo() {
-        return this.circuitInfo;
+    public SLCircuitInfo getCircuitInfo()
+    {
+        return circuitInfo;
     }
 }

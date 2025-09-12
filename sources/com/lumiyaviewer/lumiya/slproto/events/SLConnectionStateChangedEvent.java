@@ -1,11 +1,17 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.events;
 
-import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
 
-public class SLConnectionStateChangedEvent {
-    public final SLGridConnection.ConnectionState connectionState;
+public class SLConnectionStateChangedEvent
+{
 
-    public SLConnectionStateChangedEvent(SLGridConnection.ConnectionState connectionState2) {
-        this.connectionState = connectionState2;
+    public final com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState connectionState;
+
+    public SLConnectionStateChangedEvent(com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState connectionstate)
+    {
+        connectionState = connectionstate;
     }
 }

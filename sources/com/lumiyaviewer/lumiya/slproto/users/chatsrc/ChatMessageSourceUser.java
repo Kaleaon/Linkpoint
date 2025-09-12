@@ -1,66 +1,80 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.chatsrc;
 
 import com.lumiyaviewer.lumiya.GlobalOptions;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class ChatMessageSourceUser extends ChatMessageSource {
-    @Nullable
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.chatsrc:
+//            ChatMessageSource
+
+public class ChatMessageSourceUser extends ChatMessageSource
+{
+
     private String displayName;
-    @Nullable
     private String legacyName;
-    @Nonnull
     public final UUID uuid;
 
-    ChatMessageSourceUser(ChatMessage chatMessage) {
-        this.uuid = chatMessage.getSenderUUID();
-        this.displayName = chatMessage.getSenderName();
-        this.legacyName = chatMessage.getSenderLegacyName();
+    ChatMessageSourceUser(ChatMessage chatmessage)
+    {
+        uuid = chatmessage.getSenderUUID();
+        displayName = chatmessage.getSenderName();
+        legacyName = chatmessage.getSenderLegacyName();
     }
 
-    public ChatMessageSourceUser(@Nonnull UUID uuid2) {
-        this.uuid = uuid2;
-        this.displayName = null;
-        this.legacyName = null;
+    public ChatMessageSourceUser(UUID uuid1)
+    {
+        uuid = uuid1;
+        displayName = null;
+        legacyName = null;
     }
 
-    @Nonnull
-    public ChatterID getDefaultChatter(UUID uuid2) {
-        return ChatterID.getUserChatterID(uuid2, this.uuid);
+    public ChatterID getDefaultChatter(UUID uuid1)
+    {
+        return ChatterID.getUserChatterID(uuid1, uuid);
     }
 
-    @Nullable
-    public String getSourceName(@Nonnull UserManager userManager) {
-        return GlobalOptions.getInstance().isLegacyUserNames() ? this.legacyName : this.displayName;
+    public String getSourceName(UserManager usermanager)
+    {
+        if (GlobalOptions.getInstance().isLegacyUserNames())
+        {
+            return legacyName;
+        } else
+        {
+            return displayName;
+        }
     }
 
-    @Nonnull
-    public ChatMessageSource.ChatMessageSourceType getSourceType() {
+    public ChatMessageSource.ChatMessageSourceType getSourceType()
+    {
         return ChatMessageSource.ChatMessageSourceType.User;
     }
 
-    @Nullable
-    public UUID getSourceUUID() {
-        return this.uuid;
+    public UUID getSourceUUID()
+    {
+        return uuid;
     }
 
-    public void serializeTo(@Nonnull ChatMessage chatMessage) {
-        super.serializeTo(chatMessage);
-        chatMessage.setSenderUUID(this.uuid);
-        chatMessage.setSenderName(this.displayName);
-        chatMessage.setSenderLegacyName(this.legacyName);
+    public void serializeTo(ChatMessage chatmessage)
+    {
+        super.serializeTo(chatmessage);
+        chatmessage.setSenderUUID(uuid);
+        chatmessage.setSenderName(displayName);
+        chatmessage.setSenderLegacyName(legacyName);
     }
 
-    public void setDisplayName(@Nullable String str) {
-        this.displayName = str;
+    public void setDisplayName(String s)
+    {
+        displayName = s;
     }
 
-    public void setLegacyName(@Nullable String str) {
-        this.legacyName = str;
+    public void setLegacyName(String s)
+    {
+        legacyName = s;
     }
 }

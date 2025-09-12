@@ -1,74 +1,102 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.objects;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
+import com.google.common.collect.ImmutableList;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLTaskInventory;
 
-public class TaskInventoryListAdapter extends BaseAdapter {
+public class TaskInventoryListAdapter extends BaseAdapter
+{
+
     private final Context context;
-    @Nullable
-    private SLTaskInventory taskInventory = null;
+    private SLTaskInventory taskInventory;
 
-    public TaskInventoryListAdapter(Context context2) {
-        this.context = context2;
+    public TaskInventoryListAdapter(Context context1)
+    {
+        context = context1;
+        taskInventory = null;
     }
 
-    public int getCount() {
-        if (this.taskInventory != null) {
-            return this.taskInventory.entries.size();
+    public int getCount()
+    {
+        if (taskInventory != null)
+        {
+            return taskInventory.entries.size();
+        } else
+        {
+            return 0;
         }
-        return 0;
     }
 
-    public SLInventoryEntry getItem(int i) {
-        if (this.taskInventory != null) {
-            return (SLInventoryEntry) this.taskInventory.entries.get(i);
+    public SLInventoryEntry getItem(int i)
+    {
+        if (taskInventory != null)
+        {
+            return (SLInventoryEntry)taskInventory.entries.get(i);
+        } else
+        {
+            return null;
         }
-        return null;
     }
 
-    public long getItemId(int i) {
-        return (long) i;
+    public volatile Object getItem(int i)
+    {
+        return getItem(i);
     }
 
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        if (view == null) {
-            view = ((LayoutInflater) this.context.getSystemService("layout_inflater")).inflate(R.layout.inventory_item, viewGroup, false);
+    public long getItemId(int i)
+    {
+        return (long)i;
+    }
+
+    public View getView(int i, View view, ViewGroup viewgroup)
+    {
+        View view1 = view;
+        if (view == null)
+        {
+            view1 = ((LayoutInflater)context.getSystemService("layout_inflater")).inflate(0x7f040053, viewgroup, false);
         }
-        SLInventoryEntry item = getItem(i);
-        ((TextView) view.findViewById(R.id.itemNameTextView)).setText(item.name);
-        int drawableResource = item.getDrawableResource();
-        if (drawableResource >= 0) {
-            ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageResource(drawableResource);
-            int subtypeDrawableResource = item.getSubtypeDrawableResource();
-            if (subtypeDrawableResource >= 0) {
-                ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageResource(subtypeDrawableResource);
-            } else {
-                ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null);
+        view = getItem(i);
+        ((TextView)view1.findViewById(0x7f1001bf)).setText(((SLInventoryEntry) (view)).name);
+        i = view.getDrawableResource();
+        if (i >= 0)
+        {
+            ((ImageView)view1.findViewById(0x7f1001bd)).setImageResource(i);
+            i = view.getSubtypeDrawableResource();
+            if (i >= 0)
+            {
+                ((ImageView)view1.findViewById(0x7f1001be)).setImageResource(i);
+            } else
+            {
+                ((ImageView)view1.findViewById(0x7f1001be)).setImageBitmap(null);
             }
-        } else {
-            ((ImageView) view.findViewById(R.id.itemTypeIconView)).setImageBitmap((Bitmap) null);
-            ((ImageView) view.findViewById(R.id.itemSubTypeIconView)).setImageBitmap((Bitmap) null);
+        } else
+        {
+            ((ImageView)view1.findViewById(0x7f1001bd)).setImageBitmap(null);
+            ((ImageView)view1.findViewById(0x7f1001be)).setImageBitmap(null);
         }
-        view.findViewById(R.id.itemWornIcon).setVisibility(8);
-        return view;
+        view1.findViewById(0x7f1001c0).setVisibility(8);
+        return view1;
     }
 
-    public boolean hasStableIds() {
+    public boolean hasStableIds()
+    {
         return false;
     }
 
-    public void setData(SLTaskInventory sLTaskInventory) {
-        this.taskInventory = sLTaskInventory;
+    public void setData(SLTaskInventory sltaskinventory)
+    {
+        taskInventory = sltaskinventory;
         notifyDataSetChanged();
     }
 }

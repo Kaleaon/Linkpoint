@@ -1,16 +1,18 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ActionProvider;
 import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +21,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.GridConnectionService;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.eventbus.EventBus;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
@@ -33,325 +33,438 @@ import com.lumiyaviewer.lumiya.ui.login.LoginActivity;
 import com.lumiyaviewer.lumiya.ui.objpopup.ObjectPopupsActionProvider;
 import com.lumiyaviewer.lumiya.ui.objpopup.ObjectPopupsFragment;
 import com.lumiyaviewer.lumiya.ui.objpopup.SingleObjectPopupFragment;
-import java.util.UUID;
 
-public class ConnectedActivity extends ThemedActivity implements ObjectPopupsActionProvider.ObjectPopupsClickListener, ObjectPopupsManager.ObjectPopupListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.common:
+//            ThemedActivity, ActivityUtils, NavDrawerActivityHelper
+
+public class ConnectedActivity extends ThemedActivity
+    implements com.lumiyaviewer.lumiya.ui.objpopup.ObjectPopupsActionProvider.ObjectPopupsClickListener, com.lumiyaviewer.lumiya.slproto.users.manager.ObjectPopupsManager.ObjectPopupListener
+{
+
     public static final String OBJECT_POPUP_NOTIFICATION = "objectPopupNotification";
     private NavDrawerActivityHelper navDrawerHelper;
-    @Nullable
     private ObjectPopupsActionProvider objectPopupsActionProvider;
-    private boolean objectPopupsDisplayed = false;
-    private final View.OnClickListener reconnectButtonListener = new $Lambda$Zi2fvFRNZlQXFOmQ50cSiiV_3Qw(this);
-    private boolean singleObjectPopupsDisplayed = false;
-    private boolean wantedShowObjectPopups = false;
+    private boolean objectPopupsDisplayed;
+    private final android.view.View.OnClickListener reconnectButtonListener = new _2D_.Lambda.Zi2fvFRNZlQXFOmQ50cSiiV_3Qw(this);
+    private boolean singleObjectPopupsDisplayed;
+    private boolean wantedShowObjectPopups;
 
-    private void displayObjectPopups() {
-        FragmentManager supportFragmentManager = getSupportFragmentManager();
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getIntent());
-        if (activeAgentID != null) {
-            UserManager userManager = UserManager.getUserManager(activeAgentID);
-            if (userManager != null) {
-                userManager.getObjectPopupsManager().dismissDisplayedObjectPopup((SLChatEvent) null);
+    public ConnectedActivity()
+    {
+        objectPopupsDisplayed = false;
+        singleObjectPopupsDisplayed = false;
+        wantedShowObjectPopups = false;
+    }
+
+    private void displayObjectPopups()
+    {
+        Object obj = getSupportFragmentManager();
+        java.util.UUID uuid = ActivityUtils.getActiveAgentID(getIntent());
+        if (uuid != null)
+        {
+            Object obj1 = UserManager.getUserManager(uuid);
+            if (obj1 != null)
+            {
+                ((UserManager) (obj1)).getObjectPopupsManager().dismissDisplayedObjectPopup(null);
             }
-            this.singleObjectPopupsDisplayed = false;
-            this.objectPopupsDisplayed = true;
-            View currentFocus = getCurrentFocus();
-            if (currentFocus != null) {
-                currentFocus.clearFocus();
-                ((InputMethodManager) getSystemService("input_method")).hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+            singleObjectPopupsDisplayed = false;
+            objectPopupsDisplayed = true;
+            obj1 = getCurrentFocus();
+            if (obj1 != null)
+            {
+                ((View) (obj1)).clearFocus();
+                ((InputMethodManager)getSystemService("input_method")).hideSoftInputFromWindow(((View) (obj1)).getWindowToken(), 0);
             }
-            FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction();
-            beginTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            beginTransaction.replace(R.id.object_popups_container, ObjectPopupsFragment.create(activeAgentID));
-            beginTransaction.commit();
+            obj = ((FragmentManager) (obj)).beginTransaction();
+            ((FragmentTransaction) (obj)).setTransition(4097);
+            ((FragmentTransaction) (obj)).replace(0x7f100287, ObjectPopupsFragment.create(uuid));
+            ((FragmentTransaction) (obj)).commit();
         }
     }
 
-    private void hideSingleObjectPopup() {
-        if (this.singleObjectPopupsDisplayed) {
-            this.singleObjectPopupsDisplayed = false;
-            FragmentManager supportFragmentManager = getSupportFragmentManager();
-            Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.object_popups_container);
-            if (findFragmentById instanceof SingleObjectPopupFragment) {
-                FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction();
-                beginTransaction.setCustomAnimations(0, R.anim.slide_to_above);
-                beginTransaction.remove(findFragmentById);
-                beginTransaction.commit();
+    private void hideSingleObjectPopup()
+    {
+        if (singleObjectPopupsDisplayed)
+        {
+            singleObjectPopupsDisplayed = false;
+            Object obj = getSupportFragmentManager();
+            android.support.v4.app.Fragment fragment = ((FragmentManager) (obj)).findFragmentById(0x7f100287);
+            if (fragment instanceof SingleObjectPopupFragment)
+            {
+                obj = ((FragmentManager) (obj)).beginTransaction();
+                ((FragmentTransaction) (obj)).setCustomAnimations(0, 0x7f050011);
+                ((FragmentTransaction) (obj)).remove(fragment);
+                ((FragmentTransaction) (obj)).commit();
             }
         }
     }
 
-    private boolean removeObjectPopupsFragment() {
-        if (!this.objectPopupsDisplayed && !this.singleObjectPopupsDisplayed) {
+    private boolean removeObjectPopupsFragment()
+    {
+        if (objectPopupsDisplayed || singleObjectPopupsDisplayed)
+        {
+            objectPopupsDisplayed = false;
+            singleObjectPopupsDisplayed = false;
+            Object obj = getSupportFragmentManager();
+            android.support.v4.app.Fragment fragment = ((FragmentManager) (obj)).findFragmentById(0x7f100287);
+            if (fragment != null)
+            {
+                obj = ((FragmentManager) (obj)).beginTransaction();
+                ((FragmentTransaction) (obj)).setTransition(8194);
+                ((FragmentTransaction) (obj)).remove(fragment);
+                ((FragmentTransaction) (obj)).commit();
+            }
+            return true;
+        } else
+        {
             return false;
         }
-        this.objectPopupsDisplayed = false;
-        this.singleObjectPopupsDisplayed = false;
-        FragmentManager supportFragmentManager = getSupportFragmentManager();
-        Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.object_popups_container);
-        if (findFragmentById == null) {
-            return true;
-        }
-        FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction();
-        beginTransaction.setTransition(8194);
-        beginTransaction.remove(findFragmentById);
-        beginTransaction.commit();
-        return true;
     }
 
-    private void updateConnectionStatus() {
-        if (handleConnectionEvents() && !isFinishing()) {
-            View findViewById = findViewById(R.id.offline_notify_status_layout);
-            if (findViewById instanceof ViewGroup) {
-                SLGridConnection gridConnection = GridConnectionService.getGridConnection();
-                SLGridConnection.ConnectionState connectionState = gridConnection.getConnectionState();
-                if (connectionState == SLGridConnection.ConnectionState.Connected) {
-                    findViewById.setVisibility(8);
-                } else if (connectionState == SLGridConnection.ConnectionState.Connecting) {
-                    findViewById.setVisibility(0);
-                    if (gridConnection.getIsReconnecting()) {
-                        ((TextView) findViewById.findViewById(R.id.offline_notify_message)).setText(getString(R.string.reconnecting_offline_message, new Object[]{Integer.valueOf(gridConnection.getReconnectAttempt())}));
-                    } else {
-                        ((TextView) findViewById.findViewById(R.id.offline_notify_message)).setText(R.string.connecting_message);
+    private void updateConnectionStatus()
+    {
+        if (handleConnectionEvents() && !isFinishing())
+        {
+            View view = findViewById(0x7f100242);
+            if (view instanceof ViewGroup)
+            {
+                SLGridConnection slgridconnection = GridConnectionService.getGridConnection();
+                com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState connectionstate = slgridconnection.getConnectionState();
+                if (connectionstate == com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState.Connected)
+                {
+                    view.setVisibility(8);
+                } else
+                {
+                    if (connectionstate == com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState.Connecting)
+                    {
+                        view.setVisibility(0);
+                        if (slgridconnection.getIsReconnecting())
+                        {
+                            int i = slgridconnection.getReconnectAttempt();
+                            ((TextView)view.findViewById(0x7f100244)).setText(getString(0x7f09029e, new Object[] {
+                                Integer.valueOf(i)
+                            }));
+                        } else
+                        {
+                            ((TextView)view.findViewById(0x7f100244)).setText(0x7f0900cb);
+                        }
+                        ((Button)view.findViewById(0x7f100245)).setText(0x7f0900a8);
+                        view.findViewById(0x7f100243).setVisibility(0);
+                        return;
                     }
-                    ((Button) findViewById.findViewById(R.id.offline_connect_button)).setText(R.string.cancel);
-                    findViewById.findViewById(R.id.offline_notify_reconnect).setVisibility(0);
-                } else if (connectionState == SLGridConnection.ConnectionState.Idle) {
-                    findViewById.setVisibility(0);
-                    ((TextView) findViewById.findViewById(R.id.offline_notify_message)).setText(R.string.disconnnected_message);
-                    ((Button) findViewById.findViewById(R.id.offline_connect_button)).setText(R.string.offline_connect_button);
-                    findViewById.findViewById(R.id.offline_notify_reconnect).setVisibility(8);
+                    if (connectionstate == com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState.Idle)
+                    {
+                        view.setVisibility(0);
+                        ((TextView)view.findViewById(0x7f100244)).setText(0x7f090102);
+                        ((Button)view.findViewById(0x7f100245)).setText(0x7f090250);
+                        view.findViewById(0x7f100243).setVisibility(8);
+                        return;
+                    }
                 }
             }
         }
     }
 
-    public void dismissSingleObjectPopup() {
+    public void dismissSingleObjectPopup()
+    {
         hideSingleObjectPopup();
-        UserManager userManager = ActivityUtils.getUserManager(getIntent());
-        if (userManager != null) {
-            userManager.getObjectPopupsManager().dismissDisplayedObjectPopup((SLChatEvent) null);
+        UserManager usermanager = ActivityUtils.getUserManager(getIntent());
+        if (usermanager != null)
+        {
+            usermanager.getObjectPopupsManager().dismissDisplayedObjectPopup(null);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public boolean handleBackPressed() {
+    protected boolean handleBackPressed()
+    {
         return false;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean handleConnectionEvents() {
+    protected boolean handleConnectionEvents()
+    {
         return true;
     }
 
-    @EventHandler
-    public void handleConnectionStateChangedEvent(SLConnectionStateChangedEvent sLConnectionStateChangedEvent) {
+    public void handleConnectionStateChangedEvent(SLConnectionStateChangedEvent slconnectionstatechangedevent)
+    {
         updateConnectionStatus();
     }
 
-    @EventHandler
-    public void handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
-        if (handleConnectionEvents()) {
-            Debug.Printf("ConnectedActivity: disconnect event, normalDisconnect %b", Boolean.valueOf(sLDisconnectEvent.normalDisconnect));
-            if (sLDisconnectEvent.normalDisconnect) {
+    public void handleDisconnectEvent(SLDisconnectEvent sldisconnectevent)
+    {
+label0:
+        {
+            if (handleConnectionEvents())
+            {
+                Debug.Printf("ConnectedActivity: disconnect event, normalDisconnect %b", new Object[] {
+                    Boolean.valueOf(sldisconnectevent.normalDisconnect)
+                });
+                if (!sldisconnectevent.normalDisconnect)
+                {
+                    break label0;
+                }
                 Debug.Printf("ConnectedActivity: starting login activity", new Object[0]);
                 ActivityCompat.finishAffinity(this);
-                startActivity(new Intent(this, LoginActivity.class).setFlags(335577088));
-                return;
+                startActivity((new Intent(this, com/lumiyaviewer/lumiya/ui/login/LoginActivity)).setFlags(0x14008000));
             }
-            updateConnectionStatus();
+            return;
         }
+        updateConnectionStatus();
     }
 
-    /* synthetic */ void handleConnectionAction(View view) {
-        SLGridConnection gridConnection = GridConnectionService.getGridConnection();
-        SLGridConnection.ConnectionState connectionState = gridConnection.getConnectionState();
-        if (connectionState == SLGridConnection.ConnectionState.Connecting) {
-            gridConnection.Disconnect();
-        } else if (connectionState == SLGridConnection.ConnectionState.Idle) {
-            EventBus.getInstance().publish(new SLDisconnectEvent(true, (String) null));
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_common_ConnectedActivity_3108(View view)
+    {
+        view = GridConnectionService.getGridConnection();
+        com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState connectionstate = view.getConnectionState();
+        if (connectionstate == com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState.Connecting)
+        {
+            view.Disconnect();
+        } else
+        if (connectionstate == com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState.Idle)
+        {
+            EventBus.getInstance().publish(new SLDisconnectEvent(true, null));
             ActivityCompat.finishAffinity(this);
-            startActivity(new Intent(this, LoginActivity.class).setFlags(335577088));
+            startActivity((new Intent(this, com/lumiyaviewer/lumiya/ui/login/LoginActivity)).setFlags(0x14008000));
+            return;
         }
     }
 
-    public void onBackPressed() {
-        if (!this.navDrawerHelper.onBackPressed()) {
-            if ((!handleConnectionEvents() || !removeObjectPopupsFragment()) && !handleBackPressed()) {
-                super.onBackPressed();
-            }
+    public void onBackPressed()
+    {
+        if (navDrawerHelper.onBackPressed())
+        {
+            return;
+        }
+        if (handleConnectionEvents() && removeObjectPopupsFragment())
+        {
+            return;
+        }
+        if (!handleBackPressed())
+        {
+            super.onBackPressed();
         }
     }
 
-    public void onConfigurationChanged(Configuration configuration) {
+    public void onConfigurationChanged(Configuration configuration)
+    {
         super.onConfigurationChanged(configuration);
-        this.navDrawerHelper.onConfigurationChanged(configuration);
+        navDrawerHelper.onConfigurationChanged(configuration);
     }
 
-    /* access modifiers changed from: protected */
-    public void onCreate(@Nullable Bundle bundle) {
-        super.onCreate(bundle);
-        if (!handleConnectionEvents()) {
+    protected void onCreate(Bundle bundle)
+    {
+label0:
+        {
+            super.onCreate(bundle);
+            if (handleConnectionEvents())
+            {
+                if (bundle == null)
+                {
+                    break label0;
+                }
+                objectPopupsDisplayed = bundle.getBoolean("objectPopupsDisplayed");
+                singleObjectPopupsDisplayed = bundle.getBoolean("singleObjectPopupsDisplayed");
+                wantedShowObjectPopups = bundle.getBoolean("wantedShowObjectPopups");
+            }
             return;
         }
-        if (bundle != null) {
-            this.objectPopupsDisplayed = bundle.getBoolean("objectPopupsDisplayed");
-            this.singleObjectPopupsDisplayed = bundle.getBoolean("singleObjectPopupsDisplayed");
-            this.wantedShowObjectPopups = bundle.getBoolean("wantedShowObjectPopups");
-            return;
-        }
-        this.wantedShowObjectPopups = getIntent().getBooleanExtra(OBJECT_POPUP_NOTIFICATION, false);
+        wantedShowObjectPopups = getIntent().getBooleanExtra("objectPopupNotification", false);
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         Debug.Printf("ObjectPopup: createOptionsMenu", new Object[0]);
-        if (!handleConnectionEvents()) {
+        if (handleConnectionEvents())
+        {
+            getMenuInflater().inflate(0x7f120016, menu);
+            menu = MenuItemCompat.getActionProvider(menu.findItem(0x7f100337));
+            if (menu instanceof ObjectPopupsActionProvider)
+            {
+                objectPopupsActionProvider = (ObjectPopupsActionProvider)menu;
+                objectPopupsActionProvider.setObjectPopupsClickListener(this);
+                menu = ActivityUtils.getUserManager(getIntent());
+                if (menu != null && objectPopupsActionProvider != null)
+                {
+                    onObjectPopupCountChanged(menu.getObjectPopupsManager().getObjectPopupCount());
+                }
+            } else
+            {
+                objectPopupsActionProvider = null;
+            }
+            return true;
+        } else
+        {
             return super.onCreateOptionsMenu(menu);
         }
-        getMenuInflater().inflate(R.menu.object_popups_action_menu, menu);
-        ActionProvider actionProvider = MenuItemCompat.getActionProvider(menu.findItem(R.id.item_object_popups));
-        if (actionProvider instanceof ObjectPopupsActionProvider) {
-            this.objectPopupsActionProvider = (ObjectPopupsActionProvider) actionProvider;
-            this.objectPopupsActionProvider.setObjectPopupsClickListener(this);
-            UserManager userManager = ActivityUtils.getUserManager(getIntent());
-            if (userManager == null || this.objectPopupsActionProvider == null) {
-                return true;
-            }
-            onObjectPopupCountChanged(userManager.getObjectPopupsManager().getObjectPopupCount());
-            return true;
-        }
-        this.objectPopupsActionProvider = null;
-        return true;
     }
 
-    /* access modifiers changed from: protected */
-    public void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if (!handleConnectionEvents()) {
+    protected void onNewIntent(Intent intent)
+    {
+label0:
+        {
+            super.onNewIntent(intent);
+            if (handleConnectionEvents())
+            {
+                if (!intent.getBooleanExtra("objectPopupNotification", false))
+                {
+                    break label0;
+                }
+                wantedShowObjectPopups = true;
+            }
             return;
         }
-        if (intent.getBooleanExtra(OBJECT_POPUP_NOTIFICATION, false)) {
-            this.wantedShowObjectPopups = true;
-            return;
-        }
-        UserManager userManager = ActivityUtils.getUserManager(getIntent());
-        if (userManager != null) {
-            userManager.getObjectPopupsManager().dismissDisplayedObjectPopup((SLChatEvent) null);
+        intent = ActivityUtils.getUserManager(getIntent());
+        if (intent != null)
+        {
+            intent.getObjectPopupsManager().dismissDisplayedObjectPopup(null);
         }
         removeObjectPopupsFragment();
     }
 
-    public void onNewObjectPopup(SLChatEvent sLChatEvent) {
-        UUID activeAgentID;
-        if (findViewById(R.id.object_popups_container) != null && (activeAgentID = ActivityUtils.getActiveAgentID(getIntent())) != null) {
-            FragmentManager supportFragmentManager = getSupportFragmentManager();
-            if (this.objectPopupsDisplayed) {
-                UserManager userManager = UserManager.getUserManager(activeAgentID);
-                if (userManager != null) {
-                    userManager.getObjectPopupsManager().dismissDisplayedObjectPopup(sLChatEvent);
-                    return;
+    public void onNewObjectPopup(SLChatEvent slchatevent)
+    {
+        if (findViewById(0x7f100287) != null)
+        {
+            java.util.UUID uuid = ActivityUtils.getActiveAgentID(getIntent());
+            if (uuid != null)
+            {
+                FragmentManager fragmentmanager = getSupportFragmentManager();
+                if (objectPopupsDisplayed)
+                {
+                    UserManager usermanager = UserManager.getUserManager(uuid);
+                    if (usermanager != null)
+                    {
+                        usermanager.getObjectPopupsManager().dismissDisplayedObjectPopup(slchatevent);
+                        return;
+                    }
+                } else
+                if (singleObjectPopupsDisplayed && slchatevent == null)
+                {
+                    singleObjectPopupsDisplayed = false;
+                    android.support.v4.app.Fragment fragment = fragmentmanager.findFragmentById(0x7f100287);
+                    if (fragment != null)
+                    {
+                        FragmentTransaction fragmenttransaction = fragmentmanager.beginTransaction();
+                        fragmenttransaction.setTransition(8194);
+                        fragmenttransaction.remove(fragment);
+                        fragmenttransaction.commit();
+                    }
                 }
-            } else if (this.singleObjectPopupsDisplayed && sLChatEvent == null) {
-                this.singleObjectPopupsDisplayed = false;
-                Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.object_popups_container);
-                if (findFragmentById != null) {
-                    FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction();
-                    beginTransaction.setTransition(8194);
-                    beginTransaction.remove(findFragmentById);
-                    beginTransaction.commit();
+                if (slchatevent != null)
+                {
+                    singleObjectPopupsDisplayed = true;
+                    objectPopupsDisplayed = false;
+                    slchatevent = fragmentmanager.beginTransaction();
+                    slchatevent.setTransition(4097);
+                    slchatevent.replace(0x7f100287, SingleObjectPopupFragment.create(uuid));
+                    slchatevent.commit();
                 }
             }
-            if (sLChatEvent != null) {
-                this.singleObjectPopupsDisplayed = true;
-                this.objectPopupsDisplayed = false;
-                FragmentTransaction beginTransaction2 = supportFragmentManager.beginTransaction();
-                beginTransaction2.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                beginTransaction2.replace(R.id.object_popups_container, SingleObjectPopupFragment.create(activeAgentID));
-                beginTransaction2.commit();
+        }
+    }
+
+    public void onObjectPopupCountChanged(int i)
+    {
+        if (objectPopupsActionProvider != null)
+        {
+            objectPopupsActionProvider.setObjectPopupCount(i);
+        }
+        if (i == 0 && objectPopupsDisplayed)
+        {
+            objectPopupsDisplayed = false;
+            Object obj = getSupportFragmentManager();
+            android.support.v4.app.Fragment fragment = ((FragmentManager) (obj)).findFragmentById(0x7f100287);
+            if (fragment instanceof ObjectPopupsFragment)
+            {
+                obj = ((FragmentManager) (obj)).beginTransaction();
+                ((FragmentTransaction) (obj)).setTransition(8194);
+                ((FragmentTransaction) (obj)).remove(fragment);
+                ((FragmentTransaction) (obj)).commit();
             }
         }
     }
 
-    public void onObjectPopupCountChanged(int i) {
-        if (this.objectPopupsActionProvider != null) {
-            this.objectPopupsActionProvider.setObjectPopupCount(i);
-        }
-        if (i == 0 && this.objectPopupsDisplayed) {
-            this.objectPopupsDisplayed = false;
-            FragmentManager supportFragmentManager = getSupportFragmentManager();
-            Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.object_popups_container);
-            if (findFragmentById instanceof ObjectPopupsFragment) {
-                FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction();
-                beginTransaction.setTransition(8194);
-                beginTransaction.remove(findFragmentById);
-                beginTransaction.commit();
-            }
-        }
-    }
-
-    public void onObjectPopupsClicked() {
-        if (findViewById(R.id.object_popups_container) != null) {
-            FragmentManager supportFragmentManager = getSupportFragmentManager();
-            if (this.objectPopupsDisplayed) {
-                this.objectPopupsDisplayed = false;
-                Fragment findFragmentById = supportFragmentManager.findFragmentById(R.id.object_popups_container);
-                if (findFragmentById != null) {
-                    FragmentTransaction beginTransaction = supportFragmentManager.beginTransaction();
-                    beginTransaction.setTransition(8194);
-                    beginTransaction.remove(findFragmentById);
-                    beginTransaction.commit();
-                    return;
+    public void onObjectPopupsClicked()
+    {
+label0:
+        {
+            if (findViewById(0x7f100287) != null)
+            {
+                Object obj = getSupportFragmentManager();
+                if (!objectPopupsDisplayed)
+                {
+                    break label0;
                 }
-                return;
+                objectPopupsDisplayed = false;
+                android.support.v4.app.Fragment fragment = ((FragmentManager) (obj)).findFragmentById(0x7f100287);
+                if (fragment != null)
+                {
+                    obj = ((FragmentManager) (obj)).beginTransaction();
+                    ((FragmentTransaction) (obj)).setTransition(8194);
+                    ((FragmentTransaction) (obj)).remove(fragment);
+                    ((FragmentTransaction) (obj)).commit();
+                }
             }
-            displayObjectPopups();
+            return;
+        }
+        displayObjectPopups();
+    }
+
+    public boolean onOptionsItemSelected(MenuItem menuitem)
+    {
+        if (!navDrawerHelper.onOptionsItemSelected(menuitem))
+        {
+            return super.onOptionsItemSelected(menuitem);
+        } else
+        {
+            return true;
         }
     }
 
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        if (!this.navDrawerHelper.onOptionsItemSelected(menuItem)) {
-            return super.onOptionsItemSelected(menuItem);
-        }
-        return true;
-    }
-
-    /* access modifiers changed from: protected */
-    public void onPause() {
-        UserManager userManager = ActivityUtils.getUserManager(getIntent());
-        if (userManager != null && handleConnectionEvents()) {
-            userManager.getObjectPopupsManager().removeObjectPopupListener(this);
-            userManager.getObjectPopupsManager().removePopupWatcher(this);
+    protected void onPause()
+    {
+        UserManager usermanager = ActivityUtils.getUserManager(getIntent());
+        if (usermanager != null && handleConnectionEvents())
+        {
+            usermanager.getObjectPopupsManager().removeObjectPopupListener(this);
+            usermanager.getObjectPopupsManager().removePopupWatcher(this);
         }
         super.onPause();
     }
 
-    /* access modifiers changed from: protected */
-    public void onPostCreate(@Nullable Bundle bundle) {
+    protected void onPostCreate(Bundle bundle)
+    {
         super.onPostCreate(bundle);
-        if (handleConnectionEvents()) {
-            View findViewById = findViewById(R.id.offline_notify_status_layout);
-            if (findViewById instanceof ViewGroup) {
-                findViewById.findViewById(R.id.offline_connect_button).setOnClickListener(this.reconnectButtonListener);
+        if (handleConnectionEvents())
+        {
+            bundle = findViewById(0x7f100242);
+            if (bundle instanceof ViewGroup)
+            {
+                bundle.findViewById(0x7f100245).setOnClickListener(reconnectButtonListener);
             }
         }
-        this.navDrawerHelper = new NavDrawerActivityHelper(this);
-        this.navDrawerHelper.syncState();
+        navDrawerHelper = new NavDrawerActivityHelper(this);
+        navDrawerHelper.syncState();
     }
 
-    /* access modifiers changed from: protected */
-    public void onResume() {
+    protected void onResume()
+    {
         super.onResume();
-        UserManager userManager = ActivityUtils.getUserManager(getIntent());
-        if (userManager != null && handleConnectionEvents()) {
-            int objectPopupCount = userManager.getObjectPopupsManager().getObjectPopupCount();
-            if (this.objectPopupsActionProvider != null) {
-                onObjectPopupCountChanged(objectPopupCount);
+        UserManager usermanager = ActivityUtils.getUserManager(getIntent());
+        if (usermanager != null && handleConnectionEvents())
+        {
+            int i = usermanager.getObjectPopupsManager().getObjectPopupCount();
+            if (objectPopupsActionProvider != null)
+            {
+                onObjectPopupCountChanged(i);
             }
-            userManager.getObjectPopupsManager().addPopupWatcher(this);
-            userManager.getObjectPopupsManager().setObjectPopupListener(this, UIThreadExecutor.getInstance());
-            if (this.wantedShowObjectPopups) {
-                this.wantedShowObjectPopups = false;
-                if (objectPopupCount != 0 && (!this.objectPopupsDisplayed)) {
+            usermanager.getObjectPopupsManager().addPopupWatcher(this);
+            usermanager.getObjectPopupsManager().setObjectPopupListener(this, UIThreadExecutor.getInstance());
+            if (wantedShowObjectPopups)
+            {
+                wantedShowObjectPopups = false;
+                if (i != 0 && objectPopupsDisplayed ^ true)
+                {
                     displayObjectPopups();
                 }
             }
@@ -359,17 +472,14 @@ public class ConnectedActivity extends ThemedActivity implements ObjectPopupsAct
         updateConnectionStatus();
     }
 
-    /* access modifiers changed from: protected */
-    public void onSaveInstanceState(Bundle bundle) {
+    protected void onSaveInstanceState(Bundle bundle)
+    {
         super.onSaveInstanceState(bundle);
-        if (handleConnectionEvents()) {
-            bundle.putBoolean("objectPopupsDisplayed", this.objectPopupsDisplayed);
-            bundle.putBoolean("singleObjectPopupsDisplayed", this.singleObjectPopupsDisplayed);
-            bundle.putBoolean("wantedShowObjectPopups", this.wantedShowObjectPopups);
+        if (handleConnectionEvents())
+        {
+            bundle.putBoolean("objectPopupsDisplayed", objectPopupsDisplayed);
+            bundle.putBoolean("singleObjectPopupsDisplayed", singleObjectPopupsDisplayed);
+            bundle.putBoolean("wantedShowObjectPopups", wantedShowObjectPopups);
         }
-    }
-
-    public void m527lambda$com_lumiyaviewer_lumiya_ui_common_ConnectedActivity_3108(View view) {
-        // Lambda method implementation for view click handling
     }
 }

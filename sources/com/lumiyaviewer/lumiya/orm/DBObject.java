@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.orm;
 
 import android.content.ContentValues;
@@ -9,143 +13,204 @@ import android.os.Parcelable;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public abstract class DBObject implements Parcelable {
+public abstract class DBObject
+    implements Parcelable
+{
+    public static class DatabaseBindingException extends Exception
+    {
+
+        public DatabaseBindingException(Class class1, String s)
+        {
+            super((new StringBuilder()).append("Failed to bind ").append(class1.getSimpleName()).append(": ").append(s).toString());
+        }
+
+        public DatabaseBindingException(String s)
+        {
+            super(s);
+        }
+    }
+
+
     protected long _id;
 
-    public static class DatabaseBindingException extends Exception {
-        public DatabaseBindingException(Class<?> cls, String str) {
-            super("Failed to bind " + cls.getSimpleName() + ": " + str);
-        }
-
-        public DatabaseBindingException(String str) {
-            super(str);
-        }
+    public DBObject()
+    {
+        _id = 0L;
     }
 
-    public DBObject() {
-        this._id = 0;
-    }
-
-    public DBObject(Cursor cursor) {
+    public DBObject(Cursor cursor)
+    {
         loadFromCursor(cursor);
     }
 
-    public DBObject(SQLiteDatabase sQLiteDatabase, long j) throws DatabaseBindingException {
-        if (sQLiteDatabase == null) {
+    public DBObject(SQLiteDatabase sqlitedatabase, long l)
+        throws DatabaseBindingException
+    {
+        if (sqlitedatabase == null)
+        {
             throw new DatabaseBindingException(getClass(), "database not opened.");
         }
-        Cursor query = sQLiteDatabase.query(getTableName(), getFieldNames(), "_id = ?", new String[]{Long.toString(j)}, (String) null, (String) null, (String) null);
-        if (!query.moveToFirst()) {
-            query.close();
-            throw new DatabaseBindingException(getClass(), "not found: _id = " + j);
+        sqlitedatabase = sqlitedatabase.query(getTableName(), getFieldNames(), "_id = ?", new String[] {
+            Long.toString(l)
+        }, null, null, null);
+        if (!sqlitedatabase.moveToFirst())
+        {
+            sqlitedatabase.close();
+            throw new DatabaseBindingException(getClass(), (new StringBuilder()).append("not found: _id = ").append(l).toString());
+        } else
+        {
+            loadFromCursor(sqlitedatabase);
+            sqlitedatabase.close();
+            return;
         }
-        loadFromCursor(query);
-        query.close();
     }
 
-    /* access modifiers changed from: protected */
-    public UUID UUIDfromBlob(byte[] bArr) {
-        ByteBuffer wrap = ByteBuffer.wrap(bArr);
-        return new UUID(wrap.getLong(), wrap.getLong());
+    protected UUID UUIDfromBlob(byte abyte0[])
+    {
+        abyte0 = ByteBuffer.wrap(abyte0);
+        return new UUID(abyte0.getLong(), abyte0.getLong());
     }
 
-    /* access modifiers changed from: protected */
-    public byte[] UUIDtoBlob(UUID uuid) {
-        ByteBuffer wrap = ByteBuffer.wrap(new byte[16]);
-        wrap.putLong(uuid.getMostSignificantBits());
-        wrap.putLong(uuid.getLeastSignificantBits());
-        return wrap.array();
+    protected byte[] UUIDtoBlob(UUID uuid)
+    {
+        ByteBuffer bytebuffer = ByteBuffer.wrap(new byte[16]);
+        bytebuffer.putLong(uuid.getMostSignificantBits());
+        bytebuffer.putLong(uuid.getLeastSignificantBits());
+        return bytebuffer.array();
     }
 
-    public abstract void bindInsertOrUpdate(SQLiteStatement sQLiteStatement);
+    public abstract void bindInsertOrUpdate(SQLiteStatement sqlitestatement);
 
-    public void delete(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
-        if (sQLiteDatabase == null) {
+    public void delete(SQLiteDatabase sqlitedatabase)
+        throws DatabaseBindingException
+    {
+        if (sqlitedatabase == null)
+        {
             throw new DatabaseBindingException(getClass(), "database not opened.");
-        } else if (this._id != 0) {
-            sQLiteDatabase.delete(getTableName(), "_id = ?", new String[]{Long.toString(this._id)});
+        }
+        if (_id != 0L)
+        {
+            sqlitedatabase.delete(getTableName(), "_id = ?", new String[] {
+                Long.toString(_id)
+            });
         }
     }
 
     public abstract ContentValues getContentValues();
 
-    /* access modifiers changed from: protected */
-    public abstract String[] getFieldNames();
+    protected abstract String[] getFieldNames();
 
-    public long getId() {
-        return this._id;
+    public long getId()
+    {
+        return _id;
     }
 
-    /* access modifiers changed from: protected */
-    public abstract String getTableName();
+    protected abstract String getTableName();
 
     public abstract void loadFromCursor(Cursor cursor);
 
-    public void reload(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
-        if (sQLiteDatabase == null) {
-            throw new DatabaseBindingException(getClass(), "database not opened.");
-        } else if (this._id != 0) {
-            Cursor query = sQLiteDatabase.query(getTableName(), getFieldNames(), "_id = ?", new String[]{Long.toString(this._id)}, (String) null, (String) null, (String) null);
-            if (query.moveToFirst()) {
-                loadFromCursor(query);
-            }
-            query.close();
-        }
-    }
-
-    public void resetId() {
-        this._id = 0;
-    }
-
-    public void save(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
-        if (sQLiteDatabase == null) {
+    public void reload(SQLiteDatabase sqlitedatabase)
+        throws DatabaseBindingException
+    {
+        if (sqlitedatabase == null)
+        {
             throw new DatabaseBindingException(getClass(), "database not opened.");
         }
-        String tableName = getTableName();
-        ContentValues contentValues = getContentValues();
-        try {
-            if (this._id != 0) {
-                sQLiteDatabase.update(tableName, contentValues, "_id = ?", new String[]{Long.toString(this._id)});
-                return;
+        if (_id != 0L)
+        {
+            sqlitedatabase = sqlitedatabase.query(getTableName(), getFieldNames(), "_id = ?", new String[] {
+                Long.toString(_id)
+            }, null, null, null);
+            if (sqlitedatabase.moveToFirst())
+            {
+                loadFromCursor(sqlitedatabase);
             }
-            this._id = sQLiteDatabase.insert(tableName, (String) null, contentValues);
-        } catch (SQLiteException e) {
-            DatabaseBindingException databaseBindingException = new DatabaseBindingException(getClass(), "insert or update failed");
-            databaseBindingException.initCause(e);
-            throw databaseBindingException;
+            sqlitedatabase.close();
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void updateOrInsert(SQLiteDatabase sQLiteDatabase, String str, String[] strArr) throws DatabaseBindingException {
-        if (sQLiteDatabase == null) {
+    public void resetId()
+    {
+        _id = 0L;
+    }
+
+    public void save(SQLiteDatabase sqlitedatabase)
+        throws DatabaseBindingException
+    {
+        Object obj;
+        ContentValues contentvalues;
+        if (sqlitedatabase == null)
+        {
             throw new DatabaseBindingException(getClass(), "database not opened.");
         }
-        String tableName = getTableName();
-        ContentValues contentValues = getContentValues();
-        try {
-            if (sQLiteDatabase.update(tableName, contentValues, str, strArr) == 0) {
-                this._id = sQLiteDatabase.insert(tableName, (String) null, contentValues);
-            }
-        } catch (SQLiteException e) {
-            DatabaseBindingException databaseBindingException = new DatabaseBindingException(getClass(), "insert or update failed");
-            databaseBindingException.initCause(e);
-            throw databaseBindingException;
+        obj = getTableName();
+        contentvalues = getContentValues();
+        if (_id != 0L)
+        {
+            sqlitedatabase.update(((String) (obj)), contentvalues, "_id = ?", new String[] {
+                Long.toString(_id)
+            });
+            return;
         }
+        try
+        {
+            _id = sqlitedatabase.insert(((String) (obj)), null, contentvalues);
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (SQLiteDatabase sqlitedatabase)
+        {
+            obj = new DatabaseBindingException(getClass(), "insert or update failed");
+        }
+        ((DatabaseBindingException) (obj)).initCause(sqlitedatabase);
+        throw obj;
     }
 
-    /* access modifiers changed from: protected */
-    public void updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) throws DatabaseBindingException {
-        try {
-            bindInsertOrUpdate(sQLiteStatement);
-            if (sQLiteStatement.executeUpdateDelete() == 0) {
-                bindInsertOrUpdate(sQLiteStatement2);
-                this._id = sQLiteStatement2.executeInsert();
-            }
-        } catch (SQLiteException e) {
-            DatabaseBindingException databaseBindingException = new DatabaseBindingException(getClass(), "insert or update failed");
-            databaseBindingException.initCause(e);
-            throw databaseBindingException;
+    protected void updateOrInsert(SQLiteDatabase sqlitedatabase, String s, String as[])
+        throws DatabaseBindingException
+    {
+        if (sqlitedatabase == null)
+        {
+            throw new DatabaseBindingException(getClass(), "database not opened.");
         }
+        String s1 = getTableName();
+        ContentValues contentvalues = getContentValues();
+        try
+        {
+            if (sqlitedatabase.update(s1, contentvalues, s, as) == 0)
+            {
+                _id = sqlitedatabase.insert(s1, null, contentvalues);
+            }
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (SQLiteDatabase sqlitedatabase)
+        {
+            s = new DatabaseBindingException(getClass(), "insert or update failed");
+        }
+        s.initCause(sqlitedatabase);
+        throw s;
+    }
+
+    protected void updateOrInsert(SQLiteStatement sqlitestatement, SQLiteStatement sqlitestatement1)
+        throws DatabaseBindingException
+    {
+        try
+        {
+            bindInsertOrUpdate(sqlitestatement);
+            if (sqlitestatement.executeUpdateDelete() == 0)
+            {
+                bindInsertOrUpdate(sqlitestatement1);
+                _id = sqlitestatement1.executeInsert();
+            }
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (SQLiteStatement sqlitestatement)
+        {
+            sqlitestatement1 = new DatabaseBindingException(getClass(), "insert or update failed");
+        }
+        sqlitestatement1.initCause(sqlitestatement);
+        throw sqlitestatement1;
     }
 }

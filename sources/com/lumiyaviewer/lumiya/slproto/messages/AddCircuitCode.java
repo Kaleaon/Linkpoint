@@ -1,42 +1,63 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class AddCircuitCode extends SLMessage {
-    public CircuitCode CircuitCode_Field = new CircuitCode();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class CircuitCode {
+public class AddCircuitCode extends SLMessage
+{
+    public static class CircuitCode
+    {
+
         public UUID AgentID;
         public int Code;
         public UUID SessionID;
+
+        public CircuitCode()
+        {
+        }
     }
 
-    public AddCircuitCode() {
-        this.zeroCoded = false;
+
+    public CircuitCode CircuitCode_Field;
+
+    public AddCircuitCode()
+    {
+        zeroCoded = false;
+        CircuitCode_Field = new CircuitCode();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 40;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleAddCircuitCode(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleAddCircuitCode(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 2);
-        packInt(byteBuffer, this.CircuitCode_Field.Code);
-        packUUID(byteBuffer, this.CircuitCode_Field.SessionID);
-        packUUID(byteBuffer, this.CircuitCode_Field.AgentID);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)2);
+        packInt(bytebuffer, CircuitCode_Field.Code);
+        packUUID(bytebuffer, CircuitCode_Field.SessionID);
+        packUUID(bytebuffer, CircuitCode_Field.AgentID);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.CircuitCode_Field.Code = unpackInt(byteBuffer);
-        this.CircuitCode_Field.SessionID = unpackUUID(byteBuffer);
-        this.CircuitCode_Field.AgentID = unpackUUID(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        CircuitCode_Field.Code = unpackInt(bytebuffer);
+        CircuitCode_Field.SessionID = unpackUUID(bytebuffer);
+        CircuitCode_Field.AgentID = unpackUUID(bytebuffer);
     }
 }

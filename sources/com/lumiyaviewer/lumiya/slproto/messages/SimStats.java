@@ -1,88 +1,134 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class SimStats extends SLMessage {
-    public PidStat PidStat_Field;
-    public ArrayList<RegionInfo> RegionInfo_Fields = new ArrayList<>();
-    public Region Region_Field;
-    public ArrayList<Stat> Stat_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class PidStat {
+public class SimStats extends SLMessage
+{
+    public static class PidStat
+    {
+
         public int PID;
+
+        public PidStat()
+        {
+        }
     }
 
-    public static class Region {
+    public static class Region
+    {
+
         public int ObjectCapacity;
         public int RegionFlags;
         public int RegionX;
         public int RegionY;
+
+        public Region()
+        {
+        }
     }
 
-    public static class RegionInfo {
+    public static class RegionInfo
+    {
+
         public long RegionFlagsExtended;
+
+        public RegionInfo()
+        {
+        }
     }
 
-    public static class Stat {
+    public static class Stat
+    {
+
         public int StatID;
         public float StatValue;
-    }
 
-    public SimStats() {
-        this.zeroCoded = false;
-        this.Region_Field = new Region();
-        this.PidStat_Field = new PidStat();
-    }
-
-    public int CalcPayloadSize() {
-        return (this.Stat_Fields.size() * 8) + 21 + 4 + 1 + (this.RegionInfo_Fields.size() * 8);
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleSimStats(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -116);
-        packInt(byteBuffer, this.Region_Field.RegionX);
-        packInt(byteBuffer, this.Region_Field.RegionY);
-        packInt(byteBuffer, this.Region_Field.RegionFlags);
-        packInt(byteBuffer, this.Region_Field.ObjectCapacity);
-        byteBuffer.put((byte) this.Stat_Fields.size());
-        for (Stat stat : this.Stat_Fields) {
-            packInt(byteBuffer, stat.StatID);
-            packFloat(byteBuffer, stat.StatValue);
-        }
-        packInt(byteBuffer, this.PidStat_Field.PID);
-        byteBuffer.put((byte) this.RegionInfo_Fields.size());
-        for (RegionInfo regionInfo : this.RegionInfo_Fields) {
-            packLong(byteBuffer, regionInfo.RegionFlagsExtended);
+        public Stat()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.Region_Field.RegionX = unpackInt(byteBuffer);
-        this.Region_Field.RegionY = unpackInt(byteBuffer);
-        this.Region_Field.RegionFlags = unpackInt(byteBuffer);
-        this.Region_Field.ObjectCapacity = unpackInt(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
+
+    public PidStat PidStat_Field;
+    public ArrayList RegionInfo_Fields;
+    public Region Region_Field;
+    public ArrayList Stat_Fields;
+
+    public SimStats()
+    {
+        Stat_Fields = new ArrayList();
+        RegionInfo_Fields = new ArrayList();
+        zeroCoded = false;
+        Region_Field = new Region();
+        PidStat_Field = new PidStat();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return Stat_Fields.size() * 8 + 21 + 4 + 1 + RegionInfo_Fields.size() * 8;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleSimStats(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-116);
+        packInt(bytebuffer, Region_Field.RegionX);
+        packInt(bytebuffer, Region_Field.RegionY);
+        packInt(bytebuffer, Region_Field.RegionFlags);
+        packInt(bytebuffer, Region_Field.ObjectCapacity);
+        bytebuffer.put((byte)Stat_Fields.size());
+        Stat stat;
+        for (Iterator iterator = Stat_Fields.iterator(); iterator.hasNext(); packFloat(bytebuffer, stat.StatValue))
+        {
+            stat = (Stat)iterator.next();
+            packInt(bytebuffer, stat.StatID);
+        }
+
+        packInt(bytebuffer, PidStat_Field.PID);
+        bytebuffer.put((byte)RegionInfo_Fields.size());
+        for (Iterator iterator1 = RegionInfo_Fields.iterator(); iterator1.hasNext(); packLong(bytebuffer, ((RegionInfo)iterator1.next()).RegionFlagsExtended)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        Region_Field.RegionX = unpackInt(bytebuffer);
+        Region_Field.RegionY = unpackInt(bytebuffer);
+        Region_Field.RegionFlags = unpackInt(bytebuffer);
+        Region_Field.ObjectCapacity = unpackInt(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
             Stat stat = new Stat();
-            stat.StatID = unpackInt(byteBuffer);
-            stat.StatValue = unpackFloat(byteBuffer);
-            this.Stat_Fields.add(stat);
+            stat.StatID = unpackInt(bytebuffer);
+            stat.StatValue = unpackFloat(bytebuffer);
+            Stat_Fields.add(stat);
         }
-        this.PidStat_Field.PID = unpackInt(byteBuffer);
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < b2; i2++) {
-            RegionInfo regionInfo = new RegionInfo();
-            regionInfo.RegionFlagsExtended = unpackLong(byteBuffer);
-            this.RegionInfo_Fields.add(regionInfo);
+
+        PidStat_Field.PID = unpackInt(bytebuffer);
+        byte0 = bytebuffer.get();
+        for (int j = ((flag) ? 1 : 0); j < (byte0 & 0xff); j++)
+        {
+            RegionInfo regioninfo = new RegionInfo();
+            regioninfo.RegionFlagsExtended = unpackLong(bytebuffer);
+            RegionInfo_Fields.add(regioninfo);
         }
+
     }
 }

@@ -1,35 +1,61 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.glres.textures;
 
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
 import com.lumiyaviewer.lumiya.render.RenderContext;
 import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue;
 import com.lumiyaviewer.lumiya.render.glres.GLResourceCache;
+import com.lumiyaviewer.lumiya.render.glres.GLSizedResource;
 import com.lumiyaviewer.lumiya.render.tex.DrawableTextureParams;
 import com.lumiyaviewer.lumiya.res.ResourceConsumer;
 import com.lumiyaviewer.lumiya.res.textures.TextureCache;
 
-public class GLTextureCache extends GLResourceCache<DrawableTextureParams, OpenJPEG, GLLoadedTexture> {
-    public GLTextureCache(GLLoadQueue gLLoadQueue) {
-        super(gLLoadQueue);
+// Referenced classes of package com.lumiyaviewer.lumiya.render.glres.textures:
+//            GLLoadedTexture
+
+public class GLTextureCache extends GLResourceCache
+{
+
+    public GLTextureCache(GLLoadQueue glloadqueue)
+    {
+        super(glloadqueue);
     }
 
-    /* access modifiers changed from: protected */
-    public void CancelRawResource(ResourceConsumer resourceConsumer) {
-        TextureCache.getInstance().CancelRequest(resourceConsumer);
+    protected void CancelRawResource(ResourceConsumer resourceconsumer)
+    {
+        TextureCache.getInstance().CancelRequest(resourceconsumer);
     }
 
-    /* access modifiers changed from: protected */
-    public int GetResourceSize(OpenJPEG openJPEG) {
-        return openJPEG.getLoadedSize();
+    protected int GetResourceSize(OpenJPEG openjpeg)
+    {
+        return openjpeg.getLoadedSize();
     }
 
-    /* access modifiers changed from: protected */
-    public GLLoadedTexture LoadResource(DrawableTextureParams drawableTextureParams, OpenJPEG openJPEG, RenderContext renderContext) {
-        return new GLLoadedTexture(renderContext, openJPEG);
+    protected volatile int GetResourceSize(Object obj)
+    {
+        return GetResourceSize((OpenJPEG)obj);
     }
 
-    /* access modifiers changed from: protected */
-    public void RequestRawResource(DrawableTextureParams drawableTextureParams, ResourceConsumer resourceConsumer) {
-        TextureCache.getInstance().RequestResource(drawableTextureParams, resourceConsumer);
+    protected volatile GLSizedResource LoadResource(Object obj, Object obj1, RenderContext rendercontext)
+    {
+        return LoadResource((DrawableTextureParams)obj, (OpenJPEG)obj1, rendercontext);
+    }
+
+    protected GLLoadedTexture LoadResource(DrawableTextureParams drawabletextureparams, OpenJPEG openjpeg, RenderContext rendercontext)
+    {
+        return new GLLoadedTexture(rendercontext, openjpeg);
+    }
+
+    protected void RequestRawResource(DrawableTextureParams drawabletextureparams, ResourceConsumer resourceconsumer)
+    {
+        TextureCache.getInstance().RequestResource(drawabletextureparams, resourceconsumer);
+    }
+
+    protected volatile void RequestRawResource(Object obj, ResourceConsumer resourceconsumer)
+    {
+        RequestRawResource((DrawableTextureParams)obj, resourceconsumer);
     }
 }

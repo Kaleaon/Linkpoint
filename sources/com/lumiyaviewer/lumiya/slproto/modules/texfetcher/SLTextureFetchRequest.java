@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.texfetcher;
 
 import com.lumiyaviewer.lumiya.render.tex.TextureClass;
@@ -7,96 +11,120 @@ import com.lumiyaviewer.lumiya.utils.HasPriority;
 import java.io.File;
 import java.util.UUID;
 
-public class SLTextureFetchRequest implements HasPriority {
+public class SLTextureFetchRequest
+    implements HasPriority
+{
+    public static interface TextureFetchCompleteListener
+    {
 
-    /* renamed from: -com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null;
+        public abstract void OnTextureFetchComplete(SLTextureFetchRequest sltexturefetchrequest);
+    }
+
+
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_render_2D_tex_2D_TextureClassSwitchesValues[];
     public AvatarTextureFaceIndex avatarFaceIndex;
     public UUID avatarUUID;
     public final File destFile;
-    TextureFetchCompleteListener onFetchComplete = null;
+    TextureFetchCompleteListener onFetchComplete;
     public File outputFile;
     public TextureClass textureClass;
     public UUID textureID;
     public int textureLayer;
     private int visibleRangeCategory;
 
-    public interface TextureFetchCompleteListener {
-        void OnTextureFetchComplete(SLTextureFetchRequest sLTextureFetchRequest);
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_render_2D_tex_2D_TextureClassSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_render_2D_tex_2D_TextureClassSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_render_2D_tex_2D_TextureClassSwitchesValues;
+        }
+        int ai[] = new int[TextureClass.values().length];
+        try
+        {
+            ai[TextureClass.Asset.ordinal()] = 1;
+        }
+        catch (NoSuchFieldError nosuchfielderror4) { }
+        try
+        {
+            ai[TextureClass.Baked.ordinal()] = 2;
+        }
+        catch (NoSuchFieldError nosuchfielderror3) { }
+        try
+        {
+            ai[TextureClass.Prim.ordinal()] = 3;
+        }
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[TextureClass.Sculpt.ordinal()] = 4;
+        }
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[TextureClass.Terrain.ordinal()] = 5;
+        }
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_render_2D_tex_2D_TextureClassSwitchesValues = ai;
+        return ai;
     }
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m239getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues() {
-        if (f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues != null) {
-            return f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues;
-        }
-        int[] iArr = new int[TextureClass.values().length];
-        try {
-            iArr[TextureClass.Asset.ordinal()] = 1;
-        } catch (NoSuchFieldError e) {
-        }
-        try {
-            iArr[TextureClass.Baked.ordinal()] = 2;
-        } catch (NoSuchFieldError e2) {
-        }
-        try {
-            iArr[TextureClass.Prim.ordinal()] = 3;
-        } catch (NoSuchFieldError e3) {
-        }
-        try {
-            iArr[TextureClass.Sculpt.ordinal()] = 4;
-        } catch (NoSuchFieldError e4) {
-        }
-        try {
-            iArr[TextureClass.Terrain.ordinal()] = 5;
-        } catch (NoSuchFieldError e5) {
-        }
-        f130comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = iArr;
-        return iArr;
+    public SLTextureFetchRequest(UUID uuid, int i, TextureClass textureclass, AvatarTextureFaceIndex avatartexturefaceindex, UUID uuid1, File file)
+    {
+        onFetchComplete = null;
+        textureID = uuid;
+        textureLayer = i;
+        textureClass = textureclass;
+        avatarFaceIndex = avatartexturefaceindex;
+        avatarUUID = uuid1;
+        outputFile = null;
+        visibleRangeCategory = -1;
+        destFile = file;
     }
 
-    public SLTextureFetchRequest(UUID uuid, int i, TextureClass textureClass2, AvatarTextureFaceIndex avatarTextureFaceIndex, UUID uuid2, File file) {
-        this.textureID = uuid;
-        this.textureLayer = i;
-        this.textureClass = textureClass2;
-        this.avatarFaceIndex = avatarTextureFaceIndex;
-        this.avatarUUID = uuid2;
-        this.outputFile = null;
-        this.visibleRangeCategory = -1;
-        this.destFile = file;
-    }
+    public static int getPriorityForClass(TextureClass textureclass, int i)
+    {
+        switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_render_2D_tex_2D_TextureClassSwitchesValues()[textureclass.ordinal()])
+        {
+        default:
+            return TexturePriority.Lowest.ordinal();
 
-    public static int getPriorityForClass(TextureClass textureClass2, int i) {
-        switch (m239getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues()[textureClass2.ordinal()]) {
-            case 1:
-                return TexturePriority.Asset.ordinal();
-            case 2:
-                return TexturePriority.PrimVisibleClose.ordinal();
-            case 3:
-                switch (i) {
-                    case -1:
-                        return TexturePriority.PrimInvisible.ordinal();
-                    case 0:
-                        return TexturePriority.PrimVisibleClose.ordinal();
-                    case 1:
-                        return TexturePriority.PrimVisibleMedium.ordinal();
-                    default:
-                        return TexturePriority.PrimVisibleFar.ordinal();
-                }
-            case 4:
-                return TexturePriority.Sculpt.ordinal();
-            case 5:
-                return TexturePriority.Terrain.ordinal();
+        case 1: // '\001'
+            return TexturePriority.Asset.ordinal();
+
+        case 2: // '\002'
+            return TexturePriority.PrimVisibleClose.ordinal();
+
+        case 3: // '\003'
+            switch (i)
+            {
             default:
-                return TexturePriority.Lowest.ordinal();
+                return TexturePriority.PrimVisibleFar.ordinal();
+
+            case -1: 
+                return TexturePriority.PrimInvisible.ordinal();
+
+            case 0: // '\0'
+                return TexturePriority.PrimVisibleClose.ordinal();
+
+            case 1: // '\001'
+                return TexturePriority.PrimVisibleMedium.ordinal();
+            }
+
+        case 4: // '\004'
+            return TexturePriority.Sculpt.ordinal();
+
+        case 5: // '\005'
+            return TexturePriority.Terrain.ordinal();
         }
     }
 
-    public int getPriority() {
-        return getPriorityForClass(this.textureClass, this.visibleRangeCategory);
+    public int getPriority()
+    {
+        return getPriorityForClass(textureClass, visibleRangeCategory);
     }
 
-    public void setOnFetchComplete(TextureFetchCompleteListener textureFetchCompleteListener) {
-        this.onFetchComplete = textureFetchCompleteListener;
+    public void setOnFetchComplete(TextureFetchCompleteListener texturefetchcompletelistener)
+    {
+        onFetchComplete = texturefetchcompletelistener;
     }
 }

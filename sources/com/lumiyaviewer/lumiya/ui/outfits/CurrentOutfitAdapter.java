@@ -1,8 +1,10 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.outfits;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,102 +12,154 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.R;
+import com.lumiyaviewer.lumiya.slproto.assets.SLWearableType;
 import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance;
 import com.lumiyaviewer.lumiya.ui.common.DismissableAdapter;
 import com.lumiyaviewer.lumiya.ui.common.SwipeDismissListViewTouchListener;
 
-class CurrentOutfitAdapter extends BaseAdapter implements DismissableAdapter {
-    @Nullable
+class CurrentOutfitAdapter extends BaseAdapter
+    implements DismissableAdapter
+{
+
     private SLAvatarAppearance avatarAppearance;
     private final LayoutInflater inflater;
-    @NonNull
-    private ImmutableList<SLAvatarAppearance.WornItem> wornItems = ImmutableList.of();
+    private ImmutableList wornItems;
 
-    CurrentOutfitAdapter(Context context) {
-        this.inflater = LayoutInflater.from(context);
+    CurrentOutfitAdapter(Context context)
+    {
+        wornItems = ImmutableList.of();
+        inflater = LayoutInflater.from(context);
     }
 
-    public boolean canDismiss(int i) {
-        SLAvatarAppearance.WornItem item = getItem(i);
-        if (item == null || this.avatarAppearance == null) {
+    public boolean canDismiss(int i)
+    {
+        boolean flag = false;
+        com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance.WornItem wornitem = getItem(i);
+        if (wornitem != null && avatarAppearance != null)
+        {
+            if (wornitem.getWornOn() != null)
+            {
+                if (!wornitem.getWornOn().isBodyPart())
+                {
+                    flag = avatarAppearance.canTakeItemOff(wornitem.getWornOn());
+                }
+                return flag;
+            } else
+            {
+                return avatarAppearance.canDetachItem(wornitem);
+            }
+        } else
+        {
             return false;
         }
-        if (item.getWornOn() == null) {
-            return this.avatarAppearance.canDetachItem(item);
-        }
-        if (!item.getWornOn().isBodyPart()) {
-            return this.avatarAppearance.canTakeItemOff(item.getWornOn());
-        }
-        return false;
     }
 
-    public int getCount() {
-        return this.wornItems.size();
+    public int getCount()
+    {
+        return wornItems.size();
     }
 
-    public SLAvatarAppearance.WornItem getItem(int i) {
-        if (i < 0 || i >= this.wornItems.size()) {
+    public com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance.WornItem getItem(int i)
+    {
+        if (i >= 0 && i < wornItems.size())
+        {
+            return (com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance.WornItem)wornItems.get(i);
+        } else
+        {
             return null;
         }
-        return (SLAvatarAppearance.WornItem) this.wornItems.get(i);
     }
 
-    public long getItemId(int i) {
-        return (long) i;
+    public volatile Object getItem(int i)
+    {
+        return getItem(i);
     }
 
-    public int getItemViewType(int i) {
+    public long getItemId(int i)
+    {
+        return (long)i;
+    }
+
+    public int getItemViewType(int i)
+    {
         return 0;
     }
 
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        View view2 = null;
-        if (view == null || view.getId() == R.id.outfitItemLayout) {
-            view2 = view;
+    public View getView(int i, View view, ViewGroup viewgroup)
+    {
+        Object obj = null;
+        if (view != null && view.getId() != 0x7f100249)
+        {
+            view = obj;
         }
-        View inflate = view2 == null ? this.inflater.inflate(R.layout.outfit_item, viewGroup, false) : view2;
-        SLAvatarAppearance.WornItem wornItem = (SLAvatarAppearance.WornItem) this.wornItems.get(i);
-        ((TextView) inflate.findViewById(R.id.itemNameTextView)).setText(wornItem.getName());
-        if (wornItem.getWornOn() != null) {
-            ((ImageView) inflate.findViewById(R.id.itemTypeIconView)).setImageResource(R.drawable.inv_clothes);
-            inflate.findViewById(R.id.itemTouchableIcon).setVisibility(8);
-        } else {
-            ((ImageView) inflate.findViewById(R.id.itemTypeIconView)).setImageResource(R.drawable.inv_object);
-            inflate.findViewById(R.id.itemTouchableIcon).setVisibility(wornItem.getIsTouchable() ? 0 : 8);
+        if (view == null)
+        {
+            view = inflater.inflate(0x7f04007e, viewgroup, false);
         }
-        SwipeDismissListViewTouchListener.restoreViewState(inflate);
-        return inflate;
+        viewgroup = (com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance.WornItem)wornItems.get(i);
+        ((TextView)view.findViewById(0x7f1001bf)).setText(viewgroup.getName());
+        if (viewgroup.getWornOn() != null)
+        {
+            ((ImageView)view.findViewById(0x7f1001bd)).setImageResource(0x7f0200bf);
+            view.findViewById(0x7f10024a).setVisibility(8);
+        } else
+        {
+            ((ImageView)view.findViewById(0x7f1001bd)).setImageResource(0x7f0200c6);
+            View view1 = view.findViewById(0x7f10024a);
+            if (viewgroup.getIsTouchable())
+            {
+                i = 0;
+            } else
+            {
+                i = 8;
+            }
+            view1.setVisibility(i);
+        }
+        SwipeDismissListViewTouchListener.restoreViewState(view);
+        return view;
     }
 
-    public boolean hasStableIds() {
+    public boolean hasStableIds()
+    {
         return false;
     }
 
-    public boolean isEmpty() {
-        return this.wornItems.isEmpty();
+    public boolean isEmpty()
+    {
+        return wornItems.isEmpty();
     }
 
-    public void onDismiss(int i) {
-        SLAvatarAppearance.WornItem item = getItem(i);
-        if (item != null && this.avatarAppearance != null) {
-            if (item.getWornOn() != null) {
-                this.avatarAppearance.TakeItemOff(item.itemID());
-            } else {
-                this.avatarAppearance.DetachItem(item);
+    public void onDismiss(int i)
+    {
+        com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance.WornItem wornitem;
+label0:
+        {
+            wornitem = getItem(i);
+            if (wornitem != null && avatarAppearance != null)
+            {
+                if (wornitem.getWornOn() == null)
+                {
+                    break label0;
+                }
+                avatarAppearance.TakeItemOff(wornitem.itemID());
             }
+            return;
         }
+        avatarAppearance.DetachItem(wornitem);
     }
 
-    public void setAvatarAppearance(@Nullable SLAvatarAppearance sLAvatarAppearance) {
-        this.avatarAppearance = sLAvatarAppearance;
+    public void setAvatarAppearance(SLAvatarAppearance slavatarappearance)
+    {
+        avatarAppearance = slavatarappearance;
     }
 
-    public void setData(ImmutableList<SLAvatarAppearance.WornItem> immutableList) {
-        if (immutableList == null) {
-            immutableList = ImmutableList.of();
+    public void setData(ImmutableList immutablelist)
+    {
+        if (immutablelist == null)
+        {
+            immutablelist = ImmutableList.of();
         }
-        this.wornItems = immutableList;
+        wornItems = immutablelist;
         notifyDataSetChanged();
     }
 }

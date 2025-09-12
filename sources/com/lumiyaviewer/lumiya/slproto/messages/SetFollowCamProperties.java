@@ -1,57 +1,89 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class SetFollowCamProperties extends SLMessage {
-    public ArrayList<CameraProperty> CameraProperty_Fields = new ArrayList<>();
-    public ObjectData ObjectData_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class CameraProperty {
+public class SetFollowCamProperties extends SLMessage
+{
+    public static class CameraProperty
+    {
+
         public int Type;
         public float Value;
+
+        public CameraProperty()
+        {
+        }
     }
 
-    public static class ObjectData {
+    public static class ObjectData
+    {
+
         public UUID ObjectID;
-    }
 
-    public SetFollowCamProperties() {
-        this.zeroCoded = false;
-        this.ObjectData_Field = new ObjectData();
-    }
-
-    public int CalcPayloadSize() {
-        return (this.CameraProperty_Fields.size() * 8) + 21;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleSetFollowCamProperties(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -97);
-        packUUID(byteBuffer, this.ObjectData_Field.ObjectID);
-        byteBuffer.put((byte) this.CameraProperty_Fields.size());
-        for (CameraProperty cameraProperty : this.CameraProperty_Fields) {
-            packInt(byteBuffer, cameraProperty.Type);
-            packFloat(byteBuffer, cameraProperty.Value);
+        public ObjectData()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.ObjectData_Field.ObjectID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            CameraProperty cameraProperty = new CameraProperty();
-            cameraProperty.Type = unpackInt(byteBuffer);
-            cameraProperty.Value = unpackFloat(byteBuffer);
-            this.CameraProperty_Fields.add(cameraProperty);
+
+    public ArrayList CameraProperty_Fields;
+    public ObjectData ObjectData_Field;
+
+    public SetFollowCamProperties()
+    {
+        CameraProperty_Fields = new ArrayList();
+        zeroCoded = false;
+        ObjectData_Field = new ObjectData();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return CameraProperty_Fields.size() * 8 + 21;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleSetFollowCamProperties(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-97);
+        packUUID(bytebuffer, ObjectData_Field.ObjectID);
+        bytebuffer.put((byte)CameraProperty_Fields.size());
+        CameraProperty cameraproperty;
+        for (Iterator iterator = CameraProperty_Fields.iterator(); iterator.hasNext(); packFloat(bytebuffer, cameraproperty.Value))
+        {
+            cameraproperty = (CameraProperty)iterator.next();
+            packInt(bytebuffer, cameraproperty.Type);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        ObjectData_Field.ObjectID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            CameraProperty cameraproperty = new CameraProperty();
+            cameraproperty.Type = unpackInt(bytebuffer);
+            cameraproperty.Value = unpackFloat(bytebuffer);
+            CameraProperty_Fields.add(cameraproperty);
+        }
+
     }
 }

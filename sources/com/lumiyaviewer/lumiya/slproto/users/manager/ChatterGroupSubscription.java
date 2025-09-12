@@ -1,35 +1,47 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.google.common.base.Objects;
+import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.concurrent.NotThreadSafe;
+import com.lumiyaviewer.lumiya.slproto.users.SLMessageResponseCacher;
 
-@NotThreadSafe
-class ChatterGroupSubscription extends ChatterSubscription {
-    @Nonnull
-    private final Subscription<UUID, GroupProfileReply> groupProfileSubscription;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            ChatterSubscription, UserManager, ChatterDisplayData, SortedChatterList
 
-    ChatterGroupSubscription(@Nonnull SortedChatterList sortedChatterList, ChatterID.ChatterIDGroup chatterIDGroup, @Nonnull UserManager userManager) {
-        super(sortedChatterList, chatterIDGroup, userManager);
-        this.groupProfileSubscription = userManager.getCachedGroupProfiles().getPool().subscribe(chatterIDGroup.getChatterUUID(), new $Lambda$eTv5Cj2a9ssR4ZBNRV1Lgb181AY(this));
+class ChatterGroupSubscription extends ChatterSubscription
+{
+
+    private final Subscription groupProfileSubscription;
+
+    ChatterGroupSubscription(SortedChatterList sortedchatterlist, com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDGroup chatteridgroup, UserManager usermanager)
+    {
+        super(sortedchatterlist, chatteridgroup, usermanager);
+        groupProfileSubscription = usermanager.getCachedGroupProfiles().getPool().subscribe(chatteridgroup.getChatterUUID(), new _2D_.Lambda.eTv5Cj2a9ssR4ZBNRV1Lgb181AY(this));
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onGroupProfile */
-    public void m289com_lumiyaviewer_lumiya_slproto_users_manager_ChatterGroupSubscriptionmthref0(GroupProfileReply groupProfileReply) {
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name);
-        if (!Objects.equal(stringFromVariableOEM, this.displayData.displayName)) {
-            setChatterDisplayData(this.displayData.withDisplayName(stringFromVariableOEM));
+    private void onGroupProfile(GroupProfileReply groupprofilereply)
+    {
+        groupprofilereply = SLMessage.stringFromVariableOEM(groupprofilereply.GroupData_Field.Name);
+        if (!Objects.equal(groupprofilereply, displayData.displayName))
+        {
+            setChatterDisplayData(displayData.withDisplayName(groupprofilereply));
         }
     }
 
-    public void unsubscribe() {
-        this.groupProfileSubscription.unsubscribe();
+    void _2D_com_lumiyaviewer_lumiya_slproto_users_manager_ChatterGroupSubscription_2D_mthref_2D_0(GroupProfileReply groupprofilereply)
+    {
+        onGroupProfile(groupprofilereply);
+    }
+
+    public void unsubscribe()
+    {
+        groupProfileSubscription.unsubscribe();
         super.unsubscribe();
     }
 }

@@ -1,67 +1,99 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class ImprovedTerseObjectUpdate extends SLMessage {
-    public ArrayList<ObjectData> ObjectData_Fields = new ArrayList<>();
-    public RegionData RegionData_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class ObjectData {
-        public byte[] Data;
-        public byte[] TextureEntry;
+public class ImprovedTerseObjectUpdate extends SLMessage
+{
+    public static class ObjectData
+    {
+
+        public byte Data[];
+        public byte TextureEntry[];
+
+        public ObjectData()
+        {
+        }
     }
 
-    public static class RegionData {
+    public static class RegionData
+    {
+
         public long RegionHandle;
         public int TimeDilation;
-    }
 
-    public ImprovedTerseObjectUpdate() {
-        this.zeroCoded = false;
-        this.RegionData_Field = new RegionData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 12;
-        Iterator<T> it = this.ObjectData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            ObjectData objectData = (ObjectData) it.next();
-            i = objectData.TextureEntry.length + objectData.Data.length + 1 + 2 + i2;
+        public RegionData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleImprovedTerseObjectUpdate(this);
+
+    public ArrayList ObjectData_Fields;
+    public RegionData RegionData_Field;
+
+    public ImprovedTerseObjectUpdate()
+    {
+        ObjectData_Fields = new ArrayList();
+        zeroCoded = false;
+        RegionData_Field = new RegionData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) 15);
-        packLong(byteBuffer, this.RegionData_Field.RegionHandle);
-        packShort(byteBuffer, (short) this.RegionData_Field.TimeDilation);
-        byteBuffer.put((byte) this.ObjectData_Fields.size());
-        for (ObjectData objectData : this.ObjectData_Fields) {
-            packVariable(byteBuffer, objectData.Data, 1);
-            packVariable(byteBuffer, objectData.TextureEntry, 2);
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = ObjectData_Fields.iterator();
+        ObjectData objectdata;
+        int i;
+        int j;
+        for (i = 12; iterator.hasNext(); i = objectdata.TextureEntry.length + (j + 1 + 2) + i)
+        {
+            objectdata = (ObjectData)iterator.next();
+            j = objectdata.Data.length;
         }
+
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.RegionData_Field.RegionHandle = unpackLong(byteBuffer);
-        this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535;
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            ObjectData objectData = new ObjectData();
-            objectData.Data = unpackVariable(byteBuffer, 1);
-            objectData.TextureEntry = unpackVariable(byteBuffer, 2);
-            this.ObjectData_Fields.add(objectData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleImprovedTerseObjectUpdate(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.put((byte)15);
+        packLong(bytebuffer, RegionData_Field.RegionHandle);
+        packShort(bytebuffer, (short)RegionData_Field.TimeDilation);
+        bytebuffer.put((byte)ObjectData_Fields.size());
+        ObjectData objectdata;
+        for (Iterator iterator = ObjectData_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, objectdata.TextureEntry, 2))
+        {
+            objectdata = (ObjectData)iterator.next();
+            packVariable(bytebuffer, objectdata.Data, 1);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        RegionData_Field.RegionHandle = unpackLong(bytebuffer);
+        RegionData_Field.TimeDilation = unpackShort(bytebuffer) & 0xffff;
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            ObjectData objectdata = new ObjectData();
+            objectdata.Data = unpackVariable(bytebuffer, 1);
+            objectdata.TextureEntry = unpackVariable(bytebuffer, 2);
+            ObjectData_Fields.add(objectdata);
+        }
+
     }
 }

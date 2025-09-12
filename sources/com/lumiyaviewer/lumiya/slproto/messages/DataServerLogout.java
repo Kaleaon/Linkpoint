@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
@@ -5,42 +9,59 @@ import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class DataServerLogout extends SLMessage {
-    public UserData UserData_Field = new UserData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class UserData {
+public class DataServerLogout extends SLMessage
+{
+    public static class UserData
+    {
+
         public UUID AgentID;
         public boolean Disconnect;
         public UUID SessionID;
         public Inet4Address ViewerIP;
+
+        public UserData()
+        {
+        }
     }
 
-    public DataServerLogout() {
-        this.zeroCoded = false;
+
+    public UserData UserData_Field;
+
+    public DataServerLogout()
+    {
+        zeroCoded = false;
+        UserData_Field = new UserData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 41;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDataServerLogout(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleDataServerLogout(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -5);
-        packUUID(byteBuffer, this.UserData_Field.AgentID);
-        packIPAddress(byteBuffer, this.UserData_Field.ViewerIP);
-        packBoolean(byteBuffer, this.UserData_Field.Disconnect);
-        packUUID(byteBuffer, this.UserData_Field.SessionID);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-5);
+        packUUID(bytebuffer, UserData_Field.AgentID);
+        packIPAddress(bytebuffer, UserData_Field.ViewerIP);
+        packBoolean(bytebuffer, UserData_Field.Disconnect);
+        packUUID(bytebuffer, UserData_Field.SessionID);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.UserData_Field.AgentID = unpackUUID(byteBuffer);
-        this.UserData_Field.ViewerIP = unpackIPAddress(byteBuffer);
-        this.UserData_Field.Disconnect = unpackBoolean(byteBuffer);
-        this.UserData_Field.SessionID = unpackUUID(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        UserData_Field.AgentID = unpackUUID(bytebuffer);
+        UserData_Field.ViewerIP = unpackIPAddress(bytebuffer);
+        UserData_Field.Disconnect = unpackBoolean(bytebuffer);
+        UserData_Field.SessionID = unpackUUID(bytebuffer);
     }
 }

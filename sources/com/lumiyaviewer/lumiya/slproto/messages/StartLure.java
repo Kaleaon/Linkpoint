@@ -1,68 +1,101 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class StartLure extends SLMessage {
-    public AgentData AgentData_Field;
-    public Info Info_Field;
-    public ArrayList<TargetData> TargetData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class StartLure extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class Info {
+    public static class Info
+    {
+
         public int LureType;
-        public byte[] Message;
+        public byte Message[];
+
+        public Info()
+        {
+        }
     }
 
-    public static class TargetData {
+    public static class TargetData
+    {
+
         public UUID TargetID;
-    }
 
-    public StartLure() {
-        this.zeroCoded = false;
-        this.AgentData_Field = new AgentData();
-        this.Info_Field = new Info();
-    }
-
-    public int CalcPayloadSize() {
-        return this.Info_Field.Message.length + 2 + 36 + 1 + (this.TargetData_Fields.size() * 16);
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleStartLure(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 70);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packByte(byteBuffer, (byte) this.Info_Field.LureType);
-        packVariable(byteBuffer, this.Info_Field.Message, 1);
-        byteBuffer.put((byte) this.TargetData_Fields.size());
-        for (TargetData targetData : this.TargetData_Fields) {
-            packUUID(byteBuffer, targetData.TargetID);
+        public TargetData()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.Info_Field.LureType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-        this.Info_Field.Message = unpackVariable(byteBuffer, 1);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            TargetData targetData = new TargetData();
-            targetData.TargetID = unpackUUID(byteBuffer);
-            this.TargetData_Fields.add(targetData);
+
+    public AgentData AgentData_Field;
+    public Info Info_Field;
+    public ArrayList TargetData_Fields;
+
+    public StartLure()
+    {
+        TargetData_Fields = new ArrayList();
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
+        Info_Field = new Info();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return Info_Field.Message.length + 2 + 36 + 1 + TargetData_Fields.size() * 16;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleStartLure(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)70);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packByte(bytebuffer, (byte)Info_Field.LureType);
+        packVariable(bytebuffer, Info_Field.Message, 1);
+        bytebuffer.put((byte)TargetData_Fields.size());
+        for (Iterator iterator = TargetData_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, ((TargetData)iterator.next()).TargetID)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        Info_Field.LureType = unpackByte(bytebuffer) & 0xff;
+        Info_Field.Message = unpackVariable(bytebuffer, 1);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            TargetData targetdata = new TargetData();
+            targetdata.TargetID = unpackUUID(bytebuffer);
+            TargetData_Fields.add(targetdata);
         }
+
     }
 }

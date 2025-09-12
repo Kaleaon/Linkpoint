@@ -1,70 +1,103 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.terrain;
 
 import com.google.common.primitives.Floats;
 import java.util.Arrays;
 
-public class TerrainPatchHeightMap {
+public class TerrainPatchHeightMap
+{
+
     private final int hashCode = getHashCode();
-    private final float[] heightMap;
+    private final float heightMap[];
     private final int mapHeight;
     private final int mapWidth;
-    private final float[] normalMap;
+    private final float normalMap[];
     private final float waterHeight;
 
-    public TerrainPatchHeightMap(float f, float[] fArr, float[] fArr2, int i, int i2) {
-        this.waterHeight = f;
-        this.mapWidth = i;
-        this.mapHeight = i2;
-        this.heightMap = new float[fArr.length];
-        System.arraycopy(fArr, 0, this.heightMap, 0, fArr.length);
-        this.normalMap = new float[fArr2.length];
-        System.arraycopy(fArr2, 0, this.normalMap, 0, fArr2.length);
+    public TerrainPatchHeightMap(float f, float af[], float af1[], int i, int j)
+    {
+        waterHeight = f;
+        mapWidth = i;
+        mapHeight = j;
+        heightMap = new float[af.length];
+        System.arraycopy(af, 0, heightMap, 0, af.length);
+        normalMap = new float[af1.length];
+        System.arraycopy(af1, 0, normalMap, 0, af1.length);
     }
 
-    private int getHashCode() {
-        return Float.floatToIntBits(this.waterHeight) + 0 + Arrays.hashCode(this.heightMap) + Arrays.hashCode(this.normalMap) + this.mapWidth + this.mapHeight;
+    private int getHashCode()
+    {
+        return Float.floatToIntBits(waterHeight) + 0 + Arrays.hashCode(heightMap) + Arrays.hashCode(normalMap) + mapWidth + mapHeight;
     }
 
-    public boolean equals(Object obj) {
-        if (!(obj instanceof TerrainPatchHeightMap)) {
+    public boolean equals(Object obj)
+    {
+        boolean flag1 = false;
+        if (!(obj instanceof TerrainPatchHeightMap))
+        {
             return false;
         }
-        TerrainPatchHeightMap terrainPatchHeightMap = (TerrainPatchHeightMap) obj;
-        if (terrainPatchHeightMap.waterHeight == this.waterHeight && terrainPatchHeightMap.mapWidth == this.mapWidth && terrainPatchHeightMap.mapHeight == this.mapHeight && Arrays.equals(terrainPatchHeightMap.heightMap, this.heightMap)) {
-            return Arrays.equals(terrainPatchHeightMap.normalMap, this.normalMap);
+        obj = (TerrainPatchHeightMap)obj;
+        boolean flag = flag1;
+        if (((TerrainPatchHeightMap) (obj)).waterHeight == waterHeight)
+        {
+            flag = flag1;
+            if (((TerrainPatchHeightMap) (obj)).mapWidth == mapWidth)
+            {
+                flag = flag1;
+                if (((TerrainPatchHeightMap) (obj)).mapHeight == mapHeight)
+                {
+                    flag = flag1;
+                    if (Arrays.equals(((TerrainPatchHeightMap) (obj)).heightMap, heightMap))
+                    {
+                        flag = Arrays.equals(((TerrainPatchHeightMap) (obj)).normalMap, normalMap);
+                    }
+                }
+            }
         }
-        return false;
+        return flag;
     }
 
-    public final float[] getHeightArray() {
-        return this.heightMap;
+    public final float[] getHeightArray()
+    {
+        return heightMap;
     }
 
-    public final int getMapHeight() {
-        return this.mapHeight;
+    public final int getMapHeight()
+    {
+        return mapHeight;
     }
 
-    public final int getMapWidth() {
-        return this.mapWidth;
+    public final int getMapWidth()
+    {
+        return mapWidth;
     }
 
-    public float getMaxHeight() {
-        return Floats.max(this.heightMap);
+    public float getMaxHeight()
+    {
+        return Floats.max(heightMap);
     }
 
-    public float getMinHeight() {
-        return Floats.min(this.heightMap);
+    public float getMinHeight()
+    {
+        return Floats.min(heightMap);
     }
 
-    public final float[] getNormalArray() {
-        return this.normalMap;
+    public final float[] getNormalArray()
+    {
+        return normalMap;
     }
 
-    public final float getWaterHeight() {
-        return this.waterHeight;
+    public final float getWaterHeight()
+    {
+        return waterHeight;
     }
 
-    public int hashCode() {
-        return this.hashCode;
+    public int hashCode()
+    {
+        return hashCode;
     }
 }

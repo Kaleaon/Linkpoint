@@ -1,45 +1,58 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.groups;
 
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDSerialized;
 import java.util.List;
 import java.util.UUID;
 
-public class AgentGroupDataInfo {
-    @LLSDSerialized
-    public List<AgentDataEntry> AgentData;
-    @LLSDSerialized
-    public List<GroupDataEntry> GroupData;
-    @LLSDSerialized
-    public List<NewGroupDataEntry> NewGroupData;
+public class AgentGroupDataInfo
+{
+    public static class AgentDataEntry
+    {
 
-    public static class AgentDataEntry {
-        @LLSDSerialized
         public UUID AgentID;
-        @LLSDSerialized
         public UUID AvatarID;
+
+        public AgentDataEntry()
+        {
+        }
     }
 
-    public static class GroupDataEntry {
-        @LLSDSerialized
+    public static class GroupDataEntry
+    {
+
         public boolean AcceptNotices;
-        @LLSDSerialized
         public int Contribution;
-        @LLSDSerialized
         public UUID GroupID;
-        @LLSDSerialized
         public UUID GroupInsigniaID;
-        @LLSDSerialized
         public String GroupName;
-        @LLSDSerialized
         public long GroupPowers;
-        @LLSDSerialized
         public String GroupTitle;
-        @LLSDSerialized
         public boolean ListInProfile;
+
+        public GroupDataEntry()
+        {
+        }
     }
 
-    public static class NewGroupDataEntry {
-        @LLSDSerialized
+    public static class NewGroupDataEntry
+    {
+
         public boolean ListInProfile;
+
+        public NewGroupDataEntry()
+        {
+        }
+    }
+
+
+    public List AgentData;
+    public List GroupData;
+    public List NewGroupData;
+
+    public AgentGroupDataInfo()
+    {
     }
 }

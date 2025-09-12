@@ -1,128 +1,173 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.notify;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioAttributes;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.LumiyaApp;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.ui.media.NotificationSounds;
-import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels;
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-@RequiresApi(api = 26)
-public class OreoNotificationChannelManager implements NotificationChannelManager {
-    private final ImmutableMap<NotificationChannels.Channel, NotificationChannelSettings> channelSettings = ImmutableMap.of(NotificationChannels.Channel.OnlineStatus, new NotificationChannelSettings(2, false, (NotificationType) null, (NotificationChannelSettings) null), NotificationChannels.Channel.Local, new NotificationChannelSettings(3, true, NotificationType.LocalChat, (NotificationChannelSettings) null), NotificationChannels.Channel.Group, new NotificationChannelSettings(3, true, NotificationType.Group, (NotificationChannelSettings) null), NotificationChannels.Channel.IM, new NotificationChannelSettings(4, true, NotificationType.Private, (NotificationChannelSettings) null));
-    private final Map<NotificationChannels.Channel, NotificationChannel> channels = new EnumMap(NotificationChannels.Channel.class);
-    private final Object lock = new Object();
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.notify:
+//            NotificationChannelManager, NotificationChannels
 
-    private static class NotificationChannelSettings {
+public class OreoNotificationChannelManager
+    implements NotificationChannelManager
+{
+    private static class NotificationChannelSettings
+    {
+
         final int importance;
         final NotificationType notificationType;
         final boolean showBadge;
 
-        private NotificationChannelSettings(int i, boolean z, NotificationType notificationType2) {
-            this.importance = i;
-            this.showBadge = z;
-            this.notificationType = notificationType2;
+        private NotificationChannelSettings(int i, boolean flag, NotificationType notificationtype)
+        {
+            importance = i;
+            showBadge = flag;
+            notificationType = notificationtype;
         }
 
-        /* synthetic */ NotificationChannelSettings(int i, boolean z, NotificationType notificationType2, NotificationChannelSettings notificationChannelSettings) {
-            this(i, z, notificationType2);
+        NotificationChannelSettings(int i, boolean flag, NotificationType notificationtype, NotificationChannelSettings notificationchannelsettings)
+        {
+            this(i, flag, notificationtype);
         }
     }
 
-    public boolean areNotificationsSystemControlled() {
+
+    private final ImmutableMap channelSettings;
+    private final Map channels = new EnumMap(com/lumiyaviewer/lumiya/ui/notify/NotificationChannels$Channel);
+    private final Object lock = new Object();
+
+    public OreoNotificationChannelManager()
+    {
+        channelSettings = ImmutableMap.of(NotificationChannels.Channel.OnlineStatus, new NotificationChannelSettings(2, false, null, null), NotificationChannels.Channel.Local, new NotificationChannelSettings(3, true, NotificationType.LocalChat, null), NotificationChannels.Channel.Group, new NotificationChannelSettings(3, true, NotificationType.Group, null), NotificationChannels.Channel.IM, new NotificationChannelSettings(4, true, NotificationType.Private, null));
+    }
+
+    public boolean areNotificationsSystemControlled()
+    {
         return true;
     }
 
-    @Nonnull
-    public ImmutableSet<NotificationType> getEnabledTypes(Context context) {
-        NotificationChannels instance = NotificationChannels.getInstance();
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService("notification");
-        ImmutableSet.Builder builder = ImmutableSet.builder();
-        for (NotificationType notificationType : NotificationType.VALUES) {
-            NotificationChannel notificationChannel = notificationManager.getNotificationChannel(getNotificationChannelName(instance.getChannelByType(notificationType)));
-            if (notificationChannel != null && notificationChannel.getImportance() > 0) {
-                builder.add((Object) notificationType);
+    public ImmutableSet getEnabledTypes(Context context)
+    {
+        NotificationChannels notificationchannels = NotificationChannels.getInstance();
+        context = (NotificationManager)context.getSystemService("notification");
+        com.google.common.collect.ImmutableSet.Builder builder = ImmutableSet.builder();
+        Iterator iterator = NotificationType.VALUES.iterator();
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break;
             }
-        }
+            NotificationType notificationtype = (NotificationType)iterator.next();
+            NotificationChannel notificationchannel = context.getNotificationChannel(getNotificationChannelName(notificationchannels.getChannelByType(notificationtype)));
+            if (notificationchannel != null && notificationchannel.getImportance() > 0)
+            {
+                builder.add(notificationtype);
+            }
+        } while (true);
         return builder.build();
     }
 
-    @Nonnull
-    public String getNotificationChannelName(@Nonnull NotificationChannels.Channel channel) {
-        String str;
-        synchronized (this.lock) {
-            NotificationChannel notificationChannel = this.channels.get(channel);
-            if (notificationChannel != null) {
-                str = notificationChannel.getId();
-            } else {
-                Context context = LumiyaApp.getContext();
-                NotificationManager notificationManager = (NotificationManager) context.getSystemService("notification");
-                NotificationChannelSettings notificationChannelSettings = this.channelSettings.get(channel);
-                NotificationChannel notificationChannel2 = new NotificationChannel(channel.channelId, context.getString(channel.nameStringId), notificationChannelSettings.importance);
-                notificationChannel2.setDescription(context.getString(channel.descriptionStringId));
-                if (notificationChannelSettings.notificationType != null) {
-                    AudioAttributes.Builder builder = new AudioAttributes.Builder();
-                    builder.setContentType(4);
-                    builder.setUsage(5);
-                    notificationChannel2.setSound(NotificationSounds.defaultSounds.get(notificationChannelSettings.notificationType).getUri(), builder.build());
-                }
-                notificationChannel2.setShowBadge(notificationChannelSettings.showBadge);
-                Debug.Printf("Notifications: Creating new notification channel with id '%s'", channel.channelId);
-                notificationManager.createNotificationChannel(notificationChannel2);
-                this.channels.put(channel, notificationChannel2);
-                str = channel.channelId;
-            }
+    public String getNotificationChannelName(NotificationChannels.Channel channel)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        NotificationChannel notificationchannel = (NotificationChannel)channels.get(channel);
+        if (notificationchannel == null) goto _L2; else goto _L1
+_L1:
+        channel = notificationchannel.getId();
+_L4:
+        obj;
+        JVM INSTR monitorexit ;
+        return channel;
+_L2:
+        Context context = LumiyaApp.getContext();
+        NotificationManager notificationmanager = (NotificationManager)context.getSystemService("notification");
+        NotificationChannelSettings notificationchannelsettings = (NotificationChannelSettings)channelSettings.get(channel);
+        NotificationChannel notificationchannel1 = new NotificationChannel(channel.channelId, context.getString(channel.nameStringId), notificationchannelsettings.importance);
+        notificationchannel1.setDescription(context.getString(channel.descriptionStringId));
+        if (notificationchannelsettings.notificationType != null)
+        {
+            android.media.AudioAttributes.Builder builder = new android.media.AudioAttributes.Builder();
+            builder.setContentType(4);
+            builder.setUsage(5);
+            notificationchannel1.setSound(((NotificationSounds)NotificationSounds.defaultSounds.get(notificationchannelsettings.notificationType)).getUri(), builder.build());
         }
-        return str;
+        notificationchannel1.setShowBadge(notificationchannelsettings.showBadge);
+        Debug.Printf("Notifications: Creating new notification channel with id '%s'", new Object[] {
+            channel.channelId
+        });
+        notificationmanager.createNotificationChannel(notificationchannel1);
+        channels.put(channel, notificationchannel1);
+        channel = channel.channelId;
+        if (true) goto _L4; else goto _L3
+_L3:
+        channel;
+        throw channel;
     }
 
-    @Nullable
-    public String getNotificationSummary(Context context, @Nonnull NotificationChannels.Channel channel) {
-        NotificationChannel notificationChannel = ((NotificationManager) context.getSystemService("notification")).getNotificationChannel(getNotificationChannelName(channel));
-        if (notificationChannel == null) {
+    public String getNotificationSummary(Context context, NotificationChannels.Channel channel)
+    {
+        channel = ((NotificationManager)context.getSystemService("notification")).getNotificationChannel(getNotificationChannelName(channel));
+        if (channel != null)
+        {
+            switch (channel.getImportance())
+            {
+            case 3: // '\003'
+            default:
+                return context.getString(0x7f090201);
+
+            case 4: // '\004'
+            case 5: // '\005'
+                return context.getString(0x7f090203);
+
+            case 2: // '\002'
+                return context.getString(0x7f090204);
+
+            case 1: // '\001'
+                return context.getString(0x7f090205);
+
+            case 0: // '\0'
+                return context.getString(0x7f090202);
+            }
+        } else
+        {
             return null;
         }
-        switch (notificationChannel.getImportance()) {
-            case 0:
-                return context.getString(R.string.notification_summary_importance_disabled);
-            case 1:
-                return context.getString(R.string.notification_summary_importance_min);
-            case 2:
-                return context.getString(R.string.notification_summary_importance_low);
-            case 4:
-            case 5:
-                return context.getString(R.string.notification_summary_importance_high);
-            default:
-                return context.getString(R.string.notification_summary_importance_default);
-        }
     }
 
-    public boolean showSystemNotificationSettings(Context context, @Nullable Fragment fragment, @Nonnull NotificationChannels.Channel channel) {
+    public boolean showSystemNotificationSettings(Context context, Fragment fragment, NotificationChannels.Channel channel)
+    {
         Intent intent = new Intent("android.settings.CHANNEL_NOTIFICATION_SETTINGS");
         intent.putExtra("android.provider.extra.CHANNEL_ID", getNotificationChannelName(channel));
         intent.putExtra("android.provider.extra.APP_PACKAGE", context.getPackageName());
-        if (fragment != null) {
+        if (fragment != null)
+        {
             fragment.startActivityForResult(intent, 11);
-            return true;
+        } else
+        {
+            context.startActivity(intent);
         }
-        context.startActivity(intent);
         return true;
     }
 
-    public boolean useNotificationGroups() {
+    public boolean useNotificationGroups()
+    {
         return true;
     }
 }

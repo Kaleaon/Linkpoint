@@ -1,24 +1,44 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.executors;
 
-public class LoaderExecutor extends WeakExecutor {
 
-    private static class InstanceHolder {
-        /* access modifiers changed from: private */
-        public static final LoaderExecutor Instance = new LoaderExecutor((LoaderExecutor) null);
+// Referenced classes of package com.lumiyaviewer.lumiya.res.executors:
+//            WeakExecutor
 
-        private InstanceHolder() {
+public class LoaderExecutor extends WeakExecutor
+{
+    private static class InstanceHolder
+    {
+
+        private static final LoaderExecutor Instance = new LoaderExecutor(null);
+
+        static LoaderExecutor _2D_get0()
+        {
+            return Instance;
+        }
+
+
+        private InstanceHolder()
+        {
         }
     }
 
-    private LoaderExecutor() {
+
+    private LoaderExecutor()
+    {
         super("ResourceLoader", 1);
     }
 
-    /* synthetic */ LoaderExecutor(LoaderExecutor loaderExecutor) {
+    LoaderExecutor(LoaderExecutor loaderexecutor)
+    {
         this();
     }
 
-    public static LoaderExecutor getInstance() {
-        return InstanceHolder.Instance;
+    public static LoaderExecutor getInstance()
+    {
+        return InstanceHolder._2D_get0();
     }
 }

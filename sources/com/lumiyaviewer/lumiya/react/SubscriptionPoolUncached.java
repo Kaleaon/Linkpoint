@@ -1,24 +1,39 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
-import com.lumiyaviewer.lumiya.react.Subscription;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class SubscriptionPoolUncached<K, T> implements Subscribable<K, T> {
-    public Subscription<K, T> subscribe(@Nonnull K k, @Nonnull Subscription.OnData<T> onData) {
-        return subscribe(k, (Executor) null, onData, (Subscription.OnError) null);
+// Referenced classes of package com.lumiyaviewer.lumiya.react:
+//            Subscribable, Subscription
+
+public class SubscriptionPoolUncached
+    implements Subscribable
+{
+
+    public SubscriptionPoolUncached()
+    {
     }
 
-    public Subscription<K, T> subscribe(@Nonnull K k, @Nonnull Subscription.OnData<T> onData, @Nullable Subscription.OnError onError) {
-        return subscribe(k, (Executor) null, onData, onError);
+    public Subscription subscribe(Object obj, Subscription.OnData ondata)
+    {
+        return subscribe(obj, null, ondata, null);
     }
 
-    public Subscription<K, T> subscribe(@Nonnull K k, @Nullable Executor executor, @Nonnull Subscription.OnData<T> onData) {
-        return subscribe(k, executor, onData, (Subscription.OnError) null);
+    public Subscription subscribe(Object obj, Subscription.OnData ondata, Subscription.OnError onerror)
+    {
+        return subscribe(obj, null, ondata, onerror);
     }
 
-    public Subscription<K, T> subscribe(@Nonnull K k, @Nullable Executor executor, @Nonnull Subscription.OnData<T> onData, @Nullable Subscription.OnError onError) {
+    public Subscription subscribe(Object obj, Executor executor, Subscription.OnData ondata)
+    {
+        return subscribe(obj, executor, ondata, null);
+    }
+
+    public Subscription subscribe(Object obj, Executor executor, Subscription.OnData ondata, Subscription.OnError onerror)
+    {
         return null;
     }
 }

@@ -1,105 +1,146 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class DirPlacesReply extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<QueryData> QueryData_Fields = new ArrayList<>();
-    public ArrayList<QueryReplies> QueryReplies_Fields = new ArrayList<>();
-    public ArrayList<StatusData> StatusData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class DirPlacesReply extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class QueryData {
+    public static class QueryData
+    {
+
         public UUID QueryID;
+
+        public QueryData()
+        {
+        }
     }
 
-    public static class QueryReplies {
+    public static class QueryReplies
+    {
+
         public boolean Auction;
         public float Dwell;
         public boolean ForSale;
-        public byte[] Name;
+        public byte Name[];
         public UUID ParcelID;
+
+        public QueryReplies()
+        {
+        }
     }
 
-    public static class StatusData {
+    public static class StatusData
+    {
+
         public int Status;
-    }
 
-    public DirPlacesReply() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        int size = (this.QueryData_Fields.size() * 16) + 21 + 1;
-        Iterator<T> it = this.QueryReplies_Fields.iterator();
-        while (true) {
-            int i = size;
-            if (!it.hasNext()) {
-                return i + 1 + (this.StatusData_Fields.size() * 4);
-            }
-            size = ((QueryReplies) it.next()).Name.length + 17 + 1 + 1 + 4 + i;
+        public StatusData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDirPlacesReply(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList QueryData_Fields;
+    public ArrayList QueryReplies_Fields;
+    public ArrayList StatusData_Fields;
+
+    public DirPlacesReply()
+    {
+        QueryData_Fields = new ArrayList();
+        QueryReplies_Fields = new ArrayList();
+        StatusData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 35);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        byteBuffer.put((byte) this.QueryData_Fields.size());
-        for (QueryData queryData : this.QueryData_Fields) {
-            packUUID(byteBuffer, queryData.QueryID);
-        }
-        byteBuffer.put((byte) this.QueryReplies_Fields.size());
-        for (QueryReplies queryReplies : this.QueryReplies_Fields) {
-            packUUID(byteBuffer, queryReplies.ParcelID);
-            packVariable(byteBuffer, queryReplies.Name, 1);
-            packBoolean(byteBuffer, queryReplies.ForSale);
-            packBoolean(byteBuffer, queryReplies.Auction);
-            packFloat(byteBuffer, queryReplies.Dwell);
-        }
-        byteBuffer.put((byte) this.StatusData_Fields.size());
-        for (StatusData statusData : this.StatusData_Fields) {
-            packInt(byteBuffer, statusData.Status);
-        }
+    public int CalcPayloadSize()
+    {
+        int i = QueryData_Fields.size();
+        Iterator iterator = QueryReplies_Fields.iterator();
+        for (i = i * 16 + 21 + 1; iterator.hasNext(); i = ((QueryReplies)iterator.next()).Name.length + 17 + 1 + 1 + 4 + i) { }
+        return i + 1 + StatusData_Fields.size() * 4;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            QueryData queryData = new QueryData();
-            queryData.QueryID = unpackUUID(byteBuffer);
-            this.QueryData_Fields.add(queryData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleDirPlacesReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)35);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        bytebuffer.put((byte)QueryData_Fields.size());
+        for (Iterator iterator = QueryData_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, ((QueryData)iterator.next()).QueryID)) { }
+        bytebuffer.put((byte)QueryReplies_Fields.size());
+        QueryReplies queryreplies;
+        for (Iterator iterator1 = QueryReplies_Fields.iterator(); iterator1.hasNext(); packFloat(bytebuffer, queryreplies.Dwell))
+        {
+            queryreplies = (QueryReplies)iterator1.next();
+            packUUID(bytebuffer, queryreplies.ParcelID);
+            packVariable(bytebuffer, queryreplies.Name, 1);
+            packBoolean(bytebuffer, queryreplies.ForSale);
+            packBoolean(bytebuffer, queryreplies.Auction);
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < b2; i2++) {
-            QueryReplies queryReplies = new QueryReplies();
-            queryReplies.ParcelID = unpackUUID(byteBuffer);
-            queryReplies.Name = unpackVariable(byteBuffer, 1);
-            queryReplies.ForSale = unpackBoolean(byteBuffer);
-            queryReplies.Auction = unpackBoolean(byteBuffer);
-            queryReplies.Dwell = unpackFloat(byteBuffer);
-            this.QueryReplies_Fields.add(queryReplies);
+
+        bytebuffer.put((byte)StatusData_Fields.size());
+        for (Iterator iterator2 = StatusData_Fields.iterator(); iterator2.hasNext(); packInt(bytebuffer, ((StatusData)iterator2.next()).Status)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            QueryData querydata = new QueryData();
+            querydata.QueryID = unpackUUID(bytebuffer);
+            QueryData_Fields.add(querydata);
         }
-        byte b3 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i3 = 0; i3 < b3; i3++) {
-            StatusData statusData = new StatusData();
-            statusData.Status = unpackInt(byteBuffer);
-            this.StatusData_Fields.add(statusData);
+
+        byte0 = bytebuffer.get();
+        for (int j = 0; j < (byte0 & 0xff); j++)
+        {
+            QueryReplies queryreplies = new QueryReplies();
+            queryreplies.ParcelID = unpackUUID(bytebuffer);
+            queryreplies.Name = unpackVariable(bytebuffer, 1);
+            queryreplies.ForSale = unpackBoolean(bytebuffer);
+            queryreplies.Auction = unpackBoolean(bytebuffer);
+            queryreplies.Dwell = unpackFloat(bytebuffer);
+            QueryReplies_Fields.add(queryreplies);
         }
+
+        byte0 = bytebuffer.get();
+        for (int k = ((flag) ? 1 : 0); k < (byte0 & 0xff); k++)
+        {
+            StatusData statusdata = new StatusData();
+            statusdata.Status = unpackInt(bytebuffer);
+            StatusData_Fields.add(statusdata);
+        }
+
     }
 }

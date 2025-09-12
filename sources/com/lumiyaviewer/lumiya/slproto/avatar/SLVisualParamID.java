@@ -1,469 +1,1010 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.avatar;
 
-public enum SLVisualParamID {
-    Male_Skeleton,
-    Height,
-    Thickness,
-    Shoulders,
-    Hip_Width,
-    Hip_Length,
-    Torso_Length,
-    EyeBone_Spread,
-    EyeBone_Head_Shear,
-    EyeBone_Head_Elongate,
-    EyeBone_Bug,
-    Head_Size,
-    Shoe_Heels,
-    Shoe_Platform,
-    Hand_Size,
-    Neck_Thickness,
-    EyeBone_Big_Eyes,
-    Leg_Length,
-    Arm_Length,
-    Neck_Length,
-    Hover,
-    Nose_Big_Out,
-    Broad_Nostrils,
-    Bulbous_Nose,
-    Wide_Nose,
-    Crooked_Nose,
-    Lip_Width,
-    Tall_Lips,
-    Lip_Thickness,
-    Fat_Upper_Lip,
-    Fat_Lower_Lip,
-    Mouth_Height,
-    Frown_Mouth,
-    Smile_Mouth,
-    Lip_Cleft_Deep,
-    Wide_Lip_Cleft,
-    Shift_Mouth,
-    Big_Ears,
-    Ears_Out,
-    Pointy_Ears,
-    Deep_Chin,
-    Jaw_Angle,
-    Jaw_Jut,
-    Bulbous_Nose_Tip,
-    Weak_Chin,
-    Double_Chin,
-    Wide_Eyes,
-    Eyelid_Corner_Up,
-    Eyelid_Inner_Corner_Up,
-    Puffy_Lower_Lids,
-    Forehead_Angle,
-    Squash_Stretch_Head,
-    Big_Brow,
-    Noble_Nose_Bridge,
-    Lower_Bridge_Nose,
-    Wide_Nose_Bridge,
-    Low_Septum_Nose,
-    Sunken_Cheeks,
-    Square_Jaw,
-    Puffy_Upper_Cheeks,
-    Upper_Eyelid_Fold,
-    Baggy_Eyes,
-    High_Cheek_Bones,
-    Upturned_Nose_Tip,
-    Male_Package,
-    Square_Head,
-    Egg_Head,
-    Eyebrow_Size,
-    Arced_Eyebrows,
-    Lower_Eyebrows,
-    Pointy_Eyebrows,
-    Hair_Volume,
-    Hair_Volume_Small,
-    Hair_Big_Front,
-    Hair_Big_Top,
-    Hair_Big_Back,
-    Hair_Spiked,
-    Hair_Part_Middle,
-    Hair_Part_Right,
-    Hair_Part_Left,
-    Hair_Sides_Full,
-    Bangs_Front_Up,
-    Bangs_Front_Down,
-    Bangs_Sides_Up,
-    Bangs_Sides_Down,
-    Bangs_Back_Up,
-    Bangs_Back_Down,
-    Hair_Front_Down,
-    Hair_Front_Up,
-    Hair_Sides_Down,
-    Hair_Sides_Up,
-    Hair_Back_Down,
-    Hair_Back_Up,
-    Hair_Rumpled,
-    Hair_Swept_Back,
-    Hair_Swept_Forward,
-    Hair_Tilt_Right,
-    Hair_Tilt_Left,
-    Bangs_Part_Middle,
-    Hair_Egg_Head,
-    Hair_Squash_Stretch_Head,
-    Hair_Square_Head,
-    Hair_Round_Head,
-    Hair_Forehead_Round,
-    Hair_Forehead_Slant,
-    Shear_Head_Hair,
-    Elongate_Head_Hair,
-    Hair_Shear_Back,
-    Hair_Shear_Front,
-    Hair_Taper_Back,
-    Hair_Taper_Front,
-    Hair_Pigtails_Short,
-    Hair_Pigtails_Med,
-    Hair_Pigtails_Medlong,
-    Hair_Pigtails_Long,
-    Hair_Ponytail_Short,
-    Hair_Ponytail_Med,
-    Hair_Ponytail_Long,
-    Cleft_Chin,
-    Jowls,
-    Cleft_Chin_Upper,
-    Attached_Earlobes,
-    Lips_Thin,
-    Lips_Fat,
-    Wide_Upper_Lip,
-    Wide_Lower_Lip,
-    Round_Head,
-    Eye_Spread,
-    Displace_Hair_Facial,
-    Fat_Head,
-    Forehead_Round,
-    Forehead_Slant,
-    Shear_Head,
-    Elongate_Head,
-    Pop_Eye,
-    Head_Eyes_Big,
-    Bug_Eyed_Head,
-    Express_Closed_Mouth,
-    Express_Tongue_Out,
-    Express_Surprise_Emote,
-    Express_Wink_Emote,
-    Express_Embarrassed_Emote,
-    Express_Shrug_Emote,
-    Express_Kiss,
-    Express_Bored_Emote,
-    Express_Repulsed_Emote,
-    Express_Disdain,
-    Express_Afraid_Emote,
-    Express_Worry_Emote,
-    Express_Cry_Emote,
-    Express_Sad_Emote,
-    Express_Anger_Emote,
-    Express_Frown,
-    Express_Laugh_Emote,
-    Express_Toothsmile,
-    Express_Smile,
-    Express_Open_Mouth,
-    Lipsync_Aah,
-    Lipsync_Ooh,
-    Male_Head,
-    Old,
-    Furrowed_Eyebrows,
-    Surprised_Eyebrows,
-    Worried_Eyebrows,
-    Blink_Left,
-    Blink_Right,
-    Eyelashes_Long,
-    Big_Belly_Torso,
-    Big_Chest,
-    Small_Chest,
-    No_Chest,
-    Muscular_Torso,
-    Scrawny_Torso,
-    Scrawny_Torso_Male,
-    Fat_Torso,
-    Breast_Gravity,
-    Displace_Loose_Upperbody,
-    Shirtsleeve_flair,
-    Love_Handles,
-    Breast_Female_Cleavage,
-    Chest_Male_No_Pecs,
-    Male_Torso,
-    Hands_Relaxed,
-    Hands_Point,
-    Hands_Fist,
-    Hands_Relaxed_L,
-    Hands_Point_L,
-    Hands_Fist_L,
-    Hands_Relaxed_R,
-    Hands_Point_R,
-    Hands_Fist_R,
-    Hands_Typing,
-    Hands_Salute_R,
-    Hands_Peace_R,
-    Hands_Spread_R,
-    Breast_Physics_UpDown_Driven,
-    Breast_Physics_InOut_Driven,
-    Belly_Physics_Torso_UpDown_Driven,
-    Breast_Physics_LeftRight_Driven,
-    Big_Belly_Legs,
-    Big_Butt_Legs,
-    Small_Butt,
-    Muscular_Legs,
-    Scrawny_Legs,
-    Bowed_Legs,
-    Shoe_Heel_Height,
-    Shoe_Platform_Height,
-    Shoe_Platform_Width,
-    Shoe_Heel_Point,
-    Shoe_Heel_Thick,
-    Shoe_Toe_Point,
-    Shoe_Toe_Square,
-    Shoe_Toe_Thick,
-    Foot_Size,
-    Displace_Loose_Lowerbody,
-    Leg_Pantflair,
-    Leg_Longcuffs,
-    Low_Crotch,
-    Fat_Legs,
-    Saddlebags,
-    Male_Legs,
-    Belly_Physics_Legs_UpDown_Driven,
-    Butt_Physics_UpDown_Driven,
-    Butt_Physics_LeftRight_Driven,
-    Eyeball_Size,
-    skirt_poofy,
-    skirt_loose,
-    skirt_tight,
-    skirt_smallbutt,
-    skirt_bustle,
-    skirt_bowlegs,
-    skirt_bigbutt,
-    skirt_belly,
-    skirt_saddlebags,
-    skirt_chubby,
-    skirt_lovehandles,
-    skirt_male,
-    Belly_Physics_Skirt_UpDown_Driven,
-    Pigment,
-    Red_Skin,
-    Rainbow_Color,
-    Blonde_Hair,
-    Red_Hair,
-    White_Hair,
-    Eye_Color,
-    Eye_Lightness,
-    Bump_base,
-    Shading,
-    Rosy_Complexion,
-    Lip_Pinkness,
-    Wrinkles,
-    Freckles,
-    Eyebrow_Size_Bump,
-    Eyebrow_Density_Bump,
-    Eyebrow_Density,
-    Lipstick_Color,
-    Lipstick,
-    Lipgloss,
-    Blush,
-    Blush_Color,
-    Blush_Opacity,
-    Out_Shdw_Color,
-    Out_Shdw_Opacity,
-    Outer_Shadow,
-    In_Shdw_Color,
-    In_Shdw_Opacity,
-    Inner_Shadow,
-    Eyeliner,
-    Eyeliner_Color,
-    Sideburns_bump,
-    Moustache_bump,
-    Soulpatch_bump,
-    Chin_Curtains_bump,
-    Five_o_Clock_Shadow_bump,
-    Sideburns,
-    Moustache,
-    Soulpatch,
-    Chin_Curtains,
-    Five_o_Clock_Shadow,
-    tattoo_head_red,
-    tattoo_head_green,
-    tattoo_head_blue,
-    Bump_upperdef,
-    freckles_upper,
-    tattoo_upper_red,
-    tattoo_upper_green,
-    tattoo_upper_blue,
-    Sleeve_Length_bump,
-    Bottom_bump,
-    Collar_Front_bump,
-    Collar_Back_bump,
-    undershirt_red,
-    undershirt_green,
-    undershirt_blue,
-    Sleeve_Length,
-    Bottom,
-    Collar_Front,
-    Collar_Back,
-    Nail_Polish,
-    Nail_Polish_Color,
-    Glove_Length_bump,
-    Glove_Fingers_bump,
-    gloves_red,
-    gloves_green,
-    gloves_blue,
-    Glove_Length,
-    Glove_Fingers,
-    Upper_Clothes_Shading,
-    Sleeve_Length_Shadow,
-    Shirt_Shadow_Bottom,
-    Collar_Front_Shadow_Height,
-    Collar_Back_Shadow_Height,
-    Sleeve_Length_Cloth,
-    Shirt_Bottom_Cloth,
-    Collar_Front_Height_Cloth,
-    Collar_Back_Height_Cloth,
-    Shirt_Wrinkles,
-    shirt_red,
-    shirt_green,
-    shirt_blue,
-    Jacket_Sleeve_Length_bump,
-    Jacket_Collar_Front_bump,
-    Jacket_Collar_Back_bump,
-    jacket_bottom_length_upper_bump,
-    jacket_open_upper_bump,
-    jacket_upper_Wrinkles,
-    upper_jacket_red,
-    upper_jacket_green,
-    upper_jacket_blue,
-    jacket_Sleeve_Length,
-    jacket_Collar_Front,
-    jacket_Collar_Back,
-    bottom_length_upper,
-    open_upper,
-    freckles_lower,
-    tattoo_lower_red,
-    tattoo_lower_green,
-    tattoo_lower_blue,
-    Pants_Length,
-    Pants_Waist,
-    underpants_red,
-    underpants_green,
-    underpants_blue,
-    Socks_Length_bump,
-    socks_red,
-    socks_green,
-    socks_blue,
-    Shoe_Height_bump,
-    shoes_red,
-    shoes_green,
-    shoes_blue,
-    Shoe_Height,
-    Lower_Clothes_Shading,
-    Waist_Height_Shadow,
-    Pants_Length_Shadow,
-    Waist_Height_Cloth,
-    Pants_Length_Cloth,
-    Pants_Wrinkles,
-    pants_red,
-    pants_green,
-    pants_blue,
-    jacket_bottom_length_lower_bump,
-    jacket_open_lower_bump,
-    lower_jacket_red,
-    lower_jacket_green,
-    lower_jacket_blue,
-    bottom_length_lower,
-    open_lower,
-    skirt_red,
-    skirt_green,
-    skirt_blue,
-    Skirt_Length,
-    Slit_Front,
-    Slit_Back,
-    Slit_Left,
-    Slit_Right,
-    Loose_Upper_Clothing,
-    Loose_Lower_Clothing,
-    Waist_Height,
-    Shirt_Bottom,
-    Body_Definition,
-    Body_Freckles,
-    Facial_Definition,
-    Lip_Thickness_1,
-    Lip_Ratio,
-    Eye_Spacing,
-    Eye_Depth,
-    Heel_Height,
-    Heel_Shape,
-    Toe_Shape,
-    Platform_Height,
-    Head_Shape,
-    Belly_Size,
-    Body_Fat,
-    Front_Fringe,
-    Side_Fringe,
-    Back_Fringe,
-    Hair_Front,
-    Hair_Sides,
-    Hair_Back,
-    Hair_Sweep,
-    Hair_Tilt,
-    open_jacket,
-    Breast_Size,
-    Torso_Muscles,
-    Leg_Muscles,
-    male,
-    Mouth_Corner,
-    Face_Shear,
-    Head_Length,
-    Eye_Size,
-    Hair_Thickness,
-    Hair_Volume_1,
-    jacket_red,
-    jacket_green,
-    jacket_blue,
-    Pigtails,
-    Ponytail,
-    Butt_Size,
-    skirt_looseness,
-    Socks_Length,
-    Jacket_Wrinkles,
-    tattoo_red,
-    tattoo_green,
-    tattoo_blue,
-    Breast_Physics_UpDown_Controller,
-    Breast_Physics_InOut_Controller,
-    Belly_Physics_UpDown_Controller,
-    Butt_Physics_UpDown_Controller,
-    Butt_Physics_LeftRight_Controller,
-    Breast_Physics_LeftRight_Controller,
-    Breast_Physics_Mass,
-    Breast_Physics_Gravity,
-    Breast_Physics_Drag,
-    Breast_Physics_UpDown_Max_Effect,
-    Breast_Physics_UpDown_Spring,
-    Breast_Physics_UpDown_Gain,
-    Breast_Physics_UpDown_Damping,
-    Breast_Physics_InOut_Max_Effect,
-    Breast_Physics_InOut_Spring,
-    Breast_Physics_InOut_Gain,
-    Breast_Physics_InOut_Damping,
-    Belly_Physics_Mass,
-    Belly_Physics_Gravity,
-    Belly_Physics_Drag,
-    Belly_Physics_UpDown_Max_Effect,
-    Belly_Physics_UpDown_Spring,
-    Belly_Physics_UpDown_Gain,
-    Belly_Physics_UpDown_Damping,
-    Butt_Physics_Mass,
-    Butt_Physics_Gravity,
-    Butt_Physics_Drag,
-    Butt_Physics_UpDown_Max_Effect,
-    Butt_Physics_UpDown_Spring,
-    Butt_Physics_UpDown_Gain,
-    Butt_Physics_UpDown_Damping,
-    Butt_Physics_LeftRight_Max_Effect,
-    Butt_Physics_LeftRight_Spring,
-    Butt_Physics_LeftRight_Gain,
-    Butt_Physics_LeftRight_Damping,
-    Breast_Physics_LeftRight_Max_Effect,
-    Breast_Physics_LeftRight_Spring,
-    Breast_Physics_LeftRight_Gain,
-    Breast_Physics_LeftRight_Damping,
-    AppearanceMessage_Version
+
+public final class SLVisualParamID extends Enum
+{
+
+    private static final SLVisualParamID $VALUES[];
+    public static final SLVisualParamID AppearanceMessage_Version;
+    public static final SLVisualParamID Arced_Eyebrows;
+    public static final SLVisualParamID Arm_Length;
+    public static final SLVisualParamID Attached_Earlobes;
+    public static final SLVisualParamID Back_Fringe;
+    public static final SLVisualParamID Baggy_Eyes;
+    public static final SLVisualParamID Bangs_Back_Down;
+    public static final SLVisualParamID Bangs_Back_Up;
+    public static final SLVisualParamID Bangs_Front_Down;
+    public static final SLVisualParamID Bangs_Front_Up;
+    public static final SLVisualParamID Bangs_Part_Middle;
+    public static final SLVisualParamID Bangs_Sides_Down;
+    public static final SLVisualParamID Bangs_Sides_Up;
+    public static final SLVisualParamID Belly_Physics_Drag;
+    public static final SLVisualParamID Belly_Physics_Gravity;
+    public static final SLVisualParamID Belly_Physics_Legs_UpDown_Driven;
+    public static final SLVisualParamID Belly_Physics_Mass;
+    public static final SLVisualParamID Belly_Physics_Skirt_UpDown_Driven;
+    public static final SLVisualParamID Belly_Physics_Torso_UpDown_Driven;
+    public static final SLVisualParamID Belly_Physics_UpDown_Controller;
+    public static final SLVisualParamID Belly_Physics_UpDown_Damping;
+    public static final SLVisualParamID Belly_Physics_UpDown_Gain;
+    public static final SLVisualParamID Belly_Physics_UpDown_Max_Effect;
+    public static final SLVisualParamID Belly_Physics_UpDown_Spring;
+    public static final SLVisualParamID Belly_Size;
+    public static final SLVisualParamID Big_Belly_Legs;
+    public static final SLVisualParamID Big_Belly_Torso;
+    public static final SLVisualParamID Big_Brow;
+    public static final SLVisualParamID Big_Butt_Legs;
+    public static final SLVisualParamID Big_Chest;
+    public static final SLVisualParamID Big_Ears;
+    public static final SLVisualParamID Blink_Left;
+    public static final SLVisualParamID Blink_Right;
+    public static final SLVisualParamID Blonde_Hair;
+    public static final SLVisualParamID Blush;
+    public static final SLVisualParamID Blush_Color;
+    public static final SLVisualParamID Blush_Opacity;
+    public static final SLVisualParamID Body_Definition;
+    public static final SLVisualParamID Body_Fat;
+    public static final SLVisualParamID Body_Freckles;
+    public static final SLVisualParamID Bottom;
+    public static final SLVisualParamID Bottom_bump;
+    public static final SLVisualParamID Bowed_Legs;
+    public static final SLVisualParamID Breast_Female_Cleavage;
+    public static final SLVisualParamID Breast_Gravity;
+    public static final SLVisualParamID Breast_Physics_Drag;
+    public static final SLVisualParamID Breast_Physics_Gravity;
+    public static final SLVisualParamID Breast_Physics_InOut_Controller;
+    public static final SLVisualParamID Breast_Physics_InOut_Damping;
+    public static final SLVisualParamID Breast_Physics_InOut_Driven;
+    public static final SLVisualParamID Breast_Physics_InOut_Gain;
+    public static final SLVisualParamID Breast_Physics_InOut_Max_Effect;
+    public static final SLVisualParamID Breast_Physics_InOut_Spring;
+    public static final SLVisualParamID Breast_Physics_LeftRight_Controller;
+    public static final SLVisualParamID Breast_Physics_LeftRight_Damping;
+    public static final SLVisualParamID Breast_Physics_LeftRight_Driven;
+    public static final SLVisualParamID Breast_Physics_LeftRight_Gain;
+    public static final SLVisualParamID Breast_Physics_LeftRight_Max_Effect;
+    public static final SLVisualParamID Breast_Physics_LeftRight_Spring;
+    public static final SLVisualParamID Breast_Physics_Mass;
+    public static final SLVisualParamID Breast_Physics_UpDown_Controller;
+    public static final SLVisualParamID Breast_Physics_UpDown_Damping;
+    public static final SLVisualParamID Breast_Physics_UpDown_Driven;
+    public static final SLVisualParamID Breast_Physics_UpDown_Gain;
+    public static final SLVisualParamID Breast_Physics_UpDown_Max_Effect;
+    public static final SLVisualParamID Breast_Physics_UpDown_Spring;
+    public static final SLVisualParamID Breast_Size;
+    public static final SLVisualParamID Broad_Nostrils;
+    public static final SLVisualParamID Bug_Eyed_Head;
+    public static final SLVisualParamID Bulbous_Nose;
+    public static final SLVisualParamID Bulbous_Nose_Tip;
+    public static final SLVisualParamID Bump_base;
+    public static final SLVisualParamID Bump_upperdef;
+    public static final SLVisualParamID Butt_Physics_Drag;
+    public static final SLVisualParamID Butt_Physics_Gravity;
+    public static final SLVisualParamID Butt_Physics_LeftRight_Controller;
+    public static final SLVisualParamID Butt_Physics_LeftRight_Damping;
+    public static final SLVisualParamID Butt_Physics_LeftRight_Driven;
+    public static final SLVisualParamID Butt_Physics_LeftRight_Gain;
+    public static final SLVisualParamID Butt_Physics_LeftRight_Max_Effect;
+    public static final SLVisualParamID Butt_Physics_LeftRight_Spring;
+    public static final SLVisualParamID Butt_Physics_Mass;
+    public static final SLVisualParamID Butt_Physics_UpDown_Controller;
+    public static final SLVisualParamID Butt_Physics_UpDown_Damping;
+    public static final SLVisualParamID Butt_Physics_UpDown_Driven;
+    public static final SLVisualParamID Butt_Physics_UpDown_Gain;
+    public static final SLVisualParamID Butt_Physics_UpDown_Max_Effect;
+    public static final SLVisualParamID Butt_Physics_UpDown_Spring;
+    public static final SLVisualParamID Butt_Size;
+    public static final SLVisualParamID Chest_Male_No_Pecs;
+    public static final SLVisualParamID Chin_Curtains;
+    public static final SLVisualParamID Chin_Curtains_bump;
+    public static final SLVisualParamID Cleft_Chin;
+    public static final SLVisualParamID Cleft_Chin_Upper;
+    public static final SLVisualParamID Collar_Back;
+    public static final SLVisualParamID Collar_Back_Height_Cloth;
+    public static final SLVisualParamID Collar_Back_Shadow_Height;
+    public static final SLVisualParamID Collar_Back_bump;
+    public static final SLVisualParamID Collar_Front;
+    public static final SLVisualParamID Collar_Front_Height_Cloth;
+    public static final SLVisualParamID Collar_Front_Shadow_Height;
+    public static final SLVisualParamID Collar_Front_bump;
+    public static final SLVisualParamID Crooked_Nose;
+    public static final SLVisualParamID Deep_Chin;
+    public static final SLVisualParamID Displace_Hair_Facial;
+    public static final SLVisualParamID Displace_Loose_Lowerbody;
+    public static final SLVisualParamID Displace_Loose_Upperbody;
+    public static final SLVisualParamID Double_Chin;
+    public static final SLVisualParamID Ears_Out;
+    public static final SLVisualParamID Egg_Head;
+    public static final SLVisualParamID Elongate_Head;
+    public static final SLVisualParamID Elongate_Head_Hair;
+    public static final SLVisualParamID Express_Afraid_Emote;
+    public static final SLVisualParamID Express_Anger_Emote;
+    public static final SLVisualParamID Express_Bored_Emote;
+    public static final SLVisualParamID Express_Closed_Mouth;
+    public static final SLVisualParamID Express_Cry_Emote;
+    public static final SLVisualParamID Express_Disdain;
+    public static final SLVisualParamID Express_Embarrassed_Emote;
+    public static final SLVisualParamID Express_Frown;
+    public static final SLVisualParamID Express_Kiss;
+    public static final SLVisualParamID Express_Laugh_Emote;
+    public static final SLVisualParamID Express_Open_Mouth;
+    public static final SLVisualParamID Express_Repulsed_Emote;
+    public static final SLVisualParamID Express_Sad_Emote;
+    public static final SLVisualParamID Express_Shrug_Emote;
+    public static final SLVisualParamID Express_Smile;
+    public static final SLVisualParamID Express_Surprise_Emote;
+    public static final SLVisualParamID Express_Tongue_Out;
+    public static final SLVisualParamID Express_Toothsmile;
+    public static final SLVisualParamID Express_Wink_Emote;
+    public static final SLVisualParamID Express_Worry_Emote;
+    public static final SLVisualParamID EyeBone_Big_Eyes;
+    public static final SLVisualParamID EyeBone_Bug;
+    public static final SLVisualParamID EyeBone_Head_Elongate;
+    public static final SLVisualParamID EyeBone_Head_Shear;
+    public static final SLVisualParamID EyeBone_Spread;
+    public static final SLVisualParamID Eye_Color;
+    public static final SLVisualParamID Eye_Depth;
+    public static final SLVisualParamID Eye_Lightness;
+    public static final SLVisualParamID Eye_Size;
+    public static final SLVisualParamID Eye_Spacing;
+    public static final SLVisualParamID Eye_Spread;
+    public static final SLVisualParamID Eyeball_Size;
+    public static final SLVisualParamID Eyebrow_Density;
+    public static final SLVisualParamID Eyebrow_Density_Bump;
+    public static final SLVisualParamID Eyebrow_Size;
+    public static final SLVisualParamID Eyebrow_Size_Bump;
+    public static final SLVisualParamID Eyelashes_Long;
+    public static final SLVisualParamID Eyelid_Corner_Up;
+    public static final SLVisualParamID Eyelid_Inner_Corner_Up;
+    public static final SLVisualParamID Eyeliner;
+    public static final SLVisualParamID Eyeliner_Color;
+    public static final SLVisualParamID Face_Shear;
+    public static final SLVisualParamID Facial_Definition;
+    public static final SLVisualParamID Fat_Head;
+    public static final SLVisualParamID Fat_Legs;
+    public static final SLVisualParamID Fat_Lower_Lip;
+    public static final SLVisualParamID Fat_Torso;
+    public static final SLVisualParamID Fat_Upper_Lip;
+    public static final SLVisualParamID Five_o_Clock_Shadow;
+    public static final SLVisualParamID Five_o_Clock_Shadow_bump;
+    public static final SLVisualParamID Foot_Size;
+    public static final SLVisualParamID Forehead_Angle;
+    public static final SLVisualParamID Forehead_Round;
+    public static final SLVisualParamID Forehead_Slant;
+    public static final SLVisualParamID Freckles;
+    public static final SLVisualParamID Front_Fringe;
+    public static final SLVisualParamID Frown_Mouth;
+    public static final SLVisualParamID Furrowed_Eyebrows;
+    public static final SLVisualParamID Glove_Fingers;
+    public static final SLVisualParamID Glove_Fingers_bump;
+    public static final SLVisualParamID Glove_Length;
+    public static final SLVisualParamID Glove_Length_bump;
+    public static final SLVisualParamID Hair_Back;
+    public static final SLVisualParamID Hair_Back_Down;
+    public static final SLVisualParamID Hair_Back_Up;
+    public static final SLVisualParamID Hair_Big_Back;
+    public static final SLVisualParamID Hair_Big_Front;
+    public static final SLVisualParamID Hair_Big_Top;
+    public static final SLVisualParamID Hair_Egg_Head;
+    public static final SLVisualParamID Hair_Forehead_Round;
+    public static final SLVisualParamID Hair_Forehead_Slant;
+    public static final SLVisualParamID Hair_Front;
+    public static final SLVisualParamID Hair_Front_Down;
+    public static final SLVisualParamID Hair_Front_Up;
+    public static final SLVisualParamID Hair_Part_Left;
+    public static final SLVisualParamID Hair_Part_Middle;
+    public static final SLVisualParamID Hair_Part_Right;
+    public static final SLVisualParamID Hair_Pigtails_Long;
+    public static final SLVisualParamID Hair_Pigtails_Med;
+    public static final SLVisualParamID Hair_Pigtails_Medlong;
+    public static final SLVisualParamID Hair_Pigtails_Short;
+    public static final SLVisualParamID Hair_Ponytail_Long;
+    public static final SLVisualParamID Hair_Ponytail_Med;
+    public static final SLVisualParamID Hair_Ponytail_Short;
+    public static final SLVisualParamID Hair_Round_Head;
+    public static final SLVisualParamID Hair_Rumpled;
+    public static final SLVisualParamID Hair_Shear_Back;
+    public static final SLVisualParamID Hair_Shear_Front;
+    public static final SLVisualParamID Hair_Sides;
+    public static final SLVisualParamID Hair_Sides_Down;
+    public static final SLVisualParamID Hair_Sides_Full;
+    public static final SLVisualParamID Hair_Sides_Up;
+    public static final SLVisualParamID Hair_Spiked;
+    public static final SLVisualParamID Hair_Square_Head;
+    public static final SLVisualParamID Hair_Squash_Stretch_Head;
+    public static final SLVisualParamID Hair_Sweep;
+    public static final SLVisualParamID Hair_Swept_Back;
+    public static final SLVisualParamID Hair_Swept_Forward;
+    public static final SLVisualParamID Hair_Taper_Back;
+    public static final SLVisualParamID Hair_Taper_Front;
+    public static final SLVisualParamID Hair_Thickness;
+    public static final SLVisualParamID Hair_Tilt;
+    public static final SLVisualParamID Hair_Tilt_Left;
+    public static final SLVisualParamID Hair_Tilt_Right;
+    public static final SLVisualParamID Hair_Volume;
+    public static final SLVisualParamID Hair_Volume_1;
+    public static final SLVisualParamID Hair_Volume_Small;
+    public static final SLVisualParamID Hand_Size;
+    public static final SLVisualParamID Hands_Fist;
+    public static final SLVisualParamID Hands_Fist_L;
+    public static final SLVisualParamID Hands_Fist_R;
+    public static final SLVisualParamID Hands_Peace_R;
+    public static final SLVisualParamID Hands_Point;
+    public static final SLVisualParamID Hands_Point_L;
+    public static final SLVisualParamID Hands_Point_R;
+    public static final SLVisualParamID Hands_Relaxed;
+    public static final SLVisualParamID Hands_Relaxed_L;
+    public static final SLVisualParamID Hands_Relaxed_R;
+    public static final SLVisualParamID Hands_Salute_R;
+    public static final SLVisualParamID Hands_Spread_R;
+    public static final SLVisualParamID Hands_Typing;
+    public static final SLVisualParamID Head_Eyes_Big;
+    public static final SLVisualParamID Head_Length;
+    public static final SLVisualParamID Head_Shape;
+    public static final SLVisualParamID Head_Size;
+    public static final SLVisualParamID Heel_Height;
+    public static final SLVisualParamID Heel_Shape;
+    public static final SLVisualParamID Height;
+    public static final SLVisualParamID High_Cheek_Bones;
+    public static final SLVisualParamID Hip_Length;
+    public static final SLVisualParamID Hip_Width;
+    public static final SLVisualParamID Hover;
+    public static final SLVisualParamID In_Shdw_Color;
+    public static final SLVisualParamID In_Shdw_Opacity;
+    public static final SLVisualParamID Inner_Shadow;
+    public static final SLVisualParamID Jacket_Collar_Back_bump;
+    public static final SLVisualParamID Jacket_Collar_Front_bump;
+    public static final SLVisualParamID Jacket_Sleeve_Length_bump;
+    public static final SLVisualParamID Jacket_Wrinkles;
+    public static final SLVisualParamID Jaw_Angle;
+    public static final SLVisualParamID Jaw_Jut;
+    public static final SLVisualParamID Jowls;
+    public static final SLVisualParamID Leg_Length;
+    public static final SLVisualParamID Leg_Longcuffs;
+    public static final SLVisualParamID Leg_Muscles;
+    public static final SLVisualParamID Leg_Pantflair;
+    public static final SLVisualParamID Lip_Cleft_Deep;
+    public static final SLVisualParamID Lip_Pinkness;
+    public static final SLVisualParamID Lip_Ratio;
+    public static final SLVisualParamID Lip_Thickness;
+    public static final SLVisualParamID Lip_Thickness_1;
+    public static final SLVisualParamID Lip_Width;
+    public static final SLVisualParamID Lipgloss;
+    public static final SLVisualParamID Lips_Fat;
+    public static final SLVisualParamID Lips_Thin;
+    public static final SLVisualParamID Lipstick;
+    public static final SLVisualParamID Lipstick_Color;
+    public static final SLVisualParamID Lipsync_Aah;
+    public static final SLVisualParamID Lipsync_Ooh;
+    public static final SLVisualParamID Loose_Lower_Clothing;
+    public static final SLVisualParamID Loose_Upper_Clothing;
+    public static final SLVisualParamID Love_Handles;
+    public static final SLVisualParamID Low_Crotch;
+    public static final SLVisualParamID Low_Septum_Nose;
+    public static final SLVisualParamID Lower_Bridge_Nose;
+    public static final SLVisualParamID Lower_Clothes_Shading;
+    public static final SLVisualParamID Lower_Eyebrows;
+    public static final SLVisualParamID Male_Head;
+    public static final SLVisualParamID Male_Legs;
+    public static final SLVisualParamID Male_Package;
+    public static final SLVisualParamID Male_Skeleton;
+    public static final SLVisualParamID Male_Torso;
+    public static final SLVisualParamID Moustache;
+    public static final SLVisualParamID Moustache_bump;
+    public static final SLVisualParamID Mouth_Corner;
+    public static final SLVisualParamID Mouth_Height;
+    public static final SLVisualParamID Muscular_Legs;
+    public static final SLVisualParamID Muscular_Torso;
+    public static final SLVisualParamID Nail_Polish;
+    public static final SLVisualParamID Nail_Polish_Color;
+    public static final SLVisualParamID Neck_Length;
+    public static final SLVisualParamID Neck_Thickness;
+    public static final SLVisualParamID No_Chest;
+    public static final SLVisualParamID Noble_Nose_Bridge;
+    public static final SLVisualParamID Nose_Big_Out;
+    public static final SLVisualParamID Old;
+    public static final SLVisualParamID Out_Shdw_Color;
+    public static final SLVisualParamID Out_Shdw_Opacity;
+    public static final SLVisualParamID Outer_Shadow;
+    public static final SLVisualParamID Pants_Length;
+    public static final SLVisualParamID Pants_Length_Cloth;
+    public static final SLVisualParamID Pants_Length_Shadow;
+    public static final SLVisualParamID Pants_Waist;
+    public static final SLVisualParamID Pants_Wrinkles;
+    public static final SLVisualParamID Pigment;
+    public static final SLVisualParamID Pigtails;
+    public static final SLVisualParamID Platform_Height;
+    public static final SLVisualParamID Pointy_Ears;
+    public static final SLVisualParamID Pointy_Eyebrows;
+    public static final SLVisualParamID Ponytail;
+    public static final SLVisualParamID Pop_Eye;
+    public static final SLVisualParamID Puffy_Lower_Lids;
+    public static final SLVisualParamID Puffy_Upper_Cheeks;
+    public static final SLVisualParamID Rainbow_Color;
+    public static final SLVisualParamID Red_Hair;
+    public static final SLVisualParamID Red_Skin;
+    public static final SLVisualParamID Rosy_Complexion;
+    public static final SLVisualParamID Round_Head;
+    public static final SLVisualParamID Saddlebags;
+    public static final SLVisualParamID Scrawny_Legs;
+    public static final SLVisualParamID Scrawny_Torso;
+    public static final SLVisualParamID Scrawny_Torso_Male;
+    public static final SLVisualParamID Shading;
+    public static final SLVisualParamID Shear_Head;
+    public static final SLVisualParamID Shear_Head_Hair;
+    public static final SLVisualParamID Shift_Mouth;
+    public static final SLVisualParamID Shirt_Bottom;
+    public static final SLVisualParamID Shirt_Bottom_Cloth;
+    public static final SLVisualParamID Shirt_Shadow_Bottom;
+    public static final SLVisualParamID Shirt_Wrinkles;
+    public static final SLVisualParamID Shirtsleeve_flair;
+    public static final SLVisualParamID Shoe_Heel_Height;
+    public static final SLVisualParamID Shoe_Heel_Point;
+    public static final SLVisualParamID Shoe_Heel_Thick;
+    public static final SLVisualParamID Shoe_Heels;
+    public static final SLVisualParamID Shoe_Height;
+    public static final SLVisualParamID Shoe_Height_bump;
+    public static final SLVisualParamID Shoe_Platform;
+    public static final SLVisualParamID Shoe_Platform_Height;
+    public static final SLVisualParamID Shoe_Platform_Width;
+    public static final SLVisualParamID Shoe_Toe_Point;
+    public static final SLVisualParamID Shoe_Toe_Square;
+    public static final SLVisualParamID Shoe_Toe_Thick;
+    public static final SLVisualParamID Shoulders;
+    public static final SLVisualParamID Side_Fringe;
+    public static final SLVisualParamID Sideburns;
+    public static final SLVisualParamID Sideburns_bump;
+    public static final SLVisualParamID Skirt_Length;
+    public static final SLVisualParamID Sleeve_Length;
+    public static final SLVisualParamID Sleeve_Length_Cloth;
+    public static final SLVisualParamID Sleeve_Length_Shadow;
+    public static final SLVisualParamID Sleeve_Length_bump;
+    public static final SLVisualParamID Slit_Back;
+    public static final SLVisualParamID Slit_Front;
+    public static final SLVisualParamID Slit_Left;
+    public static final SLVisualParamID Slit_Right;
+    public static final SLVisualParamID Small_Butt;
+    public static final SLVisualParamID Small_Chest;
+    public static final SLVisualParamID Smile_Mouth;
+    public static final SLVisualParamID Socks_Length;
+    public static final SLVisualParamID Socks_Length_bump;
+    public static final SLVisualParamID Soulpatch;
+    public static final SLVisualParamID Soulpatch_bump;
+    public static final SLVisualParamID Square_Head;
+    public static final SLVisualParamID Square_Jaw;
+    public static final SLVisualParamID Squash_Stretch_Head;
+    public static final SLVisualParamID Sunken_Cheeks;
+    public static final SLVisualParamID Surprised_Eyebrows;
+    public static final SLVisualParamID Tall_Lips;
+    public static final SLVisualParamID Thickness;
+    public static final SLVisualParamID Toe_Shape;
+    public static final SLVisualParamID Torso_Length;
+    public static final SLVisualParamID Torso_Muscles;
+    public static final SLVisualParamID Upper_Clothes_Shading;
+    public static final SLVisualParamID Upper_Eyelid_Fold;
+    public static final SLVisualParamID Upturned_Nose_Tip;
+    public static final SLVisualParamID Waist_Height;
+    public static final SLVisualParamID Waist_Height_Cloth;
+    public static final SLVisualParamID Waist_Height_Shadow;
+    public static final SLVisualParamID Weak_Chin;
+    public static final SLVisualParamID White_Hair;
+    public static final SLVisualParamID Wide_Eyes;
+    public static final SLVisualParamID Wide_Lip_Cleft;
+    public static final SLVisualParamID Wide_Lower_Lip;
+    public static final SLVisualParamID Wide_Nose;
+    public static final SLVisualParamID Wide_Nose_Bridge;
+    public static final SLVisualParamID Wide_Upper_Lip;
+    public static final SLVisualParamID Worried_Eyebrows;
+    public static final SLVisualParamID Wrinkles;
+    public static final SLVisualParamID bottom_length_lower;
+    public static final SLVisualParamID bottom_length_upper;
+    public static final SLVisualParamID freckles_lower;
+    public static final SLVisualParamID freckles_upper;
+    public static final SLVisualParamID gloves_blue;
+    public static final SLVisualParamID gloves_green;
+    public static final SLVisualParamID gloves_red;
+    public static final SLVisualParamID jacket_Collar_Back;
+    public static final SLVisualParamID jacket_Collar_Front;
+    public static final SLVisualParamID jacket_Sleeve_Length;
+    public static final SLVisualParamID jacket_blue;
+    public static final SLVisualParamID jacket_bottom_length_lower_bump;
+    public static final SLVisualParamID jacket_bottom_length_upper_bump;
+    public static final SLVisualParamID jacket_green;
+    public static final SLVisualParamID jacket_open_lower_bump;
+    public static final SLVisualParamID jacket_open_upper_bump;
+    public static final SLVisualParamID jacket_red;
+    public static final SLVisualParamID jacket_upper_Wrinkles;
+    public static final SLVisualParamID lower_jacket_blue;
+    public static final SLVisualParamID lower_jacket_green;
+    public static final SLVisualParamID lower_jacket_red;
+    public static final SLVisualParamID male;
+    public static final SLVisualParamID open_jacket;
+    public static final SLVisualParamID open_lower;
+    public static final SLVisualParamID open_upper;
+    public static final SLVisualParamID pants_blue;
+    public static final SLVisualParamID pants_green;
+    public static final SLVisualParamID pants_red;
+    public static final SLVisualParamID shirt_blue;
+    public static final SLVisualParamID shirt_green;
+    public static final SLVisualParamID shirt_red;
+    public static final SLVisualParamID shoes_blue;
+    public static final SLVisualParamID shoes_green;
+    public static final SLVisualParamID shoes_red;
+    public static final SLVisualParamID skirt_belly;
+    public static final SLVisualParamID skirt_bigbutt;
+    public static final SLVisualParamID skirt_blue;
+    public static final SLVisualParamID skirt_bowlegs;
+    public static final SLVisualParamID skirt_bustle;
+    public static final SLVisualParamID skirt_chubby;
+    public static final SLVisualParamID skirt_green;
+    public static final SLVisualParamID skirt_loose;
+    public static final SLVisualParamID skirt_looseness;
+    public static final SLVisualParamID skirt_lovehandles;
+    public static final SLVisualParamID skirt_male;
+    public static final SLVisualParamID skirt_poofy;
+    public static final SLVisualParamID skirt_red;
+    public static final SLVisualParamID skirt_saddlebags;
+    public static final SLVisualParamID skirt_smallbutt;
+    public static final SLVisualParamID skirt_tight;
+    public static final SLVisualParamID socks_blue;
+    public static final SLVisualParamID socks_green;
+    public static final SLVisualParamID socks_red;
+    public static final SLVisualParamID tattoo_blue;
+    public static final SLVisualParamID tattoo_green;
+    public static final SLVisualParamID tattoo_head_blue;
+    public static final SLVisualParamID tattoo_head_green;
+    public static final SLVisualParamID tattoo_head_red;
+    public static final SLVisualParamID tattoo_lower_blue;
+    public static final SLVisualParamID tattoo_lower_green;
+    public static final SLVisualParamID tattoo_lower_red;
+    public static final SLVisualParamID tattoo_red;
+    public static final SLVisualParamID tattoo_upper_blue;
+    public static final SLVisualParamID tattoo_upper_green;
+    public static final SLVisualParamID tattoo_upper_red;
+    public static final SLVisualParamID underpants_blue;
+    public static final SLVisualParamID underpants_green;
+    public static final SLVisualParamID underpants_red;
+    public static final SLVisualParamID undershirt_blue;
+    public static final SLVisualParamID undershirt_green;
+    public static final SLVisualParamID undershirt_red;
+    public static final SLVisualParamID upper_jacket_blue;
+    public static final SLVisualParamID upper_jacket_green;
+    public static final SLVisualParamID upper_jacket_red;
+
+    private SLVisualParamID(String s, int i)
+    {
+        super(s, i);
+    }
+
+    public static SLVisualParamID valueOf(String s)
+    {
+        return (SLVisualParamID)Enum.valueOf(com/lumiyaviewer/lumiya/slproto/avatar/SLVisualParamID, s);
+    }
+
+    public static SLVisualParamID[] values()
+    {
+        return $VALUES;
+    }
+
+    static 
+    {
+        Male_Skeleton = new SLVisualParamID("Male_Skeleton", 0);
+        Height = new SLVisualParamID("Height", 1);
+        Thickness = new SLVisualParamID("Thickness", 2);
+        Shoulders = new SLVisualParamID("Shoulders", 3);
+        Hip_Width = new SLVisualParamID("Hip_Width", 4);
+        Hip_Length = new SLVisualParamID("Hip_Length", 5);
+        Torso_Length = new SLVisualParamID("Torso_Length", 6);
+        EyeBone_Spread = new SLVisualParamID("EyeBone_Spread", 7);
+        EyeBone_Head_Shear = new SLVisualParamID("EyeBone_Head_Shear", 8);
+        EyeBone_Head_Elongate = new SLVisualParamID("EyeBone_Head_Elongate", 9);
+        EyeBone_Bug = new SLVisualParamID("EyeBone_Bug", 10);
+        Head_Size = new SLVisualParamID("Head_Size", 11);
+        Shoe_Heels = new SLVisualParamID("Shoe_Heels", 12);
+        Shoe_Platform = new SLVisualParamID("Shoe_Platform", 13);
+        Hand_Size = new SLVisualParamID("Hand_Size", 14);
+        Neck_Thickness = new SLVisualParamID("Neck_Thickness", 15);
+        EyeBone_Big_Eyes = new SLVisualParamID("EyeBone_Big_Eyes", 16);
+        Leg_Length = new SLVisualParamID("Leg_Length", 17);
+        Arm_Length = new SLVisualParamID("Arm_Length", 18);
+        Neck_Length = new SLVisualParamID("Neck_Length", 19);
+        Hover = new SLVisualParamID("Hover", 20);
+        Nose_Big_Out = new SLVisualParamID("Nose_Big_Out", 21);
+        Broad_Nostrils = new SLVisualParamID("Broad_Nostrils", 22);
+        Bulbous_Nose = new SLVisualParamID("Bulbous_Nose", 23);
+        Wide_Nose = new SLVisualParamID("Wide_Nose", 24);
+        Crooked_Nose = new SLVisualParamID("Crooked_Nose", 25);
+        Lip_Width = new SLVisualParamID("Lip_Width", 26);
+        Tall_Lips = new SLVisualParamID("Tall_Lips", 27);
+        Lip_Thickness = new SLVisualParamID("Lip_Thickness", 28);
+        Fat_Upper_Lip = new SLVisualParamID("Fat_Upper_Lip", 29);
+        Fat_Lower_Lip = new SLVisualParamID("Fat_Lower_Lip", 30);
+        Mouth_Height = new SLVisualParamID("Mouth_Height", 31);
+        Frown_Mouth = new SLVisualParamID("Frown_Mouth", 32);
+        Smile_Mouth = new SLVisualParamID("Smile_Mouth", 33);
+        Lip_Cleft_Deep = new SLVisualParamID("Lip_Cleft_Deep", 34);
+        Wide_Lip_Cleft = new SLVisualParamID("Wide_Lip_Cleft", 35);
+        Shift_Mouth = new SLVisualParamID("Shift_Mouth", 36);
+        Big_Ears = new SLVisualParamID("Big_Ears", 37);
+        Ears_Out = new SLVisualParamID("Ears_Out", 38);
+        Pointy_Ears = new SLVisualParamID("Pointy_Ears", 39);
+        Deep_Chin = new SLVisualParamID("Deep_Chin", 40);
+        Jaw_Angle = new SLVisualParamID("Jaw_Angle", 41);
+        Jaw_Jut = new SLVisualParamID("Jaw_Jut", 42);
+        Bulbous_Nose_Tip = new SLVisualParamID("Bulbous_Nose_Tip", 43);
+        Weak_Chin = new SLVisualParamID("Weak_Chin", 44);
+        Double_Chin = new SLVisualParamID("Double_Chin", 45);
+        Wide_Eyes = new SLVisualParamID("Wide_Eyes", 46);
+        Eyelid_Corner_Up = new SLVisualParamID("Eyelid_Corner_Up", 47);
+        Eyelid_Inner_Corner_Up = new SLVisualParamID("Eyelid_Inner_Corner_Up", 48);
+        Puffy_Lower_Lids = new SLVisualParamID("Puffy_Lower_Lids", 49);
+        Forehead_Angle = new SLVisualParamID("Forehead_Angle", 50);
+        Squash_Stretch_Head = new SLVisualParamID("Squash_Stretch_Head", 51);
+        Big_Brow = new SLVisualParamID("Big_Brow", 52);
+        Noble_Nose_Bridge = new SLVisualParamID("Noble_Nose_Bridge", 53);
+        Lower_Bridge_Nose = new SLVisualParamID("Lower_Bridge_Nose", 54);
+        Wide_Nose_Bridge = new SLVisualParamID("Wide_Nose_Bridge", 55);
+        Low_Septum_Nose = new SLVisualParamID("Low_Septum_Nose", 56);
+        Sunken_Cheeks = new SLVisualParamID("Sunken_Cheeks", 57);
+        Square_Jaw = new SLVisualParamID("Square_Jaw", 58);
+        Puffy_Upper_Cheeks = new SLVisualParamID("Puffy_Upper_Cheeks", 59);
+        Upper_Eyelid_Fold = new SLVisualParamID("Upper_Eyelid_Fold", 60);
+        Baggy_Eyes = new SLVisualParamID("Baggy_Eyes", 61);
+        High_Cheek_Bones = new SLVisualParamID("High_Cheek_Bones", 62);
+        Upturned_Nose_Tip = new SLVisualParamID("Upturned_Nose_Tip", 63);
+        Male_Package = new SLVisualParamID("Male_Package", 64);
+        Square_Head = new SLVisualParamID("Square_Head", 65);
+        Egg_Head = new SLVisualParamID("Egg_Head", 66);
+        Eyebrow_Size = new SLVisualParamID("Eyebrow_Size", 67);
+        Arced_Eyebrows = new SLVisualParamID("Arced_Eyebrows", 68);
+        Lower_Eyebrows = new SLVisualParamID("Lower_Eyebrows", 69);
+        Pointy_Eyebrows = new SLVisualParamID("Pointy_Eyebrows", 70);
+        Hair_Volume = new SLVisualParamID("Hair_Volume", 71);
+        Hair_Volume_Small = new SLVisualParamID("Hair_Volume_Small", 72);
+        Hair_Big_Front = new SLVisualParamID("Hair_Big_Front", 73);
+        Hair_Big_Top = new SLVisualParamID("Hair_Big_Top", 74);
+        Hair_Big_Back = new SLVisualParamID("Hair_Big_Back", 75);
+        Hair_Spiked = new SLVisualParamID("Hair_Spiked", 76);
+        Hair_Part_Middle = new SLVisualParamID("Hair_Part_Middle", 77);
+        Hair_Part_Right = new SLVisualParamID("Hair_Part_Right", 78);
+        Hair_Part_Left = new SLVisualParamID("Hair_Part_Left", 79);
+        Hair_Sides_Full = new SLVisualParamID("Hair_Sides_Full", 80);
+        Bangs_Front_Up = new SLVisualParamID("Bangs_Front_Up", 81);
+        Bangs_Front_Down = new SLVisualParamID("Bangs_Front_Down", 82);
+        Bangs_Sides_Up = new SLVisualParamID("Bangs_Sides_Up", 83);
+        Bangs_Sides_Down = new SLVisualParamID("Bangs_Sides_Down", 84);
+        Bangs_Back_Up = new SLVisualParamID("Bangs_Back_Up", 85);
+        Bangs_Back_Down = new SLVisualParamID("Bangs_Back_Down", 86);
+        Hair_Front_Down = new SLVisualParamID("Hair_Front_Down", 87);
+        Hair_Front_Up = new SLVisualParamID("Hair_Front_Up", 88);
+        Hair_Sides_Down = new SLVisualParamID("Hair_Sides_Down", 89);
+        Hair_Sides_Up = new SLVisualParamID("Hair_Sides_Up", 90);
+        Hair_Back_Down = new SLVisualParamID("Hair_Back_Down", 91);
+        Hair_Back_Up = new SLVisualParamID("Hair_Back_Up", 92);
+        Hair_Rumpled = new SLVisualParamID("Hair_Rumpled", 93);
+        Hair_Swept_Back = new SLVisualParamID("Hair_Swept_Back", 94);
+        Hair_Swept_Forward = new SLVisualParamID("Hair_Swept_Forward", 95);
+        Hair_Tilt_Right = new SLVisualParamID("Hair_Tilt_Right", 96);
+        Hair_Tilt_Left = new SLVisualParamID("Hair_Tilt_Left", 97);
+        Bangs_Part_Middle = new SLVisualParamID("Bangs_Part_Middle", 98);
+        Hair_Egg_Head = new SLVisualParamID("Hair_Egg_Head", 99);
+        Hair_Squash_Stretch_Head = new SLVisualParamID("Hair_Squash_Stretch_Head", 100);
+        Hair_Square_Head = new SLVisualParamID("Hair_Square_Head", 101);
+        Hair_Round_Head = new SLVisualParamID("Hair_Round_Head", 102);
+        Hair_Forehead_Round = new SLVisualParamID("Hair_Forehead_Round", 103);
+        Hair_Forehead_Slant = new SLVisualParamID("Hair_Forehead_Slant", 104);
+        Shear_Head_Hair = new SLVisualParamID("Shear_Head_Hair", 105);
+        Elongate_Head_Hair = new SLVisualParamID("Elongate_Head_Hair", 106);
+        Hair_Shear_Back = new SLVisualParamID("Hair_Shear_Back", 107);
+        Hair_Shear_Front = new SLVisualParamID("Hair_Shear_Front", 108);
+        Hair_Taper_Back = new SLVisualParamID("Hair_Taper_Back", 109);
+        Hair_Taper_Front = new SLVisualParamID("Hair_Taper_Front", 110);
+        Hair_Pigtails_Short = new SLVisualParamID("Hair_Pigtails_Short", 111);
+        Hair_Pigtails_Med = new SLVisualParamID("Hair_Pigtails_Med", 112);
+        Hair_Pigtails_Medlong = new SLVisualParamID("Hair_Pigtails_Medlong", 113);
+        Hair_Pigtails_Long = new SLVisualParamID("Hair_Pigtails_Long", 114);
+        Hair_Ponytail_Short = new SLVisualParamID("Hair_Ponytail_Short", 115);
+        Hair_Ponytail_Med = new SLVisualParamID("Hair_Ponytail_Med", 116);
+        Hair_Ponytail_Long = new SLVisualParamID("Hair_Ponytail_Long", 117);
+        Cleft_Chin = new SLVisualParamID("Cleft_Chin", 118);
+        Jowls = new SLVisualParamID("Jowls", 119);
+        Cleft_Chin_Upper = new SLVisualParamID("Cleft_Chin_Upper", 120);
+        Attached_Earlobes = new SLVisualParamID("Attached_Earlobes", 121);
+        Lips_Thin = new SLVisualParamID("Lips_Thin", 122);
+        Lips_Fat = new SLVisualParamID("Lips_Fat", 123);
+        Wide_Upper_Lip = new SLVisualParamID("Wide_Upper_Lip", 124);
+        Wide_Lower_Lip = new SLVisualParamID("Wide_Lower_Lip", 125);
+        Round_Head = new SLVisualParamID("Round_Head", 126);
+        Eye_Spread = new SLVisualParamID("Eye_Spread", 127);
+        Displace_Hair_Facial = new SLVisualParamID("Displace_Hair_Facial", 128);
+        Fat_Head = new SLVisualParamID("Fat_Head", 129);
+        Forehead_Round = new SLVisualParamID("Forehead_Round", 130);
+        Forehead_Slant = new SLVisualParamID("Forehead_Slant", 131);
+        Shear_Head = new SLVisualParamID("Shear_Head", 132);
+        Elongate_Head = new SLVisualParamID("Elongate_Head", 133);
+        Pop_Eye = new SLVisualParamID("Pop_Eye", 134);
+        Head_Eyes_Big = new SLVisualParamID("Head_Eyes_Big", 135);
+        Bug_Eyed_Head = new SLVisualParamID("Bug_Eyed_Head", 136);
+        Express_Closed_Mouth = new SLVisualParamID("Express_Closed_Mouth", 137);
+        Express_Tongue_Out = new SLVisualParamID("Express_Tongue_Out", 138);
+        Express_Surprise_Emote = new SLVisualParamID("Express_Surprise_Emote", 139);
+        Express_Wink_Emote = new SLVisualParamID("Express_Wink_Emote", 140);
+        Express_Embarrassed_Emote = new SLVisualParamID("Express_Embarrassed_Emote", 141);
+        Express_Shrug_Emote = new SLVisualParamID("Express_Shrug_Emote", 142);
+        Express_Kiss = new SLVisualParamID("Express_Kiss", 143);
+        Express_Bored_Emote = new SLVisualParamID("Express_Bored_Emote", 144);
+        Express_Repulsed_Emote = new SLVisualParamID("Express_Repulsed_Emote", 145);
+        Express_Disdain = new SLVisualParamID("Express_Disdain", 146);
+        Express_Afraid_Emote = new SLVisualParamID("Express_Afraid_Emote", 147);
+        Express_Worry_Emote = new SLVisualParamID("Express_Worry_Emote", 148);
+        Express_Cry_Emote = new SLVisualParamID("Express_Cry_Emote", 149);
+        Express_Sad_Emote = new SLVisualParamID("Express_Sad_Emote", 150);
+        Express_Anger_Emote = new SLVisualParamID("Express_Anger_Emote", 151);
+        Express_Frown = new SLVisualParamID("Express_Frown", 152);
+        Express_Laugh_Emote = new SLVisualParamID("Express_Laugh_Emote", 153);
+        Express_Toothsmile = new SLVisualParamID("Express_Toothsmile", 154);
+        Express_Smile = new SLVisualParamID("Express_Smile", 155);
+        Express_Open_Mouth = new SLVisualParamID("Express_Open_Mouth", 156);
+        Lipsync_Aah = new SLVisualParamID("Lipsync_Aah", 157);
+        Lipsync_Ooh = new SLVisualParamID("Lipsync_Ooh", 158);
+        Male_Head = new SLVisualParamID("Male_Head", 159);
+        Old = new SLVisualParamID("Old", 160);
+        Furrowed_Eyebrows = new SLVisualParamID("Furrowed_Eyebrows", 161);
+        Surprised_Eyebrows = new SLVisualParamID("Surprised_Eyebrows", 162);
+        Worried_Eyebrows = new SLVisualParamID("Worried_Eyebrows", 163);
+        Blink_Left = new SLVisualParamID("Blink_Left", 164);
+        Blink_Right = new SLVisualParamID("Blink_Right", 165);
+        Eyelashes_Long = new SLVisualParamID("Eyelashes_Long", 166);
+        Big_Belly_Torso = new SLVisualParamID("Big_Belly_Torso", 167);
+        Big_Chest = new SLVisualParamID("Big_Chest", 168);
+        Small_Chest = new SLVisualParamID("Small_Chest", 169);
+        No_Chest = new SLVisualParamID("No_Chest", 170);
+        Muscular_Torso = new SLVisualParamID("Muscular_Torso", 171);
+        Scrawny_Torso = new SLVisualParamID("Scrawny_Torso", 172);
+        Scrawny_Torso_Male = new SLVisualParamID("Scrawny_Torso_Male", 173);
+        Fat_Torso = new SLVisualParamID("Fat_Torso", 174);
+        Breast_Gravity = new SLVisualParamID("Breast_Gravity", 175);
+        Displace_Loose_Upperbody = new SLVisualParamID("Displace_Loose_Upperbody", 176);
+        Shirtsleeve_flair = new SLVisualParamID("Shirtsleeve_flair", 177);
+        Love_Handles = new SLVisualParamID("Love_Handles", 178);
+        Breast_Female_Cleavage = new SLVisualParamID("Breast_Female_Cleavage", 179);
+        Chest_Male_No_Pecs = new SLVisualParamID("Chest_Male_No_Pecs", 180);
+        Male_Torso = new SLVisualParamID("Male_Torso", 181);
+        Hands_Relaxed = new SLVisualParamID("Hands_Relaxed", 182);
+        Hands_Point = new SLVisualParamID("Hands_Point", 183);
+        Hands_Fist = new SLVisualParamID("Hands_Fist", 184);
+        Hands_Relaxed_L = new SLVisualParamID("Hands_Relaxed_L", 185);
+        Hands_Point_L = new SLVisualParamID("Hands_Point_L", 186);
+        Hands_Fist_L = new SLVisualParamID("Hands_Fist_L", 187);
+        Hands_Relaxed_R = new SLVisualParamID("Hands_Relaxed_R", 188);
+        Hands_Point_R = new SLVisualParamID("Hands_Point_R", 189);
+        Hands_Fist_R = new SLVisualParamID("Hands_Fist_R", 190);
+        Hands_Typing = new SLVisualParamID("Hands_Typing", 191);
+        Hands_Salute_R = new SLVisualParamID("Hands_Salute_R", 192);
+        Hands_Peace_R = new SLVisualParamID("Hands_Peace_R", 193);
+        Hands_Spread_R = new SLVisualParamID("Hands_Spread_R", 194);
+        Breast_Physics_UpDown_Driven = new SLVisualParamID("Breast_Physics_UpDown_Driven", 195);
+        Breast_Physics_InOut_Driven = new SLVisualParamID("Breast_Physics_InOut_Driven", 196);
+        Belly_Physics_Torso_UpDown_Driven = new SLVisualParamID("Belly_Physics_Torso_UpDown_Driven", 197);
+        Breast_Physics_LeftRight_Driven = new SLVisualParamID("Breast_Physics_LeftRight_Driven", 198);
+        Big_Belly_Legs = new SLVisualParamID("Big_Belly_Legs", 199);
+        Big_Butt_Legs = new SLVisualParamID("Big_Butt_Legs", 200);
+        Small_Butt = new SLVisualParamID("Small_Butt", 201);
+        Muscular_Legs = new SLVisualParamID("Muscular_Legs", 202);
+        Scrawny_Legs = new SLVisualParamID("Scrawny_Legs", 203);
+        Bowed_Legs = new SLVisualParamID("Bowed_Legs", 204);
+        Shoe_Heel_Height = new SLVisualParamID("Shoe_Heel_Height", 205);
+        Shoe_Platform_Height = new SLVisualParamID("Shoe_Platform_Height", 206);
+        Shoe_Platform_Width = new SLVisualParamID("Shoe_Platform_Width", 207);
+        Shoe_Heel_Point = new SLVisualParamID("Shoe_Heel_Point", 208);
+        Shoe_Heel_Thick = new SLVisualParamID("Shoe_Heel_Thick", 209);
+        Shoe_Toe_Point = new SLVisualParamID("Shoe_Toe_Point", 210);
+        Shoe_Toe_Square = new SLVisualParamID("Shoe_Toe_Square", 211);
+        Shoe_Toe_Thick = new SLVisualParamID("Shoe_Toe_Thick", 212);
+        Foot_Size = new SLVisualParamID("Foot_Size", 213);
+        Displace_Loose_Lowerbody = new SLVisualParamID("Displace_Loose_Lowerbody", 214);
+        Leg_Pantflair = new SLVisualParamID("Leg_Pantflair", 215);
+        Leg_Longcuffs = new SLVisualParamID("Leg_Longcuffs", 216);
+        Low_Crotch = new SLVisualParamID("Low_Crotch", 217);
+        Fat_Legs = new SLVisualParamID("Fat_Legs", 218);
+        Saddlebags = new SLVisualParamID("Saddlebags", 219);
+        Male_Legs = new SLVisualParamID("Male_Legs", 220);
+        Belly_Physics_Legs_UpDown_Driven = new SLVisualParamID("Belly_Physics_Legs_UpDown_Driven", 221);
+        Butt_Physics_UpDown_Driven = new SLVisualParamID("Butt_Physics_UpDown_Driven", 222);
+        Butt_Physics_LeftRight_Driven = new SLVisualParamID("Butt_Physics_LeftRight_Driven", 223);
+        Eyeball_Size = new SLVisualParamID("Eyeball_Size", 224);
+        skirt_poofy = new SLVisualParamID("skirt_poofy", 225);
+        skirt_loose = new SLVisualParamID("skirt_loose", 226);
+        skirt_tight = new SLVisualParamID("skirt_tight", 227);
+        skirt_smallbutt = new SLVisualParamID("skirt_smallbutt", 228);
+        skirt_bustle = new SLVisualParamID("skirt_bustle", 229);
+        skirt_bowlegs = new SLVisualParamID("skirt_bowlegs", 230);
+        skirt_bigbutt = new SLVisualParamID("skirt_bigbutt", 231);
+        skirt_belly = new SLVisualParamID("skirt_belly", 232);
+        skirt_saddlebags = new SLVisualParamID("skirt_saddlebags", 233);
+        skirt_chubby = new SLVisualParamID("skirt_chubby", 234);
+        skirt_lovehandles = new SLVisualParamID("skirt_lovehandles", 235);
+        skirt_male = new SLVisualParamID("skirt_male", 236);
+        Belly_Physics_Skirt_UpDown_Driven = new SLVisualParamID("Belly_Physics_Skirt_UpDown_Driven", 237);
+        Pigment = new SLVisualParamID("Pigment", 238);
+        Red_Skin = new SLVisualParamID("Red_Skin", 239);
+        Rainbow_Color = new SLVisualParamID("Rainbow_Color", 240);
+        Blonde_Hair = new SLVisualParamID("Blonde_Hair", 241);
+        Red_Hair = new SLVisualParamID("Red_Hair", 242);
+        White_Hair = new SLVisualParamID("White_Hair", 243);
+        Eye_Color = new SLVisualParamID("Eye_Color", 244);
+        Eye_Lightness = new SLVisualParamID("Eye_Lightness", 245);
+        Bump_base = new SLVisualParamID("Bump_base", 246);
+        Shading = new SLVisualParamID("Shading", 247);
+        Rosy_Complexion = new SLVisualParamID("Rosy_Complexion", 248);
+        Lip_Pinkness = new SLVisualParamID("Lip_Pinkness", 249);
+        Wrinkles = new SLVisualParamID("Wrinkles", 250);
+        Freckles = new SLVisualParamID("Freckles", 251);
+        Eyebrow_Size_Bump = new SLVisualParamID("Eyebrow_Size_Bump", 252);
+        Eyebrow_Density_Bump = new SLVisualParamID("Eyebrow_Density_Bump", 253);
+        Eyebrow_Density = new SLVisualParamID("Eyebrow_Density", 254);
+        Lipstick_Color = new SLVisualParamID("Lipstick_Color", 255);
+        Lipstick = new SLVisualParamID("Lipstick", 256);
+        Lipgloss = new SLVisualParamID("Lipgloss", 257);
+        Blush = new SLVisualParamID("Blush", 258);
+        Blush_Color = new SLVisualParamID("Blush_Color", 259);
+        Blush_Opacity = new SLVisualParamID("Blush_Opacity", 260);
+        Out_Shdw_Color = new SLVisualParamID("Out_Shdw_Color", 261);
+        Out_Shdw_Opacity = new SLVisualParamID("Out_Shdw_Opacity", 262);
+        Outer_Shadow = new SLVisualParamID("Outer_Shadow", 263);
+        In_Shdw_Color = new SLVisualParamID("In_Shdw_Color", 264);
+        In_Shdw_Opacity = new SLVisualParamID("In_Shdw_Opacity", 265);
+        Inner_Shadow = new SLVisualParamID("Inner_Shadow", 266);
+        Eyeliner = new SLVisualParamID("Eyeliner", 267);
+        Eyeliner_Color = new SLVisualParamID("Eyeliner_Color", 268);
+        Sideburns_bump = new SLVisualParamID("Sideburns_bump", 269);
+        Moustache_bump = new SLVisualParamID("Moustache_bump", 270);
+        Soulpatch_bump = new SLVisualParamID("Soulpatch_bump", 271);
+        Chin_Curtains_bump = new SLVisualParamID("Chin_Curtains_bump", 272);
+        Five_o_Clock_Shadow_bump = new SLVisualParamID("Five_o_Clock_Shadow_bump", 273);
+        Sideburns = new SLVisualParamID("Sideburns", 274);
+        Moustache = new SLVisualParamID("Moustache", 275);
+        Soulpatch = new SLVisualParamID("Soulpatch", 276);
+        Chin_Curtains = new SLVisualParamID("Chin_Curtains", 277);
+        Five_o_Clock_Shadow = new SLVisualParamID("Five_o_Clock_Shadow", 278);
+        tattoo_head_red = new SLVisualParamID("tattoo_head_red", 279);
+        tattoo_head_green = new SLVisualParamID("tattoo_head_green", 280);
+        tattoo_head_blue = new SLVisualParamID("tattoo_head_blue", 281);
+        Bump_upperdef = new SLVisualParamID("Bump_upperdef", 282);
+        freckles_upper = new SLVisualParamID("freckles_upper", 283);
+        tattoo_upper_red = new SLVisualParamID("tattoo_upper_red", 284);
+        tattoo_upper_green = new SLVisualParamID("tattoo_upper_green", 285);
+        tattoo_upper_blue = new SLVisualParamID("tattoo_upper_blue", 286);
+        Sleeve_Length_bump = new SLVisualParamID("Sleeve_Length_bump", 287);
+        Bottom_bump = new SLVisualParamID("Bottom_bump", 288);
+        Collar_Front_bump = new SLVisualParamID("Collar_Front_bump", 289);
+        Collar_Back_bump = new SLVisualParamID("Collar_Back_bump", 290);
+        undershirt_red = new SLVisualParamID("undershirt_red", 291);
+        undershirt_green = new SLVisualParamID("undershirt_green", 292);
+        undershirt_blue = new SLVisualParamID("undershirt_blue", 293);
+        Sleeve_Length = new SLVisualParamID("Sleeve_Length", 294);
+        Bottom = new SLVisualParamID("Bottom", 295);
+        Collar_Front = new SLVisualParamID("Collar_Front", 296);
+        Collar_Back = new SLVisualParamID("Collar_Back", 297);
+        Nail_Polish = new SLVisualParamID("Nail_Polish", 298);
+        Nail_Polish_Color = new SLVisualParamID("Nail_Polish_Color", 299);
+        Glove_Length_bump = new SLVisualParamID("Glove_Length_bump", 300);
+        Glove_Fingers_bump = new SLVisualParamID("Glove_Fingers_bump", 301);
+        gloves_red = new SLVisualParamID("gloves_red", 302);
+        gloves_green = new SLVisualParamID("gloves_green", 303);
+        gloves_blue = new SLVisualParamID("gloves_blue", 304);
+        Glove_Length = new SLVisualParamID("Glove_Length", 305);
+        Glove_Fingers = new SLVisualParamID("Glove_Fingers", 306);
+        Upper_Clothes_Shading = new SLVisualParamID("Upper_Clothes_Shading", 307);
+        Sleeve_Length_Shadow = new SLVisualParamID("Sleeve_Length_Shadow", 308);
+        Shirt_Shadow_Bottom = new SLVisualParamID("Shirt_Shadow_Bottom", 309);
+        Collar_Front_Shadow_Height = new SLVisualParamID("Collar_Front_Shadow_Height", 310);
+        Collar_Back_Shadow_Height = new SLVisualParamID("Collar_Back_Shadow_Height", 311);
+        Sleeve_Length_Cloth = new SLVisualParamID("Sleeve_Length_Cloth", 312);
+        Shirt_Bottom_Cloth = new SLVisualParamID("Shirt_Bottom_Cloth", 313);
+        Collar_Front_Height_Cloth = new SLVisualParamID("Collar_Front_Height_Cloth", 314);
+        Collar_Back_Height_Cloth = new SLVisualParamID("Collar_Back_Height_Cloth", 315);
+        Shirt_Wrinkles = new SLVisualParamID("Shirt_Wrinkles", 316);
+        shirt_red = new SLVisualParamID("shirt_red", 317);
+        shirt_green = new SLVisualParamID("shirt_green", 318);
+        shirt_blue = new SLVisualParamID("shirt_blue", 319);
+        Jacket_Sleeve_Length_bump = new SLVisualParamID("Jacket_Sleeve_Length_bump", 320);
+        Jacket_Collar_Front_bump = new SLVisualParamID("Jacket_Collar_Front_bump", 321);
+        Jacket_Collar_Back_bump = new SLVisualParamID("Jacket_Collar_Back_bump", 322);
+        jacket_bottom_length_upper_bump = new SLVisualParamID("jacket_bottom_length_upper_bump", 323);
+        jacket_open_upper_bump = new SLVisualParamID("jacket_open_upper_bump", 324);
+        jacket_upper_Wrinkles = new SLVisualParamID("jacket_upper_Wrinkles", 325);
+        upper_jacket_red = new SLVisualParamID("upper_jacket_red", 326);
+        upper_jacket_green = new SLVisualParamID("upper_jacket_green", 327);
+        upper_jacket_blue = new SLVisualParamID("upper_jacket_blue", 328);
+        jacket_Sleeve_Length = new SLVisualParamID("jacket_Sleeve_Length", 329);
+        jacket_Collar_Front = new SLVisualParamID("jacket_Collar_Front", 330);
+        jacket_Collar_Back = new SLVisualParamID("jacket_Collar_Back", 331);
+        bottom_length_upper = new SLVisualParamID("bottom_length_upper", 332);
+        open_upper = new SLVisualParamID("open_upper", 333);
+        freckles_lower = new SLVisualParamID("freckles_lower", 334);
+        tattoo_lower_red = new SLVisualParamID("tattoo_lower_red", 335);
+        tattoo_lower_green = new SLVisualParamID("tattoo_lower_green", 336);
+        tattoo_lower_blue = new SLVisualParamID("tattoo_lower_blue", 337);
+        Pants_Length = new SLVisualParamID("Pants_Length", 338);
+        Pants_Waist = new SLVisualParamID("Pants_Waist", 339);
+        underpants_red = new SLVisualParamID("underpants_red", 340);
+        underpants_green = new SLVisualParamID("underpants_green", 341);
+        underpants_blue = new SLVisualParamID("underpants_blue", 342);
+        Socks_Length_bump = new SLVisualParamID("Socks_Length_bump", 343);
+        socks_red = new SLVisualParamID("socks_red", 344);
+        socks_green = new SLVisualParamID("socks_green", 345);
+        socks_blue = new SLVisualParamID("socks_blue", 346);
+        Shoe_Height_bump = new SLVisualParamID("Shoe_Height_bump", 347);
+        shoes_red = new SLVisualParamID("shoes_red", 348);
+        shoes_green = new SLVisualParamID("shoes_green", 349);
+        shoes_blue = new SLVisualParamID("shoes_blue", 350);
+        Shoe_Height = new SLVisualParamID("Shoe_Height", 351);
+        Lower_Clothes_Shading = new SLVisualParamID("Lower_Clothes_Shading", 352);
+        Waist_Height_Shadow = new SLVisualParamID("Waist_Height_Shadow", 353);
+        Pants_Length_Shadow = new SLVisualParamID("Pants_Length_Shadow", 354);
+        Waist_Height_Cloth = new SLVisualParamID("Waist_Height_Cloth", 355);
+        Pants_Length_Cloth = new SLVisualParamID("Pants_Length_Cloth", 356);
+        Pants_Wrinkles = new SLVisualParamID("Pants_Wrinkles", 357);
+        pants_red = new SLVisualParamID("pants_red", 358);
+        pants_green = new SLVisualParamID("pants_green", 359);
+        pants_blue = new SLVisualParamID("pants_blue", 360);
+        jacket_bottom_length_lower_bump = new SLVisualParamID("jacket_bottom_length_lower_bump", 361);
+        jacket_open_lower_bump = new SLVisualParamID("jacket_open_lower_bump", 362);
+        lower_jacket_red = new SLVisualParamID("lower_jacket_red", 363);
+        lower_jacket_green = new SLVisualParamID("lower_jacket_green", 364);
+        lower_jacket_blue = new SLVisualParamID("lower_jacket_blue", 365);
+        bottom_length_lower = new SLVisualParamID("bottom_length_lower", 366);
+        open_lower = new SLVisualParamID("open_lower", 367);
+        skirt_red = new SLVisualParamID("skirt_red", 368);
+        skirt_green = new SLVisualParamID("skirt_green", 369);
+        skirt_blue = new SLVisualParamID("skirt_blue", 370);
+        Skirt_Length = new SLVisualParamID("Skirt_Length", 371);
+        Slit_Front = new SLVisualParamID("Slit_Front", 372);
+        Slit_Back = new SLVisualParamID("Slit_Back", 373);
+        Slit_Left = new SLVisualParamID("Slit_Left", 374);
+        Slit_Right = new SLVisualParamID("Slit_Right", 375);
+        Loose_Upper_Clothing = new SLVisualParamID("Loose_Upper_Clothing", 376);
+        Loose_Lower_Clothing = new SLVisualParamID("Loose_Lower_Clothing", 377);
+        Waist_Height = new SLVisualParamID("Waist_Height", 378);
+        Shirt_Bottom = new SLVisualParamID("Shirt_Bottom", 379);
+        Body_Definition = new SLVisualParamID("Body_Definition", 380);
+        Body_Freckles = new SLVisualParamID("Body_Freckles", 381);
+        Facial_Definition = new SLVisualParamID("Facial_Definition", 382);
+        Lip_Thickness_1 = new SLVisualParamID("Lip_Thickness_1", 383);
+        Lip_Ratio = new SLVisualParamID("Lip_Ratio", 384);
+        Eye_Spacing = new SLVisualParamID("Eye_Spacing", 385);
+        Eye_Depth = new SLVisualParamID("Eye_Depth", 386);
+        Heel_Height = new SLVisualParamID("Heel_Height", 387);
+        Heel_Shape = new SLVisualParamID("Heel_Shape", 388);
+        Toe_Shape = new SLVisualParamID("Toe_Shape", 389);
+        Platform_Height = new SLVisualParamID("Platform_Height", 390);
+        Head_Shape = new SLVisualParamID("Head_Shape", 391);
+        Belly_Size = new SLVisualParamID("Belly_Size", 392);
+        Body_Fat = new SLVisualParamID("Body_Fat", 393);
+        Front_Fringe = new SLVisualParamID("Front_Fringe", 394);
+        Side_Fringe = new SLVisualParamID("Side_Fringe", 395);
+        Back_Fringe = new SLVisualParamID("Back_Fringe", 396);
+        Hair_Front = new SLVisualParamID("Hair_Front", 397);
+        Hair_Sides = new SLVisualParamID("Hair_Sides", 398);
+        Hair_Back = new SLVisualParamID("Hair_Back", 399);
+        Hair_Sweep = new SLVisualParamID("Hair_Sweep", 400);
+        Hair_Tilt = new SLVisualParamID("Hair_Tilt", 401);
+        open_jacket = new SLVisualParamID("open_jacket", 402);
+        Breast_Size = new SLVisualParamID("Breast_Size", 403);
+        Torso_Muscles = new SLVisualParamID("Torso_Muscles", 404);
+        Leg_Muscles = new SLVisualParamID("Leg_Muscles", 405);
+        male = new SLVisualParamID("male", 406);
+        Mouth_Corner = new SLVisualParamID("Mouth_Corner", 407);
+        Face_Shear = new SLVisualParamID("Face_Shear", 408);
+        Head_Length = new SLVisualParamID("Head_Length", 409);
+        Eye_Size = new SLVisualParamID("Eye_Size", 410);
+        Hair_Thickness = new SLVisualParamID("Hair_Thickness", 411);
+        Hair_Volume_1 = new SLVisualParamID("Hair_Volume_1", 412);
+        jacket_red = new SLVisualParamID("jacket_red", 413);
+        jacket_green = new SLVisualParamID("jacket_green", 414);
+        jacket_blue = new SLVisualParamID("jacket_blue", 415);
+        Pigtails = new SLVisualParamID("Pigtails", 416);
+        Ponytail = new SLVisualParamID("Ponytail", 417);
+        Butt_Size = new SLVisualParamID("Butt_Size", 418);
+        skirt_looseness = new SLVisualParamID("skirt_looseness", 419);
+        Socks_Length = new SLVisualParamID("Socks_Length", 420);
+        Jacket_Wrinkles = new SLVisualParamID("Jacket_Wrinkles", 421);
+        tattoo_red = new SLVisualParamID("tattoo_red", 422);
+        tattoo_green = new SLVisualParamID("tattoo_green", 423);
+        tattoo_blue = new SLVisualParamID("tattoo_blue", 424);
+        Breast_Physics_UpDown_Controller = new SLVisualParamID("Breast_Physics_UpDown_Controller", 425);
+        Breast_Physics_InOut_Controller = new SLVisualParamID("Breast_Physics_InOut_Controller", 426);
+        Belly_Physics_UpDown_Controller = new SLVisualParamID("Belly_Physics_UpDown_Controller", 427);
+        Butt_Physics_UpDown_Controller = new SLVisualParamID("Butt_Physics_UpDown_Controller", 428);
+        Butt_Physics_LeftRight_Controller = new SLVisualParamID("Butt_Physics_LeftRight_Controller", 429);
+        Breast_Physics_LeftRight_Controller = new SLVisualParamID("Breast_Physics_LeftRight_Controller", 430);
+        Breast_Physics_Mass = new SLVisualParamID("Breast_Physics_Mass", 431);
+        Breast_Physics_Gravity = new SLVisualParamID("Breast_Physics_Gravity", 432);
+        Breast_Physics_Drag = new SLVisualParamID("Breast_Physics_Drag", 433);
+        Breast_Physics_UpDown_Max_Effect = new SLVisualParamID("Breast_Physics_UpDown_Max_Effect", 434);
+        Breast_Physics_UpDown_Spring = new SLVisualParamID("Breast_Physics_UpDown_Spring", 435);
+        Breast_Physics_UpDown_Gain = new SLVisualParamID("Breast_Physics_UpDown_Gain", 436);
+        Breast_Physics_UpDown_Damping = new SLVisualParamID("Breast_Physics_UpDown_Damping", 437);
+        Breast_Physics_InOut_Max_Effect = new SLVisualParamID("Breast_Physics_InOut_Max_Effect", 438);
+        Breast_Physics_InOut_Spring = new SLVisualParamID("Breast_Physics_InOut_Spring", 439);
+        Breast_Physics_InOut_Gain = new SLVisualParamID("Breast_Physics_InOut_Gain", 440);
+        Breast_Physics_InOut_Damping = new SLVisualParamID("Breast_Physics_InOut_Damping", 441);
+        Belly_Physics_Mass = new SLVisualParamID("Belly_Physics_Mass", 442);
+        Belly_Physics_Gravity = new SLVisualParamID("Belly_Physics_Gravity", 443);
+        Belly_Physics_Drag = new SLVisualParamID("Belly_Physics_Drag", 444);
+        Belly_Physics_UpDown_Max_Effect = new SLVisualParamID("Belly_Physics_UpDown_Max_Effect", 445);
+        Belly_Physics_UpDown_Spring = new SLVisualParamID("Belly_Physics_UpDown_Spring", 446);
+        Belly_Physics_UpDown_Gain = new SLVisualParamID("Belly_Physics_UpDown_Gain", 447);
+        Belly_Physics_UpDown_Damping = new SLVisualParamID("Belly_Physics_UpDown_Damping", 448);
+        Butt_Physics_Mass = new SLVisualParamID("Butt_Physics_Mass", 449);
+        Butt_Physics_Gravity = new SLVisualParamID("Butt_Physics_Gravity", 450);
+        Butt_Physics_Drag = new SLVisualParamID("Butt_Physics_Drag", 451);
+        Butt_Physics_UpDown_Max_Effect = new SLVisualParamID("Butt_Physics_UpDown_Max_Effect", 452);
+        Butt_Physics_UpDown_Spring = new SLVisualParamID("Butt_Physics_UpDown_Spring", 453);
+        Butt_Physics_UpDown_Gain = new SLVisualParamID("Butt_Physics_UpDown_Gain", 454);
+        Butt_Physics_UpDown_Damping = new SLVisualParamID("Butt_Physics_UpDown_Damping", 455);
+        Butt_Physics_LeftRight_Max_Effect = new SLVisualParamID("Butt_Physics_LeftRight_Max_Effect", 456);
+        Butt_Physics_LeftRight_Spring = new SLVisualParamID("Butt_Physics_LeftRight_Spring", 457);
+        Butt_Physics_LeftRight_Gain = new SLVisualParamID("Butt_Physics_LeftRight_Gain", 458);
+        Butt_Physics_LeftRight_Damping = new SLVisualParamID("Butt_Physics_LeftRight_Damping", 459);
+        Breast_Physics_LeftRight_Max_Effect = new SLVisualParamID("Breast_Physics_LeftRight_Max_Effect", 460);
+        Breast_Physics_LeftRight_Spring = new SLVisualParamID("Breast_Physics_LeftRight_Spring", 461);
+        Breast_Physics_LeftRight_Gain = new SLVisualParamID("Breast_Physics_LeftRight_Gain", 462);
+        Breast_Physics_LeftRight_Damping = new SLVisualParamID("Breast_Physics_LeftRight_Damping", 463);
+        AppearanceMessage_Version = new SLVisualParamID("AppearanceMessage_Version", 464);
+        $VALUES = (new SLVisualParamID[] {
+            Male_Skeleton, Height, Thickness, Shoulders, Hip_Width, Hip_Length, Torso_Length, EyeBone_Spread, EyeBone_Head_Shear, EyeBone_Head_Elongate, 
+            EyeBone_Bug, Head_Size, Shoe_Heels, Shoe_Platform, Hand_Size, Neck_Thickness, EyeBone_Big_Eyes, Leg_Length, Arm_Length, Neck_Length, 
+            Hover, Nose_Big_Out, Broad_Nostrils, Bulbous_Nose, Wide_Nose, Crooked_Nose, Lip_Width, Tall_Lips, Lip_Thickness, Fat_Upper_Lip, 
+            Fat_Lower_Lip, Mouth_Height, Frown_Mouth, Smile_Mouth, Lip_Cleft_Deep, Wide_Lip_Cleft, Shift_Mouth, Big_Ears, Ears_Out, Pointy_Ears, 
+            Deep_Chin, Jaw_Angle, Jaw_Jut, Bulbous_Nose_Tip, Weak_Chin, Double_Chin, Wide_Eyes, Eyelid_Corner_Up, Eyelid_Inner_Corner_Up, Puffy_Lower_Lids, 
+            Forehead_Angle, Squash_Stretch_Head, Big_Brow, Noble_Nose_Bridge, Lower_Bridge_Nose, Wide_Nose_Bridge, Low_Septum_Nose, Sunken_Cheeks, Square_Jaw, Puffy_Upper_Cheeks, 
+            Upper_Eyelid_Fold, Baggy_Eyes, High_Cheek_Bones, Upturned_Nose_Tip, Male_Package, Square_Head, Egg_Head, Eyebrow_Size, Arced_Eyebrows, Lower_Eyebrows, 
+            Pointy_Eyebrows, Hair_Volume, Hair_Volume_Small, Hair_Big_Front, Hair_Big_Top, Hair_Big_Back, Hair_Spiked, Hair_Part_Middle, Hair_Part_Right, Hair_Part_Left, 
+            Hair_Sides_Full, Bangs_Front_Up, Bangs_Front_Down, Bangs_Sides_Up, Bangs_Sides_Down, Bangs_Back_Up, Bangs_Back_Down, Hair_Front_Down, Hair_Front_Up, Hair_Sides_Down, 
+            Hair_Sides_Up, Hair_Back_Down, Hair_Back_Up, Hair_Rumpled, Hair_Swept_Back, Hair_Swept_Forward, Hair_Tilt_Right, Hair_Tilt_Left, Bangs_Part_Middle, Hair_Egg_Head, 
+            Hair_Squash_Stretch_Head, Hair_Square_Head, Hair_Round_Head, Hair_Forehead_Round, Hair_Forehead_Slant, Shear_Head_Hair, Elongate_Head_Hair, Hair_Shear_Back, Hair_Shear_Front, Hair_Taper_Back, 
+            Hair_Taper_Front, Hair_Pigtails_Short, Hair_Pigtails_Med, Hair_Pigtails_Medlong, Hair_Pigtails_Long, Hair_Ponytail_Short, Hair_Ponytail_Med, Hair_Ponytail_Long, Cleft_Chin, Jowls, 
+            Cleft_Chin_Upper, Attached_Earlobes, Lips_Thin, Lips_Fat, Wide_Upper_Lip, Wide_Lower_Lip, Round_Head, Eye_Spread, Displace_Hair_Facial, Fat_Head, 
+            Forehead_Round, Forehead_Slant, Shear_Head, Elongate_Head, Pop_Eye, Head_Eyes_Big, Bug_Eyed_Head, Express_Closed_Mouth, Express_Tongue_Out, Express_Surprise_Emote, 
+            Express_Wink_Emote, Express_Embarrassed_Emote, Express_Shrug_Emote, Express_Kiss, Express_Bored_Emote, Express_Repulsed_Emote, Express_Disdain, Express_Afraid_Emote, Express_Worry_Emote, Express_Cry_Emote, 
+            Express_Sad_Emote, Express_Anger_Emote, Express_Frown, Express_Laugh_Emote, Express_Toothsmile, Express_Smile, Express_Open_Mouth, Lipsync_Aah, Lipsync_Ooh, Male_Head, 
+            Old, Furrowed_Eyebrows, Surprised_Eyebrows, Worried_Eyebrows, Blink_Left, Blink_Right, Eyelashes_Long, Big_Belly_Torso, Big_Chest, Small_Chest, 
+            No_Chest, Muscular_Torso, Scrawny_Torso, Scrawny_Torso_Male, Fat_Torso, Breast_Gravity, Displace_Loose_Upperbody, Shirtsleeve_flair, Love_Handles, Breast_Female_Cleavage, 
+            Chest_Male_No_Pecs, Male_Torso, Hands_Relaxed, Hands_Point, Hands_Fist, Hands_Relaxed_L, Hands_Point_L, Hands_Fist_L, Hands_Relaxed_R, Hands_Point_R, 
+            Hands_Fist_R, Hands_Typing, Hands_Salute_R, Hands_Peace_R, Hands_Spread_R, Breast_Physics_UpDown_Driven, Breast_Physics_InOut_Driven, Belly_Physics_Torso_UpDown_Driven, Breast_Physics_LeftRight_Driven, Big_Belly_Legs, 
+            Big_Butt_Legs, Small_Butt, Muscular_Legs, Scrawny_Legs, Bowed_Legs, Shoe_Heel_Height, Shoe_Platform_Height, Shoe_Platform_Width, Shoe_Heel_Point, Shoe_Heel_Thick, 
+            Shoe_Toe_Point, Shoe_Toe_Square, Shoe_Toe_Thick, Foot_Size, Displace_Loose_Lowerbody, Leg_Pantflair, Leg_Longcuffs, Low_Crotch, Fat_Legs, Saddlebags, 
+            Male_Legs, Belly_Physics_Legs_UpDown_Driven, Butt_Physics_UpDown_Driven, Butt_Physics_LeftRight_Driven, Eyeball_Size, skirt_poofy, skirt_loose, skirt_tight, skirt_smallbutt, skirt_bustle, 
+            skirt_bowlegs, skirt_bigbutt, skirt_belly, skirt_saddlebags, skirt_chubby, skirt_lovehandles, skirt_male, Belly_Physics_Skirt_UpDown_Driven, Pigment, Red_Skin, 
+            Rainbow_Color, Blonde_Hair, Red_Hair, White_Hair, Eye_Color, Eye_Lightness, Bump_base, Shading, Rosy_Complexion, Lip_Pinkness, 
+            Wrinkles, Freckles, Eyebrow_Size_Bump, Eyebrow_Density_Bump, Eyebrow_Density, Lipstick_Color, Lipstick, Lipgloss, Blush, Blush_Color, 
+            Blush_Opacity, Out_Shdw_Color, Out_Shdw_Opacity, Outer_Shadow, In_Shdw_Color, In_Shdw_Opacity, Inner_Shadow, Eyeliner, Eyeliner_Color, Sideburns_bump, 
+            Moustache_bump, Soulpatch_bump, Chin_Curtains_bump, Five_o_Clock_Shadow_bump, Sideburns, Moustache, Soulpatch, Chin_Curtains, Five_o_Clock_Shadow, tattoo_head_red, 
+            tattoo_head_green, tattoo_head_blue, Bump_upperdef, freckles_upper, tattoo_upper_red, tattoo_upper_green, tattoo_upper_blue, Sleeve_Length_bump, Bottom_bump, Collar_Front_bump, 
+            Collar_Back_bump, undershirt_red, undershirt_green, undershirt_blue, Sleeve_Length, Bottom, Collar_Front, Collar_Back, Nail_Polish, Nail_Polish_Color, 
+            Glove_Length_bump, Glove_Fingers_bump, gloves_red, gloves_green, gloves_blue, Glove_Length, Glove_Fingers, Upper_Clothes_Shading, Sleeve_Length_Shadow, Shirt_Shadow_Bottom, 
+            Collar_Front_Shadow_Height, Collar_Back_Shadow_Height, Sleeve_Length_Cloth, Shirt_Bottom_Cloth, Collar_Front_Height_Cloth, Collar_Back_Height_Cloth, Shirt_Wrinkles, shirt_red, shirt_green, shirt_blue, 
+            Jacket_Sleeve_Length_bump, Jacket_Collar_Front_bump, Jacket_Collar_Back_bump, jacket_bottom_length_upper_bump, jacket_open_upper_bump, jacket_upper_Wrinkles, upper_jacket_red, upper_jacket_green, upper_jacket_blue, jacket_Sleeve_Length, 
+            jacket_Collar_Front, jacket_Collar_Back, bottom_length_upper, open_upper, freckles_lower, tattoo_lower_red, tattoo_lower_green, tattoo_lower_blue, Pants_Length, Pants_Waist, 
+            underpants_red, underpants_green, underpants_blue, Socks_Length_bump, socks_red, socks_green, socks_blue, Shoe_Height_bump, shoes_red, shoes_green, 
+            shoes_blue, Shoe_Height, Lower_Clothes_Shading, Waist_Height_Shadow, Pants_Length_Shadow, Waist_Height_Cloth, Pants_Length_Cloth, Pants_Wrinkles, pants_red, pants_green, 
+            pants_blue, jacket_bottom_length_lower_bump, jacket_open_lower_bump, lower_jacket_red, lower_jacket_green, lower_jacket_blue, bottom_length_lower, open_lower, skirt_red, skirt_green, 
+            skirt_blue, Skirt_Length, Slit_Front, Slit_Back, Slit_Left, Slit_Right, Loose_Upper_Clothing, Loose_Lower_Clothing, Waist_Height, Shirt_Bottom, 
+            Body_Definition, Body_Freckles, Facial_Definition, Lip_Thickness_1, Lip_Ratio, Eye_Spacing, Eye_Depth, Heel_Height, Heel_Shape, Toe_Shape, 
+            Platform_Height, Head_Shape, Belly_Size, Body_Fat, Front_Fringe, Side_Fringe, Back_Fringe, Hair_Front, Hair_Sides, Hair_Back, 
+            Hair_Sweep, Hair_Tilt, open_jacket, Breast_Size, Torso_Muscles, Leg_Muscles, male, Mouth_Corner, Face_Shear, Head_Length, 
+            Eye_Size, Hair_Thickness, Hair_Volume_1, jacket_red, jacket_green, jacket_blue, Pigtails, Ponytail, Butt_Size, skirt_looseness, 
+            Socks_Length, Jacket_Wrinkles, tattoo_red, tattoo_green, tattoo_blue, Breast_Physics_UpDown_Controller, Breast_Physics_InOut_Controller, Belly_Physics_UpDown_Controller, Butt_Physics_UpDown_Controller, Butt_Physics_LeftRight_Controller, 
+            Breast_Physics_LeftRight_Controller, Breast_Physics_Mass, Breast_Physics_Gravity, Breast_Physics_Drag, Breast_Physics_UpDown_Max_Effect, Breast_Physics_UpDown_Spring, Breast_Physics_UpDown_Gain, Breast_Physics_UpDown_Damping, Breast_Physics_InOut_Max_Effect, Breast_Physics_InOut_Spring, 
+            Breast_Physics_InOut_Gain, Breast_Physics_InOut_Damping, Belly_Physics_Mass, Belly_Physics_Gravity, Belly_Physics_Drag, Belly_Physics_UpDown_Max_Effect, Belly_Physics_UpDown_Spring, Belly_Physics_UpDown_Gain, Belly_Physics_UpDown_Damping, Butt_Physics_Mass, 
+            Butt_Physics_Gravity, Butt_Physics_Drag, Butt_Physics_UpDown_Max_Effect, Butt_Physics_UpDown_Spring, Butt_Physics_UpDown_Gain, Butt_Physics_UpDown_Damping, Butt_Physics_LeftRight_Max_Effect, Butt_Physics_LeftRight_Spring, Butt_Physics_LeftRight_Gain, Butt_Physics_LeftRight_Damping, 
+            Breast_Physics_LeftRight_Max_Effect, Breast_Physics_LeftRight_Spring, Breast_Physics_LeftRight_Gain, Breast_Physics_LeftRight_Damping, AppearanceMessage_Version
+        });
+    }
 }

@@ -1,76 +1,101 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class MoveInventoryItem extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<InventoryData> InventoryData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class MoveInventoryItem extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
         public boolean Stamp;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class InventoryData {
+    public static class InventoryData
+    {
+
         public UUID FolderID;
         public UUID ItemID;
-        public byte[] NewName;
-    }
+        public byte NewName[];
 
-    public MoveInventoryItem() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 38;
-        Iterator<T> it = this.InventoryData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            i = ((InventoryData) it.next()).NewName.length + 33 + i2;
+        public InventoryData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleMoveInventoryItem(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList InventoryData_Fields;
+
+    public MoveInventoryItem()
+    {
+        InventoryData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put(Ascii.FF);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packBoolean(byteBuffer, this.AgentData_Field.Stamp);
-        byteBuffer.put((byte) this.InventoryData_Fields.size());
-        for (InventoryData inventoryData : this.InventoryData_Fields) {
-            packUUID(byteBuffer, inventoryData.ItemID);
-            packUUID(byteBuffer, inventoryData.FolderID);
-            packVariable(byteBuffer, inventoryData.NewName, 1);
-        }
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = InventoryData_Fields.iterator();
+        int i;
+        for (i = 38; iterator.hasNext(); i = ((InventoryData)iterator.next()).NewName.length + 33 + i) { }
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.AgentData_Field.Stamp = unpackBoolean(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            InventoryData inventoryData = new InventoryData();
-            inventoryData.ItemID = unpackUUID(byteBuffer);
-            inventoryData.FolderID = unpackUUID(byteBuffer);
-            inventoryData.NewName = unpackVariable(byteBuffer, 1);
-            this.InventoryData_Fields.add(inventoryData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleMoveInventoryItem(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)12);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packBoolean(bytebuffer, AgentData_Field.Stamp);
+        bytebuffer.put((byte)InventoryData_Fields.size());
+        InventoryData inventorydata;
+        for (Iterator iterator = InventoryData_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, inventorydata.NewName, 1))
+        {
+            inventorydata = (InventoryData)iterator.next();
+            packUUID(bytebuffer, inventorydata.ItemID);
+            packUUID(bytebuffer, inventorydata.FolderID);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        AgentData_Field.Stamp = unpackBoolean(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            InventoryData inventorydata = new InventoryData();
+            inventorydata.ItemID = unpackUUID(bytebuffer);
+            inventorydata.FolderID = unpackUUID(bytebuffer);
+            inventorydata.NewName = unpackVariable(bytebuffer, 1);
+            InventoryData_Fields.add(inventorydata);
+        }
+
     }
 }

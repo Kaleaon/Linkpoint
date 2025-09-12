@@ -1,38 +1,58 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 
-public class SimStatus extends SLMessage {
-    public SimStatusData SimStatusData_Field = new SimStatusData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class SimStatusData {
+public class SimStatus extends SLMessage
+{
+    public static class SimStatusData
+    {
+
         public boolean CanAcceptAgents;
         public boolean CanAcceptTasks;
+
+        public SimStatusData()
+        {
+        }
     }
 
-    public SimStatus() {
-        this.zeroCoded = false;
+
+    public SimStatusData SimStatusData_Field;
+
+    public SimStatus()
+    {
+        zeroCoded = false;
+        SimStatusData_Field = new SimStatusData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 4;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleSimStatus(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleSimStatus(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put((byte) -1);
-        byteBuffer.put(Ascii.FF);
-        packBoolean(byteBuffer, this.SimStatusData_Field.CanAcceptAgents);
-        packBoolean(byteBuffer, this.SimStatusData_Field.CanAcceptTasks);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.put((byte)-1);
+        bytebuffer.put((byte)12);
+        packBoolean(bytebuffer, SimStatusData_Field.CanAcceptAgents);
+        packBoolean(bytebuffer, SimStatusData_Field.CanAcceptTasks);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.SimStatusData_Field.CanAcceptAgents = unpackBoolean(byteBuffer);
-        this.SimStatusData_Field.CanAcceptTasks = unpackBoolean(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        SimStatusData_Field.CanAcceptAgents = unpackBoolean(bytebuffer);
+        SimStatusData_Field.CanAcceptTasks = unpackBoolean(bytebuffer);
     }
 }

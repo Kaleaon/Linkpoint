@@ -1,132 +1,226 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.os.Build;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
-import javax.annotation.Nullable;
 
-public class LoadingLayout extends FrameLayout {
-    private boolean butteryBarVisible = false;
-    @Nullable
-    private ButteryProgressBar butteryProgressBar = null;
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.common:
+//            ButteryProgressBar
+
+public class LoadingLayout extends FrameLayout
+{
+
+    private boolean butteryBarVisible;
+    private ButteryProgressBar butteryProgressBar;
     private final ProgressBar progressBar;
-    @Nullable
-    private SwipeRefreshLayout swipeRefreshLayout = null;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private final TextView textView;
-    private boolean withButteryProgressBar = false;
+    private boolean withButteryProgressBar;
 
-    public LoadingLayout(Context context) {
+    public LoadingLayout(Context context)
+    {
         super(context);
-        this.progressBar = new ProgressBar(context);
-        this.textView = new TextView(context);
+        withButteryProgressBar = false;
+        swipeRefreshLayout = null;
+        butteryProgressBar = null;
+        butteryBarVisible = false;
+        progressBar = new ProgressBar(context);
+        textView = new TextView(context);
         prepareViews(context);
     }
 
-    public LoadingLayout(Context context, AttributeSet attributeSet) {
-        super(context, attributeSet);
-        applyAttributes(context, attributeSet);
-        this.progressBar = new ProgressBar(context, attributeSet);
-        this.textView = new TextView(context, attributeSet);
+    public LoadingLayout(Context context, AttributeSet attributeset)
+    {
+        super(context, attributeset);
+        withButteryProgressBar = false;
+        swipeRefreshLayout = null;
+        butteryProgressBar = null;
+        butteryBarVisible = false;
+        applyAttributes(context, attributeset);
+        progressBar = new ProgressBar(context, attributeset);
+        textView = new TextView(context, attributeset);
         prepareViews(context);
     }
 
-    public LoadingLayout(Context context, AttributeSet attributeSet, int i) {
-        super(context, attributeSet, i);
-        applyAttributes(context, attributeSet);
-        this.progressBar = new ProgressBar(context, attributeSet, i);
-        this.textView = new TextView(context, attributeSet, i);
+    public LoadingLayout(Context context, AttributeSet attributeset, int i)
+    {
+        super(context, attributeset, i);
+        withButteryProgressBar = false;
+        swipeRefreshLayout = null;
+        butteryProgressBar = null;
+        butteryBarVisible = false;
+        applyAttributes(context, attributeset);
+        progressBar = new ProgressBar(context, attributeset, i);
+        textView = new TextView(context, attributeset, i);
         prepareViews(context);
     }
 
-    @TargetApi(21)
-    public LoadingLayout(Context context, AttributeSet attributeSet, int i, int i2) {
-        super(context, attributeSet, i, i2);
-        applyAttributes(context, attributeSet);
-        this.progressBar = new ProgressBar(context, attributeSet, i, i2);
-        this.textView = new TextView(context, attributeSet, i, i2);
+    public LoadingLayout(Context context, AttributeSet attributeset, int i, int j)
+    {
+        super(context, attributeset, i, j);
+        withButteryProgressBar = false;
+        swipeRefreshLayout = null;
+        butteryProgressBar = null;
+        butteryBarVisible = false;
+        applyAttributes(context, attributeset);
+        progressBar = new ProgressBar(context, attributeset, i, j);
+        textView = new TextView(context, attributeset, i, j);
         prepareViews(context);
     }
 
-    private void applyAttributes(Context context, AttributeSet attributeSet) {
-        TypedArray obtainStyledAttributes = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.LoadingLayout, 0, 0);
-        try {
-            this.withButteryProgressBar = obtainStyledAttributes.getBoolean(0, this.withButteryProgressBar);
-        } finally {
-            obtainStyledAttributes.recycle();
+    private void applyAttributes(Context context, AttributeSet attributeset)
+    {
+        context = context.getTheme().obtainStyledAttributes(attributeset, com.lumiyaviewer.lumiya.R.styleable.LoadingLayout, 0, 0);
+        withButteryProgressBar = context.getBoolean(0, withButteryProgressBar);
+        context.recycle();
+        return;
+        attributeset;
+        context.recycle();
+        throw attributeset;
+    }
+
+    private void prepareViews(Context context)
+    {
+        if (withButteryProgressBar && android.os.Build.VERSION.SDK_INT >= 14)
+        {
+            butteryProgressBar = new ButteryProgressBar(context);
+            butteryProgressBar.setId(0x7f100013);
+            butteryProgressBar.setVisibility(8);
+            addView(butteryProgressBar, new android.widget.FrameLayout.LayoutParams(-1, -2, 48));
         }
+        progressBar.setId(0x7f100015);
+        progressBar.setVisibility(8);
+        progressBar.setIndeterminate(true);
+        addView(progressBar, new android.widget.FrameLayout.LayoutParams(-2, -2, 17));
+        textView.setId(0x7f100014);
+        textView.setVisibility(8);
+        addView(textView, new android.widget.FrameLayout.LayoutParams(-2, -2, 17));
     }
 
-    private void prepareViews(Context context) {
-        if (this.withButteryProgressBar && Build.VERSION.SDK_INT >= 14) {
-            this.butteryProgressBar = new ButteryProgressBar(context);
-            this.butteryProgressBar.setId(R.id.loading_layout_buttery_progress_bar_id);
-            this.butteryProgressBar.setVisibility(8);
-            addView(this.butteryProgressBar, new FrameLayout.LayoutParams(-1, -2, 48));
+    private void setMode(boolean flag, boolean flag1, boolean flag2)
+    {
+        int j1 = getChildCount();
+        int i = 0;
+        while (i < j1) 
+        {
+            View view = getChildAt(i);
+            if (view == progressBar)
+            {
+                int j;
+                if (flag)
+                {
+                    j = 0;
+                } else
+                {
+                    j = 8;
+                }
+                view.setVisibility(j);
+            } else
+            if (view == textView)
+            {
+                int k;
+                if (flag1)
+                {
+                    k = 0;
+                } else
+                {
+                    k = 8;
+                }
+                view.setVisibility(k);
+            } else
+            if (view == butteryProgressBar && butteryProgressBar != null)
+            {
+                int l;
+                if (butteryBarVisible)
+                {
+                    l = 0;
+                } else
+                {
+                    l = 8;
+                }
+                view.setVisibility(l);
+            } else
+            {
+                int i1;
+                if (flag2)
+                {
+                    i1 = 0;
+                } else
+                {
+                    i1 = 8;
+                }
+                view.setVisibility(i1);
+            }
+            i++;
         }
-        this.progressBar.setId(R.id.loading_layout_progress_bar_id);
-        this.progressBar.setVisibility(8);
-        this.progressBar.setIndeterminate(true);
-        addView(this.progressBar, new FrameLayout.LayoutParams(-2, -2, 17));
-        this.textView.setId(R.id.loading_layout_message_view_id);
-        this.textView.setVisibility(8);
-        addView(this.textView, new FrameLayout.LayoutParams(-2, -2, 17));
-    }
-
-    private void setMode(boolean z, boolean z2, boolean z3) {
-        int childCount = getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View childAt = getChildAt(i);
-            if (childAt == this.progressBar) {
-                childAt.setVisibility(z ? 0 : 8);
-            } else if (childAt == this.textView) {
-                childAt.setVisibility(z2 ? 0 : 8);
-            } else if (childAt != this.butteryProgressBar || this.butteryProgressBar == null) {
-                childAt.setVisibility(z3 ? 0 : 8);
-            } else {
-                childAt.setVisibility(this.butteryBarVisible ? 0 : 8);
+        if (swipeRefreshLayout != null)
+        {
+            swipeRefreshLayout.setEnabled(flag2);
+            if (!flag2)
+            {
+                swipeRefreshLayout.setRefreshing(false);
             }
         }
-        if (this.swipeRefreshLayout != null) {
-            this.swipeRefreshLayout.setEnabled(z3);
-            if (!z3) {
-                this.swipeRefreshLayout.setRefreshing(false);
+    }
+
+    public void setButteryProgressBar(boolean flag)
+    {
+        butteryBarVisible = flag;
+        if (butteryProgressBar != null)
+        {
+            ButteryProgressBar butteryprogressbar = butteryProgressBar;
+            int i;
+            if (flag)
+            {
+                i = 0;
+            } else
+            {
+                i = 8;
             }
+            butteryprogressbar.setVisibility(i);
         }
     }
 
-    public void setButteryProgressBar(boolean z) {
-        this.butteryBarVisible = z;
-        if (this.butteryProgressBar != null) {
-            this.butteryProgressBar.setVisibility(z ? 0 : 8);
+    public void setSwipeRefreshLayout(SwipeRefreshLayout swiperefreshlayout)
+    {
+        swipeRefreshLayout = swiperefreshlayout;
+    }
+
+    public void showContent(String s)
+    {
+        boolean flag;
+        if (s != null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        setMode(false, flag, true);
+        textView.setText(s);
+        if (swipeRefreshLayout != null)
+        {
+            swipeRefreshLayout.setRefreshing(false);
         }
     }
 
-    public void setSwipeRefreshLayout(@Nullable SwipeRefreshLayout swipeRefreshLayout2) {
-        this.swipeRefreshLayout = swipeRefreshLayout2;
-    }
-
-    public void showContent(@Nullable String str) {
-        setMode(false, str != null, true);
-        this.textView.setText(str);
-        if (this.swipeRefreshLayout != null) {
-            this.swipeRefreshLayout.setRefreshing(false);
-        }
-    }
-
-    public void showLoading() {
+    public void showLoading()
+    {
         setMode(true, false, false);
     }
 
-    public void showMessage(String str) {
+    public void showMessage(String s)
+    {
         setMode(false, true, false);
-        this.textView.setText(str);
+        textView.setText(s);
     }
 }

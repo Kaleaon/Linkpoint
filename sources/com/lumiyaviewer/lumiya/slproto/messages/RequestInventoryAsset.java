@@ -1,46 +1,66 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class RequestInventoryAsset extends SLMessage {
-    public QueryData QueryData_Field = new QueryData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class QueryData {
+public class RequestInventoryAsset extends SLMessage
+{
+    public static class QueryData
+    {
+
         public UUID AgentID;
         public UUID ItemID;
         public UUID OwnerID;
         public UUID QueryID;
+
+        public QueryData()
+        {
+        }
     }
 
-    public RequestInventoryAsset() {
-        this.zeroCoded = false;
+
+    public QueryData QueryData_Field;
+
+    public RequestInventoryAsset()
+    {
+        zeroCoded = false;
+        QueryData_Field = new QueryData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 68;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleRequestInventoryAsset(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleRequestInventoryAsset(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put(Ascii.SUB);
-        packUUID(byteBuffer, this.QueryData_Field.QueryID);
-        packUUID(byteBuffer, this.QueryData_Field.AgentID);
-        packUUID(byteBuffer, this.QueryData_Field.OwnerID);
-        packUUID(byteBuffer, this.QueryData_Field.ItemID);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)26);
+        packUUID(bytebuffer, QueryData_Field.QueryID);
+        packUUID(bytebuffer, QueryData_Field.AgentID);
+        packUUID(bytebuffer, QueryData_Field.OwnerID);
+        packUUID(bytebuffer, QueryData_Field.ItemID);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.QueryData_Field.QueryID = unpackUUID(byteBuffer);
-        this.QueryData_Field.AgentID = unpackUUID(byteBuffer);
-        this.QueryData_Field.OwnerID = unpackUUID(byteBuffer);
-        this.QueryData_Field.ItemID = unpackUUID(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        QueryData_Field.QueryID = unpackUUID(bytebuffer);
+        QueryData_Field.AgentID = unpackUUID(bytebuffer);
+        QueryData_Field.OwnerID = unpackUUID(bytebuffer);
+        QueryData_Field.ItemID = unpackUUID(bytebuffer);
     }
 }

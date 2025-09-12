@@ -1,98 +1,129 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat.generic;
 
-import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.slproto.chat.SLChatTextBoxDialog;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import javax.annotation.Nullable;
 
-public class ChatTextBoxViewHolder extends ChatEventViewHolder implements View.OnClickListener, View.OnKeyListener, View.OnFocusChangeListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.chat.generic:
+//            ChatEventViewHolder
+
+public class ChatTextBoxViewHolder extends ChatEventViewHolder
+    implements android.view.View.OnClickListener, android.view.View.OnKeyListener, android.view.View.OnFocusChangeListener
+{
+
     private final Button dialogButtonIgnore;
     public final View dialogButtonsLayout;
     public final TextView dialogResultTextView;
     private final EditText textBox;
-    @Nullable
-    private SLChatTextBoxDialog textBoxEvent = null;
+    private SLChatTextBoxDialog textBoxEvent;
     private final Button textBoxSend;
 
-    ChatTextBoxViewHolder(View view, RecyclerView.Adapter adapter) {
+    ChatTextBoxViewHolder(View view, android.support.v7.widget.RecyclerView.Adapter adapter)
+    {
         super(view, adapter);
-        this.dialogResultTextView = (TextView) view.findViewById(R.id.dialogResultTextView);
-        this.dialogButtonsLayout = view.findViewById(R.id.dialogButtonsLayout);
-        this.textBoxSend = (Button) view.findViewById(R.id.buttonTextBoxSend);
-        this.dialogButtonIgnore = (Button) view.findViewById(R.id.buttonDialogIgnore);
-        this.textBox = (EditText) view.findViewById(R.id.llTextBoxEdit);
-        if (this.textBoxSend != null) {
-            this.textBoxSend.setOnClickListener(this);
+        textBoxEvent = null;
+        dialogResultTextView = (TextView)view.findViewById(0x7f10012a);
+        dialogButtonsLayout = view.findViewById(0x7f10012b);
+        textBoxSend = (Button)view.findViewById(0x7f100139);
+        dialogButtonIgnore = (Button)view.findViewById(0x7f100129);
+        textBox = (EditText)view.findViewById(0x7f100138);
+        if (textBoxSend != null)
+        {
+            textBoxSend.setOnClickListener(this);
         }
-        if (this.dialogButtonIgnore != null) {
-            this.dialogButtonIgnore.setOnClickListener(this);
+        if (dialogButtonIgnore != null)
+        {
+            dialogButtonIgnore.setOnClickListener(this);
         }
-        if (this.textBox != null) {
-            this.textBox.setOnKeyListener(this);
-            this.textBox.setOnFocusChangeListener(this);
+        if (textBox != null)
+        {
+            textBox.setOnKeyListener(this);
+            textBox.setOnFocusChangeListener(this);
         }
     }
 
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.buttonDialogIgnore:
-                if (this.textBoxEvent != null) {
-                    this.textBoxEvent.m147lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4314(UserManager.getUserManager(this.textBoxEvent.getAgentUUID()));
-                    requestAdapterUpdate();
-                    return;
-                }
+    public void onClick(View view)
+    {
+        view.getId();
+        JVM INSTR lookupswitch 2: default 32
+    //                   2131755305: 33
+    //                   2131755321: 62;
+           goto _L1 _L2 _L3
+_L1:
+        return;
+_L2:
+        if (textBoxEvent != null)
+        {
+            textBoxEvent.onDialogIgnored(UserManager.getUserManager(textBoxEvent.getAgentUUID()));
+            requestAdapterUpdate();
+            return;
+        }
+        continue; /* Loop/switch isn't completed */
+_L3:
+        if (textBox.getVisibility() == 0)
+        {
+            if (textBoxEvent != null)
+            {
+                textBoxEvent.onEnteredText(UserManager.getUserManager(textBoxEvent.getAgentUUID()), textBox.getText().toString());
+                requestAdapterUpdate();
                 return;
-            case R.id.buttonTextBoxSend:
-                if (this.textBox.getVisibility() != 0) {
-                    this.textBox.setVisibility(0);
-                    this.textBox.requestFocus();
-                    this.textBoxSend.setText(R.string.textbox_send_caption);
-                    return;
-                } else if (this.textBoxEvent != null) {
-                    this.textBoxEvent.m146lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4223(UserManager.getUserManager(this.textBoxEvent.getAgentUUID()), this.textBox.getText().toString());
-                    requestAdapterUpdate();
-                    return;
-                } else {
-                    return;
-                }
-            default:
-                return;
+            }
+        } else
+        {
+            textBox.setVisibility(0);
+            textBox.requestFocus();
+            textBoxSend.setText(0x7f090354);
+            return;
+        }
+        if (true) goto _L1; else goto _L4
+_L4:
+    }
+
+    public void onFocusChange(View view, boolean flag)
+    {
+        if (view == textBox && textBox != null && !flag)
+        {
+            textBox.setVisibility(4);
+            textBoxSend.setText(0x7f090353);
         }
     }
 
-    public void onFocusChange(View view, boolean z) {
-        if (view == this.textBox && this.textBox != null && !z) {
-            this.textBox.setVisibility(4);
-            this.textBoxSend.setText(R.string.textbox_reply_caption);
-        }
-    }
-
-    public boolean onKey(View view, int i, KeyEvent keyEvent) {
-        if (keyEvent.getAction() != 0 || i != 66 || view.getId() != R.id.llTextBoxEdit) {
+    public boolean onKey(View view, int i, KeyEvent keyevent)
+    {
+        if (keyevent.getAction() == 0 && i == 66 && view.getId() == 0x7f100138)
+        {
+            if (textBoxEvent != null)
+            {
+                textBoxEvent.onEnteredText(UserManager.getUserManager(textBoxEvent.getAgentUUID()), textBox.getText().toString());
+                requestAdapterUpdate();
+            }
+            return true;
+        } else
+        {
             return false;
         }
-        if (this.textBoxEvent == null) {
-            return true;
-        }
-        this.textBoxEvent.m146lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4223(UserManager.getUserManager(this.textBoxEvent.getAgentUUID()), this.textBox.getText().toString());
-        requestAdapterUpdate();
-        return true;
     }
 
-    public void setTextBoxEvent(@Nullable SLChatTextBoxDialog sLChatTextBoxDialog) {
-        if (this.textBoxEvent != sLChatTextBoxDialog) {
-            this.textBoxEvent = sLChatTextBoxDialog;
-            if (this.textBox != null) {
-                this.textBox.clearFocus();
-                this.textBox.setVisibility(4);
-                this.textBoxSend.setText(R.string.textbox_reply_caption);
-                this.textBox.setText((CharSequence) null);
+    public void setTextBoxEvent(SLChatTextBoxDialog slchattextboxdialog)
+    {
+        if (textBoxEvent != slchattextboxdialog)
+        {
+            textBoxEvent = slchattextboxdialog;
+            if (textBox != null)
+            {
+                textBox.clearFocus();
+                textBox.setVisibility(4);
+                textBoxSend.setText(0x7f090353);
+                textBox.setText(null);
             }
         }
     }

@@ -1,50 +1,73 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public final class SLChatFriendshipResultEvent extends SLChatEvent {
+public final class SLChatFriendshipResultEvent extends SLChatEvent
+{
+
     private final boolean accepted;
 
-    public SLChatFriendshipResultEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
-        super(chatMessage, uuid);
-        this.accepted = chatMessage.getAccepted().booleanValue();
+    public SLChatFriendshipResultEvent(ChatMessage chatmessage, UUID uuid)
+    {
+        super(chatmessage, uuid);
+        accepted = chatmessage.getAccepted().booleanValue();
     }
 
-    public SLChatFriendshipResultEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, ImprovedInstantMessage improvedInstantMessage) {
-        super(improvedInstantMessage, uuid, chatMessageSource);
-        this.accepted = improvedInstantMessage.MessageBlock_Field.Dialog == 39;
+    public SLChatFriendshipResultEvent(ChatMessageSource chatmessagesource, UUID uuid, ImprovedInstantMessage improvedinstantmessage)
+    {
+        super(improvedinstantmessage, uuid, chatmessagesource);
+        boolean flag;
+        if (improvedinstantmessage.MessageBlock_Field.Dialog == 39)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        accepted = flag;
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.FriendshipResult;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.FriendshipResult;
     }
 
-    /* access modifiers changed from: protected */
-    public String getText(Context context, @Nonnull UserManager userManager) {
-        return context.getString(this.accepted ? R.string.friendship_accepted : R.string.friendship_declined);
+    protected String getText(Context context, UserManager usermanager)
+    {
+        int i;
+        if (accepted)
+        {
+            i = 0x7f090126;
+        } else
+        {
+            i = 0x7f090127;
+        }
+        return context.getString(i);
     }
 
-    public SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
+    public com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType getViewType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isActionMessage(@Nonnull UserManager userManager) {
+    protected boolean isActionMessage(UserManager usermanager)
+    {
         return true;
     }
 
-    public void serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage);
-        chatMessage.setAccepted(Boolean.valueOf(this.accepted));
+    public void serializeToDatabaseObject(ChatMessage chatmessage)
+    {
+        super.serializeToDatabaseObject(chatmessage);
+        chatmessage.setAccepted(Boolean.valueOf(accepted));
     }
 }

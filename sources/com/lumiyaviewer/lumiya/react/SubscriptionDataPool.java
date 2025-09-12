@@ -1,33 +1,49 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class SubscriptionDataPool<K, T> extends SubscriptionGenericDataPool<K, T> {
-    private final Map<K, SubscriptionList<K, T>> entries = new HashMap();
+// Referenced classes of package com.lumiyaviewer.lumiya.react:
+//            SubscriptionGenericDataPool, SubscriptionList
 
-    /* access modifiers changed from: protected */
-    @Nullable
-    public SubscriptionList<K, T> getExistingSubscriptions(@Nonnull K k) {
-        return this.entries.get(k);
+public class SubscriptionDataPool extends SubscriptionGenericDataPool
+{
+
+    private final Map entries = new HashMap();
+
+    public SubscriptionDataPool()
+    {
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SubscriptionList<K, T> getSubscriptions(@Nonnull K k) {
-        SubscriptionList<K, T> subscriptionList = this.entries.get(k);
-        if (subscriptionList != null) {
-            return subscriptionList;
+    protected SubscriptionList getExistingSubscriptions(Object obj)
+    {
+        return (SubscriptionList)entries.get(obj);
+    }
+
+    protected SubscriptionList getSubscriptions(Object obj)
+    {
+        SubscriptionList subscriptionlist1 = (SubscriptionList)entries.get(obj);
+        SubscriptionList subscriptionlist = subscriptionlist1;
+        if (subscriptionlist1 == null)
+        {
+            subscriptionlist = new SubscriptionList();
+            entries.put(obj, subscriptionlist);
         }
-        SubscriptionList<K, T> subscriptionList2 = new SubscriptionList<>();
-        this.entries.put(k, subscriptionList2);
-        return subscriptionList2;
+        return subscriptionlist;
     }
 
-    public SubscriptionDataPool<K, T> setCanContainNulls(boolean z) {
-        super.setCanContainNulls(z);
+    public SubscriptionDataPool setCanContainNulls(boolean flag)
+    {
+        super.setCanContainNulls(flag);
         return this;
+    }
+
+    public volatile SubscriptionGenericDataPool setCanContainNulls(boolean flag)
+    {
+        return setCanContainNulls(flag);
     }
 }

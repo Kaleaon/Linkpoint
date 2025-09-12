@@ -1,49 +1,77 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class ParcelSetOtherCleanTime extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public ParcelData ParcelData_Field = new ParcelData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class ParcelSetOtherCleanTime extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class ParcelData {
+    public static class ParcelData
+    {
+
         public int LocalID;
         public int OtherCleanTime;
+
+        public ParcelData()
+        {
+        }
     }
 
-    public ParcelSetOtherCleanTime() {
-        this.zeroCoded = true;
+
+    public AgentData AgentData_Field;
+    public ParcelData ParcelData_Field;
+
+    public ParcelSetOtherCleanTime()
+    {
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        ParcelData_Field = new ParcelData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 44;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleParcelSetOtherCleanTime(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleParcelSetOtherCleanTime(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -56);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packInt(byteBuffer, this.ParcelData_Field.LocalID);
-        packInt(byteBuffer, this.ParcelData_Field.OtherCleanTime);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-56);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packInt(bytebuffer, ParcelData_Field.LocalID);
+        packInt(bytebuffer, ParcelData_Field.OtherCleanTime);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.ParcelData_Field.LocalID = unpackInt(byteBuffer);
-        this.ParcelData_Field.OtherCleanTime = unpackInt(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        ParcelData_Field.LocalID = unpackInt(bytebuffer);
+        ParcelData_Field.OtherCleanTime = unpackInt(bytebuffer);
     }
 }

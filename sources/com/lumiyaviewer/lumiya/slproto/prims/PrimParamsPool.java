@@ -1,26 +1,44 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.prims;
 
 import com.lumiyaviewer.lumiya.utils.InternPool;
 
-public class PrimParamsPool {
-    public static InternPool<PrimDrawParams> drawParamsPool = new InternPool<>();
-    public static InternPool<PrimPathParams> pathParamsPool = new InternPool<>();
-    public static InternPool<PrimProfileParams> profileParamsPool = new InternPool<>();
-    public static InternPool<PrimVolumeParams> volumeParamsPool = new InternPool<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.prims:
+//            PrimDrawParams, PrimPathParams, PrimProfileParams, PrimVolumeParams
 
-    public static PrimDrawParams get(PrimDrawParams primDrawParams) {
-        return drawParamsPool.intern(primDrawParams);
+public class PrimParamsPool
+{
+
+    public static InternPool drawParamsPool = new InternPool();
+    public static InternPool pathParamsPool = new InternPool();
+    public static InternPool profileParamsPool = new InternPool();
+    public static InternPool volumeParamsPool = new InternPool();
+
+    public PrimParamsPool()
+    {
     }
 
-    public static PrimPathParams get(PrimPathParams primPathParams) {
-        return pathParamsPool.intern(primPathParams);
+    public static PrimDrawParams get(PrimDrawParams primdrawparams)
+    {
+        return (PrimDrawParams)drawParamsPool.intern(primdrawparams);
     }
 
-    public static PrimProfileParams get(PrimProfileParams primProfileParams) {
-        return profileParamsPool.intern(primProfileParams);
+    public static PrimPathParams get(PrimPathParams primpathparams)
+    {
+        return (PrimPathParams)pathParamsPool.intern(primpathparams);
     }
 
-    public static PrimVolumeParams get(PrimVolumeParams primVolumeParams) {
-        return volumeParamsPool.intern(primVolumeParams);
+    public static PrimProfileParams get(PrimProfileParams primprofileparams)
+    {
+        return (PrimProfileParams)profileParamsPool.intern(primprofileparams);
     }
+
+    public static PrimVolumeParams get(PrimVolumeParams primvolumeparams)
+    {
+        return (PrimVolumeParams)volumeParamsPool.intern(primvolumeparams);
+    }
+
 }

@@ -1,81 +1,110 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.types;
 
-import android.annotation.SuppressLint;
-import javax.annotation.Nullable;
 
-public class ImmutableVector {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.types:
+//            LLVector3
+
+public class ImmutableVector
+{
+
     public final float x;
     public final float y;
     public final float z;
 
-    public ImmutableVector(float f, float f2, float f3) {
-        this.x = f;
-        this.y = f2;
-        this.z = f3;
+    public ImmutableVector(float f, float f1, float f2)
+    {
+        x = f;
+        y = f1;
+        z = f2;
     }
 
-    public ImmutableVector(LLVector3 lLVector3) {
-        this.x = lLVector3.x;
-        this.y = lLVector3.y;
-        this.z = lLVector3.z;
+    public ImmutableVector(LLVector3 llvector3)
+    {
+        x = llvector3.x;
+        y = llvector3.y;
+        z = llvector3.z;
     }
 
-    public float distanceTo(float f, float f2, float f3) {
-        float f4 = f - this.x;
-        float f5 = f2 - this.y;
-        float f6 = f3 - this.z;
-        return (float) Math.sqrt((double) ((f4 * f4) + (f5 * f5) + (f6 * f6)));
+    public float distanceTo(float f, float f1, float f2)
+    {
+        f -= x;
+        f1 -= y;
+        f2 -= z;
+        return (float)Math.sqrt(f * f + f1 * f1 + f2 * f2);
     }
 
-    public float distanceTo(@Nullable ImmutableVector immutableVector) {
-        if (immutableVector == null) {
-            return Float.NaN;
+    public float distanceTo(ImmutableVector immutablevector)
+    {
+        if (immutablevector == null)
+        {
+            return (0.0F / 0.0F);
+        } else
+        {
+            float f = x - immutablevector.x;
+            float f1 = y - immutablevector.y;
+            float f2 = z - immutablevector.z;
+            return (float)Math.sqrt(f * f + f1 * f1 + f2 * f2);
         }
-        float f = this.x - immutableVector.x;
-        float f2 = this.y - immutableVector.y;
-        float f3 = this.z - immutableVector.z;
-        return (float) Math.sqrt((double) ((f * f) + (f2 * f2) + (f3 * f3)));
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+        {
             return true;
         }
-        if (!(obj instanceof ImmutableVector)) {
+        if (obj instanceof ImmutableVector)
+        {
+            obj = (ImmutableVector)obj;
+            return x == ((ImmutableVector) (obj)).x && y == ((ImmutableVector) (obj)).y && z == ((ImmutableVector) (obj)).z;
+        } else
+        {
             return false;
         }
-        ImmutableVector immutableVector = (ImmutableVector) obj;
-        return this.x == immutableVector.x && this.y == immutableVector.y && this.z == immutableVector.z;
     }
 
-    public float getDistanceTo(@Nullable LLVector3 lLVector3) {
-        if (lLVector3 == null) {
-            return Float.NaN;
+    public float getDistanceTo(LLVector3 llvector3)
+    {
+        if (llvector3 == null)
+        {
+            return (0.0F / 0.0F);
+        } else
+        {
+            float f = x - llvector3.x;
+            float f1 = y - llvector3.y;
+            float f2 = z - llvector3.z;
+            return (float)Math.sqrt(f * f + f1 * f1 + f2 * f2);
         }
-        float f = this.x - lLVector3.x;
-        float f2 = this.y - lLVector3.y;
-        float f3 = this.z - lLVector3.z;
-        return (float) Math.sqrt((double) ((f * f) + (f2 * f2) + (f3 * f3)));
     }
 
-    public float getX() {
-        return this.x;
+    public float getX()
+    {
+        return x;
     }
 
-    public float getY() {
-        return this.y;
+    public float getY()
+    {
+        return y;
     }
 
-    public float getZ() {
-        return this.z;
+    public float getZ()
+    {
+        return z;
     }
 
-    public int hashCode() {
-        return Float.floatToRawIntBits(this.x) + Float.floatToRawIntBits(this.y) + Float.floatToRawIntBits(this.z);
+    public int hashCode()
+    {
+        return Float.floatToRawIntBits(x) + Float.floatToRawIntBits(y) + Float.floatToRawIntBits(z);
     }
 
-    @SuppressLint({"DefaultLocale"})
-    public String toString() {
-        return String.format("(%f,%f,%f)", new Object[]{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z)});
+    public String toString()
+    {
+        return String.format("(%f,%f,%f)", new Object[] {
+            Float.valueOf(x), Float.valueOf(y), Float.valueOf(z)
+        });
     }
 }

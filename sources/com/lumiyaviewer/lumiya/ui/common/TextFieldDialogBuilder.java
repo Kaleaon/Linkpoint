@@ -1,223 +1,107 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Resources;
+import android.text.Editable;
 import android.util.TypedValue;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
-public class TextFieldDialogBuilder {
-    private OnTextCancelledListener cancelledListener = null;
+public class TextFieldDialogBuilder
+{
+    public static interface OnTextCancelledListener
+    {
+
+        public abstract void onTextCancelled();
+    }
+
+    public static interface OnTextEnteredListener
+    {
+
+        public abstract void onTextEntered(String s);
+    }
+
+
+    private OnTextCancelledListener cancelledListener;
     private final Context context;
-    private String defaultText = "";
-    private OnTextEnteredListener listener = null;
-    private String title = null;
+    private String defaultText;
+    private OnTextEnteredListener listener;
+    private String title;
 
-    public interface OnTextCancelledListener {
-        void onTextCancelled();
+    public TextFieldDialogBuilder(Context context1)
+    {
+        title = null;
+        defaultText = "";
+        listener = null;
+        cancelledListener = null;
+        context = context1;
     }
 
-    public interface OnTextEnteredListener {
-        void onTextEntered(String str);
-    }
-
-    public TextFieldDialogBuilder(Context context2) {
-        this.context = context2;
-    }
-
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onTextDialogCancelled(DialogInterface dialogInterface, int i) {
-        dialogInterface.dismiss();
-        if (this.cancelledListener != null) {
-            this.cancelledListener.onTextCancelled();
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_common_TextFieldDialogBuilder_2200(DialogInterface dialoginterface, int i)
+    {
+        dialoginterface.dismiss();
+        if (cancelledListener != null)
+        {
+            cancelledListener.onTextCancelled();
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onTextDialogConfirmed(EditText editText, DialogInterface dialogInterface, int i) {
-        dialogInterface.dismiss();
-        if (this.listener != null) {
-            this.listener.onTextEntered(editText.getText().toString());
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_common_TextFieldDialogBuilder_2416(EditText edittext, DialogInterface dialoginterface, int i)
+    {
+        dialoginterface.dismiss();
+        if (listener != null)
+        {
+            listener.onTextEntered(edittext.getText().toString());
         }
     }
 
-    public TextFieldDialogBuilder setDefaultText(String str) {
-        this.defaultText = str;
+    public TextFieldDialogBuilder setDefaultText(String s)
+    {
+        defaultText = s;
         return this;
     }
 
-    public TextFieldDialogBuilder setOnTextCancelledListener(OnTextCancelledListener onTextCancelledListener) {
-        this.cancelledListener = onTextCancelledListener;
+    public TextFieldDialogBuilder setOnTextCancelledListener(OnTextCancelledListener ontextcancelledlistener)
+    {
+        cancelledListener = ontextcancelledlistener;
         return this;
     }
 
-    public TextFieldDialogBuilder setOnTextEnteredListener(OnTextEnteredListener onTextEnteredListener) {
-        this.listener = onTextEnteredListener;
+    public TextFieldDialogBuilder setOnTextEnteredListener(OnTextEnteredListener ontextenteredlistener)
+    {
+        listener = ontextenteredlistener;
         return this;
     }
 
-    public TextFieldDialogBuilder setTitle(String str) {
-        this.title = str;
+    public TextFieldDialogBuilder setTitle(String s)
+    {
+        title = s;
         return this;
     }
 
-    public void show() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this.context);
-        builder.setTitle(this.title);
-        EditText editText = new EditText(this.context);
-        editText.setText(this.defaultText);
-        editText.setSingleLine(true);
-        FrameLayout frameLayout = new FrameLayout(this.context);
-        int applyDimension = (int) TypedValue.applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics());
-        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(-1, -2);
-        layoutParams.leftMargin = applyDimension;
-        layoutParams.rightMargin = applyDimension;
-        editText.setLayoutParams(layoutParams);
-        frameLayout.addView(editText);
-        builder.setView(frameLayout);
-        builder.setNegativeButton("Cancel", new $Lambda$PTYOAfnVIwPVEdUoAgskdOeAqDw(this));
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener(this, editText) {
-
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f372$f0;
-
-            /* renamed from: -$f1 */
-            private final /* synthetic */ Object f373$f1;
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$PTYOAfnVIwPVEdUoAgskdOeAqDw.1.$m$0(android.content.DialogInterface, int):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.common.-$Lambda$PTYOAfnVIwPVEdUoAgskdOeAqDw.1.$m$0(android.content.DialogInterface, int):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$PTYOAfnVIwPVEdUoAgskdOeAqDw.1.onClick(android.content.DialogInterface, int):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.common.-$Lambda$PTYOAfnVIwPVEdUoAgskdOeAqDw.1.onClick(android.content.DialogInterface, int):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        });
+    public void show()
+    {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(context);
+        builder.setTitle(title);
+        EditText edittext = new EditText(context);
+        edittext.setText(defaultText);
+        edittext.setSingleLine(true);
+        FrameLayout framelayout = new FrameLayout(context);
+        int i = (int)TypedValue.applyDimension(1, 10F, context.getResources().getDisplayMetrics());
+        android.widget.FrameLayout.LayoutParams layoutparams = new android.widget.FrameLayout.LayoutParams(-1, -2);
+        layoutparams.leftMargin = i;
+        layoutparams.rightMargin = i;
+        edittext.setLayoutParams(layoutparams);
+        framelayout.addView(edittext);
+        builder.setView(framelayout);
+        builder.setNegativeButton("Cancel", new _2D_.Lambda.PTYOAfnVIwPVEdUoAgskdOeAqDw(this));
+        builder.setPositiveButton("OK", new _2D_.Lambda.PTYOAfnVIwPVEdUoAgskdOeAqDw._cls1(this, edittext));
         builder.create().show();
-    }
-
-    public void m549lambda$com_lumiyaviewer_lumiya_ui_common_TextFieldDialogBuilder_2200(DialogInterface dialogInterface, int i) {
-        // Lambda method implementation for dialog interface handling
-        if (dialogInterface != null) {
-            dialogInterface.dismiss();
-        }
     }
 }

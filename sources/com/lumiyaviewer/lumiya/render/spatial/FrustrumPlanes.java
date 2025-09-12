@@ -1,73 +1,130 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.spatial;
 
-public class FrustrumPlanes {
+
+public class FrustrumPlanes
+{
+
     public static final int INSIDE = 1;
     public static final int INTERSECT = 0;
     private static final int NUM_PLANES = 6;
     public static final int OUTSIDE = -1;
-    private final float[] params = new float[24];
-    private final int[] pnIndex = new int[36];
+    private final float params[] = new float[24];
+    private final int pnIndex[] = new int[36];
 
-    public FrustrumPlanes(float[] fArr) {
+    public FrustrumPlanes(float af[])
+    {
         int i = 0;
-        while (true) {
-            int i2 = i;
-            if (i2 < 6) {
-                initPlane(i2, fArr, 2 - (i2 / 2), (i2 & 1) != 0 ? -1.0f : 1.0f);
-                i = i2 + 1;
-            } else {
-                return;
+        while (i < 6) 
+        {
+            int j = i / 2;
+            float f;
+            if ((i & 1) != 0)
+            {
+                f = -1F;
+            } else
+            {
+                f = 1.0F;
             }
+            initPlane(i, af, 2 - j, f);
+            i++;
         }
     }
 
-    private void initPlane(int i, float[] fArr, int i2, float f) {
-        int i3 = i * 4;
-        for (int i4 = 0; i4 < 4; i4++) {
-            this.params[i3 + i4] = fArr[(i4 * 4) + 3] + (fArr[(i4 * 4) + i2] * f);
+    private void initPlane(int i, float af[], int j, float f)
+    {
+        boolean flag = false;
+        int i1 = i * 4;
+        for (int k = 0; k < 4; k++)
+        {
+            params[i1 + k] = af[k * 4 + 3] + af[k * 4 + j] * f;
         }
-        float f2 = 0.0f;
-        for (int i5 = 0; i5 < 3; i5++) {
-            float f3 = this.params[i3 + i5];
-            f2 += f3 * f3;
+
+        j = 0;
+        f = 0.0F;
+        for (; j < 3; j++)
+        {
+            float f1 = params[i1 + j];
+            f += f1 * f1;
         }
-        float sqrt = (float) Math.sqrt((double) f2);
-        for (int i6 = 0; i6 < 4; i6++) {
-            float[] fArr2 = this.params;
-            int i7 = i3 + i6;
-            fArr2[i7] = fArr2[i7] / sqrt;
-        }
-        for (int i8 = 0; i8 < 3; i8++) {
-            this.pnIndex[(i * 6) + i8] = this.params[i3 + i8] >= 0.0f ? i8 + 3 : i8;
-            this.pnIndex[(i * 6) + i8 + 3] = this.params[i3 + i8] >= 0.0f ? i8 : i8 + 3;
+
+        f = (float)Math.sqrt(f);
+        int l = 0;
+        do
+        {
+            j = ((flag) ? 1 : 0);
+            if (l >= 4)
+            {
+                break;
+            }
+            af = params;
+            j = i1 + l;
+            af[j] = af[j] / f;
+            l++;
+        } while (true);
+        while (j < 3) 
+        {
+            af = pnIndex;
+            float f2;
+            if (params[i1 + j] >= 0.0F)
+            {
+                f2 = j + 3;
+            } else
+            {
+                f2 = j;
+            }
+            af[i * 6 + j] = f2;
+            af = pnIndex;
+            if (params[i1 + j] >= 0.0F)
+            {
+                f2 = j;
+            } else
+            {
+                f2 = j + 3;
+            }
+            af[i * 6 + j + 3] = f2;
+            j++;
         }
     }
 
-    private float planeDistance(int i, int i2, float[] fArr) {
-        float f = 0.0f;
-        for (int i3 = 0; i3 < 3; i3++) {
-            f += this.params[i + i3] * fArr[this.pnIndex[i2 + i3]];
+    private float planeDistance(int i, int j, float af[])
+    {
+        float f = 0.0F;
+        for (int k = 0; k < 3; k++)
+        {
+            f += params[i + k] * af[pnIndex[j + k]];
         }
-        return this.params[i + 3] + f;
+
+        return params[i + 3] + f;
     }
 
-    public int testBoundingBox(float[] fArr, float[] fArr2) {
+    public int testBoundingBox(float af[], float af1[])
+    {
         int i = 0;
-        int i2 = 0;
-        for (int i3 = 0; i3 < 6; i3++) {
-            if (planeDistance(i2, i, fArr) < 0.0f) {
+        int j = 0;
+        int k = 0;
+        for (; i < 6; i++)
+        {
+            if (planeDistance(k, j, af) < 0.0F)
+            {
                 return -1;
             }
-            float planeDistance = planeDistance(i2, i + 3, fArr);
-            if (i3 == 0) {
-                fArr2[0] = planeDistance;
+            float f = planeDistance(k, j + 3, af);
+            if (i == 0)
+            {
+                af1[0] = f;
             }
-            if (planeDistance < 0.0f) {
+            if (f < 0.0F)
+            {
                 return 0;
             }
-            i2 += 4;
-            i += 6;
+            k += 4;
+            j += 6;
         }
+
         return 1;
     }
 }

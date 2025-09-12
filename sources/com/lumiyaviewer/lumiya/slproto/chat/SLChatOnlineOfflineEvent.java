@@ -1,48 +1,69 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public final class SLChatOnlineOfflineEvent extends SLChatEvent {
+public final class SLChatOnlineOfflineEvent extends SLChatEvent
+{
+
     private final boolean wentOnline;
 
-    public SLChatOnlineOfflineEvent(ChatMessage chatMessage, @Nonnull UUID uuid, boolean z) {
-        super(chatMessage, uuid);
-        this.wentOnline = z;
+    public SLChatOnlineOfflineEvent(ChatMessage chatmessage, UUID uuid, boolean flag)
+    {
+        super(chatmessage, uuid);
+        wentOnline = flag;
     }
 
-    public SLChatOnlineOfflineEvent(ChatMessageSource chatMessageSource, @Nonnull UUID uuid, boolean z) {
-        super(chatMessageSource, uuid);
-        this.wentOnline = z;
+    public SLChatOnlineOfflineEvent(ChatMessageSource chatmessagesource, UUID uuid, boolean flag)
+    {
+        super(chatmessagesource, uuid);
+        wentOnline = flag;
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return this.wentOnline ? SLChatEvent.ChatMessageType.WentOnline : SLChatEvent.ChatMessageType.WentOffline;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        if (wentOnline)
+        {
+            return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.WentOnline;
+        } else
+        {
+            return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.WentOffline;
+        }
     }
 
-    /* access modifiers changed from: protected */
-    public String getText(Context context, @Nonnull UserManager userManager) {
-        return context.getString(this.wentOnline ? R.string.went_online : R.string.went_offline);
+    protected String getText(Context context, UserManager usermanager)
+    {
+        int i;
+        if (wentOnline)
+        {
+            i = 0x7f090389;
+        } else
+        {
+            i = 0x7f090388;
+        }
+        return context.getString(i);
     }
 
-    public SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
+    public com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType getViewType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isActionMessage(@Nonnull UserManager userManager) {
+    protected boolean isActionMessage(UserManager usermanager)
+    {
         return true;
     }
 
-    public void serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage);
+    public void serializeToDatabaseObject(ChatMessage chatmessage)
+    {
+        super.serializeToDatabaseObject(chatmessage);
     }
 }

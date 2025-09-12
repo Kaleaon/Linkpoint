@@ -1,51 +1,78 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
-import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.dao.ChatMessageDao;
 import com.lumiyaviewer.lumiya.dao.Chatter;
+import com.lumiyaviewer.lumiya.dao.DaoSession;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader;
+import de.greenrobot.dao.Property;
 import de.greenrobot.dao.query.QueryBuilder;
 import de.greenrobot.dao.query.WhereCondition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class ChatMessageLoader extends ChunkedListLoader<ChatMessage> {
-    @Nonnull
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            UserManager, ChatterList, ActiveChattersManager
+
+public class ChatMessageLoader extends ChunkedListLoader
+{
+
     private final ChatMessageDao chatMessageDao;
-    @Nullable
-    private Chatter chatter = null;
-    @Nonnull
+    private Chatter chatter;
     private final ChatterID chatterID;
-    @Nonnull
     private final UserManager userManager;
 
-    ChatMessageLoader(@Nonnull UserManager userManager2, @Nonnull ChatterID chatterID2, int i, @Nonnull Executor executor, boolean z, @Nonnull ChunkedListLoader.EventListener eventListener) {
-        super(i, executor, z, eventListener);
-        this.chatterID = chatterID2;
-        this.userManager = userManager2;
-        this.chatMessageDao = userManager2.getDaoSession().getChatMessageDao();
+    ChatMessageLoader(UserManager usermanager, ChatterID chatterid, int i, Executor executor, boolean flag, com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader.EventListener eventlistener)
+    {
+        super(i, executor, flag, eventlistener);
+        chatter = null;
+        chatterID = chatterid;
+        userManager = usermanager;
+        chatMessageDao = usermanager.getDaoSession().getChatMessageDao();
     }
 
-    /* access modifiers changed from: protected */
-    public ChunkedListLoader.LoadResult<ChatMessage> loadInBackground(int i, long j, boolean z) {
-        if (this.chatter == null) {
-            this.chatter = this.userManager.getChatterList().getActiveChattersManager().getChatter(this.chatterID, true);
+    protected com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader.LoadResult loadInBackground(int i, long l, boolean flag)
+    {
+        if (chatter == null)
+        {
+            chatter = userManager.getChatterList().getActiveChattersManager().getChatter(chatterID, true);
         }
-        if (this.chatter == null) {
-            return new ChunkedListLoader.LoadResult<>(new ArrayList(), false, j);
+        if (chatter != null)
+        {
+            Object obj = chatMessageDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.ChatMessageDao.Properties.ChatterID.eq(chatter.getId()), new WhereCondition[0]);
+            if (flag)
+            {
+                obj = ((QueryBuilder) (obj)).where(com.lumiyaviewer.lumiya.dao.ChatMessageDao.Properties.Id.gt(Long.valueOf(l)), new WhereCondition[0]).orderAsc(new Property[] {
+                    com.lumiyaviewer.lumiya.dao.ChatMessageDao.Properties.Id
+                });
+            } else
+            {
+                obj = ((QueryBuilder) (obj)).where(com.lumiyaviewer.lumiya.dao.ChatMessageDao.Properties.Id.lt(Long.valueOf(l)), new WhereCondition[0]).orderDesc(new Property[] {
+                    com.lumiyaviewer.lumiya.dao.ChatMessageDao.Properties.Id
+                });
+            }
+            ((QueryBuilder) (obj)).limit(i + 1);
+            obj = ((QueryBuilder) (obj)).list();
+            if (((List) (obj)).size() > i)
+            {
+                flag = true;
+            } else
+            {
+                flag = false;
+            }
+            if (flag)
+            {
+                ((List) (obj)).remove(((List) (obj)).size() - 1);
+            }
+            return new com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader.LoadResult(((List) (obj)), flag, l);
+        } else
+        {
+            return new com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader.LoadResult(new ArrayList(), false, l);
         }
-        QueryBuilder where = this.chatMessageDao.queryBuilder().where(ChatMessageDao.Properties.ChatterID.eq(this.chatter.getId()), new WhereCondition[0]);
-        QueryBuilder orderAsc = z ? where.where(ChatMessageDao.Properties.Id.gt(Long.valueOf(j)), new WhereCondition[0]).orderAsc(ChatMessageDao.Properties.Id) : where.where(ChatMessageDao.Properties.Id.lt(Long.valueOf(j)), new WhereCondition[0]).orderDesc(ChatMessageDao.Properties.Id);
-        orderAsc.limit(i + 1);
-        List list = orderAsc.list();
-        boolean z2 = list.size() > i;
-        if (z2) {
-            list.remove(list.size() - 1);
-        }
-        return new ChunkedListLoader.LoadResult<>(list, z2, j);
     }
 }

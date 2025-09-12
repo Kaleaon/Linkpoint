@@ -1,33 +1,47 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.shaders;
 
 import android.opengl.GLES20;
 import com.lumiyaviewer.lumiya.render.RenderContext;
+import com.lumiyaviewer.lumiya.slproto.windlight.WindlightPreset;
 
-public class StarsProgram extends ShaderProgram {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.shaders:
+//            ShaderProgram, Shader, ShaderPreprocessor
+
+public class StarsProgram extends ShaderProgram
+{
+
     public int uMVPMatrix;
     public int uStarColor;
     public int vPosition;
 
-    public StarsProgram() {
+    public StarsProgram()
+    {
         super(Shader.StarsVertexShader, Shader.StarsFragmentShader);
     }
 
-    public void ApplyWindlight(RenderContext renderContext) {
-        GLES20.glUniform4f(this.uStarColor, 1.0f, 1.0f, 1.0f, renderContext.windlightPreset.star_brightness);
+    public void ApplyWindlight(RenderContext rendercontext)
+    {
+        GLES20.glUniform4f(uStarColor, 1.0F, 1.0F, 1.0F, rendercontext.windlightPreset.star_brightness);
     }
 
-    public /* bridge */ /* synthetic */ int Compile(ShaderPreprocessor shaderPreprocessor) {
-        return super.Compile(shaderPreprocessor);
+    public volatile int Compile(ShaderPreprocessor shaderpreprocessor)
+    {
+        return super.Compile(shaderpreprocessor);
     }
 
-    /* access modifiers changed from: protected */
-    public void bindVariables() {
-        this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition");
-        this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix");
-        this.uStarColor = GLES20.glGetUniformLocation(this.handle, "uStarColor");
+    protected void bindVariables()
+    {
+        vPosition = GLES20.glGetAttribLocation(handle, "vPosition");
+        uMVPMatrix = GLES20.glGetUniformLocation(handle, "uMVPMatrix");
+        uStarColor = GLES20.glGetUniformLocation(handle, "uStarColor");
     }
 
-    public /* bridge */ /* synthetic */ int getHandle() {
+    public volatile int getHandle()
+    {
         return super.getHandle();
     }
 }

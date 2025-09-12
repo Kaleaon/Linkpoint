@@ -1,106 +1,210 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.voice.common.model;
 
 import android.os.Bundle;
 import com.google.common.collect.Interner;
 import com.google.common.collect.Interners;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class VoiceChatInfo {
-    private static final VoiceChatInfo emptyChatState = interner.intern(new VoiceChatInfo(VoiceChatState.None, VoiceChatState.None, 0, (UUID) null, false, false));
-    private static final Interner<VoiceChatInfo> interner = Interners.newWeakInterner();
-    @Nullable
+public class VoiceChatInfo
+{
+    public static final class VoiceChatState extends Enum
+    {
+
+        private static final VoiceChatState $VALUES[];
+        public static final VoiceChatState Active;
+        public static final VoiceChatState Connecting;
+        public static final VoiceChatState None;
+        public static final VoiceChatState Ringing;
+
+        public static VoiceChatState valueOf(String s)
+        {
+            return (VoiceChatState)Enum.valueOf(com/lumiyaviewer/lumiya/voice/common/model/VoiceChatInfo$VoiceChatState, s);
+        }
+
+        public static VoiceChatState[] values()
+        {
+            return (VoiceChatState[])$VALUES.clone();
+        }
+
+        static 
+        {
+            None = new VoiceChatState("None", 0);
+            Ringing = new VoiceChatState("Ringing", 1);
+            Connecting = new VoiceChatState("Connecting", 2);
+            Active = new VoiceChatState("Active", 3);
+            $VALUES = (new VoiceChatState[] {
+                None, Ringing, Connecting, Active
+            });
+        }
+
+        private VoiceChatState(String s, int i)
+        {
+            super(s, i);
+        }
+    }
+
+
+    private static final VoiceChatInfo emptyChatState;
+    private static final Interner interner;
     public final UUID activeSpeakerID;
     public final boolean isConference;
     public final boolean localMicActive;
     public final int numActiveSpeakers;
-    @Nonnull
     public final VoiceChatState previousState;
-    @Nonnull
     public final VoiceChatState state;
 
-    public enum VoiceChatState {
-        None,
-        Ringing,
-        Connecting,
-        Active
-    }
-
-    private VoiceChatInfo(Bundle bundle) {
+    private VoiceChatInfo(Bundle bundle)
+    {
         UUID uuid = null;
-        this.state = VoiceChatState.valueOf(bundle.getString("state"));
-        this.previousState = VoiceChatState.valueOf(bundle.getString("previousState"));
-        this.numActiveSpeakers = bundle.getInt("numActiveSpeakers");
-        String string = bundle.getString("activeSpeakerID");
-        this.activeSpeakerID = string != null ? UUID.fromString(string) : uuid;
-        this.isConference = bundle.getBoolean("isConference");
-        this.localMicActive = bundle.getBoolean("localMicActive");
+        super();
+        state = VoiceChatState.valueOf(bundle.getString("state"));
+        previousState = VoiceChatState.valueOf(bundle.getString("previousState"));
+        numActiveSpeakers = bundle.getInt("numActiveSpeakers");
+        String s = bundle.getString("activeSpeakerID");
+        if (s != null)
+        {
+            uuid = UUID.fromString(s);
+        }
+        activeSpeakerID = uuid;
+        isConference = bundle.getBoolean("isConference");
+        localMicActive = bundle.getBoolean("localMicActive");
     }
 
-    private VoiceChatInfo(@Nonnull VoiceChatState voiceChatState, @Nonnull VoiceChatState voiceChatState2, int i, @Nullable UUID uuid, boolean z, boolean z2) {
-        this.state = voiceChatState;
-        this.previousState = voiceChatState2;
-        this.numActiveSpeakers = i;
-        this.activeSpeakerID = uuid;
-        this.isConference = z;
-        this.localMicActive = z2;
+    private VoiceChatInfo(VoiceChatState voicechatstate, VoiceChatState voicechatstate1, int i, UUID uuid, boolean flag, boolean flag1)
+    {
+        state = voicechatstate;
+        previousState = voicechatstate1;
+        numActiveSpeakers = i;
+        activeSpeakerID = uuid;
+        isConference = flag;
+        localMicActive = flag1;
     }
 
-    @Nonnull
-    public static VoiceChatInfo create(Bundle bundle) {
-        return interner.intern(new VoiceChatInfo(bundle));
+    public static VoiceChatInfo create(Bundle bundle)
+    {
+        return (VoiceChatInfo)interner.intern(new VoiceChatInfo(bundle));
     }
 
-    @Nonnull
-    public static VoiceChatInfo create(@Nonnull VoiceChatState voiceChatState, @Nonnull VoiceChatState voiceChatState2, int i, @Nullable UUID uuid, boolean z, boolean z2) {
-        return interner.intern(new VoiceChatInfo(voiceChatState, voiceChatState2, i, uuid, z, z2));
+    public static VoiceChatInfo create(VoiceChatState voicechatstate, VoiceChatState voicechatstate1, int i, UUID uuid, boolean flag, boolean flag1)
+    {
+        return (VoiceChatInfo)interner.intern(new VoiceChatInfo(voicechatstate, voicechatstate1, i, uuid, flag, flag1));
     }
 
-    @Nonnull
-    public static VoiceChatInfo empty() {
+    public static VoiceChatInfo empty()
+    {
         return emptyChatState;
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object obj)
+    {
+        if (this != obj)
+        {
+            if (obj == null || getClass() != obj.getClass())
+            {
+                return false;
+            }
+            obj = (VoiceChatInfo)obj;
+        } else
+        {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (numActiveSpeakers == ((VoiceChatInfo) (obj)).numActiveSpeakers)
+        {
+            if (isConference == ((VoiceChatInfo) (obj)).isConference)
+            {
+                if (localMicActive == ((VoiceChatInfo) (obj)).localMicActive)
+                {
+                    if (state == ((VoiceChatInfo) (obj)).state)
+                    {
+                        if (previousState == ((VoiceChatInfo) (obj)).previousState)
+                        {
+                            if (activeSpeakerID == null)
+                            {
+                                return ((VoiceChatInfo) (obj)).activeSpeakerID == null;
+                            } else
+                            {
+                                return activeSpeakerID.equals(((VoiceChatInfo) (obj)).activeSpeakerID);
+                            }
+                        } else
+                        {
+                            return false;
+                        }
+                    } else
+                    {
+                        return false;
+                    }
+                } else
+                {
+                    return false;
+                }
+            } else
+            {
+                return false;
+            }
+        } else
+        {
             return false;
         }
-        VoiceChatInfo voiceChatInfo = (VoiceChatInfo) obj;
-        if (this.numActiveSpeakers == voiceChatInfo.numActiveSpeakers && this.isConference == voiceChatInfo.isConference && this.localMicActive == voiceChatInfo.localMicActive && this.state == voiceChatInfo.state && this.previousState == voiceChatInfo.previousState) {
-            return this.activeSpeakerID == null ? voiceChatInfo.activeSpeakerID == null : this.activeSpeakerID.equals(voiceChatInfo.activeSpeakerID);
-        }
-        return false;
     }
 
-    public int hashCode() {
-        int i = 0;
-        int hashCode = ((!this.isConference ? 0 : 1) + (((this.activeSpeakerID == null ? 0 : this.activeSpeakerID.hashCode()) + (((((this.state.hashCode() * 31) + this.previousState.hashCode()) * 31) + this.numActiveSpeakers) * 31)) * 31)) * 31;
-        if (this.localMicActive) {
-            i = 1;
+    public int hashCode()
+    {
+        int k = 0;
+        int l = state.hashCode();
+        int i1 = previousState.hashCode();
+        int j1 = numActiveSpeakers;
+        int i;
+        int j;
+        if (activeSpeakerID == null)
+        {
+            i = 0;
+        } else
+        {
+            i = activeSpeakerID.hashCode();
         }
-        return hashCode + i;
+        if (!isConference)
+        {
+            j = 0;
+        } else
+        {
+            j = 1;
+        }
+        if (localMicActive)
+        {
+            k = 1;
+        }
+        return (j + (i + ((l * 31 + i1) * 31 + j1) * 31) * 31) * 31 + k;
     }
 
-    public Bundle toBundle() {
-        String str = null;
+    public Bundle toBundle()
+    {
+        String s = null;
         Bundle bundle = new Bundle();
-        bundle.putString("state", this.state.toString());
-        bundle.putString("previousState", this.previousState.toString());
-        bundle.putInt("numActiveSpeakers", this.numActiveSpeakers);
-        if (this.activeSpeakerID != null) {
-            str = this.activeSpeakerID.toString();
+        bundle.putString("state", state.toString());
+        bundle.putString("previousState", previousState.toString());
+        bundle.putInt("numActiveSpeakers", numActiveSpeakers);
+        if (activeSpeakerID != null)
+        {
+            s = activeSpeakerID.toString();
         }
-        bundle.putString("activeSpeakerID", str);
-        bundle.putBoolean("isConference", this.isConference);
-        bundle.putBoolean("localMicActive", this.localMicActive);
+        bundle.putString("activeSpeakerID", s);
+        bundle.putBoolean("isConference", isConference);
+        bundle.putBoolean("localMicActive", localMicActive);
         return bundle;
     }
 
-    public String toString() {
-        return "VoiceChatInfo{state=" + this.state + ", previousState=" + this.previousState + ", numActiveSpeakers=" + this.numActiveSpeakers + ", activeSpeakerID=" + this.activeSpeakerID + ", isConference=" + this.isConference + ", localMicActive=" + this.localMicActive + '}';
+    public String toString()
+    {
+        return (new StringBuilder()).append("VoiceChatInfo{state=").append(state).append(", previousState=").append(previousState).append(", numActiveSpeakers=").append(numActiveSpeakers).append(", activeSpeakerID=").append(activeSpeakerID).append(", isConference=").append(isConference).append(", localMicActive=").append(localMicActive).append('}').toString();
+    }
+
+    static 
+    {
+        interner = Interners.newWeakInterner();
+        emptyChatState = (VoiceChatInfo)interner.intern(new VoiceChatInfo(VoiceChatState.None, VoiceChatState.None, 0, null, false, false));
     }
 }

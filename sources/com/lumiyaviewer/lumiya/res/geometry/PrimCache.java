@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.geometry;
 
 import com.lumiyaviewer.lumiya.render.drawable.DrawableGeometry;
@@ -10,56 +14,83 @@ import com.lumiyaviewer.lumiya.res.ResourceRequest;
 import com.lumiyaviewer.lumiya.res.executors.PrimComputeExecutor;
 import com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams;
 
-public class PrimCache extends ResourceMemoryCache<PrimDrawParams, DrawablePrim> {
-    private final GeometryCache geometryCache;
-    private final GLTextureCache textureCache;
+// Referenced classes of package com.lumiyaviewer.lumiya.res.geometry:
+//            GeometryCache
 
-    private static class PrimRequest extends ResourceRequest<PrimDrawParams, DrawablePrim> implements Runnable, ResourceConsumer {
+public class PrimCache extends ResourceMemoryCache
+{
+    private static class PrimRequest extends ResourceRequest
+        implements Runnable, ResourceConsumer
+    {
+
         private volatile DrawableGeometry geometry;
         private final GeometryCache geometryCache;
         private final GLTextureCache glTextureCache;
 
-        public PrimRequest(GLTextureCache gLTextureCache, GeometryCache geometryCache2, PrimDrawParams primDrawParams, ResourceManager<PrimDrawParams, DrawablePrim> resourceManager) {
-            super(primDrawParams, resourceManager);
-            this.glTextureCache = gLTextureCache;
-            this.geometryCache = geometryCache2;
-        }
-
-        public void OnResourceReady(Object obj, boolean z) {
-            if (obj instanceof DrawableGeometry) {
-                this.geometry = (DrawableGeometry) obj;
+        public void OnResourceReady(Object obj, boolean flag)
+        {
+            if (obj instanceof DrawableGeometry)
+            {
+                geometry = (DrawableGeometry)obj;
                 PrimComputeExecutor.getInstance().execute(this);
                 return;
+            } else
+            {
+                completeRequest(null);
+                return;
             }
-            completeRequest(null);
         }
 
-        public void cancelRequest() {
+        public void cancelRequest()
+        {
             PrimComputeExecutor.getInstance().remove(this);
-            this.geometryCache.CancelRequest(this);
+            geometryCache.CancelRequest(this);
             super.cancelRequest();
         }
 
-        public void execute() {
-            this.geometryCache.RequestResource(((PrimDrawParams) getParams()).getVolumeParams(), this);
+        public void execute()
+        {
+            geometryCache.RequestResource(((PrimDrawParams)getParams()).getVolumeParams(), this);
         }
 
-        public void run() {
-            try {
-                completeRequest(new DrawablePrim((PrimDrawParams) getParams(), this.geometry));
-            } catch (Exception e) {
+        public void run()
+        {
+            try
+            {
+                completeRequest(new DrawablePrim((PrimDrawParams)getParams(), geometry));
+                return;
+            }
+            catch (Exception exception)
+            {
                 completeRequest(null);
             }
         }
+
+        public PrimRequest(GLTextureCache gltexturecache, GeometryCache geometrycache, PrimDrawParams primdrawparams, ResourceManager resourcemanager)
+        {
+            super(primdrawparams, resourcemanager);
+            glTextureCache = gltexturecache;
+            geometryCache = geometrycache;
+        }
     }
 
-    public PrimCache(GLTextureCache gLTextureCache, GeometryCache geometryCache2) {
-        this.textureCache = gLTextureCache;
-        this.geometryCache = geometryCache2;
+
+    private final GeometryCache geometryCache;
+    private final GLTextureCache textureCache;
+
+    public PrimCache(GLTextureCache gltexturecache, GeometryCache geometrycache)
+    {
+        textureCache = gltexturecache;
+        geometryCache = geometrycache;
     }
 
-    /* access modifiers changed from: protected */
-    public ResourceRequest<PrimDrawParams, DrawablePrim> CreateNewRequest(PrimDrawParams primDrawParams, ResourceManager<PrimDrawParams, DrawablePrim> resourceManager) {
-        return new PrimRequest(this.textureCache, this.geometryCache, primDrawParams, resourceManager);
+    protected ResourceRequest CreateNewRequest(PrimDrawParams primdrawparams, ResourceManager resourcemanager)
+    {
+        return new PrimRequest(textureCache, geometryCache, primdrawparams, resourcemanager);
+    }
+
+    protected volatile ResourceRequest CreateNewRequest(Object obj, ResourceManager resourcemanager)
+    {
+        return CreateNewRequest((PrimDrawParams)obj, resourcemanager);
     }
 }

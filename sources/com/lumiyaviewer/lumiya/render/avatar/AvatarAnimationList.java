@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.avatar;
 
 import com.google.common.collect.ImmutableList;
@@ -7,54 +11,54 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import javax.annotation.Nonnull;
 
-class AvatarAnimationList {
-    @Nonnull
-    private final ImmutableList<AvatarRunningAnimation> animations;
-    @Nonnull
-    private final ImmutableList<AvatarRunningSequence> sequences;
+// Referenced classes of package com.lumiyaviewer.lumiya.render.avatar:
+//            AvatarAnimationState, AvatarRunningAnimation, AvatarRunningSequence, AvatarSkeleton
 
-    AvatarAnimationList(Collection<AvatarAnimationState> collection) {
-        ArrayList arrayList = new ArrayList(collection.size());
-        ImmutableList.Builder builder = ImmutableList.builder();
-        for (AvatarAnimationState runningAnimations : collection) {
-            runningAnimations.getRunningAnimations(builder, arrayList);
-        }
-        Collections.sort(arrayList);
-        this.sequences = builder.build();
-        this.animations = ImmutableList.copyOf(arrayList);
+class AvatarAnimationList
+{
+
+    private final ImmutableList animations;
+    private final ImmutableList sequences;
+
+    AvatarAnimationList(Collection collection)
+    {
+        ArrayList arraylist = new ArrayList(collection.size());
+        com.google.common.collect.ImmutableList.Builder builder = ImmutableList.builder();
+        for (collection = collection.iterator(); collection.hasNext(); ((AvatarAnimationState)collection.next()).getRunningAnimations(builder, arraylist)) { }
+        Collections.sort(arraylist);
+        sequences = builder.build();
+        animations = ImmutableList.copyOf(arraylist);
     }
 
-    /* access modifiers changed from: package-private */
-    public void animate(AvatarSkeleton avatarSkeleton, float[] fArr, float[] fArr2, LLQuaternion[] lLQuaternionArr, LLVector3[] lLVector3Arr) {
-        for (AvatarRunningAnimation animate : this.animations) {
-            animate.animate(avatarSkeleton, fArr, fArr2, lLQuaternionArr, lLVector3Arr);
-        }
-        int length = fArr.length;
-        for (int i = 0; i < length; i++) {
-            float f = 1.0f - fArr[i];
-            if (f > 0.01f && f < 1.0f) {
-                float f2 = 1.0f / f;
-                lLQuaternionArr[i].x *= f2;
-                lLQuaternionArr[i].y *= f2;
-                lLQuaternionArr[i].z *= f2;
-                LLQuaternion lLQuaternion = lLQuaternionArr[i];
-                lLQuaternion.w = f2 * lLQuaternion.w;
+    void animate(AvatarSkeleton avatarskeleton, float af[], float af1[], LLQuaternion allquaternion[], LLVector3 allvector3[])
+    {
+        for (Iterator iterator = animations.iterator(); iterator.hasNext(); ((AvatarRunningAnimation)iterator.next()).animate(avatarskeleton, af, af1, allquaternion, allvector3)) { }
+        int j = af.length;
+        for (int i = 0; i < j; i++)
+        {
+            float f = 1.0F - af[i];
+            if (f > 0.01F && f < 1.0F)
+            {
+                f = 1.0F / f;
+                avatarskeleton = allquaternion[i];
+                avatarskeleton.x = ((LLQuaternion) (avatarskeleton)).x * f;
+                avatarskeleton = allquaternion[i];
+                avatarskeleton.y = ((LLQuaternion) (avatarskeleton)).y * f;
+                avatarskeleton = allquaternion[i];
+                avatarskeleton.z = ((LLQuaternion) (avatarskeleton)).z * f;
+                avatarskeleton = allquaternion[i];
+                avatarskeleton.w = f * ((LLQuaternion) (avatarskeleton)).w;
             }
         }
+
     }
 
-    /* access modifiers changed from: package-private */
-    public boolean needAnimate(long j) {
-        boolean z = false;
-        Iterator<T> it = this.sequences.iterator();
-        while (true) {
-            boolean z2 = z;
-            if (!it.hasNext()) {
-                return z2;
-            }
-            z = ((AvatarRunningSequence) it.next()).needAnimate(j) | z2;
-        }
+    boolean needAnimate(long l)
+    {
+        Iterator iterator = sequences.iterator();
+        boolean flag;
+        for (flag = false; iterator.hasNext(); flag = ((AvatarRunningSequence)iterator.next()).needAnimate(l) | flag) { }
+        return flag;
     }
 }

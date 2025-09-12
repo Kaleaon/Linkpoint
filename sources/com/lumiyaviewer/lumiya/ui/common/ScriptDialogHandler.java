@@ -1,7 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import java.util.UUID;
 
-public interface ScriptDialogHandler {
-    void setLastTouchUUID(UUID uuid);
+public interface ScriptDialogHandler
+{
+
+    public abstract void setLastTouchUUID(UUID uuid);
 }

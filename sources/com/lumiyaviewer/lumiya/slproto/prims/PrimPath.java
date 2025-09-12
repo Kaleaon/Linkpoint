@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.prims;
 
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion;
@@ -5,186 +9,275 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector2;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import java.util.ArrayList;
 
-public class PrimPath {
-    private static final int MIN_DETAIL_FACES = 6;
-    private static float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f};
-    boolean Dirty = true;
-    boolean Open = false;
-    ArrayList<PathPoint> Path = new ArrayList<>();
-    float Step = 1.0f;
-    int Total = 0;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.prims:
+//            PrimPathParams, PrimMath
 
-    public static class PathPoint {
-        float TexT = 0.0f;
-        LLVector3 pos = new LLVector3();
-        LLQuaternion rot = new LLQuaternion();
-        LLVector2 scale = new LLVector2();
+public class PrimPath
+{
+    public static class PathPoint
+    {
+
+        float TexT;
+        LLVector3 pos;
+        LLQuaternion rot;
+        LLVector2 scale;
+
+        public PathPoint()
+        {
+            pos = new LLVector3();
+            scale = new LLVector2();
+            rot = new LLQuaternion();
+            TexT = 0.0F;
+        }
     }
 
-    private void genNGon(PrimPathParams primPathParams, int i, float f, float f2, float f3) {
-        float f4;
+
+    private static final int MIN_DETAIL_FACES = 6;
+    private static float tableScale[] = {
+        1.0F, 1.0F, 1.0F, 0.5F, 0.707107F, 0.53F, 0.525F, 0.5F
+    };
+    boolean Dirty;
+    boolean Open;
+    ArrayList Path;
+    float Step;
+    int Total;
+
+    public PrimPath()
+    {
+        Open = false;
+        Total = 0;
+        Dirty = true;
+        Step = 1.0F;
+        Path = new ArrayList();
+    }
+
+    private void genNGon(PrimPathParams primpathparams, int i, float f, float f1, float f2)
+    {
+        float f12 = primpathparams.Revolutions;
+        float f9 = primpathparams.Skew;
+        float f13 = Math.abs(f9);
+        float f10 = primpathparams.ScaleX * (1.0F - f13);
+        float f11 = primpathparams.ScaleY;
+        float f3 = 1.0F - primpathparams.TaperX;
+        float f4 = 1.0F - primpathparams.TaperY;
+        double d;
         float f5;
-        float f6;
         float f7;
         float f8;
-        float f9 = primPathParams.Revolutions;
-        float f10 = primPathParams.Skew;
-        float abs = Math.abs(f10);
-        float f11 = primPathParams.ScaleX * (1.0f - abs);
-        float f12 = primPathParams.ScaleY;
-        float f13 = 1.0f - primPathParams.TaperX;
-        float f14 = 1.0f - primPathParams.TaperY;
-        if (f13 > 1.0f) {
-            f4 = 1.0f;
-            f5 = 2.0f - f13;
-        } else {
-            f4 = f13;
-            f5 = 1.0f;
+        float f14;
+        float f15;
+        float f16;
+        float f17;
+        LLQuaternion llquaternion;
+        LLQuaternion llquaternion1;
+        LLVector3 llvector3;
+        PathPoint pathpoint;
+        LLVector3 llvector3_1;
+        boolean flag;
+        if (f3 > 1.0F)
+        {
+            f = 1.0F;
+            f3 = 2.0F - f3;
+        } else
+        {
+            f = f3;
+            f3 = 1.0F;
         }
-        if (f14 > 1.0f) {
-            f6 = 1.0f;
-            f7 = 2.0f - f14;
-        } else {
-            f6 = f14;
-            f7 = 1.0f;
+        if (f4 > 1.0F)
+        {
+            float f6 = 1.0F;
+            f5 = 2.0F - f4;
+            f4 = f6;
+        } else
+        {
+            f5 = 1.0F;
         }
-        float f15 = 0.5f;
-        if (i < 8) {
-            f15 = tableScale[i];
+        f7 = 0.5F;
+        if (i < 8)
+        {
+            f7 = tableScale[i];
         }
-        float f16 = f15 * (1.0f - f12);
-        float f17 = primPathParams.RadiusOffset;
-        if (f17 < 0.0f) {
-            f8 = (f17 + 1.0f) * f16;
-        } else {
-            float f18 = (1.0f - f17) * f16;
-            f8 = f16;
-            f16 = f18;
+        f7 *= 1.0F - f11;
+        f14 = primpathparams.RadiusOffset;
+        if (f14 < 0.0F)
+        {
+            f8 = (f14 + 1.0F) * f7;
+        } else
+        {
+            f8 = f7;
+            f7 = (1.0F - f14) * f7;
         }
-        this.Open = ((primPathParams.End * f2) - primPathParams.Begin < 1.0f || abs > 0.001f || Math.abs(f4 - f5) > 0.001f || Math.abs(f6 - f7) > 0.001f) ? true : Math.abs(f16 - f8) > 0.001f;
-        LLQuaternion lLQuaternion = new LLQuaternion();
-        LLQuaternion lLQuaternion2 = new LLQuaternion();
-        LLVector3 lLVector3 = new LLVector3(1.0f, 0.0f, 0.0f);
-        float f19 = primPathParams.TwistBegin * f3;
-        float f20 = primPathParams.TwistEnd * f3;
-        float f21 = 1.0f / ((float) i);
-        float f22 = primPathParams.Begin;
-        PathPoint pathPoint = new PathPoint();
-        float f23 = 6.2831855f * f9 * f22;
-        float sin = (float) (Math.sin((double) f23) * ((double) PrimMath.lerp(f8, f16, f22)));
-        pathPoint.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, sin) + 0.0f + (PrimMath.lerp(-f10, f10, f22) * 0.5f), ((float) (Math.cos((double) f23) * ((double) PrimMath.lerp(f8, f16, f22)))) + PrimMath.lerp(0.0f, primPathParams.ShearY, sin), sin);
-        pathPoint.scale.x = PrimMath.lerp(f5, f4, f22) * f11;
-        pathPoint.scale.y = PrimMath.lerp(f7, f6, f22) * f12;
-        pathPoint.TexT = f22;
-        lLQuaternion.setQuat(((PrimMath.lerp(f19, f20, f22) * 2.0f) * 3.1415927f) - 3.1415927f, 0.0f, 0.0f, 1.0f);
-        lLQuaternion2.setQuat(f23, lLVector3);
-        pathPoint.rot.setMul(lLQuaternion, lLQuaternion2);
-        this.Path.add(pathPoint);
-        for (float f24 = ((float) ((int) ((f22 + f21) * ((float) i)))) / ((float) i); f24 < primPathParams.End; f24 += f21) {
-            PathPoint pathPoint2 = new PathPoint();
-            float f25 = 6.2831855f * f9 * f24;
-            float cos = (float) (Math.cos((double) f25) * ((double) PrimMath.lerp(f8, f16, f24)));
-            float sin2 = (float) (Math.sin((double) f25) * ((double) PrimMath.lerp(f8, f16, f24)));
-            pathPoint2.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, sin2) + 0.0f + (PrimMath.lerp(-f10, f10, f24) * 0.5f), cos + PrimMath.lerp(0.0f, primPathParams.ShearY, sin2), sin2);
-            pathPoint2.scale.x = PrimMath.lerp(f5, f4, f24) * f11;
-            pathPoint2.scale.y = PrimMath.lerp(f7, f6, f24) * f12;
-            pathPoint2.TexT = f24;
-            lLQuaternion.setQuat(((PrimMath.lerp(f19, f20, f24) * 2.0f) * 3.1415927f) - 3.1415927f, 0.0f, 0.0f, 1.0f);
-            lLQuaternion2.setQuat(f25, lLVector3);
-            pathPoint2.rot.setMul(lLQuaternion, lLQuaternion2);
-            this.Path.add(pathPoint2);
+        break MISSING_BLOCK_LABEL_135;
+        if (primpathparams.End * f1 - primpathparams.Begin < 1.0F || f13 > 0.001F || Math.abs(f - f3) > 0.001F || Math.abs(f4 - f5) > 0.001F)
+        {
+            flag = true;
+        } else
+        if (Math.abs(f7 - f8) > 0.001F)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
         }
-        float f26 = primPathParams.End;
-        PathPoint pathPoint3 = new PathPoint();
-        float f27 = f9 * 6.2831855f * f26;
-        float cos2 = (float) (Math.cos((double) f27) * ((double) PrimMath.lerp(f8, f16, f26)));
-        float lerp = (float) (((double) PrimMath.lerp(f8, f16, f26)) * Math.sin((double) f27));
-        pathPoint3.pos.set((PrimMath.lerp(-f10, f10, f26) * 0.5f) + PrimMath.lerp(0.0f, primPathParams.ShearX, lerp) + 0.0f, cos2 + PrimMath.lerp(0.0f, primPathParams.ShearY, lerp), lerp);
-        pathPoint3.scale.x = PrimMath.lerp(f5, f4, f26) * f11;
-        pathPoint3.scale.y = PrimMath.lerp(f7, f6, f26) * f12;
-        pathPoint3.TexT = f26;
-        lLQuaternion.setQuat(((PrimMath.lerp(f19, f20, f26) * 2.0f) * 3.1415927f) - 3.1415927f, 0.0f, 0.0f, 1.0f);
-        lLQuaternion2.setQuat(f27, lLVector3);
-        pathPoint3.rot.setMul(lLQuaternion, lLQuaternion2);
-        this.Path.add(pathPoint3);
-        this.Total = this.Path.size();
+        Open = flag;
+        llquaternion = new LLQuaternion();
+        llquaternion1 = new LLQuaternion();
+        llvector3 = new LLVector3(1.0F, 0.0F, 0.0F);
+        f13 = primpathparams.TwistBegin * f2;
+        f2 = primpathparams.TwistEnd * f2;
+        f14 = 1.0F / (float)i;
+        f1 = primpathparams.Begin;
+        pathpoint = new PathPoint();
+        f15 = 6.283185F * f12 * f1;
+        f16 = (float)(Math.sin(f15) * (double)PrimMath.lerp(f8, f7, f1));
+        f17 = (float)(Math.cos(f15) * (double)PrimMath.lerp(f8, f7, f1));
+        pathpoint.pos.set(PrimMath.lerp(0.0F, primpathparams.ShearX, f16) + 0.0F + PrimMath.lerp(-f9, f9, f1) * 0.5F, f17 + PrimMath.lerp(0.0F, primpathparams.ShearY, f16), f16);
+        pathpoint.scale.x = PrimMath.lerp(f3, f, f1) * f10;
+        pathpoint.scale.y = PrimMath.lerp(f5, f4, f1) * f11;
+        pathpoint.TexT = f1;
+        llquaternion.setQuat(PrimMath.lerp(f13, f2, f1) * 2.0F * 3.141593F - 3.141593F, 0.0F, 0.0F, 1.0F);
+        llquaternion1.setQuat(f15, llvector3);
+        pathpoint.rot.setMul(llquaternion, llquaternion1);
+        Path.add(pathpoint);
+        for (f1 = (float)(int)((f1 + f14) * (float)i) / (float)i; f1 < primpathparams.End; f1 += f14)
+        {
+            pathpoint = new PathPoint();
+            f15 = 6.283185F * f12 * f1;
+            f16 = (float)(Math.cos(f15) * (double)PrimMath.lerp(f8, f7, f1));
+            f17 = (float)(Math.sin(f15) * (double)PrimMath.lerp(f8, f7, f1));
+            pathpoint.pos.set(PrimMath.lerp(0.0F, primpathparams.ShearX, f17) + 0.0F + PrimMath.lerp(-f9, f9, f1) * 0.5F, f16 + PrimMath.lerp(0.0F, primpathparams.ShearY, f17), f17);
+            pathpoint.scale.x = PrimMath.lerp(f3, f, f1) * f10;
+            pathpoint.scale.y = PrimMath.lerp(f5, f4, f1) * f11;
+            pathpoint.TexT = f1;
+            llquaternion.setQuat(PrimMath.lerp(f13, f2, f1) * 2.0F * 3.141593F - 3.141593F, 0.0F, 0.0F, 1.0F);
+            llquaternion1.setQuat(f15, llvector3);
+            pathpoint.rot.setMul(llquaternion, llquaternion1);
+            Path.add(pathpoint);
+        }
+
+        break MISSING_BLOCK_LABEL_753;
+        f1 = primpathparams.End;
+        pathpoint = new PathPoint();
+        f12 = f12 * 6.283185F * f1;
+        f14 = (float)(Math.cos(f12) * (double)PrimMath.lerp(f8, f7, f1));
+        d = Math.sin(f12);
+        f7 = (float)((double)PrimMath.lerp(f8, f7, f1) * d);
+        llvector3_1 = pathpoint.pos;
+        f8 = PrimMath.lerp(0.0F, primpathparams.ShearX, f7);
+        llvector3_1.set(PrimMath.lerp(-f9, f9, f1) * 0.5F + (f8 + 0.0F), f14 + PrimMath.lerp(0.0F, primpathparams.ShearY, f7), f7);
+        pathpoint.scale.x = PrimMath.lerp(f3, f, f1) * f10;
+        pathpoint.scale.y = PrimMath.lerp(f5, f4, f1) * f11;
+        pathpoint.TexT = f1;
+        llquaternion.setQuat(PrimMath.lerp(f13, f2, f1) * 2.0F * 3.141593F - 3.141593F, 0.0F, 0.0F, 1.0F);
+        llquaternion1.setQuat(f12, llvector3);
+        pathpoint.rot.setMul(llquaternion, llquaternion1);
+        Path.add(pathpoint);
+        Total = Path.size();
+        return;
     }
 
-    public boolean generate(PrimPathParams primPathParams, float f, int i, boolean z, int i2) {
-        if (!this.Dirty && (!z)) {
+    public boolean generate(PrimPathParams primpathparams, float f, int i, boolean flag, int j)
+    {
+        float f1;
+        if (!Dirty && flag ^ true)
+        {
             return false;
         }
-        if (f < 0.0f) {
-            f = 0.0f;
+        f1 = f;
+        if (f < 0.0F)
+        {
+            f1 = 0.0F;
         }
-        this.Dirty = false;
-        this.Path.clear();
-        this.Open = true;
-        switch (primPathParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK) {
-            case 32:
-                int floor = (int) Math.floor(Math.floor((double) ((Math.abs(primPathParams.TwistBegin - primPathParams.TwistEnd) * 3.5f * (f - 0.5f)) + (6.0f * f))) * ((double) primPathParams.Revolutions));
-                if (z) {
-                    floor = i2;
-                }
-                genNGon(primPathParams, floor, 0.0f, 1.0f, 1.0f);
-                break;
-            case 48:
-                if (primPathParams.End - primPathParams.Begin >= 0.99f && primPathParams.ScaleX >= 0.99f) {
-                    this.Open = false;
-                }
-                genNGon(primPathParams, (int) Math.floor((double) (6.0f * f)), 0.0f, 1.0f, 1.0f);
-                float size = 1.0f / ((float) this.Path.size());
-                int i3 = 0;
-                float f2 = 0.5f;
-                while (true) {
-                    int i4 = i3;
-                    if (i4 >= this.Path.size()) {
-                        break;
-                    } else {
-                        this.Path.get(i4).pos.x = f2;
-                        f2 = f2 == 0.5f ? -0.5f : 0.5f;
-                        i3 = i4 + 1;
-                    }
-                }
-            case 64:
-                this.Step = 1.0f / ((float) 4);
-                this.Path.ensureCapacity(5);
-                for (int i5 = 0; i5 < 5; i5++) {
-                    float f3 = ((float) i5) * this.Step;
-                    PathPoint pathPoint = new PathPoint();
-                    pathPoint.pos.set(0.0f, PrimMath.lerp(0.0f, (float) ((-Math.sin((double) (primPathParams.TwistEnd * 3.1415927f * f3))) * 0.5d), f3), PrimMath.lerp(-0.5f, (float) (Math.cos((double) (primPathParams.TwistEnd * 3.1415927f * f3)) * 0.5d), f3));
-                    pathPoint.scale.x = PrimMath.lerp(1.0f, primPathParams.ScaleX, f3);
-                    pathPoint.scale.y = PrimMath.lerp(1.0f, primPathParams.ScaleY, f3);
-                    pathPoint.TexT = f3;
-                    pathPoint.rot.setQuat(f3 * primPathParams.TwistEnd * 3.1415927f, 1.0f, 0.0f, 0.0f);
-                    this.Path.add(pathPoint);
-                }
-                break;
-            default:
-                int floor2 = ((int) Math.floor((double) (Math.abs(primPathParams.TwistBegin - primPathParams.TwistEnd) * 3.5f * (f - 0.5f)))) + 2;
-                if (floor2 < i + 2) {
-                    floor2 = i + 2;
-                }
-                this.Step = 1.0f / ((float) (floor2 - 1));
-                this.Path.ensureCapacity(floor2);
-                LLVector2 beginScale = primPathParams.getBeginScale();
-                LLVector2 endScale = primPathParams.getEndScale();
-                for (int i6 = 0; i6 < floor2; i6++) {
-                    float lerp = PrimMath.lerp(primPathParams.Begin, primPathParams.End, ((float) i6) * this.Step);
-                    PathPoint pathPoint2 = new PathPoint();
-                    pathPoint2.pos.set(PrimMath.lerp(0.0f, primPathParams.ShearX, lerp), PrimMath.lerp(0.0f, primPathParams.ShearY, lerp), lerp - 0.5f);
-                    pathPoint2.rot.setQuat(PrimMath.lerp(primPathParams.TwistBegin * 3.1415927f, primPathParams.TwistEnd * 3.1415927f, lerp), 0.0f, 0.0f, 1.0f);
-                    pathPoint2.scale.x = PrimMath.lerp(beginScale.x, endScale.x, lerp);
-                    pathPoint2.scale.y = PrimMath.lerp(beginScale.y, endScale.y, lerp);
-                    pathPoint2.TexT = lerp;
-                    this.Path.add(pathPoint2);
-                }
-                break;
+        Dirty = false;
+        Path.clear();
+        Open = true;
+        primpathparams.CurveType & 0xf0;
+        JVM INSTR lookupswitch 4: default 96
+    //                   16: 96
+    //                   32: 337
+    //                   48: 415
+    //                   64: 531;
+           goto _L1 _L1 _L2 _L3 _L4
+_L1:
+        int k = (int)Math.floor(Math.abs(primpathparams.TwistBegin - primpathparams.TwistEnd) * 3.5F * (f1 - 0.5F)) + 2;
+        j = k;
+        if (k < i + 2)
+        {
+            j = i + 2;
         }
-        if (primPathParams.TwistEnd == primPathParams.TwistBegin) {
-            return true;
+        Step = 1.0F / (float)(j - 1);
+        Path.ensureCapacity(j);
+        LLVector2 llvector2 = primpathparams.getBeginScale();
+        LLVector2 llvector2_1 = primpathparams.getEndScale();
+        for (i = 0; i < j; i++)
+        {
+            f = PrimMath.lerp(primpathparams.Begin, primpathparams.End, (float)i * Step);
+            PathPoint pathpoint1 = new PathPoint();
+            pathpoint1.pos.set(PrimMath.lerp(0.0F, primpathparams.ShearX, f), PrimMath.lerp(0.0F, primpathparams.ShearY, f), f - 0.5F);
+            pathpoint1.rot.setQuat(PrimMath.lerp(primpathparams.TwistBegin * 3.141593F, primpathparams.TwistEnd * 3.141593F, f), 0.0F, 0.0F, 1.0F);
+            pathpoint1.scale.x = PrimMath.lerp(llvector2.x, llvector2_1.x, f);
+            pathpoint1.scale.y = PrimMath.lerp(llvector2.y, llvector2_1.y, f);
+            pathpoint1.TexT = f;
+            Path.add(pathpoint1);
         }
-        this.Open = true;
+
+        break; /* Loop/switch isn't completed */
+_L2:
+        i = (int)Math.floor(Math.floor(Math.abs(primpathparams.TwistBegin - primpathparams.TwistEnd) * 3.5F * (f1 - 0.5F) + 6F * f1) * (double)primpathparams.Revolutions);
+        if (flag)
+        {
+            i = j;
+        }
+        genNGon(primpathparams, i, 0.0F, 1.0F, 1.0F);
+_L6:
+        if (primpathparams.TwistEnd != primpathparams.TwistBegin)
+        {
+            Open = true;
+        }
         return true;
+_L3:
+        if (primpathparams.End - primpathparams.Begin >= 0.99F && primpathparams.ScaleX >= 0.99F)
+        {
+            Open = false;
+        }
+        genNGon(primpathparams, (int)Math.floor(6F * f1), 0.0F, 1.0F, 1.0F);
+        f = 1.0F / (float)Path.size();
+        f = 0.5F;
+        i = 0;
+        while (i < Path.size()) 
+        {
+            ((PathPoint)Path.get(i)).pos.x = f;
+            if (f == 0.5F)
+            {
+                f = -0.5F;
+            } else
+            {
+                f = 0.5F;
+            }
+            i++;
+        }
+        if (true)
+        {
+            continue; /* Loop/switch isn't completed */
+        }
+_L4:
+        Step = 1.0F / (float)4;
+        Path.ensureCapacity(5);
+        i = 0;
+        while (i < 5) 
+        {
+            f = (float)i * Step;
+            PathPoint pathpoint = new PathPoint();
+            pathpoint.pos.set(0.0F, PrimMath.lerp(0.0F, (float)(-Math.sin(primpathparams.TwistEnd * 3.141593F * f) * 0.5D), f), PrimMath.lerp(-0.5F, (float)(Math.cos(primpathparams.TwistEnd * 3.141593F * f) * 0.5D), f));
+            pathpoint.scale.x = PrimMath.lerp(1.0F, primpathparams.ScaleX, f);
+            pathpoint.scale.y = PrimMath.lerp(1.0F, primpathparams.ScaleY, f);
+            pathpoint.TexT = f;
+            pathpoint.rot.setQuat(f * (primpathparams.TwistEnd * 3.141593F), 1.0F, 0.0F, 0.0F);
+            Path.add(pathpoint);
+            i++;
+        }
+        if (true) goto _L6; else goto _L5
+_L5:
     }
+
 }

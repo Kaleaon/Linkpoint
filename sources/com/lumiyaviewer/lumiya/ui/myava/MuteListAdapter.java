@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.myava;
 
 import android.content.Context;
@@ -8,108 +12,139 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteListEntry;
 import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteType;
 import com.lumiyaviewer.lumiya.ui.common.SwipeDismissListViewTouchListener;
 import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-class MuteListAdapter extends BaseAdapter {
+class MuteListAdapter extends BaseAdapter
+{
 
-    /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-mutelist-MuteTypeSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues = null;
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_modules_2D_mutelist_2D_MuteTypeSwitchesValues[];
     private final LayoutInflater layoutInflater;
-    @Nonnull
-    private ImmutableList<MuteListEntry> muteList = ImmutableList.of();
+    private ImmutableList muteList;
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-mutelist-MuteTypeSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m646getcomlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues() {
-        if (f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues != null) {
-            return f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues;
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_modules_2D_mutelist_2D_MuteTypeSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_modules_2D_mutelist_2D_MuteTypeSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_modules_2D_mutelist_2D_MuteTypeSwitchesValues;
         }
-        int[] iArr = new int[MuteType.values().length];
-        try {
-            iArr[MuteType.AGENT.ordinal()] = 1;
-        } catch (NoSuchFieldError e) {
+        int ai[] = new int[MuteType.values().length];
+        try
+        {
+            ai[MuteType.AGENT.ordinal()] = 1;
         }
-        try {
-            iArr[MuteType.BY_NAME.ordinal()] = 2;
-        } catch (NoSuchFieldError e2) {
+        catch (NoSuchFieldError nosuchfielderror4) { }
+        try
+        {
+            ai[MuteType.BY_NAME.ordinal()] = 2;
         }
-        try {
-            iArr[MuteType.EXTERNAL.ordinal()] = 3;
-        } catch (NoSuchFieldError e3) {
+        catch (NoSuchFieldError nosuchfielderror3) { }
+        try
+        {
+            ai[MuteType.EXTERNAL.ordinal()] = 3;
         }
-        try {
-            iArr[MuteType.GROUP.ordinal()] = 4;
-        } catch (NoSuchFieldError e4) {
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[MuteType.GROUP.ordinal()] = 4;
         }
-        try {
-            iArr[MuteType.OBJECT.ordinal()] = 5;
-        } catch (NoSuchFieldError e5) {
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[MuteType.OBJECT.ordinal()] = 5;
         }
-        f461comlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues = iArr;
-        return iArr;
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_modules_2D_mutelist_2D_MuteTypeSwitchesValues = ai;
+        return ai;
     }
 
-    MuteListAdapter(Context context) {
-        this.layoutInflater = LayoutInflater.from(context);
+    MuteListAdapter(Context context)
+    {
+        muteList = ImmutableList.of();
+        layoutInflater = LayoutInflater.from(context);
     }
 
-    public int getCount() {
-        return this.muteList.size();
+    public int getCount()
+    {
+        return muteList.size();
     }
 
-    public MuteListEntry getItem(int i) {
-        if (i < 0 || i >= this.muteList.size()) {
+    public MuteListEntry getItem(int i)
+    {
+        if (i >= 0 && i < muteList.size())
+        {
+            return (MuteListEntry)muteList.get(i);
+        } else
+        {
             return null;
         }
-        return (MuteListEntry) this.muteList.get(i);
     }
 
-    public long getItemId(int i) {
-        return 0;
+    public volatile Object getItem(int i)
+    {
+        return getItem(i);
     }
 
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        int i2;
-        MuteListEntry item = getItem(i);
-        if (item != null) {
-            if (view == null) {
-                view = this.layoutInflater.inflate(R.layout.mute_list_item, viewGroup, false);
-            }
-            if (view != null) {
-                ((TextView) view.findViewById(R.id.muteName)).setText(item.name);
-                switch (m646getcomlumiyaviewerlumiyaslprotomodulesmutelistMuteTypeSwitchesValues()[item.type.ordinal()]) {
-                    case 1:
-                    case 4:
-                        i2 = R.drawable.inv_human;
-                        break;
-                    case 2:
-                    case 5:
-                        i2 = R.drawable.inv_object;
-                        break;
-                    default:
-                        i2 = R.drawable.inv_link;
-                        break;
-                }
-                ((ImageView) view.findViewById(R.id.muteTypeIcon)).setImageResource(i2);
-                SwipeDismissListViewTouchListener.restoreViewState(view);
-                return view;
-            }
+    public long getItemId(int i)
+    {
+        return 0L;
+    }
+
+    public View getView(int i, View view, ViewGroup viewgroup)
+    {
+        MuteListEntry mutelistentry = getItem(i);
+        if (mutelistentry == null) goto _L2; else goto _L1
+_L1:
+        View view1;
+        view1 = view;
+        if (view == null)
+        {
+            view1 = layoutInflater.inflate(0x7f040062, viewgroup, false);
         }
+        if (view1 == null) goto _L2; else goto _L3
+_L3:
+        ((TextView)view1.findViewById(0x7f1001e7)).setText(mutelistentry.name);
+        _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_modules_2D_mutelist_2D_MuteTypeSwitchesValues()[mutelistentry.type.ordinal()];
+        JVM INSTR tableswitch 1 5: default 100
+    //                   1 125
+    //                   2 131
+    //                   3 100
+    //                   4 125
+    //                   5 131;
+           goto _L4 _L5 _L6 _L4 _L5 _L6
+_L4:
+        i = 0x7f0200c4;
+_L7:
+        ((ImageView)view1.findViewById(0x7f1001e6)).setImageResource(i);
+        SwipeDismissListViewTouchListener.restoreViewState(view1);
+        return view1;
+_L5:
+        i = 0x7f0200c1;
+        continue; /* Loop/switch isn't completed */
+_L6:
+        i = 0x7f0200c6;
+        if (true) goto _L7; else goto _L2
+_L2:
         return null;
     }
 
-    public boolean hasStableIds() {
+    public boolean hasStableIds()
+    {
         return false;
     }
 
-    /* access modifiers changed from: package-private */
-    public void setData(@Nullable List<MuteListEntry> list) {
-        this.muteList = list != null ? ImmutableList.copyOf(list) : ImmutableList.of();
+    void setData(List list)
+    {
+        if (list != null)
+        {
+            list = ImmutableList.copyOf(list);
+        } else
+        {
+            list = ImmutableList.of();
+        }
+        muteList = list;
         notifyDataSetChanged();
     }
 }

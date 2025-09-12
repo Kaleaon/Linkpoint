@@ -1,71 +1,107 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res;
 
 import java.util.Collections;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public abstract class ResourceRequest<ResourceParams, ResourceType> {
-    private final Set<ResourceConsumer> consumers = Collections.newSetFromMap(new WeakHashMap(4, 0.5f));
-    private boolean isCancelled = false;
-    private boolean isCompleted = false;
-    private final ResourceManager<ResourceParams, ResourceType> manager;
-    private final ResourceParams params;
-    private boolean started = false;
+// Referenced classes of package com.lumiyaviewer.lumiya.res:
+//            ResourceManager, ResourceConsumer
 
-    public ResourceRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
-        this.params = resourceparams;
-        this.manager = resourceManager;
+public abstract class ResourceRequest
+{
+
+    private final Set consumers = Collections.newSetFromMap(new WeakHashMap(4, 0.5F));
+    private boolean isCancelled;
+    private boolean isCompleted;
+    private final ResourceManager manager;
+    private final Object params;
+    private boolean started;
+
+    public ResourceRequest(Object obj, ResourceManager resourcemanager)
+    {
+        started = false;
+        isCompleted = false;
+        isCancelled = false;
+        params = obj;
+        manager = resourcemanager;
     }
 
-    public void addConsumer(ResourceConsumer resourceConsumer) {
-        this.consumers.add(resourceConsumer);
+    public void addConsumer(ResourceConsumer resourceconsumer)
+    {
+        consumers.add(resourceconsumer);
     }
 
-    public void cancelRequest() {
+    public void cancelRequest()
+    {
     }
 
-    public void completeRequest(ResourceType resourcetype) {
-        this.isCompleted = true;
-        this.manager.CompleteRequest(this.params, resourcetype, this.consumers);
+    public void completeRequest(Object obj)
+    {
+        isCompleted = true;
+        manager.CompleteRequest(params, obj, consumers);
     }
 
     public abstract void execute();
 
-    /* access modifiers changed from: protected */
-    public final ResourceParams getParams() {
-        return this.params;
+    protected final Object getParams()
+    {
+        return params;
     }
 
-    public void intermediateResult(ResourceType resourcetype) {
-        this.manager.IntermediateResult(this.params, resourcetype, this.consumers);
+    public void intermediateResult(Object obj)
+    {
+        manager.IntermediateResult(params, obj, consumers);
     }
 
-    public boolean isCancelled() {
-        return this.isCancelled;
+    public boolean isCancelled()
+    {
+        return isCancelled;
     }
 
-    public final boolean isCompleted() {
-        return this.isCompleted;
+    public final boolean isCompleted()
+    {
+        return isCompleted;
     }
 
-    public boolean isStale() {
-        return this.consumers.size() == 0;
+    public boolean isStale()
+    {
+        boolean flag = false;
+        if (consumers.size() == 0)
+        {
+            flag = true;
+        }
+        return flag;
     }
 
-    public boolean removeConsumer(ResourceConsumer resourceConsumer) {
-        this.consumers.remove(resourceConsumer);
-        return this.consumers.size() == 0;
+    public boolean removeConsumer(ResourceConsumer resourceconsumer)
+    {
+        boolean flag = false;
+        consumers.remove(resourceconsumer);
+        if (consumers.size() == 0)
+        {
+            flag = true;
+        }
+        return flag;
     }
 
-    public void setCancelled(boolean z) {
-        this.isCancelled = z;
+    public void setCancelled(boolean flag)
+    {
+        isCancelled = flag;
     }
 
-    public final boolean willStart() {
-        if (this.started) {
+    public final boolean willStart()
+    {
+        if (!started)
+        {
+            started = true;
+            return true;
+        } else
+        {
             return false;
         }
-        this.started = true;
-        return true;
     }
 }

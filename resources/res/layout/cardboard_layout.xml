@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:id="@+id/content_frame" android:layout_width="match_parent" android:layout_height="match_parent">
-    <com.lumiyaviewer.lumiya.ui.render.CardboardControlsPlaceholder android:id="@+id/controls_placeholder" android:layout_width="0dp" android:layout_height="0dp"/>
-    <FrameLayout android:id="@+id/vr_view_placeholder" android:layout_width="match_parent" android:layout_height="match_parent"/>
-</FrameLayout>

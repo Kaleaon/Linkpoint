@@ -1,36 +1,57 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class RequestPayPrice extends SLMessage {
-    public ObjectData ObjectData_Field = new ObjectData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class ObjectData {
+public class RequestPayPrice extends SLMessage
+{
+    public static class ObjectData
+    {
+
         public UUID ObjectID;
+
+        public ObjectData()
+        {
+        }
     }
 
-    public RequestPayPrice() {
-        this.zeroCoded = false;
+
+    public ObjectData ObjectData_Field;
+
+    public RequestPayPrice()
+    {
+        zeroCoded = false;
+        ObjectData_Field = new ObjectData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 20;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleRequestPayPrice(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleRequestPayPrice(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -95);
-        packUUID(byteBuffer, this.ObjectData_Field.ObjectID);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-95);
+        packUUID(bytebuffer, ObjectData_Field.ObjectID);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.ObjectData_Field.ObjectID = unpackUUID(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        ObjectData_Field.ObjectID = unpackUUID(bytebuffer);
     }
 }

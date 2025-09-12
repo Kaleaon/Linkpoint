@@ -1,9 +1,11 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.slproto.messages.SLMessageFactory;
 import com.lumiyaviewer.lumiya.slproto.messages.SLMessageHandler;
@@ -22,486 +24,676 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-public abstract class SLMessage implements Parcelable {
-    public static final Parcelable.Creator<SLMessage> CREATOR = new Parcelable.Creator<SLMessage>() {
-        public SLMessage createFromParcel(Parcel parcel) {
-            byte[] bArr = new byte[parcel.readInt()];
-            parcel.readByteArray(bArr);
-            ByteBuffer order = ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder());
-            SLMessage CreateByID = SLMessageFactory.CreateByID(SLMessage.DecodeMessageIDGeneric(order));
-            if (CreateByID == null) {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto:
+//            SLDefaultMessage, SLMessageEventListener
+
+public abstract class SLMessage
+    implements Parcelable
+{
+
+    public static final android.os.Parcelable.Creator CREATOR = new android.os.Parcelable.Creator() {
+
+        public SLMessage createFromParcel(Parcel parcel)
+        {
+            byte abyte0[] = new byte[parcel.readInt()];
+            parcel.readByteArray(abyte0);
+            parcel = ByteBuffer.wrap(abyte0).order(ByteOrder.nativeOrder());
+            SLMessage slmessage = SLMessageFactory.CreateByID(SLMessage.DecodeMessageIDGeneric(parcel));
+            if (slmessage != null)
+            {
+                slmessage.UnpackPayload(parcel);
+                return slmessage;
+            } else
+            {
                 return null;
             }
-            CreateByID.UnpackPayload(order);
-            return CreateByID;
         }
 
-        public SLMessage[] newArray(int i) {
+        public volatile Object createFromParcel(Parcel parcel)
+        {
+            return createFromParcel(parcel);
+        }
+
+        public SLMessage[] newArray(int i)
+        {
             return null;
         }
+
+        public volatile Object[] newArray(int i)
+        {
+            return newArray(i);
+        }
+
     };
     private static final byte LL_ACK_FLAG = 16;
     private static final byte LL_RELIABLE_FLAG = 64;
     private static final byte LL_RESENT_FLAG = 32;
-    private static final byte LL_ZERO_CODE_FLAG = Byte.MIN_VALUE;
-    public static final int MAX_MESSAGE_SIZE = 65536;
+    private static final byte LL_ZERO_CODE_FLAG = -128;
+    public static final int MAX_MESSAGE_SIZE = 0x10000;
     public static final int MAX_PAYLOAD_SIZE = 1018;
     public static final int MAX_TRANSMIT_SIZE = 1024;
     public boolean isReliable;
     public boolean isResent;
-    private SLMessageEventListener listener = null;
+    private SLMessageEventListener listener;
     public int retries;
     public long sentTimeMillis;
     public int seqNum;
     public boolean zeroCoded;
 
-    public static int DecodeMessageID(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get();
-        if (b != -1) {
-            return b;
-        }
-        byte b2 = byteBuffer.get();
-        return b2 != -1 ? b2 | 65280 : byteBuffer.getShort() | -65536;
+    public SLMessage()
+    {
+        listener = null;
     }
 
-    public static int DecodeMessageIDGeneric(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get();
-        if (b != -1) {
-            return b;
+    public static int DecodeMessageID(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        if (byte0 != -1)
+        {
+            return byte0;
         }
-        byte b2 = byteBuffer.get();
-        if (b2 != -1) {
-            return b2 | 65280;
+        byte0 = bytebuffer.get();
+        if (byte0 != -1)
+        {
+            return byte0 | 0xff00;
+        } else
+        {
+            return bytebuffer.getShort() | 0xffff0000;
         }
-        return ((byteBuffer.get() << 8) & 65280) | -65536 | (byteBuffer.get() & UnsignedBytes.MAX_VALUE);
     }
 
-    private void PackPayloadLE(ByteBuffer byteBuffer) {
-        ByteOrder order = byteBuffer.order();
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        PackPayload(byteBuffer);
-        byteBuffer.order(order);
+    public static int DecodeMessageIDGeneric(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        if (byte0 != -1)
+        {
+            return byte0;
+        }
+        byte0 = bytebuffer.get();
+        if (byte0 != -1)
+        {
+            return byte0 | 0xff00;
+        } else
+        {
+            return bytebuffer.get() << 8 & 0xff00 | 0xffff0000 | bytebuffer.get() & 0xff;
+        }
     }
 
-    public static SLMessage Unpack(ByteBuffer byteBuffer, ByteBuffer byteBuffer2, List<Integer> list) {
-        boolean z = true;
-        int limit = byteBuffer.limit();
-        byte b = byteBuffer.get();
-        int i = byteBuffer.getInt();
-        byte b2 = byteBuffer.get();
-        if (b2 != 0) {
-            byteBuffer.position(b2 + byteBuffer.position());
+    private void PackPayloadLE(ByteBuffer bytebuffer)
+    {
+        ByteOrder byteorder = bytebuffer.order();
+        bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
+        PackPayload(bytebuffer);
+        bytebuffer.order(byteorder);
+    }
+
+    public static SLMessage Unpack(ByteBuffer bytebuffer, ByteBuffer bytebuffer1, List list)
+    {
+        boolean flag1 = true;
+        int k = bytebuffer.limit();
+        byte byte1 = bytebuffer.get();
+        int l = bytebuffer.getInt();
+        byte byte0 = bytebuffer.get();
+        if (byte0 != 0)
+        {
+            bytebuffer.position(byte0 + bytebuffer.position());
         }
-        if ((b & 16) != 0) {
-            byte b3 = byteBuffer.get(byteBuffer.limit() - 1);
-            int limit2 = (byteBuffer.limit() - 1) - (b3 * 4);
-            for (int i2 = 0; i2 < b3; i2++) {
-                list.add(Integer.valueOf(byteBuffer.getInt(limit2)));
-                limit2 += 4;
+        if ((byte1 & 0x10) != 0)
+        {
+            byte byte2 = bytebuffer.get(bytebuffer.limit() - 1);
+            int j = bytebuffer.limit() - 1 - byte2 * 4;
+            for (int i = 0; i < byte2; i++)
+            {
+                list.add(Integer.valueOf(bytebuffer.getInt(j)));
+                j += 4;
             }
-            byteBuffer.limit(limit2);
+
+            bytebuffer.limit(j);
         }
-        if ((b & Byte.MIN_VALUE) != 0) {
-            byteBuffer2.clear();
-            byteBuffer2.order(ByteOrder.BIG_ENDIAN);
-            ZeroDecode(byteBuffer2, byteBuffer);
-            byteBuffer2.flip();
-        } else {
-            byteBuffer2 = byteBuffer;
+        SLMessage slmessage;
+        boolean flag;
+        if ((byte1 & 0xffffff80) != 0)
+        {
+            bytebuffer1.clear();
+            bytebuffer1.order(ByteOrder.BIG_ENDIAN);
+            ZeroDecode(bytebuffer1, bytebuffer);
+            bytebuffer1.flip();
+        } else
+        {
+            bytebuffer1 = bytebuffer;
         }
-        SLMessage CreateByID = SLMessageFactory.CreateByID(DecodeMessageID(byteBuffer2));
-        if (CreateByID == null) {
-            CreateByID = new SLDefaultMessage();
+        slmessage = SLMessageFactory.CreateByID(DecodeMessageID(bytebuffer1));
+        list = slmessage;
+        if (slmessage == null)
+        {
+            list = new SLDefaultMessage();
         }
-        CreateByID.seqNum = i;
-        CreateByID.isReliable = (b & 64) != 0;
-        CreateByID.isResent = (b & 32) != 0;
-        if ((b & Byte.MIN_VALUE) == 0) {
-            z = false;
+        list.seqNum = l;
+        if ((byte1 & 0x40) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
         }
-        CreateByID.zeroCoded = z;
-        try {
-            CreateByID.UnpackPayloadLE(byteBuffer2);
-        } catch (BufferUnderflowException e) {
-            Debug.Log("Message too short: " + CreateByID.getClass().getSimpleName());
-        } catch (Exception e2) {
-            Debug.Log("Failed to unpack (" + CreateByID.getClass().getSimpleName() + "), zeroCoded = " + CreateByID.zeroCoded);
-            Debug.DumpBuffer("decodedPayload", byteBuffer2);
-            Debug.DumpBuffer("origPacket w/o acks", byteBuffer);
-            byteBuffer.limit(limit);
-            Debug.DumpBuffer("origPacket", byteBuffer);
-            e2.printStackTrace();
+        list.isReliable = flag;
+        if ((byte1 & 0x20) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        list.isResent = flag;
+        if ((byte1 & 0xffffff80) != 0)
+        {
+            flag = flag1;
+        } else
+        {
+            flag = false;
+        }
+        list.zeroCoded = flag;
+        try
+        {
+            list.UnpackPayloadLE(bytebuffer1);
+        }
+        // Misplaced declaration of an exception variable
+        catch (ByteBuffer bytebuffer)
+        {
+            Debug.Log((new StringBuilder()).append("Message too short: ").append(list.getClass().getSimpleName()).toString());
+            return list;
+        }
+        catch (Exception exception)
+        {
+            Debug.Log((new StringBuilder()).append("Failed to unpack (").append(list.getClass().getSimpleName()).append("), zeroCoded = ").append(((SLMessage) (list)).zeroCoded).toString());
+            Debug.DumpBuffer("decodedPayload", bytebuffer1);
+            Debug.DumpBuffer("origPacket w/o acks", bytebuffer);
+            bytebuffer.limit(k);
+            Debug.DumpBuffer("origPacket", bytebuffer);
+            exception.printStackTrace();
             return null;
         }
-        return CreateByID;
+        return list;
     }
 
-    private void UnpackPayloadLE(ByteBuffer byteBuffer) {
-        ByteOrder order = byteBuffer.order();
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        UnpackPayload(byteBuffer);
-        byteBuffer.order(order);
+    private void UnpackPayloadLE(ByteBuffer bytebuffer)
+    {
+        ByteOrder byteorder = bytebuffer.order();
+        bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
+        UnpackPayload(bytebuffer);
+        bytebuffer.order(byteorder);
     }
 
-    private static void ZeroDecode(ByteBuffer byteBuffer, ByteBuffer byteBuffer2) {
-        byteBuffer.position(DirectByteBuffer.zeroDecode(byteBuffer.array(), byteBuffer.arrayOffset() + byteBuffer.position(), byteBuffer.capacity() - byteBuffer.position(), byteBuffer2.array(), byteBuffer2.arrayOffset() + byteBuffer2.position(), byteBuffer2.remaining()) + byteBuffer.position());
+    private static void ZeroDecode(ByteBuffer bytebuffer, ByteBuffer bytebuffer1)
+    {
+        bytebuffer.position(DirectByteBuffer.zeroDecode(bytebuffer.array(), bytebuffer.arrayOffset() + bytebuffer.position(), bytebuffer.capacity() - bytebuffer.position(), bytebuffer1.array(), bytebuffer1.arrayOffset() + bytebuffer1.position(), bytebuffer1.remaining()) + bytebuffer.position());
     }
 
-    private static void ZeroEncode(ByteBuffer byteBuffer, ByteBuffer byteBuffer2) {
+    private static void ZeroEncode(ByteBuffer bytebuffer, ByteBuffer bytebuffer1)
+    {
         int i = 0;
-        boolean z = false;
-        while (byteBuffer.hasRemaining()) {
-            byte b = byteBuffer.get();
-            if (b != 0) {
-                if (i != 0) {
-                    byteBuffer2.put((byte) i);
-                    i = 0;
-                    z = false;
+        boolean flag = false;
+        while (bytebuffer.hasRemaining()) 
+        {
+            byte byte0 = bytebuffer.get();
+            if (byte0 != 0)
+            {
+                int j = i;
+                if (i != 0)
+                {
+                    bytebuffer1.put((byte)i);
+                    j = 0;
+                    flag = false;
                 }
-                byteBuffer2.put(b);
-            } else {
-                if (!z) {
-                    byteBuffer2.put(b);
-                    z = true;
+                bytebuffer1.put(byte0);
+                i = j;
+            } else
+            {
+                boolean flag1 = flag;
+                if (!flag)
+                {
+                    bytebuffer1.put(byte0);
+                    flag1 = true;
                 }
                 i++;
+                flag = flag1;
             }
         }
-        if (i != 0) {
-            byteBuffer2.put((byte) i);
+        if (i != 0)
+        {
+            bytebuffer1.put((byte)i);
         }
     }
 
-    public static int flipBytes(int i) {
-        byte b = (((byte) (i >>> 8)) << 16) & 16711680;
-        byte b2 = (((byte) (i >>> 16)) << 8) & 65280;
-        return (((byte) (i >>> 24)) & UnsignedBytes.MAX_VALUE) | b2 | b | ((((byte) (i >>> 0)) << Ascii.CAN) & -16777216);
+    public static int flipBytes(int i)
+    {
+        return (byte)(i >>> 24) & 0xff | ((byte)(i >>> 16) << 8 & 0xff00 | ((byte)(i >>> 8) << 16 & 0xff0000 | (byte)(i >>> 0) << 24 & 0xff000000));
     }
 
-    public static String stringFromVariableOEM(byte[] bArr) {
-        String str;
-        try {
-            str = new String(bArr, "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            str = "";
+    public static String stringFromVariableOEM(byte abyte0[])
+    {
+        Object obj;
+        try
+        {
+            abyte0 = new String(abyte0, "ISO-8859-1");
         }
-        return str.endsWith("\u0000") ? str.substring(0, str.length() - 1) : str;
+        // Misplaced declaration of an exception variable
+        catch (byte abyte0[])
+        {
+            abyte0 = "";
+        }
+        obj = abyte0;
+        if (abyte0.endsWith("\0"))
+        {
+            obj = abyte0.substring(0, abyte0.length() - 1);
+        }
+        return ((String) (obj));
     }
 
-    public static String stringFromVariableUTF(byte[] bArr) {
-        String str;
-        try {
-            str = new String(bArr, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            str = "";
+    public static String stringFromVariableUTF(byte abyte0[])
+    {
+        Object obj;
+        try
+        {
+            abyte0 = new String(abyte0, "UTF-8");
         }
-        return str.endsWith("\u0000") ? str.substring(0, str.length() - 1) : str;
+        // Misplaced declaration of an exception variable
+        catch (byte abyte0[])
+        {
+            abyte0 = "";
+        }
+        obj = abyte0;
+        if (abyte0.endsWith("\0"))
+        {
+            obj = abyte0.substring(0, abyte0.length() - 1);
+        }
+        return ((String) (obj));
     }
 
-    public static byte[] stringToVariableOEM(String str) {
-        try {
-            return (str + "\u0000").getBytes("ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            return new byte[]{0};
+    public static byte[] stringToVariableOEM(String s)
+    {
+        try
+        {
+            s = (new StringBuilder()).append(s).append("\0").toString().getBytes("ISO-8859-1");
         }
+        // Misplaced declaration of an exception variable
+        catch (String s)
+        {
+            return (new byte[] {
+                0
+            });
+        }
+        return s;
     }
 
-    public static byte[] stringToVariableUTF(String str) {
-        try {
-            return (str + "\u0000").getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return new byte[]{0};
+    public static byte[] stringToVariableUTF(String s)
+    {
+        try
+        {
+            s = (new StringBuilder()).append(s).append("\0").toString().getBytes("UTF-8");
         }
+        // Misplaced declaration of an exception variable
+        catch (String s)
+        {
+            return (new byte[] {
+                0
+            });
+        }
+        return s;
     }
 
-    public int AppendPendingAcks(ByteBuffer byteBuffer, List<Integer> list) {
-        Iterator<Integer> it = list.iterator();
-        int i = 0;
-        while (it.hasNext() && byteBuffer.position() <= 1019) {
-            byteBuffer.putInt(it.next().intValue());
-            i++;
+    public int AppendPendingAcks(ByteBuffer bytebuffer, List list)
+    {
+        list = list.iterator();
+        int i;
+        for (i = 0; list.hasNext() && bytebuffer.position() <= 1019; i++)
+        {
+            bytebuffer.putInt(((Integer)list.next()).intValue());
         }
-        if (i != 0) {
-            byteBuffer.put(0, (byte) (byteBuffer.get(0) | 16));
-            byteBuffer.put((byte) i);
+
+        if (i != 0)
+        {
+            bytebuffer.put(0, (byte)(bytebuffer.get(0) | 0x10));
+            bytebuffer.put((byte)i);
         }
         return i;
     }
 
     public abstract int CalcPayloadSize();
 
-    public abstract void Handle(SLMessageHandler sLMessageHandler);
+    public abstract void Handle(SLMessageHandler slmessagehandler);
 
-    public void Pack(ByteBuffer byteBuffer, ByteBuffer byteBuffer2) {
-        byteBuffer.clear();
-        byteBuffer.order(ByteOrder.BIG_ENDIAN);
-        byte b = this.isReliable ? (byte) 64 : 0;
-        if (this.isResent) {
-            b = (byte) (b | 32);
+    public void Pack(ByteBuffer bytebuffer, ByteBuffer bytebuffer1)
+    {
+        bytebuffer.clear();
+        bytebuffer.order(ByteOrder.BIG_ENDIAN);
+        byte byte0;
+        byte byte1;
+        if (isReliable)
+        {
+            byte0 = (byte)64;
+        } else
+        {
+            byte0 = 0;
         }
-        byteBuffer.put(b);
-        byteBuffer.putInt(this.seqNum);
-        byteBuffer.put((byte) 0);
-        if (this.zeroCoded) {
-            byteBuffer2.clear();
-            byteBuffer2.order(ByteOrder.BIG_ENDIAN);
-            PackPayloadLE(byteBuffer2);
-            byteBuffer2.flip();
-            int limit = byteBuffer2.limit();
-            int position = byteBuffer.position();
-            ZeroEncode(byteBuffer2, byteBuffer);
-            if (byteBuffer.position() - position < limit) {
-                byteBuffer.put(0, (byte) (byteBuffer.get(0) | Byte.MIN_VALUE));
+        byte1 = byte0;
+        if (isResent)
+        {
+            byte1 = (byte)(byte0 | 0x20);
+        }
+        bytebuffer.put(byte1);
+        bytebuffer.putInt(seqNum);
+        bytebuffer.put((byte)0);
+        if (zeroCoded)
+        {
+            bytebuffer1.clear();
+            bytebuffer1.order(ByteOrder.BIG_ENDIAN);
+            PackPayloadLE(bytebuffer1);
+            bytebuffer1.flip();
+            int i = bytebuffer1.limit();
+            int j = bytebuffer.position();
+            ZeroEncode(bytebuffer1, bytebuffer);
+            if (bytebuffer.position() - j < i)
+            {
+                bytebuffer.put(0, (byte)(bytebuffer.get(0) | 0xffffff80));
+                return;
+            } else
+            {
+                bytebuffer.position(j);
+                bytebuffer1.rewind();
+                bytebuffer.put(bytebuffer1);
                 return;
             }
-            byteBuffer.position(position);
-            byteBuffer2.rewind();
-            byteBuffer.put(byteBuffer2);
+        } else
+        {
+            PackPayloadLE(bytebuffer);
             return;
         }
-        PackPayloadLE(byteBuffer);
     }
 
-    public abstract void PackPayload(ByteBuffer byteBuffer);
+    public abstract void PackPayload(ByteBuffer bytebuffer);
 
-    public abstract void UnpackPayload(ByteBuffer byteBuffer);
+    public abstract void UnpackPayload(ByteBuffer bytebuffer);
 
-    public int describeContents() {
+    public int describeContents()
+    {
         return 0;
     }
 
-    public void handleMessageAcknowledged() {
-        if (this.listener != null) {
-            this.listener.onMessageAcknowledged(this);
+    public void handleMessageAcknowledged()
+    {
+        if (listener != null)
+        {
+            listener.onMessageAcknowledged(this);
         }
     }
 
-    public void handleMessageTimeout() {
-        if (this.listener != null) {
-            this.listener.onMessageTimeout(this);
+    public void handleMessageTimeout()
+    {
+        if (listener != null)
+        {
+            listener.onMessageTimeout(this);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void packBoolean(ByteBuffer byteBuffer, boolean z) {
-        byteBuffer.put((byte) (z ? 1 : 0));
-    }
-
-    /* access modifiers changed from: protected */
-    public void packByte(ByteBuffer byteBuffer, byte b) {
-        byteBuffer.put(b);
-    }
-
-    /* access modifiers changed from: protected */
-    public void packDouble(ByteBuffer byteBuffer, double d) {
-        byteBuffer.putDouble(d);
-    }
-
-    /* access modifiers changed from: protected */
-    public void packFixed(ByteBuffer byteBuffer, byte[] bArr, int i) {
-        if (bArr.length == i) {
-            byteBuffer.put(bArr);
-            return;
+    protected void packBoolean(ByteBuffer bytebuffer, boolean flag)
+    {
+        int i;
+        if (flag)
+        {
+            i = 1;
+        } else
+        {
+            i = 0;
         }
-        for (int i2 = 0; i2 < i; i2++) {
-            if (i2 < bArr.length) {
-                byteBuffer.put(bArr[i2]);
-            } else {
-                byteBuffer.put((byte) 0);
+        bytebuffer.put((byte)i);
+    }
+
+    protected void packByte(ByteBuffer bytebuffer, byte byte0)
+    {
+        bytebuffer.put(byte0);
+    }
+
+    protected void packDouble(ByteBuffer bytebuffer, double d)
+    {
+        bytebuffer.putDouble(d);
+    }
+
+    protected void packFixed(ByteBuffer bytebuffer, byte abyte0[], int i)
+    {
+        if (abyte0.length == i)
+        {
+            bytebuffer.put(abyte0);
+        } else
+        {
+            int j = 0;
+            while (j < i) 
+            {
+                if (j < abyte0.length)
+                {
+                    bytebuffer.put(abyte0[j]);
+                } else
+                {
+                    bytebuffer.put((byte)0);
+                }
+                j++;
             }
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void packFloat(ByteBuffer byteBuffer, float f) {
-        byteBuffer.putFloat(f);
+    protected void packFloat(ByteBuffer bytebuffer, float f)
+    {
+        bytebuffer.putFloat(f);
     }
 
-    /* access modifiers changed from: protected */
-    public void packIPAddress(ByteBuffer byteBuffer, Inet4Address inet4Address) {
-        byteBuffer.put(inet4Address.getAddress());
+    protected void packIPAddress(ByteBuffer bytebuffer, Inet4Address inet4address)
+    {
+        bytebuffer.put(inet4address.getAddress());
     }
 
-    /* access modifiers changed from: protected */
-    public void packInt(ByteBuffer byteBuffer, int i) {
-        byteBuffer.putInt(i);
+    protected void packInt(ByteBuffer bytebuffer, int i)
+    {
+        bytebuffer.putInt(i);
     }
 
-    /* access modifiers changed from: protected */
-    public void packLLQuaternion(ByteBuffer byteBuffer, LLQuaternion lLQuaternion) {
-        byteBuffer.putFloat(lLQuaternion.x);
-        byteBuffer.putFloat(lLQuaternion.y);
-        byteBuffer.putFloat(lLQuaternion.z);
+    protected void packLLQuaternion(ByteBuffer bytebuffer, LLQuaternion llquaternion)
+    {
+        bytebuffer.putFloat(llquaternion.x);
+        bytebuffer.putFloat(llquaternion.y);
+        bytebuffer.putFloat(llquaternion.z);
     }
 
-    /* access modifiers changed from: protected */
-    public void packLLVector3(ByteBuffer byteBuffer, LLVector3 lLVector3) {
-        byteBuffer.putFloat(lLVector3.x);
-        byteBuffer.putFloat(lLVector3.y);
-        byteBuffer.putFloat(lLVector3.z);
+    protected void packLLVector3(ByteBuffer bytebuffer, LLVector3 llvector3)
+    {
+        bytebuffer.putFloat(llvector3.x);
+        bytebuffer.putFloat(llvector3.y);
+        bytebuffer.putFloat(llvector3.z);
     }
 
-    /* access modifiers changed from: protected */
-    public void packLLVector3d(ByteBuffer byteBuffer, LLVector3d lLVector3d) {
-        byteBuffer.putDouble(lLVector3d.x);
-        byteBuffer.putDouble(lLVector3d.y);
-        byteBuffer.putDouble(lLVector3d.z);
+    protected void packLLVector3d(ByteBuffer bytebuffer, LLVector3d llvector3d)
+    {
+        bytebuffer.putDouble(llvector3d.x);
+        bytebuffer.putDouble(llvector3d.y);
+        bytebuffer.putDouble(llvector3d.z);
     }
 
-    /* access modifiers changed from: protected */
-    public void packLLVector4(ByteBuffer byteBuffer, LLVector4 lLVector4) {
-        byteBuffer.putFloat(lLVector4.x);
-        byteBuffer.putFloat(lLVector4.y);
-        byteBuffer.putFloat(lLVector4.z);
-        byteBuffer.putFloat(lLVector4.w);
+    protected void packLLVector4(ByteBuffer bytebuffer, LLVector4 llvector4)
+    {
+        bytebuffer.putFloat(llvector4.x);
+        bytebuffer.putFloat(llvector4.y);
+        bytebuffer.putFloat(llvector4.z);
+        bytebuffer.putFloat(llvector4.w);
     }
 
-    /* access modifiers changed from: protected */
-    public void packLong(ByteBuffer byteBuffer, long j) {
-        byteBuffer.putLong(j);
+    protected void packLong(ByteBuffer bytebuffer, long l)
+    {
+        bytebuffer.putLong(l);
     }
 
-    /* access modifiers changed from: protected */
-    public void packShort(ByteBuffer byteBuffer, short s) {
-        byteBuffer.putShort(s);
+    protected void packShort(ByteBuffer bytebuffer, short word0)
+    {
+        bytebuffer.putShort(word0);
     }
 
-    /* access modifiers changed from: protected */
-    public void packUUID(ByteBuffer byteBuffer, UUID uuid) {
-        ByteOrder order = byteBuffer.order();
-        byteBuffer.order(ByteOrder.BIG_ENDIAN);
-        byteBuffer.putLong(uuid.getMostSignificantBits());
-        byteBuffer.putLong(uuid.getLeastSignificantBits());
-        byteBuffer.order(order);
+    protected void packUUID(ByteBuffer bytebuffer, UUID uuid)
+    {
+        ByteOrder byteorder = bytebuffer.order();
+        bytebuffer.order(ByteOrder.BIG_ENDIAN);
+        bytebuffer.putLong(uuid.getMostSignificantBits());
+        bytebuffer.putLong(uuid.getLeastSignificantBits());
+        bytebuffer.order(byteorder);
     }
 
-    /* access modifiers changed from: protected */
-    public void packVariable(ByteBuffer byteBuffer, byte[] bArr, int i) {
-        if (i == 1) {
-            byteBuffer.put((byte) bArr.length);
-        } else {
-            byteBuffer.put((byte) (bArr.length & 255));
-            byteBuffer.put((byte) ((bArr.length >>> 8) & 255));
+    protected void packVariable(ByteBuffer bytebuffer, byte abyte0[], int i)
+    {
+        if (i == 1)
+        {
+            bytebuffer.put((byte)abyte0.length);
+        } else
+        {
+            bytebuffer.put((byte)(abyte0.length & 0xff));
+            bytebuffer.put((byte)(abyte0.length >>> 8 & 0xff));
         }
-        byteBuffer.put(bArr);
+        bytebuffer.put(abyte0);
     }
 
-    public void setEventListener(SLMessageEventListener sLMessageEventListener) {
-        this.listener = sLMessageEventListener;
+    public void setEventListener(SLMessageEventListener slmessageeventlistener)
+    {
+        listener = slmessageeventlistener;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean unpackBoolean(ByteBuffer byteBuffer) {
-        return byteBuffer.get() != 0;
+    protected boolean unpackBoolean(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        if (bytebuffer.get() != 0)
+        {
+            flag = true;
+        }
+        return flag;
     }
 
-    /* access modifiers changed from: protected */
-    public byte unpackByte(ByteBuffer byteBuffer) {
-        return byteBuffer.get();
+    protected byte unpackByte(ByteBuffer bytebuffer)
+    {
+        return bytebuffer.get();
     }
 
-    /* access modifiers changed from: protected */
-    public double unpackDouble(ByteBuffer byteBuffer) {
-        return byteBuffer.getDouble();
+    protected double unpackDouble(ByteBuffer bytebuffer)
+    {
+        return bytebuffer.getDouble();
     }
 
-    /* access modifiers changed from: protected */
-    public byte[] unpackFixed(ByteBuffer byteBuffer, int i) {
-        byte[] bArr = new byte[i];
-        byteBuffer.get(bArr);
-        return bArr;
+    protected byte[] unpackFixed(ByteBuffer bytebuffer, int i)
+    {
+        byte abyte0[] = new byte[i];
+        bytebuffer.get(abyte0);
+        return abyte0;
     }
 
-    /* access modifiers changed from: protected */
-    public float unpackFloat(ByteBuffer byteBuffer) {
-        return byteBuffer.getFloat();
+    protected float unpackFloat(ByteBuffer bytebuffer)
+    {
+        return bytebuffer.getFloat();
     }
 
-    /* access modifiers changed from: protected */
-    public Inet4Address unpackIPAddress(ByteBuffer byteBuffer) {
-        byte[] bArr = new byte[4];
-        byteBuffer.get(bArr);
-        try {
-            return (Inet4Address) Inet4Address.getByAddress(bArr);
-        } catch (UnknownHostException e) {
+    protected Inet4Address unpackIPAddress(ByteBuffer bytebuffer)
+    {
+        byte abyte0[] = new byte[4];
+        bytebuffer.get(abyte0);
+        try
+        {
+            bytebuffer = (Inet4Address)Inet4Address.getByAddress(abyte0);
+        }
+        // Misplaced declaration of an exception variable
+        catch (ByteBuffer bytebuffer)
+        {
             return null;
         }
+        return bytebuffer;
     }
 
-    /* access modifiers changed from: protected */
-    public int unpackInt(ByteBuffer byteBuffer) {
-        return byteBuffer.getInt();
+    protected int unpackInt(ByteBuffer bytebuffer)
+    {
+        return bytebuffer.getInt();
     }
 
-    /* access modifiers changed from: protected */
-    public LLQuaternion unpackLLQuaternion(ByteBuffer byteBuffer) {
-        LLQuaternion lLQuaternion = new LLQuaternion();
-        lLQuaternion.x = byteBuffer.getFloat();
-        lLQuaternion.y = byteBuffer.getFloat();
-        lLQuaternion.z = byteBuffer.getFloat();
-        return lLQuaternion;
+    protected LLQuaternion unpackLLQuaternion(ByteBuffer bytebuffer)
+    {
+        LLQuaternion llquaternion = new LLQuaternion();
+        llquaternion.x = bytebuffer.getFloat();
+        llquaternion.y = bytebuffer.getFloat();
+        llquaternion.z = bytebuffer.getFloat();
+        return llquaternion;
     }
 
-    /* access modifiers changed from: protected */
-    public LLVector3 unpackLLVector3(ByteBuffer byteBuffer) {
-        LLVector3 lLVector3 = new LLVector3();
-        lLVector3.x = byteBuffer.getFloat();
-        lLVector3.y = byteBuffer.getFloat();
-        lLVector3.z = byteBuffer.getFloat();
-        return lLVector3;
+    protected LLVector3 unpackLLVector3(ByteBuffer bytebuffer)
+    {
+        LLVector3 llvector3 = new LLVector3();
+        llvector3.x = bytebuffer.getFloat();
+        llvector3.y = bytebuffer.getFloat();
+        llvector3.z = bytebuffer.getFloat();
+        return llvector3;
     }
 
-    /* access modifiers changed from: protected */
-    public LLVector3d unpackLLVector3d(ByteBuffer byteBuffer) {
-        LLVector3d lLVector3d = new LLVector3d();
-        lLVector3d.x = byteBuffer.getDouble();
-        lLVector3d.y = byteBuffer.getDouble();
-        lLVector3d.z = byteBuffer.getDouble();
-        return lLVector3d;
+    protected LLVector3d unpackLLVector3d(ByteBuffer bytebuffer)
+    {
+        LLVector3d llvector3d = new LLVector3d();
+        llvector3d.x = bytebuffer.getDouble();
+        llvector3d.y = bytebuffer.getDouble();
+        llvector3d.z = bytebuffer.getDouble();
+        return llvector3d;
     }
 
-    /* access modifiers changed from: protected */
-    public LLVector4 unpackLLVector4(ByteBuffer byteBuffer) {
-        LLVector4 lLVector4 = new LLVector4();
-        lLVector4.x = byteBuffer.getFloat();
-        lLVector4.y = byteBuffer.getFloat();
-        lLVector4.z = byteBuffer.getFloat();
-        lLVector4.w = byteBuffer.getFloat();
-        return lLVector4;
+    protected LLVector4 unpackLLVector4(ByteBuffer bytebuffer)
+    {
+        LLVector4 llvector4 = new LLVector4();
+        llvector4.x = bytebuffer.getFloat();
+        llvector4.y = bytebuffer.getFloat();
+        llvector4.z = bytebuffer.getFloat();
+        llvector4.w = bytebuffer.getFloat();
+        return llvector4;
     }
 
-    /* access modifiers changed from: protected */
-    public long unpackLong(ByteBuffer byteBuffer) {
-        return byteBuffer.getLong();
+    protected long unpackLong(ByteBuffer bytebuffer)
+    {
+        return bytebuffer.getLong();
     }
 
-    /* access modifiers changed from: protected */
-    public short unpackShort(ByteBuffer byteBuffer) {
-        return byteBuffer.getShort();
+    protected short unpackShort(ByteBuffer bytebuffer)
+    {
+        return bytebuffer.getShort();
     }
 
-    /* access modifiers changed from: protected */
-    public UUID unpackUUID(ByteBuffer byteBuffer) {
-        ByteOrder order = byteBuffer.order();
-        byteBuffer.order(ByteOrder.BIG_ENDIAN);
-        long j = byteBuffer.getLong();
-        long j2 = byteBuffer.getLong();
-        byteBuffer.order(order);
-        return new UUID(j, j2);
+    protected UUID unpackUUID(ByteBuffer bytebuffer)
+    {
+        ByteOrder byteorder = bytebuffer.order();
+        bytebuffer.order(ByteOrder.BIG_ENDIAN);
+        long l = bytebuffer.getLong();
+        long l1 = bytebuffer.getLong();
+        bytebuffer.order(byteorder);
+        return new UUID(l, l1);
     }
 
-    /* access modifiers changed from: protected */
-    public byte[] unpackVariable(ByteBuffer byteBuffer, int i) {
-        byte[] bArr = new byte[(i == 1 ? byteBuffer.get() & UnsignedBytes.MAX_VALUE : (byteBuffer.get() & UnsignedBytes.MAX_VALUE) | ((byteBuffer.get() & UnsignedBytes.MAX_VALUE) << 8))];
-        byteBuffer.get(bArr);
-        return bArr;
+    protected byte[] unpackVariable(ByteBuffer bytebuffer, int i)
+    {
+        byte abyte0[];
+        if (i == 1)
+        {
+            i = bytebuffer.get() & 0xff;
+        } else
+        {
+            i = bytebuffer.get() & 0xff | (bytebuffer.get() & 0xff) << 8;
+        }
+        abyte0 = new byte[i];
+        bytebuffer.get(abyte0);
+        return abyte0;
     }
 
-    public void writeToParcel(Parcel parcel, int i) {
-        int CalcPayloadSize = CalcPayloadSize();
-        byte[] bArr = new byte[CalcPayloadSize];
-        PackPayload(ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder()));
-        parcel.writeInt(CalcPayloadSize);
-        parcel.writeByteArray(bArr);
+    public void writeToParcel(Parcel parcel, int i)
+    {
+        i = CalcPayloadSize();
+        byte abyte0[] = new byte[i];
+        PackPayload(ByteBuffer.wrap(abyte0).order(ByteOrder.nativeOrder()));
+        parcel.writeInt(i);
+        parcel.writeByteArray(abyte0);
     }
+
 }

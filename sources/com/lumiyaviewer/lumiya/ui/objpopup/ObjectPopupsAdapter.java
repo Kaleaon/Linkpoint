@@ -1,42 +1,58 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.objpopup;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.ChatEventViewHolder;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.users.manager.SubscribableList;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatEventTimestampUpdater;
 import com.lumiyaviewer.lumiya.ui.common.RecyclerSubscribableListAdapter;
 
-public class ObjectPopupsAdapter extends RecyclerSubscribableListAdapter<SLChatEvent> {
+public class ObjectPopupsAdapter extends RecyclerSubscribableListAdapter
+{
+
     private final Context context;
     private final LayoutInflater layoutInflater;
     private final UserManager userManager;
 
-    public ObjectPopupsAdapter(Context context2, SubscribableList<SLChatEvent> subscribableList, UserManager userManager2) {
-        super(subscribableList);
-        this.context = context2;
-        this.userManager = userManager2;
-        this.layoutInflater = LayoutInflater.from(context2);
+    public ObjectPopupsAdapter(Context context1, SubscribableList subscribablelist, UserManager usermanager)
+    {
+        super(subscribablelist);
+        context = context1;
+        userManager = usermanager;
+        layoutInflater = LayoutInflater.from(context1);
     }
 
-    /* access modifiers changed from: protected */
-    public void bindObjectViewHolder(RecyclerView.ViewHolder viewHolder, SLChatEvent sLChatEvent) {
-        if (viewHolder instanceof ChatEventViewHolder) {
-            sLChatEvent.bindViewHolder((ChatEventViewHolder) viewHolder, this.userManager, (ChatEventTimestampUpdater) null);
+    protected void bindObjectViewHolder(android.support.v7.widget.RecyclerView.ViewHolder viewholder, SLChatEvent slchatevent)
+    {
+        if (viewholder instanceof ChatEventViewHolder)
+        {
+            slchatevent.bindViewHolder((ChatEventViewHolder)viewholder, userManager, null);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public RecyclerView.ViewHolder createObjectViewHolder(ViewGroup viewGroup, int i) {
-        return SLChatEvent.createViewHolder(this.layoutInflater, i, viewGroup, this);
+    protected volatile void bindObjectViewHolder(android.support.v7.widget.RecyclerView.ViewHolder viewholder, Object obj)
+    {
+        bindObjectViewHolder(viewholder, (SLChatEvent)obj);
     }
 
-    /* access modifiers changed from: protected */
-    public int getObjectViewType(SLChatEvent sLChatEvent) {
-        return sLChatEvent.getViewType().ordinal();
+    protected android.support.v7.widget.RecyclerView.ViewHolder createObjectViewHolder(ViewGroup viewgroup, int i)
+    {
+        return SLChatEvent.createViewHolder(layoutInflater, i, viewgroup, this);
+    }
+
+    protected int getObjectViewType(SLChatEvent slchatevent)
+    {
+        return slchatevent.getViewType().ordinal();
+    }
+
+    protected volatile int getObjectViewType(Object obj)
+    {
+        return getObjectViewType((SLChatEvent)obj);
     }
 }

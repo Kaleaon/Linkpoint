@@ -1,134 +1,179 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.spatial;
 
 import com.lumiyaviewer.lumiya.Debug;
+import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo;
 import com.lumiyaviewer.lumiya.utils.InlineList;
 
-class SpatialTree {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.spatial:
+//            SpatialTreeNode, MyAvatarTreeNode, DrawListAvatarEntry, DrawListEntry, 
+//            SpatialObjectIndex, DrawList, FrustrumPlanes
+
+class SpatialTree
+{
+
     static final int INVALID_BIN = -1;
-    private final SpatialTreeNode[] bins;
-    private final float[] depthBuf = new float[1];
-    private float drawDistance = 1.0f;
-    private boolean drawListChanged = false;
-    private final MyAvatarTreeNode myAvatarTreeNode;
+    private final SpatialTreeNode bins[];
+    private final float depthBuf[] = new float[1];
+    private float drawDistance;
+    private boolean drawListChanged;
+    private final MyAvatarTreeNode myAvatarTreeNode = new MyAvatarTreeNode(this);
     private final int numBins;
     private final SpatialTreeNode rootNode;
     final SpatialObjectIndex spatialObjectIndex;
-    private boolean treeWalkNeeded = false;
+    private boolean treeWalkNeeded;
 
-    SpatialTree(int i, float f, float f2, float f3, SpatialObjectIndex spatialObjectIndex2) {
-        this.numBins = i;
-        this.bins = new SpatialTreeNode[i];
-        this.spatialObjectIndex = spatialObjectIndex2;
-        this.rootNode = new SpatialTreeNode(this, f, f2, f3);
-        this.myAvatarTreeNode = new MyAvatarTreeNode(this);
+    SpatialTree(int i, float f, float f1, float f2, SpatialObjectIndex spatialobjectindex)
+    {
+        drawDistance = 1.0F;
+        treeWalkNeeded = false;
+        drawListChanged = false;
+        numBins = i;
+        bins = new SpatialTreeNode[i];
+        spatialObjectIndex = spatialobjectindex;
+        rootNode = new SpatialTreeNode(this, f, f1, f2);
     }
 
-    private InlineList<DrawListEntry> getNodeForObject(DrawListEntry drawListEntry) {
-        return (!(drawListEntry instanceof DrawListAvatarEntry) || !((DrawListAvatarEntry) drawListEntry).getObjectAvatarInfo().isMyAvatar()) ? this.rootNode.findNode(drawListEntry.boundingBox) : this.myAvatarTreeNode;
+    private InlineList getNodeForObject(DrawListEntry drawlistentry)
+    {
+        if ((drawlistentry instanceof DrawListAvatarEntry) && ((DrawListAvatarEntry)drawlistentry).getObjectAvatarInfo().isMyAvatar())
+        {
+            return myAvatarTreeNode;
+        } else
+        {
+            return rootNode.findNode(drawlistentry.boundingBox);
+        }
     }
 
-    private void setEntryBin(SpatialTreeNode spatialTreeNode, int i) {
-        if (i != spatialTreeNode.depthBin) {
-            if (spatialTreeNode.depthBin != -1) {
-                if (spatialTreeNode.prevDepth != null) {
-                    spatialTreeNode.prevDepth.nextDepth = spatialTreeNode.nextDepth;
-                } else {
-                    this.bins[spatialTreeNode.depthBin] = spatialTreeNode.nextDepth;
+    private void setEntryBin(SpatialTreeNode spatialtreenode, int i)
+    {
+        if (i != spatialtreenode.depthBin)
+        {
+            if (spatialtreenode.depthBin != -1)
+            {
+                if (spatialtreenode.prevDepth != null)
+                {
+                    spatialtreenode.prevDepth.nextDepth = spatialtreenode.nextDepth;
+                } else
+                {
+                    bins[spatialtreenode.depthBin] = spatialtreenode.nextDepth;
                 }
-                if (spatialTreeNode.nextDepth != null) {
-                    spatialTreeNode.nextDepth.prevDepth = spatialTreeNode.prevDepth;
+                if (spatialtreenode.nextDepth != null)
+                {
+                    spatialtreenode.nextDepth.prevDepth = spatialtreenode.prevDepth;
                 }
-                spatialTreeNode.prevDepth = null;
-                spatialTreeNode.nextDepth = null;
+                spatialtreenode.prevDepth = null;
+                spatialtreenode.nextDepth = null;
             }
-            if (i != -1) {
-                spatialTreeNode.nextDepth = this.bins[i];
-                spatialTreeNode.prevDepth = null;
-                if (spatialTreeNode.nextDepth != null) {
-                    spatialTreeNode.nextDepth.prevDepth = spatialTreeNode;
+            if (i != -1)
+            {
+                spatialtreenode.nextDepth = bins[i];
+                spatialtreenode.prevDepth = null;
+                if (spatialtreenode.nextDepth != null)
+                {
+                    spatialtreenode.nextDepth.prevDepth = spatialtreenode;
                 }
-                this.bins[i] = spatialTreeNode;
+                bins[i] = spatialtreenode;
             }
-            spatialTreeNode.depthBin = i;
-            if (spatialTreeNode.getFirst() != null) {
+            spatialtreenode.depthBin = i;
+            if (spatialtreenode.getFirst() != null)
+            {
                 setDrawListChanged();
             }
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public void addDrawables(DrawList drawList) {
+    void addDrawables(DrawList drawlist)
+    {
         Debug.Printf("SpatialTree: adding drawables.", new Object[0]);
-        this.myAvatarTreeNode.addDrawables(drawList);
-        for (SpatialTreeNode spatialTreeNode : this.bins) {
-            while (spatialTreeNode != null) {
-                spatialTreeNode.addDrawables(drawList);
-                spatialTreeNode = spatialTreeNode.nextDepth;
+        myAvatarTreeNode.addDrawables(drawlist);
+        SpatialTreeNode aspatialtreenode[] = bins;
+        int j = aspatialtreenode.length;
+        for (int i = 0; i < j; i++)
+        {
+            for (SpatialTreeNode spatialtreenode = aspatialtreenode[i]; spatialtreenode != null; spatialtreenode = spatialtreenode.nextDepth)
+            {
+                spatialtreenode.addDrawables(drawlist);
+            }
+
+        }
+
+        drawListChanged = false;
+    }
+
+    final boolean isDrawListChanged()
+    {
+        return drawListChanged;
+    }
+
+    final boolean isTreeWalkNeeded()
+    {
+        return treeWalkNeeded;
+    }
+
+    final void removeEntry(SpatialTreeNode spatialtreenode)
+    {
+        setEntryBin(spatialtreenode, -1);
+    }
+
+    void removeObject(DrawListEntry drawlistentry)
+    {
+        InlineList inlinelist = drawlistentry.getList();
+        if (inlinelist != null)
+        {
+            inlinelist.removeEntry(drawlistentry);
+        }
+    }
+
+    final void setDrawListChanged()
+    {
+        drawListChanged = true;
+    }
+
+    final void setEntryDepth(SpatialTreeNode spatialtreenode, float f)
+    {
+        int i = 0;
+        int j = Math.round(((float)numBins * f) / drawDistance);
+        if (j >= 0)
+        {
+            if (j >= numBins)
+            {
+                i = numBins - 1;
+            } else
+            {
+                i = j;
             }
         }
-        this.drawListChanged = false;
+        setEntryBin(spatialtreenode, i);
     }
 
-    /* access modifiers changed from: package-private */
-    public final boolean isDrawListChanged() {
-        return this.drawListChanged;
+    final void setTreeWalkNeeded()
+    {
+        treeWalkNeeded = true;
     }
 
-    /* access modifiers changed from: package-private */
-    public final boolean isTreeWalkNeeded() {
-        return this.treeWalkNeeded;
-    }
-
-    /* access modifiers changed from: package-private */
-    public final void removeEntry(SpatialTreeNode spatialTreeNode) {
-        setEntryBin(spatialTreeNode, -1);
-    }
-
-    /* access modifiers changed from: package-private */
-    public void removeObject(DrawListEntry drawListEntry) {
-        InlineList<DrawListEntry> list = drawListEntry.getList();
-        if (list != null) {
-            list.removeEntry(drawListEntry);
+    void updateObject(DrawListEntry drawlistentry)
+    {
+        InlineList inlinelist = getNodeForObject(drawlistentry);
+        InlineList inlinelist1 = drawlistentry.getList();
+        if (inlinelist != inlinelist1 && inlinelist1 != null)
+        {
+            inlinelist1.removeEntry(drawlistentry);
+        }
+        if (inlinelist != null)
+        {
+            inlinelist.addEntry(drawlistentry);
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public final void setDrawListChanged() {
-        this.drawListChanged = true;
-    }
-
-    /* access modifiers changed from: package-private */
-    public final void setEntryDepth(SpatialTreeNode spatialTreeNode, float f) {
-        int i = 0;
-        int round = Math.round((((float) this.numBins) * f) / this.drawDistance);
-        if (round >= 0) {
-            i = round >= this.numBins ? this.numBins - 1 : round;
-        }
-        setEntryBin(spatialTreeNode, i);
-    }
-
-    /* access modifiers changed from: package-private */
-    public final void setTreeWalkNeeded() {
-        this.treeWalkNeeded = true;
-    }
-
-    /* access modifiers changed from: package-private */
-    public void updateObject(DrawListEntry drawListEntry) {
-        InlineList<DrawListEntry> nodeForObject = getNodeForObject(drawListEntry);
-        InlineList<DrawListEntry> list = drawListEntry.getList();
-        if (!(nodeForObject == list || list == null)) {
-            list.removeEntry(drawListEntry);
-        }
-        if (nodeForObject != null) {
-            nodeForObject.addEntry(drawListEntry);
-        }
-    }
-
-    /* access modifiers changed from: package-private */
-    public void walkTree(FrustrumPlanes frustrumPlanes, float f) {
+    void walkTree(FrustrumPlanes frustrumplanes, float f)
+    {
         Debug.Printf("SpatialTree: walkTree: starting to walk.", new Object[0]);
-        this.drawDistance = f;
-        this.rootNode.walkTree(frustrumPlanes, 1, this.depthBuf);
-        this.treeWalkNeeded = false;
+        drawDistance = f;
+        rootNode.walkTree(frustrumplanes, 1, depthBuf);
+        treeWalkNeeded = false;
     }
 }

@@ -1,50 +1,58 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
-import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public final class SLChatInventoryItemOfferedByYouEvent extends SLChatEvent {
+public final class SLChatInventoryItemOfferedByYouEvent extends SLChatEvent
+{
+
     private final String itemName;
 
-    public SLChatInventoryItemOfferedByYouEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
-        super(chatMessage, uuid);
-        this.itemName = chatMessage.getItemName();
+    public SLChatInventoryItemOfferedByYouEvent(ChatMessage chatmessage, UUID uuid)
+    {
+        super(chatmessage, uuid);
+        itemName = chatmessage.getItemName();
     }
 
-    public SLChatInventoryItemOfferedByYouEvent(@Nonnull UUID uuid, String str) {
-        super((ChatMessageSource) ChatMessageSourceUnknown.getInstance(), uuid);
-        this.itemName = str;
+    public SLChatInventoryItemOfferedByYouEvent(UUID uuid, String s)
+    {
+        super(ChatMessageSourceUnknown.getInstance(), uuid);
+        itemName = s;
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.InventoryItemOfferedByYou;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.InventoryItemOfferedByYou;
     }
 
-    /* access modifiers changed from: protected */
-    public String getText(Context context, @Nonnull UserManager userManager) {
-        return context.getString(R.string.chat_inventory_own_offer_format, new Object[]{this.itemName});
+    protected String getText(Context context, UserManager usermanager)
+    {
+        return context.getString(0x7f0900af, new Object[] {
+            itemName
+        });
     }
 
-    public SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
+    public com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType getViewType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isActionMessage(@Nonnull UserManager userManager) {
+    protected boolean isActionMessage(UserManager usermanager)
+    {
         return false;
     }
 
-    public void serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage);
-        chatMessage.setItemName(this.itemName);
+    public void serializeToDatabaseObject(ChatMessage chatmessage)
+    {
+        super.serializeToDatabaseObject(chatmessage);
+        chatmessage.setItemName(itemName);
     }
 }

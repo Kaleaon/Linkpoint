@@ -1,252 +1,255 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.orm;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Build;
-import com.lumiyaviewer.lumiya.orm.DBObject;
+import android.database.sqlite.SQLiteException;
+import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class InventoryDB {
+public class InventoryDB
+{
+
     public static final int MAX_UPDATES_PER_TRANSACTION = 16;
     private final SQLiteDatabase db;
 
-    public InventoryDB(SQLiteDatabase sQLiteDatabase) {
-        this.db = sQLiteDatabase;
+    public InventoryDB(SQLiteDatabase sqlitedatabase)
+    {
+        db = sqlitedatabase;
     }
 
-    public void beginTransaction() {
-        if (Build.VERSION.SDK_INT >= 11) {
-            this.db.beginTransactionNonExclusive();
-        } else {
-            this.db.beginTransaction();
+    public void beginTransaction()
+    {
+        if (android.os.Build.VERSION.SDK_INT >= 11)
+        {
+            db.beginTransactionNonExclusive();
+            return;
+        } else
+        {
+            db.beginTransaction();
+            return;
         }
     }
 
-    public void deleteEntry(@Nonnull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
-        sLInventoryEntry.delete(this.db);
+    public void deleteEntry(SLInventoryEntry slinventoryentry)
+        throws DBObject.DatabaseBindingException
+    {
+        slinventoryentry.delete(db);
     }
 
-    public void endTransaction() {
-        this.db.endTransaction();
+    public void endTransaction()
+    {
+        db.endTransaction();
     }
 
-    @Nullable
-    public SLInventoryEntry findEntry(UUID uuid) {
-        return SLInventoryEntry.find(this.db, uuid);
+    public SLInventoryEntry findEntry(UUID uuid)
+    {
+        return SLInventoryEntry.find(db, uuid);
     }
 
-    @Nonnull
-    public SLInventoryEntry findEntryOrCreate(UUID uuid) {
-        SLInventoryEntry findEntry = findEntry(uuid);
-        if (findEntry != null) {
-            return findEntry;
+    public SLInventoryEntry findEntryOrCreate(UUID uuid)
+    {
+        SLInventoryEntry slinventoryentry1 = findEntry(uuid);
+        SLInventoryEntry slinventoryentry = slinventoryentry1;
+        if (slinventoryentry1 == null)
+        {
+            slinventoryentry = new SLInventoryEntry();
+            slinventoryentry.uuid = uuid;
         }
-        SLInventoryEntry sLInventoryEntry = new SLInventoryEntry();
-        sLInventoryEntry.uuid = uuid;
-        return sLInventoryEntry;
+        return slinventoryentry;
     }
 
-    @Nullable
-    public SLInventoryEntry findSpecialFolder(long j, int i) {
-        SLInventoryEntry sLInventoryEntry = null;
-        Cursor query = SLInventoryEntry.query(this.db, "isFolder AND typeDefault = ? AND parent_id = ?", new String[]{Integer.toString(i), Long.toString(j)}, (String) null);
-        if (query.moveToNext()) {
-            sLInventoryEntry = new SLInventoryEntry(query);
+    public SLInventoryEntry findSpecialFolder(long l, int i)
+    {
+        SLInventoryEntry slinventoryentry = null;
+        Cursor cursor = SLInventoryEntry.query(db, "isFolder AND typeDefault = ? AND parent_id = ?", new String[] {
+            Integer.toString(i), Long.toString(l)
+        }, null);
+        if (cursor.moveToNext())
+        {
+            slinventoryentry = new SLInventoryEntry(cursor);
         }
-        query.close();
-        return sLInventoryEntry;
+        cursor.close();
+        return slinventoryentry;
     }
 
-    @Nullable
-    public SLInventoryEntry findSpecialFolder(UUID uuid, int i) {
-        SLInventoryEntry sLInventoryEntry = null;
-        Cursor query = SLInventoryEntry.query(this.db, "isFolder AND typeDefault = ? AND parentUUID_high = ? AND parentUUID_low = ?", new String[]{Integer.toString(i), Long.toString(uuid.getMostSignificantBits()), Long.toString(uuid.getLeastSignificantBits())}, (String) null);
-        if (query.moveToNext()) {
-            sLInventoryEntry = new SLInventoryEntry(query);
+    public SLInventoryEntry findSpecialFolder(UUID uuid, int i)
+    {
+        Object obj = null;
+        Cursor cursor = SLInventoryEntry.query(db, "isFolder AND typeDefault = ? AND parentUUID_high = ? AND parentUUID_low = ?", new String[] {
+            Integer.toString(i), Long.toString(uuid.getMostSignificantBits()), Long.toString(uuid.getLeastSignificantBits())
+        }, null);
+        uuid = obj;
+        if (cursor.moveToNext())
+        {
+            uuid = new SLInventoryEntry(cursor);
         }
-        query.close();
-        return sLInventoryEntry;
+        cursor.close();
+        return uuid;
     }
 
-    public SQLiteDatabase getDatabase() {
-        return this.db;
+    public SQLiteDatabase getDatabase()
+    {
+        return db;
     }
 
-    public long getSpecialFolderId(long j, int i) {
-        SLInventoryEntry findSpecialFolder = findSpecialFolder(j, i);
-        if (findSpecialFolder != null) {
-            return findSpecialFolder.getId();
+    public long getSpecialFolderId(long l, int i)
+    {
+        SLInventoryEntry slinventoryentry = findSpecialFolder(l, i);
+        if (slinventoryentry != null)
+        {
+            return slinventoryentry.getId();
+        } else
+        {
+            return 0L;
         }
-        return 0;
     }
 
-    @Nullable
-    public UUID getSpecialFolderUUID(long j, int i) {
-        SLInventoryEntry findSpecialFolder = findSpecialFolder(j, i);
-        if (findSpecialFolder != null) {
-            return findSpecialFolder.uuid;
+    public UUID getSpecialFolderUUID(long l, int i)
+    {
+        UUID uuid = null;
+        SLInventoryEntry slinventoryentry = findSpecialFolder(l, i);
+        if (slinventoryentry != null)
+        {
+            uuid = slinventoryentry.uuid;
         }
-        return null;
+        return uuid;
     }
 
-    @Nonnull
-    public SLInventoryEntry loadEntry(long j) throws DBObject.DatabaseBindingException {
-        return new SLInventoryEntry(this.db, j);
+    public SLInventoryEntry loadEntry(long l)
+        throws DBObject.DatabaseBindingException
+    {
+        return new SLInventoryEntry(db, l);
     }
 
-    @Nullable
-    public SLInventoryEntry resolveLink(@Nullable SLInventoryEntry sLInventoryEntry) {
-        return (sLInventoryEntry == null || !sLInventoryEntry.isLink()) ? sLInventoryEntry : findEntry(sLInventoryEntry.assetUUID);
+    public SLInventoryEntry resolveLink(SLInventoryEntry slinventoryentry)
+    {
+        if (slinventoryentry != null && slinventoryentry.isLink())
+        {
+            return findEntry(slinventoryentry.assetUUID);
+        } else
+        {
+            return slinventoryentry;
+        }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:29:?, code lost:
-        com.lumiyaviewer.lumiya.Debug.Log("retainChildren: parentId = " + r16 + ", deleteCount = " + r3);
-     */
-    /* JADX WARNING: Code restructure failed: missing block: B:45:?, code lost:
+    public void retainChildren(long l, Set set)
+    {
+        ArrayList arraylist;
+        Object obj;
+        int i;
+        try
+        {
+            SQLiteDatabase sqlitedatabase = db;
+            obj = Long.toString(l);
+            obj = sqlitedatabase.query("Entries", new String[] {
+                "_id", "uuid_low", "uuid_high"
+            }, "parent_id = ?", new String[] {
+                obj
+            }, null, null, null);
+            Debug.Log((new StringBuilder()).append("retainChildren: parentId = ").append(l).append(", count = ").append(((Cursor) (obj)).getCount()).toString());
+        }
+        // Misplaced declaration of an exception variable
+        catch (Set set)
+        {
+            Debug.Warning(set);
+            return;
+        }
+        i = 0;
+        arraylist = new ArrayList();
+        do
+        {
+            if (!((Cursor) (obj)).moveToNext())
+            {
+                break;
+            }
+            if (!set.contains(new UUID(((Cursor) (obj)).getLong(2), ((Cursor) (obj)).getLong(1))))
+            {
+                arraylist.add(Long.valueOf(((Cursor) (obj)).getLong(0)));
+            }
+        } while (true);
+        ((Cursor) (obj)).close();
+        int i1 = 0;
+_L3:
+        int j = i;
+        if (i1 >= 2) goto _L2; else goto _L1
+_L1:
+        int k = i;
+        beginTransaction();
+        j = i;
+        set = arraylist.iterator();
+        int j1 = 0;
+_L4:
+        j = i;
+        if (!set.hasNext())
+        {
+            break MISSING_BLOCK_LABEL_316;
+        }
+        j = i;
+        obj = (Long)set.next();
+        j = i;
+        db.delete("Entries", "_id = ?", new String[] {
+            Long.toString(((Long) (obj)).longValue())
+        });
+        k = i + 1;
+        j = j1 + 1;
+        i = j;
+        if (j < 16)
+        {
+            break MISSING_BLOCK_LABEL_402;
+        }
+        i = 0;
+        j = k;
+        db.yieldIfContendedSafely();
+        break MISSING_BLOCK_LABEL_402;
+        j = i;
+        setTransactionSuccessful();
+        k = i;
+        endTransaction();
+        j = i;
+_L2:
+        Debug.Log((new StringBuilder()).append("retainChildren: parentId = ").append(l).append(", deleteCount = ").append(j).toString());
         return;
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public void retainChildren(long r16, java.util.Set<java.util.UUID> r18) {
-        /*
-            r15 = this;
-            android.database.sqlite.SQLiteDatabase r2 = r15.db     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r3 = "Entries"
-            r4 = 3
-            java.lang.String[] r4 = new java.lang.String[r4]     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r5 = "_id"
-            r6 = 0
-            r4[r6] = r5     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r5 = "uuid_low"
-            r6 = 1
-            r4[r6] = r5     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r5 = "uuid_high"
-            r6 = 2
-            r4[r6] = r5     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r5 = "parent_id = ?"
-            r6 = 1
-            java.lang.String[] r6 = new java.lang.String[r6]     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r7 = java.lang.Long.toString(r16)     // Catch:{ SQLiteException -> 0x0086 }
-            r8 = 0
-            r6[r8] = r7     // Catch:{ SQLiteException -> 0x0086 }
-            r7 = 0
-            r8 = 0
-            r9 = 0
-            android.database.Cursor r2 = r2.query(r3, r4, r5, r6, r7, r8, r9)     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.StringBuilder r3 = new java.lang.StringBuilder     // Catch:{ SQLiteException -> 0x0086 }
-            r3.<init>()     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r4 = "retainChildren: parentId = "
-            java.lang.StringBuilder r3 = r3.append(r4)     // Catch:{ SQLiteException -> 0x0086 }
-            r0 = r16
-            java.lang.StringBuilder r3 = r3.append(r0)     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r4 = ", count = "
-            java.lang.StringBuilder r3 = r3.append(r4)     // Catch:{ SQLiteException -> 0x0086 }
-            int r4 = r2.getCount()     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.StringBuilder r3 = r3.append(r4)     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r3 = r3.toString()     // Catch:{ SQLiteException -> 0x0086 }
-            com.lumiyaviewer.lumiya.Debug.Log(r3)     // Catch:{ SQLiteException -> 0x0086 }
-            r3 = 0
-            java.util.ArrayList r6 = new java.util.ArrayList     // Catch:{ SQLiteException -> 0x0086 }
-            r6.<init>()     // Catch:{ SQLiteException -> 0x0086 }
-        L_0x005c:
-            boolean r4 = r2.moveToNext()     // Catch:{ SQLiteException -> 0x0086 }
-            if (r4 == 0) goto L_0x008b
-            java.util.UUID r4 = new java.util.UUID     // Catch:{ SQLiteException -> 0x0086 }
-            r5 = 2
-            long r8 = r2.getLong(r5)     // Catch:{ SQLiteException -> 0x0086 }
-            r5 = 1
-            long r10 = r2.getLong(r5)     // Catch:{ SQLiteException -> 0x0086 }
-            r4.<init>(r8, r10)     // Catch:{ SQLiteException -> 0x0086 }
-            r0 = r18
-            boolean r4 = r0.contains(r4)     // Catch:{ SQLiteException -> 0x0086 }
-            if (r4 != 0) goto L_0x005c
-            r4 = 0
-            long r4 = r2.getLong(r4)     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.Long r4 = java.lang.Long.valueOf(r4)     // Catch:{ SQLiteException -> 0x0086 }
-            r6.add(r4)     // Catch:{ SQLiteException -> 0x0086 }
-            goto L_0x005c
-        L_0x0086:
-            r2 = move-exception
-            com.lumiyaviewer.lumiya.Debug.Warning(r2)
-        L_0x008a:
-            return
-        L_0x008b:
-            r2.close()     // Catch:{ SQLiteException -> 0x0086 }
-            r2 = 0
-            r5 = r2
-        L_0x0090:
-            r2 = 2
-            if (r5 >= r2) goto L_0x00d7
-            r2 = 0
-            r15.beginTransaction()     // Catch:{ SQLiteException -> 0x0101 }
-            java.util.Iterator r7 = r6.iterator()     // Catch:{ all -> 0x00fc }
-            r4 = r2
-        L_0x009c:
-            boolean r2 = r7.hasNext()     // Catch:{ all -> 0x00fc }
-            if (r2 == 0) goto L_0x00d1
-            java.lang.Object r2 = r7.next()     // Catch:{ all -> 0x00fc }
-            java.lang.Long r2 = (java.lang.Long) r2     // Catch:{ all -> 0x00fc }
-            android.database.sqlite.SQLiteDatabase r8 = r15.db     // Catch:{ all -> 0x00fc }
-            java.lang.String r9 = "Entries"
-            java.lang.String r10 = "_id = ?"
-            r11 = 1
-            java.lang.String[] r11 = new java.lang.String[r11]     // Catch:{ all -> 0x00fc }
-            long r12 = r2.longValue()     // Catch:{ all -> 0x00fc }
-            java.lang.String r2 = java.lang.Long.toString(r12)     // Catch:{ all -> 0x00fc }
-            r12 = 0
-            r11[r12] = r2     // Catch:{ all -> 0x00fc }
-            r8.delete(r9, r10, r11)     // Catch:{ all -> 0x00fc }
-            int r3 = r3 + 1
-            int r2 = r4 + 1
-            r4 = 16
-            if (r2 < r4) goto L_0x00cf
-            r2 = 0
-            android.database.sqlite.SQLiteDatabase r4 = r15.db     // Catch:{ all -> 0x00fc }
-            r4.yieldIfContendedSafely()     // Catch:{ all -> 0x00fc }
-        L_0x00cf:
-            r4 = r2
-            goto L_0x009c
-        L_0x00d1:
-            r15.setTransactionSuccessful()     // Catch:{ all -> 0x00fc }
-            r15.endTransaction()     // Catch:{ SQLiteException -> 0x0101 }
-        L_0x00d7:
-            java.lang.StringBuilder r2 = new java.lang.StringBuilder     // Catch:{ SQLiteException -> 0x0086 }
-            r2.<init>()     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r4 = "retainChildren: parentId = "
-            java.lang.StringBuilder r2 = r2.append(r4)     // Catch:{ SQLiteException -> 0x0086 }
-            r0 = r16
-            java.lang.StringBuilder r2 = r2.append(r0)     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r4 = ", deleteCount = "
-            java.lang.StringBuilder r2 = r2.append(r4)     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.StringBuilder r2 = r2.append(r3)     // Catch:{ SQLiteException -> 0x0086 }
-            java.lang.String r2 = r2.toString()     // Catch:{ SQLiteException -> 0x0086 }
-            com.lumiyaviewer.lumiya.Debug.Log(r2)     // Catch:{ SQLiteException -> 0x0086 }
-            goto L_0x008a
-        L_0x00fc:
-            r2 = move-exception
-            r15.endTransaction()     // Catch:{ SQLiteException -> 0x0101 }
-            throw r2     // Catch:{ SQLiteException -> 0x0101 }
-        L_0x0101:
-            r2 = move-exception
-            com.lumiyaviewer.lumiya.Debug.Warning(r2)     // Catch:{ SQLiteException -> 0x0086 }
-            int r2 = r5 + 1
-            r5 = r2
-            goto L_0x0090
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.orm.InventoryDB.retainChildren(long, java.util.Set):void");
+        set;
+        k = j;
+        endTransaction();
+        k = j;
+        try
+        {
+            throw set;
+        }
+        // Misplaced declaration of an exception variable
+        catch (Set set) { }
+        Debug.Warning(set);
+        i1++;
+        i = k;
+          goto _L3
+        j1 = i;
+        i = k;
+          goto _L4
     }
 
-    public void saveEntry(@Nonnull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
-        sLInventoryEntry.save(this.db);
+    public void saveEntry(SLInventoryEntry slinventoryentry)
+        throws DBObject.DatabaseBindingException
+    {
+        slinventoryentry.save(db);
     }
 
-    public void setTransactionSuccessful() {
-        this.db.setTransactionSuccessful();
+    public void setTransactionSuccessful()
+    {
+        db.setTransactionSuccessful();
     }
 
-    public void yieldIfContendedSafely() {
-        this.db.yieldIfContendedSafely();
+    public void yieldIfContendedSafely()
+    {
+        db.yieldIfContendedSafely();
     }
 }

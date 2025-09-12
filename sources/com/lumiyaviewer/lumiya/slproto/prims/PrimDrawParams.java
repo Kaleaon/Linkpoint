@@ -1,49 +1,108 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.prims;
 
 import com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry;
 
-public class PrimDrawParams {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.prims:
+//            PrimVolumeParams
+
+public class PrimDrawParams
+{
+
     private final SLTextureEntry textures;
     private final PrimVolumeParams volumeParams;
 
-    public PrimDrawParams(PrimVolumeParams primVolumeParams, SLTextureEntry sLTextureEntry) {
-        this.volumeParams = primVolumeParams;
-        this.textures = sLTextureEntry;
+    public PrimDrawParams(PrimVolumeParams primvolumeparams, SLTextureEntry sltextureentry)
+    {
+        volumeParams = primvolumeparams;
+        textures = sltextureentry;
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
             return true;
         }
-        if (obj == null || !(obj instanceof PrimDrawParams)) {
+        if (obj == null)
+        {
             return false;
         }
-        PrimDrawParams primDrawParams = (PrimDrawParams) obj;
-        if ((this.volumeParams == null) != (primDrawParams.volumeParams == null)) {
+        if (!(obj instanceof PrimDrawParams))
+        {
             return false;
         }
-        if (this.volumeParams != null && !this.volumeParams.equals(primDrawParams.volumeParams)) {
+        obj = (PrimDrawParams)obj;
+        boolean flag;
+        boolean flag1;
+        if (volumeParams == null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (((PrimDrawParams) (obj)).volumeParams == null)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        if (flag != flag1)
+        {
             return false;
         }
-        if ((this.textures == null) != (primDrawParams.textures == null)) {
+        if (volumeParams != null && !volumeParams.equals(((PrimDrawParams) (obj)).volumeParams))
+        {
             return false;
         }
-        return this.textures == null || this.textures.equals(primDrawParams.textures);
+        if (textures == null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (((PrimDrawParams) (obj)).textures == null)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        if (flag != flag1)
+        {
+            return false;
+        }
+        return textures == null || textures.equals(((PrimDrawParams) (obj)).textures);
     }
 
-    public final SLTextureEntry getTextures() {
-        return this.textures;
+    public final SLTextureEntry getTextures()
+    {
+        return textures;
     }
 
-    public final PrimVolumeParams getVolumeParams() {
-        return this.volumeParams;
+    public final PrimVolumeParams getVolumeParams()
+    {
+        return volumeParams;
     }
 
-    public int hashCode() {
+    public int hashCode()
+    {
         int i = 0;
-        if (this.volumeParams != null) {
-            i = this.volumeParams.hashCode() + 0;
+        if (volumeParams != null)
+        {
+            i = volumeParams.hashCode() + 0;
         }
-        return this.textures != null ? i + this.textures.hashCode() : i;
+        int j = i;
+        if (textures != null)
+        {
+            j = i + textures.hashCode();
+        }
+        return j;
     }
 }

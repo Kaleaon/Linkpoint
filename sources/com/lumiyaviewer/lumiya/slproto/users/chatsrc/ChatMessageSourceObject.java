@@ -1,51 +1,59 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.chatsrc;
 
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class ChatMessageSourceObject extends ChatMessageSource {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.chatsrc:
+//            ChatMessageSource
+
+public class ChatMessageSourceObject extends ChatMessageSource
+{
+
     public final String name;
-    @Nonnull
     public final UUID uuid;
 
-    ChatMessageSourceObject(ChatMessage chatMessage) {
-        this.uuid = chatMessage.getSenderUUID();
-        this.name = chatMessage.getSenderName();
+    ChatMessageSourceObject(ChatMessage chatmessage)
+    {
+        uuid = chatmessage.getSenderUUID();
+        name = chatmessage.getSenderName();
     }
 
-    public ChatMessageSourceObject(@Nonnull UUID uuid2, String str) {
-        this.uuid = uuid2;
-        this.name = str;
+    public ChatMessageSourceObject(UUID uuid1, String s)
+    {
+        uuid = uuid1;
+        name = s;
     }
 
-    @Nonnull
-    public ChatterID getDefaultChatter(UUID uuid2) {
-        return ChatterID.getLocalChatterID(uuid2);
+    public ChatterID getDefaultChatter(UUID uuid1)
+    {
+        return ChatterID.getLocalChatterID(uuid1);
     }
 
-    @Nullable
-    public String getSourceName(@Nonnull UserManager userManager) {
-        return this.name;
+    public String getSourceName(UserManager usermanager)
+    {
+        return name;
     }
 
-    @Nonnull
-    public ChatMessageSource.ChatMessageSourceType getSourceType() {
+    public ChatMessageSource.ChatMessageSourceType getSourceType()
+    {
         return ChatMessageSource.ChatMessageSourceType.Object;
     }
 
-    @Nullable
-    public UUID getSourceUUID() {
-        return this.uuid;
+    public UUID getSourceUUID()
+    {
+        return uuid;
     }
 
-    public void serializeTo(@Nonnull ChatMessage chatMessage) {
-        super.serializeTo(chatMessage);
-        chatMessage.setSenderUUID(this.uuid);
-        chatMessage.setSenderName(this.name);
+    public void serializeTo(ChatMessage chatmessage)
+    {
+        super.serializeTo(chatmessage);
+        chatmessage.setSenderUUID(uuid);
+        chatmessage.setSenderName(name);
     }
 }

@@ -1,82 +1,114 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class GroupNoticesListReply extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<Data> Data_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class GroupNoticesListReply extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID GroupID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class Data {
+    public static class Data
+    {
+
         public int AssetType;
-        public byte[] FromName;
+        public byte FromName[];
         public boolean HasAttachment;
         public UUID NoticeID;
-        public byte[] Subject;
+        public byte Subject[];
         public int Timestamp;
-    }
 
-    public GroupNoticesListReply() {
-        this.zeroCoded = false;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 37;
-        Iterator<T> it = this.Data_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            Data data = (Data) it.next();
-            i = data.Subject.length + data.FromName.length + 22 + 2 + 1 + 1 + i2;
+        public Data()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleGroupNoticesListReply(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList Data_Fields;
+
+    public GroupNoticesListReply()
+    {
+        Data_Fields = new ArrayList();
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 59);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.GroupID);
-        byteBuffer.put((byte) this.Data_Fields.size());
-        for (Data data : this.Data_Fields) {
-            packUUID(byteBuffer, data.NoticeID);
-            packInt(byteBuffer, data.Timestamp);
-            packVariable(byteBuffer, data.FromName, 2);
-            packVariable(byteBuffer, data.Subject, 2);
-            packBoolean(byteBuffer, data.HasAttachment);
-            packByte(byteBuffer, (byte) data.AssetType);
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = Data_Fields.iterator();
+        Data data;
+        int i;
+        int j;
+        for (i = 37; iterator.hasNext(); i = data.Subject.length + (j + 22 + 2) + 1 + 1 + i)
+        {
+            data = (Data)iterator.next();
+            j = data.FromName.length;
         }
+
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.GroupID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleGroupNoticesListReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)59);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.GroupID);
+        bytebuffer.put((byte)Data_Fields.size());
+        Data data;
+        for (Iterator iterator = Data_Fields.iterator(); iterator.hasNext(); packByte(bytebuffer, (byte)data.AssetType))
+        {
+            data = (Data)iterator.next();
+            packUUID(bytebuffer, data.NoticeID);
+            packInt(bytebuffer, data.Timestamp);
+            packVariable(bytebuffer, data.FromName, 2);
+            packVariable(bytebuffer, data.Subject, 2);
+            packBoolean(bytebuffer, data.HasAttachment);
+        }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.GroupID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
             Data data = new Data();
-            data.NoticeID = unpackUUID(byteBuffer);
-            data.Timestamp = unpackInt(byteBuffer);
-            data.FromName = unpackVariable(byteBuffer, 2);
-            data.Subject = unpackVariable(byteBuffer, 2);
-            data.HasAttachment = unpackBoolean(byteBuffer);
-            data.AssetType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            this.Data_Fields.add(data);
+            data.NoticeID = unpackUUID(bytebuffer);
+            data.Timestamp = unpackInt(bytebuffer);
+            data.FromName = unpackVariable(bytebuffer, 2);
+            data.Subject = unpackVariable(bytebuffer, 2);
+            data.HasAttachment = unpackBoolean(bytebuffer);
+            data.AssetType = unpackByte(bytebuffer) & 0xff;
+            Data_Fields.add(data);
         }
+
     }
 }

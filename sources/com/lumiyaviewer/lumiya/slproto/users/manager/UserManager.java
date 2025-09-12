@@ -1,11 +1,14 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Table;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.LumiyaApp;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
@@ -17,6 +20,7 @@ import com.lumiyaviewer.lumiya.dao.DaoSession;
 import com.lumiyaviewer.lumiya.dao.User;
 import com.lumiyaviewer.lumiya.dao.UserDao;
 import com.lumiyaviewer.lumiya.dao.UserName;
+import com.lumiyaviewer.lumiya.dao.UserNameDao;
 import com.lumiyaviewer.lumiya.dao.UserPic;
 import com.lumiyaviewer.lumiya.dao.UserPicDao;
 import com.lumiyaviewer.lumiya.eventbus.EventBus;
@@ -24,28 +28,13 @@ import com.lumiyaviewer.lumiya.react.OpportunisticExecutor;
 import com.lumiyaviewer.lumiya.react.RateLimitRequestHandler;
 import com.lumiyaviewer.lumiya.react.RequestProcessor;
 import com.lumiyaviewer.lumiya.react.RequestQueue;
+import com.lumiyaviewer.lumiya.react.RequestSource;
 import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.SubscriptionDataPool;
 import com.lumiyaviewer.lumiya.react.SubscriptionPool;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleDataPool;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
-import com.lumiyaviewer.lumiya.slproto.assets.SLWearable;
-import com.lumiyaviewer.lumiya.slproto.assets.SLWearableType;
-import com.lumiyaviewer.lumiya.slproto.messages.AgentDataUpdate;
-import com.lumiyaviewer.lumiya.slproto.messages.AvatarNotesReply;
-import com.lumiyaviewer.lumiya.slproto.messages.AvatarPicksReply;
-import com.lumiyaviewer.lumiya.slproto.messages.AvatarPropertiesReply;
-import com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply;
-import com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply;
-import com.lumiyaviewer.lumiya.slproto.messages.GroupTitlesReply;
-import com.lumiyaviewer.lumiya.slproto.messages.ParcelInfoReply;
-import com.lumiyaviewer.lumiya.slproto.messages.PickInfoReply;
-import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance;
-import com.lumiyaviewer.lumiya.slproto.modules.SLMinimap;
-import com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList;
-import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteListEntry;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.SLMessageResponseCacher;
 import com.lumiyaviewer.lumiya.slproto.users.SerializableResponseCacher;
@@ -55,7 +44,9 @@ import com.lumiyaviewer.lumiya.utils.StringUtils;
 import com.lumiyaviewer.lumiya.utils.reqset.WeakPriorityRequestSet;
 import com.lumiyaviewer.lumiya.voice.common.messages.VoiceAudioProperties;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo;
+import de.greenrobot.dao.Property;
 import de.greenrobot.dao.query.Query;
+import de.greenrobot.dao.query.QueryBuilder;
 import de.greenrobot.dao.query.WhereCondition;
 import java.io.File;
 import java.util.Map;
@@ -63,616 +54,789 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class UserManager {
-    private static final SubscriptionDataPool<UUID, SLAgentCircuit> activeAgentCircuitsPool = new SubscriptionDataPool().setCanContainNulls(true);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            InventoryManager, UnreadNotificationManager, ObjectPopupsManager, ObjectsManager, 
+//            BalanceManager, SearchManager, ChatterList, UserPicBitmapCache, 
+//            SyncManager, CurrentLocationInfo
+
+public class UserManager
+{
+
+    private static final SubscriptionDataPool activeAgentCircuitsPool = (new SubscriptionDataPool()).setCanContainNulls(true);
     private static final Object lock = new Object();
-    private static final Map<UUID, UserManager> userManagers = new WeakHashMap();
-    private final AtomicReference<SLAgentCircuit> activeAgentCircuit = new AtomicReference<>();
-    @Nonnull
-    private final Query<Chatter> activeChattersQuery;
-    private final SLMessageResponseCacher<UUID, AgentDataUpdate> agentDataUpdates;
+    private static final Map userManagers = new WeakHashMap();
+    private final AtomicReference activeAgentCircuit = new AtomicReference();
+    private final Query activeChattersQuery;
+    private final SLMessageResponseCacher agentDataUpdates;
     private final AssetResponseCacher assetResponseCacher;
-    private final SerializableResponseCacher<UUID, AvatarGroupList> avatarGroupLists;
-    private final SLMessageResponseCacher<UUID, AvatarNotesReply> avatarNotes;
-    private final SLMessageResponseCacher<AvatarPickKey, PickInfoReply> avatarPickInfos;
-    private final SLMessageResponseCacher<UUID, AvatarPicksReply> avatarPicks;
-    private final SLMessageResponseCacher<UUID, AvatarPropertiesReply> avatarProperties;
-    @Nonnull
+    private final SerializableResponseCacher avatarGroupLists;
+    private final SLMessageResponseCacher avatarNotes;
+    private final SLMessageResponseCacher avatarPickInfos;
+    private final SLMessageResponseCacher avatarPicks;
+    private final SLMessageResponseCacher avatarProperties;
     private final BalanceManager balanceManager;
-    @Nonnull
     private final ChatMessageDao chatMessageDao;
-    @Nonnull
     private final ChatterDao chatterDao;
-    @Nonnull
     private final ChatterList chatterList;
     private final Object chatterUpdateLock = new Object();
-    private final SubscriptionSingleDataPool<CurrentLocationInfo> currentLocationInfoPool = new SubscriptionSingleDataPool<>();
-    /* access modifiers changed from: private */
-    @Nonnull
-    public final DaoSession daoSession;
+    private final SubscriptionSingleDataPool currentLocationInfoPool = new SubscriptionSingleDataPool();
+    private final DaoSession daoSession;
     private final OpportunisticExecutor dbExecutor = new OpportunisticExecutor("Database");
     private final EventBus eventBus = EventBus.getInstance();
-    @Nonnull
-    private final Query<Chatter> findChatterQuery;
-    @Nonnull
-    private final Query<UserPic> findUserPicQuery;
-    @Nonnull
-    private final Query<User> findUserQuery;
-    @Nonnull
-    private final Query<User> friendsQuery;
-    private final SLMessageResponseCacher<UUID, GroupProfileReply> groupProfiles;
-    private final SLMessageResponseCacher<UUID, GroupRoleDataReply> groupRoles;
-    private final SLMessageResponseCacher<UUID, GroupTitlesReply> groupTitles;
-    @Nonnull
+    private final Query findChatterQuery;
+    private final Query findUserPicQuery;
+    private final Query findUserQuery;
+    private final Query friendsQuery;
+    private final SLMessageResponseCacher groupProfiles;
+    private final SLMessageResponseCacher groupRoles;
+    private final SLMessageResponseCacher groupTitles;
     private final InventoryManager inventoryManager;
-    @Nonnull
-    private final Query<ChatMessage> loadMessageQuery;
-    private final SubscriptionSingleDataPool<SLMinimap.MinimapBitmap> minimapBitmapPool = new SubscriptionSingleDataPool<>();
-    private final SubscriptionPool<SubscriptionSingleKey, ImmutableList<MuteListEntry>> muteListPool = new SubscriptionPool<>();
-    @Nonnull
+    private final Query loadMessageQuery;
+    private final SubscriptionSingleDataPool minimapBitmapPool = new SubscriptionSingleDataPool();
+    private final SubscriptionPool muteListPool = new SubscriptionPool();
     private final UnreadNotificationManager notificationManager;
-    @Nonnull
     private final ObjectPopupsManager objectPopupsManager;
-    @Nonnull
     private final ObjectsManager objectsManager;
-    private final SLMessageResponseCacher<UUID, ParcelInfoReply> parcelInfoData;
-    @Nonnull
+    private final SLMessageResponseCacher parcelInfoData;
     private final SearchManager searchManager;
-    @Nonnull
     private final SyncManager syncManager;
-    @Nonnull
     private final UserDao userDao;
-    @Nonnull
     private final UUID userID;
-    private final SubscriptionPool<SubscriptionSingleKey, SLMinimap.UserLocations> userLocationsPool = new SubscriptionPool<>();
-    private final WeakPriorityRequestSet<UUID> userNameRequests = new WeakPriorityRequestSet<>();
-    private final RateLimitRequestHandler<UUID, UserName> userNamesHandler = new RateLimitRequestHandler<>(new RequestProcessor<UUID, UserName, UserName>(this.userNamesPool, this.dbExecutor) {
-        /* access modifiers changed from: protected */
-        public boolean isRequestComplete(@Nonnull UUID uuid, UserName userName) {
-            if (userName != null) {
-                if (userName.getIsBadUUID()) {
-                    return true;
-                }
-                if (!(userName.getDisplayName() == null || userName.getUserName() == null)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /* access modifiers changed from: protected */
-        @Nullable
-        public UserName processRequest(@Nonnull UUID uuid) {
-            return (UserName) UserManager.this.daoSession.getUserNameDao().load(uuid);
-        }
-
-        /* access modifiers changed from: protected */
-        public UserName processResult(@Nonnull UUID uuid, UserName userName) {
-            UserName userName2 = (UserName) UserManager.this.daoSession.getUserNameDao().load(uuid);
-            if (userName2 != null) {
-                if (userName2.mergeWith(userName)) {
-                    UserManager.this.daoSession.getUserNameDao().update(userName2);
-                }
-                return userName2;
-            }
-            UserManager.this.daoSession.getUserNameDao().insertOrReplace(userName);
-            return userName;
-        }
-    });
-    private final SubscriptionPool<UUID, UserName> userNamesPool = new SubscriptionPool<>();
+    private final SubscriptionPool userLocationsPool = new SubscriptionPool();
+    private final WeakPriorityRequestSet userNameRequests = new WeakPriorityRequestSet();
+    private final RateLimitRequestHandler userNamesHandler;
+    private final SubscriptionPool userNamesPool = new SubscriptionPool();
     private final UserPicBitmapCache userPicBitmapCache;
-    @Nonnull
     private final UserPicDao userPicDao;
     private final Object userPicUpdateLock = new Object();
     private final Object userUpdateLock = new Object();
-    private final SubscriptionSingleDataPool<ChatterID> voiceActiveChatterPool = new SubscriptionSingleDataPool<>();
-    private final SubscriptionSingleDataPool<VoiceAudioProperties> voiceAudioPropertiesPool = new SubscriptionSingleDataPool<>();
-    private final SubscriptionDataPool<ChatterID, VoiceChatInfo> voiceChatInfoPool = new SubscriptionDataPool().setCanContainNulls(true);
-    private final SubscriptionSingleDataPool<Boolean> voiceLoggedInPool = new SubscriptionSingleDataPool<>();
-    private final SubscriptionSingleDataPool<ImmutableMap<UUID, String>> wornAttachmentsPool = new SubscriptionSingleDataPool<>();
-    private final SubscriptionPool<SubscriptionSingleKey, ImmutableList<SLAvatarAppearance.WornItem>> wornItemsPool = new SubscriptionPool<>();
-    private final SubscriptionSingleDataPool<UUID> wornOutfitLinkPool = new SubscriptionSingleDataPool<>();
-    private final SubscriptionSingleDataPool<Table<SLWearableType, UUID, SLWearable>> wornWearablesPool = new SubscriptionSingleDataPool<>();
+    private final SubscriptionSingleDataPool voiceActiveChatterPool = new SubscriptionSingleDataPool();
+    private final SubscriptionSingleDataPool voiceAudioPropertiesPool = new SubscriptionSingleDataPool();
+    private final SubscriptionDataPool voiceChatInfoPool = (new SubscriptionDataPool()).setCanContainNulls(true);
+    private final SubscriptionSingleDataPool voiceLoggedInPool = new SubscriptionSingleDataPool();
+    private final SubscriptionSingleDataPool wornAttachmentsPool = new SubscriptionSingleDataPool();
+    private final SubscriptionPool wornItemsPool = new SubscriptionPool();
+    private final SubscriptionSingleDataPool wornOutfitLinkPool = new SubscriptionSingleDataPool();
+    private final SubscriptionSingleDataPool wornWearablesPool = new SubscriptionSingleDataPool();
 
-    private UserManager(@Nonnull UUID uuid) throws IllegalArgumentException {
-        this.userID = uuid;
-        DaoSession userDaoSession = DaoManager.getUserDaoSession(uuid);
-        if (userDaoSession == null) {
-            throw new IllegalArgumentException("Null DAO session");
-        }
-        this.daoSession = userDaoSession;
-        this.userDao = userDaoSession.getUserDao();
-        this.userPicDao = userDaoSession.getUserPicDao();
-        this.chatMessageDao = userDaoSession.getChatMessageDao();
-        this.chatterDao = userDaoSession.getChatterDao();
-        this.avatarPicks = new SLMessageResponseCacher<>(userDaoSession, this.dbExecutor, "AvatarPicks");
-        this.avatarPickInfos = new SLMessageResponseCacher<>(userDaoSession, this.dbExecutor, "AvatarPickInfos");
-        this.avatarGroupLists = new SerializableResponseCacher<>(userDaoSession, this.dbExecutor, "AvatarGroupLists");
-        this.groupProfiles = new SLMessageResponseCacher<>(userDaoSession, this.dbExecutor, "GroupProfiles");
-        this.groupTitles = new SLMessageResponseCacher<>(userDaoSession, this.dbExecutor, "GroupTitles");
-        this.agentDataUpdates = new SLMessageResponseCacher<>(userDaoSession, this.dbExecutor, "AgentDataUpdates");
-        this.groupRoles = new SLMessageResponseCacher<>(userDaoSession, this.dbExecutor, "GroupRoles");
-        this.avatarNotes = new SLMessageResponseCacher<>(userDaoSession, this.dbExecutor, "AvatarNotes");
-        this.avatarProperties = new SLMessageResponseCacher<>(userDaoSession, this.dbExecutor, "AvatarProperties");
-        this.parcelInfoData = new SLMessageResponseCacher<>(userDaoSession, this.dbExecutor, "ParcelInfoReply");
-        this.assetResponseCacher = new AssetResponseCacher(userDaoSession, this.dbExecutor);
-        this.findUserQuery = this.userDao.queryBuilder().where(UserDao.Properties.Uuid.eq(""), new WhereCondition[0]).build();
-        this.friendsQuery = this.userDao.queryBuilder().where(UserDao.Properties.IsFriend.eq(Boolean.TRUE), new WhereCondition[0]).build();
-        this.findUserPicQuery = this.userPicDao.queryBuilder().where(UserPicDao.Properties.Uuid.eq(""), new WhereCondition[0]).build();
-        this.loadMessageQuery = this.chatMessageDao.queryBuilder().where(ChatMessageDao.Properties.Id.eq(""), new WhereCondition[0]).build();
-        this.findChatterQuery = this.chatterDao.queryBuilder().where(ChatterDao.Properties.Type.eq((Object) null), ChatterDao.Properties.Uuid.eq("")).build();
-        this.activeChattersQuery = this.chatterDao.queryBuilder().where(ChatterDao.Properties.Active.eq(true), new WhereCondition[0]).build();
-        this.inventoryManager = new InventoryManager(uuid);
-        this.notificationManager = new UnreadNotificationManager(this, userDaoSession);
-        this.objectPopupsManager = new ObjectPopupsManager(this);
-        this.objectsManager = new ObjectsManager(this);
-        this.balanceManager = new BalanceManager(this);
-        this.searchManager = new SearchManager(this, userDaoSession);
-        this.chatterList = new ChatterList(this);
-        this.userPicBitmapCache = new UserPicBitmapCache(this);
-        this.syncManager = new SyncManager(this);
+    static DaoSession _2D_get0(UserManager usermanager)
+    {
+        return usermanager.daoSession;
     }
 
-    @Nonnull
-    public static Subscribable<UUID, SLAgentCircuit> agentCircuits() {
+    private UserManager(UUID uuid)
+        throws IllegalArgumentException
+    {
+        userNamesHandler = new RateLimitRequestHandler(new RequestProcessor(userNamesPool, dbExecutor) {
+
+            final UserManager this$0;
+
+            protected volatile boolean isRequestComplete(Object obj, Object obj1)
+            {
+                return isRequestComplete((UUID)obj, (UserName)obj1);
+            }
+
+            protected boolean isRequestComplete(UUID uuid1, UserName username)
+            {
+                return username != null && (username.getIsBadUUID() || username.getDisplayName() != null && username.getUserName() != null);
+            }
+
+            protected UserName processRequest(UUID uuid1)
+            {
+                return (UserName)UserManager._2D_get0(UserManager.this).getUserNameDao().load(uuid1);
+            }
+
+            protected volatile Object processRequest(Object obj)
+            {
+                return processRequest((UUID)obj);
+            }
+
+            protected UserName processResult(UUID uuid1, UserName username)
+            {
+                uuid1 = (UserName)UserManager._2D_get0(UserManager.this).getUserNameDao().load(uuid1);
+                if (uuid1 != null)
+                {
+                    if (uuid1.mergeWith(username))
+                    {
+                        UserManager._2D_get0(UserManager.this).getUserNameDao().update(uuid1);
+                    }
+                    return uuid1;
+                } else
+                {
+                    UserManager._2D_get0(UserManager.this).getUserNameDao().insertOrReplace(username);
+                    return username;
+                }
+            }
+
+            protected volatile Object processResult(Object obj, Object obj1)
+            {
+                return processResult((UUID)obj, (UserName)obj1);
+            }
+
+            
+            {
+                this$0 = UserManager.this;
+                super(requestsource, executor);
+            }
+        });
+        userID = uuid;
+        DaoSession daosession = DaoManager.getUserDaoSession(uuid);
+        if (daosession == null)
+        {
+            throw new IllegalArgumentException("Null DAO session");
+        } else
+        {
+            daoSession = daosession;
+            userDao = daosession.getUserDao();
+            userPicDao = daosession.getUserPicDao();
+            chatMessageDao = daosession.getChatMessageDao();
+            chatterDao = daosession.getChatterDao();
+            avatarPicks = new SLMessageResponseCacher(daosession, dbExecutor, "AvatarPicks");
+            avatarPickInfos = new SLMessageResponseCacher(daosession, dbExecutor, "AvatarPickInfos");
+            avatarGroupLists = new SerializableResponseCacher(daosession, dbExecutor, "AvatarGroupLists");
+            groupProfiles = new SLMessageResponseCacher(daosession, dbExecutor, "GroupProfiles");
+            groupTitles = new SLMessageResponseCacher(daosession, dbExecutor, "GroupTitles");
+            agentDataUpdates = new SLMessageResponseCacher(daosession, dbExecutor, "AgentDataUpdates");
+            groupRoles = new SLMessageResponseCacher(daosession, dbExecutor, "GroupRoles");
+            avatarNotes = new SLMessageResponseCacher(daosession, dbExecutor, "AvatarNotes");
+            avatarProperties = new SLMessageResponseCacher(daosession, dbExecutor, "AvatarProperties");
+            parcelInfoData = new SLMessageResponseCacher(daosession, dbExecutor, "ParcelInfoReply");
+            assetResponseCacher = new AssetResponseCacher(daosession, dbExecutor);
+            findUserQuery = userDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.UserDao.Properties.Uuid.eq(""), new WhereCondition[0]).build();
+            friendsQuery = userDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.UserDao.Properties.IsFriend.eq(Boolean.TRUE), new WhereCondition[0]).build();
+            findUserPicQuery = userPicDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.UserPicDao.Properties.Uuid.eq(""), new WhereCondition[0]).build();
+            loadMessageQuery = chatMessageDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.ChatMessageDao.Properties.Id.eq(""), new WhereCondition[0]).build();
+            findChatterQuery = chatterDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.ChatterDao.Properties.Type.eq(null), new WhereCondition[] {
+                com.lumiyaviewer.lumiya.dao.ChatterDao.Properties.Uuid.eq("")
+            }).build();
+            activeChattersQuery = chatterDao.queryBuilder().where(com.lumiyaviewer.lumiya.dao.ChatterDao.Properties.Active.eq(Boolean.valueOf(true)), new WhereCondition[0]).build();
+            inventoryManager = new InventoryManager(uuid);
+            notificationManager = new UnreadNotificationManager(this, daosession);
+            objectPopupsManager = new ObjectPopupsManager(this);
+            objectsManager = new ObjectsManager(this);
+            balanceManager = new BalanceManager(this);
+            searchManager = new SearchManager(this, daosession);
+            chatterList = new ChatterList(this);
+            userPicBitmapCache = new UserPicBitmapCache(this);
+            syncManager = new SyncManager(this);
+            return;
+        }
+    }
+
+    public static Subscribable agentCircuits()
+    {
         return activeAgentCircuitsPool;
     }
 
-    @Nullable
-    public static SLAgentCircuit getActiveAgentCircuit(@Nullable UUID uuid) {
-        UserManager userManager;
-        if (uuid == null || (userManager = getUserManager(uuid)) == null) {
-            return null;
+    public static SLAgentCircuit getActiveAgentCircuit(UUID uuid)
+    {
+        if (uuid != null)
+        {
+            uuid = getUserManager(uuid);
+            if (uuid != null)
+            {
+                return uuid.getActiveAgentCircuit();
+            }
         }
-        return userManager.getActiveAgentCircuit();
+        return null;
     }
 
-    @Nonnull
-    public static SLAgentCircuit getConnectedAgentCircuit(@Nullable UUID uuid) throws SLGridConnection.NotConnectedException {
-        SLAgentCircuit activeAgentCircuit2 = getActiveAgentCircuit(uuid);
-        if (activeAgentCircuit2 != null) {
-            return activeAgentCircuit2;
+    public static SLAgentCircuit getConnectedAgentCircuit(UUID uuid)
+        throws com.lumiyaviewer.lumiya.slproto.SLGridConnection.NotConnectedException
+    {
+        uuid = getActiveAgentCircuit(uuid);
+        if (uuid != null)
+        {
+            return uuid;
+        } else
+        {
+            throw new com.lumiyaviewer.lumiya.slproto.SLGridConnection.NotConnectedException();
         }
-        throw new SLGridConnection.NotConnectedException();
     }
 
-    private static File getInventoryDatabasePath(String str) {
-        if (PreferenceManager.getDefaultSharedPreferences(LumiyaApp.getContext()).getString("db_location", "internal").equals("sd")) {
+    private static File getInventoryDatabasePath(String s)
+    {
+        if (PreferenceManager.getDefaultSharedPreferences(LumiyaApp.getContext()).getString("db_location", "internal").equals("sd"))
+        {
             File file = new File(Environment.getExternalStorageDirectory(), "/Android/data/com.lumiyaviewer.lumiya/cache/database");
             file.mkdirs();
-            return new File(file, str);
+            return new File(file, s);
         }
-        File databasePath = LumiyaApp.getContext().getDatabasePath(str);
-        File parentFile = databasePath.getParentFile();
-        if (parentFile != null) {
-            parentFile.mkdirs();
+        s = LumiyaApp.getContext().getDatabasePath(s);
+        File file1 = s.getParentFile();
+        if (file1 != null)
+        {
+            file1.mkdirs();
         }
-        return databasePath;
+        return s;
     }
 
-    @Nullable
-    public static UserManager getUserManager(@Nullable UUID uuid) {
-        UserManager userManager;
-        if (uuid == null) {
+    public static UserManager getUserManager(UUID uuid)
+    {
+        if (uuid == null)
+        {
             return null;
         }
-        synchronized (lock) {
-            userManager = userManagers.get(uuid);
-            if (userManager == null) {
-                try {
-                    userManager = new UserManager(uuid);
-                    userManagers.put(uuid, userManager);
-                } catch (IllegalArgumentException e) {
-                    Debug.Warning(e);
-                    return null;
-                }
-            }
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        UserManager usermanager1 = (UserManager)userManagers.get(uuid);
+        UserManager usermanager;
+        usermanager = usermanager1;
+        if (usermanager1 != null)
+        {
+            break MISSING_BLOCK_LABEL_51;
         }
-        return userManager;
+        usermanager = new UserManager(uuid);
+        userManagers.put(uuid, usermanager);
+        obj;
+        JVM INSTR monitorexit ;
+        return usermanager;
+        uuid;
+        Debug.Warning(uuid);
+        obj;
+        JVM INSTR monitorexit ;
+        return null;
+        uuid;
+        throw uuid;
     }
 
-    public void addChatMessage(@Nonnull ChatMessage chatMessage) {
-        this.chatMessageDao.insert(chatMessage);
+    public void addChatMessage(ChatMessage chatmessage)
+    {
+        chatMessageDao.insert(chatmessage);
     }
 
-    public void clearActiveAgentCircuit(@Nullable SLAgentCircuit sLAgentCircuit) {
-        if (this.activeAgentCircuit.compareAndSet(sLAgentCircuit, (Object) null)) {
+    public void clearActiveAgentCircuit(SLAgentCircuit slagentcircuit)
+    {
+        if (activeAgentCircuit.compareAndSet(slagentcircuit, null))
+        {
             Debug.Printf("Active agent circuit cleared.", new Object[0]);
-            this.objectPopupsManager.clearObjectPopups();
-            this.objectsManager.requestObjectListUpdate();
-            activeAgentCircuitsPool.setData(this.userID, null);
+            objectPopupsManager.clearObjectPopups();
+            objectsManager.requestObjectListUpdate();
+            activeAgentCircuitsPool.setData(userID, null);
         }
     }
 
-    @Nullable
-    public SLAgentCircuit getActiveAgentCircuit() {
-        return this.activeAgentCircuit.get();
+    public SLAgentCircuit getActiveAgentCircuit()
+    {
+        return (SLAgentCircuit)activeAgentCircuit.get();
     }
 
-    public SLMessageResponseCacher<UUID, AgentDataUpdate> getAgentDataUpdates() {
-        return this.agentDataUpdates;
+    public SLMessageResponseCacher getAgentDataUpdates()
+    {
+        return agentDataUpdates;
     }
 
-    public AssetResponseCacher getAssetResponseCacher() {
-        return this.assetResponseCacher;
+    public AssetResponseCacher getAssetResponseCacher()
+    {
+        return assetResponseCacher;
     }
 
-    public SerializableResponseCacher<UUID, AvatarGroupList> getAvatarGroupLists() {
-        return this.avatarGroupLists;
+    public SerializableResponseCacher getAvatarGroupLists()
+    {
+        return avatarGroupLists;
     }
 
-    public SLMessageResponseCacher<UUID, AvatarNotesReply> getAvatarNotes() {
-        return this.avatarNotes;
+    public SLMessageResponseCacher getAvatarNotes()
+    {
+        return avatarNotes;
     }
 
-    public SLMessageResponseCacher<AvatarPickKey, PickInfoReply> getAvatarPickInfos() {
-        return this.avatarPickInfos;
+    public SLMessageResponseCacher getAvatarPickInfos()
+    {
+        return avatarPickInfos;
     }
 
-    public SLMessageResponseCacher<UUID, AvatarPicksReply> getAvatarPicks() {
-        return this.avatarPicks;
+    public SLMessageResponseCacher getAvatarPicks()
+    {
+        return avatarPicks;
     }
 
-    public SLMessageResponseCacher<UUID, AvatarPropertiesReply> getAvatarProperties() {
-        return this.avatarProperties;
+    public SLMessageResponseCacher getAvatarProperties()
+    {
+        return avatarProperties;
     }
 
-    @Nonnull
-    public BalanceManager getBalanceManager() {
-        return this.balanceManager;
+    public BalanceManager getBalanceManager()
+    {
+        return balanceManager;
     }
 
-    public SLMessageResponseCacher<UUID, GroupProfileReply> getCachedGroupProfiles() {
-        return this.groupProfiles;
+    public SLMessageResponseCacher getCachedGroupProfiles()
+    {
+        return groupProfiles;
     }
 
-    @Nullable
-    public ChatMessage getChatMessage(long j) {
-        Query<ChatMessage> forCurrentThread = this.loadMessageQuery.forCurrentThread();
-        forCurrentThread.setParameter(0, Long.valueOf(j));
-        return forCurrentThread.unique();
+    public ChatMessage getChatMessage(long l)
+    {
+        Query query = loadMessageQuery.forCurrentThread();
+        query.setParameter(0, Long.valueOf(l));
+        return (ChatMessage)query.unique();
     }
 
-    @Nonnull
-    public ChatMessageDao getChatMessageDao() {
-        return this.chatMessageDao;
+    public ChatMessageDao getChatMessageDao()
+    {
+        return chatMessageDao;
     }
 
-    public Chatter getChatter(Cursor cursor) {
-        return this.chatterDao.readEntity(cursor, 0);
+    public Chatter getChatter(Cursor cursor)
+    {
+        return chatterDao.readEntity(cursor, 0);
     }
 
-    @Nonnull
-    public ChatterDao getChatterDao() {
-        return this.chatterDao;
+    public ChatterDao getChatterDao()
+    {
+        return chatterDao;
     }
 
-    @Nonnull
-    public ChatterList getChatterList() {
-        return this.chatterList;
+    public ChatterList getChatterList()
+    {
+        return chatterList;
     }
 
-    public Subscribable<SubscriptionSingleKey, CurrentLocationInfo> getCurrentLocationInfo() {
-        return this.currentLocationInfoPool;
+    public Subscribable getCurrentLocationInfo()
+    {
+        return currentLocationInfoPool;
     }
 
-    @Nullable
-    public CurrentLocationInfo getCurrentLocationInfoSnapshot() {
-        return this.currentLocationInfoPool.getData();
+    public CurrentLocationInfo getCurrentLocationInfoSnapshot()
+    {
+        return (CurrentLocationInfo)currentLocationInfoPool.getData();
     }
 
-    @Nonnull
-    public DaoSession getDaoSession() {
-        return this.daoSession;
+    public DaoSession getDaoSession()
+    {
+        return daoSession;
     }
 
-    @Nonnull
-    public Executor getDatabaseExecutor() {
-        return this.dbExecutor;
+    public Executor getDatabaseExecutor()
+    {
+        return dbExecutor;
     }
 
-    @Nonnull
-    public Executor getDatabaseRunOnceExecutor() {
-        return this.dbExecutor.getRunOnceExecutor();
+    public Executor getDatabaseRunOnceExecutor()
+    {
+        return dbExecutor.getRunOnceExecutor();
     }
 
-    public EventBus getEventBus() {
-        return this.eventBus;
+    public EventBus getEventBus()
+    {
+        return eventBus;
     }
 
-    public SLMessageResponseCacher<UUID, GroupRoleDataReply> getGroupRoles() {
-        return this.groupRoles;
+    public SLMessageResponseCacher getGroupRoles()
+    {
+        return groupRoles;
     }
 
-    public SLMessageResponseCacher<UUID, GroupTitlesReply> getGroupTitles() {
-        return this.groupTitles;
+    public SLMessageResponseCacher getGroupTitles()
+    {
+        return groupTitles;
     }
 
-    @Nonnull
-    public InventoryManager getInventoryManager() {
-        return this.inventoryManager;
+    public InventoryManager getInventoryManager()
+    {
+        return inventoryManager;
     }
 
-    public SubscriptionSingleDataPool<SLMinimap.MinimapBitmap> getMinimapBitmapPool() {
-        return this.minimapBitmapPool;
+    public SubscriptionSingleDataPool getMinimapBitmapPool()
+    {
+        return minimapBitmapPool;
     }
 
-    @Nonnull
-    public ObjectPopupsManager getObjectPopupsManager() {
-        return this.objectPopupsManager;
+    public ObjectPopupsManager getObjectPopupsManager()
+    {
+        return objectPopupsManager;
     }
 
-    @Nonnull
-    public ObjectsManager getObjectsManager() {
-        return this.objectsManager;
+    public ObjectsManager getObjectsManager()
+    {
+        return objectsManager;
     }
 
-    @Nonnull
-    public SearchManager getSearchManager() {
-        return this.searchManager;
+    public SearchManager getSearchManager()
+    {
+        return searchManager;
     }
 
-    @Nonnull
-    public SyncManager getSyncManager() {
-        return this.syncManager;
+    public SyncManager getSyncManager()
+    {
+        return syncManager;
     }
 
-    @Nonnull
-    public UnreadNotificationManager getUnreadNotificationManager() {
-        return this.notificationManager;
+    public UnreadNotificationManager getUnreadNotificationManager()
+    {
+        return notificationManager;
     }
 
-    public User getUser(Cursor cursor) {
-        return this.userDao.readEntity(cursor, 0);
+    public User getUser(Cursor cursor)
+    {
+        return userDao.readEntity(cursor, 0);
     }
 
-    @Nonnull
-    public User getUser(@Nonnull UUID uuid, @Nullable String str, @Nullable String str2) {
-        Query<User> forCurrentThread = this.findUserQuery.forCurrentThread();
-        forCurrentThread.setParameter(0, uuid.toString());
-        User unique = forCurrentThread.unique();
-        if (unique == null) {
-            synchronized (this.userUpdateLock) {
-                unique = forCurrentThread.unique();
-                if (unique == null) {
-                    unique = new User((Long) null);
-                    unique.setUuid(uuid);
-                    if (str != null) {
-                        unique.setUserName(str);
-                    }
-                    if (str2 != null) {
-                        unique.setDisplayName(str2);
-                    }
-                    this.userDao.insert(unique);
-                }
-            }
+    public User getUser(UUID uuid, String s, String s1)
+    {
+        User user;
+        User user1;
+        Query query;
+        query = findUserQuery.forCurrentThread();
+        query.setParameter(0, uuid.toString());
+        user1 = (User)query.unique();
+        user = user1;
+        if (user1 != null) goto _L2; else goto _L1
+_L1:
+        Object obj = userUpdateLock;
+        obj;
+        JVM INSTR monitorenter ;
+        user1 = (User)query.unique();
+        user = user1;
+        if (user1 != null)
+        {
+            break MISSING_BLOCK_LABEL_112;
         }
-        return unique;
+        user = new User(null);
+        user.setUuid(uuid);
+        if (s == null)
+        {
+            break MISSING_BLOCK_LABEL_92;
+        }
+        user.setUserName(s);
+        if (s1 == null)
+        {
+            break MISSING_BLOCK_LABEL_102;
+        }
+        user.setDisplayName(s1);
+        userDao.insert(user);
+        obj;
+        JVM INSTR monitorexit ;
+_L2:
+        return user;
+        uuid;
+        throw uuid;
     }
 
-    @Nonnull
-    public UserDao getUserDao() {
-        return this.userDao;
+    public UserDao getUserDao()
+    {
+        return userDao;
     }
 
-    @Nonnull
-    public UUID getUserID() {
-        return this.userID;
+    public UUID getUserID()
+    {
+        return userID;
     }
 
-    public SubscriptionPool<SubscriptionSingleKey, SLMinimap.UserLocations> getUserLocationsPool() {
-        return this.userLocationsPool;
+    public SubscriptionPool getUserLocationsPool()
+    {
+        return userLocationsPool;
     }
 
-    public RequestQueue<UUID, UserName> getUserNameRequestQueue() {
-        return this.userNamesHandler;
+    public RequestQueue getUserNameRequestQueue()
+    {
+        return userNamesHandler;
     }
 
-    public WeakPriorityRequestSet<UUID> getUserNameRequests() {
-        return this.userNameRequests;
+    public WeakPriorityRequestSet getUserNameRequests()
+    {
+        return userNameRequests;
     }
 
-    public Subscribable<UUID, UserName> getUserNames() {
-        return this.userNamesPool;
+    public Subscribable getUserNames()
+    {
+        return userNamesPool;
     }
 
-    public byte[] getUserPic(UUID uuid) {
-        if (uuid == null) {
+    public byte[] getUserPic(UUID uuid)
+    {
+        if (uuid == null)
+        {
             return null;
         }
-        Query<UserPic> forCurrentThread = this.findUserPicQuery.forCurrentThread();
-        forCurrentThread.setParameter(0, uuid.toString());
-        UserPic unique = forCurrentThread.unique();
-        if (unique == null) {
+        Query query = findUserPicQuery.forCurrentThread();
+        query.setParameter(0, uuid.toString());
+        uuid = (UserPic)query.unique();
+        if (uuid == null)
+        {
             return null;
+        } else
+        {
+            return uuid.getBitmap();
         }
-        return unique.getBitmap();
     }
 
-    public UserPicBitmapCache getUserPicBitmapCache() {
-        return this.userPicBitmapCache;
+    public UserPicBitmapCache getUserPicBitmapCache()
+    {
+        return userPicBitmapCache;
     }
 
-    public Subscribable<SubscriptionSingleKey, ChatterID> getVoiceActiveChatter() {
-        return this.voiceActiveChatterPool;
+    public Subscribable getVoiceActiveChatter()
+    {
+        return voiceActiveChatterPool;
     }
 
-    public Subscribable<SubscriptionSingleKey, VoiceAudioProperties> getVoiceAudioProperties() {
-        return this.voiceAudioPropertiesPool;
+    public Subscribable getVoiceAudioProperties()
+    {
+        return voiceAudioPropertiesPool;
     }
 
-    public Subscribable<ChatterID, VoiceChatInfo> getVoiceChatInfo() {
-        return this.voiceChatInfoPool;
+    public Subscribable getVoiceChatInfo()
+    {
+        return voiceChatInfoPool;
     }
 
-    public Subscribable<SubscriptionSingleKey, Boolean> getVoiceLoggedIn() {
-        return this.voiceLoggedInPool;
+    public Subscribable getVoiceLoggedIn()
+    {
+        return voiceLoggedInPool;
     }
 
-    public SubscriptionSingleDataPool<ImmutableMap<UUID, String>> getWornAttachmentsPool() {
-        return this.wornAttachmentsPool;
+    public SubscriptionSingleDataPool getWornAttachmentsPool()
+    {
+        return wornAttachmentsPool;
     }
 
-    public SubscriptionSingleDataPool<Table<SLWearableType, UUID, SLWearable>> getWornWearablesPool() {
-        return this.wornWearablesPool;
+    public SubscriptionSingleDataPool getWornWearablesPool()
+    {
+        return wornWearablesPool;
     }
 
-    public boolean isChatterActive(ChatterID chatterID) {
-        if (chatterID.getChatterType() == ChatterID.ChatterType.Local) {
+    public boolean isChatterActive(ChatterID chatterid)
+    {
+        if (chatterid.getChatterType() == com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Local)
+        {
             return true;
         }
-        synchronized (this.chatterUpdateLock) {
-            Query<Chatter> forCurrentThread = this.findChatterQuery.forCurrentThread();
-            forCurrentThread.setParameter(0, Integer.valueOf(chatterID.getChatterType().ordinal()));
-            forCurrentThread.setParameter(1, StringUtils.toString(chatterID.getOptionalChatterUUID()));
-            Chatter unique = forCurrentThread.unique();
-            if (unique == null) {
-                return false;
-            }
-            boolean active = unique.getActive();
-            return active;
+        Object obj = chatterUpdateLock;
+        obj;
+        JVM INSTR monitorenter ;
+        Query query = findChatterQuery.forCurrentThread();
+        query.setParameter(0, Integer.valueOf(chatterid.getChatterType().ordinal()));
+        query.setParameter(1, StringUtils.toString(chatterid.getOptionalChatterUUID()));
+        chatterid = (Chatter)query.unique();
+        if (chatterid != null)
+        {
+            break MISSING_BLOCK_LABEL_70;
         }
+        obj;
+        JVM INSTR monitorexit ;
+        return false;
+        boolean flag = chatterid.getActive();
+        obj;
+        JVM INSTR monitorexit ;
+        return flag;
+        chatterid;
+        throw chatterid;
     }
 
-    public boolean isChatterMuted(ChatterID chatterID) {
-        if (chatterID.getChatterType() == ChatterID.ChatterType.Local) {
+    public boolean isChatterMuted(ChatterID chatterid)
+    {
+        if (chatterid.getChatterType() == com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Local)
+        {
             return false;
         }
-        synchronized (this.chatterUpdateLock) {
-            Query<Chatter> forCurrentThread = this.findChatterQuery.forCurrentThread();
-            forCurrentThread.setParameter(0, Integer.valueOf(chatterID.getChatterType().ordinal()));
-            forCurrentThread.setParameter(1, StringUtils.toString(chatterID.getOptionalChatterUUID()));
-            Chatter unique = forCurrentThread.unique();
-            if (unique == null) {
-                return false;
-            }
-            boolean muted = unique.getMuted();
-            return muted;
+        Object obj = chatterUpdateLock;
+        obj;
+        JVM INSTR monitorenter ;
+        Query query = findChatterQuery.forCurrentThread();
+        query.setParameter(0, Integer.valueOf(chatterid.getChatterType().ordinal()));
+        query.setParameter(1, StringUtils.toString(chatterid.getOptionalChatterUUID()));
+        chatterid = (Chatter)query.unique();
+        if (chatterid != null)
+        {
+            break MISSING_BLOCK_LABEL_70;
         }
+        obj;
+        JVM INSTR monitorexit ;
+        return false;
+        boolean flag = chatterid.getMuted();
+        obj;
+        JVM INSTR monitorexit ;
+        return flag;
+        chatterid;
+        throw chatterid;
     }
 
-    public SubscriptionPool<SubscriptionSingleKey, ImmutableList<MuteListEntry>> muteListPool() {
-        return this.muteListPool;
+    public SubscriptionPool muteListPool()
+    {
+        return muteListPool;
     }
 
-    public SLMessageResponseCacher<UUID, ParcelInfoReply> parcelInfoData() {
-        return this.parcelInfoData;
+    public SLMessageResponseCacher parcelInfoData()
+    {
+        return parcelInfoData;
     }
 
-    public void setActiveAgentCircuit(@Nullable SLAgentCircuit sLAgentCircuit) {
-        this.activeAgentCircuit.set(sLAgentCircuit);
-        if (sLAgentCircuit == null) {
-            this.objectPopupsManager.clearObjectPopups();
+    public void setActiveAgentCircuit(SLAgentCircuit slagentcircuit)
+    {
+        activeAgentCircuit.set(slagentcircuit);
+        if (slagentcircuit == null)
+        {
+            objectPopupsManager.clearObjectPopups();
         }
-        this.objectsManager.requestObjectListUpdate();
-        activeAgentCircuitsPool.setData(this.userID, sLAgentCircuit);
+        objectsManager.requestObjectListUpdate();
+        activeAgentCircuitsPool.setData(userID, slagentcircuit);
     }
 
-    public void setChatterMuted(ChatterID chatterID, boolean z) {
-        if (chatterID.getChatterType() != ChatterID.ChatterType.Local) {
-            synchronized (this.chatterUpdateLock) {
-                Query<Chatter> forCurrentThread = this.findChatterQuery.forCurrentThread();
-                forCurrentThread.setParameter(0, Integer.valueOf(chatterID.getChatterType().ordinal()));
-                forCurrentThread.setParameter(1, StringUtils.toString(chatterID.getOptionalChatterUUID()));
-                Chatter unique = forCurrentThread.unique();
-                if (unique != null) {
-                    if (unique.getMuted() != z) {
-                        unique.setMuted(z);
-                        if (z || !(!unique.getActive())) {
-                            this.chatterDao.update(unique);
-                        } else {
-                            this.chatterDao.delete(unique);
-                        }
-                    }
-                } else if (z) {
-                    this.chatterDao.insert(new Chatter((Long) null, chatterID.getChatterType().ordinal(), chatterID.getOptionalChatterUUID(), false, true, 0, (Long) null, (UUID) null));
-                }
-            }
+    public void setChatterMuted(ChatterID chatterid, boolean flag)
+    {
+        if (chatterid.getChatterType() == com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Local)
+        {
+            return;
         }
+        Object obj = chatterUpdateLock;
+        obj;
+        JVM INSTR monitorenter ;
+        Object obj1;
+        obj1 = findChatterQuery.forCurrentThread();
+        ((Query) (obj1)).setParameter(0, Integer.valueOf(chatterid.getChatterType().ordinal()));
+        ((Query) (obj1)).setParameter(1, StringUtils.toString(chatterid.getOptionalChatterUUID()));
+        obj1 = (Chatter)((Query) (obj1)).unique();
+        if (obj1 == null) goto _L2; else goto _L1
+_L1:
+        if (((Chatter) (obj1)).getMuted() == flag) goto _L4; else goto _L3
+_L3:
+        ((Chatter) (obj1)).setMuted(flag);
+        if (flag) goto _L6; else goto _L5
+_L5:
+        if (!(((Chatter) (obj1)).getActive() ^ true)) goto _L6; else goto _L7
+_L7:
+        chatterDao.delete(obj1);
+_L4:
+        obj;
+        JVM INSTR monitorexit ;
+        return;
+_L6:
+        chatterDao.update(obj1);
+          goto _L4
+        chatterid;
+        throw chatterid;
+_L2:
+        if (!flag) goto _L4; else goto _L8
+_L8:
+        chatterid = new Chatter(null, chatterid.getChatterType().ordinal(), chatterid.getOptionalChatterUUID(), false, true, 0, null, null);
+        chatterDao.insert(chatterid);
+          goto _L4
     }
 
-    public void setCurrentLocationInfo(CurrentLocationInfo currentLocationInfo) {
-        this.currentLocationInfoPool.setData(this.currentLocationInfoPool.getKey(), currentLocationInfo);
+    public void setCurrentLocationInfo(CurrentLocationInfo currentlocationinfo)
+    {
+        currentLocationInfoPool.setData(currentLocationInfoPool.getKey(), currentlocationinfo);
     }
 
-    public void setUserBadUUID(UUID uuid) {
-        updateUserNames(uuid, (String) null, (String) null, true);
+    public void setUserBadUUID(UUID uuid)
+    {
+        updateUserNames(uuid, null, null, true);
     }
 
-    public void setUserPic(UUID uuid, byte[] bArr) {
-        if (uuid != null) {
-            Query<UserPic> forCurrentThread = this.findUserPicQuery.forCurrentThread();
-            forCurrentThread.setParameter(0, uuid.toString());
-            synchronized (this.userPicUpdateLock) {
-                UserPic unique = forCurrentThread.unique();
-                if (unique == null) {
-                    unique = new UserPic((Long) null);
-                    unique.setUuid(uuid.toString());
-                }
-                unique.setBitmap(bArr);
-                this.userPicDao.insertOrReplace(unique);
-            }
+    public void setUserPic(UUID uuid, byte abyte0[])
+    {
+        if (uuid == null) goto _L2; else goto _L1
+_L1:
+        Object obj;
+        obj = findUserPicQuery.forCurrentThread();
+        ((Query) (obj)).setParameter(0, uuid.toString());
+        Object obj1 = userPicUpdateLock;
+        obj1;
+        JVM INSTR monitorenter ;
+        UserPic userpic = (UserPic)((Query) (obj)).unique();
+        obj = userpic;
+        if (userpic != null)
+        {
+            break MISSING_BLOCK_LABEL_64;
         }
+        obj = new UserPic(null);
+        ((UserPic) (obj)).setUuid(uuid.toString());
+        ((UserPic) (obj)).setBitmap(abyte0);
+        userPicDao.insertOrReplace(obj);
+        obj1;
+        JVM INSTR monitorexit ;
+_L2:
+        return;
+        uuid;
+        throw uuid;
     }
 
-    public void setVoiceActiveChatter(@Nullable ChatterID chatterID) {
-        this.voiceActiveChatterPool.setData(SubscriptionSingleKey.Value, chatterID);
+    public void setVoiceActiveChatter(ChatterID chatterid)
+    {
+        voiceActiveChatterPool.setData(SubscriptionSingleKey.Value, chatterid);
     }
 
-    public void setVoiceAudioProperties(VoiceAudioProperties voiceAudioProperties) {
-        this.voiceAudioPropertiesPool.setData(SubscriptionSingleKey.Value, voiceAudioProperties);
+    public void setVoiceAudioProperties(VoiceAudioProperties voiceaudioproperties)
+    {
+        voiceAudioPropertiesPool.setData(SubscriptionSingleKey.Value, voiceaudioproperties);
     }
 
-    public void setVoiceChatInfo(@Nonnull ChatterID chatterID, @Nullable VoiceChatInfo voiceChatInfo) {
-        this.voiceChatInfoPool.setData(chatterID, voiceChatInfo);
+    public void setVoiceChatInfo(ChatterID chatterid, VoiceChatInfo voicechatinfo)
+    {
+        voiceChatInfoPool.setData(chatterid, voicechatinfo);
     }
 
-    public void setVoiceLoggedIn(boolean z) {
-        this.voiceLoggedInPool.setData(SubscriptionSingleKey.Value, Boolean.valueOf(z));
+    public void setVoiceLoggedIn(boolean flag)
+    {
+        voiceLoggedInPool.setData(SubscriptionSingleKey.Value, Boolean.valueOf(flag));
     }
 
-    public void updateUserNames(@Nonnull UUID uuid, @Nullable String str, @Nullable String str2) {
-        updateUserNames(uuid, str, str2, false);
+    public void updateUserNames(UUID uuid, String s, String s1)
+    {
+        updateUserNames(uuid, s, s1, false);
     }
 
-    public void updateUserNames(@Nonnull UUID uuid, @Nullable String str, @Nullable String str2, boolean z) {
-        Query<User> forCurrentThread = this.findUserQuery.forCurrentThread();
-        forCurrentThread.setParameter(0, uuid.toString());
-        synchronized (this.userUpdateLock) {
-            User unique = forCurrentThread.unique();
-            if (unique != null) {
-                if (unique.getUserName() == null && str != null) {
-                    unique.setUserName(str);
-                }
-                if (unique.getDisplayName() == null && str2 != null) {
-                    unique.setDisplayName(str2);
-                }
-                unique.setBadUUID(z);
-                this.userDao.update(unique);
-            } else {
-                User user = new User((Long) null);
-                user.setUuid(uuid);
-                if (str != null) {
-                    user.setUserName(str);
-                }
-                if (str2 != null) {
-                    user.setDisplayName(str2);
-                }
-                user.setBadUUID(z);
-                this.userDao.insert(user);
-            }
+    public void updateUserNames(UUID uuid, String s, String s1, boolean flag)
+    {
+        Object obj1;
+        obj1 = findUserQuery.forCurrentThread();
+        ((Query) (obj1)).setParameter(0, uuid.toString());
+        Object obj = userUpdateLock;
+        obj;
+        JVM INSTR monitorenter ;
+        obj1 = (User)((Query) (obj1)).unique();
+        if (obj1 == null) goto _L2; else goto _L1
+_L1:
+        if (((User) (obj1)).getUserName() != null || s == null)
+        {
+            break MISSING_BLOCK_LABEL_61;
         }
-        this.eventBus.publish(new EventUserInfoChanged(this.userID, uuid, 2));
+        ((User) (obj1)).setUserName(s);
+        if (((User) (obj1)).getDisplayName() != null || s1 == null)
+        {
+            break MISSING_BLOCK_LABEL_79;
+        }
+        ((User) (obj1)).setDisplayName(s1);
+        ((User) (obj1)).setBadUUID(flag);
+        userDao.update(obj1);
+_L4:
+        obj;
+        JVM INSTR monitorexit ;
+        eventBus.publish(new EventUserInfoChanged(userID, uuid, 2));
+        return;
+_L2:
+        obj1 = new User(null);
+        ((User) (obj1)).setUuid(uuid);
+        if (s == null)
+        {
+            break MISSING_BLOCK_LABEL_145;
+        }
+        ((User) (obj1)).setUserName(s);
+        if (s1 == null)
+        {
+            break MISSING_BLOCK_LABEL_155;
+        }
+        ((User) (obj1)).setDisplayName(s1);
+        ((User) (obj1)).setBadUUID(flag);
+        userDao.insert(obj1);
+        if (true) goto _L4; else goto _L3
+_L3:
+        uuid;
+        throw uuid;
     }
 
-    public SubscriptionPool<SubscriptionSingleKey, ImmutableList<SLAvatarAppearance.WornItem>> wornItems() {
-        return this.wornItemsPool;
+    public SubscriptionPool wornItems()
+    {
+        return wornItemsPool;
     }
 
-    public SubscriptionSingleDataPool<UUID> wornOutfitLink() {
-        return this.wornOutfitLinkPool;
+    public SubscriptionSingleDataPool wornOutfitLink()
+    {
+        return wornOutfitLinkPool;
     }
+
 }

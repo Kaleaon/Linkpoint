@@ -1,19 +1,23 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto;
 
-import android.annotation.SuppressLint;
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.google.common.logging.nano.Vr;
-import com.google.common.primitives.UnsignedBytes;
+import com.google.common.collect.ImmutableMap;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.GridConnectionService;
 import com.lumiyaviewer.lumiya.dao.UserName;
 import com.lumiyaviewer.lumiya.eventbus.EventBus;
 import com.lumiyaviewer.lumiya.eventbus.EventRateLimiter;
+import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.Subscription;
+import com.lumiyaviewer.lumiya.react.SubscriptionPool;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply;
-import com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue;
 import com.lumiyaviewer.lumiya.slproto.caps.SLCaps;
 import com.lumiyaviewer.lumiya.slproto.chat.SLChatBalanceChangedEvent;
 import com.lumiyaviewer.lumiya.slproto.chat.SLChatFriendshipOfferedEvent;
@@ -35,6 +39,7 @@ import com.lumiyaviewer.lumiya.slproto.events.SLObjectPayInfoEvent;
 import com.lumiyaviewer.lumiya.slproto.events.SLRegionInfoChangedEvent;
 import com.lumiyaviewer.lumiya.slproto.events.SLTeleportResultEvent;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType;
+import com.lumiyaviewer.lumiya.slproto.inventory.SLInventory;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDException;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode;
@@ -75,6 +80,7 @@ import com.lumiyaviewer.lumiya.slproto.messages.RegionHandshakeReply;
 import com.lumiyaviewer.lumiya.slproto.messages.RequestMultipleObjects;
 import com.lumiyaviewer.lumiya.slproto.messages.RequestPayPrice;
 import com.lumiyaviewer.lumiya.slproto.messages.RetrieveInstantMessages;
+import com.lumiyaviewer.lumiya.slproto.messages.RezObject;
 import com.lumiyaviewer.lumiya.slproto.messages.ScriptDialog;
 import com.lumiyaviewer.lumiya.slproto.messages.ScriptDialogReply;
 import com.lumiyaviewer.lumiya.slproto.messages.SimulatorViewerTimeMessage;
@@ -88,23 +94,41 @@ import com.lumiyaviewer.lumiya.slproto.messages.TeleportProgress;
 import com.lumiyaviewer.lumiya.slproto.messages.TeleportStart;
 import com.lumiyaviewer.lumiya.slproto.messages.TerminateFriendship;
 import com.lumiyaviewer.lumiya.slproto.messages.UseCircuitCode;
+import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance;
+import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarControl;
+import com.lumiyaviewer.lumiya.slproto.modules.SLDrawDistance;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
+import com.lumiyaviewer.lumiya.slproto.modules.finance.SLFinancialInfo;
 import com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList;
+import com.lumiyaviewer.lumiya.slproto.modules.groups.SLGroupManager;
 import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteType;
 import com.lumiyaviewer.lumiya.slproto.modules.mutelist.SLMuteList;
+import com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVController;
+import com.lumiyaviewer.lumiya.slproto.modules.voice.SLVoice;
 import com.lumiyaviewer.lumiya.slproto.objects.PayInfo;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData;
 import com.lumiyaviewer.lumiya.slproto.objects.UnsupportedObjectTypeException;
+import com.lumiyaviewer.lumiya.slproto.terrain.TerrainData;
+import com.lumiyaviewer.lumiya.slproto.types.AgentPosition;
 import com.lumiyaviewer.lumiya.slproto.types.EDeRezDestination;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3d;
+import com.lumiyaviewer.lumiya.slproto.types.Vector3Array;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
+import com.lumiyaviewer.lumiya.slproto.users.ParcelData;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUnknown;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceUser;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
+import com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo;
+import com.lumiyaviewer.lumiya.slproto.users.manager.FriendManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.GroupManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.InventoryManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectsManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.io.IOException;
@@ -112,6 +136,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.Selector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -123,2133 +148,2844 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class SLAgentCircuit extends SLThreadingCircuit implements SLCapEventQueue.ICapsEventHandler {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto:
+//            SLThreadingCircuit, SLCircuitInfo, SLTempCircuit, SLMessage, 
+//            SLGridConnection, SLParcelInfo, SLMessageEventListener
 
-    /* renamed from: -com-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f60comlumiyaviewerlumiyaslprotocapsSLCapEventQueue$CapsEventTypeSwitchesValues = null;
+public class SLAgentCircuit extends SLThreadingCircuit
+    implements com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.ICapsEventHandler
+{
 
-    /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f61comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null;
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_caps_2D_SLCapEventQueue$CapsEventTypeSwitchesValues[];
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues[];
     private Subscription agentNameSubscription;
-    private boolean agentPaused = false;
-    @Nonnull
+    private boolean agentPaused;
     private final UUID agentUUID;
-    private final AtomicReference<UserName> agentUserName = new AtomicReference<>((Object) null);
+    private final AtomicReference agentUserName = new AtomicReference(null);
     private final SLCaps caps;
-    private final ConcurrentLinkedQueue<SLCapEventQueue.CapsEvent> capsEventQueue = new ConcurrentLinkedQueue<>();
-    private boolean doingObjectSelection = false;
-    /* access modifiers changed from: private */
-    public final EventBus eventBus = EventBus.getInstance();
-    private final Map<UUID, SLObjectInfo> forceNeedObjectNames = new ConcurrentHashMap();
-    private boolean isEstateManager = false;
-    private long lastObjectSelection = 0;
-    private int lastPauseId = 0;
-    private long lastVisibleActivities = 0;
+    private final ConcurrentLinkedQueue capsEventQueue = new ConcurrentLinkedQueue();
+    private boolean doingObjectSelection;
+    private final EventBus eventBus = EventBus.getInstance();
+    private final Map forceNeedObjectNames = new ConcurrentHashMap();
+    private boolean isEstateManager;
+    private long lastObjectSelection;
+    private int lastPauseId;
+    private long lastVisibleActivities;
     private final ChatterID localChatterID;
-    /* access modifiers changed from: private */
-    public final SLModules modules;
-    private final Map<UUID, SLObjectInfo> objectNamesRequested = new ConcurrentHashMap();
-    private final EventRateLimiter objectPropertiesRateLimiter = new EventRateLimiter(this.eventBus, 500) {
-        /* access modifiers changed from: protected */
-        public Object getEventToFire() {
-            return null;
-        }
+    private final SLModules modules;
+    private final Map objectNamesRequested = new ConcurrentHashMap();
+    private final EventRateLimiter objectPropertiesRateLimiter;
+    private List pendingGroupMessages;
+    private long regionHandle;
+    private UUID regionID;
+    private String regionName;
+    private final Set startedGroupSessions = new HashSet();
+    private boolean teleportRequestSent;
+    private final Set typingUsers = Collections.synchronizedSet(new HashSet());
+    private final UserManager userManager;
 
-        /* access modifiers changed from: protected */
-        public void onActualFire() {
-            SLAgentCircuit.this.notifyObjectPropertiesChange();
-        }
-    };
-    private List<ImprovedInstantMessage> pendingGroupMessages = new LinkedList();
-    private long regionHandle = 0;
-    private UUID regionID = null;
-    private String regionName = null;
-    private final Set<UUID> startedGroupSessions = new HashSet();
-    private boolean teleportRequestSent = false;
-    private final Set<UUID> typingUsers = Collections.synchronizedSet(new HashSet());
-    /* access modifiers changed from: private */
-    public final UserManager userManager;
-
-    /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m123getcomlumiyaviewerlumiyaslprotocapsSLCapEventQueue$CapsEventTypeSwitchesValues() {
-        if (f60comlumiyaviewerlumiyaslprotocapsSLCapEventQueue$CapsEventTypeSwitchesValues != null) {
-            return f60comlumiyaviewerlumiyaslprotocapsSLCapEventQueue$CapsEventTypeSwitchesValues;
-        }
-        int[] iArr = new int[SLCapEventQueue.CapsEventType.values().length];
-        try {
-            iArr[SLCapEventQueue.CapsEventType.AgentGroupDataUpdate.ordinal()] = 9;
-        } catch (NoSuchFieldError e) {
-        }
-        try {
-            iArr[SLCapEventQueue.CapsEventType.AvatarGroupsReply.ordinal()] = 10;
-        } catch (NoSuchFieldError e2) {
-        }
-        try {
-            iArr[SLCapEventQueue.CapsEventType.BulkUpdateInventory.ordinal()] = 11;
-        } catch (NoSuchFieldError e3) {
-        }
-        try {
-            iArr[SLCapEventQueue.CapsEventType.ChatterBoxInvitation.ordinal()] = 1;
-        } catch (NoSuchFieldError e4) {
-        }
-        try {
-            iArr[SLCapEventQueue.CapsEventType.ChatterBoxSessionStartReply.ordinal()] = 2;
-        } catch (NoSuchFieldError e5) {
-        }
-        try {
-            iArr[SLCapEventQueue.CapsEventType.EstablishAgentCommunication.ordinal()] = 3;
-        } catch (NoSuchFieldError e6) {
-        }
-        try {
-            iArr[SLCapEventQueue.CapsEventType.ParcelProperties.ordinal()] = 12;
-        } catch (NoSuchFieldError e7) {
-        }
-        try {
-            iArr[SLCapEventQueue.CapsEventType.TeleportFailed.ordinal()] = 4;
-        } catch (NoSuchFieldError e8) {
-        }
-        try {
-            iArr[SLCapEventQueue.CapsEventType.TeleportFinish.ordinal()] = 5;
-        } catch (NoSuchFieldError e9) {
-        }
-        try {
-            iArr[SLCapEventQueue.CapsEventType.UnknownCapsEvent.ordinal()] = 13;
-        } catch (NoSuchFieldError e10) {
-        }
-        f60comlumiyaviewerlumiyaslprotocapsSLCapEventQueue$CapsEventTypeSwitchesValues = iArr;
-        return iArr;
+    static EventBus _2D_get0(SLAgentCircuit slagentcircuit)
+    {
+        return slagentcircuit.eventBus;
     }
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m124getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
-        if (f61comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues != null) {
-            return f61comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues;
-        }
-        int[] iArr = new int[ChatterID.ChatterType.values().length];
-        try {
-            iArr[ChatterID.ChatterType.Group.ordinal()] = 1;
-        } catch (NoSuchFieldError e) {
-        }
-        try {
-            iArr[ChatterID.ChatterType.Local.ordinal()] = 2;
-        } catch (NoSuchFieldError e2) {
-        }
-        try {
-            iArr[ChatterID.ChatterType.User.ordinal()] = 3;
-        } catch (NoSuchFieldError e3) {
-        }
-        f61comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = iArr;
-        return iArr;
+    static SLModules _2D_get1(SLAgentCircuit slagentcircuit)
+    {
+        return slagentcircuit.modules;
     }
 
-    public SLAgentCircuit(SLGridConnection sLGridConnection, SLCircuitInfo sLCircuitInfo, SLAuthReply sLAuthReply, SLCaps sLCaps, SLTempCircuit sLTempCircuit) throws IOException {
-        super(sLGridConnection, sLCircuitInfo, sLAuthReply, sLTempCircuit);
-        this.caps = sLCaps;
-        this.agentUUID = sLCircuitInfo.agentID;
-        this.localChatterID = ChatterID.getLocalChatterID(this.agentUUID);
-        this.lastVisibleActivities = System.currentTimeMillis();
-        this.userManager = UserManager.getUserManager(sLCircuitInfo.agentID);
-        if (sLCaps == null || !(!sLAuthReply.isTemporary)) {
-            this.modules = null;
-        } else {
-            this.modules = new SLModules(this, sLCaps, sLGridConnection);
+    static UserManager _2D_get2(SLAgentCircuit slagentcircuit)
+    {
+        return slagentcircuit.userManager;
+    }
+
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_caps_2D_SLCapEventQueue$CapsEventTypeSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_caps_2D_SLCapEventQueue$CapsEventTypeSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_caps_2D_SLCapEventQueue$CapsEventTypeSwitchesValues;
         }
-        if (!sLAuthReply.isTemporary && this.userManager != null) {
-            this.userManager.setActiveAgentCircuit(this);
+        int ai[] = new int[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.values().length];
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.AgentGroupDataUpdate.ordinal()] = 9;
         }
-        if (sLTempCircuit != null) {
-            for (SLMessage Handle : sLTempCircuit.getPendingMessages()) {
-                Handle.Handle(this);
+        catch (NoSuchFieldError nosuchfielderror9) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.AvatarGroupsReply.ordinal()] = 10;
+        }
+        catch (NoSuchFieldError nosuchfielderror8) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.BulkUpdateInventory.ordinal()] = 11;
+        }
+        catch (NoSuchFieldError nosuchfielderror7) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.ChatterBoxInvitation.ordinal()] = 1;
+        }
+        catch (NoSuchFieldError nosuchfielderror6) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.ChatterBoxSessionStartReply.ordinal()] = 2;
+        }
+        catch (NoSuchFieldError nosuchfielderror5) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.EstablishAgentCommunication.ordinal()] = 3;
+        }
+        catch (NoSuchFieldError nosuchfielderror4) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.ParcelProperties.ordinal()] = 12;
+        }
+        catch (NoSuchFieldError nosuchfielderror3) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.TeleportFailed.ordinal()] = 4;
+        }
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.TeleportFinish.ordinal()] = 5;
+        }
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.UnknownCapsEvent.ordinal()] = 13;
+        }
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_caps_2D_SLCapEventQueue$CapsEventTypeSwitchesValues = ai;
+        return ai;
+    }
+
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues;
+        }
+        int ai[] = new int[com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.values().length];
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Group.ordinal()] = 1;
+        }
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.Local.ordinal()] = 2;
+        }
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterType.User.ordinal()] = 3;
+        }
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues = ai;
+        return ai;
+    }
+
+    static void _2D_wrap0(SLAgentCircuit slagentcircuit)
+    {
+        slagentcircuit.SendCompleteAgentMovement();
+    }
+
+    static void _2D_wrap1(SLAgentCircuit slagentcircuit)
+    {
+        slagentcircuit.notifyObjectPropertiesChange();
+    }
+
+    public SLAgentCircuit(SLGridConnection slgridconnection, SLCircuitInfo slcircuitinfo, SLAuthReply slauthreply, SLCaps slcaps, SLTempCircuit sltempcircuit)
+        throws IOException
+    {
+        super(slgridconnection, slcircuitinfo, slauthreply, sltempcircuit);
+        pendingGroupMessages = new LinkedList();
+        teleportRequestSent = false;
+        regionID = null;
+        regionName = null;
+        regionHandle = 0L;
+        isEstateManager = false;
+        lastObjectSelection = 0L;
+        doingObjectSelection = false;
+        objectPropertiesRateLimiter = new EventRateLimiter(eventBus, 500L) {
+
+            final SLAgentCircuit this$0;
+
+            protected Object getEventToFire()
+            {
+                return null;
             }
+
+            protected void onActualFire()
+            {
+                SLAgentCircuit._2D_wrap1(SLAgentCircuit.this);
+            }
+
+            
+            {
+                this$0 = SLAgentCircuit.this;
+                super(eventbus, l);
+            }
+        };
+        agentPaused = false;
+        lastVisibleActivities = 0L;
+        lastPauseId = 0;
+        caps = slcaps;
+        agentUUID = slcircuitinfo.agentID;
+        localChatterID = ChatterID.getLocalChatterID(agentUUID);
+        lastVisibleActivities = System.currentTimeMillis();
+        userManager = UserManager.getUserManager(slcircuitinfo.agentID);
+        if (slcaps != null && slauthreply.isTemporary ^ true)
+        {
+            modules = new SLModules(this, slcaps, slgridconnection);
+        } else
+        {
+            modules = null;
+        }
+        if (!slauthreply.isTemporary && userManager != null)
+        {
+            userManager.setActiveAgentCircuit(this);
+        }
+        if (sltempcircuit != null)
+        {
+            for (slgridconnection = sltempcircuit.getPendingMessages().iterator(); slgridconnection.hasNext(); ((SLMessage)slgridconnection.next()).Handle(this)) { }
         }
     }
 
-    private void DoAgentPause() {
-        this.agentPaused = true;
-        Debug.Log("AgentPause: Sending agentPause with ID = " + this.lastPauseId);
-        AgentPause agentPause = new AgentPause();
-        agentPause.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        agentPause.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        agentPause.AgentData_Field.SerialNum = this.lastPauseId;
-        agentPause.isReliable = true;
-        SendMessage(agentPause);
-        this.lastPauseId++;
+    private void DoAgentPause()
+    {
+        agentPaused = true;
+        Debug.Log((new StringBuilder()).append("AgentPause: Sending agentPause with ID = ").append(lastPauseId).toString());
+        AgentPause agentpause = new AgentPause();
+        agentpause.AgentData_Field.AgentID = circuitInfo.agentID;
+        agentpause.AgentData_Field.SessionID = circuitInfo.sessionID;
+        agentpause.AgentData_Field.SerialNum = lastPauseId;
+        agentpause.isReliable = true;
+        SendMessage(agentpause);
+        lastPauseId = lastPauseId + 1;
     }
 
-    private void DoAgentResume() {
-        this.agentPaused = false;
-        Debug.Log("AgentPause: Sending agentResume with ID = " + this.lastPauseId);
-        AgentResume agentResume = new AgentResume();
-        agentResume.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        agentResume.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        agentResume.AgentData_Field.SerialNum = this.lastPauseId;
-        agentResume.isReliable = true;
-        SendMessage(agentResume);
-        this.lastPauseId++;
+    private void DoAgentResume()
+    {
+        agentPaused = false;
+        Debug.Log((new StringBuilder()).append("AgentPause: Sending agentResume with ID = ").append(lastPauseId).toString());
+        AgentResume agentresume = new AgentResume();
+        agentresume.AgentData_Field.AgentID = circuitInfo.agentID;
+        agentresume.AgentData_Field.SessionID = circuitInfo.sessionID;
+        agentresume.AgentData_Field.SerialNum = lastPauseId;
+        agentresume.isReliable = true;
+        SendMessage(agentresume);
+        lastPauseId = lastPauseId + 1;
     }
 
-    private void HandleCapsEvent(SLCapEventQueue.CapsEvent capsEvent) {
-        switch (m123getcomlumiyaviewerlumiyaslprotocapsSLCapEventQueue$CapsEventTypeSwitchesValues()[capsEvent.eventType.ordinal()]) {
-            case 1:
-                HandleChatterBoxInvitation(capsEvent.eventBody);
+    private void HandleCapsEvent(com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEvent capsevent)
+    {
+        switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_caps_2D_SLCapEventQueue$CapsEventTypeSwitchesValues()[capsevent.eventType.ordinal()])
+        {
+        default:
+            DefaultEventQueueHandler(capsevent.eventType, capsevent.eventBody);
+            return;
+
+        case 1: // '\001'
+            HandleChatterBoxInvitation(capsevent.eventBody);
+            return;
+
+        case 2: // '\002'
+            HandleChatterBoxSessionStartReply(capsevent.eventBody);
+            return;
+
+        case 4: // '\004'
+            HandleTeleportFailed(capsevent.eventBody);
+            return;
+
+        case 5: // '\005'
+            HandleTeleportFinish(capsevent.eventBody);
+            return;
+
+        case 3: // '\003'
+            HandleEstablishAgentCommunication(capsevent.eventBody);
+            return;
+        }
+    }
+
+    private void HandleChatterBoxInvitation(LLSDNode llsdnode)
+    {
+        Object obj;
+        UUID uuid;
+        AvatarGroupList avatargrouplist;
+        UUID uuid1;
+        Object obj1;
+        try
+        {
+            Debug.Log((new StringBuilder()).append("ChatterBoxInvitation: event = ").append(llsdnode.serializeToXML()).toString());
+        }
+        // Misplaced declaration of an exception variable
+        catch (Object obj)
+        {
+            ((IOException) (obj)).printStackTrace();
+        }
+        uuid = UUID.fromString(llsdnode.byKey("session_id").asString());
+        avatargrouplist = userManager.getChatterList().getGroupManager().getAvatarGroupList();
+        if (avatargrouplist == null)
+        {
+            break MISSING_BLOCK_LABEL_289;
+        }
+        obj = (com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry)avatargrouplist.Groups.get(uuid);
+_L6:
+        obj1 = llsdnode.byKey("instantmessage").byKey("message_params");
+        if (!((LLSDNode) (obj1)).keyExists("from_id")) goto _L2; else goto _L1
+_L1:
+        llsdnode = ((LLSDNode) (obj1)).byKey("from_id").asUUID();
+_L5:
+        uuid1 = ((LLSDNode) (obj1)).byKey("to_id").asUUID();
+        obj1 = ((LLSDNode) (obj1)).byKey("message").asString();
+        if (obj == null) goto _L4; else goto _L3
+_L3:
+        for (; obj != null && llsdnode != null; obj = null)
+        {
+            try
+            {
+                HandleChatEvent(ChatterID.getGroupChatterID(agentUUID, ((com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry) (obj)).GroupID), new SLChatTextEvent(new ChatMessageSourceUser(llsdnode), agentUUID, ((String) (obj1))), true);
                 return;
-            case 2:
-                HandleChatterBoxSessionStartReply(capsEvent.eventBody);
+            }
+            // Misplaced declaration of an exception variable
+            catch (LLSDNode llsdnode)
+            {
+                Debug.Log((new StringBuilder()).append("ChatterBoxInvitation: LLSDException ").append(llsdnode.getMessage()).toString());
+            }
+            llsdnode.printStackTrace();
+            return;
+        }
+
+        break MISSING_BLOCK_LABEL_217;
+_L4:
+        if (avatargrouplist == null)
+        {
+            break MISSING_BLOCK_LABEL_294;
+        }
+        obj = (com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry)avatargrouplist.Groups.get(uuid1);
+          goto _L3
+        Debug.Log((new StringBuilder()).append("ChatterBoxInvitation: chat from unknown group (").append(uuid).append("), to_id = ").append(uuid1).toString());
+        return;
+_L2:
+        llsdnode = null;
+          goto _L5
+        obj = null;
+          goto _L6
+    }
+
+    private void HandleChatterBoxSessionStartReply(LLSDNode llsdnode)
+    {
+        UUID uuid;
+        Exception exception;
+        try
+        {
+            Debug.Log((new StringBuilder()).append("ChatterBoxSessionStartReply: event = ").append(llsdnode.serializeToXML()).toString());
+        }
+        catch (IOException ioexception)
+        {
+            ioexception.printStackTrace();
+        }
+        uuid = llsdnode.byKey("session_id").asUUID();
+        modules.voice.onGroupSessionReady(uuid);
+        llsdnode = startedGroupSessions;
+        llsdnode;
+        JVM INSTR monitorenter ;
+        startedGroupSessions.add(uuid);
+        Iterator iterator = pendingGroupMessages.iterator();
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break;
+            }
+            ImprovedInstantMessage improvedinstantmessage = (ImprovedInstantMessage)iterator.next();
+            if (improvedinstantmessage.MessageBlock_Field.ID.equals(uuid))
+            {
+                iterator.remove();
+                SendMessage(improvedinstantmessage);
+            }
+        } while (true);
+        break MISSING_BLOCK_LABEL_171;
+        exception;
+        llsdnode;
+        JVM INSTR monitorexit ;
+        throw exception;
+        llsdnode;
+        Debug.Log((new StringBuilder()).append("ChatterBoxSessionStartReply: LLSDException ").append(llsdnode.getMessage()).toString());
+        llsdnode.printStackTrace();
+        return;
+        llsdnode;
+        JVM INSTR monitorexit ;
+    }
+
+    private void HandleChatterOnlineStatus(ChatterID chatterid, boolean flag)
+    {
+        if (userManager.isChatterActive(chatterid) && (chatterid instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser))
+        {
+            HandleChatEvent(chatterid, new SLChatOnlineOfflineEvent(new ChatMessageSourceUser(((com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser)chatterid).getChatterUUID()), agentUUID, flag), false);
+        }
+    }
+
+    private void HandleEstablishAgentCommunication(LLSDNode llsdnode)
+    {
+        if (!teleportRequestSent)
+        {
+            break MISSING_BLOCK_LABEL_107;
+        }
+        String s;
+        String s1;
+        String as[];
+        try
+        {
+            Debug.Log((new StringBuilder()).append("EstablishAgentCommunication: event = ").append(llsdnode.serializeToXML()).toString());
+        }
+        catch (IOException ioexception)
+        {
+            ioexception.printStackTrace();
+        }
+        s1 = llsdnode.byKey("sim-ip-and-port").asString();
+        s = llsdnode.byKey("seed-capability").asString();
+        llsdnode = llsdnode.byKey("agent-id").asUUID();
+        as = s1.split(":");
+        llsdnode = new SLAuthReply(authReply, true, true, llsdnode, as[0], Integer.parseInt(as[1]), s);
+        gridConn.addTempCircuit(llsdnode);
+        return;
+        llsdnode;
+        llsdnode.printStackTrace();
+        return;
+    }
+
+    private void HandleGroupNotice(ImprovedInstantMessage improvedinstantmessage, ChatMessageSource chatmessagesource)
+    {
+        Object obj2 = ByteBuffer.wrap(improvedinstantmessage.MessageBlock_Field.BinaryBucket);
+        if (((ByteBuffer) (obj2)).limit() < 18)
+        {
+            return;
+        }
+        ((ByteBuffer) (obj2)).order(ByteOrder.BIG_ENDIAN);
+        byte byte0 = ((ByteBuffer) (obj2)).get();
+        byte byte1 = ((ByteBuffer) (obj2)).get();
+        Object obj = new UUID(((ByteBuffer) (obj2)).getLong(), ((ByteBuffer) (obj2)).getLong());
+        Object obj1 = "";
+        if (byte0 != 0)
+        {
+            obj1 = new byte[((ByteBuffer) (obj2)).remaining()];
+            ((ByteBuffer) (obj2)).get(((byte []) (obj1)));
+            obj1 = SLMessage.stringFromVariableOEM(((byte []) (obj1)));
+        }
+        Debug.Log((new StringBuilder()).append("HandleGroupNotice: group UUID = ").append(((UUID) (obj)).toString()).toString());
+        ChatterID chatterid = ChatterID.getGroupChatterID(agentUUID, ((UUID) (obj)));
+        boolean flag = Objects.equal(chatmessagesource.getSourceUUID(), circuitInfo.agentID);
+        obj2 = SLMessage.stringFromVariableUTF(improvedinstantmessage.MessageBlock_Field.Message);
+        int i = ((String) (obj2)).indexOf('|');
+        obj = obj2;
+        if (i >= 0)
+        {
+            obj = ((String) (obj2)).substring(0, i);
+            obj2 = ((String) (obj2)).substring(i + 1);
+            obj = (new StringBuilder()).append(((String) (obj))).append("\n").append(((String) (obj2))).toString();
+        }
+        obj2 = obj;
+        if (flag)
+        {
+            obj2 = obj;
+            if (byte0 != 0)
+            {
+                obj2 = (new StringBuilder()).append(((String) (obj))).append("\n").append("(This notice contains attached item '").append(((String) (obj1))).append("')").toString();
+            }
+        }
+        HandleChatEvent(chatterid, new SLChatTextEvent(chatmessagesource, agentUUID, improvedinstantmessage, ((String) (obj2))), true);
+        if (byte0 != 0 && flag ^ true)
+        {
+            HandleChatEvent(chatterid, new SLChatInventoryItemOfferedByGroupNoticeEvent(chatmessagesource, agentUUID, improvedinstantmessage, ((String) (obj1)), SLAssetType.getByType(byte1)), false);
+        }
+    }
+
+    private void HandleIM(ImprovedInstantMessage improvedinstantmessage, ChatMessageSource chatmessagesource)
+    {
+        SLModules slmodules;
+        int i;
+        slmodules = getModules();
+        if (slmodules != null && slmodules.rlvController.onIncomingIM(improvedinstantmessage))
+        {
+            return;
+        }
+        i = improvedinstantmessage.MessageBlock_Field.Dialog;
+        i;
+        JVM INSTR tableswitch 0 42: default 220
+    //                   0 754
+    //                   1 342
+    //                   2 342
+    //                   3 727
+    //                   4 404
+    //                   5 220
+    //                   6 220
+    //                   7 220
+    //                   8 220
+    //                   9 431
+    //                   10 220
+    //                   11 220
+    //                   12 220
+    //                   13 220
+    //                   14 220
+    //                   15 220
+    //                   16 220
+    //                   17 397
+    //                   18 220
+    //                   19 873
+    //                   20 754
+    //                   21 220
+    //                   22 477
+    //                   23 220
+    //                   24 220
+    //                   25 220
+    //                   26 560
+    //                   27 220
+    //                   28 220
+    //                   29 220
+    //                   30 220
+    //                   31 873
+    //                   32 390
+    //                   33 220
+    //                   34 220
+    //                   35 220
+    //                   36 220
+    //                   37 390
+    //                   38 615
+    //                   39 642
+    //                   40 642
+    //                   41 376
+    //                   42 383;
+           goto _L1 _L2 _L3 _L3 _L4 _L5 _L1 _L1 _L1 _L1 _L6 _L1 _L1 _L1 _L1 _L1 _L1 _L1 _L7 _L1 _L8 _L2 _L1 _L9 _L1 _L1 _L1 _L10 _L1 _L1 _L1 _L1 _L8 _L11 _L1 _L1 _L1 _L1 _L11 _L12 _L13 _L13 _L14 _L15
+_L1:
+        Debug.Log((new StringBuilder()).append("HandleIM: unknown type = ").append(i).append(", sessionId = ").append(improvedinstantmessage.AgentData_Field.SessionID.toString()).append(", ").append("toAgentID = ").append(improvedinstantmessage.MessageBlock_Field.ToAgentID.toString()).append(", ").append("fromGroup = ").append(improvedinstantmessage.MessageBlock_Field.FromGroup).append(", ").append("message = '").append(SLMessage.stringFromVariableUTF(improvedinstantmessage.MessageBlock_Field.Message)).append("'").toString());
+_L17:
+        return;
+_L3:
+        HandleChatEvent(localChatterID, new SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), agentUUID, SLMessage.stringFromVariableUTF(improvedinstantmessage.MessageBlock_Field.Message)), true);
+        return;
+_L14:
+        HandleTypingNotification(chatmessagesource, true);
+        return;
+_L15:
+        HandleTypingNotification(chatmessagesource, false);
+        return;
+_L11:
+        HandleGroupNotice(improvedinstantmessage, chatmessagesource);
+        return;
+_L7:
+        HandleSessionIM(improvedinstantmessage, chatmessagesource);
+        return;
+_L5:
+        HandleChatEvent(chatmessagesource.getDefaultChatter(agentUUID), new SLChatInventoryItemOfferedEvent(chatmessagesource, agentUUID, improvedinstantmessage), true);
+        return;
+_L6:
+        HandleChatEvent(localChatterID, new SLChatInventoryItemOfferedEvent(new ChatMessageSourceObject(improvedinstantmessage.AgentData_Field.AgentID, SLMessage.stringFromVariableOEM(improvedinstantmessage.MessageBlock_Field.FromAgentName)), agentUUID, improvedinstantmessage), true);
+        return;
+_L9:
+        UUID uuid;
+        if (chatmessagesource.getSourceType() != com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        uuid = chatmessagesource.getSourceUUID();
+        if (slmodules == null)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        if (slmodules.rlvController.autoAcceptTeleport(uuid))
+        {
+            TeleportToLure(improvedinstantmessage.MessageBlock_Field.ID);
+            return;
+        }
+        if (!slmodules.rlvController.canTeleportToLure(uuid)) goto _L17; else goto _L16
+_L16:
+        HandleChatEvent(chatmessagesource.getDefaultChatter(agentUUID), new SLChatLureEvent(chatmessagesource, agentUUID, improvedinstantmessage), true);
+        return;
+_L10:
+        if (chatmessagesource.getSourceType() == com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User && slmodules != null && !slmodules.rlvController.canTeleportToLure(chatmessagesource.getSourceUUID())) goto _L17; else goto _L18
+_L18:
+        HandleChatEvent(chatmessagesource.getDefaultChatter(agentUUID), new SLChatLureRequestEvent(chatmessagesource, agentUUID, improvedinstantmessage), true);
+        return;
+_L12:
+        HandleChatEvent(chatmessagesource.getDefaultChatter(agentUUID), new SLChatFriendshipOfferedEvent(chatmessagesource, agentUUID, improvedinstantmessage), true);
+        return;
+_L13:
+        HandleChatEvent(chatmessagesource.getDefaultChatter(agentUUID), new SLChatFriendshipResultEvent(chatmessagesource, agentUUID, improvedinstantmessage), true);
+        if (i != 39 || chatmessagesource.getSourceType() != com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User) goto _L17; else goto _L19
+_L19:
+        improvedinstantmessage = chatmessagesource.getSourceUUID();
+        if (improvedinstantmessage == null) goto _L17; else goto _L20
+_L20:
+        userManager.getChatterList().getFriendManager().addFriend(improvedinstantmessage);
+        SendGenericMessage("requestonlinenotification", new String[] {
+            improvedinstantmessage.toString()
+        });
+        return;
+_L4:
+        HandleChatEvent(chatmessagesource.getDefaultChatter(agentUUID), new SLChatGroupInvitationEvent(chatmessagesource, agentUUID, improvedinstantmessage), true);
+        return;
+_L2:
+        boolean flag;
+        SLChatTextEvent slchattextevent = new SLChatTextEvent(chatmessagesource, agentUUID, improvedinstantmessage, null);
+        chatmessagesource = chatmessagesource.getDefaultChatter(agentUUID);
+        flag = userManager.isChatterActive(chatmessagesource);
+        HandleChatEvent(chatmessagesource, slchattextevent, true);
+        if (userManager.isChatterMuted(chatmessagesource) || i == 20 || improvedinstantmessage.MessageBlock_Field.Offline != 0 || improvedinstantmessage.MessageBlock_Field.Message.length == 0 || flag || !(chatmessagesource instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser)) goto _L17; else goto _L21
+_L21:
+        improvedinstantmessage = SLGridConnection.getAutoresponse();
+        if (Strings.isNullOrEmpty(improvedinstantmessage)) goto _L17; else goto _L22
+_L22:
+        SendInstantMessage(((com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser)chatmessagesource).getChatterUUID(), improvedinstantmessage, 20);
+        return;
+_L8:
+        HandleChatEvent(chatmessagesource.getDefaultChatter(agentUUID), new SLChatTextEvent(chatmessagesource, agentUUID, improvedinstantmessage, null), true);
+        return;
+    }
+
+    private void HandleSessionIM(ImprovedInstantMessage improvedinstantmessage, ChatMessageSource chatmessagesource)
+    {
+        HandleChatEvent(ChatterID.getGroupChatterID(agentUUID, improvedinstantmessage.MessageBlock_Field.ID), new SLChatTextEvent(chatmessagesource, agentUUID, improvedinstantmessage, null), true);
+    }
+
+    private void HandleTeleportFailed(LLSDNode llsdnode)
+    {
+        try
+        {
+            Debug.Log((new StringBuilder()).append("TeleportFailed: event = ").append(llsdnode.serializeToXML()).toString());
+        }
+        // Misplaced declaration of an exception variable
+        catch (LLSDNode llsdnode)
+        {
+            llsdnode.printStackTrace();
+        }
+        if (teleportRequestSent)
+        {
+            teleportRequestSent = false;
+            eventBus.publish(new SLTeleportResultEvent(false, "Teleport has failed."));
+        }
+    }
+
+    private void HandleTeleportFinish(LLSDNode llsdnode)
+    {
+        try
+        {
+            Debug.Log((new StringBuilder()).append("TeleportFinish: event = ").append(llsdnode.serializeToXML()).toString());
+        }
+        catch (IOException ioexception)
+        {
+            ioexception.printStackTrace();
+        }
+        if (teleportRequestSent)
+        {
+            teleportRequestSent = false;
+            try
+            {
+                llsdnode = llsdnode.byKey("Info").byIndex(0);
+                String s = llsdnode.byKey("SeedCapability").asString();
+                byte abyte0[] = llsdnode.byKey("SimIP").asBinary();
+                String s1 = String.format("%d.%d.%d.%d", new Object[] {
+                    Integer.valueOf(abyte0[0] & 0xff), Integer.valueOf(abyte0[1] & 0xff), Integer.valueOf(abyte0[2] & 0xff), Integer.valueOf(abyte0[3] & 0xff)
+                });
+                int i = llsdnode.byKey("SimPort").asInt();
+                llsdnode = new SLAuthReply(authReply, true, false, authReply.agentID, s1, i, s);
+                Debug.Printf("new sim address: %s", new Object[] {
+                    ((SLAuthReply) (llsdnode)).simAddress
+                });
+                modules.avatarControl.setEnableAgentUpdates(false);
+                gridConn.HandleTeleportFinish(llsdnode);
                 return;
-            case 3:
-                HandleEstablishAgentCommunication(capsEvent.eventBody);
-                return;
-            case 4:
-                HandleTeleportFailed(capsEvent.eventBody);
-                return;
-            case 5:
-                HandleTeleportFinish(capsEvent.eventBody);
-                return;
-            default:
-                DefaultEventQueueHandler(capsEvent.eventType, capsEvent.eventBody);
-                return;
-        }
-    }
-
-    private void HandleChatterBoxInvitation(LLSDNode lLSDNode) {
-        try {
-            Debug.Log("ChatterBoxInvitation: event = " + lLSDNode.serializeToXML());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            UUID fromString = UUID.fromString(lLSDNode.byKey("session_id").asString());
-            AvatarGroupList avatarGroupList = this.userManager.getChatterList().getGroupManager().getAvatarGroupList();
-            AvatarGroupList.AvatarGroupEntry avatarGroupEntry = avatarGroupList != null ? avatarGroupList.Groups.get(fromString) : null;
-            LLSDNode byKey = lLSDNode.byKey("instantmessage").byKey("message_params");
-            UUID asUUID = byKey.keyExists("from_id") ? byKey.byKey("from_id").asUUID() : null;
-            UUID asUUID2 = byKey.byKey("to_id").asUUID();
-            String asString = byKey.byKey("message").asString();
-            if (avatarGroupEntry == null) {
-                avatarGroupEntry = avatarGroupList != null ? avatarGroupList.Groups.get(asUUID2) : null;
             }
-            if (avatarGroupEntry == null || asUUID == null) {
-                Debug.Log("ChatterBoxInvitation: chat from unknown group (" + fromString + "), to_id = " + asUUID2);
-            } else {
-                HandleChatEvent(ChatterID.getGroupChatterID(this.agentUUID, avatarGroupEntry.GroupID), new SLChatTextEvent((ChatMessageSource) new ChatMessageSourceUser(asUUID), this.agentUUID, asString), true);
-            }
-        } catch (LLSDException e2) {
-            Debug.Log("ChatterBoxInvitation: LLSDException " + e2.getMessage());
-            e2.printStackTrace();
-        }
-    }
-
-    private void HandleChatterBoxSessionStartReply(LLSDNode lLSDNode) {
-        try {
-            Debug.Log("ChatterBoxSessionStartReply: event = " + lLSDNode.serializeToXML());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            UUID asUUID = lLSDNode.byKey("session_id").asUUID();
-            this.modules.voice.onGroupSessionReady(asUUID);
-            synchronized (this.startedGroupSessions) {
-                this.startedGroupSessions.add(asUUID);
-                Iterator<ImprovedInstantMessage> it = this.pendingGroupMessages.iterator();
-                while (it.hasNext()) {
-                    ImprovedInstantMessage next = it.next();
-                    if (next.MessageBlock_Field.ID.equals(asUUID)) {
-                        it.remove();
-                        SendMessage(next);
-                    }
-                }
-            }
-        } catch (LLSDException e2) {
-            Debug.Log("ChatterBoxSessionStartReply: LLSDException " + e2.getMessage());
-            e2.printStackTrace();
-        }
-    }
-
-    private void HandleChatterOnlineStatus(ChatterID chatterID, boolean z) {
-        if (this.userManager.isChatterActive(chatterID) && (chatterID instanceof ChatterID.ChatterIDUser)) {
-            HandleChatEvent(chatterID, new SLChatOnlineOfflineEvent((ChatMessageSource) new ChatMessageSourceUser(((ChatterID.ChatterIDUser) chatterID).getChatterUUID()), this.agentUUID, z), false);
-        }
-    }
-
-    private void HandleEstablishAgentCommunication(LLSDNode lLSDNode) {
-        if (this.teleportRequestSent) {
-            try {
-                Debug.Log("EstablishAgentCommunication: event = " + lLSDNode.serializeToXML());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                String asString = lLSDNode.byKey("sim-ip-and-port").asString();
-                String asString2 = lLSDNode.byKey("seed-capability").asString();
-                UUID asUUID = lLSDNode.byKey("agent-id").asUUID();
-                String[] split = asString.split(":");
-                this.gridConn.addTempCircuit(new SLAuthReply(this.authReply, true, true, asUUID, split[0], Integer.parseInt(split[1]), asString2));
-            } catch (Exception e2) {
-                e2.printStackTrace();
-            }
-        }
-    }
-
-    private void HandleGroupNotice(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        ByteBuffer wrap = ByteBuffer.wrap(improvedInstantMessage.MessageBlock_Field.BinaryBucket);
-        if (wrap.limit() >= 18) {
-            wrap.order(ByteOrder.BIG_ENDIAN);
-            byte b = wrap.get();
-            byte b2 = wrap.get();
-            UUID uuid = new UUID(wrap.getLong(), wrap.getLong());
-            String str = "";
-            if (b != 0) {
-                byte[] bArr = new byte[wrap.remaining()];
-                wrap.get(bArr);
-                str = SLMessage.stringFromVariableOEM(bArr);
-            }
-            Debug.Log("HandleGroupNotice: group UUID = " + uuid.toString());
-            ChatterID groupChatterID = ChatterID.getGroupChatterID(this.agentUUID, uuid);
-            boolean equal = Objects.equal(chatMessageSource.getSourceUUID(), this.circuitInfo.agentID);
-            String stringFromVariableUTF = SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message);
-            int indexOf = stringFromVariableUTF.indexOf(Vr.VREvent.VrCore.ErrorCode.CONTROLLER_GATT_NOTIFY_FAILED);
-            if (indexOf >= 0) {
-                stringFromVariableUTF = stringFromVariableUTF.substring(0, indexOf) + "\n" + stringFromVariableUTF.substring(indexOf + 1);
-            }
-            if (equal && b != 0) {
-                stringFromVariableUTF = stringFromVariableUTF + "\n" + "(This notice contains attached item '" + str + "')";
-            }
-            HandleChatEvent(groupChatterID, new SLChatTextEvent(chatMessageSource, this.agentUUID, improvedInstantMessage, stringFromVariableUTF), true);
-            if (b != 0 && (!equal)) {
-                HandleChatEvent(groupChatterID, new SLChatInventoryItemOfferedByGroupNoticeEvent(chatMessageSource, this.agentUUID, improvedInstantMessage, str, SLAssetType.getByType(b2)), false);
-            }
-        }
-    }
-
-    private void HandleIM(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        UUID sourceUUID;
-        SLModules modules2 = getModules();
-        if (modules2 == null || !modules2.rlvController.onIncomingIM(improvedInstantMessage)) {
-            int i = improvedInstantMessage.MessageBlock_Field.Dialog;
-            switch (i) {
-                case 0:
-                case 20:
-                    SLChatTextEvent sLChatTextEvent = new SLChatTextEvent(chatMessageSource, this.agentUUID, improvedInstantMessage, (String) null);
-                    ChatterID defaultChatter = chatMessageSource.getDefaultChatter(this.agentUUID);
-                    boolean isChatterActive = this.userManager.isChatterActive(defaultChatter);
-                    HandleChatEvent(defaultChatter, sLChatTextEvent, true);
-                    if (!this.userManager.isChatterMuted(defaultChatter) && i != 20 && improvedInstantMessage.MessageBlock_Field.Offline == 0 && improvedInstantMessage.MessageBlock_Field.Message.length != 0 && !isChatterActive && (defaultChatter instanceof ChatterID.ChatterIDUser)) {
-                        String autoresponse = SLGridConnection.getAutoresponse();
-                        if (!Strings.isNullOrEmpty(autoresponse)) {
-                            SendInstantMessage(((ChatterID.ChatterIDUser) defaultChatter).getChatterUUID(), autoresponse, 20);
-                            return;
-                        }
-                        return;
-                    }
-                    return;
-                case 1:
-                case 2:
-                    HandleChatEvent(this.localChatterID, new SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), this.agentUUID, SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message)), true);
-                    return;
-                case 3:
-                    HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), new SLChatGroupInvitationEvent(chatMessageSource, this.agentUUID, improvedInstantMessage), true);
-                    return;
-                case 4:
-                    HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), new SLChatInventoryItemOfferedEvent(chatMessageSource, this.agentUUID, improvedInstantMessage), true);
-                    return;
-                case 9:
-                    HandleChatEvent(this.localChatterID, new SLChatInventoryItemOfferedEvent(new ChatMessageSourceObject(improvedInstantMessage.AgentData_Field.AgentID, SLMessage.stringFromVariableOEM(improvedInstantMessage.MessageBlock_Field.FromAgentName)), this.agentUUID, improvedInstantMessage), true);
-                    return;
-                case 17:
-                    HandleSessionIM(improvedInstantMessage, chatMessageSource);
-                    return;
-                case 19:
-                case 31:
-                    HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), new SLChatTextEvent(chatMessageSource, this.agentUUID, improvedInstantMessage, (String) null), true);
-                    return;
-                case 22:
-                    if (chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.User) {
-                        UUID sourceUUID2 = chatMessageSource.getSourceUUID();
-                        if (modules2 != null) {
-                            if (modules2.rlvController.autoAcceptTeleport(sourceUUID2)) {
-                                TeleportToLure(improvedInstantMessage.MessageBlock_Field.ID);
-                                return;
-                            } else if (!modules2.rlvController.canTeleportToLure(sourceUUID2)) {
-                                return;
-                            }
-                        }
-                    }
-                    HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), new SLChatLureEvent(chatMessageSource, this.agentUUID, improvedInstantMessage), true);
-                    return;
-                case 26:
-                    if (chatMessageSource.getSourceType() != ChatMessageSource.ChatMessageSourceType.User || modules2 == null || modules2.rlvController.canTeleportToLure(chatMessageSource.getSourceUUID())) {
-                        HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), new SLChatLureRequestEvent(chatMessageSource, this.agentUUID, improvedInstantMessage), true);
-                        return;
-                    }
-                    return;
-                case 32:
-                case 37:
-                    HandleGroupNotice(improvedInstantMessage, chatMessageSource);
-                    return;
-                case 38:
-                    HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), new SLChatFriendshipOfferedEvent(chatMessageSource, this.agentUUID, improvedInstantMessage), true);
-                    return;
-                case 39:
-                case 40:
-                    HandleChatEvent(chatMessageSource.getDefaultChatter(this.agentUUID), new SLChatFriendshipResultEvent(chatMessageSource, this.agentUUID, improvedInstantMessage), true);
-                    if (i == 39 && chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.User && (sourceUUID = chatMessageSource.getSourceUUID()) != null) {
-                        this.userManager.getChatterList().getFriendManager().addFriend(sourceUUID);
-                        SendGenericMessage("requestonlinenotification", new String[]{sourceUUID.toString()});
-                        return;
-                    }
-                    return;
-                case 41:
-                    HandleTypingNotification(chatMessageSource, true);
-                    return;
-                case 42:
-                    HandleTypingNotification(chatMessageSource, false);
-                    return;
-                default:
-                    Debug.Log("HandleIM: unknown type = " + i + ", sessionId = " + improvedInstantMessage.AgentData_Field.SessionID.toString() + ", " + "toAgentID = " + improvedInstantMessage.MessageBlock_Field.ToAgentID.toString() + ", " + "fromGroup = " + improvedInstantMessage.MessageBlock_Field.FromGroup + ", " + "message = '" + SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message) + "'");
-                    return;
-            }
-        }
-    }
-
-    private void HandleSessionIM(ImprovedInstantMessage improvedInstantMessage, ChatMessageSource chatMessageSource) {
-        HandleChatEvent(ChatterID.getGroupChatterID(this.agentUUID, improvedInstantMessage.MessageBlock_Field.ID), new SLChatTextEvent(chatMessageSource, this.agentUUID, improvedInstantMessage, (String) null), true);
-    }
-
-    private void HandleTeleportFailed(LLSDNode lLSDNode) {
-        try {
-            Debug.Log("TeleportFailed: event = " + lLSDNode.serializeToXML());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (this.teleportRequestSent) {
-            this.teleportRequestSent = false;
-            this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport has failed."));
-        }
-    }
-
-    private void HandleTeleportFinish(LLSDNode lLSDNode) {
-        try {
-            Debug.Log("TeleportFinish: event = " + lLSDNode.serializeToXML());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (this.teleportRequestSent) {
-            this.teleportRequestSent = false;
-            try {
-                LLSDNode byIndex = lLSDNode.byKey("Info").byIndex(0);
-                String asString = byIndex.byKey("SeedCapability").asString();
-                byte[] asBinary = byIndex.byKey("SimIP").asBinary();
-                SLAuthReply sLAuthReply = new SLAuthReply(this.authReply, true, false, this.authReply.agentID, String.format("%d.%d.%d.%d", new Object[]{Integer.valueOf(asBinary[0] & UnsignedBytes.MAX_VALUE), Integer.valueOf(asBinary[1] & UnsignedBytes.MAX_VALUE), Integer.valueOf(asBinary[2] & UnsignedBytes.MAX_VALUE), Integer.valueOf(asBinary[3] & UnsignedBytes.MAX_VALUE)}), byIndex.byKey("SimPort").asInt(), asString);
-                Debug.Printf("new sim address: %s", sLAuthReply.simAddress);
-                this.modules.avatarControl.setEnableAgentUpdates(false);
-                this.gridConn.HandleTeleportFinish(sLAuthReply);
-            } catch (LLSDException e2) {
+            // Misplaced declaration of an exception variable
+            catch (LLSDNode llsdnode)
+            {
                 Debug.Log("TeleportFinish: LLSDException, teleport apparently failed");
-                e2.printStackTrace();
             }
-        } else {
+            llsdnode.printStackTrace();
+            return;
+        } else
+        {
             Debug.Log("TeleportFinish: stale teleport finish?");
+            return;
         }
     }
 
-    private void HandleTypingNotification(ChatMessageSource chatMessageSource, boolean z) {
-        UUID sourceUUID;
-        if ((chatMessageSource instanceof ChatMessageSourceUser) && (sourceUUID = chatMessageSource.getSourceUUID()) != null) {
-            if (z) {
-                if (this.typingUsers.add(sourceUUID)) {
-                    this.userManager.getChatterList().updateUserTypingStatus(sourceUUID);
-                }
-            } else if (this.typingUsers.remove(sourceUUID)) {
-                this.userManager.getChatterList().updateUserTypingStatus(sourceUUID);
-            }
-        }
-    }
-
-    private void ProcessObjectSelection() {
-        ObjectSelect objectSelect;
-        if (getNeedObjectNames() && (!this.doingObjectSelection)) {
-            ObjectSelect objectSelect2 = null;
-            for (SLObjectInfo sLObjectInfo : this.forceNeedObjectNames.values()) {
-                if (objectSelect2 == null) {
-                    objectSelect2 = new ObjectSelect();
-                    objectSelect2.AgentData_Field.AgentID = this.circuitInfo.agentID;
-                    objectSelect2.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-                }
-                if (objectSelect2.ObjectData_Fields.size() > 16) {
-                    break;
-                }
-                ObjectSelect.ObjectData objectData = new ObjectSelect.ObjectData();
-                objectData.ObjectLocalID = sLObjectInfo.localID;
-                objectSelect2.ObjectData_Fields.add(objectData);
-                sLObjectInfo.nameRequested = true;
-                sLObjectInfo.nameRequestedAt = System.currentTimeMillis();
-                this.objectNamesRequested.put(sLObjectInfo.getId(), sLObjectInfo);
-            }
-            synchronized (this.gridConn.parcelInfo.objectNamesQueue) {
-                Iterator<T> it = this.gridConn.parcelInfo.objectNamesQueue.values().iterator();
-                while (true) {
-                    if (!it.hasNext()) {
-                        objectSelect = objectSelect2;
-                        break;
+    private void HandleTypingNotification(ChatMessageSource chatmessagesource, boolean flag)
+    {
+        if (chatmessagesource instanceof ChatMessageSourceUser)
+        {
+            chatmessagesource = chatmessagesource.getSourceUUID();
+            if (chatmessagesource != null)
+            {
+                if (flag)
+                {
+                    if (typingUsers.add(chatmessagesource))
+                    {
+                        userManager.getChatterList().updateUserTypingStatus(chatmessagesource);
                     }
-                    SLObjectInfo sLObjectInfo2 = (SLObjectInfo) it.next();
-                    if (objectSelect2 == null) {
-                        objectSelect2 = new ObjectSelect();
-                        objectSelect2.AgentData_Field.AgentID = this.circuitInfo.agentID;
-                        objectSelect2.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-                    }
-                    if (objectSelect2.ObjectData_Fields.size() > 16) {
-                        objectSelect = objectSelect2;
-                        break;
-                    }
-                    ObjectSelect.ObjectData objectData2 = new ObjectSelect.ObjectData();
-                    objectData2.ObjectLocalID = sLObjectInfo2.localID;
-                    objectSelect2.ObjectData_Fields.add(objectData2);
-                    sLObjectInfo2.nameRequested = true;
-                    sLObjectInfo2.nameRequestedAt = System.currentTimeMillis();
-                    this.objectNamesRequested.put(sLObjectInfo2.getId(), sLObjectInfo2);
+                } else
+                if (typingUsers.remove(chatmessagesource))
+                {
+                    userManager.getChatterList().updateUserTypingStatus(chatmessagesource);
+                    return;
                 }
             }
-            if (objectSelect != null) {
-                Debug.Log("ObjectSelect: Sending ObjectSelect for " + objectSelect.ObjectData_Fields.size() + " objects, " + this.gridConn.parcelInfo.objectNamesQueue.size() + " remains.");
-                objectSelect.isReliable = true;
-                SendMessage(objectSelect);
-                this.lastObjectSelection = System.currentTimeMillis();
-                this.doingObjectSelection = true;
+        }
+    }
+
+    private void ProcessObjectSelection()
+    {
+        if (!getNeedObjectNames() || !(doingObjectSelection ^ true)) goto _L2; else goto _L1
+_L1:
+        Object obj;
+        Object obj2;
+        obj2 = forceNeedObjectNames.values().iterator();
+        obj = null;
+_L8:
+        Object obj1 = obj;
+        if (!((Iterator) (obj2)).hasNext()) goto _L4; else goto _L3
+_L3:
+        Object obj3;
+        obj3 = (SLObjectInfo)((Iterator) (obj2)).next();
+        obj1 = obj;
+        if (obj == null)
+        {
+            obj1 = new ObjectSelect();
+            ((ObjectSelect) (obj1)).AgentData_Field.AgentID = circuitInfo.agentID;
+            ((ObjectSelect) (obj1)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        }
+        if (((ObjectSelect) (obj1)).ObjectData_Fields.size() <= 16) goto _L5; else goto _L4
+_L4:
+        obj2 = gridConn.parcelInfo.objectNamesQueue;
+        obj2;
+        JVM INSTR monitorenter ;
+        obj3 = gridConn.parcelInfo.objectNamesQueue.values().iterator();
+_L9:
+        SLObjectInfo slobjectinfo;
+        if (!((Iterator) (obj3)).hasNext())
+        {
+            break MISSING_BLOCK_LABEL_441;
+        }
+        slobjectinfo = (SLObjectInfo)((Iterator) (obj3)).next();
+        obj = obj1;
+        if (obj1 != null)
+        {
+            break MISSING_BLOCK_LABEL_208;
+        }
+        obj = new ObjectSelect();
+        ((ObjectSelect) (obj)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((ObjectSelect) (obj)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        int i = ((ObjectSelect) (obj)).ObjectData_Fields.size();
+        if (i <= 16) goto _L7; else goto _L6
+_L6:
+        obj2;
+        JVM INSTR monitorexit ;
+        if (obj != null)
+        {
+            Debug.Log((new StringBuilder()).append("ObjectSelect: Sending ObjectSelect for ").append(((ObjectSelect) (obj)).ObjectData_Fields.size()).append(" objects, ").append(gridConn.parcelInfo.objectNamesQueue.size()).append(" remains.").toString());
+            obj.isReliable = true;
+            SendMessage(((SLMessage) (obj)));
+            lastObjectSelection = System.currentTimeMillis();
+            doingObjectSelection = true;
+        }
+_L2:
+        return;
+_L5:
+        obj = new com.lumiyaviewer.lumiya.slproto.messages.ObjectSelect.ObjectData();
+        obj.ObjectLocalID = ((SLObjectInfo) (obj3)).localID;
+        ((ObjectSelect) (obj1)).ObjectData_Fields.add(obj);
+        obj3.nameRequested = true;
+        obj3.nameRequestedAt = System.currentTimeMillis();
+        objectNamesRequested.put(((SLObjectInfo) (obj3)).getId(), obj3);
+        obj = obj1;
+          goto _L8
+_L7:
+        obj1 = new com.lumiyaviewer.lumiya.slproto.messages.ObjectSelect.ObjectData();
+        obj1.ObjectLocalID = slobjectinfo.localID;
+        ((ObjectSelect) (obj)).ObjectData_Fields.add(obj1);
+        slobjectinfo.nameRequested = true;
+        slobjectinfo.nameRequestedAt = System.currentTimeMillis();
+        objectNamesRequested.put(slobjectinfo.getId(), slobjectinfo);
+        obj1 = obj;
+          goto _L9
+        obj;
+        throw obj;
+        obj = obj1;
+          goto _L6
+    }
+
+    private void ProcessObjectSelectionTimeout()
+    {
+        SLObjectInfo slobjectinfo;
+        for (Iterator iterator = objectNamesRequested.values().iterator(); iterator.hasNext(); forceNeedObjectNames.remove(slobjectinfo.getId()))
+        {
+            slobjectinfo = (SLObjectInfo)iterator.next();
+            SLObjectInfo slobjectinfo1 = (SLObjectInfo)gridConn.parcelInfo.objectNamesQueue.remove(slobjectinfo.getId());
+            if (slobjectinfo1 != null)
+            {
+                gridConn.parcelInfo.objectNamesQueue.put(slobjectinfo1.getId(), slobjectinfo1);
             }
         }
+
+        objectNamesRequested.clear();
     }
 
-    private void ProcessObjectSelectionTimeout() {
-        for (SLObjectInfo sLObjectInfo : this.objectNamesRequested.values()) {
-            SLObjectInfo remove = this.gridConn.parcelInfo.objectNamesQueue.remove(sLObjectInfo.getId());
-            if (remove != null) {
-                this.gridConn.parcelInfo.objectNamesQueue.put(remove.getId(), remove);
+    private void SendAgentFOV()
+    {
+        AgentFOV agentfov = new AgentFOV();
+        agentfov.AgentData_Field.AgentID = circuitInfo.agentID;
+        agentfov.AgentData_Field.SessionID = circuitInfo.sessionID;
+        agentfov.AgentData_Field.CircuitCode = circuitInfo.circuitCode;
+        agentfov.FOVBlock_Field.GenCounter = 0;
+        agentfov.FOVBlock_Field.VerticalAngle = 3.054326F;
+        agentfov.isReliable = true;
+        SendMessage(agentfov);
+    }
+
+    private void SendCompleteAgentMovement()
+    {
+        CompleteAgentMovement completeagentmovement = new CompleteAgentMovement();
+        completeagentmovement.AgentData_Field.CircuitCode = circuitInfo.circuitCode;
+        completeagentmovement.AgentData_Field.AgentID = circuitInfo.agentID;
+        completeagentmovement.AgentData_Field.SessionID = circuitInfo.sessionID;
+        completeagentmovement.isReliable = true;
+        SendMessage(completeagentmovement);
+    }
+
+    private void SendEstateOwnerMessage(String s, String as[])
+    {
+        EstateOwnerMessage estateownermessage = new EstateOwnerMessage();
+        estateownermessage.AgentData_Field.AgentID = circuitInfo.agentID;
+        estateownermessage.AgentData_Field.SessionID = circuitInfo.sessionID;
+        estateownermessage.AgentData_Field.TransactionID = new UUID(0L, 0L);
+        estateownermessage.MethodData_Field.Method = SLMessage.stringToVariableOEM(s);
+        estateownermessage.MethodData_Field.Invoice = new UUID(0L, 0L);
+        int i = 0;
+        for (int j = as.length; i < j; i++)
+        {
+            s = as[i];
+            com.lumiyaviewer.lumiya.slproto.messages.EstateOwnerMessage.ParamList paramlist = new com.lumiyaviewer.lumiya.slproto.messages.EstateOwnerMessage.ParamList();
+            paramlist.Parameter = SLMessage.stringToVariableOEM(s);
+            estateownermessage.ParamList_Fields.add(paramlist);
+        }
+
+        estateownermessage.isReliable = true;
+        SendMessage(estateownermessage);
+    }
+
+    private void SendGroupSessionStart(UUID uuid)
+    {
+        ImprovedInstantMessage improvedinstantmessage = new ImprovedInstantMessage();
+        improvedinstantmessage.AgentData_Field.AgentID = circuitInfo.agentID;
+        improvedinstantmessage.AgentData_Field.SessionID = circuitInfo.sessionID;
+        improvedinstantmessage.MessageBlock_Field.FromGroup = false;
+        improvedinstantmessage.MessageBlock_Field.ToAgentID = uuid;
+        improvedinstantmessage.MessageBlock_Field.ParentEstateID = 0;
+        improvedinstantmessage.MessageBlock_Field.RegionID = new UUID(0L, 0L);
+        improvedinstantmessage.MessageBlock_Field.Position = modules.avatarControl.getAgentPosition().getPosition();
+        improvedinstantmessage.MessageBlock_Field.Offline = 0;
+        improvedinstantmessage.MessageBlock_Field.Dialog = 15;
+        improvedinstantmessage.MessageBlock_Field.ID = uuid;
+        improvedinstantmessage.MessageBlock_Field.Timestamp = 0;
+        improvedinstantmessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
+        improvedinstantmessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("");
+        improvedinstantmessage.MessageBlock_Field.BinaryBucket = new byte[1];
+        improvedinstantmessage.isReliable = true;
+        SendMessage(improvedinstantmessage);
+    }
+
+    private boolean SendInstantMessage(UUID uuid, String s, int i)
+    {
+label0:
+        {
+            if (!getModules().rlvController.canSendIM(uuid))
+            {
+                return false;
             }
-            this.forceNeedObjectNames.remove(sLObjectInfo.getId());
-        }
-        this.objectNamesRequested.clear();
-    }
-
-    private void SendAgentFOV() {
-        AgentFOV agentFOV = new AgentFOV();
-        agentFOV.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        agentFOV.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        agentFOV.AgentData_Field.CircuitCode = this.circuitInfo.circuitCode;
-        agentFOV.FOVBlock_Field.GenCounter = 0;
-        agentFOV.FOVBlock_Field.VerticalAngle = 3.0543263f;
-        agentFOV.isReliable = true;
-        SendMessage(agentFOV);
-    }
-
-    /* access modifiers changed from: private */
-    public void SendCompleteAgentMovement() {
-        CompleteAgentMovement completeAgentMovement = new CompleteAgentMovement();
-        completeAgentMovement.AgentData_Field.CircuitCode = this.circuitInfo.circuitCode;
-        completeAgentMovement.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        completeAgentMovement.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        completeAgentMovement.isReliable = true;
-        SendMessage(completeAgentMovement);
-    }
-
-    private void SendEstateOwnerMessage(String str, String[] strArr) {
-        EstateOwnerMessage estateOwnerMessage = new EstateOwnerMessage();
-        estateOwnerMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        estateOwnerMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        estateOwnerMessage.AgentData_Field.TransactionID = new UUID(0, 0);
-        estateOwnerMessage.MethodData_Field.Method = SLMessage.stringToVariableOEM(str);
-        estateOwnerMessage.MethodData_Field.Invoice = new UUID(0, 0);
-        for (String stringToVariableOEM : strArr) {
-            EstateOwnerMessage.ParamList paramList = new EstateOwnerMessage.ParamList();
-            paramList.Parameter = SLMessage.stringToVariableOEM(stringToVariableOEM);
-            estateOwnerMessage.ParamList_Fields.add(paramList);
-        }
-        estateOwnerMessage.isReliable = true;
-        SendMessage(estateOwnerMessage);
-    }
-
-    private void SendGroupSessionStart(UUID uuid) {
-        ImprovedInstantMessage improvedInstantMessage = new ImprovedInstantMessage();
-        improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        improvedInstantMessage.MessageBlock_Field.FromGroup = false;
-        improvedInstantMessage.MessageBlock_Field.ToAgentID = uuid;
-        improvedInstantMessage.MessageBlock_Field.ParentEstateID = 0;
-        improvedInstantMessage.MessageBlock_Field.RegionID = new UUID(0, 0);
-        improvedInstantMessage.MessageBlock_Field.Position = this.modules.avatarControl.getAgentPosition().getPosition();
-        improvedInstantMessage.MessageBlock_Field.Offline = 0;
-        improvedInstantMessage.MessageBlock_Field.Dialog = 15;
-        improvedInstantMessage.MessageBlock_Field.ID = uuid;
-        improvedInstantMessage.MessageBlock_Field.Timestamp = 0;
-        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
-        improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("");
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = new byte[1];
-        improvedInstantMessage.isReliable = true;
-        SendMessage(improvedInstantMessage);
-    }
-
-    private boolean SendInstantMessage(UUID uuid, String str, int i) {
-        if (!getModules().rlvController.canSendIM(uuid)) {
-            return false;
-        }
-        ImprovedInstantMessage improvedInstantMessage = new ImprovedInstantMessage();
-        improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        improvedInstantMessage.MessageBlock_Field.FromGroup = false;
-        improvedInstantMessage.MessageBlock_Field.ToAgentID = uuid;
-        improvedInstantMessage.MessageBlock_Field.ParentEstateID = 0;
-        improvedInstantMessage.MessageBlock_Field.RegionID = new UUID(0, 0);
-        improvedInstantMessage.MessageBlock_Field.Position = new LLVector3();
-        improvedInstantMessage.MessageBlock_Field.Offline = 0;
-        improvedInstantMessage.MessageBlock_Field.Dialog = i;
-        improvedInstantMessage.MessageBlock_Field.ID = new UUID(uuid.getMostSignificantBits() ^ this.circuitInfo.agentID.getMostSignificantBits(), uuid.getLeastSignificantBits() ^ this.circuitInfo.agentID.getLeastSignificantBits());
-        improvedInstantMessage.MessageBlock_Field.Timestamp = 0;
-        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
-        improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str);
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = new byte[0];
-        improvedInstantMessage.isReliable = true;
-        SendMessage(improvedInstantMessage);
-        if (!(i == 20 || i == 41 || i == 42)) {
-            if (i == 26) {
-                HandleChatEvent(ChatterID.getUserChatterID(this.agentUUID, uuid), new SLChatLureRequestedEvent(str, this.agentUUID), false);
-            } else {
-                HandleChatEvent(ChatterID.getUserChatterID(this.agentUUID, uuid), new SLChatTextEvent((ChatMessageSource) new ChatMessageSourceUser(this.circuitInfo.agentID), this.agentUUID, str), false);
+            ImprovedInstantMessage improvedinstantmessage = new ImprovedInstantMessage();
+            improvedinstantmessage.AgentData_Field.AgentID = circuitInfo.agentID;
+            improvedinstantmessage.AgentData_Field.SessionID = circuitInfo.sessionID;
+            improvedinstantmessage.MessageBlock_Field.FromGroup = false;
+            improvedinstantmessage.MessageBlock_Field.ToAgentID = uuid;
+            improvedinstantmessage.MessageBlock_Field.ParentEstateID = 0;
+            improvedinstantmessage.MessageBlock_Field.RegionID = new UUID(0L, 0L);
+            improvedinstantmessage.MessageBlock_Field.Position = new LLVector3();
+            improvedinstantmessage.MessageBlock_Field.Offline = 0;
+            improvedinstantmessage.MessageBlock_Field.Dialog = i;
+            improvedinstantmessage.MessageBlock_Field.ID = new UUID(uuid.getMostSignificantBits() ^ circuitInfo.agentID.getMostSignificantBits(), uuid.getLeastSignificantBits() ^ circuitInfo.agentID.getLeastSignificantBits());
+            improvedinstantmessage.MessageBlock_Field.Timestamp = 0;
+            improvedinstantmessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
+            improvedinstantmessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(s);
+            improvedinstantmessage.MessageBlock_Field.BinaryBucket = new byte[0];
+            improvedinstantmessage.isReliable = true;
+            SendMessage(improvedinstantmessage);
+            if (i != 20 && i != 41 && i != 42)
+            {
+                if (i != 26)
+                {
+                    break label0;
+                }
+                HandleChatEvent(ChatterID.getUserChatterID(agentUUID, uuid), new SLChatLureRequestedEvent(s, agentUUID), false);
             }
+            return true;
         }
+        HandleChatEvent(ChatterID.getUserChatterID(agentUUID, uuid), new SLChatTextEvent(new ChatMessageSourceUser(circuitInfo.agentID), agentUUID, s), false);
         return true;
     }
 
-    private void SendRetrieveInstantMessages() {
-        RetrieveInstantMessages retrieveInstantMessages = new RetrieveInstantMessages();
-        retrieveInstantMessages.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        retrieveInstantMessages.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        retrieveInstantMessages.isReliable = true;
-        SendMessage(retrieveInstantMessages);
+    private void SendRetrieveInstantMessages()
+    {
+        RetrieveInstantMessages retrieveinstantmessages = new RetrieveInstantMessages();
+        retrieveinstantmessages.AgentData_Field.AgentID = circuitInfo.agentID;
+        retrieveinstantmessages.AgentData_Field.SessionID = circuitInfo.sessionID;
+        retrieveinstantmessages.isReliable = true;
+        SendMessage(retrieveinstantmessages);
     }
 
-    private UUID getActiveGroupID() {
-        if (this.modules != null) {
-            return this.modules.groupManager.getActiveGroupID();
+    private UUID getActiveGroupID()
+    {
+        if (modules != null)
+        {
+            return modules.groupManager.getActiveGroupID();
+        } else
+        {
+            return null;
         }
-        return null;
     }
 
-    private boolean getNeedObjectNames() {
-        if (this.forceNeedObjectNames != null && !this.forceNeedObjectNames.isEmpty()) {
+    private boolean getNeedObjectNames()
+    {
+        if (forceNeedObjectNames != null && !forceNeedObjectNames.isEmpty())
+        {
             return true;
         }
-        if (this.modules != null) {
-            return this.modules.drawDistance.isObjectSelectEnabled();
+        if (modules != null)
+        {
+            return modules.drawDistance.isObjectSelectEnabled();
+        } else
+        {
+            return false;
+        }
+    }
+
+    private boolean isEventMuted(ChatterID chatterid, SLChatEvent slchatevent)
+    {
+        if (modules != null)
+        {
+            SLMuteList slmutelist = modules.muteList;
+            slchatevent = slchatevent.getSource();
+            if (slchatevent.getSourceType() == com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User)
+            {
+                if (slmutelist.isMuted(slchatevent.getSourceUUID(), MuteType.AGENT))
+                {
+                    return true;
+                }
+            } else
+            if (slchatevent.getSourceType() == com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.Object)
+            {
+                UUID uuid = slchatevent.getSourceUUID();
+                if (uuid != null && !uuid.equals(UUIDPool.ZeroUUID) && slmutelist.isMuted(uuid, MuteType.OBJECT))
+                {
+                    return true;
+                }
+                slchatevent = slchatevent.getSourceName(userManager);
+                if (slchatevent != null && slmutelist.isMutedByName(slchatevent))
+                {
+                    return true;
+                }
+            }
+            if (chatterid instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDGroup)
+            {
+                chatterid = ((com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDGroup)chatterid).getChatterUUID();
+                if (!chatterid.equals(UUIDPool.ZeroUUID) && slmutelist.isMuted(chatterid, MuteType.GROUP))
+                {
+                    return true;
+                }
+            }
         }
         return false;
     }
 
-    private boolean isEventMuted(ChatterID chatterID, SLChatEvent sLChatEvent) {
-        if (this.modules == null) {
-            return false;
-        }
-        SLMuteList sLMuteList = this.modules.muteList;
-        ChatMessageSource source = sLChatEvent.getSource();
-        if (source.getSourceType() == ChatMessageSource.ChatMessageSourceType.User) {
-            if (sLMuteList.isMuted(source.getSourceUUID(), MuteType.AGENT)) {
-                return true;
-            }
-        } else if (source.getSourceType() == ChatMessageSource.ChatMessageSourceType.Object) {
-            UUID sourceUUID = source.getSourceUUID();
-            if (sourceUUID != null && !sourceUUID.equals(UUIDPool.ZeroUUID) && sLMuteList.isMuted(sourceUUID, MuteType.OBJECT)) {
-                return true;
-            }
-            String sourceName = source.getSourceName(this.userManager);
-            if (sourceName != null && sLMuteList.isMutedByName(sourceName)) {
-                return true;
-            }
-        }
-        if (!(chatterID instanceof ChatterID.ChatterIDGroup)) {
-            return false;
-        }
-        UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID();
-        return !chatterUUID.equals(UUIDPool.ZeroUUID) && sLMuteList.isMuted(chatterUUID, MuteType.GROUP);
-    }
-
-    /* access modifiers changed from: private */
-    public void notifyObjectPropertiesChange() {
-        if (this.userManager != null) {
-            this.userManager.getObjectsManager().requestObjectListUpdate();
+    private void notifyObjectPropertiesChange()
+    {
+        if (userManager != null)
+        {
+            userManager.getObjectsManager().requestObjectListUpdate();
         }
     }
 
-    private void processMyAvatarUpdate(SLObjectAvatarInfo sLObjectAvatarInfo) {
-        if (this.modules != null) {
-            this.modules.avatarControl.setAgentPosition(sLObjectAvatarInfo.getAbsolutePosition(), sLObjectAvatarInfo.getObjectCoords().get(2));
+    private void processMyAvatarUpdate(SLObjectAvatarInfo slobjectavatarinfo)
+    {
+        if (modules != null)
+        {
+            modules.avatarControl.setAgentPosition(slobjectavatarinfo.getAbsolutePosition(), slobjectavatarinfo.getObjectCoords().get(2));
         }
     }
 
-    public void AcceptFriendship(UUID uuid, UUID uuid2) {
-        UUID uuid3 = null;
-        this.userManager.getChatterList().getFriendManager().addFriend(uuid);
-        AcceptFriendship acceptFriendship = new AcceptFriendship();
-        acceptFriendship.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        acceptFriendship.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        if (this.modules != null) {
-            uuid3 = this.modules.inventory.getCallingCardsFolderUUID();
+    public void AcceptFriendship(UUID uuid, UUID uuid1)
+    {
+        UUID uuid2 = null;
+        userManager.getChatterList().getFriendManager().addFriend(uuid);
+        AcceptFriendship acceptfriendship = new AcceptFriendship();
+        acceptfriendship.AgentData_Field.AgentID = circuitInfo.agentID;
+        acceptfriendship.AgentData_Field.SessionID = circuitInfo.sessionID;
+        uuid = uuid2;
+        if (modules != null)
+        {
+            uuid = modules.inventory.getCallingCardsFolderUUID();
         }
-        AcceptFriendship.FolderData folderData = new AcceptFriendship.FolderData();
-        if (uuid3 == null) {
-            uuid3 = UUIDPool.ZeroUUID;
+        com.lumiyaviewer.lumiya.slproto.messages.AcceptFriendship.FolderData folderdata = new com.lumiyaviewer.lumiya.slproto.messages.AcceptFriendship.FolderData();
+        uuid2 = uuid;
+        if (uuid == null)
+        {
+            uuid2 = UUIDPool.ZeroUUID;
         }
-        folderData.FolderID = uuid3;
-        acceptFriendship.FolderData_Fields.add(folderData);
-        acceptFriendship.TransactionBlock_Field.TransactionID = uuid2;
-        acceptFriendship.isReliable = true;
-        SendMessage(acceptFriendship);
+        folderdata.FolderID = uuid2;
+        acceptfriendship.FolderData_Fields.add(folderdata);
+        acceptfriendship.TransactionBlock_Field.TransactionID = uuid1;
+        acceptfriendship.isReliable = true;
+        SendMessage(acceptfriendship);
     }
 
-    public void AcceptInventoryOffer(int i, boolean z, UUID uuid, UUID uuid2, UUID uuid3) {
-        ImprovedInstantMessage improvedInstantMessage = new ImprovedInstantMessage();
-        improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        improvedInstantMessage.MessageBlock_Field.FromGroup = false;
-        improvedInstantMessage.MessageBlock_Field.ToAgentID = uuid;
-        improvedInstantMessage.MessageBlock_Field.ParentEstateID = 0;
-        improvedInstantMessage.MessageBlock_Field.RegionID = new UUID(0, 0);
-        improvedInstantMessage.MessageBlock_Field.Position = new LLVector3();
-        improvedInstantMessage.MessageBlock_Field.Offline = 0;
-        if (z) {
-            improvedInstantMessage.MessageBlock_Field.Dialog = i + 1;
-        } else {
-            improvedInstantMessage.MessageBlock_Field.Dialog = i + 2;
+    public void AcceptInventoryOffer(int i, boolean flag, UUID uuid, UUID uuid1, UUID uuid2)
+    {
+        ImprovedInstantMessage improvedinstantmessage = new ImprovedInstantMessage();
+        improvedinstantmessage.AgentData_Field.AgentID = circuitInfo.agentID;
+        improvedinstantmessage.AgentData_Field.SessionID = circuitInfo.sessionID;
+        improvedinstantmessage.MessageBlock_Field.FromGroup = false;
+        improvedinstantmessage.MessageBlock_Field.ToAgentID = uuid;
+        improvedinstantmessage.MessageBlock_Field.ParentEstateID = 0;
+        improvedinstantmessage.MessageBlock_Field.RegionID = new UUID(0L, 0L);
+        improvedinstantmessage.MessageBlock_Field.Position = new LLVector3();
+        improvedinstantmessage.MessageBlock_Field.Offline = 0;
+        if (flag)
+        {
+            improvedinstantmessage.MessageBlock_Field.Dialog = i + 1;
+        } else
+        {
+            improvedinstantmessage.MessageBlock_Field.Dialog = i + 2;
         }
-        improvedInstantMessage.MessageBlock_Field.ID = uuid2;
-        improvedInstantMessage.MessageBlock_Field.Timestamp = 0;
-        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
-        improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("");
-        if (uuid3 != null) {
-            ByteBuffer wrap = ByteBuffer.wrap(new byte[16]);
-            wrap.order(ByteOrder.BIG_ENDIAN);
-            wrap.putLong(uuid3.getMostSignificantBits());
-            wrap.putLong(uuid3.getLeastSignificantBits());
-            wrap.position(0);
-            improvedInstantMessage.MessageBlock_Field.BinaryBucket = wrap.array();
-        } else {
-            improvedInstantMessage.MessageBlock_Field.BinaryBucket = new byte[0];
+        improvedinstantmessage.MessageBlock_Field.ID = uuid1;
+        improvedinstantmessage.MessageBlock_Field.Timestamp = 0;
+        improvedinstantmessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
+        improvedinstantmessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("");
+        if (uuid2 != null)
+        {
+            uuid = ByteBuffer.wrap(new byte[16]);
+            uuid.order(ByteOrder.BIG_ENDIAN);
+            uuid.putLong(uuid2.getMostSignificantBits());
+            uuid.putLong(uuid2.getLeastSignificantBits());
+            uuid.position(0);
+            improvedinstantmessage.MessageBlock_Field.BinaryBucket = uuid.array();
+        } else
+        {
+            improvedinstantmessage.MessageBlock_Field.BinaryBucket = new byte[0];
         }
-        improvedInstantMessage.isReliable = true;
-        SendMessage(improvedInstantMessage);
+        improvedinstantmessage.isReliable = true;
+        SendMessage(improvedinstantmessage);
     }
 
-    public void AddFriend(UUID uuid, String str) {
-        ImprovedInstantMessage improvedInstantMessage = new ImprovedInstantMessage();
-        improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        improvedInstantMessage.MessageBlock_Field.FromGroup = false;
-        improvedInstantMessage.MessageBlock_Field.ToAgentID = uuid;
-        improvedInstantMessage.MessageBlock_Field.ParentEstateID = 0;
-        improvedInstantMessage.MessageBlock_Field.RegionID = new UUID(0, 0);
-        improvedInstantMessage.MessageBlock_Field.Position = new LLVector3();
-        improvedInstantMessage.MessageBlock_Field.Offline = 0;
-        improvedInstantMessage.MessageBlock_Field.Dialog = 38;
-        improvedInstantMessage.MessageBlock_Field.ID = new UUID(uuid.getMostSignificantBits() ^ this.circuitInfo.agentID.getMostSignificantBits(), uuid.getLeastSignificantBits() ^ this.circuitInfo.agentID.getLeastSignificantBits());
-        improvedInstantMessage.MessageBlock_Field.Timestamp = 0;
-        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
-        improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str);
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = new byte[0];
-        improvedInstantMessage.isReliable = true;
-        SendMessage(improvedInstantMessage);
+    public void AddFriend(UUID uuid, String s)
+    {
+        ImprovedInstantMessage improvedinstantmessage = new ImprovedInstantMessage();
+        improvedinstantmessage.AgentData_Field.AgentID = circuitInfo.agentID;
+        improvedinstantmessage.AgentData_Field.SessionID = circuitInfo.sessionID;
+        improvedinstantmessage.MessageBlock_Field.FromGroup = false;
+        improvedinstantmessage.MessageBlock_Field.ToAgentID = uuid;
+        improvedinstantmessage.MessageBlock_Field.ParentEstateID = 0;
+        improvedinstantmessage.MessageBlock_Field.RegionID = new UUID(0L, 0L);
+        improvedinstantmessage.MessageBlock_Field.Position = new LLVector3();
+        improvedinstantmessage.MessageBlock_Field.Offline = 0;
+        improvedinstantmessage.MessageBlock_Field.Dialog = 38;
+        improvedinstantmessage.MessageBlock_Field.ID = new UUID(uuid.getMostSignificantBits() ^ circuitInfo.agentID.getMostSignificantBits(), uuid.getLeastSignificantBits() ^ circuitInfo.agentID.getLeastSignificantBits());
+        improvedinstantmessage.MessageBlock_Field.Timestamp = 0;
+        improvedinstantmessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
+        improvedinstantmessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(s);
+        improvedinstantmessage.MessageBlock_Field.BinaryBucket = new byte[0];
+        improvedinstantmessage.isReliable = true;
+        SendMessage(improvedinstantmessage);
     }
 
-    public void BuyObject(int i, byte b, int i2) {
-        UUID activeGroupID = getActiveGroupID();
-        ObjectBuy objectBuy = new ObjectBuy();
-        objectBuy.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        objectBuy.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        ObjectBuy.AgentData agentData = objectBuy.AgentData_Field;
-        if (activeGroupID == null) {
-            activeGroupID = UUIDPool.ZeroUUID;
+    public void BuyObject(int i, byte byte0, int j)
+    {
+        Object obj = getActiveGroupID();
+        ObjectBuy objectbuy = new ObjectBuy();
+        objectbuy.AgentData_Field.AgentID = circuitInfo.agentID;
+        objectbuy.AgentData_Field.SessionID = circuitInfo.sessionID;
+        com.lumiyaviewer.lumiya.slproto.messages.ObjectBuy.AgentData agentdata = objectbuy.AgentData_Field;
+        if (obj == null)
+        {
+            obj = UUIDPool.ZeroUUID;
         }
-        agentData.GroupID = activeGroupID;
-        objectBuy.AgentData_Field.CategoryID = getModules().inventory.rootFolder.uuid;
-        ObjectBuy.ObjectData objectData = new ObjectBuy.ObjectData();
-        objectData.ObjectLocalID = i;
-        objectData.SaleType = b;
-        objectData.SalePrice = i2;
-        objectBuy.ObjectData_Fields.add(objectData);
-        objectBuy.isReliable = true;
-        SendMessage(objectBuy);
+        agentdata.GroupID = ((UUID) (obj));
+        objectbuy.AgentData_Field.CategoryID = getModules().inventory.rootFolder.uuid;
+        obj = new com.lumiyaviewer.lumiya.slproto.messages.ObjectBuy.ObjectData();
+        obj.ObjectLocalID = i;
+        obj.SaleType = byte0;
+        obj.SalePrice = j;
+        objectbuy.ObjectData_Fields.add(obj);
+        objectbuy.isReliable = true;
+        SendMessage(objectbuy);
     }
 
-    public void CloseCircuit() {
+    public void CloseCircuit()
+    {
         Debug.Printf("AgentCircuit: closing circuit.", new Object[0]);
-        if (this.modules != null) {
-            this.modules.HandleCloseCircuit();
+        if (modules != null)
+        {
+            modules.HandleCloseCircuit();
         }
-        if (this.userManager != null) {
-            this.userManager.clearActiveAgentCircuit(this);
+        if (userManager != null)
+        {
+            userManager.clearActiveAgentCircuit(this);
         }
-        if (this.agentNameSubscription != null) {
-            this.agentNameSubscription.unsubscribe();
-            this.agentNameSubscription = null;
+        if (agentNameSubscription != null)
+        {
+            agentNameSubscription.unsubscribe();
+            agentNameSubscription = null;
         }
         super.CloseCircuit();
     }
 
-    public void DerezObject(int i, EDeRezDestination eDeRezDestination) {
-        UUID activeGroupID = getActiveGroupID();
-        DeRezObject deRezObject = new DeRezObject();
-        deRezObject.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        deRezObject.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        DeRezObject.AgentBlock agentBlock = deRezObject.AgentBlock_Field;
-        if (activeGroupID == null) {
-            activeGroupID = new UUID(0, 0);
+    public void DerezObject(int i, EDeRezDestination ederezdestination)
+    {
+        UUID uuid = getActiveGroupID();
+        DeRezObject derezobject = new DeRezObject();
+        derezobject.AgentData_Field.AgentID = circuitInfo.agentID;
+        derezobject.AgentData_Field.SessionID = circuitInfo.sessionID;
+        com.lumiyaviewer.lumiya.slproto.messages.DeRezObject.AgentBlock agentblock = derezobject.AgentBlock_Field;
+        if (uuid == null)
+        {
+            uuid = new UUID(0L, 0L);
         }
-        agentBlock.GroupID = activeGroupID;
-        deRezObject.AgentBlock_Field.Destination = eDeRezDestination.getCode();
-        deRezObject.AgentBlock_Field.DestinationID = new UUID(0, 0);
-        deRezObject.AgentBlock_Field.PacketCount = 1;
-        deRezObject.AgentBlock_Field.PacketNumber = 0;
-        deRezObject.AgentBlock_Field.TransactionID = UUID.randomUUID();
-        DeRezObject.ObjectData objectData = new DeRezObject.ObjectData();
-        objectData.ObjectLocalID = i;
-        deRezObject.ObjectData_Fields.add(objectData);
-        deRezObject.isReliable = true;
-        SendMessage(deRezObject);
+        agentblock.GroupID = uuid;
+        derezobject.AgentBlock_Field.Destination = ederezdestination.getCode();
+        derezobject.AgentBlock_Field.DestinationID = new UUID(0L, 0L);
+        derezobject.AgentBlock_Field.PacketCount = 1;
+        derezobject.AgentBlock_Field.PacketNumber = 0;
+        derezobject.AgentBlock_Field.TransactionID = UUID.randomUUID();
+        ederezdestination = new com.lumiyaviewer.lumiya.slproto.messages.DeRezObject.ObjectData();
+        ederezdestination.ObjectLocalID = i;
+        derezobject.ObjectData_Fields.add(ederezdestination);
+        derezobject.isReliable = true;
+        SendMessage(derezobject);
     }
 
-    public void DoRequestPayPrice(UUID uuid) {
-        SLObjectInfo sLObjectInfo = this.gridConn.parcelInfo.allObjectsNearby.get(uuid);
-        if (sLObjectInfo == null) {
-            return;
-        }
-        if (sLObjectInfo.getPayInfo() != null) {
-            this.eventBus.publish(new SLObjectPayInfoEvent(sLObjectInfo));
-            return;
-        }
-        RequestPayPrice requestPayPrice = new RequestPayPrice();
-        requestPayPrice.ObjectData_Field.ObjectID = uuid;
-        requestPayPrice.isReliable = true;
-        SendMessage(requestPayPrice);
-    }
-
-    public void GenerateChatMoneyEvent(UUID uuid, int i, int i2) {
-        HandleChatEvent(uuid != null ? ChatterID.getUserChatterID(this.agentUUID, uuid) : this.localChatterID, new SLChatBalanceChangedEvent(uuid != null ? new ChatMessageSourceUser(uuid) : ChatMessageSourceUnknown.getInstance(), this.agentUUID, true, i, i2), true);
-        if (this.modules != null) {
-            this.modules.financialInfo.RecordChatEvent(uuid, i, i2);
-        }
-    }
-
-    public void HandleAgentMovementComplete(AgentMovementComplete agentMovementComplete) {
-        this.regionHandle = agentMovementComplete.Data_Field.RegionHandle;
-        this.modules.avatarControl.setAgentPosition(agentMovementComplete.Data_Field.Position, (LLVector3) null);
-        Debug.Printf("Got agentPosition: %s", this.modules.avatarControl.getAgentPosition().getImmutablePosition());
-        SendAgentFOV();
-        this.modules.avatarAppearance.SendAgentWearablesRequest();
-        SendRetrieveInstantMessages();
-        this.modules.avatarControl.setEnableAgentUpdates(true);
-    }
-
-    public void HandleAlertMessage(AlertMessage alertMessage) {
-        HandleChatEvent(this.localChatterID, new SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), this.agentUUID, SLMessage.stringFromVariableOEM(alertMessage.AlertData_Field.Message)), true);
-    }
-
-    public void HandleAvatarAnimation(AvatarAnimation avatarAnimation) {
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo;
-        if (sLParcelInfo != null && this.modules != null) {
-            sLParcelInfo.ApplyAvatarAnimation(avatarAnimation, this.modules.avatarControl);
-        }
-    }
-
-    public void HandleAvatarAppearance(AvatarAppearance avatarAppearance) {
-        Debug.Log("Got AvatarAppearance, ID = " + avatarAppearance.Sender_Field.ID.toString() + " isTrial = " + avatarAppearance.Sender_Field.IsTrial + ", our ID = " + this.circuitInfo.agentID.toString());
-        if (avatarAppearance.Sender_Field.ID.equals(this.circuitInfo.agentID) && this.modules != null) {
-            this.modules.avatarAppearance.HandleAvatarAppearance(avatarAppearance);
-        }
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo;
-        if (sLParcelInfo != null) {
-            sLParcelInfo.ApplyAvatarAppearance(avatarAppearance);
-        }
-    }
-
-    public void HandleAvatarInterestsReply(AvatarInterestsReply avatarInterestsReply) {
-        Debug.Log("got AvatarInterestsReply: wantToText = " + SLMessage.stringFromVariableOEM(avatarInterestsReply.PropertiesData_Field.WantToText));
-        Debug.Log("got AvatarInterestsReply: skillText = " + SLMessage.stringFromVariableOEM(avatarInterestsReply.PropertiesData_Field.SkillsText));
-    }
-
-    public void HandleChatEvent(ChatterID chatterID, SLChatEvent sLChatEvent, boolean z) {
-        if (!isEventMuted(chatterID, sLChatEvent)) {
-            this.userManager.getChatterList().getActiveChattersManager().HandleChatEvent(chatterID, sLChatEvent, z);
-        }
-    }
-
-    public void HandleChatFromSimulator(ChatFromSimulator chatFromSimulator) {
-        int i;
-        SLModules modules2 = getModules();
-        if (modules2 == null || !modules2.rlvController.onIncomingChat(chatFromSimulator)) {
-            UUID uuid = chatFromSimulator.ChatData_Field.SourceID;
-            String stringFromVariableOEM = SLMessage.stringFromVariableOEM(chatFromSimulator.ChatData_Field.FromName);
-            String stringFromVariableUTF = SLMessage.stringFromVariableUTF(chatFromSimulator.ChatData_Field.Message);
-            if (chatFromSimulator.ChatData_Field.ChatType == 8 && chatFromSimulator.ChatData_Field.SourceType == 2 && stringFromVariableOEM.startsWith("#Firestorm LSL Bridge") && stringFromVariableUTF.startsWith("<bridgeURL>")) {
-                return;
-            }
-            if ((chatFromSimulator.ChatData_Field.SourceType != 1 || modules2 == null || modules2.rlvController.canRecvChat(stringFromVariableUTF, uuid)) && chatFromSimulator.ChatData_Field.Audible == 1 && (i = chatFromSimulator.ChatData_Field.ChatType) != 6 && i != 4 && i != 5) {
-                switch (chatFromSimulator.ChatData_Field.SourceType) {
-                    case 1:
-                        HandleChatEvent(this.localChatterID, new SLChatTextEvent((ChatMessageSource) new ChatMessageSourceUser(uuid), this.agentUUID, stringFromVariableUTF), true);
-                        return;
-                    case 2:
-                        HandleChatEvent(this.localChatterID, new SLChatTextEvent((ChatMessageSource) new ChatMessageSourceObject(uuid, stringFromVariableOEM), this.agentUUID, stringFromVariableUTF), true);
-                        return;
-                    default:
-                        HandleChatEvent(this.localChatterID, new SLChatTextEvent((ChatMessageSource) ChatMessageSourceUnknown.getInstance(), this.agentUUID, stringFromVariableUTF), true);
-                        return;
+    public void DoRequestPayPrice(UUID uuid)
+    {
+label0:
+        {
+            SLObjectInfo slobjectinfo = (SLObjectInfo)gridConn.parcelInfo.allObjectsNearby.get(uuid);
+            if (slobjectinfo != null)
+            {
+                if (slobjectinfo.getPayInfo() == null)
+                {
+                    break label0;
                 }
+                eventBus.publish(new SLObjectPayInfoEvent(slobjectinfo));
             }
+            return;
+        }
+        RequestPayPrice requestpayprice = new RequestPayPrice();
+        requestpayprice.ObjectData_Field.ObjectID = uuid;
+        requestpayprice.isReliable = true;
+        SendMessage(requestpayprice);
+    }
+
+    public void GenerateChatMoneyEvent(UUID uuid, int i, int j)
+    {
+        Object obj;
+        Object obj1;
+        if (uuid != null)
+        {
+            obj = new ChatMessageSourceUser(uuid);
+        } else
+        {
+            obj = ChatMessageSourceUnknown.getInstance();
+        }
+        if (uuid != null)
+        {
+            obj1 = ChatterID.getUserChatterID(agentUUID, uuid);
+        } else
+        {
+            obj1 = localChatterID;
+        }
+        HandleChatEvent(((ChatterID) (obj1)), new SLChatBalanceChangedEvent(((ChatMessageSource) (obj)), agentUUID, true, i, j), true);
+        if (modules != null)
+        {
+            modules.financialInfo.RecordChatEvent(uuid, i, j);
         }
     }
 
-    public void HandleImprovedInstantMessage(ImprovedInstantMessage improvedInstantMessage) {
-        ChatMessageSource chatMessageSource;
-        int i = improvedInstantMessage.MessageBlock_Field.Dialog;
-        if (i == 19 || i == 31) {
-            chatMessageSource = new ChatMessageSourceObject(improvedInstantMessage.AgentData_Field.AgentID, SLMessage.stringFromVariableOEM(improvedInstantMessage.MessageBlock_Field.FromAgentName));
-        } else if (i == 3) {
-            chatMessageSource = ChatMessageSourceUnknown.getInstance();
-        } else if (UUIDPool.ZeroUUID.equals(improvedInstantMessage.AgentData_Field.AgentID)) {
-            chatMessageSource = ChatMessageSourceUnknown.getInstance();
-        } else {
-            chatMessageSource = new ChatMessageSourceUser(improvedInstantMessage.AgentData_Field.AgentID);
-            if (!getModules().rlvController.canRecvIM(chatMessageSource.getSourceUUID())) {
-                return;
-            }
-        }
-        HandleIM(improvedInstantMessage, chatMessageSource);
+    public void HandleAgentMovementComplete(AgentMovementComplete agentmovementcomplete)
+    {
+        regionHandle = agentmovementcomplete.Data_Field.RegionHandle;
+        modules.avatarControl.setAgentPosition(agentmovementcomplete.Data_Field.Position, null);
+        Debug.Printf("Got agentPosition: %s", new Object[] {
+            modules.avatarControl.getAgentPosition().getImmutablePosition()
+        });
+        SendAgentFOV();
+        modules.avatarAppearance.SendAgentWearablesRequest();
+        SendRetrieveInstantMessages();
+        modules.avatarControl.setEnableAgentUpdates(true);
     }
 
-    public void HandleImprovedTerseObjectUpdate(ImprovedTerseObjectUpdate improvedTerseObjectUpdate) {
-        SLObjectInfo sLObjectInfo;
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo;
-        RequestMultipleObjects requestMultipleObjects = null;
-        for (ImprovedTerseObjectUpdate.ObjectData objectData : improvedTerseObjectUpdate.ObjectData_Fields) {
-            int localID = SLObjectInfo.getLocalID(objectData);
-            UUID uuid = sLParcelInfo.uuidsNearby.get(Integer.valueOf(localID));
-            if (uuid != null) {
-                sLObjectInfo = sLParcelInfo.allObjectsNearby.get(uuid);
-                if (sLObjectInfo != null) {
-                    sLObjectInfo.ApplyTerseObjectUpdate(objectData);
-                    if (sLObjectInfo instanceof SLObjectAvatarInfo ? ((SLObjectAvatarInfo) sLObjectInfo).isMyAvatar() : false) {
-                        processMyAvatarUpdate((SLObjectAvatarInfo) sLObjectInfo);
-                    } else if (sLObjectInfo.isMyAttachment()) {
-                        processMyAttachmentUpdate(sLObjectInfo);
+    public void HandleAlertMessage(AlertMessage alertmessage)
+    {
+        alertmessage = SLMessage.stringFromVariableOEM(alertmessage.AlertData_Field.Message);
+        alertmessage = new SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), agentUUID, alertmessage);
+        HandleChatEvent(localChatterID, alertmessage, true);
+    }
+
+    public void HandleAvatarAnimation(AvatarAnimation avataranimation)
+    {
+        SLParcelInfo slparcelinfo = gridConn.parcelInfo;
+        if (slparcelinfo != null && modules != null)
+        {
+            slparcelinfo.ApplyAvatarAnimation(avataranimation, modules.avatarControl);
+        }
+    }
+
+    public void HandleAvatarAppearance(AvatarAppearance avatarappearance)
+    {
+        Debug.Log((new StringBuilder()).append("Got AvatarAppearance, ID = ").append(avatarappearance.Sender_Field.ID.toString()).append(" isTrial = ").append(avatarappearance.Sender_Field.IsTrial).append(", our ID = ").append(circuitInfo.agentID.toString()).toString());
+        if (avatarappearance.Sender_Field.ID.equals(circuitInfo.agentID) && modules != null)
+        {
+            modules.avatarAppearance.HandleAvatarAppearance(avatarappearance);
+        }
+        SLParcelInfo slparcelinfo = gridConn.parcelInfo;
+        if (slparcelinfo != null)
+        {
+            slparcelinfo.ApplyAvatarAppearance(avatarappearance);
+        }
+    }
+
+    public void HandleAvatarInterestsReply(AvatarInterestsReply avatarinterestsreply)
+    {
+        Debug.Log((new StringBuilder()).append("got AvatarInterestsReply: wantToText = ").append(SLMessage.stringFromVariableOEM(avatarinterestsreply.PropertiesData_Field.WantToText)).toString());
+        Debug.Log((new StringBuilder()).append("got AvatarInterestsReply: skillText = ").append(SLMessage.stringFromVariableOEM(avatarinterestsreply.PropertiesData_Field.SkillsText)).toString());
+    }
+
+    public void HandleChatEvent(ChatterID chatterid, SLChatEvent slchatevent, boolean flag)
+    {
+        if (isEventMuted(chatterid, slchatevent))
+        {
+            return;
+        } else
+        {
+            userManager.getChatterList().getActiveChattersManager().HandleChatEvent(chatterid, slchatevent, flag);
+            return;
+        }
+    }
+
+    public void HandleChatFromSimulator(ChatFromSimulator chatfromsimulator)
+    {
+        SLModules slmodules = getModules();
+        if (slmodules != null && slmodules.rlvController.onIncomingChat(chatfromsimulator))
+        {
+            return;
+        }
+        UUID uuid = chatfromsimulator.ChatData_Field.SourceID;
+        String s = SLMessage.stringFromVariableOEM(chatfromsimulator.ChatData_Field.FromName);
+        String s1 = SLMessage.stringFromVariableUTF(chatfromsimulator.ChatData_Field.Message);
+        if (chatfromsimulator.ChatData_Field.ChatType == 8 && chatfromsimulator.ChatData_Field.SourceType == 2 && s.startsWith("#Firestorm LSL Bridge") && s1.startsWith("<bridgeURL>"))
+        {
+            return;
+        }
+        if (chatfromsimulator.ChatData_Field.SourceType == 1 && slmodules != null && !slmodules.rlvController.canRecvChat(s1, uuid))
+        {
+            return;
+        }
+        if (chatfromsimulator.ChatData_Field.Audible != 1)
+        {
+            return;
+        }
+        for (int i = chatfromsimulator.ChatData_Field.ChatType; i == 6 || i == 4 || i == 5;)
+        {
+            return;
+        }
+
+        switch (chatfromsimulator.ChatData_Field.SourceType)
+        {
+        default:
+            HandleChatEvent(localChatterID, new SLChatTextEvent(ChatMessageSourceUnknown.getInstance(), agentUUID, s1), true);
+            return;
+
+        case 1: // '\001'
+            HandleChatEvent(localChatterID, new SLChatTextEvent(new ChatMessageSourceUser(uuid), agentUUID, s1), true);
+            return;
+
+        case 2: // '\002'
+            HandleChatEvent(localChatterID, new SLChatTextEvent(new ChatMessageSourceObject(uuid, s), agentUUID, s1), true);
+            break;
+        }
+    }
+
+    public void HandleImprovedInstantMessage(ImprovedInstantMessage improvedinstantmessage)
+    {
+        int i = improvedinstantmessage.MessageBlock_Field.Dialog;
+        if (i != 19 && i != 31) goto _L2; else goto _L1
+_L1:
+        Object obj = new ChatMessageSourceObject(improvedinstantmessage.AgentData_Field.AgentID, SLMessage.stringFromVariableOEM(improvedinstantmessage.MessageBlock_Field.FromAgentName));
+_L4:
+        HandleIM(improvedinstantmessage, ((ChatMessageSource) (obj)));
+        return;
+_L2:
+        if (i == 3)
+        {
+            obj = ChatMessageSourceUnknown.getInstance();
+            continue; /* Loop/switch isn't completed */
+        }
+        if (!UUIDPool.ZeroUUID.equals(improvedinstantmessage.AgentData_Field.AgentID))
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        obj = ChatMessageSourceUnknown.getInstance();
+        if (true) goto _L4; else goto _L3
+_L3:
+        ChatMessageSourceUser chatmessagesourceuser = new ChatMessageSourceUser(improvedinstantmessage.AgentData_Field.AgentID);
+        obj = chatmessagesourceuser;
+        if (!getModules().rlvController.canRecvIM(chatmessagesourceuser.getSourceUUID()))
+        {
+            return;
+        }
+        if (true) goto _L4; else goto _L5
+_L5:
+    }
+
+    public void HandleImprovedTerseObjectUpdate(ImprovedTerseObjectUpdate improvedterseobjectupdate)
+    {
+        SLParcelInfo slparcelinfo = gridConn.parcelInfo;
+        Iterator iterator = improvedterseobjectupdate.ObjectData_Fields.iterator();
+        improvedterseobjectupdate = null;
+        while (iterator.hasNext()) 
+        {
+            com.lumiyaviewer.lumiya.slproto.messages.ImprovedTerseObjectUpdate.ObjectData objectdata = (com.lumiyaviewer.lumiya.slproto.messages.ImprovedTerseObjectUpdate.ObjectData)iterator.next();
+            int i = SLObjectInfo.getLocalID(objectdata);
+            Object obj = (UUID)slparcelinfo.uuidsNearby.get(Integer.valueOf(i));
+            if (obj != null)
+            {
+                SLObjectInfo slobjectinfo = (SLObjectInfo)slparcelinfo.allObjectsNearby.get(obj);
+                obj = slobjectinfo;
+                if (slobjectinfo != null)
+                {
+                    slobjectinfo.ApplyTerseObjectUpdate(objectdata);
+                    boolean flag;
+                    if (slobjectinfo instanceof SLObjectAvatarInfo)
+                    {
+                        flag = ((SLObjectAvatarInfo)slobjectinfo).isMyAvatar();
+                    } else
+                    {
+                        flag = false;
+                    }
+                    if (flag)
+                    {
+                        processMyAvatarUpdate((SLObjectAvatarInfo)slobjectinfo);
+                        obj = slobjectinfo;
+                    } else
+                    {
+                        obj = slobjectinfo;
+                        if (slobjectinfo.isMyAttachment())
+                        {
+                            processMyAttachmentUpdate(slobjectinfo);
+                            obj = slobjectinfo;
+                        }
                     }
                 }
-            } else {
-                sLObjectInfo = null;
+            } else
+            {
+                obj = null;
             }
-            if (sLObjectInfo == null) {
-                if (requestMultipleObjects == null) {
-                    requestMultipleObjects = new RequestMultipleObjects();
-                    requestMultipleObjects.AgentData_Field.AgentID = this.circuitInfo.agentID;
-                    requestMultipleObjects.AgentData_Field.SessionID = this.circuitInfo.sessionID;
+            if (obj == null)
+            {
+                obj = improvedterseobjectupdate;
+                if (improvedterseobjectupdate == null)
+                {
+                    obj = new RequestMultipleObjects();
+                    ((RequestMultipleObjects) (obj)).AgentData_Field.AgentID = circuitInfo.agentID;
+                    ((RequestMultipleObjects) (obj)).AgentData_Field.SessionID = circuitInfo.sessionID;
                 }
-                RequestMultipleObjects.ObjectData objectData2 = new RequestMultipleObjects.ObjectData();
-                objectData2.CacheMissType = 0;
-                objectData2.ID = localID;
-                requestMultipleObjects.ObjectData_Fields.add(objectData2);
+                improvedterseobjectupdate = new com.lumiyaviewer.lumiya.slproto.messages.RequestMultipleObjects.ObjectData();
+                improvedterseobjectupdate.CacheMissType = 0;
+                improvedterseobjectupdate.ID = i;
+                ((RequestMultipleObjects) (obj)).ObjectData_Fields.add(improvedterseobjectupdate);
+                improvedterseobjectupdate = ((ImprovedTerseObjectUpdate) (obj));
             }
-            requestMultipleObjects = requestMultipleObjects;
         }
-        if (requestMultipleObjects != null) {
-            Debug.Log("Handing cache miss for terse update: " + requestMultipleObjects.ObjectData_Fields.size() + " objects.");
-            requestMultipleObjects.isReliable = true;
-            SendMessage(requestMultipleObjects);
+        if (improvedterseobjectupdate != null)
+        {
+            Debug.Log((new StringBuilder()).append("Handing cache miss for terse update: ").append(((RequestMultipleObjects) (improvedterseobjectupdate)).ObjectData_Fields.size()).append(" objects.").toString());
+            improvedterseobjectupdate.isReliable = true;
+            SendMessage(improvedterseobjectupdate);
         }
     }
 
-    public void HandleKillObject(KillObject killObject) {
-        boolean z;
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo;
-        boolean z2 = false;
-        Iterator<T> it = killObject.ObjectData_Fields.iterator();
-        while (true) {
-            z = z2;
-            if (!it.hasNext()) {
+    public void HandleKillObject(KillObject killobject)
+    {
+        SLParcelInfo slparcelinfo = gridConn.parcelInfo;
+        killobject = killobject.ObjectData_Fields.iterator();
+        boolean flag = false;
+        do
+        {
+            if (!killobject.hasNext())
+            {
                 break;
             }
-            z2 = sLParcelInfo.killObject(this, ((KillObject.ObjectData) it.next()).ID) ? true : z;
-        }
-        if (z) {
-            this.objectPropertiesRateLimiter.fire();
-        }
-    }
-
-    public void HandleLayerData(LayerData layerData) {
-        SLParcelInfo sLParcelInfo;
-        if (layerData.LayerID_Field.Type == 76 && (sLParcelInfo = this.gridConn.parcelInfo) != null) {
-            sLParcelInfo.terrainData.ProcessLayerData(layerData.LayerDataData_Field.Data);
-        }
-    }
-
-    public void HandleLoadURL(LoadURL loadURL) {
-        HandleChatEvent(this.localChatterID, new SLChatTextEvent((ChatMessageSource) new ChatMessageSourceObject(loadURL.Data_Field.ObjectID, SLMessage.stringFromVariableOEM(loadURL.Data_Field.ObjectName)), this.agentUUID, loadURL), true);
-    }
-
-    public void HandleObjectProperties(ObjectProperties objectProperties) {
-        UUID id;
-        Debug.Log("ObjectProperties: " + objectProperties.ObjectData_Fields.size() + " ObjectSelect replies. Reqd " + this.objectNamesRequested.size() + " obj, remains " + this.gridConn.parcelInfo.objectNamesQueue.size() + " objects.");
-        for (ObjectProperties.ObjectData objectData : objectProperties.ObjectData_Fields) {
-            SLObjectInfo remove = this.gridConn.parcelInfo.objectNamesQueue.remove(objectData.ObjectID);
-            if (remove != null) {
-                remove.ApplyObjectProperties(objectData);
-                this.userManager.getObjectsManager().requestObjectProfileUpdate(remove.localID);
+            if (slparcelinfo.killObject(this, ((com.lumiyaviewer.lumiya.slproto.messages.KillObject.ObjectData)killobject.next()).ID))
+            {
+                flag = true;
             }
-            SLObjectInfo remove2 = this.forceNeedObjectNames.remove(objectData.ObjectID);
-            if (remove2 != null) {
-                remove2.ApplyObjectProperties(objectData);
-                this.userManager.getObjectsManager().requestObjectProfileUpdate(remove2.localID);
-                SLObjectInfo parentObject = remove2.getParentObject();
-                if (!(parentObject == null || (id = parentObject.getId()) == null)) {
-                    this.userManager.getObjectsManager().requestTouchableChildrenUpdate(id);
-                }
-            }
-            this.objectNamesRequested.remove(objectData.ObjectID);
+        } while (true);
+        if (flag)
+        {
+            objectPropertiesRateLimiter.fire();
         }
-        if (this.objectNamesRequested.isEmpty()) {
-            this.doingObjectSelection = false;
+    }
+
+    public void HandleLayerData(LayerData layerdata)
+    {
+        if (layerdata.LayerID_Field.Type == 76)
+        {
+            SLParcelInfo slparcelinfo = gridConn.parcelInfo;
+            if (slparcelinfo != null)
+            {
+                slparcelinfo.terrainData.ProcessLayerData(layerdata.LayerDataData_Field.Data);
+            }
+        }
+    }
+
+    public void HandleLoadURL(LoadURL loadurl)
+    {
+        ChatMessageSourceObject chatmessagesourceobject = new ChatMessageSourceObject(loadurl.Data_Field.ObjectID, SLMessage.stringFromVariableOEM(loadurl.Data_Field.ObjectName));
+        HandleChatEvent(localChatterID, new SLChatTextEvent(chatmessagesourceobject, agentUUID, loadurl), true);
+    }
+
+    public void HandleObjectProperties(ObjectProperties objectproperties)
+    {
+        Debug.Log((new StringBuilder()).append("ObjectProperties: ").append(objectproperties.ObjectData_Fields.size()).append(" ObjectSelect replies. Reqd ").append(objectNamesRequested.size()).append(" obj, remains ").append(gridConn.parcelInfo.objectNamesQueue.size()).append(" objects.").toString());
+        com.lumiyaviewer.lumiya.slproto.messages.ObjectProperties.ObjectData objectdata;
+        for (objectproperties = objectproperties.ObjectData_Fields.iterator(); objectproperties.hasNext(); objectNamesRequested.remove(objectdata.ObjectID))
+        {
+            objectdata = (com.lumiyaviewer.lumiya.slproto.messages.ObjectProperties.ObjectData)objectproperties.next();
+            Object obj = (SLObjectInfo)gridConn.parcelInfo.objectNamesQueue.remove(objectdata.ObjectID);
+            if (obj != null)
+            {
+                ((SLObjectInfo) (obj)).ApplyObjectProperties(objectdata);
+                userManager.getObjectsManager().requestObjectProfileUpdate(((SLObjectInfo) (obj)).localID);
+            }
+            obj = (SLObjectInfo)forceNeedObjectNames.remove(objectdata.ObjectID);
+            if (obj == null)
+            {
+                continue;
+            }
+            ((SLObjectInfo) (obj)).ApplyObjectProperties(objectdata);
+            userManager.getObjectsManager().requestObjectProfileUpdate(((SLObjectInfo) (obj)).localID);
+            obj = ((SLObjectInfo) (obj)).getParentObject();
+            if (obj == null)
+            {
+                continue;
+            }
+            obj = ((SLObjectInfo) (obj)).getId();
+            if (obj != null)
+            {
+                userManager.getObjectsManager().requestTouchableChildrenUpdate(((UUID) (obj)));
+            }
+        }
+
+        if (objectNamesRequested.isEmpty())
+        {
+            doingObjectSelection = false;
             ProcessObjectSelection();
         }
-        this.objectPropertiesRateLimiter.fire();
+        objectPropertiesRateLimiter.fire();
     }
 
-    public void HandleObjectUpdate(ObjectUpdate objectUpdate) {
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo;
-        boolean z = false;
-        boolean z2 = false;
-        for (ObjectUpdate.ObjectData objectData : objectUpdate.ObjectData_Fields) {
-            if (objectData.PCode == 47 || objectData.PCode == 9) {
-                SLObjectInfo sLObjectInfo = sLParcelInfo.allObjectsNearby.get(objectData.FullID);
-                if (sLObjectInfo != null) {
-                    int i = sLObjectInfo.parentID;
-                    sLObjectInfo.ApplyObjectUpdate(objectData);
-                    sLParcelInfo.updateObjectParent(i, sLObjectInfo);
-                    if (sLObjectInfo.parentID != i && (sLObjectInfo instanceof SLObjectAvatarInfo) && ((SLObjectAvatarInfo) sLObjectInfo).isMyAvatar()) {
-                        z = true;
-                    }
-                    z2 = true;
-                } else {
-                    sLObjectInfo = SLObjectInfo.create(this.agentUUID, objectData, this.circuitInfo.agentID);
-                    if (sLParcelInfo.addObject(sLObjectInfo)) {
-                        z2 = true;
-                    }
-                    if ((sLObjectInfo instanceof SLObjectAvatarInfo) && ((SLObjectAvatarInfo) sLObjectInfo).isMyAvatar()) {
-                        Debug.Log("ObjectUpdate: got my avatar (normal)");
-                        sLParcelInfo.setAgentAvatar((SLObjectAvatarInfo) sLObjectInfo);
-                        this.modules.avatarAppearance.OnMyAvatarCreated((SLObjectAvatarInfo) sLObjectInfo);
-                        z = true;
-                    }
-                }
-                if (sLObjectInfo instanceof SLObjectAvatarInfo ? ((SLObjectAvatarInfo) sLObjectInfo).isMyAvatar() : false) {
-                    processMyAvatarUpdate((SLObjectAvatarInfo) sLObjectInfo);
-                } else if (sLObjectInfo.isMyAttachment()) {
-                    processMyAttachmentUpdate(sLObjectInfo);
+    public void HandleObjectUpdate(ObjectUpdate objectupdate)
+    {
+        SLParcelInfo slparcelinfo;
+        Iterator iterator;
+        boolean flag;
+        boolean flag1;
+        slparcelinfo = gridConn.parcelInfo;
+        iterator = objectupdate.ObjectData_Fields.iterator();
+        flag1 = false;
+        flag = false;
+_L8:
+        Object obj;
+        if (!iterator.hasNext())
+        {
+            break MISSING_BLOCK_LABEL_344;
+        }
+        obj = (com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate.ObjectData)iterator.next();
+        if (((com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate.ObjectData) (obj)).PCode != 47 && ((com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate.ObjectData) (obj)).PCode != 9) goto _L2; else goto _L1
+_L1:
+        objectupdate = (SLObjectInfo)slparcelinfo.allObjectsNearby.get(((com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate.ObjectData) (obj)).FullID);
+        if (objectupdate == null) goto _L4; else goto _L3
+_L3:
+        int i;
+        i = ((SLObjectInfo) (objectupdate)).parentID;
+        objectupdate.ApplyObjectUpdate(((com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate.ObjectData) (obj)));
+        slparcelinfo.updateObjectParent(i, objectupdate);
+        flag = flag1;
+        if (((SLObjectInfo) (objectupdate)).parentID != i)
+        {
+            flag = flag1;
+            if (objectupdate instanceof SLObjectAvatarInfo)
+            {
+                flag = flag1;
+                if (((SLObjectAvatarInfo)objectupdate).isMyAvatar())
+                {
+                    flag = true;
                 }
             }
-            z = z;
-            z2 = z2;
         }
-        if (z) {
-            this.userManager.getObjectsManager().myAvatarState().requestUpdate(SubscriptionSingleKey.Value);
+        i = 1;
+_L6:
+        boolean flag2;
+        boolean flag3;
+        if (objectupdate instanceof SLObjectAvatarInfo)
+        {
+            flag3 = ((SLObjectAvatarInfo)objectupdate).isMyAvatar();
+        } else
+        {
+            flag3 = false;
         }
-        if (z2) {
+        if (flag3)
+        {
+            processMyAvatarUpdate((SLObjectAvatarInfo)objectupdate);
+            flag1 = i;
+        } else
+        if (objectupdate.isMyAttachment())
+        {
+            processMyAttachmentUpdate(objectupdate);
+            flag1 = i;
+        } else
+        {
+            flag1 = i;
+        }
+_L5:
+        i = ((flag1) ? 1 : 0);
+        flag1 = flag;
+        flag = i;
+        continue; /* Loop/switch isn't completed */
+_L2:
+        i = ((flag) ? 1 : 0);
+        flag = flag1;
+        flag1 = i;
+        if (true) goto _L5; else goto _L4
+_L4:
+        obj = SLObjectInfo.create(agentUUID, ((com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate.ObjectData) (obj)), circuitInfo.agentID);
+        flag2 = flag;
+        if (slparcelinfo.addObject(((SLObjectInfo) (obj))))
+        {
+            flag2 = true;
+        }
+        objectupdate = ((ObjectUpdate) (obj));
+        flag = flag1;
+        i = ((flag2) ? 1 : 0);
+        if (obj instanceof SLObjectAvatarInfo)
+        {
+            objectupdate = ((ObjectUpdate) (obj));
+            flag = flag1;
+            i = ((flag2) ? 1 : 0);
+            if (((SLObjectAvatarInfo)obj).isMyAvatar())
+            {
+                Debug.Log("ObjectUpdate: got my avatar (normal)");
+                slparcelinfo.setAgentAvatar((SLObjectAvatarInfo)obj);
+                modules.avatarAppearance.OnMyAvatarCreated((SLObjectAvatarInfo)obj);
+                flag = true;
+                objectupdate = ((ObjectUpdate) (obj));
+                i = ((flag2) ? 1 : 0);
+            }
+        }
+          goto _L6
+        if (flag1)
+        {
+            userManager.getObjectsManager().myAvatarState().requestUpdate(SubscriptionSingleKey.Value);
+        }
+        if (flag)
+        {
             ProcessObjectSelection();
-            this.objectPropertiesRateLimiter.fire();
+            objectPropertiesRateLimiter.fire();
         }
+        return;
+        if (true) goto _L8; else goto _L7
+_L7:
     }
 
-    public void HandleObjectUpdateCached(ObjectUpdateCached objectUpdateCached) {
-        RequestMultipleObjects requestMultipleObjects = new RequestMultipleObjects();
-        requestMultipleObjects.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        requestMultipleObjects.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        for (ObjectUpdateCached.ObjectData objectData : objectUpdateCached.ObjectData_Fields) {
-            RequestMultipleObjects.ObjectData objectData2 = new RequestMultipleObjects.ObjectData();
-            objectData2.CacheMissType = 0;
-            objectData2.ID = objectData.ID;
-            requestMultipleObjects.ObjectData_Fields.add(objectData2);
+    public void HandleObjectUpdateCached(ObjectUpdateCached objectupdatecached)
+    {
+        RequestMultipleObjects requestmultipleobjects = new RequestMultipleObjects();
+        requestmultipleobjects.AgentData_Field.AgentID = circuitInfo.agentID;
+        requestmultipleobjects.AgentData_Field.SessionID = circuitInfo.sessionID;
+        com.lumiyaviewer.lumiya.slproto.messages.RequestMultipleObjects.ObjectData objectdata1;
+        for (objectupdatecached = objectupdatecached.ObjectData_Fields.iterator(); objectupdatecached.hasNext(); requestmultipleobjects.ObjectData_Fields.add(objectdata1))
+        {
+            com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCached.ObjectData objectdata = (com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCached.ObjectData)objectupdatecached.next();
+            objectdata1 = new com.lumiyaviewer.lumiya.slproto.messages.RequestMultipleObjects.ObjectData();
+            objectdata1.CacheMissType = 0;
+            objectdata1.ID = objectdata.ID;
         }
-        requestMultipleObjects.isReliable = true;
-        SendMessage(requestMultipleObjects);
+
+        requestmultipleobjects.isReliable = true;
+        SendMessage(requestmultipleobjects);
     }
 
-    public void HandleObjectUpdateCompressed(ObjectUpdateCompressed objectUpdateCompressed) {
-        boolean z;
-        SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo;
-        boolean z2 = false;
-        boolean z3 = false;
-        for (ObjectUpdateCompressed.ObjectData objectData : objectUpdateCompressed.ObjectData_Fields) {
-            try {
-                UUID uuid = sLParcelInfo.uuidsNearby.get(Integer.valueOf(SLObjectInfo.getLocalID(objectData)));
-                SLObjectInfo sLObjectInfo = uuid != null ? sLParcelInfo.allObjectsNearby.get(uuid) : null;
-                if (sLObjectInfo != null) {
-                    int i = sLObjectInfo.parentID;
-                    sLObjectInfo.ApplyObjectUpdate(objectData);
-                    sLParcelInfo.updateObjectParent(i, sLObjectInfo);
-                    z = sLObjectInfo.parentID != i;
-                    z3 = true;
-                } else {
-                    sLObjectInfo = SLObjectInfo.create(objectData);
-                    if (sLParcelInfo.addObject(sLObjectInfo)) {
-                        z3 = true;
-                    }
-                    z = false;
-                }
-                if (sLObjectInfo instanceof SLObjectAvatarInfo ? ((SLObjectAvatarInfo) sLObjectInfo).isMyAvatar() : false) {
-                    if (z) {
-                        z2 = true;
-                    }
-                    processMyAvatarUpdate((SLObjectAvatarInfo) sLObjectInfo);
-                } else if (sLObjectInfo.isMyAttachment()) {
-                    processMyAttachmentUpdate(sLObjectInfo);
-                }
-            } catch (UnsupportedObjectTypeException e) {
-            } catch (Exception e2) {
-                Debug.Warning(e2);
-            }
-            z2 = z2;
-            z3 = z3;
+    public void HandleObjectUpdateCompressed(ObjectUpdateCompressed objectupdatecompressed)
+    {
+        SLParcelInfo slparcelinfo;
+        Iterator iterator;
+        boolean flag;
+        boolean flag1;
+        slparcelinfo = gridConn.parcelInfo;
+        iterator = objectupdatecompressed.ObjectData_Fields.iterator();
+        flag = false;
+        flag1 = false;
+_L10:
+        if (!iterator.hasNext()) goto _L2; else goto _L1
+_L1:
+        com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed.ObjectData objectdata;
+        boolean flag2;
+        boolean flag3;
+        boolean flag4;
+        boolean flag5;
+        objectdata = (com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed.ObjectData)iterator.next();
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        int i = SLObjectInfo.getLocalID(objectdata);
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        objectupdatecompressed = (UUID)slparcelinfo.uuidsNearby.get(Integer.valueOf(i));
+        if (objectupdatecompressed == null) goto _L4; else goto _L3
+_L3:
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        objectupdatecompressed = (SLObjectInfo)slparcelinfo.allObjectsNearby.get(objectupdatecompressed);
+_L11:
+        if (objectupdatecompressed == null) goto _L6; else goto _L5
+_L5:
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        i = ((SLObjectInfo) (objectupdatecompressed)).parentID;
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        objectupdatecompressed.ApplyObjectUpdate(objectdata);
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        slparcelinfo.updateObjectParent(i, objectupdatecompressed);
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        break MISSING_BLOCK_LABEL_223;
+_L12:
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        if (!(objectupdatecompressed instanceof SLObjectAvatarInfo))
+        {
+            break MISSING_BLOCK_LABEL_543;
         }
-        if (z3) {
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        boolean flag7 = ((SLObjectAvatarInfo)objectupdatecompressed).isMyAvatar();
+          goto _L7
+_L13:
+        boolean flag6;
+        if (flag6)
+        {
+            flag = true;
+        }
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        processMyAvatarUpdate((SLObjectAvatarInfo)objectupdatecompressed);
+        flag6 = flag;
+          goto _L8
+_L6:
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        objectupdatecompressed = SLObjectInfo.create(objectdata);
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        break MISSING_BLOCK_LABEL_358;
+_L14:
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        flag6 = flag;
+        if (!objectupdatecompressed.isMyAttachment()) goto _L8; else goto _L9
+_L9:
+        flag4 = flag;
+        flag2 = flag1;
+        flag5 = flag;
+        flag3 = flag1;
+        processMyAttachmentUpdate(objectupdatecompressed);
+        flag6 = flag;
+          goto _L8
+        objectupdatecompressed;
+        flag = flag4;
+        flag1 = flag2;
+          goto _L10
+        objectupdatecompressed;
+        Debug.Warning(objectupdatecompressed);
+        flag = flag5;
+        flag1 = flag3;
+          goto _L10
+_L2:
+        if (flag1)
+        {
             ProcessObjectSelection();
-            this.objectPropertiesRateLimiter.fire();
+            objectPropertiesRateLimiter.fire();
         }
-        if (z2) {
-            this.userManager.getObjectsManager().myAvatarState().requestUpdate(SubscriptionSingleKey.Value);
+        if (flag)
+        {
+            userManager.getObjectsManager().myAvatarState().requestUpdate(SubscriptionSingleKey.Value);
         }
+        return;
+_L4:
+        objectupdatecompressed = null;
+          goto _L11
+        if (((SLObjectInfo) (objectupdatecompressed)).parentID != i)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        flag6 = flag1;
+        flag1 = true;
+          goto _L12
+_L7:
+        if (!flag7) goto _L14; else goto _L13
+_L8:
+        flag = flag6;
+          goto _L10
+        if (slparcelinfo.addObject(objectupdatecompressed))
+        {
+            flag1 = true;
+        }
+        flag6 = false;
+          goto _L12
+        flag7 = false;
+          goto _L7
     }
 
-    public void HandleOfflineNotification(OfflineNotification offlineNotification) {
-        ArrayList arrayList = new ArrayList(offlineNotification.AgentBlock_Fields.size());
-        for (OfflineNotification.AgentBlock agentBlock : offlineNotification.AgentBlock_Fields) {
-            arrayList.add(agentBlock.AgentID);
-        }
-        this.userManager.getChatterList().getFriendManager().setUsersOnline(arrayList, false);
+    public void HandleOfflineNotification(OfflineNotification offlinenotification)
+    {
+        ArrayList arraylist = new ArrayList(offlinenotification.AgentBlock_Fields.size());
+        for (offlinenotification = offlinenotification.AgentBlock_Fields.iterator(); offlinenotification.hasNext(); arraylist.add(((com.lumiyaviewer.lumiya.slproto.messages.OfflineNotification.AgentBlock)offlinenotification.next()).AgentID)) { }
+        userManager.getChatterList().getFriendManager().setUsersOnline(arraylist, false);
     }
 
-    public void HandleOnlineNotification(OnlineNotification onlineNotification) {
-        ArrayList arrayList = new ArrayList(onlineNotification.AgentBlock_Fields.size());
-        for (OnlineNotification.AgentBlock agentBlock : onlineNotification.AgentBlock_Fields) {
-            arrayList.add(agentBlock.AgentID);
-        }
-        this.userManager.getChatterList().getFriendManager().setUsersOnline(arrayList, true);
+    public void HandleOnlineNotification(OnlineNotification onlinenotification)
+    {
+        ArrayList arraylist = new ArrayList(onlinenotification.AgentBlock_Fields.size());
+        for (onlinenotification = onlinenotification.AgentBlock_Fields.iterator(); onlinenotification.hasNext(); arraylist.add(((com.lumiyaviewer.lumiya.slproto.messages.OnlineNotification.AgentBlock)onlinenotification.next()).AgentID)) { }
+        userManager.getChatterList().getFriendManager().setUsersOnline(arraylist, true);
     }
 
-    public void HandlePayPriceReply(PayPriceReply payPriceReply) {
-        SLObjectInfo sLObjectInfo = this.gridConn.parcelInfo.allObjectsNearby.get(payPriceReply.ObjectData_Field.ObjectID);
-        if (sLObjectInfo != null) {
-            int i = payPriceReply.ObjectData_Field.DefaultPayPrice;
-            int[] iArr = new int[payPriceReply.ButtonData_Fields.size()];
-            int i2 = 0;
-            while (true) {
-                int i3 = i2;
-                if (i3 >= payPriceReply.ButtonData_Fields.size()) {
-                    break;
-                }
-                iArr[i3] = payPriceReply.ButtonData_Fields.get(i3).PayButton;
-                i2 = i3 + 1;
+    public void HandlePayPriceReply(PayPriceReply paypricereply)
+    {
+        SLObjectInfo slobjectinfo = (SLObjectInfo)gridConn.parcelInfo.allObjectsNearby.get(paypricereply.ObjectData_Field.ObjectID);
+        if (slobjectinfo != null)
+        {
+            int j = paypricereply.ObjectData_Field.DefaultPayPrice;
+            int ai[] = new int[paypricereply.ButtonData_Fields.size()];
+            for (int i = 0; i < paypricereply.ButtonData_Fields.size(); i++)
+            {
+                ai[i] = ((com.lumiyaviewer.lumiya.slproto.messages.PayPriceReply.ButtonData)paypricereply.ButtonData_Fields.get(i)).PayButton;
             }
-            sLObjectInfo.setPayInfo(PayInfo.create(i, iArr));
-            if (this.userManager != null) {
-                this.userManager.getObjectsManager().requestObjectProfileUpdate(sLObjectInfo.localID);
+
+            slobjectinfo.setPayInfo(PayInfo.create(j, ai));
+            if (userManager != null)
+            {
+                userManager.getObjectsManager().requestObjectProfileUpdate(slobjectinfo.localID);
             }
-            this.eventBus.publish(new SLObjectPayInfoEvent(sLObjectInfo));
+            eventBus.publish(new SLObjectPayInfoEvent(slobjectinfo));
         }
     }
 
-    public void HandleRegionHandshake(RegionHandshake regionHandshake) {
-        if (!this.authReply.isTemporary) {
-            RegionHandshakeReply regionHandshakeReply = new RegionHandshakeReply();
-            regionHandshakeReply.AgentData_Field.AgentID = this.circuitInfo.agentID;
-            regionHandshakeReply.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-            regionHandshakeReply.RegionInfo_Field.Flags = 0;
-            if (!(this.gridConn == null || this.gridConn.parcelInfo == null)) {
-                this.gridConn.parcelInfo.terrainData.ApplyRegionInfo(regionHandshake.RegionInfo_Field);
+    public void HandleRegionHandshake(RegionHandshake regionhandshake)
+    {
+        if (!authReply.isTemporary)
+        {
+            RegionHandshakeReply regionhandshakereply = new RegionHandshakeReply();
+            regionhandshakereply.AgentData_Field.AgentID = circuitInfo.agentID;
+            regionhandshakereply.AgentData_Field.SessionID = circuitInfo.sessionID;
+            regionhandshakereply.RegionInfo_Field.Flags = 0;
+            if (gridConn != null && gridConn.parcelInfo != null)
+            {
+                gridConn.parcelInfo.terrainData.ApplyRegionInfo(regionhandshake.RegionInfo_Field);
             }
-            SendMessage(regionHandshakeReply);
-            this.regionName = SLMessage.stringFromVariableOEM(regionHandshake.RegionInfo_Field.SimName);
-            if (!(regionHandshake.RegionInfo2_Field == null || regionHandshake.RegionInfo2_Field.RegionID == null)) {
-                this.regionID = regionHandshake.RegionInfo2_Field.RegionID;
+            SendMessage(regionhandshakereply);
+            regionName = SLMessage.stringFromVariableOEM(regionhandshake.RegionInfo_Field.SimName);
+            if (regionhandshake.RegionInfo2_Field != null && regionhandshake.RegionInfo2_Field.RegionID != null)
+            {
+                regionID = regionhandshake.RegionInfo2_Field.RegionID;
             }
-            this.isEstateManager = regionHandshake.RegionInfo_Field.IsEstateManager;
-            this.agentNameSubscription = this.userManager.getUserNames().subscribe(this.circuitInfo.agentID, new $Lambda$K1xWCpEh0d4XNuVVYxGUJwEFRxU(this));
-            if (this.eventBus != null) {
-                this.eventBus.publish(new SLRegionInfoChangedEvent());
+            isEstateManager = regionhandshake.RegionInfo_Field.IsEstateManager;
+            agentNameSubscription = userManager.getUserNames().subscribe(circuitInfo.agentID, new _2D_.Lambda.K1xWCpEh0d4XNuVVYxGUJwEFRxU(this));
+            if (eventBus != null)
+            {
+                eventBus.publish(new SLRegionInfoChangedEvent());
             }
         }
     }
 
-    public void HandleScriptDialog(ScriptDialog scriptDialog) {
-        String[] strArr;
-        boolean z;
-        int i = 0;
-        if (scriptDialog.Buttons_Fields.size() > 0) {
-            String[] strArr2 = new String[scriptDialog.Buttons_Fields.size()];
-            Iterator<T> it = scriptDialog.Buttons_Fields.iterator();
-            int i2 = 0;
-            while (true) {
-                if (!it.hasNext()) {
-                    z = false;
-                    strArr = strArr2;
-                    break;
-                }
-                strArr2[i2] = SLMessage.stringFromVariableUTF(((ScriptDialog.Buttons) it.next()).ButtonLabel);
-                if (strArr2[i2].equals("!!llTextBox!!")) {
-                    i = i2;
-                    z = true;
-                    strArr = strArr2;
-                    break;
-                }
-                i2++;
-            }
-        } else {
-            strArr = null;
-            z = false;
+    public void HandleScriptDialog(ScriptDialog scriptdialog)
+    {
+        String as[];
+        Iterator iterator;
+        int i;
+        int j;
+        j = 0;
+        if (scriptdialog.Buttons_Fields.size() <= 0)
+        {
+            break MISSING_BLOCK_LABEL_156;
         }
-        if (!z) {
-            HandleChatEvent(this.localChatterID, new SLChatScriptDialog(scriptDialog, this.agentUUID, strArr), true);
-        } else {
-            HandleChatEvent(this.localChatterID, new SLChatTextBoxDialog(scriptDialog, this.agentUUID, i), true);
+        as = new String[scriptdialog.Buttons_Fields.size()];
+        iterator = scriptdialog.Buttons_Fields.iterator();
+        i = 0;
+_L5:
+        if (!iterator.hasNext()) goto _L2; else goto _L1
+_L1:
+        as[i] = SLMessage.stringFromVariableUTF(((com.lumiyaviewer.lumiya.slproto.messages.ScriptDialog.Buttons)iterator.next()).ButtonLabel);
+        if (!as[i].equals("!!llTextBox!!")) goto _L4; else goto _L3
+_L3:
+        boolean flag = true;
+        j = i;
+        i = ((flag) ? 1 : 0);
+_L6:
+        if (i == 0)
+        {
+            HandleChatEvent(localChatterID, new SLChatScriptDialog(scriptdialog, agentUUID, as), true);
+            return;
+        } else
+        {
+            HandleChatEvent(localChatterID, new SLChatTextBoxDialog(scriptdialog, agentUUID, j), true);
+            return;
         }
+_L4:
+        i++;
+          goto _L5
+_L2:
+        i = 0;
+          goto _L6
+        as = null;
+        i = 0;
+          goto _L6
     }
 
-    public void HandleSimulatorViewerTimeMessage(SimulatorViewerTimeMessage simulatorViewerTimeMessage) {
-        if (!this.authReply.isTemporary && this.gridConn != null && this.gridConn.parcelInfo != null) {
-            float f = (simulatorViewerTimeMessage.TimeInfo_Field.SunPhase / 6.2831855f) + 0.25f;
-            this.gridConn.parcelInfo.setSunHour((float) (((double) f) - Math.floor((double) f)));
-        }
-    }
-
-    public void HandleTeleportFailed(TeleportFailed teleportFailed) {
-        Debug.Log("TeleportFailed: reason = " + SLMessage.stringFromVariableOEM(teleportFailed.Info_Field.Reason));
-        this.teleportRequestSent = false;
-        this.eventBus.publish(new SLTeleportResultEvent(false, SLMessage.stringFromVariableOEM(teleportFailed.Info_Field.Reason)));
-    }
-
-    public void HandleTeleportLocal(TeleportLocal teleportLocal) {
-        this.teleportRequestSent = false;
-        this.eventBus.publish(new SLTeleportResultEvent(true, (String) null));
-    }
-
-    public void HandleTeleportProgress(TeleportProgress teleportProgress) {
-        Debug.Log("Teleport progress: flags = " + teleportProgress.Info_Field.TeleportFlags + ", progress = " + SLMessage.stringFromVariableOEM(teleportProgress.Info_Field.Message));
-    }
-
-    public void HandleTeleportStart(TeleportStart teleportStart) {
-        Debug.Log("TeleportStart: flags = " + teleportStart.Info_Field.TeleportFlags);
-    }
-
-    public void OfferInventoryItem(UUID uuid, SLInventoryEntry sLInventoryEntry) {
-        this.userManager.getInventoryManager().getExecutor().execute(new Runnable(this, sLInventoryEntry, uuid) {
-
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f55$f0;
-
-            /* renamed from: -$f1 */
-            private final /* synthetic */ Object f56$f1;
-
-            /* renamed from: -$f2 */
-            private final /* synthetic */ Object f57$f2;
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.-$Lambda$K1xWCpEh0d4XNuVVYxGUJwEFRxU.1.$m$0():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.-$Lambda$K1xWCpEh0d4XNuVVYxGUJwEFRxU.1.$m$0():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.-$Lambda$K1xWCpEh0d4XNuVVYxGUJwEFRxU.1.run():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.-$Lambda$K1xWCpEh0d4XNuVVYxGUJwEFRxU.1.run():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        });
-    }
-
-    public void OfferTeleport(UUID uuid, String str) {
-        StartLure startLure = new StartLure();
-        startLure.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        startLure.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        startLure.Info_Field.Message = SLMessage.stringToVariableUTF(str);
-        StartLure.TargetData targetData = new StartLure.TargetData();
-        targetData.TargetID = uuid;
-        startLure.TargetData_Fields.add(targetData);
-        startLure.isReliable = true;
-        SendMessage(startLure);
-    }
-
-    public void OnCapsEvent(SLCapEventQueue.CapsEvent capsEvent) {
-        try {
-            this.capsEventQueue.add(capsEvent);
-            this.selector.wakeup();
-        } catch (Exception e) {
+    public void HandleSimulatorViewerTimeMessage(SimulatorViewerTimeMessage simulatorviewertimemessage)
+    {
+        if (!authReply.isTemporary && gridConn != null && gridConn.parcelInfo != null)
+        {
+            float f = simulatorviewertimemessage.TimeInfo_Field.SunPhase / 6.283185F + 0.25F;
+            f = (float)((double)f - Math.floor(f));
+            gridConn.parcelInfo.setSunHour(f);
         }
     }
 
-    public void ProcessIdle() {
-        if (this.doingObjectSelection && System.currentTimeMillis() > this.lastObjectSelection + 15000) {
-            this.doingObjectSelection = false;
+    public void HandleTeleportFailed(TeleportFailed teleportfailed)
+    {
+        Debug.Log((new StringBuilder()).append("TeleportFailed: reason = ").append(SLMessage.stringFromVariableOEM(teleportfailed.Info_Field.Reason)).toString());
+        teleportRequestSent = false;
+        teleportfailed = SLMessage.stringFromVariableOEM(teleportfailed.Info_Field.Reason);
+        eventBus.publish(new SLTeleportResultEvent(false, teleportfailed));
+    }
+
+    public void HandleTeleportLocal(TeleportLocal teleportlocal)
+    {
+        teleportRequestSent = false;
+        eventBus.publish(new SLTeleportResultEvent(true, null));
+    }
+
+    public void HandleTeleportProgress(TeleportProgress teleportprogress)
+    {
+        Debug.Log((new StringBuilder()).append("Teleport progress: flags = ").append(teleportprogress.Info_Field.TeleportFlags).append(", progress = ").append(SLMessage.stringFromVariableOEM(teleportprogress.Info_Field.Message)).toString());
+    }
+
+    public void HandleTeleportStart(TeleportStart teleportstart)
+    {
+        Debug.Log((new StringBuilder()).append("TeleportStart: flags = ").append(teleportstart.Info_Field.TeleportFlags).toString());
+    }
+
+    public void OfferInventoryItem(UUID uuid, SLInventoryEntry slinventoryentry)
+    {
+        userManager.getInventoryManager().getExecutor().execute(new _2D_.Lambda.K1xWCpEh0d4XNuVVYxGUJwEFRxU._cls1(this, slinventoryentry, uuid));
+    }
+
+    public void OfferTeleport(UUID uuid, String s)
+    {
+        StartLure startlure = new StartLure();
+        startlure.AgentData_Field.AgentID = circuitInfo.agentID;
+        startlure.AgentData_Field.SessionID = circuitInfo.sessionID;
+        startlure.Info_Field.Message = SLMessage.stringToVariableUTF(s);
+        s = new com.lumiyaviewer.lumiya.slproto.messages.StartLure.TargetData();
+        s.TargetID = uuid;
+        startlure.TargetData_Fields.add(s);
+        startlure.isReliable = true;
+        SendMessage(startlure);
+    }
+
+    public void OnCapsEvent(com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEvent capsevent)
+    {
+        try
+        {
+            capsEventQueue.add(capsevent);
+            selector.wakeup();
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEvent capsevent)
+        {
+            return;
+        }
+    }
+
+    public void ProcessIdle()
+    {
+        if (doingObjectSelection && System.currentTimeMillis() > lastObjectSelection + 15000L)
+        {
+            doingObjectSelection = false;
             ProcessObjectSelectionTimeout();
         }
-        if (!this.teleportRequestSent && getNeedObjectNames() && (!this.doingObjectSelection) && System.currentTimeMillis() >= this.lastObjectSelection + 500) {
+        if (!teleportRequestSent && getNeedObjectNames() && doingObjectSelection ^ true && System.currentTimeMillis() >= lastObjectSelection + 500L)
+        {
             ProcessObjectSelection();
         }
-        if (!this.agentPaused) {
-            long currentTimeMillis = System.currentTimeMillis();
-            if (GridConnectionService.hasVisibleActivities()) {
-                this.lastVisibleActivities = currentTimeMillis;
-            } else if (currentTimeMillis >= this.lastVisibleActivities + 10000) {
-                DoAgentPause();
+        if (!agentPaused)
+        {
+            long l = System.currentTimeMillis();
+            if (!GridConnectionService.hasVisibleActivities())
+            {
+                if (l >= lastVisibleActivities + 10000L)
+                {
+                    DoAgentPause();
+                }
+            } else
+            {
+                lastVisibleActivities = l;
             }
         }
-        if (this.objectPropertiesRateLimiter != null) {
-            this.objectPropertiesRateLimiter.firePending();
+        if (objectPropertiesRateLimiter != null)
+        {
+            objectPropertiesRateLimiter.firePending();
         }
     }
 
-    public void ProcessNetworkError() {
+    public void ProcessNetworkError()
+    {
         super.ProcessNetworkError();
         Debug.Printf("Network: Network error.", new Object[0]);
-        if (this.modules != null) {
-            this.modules.avatarControl.setEnableAgentUpdates(false);
+        if (modules != null)
+        {
+            modules.avatarControl.setEnableAgentUpdates(false);
         }
-        if (!this.authReply.isTemporary) {
-            this.gridConn.processDisconnect(false, "Network connection lost.");
+        if (!authReply.isTemporary)
+        {
+            gridConn.processDisconnect(false, "Network connection lost.");
         }
     }
 
-    public void ProcessTimeout() {
+    public void ProcessTimeout()
+    {
         super.ProcessTimeout();
-        if (this.modules != null) {
-            this.modules.avatarControl.setEnableAgentUpdates(false);
+        if (modules != null)
+        {
+            modules.avatarControl.setEnableAgentUpdates(false);
         }
-        if (!this.authReply.isTemporary) {
-            this.gridConn.processDisconnect(false, "Connection has timed out.");
+        if (!authReply.isTemporary)
+        {
+            gridConn.processDisconnect(false, "Connection has timed out.");
         }
     }
 
-    public void ProcessWakeup() {
+    public void ProcessWakeup()
+    {
         super.ProcessWakeup();
-        while (true) {
-            try {
-                SLCapEventQueue.CapsEvent poll = this.capsEventQueue.poll();
-                if (poll == null) {
-                    break;
-                }
-                HandleCapsEvent(poll);
-            } catch (Exception e) {
-            }
+_L1:
+        com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEvent capsevent = (com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEvent)capsEventQueue.poll();
+        if (capsevent == null)
+        {
+            break MISSING_BLOCK_LABEL_28;
         }
+        HandleCapsEvent(capsevent);
+          goto _L1
+        Exception exception;
+        exception;
         ProcessIdle();
+        return;
     }
 
-    public void RemoveFriend(UUID uuid) {
-        TerminateFriendship terminateFriendship = new TerminateFriendship();
-        terminateFriendship.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        terminateFriendship.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        terminateFriendship.ExBlock_Field.OtherID = uuid;
-        terminateFriendship.isReliable = true;
-        SendMessage(terminateFriendship);
-        this.userManager.getChatterList().getFriendManager().removeFriend(uuid);
+    public void RemoveFriend(UUID uuid)
+    {
+        TerminateFriendship terminatefriendship = new TerminateFriendship();
+        terminatefriendship.AgentData_Field.AgentID = circuitInfo.agentID;
+        terminatefriendship.AgentData_Field.SessionID = circuitInfo.sessionID;
+        terminatefriendship.ExBlock_Field.OtherID = uuid;
+        terminatefriendship.isReliable = true;
+        SendMessage(terminatefriendship);
+        userManager.getChatterList().getFriendManager().removeFriend(uuid);
     }
 
-    /* access modifiers changed from: package-private */
-    public void RequestObjectName(SLObjectInfo sLObjectInfo) {
-        if (sLObjectInfo.getId() != null && !this.objectNamesRequested.containsKey(sLObjectInfo.getId()) && (!this.forceNeedObjectNames.containsKey(sLObjectInfo.getId()))) {
-            this.forceNeedObjectNames.put(sLObjectInfo.getId(), sLObjectInfo);
+    void RequestObjectName(SLObjectInfo slobjectinfo)
+    {
+        if (slobjectinfo.getId() != null && !objectNamesRequested.containsKey(slobjectinfo.getId()) && forceNeedObjectNames.containsKey(slobjectinfo.getId()) ^ true)
+        {
+            forceNeedObjectNames.put(slobjectinfo.getId(), slobjectinfo);
         }
         TryWakeUp();
     }
 
-    public void RequestTeleport(UUID uuid, String str) {
-        SendInstantMessage(uuid, str, 26);
+    public void RequestTeleport(UUID uuid, String s)
+    {
+        SendInstantMessage(uuid, s, 26);
     }
 
-    public boolean RestartRegion(int i) {
-        if (!this.isEstateManager) {
+    public boolean RestartRegion(int i)
+    {
+        if (isEstateManager)
+        {
+            SendEstateOwnerMessage("restart", new String[] {
+                Integer.toString(i)
+            });
+            return true;
+        } else
+        {
             return false;
         }
-        SendEstateOwnerMessage("restart", new String[]{Integer.toString(i)});
-        return true;
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:4:0x0011, code lost:
-        r2 = (r2 = r7.userManager.getCurrentLocationInfoSnapshot()).parcelData();
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public void RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r8) {
-        /*
-            r7 = this;
-            r6 = 1
-            r5 = 0
-            r0 = 0
-            java.util.UUID r1 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID
-            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r7.userManager
-            if (r2 == 0) goto L_0x0169
-            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r7.userManager
-            com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo r2 = r2.getCurrentLocationInfoSnapshot()
-            if (r2 == 0) goto L_0x0169
-            com.lumiyaviewer.lumiya.slproto.users.ParcelData r2 = r2.parcelData()
-            if (r2 == 0) goto L_0x0169
-            boolean r3 = r2.isGroupOwned()
-            if (r3 == 0) goto L_0x0169
-            java.util.UUID r2 = r2.getOwnerID()
-        L_0x0021:
-            if (r2 == 0) goto L_0x015a
-            java.util.UUID r3 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID
-            boolean r3 = r3.equals(r2)
-            if (r3 == 0) goto L_0x0166
-        L_0x002b:
-            if (r0 == 0) goto L_0x015d
-            com.lumiyaviewer.lumiya.slproto.users.manager.UserManager r2 = r7.userManager
-            com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList r2 = r2.getChatterList()
-            com.lumiyaviewer.lumiya.slproto.users.manager.GroupManager r2 = r2.getGroupManager()
-            com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList r2 = r2.getAvatarGroupList()
-            if (r2 == 0) goto L_0x0163
-            com.google.common.collect.ImmutableMap<java.util.UUID, com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList$AvatarGroupEntry> r2 = r2.Groups
-            boolean r2 = r2.containsKey(r0)
-            if (r2 == 0) goto L_0x0163
-        L_0x0045:
-            if (r0 != 0) goto L_0x0049
-            java.util.UUID r0 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID
-        L_0x0049:
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject r1 = new com.lumiyaviewer.lumiya.slproto.messages.RezObject
-            r1.<init>()
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$AgentData r2 = r1.AgentData_Field
-            com.lumiyaviewer.lumiya.slproto.SLCircuitInfo r3 = r7.circuitInfo
-            java.util.UUID r3 = r3.agentID
-            r2.AgentID = r3
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$AgentData r2 = r1.AgentData_Field
-            com.lumiyaviewer.lumiya.slproto.SLCircuitInfo r3 = r7.circuitInfo
-            java.util.UUID r3 = r3.sessionID
-            r2.SessionID = r3
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$AgentData r2 = r1.AgentData_Field
-            r2.GroupID = r0
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            java.util.UUID r2 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID
-            r0.FromTaskID = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            r0.BypassRaycast = r6
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            com.lumiyaviewer.lumiya.slproto.modules.SLModules r2 = r7.modules
-            com.lumiyaviewer.lumiya.slproto.modules.SLAvatarControl r2 = r2.avatarControl
-            com.lumiyaviewer.lumiya.slproto.types.AgentPosition r2 = r2.getAgentPosition()
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r2 = r2.getPosition()
-            r0.RayStart = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r2 = r1.RezData_Field
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r2 = r2.RayStart
-            com.lumiyaviewer.lumiya.slproto.modules.SLModules r3 = r7.getModules()
-            com.lumiyaviewer.lumiya.slproto.modules.SLAvatarControl r3 = r3.avatarControl
-            float r3 = r3.getAgentHeading()
-            r4 = 1069547520(0x3fc00000, float:1.5)
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r2 = r2.getRotatedOffset(r4, r3)
-            r0.RayEnd = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            r0.RayEndIsIntersection = r6
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            java.util.UUID r2 = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID
-            r0.RayTargetID = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            r0.RezSelected = r5
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            r0.RemoveItem = r5
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            r0.ItemFlags = r5
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            int r2 = r8.groupMask
-            r0.GroupMask = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            int r2 = r8.everyoneMask
-            r0.EveryoneMask = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$RezData r0 = r1.RezData_Field
-            int r2 = r8.nextOwnerMask
-            r0.NextOwnerMask = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            java.util.UUID r2 = r8.uuid
-            r0.ItemID = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            java.util.UUID r2 = r8.parentUUID
-            r0.FolderID = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            java.util.UUID r2 = r8.creatorUUID
-            r0.CreatorID = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            java.util.UUID r2 = r8.ownerUUID
-            r0.OwnerID = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            java.util.UUID r2 = r8.groupUUID
-            r0.GroupID = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.baseMask
-            r0.BaseMask = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.ownerMask
-            r0.OwnerMask = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.groupMask
-            r0.GroupMask = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.everyoneMask
-            r0.EveryoneMask = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.nextOwnerMask
-            r0.NextOwnerMask = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            boolean r2 = r8.isGroupOwned
-            r0.GroupOwned = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            java.util.UUID r2 = java.util.UUID.randomUUID()
-            r0.TransactionID = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.assetType
-            r0.Type = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.invType
-            r0.InvType = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.flags
-            r0.Flags = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.saleType
-            r0.SaleType = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.salePrice
-            r0.SalePrice = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            java.lang.String r2 = r8.name
-            byte[] r2 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringToVariableOEM(r2)
-            r0.Name = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            java.lang.String r2 = r8.description
-            byte[] r2 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringToVariableOEM(r2)
-            r0.Description = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            int r2 = r8.creationDate
-            r0.CreationDate = r2
-            com.lumiyaviewer.lumiya.slproto.messages.RezObject$InventoryData r0 = r1.InventoryData_Field
-            r0.CRC = r5
-            r1.isReliable = r6
-            int r0 = r8.ownerMask
-            r2 = 32768(0x8000, float:4.5918E-41)
-            r0 = r0 & r2
-            if (r0 != 0) goto L_0x0156
-            java.util.UUID r0 = r8.parentUUID
-            com.lumiyaviewer.lumiya.slproto.SLAgentCircuit$9 r2 = new com.lumiyaviewer.lumiya.slproto.SLAgentCircuit$9
-            r2.<init>(r0)
-            r1.setEventListener(r2)
-        L_0x0156:
-            r7.SendMessage(r1)
-            return
-        L_0x015a:
-            r0 = r2
-            goto L_0x002b
-        L_0x015d:
-            java.util.UUID r0 = r7.getActiveGroupID()
-            goto L_0x0045
-        L_0x0163:
-            r0 = r1
-            goto L_0x0045
-        L_0x0166:
-            r0 = r2
-            goto L_0x002b
-        L_0x0169:
-            r2 = r0
-            goto L_0x0021
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.SLAgentCircuit.RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry):void");
-    }
-
-    public void SendChatMessage(@Nonnull ChatterID chatterID, String str) {
-        switch (m124getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues()[chatterID.getChatterType().ordinal()]) {
-            case 1:
-                SendGroupInstantMessage(chatterID.getOptionalChatterUUID(), str);
-                return;
-            case 2:
-                SendLocalChatMessage(str);
-                return;
-            case 3:
-                SendInstantMessage(chatterID.getOptionalChatterUUID(), str);
-                return;
-            default:
-                return;
+    public void RezObject(SLInventoryEntry slinventoryentry)
+    {
+        UUID uuid;
+        Object obj1;
+        obj1 = null;
+        uuid = UUIDPool.ZeroUUID;
+        if (userManager == null) goto _L2; else goto _L1
+_L1:
+        Object obj = userManager.getCurrentLocationInfoSnapshot();
+        if (obj == null) goto _L2; else goto _L3
+_L3:
+        obj = ((CurrentLocationInfo) (obj)).parcelData();
+        if (obj == null || !((ParcelData) (obj)).isGroupOwned()) goto _L2; else goto _L4
+_L4:
+        obj = ((ParcelData) (obj)).getOwnerID();
+_L6:
+        if (obj != null && UUIDPool.ZeroUUID.equals(obj))
+        {
+            obj = obj1;
         }
-    }
-
-    public void SendGenericMessage(String str, String[] strArr) {
-        GenericMessage genericMessage = new GenericMessage();
-        genericMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        genericMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        genericMessage.AgentData_Field.TransactionID = new UUID(0, 0);
-        genericMessage.MethodData_Field.Method = SLMessage.stringToVariableOEM(str);
-        genericMessage.MethodData_Field.Invoice = new UUID(0, 0);
-        for (String stringToVariableOEM : strArr) {
-            GenericMessage.ParamList paramList = new GenericMessage.ParamList();
-            paramList.Parameter = SLMessage.stringToVariableOEM(stringToVariableOEM);
-            genericMessage.ParamList_Fields.add(paramList);
-        }
-        genericMessage.isReliable = true;
-        SendMessage(genericMessage);
-    }
-
-    public void SendGroupInstantMessage(UUID uuid, String str) {
-        ImprovedInstantMessage improvedInstantMessage = new ImprovedInstantMessage();
-        improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        improvedInstantMessage.MessageBlock_Field.FromGroup = false;
-        improvedInstantMessage.MessageBlock_Field.ToAgentID = uuid;
-        improvedInstantMessage.MessageBlock_Field.ParentEstateID = 0;
-        improvedInstantMessage.MessageBlock_Field.RegionID = new UUID(0, 0);
-        improvedInstantMessage.MessageBlock_Field.Position = this.modules.avatarControl.getAgentPosition().getPosition();
-        improvedInstantMessage.MessageBlock_Field.Offline = 0;
-        improvedInstantMessage.MessageBlock_Field.Dialog = 17;
-        improvedInstantMessage.MessageBlock_Field.ID = uuid;
-        improvedInstantMessage.MessageBlock_Field.Timestamp = 0;
-        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
-        improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str);
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = new byte[1];
-        improvedInstantMessage.isReliable = true;
-        synchronized (this.startedGroupSessions) {
-            if (!this.startedGroupSessions.contains(uuid)) {
-                SendGroupSessionStart(uuid);
-                this.pendingGroupMessages.add(improvedInstantMessage);
-            } else {
-                SendMessage(improvedInstantMessage);
+        if (obj != null)
+        {
+            AvatarGroupList avatargrouplist = userManager.getChatterList().getGroupManager().getAvatarGroupList();
+            if (avatargrouplist == null || !avatargrouplist.Groups.containsKey(obj))
+            {
+                obj = uuid;
             }
+        } else
+        {
+            obj = getActiveGroupID();
+        }
+        uuid = ((UUID) (obj));
+        if (obj == null)
+        {
+            uuid = UUIDPool.ZeroUUID;
+        }
+        obj = new RezObject();
+        ((RezObject) (obj)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((RezObject) (obj)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        ((RezObject) (obj)).AgentData_Field.GroupID = uuid;
+        ((RezObject) (obj)).RezData_Field.FromTaskID = UUIDPool.ZeroUUID;
+        ((RezObject) (obj)).RezData_Field.BypassRaycast = 1;
+        ((RezObject) (obj)).RezData_Field.RayStart = modules.avatarControl.getAgentPosition().getPosition();
+        ((RezObject) (obj)).RezData_Field.RayEnd = ((RezObject) (obj)).RezData_Field.RayStart.getRotatedOffset(1.5F, getModules().avatarControl.getAgentHeading());
+        ((RezObject) (obj)).RezData_Field.RayEndIsIntersection = true;
+        ((RezObject) (obj)).RezData_Field.RayTargetID = UUIDPool.ZeroUUID;
+        ((RezObject) (obj)).RezData_Field.RezSelected = false;
+        ((RezObject) (obj)).RezData_Field.RemoveItem = false;
+        ((RezObject) (obj)).RezData_Field.ItemFlags = 0;
+        ((RezObject) (obj)).RezData_Field.GroupMask = slinventoryentry.groupMask;
+        ((RezObject) (obj)).RezData_Field.EveryoneMask = slinventoryentry.everyoneMask;
+        ((RezObject) (obj)).RezData_Field.NextOwnerMask = slinventoryentry.nextOwnerMask;
+        ((RezObject) (obj)).InventoryData_Field.ItemID = slinventoryentry.uuid;
+        ((RezObject) (obj)).InventoryData_Field.FolderID = slinventoryentry.parentUUID;
+        ((RezObject) (obj)).InventoryData_Field.CreatorID = slinventoryentry.creatorUUID;
+        ((RezObject) (obj)).InventoryData_Field.OwnerID = slinventoryentry.ownerUUID;
+        ((RezObject) (obj)).InventoryData_Field.GroupID = slinventoryentry.groupUUID;
+        ((RezObject) (obj)).InventoryData_Field.BaseMask = slinventoryentry.baseMask;
+        ((RezObject) (obj)).InventoryData_Field.OwnerMask = slinventoryentry.ownerMask;
+        ((RezObject) (obj)).InventoryData_Field.GroupMask = slinventoryentry.groupMask;
+        ((RezObject) (obj)).InventoryData_Field.EveryoneMask = slinventoryentry.everyoneMask;
+        ((RezObject) (obj)).InventoryData_Field.NextOwnerMask = slinventoryentry.nextOwnerMask;
+        ((RezObject) (obj)).InventoryData_Field.GroupOwned = slinventoryentry.isGroupOwned;
+        ((RezObject) (obj)).InventoryData_Field.TransactionID = UUID.randomUUID();
+        ((RezObject) (obj)).InventoryData_Field.Type = slinventoryentry.assetType;
+        ((RezObject) (obj)).InventoryData_Field.InvType = slinventoryentry.invType;
+        ((RezObject) (obj)).InventoryData_Field.Flags = slinventoryentry.flags;
+        ((RezObject) (obj)).InventoryData_Field.SaleType = slinventoryentry.saleType;
+        ((RezObject) (obj)).InventoryData_Field.SalePrice = slinventoryentry.salePrice;
+        ((RezObject) (obj)).InventoryData_Field.Name = SLMessage.stringToVariableOEM(slinventoryentry.name);
+        ((RezObject) (obj)).InventoryData_Field.Description = SLMessage.stringToVariableOEM(slinventoryentry.description);
+        ((RezObject) (obj)).InventoryData_Field.CreationDate = slinventoryentry.creationDate;
+        ((RezObject) (obj)).InventoryData_Field.CRC = 0;
+        obj.isReliable = true;
+        if ((slinventoryentry.ownerMask & 0x8000) == 0)
+        {
+            ((RezObject) (obj)).setEventListener(new SLMessageEventListener() {
+
+                final SLAgentCircuit this$0;
+                final UUID val$folderUUID;
+
+                public void onMessageAcknowledged(SLMessage slmessage)
+                {
+                    if (SLAgentCircuit._2D_get2(SLAgentCircuit.this) != null)
+                    {
+                        SLAgentCircuit._2D_get2(SLAgentCircuit.this).getInventoryManager().requestFolderUpdate(folderUUID);
+                    }
+                }
+
+                public void onMessageTimeout(SLMessage slmessage)
+                {
+                }
+
+            
+            {
+                this$0 = SLAgentCircuit.this;
+                folderUUID = uuid;
+                super();
+            }
+            });
+        }
+        SendMessage(((SLMessage) (obj)));
+        return;
+_L2:
+        obj = null;
+        if (true) goto _L6; else goto _L5
+_L5:
+    }
+
+    public void SendChatMessage(ChatterID chatterid, String s)
+    {
+        switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues()[chatterid.getChatterType().ordinal()])
+        {
+        default:
+            return;
+
+        case 2: // '\002'
+            SendLocalChatMessage(s);
+            return;
+
+        case 3: // '\003'
+            SendInstantMessage(chatterid.getOptionalChatterUUID(), s);
+            return;
+
+        case 1: // '\001'
+            SendGroupInstantMessage(chatterid.getOptionalChatterUUID(), s);
+            return;
         }
     }
 
-    public boolean SendInstantMessage(UUID uuid, String str) {
-        return SendInstantMessage(uuid, str, 0);
-    }
-
-    public void SendLocalChatMessage(String str) {
+    public void SendGenericMessage(String s, String as[])
+    {
+        GenericMessage genericmessage = new GenericMessage();
+        genericmessage.AgentData_Field.AgentID = circuitInfo.agentID;
+        genericmessage.AgentData_Field.SessionID = circuitInfo.sessionID;
+        genericmessage.AgentData_Field.TransactionID = new UUID(0L, 0L);
+        genericmessage.MethodData_Field.Method = SLMessage.stringToVariableOEM(s);
+        genericmessage.MethodData_Field.Invoice = new UUID(0L, 0L);
         int i = 0;
-        if (str.startsWith("/")) {
-            int i2 = 1;
-            int i3 = 0;
-            while (i2 < str.length() && Character.isDigit(str.charAt(i2))) {
-                i3++;
-                i2++;
-            }
-            if (i3 >= 0) {
-                try {
-                    i = Integer.parseInt(str.substring(1, i3 + 1));
-                    str = str.substring(i3 + 1).trim();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        for (int j = as.length; i < j; i++)
+        {
+            s = as[i];
+            com.lumiyaviewer.lumiya.slproto.messages.GenericMessage.ParamList paramlist = new com.lumiyaviewer.lumiya.slproto.messages.GenericMessage.ParamList();
+            paramlist.Parameter = SLMessage.stringToVariableOEM(s);
+            genericmessage.ParamList_Fields.add(paramlist);
         }
-        if (getModules().rlvController.onSendLocalChat(i, str)) {
-            ChatFromViewer chatFromViewer = new ChatFromViewer();
-            chatFromViewer.AgentData_Field.AgentID = this.circuitInfo.agentID;
-            chatFromViewer.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-            chatFromViewer.ChatData_Field.Channel = i;
-            chatFromViewer.ChatData_Field.Type = 1;
-            chatFromViewer.ChatData_Field.Message = SLMessage.stringToVariableUTF(str);
-            chatFromViewer.isReliable = true;
-            SendMessage(chatFromViewer);
-        }
+
+        genericmessage.isReliable = true;
+        SendMessage(genericmessage);
     }
 
-    /* access modifiers changed from: package-private */
-    public void SendLogoutRequest() {
+    public void SendGroupInstantMessage(UUID uuid, String s)
+    {
+        ImprovedInstantMessage improvedinstantmessage;
+        improvedinstantmessage = new ImprovedInstantMessage();
+        improvedinstantmessage.AgentData_Field.AgentID = circuitInfo.agentID;
+        improvedinstantmessage.AgentData_Field.SessionID = circuitInfo.sessionID;
+        improvedinstantmessage.MessageBlock_Field.FromGroup = false;
+        improvedinstantmessage.MessageBlock_Field.ToAgentID = uuid;
+        improvedinstantmessage.MessageBlock_Field.ParentEstateID = 0;
+        improvedinstantmessage.MessageBlock_Field.RegionID = new UUID(0L, 0L);
+        improvedinstantmessage.MessageBlock_Field.Position = modules.avatarControl.getAgentPosition().getPosition();
+        improvedinstantmessage.MessageBlock_Field.Offline = 0;
+        improvedinstantmessage.MessageBlock_Field.Dialog = 17;
+        improvedinstantmessage.MessageBlock_Field.ID = uuid;
+        improvedinstantmessage.MessageBlock_Field.Timestamp = 0;
+        improvedinstantmessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
+        improvedinstantmessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(s);
+        improvedinstantmessage.MessageBlock_Field.BinaryBucket = new byte[1];
+        improvedinstantmessage.isReliable = true;
+        s = startedGroupSessions;
+        s;
+        JVM INSTR monitorenter ;
+        if (startedGroupSessions.contains(uuid)) goto _L2; else goto _L1
+_L1:
+        SendGroupSessionStart(uuid);
+        pendingGroupMessages.add(improvedinstantmessage);
+_L4:
+        s;
+        JVM INSTR monitorexit ;
+        return;
+_L2:
+        SendMessage(improvedinstantmessage);
+        if (true) goto _L4; else goto _L3
+_L3:
+        uuid;
+        throw uuid;
+    }
+
+    public boolean SendInstantMessage(UUID uuid, String s)
+    {
+        return SendInstantMessage(uuid, s, 0);
+    }
+
+    public void SendLocalChatMessage(String s)
+    {
+        Object obj;
+        int i;
+        int j;
+        boolean flag1 = false;
+        boolean flag = false;
+        i = ((flag) ? 1 : 0);
+        obj = s;
+        if (!s.startsWith("/"))
+        {
+            break MISSING_BLOCK_LABEL_103;
+        }
+        i = 1;
+        j = 0;
+        for (; i < s.length() && Character.isDigit(s.charAt(i)); i++)
+        {
+            j++;
+        }
+
+        i = ((flag) ? 1 : 0);
+        obj = s;
+        if (j < 0)
+        {
+            break MISSING_BLOCK_LABEL_103;
+        }
+        i = ((flag1) ? 1 : 0);
+        int k = Integer.parseInt(s.substring(1, j + 1));
+        i = k;
+        obj = s.substring(j + 1).trim();
+        i = k;
+_L1:
+        if (!getModules().rlvController.onSendLocalChat(i, ((String) (obj))))
+        {
+            return;
+        } else
+        {
+            s = new ChatFromViewer();
+            ((ChatFromViewer) (s)).AgentData_Field.AgentID = circuitInfo.agentID;
+            ((ChatFromViewer) (s)).AgentData_Field.SessionID = circuitInfo.sessionID;
+            ((ChatFromViewer) (s)).ChatData_Field.Channel = i;
+            ((ChatFromViewer) (s)).ChatData_Field.Type = 1;
+            ((ChatFromViewer) (s)).ChatData_Field.Message = SLMessage.stringToVariableUTF(((String) (obj)));
+            s.isReliable = true;
+            SendMessage(s);
+            return;
+        }
+        obj;
+        ((Exception) (obj)).printStackTrace();
+        obj = s;
+          goto _L1
+    }
+
+    void SendLogoutRequest()
+    {
         Debug.Log("Logout: Sending logout request.");
-        this.modules.avatarControl.setEnableAgentUpdates(false);
-        LogoutRequest logoutRequest = new LogoutRequest();
-        logoutRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        logoutRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        logoutRequest.isReliable = true;
-        logoutRequest.setEventListener(new SLMessageEventListener() {
-            public void onMessageAcknowledged(SLMessage sLMessage) {
+        modules.avatarControl.setEnableAgentUpdates(false);
+        LogoutRequest logoutrequest = new LogoutRequest();
+        logoutrequest.AgentData_Field.AgentID = circuitInfo.agentID;
+        logoutrequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+        logoutrequest.isReliable = true;
+        logoutrequest.setEventListener(new SLMessageEventListener() {
+
+            final SLAgentCircuit this$0;
+
+            public void onMessageAcknowledged(SLMessage slmessage)
+            {
                 Debug.Log("Logout: Logout request acknowledged.");
-                SLAgentCircuit.this.gridConn.processDisconnect(true, "Logged out.");
+                gridConn.processDisconnect(true, "Logged out.");
             }
 
-            public void onMessageTimeout(SLMessage sLMessage) {
+            public void onMessageTimeout(SLMessage slmessage)
+            {
                 Debug.Log("Logout: LogoutRequest timed out!");
-                SLAgentCircuit.this.gridConn.processDisconnect(false, "Logout request has timed out.");
+                gridConn.processDisconnect(false, "Logout request has timed out.");
+            }
+
+            
+            {
+                this$0 = SLAgentCircuit.this;
+                super();
             }
         });
-        SendMessage(logoutRequest);
+        SendMessage(logoutrequest);
     }
 
-    public void SendScriptDialogReply(UUID uuid, int i, int i2, String str) {
-        ScriptDialogReply scriptDialogReply = new ScriptDialogReply();
-        scriptDialogReply.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        scriptDialogReply.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        scriptDialogReply.isReliable = true;
-        scriptDialogReply.Data_Field.ObjectID = uuid;
-        scriptDialogReply.Data_Field.ChatChannel = i;
-        scriptDialogReply.Data_Field.ButtonIndex = i2;
-        scriptDialogReply.Data_Field.ButtonLabel = SLMessage.stringToVariableUTF(str);
-        SendMessage(scriptDialogReply);
+    public void SendScriptDialogReply(UUID uuid, int i, int j, String s)
+    {
+        ScriptDialogReply scriptdialogreply = new ScriptDialogReply();
+        scriptdialogreply.AgentData_Field.AgentID = circuitInfo.agentID;
+        scriptdialogreply.AgentData_Field.SessionID = circuitInfo.sessionID;
+        scriptdialogreply.isReliable = true;
+        scriptdialogreply.Data_Field.ObjectID = uuid;
+        scriptdialogreply.Data_Field.ChatChannel = i;
+        scriptdialogreply.Data_Field.ButtonIndex = j;
+        scriptdialogreply.Data_Field.ButtonLabel = SLMessage.stringToVariableUTF(s);
+        SendMessage(scriptdialogreply);
     }
 
-    /* access modifiers changed from: package-private */
-    public void SendUseCode() {
-        Debug.Printf("Using circuitCode: %d", Integer.valueOf(this.circuitInfo.circuitCode));
-        UseCircuitCode useCircuitCode = new UseCircuitCode();
-        useCircuitCode.CircuitCode_Field.Code = this.circuitInfo.circuitCode;
-        useCircuitCode.CircuitCode_Field.SessionID = this.circuitInfo.sessionID;
-        useCircuitCode.CircuitCode_Field.ID = this.circuitInfo.agentID;
-        useCircuitCode.isReliable = true;
-        useCircuitCode.setEventListener(new SLMessageEventListener() {
-            public void onMessageAcknowledged(SLMessage sLMessage) {
+    void SendUseCode()
+    {
+        Debug.Printf("Using circuitCode: %d", new Object[] {
+            Integer.valueOf(circuitInfo.circuitCode)
+        });
+        UseCircuitCode usecircuitcode = new UseCircuitCode();
+        usecircuitcode.CircuitCode_Field.Code = circuitInfo.circuitCode;
+        usecircuitcode.CircuitCode_Field.SessionID = circuitInfo.sessionID;
+        usecircuitcode.CircuitCode_Field.ID = circuitInfo.agentID;
+        usecircuitcode.isReliable = true;
+        usecircuitcode.setEventListener(new SLMessageEventListener() {
+
+            final SLAgentCircuit this$0;
+
+            public void onMessageAcknowledged(SLMessage slmessage)
+            {
                 Debug.Log("SLAgentCircuit: UseCircuitCode acknowledged.");
-                if (!SLAgentCircuit.this.authReply.isTemporary) {
-                    if (SLAgentCircuit.this.authReply.fromTeleport) {
+                if (!authReply.isTemporary)
+                {
+                    if (authReply.fromTeleport)
+                    {
                         Debug.Log("SLAgentCircuit: Ack from teleport, sending Teleport success.");
-                        SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(true, (String) null));
-                    } else {
-                        SLAgentCircuit.this.gridConn.notifyLoginSuccess();
+                        SLAgentCircuit._2D_get0(SLAgentCircuit.this).publish(new SLTeleportResultEvent(true, null));
+                    } else
+                    {
+                        gridConn.notifyLoginSuccess();
                     }
-                    SLAgentCircuit.this.SendCompleteAgentMovement();
-                    if (SLAgentCircuit.this.modules != null) {
-                        SLAgentCircuit.this.modules.HandleCircuitReady();
+                    SLAgentCircuit._2D_wrap0(SLAgentCircuit.this);
+                    if (SLAgentCircuit._2D_get1(SLAgentCircuit.this) != null)
+                    {
+                        SLAgentCircuit._2D_get1(SLAgentCircuit.this).HandleCircuitReady();
                     }
                 }
             }
 
-            public void onMessageTimeout(SLMessage sLMessage) {
-                if (SLAgentCircuit.this.authReply.fromTeleport) {
-                    SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Timed out while connecting to the simulator."));
-                } else {
-                    SLAgentCircuit.this.gridConn.notifyLoginError("Timed out while connecting to the simulator.");
+            public void onMessageTimeout(SLMessage slmessage)
+            {
+                if (authReply.fromTeleport)
+                {
+                    SLAgentCircuit._2D_get0(SLAgentCircuit.this).publish(new SLTeleportResultEvent(false, "Timed out while connecting to the simulator."));
+                    return;
+                } else
+                {
+                    gridConn.notifyLoginError("Timed out while connecting to the simulator.");
+                    return;
                 }
+            }
+
+            
+            {
+                this$0 = SLAgentCircuit.this;
+                super();
             }
         });
-        SendMessage(useCircuitCode);
+        SendMessage(usecircuitcode);
     }
 
-    public void StartGroupSessionForVoice(UUID uuid) {
-        boolean z = false;
-        synchronized (this.startedGroupSessions) {
-            if (!this.startedGroupSessions.contains(uuid)) {
-                SendGroupSessionStart(uuid);
-                z = true;
-            }
+    public void StartGroupSessionForVoice(UUID uuid)
+    {
+        boolean flag = false;
+        Set set = startedGroupSessions;
+        set;
+        JVM INSTR monitorenter ;
+        if (startedGroupSessions.contains(uuid))
+        {
+            break MISSING_BLOCK_LABEL_29;
         }
-        if (!z) {
-            this.modules.voice.onGroupSessionReady(uuid);
+        SendGroupSessionStart(uuid);
+        flag = true;
+        set;
+        JVM INSTR monitorexit ;
+        if (!flag)
+        {
+            modules.voice.onGroupSessionReady(uuid);
         }
+        return;
+        uuid;
+        throw uuid;
     }
 
-    public void TeleportToGlobalPosition(LLVector3 lLVector3) {
-        int floor = (int) Math.floor((double) lLVector3.x);
-        int floor2 = (int) Math.floor((double) lLVector3.y);
-        long j = ((long) (floor2 - (floor2 % 256))) | (((long) (floor - (floor % 256))) << 32);
-        LLVector3 lLVector32 = new LLVector3(lLVector3.x % 256.0f, lLVector3.y % 256.0f, lLVector3.z);
-        LLVector3 lLVector33 = new LLVector3(lLVector32);
-        lLVector33.x += 1.0f;
-        Debug.Printf("regionHandle = %s, globalPos = %s", Long.toHexString(j), lLVector3);
-        this.teleportRequestSent = true;
-        TeleportLocationRequest teleportLocationRequest = new TeleportLocationRequest();
-        teleportLocationRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        teleportLocationRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        teleportLocationRequest.Info_Field.RegionHandle = j;
-        teleportLocationRequest.Info_Field.Position = lLVector32;
-        teleportLocationRequest.Info_Field.LookAt = lLVector33;
-        teleportLocationRequest.isReliable = true;
-        teleportLocationRequest.setEventListener(new SLMessageEventListener() {
-            public void onMessageAcknowledged(SLMessage sLMessage) {
+    public void TeleportToGlobalPosition(LLVector3 llvector3)
+    {
+        int i = (int)Math.floor(llvector3.x);
+        int j = (int)Math.floor(llvector3.y);
+        long l = i - i % 256;
+        l = (long)(j - j % 256) | l << 32;
+        LLVector3 llvector3_1 = new LLVector3(llvector3.x % 256F, llvector3.y % 256F, llvector3.z);
+        LLVector3 llvector3_2 = new LLVector3(llvector3_1);
+        llvector3_2.x = llvector3_2.x + 1.0F;
+        Debug.Printf("regionHandle = %s, globalPos = %s", new Object[] {
+            Long.toHexString(l), llvector3
+        });
+        teleportRequestSent = true;
+        llvector3 = new TeleportLocationRequest();
+        ((TeleportLocationRequest) (llvector3)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((TeleportLocationRequest) (llvector3)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        ((TeleportLocationRequest) (llvector3)).Info_Field.RegionHandle = l;
+        ((TeleportLocationRequest) (llvector3)).Info_Field.Position = llvector3_1;
+        ((TeleportLocationRequest) (llvector3)).Info_Field.LookAt = llvector3_2;
+        llvector3.isReliable = true;
+        llvector3.setEventListener(new SLMessageEventListener() {
+
+            final SLAgentCircuit this$0;
+
+            public void onMessageAcknowledged(SLMessage slmessage)
+            {
             }
 
-            public void onMessageTimeout(SLMessage sLMessage) {
-                SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
+            public void onMessageTimeout(SLMessage slmessage)
+            {
+                SLAgentCircuit._2D_get0(SLAgentCircuit.this).publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
+            }
+
+            
+            {
+                this$0 = SLAgentCircuit.this;
+                super();
             }
         });
-        SendMessage(teleportLocationRequest);
+        SendMessage(llvector3);
     }
 
-    public void TeleportToLandmarkAsset(UUID uuid) {
-        if (getModules().rlvController.canTeleportToLandmark()) {
-            this.teleportRequestSent = true;
-            TeleportLandmarkRequest teleportLandmarkRequest = new TeleportLandmarkRequest();
-            teleportLandmarkRequest.Info_Field.AgentID = this.circuitInfo.agentID;
-            teleportLandmarkRequest.Info_Field.SessionID = this.circuitInfo.sessionID;
-            teleportLandmarkRequest.Info_Field.LandmarkID = uuid;
-            teleportLandmarkRequest.isReliable = true;
-            teleportLandmarkRequest.setEventListener(new SLMessageEventListener() {
-                public void onMessageAcknowledged(SLMessage sLMessage) {
+    public void TeleportToLandmarkAsset(UUID uuid)
+    {
+        if (!getModules().rlvController.canTeleportToLandmark())
+        {
+            return;
+        } else
+        {
+            teleportRequestSent = true;
+            TeleportLandmarkRequest teleportlandmarkrequest = new TeleportLandmarkRequest();
+            teleportlandmarkrequest.Info_Field.AgentID = circuitInfo.agentID;
+            teleportlandmarkrequest.Info_Field.SessionID = circuitInfo.sessionID;
+            teleportlandmarkrequest.Info_Field.LandmarkID = uuid;
+            teleportlandmarkrequest.isReliable = true;
+            teleportlandmarkrequest.setEventListener(new SLMessageEventListener() {
+
+                final SLAgentCircuit this$0;
+
+                public void onMessageAcknowledged(SLMessage slmessage)
+                {
                 }
 
-                public void onMessageTimeout(SLMessage sLMessage) {
-                    SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
+                public void onMessageTimeout(SLMessage slmessage)
+                {
+                    SLAgentCircuit._2D_get0(SLAgentCircuit.this).publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
                 }
+
+            
+            {
+                this$0 = SLAgentCircuit.this;
+                super();
+            }
             });
-            SendMessage(teleportLandmarkRequest);
+            SendMessage(teleportlandmarkrequest);
+            return;
         }
     }
 
-    public boolean TeleportToLocalPosition(LLVector3 lLVector3) {
-        if (this.regionID == null) {
+    public boolean TeleportToLocalPosition(LLVector3 llvector3)
+    {
+        if (regionID != null)
+        {
+            Debug.Printf("Teleport: localPos = %s, regionHandle = %d", new Object[] {
+                llvector3.toString(), Long.valueOf(regionHandle)
+            });
+            teleportRequestSent = true;
+            TeleportLocationRequest teleportlocationrequest = new TeleportLocationRequest();
+            teleportlocationrequest.AgentData_Field.AgentID = circuitInfo.agentID;
+            teleportlocationrequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+            teleportlocationrequest.Info_Field.RegionHandle = regionHandle;
+            teleportlocationrequest.Info_Field.Position = llvector3;
+            teleportlocationrequest.Info_Field.LookAt = new LLVector3(llvector3);
+            llvector3 = teleportlocationrequest.Info_Field.LookAt;
+            llvector3.x = llvector3.x + 10F;
+            teleportlocationrequest.isReliable = true;
+            teleportlocationrequest.setEventListener(new SLMessageEventListener() {
+
+                final SLAgentCircuit this$0;
+
+                public void onMessageAcknowledged(SLMessage slmessage)
+                {
+                }
+
+                public void onMessageTimeout(SLMessage slmessage)
+                {
+                    SLAgentCircuit._2D_get0(SLAgentCircuit.this).publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
+                }
+
+            
+            {
+                this$0 = SLAgentCircuit.this;
+                super();
+            }
+            });
+            SendMessage(teleportlocationrequest);
+            return true;
+        } else
+        {
             return false;
         }
-        Debug.Printf("Teleport: localPos = %s, regionHandle = %d", lLVector3.toString(), Long.valueOf(this.regionHandle));
-        this.teleportRequestSent = true;
-        TeleportLocationRequest teleportLocationRequest = new TeleportLocationRequest();
-        teleportLocationRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        teleportLocationRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        teleportLocationRequest.Info_Field.RegionHandle = this.regionHandle;
-        teleportLocationRequest.Info_Field.Position = lLVector3;
-        teleportLocationRequest.Info_Field.LookAt = new LLVector3(lLVector3);
-        teleportLocationRequest.Info_Field.LookAt.x += 10.0f;
-        teleportLocationRequest.isReliable = true;
-        teleportLocationRequest.setEventListener(new SLMessageEventListener() {
-            public void onMessageAcknowledged(SLMessage sLMessage) {
-            }
-
-            public void onMessageTimeout(SLMessage sLMessage) {
-                SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
-            }
-        });
-        SendMessage(teleportLocationRequest);
-        return true;
     }
 
-    public void TeleportToLure(UUID uuid) {
-        this.teleportRequestSent = true;
-        TeleportLureRequest teleportLureRequest = new TeleportLureRequest();
-        teleportLureRequest.Info_Field.AgentID = this.circuitInfo.agentID;
-        teleportLureRequest.Info_Field.SessionID = this.circuitInfo.sessionID;
-        teleportLureRequest.Info_Field.LureID = uuid;
-        teleportLureRequest.isReliable = true;
-        teleportLureRequest.setEventListener(new SLMessageEventListener() {
-            public void onMessageAcknowledged(SLMessage sLMessage) {
+    public void TeleportToLure(UUID uuid)
+    {
+        teleportRequestSent = true;
+        TeleportLureRequest teleportlurerequest = new TeleportLureRequest();
+        teleportlurerequest.Info_Field.AgentID = circuitInfo.agentID;
+        teleportlurerequest.Info_Field.SessionID = circuitInfo.sessionID;
+        teleportlurerequest.Info_Field.LureID = uuid;
+        teleportlurerequest.isReliable = true;
+        teleportlurerequest.setEventListener(new SLMessageEventListener() {
+
+            final SLAgentCircuit this$0;
+
+            public void onMessageAcknowledged(SLMessage slmessage)
+            {
             }
 
-            public void onMessageTimeout(SLMessage sLMessage) {
-                SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
+            public void onMessageTimeout(SLMessage slmessage)
+            {
+                SLAgentCircuit._2D_get0(SLAgentCircuit.this).publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
+            }
+
+            
+            {
+                this$0 = SLAgentCircuit.this;
+                super();
             }
         });
-        SendMessage(teleportLureRequest);
+        SendMessage(teleportlurerequest);
     }
 
-    public void TeleportToRegion(long j, int i, int i2, int i3) {
-        if (getModules().rlvController.canTeleportToLocation()) {
-            Debug.Log("TeleportToRegion: regionHandle = " + Long.toHexString(j) + ", pos = (" + i + ", " + i2 + ", " + i3 + ")");
-            this.teleportRequestSent = true;
-            TeleportLocationRequest teleportLocationRequest = new TeleportLocationRequest();
-            teleportLocationRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-            teleportLocationRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-            teleportLocationRequest.Info_Field.RegionHandle = j;
-            teleportLocationRequest.Info_Field.Position = new LLVector3((float) i, (float) i2, (float) i3);
-            teleportLocationRequest.Info_Field.LookAt = new LLVector3(0.0f, 1.0f, 0.0f);
-            teleportLocationRequest.isReliable = true;
-            teleportLocationRequest.setEventListener(new SLMessageEventListener() {
-                public void onMessageAcknowledged(SLMessage sLMessage) {
+    public void TeleportToRegion(long l, int i, int j, int k)
+    {
+        if (!getModules().rlvController.canTeleportToLocation())
+        {
+            return;
+        } else
+        {
+            Debug.Log((new StringBuilder()).append("TeleportToRegion: regionHandle = ").append(Long.toHexString(l)).append(", pos = (").append(i).append(", ").append(j).append(", ").append(k).append(")").toString());
+            teleportRequestSent = true;
+            TeleportLocationRequest teleportlocationrequest = new TeleportLocationRequest();
+            teleportlocationrequest.AgentData_Field.AgentID = circuitInfo.agentID;
+            teleportlocationrequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+            teleportlocationrequest.Info_Field.RegionHandle = l;
+            teleportlocationrequest.Info_Field.Position = new LLVector3(i, j, k);
+            teleportlocationrequest.Info_Field.LookAt = new LLVector3(0.0F, 1.0F, 0.0F);
+            teleportlocationrequest.isReliable = true;
+            teleportlocationrequest.setEventListener(new SLMessageEventListener() {
+
+                final SLAgentCircuit this$0;
+
+                public void onMessageAcknowledged(SLMessage slmessage)
+                {
                 }
 
-                public void onMessageTimeout(SLMessage sLMessage) {
-                    SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
+                public void onMessageTimeout(SLMessage slmessage)
+                {
+                    SLAgentCircuit._2D_get0(SLAgentCircuit.this).publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
                 }
+
+            
+            {
+                this$0 = SLAgentCircuit.this;
+                super();
+            }
             });
-            SendMessage(teleportLocationRequest);
+            SendMessage(teleportlocationrequest);
+            return;
         }
     }
 
-    public void TouchObject(int i) {
-        ObjectGrab objectGrab = new ObjectGrab();
-        objectGrab.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        objectGrab.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        objectGrab.ObjectData_Field.LocalID = i;
-        objectGrab.ObjectData_Field.GrabOffset = new LLVector3();
-        objectGrab.isReliable = true;
-        SendMessage(objectGrab);
-        ObjectDeGrab objectDeGrab = new ObjectDeGrab();
-        objectDeGrab.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        objectDeGrab.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        objectDeGrab.ObjectData_Field.LocalID = i;
-        objectDeGrab.isReliable = true;
-        SendMessage(objectDeGrab);
+    public void TouchObject(int i)
+    {
+        Object obj = new ObjectGrab();
+        ((ObjectGrab) (obj)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((ObjectGrab) (obj)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        ((ObjectGrab) (obj)).ObjectData_Field.LocalID = i;
+        ((ObjectGrab) (obj)).ObjectData_Field.GrabOffset = new LLVector3();
+        obj.isReliable = true;
+        SendMessage(((SLMessage) (obj)));
+        obj = new ObjectDeGrab();
+        ((ObjectDeGrab) (obj)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((ObjectDeGrab) (obj)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        ((ObjectDeGrab) (obj)).ObjectData_Field.LocalID = i;
+        obj.isReliable = true;
+        SendMessage(((SLMessage) (obj)));
     }
 
-    public void TouchObjectFace(SLObjectInfo sLObjectInfo, int i, float f, float f2, float f3, float f4, float f5, float f6, float f7) {
-        Debug.Printf("Touch: Object %d, face %d, pos (%f, %f, %f), uv (%f, %f)", Integer.valueOf(sLObjectInfo.localID), Integer.valueOf(i), Float.valueOf(f), Float.valueOf(f2), Float.valueOf(f3), Float.valueOf(f4), Float.valueOf(f5));
-        ObjectGrab objectGrab = new ObjectGrab();
-        objectGrab.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        objectGrab.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        objectGrab.ObjectData_Field.LocalID = sLObjectInfo.localID;
-        objectGrab.ObjectData_Field.GrabOffset = new LLVector3();
-        ObjectGrab.SurfaceInfo surfaceInfo = new ObjectGrab.SurfaceInfo();
-        surfaceInfo.FaceIndex = i;
-        surfaceInfo.Position = new LLVector3(f, f2, f3);
-        surfaceInfo.UVCoord = new LLVector3(f4, f5, 0.0f);
-        surfaceInfo.STCoord = new LLVector3(f6, f7, 0.0f);
-        surfaceInfo.Normal = new LLVector3(1.0f, 0.0f, 0.0f);
-        surfaceInfo.Binormal = new LLVector3(0.0f, 0.0f, 1.0f);
-        objectGrab.SurfaceInfo_Fields.add(surfaceInfo);
-        objectGrab.isReliable = true;
-        SendMessage(objectGrab);
-        ObjectDeGrab objectDeGrab = new ObjectDeGrab();
-        objectDeGrab.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        objectDeGrab.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        objectDeGrab.ObjectData_Field.LocalID = sLObjectInfo.localID;
-        objectDeGrab.isReliable = true;
-        SendMessage(objectDeGrab);
+    public void TouchObjectFace(SLObjectInfo slobjectinfo, int i, float f, float f1, float f2, float f3, float f4, 
+            float f5, float f6)
+    {
+        Debug.Printf("Touch: Object %d, face %d, pos (%f, %f, %f), uv (%f, %f)", new Object[] {
+            Integer.valueOf(slobjectinfo.localID), Integer.valueOf(i), Float.valueOf(f), Float.valueOf(f1), Float.valueOf(f2), Float.valueOf(f3), Float.valueOf(f4)
+        });
+        Object obj = new ObjectGrab();
+        ((ObjectGrab) (obj)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((ObjectGrab) (obj)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        ((ObjectGrab) (obj)).ObjectData_Field.LocalID = slobjectinfo.localID;
+        ((ObjectGrab) (obj)).ObjectData_Field.GrabOffset = new LLVector3();
+        com.lumiyaviewer.lumiya.slproto.messages.ObjectGrab.SurfaceInfo surfaceinfo = new com.lumiyaviewer.lumiya.slproto.messages.ObjectGrab.SurfaceInfo();
+        surfaceinfo.FaceIndex = i;
+        surfaceinfo.Position = new LLVector3(f, f1, f2);
+        surfaceinfo.UVCoord = new LLVector3(f3, f4, 0.0F);
+        surfaceinfo.STCoord = new LLVector3(f5, f6, 0.0F);
+        surfaceinfo.Normal = new LLVector3(1.0F, 0.0F, 0.0F);
+        surfaceinfo.Binormal = new LLVector3(0.0F, 0.0F, 1.0F);
+        ((ObjectGrab) (obj)).SurfaceInfo_Fields.add(surfaceinfo);
+        obj.isReliable = true;
+        SendMessage(((SLMessage) (obj)));
+        obj = new ObjectDeGrab();
+        ((ObjectDeGrab) (obj)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((ObjectDeGrab) (obj)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        ((ObjectDeGrab) (obj)).ObjectData_Field.LocalID = slobjectinfo.localID;
+        obj.isReliable = true;
+        SendMessage(((SLMessage) (obj)));
     }
 
-    public void TryWakeUp() {
-        try {
-            this.selector.wakeup();
-        } catch (Exception e) {
+    public void TryWakeUp()
+    {
+        try
+        {
+            selector.wakeup();
+            return;
+        }
+        catch (Exception exception)
+        {
+            return;
         }
     }
 
-    public void UnpauseAgent() {
-        this.lastVisibleActivities = System.currentTimeMillis();
-        if (this.agentPaused) {
+    public void UnpauseAgent()
+    {
+        lastVisibleActivities = System.currentTimeMillis();
+        if (agentPaused)
+        {
             DoAgentResume();
         }
     }
 
-    @Nullable
-    public LLVector3d getAgentGlobalPosition() {
-        if (this.modules == null) {
-            return null;
-        }
-        LLVector3 position = this.modules.avatarControl.getAgentPosition().getPosition();
-        int i = (int) ((this.regionHandle >> 32) & 4294967295L);
-        LLVector3d lLVector3d = new LLVector3d();
-        lLVector3d.x = ((double) i) + ((double) position.x);
-        lLVector3d.y = ((double) ((int) (this.regionHandle & 4294967295L))) + ((double) position.y);
-        lLVector3d.z = (double) position.z;
-        return lLVector3d;
-    }
-
-    @SuppressLint({"DefaultLocale"})
-    @Nullable
-    public String getAgentSLURL() {
-        if (this.modules == null || !Objects.equal(this.authReply.loginURL, "https://login.agni.lindenlab.com/cgi-bin/login.cgi") || this.regionName == null) {
-            return null;
-        }
-        LLVector3 position = this.modules.avatarControl.getAgentPosition().getPosition();
-        try {
-            return String.format("http://maps.secondlife.com/secondlife/%s/%d/%d/%d", new Object[]{URLEncoder.encode(this.regionName, "UTF-8"), Integer.valueOf((int) position.x), Integer.valueOf((int) position.y), Integer.valueOf((int) position.z)});
-        } catch (UnsupportedEncodingException e) {
+    public LLVector3d getAgentGlobalPosition()
+    {
+        if (modules != null)
+        {
+            LLVector3 llvector3 = modules.avatarControl.getAgentPosition().getPosition();
+            int i = (int)(regionHandle >> 32 & 0xffffffffL);
+            int j = (int)(regionHandle & 0xffffffffL);
+            LLVector3d llvector3d = new LLVector3d();
+            llvector3d.x = (double)i + (double)llvector3.x;
+            llvector3d.y = (double)j + (double)llvector3.y;
+            llvector3d.z = llvector3.z;
+            return llvector3d;
+        } else
+        {
             return null;
         }
     }
 
-    @Nonnull
-    public UUID getAgentUUID() {
-        return this.agentUUID;
-    }
-
-    public SLCaps getCaps() {
-        return this.caps;
-    }
-
-    public boolean getIsEstateManager() {
-        return this.isEstateManager;
-    }
-
-    public ChatterID getLocalChatterID() {
-        return this.localChatterID;
-    }
-
-    public SLModules getModules() {
-        return this.modules;
-    }
-
-    public SLObjectProfileData getObjectProfile(int i) {
-        SLObjectInfo objectInfo = this.gridConn.parcelInfo.getObjectInfo(i);
-        if (objectInfo == null) {
+    public String getAgentSLURL()
+    {
+        if (modules != null && Objects.equal(authReply.loginURL, "https://login.agni.lindenlab.com/cgi-bin/login.cgi") && regionName != null)
+        {
+            Object obj = modules.avatarControl.getAgentPosition().getPosition();
+            try
+            {
+                obj = String.format("http://maps.secondlife.com/secondlife/%s/%d/%d/%d", new Object[] {
+                    URLEncoder.encode(regionName, "UTF-8"), Integer.valueOf((int)((LLVector3) (obj)).x), Integer.valueOf((int)((LLVector3) (obj)).y), Integer.valueOf((int)((LLVector3) (obj)).z)
+                });
+            }
+            catch (UnsupportedEncodingException unsupportedencodingexception)
+            {
+                return null;
+            }
+            return ((String) (obj));
+        } else
+        {
             return null;
         }
-        SLObjectProfileData create = SLObjectProfileData.create(objectInfo);
-        if (!create.name().isPresent() && (!objectInfo.isDead)) {
-            RequestObjectName(objectInfo);
+    }
+
+    public UUID getAgentUUID()
+    {
+        return agentUUID;
+    }
+
+    public SLCaps getCaps()
+    {
+        return caps;
+    }
+
+    public boolean getIsEstateManager()
+    {
+        return isEstateManager;
+    }
+
+    public ChatterID getLocalChatterID()
+    {
+        return localChatterID;
+    }
+
+    public SLModules getModules()
+    {
+        return modules;
+    }
+
+    public SLObjectProfileData getObjectProfile(int i)
+    {
+        SLObjectInfo slobjectinfo = gridConn.parcelInfo.getObjectInfo(i);
+        if (slobjectinfo != null)
+        {
+            SLObjectProfileData slobjectprofiledata = SLObjectProfileData.create(slobjectinfo);
+            if (!slobjectprofiledata.name().isPresent() && slobjectinfo.isDead ^ true)
+            {
+                RequestObjectName(slobjectinfo);
+            }
+            return slobjectprofiledata;
+        } else
+        {
+            return null;
         }
-        return create;
     }
 
-    public String getRegionName() {
-        return this.regionName;
+    public String getRegionName()
+    {
+        return regionName;
     }
 
-    public UUID getSessionID() {
-        return this.circuitInfo.sessionID;
+    public UUID getSessionID()
+    {
+        return circuitInfo.sessionID;
     }
 
-    public Boolean isUserTyping(UUID uuid) {
-        return Boolean.valueOf(this.typingUsers.contains(uuid));
+    public Boolean isUserTyping(UUID uuid)
+    {
+        return Boolean.valueOf(typingUsers.contains(uuid));
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: setAgentUserName - sets the agent username in the circuit */
-    public /* synthetic */ void setAgentUserName(UserName userName) {
-        this.agentUserName.set(userName);
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_SLAgentCircuit_14593(UserName username)
+    {
+        agentUserName.set(username);
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: sendInventoryOffer - sends inventory items as instant message offer to another agent */
-    public /* synthetic */ void sendInventoryOffer(SLInventoryEntry sLInventoryEntry, UUID uuid) {
-        ArrayList<SLInventoryEntry> arrayList = new ArrayList<>();
-        arrayList.add(sLInventoryEntry);
-        if (sLInventoryEntry.isFolder) {
-            arrayList.addAll(this.modules.inventory.CollectGiveableItems(sLInventoryEntry));
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_SLAgentCircuit_77024(SLInventoryEntry slinventoryentry, UUID uuid)
+    {
+        Object obj = new ArrayList();
+        ((List) (obj)).add(slinventoryentry);
+        if (slinventoryentry.isFolder)
+        {
+            ((List) (obj)).addAll(modules.inventory.CollectGiveableItems(slinventoryentry));
         }
-        ImprovedInstantMessage improvedInstantMessage = new ImprovedInstantMessage();
-        improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        improvedInstantMessage.MessageBlock_Field.FromGroup = false;
-        improvedInstantMessage.MessageBlock_Field.ToAgentID = uuid;
-        improvedInstantMessage.MessageBlock_Field.ParentEstateID = 0;
-        improvedInstantMessage.MessageBlock_Field.RegionID = new UUID(0, 0);
-        improvedInstantMessage.MessageBlock_Field.Position = new LLVector3();
-        improvedInstantMessage.MessageBlock_Field.Offline = 0;
-        improvedInstantMessage.MessageBlock_Field.Dialog = 4;
-        improvedInstantMessage.MessageBlock_Field.ID = UUID.randomUUID();
-        improvedInstantMessage.MessageBlock_Field.Timestamp = 0;
-        improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
-        improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(sLInventoryEntry.name);
-        ByteBuffer wrap = ByteBuffer.wrap(new byte[(arrayList.size() * 17)]);
-        wrap.order(ByteOrder.BIG_ENDIAN);
-        for (SLInventoryEntry sLInventoryEntry2 : arrayList) {
-            wrap.put((byte) (sLInventoryEntry2.isFolder ? SLAssetType.AT_CATEGORY.getTypeCode() : sLInventoryEntry2.assetType));
-            wrap.putLong(sLInventoryEntry2.uuid.getMostSignificantBits());
-            wrap.putLong(sLInventoryEntry2.uuid.getLeastSignificantBits());
+        ImprovedInstantMessage improvedinstantmessage = new ImprovedInstantMessage();
+        improvedinstantmessage.AgentData_Field.AgentID = circuitInfo.agentID;
+        improvedinstantmessage.AgentData_Field.SessionID = circuitInfo.sessionID;
+        improvedinstantmessage.MessageBlock_Field.FromGroup = false;
+        improvedinstantmessage.MessageBlock_Field.ToAgentID = uuid;
+        improvedinstantmessage.MessageBlock_Field.ParentEstateID = 0;
+        improvedinstantmessage.MessageBlock_Field.RegionID = new UUID(0L, 0L);
+        improvedinstantmessage.MessageBlock_Field.Position = new LLVector3();
+        improvedinstantmessage.MessageBlock_Field.Offline = 0;
+        improvedinstantmessage.MessageBlock_Field.Dialog = 4;
+        improvedinstantmessage.MessageBlock_Field.ID = UUID.randomUUID();
+        improvedinstantmessage.MessageBlock_Field.Timestamp = 0;
+        improvedinstantmessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo");
+        improvedinstantmessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(slinventoryentry.name);
+        ByteBuffer bytebuffer = ByteBuffer.wrap(new byte[((List) (obj)).size() * 17]);
+        bytebuffer.order(ByteOrder.BIG_ENDIAN);
+        obj = ((Iterable) (obj)).iterator();
+        while (((Iterator) (obj)).hasNext()) 
+        {
+            SLInventoryEntry slinventoryentry1 = (SLInventoryEntry)((Iterator) (obj)).next();
+            int i;
+            if (slinventoryentry1.isFolder)
+            {
+                i = SLAssetType.AT_CATEGORY.getTypeCode();
+            } else
+            {
+                i = slinventoryentry1.assetType;
+            }
+            bytebuffer.put((byte)i);
+            bytebuffer.putLong(slinventoryentry1.uuid.getMostSignificantBits());
+            bytebuffer.putLong(slinventoryentry1.uuid.getLeastSignificantBits());
         }
-        wrap.position(0);
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = wrap.array();
-        improvedInstantMessage.isReliable = true;
-        SendMessage(improvedInstantMessage);
-        HandleChatEvent(ChatterID.getUserChatterID(this.agentUUID, uuid), new SLChatInventoryItemOfferedByYouEvent(this.agentUUID, sLInventoryEntry.name), false);
+        bytebuffer.position(0);
+        improvedinstantmessage.MessageBlock_Field.BinaryBucket = bytebuffer.array();
+        improvedinstantmessage.isReliable = true;
+        SendMessage(improvedinstantmessage);
+        HandleChatEvent(ChatterID.getUserChatterID(agentUUID, uuid), new SLChatInventoryItemOfferedByYouEvent(agentUUID, slinventoryentry.name), false);
     }
 
-    /* access modifiers changed from: package-private */
-    public void processMyAttachmentUpdate(SLObjectInfo sLObjectInfo) {
-        if (sLObjectInfo != null && !sLObjectInfo.nameKnown && (!sLObjectInfo.isDead)) {
-            RequestObjectName(sLObjectInfo);
+    void processMyAttachmentUpdate(SLObjectInfo slobjectinfo)
+    {
+        if (slobjectinfo != null && !slobjectinfo.nameKnown && slobjectinfo.isDead ^ true)
+        {
+            RequestObjectName(slobjectinfo);
         }
         getModules().avatarAppearance.UpdateMyAttachments();
     }
 
-    public void sendTypingNotify(UUID uuid, boolean z) {
-        SendInstantMessage(uuid, "", z ? 41 : 42);
+    public void sendTypingNotify(UUID uuid, boolean flag)
+    {
+        byte byte0;
+        if (flag)
+        {
+            byte0 = 41;
+        } else
+        {
+            byte0 = 42;
+        }
+        SendInstantMessage(uuid, "", byte0);
     }
 }

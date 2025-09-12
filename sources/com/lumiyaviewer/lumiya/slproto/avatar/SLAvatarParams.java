@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.avatar;
 
 import com.google.common.collect.ImmutableList;
@@ -5,104 +9,117 @@ import com.google.common.collect.ImmutableMap;
 import com.lumiyaviewer.lumiya.slproto.types.ImmutableVector;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import java.util.HashMap;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class SLAvatarParams {
-    public static final int NUM_PARAMS = 218;
-    @Nonnull
-    public static final ImmutableMap<Integer, ParamSet> paramByIDs;
-    @Nonnull
-    public static final ParamSet[] paramDefs = new ParamSet[218];
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.avatar:
+//            SLAvatarParamBuilder, MeshIndex, SLAvatarParamAlpha, SLAvatarParamColor, 
+//            SLVisualParamID
 
-    public static class AvatarParam {
+public class SLAvatarParams
+{
+    public static class AvatarParam
+    {
+
         public final float defValue;
-        @Nullable
-        public final ImmutableList<DrivenParam> drivenParams;
+        public final ImmutableList drivenParams;
         public final float maxValue;
-        @Nullable
         public final MeshIndex meshIndex;
         public final float minValue;
         public final boolean morph;
-        @Nullable
         public final SLAvatarParamAlpha paramAlpha;
-        @Nullable
         public final SLAvatarParamColor paramColor;
-        @Nullable
-        public final ImmutableMap<SLSkeletonBoneID, SkeletonParamDefinition> skeletonParams;
+        public final ImmutableMap skeletonParams;
 
-        AvatarParam(@Nullable MeshIndex meshIndex2, float f, float f2, float f3, boolean z, @Nullable SLAvatarParamColor sLAvatarParamColor, @Nullable SLAvatarParamAlpha sLAvatarParamAlpha, @Nullable ImmutableList<DrivenParam> immutableList, @Nullable ImmutableMap<SLSkeletonBoneID, SkeletonParamDefinition> immutableMap) {
-            this.meshIndex = meshIndex2;
-            this.minValue = f;
-            this.maxValue = f2;
-            this.defValue = f3;
-            this.morph = z;
-            this.paramColor = sLAvatarParamColor;
-            this.paramAlpha = sLAvatarParamAlpha;
-            this.drivenParams = immutableList;
-            this.skeletonParams = immutableMap;
+        AvatarParam(MeshIndex meshindex, float f, float f1, float f2, boolean flag, SLAvatarParamColor slavatarparamcolor, SLAvatarParamAlpha slavatarparamalpha, 
+                ImmutableList immutablelist, ImmutableMap immutablemap)
+        {
+            meshIndex = meshindex;
+            minValue = f;
+            maxValue = f1;
+            defValue = f2;
+            morph = flag;
+            paramColor = slavatarparamcolor;
+            paramAlpha = slavatarparamalpha;
+            drivenParams = immutablelist;
+            skeletonParams = immutablemap;
         }
     }
 
-    public static class DrivenParam {
+    public static class DrivenParam
+    {
+
         public final int drivenID;
         public final float max1;
         public final float max2;
         public final float min1;
         public final float min2;
 
-        DrivenParam(int i, float f, float f2, float f3, float f4) {
-            this.drivenID = i;
-            this.min1 = f;
-            this.max1 = f2;
-            this.min2 = f3;
-            this.max2 = f4;
+        DrivenParam(int i, float f, float f1, float f2, float f3)
+        {
+            drivenID = i;
+            min1 = f;
+            max1 = f1;
+            min2 = f2;
+            max2 = f3;
         }
     }
 
-    public static class ParamSet {
+    public static class ParamSet
+    {
+
         public final int appearanceIndex;
         public final int id;
-        @Nonnull
         public final SLVisualParamID name;
-        @Nonnull
-        public final ImmutableList<AvatarParam> params;
+        public final ImmutableList params;
 
-        ParamSet(int i, int i2, @Nonnull SLVisualParamID sLVisualParamID, @Nonnull ImmutableList<AvatarParam> immutableList) {
-            this.id = i;
-            this.appearanceIndex = i2;
-            this.name = sLVisualParamID;
-            this.params = immutableList;
+        ParamSet(int i, int j, SLVisualParamID slvisualparamid, ImmutableList immutablelist)
+        {
+            id = i;
+            appearanceIndex = j;
+            name = slvisualparamid;
+            params = immutablelist;
         }
     }
 
-    public static class SkeletonParamDefinition {
-        @Nullable
+    public static class SkeletonParamDefinition
+    {
+
         public final ImmutableVector offset;
-        @Nullable
         public final ImmutableVector scale;
 
-        SkeletonParamDefinition(@Nullable ImmutableVector immutableVector, @Nullable ImmutableVector immutableVector2) {
-            this.scale = immutableVector;
-            this.offset = immutableVector2;
+        SkeletonParamDefinition(ImmutableVector immutablevector, ImmutableVector immutablevector1)
+        {
+            scale = immutablevector;
+            offset = immutablevector1;
         }
     }
 
-    public static class SkeletonParamValue {
-        @Nonnull
+    public static class SkeletonParamValue
+    {
+
         public final LLVector3 offset;
-        @Nonnull
         public final LLVector3 scale;
 
-        public SkeletonParamValue(@Nonnull LLVector3 lLVector3, @Nonnull LLVector3 lLVector32) {
-            this.scale = lLVector3;
-            this.offset = lLVector32;
+        public SkeletonParamValue(LLVector3 llvector3, LLVector3 llvector3_1)
+        {
+            scale = llvector3;
+            offset = llvector3_1;
         }
     }
 
-    static {
-        HashMap hashMap = new HashMap();
-        SLAvatarParamBuilder.buildParams(paramDefs, hashMap);
-        paramByIDs = ImmutableMap.copyOf(hashMap);
+
+    public static final int NUM_PARAMS = 218;
+    public static final ImmutableMap paramByIDs;
+    public static final ParamSet paramDefs[];
+
+    public SLAvatarParams()
+    {
+    }
+
+    static 
+    {
+        paramDefs = new ParamSet[218];
+        HashMap hashmap = new HashMap();
+        SLAvatarParamBuilder.buildParams(paramDefs, hashmap);
+        paramByIDs = ImmutableMap.copyOf(hashmap);
     }
 }

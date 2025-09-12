@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.content.Context;
@@ -11,142 +15,192 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.events.EventUserInfoChanged;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.chat.ChatFragment;
 import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo;
 import com.lumiyaviewer.lumiya.ui.chat.contacts.ChatFragmentActivityFactory;
-import com.lumiyaviewer.lumiya.ui.common.SwipeDismissListViewTouchListener;
-import com.lumiyaviewer.lumiya.ui.render.CardboardActivity;
 import java.io.Closeable;
 import java.io.IOException;
-import javax.annotation.Nullable;
+import java.util.UUID;
 
-public abstract class UserListFragment extends Fragment {
-    @Nullable
-    protected UserManager userManager = null;
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.common:
+//            DetailsActivity, SwipeDismissListViewTouchListener, ActivityUtils, DismissableAdapter
 
-    private void updateListViews() {
-        ListView listView;
-        View view = getView();
-        if (view != null && (listView = (ListView) view.findViewById(R.id.contactList)) != null) {
-            listView.invalidateViews();
-        }
+public abstract class UserListFragment extends Fragment
+{
+
+    protected UserManager userManager;
+
+    public UserListFragment()
+    {
+        userManager = null;
     }
 
-    /* access modifiers changed from: protected */
-    public abstract ListAdapter createListAdapter(Context context, LoaderManager loaderManager, UserManager userManager2);
-
-    /* access modifiers changed from: protected */
-    public void handleUserDefaultAction(ChatterID chatterID) {
-        if (this.userManager != null) {
-            Bundle makeSelection = ChatFragment.makeSelection(chatterID);
-            Bundle arguments = getArguments();
-            if (arguments.containsKey(CardboardActivity.VR_MODE_TAG)) {
-                makeSelection.putBoolean(CardboardActivity.VR_MODE_TAG, arguments.getBoolean(CardboardActivity.VR_MODE_TAG));
+    private void updateListViews()
+    {
+        Object obj = getView();
+        if (obj != null)
+        {
+            obj = (ListView)((View) (obj)).findViewById(0x7f10014a);
+            if (obj != null)
+            {
+                ((ListView) (obj)).invalidateViews();
             }
-            DetailsActivity.showDetails(getActivity(), ChatFragmentActivityFactory.getInstance(), makeSelection);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public boolean itemsMayBeDismissed() {
+    protected abstract ListAdapter createListAdapter(Context context, LoaderManager loadermanager, UserManager usermanager);
+
+    protected void handleUserDefaultAction(ChatterID chatterid)
+    {
+        if (userManager != null)
+        {
+            chatterid = ChatFragment.makeSelection(chatterid);
+            Bundle bundle = getArguments();
+            if (bundle.containsKey("vrMode"))
+            {
+                chatterid.putBoolean("vrMode", bundle.getBoolean("vrMode"));
+            }
+            DetailsActivity.showDetails(getActivity(), ChatFragmentActivityFactory.getInstance(), chatterid);
+        }
+    }
+
+    protected boolean itemsMayBeDismissed()
+    {
         return false;
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onUserListItemClicked(AdapterView adapterView, View view, int i, long j) {
-        ChatterID chatterID;
-        Object itemAtPosition = adapterView.getItemAtPosition(i);
-        if ((itemAtPosition instanceof ChatterDisplayInfo) && this.userManager != null && (chatterID = ((ChatterDisplayInfo) itemAtPosition).getChatterID(this.userManager)) != null) {
-            handleUserDefaultAction(chatterID);
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_common_UserListFragment_1689(AdapterView adapterview, View view, int i, long l)
+    {
+        adapterview = ((AdapterView) (adapterview.getItemAtPosition(i)));
+        if ((adapterview instanceof ChatterDisplayInfo) && userManager != null)
+        {
+            adapterview = ((ChatterDisplayInfo)adapterview).getChatterID(userManager);
+            if (adapterview != null)
+            {
+                handleUserDefaultAction(adapterview);
+            }
         }
     }
 
-    public void onActivityCreated(Bundle bundle) {
+    public void onActivityCreated(Bundle bundle)
+    {
         super.onActivityCreated(bundle);
-        View view = getView();
-        if (view != null) {
-            ListView listView = (ListView) view.findViewById(R.id.contactList);
-            listView.setOnItemClickListener(new $Lambda$1wR8wJi1eGgAIYEhals_u5j3nM(this));
-            registerForContextMenu(listView);
-            if (itemsMayBeDismissed()) {
-                SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = new SwipeDismissListViewTouchListener(listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
-                    public boolean canDismiss(ListView listView, int i) {
-                        ListAdapter adapter = listView.getAdapter();
-                        if (adapter instanceof DismissableAdapter) {
-                            return ((DismissableAdapter) adapter).canDismiss(i);
+        bundle = getView();
+        if (bundle != null)
+        {
+            bundle = (ListView)bundle.findViewById(0x7f10014a);
+            bundle.setOnItemClickListener(new _2D_.Lambda._cls1wR8wJi1e_2D_GgAIYEhals_u5j3nM(this));
+            registerForContextMenu(bundle);
+            if (itemsMayBeDismissed())
+            {
+                SwipeDismissListViewTouchListener swipedismisslistviewtouchlistener = new SwipeDismissListViewTouchListener(bundle, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+
+                    final UserListFragment this$0;
+
+                    public boolean canDismiss(ListView listview, int i)
+                    {
+                        listview = listview.getAdapter();
+                        if (listview instanceof DismissableAdapter)
+                        {
+                            return ((DismissableAdapter)listview).canDismiss(i);
+                        } else
+                        {
+                            return false;
                         }
-                        return false;
                     }
 
-                    public void onDismiss(ListView listView, int i) {
-                        ListAdapter adapter = listView.getAdapter();
-                        if (adapter instanceof DismissableAdapter) {
-                            ((DismissableAdapter) adapter).onDismiss(i);
+                    public void onDismiss(ListView listview, int i)
+                    {
+                        listview = listview.getAdapter();
+                        if (listview instanceof DismissableAdapter)
+                        {
+                            ((DismissableAdapter)listview).onDismiss(i);
                         }
                     }
+
+            
+            {
+                this$0 = UserListFragment.this;
+                super();
+            }
                 });
-                listView.setOnTouchListener(swipeDismissListViewTouchListener);
-                listView.setOnScrollListener(swipeDismissListViewTouchListener.makeScrollListener());
+                bundle.setOnTouchListener(swipedismisslistviewtouchlistener);
+                bundle.setOnScrollListener(swipedismisslistviewtouchlistener.makeScrollListener());
             }
         }
     }
 
-    public void onCreate(Bundle bundle) {
+    public void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
-        this.userManager = ActivityUtils.getUserManager(getArguments());
+        userManager = ActivityUtils.getUserManager(getArguments());
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        return layoutInflater.inflate(R.layout.contacts_group, viewGroup, false);
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        return layoutinflater.inflate(0x7f04002e, viewgroup, false);
     }
 
-    public void onStart() {
-        ListView listView;
-        ListAdapter listAdapter = null;
+    public void onStart()
+    {
+        ListAdapter listadapter = null;
         super.onStart();
-        View view = getView();
-        Debug.Printf("UserListFragment: onStart, rootView = %s", view);
-        if (view != null && (listView = (ListView) view.findViewById(R.id.contactList)) != null && listView.getAdapter() == null) {
-            UserManager userManager2 = ActivityUtils.getUserManager(getArguments());
-            if (userManager2 != null) {
-                listAdapter = createListAdapter(getActivity(), getLoaderManager(), userManager2);
+        Object obj = getView();
+        Debug.Printf("UserListFragment: onStart, rootView = %s", new Object[] {
+            obj
+        });
+        if (obj != null)
+        {
+            obj = (ListView)((View) (obj)).findViewById(0x7f10014a);
+            if (obj != null && ((ListView) (obj)).getAdapter() == null)
+            {
+                UserManager usermanager = ActivityUtils.getUserManager(getArguments());
+                if (usermanager != null)
+                {
+                    listadapter = createListAdapter(getActivity(), getLoaderManager(), usermanager);
+                }
+                ((ListView) (obj)).setAdapter(listadapter);
             }
-            listView.setAdapter(listAdapter);
         }
     }
 
-    public void onStop() {
-        ListView listView;
-        View view = getView();
-        Debug.Printf("UserListFragment: onStop, rootView = %s", view);
-        if (!(view == null || (listView = (ListView) view.findViewById(R.id.contactList)) == null)) {
-            ListAdapter adapter = listView.getAdapter();
-            if (adapter instanceof Closeable) {
-                try {
-                    ((Closeable) adapter).close();
-                } catch (IOException e) {
-                    Debug.Warning(e);
+    public void onStop()
+    {
+        Object obj = getView();
+        Debug.Printf("UserListFragment: onStop, rootView = %s", new Object[] {
+            obj
+        });
+        if (obj != null)
+        {
+            obj = (ListView)((View) (obj)).findViewById(0x7f10014a);
+            if (obj != null)
+            {
+                ListAdapter listadapter = ((ListView) (obj)).getAdapter();
+                if (listadapter instanceof Closeable)
+                {
+                    try
+                    {
+                        ((Closeable)listadapter).close();
+                    }
+                    catch (IOException ioexception)
+                    {
+                        Debug.Warning(ioexception);
+                    }
                 }
+                ((ListView) (obj)).setAdapter(null);
             }
-            listView.setAdapter((ListAdapter) null);
         }
         super.onStop();
     }
 
-    @EventHandler
-    public void onUserInfoChanged(EventUserInfoChanged eventUserInfoChanged) {
-        if (this.userManager != null && this.userManager.getUserID().equals(eventUserInfoChanged.agentUUID) && eventUserInfoChanged.isProfileChanged()) {
+    public void onUserInfoChanged(EventUserInfoChanged eventuserinfochanged)
+    {
+        if (userManager != null && userManager.getUserID().equals(eventuserinfochanged.agentUUID) && eventuserinfochanged.isProfileChanged())
+        {
             updateListViews();
         }
-    }
-
-    public void m578lambda$com_lumiyaviewer_lumiya_ui_common_UserListFragment_1689(AdapterView<?> adapterView, View view, int i, long j) {
-        // Lambda method implementation for list item click handling
-        // Parameters: adapterView, view, position, id
     }
 }

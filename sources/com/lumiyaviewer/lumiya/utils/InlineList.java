@@ -1,48 +1,72 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.utils;
 
-import com.lumiyaviewer.lumiya.utils.InlineListEntry;
 
-public class InlineList<T extends InlineListEntry<T>> {
-    private T first = null;
+// Referenced classes of package com.lumiyaviewer.lumiya.utils:
+//            InlineListEntry
 
-    public void addEntry(T t) {
-        InlineList list = t.getList();
-        if (list != this) {
-            if (list != null) {
-                list.removeEntry(t);
+public class InlineList
+{
+
+    private InlineListEntry first;
+
+    public InlineList()
+    {
+        first = null;
+    }
+
+    public void addEntry(InlineListEntry inlinelistentry)
+    {
+        InlineList inlinelist = inlinelistentry.getList();
+        if (inlinelist != this)
+        {
+            if (inlinelist != null)
+            {
+                inlinelist.removeEntry(inlinelistentry);
             }
-            t.setNext(this.first);
-            t.setPrev(null);
-            if (this.first != null) {
-                this.first.setPrev(t);
+            inlinelistentry.setNext(first);
+            inlinelistentry.setPrev(null);
+            if (first != null)
+            {
+                first.setPrev(inlinelistentry);
             }
-            this.first = t;
-            t.setList(this);
+            first = inlinelistentry;
+            inlinelistentry.setList(this);
         }
     }
 
-    public final T getFirst() {
-        return this.first;
+    public final InlineListEntry getFirst()
+    {
+        return first;
     }
 
-    public void removeEntry(T t) {
-        if (t.getList() == this) {
-            T next = t.getNext();
-            InlineListEntry prev = t.getPrev();
-            if (prev != null) {
-                prev.setNext(next);
-            } else {
-                this.first = next;
+    public void removeEntry(InlineListEntry inlinelistentry)
+    {
+        if (inlinelistentry.getList() == this)
+        {
+            InlineListEntry inlinelistentry1 = inlinelistentry.getNext();
+            InlineListEntry inlinelistentry2 = inlinelistentry.getPrev();
+            if (inlinelistentry2 != null)
+            {
+                inlinelistentry2.setNext(inlinelistentry1);
+            } else
+            {
+                first = inlinelistentry1;
             }
-            if (next != null) {
-                next.setPrev(prev);
+            if (inlinelistentry1 != null)
+            {
+                inlinelistentry1.setPrev(inlinelistentry2);
             }
-            t.setPrev(null);
-            t.setNext(null);
-            t.setList((InlineList) null);
+            inlinelistentry.setPrev(null);
+            inlinelistentry.setNext(null);
+            inlinelistentry.setList(null);
         }
     }
 
-    public void requestEntryRemoval(T t) {
+    public void requestEntryRemoval(InlineListEntry inlinelistentry)
+    {
     }
 }

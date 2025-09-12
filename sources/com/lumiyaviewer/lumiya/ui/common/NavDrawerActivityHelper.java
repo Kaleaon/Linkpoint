@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.app.Activity;
@@ -10,74 +14,104 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import com.lumiyaviewer.lumiya.R;
 
-public class NavDrawerActivityHelper implements AdapterView.OnItemClickListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.common:
+//            NavDrawerAdapter
+
+public class NavDrawerActivityHelper
+    implements android.widget.AdapterView.OnItemClickListener
+{
+    private static class DrawerToggle extends ActionBarDrawerToggle
+    {
+
+        public DrawerToggle(Activity activity, DrawerLayout drawerlayout, int i, int j)
+        {
+            super(activity, drawerlayout, i, j);
+        }
+    }
+
+
     private final NavDrawerAdapter drawerAdapter;
     private final DrawerLayout drawerLayout;
     private final DrawerToggle drawerToggle;
 
-    private static class DrawerToggle extends ActionBarDrawerToggle {
-        public DrawerToggle(Activity activity, DrawerLayout drawerLayout, int i, int i2) {
-            super(activity, drawerLayout, i, i2);
-        }
-    }
-
-    public NavDrawerActivityHelper(Activity activity) {
-        ActionBar supportActionBar;
-        this.drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
-        if (this.drawerLayout != null) {
-            this.drawerToggle = new DrawerToggle(activity, this.drawerLayout, R.string.open_menu, R.string.close_menu);
-            this.drawerLayout.setDrawerListener(this.drawerToggle);
-            ListView listView = (ListView) this.drawerLayout.findViewById(R.id.left_drawer);
-            if (listView != null) {
-                this.drawerAdapter = new NavDrawerAdapter(activity);
-                listView.setAdapter(this.drawerAdapter);
-                listView.setOnItemClickListener(this);
-            } else {
-                this.drawerAdapter = null;
+    public NavDrawerActivityHelper(Activity activity)
+    {
+        drawerLayout = (DrawerLayout)activity.findViewById(0x7f100282);
+        if (drawerLayout != null)
+        {
+            drawerToggle = new DrawerToggle(activity, drawerLayout, 0x7f090252, 0x7f0900c0);
+            drawerLayout.setDrawerListener(drawerToggle);
+            ListView listview = (ListView)drawerLayout.findViewById(0x7f100283);
+            if (listview != null)
+            {
+                drawerAdapter = new NavDrawerAdapter(activity);
+                listview.setAdapter(drawerAdapter);
+                listview.setOnItemClickListener(this);
+            } else
+            {
+                drawerAdapter = null;
             }
-            if ((activity instanceof AppCompatActivity) && (supportActionBar = ((AppCompatActivity) activity).getSupportActionBar()) != null) {
-                supportActionBar.setDisplayHomeAsUpEnabled(true);
-                supportActionBar.setHomeButtonEnabled(true);
-                return;
+            if (activity instanceof AppCompatActivity)
+            {
+                activity = ((AppCompatActivity)activity).getSupportActionBar();
+                if (activity != null)
+                {
+                    activity.setDisplayHomeAsUpEnabled(true);
+                    activity.setHomeButtonEnabled(true);
+                }
             }
             return;
+        } else
+        {
+            drawerToggle = null;
+            drawerAdapter = null;
+            return;
         }
-        this.drawerToggle = null;
-        this.drawerAdapter = null;
     }
 
-    public boolean onBackPressed() {
-        if (this.drawerLayout == null || !this.drawerLayout.isDrawerOpen(this.drawerLayout.findViewById(R.id.left_drawer))) {
+    public boolean onBackPressed()
+    {
+        if (drawerLayout != null && drawerLayout.isDrawerOpen(drawerLayout.findViewById(0x7f100283)))
+        {
+            drawerLayout.closeDrawers();
+            return true;
+        } else
+        {
             return false;
         }
-        this.drawerLayout.closeDrawers();
-        return true;
     }
 
-    public void onConfigurationChanged(Configuration configuration) {
-        if (this.drawerToggle != null) {
-            this.drawerToggle.onConfigurationChanged(configuration);
+    public void onConfigurationChanged(Configuration configuration)
+    {
+        if (drawerToggle != null)
+        {
+            drawerToggle.onConfigurationChanged(configuration);
         }
     }
 
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long j) {
-        if (this.drawerLayout != null) {
-            this.drawerLayout.closeDrawers();
+    public void onItemClick(AdapterView adapterview, View view, int i, long l)
+    {
+        if (drawerLayout != null)
+        {
+            drawerLayout.closeDrawers();
         }
-        if (this.drawerAdapter != null) {
-            this.drawerAdapter.onItemClick(adapterView, view, i, j);
+        if (drawerAdapter != null)
+        {
+            drawerAdapter.onItemClick(adapterview, view, i, l);
         }
     }
 
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        return this.drawerToggle != null && this.drawerToggle.onOptionsItemSelected(menuItem);
+    public boolean onOptionsItemSelected(MenuItem menuitem)
+    {
+        return drawerToggle != null && drawerToggle.onOptionsItemSelected(menuitem);
     }
 
-    public void syncState() {
-        if (this.drawerToggle != null) {
-            this.drawerToggle.syncState();
+    public void syncState()
+    {
+        if (drawerToggle != null)
+        {
+            drawerToggle.syncState();
         }
     }
 }

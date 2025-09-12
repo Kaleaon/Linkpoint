@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.https;
 
-import com.google.common.net.HttpHeaders;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -13,185 +16,306 @@ import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.Dns;
-import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
-public class SLHTTPSConnection {
-    private static final long CONNECT_TIMEOUT = 60;
-    private static final long READ_TIMEOUT = 60;
-    private static final OkHttpClient okHttpClient = new OkHttpClient.Builder().proxy(Proxy.NO_PROXY).dns(new SLDNS()).connectionPool(new ConnectionPool(8, 5, TimeUnit.MINUTES)).connectTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).hostnameVerifier(new HostnameVerifier() {
-        public boolean verify(String str, SSLSession sSLSession) {
-            return true;
-        }
-    }).addNetworkInterceptor(new CharsetStripInterceptor()).sslSocketFactory(getSocketFactory(), trustEverythingManager).build();
-    private static TrustManager[] trustAllCerts = {trustEverythingManager};
-    private static final X509TrustManager trustEverythingManager = new X509TrustManager() {
-        public void checkClientTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
-        }
+public class SLHTTPSConnection
+{
+    static class CharsetStripInterceptor
+        implements Interceptor
+    {
 
-        public void checkServerTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
-        }
-
-        public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[0];
-        }
-    };
-
-    static class CharsetStripInterceptor implements Interceptor {
-        CharsetStripInterceptor() {
-        }
-
-        public Response intercept(Interceptor.Chain chain) throws IOException {
+        public Response intercept(okhttp3.Interceptor.Chain chain)
+            throws IOException
+        {
             Request request = chain.request();
-            String header = request.header(HttpHeaders.CONTENT_TYPE);
-            if (header == null || (!header.contains(";"))) {
+            String s1 = request.header("Content-Type");
+            if (s1 == null || s1.contains(";") ^ true)
+            {
                 return chain.proceed(request);
             }
-            int indexOf = header.indexOf(";");
-            if (indexOf != -1) {
-                header = header.substring(0, indexOf);
+            int i = s1.indexOf(";");
+            String s = s1;
+            if (i != -1)
+            {
+                s = s1.substring(0, i);
             }
-            return chain.proceed(request.newBuilder().header(HttpHeaders.CONTENT_TYPE, header).build());
+            return chain.proceed(request.newBuilder().header("Content-Type", s).build());
+        }
+
+        CharsetStripInterceptor()
+        {
         }
     }
 
-    static class DNSforDNS implements Dns {
-        private final Dns systemDns = Dns.SYSTEM;
+    static class DNSforDNS
+        implements Dns
+    {
 
-        DNSforDNS() {
+        private final Dns systemDns;
+
+        public List lookup(String s)
+            throws UnknownHostException
+        {
+            Object obj = systemDns.lookup(s);
+            if (obj == null)
+            {
+                try
+                {
+                    throw new UnknownHostException(s);
+                }
+                // Misplaced declaration of an exception variable
+                catch (Object obj) { }
+                if (s.equalsIgnoreCase("dns.google.com"))
+                {
+                    Debug.Printf("DNS: Falling back to static IP addresses for %s", new Object[] {
+                        s
+                    });
+                    s = new ArrayList();
+                    s.add(InetAddress.getByName("64.233.164.101"));
+                    s.add(InetAddress.getByName("64.233.164.113"));
+                    s.add(InetAddress.getByName("64.233.164.139"));
+                    s.add(InetAddress.getByName("64.233.164.138"));
+                    s.add(InetAddress.getByName("64.233.164.100"));
+                    s.add(InetAddress.getByName("64.233.164.102"));
+                    return s;
+                } else
+                {
+                    throw obj;
+                }
+            }
+            if (((List) (obj)).isEmpty())
+            {
+                throw new UnknownHostException(s);
+            }
+            return ((List) (obj));
         }
 
-        public List<InetAddress> lookup(String str) throws UnknownHostException {
-            try {
-                List<InetAddress> lookup = this.systemDns.lookup(str);
-                if (lookup == null) {
-                    throw new UnknownHostException(str);
-                } else if (!lookup.isEmpty()) {
-                    return lookup;
-                } else {
-                    throw new UnknownHostException(str);
-                }
-            } catch (UnknownHostException e) {
-                if (str.equalsIgnoreCase("dns.google.com")) {
-                    Debug.Printf("DNS: Falling back to static IP addresses for %s", str);
-                    ArrayList arrayList = new ArrayList();
-                    arrayList.add(InetAddress.getByName("64.233.164.101"));
-                    arrayList.add(InetAddress.getByName("64.233.164.113"));
-                    arrayList.add(InetAddress.getByName("64.233.164.139"));
-                    arrayList.add(InetAddress.getByName("64.233.164.138"));
-                    arrayList.add(InetAddress.getByName("64.233.164.100"));
-                    arrayList.add(InetAddress.getByName("64.233.164.102"));
-                    return arrayList;
-                }
-                throw e;
-            }
+        DNSforDNS()
+        {
+            systemDns = Dns.SYSTEM;
         }
     }
 
-    static class SLDNS implements Dns {
-        private final OkHttpClient httpResolverClient = new OkHttpClient.Builder().dns(new DNSforDNS()).connectTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).build();
-        private final Dns systemDns = Dns.SYSTEM;
+    static class SLDNS
+        implements Dns
+    {
 
-        SLDNS() {
-        }
+        private final OkHttpClient httpResolverClient;
+        private final Dns systemDns;
 
-        private List<InetAddress> tryResolveOverHTTP(String str) throws UnknownHostException {
-            Debug.Printf("DNS: Trying to resolve over HTTPS: hostname = %s", str);
-            try {
-                Response execute = this.httpResolverClient.newCall(new Request.Builder().url(new HttpUrl.Builder().scheme("https").host("dns.google.com").addPathSegment("resolve").addQueryParameter("name", str).addQueryParameter("type", "A").build()).get().build()).execute();
-                if (execute == null) {
-                    throw new UnknownHostException(str);
-                } else if (!execute.isSuccessful()) {
-                    Debug.Printf("DNS: Failed to resolve over HTTPS: error code %d, error message %s", Integer.valueOf(execute.code()), execute.message());
-                    throw new UnknownHostException(str);
-                } else {
-                    JsonObject asJsonObject = new JsonParser().parse(execute.body().string()).getAsJsonObject();
-                    ArrayList arrayList = new ArrayList();
-                    for (JsonElement jsonElement : asJsonObject.getAsJsonArray("Answer")) {
-                        if (jsonElement.isJsonObject()) {
-                            JsonObject asJsonObject2 = jsonElement.getAsJsonObject();
-                            if (asJsonObject2.has("name") && asJsonObject2.has("type") && asJsonObject2.has("data")) {
-                                String asString = asJsonObject2.get("name").getAsString();
-                                int asInt = asJsonObject2.get("type").getAsInt();
-                                String asString2 = asJsonObject2.get("data").getAsString();
-                                if (asString.equalsIgnoreCase(str + ".") && asInt == 1 && asString2 != null && (!asString2.isEmpty())) {
-                                    Debug.Printf("DNS: Resolving '%s': found good result '%s'", str, asString2);
-                                    InetAddress byName = InetAddress.getByName(asString2);
-                                    if (byName != null) {
-                                        arrayList.add(byName);
-                                    }
-                                }
-                            }
+        private List tryResolveOverHTTP(String s)
+            throws UnknownHostException
+        {
+            Object obj;
+            Debug.Printf("DNS: Trying to resolve over HTTPS: hostname = %s", new Object[] {
+                s
+            });
+            obj = (new okhttp3.HttpUrl.Builder()).scheme("https").host("dns.google.com").addPathSegment("resolve").addQueryParameter("name", s).addQueryParameter("type", "A").build();
+            obj = (new okhttp3.Request.Builder()).url(((okhttp3.HttpUrl) (obj))).get().build();
+            obj = httpResolverClient.newCall(((Request) (obj))).execute();
+            if (obj == null)
+            {
+                try
+                {
+                    throw new UnknownHostException(s);
+                }
+                // Misplaced declaration of an exception variable
+                catch (Object obj)
+                {
+                    Debug.Printf("DNS: Failed to resolve over HTTPS: hostname = %s, error = %s", new Object[] {
+                        s, ((Exception) (obj)).getMessage()
+                    });
+                }
+                throw new UnknownHostException(s);
+            }
+            Object obj1;
+            if (!((Response) (obj)).isSuccessful())
+            {
+                Debug.Printf("DNS: Failed to resolve over HTTPS: error code %d, error message %s", new Object[] {
+                    Integer.valueOf(((Response) (obj)).code()), ((Response) (obj)).message()
+                });
+                throw new UnknownHostException(s);
+            }
+            obj1 = (new JsonParser()).parse(((Response) (obj)).body().string()).getAsJsonObject();
+            obj = new ArrayList();
+            obj1 = ((JsonObject) (obj1)).getAsJsonArray("Answer").iterator();
+_L2:
+            Object obj2;
+            Object obj3;
+            int i;
+            do
+            {
+                do
+                {
+                    JsonElement jsonelement;
+                    do
+                    {
+                        if (!((Iterator) (obj1)).hasNext())
+                        {
+                            break MISSING_BLOCK_LABEL_401;
                         }
-                    }
-                    if (!arrayList.isEmpty()) {
-                        return arrayList;
-                    }
-                    Debug.Printf("DNS: Failed to resolve over HTTPS: hostname = %s, no valid answers", str);
-                    throw new UnknownHostException(str);
-                }
-            } catch (Exception e) {
-                Debug.Printf("DNS: Failed to resolve over HTTPS: hostname = %s, error = %s", str, e.getMessage());
-                throw new UnknownHostException(str);
+                        jsonelement = (JsonElement)((Iterator) (obj1)).next();
+                    } while (!jsonelement.isJsonObject());
+                    obj3 = jsonelement.getAsJsonObject();
+                } while (!((JsonObject) (obj3)).has("name") || !((JsonObject) (obj3)).has("type") || !((JsonObject) (obj3)).has("data"));
+                obj2 = ((JsonObject) (obj3)).get("name").getAsString();
+                i = ((JsonObject) (obj3)).get("type").getAsInt();
+                obj3 = ((JsonObject) (obj3)).get("data").getAsString();
+            } while (!((String) (obj2)).equalsIgnoreCase((new StringBuilder()).append(s).append(".").toString()) || i != 1 || obj3 == null);
+            if (!(((String) (obj3)).isEmpty() ^ true)) goto _L2; else goto _L1
+_L1:
+            Debug.Printf("DNS: Resolving '%s': found good result '%s'", new Object[] {
+                s, obj3
+            });
+            obj2 = InetAddress.getByName(((String) (obj3)));
+            if (obj2 == null) goto _L2; else goto _L3
+_L3:
+            ((List) (obj)).add(obj2);
+              goto _L2
+            if (((List) (obj)).isEmpty())
+            {
+                Debug.Printf("DNS: Failed to resolve over HTTPS: hostname = %s, no valid answers", new Object[] {
+                    s
+                });
+                throw new UnknownHostException(s);
             }
+            return ((List) (obj));
         }
 
-        public List<InetAddress> lookup(String str) throws UnknownHostException {
-            try {
-                List<InetAddress> lookup = this.systemDns.lookup(str);
-                if (lookup == null) {
-                    throw new UnknownHostException(str);
-                } else if (!lookup.isEmpty()) {
-                    return lookup;
-                } else {
-                    throw new UnknownHostException(str);
-                }
-            } catch (UnknownHostException e) {
-                List<InetAddress> tryResolveOverHTTP = tryResolveOverHTTP(str);
-                if (tryResolveOverHTTP == null) {
-                    throw new UnknownHostException(str);
-                } else if (!tryResolveOverHTTP.isEmpty()) {
-                    return tryResolveOverHTTP;
-                } else {
-                    throw new UnknownHostException(str);
-                }
-            } catch (UnknownHostException e2) {
-                if (str.equalsIgnoreCase("login.agni.lindenlab.com")) {
-                    Debug.Printf("DNS: Falling back to static address for %s", str);
-                    ArrayList arrayList = new ArrayList();
-                    arrayList.add(InetAddress.getByName("216.82.57.58"));
-                    return arrayList;
-                }
-                throw e2;
+        public List lookup(String s)
+            throws UnknownHostException
+        {
+            Object obj = systemDns.lookup(s);
+            if (obj != null)
+            {
+                break MISSING_BLOCK_LABEL_92;
             }
+            try
+            {
+                throw new UnknownHostException(s);
+            }
+            // Misplaced declaration of an exception variable
+            catch (Object obj) { }
+            obj = tryResolveOverHTTP(s);
+            if (obj == null)
+            {
+                try
+                {
+                    throw new UnknownHostException(s);
+                }
+                // Misplaced declaration of an exception variable
+                catch (Object obj) { }
+                if (s.equalsIgnoreCase("login.agni.lindenlab.com"))
+                {
+                    Debug.Printf("DNS: Falling back to static address for %s", new Object[] {
+                        s
+                    });
+                    s = new ArrayList();
+                    s.add(InetAddress.getByName("216.82.57.58"));
+                    return s;
+                } else
+                {
+                    throw obj;
+                }
+            }
+            break MISSING_BLOCK_LABEL_112;
+            if (((List) (obj)).isEmpty())
+            {
+                throw new UnknownHostException(s);
+            }
+            return ((List) (obj));
+            if (((List) (obj)).isEmpty())
+            {
+                throw new UnknownHostException(s);
+            }
+            return ((List) (obj));
+        }
+
+        SLDNS()
+        {
+            systemDns = Dns.SYSTEM;
+            httpResolverClient = (new okhttp3.OkHttpClient.Builder()).dns(new DNSforDNS()).connectTimeout(60L, TimeUnit.SECONDS).readTimeout(60L, TimeUnit.SECONDS).build();
         }
     }
 
-    public static OkHttpClient getOkHttpClient() {
+
+    private static final long CONNECT_TIMEOUT = 60L;
+    private static final long READ_TIMEOUT = 60L;
+    private static final OkHttpClient okHttpClient;
+    private static TrustManager trustAllCerts[];
+    private static final X509TrustManager trustEverythingManager;
+
+    public SLHTTPSConnection()
+    {
+    }
+
+    public static OkHttpClient getOkHttpClient()
+    {
         return okHttpClient;
     }
 
-    private static SSLSocketFactory getSocketFactory() {
-        try {
-            SSLContext instance = SSLContext.getInstance("TLS");
-            instance.init((KeyManager[]) null, trustAllCerts, new SecureRandom());
-            return instance.getSocketFactory();
-        } catch (Exception e) {
+    private static SSLSocketFactory getSocketFactory()
+    {
+        Object obj;
+        try
+        {
+            obj = SSLContext.getInstance("TLS");
+            ((SSLContext) (obj)).init(null, trustAllCerts, new SecureRandom());
+            obj = ((SSLContext) (obj)).getSocketFactory();
+        }
+        catch (Exception exception)
+        {
             return null;
         }
+        return ((SSLSocketFactory) (obj));
+    }
+
+    static 
+    {
+        trustEverythingManager = new X509TrustManager() {
+
+            public void checkClientTrusted(X509Certificate ax509certificate[], String s)
+                throws CertificateException
+            {
+            }
+
+            public void checkServerTrusted(X509Certificate ax509certificate[], String s)
+                throws CertificateException
+            {
+            }
+
+            public X509Certificate[] getAcceptedIssuers()
+            {
+                return new X509Certificate[0];
+            }
+
+        };
+        trustAllCerts = (new TrustManager[] {
+            trustEverythingManager
+        });
+        okHttpClient = (new okhttp3.OkHttpClient.Builder()).proxy(Proxy.NO_PROXY).dns(new SLDNS()).connectionPool(new ConnectionPool(8, 5L, TimeUnit.MINUTES)).connectTimeout(60L, TimeUnit.SECONDS).readTimeout(60L, TimeUnit.SECONDS).hostnameVerifier(new HostnameVerifier() {
+
+            public boolean verify(String s, SSLSession sslsession)
+            {
+                return true;
+            }
+
+        }).addNetworkInterceptor(new CharsetStripInterceptor()).sslSocketFactory(getSocketFactory(), trustEverythingManager).build();
     }
 }

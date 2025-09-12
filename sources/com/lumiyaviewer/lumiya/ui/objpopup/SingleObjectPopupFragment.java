@@ -1,125 +1,164 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.objpopup;
 
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.ChatEventViewHolder;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectPopupsManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatEventTimestampUpdater;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.ConnectedActivity;
 import com.lumiyaviewer.lumiya.ui.common.SwipeDismissAdvancedBehavior;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class SingleObjectPopupFragment extends Fragment {
-    private final SwipeDismissAdvancedBehavior.OnDismissListener dismissListener = new SwipeDismissAdvancedBehavior.OnDismissListener() {
-        public void onDismiss(View view) {
-            SingleObjectPopupFragment.this.hideAndDismiss();
+public class SingleObjectPopupFragment extends Fragment
+{
+
+    private final com.lumiyaviewer.lumiya.ui.common.SwipeDismissAdvancedBehavior.OnDismissListener dismissListener = new com.lumiyaviewer.lumiya.ui.common.SwipeDismissAdvancedBehavior.OnDismissListener() {
+
+        final SingleObjectPopupFragment this$0;
+
+        public void onDismiss(View view)
+        {
+            SingleObjectPopupFragment._2D_wrap0(SingleObjectPopupFragment.this);
         }
 
-        public void onDragStateChanged(int i) {
+        public void onDragStateChanged(int i)
+        {
         }
+
+            
+            {
+                this$0 = SingleObjectPopupFragment.this;
+                super();
+            }
     };
-    private final View.OnClickListener frameClickListener = new $Lambda$gmgx9kG_frukRCwYiu6KI4GSv6k(this);
+    private final android.view.View.OnClickListener frameClickListener = new _2D_.Lambda.gmgx9kG_frukRCwYiu6KI4GSv6k(this);
 
-    public static SingleObjectPopupFragment create(@Nonnull UUID uuid) {
-        SingleObjectPopupFragment singleObjectPopupFragment = new SingleObjectPopupFragment();
-        singleObjectPopupFragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, (Bundle) null));
-        return singleObjectPopupFragment;
+    static void _2D_wrap0(SingleObjectPopupFragment singleobjectpopupfragment)
+    {
+        singleobjectpopupfragment.hideAndDismiss();
     }
 
-    @Nullable
-    private SLChatEvent getEvent() {
-        UserManager userManager = getUserManager();
-        if (userManager != null) {
-            return userManager.getObjectPopupsManager().getDisplayedObjectPopup();
+    public SingleObjectPopupFragment()
+    {
+    }
+
+    public static SingleObjectPopupFragment create(UUID uuid)
+    {
+        SingleObjectPopupFragment singleobjectpopupfragment = new SingleObjectPopupFragment();
+        singleobjectpopupfragment.setArguments(ActivityUtils.makeFragmentArguments(uuid, null));
+        return singleobjectpopupfragment;
+    }
+
+    private SLChatEvent getEvent()
+    {
+        UserManager usermanager = getUserManager();
+        if (usermanager != null)
+        {
+            return usermanager.getObjectPopupsManager().getDisplayedObjectPopup();
+        } else
+        {
+            return null;
         }
-        return null;
     }
 
-    @Nullable
-    private UserManager getUserManager() {
+    private UserManager getUserManager()
+    {
         return ActivityUtils.getUserManager(getArguments());
     }
 
-    /* access modifiers changed from: private */
-    public void hideAndDismiss() {
-        FragmentActivity activity = getActivity();
-        if (activity instanceof ConnectedActivity) {
-            ((ConnectedActivity) activity).dismissSingleObjectPopup();
+    private void hideAndDismiss()
+    {
+        android.support.v4.app.FragmentActivity fragmentactivity = getActivity();
+        if (fragmentactivity instanceof ConnectedActivity)
+        {
+            ((ConnectedActivity)fragmentactivity).dismissSingleObjectPopup();
         }
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objpopup_SingleObjectPopupFragment_4170  reason: not valid java name */
-    public /* synthetic */ void m694lambda$com_lumiyaviewer_lumiya_ui_objpopup_SingleObjectPopupFragment_4170(View view) {
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_objpopup_SingleObjectPopupFragment_4170(View view)
+    {
         hideAndDismiss();
     }
 
-    @Nullable
-    public View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
-        boolean z;
-        SLChatEvent sLChatEvent;
-        View inflate = layoutInflater.inflate(R.layout.object_popups_single_fragment_layout, viewGroup, false);
-        UserManager userManager = getUserManager();
-        if (userManager != null) {
-            SLChatEvent displayedObjectPopup = userManager.getObjectPopupsManager().getDisplayedObjectPopup();
-            if (displayedObjectPopup != null) {
-                sLChatEvent = displayedObjectPopup;
-                z = userManager.getObjectPopupsManager().mustAnimatePopup(displayedObjectPopup);
-            } else {
-                sLChatEvent = displayedObjectPopup;
-                z = false;
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        viewgroup = layoutinflater.inflate(0x7f04007b, viewgroup, false);
+        bundle = getUserManager();
+        boolean flag;
+        if (bundle != null)
+        {
+            layoutinflater = bundle.getObjectPopupsManager().getDisplayedObjectPopup();
+            ChatEventViewHolder chateventviewholder;
+            CoordinatorLayout coordinatorlayout;
+            if (layoutinflater != null)
+            {
+                flag = bundle.getObjectPopupsManager().mustAnimatePopup(layoutinflater);
+            } else
+            {
+                flag = false;
             }
-        } else {
-            z = false;
-            sLChatEvent = null;
+        } else
+        {
+            flag = false;
+            layoutinflater = null;
         }
-        if (sLChatEvent == null) {
-            hideAndDismiss();
-        } else {
-            CoordinatorLayout coordinatorLayout = (CoordinatorLayout) inflate.findViewById(R.id.single_object_popup_container);
-            ChatEventViewHolder createViewHolder = SLChatEvent.createViewHolder(LayoutInflater.from(getContext()), sLChatEvent.getViewType().ordinal(), coordinatorLayout, (RecyclerView.Adapter) null);
-            sLChatEvent.bindViewHolder(createViewHolder, userManager, (ChatEventTimestampUpdater) null);
-            coordinatorLayout.addView(createViewHolder.itemView);
-            ViewGroup.LayoutParams layoutParams = createViewHolder.itemView.getLayoutParams();
-            if (layoutParams instanceof CoordinatorLayout.LayoutParams) {
-                SwipeDismissAdvancedBehavior swipeDismissAdvancedBehavior = new SwipeDismissAdvancedBehavior();
-                swipeDismissAdvancedBehavior.setSwipeDirection(7);
-                swipeDismissAdvancedBehavior.setListener(this.dismissListener);
-                ((CoordinatorLayout.LayoutParams) layoutParams).setBehavior(swipeDismissAdvancedBehavior);
-            }
-            if (z) {
-                createViewHolder.itemView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.slide_from_above));
-            }
+        if (layoutinflater != null) goto _L2; else goto _L1
+_L1:
+        hideAndDismiss();
+_L4:
+        layoutinflater = viewgroup.findViewById(0x7f100241);
+        if (layoutinflater != null)
+        {
+            layoutinflater.setOnClickListener(frameClickListener);
         }
-        View findViewById = inflate.findViewById(R.id.touch_capture_view);
-        if (findViewById != null) {
-            findViewById.setOnClickListener(this.frameClickListener);
+        return viewgroup;
+_L2:
+        coordinatorlayout = (CoordinatorLayout)viewgroup.findViewById(0x7f100240);
+        chateventviewholder = SLChatEvent.createViewHolder(LayoutInflater.from(getContext()), layoutinflater.getViewType().ordinal(), coordinatorlayout, null);
+        layoutinflater.bindViewHolder(chateventviewholder, bundle, null);
+        coordinatorlayout.addView(chateventviewholder.itemView);
+        layoutinflater = chateventviewholder.itemView.getLayoutParams();
+        if (layoutinflater instanceof android.support.design.widget.CoordinatorLayout.LayoutParams)
+        {
+            bundle = new SwipeDismissAdvancedBehavior();
+            bundle.setSwipeDirection(7);
+            bundle.setListener(dismissListener);
+            ((android.support.design.widget.CoordinatorLayout.LayoutParams)layoutinflater).setBehavior(bundle);
         }
-        return inflate;
+        if (flag)
+        {
+            layoutinflater = AnimationUtils.loadAnimation(getContext(), 0x7f05000f);
+            chateventviewholder.itemView.startAnimation(layoutinflater);
+        }
+        if (true) goto _L4; else goto _L3
+_L3:
     }
 
-    public void onResume() {
+    public void onResume()
+    {
         super.onResume();
-        if (getEvent() == null) {
+        if (getEvent() == null)
+        {
             hideAndDismiss();
         }
     }
 
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        if (getEvent() == null) {
+        if (getEvent() == null)
+        {
             hideAndDismiss();
         }
     }

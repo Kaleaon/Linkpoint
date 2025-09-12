@@ -1,45 +1,66 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class TeleportLureRequest extends SLMessage {
-    public Info Info_Field = new Info();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class Info {
+public class TeleportLureRequest extends SLMessage
+{
+    public static class Info
+    {
+
         public UUID AgentID;
         public UUID LureID;
         public UUID SessionID;
         public int TeleportFlags;
+
+        public Info()
+        {
+        }
     }
 
-    public TeleportLureRequest() {
-        this.zeroCoded = false;
+
+    public Info Info_Field;
+
+    public TeleportLureRequest()
+    {
+        zeroCoded = false;
+        Info_Field = new Info();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 56;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleTeleportLureRequest(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleTeleportLureRequest(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 71);
-        packUUID(byteBuffer, this.Info_Field.AgentID);
-        packUUID(byteBuffer, this.Info_Field.SessionID);
-        packUUID(byteBuffer, this.Info_Field.LureID);
-        packInt(byteBuffer, this.Info_Field.TeleportFlags);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)71);
+        packUUID(bytebuffer, Info_Field.AgentID);
+        packUUID(bytebuffer, Info_Field.SessionID);
+        packUUID(bytebuffer, Info_Field.LureID);
+        packInt(bytebuffer, Info_Field.TeleportFlags);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.Info_Field.AgentID = unpackUUID(byteBuffer);
-        this.Info_Field.SessionID = unpackUUID(byteBuffer);
-        this.Info_Field.LureID = unpackUUID(byteBuffer);
-        this.Info_Field.TeleportFlags = unpackInt(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        Info_Field.AgentID = unpackUUID(bytebuffer);
+        Info_Field.SessionID = unpackUUID(bytebuffer);
+        Info_Field.LureID = unpackUUID(bytebuffer);
+        Info_Field.TeleportFlags = unpackInt(bytebuffer);
     }
 }

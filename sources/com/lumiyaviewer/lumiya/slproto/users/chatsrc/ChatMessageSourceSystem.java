@@ -1,33 +1,40 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.chatsrc;
 
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-class ChatMessageSourceSystem extends ChatMessageSource {
-    ChatMessageSourceSystem() {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.chatsrc:
+//            ChatMessageSource
+
+class ChatMessageSourceSystem extends ChatMessageSource
+{
+
+    ChatMessageSourceSystem()
+    {
     }
 
-    @Nonnull
-    public ChatterID getDefaultChatter(UUID uuid) {
+    public ChatterID getDefaultChatter(UUID uuid)
+    {
         return ChatterID.getLocalChatterID(uuid);
     }
 
-    @Nullable
-    public String getSourceName(@Nonnull UserManager userManager) {
+    public String getSourceName(UserManager usermanager)
+    {
         return null;
     }
 
-    @Nonnull
-    public ChatMessageSource.ChatMessageSourceType getSourceType() {
+    public ChatMessageSource.ChatMessageSourceType getSourceType()
+    {
         return ChatMessageSource.ChatMessageSourceType.System;
     }
 
-    @Nullable
-    public UUID getSourceUUID() {
+    public UUID getSourceUUID()
+    {
         return null;
     }
 }

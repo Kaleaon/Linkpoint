@@ -1,10 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.myava;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,298 +15,239 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.MoneyTransaction;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
+import com.lumiyaviewer.lumiya.slproto.users.manager.BalanceManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.chat.profiles.UserProfileFragment;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
 import com.lumiyaviewer.lumiya.ui.common.FragmentWithTitle;
 import com.lumiyaviewer.lumiya.ui.common.LoadingLayout;
+import com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable;
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor;
-import com.lumiyaviewer.lumiya.ui.myava.TransactionLogAdapter;
 import de.greenrobot.dao.query.LazyList;
 import java.util.UUID;
 
-public class TransactionLogFragment extends FragmentWithTitle implements LoadableMonitor.OnLoadableDataChangedListener, TransactionLogAdapter.OnTransactionClickListener {
-    /* access modifiers changed from: private */
-    public TransactionLogAdapter adapter;
-    private final LoadableMonitor loadableMonitor = new LoadableMonitor(this.moneyTransactions).withDataChangedListener(this);
-    @BindView(2131755197)
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.myava:
+//            TransactionLogAdapter
+
+public class TransactionLogFragment extends FragmentWithTitle
+    implements com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor.OnLoadableDataChangedListener, TransactionLogAdapter.OnTransactionClickListener
+{
+
+    private TransactionLogAdapter adapter;
+    private final LoadableMonitor loadableMonitor;
     LoadingLayout loadingLayout;
-    /* access modifiers changed from: private */
-    public final Handler mHandler = new Handler();
-    private final SubscriptionData<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactions = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    /* access modifiers changed from: private */
-    public final Runnable scrollToBottomRunnable = new Runnable() {
-        public void run() {
-            int itemCount;
-            boolean unused = TransactionLogFragment.this.scrollToBottomRunnablePosted = false;
-            if (TransactionLogFragment.this.unbinder != null) {
-                RecyclerView recyclerView = TransactionLogFragment.this.transactionLogView;
-                if (recyclerView.hasPendingAdapterUpdates()) {
-                    boolean unused2 = TransactionLogFragment.this.scrollToBottomRunnablePosted = true;
-                    TransactionLogFragment.this.mHandler.post(TransactionLogFragment.this.scrollToBottomRunnable);
-                } else if (TransactionLogFragment.this.adapter != null && (itemCount = TransactionLogFragment.this.adapter.getItemCount()) > 0) {
-                    recyclerView.scrollToPosition(itemCount - 1);
+    private final Handler mHandler = new Handler();
+    private final SubscriptionData moneyTransactions = new SubscriptionData(UIThreadExecutor.getInstance());
+    private final Runnable scrollToBottomRunnable = new Runnable() {
+
+        final TransactionLogFragment this$0;
+
+        public void run()
+        {
+label0:
+            {
+                TransactionLogFragment._2D_set0(TransactionLogFragment.this, false);
+                if (TransactionLogFragment._2D_get3(TransactionLogFragment.this) != null)
+                {
+                    RecyclerView recyclerview = transactionLogView;
+                    if (recyclerview.hasPendingAdapterUpdates())
+                    {
+                        break label0;
+                    }
+                    if (TransactionLogFragment._2D_get0(TransactionLogFragment.this) != null)
+                    {
+                        int i = TransactionLogFragment._2D_get0(TransactionLogFragment.this).getItemCount();
+                        if (i > 0)
+                        {
+                            recyclerview.scrollToPosition(i - 1);
+                        }
+                    }
                 }
+                return;
             }
+            TransactionLogFragment._2D_set0(TransactionLogFragment.this, true);
+            TransactionLogFragment._2D_get1(TransactionLogFragment.this).post(TransactionLogFragment._2D_get2(TransactionLogFragment.this));
         }
+
+            
+            {
+                this$0 = TransactionLogFragment.this;
+                super();
+            }
     };
-    /* access modifiers changed from: private */
-    public boolean scrollToBottomRunnablePosted = false;
-    @BindView(2131755676)
+    private boolean scrollToBottomRunnablePosted;
     RecyclerView transactionLogView;
-    /* access modifiers changed from: private */
-    public Unbinder unbinder;
+    private Unbinder unbinder;
 
-    private void clearTransactionLog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(R.string.clear_transaction_log_message).setCancelable(true).setPositiveButton("Yes", new DialogInterface.OnClickListener(this) {
+    static TransactionLogAdapter _2D_get0(TransactionLogFragment transactionlogfragment)
+    {
+        return transactionlogfragment.adapter;
+    }
 
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f456$f0;
+    static Handler _2D_get1(TransactionLogFragment transactionlogfragment)
+    {
+        return transactionlogfragment.mHandler;
+    }
 
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_xrT8AwWQ2OjPw50fSCa4Lhb58.1.$m$0(android.content.DialogInterface, int):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_xrT8AwWQ2OjPw50fSCa4Lhb58.1.$m$0(android.content.DialogInterface, int):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
+    static Runnable _2D_get2(TransactionLogFragment transactionlogfragment)
+    {
+        return transactionlogfragment.scrollToBottomRunnable;
+    }
 
-            public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_xrT8AwWQ2OjPw50fSCa4Lhb58.1.onClick(android.content.DialogInterface, int):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_xrT8AwWQ2OjPw50fSCa4Lhb58.1.onClick(android.content.DialogInterface, int):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        }).setNegativeButton("No", new $Lambda$N_xrT8AwWQ2OjPw50fSCa4Lhb58());
+    static Unbinder _2D_get3(TransactionLogFragment transactionlogfragment)
+    {
+        return transactionlogfragment.unbinder;
+    }
+
+    static boolean _2D_set0(TransactionLogFragment transactionlogfragment, boolean flag)
+    {
+        transactionlogfragment.scrollToBottomRunnablePosted = flag;
+        return flag;
+    }
+
+    public TransactionLogFragment()
+    {
+        loadableMonitor = (new LoadableMonitor(new Loadable[] {
+            moneyTransactions
+        })).withDataChangedListener(this);
+        scrollToBottomRunnablePosted = false;
+    }
+
+    private void clearTransactionLog()
+    {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(getActivity());
+        builder.setMessage(0x7f0900be).setCancelable(true).setPositiveButton("Yes", new _2D_.Lambda.N_xrT8AwWQ2OjPw50fSCa4Lhb58._cls1(this)).setNegativeButton("No", new _2D_.Lambda.N_xrT8AwWQ2OjPw50fSCa4Lhb58());
         builder.create().show();
     }
 
-    public static Bundle makeSelection(UUID uuid) {
+    static void lambda$_2D_com_lumiyaviewer_lumiya_ui_myava_TransactionLogFragment_4924(DialogInterface dialoginterface, int i)
+    {
+        dialoginterface.cancel();
+    }
+
+    public static Bundle makeSelection(UUID uuid)
+    {
         Bundle bundle = new Bundle();
         ActivityUtils.setActiveAgentID(bundle, uuid);
         return bundle;
     }
 
-    private void performClearTransactionLog() {
-        UserManager userManager = ActivityUtils.getUserManager(getArguments());
-        if (userManager != null) {
-            userManager.getBalanceManager().clearMoneyTransactions();
+    private void performClearTransactionLog()
+    {
+        UserManager usermanager = ActivityUtils.getUserManager(getArguments());
+        if (usermanager != null)
+        {
+            usermanager.getBalanceManager().clearMoneyTransactions();
         }
     }
 
-    private void scrollToBottom() {
-        if (!this.scrollToBottomRunnablePosted) {
-            this.scrollToBottomRunnablePosted = true;
-            this.mHandler.post(this.scrollToBottomRunnable);
+    private void scrollToBottom()
+    {
+        if (!scrollToBottomRunnablePosted)
+        {
+            scrollToBottomRunnablePosted = true;
+            mHandler.post(scrollToBottomRunnable);
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onClearTransactionLogConfirmed(DialogInterface dialogInterface, int i) {
-        dialogInterface.dismiss();
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_myava_TransactionLogFragment_4757(DialogInterface dialoginterface, int i)
+    {
+        dialoginterface.dismiss();
         performClearTransactionLog();
     }
 
-    public void onCreate(@Nullable Bundle bundle) {
+    public void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
         setHasOptionsMenu(true);
     }
 
-    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        super.onCreateOptionsMenu(menu, menuInflater);
-        menuInflater.inflate(R.menu.transaction_log_menu, menu);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuinflater)
+    {
+        super.onCreateOptionsMenu(menu, menuinflater);
+        menuinflater.inflate(0x7f120021, menu);
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        super.onCreateView(layoutInflater, viewGroup, bundle);
-        View inflate = layoutInflater.inflate(R.layout.transaction_log, viewGroup, false);
-        this.unbinder = ButterKnife.bind((Object) this, inflate);
-        this.adapter = new TransactionLogAdapter(getContext(), ActivityUtils.getActiveAgentID(getArguments()), this);
-        this.transactionLogView.setAdapter(this.adapter);
-        this.loadableMonitor.setLoadingLayout(this.loadingLayout, (String) null, getString(R.string.cannot_load_transaction_list));
-        return inflate;
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        super.onCreateView(layoutinflater, viewgroup, bundle);
+        layoutinflater = layoutinflater.inflate(0x7f0400af, viewgroup, false);
+        unbinder = ButterKnife.bind(this, layoutinflater);
+        adapter = new TransactionLogAdapter(getContext(), ActivityUtils.getActiveAgentID(getArguments()), this);
+        transactionLogView.setAdapter(adapter);
+        loadableMonitor.setLoadingLayout(loadingLayout, null, getString(0x7f0900a9));
+        return layoutinflater;
     }
 
-    public void onDestroyView() {
-        if (this.unbinder != null) {
-            this.unbinder.unbind();
-            this.unbinder = null;
+    public void onDestroyView()
+    {
+        if (unbinder != null)
+        {
+            unbinder.unbind();
+            unbinder = null;
         }
         super.onDestroyView();
     }
 
-    public void onLoadableDataChanged() {
-        LazyList data = this.moneyTransactions.getData();
-        if (data != null) {
-            this.loadableMonitor.setEmptyMessage(data.isEmpty(), getString(R.string.no_transactions_per_session));
-            if (this.adapter != null) {
-                this.adapter.setData(data);
+    public void onLoadableDataChanged()
+    {
+        LazyList lazylist = (LazyList)moneyTransactions.getData();
+        if (lazylist != null)
+        {
+            loadableMonitor.setEmptyMessage(lazylist.isEmpty(), getString(0x7f0901f0));
+            if (adapter != null)
+            {
+                adapter.setData(lazylist);
                 scrollToBottom();
             }
         }
     }
 
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.item_clear_transaction_log:
-                clearTransactionLog();
-                return true;
-            default:
-                return super.onOptionsItemSelected(menuItem);
+    public boolean onOptionsItemSelected(MenuItem menuitem)
+    {
+        switch (menuitem.getItemId())
+        {
+        default:
+            return super.onOptionsItemSelected(menuitem);
+
+        case 2131755859: 
+            clearTransactionLog();
+            break;
         }
+        return true;
     }
 
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        UserManager userManager = ActivityUtils.getUserManager(getArguments());
-        if (userManager != null) {
-            this.moneyTransactions.subscribe(userManager.getBalanceManager().moneyTransactions(), SubscriptionSingleKey.Value);
+        UserManager usermanager = ActivityUtils.getUserManager(getArguments());
+        if (usermanager != null)
+        {
+            moneyTransactions.subscribe(usermanager.getBalanceManager().moneyTransactions(), SubscriptionSingleKey.Value);
         }
     }
 
-    public void onStop() {
-        this.loadableMonitor.unsubscribeAll();
+    public void onStop()
+    {
+        loadableMonitor.unsubscribeAll();
         super.onStop();
     }
 
-    public void onTransactionClicked(MoneyTransaction moneyTransaction) {
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments());
-        if (activeAgentID != null) {
-            DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(activeAgentID, moneyTransaction.getAgentUUID())));
+    public void onTransactionClicked(MoneyTransaction moneytransaction)
+    {
+        UUID uuid = ActivityUtils.getActiveAgentID(getArguments());
+        if (uuid != null)
+        {
+            moneytransaction = ChatterID.getUserChatterID(uuid, moneytransaction.getAgentUUID());
+            DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/chat/profiles/UserProfileFragment, UserProfileFragment.makeSelection(moneytransaction));
         }
     }
 }

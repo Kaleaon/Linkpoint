@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.avatar;
 
 import android.opengl.GLES11;
@@ -8,15 +12,16 @@ import com.google.common.collect.Multimap;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.render.DrawableObject;
 import com.lumiyaviewer.lumiya.render.DrawableStore;
+import com.lumiyaviewer.lumiya.render.MatrixStack;
 import com.lumiyaviewer.lumiya.render.RenderContext;
 import com.lumiyaviewer.lumiya.render.picking.CollisionBox;
 import com.lumiyaviewer.lumiya.render.picking.GLRayTrace;
 import com.lumiyaviewer.lumiya.render.picking.IntersectInfo;
 import com.lumiyaviewer.lumiya.render.picking.IntersectPickable;
 import com.lumiyaviewer.lumiya.render.picking.ObjectIntersectInfo;
+import com.lumiyaviewer.lumiya.render.shaders.AvatarProgram;
 import com.lumiyaviewer.lumiya.render.spatial.DrawEntryList;
 import com.lumiyaviewer.lumiya.render.spatial.DrawListEntry;
-import com.lumiyaviewer.lumiya.render.spatial.DrawListObjectEntry;
 import com.lumiyaviewer.lumiya.render.spatial.DrawListPrimEntry;
 import com.lumiyaviewer.lumiya.res.executors.PrimComputeExecutor;
 import com.lumiyaviewer.lumiya.slproto.avatar.MeshIndex;
@@ -41,534 +46,680 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
 
-public class DrawableAvatar extends DrawableAvatarStub implements IntersectPickable, DrawEntryList.EntryRemovalListener {
-    private final Object animationLock = new Object();
-    private final AnimationSkeletonData animationSkeletonData = new AnimationSkeletonData();
-    private final Map<UUID, AvatarAnimationState> animations = new HashMap();
-    private volatile boolean animationsInitialized = false;
-    private final Set<DrawListEntry> deadAttachmentsList = Collections.newSetFromMap(new IdentityHashMap());
-    private final Object deadAttachmentsLock = new Object();
-    private final AtomicInteger displayedHUDid = new AtomicInteger();
-    @Nonnull
-    private volatile DrawableAttachments drawableAttachmentList = new DrawableAttachments();
-    private final DrawEntryList drawableAttachments = new DrawEntryList(this);
+// Referenced classes of package com.lumiyaviewer.lumiya.render.avatar:
+//            DrawableAvatarStub, DrawableAttachments, AnimationSkeletonData, DrawableAvatarPart, 
+//            AnimationSequenceInfo, AvatarAnimationState, AvatarSkeleton, AvatarAnimationList, 
+//            DrawableHUD, DrawableHoverText, AvatarTextures, AvatarShapeParams
+
+public class DrawableAvatar extends DrawableAvatarStub
+    implements IntersectPickable, com.lumiyaviewer.lumiya.render.spatial.DrawEntryList.EntryRemovalListener
+{
+
+    private final Object animationLock;
+    private final AnimationSkeletonData animationSkeletonData;
+    private final Map animations;
+    private volatile boolean animationsInitialized;
+    private final Set deadAttachmentsList;
+    private final Object deadAttachmentsLock;
+    private final AtomicInteger displayedHUDid;
+    private volatile DrawableAttachments drawableAttachmentList;
+    private final DrawEntryList drawableAttachments;
     private volatile DrawableHUD drawableHUD;
     private LLVector3 headPosition;
-    private boolean jointMatrixUpdated = false;
-    private final float[] localAviWorldMatrix = new float[16];
-    private final Map<MeshIndex, DrawableAvatarPart> parts = new EnumMap(MeshIndex.class);
-    private float pelvisTranslateX = 0.0f;
-    private float pelvisTranslateY = 0.0f;
-    private float pelvisTranslateZ = 0.0f;
-    private final Set<DrawableObject> riggedMeshes = Collections.newSetFromMap(new ConcurrentHashMap());
-    private volatile AvatarAnimationList runningAnimations = null;
+    private boolean jointMatrixUpdated;
+    private final float localAviWorldMatrix[];
+    private final Map parts;
+    private float pelvisTranslateX;
+    private float pelvisTranslateY;
+    private float pelvisTranslateZ;
+    private final Set riggedMeshes;
+    private volatile AvatarAnimationList runningAnimations;
     private volatile AvatarShapeParams shapeParams;
-    private final Runnable shapeParamsUpdate = new Runnable(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f49$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.render.avatar.-$Lambda$0R0mXpfMxrM5lCygN3JijOMDexU.1.$m$0():void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.render.avatar.-$Lambda$0R0mXpfMxrM5lCygN3JijOMDexU.1.$m$0():void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.render.avatar.-$Lambda$0R0mXpfMxrM5lCygN3JijOMDexU.1.run():void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.render.avatar.-$Lambda$0R0mXpfMxrM5lCygN3JijOMDexU.1.run():void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    };
+    private final Runnable shapeParamsUpdate;
     private volatile AvatarSkeleton skeleton;
-    private final Runnable updateAttachmentsRunnable = new $Lambda$0R0mXpfMxrM5lCygN3JijOMDexU(this);
-    private final AtomicReference<AvatarSkeleton> updatedSkeleton = new AtomicReference<>((Object) null);
+    private final Runnable updateAttachmentsRunnable;
+    private final AtomicReference updatedSkeleton;
 
-    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    public DrawableAvatar(DrawableStore drawableStore, UUID uuid, SLObjectAvatarInfo sLObjectAvatarInfo, UUID uuid2, Map<UUID, AnimationSequenceInfo> map) {
-        super(drawableStore, uuid, sLObjectAvatarInfo);
-        SLBaseAvatar instance = SLBaseAvatar.getInstance();
-        for (MeshIndex meshIndex : MeshIndex.VALUES) {
-            this.parts.put(meshIndex, new DrawableAvatarPart(uuid2, instance.getMeshEntry(meshIndex).textureFaceIndex, instance.getMeshEntry(meshIndex).polyMesh, drawableStore.hasGL20));
+    public DrawableAvatar(DrawableStore drawablestore, UUID uuid, SLObjectAvatarInfo slobjectavatarinfo, UUID uuid1, Map map)
+    {
+        int i = 0;
+        super(drawablestore, uuid, slobjectavatarinfo);
+        updatedSkeleton = new AtomicReference(null);
+        parts = new EnumMap(com/lumiyaviewer/lumiya/slproto/avatar/MeshIndex);
+        animationLock = new Object();
+        animations = new HashMap();
+        runningAnimations = null;
+        animationsInitialized = false;
+        drawableAttachmentList = new DrawableAttachments();
+        displayedHUDid = new AtomicInteger();
+        drawableAttachments = new DrawEntryList(this);
+        deadAttachmentsLock = new Object();
+        deadAttachmentsList = Collections.newSetFromMap(new IdentityHashMap());
+        riggedMeshes = Collections.newSetFromMap(new ConcurrentHashMap());
+        animationSkeletonData = new AnimationSkeletonData();
+        pelvisTranslateX = 0.0F;
+        pelvisTranslateY = 0.0F;
+        pelvisTranslateZ = 0.0F;
+        localAviWorldMatrix = new float[16];
+        jointMatrixUpdated = false;
+        updateAttachmentsRunnable = new _2D_.Lambda._cls0R0mXpfMxrM5lCygN3JijOMDexU(this);
+        shapeParamsUpdate = new _2D_.Lambda._cls0R0mXpfMxrM5lCygN3JijOMDexU._cls1(this);
+        uuid = SLBaseAvatar.getInstance();
+        slobjectavatarinfo = MeshIndex.VALUES;
+        for (int j = slobjectavatarinfo.length; i < j; i++)
+        {
+            MeshIndex meshindex = slobjectavatarinfo[i];
+            DrawableAvatarPart drawableavatarpart = new DrawableAvatarPart(uuid1, uuid.getMeshEntry(meshindex).textureFaceIndex, uuid.getMeshEntry(meshindex).polyMesh, drawablestore.hasGL20);
+            parts.put(meshindex, drawableavatarpart);
         }
-        synchronized (this.animationLock) {
-            if (map != null) {
-                for (AnimationSequenceInfo animationSequenceInfo : map.values()) {
-                    this.animations.put(animationSequenceInfo.animationID, new AvatarAnimationState(animationSequenceInfo, this));
-                }
-            }
-            this.animationsInitialized = true;
-            updateRunningAnimations();
+
+        drawablestore = ((DrawableStore) (animationLock));
+        drawablestore;
+        JVM INSTR monitorenter ;
+        if (map == null)
+        {
+            break MISSING_BLOCK_LABEL_359;
         }
+        for (uuid = map.values().iterator(); uuid.hasNext(); animations.put(((AnimationSequenceInfo) (slobjectavatarinfo)).animationID, new AvatarAnimationState(slobjectavatarinfo, this)))
+        {
+            slobjectavatarinfo = (AnimationSequenceInfo)uuid.next();
+        }
+
+        break MISSING_BLOCK_LABEL_359;
+        uuid;
+        throw uuid;
+        animationsInitialized = true;
+        updateRunningAnimations();
+        drawablestore;
+        JVM INSTR monitorexit ;
         updateAttachments();
+        return;
     }
 
-    private void DrawParts(RenderContext renderContext) {
-        AvatarSkeleton avatarSkeleton = this.skeleton;
-        if (avatarSkeleton != null) {
-            float pelvisToFoot = this.avatarObject.parentID == 0 ? ((-avatarSkeleton.getBodySize()) / 2.0f) + avatarSkeleton.getPelvisToFoot() + avatarSkeleton.getPelvisOffset() : 0.0f;
-            this.pelvisTranslateX = -avatarSkeleton.rootBone.getPositionX();
-            this.pelvisTranslateY = -avatarSkeleton.rootBone.getPositionY();
-            this.pelvisTranslateZ = pelvisToFoot + (-avatarSkeleton.rootBone.getPositionZ());
-            renderContext.glObjWorldTranslatef(this.pelvisTranslateX, this.pelvisTranslateY, this.pelvisTranslateZ);
-            renderContext.objWorldMatrix.getMatrix(this.localAviWorldMatrix, 0);
-            GLPrepare(renderContext, avatarSkeleton.jointMatrix);
-            MeshIndex[] meshIndexArr = MeshIndex.VALUES;
-            int length = meshIndexArr.length;
-            for (int i = 0; i < length; i++) {
-                MeshIndex meshIndex = meshIndexArr[i];
-                DrawableAvatarPart drawableAvatarPart = this.parts.get(meshIndex);
-                SLSkeletonBone sLSkeletonBone = meshIndex == MeshIndex.MESH_ID_EYEBALL_LEFT ? (SLSkeletonBone) avatarSkeleton.bones.get(SLSkeletonBoneID.mEyeLeft) : meshIndex == MeshIndex.MESH_ID_EYEBALL_RIGHT ? (SLSkeletonBone) avatarSkeleton.bones.get(SLSkeletonBoneID.mEyeRight) : null;
-                if (sLSkeletonBone != null) {
-                    renderContext.glObjWorldPushAndMultMatrixf(sLSkeletonBone.getGlobalMatrix(), 0);
-                }
-                drawableAvatarPart.GLDraw(renderContext, avatarSkeleton.jointMatrix, this.jointMatrixUpdated);
-                if (sLSkeletonBone != null) {
-                    renderContext.glObjWorldPopMatrix();
-                }
-            }
-            SLSkeletonBone sLSkeletonBone2 = (SLSkeletonBone) avatarSkeleton.bones.get(SLSkeletonBoneID.mHead);
-            if (sLSkeletonBone2 != null) {
-                renderContext.glObjWorldPushAndMultMatrixf(sLSkeletonBone2.getGlobalMatrix(), 0);
-                float[] matrixData = renderContext.objWorldMatrix.getMatrixData();
-                int matrixDataOffset = renderContext.objWorldMatrix.getMatrixDataOffset();
-                float f = matrixData[matrixDataOffset + 12];
-                float f2 = matrixData[matrixDataOffset + 13];
-                float f3 = matrixData[matrixDataOffset + 14];
-                if (this.headPosition == null) {
-                    this.headPosition = new LLVector3();
-                }
-                this.headPosition.set(f, f2, f3);
-                renderContext.glObjWorldPopMatrix();
-            }
-            renderContext.curPrimProgram = null;
-            if (this.drawableAttachmentList.Draw(renderContext, avatarSkeleton, this.jointMatrixUpdated)) {
-                this.drawableAttachmentList = new DrawableAttachments(this.drawableAttachmentList);
-            }
-            this.jointMatrixUpdated = false;
-        }
-    }
-
-    private void GLPrepare(RenderContext renderContext, float[] fArr) {
-        if (renderContext.hasGL20) {
-            GLES20.glUseProgram(renderContext.avatarProgram.getHandle());
-            GLES20.glUniform1i(renderContext.avatarProgram.sTexture, 0);
-            GLES20.glUniform4f(renderContext.avatarProgram.uObjCoordScale, 1.0f, 1.0f, 1.0f, 1.0f);
-            renderContext.glModelApplyMatrix(renderContext.avatarProgram.uMVPMatrix);
-            renderContext.avatarProgram.SetupLighting(renderContext, renderContext.windlightPreset);
-            GLES20.glUniformMatrix4fv(renderContext.avatarProgram.uJointMatrix, 133, false, fArr, 0);
+    private void DrawParts(RenderContext rendercontext)
+    {
+        AvatarSkeleton avatarskeleton = skeleton;
+        if (avatarskeleton == null)
+        {
             return;
         }
-        GLES11.glMatrixMode(5890);
-        GLES11.glLoadMatrixf(IdentityMatrix.getMatrix(), 0);
-        GLES11.glMatrixMode(5888);
+        float f = avatarskeleton.getBodySize();
+        float f1 = avatarskeleton.getPelvisToFoot();
+        float f3 = avatarskeleton.getPelvisOffset();
+        MeshIndex ameshindex[];
+        int i;
+        int j;
+        if (avatarObject.parentID == 0)
+        {
+            f = -f / 2.0F + f1 + f3;
+        } else
+        {
+            f = 0.0F;
+        }
+        pelvisTranslateX = -avatarskeleton.rootBone.getPositionX();
+        pelvisTranslateY = -avatarskeleton.rootBone.getPositionY();
+        pelvisTranslateZ = f + -avatarskeleton.rootBone.getPositionZ();
+        rendercontext.glObjWorldTranslatef(pelvisTranslateX, pelvisTranslateY, pelvisTranslateZ);
+        rendercontext.objWorldMatrix.getMatrix(localAviWorldMatrix, 0);
+        GLPrepare(rendercontext, avatarskeleton.jointMatrix);
+        ameshindex = MeshIndex.VALUES;
+        j = ameshindex.length;
+        i = 0;
+        while (i < j) 
+        {
+            Object obj = ameshindex[i];
+            DrawableAvatarPart drawableavatarpart = (DrawableAvatarPart)parts.get(obj);
+            float f2;
+            float f4;
+            if (obj == MeshIndex.MESH_ID_EYEBALL_LEFT)
+            {
+                obj = (SLSkeletonBone)avatarskeleton.bones.get(SLSkeletonBoneID.mEyeLeft);
+            } else
+            if (obj == MeshIndex.MESH_ID_EYEBALL_RIGHT)
+            {
+                obj = (SLSkeletonBone)avatarskeleton.bones.get(SLSkeletonBoneID.mEyeRight);
+            } else
+            {
+                obj = null;
+            }
+            if (obj != null)
+            {
+                rendercontext.glObjWorldPushAndMultMatrixf(((SLSkeletonBone) (obj)).getGlobalMatrix(), 0);
+            }
+            drawableavatarpart.GLDraw(rendercontext, avatarskeleton.jointMatrix, jointMatrixUpdated);
+            if (obj != null)
+            {
+                rendercontext.glObjWorldPopMatrix();
+            }
+            i++;
+        }
+        obj = (SLSkeletonBone)avatarskeleton.bones.get(SLSkeletonBoneID.mHead);
+        if (obj != null)
+        {
+            rendercontext.glObjWorldPushAndMultMatrixf(((SLSkeletonBone) (obj)).getGlobalMatrix(), 0);
+            obj = rendercontext.objWorldMatrix.getMatrixData();
+            i = rendercontext.objWorldMatrix.getMatrixDataOffset();
+            f = obj[i + 12];
+            f2 = obj[i + 13];
+            f4 = obj[i + 14];
+            if (headPosition == null)
+            {
+                headPosition = new LLVector3();
+            }
+            headPosition.set(f, f2, f4);
+            rendercontext.glObjWorldPopMatrix();
+        }
+        rendercontext.curPrimProgram = null;
+        if (drawableAttachmentList.Draw(rendercontext, avatarskeleton, jointMatrixUpdated))
+        {
+            drawableAttachmentList = new DrawableAttachments(drawableAttachmentList);
+        }
+        jointMatrixUpdated = false;
     }
 
-    private boolean animate(AvatarSkeleton avatarSkeleton) {
-        boolean needForceAnimate = avatarSkeleton.needForceAnimate();
-        AvatarAnimationList avatarAnimationList = this.runningAnimations;
-        if (!avatarAnimationList.needAnimate(System.currentTimeMillis()) && !needForceAnimate) {
+    private void GLPrepare(RenderContext rendercontext, float af[])
+    {
+        if (rendercontext.hasGL20)
+        {
+            GLES20.glUseProgram(rendercontext.avatarProgram.getHandle());
+            GLES20.glUniform1i(rendercontext.avatarProgram.sTexture, 0);
+            GLES20.glUniform4f(rendercontext.avatarProgram.uObjCoordScale, 1.0F, 1.0F, 1.0F, 1.0F);
+            rendercontext.glModelApplyMatrix(rendercontext.avatarProgram.uMVPMatrix);
+            rendercontext.avatarProgram.SetupLighting(rendercontext, rendercontext.windlightPreset);
+            GLES20.glUniformMatrix4fv(rendercontext.avatarProgram.uJointMatrix, 133, false, af, 0);
+            return;
+        } else
+        {
+            GLES11.glMatrixMode(5890);
+            GLES11.glLoadMatrixf(IdentityMatrix.getMatrix(), 0);
+            GLES11.glMatrixMode(5888);
+            return;
+        }
+    }
+
+    private boolean animate(AvatarSkeleton avatarskeleton)
+    {
+        boolean flag = avatarskeleton.needForceAnimate();
+        AvatarAnimationList avataranimationlist = runningAnimations;
+        if (avataranimationlist.needAnimate(System.currentTimeMillis()) || flag)
+        {
+            animationSkeletonData.animate(avatarskeleton, avataranimationlist);
+            return true;
+        } else
+        {
             return false;
         }
-        this.animationSkeletonData.animate(avatarSkeleton, avatarAnimationList);
-        return true;
     }
 
-    private AvatarAnimationList getRunningAnimations() {
-        AvatarAnimationList avatarAnimationList;
-        synchronized (this.animationLock) {
-            avatarAnimationList = new AvatarAnimationList(this.animations.values());
-        }
-        return avatarAnimationList;
+    private AvatarAnimationList getRunningAnimations()
+    {
+        Object obj = animationLock;
+        obj;
+        JVM INSTR monitorenter ;
+        AvatarAnimationList avataranimationlist = new AvatarAnimationList(animations.values());
+        obj;
+        JVM INSTR monitorexit ;
+        return avataranimationlist;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: processUpdateAttachments */
-    public void m52com_lumiyaviewer_lumiya_render_avatar_DrawableAvatarmthref0() {
-        DrawListEntry[] drawListEntryArr;
-        boolean z;
-        DrawableObject drawableObject;
-        DrawableHUD drawableHUD2;
-        int i = 0;
-        ArrayListMultimap create = ArrayListMultimap.create();
-        Set newSetFromMap = Collections.newSetFromMap(new IdentityHashMap());
-        int i2 = this.displayedHUDid.get();
-        LinkedTreeNode firstChild = this.avatarObject.treeNode.getFirstChild();
-        DrawableHUD drawableHUD3 = null;
-        while (firstChild != null) {
-            SLObjectInfo sLObjectInfo = (SLObjectInfo) firstChild.getDataObject();
-            if (!sLObjectInfo.isDead) {
-                int i3 = sLObjectInfo.attachmentID;
-                if (i3 < 0 || i3 >= 56) {
-                    drawableHUD2 = drawableHUD3;
-                    firstChild = firstChild.getNextChild();
-                    drawableHUD3 = drawableHUD2;
-                } else {
-                    SLAttachmentPoint sLAttachmentPoint = SLAttachmentPoint.attachmentPoints[i3];
-                    if (sLAttachmentPoint != null) {
-                        if (!sLAttachmentPoint.isHUD) {
-                            updateAttachmentParts(sLObjectInfo, create, i3);
-                            drawableHUD2 = drawableHUD3;
-                        } else if (i2 == sLObjectInfo.localID) {
-                            drawableHUD2 = new DrawableHUD(sLAttachmentPoint, this.drawableAttachments, sLObjectInfo, this.drawableStore, this);
-                        }
-                        firstChild = firstChild.getNextChild();
-                        drawableHUD3 = drawableHUD2;
+    private void processUpdateAttachments()
+    {
+        Object obj;
+        ArrayListMultimap arraylistmultimap;
+        Set set;
+        int k;
+        k = 0;
+        arraylistmultimap = ArrayListMultimap.create();
+        set = Collections.newSetFromMap(new IdentityHashMap());
+        int i = displayedHUDid.get();
+        LinkedTreeNode linkedtreenode = avatarObject.treeNode.getFirstChild();
+        obj = null;
+        while (linkedtreenode != null) 
+        {
+            SLObjectInfo slobjectinfo = (SLObjectInfo)linkedtreenode.getDataObject();
+            if (slobjectinfo.isDead)
+            {
+                continue;
+            }
+            int j = slobjectinfo.attachmentID;
+            if (j < 0 || j >= 56)
+            {
+                continue;
+            }
+            SLAttachmentPoint slattachmentpoint = SLAttachmentPoint.attachmentPoints[j];
+            if (slattachmentpoint != null)
+            {
+                if (slattachmentpoint.isHUD)
+                {
+                    if (i == slobjectinfo.localID)
+                    {
+                        obj = new DrawableHUD(slattachmentpoint, drawableAttachments, slobjectinfo, drawableStore, this);
                     }
+                } else
+                {
+                    updateAttachmentParts(slobjectinfo, arraylistmultimap, j);
                 }
             }
-            drawableHUD2 = drawableHUD3;
-            firstChild = firstChild.getNextChild();
-            drawableHUD3 = drawableHUD2;
+            linkedtreenode = linkedtreenode.getNextChild();
         }
-        synchronized (this.deadAttachmentsLock) {
-            if (!this.deadAttachmentsList.isEmpty()) {
-                DrawListEntry[] drawListEntryArr2 = (DrawListEntry[]) this.deadAttachmentsList.toArray(new DrawListEntry[this.deadAttachmentsList.size()]);
-                this.deadAttachmentsList.clear();
-                drawListEntryArr = drawListEntryArr2;
-            } else {
-                drawListEntryArr = null;
-            }
-        }
-        boolean z2 = false;
-        for (DrawableObject drawableObject2 : create.values()) {
-            if (drawableObject2.isRiggedMesh()) {
-                if (this.riggedMeshes.add(drawableObject2)) {
-                    z2 = true;
-                }
-                newSetFromMap.add(drawableObject2);
-            }
-            z2 = z2;
-        }
-        if (drawListEntryArr != null) {
-            int length = drawListEntryArr.length;
-            while (i < length) {
-                DrawListPrimEntry drawListPrimEntry = drawListEntryArr[i];
-                this.drawableAttachments.removeEntry(drawListPrimEntry);
-                if ((drawListPrimEntry instanceof DrawListPrimEntry) && (drawableObject = drawListPrimEntry.getDrawableObject()) != null) {
-                    newSetFromMap.remove(drawableObject);
-                    if (this.riggedMeshes.remove(drawableObject)) {
-                        z = true;
-                        i++;
-                        z2 = z;
-                    }
-                }
-                z = z2;
-                i++;
-                z2 = z;
-            }
-        }
-        for (DrawableObject drawableObject3 : this.riggedMeshes) {
-            if (!newSetFromMap.contains(drawableObject3)) {
-                this.riggedMeshes.remove(drawableObject3);
-                z2 = true;
-            }
-        }
-        this.drawableHUD = drawableHUD3;
-        this.drawableAttachmentList = new DrawableAttachments((Multimap<Integer, DrawableObject>) create);
-        if (z2) {
-            updateRiggedMeshes();
-        }
-    }
-
-    private void updateAttachmentParts(SLObjectInfo sLObjectInfo, Multimap<Integer, DrawableObject> multimap, int i) {
-        DrawListObjectEntry drawListEntry = sLObjectInfo.getDrawListEntry();
-        this.drawableAttachments.addEntry(drawListEntry);
-        if (drawListEntry instanceof DrawListPrimEntry) {
-            multimap.put(Integer.valueOf(i), ((DrawListPrimEntry) drawListEntry).getDrawableAttachment(this.drawableStore, this));
-        }
-        for (LinkedTreeNode<SLObjectInfo> firstChild = sLObjectInfo.treeNode.getFirstChild(); firstChild != null; firstChild = firstChild.getNextChild()) {
-            SLObjectInfo dataObject = firstChild.getDataObject();
-            if (dataObject != null) {
-                updateAttachmentParts(dataObject, multimap, i);
-            }
-        }
-    }
-
-    private void updateRiggedMeshes() {
-        PrimComputeExecutor.getInstance().execute(this.shapeParamsUpdate);
-    }
-
-    /* access modifiers changed from: package-private */
-    public void AnimationRemove(UUID uuid) {
-        boolean z;
-        synchronized (this.animationLock) {
-            z = this.animations.remove(uuid) != null;
-        }
-        if (z) {
-            updateRunningAnimations();
-        }
-    }
-
-    /* access modifiers changed from: package-private */
-    public void AnimationUpdate(AnimationSequenceInfo animationSequenceInfo) {
-        UUID uuid = animationSequenceInfo.animationID;
-        synchronized (this.animationLock) {
-            AvatarAnimationState avatarAnimationState = this.animations.get(uuid);
-            if (avatarAnimationState == null) {
-                this.animations.put(uuid, new AvatarAnimationState(animationSequenceInfo, this));
-            } else {
-                avatarAnimationState.updateSequenceInfo(animationSequenceInfo);
-            }
-        }
-        updateRunningAnimations();
-    }
-
-    public void Draw(RenderContext renderContext) {
-        float[] worldMatrix = getWorldMatrix(renderContext);
-        if (worldMatrix != null) {
-            try {
-                renderContext.glObjWorldPushAndMultMatrixf(worldMatrix, 0);
-                DrawParts(renderContext);
-                renderContext.glObjWorldPopMatrix();
-            } catch (Exception e) {
-                Debug.Warning(e);
-            }
-        }
-    }
-
-    public void DrawNameTag(RenderContext renderContext) {
-        DrawableHoverText drawableHoverText = this.drawableNameTag;
-        if (drawableHoverText != null) {
-            LLVector3 lLVector3 = this.headPosition;
-            if (lLVector3 != null) {
-                drawableHoverText.DrawAtWorld(renderContext, lLVector3.x, lLVector3.y, lLVector3.z, 0.5f, renderContext.projectionMatrix, false, 0);
-                return;
-            }
-            super.DrawNameTag(renderContext);
-        }
-    }
-
-    /* access modifiers changed from: package-private */
-    public boolean IsAnimationStopped(UUID uuid) {
-        boolean hasStopped;
-        synchronized (this.animationLock) {
-            AvatarAnimationState avatarAnimationState = this.animations.get(uuid);
-            hasStopped = avatarAnimationState != null ? avatarAnimationState.hasStopped() : false;
-        }
-        return hasStopped;
-    }
-
-    public ObjectIntersectInfo PickObject(RenderContext renderContext, float f, float f2, float f3) {
-        ObjectIntersectInfo objectIntersectInfo;
-        float[] worldMatrix = getWorldMatrix(renderContext);
-        AvatarSkeleton avatarSkeleton = this.skeleton;
-        if (worldMatrix == null || avatarSkeleton == null) {
-            return null;
-        }
-        int[] iArr = renderContext.viewportRect;
-        float[] fArr = new float[32];
-        float[] fArr2 = new float[6];
-        float f4 = ((float) iArr[3]) - f2;
-        renderContext.glObjWorldPushAndMultMatrixf(worldMatrix, 0);
-        renderContext.glObjWorldTranslatef(this.pelvisTranslateX, this.pelvisTranslateY, this.pelvisTranslateZ);
-        Iterator it = avatarSkeleton.bones.values().iterator();
-        while (true) {
-            if (!it.hasNext()) {
-                objectIntersectInfo = null;
+        Object obj2 = deadAttachmentsLock;
+        obj2;
+        JVM INSTR monitorenter ;
+        if (deadAttachmentsList.isEmpty()) goto _L2; else goto _L1
+_L1:
+        Object obj1;
+        obj1 = (DrawListEntry[])deadAttachmentsList.toArray(new DrawListEntry[deadAttachmentsList.size()]);
+        deadAttachmentsList.clear();
+_L4:
+        obj2;
+        JVM INSTR monitorexit ;
+        boolean flag;
+        obj2 = arraylistmultimap.values().iterator();
+        flag = false;
+        do
+        {
+            if (!((Iterator) (obj2)).hasNext())
+            {
                 break;
             }
-            SLSkeletonBone sLSkeletonBone = (SLSkeletonBone) it.next();
-            if (!sLSkeletonBone.boneID.isJoint) {
-                renderContext.glObjWorldPushAndMultMatrixf(avatarSkeleton.jointWorldMatrix, sLSkeletonBone.boneID.ordinal() * 16);
-                if (renderContext.hasGL20) {
-                    Matrix.scaleM(fArr, 0, renderContext.objWorldMatrix.getMatrixData(), renderContext.objWorldMatrix.getMatrixDataOffset(), 1.0f, 1.0f, 1.0f);
-                    RenderContext.gluUnProject(f, f4, 0.0f, fArr, 0, renderContext.modelViewMatrix.getMatrixData(), renderContext.modelViewMatrix.getMatrixDataOffset(), iArr, 0, fArr2, 0);
-                    RenderContext.gluUnProject(f, f4, 1.0f, fArr, 0, renderContext.modelViewMatrix.getMatrixData(), renderContext.modelViewMatrix.getMatrixDataOffset(), iArr, 0, fArr2, 3);
-                } else {
-                    Matrix.scaleM(fArr, 16, renderContext.objWorldMatrix.getMatrixData(), renderContext.objWorldMatrix.getMatrixDataOffset(), 1.0f, 1.0f, 1.0f);
-                    Matrix.multiplyMM(fArr, 0, renderContext.modelViewMatrix.getMatrixData(), renderContext.modelViewMatrix.getMatrixDataOffset(), fArr, 16);
-                    RenderContext.gluUnProject(f, f4, 0.0f, fArr, 0, renderContext.projectionMatrix.getMatrixData(), renderContext.projectionMatrix.getMatrixDataOffset(), iArr, 0, fArr2, 0);
-                    RenderContext.gluUnProject(f, f4, 1.0f, fArr, 0, renderContext.projectionMatrix.getMatrixData(), renderContext.projectionMatrix.getMatrixDataOffset(), iArr, 0, fArr2, 3);
+            DrawableObject drawableobject1 = (DrawableObject)((Iterator) (obj2)).next();
+            if (drawableobject1.isRiggedMesh())
+            {
+                if (riggedMeshes.add(drawableobject1))
+                {
+                    flag = true;
                 }
-                renderContext.glObjWorldPopMatrix();
-                LLVector3 lLVector3 = new LLVector3(fArr2[0], fArr2[1], fArr2[2]);
-                LLVector3 lLVector32 = new LLVector3(fArr2[3], fArr2[4], fArr2[5]);
-                LLVector3[] lLVector3Arr = CollisionBox.getInstance().vertices;
-                GLRayTrace.RayIntersectInfo rayIntersectInfo = null;
-                int i = 0;
-                while (i < 12 && (rayIntersectInfo = GLRayTrace.intersect_RayTriangle(lLVector3, lLVector32, lLVector3Arr, i * 3)) == null) {
-                    i++;
-                }
-                if (rayIntersectInfo != null) {
-                    float intersectionDepth = GLRayTrace.getIntersectionDepth(renderContext, rayIntersectInfo.intersectPoint, fArr);
-                    if (intersectionDepth >= f3) {
-                        objectIntersectInfo = new ObjectIntersectInfo(new IntersectInfo(rayIntersectInfo.intersectPoint), this.avatarObject, intersectionDepth);
-                        break;
-                    }
-                } else {
-                    continue;
-                }
+                set.add(drawableobject1);
             }
-        }
-        renderContext.glObjWorldPopMatrix();
-        return objectIntersectInfo;
-    }
-
-    public void RunAnimations() {
-        AvatarSkeleton andSet = this.updatedSkeleton.getAndSet((Object) null);
-        if (andSet != null) {
-            this.skeleton = andSet;
-        }
-        AvatarSkeleton avatarSkeleton = this.skeleton;
-        if (avatarSkeleton != null && animate(avatarSkeleton)) {
-            avatarSkeleton.UpdateGlobalPositions(this.animationSkeletonData);
-            this.jointMatrixUpdated |= true;
-        }
-    }
-
-    /* access modifiers changed from: package-private */
-    public void UpdateShapeParams(AvatarShapeParams avatarShapeParams) {
-        this.shapeParams = avatarShapeParams;
-        PrimComputeExecutor.getInstance().execute(this.shapeParamsUpdate);
-    }
-
-    /* access modifiers changed from: package-private */
-    public void UpdateTextures(AvatarTextures avatarTextures) {
-        for (Map.Entry entry : this.parts.entrySet()) {
-            ((DrawableAvatarPart) entry.getValue()).setTexture(this.drawableStore.glTextureCache, avatarTextures.getTexture(((DrawableAvatarPart) entry.getValue()).getFaceIndex()));
-        }
-    }
-
-    public DrawableHUD getDrawableHUD() {
-        return this.drawableHUD;
-    }
-
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_render_avatar_DrawableAvatar_15479  reason: not valid java name */
-    public /* synthetic */ void m53lambda$com_lumiyaviewer_lumiya_render_avatar_DrawableAvatar_15479() {
-        boolean z;
-        boolean z2 = false;
-        AvatarShapeParams avatarShapeParams = this.shapeParams;
-        if (avatarShapeParams != null) {
-            Debug.Printf("Avatar: shapeParamsUpdate: %d rigged meshes", Integer.valueOf(this.riggedMeshes.size()));
-            MeshJointTranslations meshJointTranslations = new MeshJointTranslations();
-            Iterator<T> it = this.riggedMeshes.iterator();
-            while (true) {
-                z = z2;
-                if (!it.hasNext()) {
+        } while (true);
+        break MISSING_BLOCK_LABEL_296;
+        obj;
+        throw obj;
+        boolean flag1 = flag;
+        if (obj1 != null)
+        {
+            int l = obj1.length;
+            do
+            {
+                flag1 = flag;
+                if (k >= l)
+                {
                     break;
                 }
-                DrawableObject drawableObject = (DrawableObject) it.next();
-                drawableObject.ApplyJointTranslations(meshJointTranslations);
-                z2 = drawableObject.hasExtendedBones() | z;
+                Object obj3 = obj1[k];
+                drawableAttachments.removeEntry(((com.lumiyaviewer.lumiya.utils.InlineListEntry) (obj3)));
+                if (obj3 instanceof DrawListPrimEntry)
+                {
+                    obj3 = ((DrawListPrimEntry)obj3).getDrawableObject();
+                    if (obj3 != null)
+                    {
+                        set.remove(obj3);
+                        if (riggedMeshes.remove(obj3))
+                        {
+                            flag = true;
+                        }
+                    }
+                }
+                k++;
+            } while (true);
+        }
+        obj1 = riggedMeshes.iterator();
+        do
+        {
+            if (!((Iterator) (obj1)).hasNext())
+            {
+                break;
             }
-            AvatarSkeleton avatarSkeleton = new AvatarSkeleton(avatarShapeParams, meshJointTranslations, z);
-            this.updatedSkeleton.set(avatarSkeleton);
-            for (Map.Entry entry : this.parts.entrySet()) {
-                ((DrawableAvatarPart) entry.getValue()).setPartMorphParams(avatarSkeleton.getMorphParams((MeshIndex) entry.getKey()));
+            DrawableObject drawableobject = (DrawableObject)((Iterator) (obj1)).next();
+            if (!set.contains(drawableobject))
+            {
+                riggedMeshes.remove(drawableobject);
+                flag1 = true;
             }
+        } while (true);
+        drawableHUD = ((DrawableHUD) (obj));
+        drawableAttachmentList = new DrawableAttachments(arraylistmultimap);
+        if (flag1)
+        {
+            updateRiggedMeshes();
+        }
+        return;
+_L2:
+        obj1 = null;
+        if (true) goto _L4; else goto _L3
+_L3:
+    }
+
+    private void updateAttachmentParts(SLObjectInfo slobjectinfo, Multimap multimap, int i)
+    {
+        com.lumiyaviewer.lumiya.render.spatial.DrawListObjectEntry drawlistobjectentry = slobjectinfo.getDrawListEntry();
+        drawableAttachments.addEntry(drawlistobjectentry);
+        if (drawlistobjectentry instanceof DrawListPrimEntry)
+        {
+            multimap.put(Integer.valueOf(i), ((DrawListPrimEntry)drawlistobjectentry).getDrawableAttachment(drawableStore, this));
+        }
+        for (slobjectinfo = slobjectinfo.treeNode.getFirstChild(); slobjectinfo != null; slobjectinfo = slobjectinfo.getNextChild())
+        {
+            SLObjectInfo slobjectinfo1 = (SLObjectInfo)slobjectinfo.getDataObject();
+            if (slobjectinfo1 != null)
+            {
+                updateAttachmentParts(slobjectinfo1, multimap, i);
+            }
+        }
+
+    }
+
+    private void updateRiggedMeshes()
+    {
+        PrimComputeExecutor.getInstance().execute(shapeParamsUpdate);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_render_avatar_DrawableAvatar_2D_mthref_2D_0()
+    {
+        processUpdateAttachments();
+    }
+
+    void AnimationRemove(UUID uuid)
+    {
+        Object obj = animationLock;
+        obj;
+        JVM INSTR monitorenter ;
+        uuid = ((UUID) (animations.remove(uuid)));
+        boolean flag;
+        if (uuid != null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        obj;
+        JVM INSTR monitorexit ;
+        if (flag)
+        {
+            updateRunningAnimations();
+        }
+        return;
+        uuid;
+        throw uuid;
+    }
+
+    void AnimationUpdate(AnimationSequenceInfo animationsequenceinfo)
+    {
+        UUID uuid = animationsequenceinfo.animationID;
+        Object obj = animationLock;
+        obj;
+        JVM INSTR monitorenter ;
+        AvatarAnimationState avataranimationstate = (AvatarAnimationState)animations.get(uuid);
+        if (avataranimationstate != null) goto _L2; else goto _L1
+_L1:
+        animations.put(uuid, new AvatarAnimationState(animationsequenceinfo, this));
+_L4:
+        obj;
+        JVM INSTR monitorexit ;
+        updateRunningAnimations();
+        return;
+_L2:
+        avataranimationstate.updateSequenceInfo(animationsequenceinfo);
+        if (true) goto _L4; else goto _L3
+_L3:
+        animationsequenceinfo;
+        throw animationsequenceinfo;
+    }
+
+    public void Draw(RenderContext rendercontext)
+    {
+        float af[];
+        af = getWorldMatrix(rendercontext);
+        if (af == null)
+        {
+            break MISSING_BLOCK_LABEL_25;
+        }
+        rendercontext.glObjWorldPushAndMultMatrixf(af, 0);
+        DrawParts(rendercontext);
+        rendercontext.glObjWorldPopMatrix();
+        return;
+        rendercontext;
+        Debug.Warning(rendercontext);
+        return;
+    }
+
+    public void DrawNameTag(RenderContext rendercontext)
+    {
+label0:
+        {
+            DrawableHoverText drawablehovertext = drawableNameTag;
+            if (drawablehovertext != null)
+            {
+                LLVector3 llvector3 = headPosition;
+                if (llvector3 == null)
+                {
+                    break label0;
+                }
+                drawablehovertext.DrawAtWorld(rendercontext, llvector3.x, llvector3.y, llvector3.z, 0.5F, rendercontext.projectionMatrix, false, 0);
+            }
+            return;
+        }
+        super.DrawNameTag(rendercontext);
+    }
+
+    boolean IsAnimationStopped(UUID uuid)
+    {
+        Object obj = animationLock;
+        obj;
+        JVM INSTR monitorenter ;
+        uuid = (AvatarAnimationState)animations.get(uuid);
+        if (uuid == null) goto _L2; else goto _L1
+_L1:
+        boolean flag = uuid.hasStopped();
+_L4:
+        obj;
+        JVM INSTR monitorexit ;
+        return flag;
+_L2:
+        flag = false;
+        if (true) goto _L4; else goto _L3
+_L3:
+        uuid;
+        throw uuid;
+    }
+
+    public ObjectIntersectInfo PickObject(RenderContext rendercontext, float f, float f1, float f2)
+    {
+        Object obj;
+        int ai[];
+        AvatarSkeleton avatarskeleton;
+        float af2[];
+        af2 = getWorldMatrix(rendercontext);
+        avatarskeleton = skeleton;
+        ai = null;
+        obj = ai;
+        if (af2 == null) goto _L2; else goto _L1
+_L1:
+        obj = ai;
+        if (avatarskeleton == null) goto _L2; else goto _L3
+_L3:
+        float af[];
+        float af1[];
+        Iterator iterator;
+        ai = rendercontext.viewportRect;
+        af = new float[32];
+        af1 = new float[6];
+        f1 = (float)ai[3] - f1;
+        rendercontext.glObjWorldPushAndMultMatrixf(af2, 0);
+        rendercontext.glObjWorldTranslatef(pelvisTranslateX, pelvisTranslateY, pelvisTranslateZ);
+        iterator = avatarskeleton.bones.values().iterator();
+_L7:
+        int i;
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_510;
+            }
+            obj = (SLSkeletonBone)iterator.next();
+        } while (((SLSkeletonBone) (obj)).boneID.isJoint);
+        rendercontext.glObjWorldPushAndMultMatrixf(avatarskeleton.jointWorldMatrix, ((SLSkeletonBone) (obj)).boneID.ordinal() * 16);
+        float f3;
+        LLVector3 llvector3;
+        LLVector3 llvector3_1;
+        LLVector3 allvector3[];
+        if (rendercontext.hasGL20)
+        {
+            Matrix.scaleM(af, 0, rendercontext.objWorldMatrix.getMatrixData(), rendercontext.objWorldMatrix.getMatrixDataOffset(), 1.0F, 1.0F, 1.0F);
+            RenderContext.gluUnProject(f, f1, 0.0F, af, 0, rendercontext.modelViewMatrix.getMatrixData(), rendercontext.modelViewMatrix.getMatrixDataOffset(), ai, 0, af1, 0);
+            RenderContext.gluUnProject(f, f1, 1.0F, af, 0, rendercontext.modelViewMatrix.getMatrixData(), rendercontext.modelViewMatrix.getMatrixDataOffset(), ai, 0, af1, 3);
+        } else
+        {
+            Matrix.scaleM(af, 16, rendercontext.objWorldMatrix.getMatrixData(), rendercontext.objWorldMatrix.getMatrixDataOffset(), 1.0F, 1.0F, 1.0F);
+            Matrix.multiplyMM(af, 0, rendercontext.modelViewMatrix.getMatrixData(), rendercontext.modelViewMatrix.getMatrixDataOffset(), af, 16);
+            RenderContext.gluUnProject(f, f1, 0.0F, af, 0, rendercontext.projectionMatrix.getMatrixData(), rendercontext.projectionMatrix.getMatrixDataOffset(), ai, 0, af1, 0);
+            RenderContext.gluUnProject(f, f1, 1.0F, af, 0, rendercontext.projectionMatrix.getMatrixData(), rendercontext.projectionMatrix.getMatrixDataOffset(), ai, 0, af1, 3);
+        }
+        rendercontext.glObjWorldPopMatrix();
+        llvector3 = new LLVector3(af1[0], af1[1], af1[2]);
+        llvector3_1 = new LLVector3(af1[3], af1[4], af1[5]);
+        allvector3 = CollisionBox.getInstance().vertices;
+        obj = null;
+        i = 0;
+_L9:
+        if (i >= 12)
+        {
+            continue; /* Loop/switch isn't completed */
+        }
+        obj = GLRayTrace.intersect_RayTriangle(llvector3, llvector3_1, allvector3, i * 3);
+        if (obj == null) goto _L5; else goto _L4
+_L4:
+        if (obj == null) goto _L7; else goto _L6
+_L6:
+        f3 = GLRayTrace.getIntersectionDepth(rendercontext, ((com.lumiyaviewer.lumiya.render.picking.GLRayTrace.RayIntersectInfo) (obj)).intersectPoint, af);
+        if (f3 < f2) goto _L7; else goto _L8
+_L8:
+        obj = new ObjectIntersectInfo(new IntersectInfo(((com.lumiyaviewer.lumiya.render.picking.GLRayTrace.RayIntersectInfo) (obj)).intersectPoint), avatarObject, f3);
+_L10:
+        rendercontext.glObjWorldPopMatrix();
+_L2:
+        return ((ObjectIntersectInfo) (obj));
+_L5:
+        i++;
+          goto _L9
+        obj = null;
+          goto _L10
+    }
+
+    public void RunAnimations()
+    {
+        AvatarSkeleton avatarskeleton = (AvatarSkeleton)updatedSkeleton.getAndSet(null);
+        if (avatarskeleton != null)
+        {
+            skeleton = avatarskeleton;
+        }
+        avatarskeleton = skeleton;
+        if (avatarskeleton != null && animate(avatarskeleton))
+        {
+            avatarskeleton.UpdateGlobalPositions(animationSkeletonData);
+            jointMatrixUpdated = jointMatrixUpdated | true;
         }
     }
 
-    public void onEntryRemovalRequested(DrawListEntry drawListEntry) {
-        synchronized (this.deadAttachmentsLock) {
-            this.deadAttachmentsList.add(drawListEntry);
+    void UpdateShapeParams(AvatarShapeParams avatarshapeparams)
+    {
+        shapeParams = avatarshapeparams;
+        PrimComputeExecutor.getInstance().execute(shapeParamsUpdate);
+    }
+
+    void UpdateTextures(AvatarTextures avatartextures)
+    {
+        java.util.Map.Entry entry;
+        for (Iterator iterator = parts.entrySet().iterator(); iterator.hasNext(); ((DrawableAvatarPart)entry.getValue()).setTexture(drawableStore.glTextureCache, avatartextures.getTexture(((DrawableAvatarPart)entry.getValue()).getFaceIndex())))
+        {
+            entry = (java.util.Map.Entry)iterator.next();
         }
+
+    }
+
+    public DrawableHUD getDrawableHUD()
+    {
+        return drawableHUD;
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_render_avatar_DrawableAvatar_15479()
+    {
+        Object obj = shapeParams;
+        if (obj != null)
+        {
+            Debug.Printf("Avatar: shapeParamsUpdate: %d rigged meshes", new Object[] {
+                Integer.valueOf(riggedMeshes.size())
+            });
+            MeshJointTranslations meshjointtranslations = new MeshJointTranslations();
+            Iterator iterator1 = riggedMeshes.iterator();
+            DrawableObject drawableobject;
+            boolean flag;
+            for (flag = false; iterator1.hasNext(); flag = drawableobject.hasExtendedBones() | flag)
+            {
+                drawableobject = (DrawableObject)iterator1.next();
+                drawableobject.ApplyJointTranslations(meshjointtranslations);
+            }
+
+            obj = new AvatarSkeleton(((AvatarShapeParams) (obj)), meshjointtranslations, flag);
+            updatedSkeleton.set(obj);
+            java.util.Map.Entry entry;
+            for (Iterator iterator = parts.entrySet().iterator(); iterator.hasNext(); ((DrawableAvatarPart)entry.getValue()).setPartMorphParams(((AvatarSkeleton) (obj)).getMorphParams((MeshIndex)entry.getKey())))
+            {
+                entry = (java.util.Map.Entry)iterator.next();
+            }
+
+        }
+    }
+
+    public void onEntryRemovalRequested(DrawListEntry drawlistentry)
+    {
+        Object obj = deadAttachmentsLock;
+        obj;
+        JVM INSTR monitorenter ;
+        deadAttachmentsList.add(drawlistentry);
+        obj;
+        JVM INSTR monitorexit ;
         updateAttachments();
+        return;
+        drawlistentry;
+        throw drawlistentry;
     }
 
-    public void onRiggedMeshReady(DrawableObject drawableObject) {
-        if (this.riggedMeshes.add(drawableObject)) {
+    public void onRiggedMeshReady(DrawableObject drawableobject)
+    {
+        if (riggedMeshes.add(drawableobject))
+        {
             updateRiggedMeshes();
         }
     }
 
-    public void setDisplayedHUDid(int i) {
-        if (this.displayedHUDid.getAndSet(i) != i) {
+    public void setDisplayedHUDid(int i)
+    {
+        if (displayedHUDid.getAndSet(i) != i)
+        {
             updateAttachments();
         }
     }
 
-    public void updateAttachments() {
-        PrimComputeExecutor.getInstance().execute(this.updateAttachmentsRunnable);
+    public void updateAttachments()
+    {
+        PrimComputeExecutor.getInstance().execute(updateAttachmentsRunnable);
     }
 
-    /* access modifiers changed from: package-private */
-    public void updateRunningAnimations() {
-        if (this.animationsInitialized) {
-            this.runningAnimations = getRunningAnimations();
-            AvatarSkeleton avatarSkeleton = this.skeleton;
-            if (avatarSkeleton != null) {
-                avatarSkeleton.setForceAnimate();
+    void updateRunningAnimations()
+    {
+        if (animationsInitialized)
+        {
+            runningAnimations = getRunningAnimations();
+            AvatarSkeleton avatarskeleton = skeleton;
+            if (avatarskeleton != null)
+            {
+                avatarskeleton.setForceAnimate();
             }
         }
     }

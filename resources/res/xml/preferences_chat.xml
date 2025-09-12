@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:title="@string/prefs_category_chat">
-    <com.lumiyaviewer.lumiya.ui.settings.VoiceEnablePreference android:title="Enable voice chat" android:key="enableVoice" android:defaultValue="false"/>
-    <CheckBoxPreference android:title="Legacy user names" android:key="legacyUserNames" android:summary="Show user names instead of display names" android:defaultValue="false"/>
-    <CheckBoxPreference android:title="Timestamps in chat" android:key="chatTimestamps" android:summary="Show timestamps for received messages" android:defaultValue="true"/>
-    <com.lumiyaviewer.lumiya.ui.settings.GoogleDriveSyncPreference android:title="Save chat history to Google Drive" android:key="sync_to_gdrive" android:defaultValue="false"/>
-    <CheckBoxPreference android:title="Auto response" android:key="autoresponse" android:summary="Automatically reply to new IMs" android:defaultValue="false"/>
-    <EditTextPreference android:title="Auto response text" android:key="autoresponseText" android:summary="Message to send in response to new IMs" android:dependency="autoresponse" android:defaultValue="(Autoresponse) I have auto-response feature enabled. I will respond shortly."/>
-</PreferenceScreen>

@@ -1,105 +1,144 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class MapBlockReply extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<Data> Data_Fields = new ArrayList<>();
-    public ArrayList<Size> Size_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class MapBlockReply extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public int Flags;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class Data {
+    public static class Data
+    {
+
         public int Access;
         public int Agents;
         public UUID MapImageID;
-        public byte[] Name;
+        public byte Name[];
         public int RegionFlags;
         public int WaterHeight;
         public int X;
         public int Y;
+
+        public Data()
+        {
+        }
     }
 
-    public static class Size {
+    public static class Size
+    {
+
         public int SizeX;
         public int SizeY;
-    }
 
-    public MapBlockReply() {
-        this.zeroCoded = false;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 25;
-        Iterator<T> it = this.Data_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2 + 1 + (this.Size_Fields.size() * 4);
-            }
-            i = ((Data) it.next()).Name.length + 5 + 1 + 4 + 1 + 1 + 16 + i2;
+        public Size()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleMapBlockReply(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList Data_Fields;
+    public ArrayList Size_Fields;
+
+    public MapBlockReply()
+    {
+        Data_Fields = new ArrayList();
+        Size_Fields = new ArrayList();
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) -103);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packInt(byteBuffer, this.AgentData_Field.Flags);
-        byteBuffer.put((byte) this.Data_Fields.size());
-        for (Data data : this.Data_Fields) {
-            packShort(byteBuffer, (short) data.X);
-            packShort(byteBuffer, (short) data.Y);
-            packVariable(byteBuffer, data.Name, 1);
-            packByte(byteBuffer, (byte) data.Access);
-            packInt(byteBuffer, data.RegionFlags);
-            packByte(byteBuffer, (byte) data.WaterHeight);
-            packByte(byteBuffer, (byte) data.Agents);
-            packUUID(byteBuffer, data.MapImageID);
-        }
-        byteBuffer.put((byte) this.Size_Fields.size());
-        for (Size size : this.Size_Fields) {
-            packShort(byteBuffer, (short) size.SizeX);
-            packShort(byteBuffer, (short) size.SizeY);
-        }
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = Data_Fields.iterator();
+        int i;
+        for (i = 25; iterator.hasNext(); i = ((Data)iterator.next()).Name.length + 5 + 1 + 4 + 1 + 1 + 16 + i) { }
+        return i + 1 + Size_Fields.size() * 4;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.Flags = unpackInt(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleMapBlockReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)-103);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packInt(bytebuffer, AgentData_Field.Flags);
+        bytebuffer.put((byte)Data_Fields.size());
+        Data data;
+        for (Iterator iterator = Data_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, data.MapImageID))
+        {
+            data = (Data)iterator.next();
+            packShort(bytebuffer, (short)data.X);
+            packShort(bytebuffer, (short)data.Y);
+            packVariable(bytebuffer, data.Name, 1);
+            packByte(bytebuffer, (byte)data.Access);
+            packInt(bytebuffer, data.RegionFlags);
+            packByte(bytebuffer, (byte)data.WaterHeight);
+            packByte(bytebuffer, (byte)data.Agents);
+        }
+
+        bytebuffer.put((byte)Size_Fields.size());
+        Size size;
+        for (Iterator iterator1 = Size_Fields.iterator(); iterator1.hasNext(); packShort(bytebuffer, (short)size.SizeY))
+        {
+            size = (Size)iterator1.next();
+            packShort(bytebuffer, (short)size.SizeX);
+        }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        boolean flag = false;
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.Flags = unpackInt(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
             Data data = new Data();
-            data.X = unpackShort(byteBuffer) & 65535;
-            data.Y = unpackShort(byteBuffer) & 65535;
-            data.Name = unpackVariable(byteBuffer, 1);
-            data.Access = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            data.RegionFlags = unpackInt(byteBuffer);
-            data.WaterHeight = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            data.Agents = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            data.MapImageID = unpackUUID(byteBuffer);
-            this.Data_Fields.add(data);
+            data.X = unpackShort(bytebuffer) & 0xffff;
+            data.Y = unpackShort(bytebuffer) & 0xffff;
+            data.Name = unpackVariable(bytebuffer, 1);
+            data.Access = unpackByte(bytebuffer) & 0xff;
+            data.RegionFlags = unpackInt(bytebuffer);
+            data.WaterHeight = unpackByte(bytebuffer) & 0xff;
+            data.Agents = unpackByte(bytebuffer) & 0xff;
+            data.MapImageID = unpackUUID(bytebuffer);
+            Data_Fields.add(data);
         }
-        byte b2 = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i2 = 0; i2 < b2; i2++) {
+
+        byte0 = bytebuffer.get();
+        for (int j = ((flag) ? 1 : 0); j < (byte0 & 0xff); j++)
+        {
             Size size = new Size();
-            size.SizeX = unpackShort(byteBuffer) & 65535;
-            size.SizeY = unpackShort(byteBuffer) & 65535;
-            this.Size_Fields.add(size);
+            size.SizeX = unpackShort(bytebuffer) & 0xffff;
+            size.SizeY = unpackShort(bytebuffer) & 0xffff;
+            Size_Fields.add(size);
         }
+
     }
 }

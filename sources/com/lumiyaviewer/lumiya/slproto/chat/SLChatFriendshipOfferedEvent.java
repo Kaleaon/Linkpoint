@@ -1,67 +1,79 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatYesNoEvent;
 import com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public final class SLChatFriendshipOfferedEvent extends SLChatYesNoEvent {
+public final class SLChatFriendshipOfferedEvent extends SLChatYesNoEvent
+{
+
     public final UUID sessionID;
 
-    public SLChatFriendshipOfferedEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
-        super(chatMessage, uuid);
-        this.sessionID = chatMessage.getSessionID();
+    public SLChatFriendshipOfferedEvent(ChatMessage chatmessage, UUID uuid)
+    {
+        super(chatmessage, uuid);
+        sessionID = chatmessage.getSessionID();
     }
 
-    public SLChatFriendshipOfferedEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, ImprovedInstantMessage improvedInstantMessage) {
-        super(chatMessageSource, uuid, improvedInstantMessage, (String) null);
-        this.sessionID = improvedInstantMessage.MessageBlock_Field.ID;
+    public SLChatFriendshipOfferedEvent(ChatMessageSource chatmessagesource, UUID uuid, ImprovedInstantMessage improvedinstantmessage)
+    {
+        super(chatmessagesource, uuid, improvedinstantmessage, null);
+        sessionID = improvedinstantmessage.MessageBlock_Field.ID;
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.FriendshipOffered;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.FriendshipOffered;
     }
 
-    public String getNoButton(Context context) {
-        return context.getString(R.string.friendship_request_no);
+    public String getNoButton(Context context)
+    {
+        return context.getString(0x7f09012a);
     }
 
-    public String getNoMessage(Context context) {
-        return context.getString(R.string.friendship_request_declined);
+    public String getNoMessage(Context context)
+    {
+        return context.getString(0x7f090129);
     }
 
-    public String getQuestion(Context context) {
-        return context.getString(R.string.friendship_request_question);
+    public String getQuestion(Context context)
+    {
+        return context.getString(0x7f09012b);
     }
 
-    public String getYesButton(Context context) {
-        return context.getString(R.string.friendship_request_yes);
+    public String getYesButton(Context context)
+    {
+        return context.getString(0x7f09012c);
     }
 
-    public String getYesMessage(Context context) {
-        return context.getString(R.string.friendship_request_accepted);
+    public String getYesMessage(Context context)
+    {
+        return context.getString(0x7f090128);
     }
 
-    public void onYesAction(Context context, UserManager userManager) {
-        super.onYesAction(context, userManager);
-        UUID sourceUUID = this.source.getSourceUUID();
-        SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit();
-        if (sourceUUID != null && activeAgentCircuit != null) {
-            activeAgentCircuit.AcceptFriendship(sourceUUID, this.sessionID);
+    public void onYesAction(Context context, UserManager usermanager)
+    {
+        super.onYesAction(context, usermanager);
+        context = source.getSourceUUID();
+        usermanager = usermanager.getActiveAgentCircuit();
+        if (context != null && usermanager != null)
+        {
+            usermanager.AcceptFriendship(context, sessionID);
         }
     }
 
-    public void serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage);
-        chatMessage.setSessionID(this.sessionID);
+    public void serializeToDatabaseObject(ChatMessage chatmessage)
+    {
+        super.serializeToDatabaseObject(chatmessage);
+        chatmessage.setSessionID(sessionID);
     }
 }

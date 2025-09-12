@@ -1,45 +1,66 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class RpcChannelRequest extends SLMessage {
-    public DataBlock DataBlock_Field = new DataBlock();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class DataBlock {
+public class RpcChannelRequest extends SLMessage
+{
+    public static class DataBlock
+    {
+
         public int GridX;
         public int GridY;
         public UUID ItemID;
         public UUID TaskID;
+
+        public DataBlock()
+        {
+        }
     }
 
-    public RpcChannelRequest() {
-        this.zeroCoded = false;
+
+    public DataBlock DataBlock_Field;
+
+    public RpcChannelRequest()
+    {
+        zeroCoded = false;
+        DataBlock_Field = new DataBlock();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 44;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleRpcChannelRequest(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleRpcChannelRequest(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) -99);
-        packInt(byteBuffer, this.DataBlock_Field.GridX);
-        packInt(byteBuffer, this.DataBlock_Field.GridY);
-        packUUID(byteBuffer, this.DataBlock_Field.TaskID);
-        packUUID(byteBuffer, this.DataBlock_Field.ItemID);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)-99);
+        packInt(bytebuffer, DataBlock_Field.GridX);
+        packInt(bytebuffer, DataBlock_Field.GridY);
+        packUUID(bytebuffer, DataBlock_Field.TaskID);
+        packUUID(bytebuffer, DataBlock_Field.ItemID);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.DataBlock_Field.GridX = unpackInt(byteBuffer);
-        this.DataBlock_Field.GridY = unpackInt(byteBuffer);
-        this.DataBlock_Field.TaskID = unpackUUID(byteBuffer);
-        this.DataBlock_Field.ItemID = unpackUUID(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        DataBlock_Field.GridX = unpackInt(bytebuffer);
+        DataBlock_Field.GridY = unpackInt(bytebuffer);
+        DataBlock_Field.TaskID = unpackUUID(bytebuffer);
+        DataBlock_Field.ItemID = unpackUUID(bytebuffer);
     }
 }

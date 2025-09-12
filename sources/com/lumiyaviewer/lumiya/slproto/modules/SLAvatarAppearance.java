@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules;
 
 import com.google.common.base.Objects;
@@ -8,6 +12,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import com.lumiyaviewer.lumiya.Debug;
+import com.lumiyaviewer.lumiya.eventbus.EventBus;
 import com.lumiyaviewer.lumiya.orm.InventoryDB;
 import com.lumiyaviewer.lumiya.orm.InventoryEntryList;
 import com.lumiyaviewer.lumiya.orm.InventoryQuery;
@@ -15,10 +20,13 @@ import com.lumiyaviewer.lumiya.react.AsyncRequestHandler;
 import com.lumiyaviewer.lumiya.react.RequestHandler;
 import com.lumiyaviewer.lumiya.react.ResultHandler;
 import com.lumiyaviewer.lumiya.react.SimpleRequestHandler;
-import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
+import com.lumiyaviewer.lumiya.react.SubscriptionPool;
+import com.lumiyaviewer.lumiya.react.SubscriptionSingleDataPool;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
+import com.lumiyaviewer.lumiya.slproto.SLCircuitInfo;
+import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.SLParcelInfo;
 import com.lumiyaviewer.lumiya.slproto.assets.SLWearable;
@@ -28,7 +36,6 @@ import com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams;
 import com.lumiyaviewer.lumiya.slproto.baker.BakeProcess;
 import com.lumiyaviewer.lumiya.slproto.caps.SLCaps;
 import com.lumiyaviewer.lumiya.slproto.events.SLBakingProgressEvent;
-import com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler;
 import com.lumiyaviewer.lumiya.slproto.https.GenericHTTPExecutor;
 import com.lumiyaviewer.lumiya.slproto.https.LLSDXMLRequest;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType;
@@ -52,6 +59,8 @@ import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
 import com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
+import com.lumiyaviewer.lumiya.slproto.users.manager.InventoryManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectsManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,13 +70,76 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
 
-public class SLAvatarAppearance extends SLModule implements SLWearable.OnWearableStatusChangeListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.modules:
+//            SLModule, SLModules
+
+public class SLAvatarAppearance extends SLModule
+    implements com.lumiyaviewer.lumiya.slproto.assets.SLWearable.OnWearableStatusChangeListener
+{
+    public static class WornItem
+    {
+
+        private final int attachedTo;
+        private final boolean isTouchable;
+        private final UUID itemID;
+        private final String name;
+        private final int objectLocalID;
+        private final SLWearableType wornOn;
+
+        static int _2D_get0(WornItem wornitem)
+        {
+            return wornitem.objectLocalID;
+        }
+
+        int getAttachedTo()
+        {
+            return attachedTo;
+        }
+
+        public boolean getIsTouchable()
+        {
+            return isTouchable;
+        }
+
+        public String getName()
+        {
+            return name;
+        }
+
+        public int getObjectLocalID()
+        {
+            return objectLocalID;
+        }
+
+        public SLWearableType getWornOn()
+        {
+            return wornOn;
+        }
+
+        public UUID itemID()
+        {
+            return itemID;
+        }
+
+        WornItem(SLWearableType slwearabletype, int i, UUID uuid, String s, int j, boolean flag)
+        {
+            wornOn = slwearabletype;
+            attachedTo = i;
+            itemID = uuid;
+            name = s;
+            objectLocalID = j;
+            isTouchable = flag;
+        }
+    }
+
+
     private static final int Param_agentSizeVPHeadSize = 682;
     private static final int Param_agentSizeVPHeelHeight = 198;
     private static final int Param_agentSizeVPHeight = 33;
@@ -76,7 +148,7 @@ public class SLAvatarAppearance extends SLModule implements SLWearable.OnWearabl
     private static final int Param_agentSizeVPNeckLength = 756;
     private static final int Param_agentSizeVPPlatformHeight = 503;
     private SLTextureEntry agentBakedTextures;
-    private boolean agentSizeKnown = false;
+    private boolean agentSizeKnown;
     private float agentSizeVPHeadSize;
     private float agentSizeVPHeelHeight;
     private float agentSizeVPHeight;
@@ -84,1664 +156,2158 @@ public class SLAvatarAppearance extends SLModule implements SLWearable.OnWearabl
     private float agentSizeVPLegLength;
     private float agentSizeVPNeckLength;
     private float agentSizeVPPlatformHeight;
-    private int[] agentVisualParams;
-    private volatile BakeProcess bakeProcess = null;
-    private Thread bakingThread = null;
+    private int agentVisualParams[];
+    private volatile BakeProcess bakeProcess;
+    private Thread bakingThread;
     private final SLCaps caps;
-    private final AtomicReference<UUID> cofFolderUUID = new AtomicReference<>();
-    private volatile boolean cofReady = false;
-    private volatile int currentCofAppearanceVersion = 0;
-    private volatile int currentCofInventoryVersion = 0;
-    private final SubscriptionData<InventoryQuery, InventoryEntryList> currentOutfitFolder;
-    private final SubscriptionData<InventoryQuery, InventoryEntryList> findCofFolder;
+    private final AtomicReference cofFolderUUID = new AtomicReference();
+    private volatile boolean cofReady;
+    private volatile int currentCofAppearanceVersion;
+    private volatile int currentCofInventoryVersion;
+    private final SubscriptionData currentOutfitFolder;
+    private final SubscriptionData findCofFolder;
     private final SLInventory inventory;
-    private volatile boolean lastCofUpdateError = false;
-    private volatile int lastCofUpdatedVersion = 0;
-    private volatile boolean legacyAppearanceReady = false;
-    private volatile boolean multiLayerDone = false;
-    private volatile boolean needUpdateAppearance = false;
+    private volatile boolean lastCofUpdateError;
+    private volatile int lastCofUpdatedVersion;
+    private volatile boolean legacyAppearanceReady;
+    private volatile boolean multiLayerDone;
+    private volatile boolean needUpdateAppearance;
     private final AtomicBoolean needUpdateCOF = new AtomicBoolean(false);
     private final SLParcelInfo parcelInfo;
-    private Future<?> serverSideAppearanceUpdateTask = null;
-    private int setAppearanceSerialNum = 1;
+    private Future serverSideAppearanceUpdateTask;
+    private int setAppearanceSerialNum;
     private final UserManager userManager;
-    private final AtomicReference<Map<UUID, String>> wantedAttachments = new AtomicReference<>(ImmutableMap.of());
-    private SLInventoryEntry wantedOutfitFolder = null;
-    @Nonnull
-    private volatile ImmutableMap<UUID, String> wornAttachments = ImmutableMap.of();
-    private final RequestHandler<SubscriptionSingleKey> wornItemsRequestHandler = new AsyncRequestHandler(this.agentCircuit, new SimpleRequestHandler<SubscriptionSingleKey>() {
-        public void onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
-            if (SLAvatarAppearance.this.wornItemsResultHandler != null) {
-                SLAvatarAppearance.this.wornItemsResultHandler.onResultData(subscriptionSingleKey, SLAvatarAppearance.this.getWornItems());
-            }
-        }
-    });
-    /* access modifiers changed from: private */
-    public final ResultHandler<SubscriptionSingleKey, ImmutableList<WornItem>> wornItemsResultHandler;
-    @Nonnull
-    private volatile Table<SLWearableType, UUID, SLWearable> wornWearables = ImmutableTable.of();
+    private final AtomicReference wantedAttachments = new AtomicReference(ImmutableMap.of());
+    private SLInventoryEntry wantedOutfitFolder;
+    private volatile ImmutableMap wornAttachments;
+    private final RequestHandler wornItemsRequestHandler;
+    private final ResultHandler wornItemsResultHandler;
+    private volatile Table wornWearables;
 
-    public static class WornItem {
-        private final int attachedTo;
-        private final boolean isTouchable;
-        private final UUID itemID;
-        private final String name;
-        /* access modifiers changed from: private */
-        public final int objectLocalID;
-        private final SLWearableType wornOn;
-
-        WornItem(SLWearableType sLWearableType, int i, UUID uuid, String str, int i2, boolean z) {
-            this.wornOn = sLWearableType;
-            this.attachedTo = i;
-            this.itemID = uuid;
-            this.name = str;
-            this.objectLocalID = i2;
-            this.isTouchable = z;
-        }
-
-        /* access modifiers changed from: package-private */
-        public int getAttachedTo() {
-            return this.attachedTo;
-        }
-
-        public boolean getIsTouchable() {
-            return this.isTouchable;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public int getObjectLocalID() {
-            return this.objectLocalID;
-        }
-
-        public SLWearableType getWornOn() {
-            return this.wornOn;
-        }
-
-        public UUID itemID() {
-            return this.itemID;
-        }
+    static ResultHandler _2D_get0(SLAvatarAppearance slavatarappearance)
+    {
+        return slavatarappearance.wornItemsResultHandler;
     }
 
-    public SLAvatarAppearance(SLAgentCircuit sLAgentCircuit, SLInventory sLInventory, SLCaps sLCaps) {
-        super(sLAgentCircuit);
-        this.caps = sLCaps;
-        this.inventory = sLInventory;
-        this.parcelInfo = sLAgentCircuit.getGridConnection().parcelInfo;
-        this.userManager = UserManager.getUserManager(sLAgentCircuit.getAgentUUID());
-        this.currentOutfitFolder = new SubscriptionData<>(sLAgentCircuit, new $Lambda$Jp5Too8LbDpaKzeYKjkvQvC1hZo(this));
-        this.findCofFolder = new SubscriptionData<>(sLAgentCircuit, new Subscription.OnData(this) {
-
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f118$f0;
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lambda$Jp5Too8LbDpaKzeYKjkvQvC1hZo.1.$m$0(java.lang.Object):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.-$Lambda$Jp5Too8LbDpaKzeYKjkvQvC1hZo.1.$m$0(java.lang.Object):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lambda$Jp5Too8LbDpaKzeYKjkvQvC1hZo.1.onData(java.lang.Object):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.-$Lambda$Jp5Too8LbDpaKzeYKjkvQvC1hZo.1.onData(java.lang.Object):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        });
-        if (this.userManager != null) {
-            this.wornItemsResultHandler = this.userManager.wornItems().attachRequestHandler(this.wornItemsRequestHandler);
-        } else {
-            this.wornItemsResultHandler = null;
-        }
+    static ImmutableList _2D_wrap0(SLAvatarAppearance slavatarappearance)
+    {
+        return slavatarappearance.getWornItems();
     }
 
-    private void DetachItem(int i) {
-        SLObjectAvatarInfo agentAvatar;
-        boolean z;
-        Debug.Log("Outfits: detaching item " + i);
-        boolean z2 = false;
-        Map map = this.wantedAttachments.get();
-        if (map != null) {
-            HashMap hashMap = new HashMap(map);
-            if (!(this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null)) {
-                try {
-                    Iterator<SLObjectInfo> it = agentAvatar.treeNode.iterator();
-                    while (true) {
-                        if (!it.hasNext()) {
-                            z = false;
-                            break;
-                        }
-                        SLObjectInfo next = it.next();
-                        if (next.attachedToUUID != null && (!next.isDead) && next.localID == i) {
-                            if (hashMap.remove(next.getId()) != null) {
-                                z = true;
-                                break;
-                            } else if (hashMap.remove(next.attachedToUUID) != null) {
-                                z = true;
-                                break;
-                            }
-                        }
-                    }
-                    z2 = z;
-                } catch (NoSuchElementException e) {
-                    Debug.Warning(e);
+    public SLAvatarAppearance(SLAgentCircuit slagentcircuit, SLInventory slinventory, SLCaps slcaps)
+    {
+        super(slagentcircuit);
+        setAppearanceSerialNum = 1;
+        agentSizeKnown = false;
+        needUpdateAppearance = false;
+        wornAttachments = ImmutableMap.of();
+        wornWearables = ImmutableTable.of();
+        wantedOutfitFolder = null;
+        bakingThread = null;
+        serverSideAppearanceUpdateTask = null;
+        currentCofInventoryVersion = 0;
+        currentCofAppearanceVersion = 0;
+        lastCofUpdatedVersion = 0;
+        lastCofUpdateError = false;
+        legacyAppearanceReady = false;
+        cofReady = false;
+        multiLayerDone = false;
+        wornItemsRequestHandler = new AsyncRequestHandler(agentCircuit, new SimpleRequestHandler() {
+
+            final SLAvatarAppearance this$0;
+
+            public void onRequest(SubscriptionSingleKey subscriptionsinglekey)
+            {
+                if (SLAvatarAppearance._2D_get0(SLAvatarAppearance.this) != null)
+                {
+                    SLAvatarAppearance._2D_get0(SLAvatarAppearance.this).onResultData(subscriptionsinglekey, SLAvatarAppearance._2D_wrap0(SLAvatarAppearance.this));
                 }
             }
-            if (z2) {
-                this.wantedAttachments.set(ImmutableMap.copyOf(hashMap));
+
+            public volatile void onRequest(Object obj)
+            {
+                onRequest((SubscriptionSingleKey)obj);
             }
+
+            
+            {
+                this$0 = SLAvatarAppearance.this;
+                super();
+            }
+        });
+        bakeProcess = null;
+        caps = slcaps;
+        inventory = slinventory;
+        parcelInfo = slagentcircuit.getGridConnection().parcelInfo;
+        userManager = UserManager.getUserManager(slagentcircuit.getAgentUUID());
+        currentOutfitFolder = new SubscriptionData(slagentcircuit, new _2D_.Lambda.Jp5Too8LbDpaKzeYKjkvQvC1hZo(this));
+        findCofFolder = new SubscriptionData(slagentcircuit, new _2D_.Lambda.Jp5Too8LbDpaKzeYKjkvQvC1hZo._cls1(this));
+        if (userManager != null)
+        {
+            wornItemsResultHandler = userManager.wornItems().attachRequestHandler(wornItemsRequestHandler);
+            return;
+        } else
+        {
+            wornItemsResultHandler = null;
+            return;
         }
-        ObjectDetach objectDetach = new ObjectDetach();
-        objectDetach.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        objectDetach.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        ObjectDetach.ObjectData objectData = new ObjectDetach.ObjectData();
-        objectData.ObjectLocalID = i;
-        objectDetach.ObjectData_Fields.add(objectData);
-        objectDetach.isReliable = true;
-        SendMessage(objectDetach);
-        if (z2) {
-            this.needUpdateCOF.set(true);
+    }
+
+    private void DetachItem(int i)
+    {
+        Object obj;
+        boolean flag1;
+        boolean flag2;
+        Debug.Log((new StringBuilder()).append("Outfits: detaching item ").append(i).toString());
+        flag1 = false;
+        flag2 = false;
+        obj = (Map)wantedAttachments.get();
+        if (obj == null) goto _L2; else goto _L1
+_L1:
+        boolean flag;
+        obj = new HashMap(((Map) (obj)));
+        flag = flag2;
+        if (parcelInfo == null) goto _L4; else goto _L3
+_L3:
+        Object obj1;
+        obj1 = parcelInfo.getAgentAvatar();
+        flag = flag2;
+        if (obj1 == null) goto _L4; else goto _L5
+_L5:
+        obj1 = ((SLObjectInfo) (obj1)).treeNode.iterator();
+_L9:
+        Object obj2;
+        Object obj3;
+        do
+        {
+            if (!((Iterator) (obj1)).hasNext())
+            {
+                break MISSING_BLOCK_LABEL_303;
+            }
+            obj2 = (SLObjectInfo)((Iterator) (obj1)).next();
+        } while (((SLObjectInfo) (obj2)).attachedToUUID == null || !(((SLObjectInfo) (obj2)).isDead ^ true) || ((SLObjectInfo) (obj2)).localID != i);
+        obj3 = ((Map) (obj)).remove(((SLObjectInfo) (obj2)).getId());
+        if (obj3 == null) goto _L7; else goto _L6
+_L6:
+        flag = true;
+_L4:
+        flag1 = flag;
+        if (flag)
+        {
+            wantedAttachments.set(ImmutableMap.copyOf(((Map) (obj))));
+            flag1 = flag;
+        }
+_L2:
+        obj = new ObjectDetach();
+        ((ObjectDetach) (obj)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((ObjectDetach) (obj)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        com.lumiyaviewer.lumiya.slproto.messages.ObjectDetach.ObjectData objectdata = new com.lumiyaviewer.lumiya.slproto.messages.ObjectDetach.ObjectData();
+        objectdata.ObjectLocalID = i;
+        ((ObjectDetach) (obj)).ObjectData_Fields.add(objectdata);
+        obj.isReliable = true;
+        SendMessage(((SLMessage) (obj)));
+        if (flag1)
+        {
+            needUpdateCOF.set(true);
             UpdateCOFContents();
         }
+        return;
+_L7:
+        obj2 = ((Map) (obj)).remove(((SLObjectInfo) (obj2)).attachedToUUID);
+        if (obj2 == null) goto _L9; else goto _L8
+_L8:
+        flag = true;
+          goto _L4
+        NoSuchElementException nosuchelementexception;
+        nosuchelementexception;
+        Debug.Warning(nosuchelementexception);
+        flag = flag2;
+          goto _L4
+        flag = false;
+          goto _L4
     }
 
-    private void ForceUpdateAppearance(boolean z) {
-        this.needUpdateAppearance = true;
-        if (this.caps.getCapability(SLCaps.SLCapability.UpdateAvatarAppearance) == null) {
-            this.eventBus.publish(new SLBakingProgressEvent(true, false, 0));
-        } else if (z) {
-            this.lastCofUpdatedVersion = 0;
-            this.currentCofAppearanceVersion = 0;
+    private void ForceUpdateAppearance(boolean flag)
+    {
+        needUpdateAppearance = true;
+        if (caps.getCapability(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.UpdateAvatarAppearance) != null) goto _L2; else goto _L1
+_L1:
+        eventBus.publish(new SLBakingProgressEvent(true, false, 0));
+_L4:
+        StartUpdatingAppearance();
+        return;
+_L2:
+        if (flag)
+        {
+            lastCofUpdatedVersion = 0;
+            currentCofAppearanceVersion = 0;
             RequestServerRebake();
         }
-        StartUpdatingAppearance();
+        if (true) goto _L4; else goto _L3
+_L3:
     }
 
-    private void ProcessMultiLayer() {
-        if (!this.multiLayerDone && this.cofReady && this.legacyAppearanceReady) {
+    private void ProcessMultiLayer()
+    {
+        if (!multiLayerDone && cofReady && legacyAppearanceReady)
+        {
             UpdateMultiLayer();
         }
     }
 
-    private void RequestServerRebake() {
-        SLInventoryEntry folder;
-        String capability = this.caps.getCapability(SLCaps.SLCapability.UpdateAvatarAppearance);
-        InventoryEntryList data = this.currentOutfitFolder.getData();
-        if (capability != null && data != null && (folder = data.getFolder()) != null) {
-            this.currentCofInventoryVersion = folder.version;
-            if ((this.currentCofInventoryVersion != this.lastCofUpdatedVersion && this.currentCofInventoryVersion != this.currentCofAppearanceVersion) || this.lastCofUpdateError) {
-                this.lastCofUpdatedVersion = this.currentCofInventoryVersion;
-                this.lastCofUpdateError = false;
-                UpdateServerSideAppearance(capability, folder.version);
+    private void RequestServerRebake()
+    {
+        String s;
+        Object obj;
+        s = caps.getCapability(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.UpdateAvatarAppearance);
+        obj = (InventoryEntryList)currentOutfitFolder.getData();
+        if (s != null && obj != null)
+        {
+            obj = ((InventoryEntryList) (obj)).getFolder();
+            if (obj != null)
+            {
+                currentCofInventoryVersion = ((SLInventoryEntry) (obj)).version;
+                break MISSING_BLOCK_LABEL_47;
             }
         }
+_L1:
+        return;
+        if (currentCofInventoryVersion != lastCofUpdatedVersion && currentCofInventoryVersion != currentCofAppearanceVersion || lastCofUpdateError)
+        {
+            lastCofUpdatedVersion = currentCofInventoryVersion;
+            lastCofUpdateError = false;
+            UpdateServerSideAppearance(s, ((SLInventoryEntry) (obj)).version);
+        }
+          goto _L1
     }
 
-    private void SendAgentIsNowWearing() {
-        boolean z;
-        AgentIsNowWearing agentIsNowWearing = new AgentIsNowWearing();
-        agentIsNowWearing.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        agentIsNowWearing.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        for (SLWearableType sLWearableType : SLWearableType.values()) {
-            Map<UUID, SLWearable> row = this.wornWearables.row(sLWearableType);
-            if (row != null) {
-                z = true;
-                for (SLWearable sLWearable : row.values()) {
-                    AgentIsNowWearing.WearableData wearableData = new AgentIsNowWearing.WearableData();
-                    wearableData.ItemID = sLWearable.itemID;
-                    wearableData.WearableType = sLWearableType.getTypeCode();
-                    agentIsNowWearing.WearableData_Fields.add(wearableData);
-                    z = false;
+    private void SendAgentIsNowWearing()
+    {
+        AgentIsNowWearing agentisnowwearing = new AgentIsNowWearing();
+        agentisnowwearing.AgentData_Field.AgentID = circuitInfo.agentID;
+        agentisnowwearing.AgentData_Field.SessionID = circuitInfo.sessionID;
+        SLWearableType aslwearabletype[] = SLWearableType.values();
+        int j = aslwearabletype.length;
+        for (int i = 0; i < j; i++)
+        {
+            SLWearableType slwearabletype = aslwearabletype[i];
+            Object obj = wornWearables.row(slwearabletype);
+            boolean flag;
+            if (obj != null)
+            {
+                obj = ((Map) (obj)).values().iterator();
+                for (flag = true; ((Iterator) (obj)).hasNext(); flag = false)
+                {
+                    SLWearable slwearable = (SLWearable)((Iterator) (obj)).next();
+                    com.lumiyaviewer.lumiya.slproto.messages.AgentIsNowWearing.WearableData wearabledata1 = new com.lumiyaviewer.lumiya.slproto.messages.AgentIsNowWearing.WearableData();
+                    wearabledata1.ItemID = slwearable.itemID;
+                    wearabledata1.WearableType = slwearabletype.getTypeCode();
+                    agentisnowwearing.WearableData_Fields.add(wearabledata1);
                 }
-            } else {
-                z = true;
+
+            } else
+            {
+                flag = true;
             }
-            if (z) {
-                AgentIsNowWearing.WearableData wearableData2 = new AgentIsNowWearing.WearableData();
-                wearableData2.ItemID = new UUID(0, 0);
-                wearableData2.WearableType = sLWearableType.getTypeCode();
-                agentIsNowWearing.WearableData_Fields.add(wearableData2);
+            if (flag)
+            {
+                com.lumiyaviewer.lumiya.slproto.messages.AgentIsNowWearing.WearableData wearabledata = new com.lumiyaviewer.lumiya.slproto.messages.AgentIsNowWearing.WearableData();
+                wearabledata.ItemID = new UUID(0L, 0L);
+                wearabledata.WearableType = slwearabletype.getTypeCode();
+                agentisnowwearing.WearableData_Fields.add(wearabledata);
             }
         }
-        Debug.Log("AvatarAppearance: Sending AgentIsNowWearing, " + agentIsNowWearing.WearableData_Fields.size() + " wearables.");
-        agentIsNowWearing.isReliable = true;
-        SendMessage(agentIsNowWearing);
-        this.needUpdateCOF.set(true);
+
+        Debug.Log((new StringBuilder()).append("AvatarAppearance: Sending AgentIsNowWearing, ").append(agentisnowwearing.WearableData_Fields.size()).append(" wearables.").toString());
+        agentisnowwearing.isReliable = true;
+        SendMessage(agentisnowwearing);
+        needUpdateCOF.set(true);
         UpdateCOFContents();
     }
 
-    private void SendAvatarSetAppearance() {
-        SLObjectAvatarInfo sLObjectAvatarInfo = null;
+    private void SendAvatarSetAppearance()
+    {
+        Object obj = null;
         UpdateCOFContents();
-        if (this.caps.getCapability(SLCaps.SLCapability.UpdateAvatarAppearance) == null) {
-            if (this.parcelInfo != null) {
-                sLObjectAvatarInfo = this.parcelInfo.getAgentAvatar();
+        if (caps.getCapability(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.UpdateAvatarAppearance) == null)
+        {
+            if (parcelInfo != null)
+            {
+                obj = parcelInfo.getAgentAvatar();
             }
-            if (!(this.agentBakedTextures == null || sLObjectAvatarInfo == null)) {
-                sLObjectAvatarInfo.ApplyAvatarTextures(this.agentBakedTextures, true);
+            if (agentBakedTextures != null && obj != null)
+            {
+                ((SLObjectAvatarInfo) (obj)).ApplyAvatarTextures(agentBakedTextures, true);
             }
-            AgentSetAppearance agentSetAppearance = new AgentSetAppearance();
-            agentSetAppearance.AgentData_Field.AgentID = this.circuitInfo.agentID;
-            agentSetAppearance.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-            agentSetAppearance.AgentData_Field.SerialNum = this.setAppearanceSerialNum;
-            agentSetAppearance.AgentData_Field.Size = new LLVector3();
-            agentSetAppearance.AgentData_Field.Size.x = 1.0f;
-            agentSetAppearance.AgentData_Field.Size.y = 1.0f;
-            agentSetAppearance.AgentData_Field.Size.z = 1.0f;
-            if (this.agentBakedTextures != null) {
-                agentSetAppearance.ObjectData_Field.TextureEntry = this.agentBakedTextures.packByteArray();
-            } else {
-                agentSetAppearance.ObjectData_Field.TextureEntry = new byte[0];
+            AgentSetAppearance agentsetappearance = new AgentSetAppearance();
+            agentsetappearance.AgentData_Field.AgentID = circuitInfo.agentID;
+            agentsetappearance.AgentData_Field.SessionID = circuitInfo.sessionID;
+            agentsetappearance.AgentData_Field.SerialNum = setAppearanceSerialNum;
+            agentsetappearance.AgentData_Field.Size = new LLVector3();
+            agentsetappearance.AgentData_Field.Size.x = 1.0F;
+            agentsetappearance.AgentData_Field.Size.y = 1.0F;
+            agentsetappearance.AgentData_Field.Size.z = 1.0F;
+            int ai[];
+            int j;
+            if (agentBakedTextures != null)
+            {
+                agentsetappearance.ObjectData_Field.TextureEntry = agentBakedTextures.packByteArray();
+            } else
+            {
+                agentsetappearance.ObjectData_Field.TextureEntry = new byte[0];
             }
-            this.agentVisualParams = getAppearanceParams();
-            if (sLObjectAvatarInfo != null) {
-                sLObjectAvatarInfo.ApplyAvatarVisualParams(this.agentVisualParams);
+            agentVisualParams = getAppearanceParams();
+            if (obj != null)
+            {
+                ((SLObjectAvatarInfo) (obj)).ApplyAvatarVisualParams(agentVisualParams);
             }
-            for (int i : this.agentVisualParams) {
-                AgentSetAppearance.VisualParam visualParam = new AgentSetAppearance.VisualParam();
-                visualParam.ParamValue = i;
-                agentSetAppearance.VisualParam_Fields.add(visualParam);
+            ai = agentVisualParams;
+            j = ai.length;
+            for (int i = 0; i < j; i++)
+            {
+                int k = ai[i];
+                com.lumiyaviewer.lumiya.slproto.messages.AgentSetAppearance.VisualParam visualparam = new com.lumiyaviewer.lumiya.slproto.messages.AgentSetAppearance.VisualParam();
+                visualparam.ParamValue = k;
+                agentsetappearance.VisualParam_Fields.add(visualparam);
             }
-            if (this.agentSizeKnown && areWearablesReady()) {
-                agentSetAppearance.AgentData_Field.Size.x = 0.45f;
-                agentSetAppearance.AgentData_Field.Size.y = 0.6f;
-                agentSetAppearance.AgentData_Field.Size.z = getAgentHeight();
-                Debug.Log("set agent height to " + agentSetAppearance.AgentData_Field.Size.z);
+
+            if (agentSizeKnown && areWearablesReady())
+            {
+                agentsetappearance.AgentData_Field.Size.x = 0.45F;
+                agentsetappearance.AgentData_Field.Size.y = 0.6F;
+                agentsetappearance.AgentData_Field.Size.z = getAgentHeight();
+                Debug.Log((new StringBuilder()).append("set agent height to ").append(agentsetappearance.AgentData_Field.Size.z).toString());
             }
-            agentSetAppearance.isReliable = true;
-            Debug.Log("AvatarAppearance: Sending agentSetAppearance: " + agentSetAppearance.VisualParam_Fields.size() + " params, hasTextures = " + (this.agentBakedTextures != null ? "yes" : "no"));
-            SendMessage(agentSetAppearance);
-            this.setAppearanceSerialNum++;
+            agentsetappearance.isReliable = true;
+            StringBuilder stringbuilder = (new StringBuilder()).append("AvatarAppearance: Sending agentSetAppearance: ").append(agentsetappearance.VisualParam_Fields.size()).append(" params, hasTextures = ");
+            if (agentBakedTextures != null)
+            {
+                ai = "yes";
+            } else
+            {
+                ai = "no";
+            }
+            Debug.Log(stringbuilder.append(ai).toString());
+            SendMessage(agentsetappearance);
+            setAppearanceSerialNum = setAppearanceSerialNum + 1;
         }
     }
 
-    private void StartUpdatingAppearance() {
+    private void StartUpdatingAppearance()
+    {
         updateIfWearablesReady();
     }
 
-    private void UpdateCOFContents() {
-        InventoryEntryList<SLInventoryEntry> data;
-        SLInventoryEntry folder;
-        boolean z;
-        boolean z2;
-        boolean areWearablesReady = areWearablesReady();
-        Debug.Printf("Wearables ready %b, cofReady %b", Boolean.valueOf(areWearablesReady), Boolean.valueOf(this.cofReady));
-        if ((areWearablesReady ? this.cofReady : false) && (data = this.currentOutfitFolder.getData()) != null && (folder = data.getFolder()) != null && this.needUpdateCOF.getAndSet(false)) {
-            this.currentCofInventoryVersion = folder.version;
-            LinkedList linkedList = new LinkedList();
-            HashMap hashMap = new HashMap();
-            HashMap hashMap2 = new HashMap();
-            HashSet hashSet = new HashSet();
-            for (SLWearable sLWearable : this.wornWearables.values()) {
-                if (!sLWearable.getIsFailed()) {
-                    hashSet.add(sLWearable.itemID);
-                    hashMap.put(sLWearable.itemID, sLWearable);
-                }
-            }
-            Map map = this.wantedAttachments.get();
-            if (map != null) {
-                hashMap2.putAll(map);
-            }
-            boolean z3 = true;
-            for (SLInventoryEntry sLInventoryEntry : data) {
-                if (sLInventoryEntry.assetType == SLAssetType.AT_LINK.getTypeCode()) {
-                    if (sLInventoryEntry.invType == SLInventoryType.IT_WEARABLE.getTypeCode()) {
-                        if (!hashSet.contains(sLInventoryEntry.assetUUID)) {
-                            linkedList.add(sLInventoryEntry.uuid);
-                        }
-                    } else if (sLInventoryEntry.invType == SLInventoryType.IT_OBJECT.getTypeCode() && map != null && !map.containsKey(sLInventoryEntry.assetUUID)) {
-                        Debug.Printf("Attached entry %s (%s) not found in wanted attachments", sLInventoryEntry.assetUUID, sLInventoryEntry.name);
-                        linkedList.add(sLInventoryEntry.uuid);
-                    }
-                    hashMap.remove(sLInventoryEntry.assetUUID);
-                    hashMap2.remove(sLInventoryEntry.assetUUID);
-                    z2 = z3;
-                } else if (sLInventoryEntry.assetType != SLAssetType.AT_LINK_FOLDER.getTypeCode() || this.wantedOutfitFolder == null) {
-                    z2 = z3;
-                } else if (!this.wantedOutfitFolder.uuid.equals(sLInventoryEntry.assetUUID)) {
-                    linkedList.add(sLInventoryEntry.uuid);
-                    z2 = z3;
-                } else {
-                    z2 = false;
-                }
-                z3 = z2;
-            }
-            Debug.Printf("Update COF: addWearablesList %d, killList %d", Integer.valueOf(hashMap.size()), Integer.valueOf(linkedList.size()));
-            if (!linkedList.isEmpty()) {
-                this.inventory.DeleteMultiInventoryItemRaw(folder, linkedList);
-                z = true;
-            } else {
-                z = false;
-            }
-            for (SLWearable sLWearable2 : hashMap.values()) {
-                Debug.Printf("Update COF: adding %s, name = '%s'", sLWearable2.itemID, sLWearable2.getName());
-                this.inventory.LinkInventoryItem(folder, sLWearable2.itemID, SLInventoryType.IT_WEARABLE.getTypeCode(), SLAssetType.AT_LINK.getTypeCode(), sLWearable2.getName(), "");
-                z = true;
-            }
-            for (Map.Entry entry : hashMap2.entrySet()) {
-                Debug.Printf("Update COF: adding attachment %s, name = '%s'", entry.getKey(), entry.getValue());
-                this.inventory.LinkInventoryItem(folder, (UUID) entry.getKey(), SLInventoryType.IT_OBJECT.getTypeCode(), SLAssetType.AT_LINK.getTypeCode(), (String) entry.getValue(), "");
-                z = true;
-            }
-            if (z3 && this.wantedOutfitFolder != null) {
-                Debug.Printf("Update COF: adding outfit link for outfit folder %s", this.wantedOutfitFolder.uuid);
-                this.inventory.LinkInventoryItem(folder, this.wantedOutfitFolder.uuid, SLInventoryType.IT_CATEGORY.getTypeCode(), SLAssetType.AT_LINK_FOLDER.getTypeCode(), this.wantedOutfitFolder.name, "");
-                z = true;
-            }
-            Debug.Printf("Update COF: COF updated (had changes: %b).", Boolean.valueOf(z));
-            if (z && this.userManager != null) {
-                this.userManager.getInventoryManager().requestFolderUpdate(folder.uuid);
-            }
-            RequestServerRebake();
-        }
-    }
-
-    private void UpdateCurrentOutfitLink(@Nonnull InventoryEntryList inventoryEntryList) {
-        Iterator it = inventoryEntryList.iterator();
-        while (it.hasNext()) {
-            SLInventoryEntry sLInventoryEntry = (SLInventoryEntry) it.next();
-            if (sLInventoryEntry.assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode()) {
-                this.userManager.wornOutfitLink().setData(SubscriptionSingleKey.Value, sLInventoryEntry.assetUUID);
-                return;
-            }
-        }
-    }
-
-    private synchronized void UpdateMultiLayer() {
-        RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv;
-        Debug.Printf("AvatarAppearance: MultiLayer: Updating multi layer appearance.", new Object[0]);
-        InventoryEntryList<SLInventoryEntry> data = this.currentOutfitFolder.getData();
-        InventoryDB database = this.userManager != null ? this.userManager.getInventoryManager().getDatabase() : null;
-        if (!(data == null || database == null)) {
-            LinkedList linkedList = new LinkedList();
-            LinkedList<SLInventoryEntry> linkedList2 = new LinkedList<>();
-            for (SLInventoryEntry sLInventoryEntry : data) {
-                if (sLInventoryEntry.invType == SLInventoryType.IT_WEARABLE.getTypeCode()) {
-                    linkedList.add(sLInventoryEntry);
-                } else if (sLInventoryEntry.assetType == SLAssetType.AT_OBJECT.getTypeCode() || (sLInventoryEntry.isLink() && sLInventoryEntry.invType == SLInventoryType.IT_OBJECT.getTypeCode())) {
-                    linkedList2.add(sLInventoryEntry);
-                }
-            }
-            if (WearItemList(database, linkedList, false)) {
-                Debug.Printf("AvatarAppearance: MultiLayer: had some extra layers.", new Object[0]);
-                SendAgentIsNowWearing();
-                StartUpdatingAppearance();
-            } else {
-                Debug.Printf("AvatarAppearance: MultiLayer: no extra layers.", new Object[0]);
-            }
-            if (linkedList2.size() != 0) {
-                Debug.Printf("AvatarAppearance: Re-attaching %d attachments from COF.", Integer.valueOf(linkedList2.size()));
-                HashMap hashMap = new HashMap();
-                UUID randomUUID = UUID.randomUUID();
-                RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv2 = null;
-                for (SLInventoryEntry sLInventoryEntry2 : linkedList2) {
-                    SLInventoryEntry resolveLink = database.resolveLink(sLInventoryEntry2);
-                    if (resolveLink != null) {
-                        if (rezMultipleAttachmentsFromInv2 == null) {
-                            rezMultipleAttachmentsFromInv2 = new RezMultipleAttachmentsFromInv();
-                            rezMultipleAttachmentsFromInv2.AgentData_Field.AgentID = this.circuitInfo.agentID;
-                            rezMultipleAttachmentsFromInv2.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-                            rezMultipleAttachmentsFromInv2.HeaderData_Field.CompoundMsgID = randomUUID;
-                            rezMultipleAttachmentsFromInv2.HeaderData_Field.TotalObjects = linkedList2.size();
-                            rezMultipleAttachmentsFromInv2.HeaderData_Field.FirstDetachAll = false;
-                        }
-                        RezMultipleAttachmentsFromInv.ObjectData objectData = new RezMultipleAttachmentsFromInv.ObjectData();
-                        Debug.Printf("Re-attaching attachment: entry %s (%s)", resolveLink.uuid, sLInventoryEntry2.name);
-                        hashMap.put(resolveLink.uuid, sLInventoryEntry2.name);
-                        objectData.ItemID = resolveLink.uuid;
-                        objectData.OwnerID = resolveLink.ownerUUID;
-                        objectData.AttachmentPt = 128;
-                        objectData.ItemFlags = resolveLink.flags;
-                        objectData.GroupMask = resolveLink.groupMask;
-                        objectData.EveryoneMask = resolveLink.everyoneMask;
-                        objectData.NextOwnerMask = resolveLink.nextOwnerMask;
-                        objectData.Name = SLMessage.stringToVariableOEM(sLInventoryEntry2.name);
-                        objectData.Description = SLMessage.stringToVariableOEM(sLInventoryEntry2.description);
-                        rezMultipleAttachmentsFromInv2.ObjectData_Fields.add(objectData);
-                        if (rezMultipleAttachmentsFromInv2.ObjectData_Fields.size() >= 4) {
-                            rezMultipleAttachmentsFromInv2.isReliable = true;
-                            SendMessage(rezMultipleAttachmentsFromInv2);
-                            rezMultipleAttachmentsFromInv = null;
-                            rezMultipleAttachmentsFromInv2 = rezMultipleAttachmentsFromInv;
-                        }
-                    }
-                    rezMultipleAttachmentsFromInv = rezMultipleAttachmentsFromInv2;
-                    rezMultipleAttachmentsFromInv2 = rezMultipleAttachmentsFromInv;
-                }
-                this.wantedAttachments.set(ImmutableMap.copyOf(hashMap));
-                if (rezMultipleAttachmentsFromInv2 != null) {
-                    rezMultipleAttachmentsFromInv2.isReliable = true;
-                    SendMessage(rezMultipleAttachmentsFromInv2);
-                }
-            } else {
-                Debug.Printf("AvatarAppearance: No attachments in COF.", new Object[0]);
-            }
-        }
-        this.multiLayerDone = true;
-    }
-
-    private synchronized void UpdateServerSideAppearance(String str, int i) {
-        Debug.Printf("AvatarAppearance: capURL '%s', cofVersion %d", str, Integer.valueOf(i));
-        if (this.serverSideAppearanceUpdateTask != null) {
-            this.serverSideAppearanceUpdateTask.cancel(true);
-        }
-        this.serverSideAppearanceUpdateTask = GenericHTTPExecutor.getInstance().submit(() -> performServerSideAppearanceUpdate(i, str));
-
-
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lambda$Jp5Too8LbDpaKzeYKjkvQvC1hZo.2.$m$0():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.-$Lambda$Jp5Too8LbDpaKzeYKjkvQvC1hZo.2.$m$0():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lambda$Jp5Too8LbDpaKzeYKjkvQvC1hZo.2.run():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.-$Lambda$Jp5Too8LbDpaKzeYKjkvQvC1hZo.2.run():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
+    private void UpdateCOFContents()
+    {
+        SLInventoryEntry slinventoryentry;
+        Object obj;
+        Object obj1;
+        HashMap hashmap;
+        HashSet hashset;
+        Object obj2;
+        Object obj3;
+        boolean flag;
+        boolean flag1 = areWearablesReady();
+        Debug.Printf("Wearables ready %b, cofReady %b", new Object[] {
+            Boolean.valueOf(flag1), Boolean.valueOf(cofReady)
         });
-    }
-
-    private void UpdateWearableNames() {
-        SLInventoryEntry resolveLink;
-        SLWearableType byCode;
-        SLWearable sLWearable;
-        InventoryDB inventoryDB = null;
-        InventoryEntryList<SLInventoryEntry> data = this.currentOutfitFolder.getData();
-        if (this.userManager != null) {
-            inventoryDB = this.userManager.getInventoryManager().getDatabase();
+        if (flag1)
+        {
+            flag1 = cofReady;
+        } else
+        {
+            flag1 = false;
         }
-        if (data != null && inventoryDB != null) {
-            for (SLInventoryEntry sLInventoryEntry : data) {
-                if (!(sLInventoryEntry.isFolderOrFolderLink() || (resolveLink = inventoryDB.resolveLink(sLInventoryEntry)) == null || resolveLink.invType != SLInventoryType.IT_WEARABLE.getTypeCode() || (byCode = SLWearableType.getByCode(resolveLink.flags & 255)) == null || (sLWearable = this.wornWearables.get(byCode, resolveLink.assetUUID)) == null)) {
-                    sLWearable.setInventoryName(resolveLink.name);
-                }
-            }
+        if (!flag1)
+        {
+            return;
         }
-    }
-
-    private boolean WearItemList(InventoryDB inventoryDB, List<SLInventoryEntry> list, boolean z) {
-        boolean z2;
-        SLWearableType byCode;
-        boolean z3;
-        boolean z4;
-        boolean z5 = false;
-        RLVController rLVController = this.agentCircuit.getModules().rlvController;
-        HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables);
-        Iterator<T> it = list.iterator();
-        while (true) {
-            z2 = z5;
-            if (!it.hasNext()) {
+        obj2 = (InventoryEntryList)currentOutfitFolder.getData();
+        if (obj2 == null)
+        {
+            return;
+        }
+        slinventoryentry = ((InventoryEntryList) (obj2)).getFolder();
+        if (slinventoryentry == null)
+        {
+            return;
+        }
+        if (!needUpdateCOF.getAndSet(false))
+        {
+            break MISSING_BLOCK_LABEL_881;
+        }
+        currentCofInventoryVersion = slinventoryentry.version;
+        obj1 = new LinkedList();
+        hashmap = new HashMap();
+        obj = new HashMap();
+        hashset = new HashSet();
+        obj3 = wornWearables.values().iterator();
+        do
+        {
+            if (!((Iterator) (obj3)).hasNext())
+            {
                 break;
             }
-            SLInventoryEntry resolveLink = inventoryDB.resolveLink((SLInventoryEntry) it.next());
-            if (!(resolveLink == null || (byCode = SLWearableType.getByCode(resolveLink.flags & 255)) == null)) {
-                boolean isBodyPart = !z ? byCode.isBodyPart() : true;
-                if (!rLVController.canWearItem(byCode)) {
-                    z3 = false;
-                } else if (isBodyPart) {
-                    if (!rLVController.canTakeItemOff(byCode)) {
-                        boolean z6 = false;
-                        Iterator<T> it2 = create.row(byCode).keySet().iterator();
-                        while (true) {
-                            z4 = z6;
-                            if (!it2.hasNext()) {
-                                break;
-                            }
-                            z6 = !((UUID) it2.next()).equals(resolveLink.assetUUID) ? true : z4;
-                        }
-                        if (z4) {
-                            z3 = false;
-                        }
-                    }
-                    z3 = true;
-                } else {
-                    z3 = true;
-                }
-                if (z3 && !create.contains(byCode, resolveLink.assetUUID)) {
-                    if (isBodyPart) {
-                        HashSet<UUID> hashSet = new HashSet<>(create.row(byCode).keySet());
-                        hashSet.remove(resolveLink.assetUUID);
-                        for (UUID remove : hashSet) {
-                            SLWearable remove2 = create.remove(byCode, remove);
-                            if (remove2 != null) {
-                                remove2.dispose();
-                            }
-                        }
-                    }
-                    addWearable(create, byCode, resolveLink.uuid, resolveLink.assetUUID, resolveLink.name);
-                    z2 = true;
-                }
+            SLWearable slwearable1 = (SLWearable)((Iterator) (obj3)).next();
+            if (!slwearable1.getIsFailed())
+            {
+                hashset.add(slwearable1.itemID);
+                hashmap.put(slwearable1.itemID, slwearable1);
             }
-            z5 = z2;
+        } while (true);
+        obj3 = (Map)wantedAttachments.get();
+        if (obj3 != null)
+        {
+            ((Map) (obj)).putAll(((Map) (obj3)));
         }
-        if (z2) {
-            this.wornWearables = ImmutableTable.copyOf(create);
-            this.userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, this.wornWearables);
-            this.userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
+        obj2 = ((Iterable) (obj2)).iterator();
+        flag = true;
+_L7:
+        SLInventoryEntry slinventoryentry1;
+        if (!((Iterator) (obj2)).hasNext())
+        {
+            break; /* Loop/switch isn't completed */
         }
-        return z2;
+        slinventoryentry1 = (SLInventoryEntry)((Iterator) (obj2)).next();
+        if (slinventoryentry1.assetType != SLAssetType.AT_LINK.getTypeCode()) goto _L2; else goto _L1
+_L1:
+        if (slinventoryentry1.invType != SLInventoryType.IT_WEARABLE.getTypeCode()) goto _L4; else goto _L3
+_L3:
+        if (!hashset.contains(slinventoryentry1.assetUUID))
+        {
+            ((List) (obj1)).add(slinventoryentry1.uuid);
+        }
+_L5:
+        hashmap.remove(slinventoryentry1.assetUUID);
+        ((Map) (obj)).remove(slinventoryentry1.assetUUID);
+        continue; /* Loop/switch isn't completed */
+_L4:
+        if (slinventoryentry1.invType == SLInventoryType.IT_OBJECT.getTypeCode() && obj3 != null && !((Map) (obj3)).containsKey(slinventoryentry1.assetUUID))
+        {
+            Debug.Printf("Attached entry %s (%s) not found in wanted attachments", new Object[] {
+                slinventoryentry1.assetUUID, slinventoryentry1.name
+            });
+            ((List) (obj1)).add(slinventoryentry1.uuid);
+        }
+        if (true) goto _L5; else goto _L2
+_L2:
+        if (slinventoryentry1.assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode() && wantedOutfitFolder != null)
+        {
+            if (!wantedOutfitFolder.uuid.equals(slinventoryentry1.assetUUID))
+            {
+                ((List) (obj1)).add(slinventoryentry1.uuid);
+            } else
+            {
+                flag = false;
+            }
+        }
+        if (true) goto _L7; else goto _L6
+_L6:
+        Debug.Printf("Update COF: addWearablesList %d, killList %d", new Object[] {
+            Integer.valueOf(hashmap.size()), Integer.valueOf(((List) (obj1)).size())
+        });
+        boolean flag2;
+        boolean flag3;
+        if (!((List) (obj1)).isEmpty())
+        {
+            inventory.DeleteMultiInventoryItemRaw(slinventoryentry, ((List) (obj1)));
+            flag2 = true;
+        } else
+        {
+            flag2 = false;
+        }
+        for (obj1 = hashmap.values().iterator(); ((Iterator) (obj1)).hasNext();)
+        {
+            SLWearable slwearable = (SLWearable)((Iterator) (obj1)).next();
+            Debug.Printf("Update COF: adding %s, name = '%s'", new Object[] {
+                slwearable.itemID, slwearable.getName()
+            });
+            inventory.LinkInventoryItem(slinventoryentry, slwearable.itemID, SLInventoryType.IT_WEARABLE.getTypeCode(), SLAssetType.AT_LINK.getTypeCode(), slwearable.getName(), "");
+            flag2 = true;
+        }
+
+        for (obj = ((Map) (obj)).entrySet().iterator(); ((Iterator) (obj)).hasNext();)
+        {
+            java.util.Map.Entry entry = (java.util.Map.Entry)((Iterator) (obj)).next();
+            Debug.Printf("Update COF: adding attachment %s, name = '%s'", new Object[] {
+                entry.getKey(), entry.getValue()
+            });
+            inventory.LinkInventoryItem(slinventoryentry, (UUID)entry.getKey(), SLInventoryType.IT_OBJECT.getTypeCode(), SLAssetType.AT_LINK.getTypeCode(), (String)entry.getValue(), "");
+            flag2 = true;
+        }
+
+        flag3 = flag2;
+        if (flag)
+        {
+            flag3 = flag2;
+            if (wantedOutfitFolder != null)
+            {
+                Debug.Printf("Update COF: adding outfit link for outfit folder %s", new Object[] {
+                    wantedOutfitFolder.uuid
+                });
+                inventory.LinkInventoryItem(slinventoryentry, wantedOutfitFolder.uuid, SLInventoryType.IT_CATEGORY.getTypeCode(), SLAssetType.AT_LINK_FOLDER.getTypeCode(), wantedOutfitFolder.name, "");
+                flag3 = true;
+            }
+        }
+        Debug.Printf("Update COF: COF updated (had changes: %b).", new Object[] {
+            Boolean.valueOf(flag3)
+        });
+        if (flag3 && userManager != null)
+        {
+            userManager.getInventoryManager().requestFolderUpdate(slinventoryentry.uuid);
+        }
+        RequestServerRebake();
     }
 
-    private SLWearable addWearable(Table<SLWearableType, UUID, SLWearable> table, SLWearableType sLWearableType, UUID uuid, UUID uuid2, String str) {
-        SLWearable sLWearable = new SLWearable(this.userManager, this.agentCircuit, uuid, uuid2, sLWearableType, this);
-        if (str != null) {
-            sLWearable.setInventoryName(str);
-        }
-        table.put(sLWearableType, uuid2, sLWearable);
-        return sLWearable;
+    private void UpdateCurrentOutfitLink(InventoryEntryList inventoryentrylist)
+    {
+        inventoryentrylist = inventoryentrylist.iterator();
+        do
+        {
+            if (!inventoryentrylist.hasNext())
+            {
+                break;
+            }
+            SLInventoryEntry slinventoryentry = (SLInventoryEntry)inventoryentrylist.next();
+            if (slinventoryentry.assetType != SLAssetType.AT_LINK_FOLDER.getTypeCode())
+            {
+                continue;
+            }
+            userManager.wornOutfitLink().setData(SubscriptionSingleKey.Value, slinventoryentry.assetUUID);
+            break;
+        } while (true);
     }
 
-    private boolean areWearablesReady() {
-        boolean z;
-        boolean z2;
-        boolean z3;
-        boolean z4;
-        boolean z5;
-        SLWearableType[] values = SLWearableType.values();
-        int length = values.length;
-        int i = 0;
-        boolean z6 = false;
-        boolean z7 = false;
-        while (i < length) {
-            SLWearableType sLWearableType = values[i];
-            boolean isCritical = sLWearableType.getIsCritical();
-            Map<UUID, SLWearable> row = this.wornWearables.row(sLWearableType);
-            if (row != null) {
-                z2 = false;
-                z = z7;
-                for (SLWearable sLWearable : row.values()) {
-                    if (sLWearable.getIsValid()) {
-                        z4 = true;
-                        z5 = z;
-                    } else if (!sLWearable.getIsFailed()) {
-                        z4 = z2;
-                        z5 = true;
-                    } else {
-                        z4 = z2;
-                        z5 = z;
-                    }
-                    z = z5;
-                    z2 = z4;
+    private void UpdateMultiLayer()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        Object obj;
+        Debug.Printf("AvatarAppearance: MultiLayer: Updating multi layer appearance.", new Object[0]);
+        obj = (InventoryEntryList)currentOutfitFolder.getData();
+        if (userManager == null) goto _L2; else goto _L1
+_L1:
+        InventoryDB inventorydb = userManager.getInventoryManager().getDatabase();
+_L10:
+        if (obj == null || inventorydb == null) goto _L4; else goto _L3
+_L3:
+        Object obj1;
+        LinkedList linkedlist;
+        obj1 = new LinkedList();
+        linkedlist = new LinkedList();
+        obj = ((Iterable) (obj)).iterator();
+_L9:
+        if (!((Iterator) (obj)).hasNext()) goto _L6; else goto _L5
+_L5:
+        Object obj2 = (SLInventoryEntry)((Iterator) (obj)).next();
+        if (((SLInventoryEntry) (obj2)).invType != SLInventoryType.IT_WEARABLE.getTypeCode()) goto _L8; else goto _L7
+_L7:
+        ((List) (obj1)).add(obj2);
+          goto _L9
+        Exception exception;
+        exception;
+        throw exception;
+_L2:
+        inventorydb = null;
+          goto _L10
+_L8:
+        if (((SLInventoryEntry) (obj2)).assetType != SLAssetType.AT_OBJECT.getTypeCode() && (!((SLInventoryEntry) (obj2)).isLink() || ((SLInventoryEntry) (obj2)).invType != SLInventoryType.IT_OBJECT.getTypeCode())) goto _L9; else goto _L11
+_L11:
+        linkedlist.add(obj2);
+          goto _L9
+_L6:
+        if (!WearItemList(inventorydb, ((List) (obj1)), false)) goto _L13; else goto _L12
+_L12:
+        Debug.Printf("AvatarAppearance: MultiLayer: had some extra layers.", new Object[0]);
+        SendAgentIsNowWearing();
+        StartUpdatingAppearance();
+_L19:
+        if (linkedlist.size() == 0) goto _L15; else goto _L14
+_L14:
+        HashMap hashmap;
+        UUID uuid;
+        Iterator iterator;
+        Debug.Printf("AvatarAppearance: Re-attaching %d attachments from COF.", new Object[] {
+            Integer.valueOf(linkedlist.size())
+        });
+        hashmap = new HashMap();
+        uuid = UUID.randomUUID();
+        iterator = linkedlist.iterator();
+        exception = null;
+_L18:
+        if (!iterator.hasNext()) goto _L17; else goto _L16
+_L16:
+        SLInventoryEntry slinventoryentry;
+        SLInventoryEntry slinventoryentry1;
+        slinventoryentry = (SLInventoryEntry)iterator.next();
+        slinventoryentry1 = inventorydb.resolveLink(slinventoryentry);
+        obj2 = exception;
+        if (slinventoryentry1 == null)
+        {
+            break MISSING_BLOCK_LABEL_606;
+        }
+        obj1 = exception;
+        if (exception != null)
+        {
+            break MISSING_BLOCK_LABEL_372;
+        }
+        obj1 = new RezMultipleAttachmentsFromInv();
+        ((RezMultipleAttachmentsFromInv) (obj1)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((RezMultipleAttachmentsFromInv) (obj1)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        ((RezMultipleAttachmentsFromInv) (obj1)).HeaderData_Field.CompoundMsgID = uuid;
+        ((RezMultipleAttachmentsFromInv) (obj1)).HeaderData_Field.TotalObjects = linkedlist.size();
+        ((RezMultipleAttachmentsFromInv) (obj1)).HeaderData_Field.FirstDetachAll = false;
+        exception = new com.lumiyaviewer.lumiya.slproto.messages.RezMultipleAttachmentsFromInv.ObjectData();
+        Debug.Printf("Re-attaching attachment: entry %s (%s)", new Object[] {
+            slinventoryentry1.uuid, slinventoryentry.name
+        });
+        hashmap.put(slinventoryentry1.uuid, slinventoryentry.name);
+        exception.ItemID = slinventoryentry1.uuid;
+        exception.OwnerID = slinventoryentry1.ownerUUID;
+        exception.AttachmentPt = 128;
+        exception.ItemFlags = slinventoryentry1.flags;
+        exception.GroupMask = slinventoryentry1.groupMask;
+        exception.EveryoneMask = slinventoryentry1.everyoneMask;
+        exception.NextOwnerMask = slinventoryentry1.nextOwnerMask;
+        exception.Name = SLMessage.stringToVariableOEM(slinventoryentry.name);
+        exception.Description = SLMessage.stringToVariableOEM(slinventoryentry.description);
+        ((RezMultipleAttachmentsFromInv) (obj1)).ObjectData_Fields.add(exception);
+        obj2 = obj1;
+        if (((RezMultipleAttachmentsFromInv) (obj1)).ObjectData_Fields.size() < 4)
+        {
+            break MISSING_BLOCK_LABEL_606;
+        }
+        obj1.isReliable = true;
+        SendMessage(((SLMessage) (obj1)));
+        exception = null;
+          goto _L18
+_L13:
+        Debug.Printf("AvatarAppearance: MultiLayer: no extra layers.", new Object[0]);
+          goto _L19
+_L17:
+        wantedAttachments.set(ImmutableMap.copyOf(hashmap));
+        if (exception == null) goto _L4; else goto _L20
+_L20:
+        exception.isReliable = true;
+        SendMessage(exception);
+_L4:
+        multiLayerDone = true;
+        this;
+        JVM INSTR monitorexit ;
+        return;
+_L15:
+        Debug.Printf("AvatarAppearance: No attachments in COF.", new Object[0]);
+          goto _L4
+        exception = ((Exception) (obj2));
+          goto _L18
+    }
+
+    private void UpdateServerSideAppearance(String s, int i)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        Debug.Printf("AvatarAppearance: capURL '%s', cofVersion %d", new Object[] {
+            s, Integer.valueOf(i)
+        });
+        if (serverSideAppearanceUpdateTask != null)
+        {
+            serverSideAppearanceUpdateTask.cancel(true);
+        }
+        serverSideAppearanceUpdateTask = GenericHTTPExecutor.getInstance().submit(new _2D_.Lambda.Jp5Too8LbDpaKzeYKjkvQvC1hZo._cls2(i, this, s));
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        s;
+        throw s;
+    }
+
+    private void UpdateWearableNames()
+    {
+        InventoryDB inventorydb = null;
+        Object obj = (InventoryEntryList)currentOutfitFolder.getData();
+        if (userManager != null)
+        {
+            inventorydb = userManager.getInventoryManager().getDatabase();
+        }
+        if (obj != null && inventorydb != null)
+        {
+            obj = ((Iterable) (obj)).iterator();
+            do
+            {
+                if (!((Iterator) (obj)).hasNext())
+                {
+                    break;
                 }
-            } else {
-                z2 = false;
-                z = z7;
-            }
-            if (!isCritical) {
-                z3 = z6;
-            } else if (!z2) {
-                Object[] objArr = new Object[2];
-                objArr[0] = sLWearableType;
-                objArr[1] = Integer.valueOf(row != null ? row.size() : 0);
-                Debug.Printf("missing wearables on critical layer %s (worn: %d entries)", objArr);
-                z3 = true;
-            } else {
-                z3 = z6;
-            }
-            i++;
-            z6 = z3;
-            z7 = z;
+                SLInventoryEntry slinventoryentry = (SLInventoryEntry)((Iterator) (obj)).next();
+                if (!slinventoryentry.isFolderOrFolderLink())
+                {
+                    slinventoryentry = inventorydb.resolveLink(slinventoryentry);
+                    if (slinventoryentry != null && slinventoryentry.invType == SLInventoryType.IT_WEARABLE.getTypeCode())
+                    {
+                        Object obj1 = SLWearableType.getByCode(slinventoryentry.flags & 0xff);
+                        if (obj1 != null)
+                        {
+                            obj1 = (SLWearable)wornWearables.get(obj1, slinventoryentry.assetUUID);
+                            if (obj1 != null)
+                            {
+                                ((SLWearable) (obj1)).setInventoryName(slinventoryentry.name);
+                            }
+                        }
+                    }
+                }
+            } while (true);
         }
-        Debug.Printf("hasNotDownloaded %b, hasCriticalMissing %b", Boolean.valueOf(z7), Boolean.valueOf(z6));
-        if (!z7) {
-            return !z6;
+    }
+
+    private boolean WearItemList(InventoryDB inventorydb, List list, boolean flag)
+    {
+        RLVController rlvcontroller;
+        HashBasedTable hashbasedtable;
+        boolean flag2;
+        rlvcontroller = agentCircuit.getModules().rlvController;
+        hashbasedtable = HashBasedTable.create(wornWearables);
+        list = list.iterator();
+        flag2 = false;
+_L4:
+        if (!list.hasNext()) goto _L2; else goto _L1
+_L1:
+        SLInventoryEntry slinventoryentry = inventorydb.resolveLink((SLInventoryEntry)list.next());
+        if (slinventoryentry == null) goto _L4; else goto _L3
+_L3:
+        SLWearableType slwearabletype = SLWearableType.getByCode(slinventoryentry.flags & 0xff);
+        if (slwearabletype == null) goto _L4; else goto _L5
+_L5:
+        boolean flag1;
+        Object obj;
+        SLWearable slwearable;
+        boolean flag3;
+        if (!flag)
+        {
+            flag3 = slwearabletype.isBodyPart();
+        } else
+        {
+            flag3 = true;
         }
+        if (!rlvcontroller.canWearItem(slwearabletype))
+        {
+            flag1 = false;
+        } else
+        {
+label0:
+            {
+                if (flag3)
+                {
+                    if (!(rlvcontroller.canTakeItemOff(slwearabletype) ^ true))
+                    {
+                        break MISSING_BLOCK_LABEL_403;
+                    }
+                    Iterator iterator = hashbasedtable.row(slwearabletype).keySet().iterator();
+                    flag1 = false;
+                    do
+                    {
+                        if (!iterator.hasNext())
+                        {
+                            break;
+                        }
+                        if (!((UUID)iterator.next()).equals(slinventoryentry.assetUUID))
+                        {
+                            flag1 = true;
+                        }
+                    } while (true);
+                    break label0;
+                }
+                flag1 = true;
+            }
+        }
+_L7:
+        if (!flag1 || hashbasedtable.contains(slwearabletype, slinventoryentry.assetUUID)) goto _L4; else goto _L6
+_L6:
+        if (flag3)
+        {
+            obj = new HashSet(hashbasedtable.row(slwearabletype).keySet());
+            ((Set) (obj)).remove(slinventoryentry.assetUUID);
+            obj = ((Iterable) (obj)).iterator();
+            do
+            {
+                if (!((Iterator) (obj)).hasNext())
+                {
+                    break;
+                }
+                slwearable = (SLWearable)hashbasedtable.remove(slwearabletype, (UUID)((Iterator) (obj)).next());
+                if (slwearable != null)
+                {
+                    slwearable.dispose();
+                }
+            } while (true);
+        }
+        break MISSING_BLOCK_LABEL_323;
+        if (!flag1)
+        {
+            break MISSING_BLOCK_LABEL_403;
+        }
+        flag1 = false;
+          goto _L7
+        addWearable(hashbasedtable, slwearabletype, slinventoryentry.uuid, slinventoryentry.assetUUID, slinventoryentry.name);
+        flag2 = true;
+          goto _L4
+_L2:
+        if (flag2)
+        {
+            wornWearables = ImmutableTable.copyOf(hashbasedtable);
+            userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, wornWearables);
+            userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
+        }
+        return flag2;
+        flag1 = true;
+          goto _L7
+    }
+
+    private SLWearable addWearable(Table table, SLWearableType slwearabletype, UUID uuid, UUID uuid1, String s)
+    {
+        uuid = new SLWearable(userManager, agentCircuit, uuid, uuid1, slwearabletype, this);
+        if (s != null)
+        {
+            uuid.setInventoryName(s);
+        }
+        table.put(slwearabletype, uuid1, uuid);
+        return uuid;
+    }
+
+    private boolean areWearablesReady()
+    {
+        boolean flag5 = false;
+        SLWearableType aslwearabletype[] = SLWearableType.values();
+        int k = aslwearabletype.length;
+        int j = 0;
+        boolean flag3 = false;
+        boolean flag2 = false;
+        while (j < k) 
+        {
+            SLWearableType slwearabletype = aslwearabletype[j];
+            boolean flag6 = slwearabletype.getIsCritical();
+            Map map = wornWearables.row(slwearabletype);
+            boolean flag1;
+            boolean flag4;
+            if (map != null)
+            {
+                Iterator iterator = map.values().iterator();
+                boolean flag = false;
+                do
+                {
+                    flag1 = flag;
+                    flag4 = flag2;
+                    if (!iterator.hasNext())
+                    {
+                        break;
+                    }
+                    SLWearable slwearable = (SLWearable)iterator.next();
+                    if (slwearable.getIsValid())
+                    {
+                        flag = true;
+                    } else
+                    if (!slwearable.getIsFailed())
+                    {
+                        flag2 = true;
+                    }
+                } while (true);
+            } else
+            {
+                flag1 = false;
+                flag4 = flag2;
+            }
+            if (flag6)
+            {
+                if (flag1 ^ true)
+                {
+                    int i;
+                    if (map != null)
+                    {
+                        i = map.size();
+                    } else
+                    {
+                        i = 0;
+                    }
+                    Debug.Printf("missing wearables on critical layer %s (worn: %d entries)", new Object[] {
+                        slwearabletype, Integer.valueOf(i)
+                    });
+                    flag2 = true;
+                } else
+                {
+                    flag2 = flag3;
+                }
+            } else
+            {
+                flag2 = flag3;
+            }
+            j++;
+            flag3 = flag2;
+            flag2 = flag4;
+        }
+        Debug.Printf("hasNotDownloaded %b, hasCriticalMissing %b", new Object[] {
+            Boolean.valueOf(flag2), Boolean.valueOf(flag3)
+        });
+        flag4 = flag5;
+        if (!flag2)
+        {
+            flag4 = flag3 ^ true;
+        }
+        return flag4;
+    }
+
+    private boolean canDetachItem(UUID uuid)
+    {
+        Object obj;
+        if (parcelInfo == null)
+        {
+            break MISSING_BLOCK_LABEL_114;
+        }
+        obj = parcelInfo.getAgentAvatar();
+        if (obj == null)
+        {
+            break MISSING_BLOCK_LABEL_114;
+        }
+        obj = ((SLObjectInfo) (obj)).treeNode.iterator();
+        boolean flag;
+        do
+        {
+            SLObjectInfo slobjectinfo;
+            do
+            {
+                if (!((Iterator) (obj)).hasNext())
+                {
+                    break MISSING_BLOCK_LABEL_114;
+                }
+                slobjectinfo = (SLObjectInfo)((Iterator) (obj)).next();
+            } while (slobjectinfo.attachedToUUID == null || !(slobjectinfo.isDead ^ true) || !slobjectinfo.attachedToUUID.equals(uuid));
+            int i = slobjectinfo.attachmentID;
+            flag = agentCircuit.getModules().rlvController.canDetachItem(i, slobjectinfo.getId());
+        } while (flag);
         return false;
+        uuid;
+        Debug.Warning(uuid);
+        return true;
     }
 
-    private boolean canDetachItem(UUID uuid) {
-        SLObjectAvatarInfo agentAvatar;
-        if (this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null) {
-            return true;
+    private boolean canWearItem(SLWearableType slwearabletype)
+    {
+        return agentCircuit.getModules().rlvController.canWearItem(slwearabletype);
+    }
+
+    private float getAgentHeight()
+    {
+        return agentSizeVPLegLength * 0.1918F + 1.706F + agentSizeVPHipLength * 0.0375F + agentSizeVPHeight * 0.12022F + agentSizeVPHeadSize * 0.01117F + agentSizeVPNeckLength * 0.038F + agentSizeVPHeelHeight * 0.08F + agentSizeVPPlatformHeight * 0.07F;
+    }
+
+    private int[] getAppearanceParams()
+    {
+        int ai[];
+        int k;
+        ai = new int[218];
+        k = 0;
+_L14:
+        if (k >= 218) goto _L2; else goto _L1
+_L1:
+        Object obj;
+        ai[k] = 0;
+        obj = SLAvatarParams.paramDefs[k];
+        if (obj == null || ((com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.ParamSet) (obj)).params.size() <= 0) goto _L4; else goto _L3
+_L3:
+        obj = (com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.AvatarParam)((com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.ParamSet) (obj)).params.get(0);
+        if (obj == null) goto _L4; else goto _L5
+_L5:
+        int i1 = Math.round(((((com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.AvatarParam) (obj)).defValue - ((com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.AvatarParam) (obj)).minValue) * 255F) / (((com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.AvatarParam) (obj)).maxValue - ((com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.AvatarParam) (obj)).minValue));
+        if (i1 >= 0) goto _L7; else goto _L6
+_L6:
+        int i = 0;
+_L8:
+        ai[k] = i;
+_L4:
+        k++;
+        continue; /* Loop/switch isn't completed */
+_L7:
+        i = i1;
+        if (i1 > 255)
+        {
+            i = 255;
         }
-        try {
-            for (SLObjectInfo next : agentAvatar.treeNode) {
-                if (next.attachedToUUID != null && (!next.isDead) && next.attachedToUUID.equals(uuid)) {
-                    if (!this.agentCircuit.getModules().rlvController.canDetachItem(next.attachmentID, next.getId())) {
-                        return false;
+        if (true) goto _L8; else goto _L2
+_L2:
+        obj = wornWearables.values().iterator();
+_L10:
+        Object obj1;
+        if (!((Iterator) (obj)).hasNext())
+        {
+            break MISSING_BLOCK_LABEL_487;
+        }
+        obj1 = ((SLWearable)((Iterator) (obj)).next()).getWearableData();
+        if (obj1 == null)
+        {
+            continue; /* Loop/switch isn't completed */
+        }
+        obj1 = ((SLWearableData) (obj1)).params.iterator();
+_L12:
+        com.lumiyaviewer.lumiya.slproto.assets.SLWearableData.WearableParam wearableparam;
+        com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.ParamSet paramset;
+        do
+        {
+            if (!((Iterator) (obj1)).hasNext())
+            {
+                continue; /* Loop/switch isn't completed */
+            }
+            wearableparam = (com.lumiyaviewer.lumiya.slproto.assets.SLWearableData.WearableParam)((Iterator) (obj1)).next();
+            paramset = (com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.ParamSet)SLAvatarParams.paramByIDs.get(Integer.valueOf(wearableparam.paramIndex));
+        } while (paramset == null || paramset.params.size() <= 0 || paramset.appearanceIndex < 0);
+        break; /* Loop/switch isn't completed */
+        if (true) goto _L10; else goto _L9
+_L9:
+        com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.AvatarParam avatarparam = (com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.AvatarParam)paramset.params.get(0);
+        int l = Math.round(((wearableparam.paramValue - avatarparam.minValue) * 255F) / (avatarparam.maxValue - avatarparam.minValue));
+        int j;
+        if (l < 0)
+        {
+            j = 0;
+        } else
+        {
+            j = l;
+            if (l > 255)
+            {
+                j = 255;
+            }
+        }
+        ai[paramset.appearanceIndex] = j;
+        switch (paramset.id)
+        {
+        case 33: // '!'
+            agentSizeVPHeight = wearableparam.paramValue;
+            break;
+
+        case 198: 
+            agentSizeVPHeelHeight = wearableparam.paramValue;
+            break;
+
+        case 503: 
+            agentSizeVPPlatformHeight = wearableparam.paramValue;
+            break;
+
+        case 682: 
+            agentSizeVPHeadSize = wearableparam.paramValue;
+            break;
+
+        case 692: 
+            agentSizeVPLegLength = wearableparam.paramValue;
+            break;
+
+        case 756: 
+            agentSizeVPNeckLength = wearableparam.paramValue;
+            break;
+
+        case 842: 
+            agentSizeVPHipLength = wearableparam.paramValue;
+            break;
+        }
+        continue; /* Loop/switch isn't completed */
+        if (true) goto _L12; else goto _L11
+_L11:
+        agentSizeKnown = true;
+        return ai;
+        if (true) goto _L14; else goto _L13
+_L13:
+    }
+
+    private ImmutableList getWornItems()
+    {
+        com.google.common.collect.ImmutableList.Builder builder = ImmutableList.builder();
+        Iterator iterator = wornWearables.cellSet().iterator();
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break;
+            }
+            com.google.common.collect.Table.Cell cell = (com.google.common.collect.Table.Cell)iterator.next();
+            SLWearable slwearable = (SLWearable)cell.getValue();
+            if (slwearable != null)
+            {
+                builder.add(new WornItem((SLWearableType)cell.getRowKey(), 0, (UUID)cell.getColumnKey(), slwearable.getName(), 0, false));
+            }
+        } while (true);
+        if (parcelInfo != null)
+        {
+            Object obj = parcelInfo.getAgentAvatar();
+            if (obj != null)
+            {
+                try
+                {
+                    SLObjectInfo slobjectinfo;
+                    for (obj = ((SLObjectInfo) (obj)).treeNode.iterator(); ((Iterator) (obj)).hasNext(); builder.add(new WornItem(null, slobjectinfo.attachmentID, slobjectinfo.getId(), slobjectinfo.getName(), slobjectinfo.localID, slobjectinfo.isTouchable())))
+                    {
+                        slobjectinfo = (SLObjectInfo)((Iterator) (obj)).next();
                     }
-                }
-            }
-            return true;
-        } catch (NoSuchElementException e) {
-            Debug.Warning(e);
-            return true;
-        }
-    }
 
-    private boolean canWearItem(SLWearableType sLWearableType) {
-        return this.agentCircuit.getModules().rlvController.canWearItem(sLWearableType);
-    }
-
-    private float getAgentHeight() {
-        return (this.agentSizeVPLegLength * 0.1918f) + 1.706f + (this.agentSizeVPHipLength * 0.0375f) + (this.agentSizeVPHeight * 0.12022f) + (this.agentSizeVPHeadSize * 0.01117f) + (this.agentSizeVPNeckLength * 0.038f) + (this.agentSizeVPHeelHeight * 0.08f) + (this.agentSizeVPPlatformHeight * 0.07f);
-    }
-
-    private int[] getAppearanceParams() {
-        SLAvatarParams.AvatarParam avatarParam;
-        int[] iArr = new int[218];
-        for (int i = 0; i < 218; i++) {
-            iArr[i] = 0;
-            SLAvatarParams.ParamSet paramSet = SLAvatarParams.paramDefs[i];
-            if (!(paramSet == null || paramSet.params.size() <= 0 || (avatarParam = (SLAvatarParams.AvatarParam) paramSet.params.get(0)) == null)) {
-                int round = Math.round(((avatarParam.defValue - avatarParam.minValue) * 255.0f) / (avatarParam.maxValue - avatarParam.minValue));
-                if (round < 0) {
-                    round = 0;
-                } else if (round > 255) {
-                    round = 255;
                 }
-                iArr[i] = round;
-            }
-        }
-        for (SLWearable wearableData : this.wornWearables.values()) {
-            SLWearableData wearableData2 = wearableData.getWearableData();
-            if (wearableData2 != null) {
-                for (SLWearableData.WearableParam wearableParam : wearableData2.params) {
-                    SLAvatarParams.ParamSet paramSet2 = SLAvatarParams.paramByIDs.get(Integer.valueOf(wearableParam.paramIndex));
-                    if (paramSet2 != null && paramSet2.params.size() > 0 && paramSet2.appearanceIndex >= 0) {
-                        SLAvatarParams.AvatarParam avatarParam2 = (SLAvatarParams.AvatarParam) paramSet2.params.get(0);
-                        int round2 = Math.round(((wearableParam.paramValue - avatarParam2.minValue) * 255.0f) / (avatarParam2.maxValue - avatarParam2.minValue));
-                        if (round2 < 0) {
-                            round2 = 0;
-                        } else if (round2 > 255) {
-                            round2 = 255;
-                        }
-                        iArr[paramSet2.appearanceIndex] = round2;
-                        switch (paramSet2.id) {
-                            case 33:
-                                this.agentSizeVPHeight = wearableParam.paramValue;
-                                break;
-                            case Param_agentSizeVPHeelHeight /*198*/:
-                                this.agentSizeVPHeelHeight = wearableParam.paramValue;
-                                break;
-                            case Param_agentSizeVPPlatformHeight /*503*/:
-                                this.agentSizeVPPlatformHeight = wearableParam.paramValue;
-                                break;
-                            case Param_agentSizeVPHeadSize /*682*/:
-                                this.agentSizeVPHeadSize = wearableParam.paramValue;
-                                break;
-                            case Param_agentSizeVPLegLength /*692*/:
-                                this.agentSizeVPLegLength = wearableParam.paramValue;
-                                break;
-                            case Param_agentSizeVPNeckLength /*756*/:
-                                this.agentSizeVPNeckLength = wearableParam.paramValue;
-                                break;
-                            case Param_agentSizeVPHipLength /*842*/:
-                                this.agentSizeVPHipLength = wearableParam.paramValue;
-                                break;
-                        }
-                    }
+                catch (NoSuchElementException nosuchelementexception)
+                {
+                    Debug.Warning(nosuchelementexception);
                 }
-            }
-        }
-        this.agentSizeKnown = true;
-        return iArr;
-    }
-
-    /* access modifiers changed from: private */
-    public ImmutableList<WornItem> getWornItems() {
-        SLObjectAvatarInfo agentAvatar;
-        ImmutableList.Builder builder = ImmutableList.builder();
-        for (Table.Cell cell : this.wornWearables.cellSet()) {
-            SLWearable sLWearable = (SLWearable) cell.getValue();
-            if (sLWearable != null) {
-                builder.add((Object) new WornItem((SLWearableType) cell.getRowKey(), 0, (UUID) cell.getColumnKey(), sLWearable.getName(), 0, false));
-            }
-        }
-        if (!(this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null)) {
-            try {
-                for (SLObjectInfo next : agentAvatar.treeNode) {
-                    builder.add((Object) new WornItem((SLWearableType) null, next.attachmentID, next.getId(), next.getName(), next.localID, next.isTouchable()));
-                }
-            } catch (NoSuchElementException e) {
-                Debug.Warning(e);
             }
         }
         return builder.build();
     }
 
-    private boolean isItemWorn(SLInventoryEntry sLInventoryEntry, boolean z) {
-        return sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, z) != null;
+    private boolean isItemWorn(SLInventoryEntry slinventoryentry, boolean flag)
+    {
+        return slinventoryentry.whatIsItemWornOn(wornAttachments, wornWearables, flag) != null;
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onCofFolderEntry */
-    public void m201com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearancemthref1(InventoryEntryList inventoryEntryList) {
-        if (inventoryEntryList != null) {
-            Iterator it = inventoryEntryList.iterator();
-            while (it.hasNext()) {
-                SLInventoryEntry sLInventoryEntry = (SLInventoryEntry) it.next();
-                if (sLInventoryEntry != null && sLInventoryEntry.isFolder && sLInventoryEntry.typeDefault == 46) {
-                    this.cofFolderUUID.set(sLInventoryEntry.uuid);
-                    this.findCofFolder.unsubscribe();
-                    this.currentOutfitFolder.subscribe(this.userManager.getInventoryManager().getInventoryEntries(), InventoryQuery.create(sLInventoryEntry.uuid, (String) null, true, true, false, (SLAssetType) null));
-                    return;
-                }
+    private void onCofFolderEntry(InventoryEntryList inventoryentrylist)
+    {
+label0:
+        {
+            if (inventoryentrylist == null)
+            {
+                break label0;
             }
+            inventoryentrylist = inventoryentrylist.iterator();
+            SLInventoryEntry slinventoryentry;
+            do
+            {
+                if (!inventoryentrylist.hasNext())
+                {
+                    break label0;
+                }
+                slinventoryentry = (SLInventoryEntry)inventoryentrylist.next();
+            } while (slinventoryentry == null || !slinventoryentry.isFolder || slinventoryentry.typeDefault != 46);
+            cofFolderUUID.set(slinventoryentry.uuid);
+            findCofFolder.unsubscribe();
+            currentOutfitFolder.subscribe(userManager.getInventoryManager().getInventoryEntries(), InventoryQuery.create(slinventoryentry.uuid, null, true, true, false, null));
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onCurrentOutfitFolder */
-    public void m200com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearancemthref0(InventoryEntryList inventoryEntryList) {
-        SLInventoryEntry folder;
-        if (inventoryEntryList != null && (folder = inventoryEntryList.getFolder()) != null && Objects.equal(folder.sessionID, this.agentCircuit.circuitInfo.sessionID)) {
-            Debug.Log("AvatarAppearance: COF has been fetched from inventory.");
-            UpdateWearableNames();
-            this.cofReady = true;
-            UpdateCurrentOutfitLink(inventoryEntryList);
-            ProcessMultiLayer();
-            UpdateCOFContents();
-            RequestServerRebake();
-        }
-    }
-
-    private void startBaking() {
-        BakeProcess bakeProcess2 = this.bakeProcess;
-        if (bakeProcess2 != null) {
-            bakeProcess2.cancel();
-        }
-        this.bakeProcess = new BakeProcess(this.wornWearables, this, this.agentCircuit.getModules().textureUploader, this.eventBus);
-    }
-
-    private void updateIfWearablesReady() {
-        if (areWearablesReady()) {
-            SendAvatarSetAppearance();
-            if (!this.needUpdateAppearance) {
+    private void onCurrentOutfitFolder(InventoryEntryList inventoryentrylist)
+    {
+        if (inventoryentrylist != null)
+        {
+            SLInventoryEntry slinventoryentry = inventoryentrylist.getFolder();
+            if (slinventoryentry != null && Objects.equal(slinventoryentry.sessionID, agentCircuit.circuitInfo.sessionID))
+            {
+                Debug.Log("AvatarAppearance: COF has been fetched from inventory.");
+                UpdateWearableNames();
+                cofReady = true;
+                UpdateCurrentOutfitLink(inventoryentrylist);
+                ProcessMultiLayer();
                 UpdateCOFContents();
-            } else if (this.caps.getCapability(SLCaps.SLCapability.UpdateAvatarAppearance) == null) {
-                startBaking();
+                RequestServerRebake();
             }
         }
     }
 
-    public void AttachInventoryItem(SLInventoryEntry sLInventoryEntry, int i, boolean z) {
-        boolean z2;
-        InventoryDB inventoryDB = null;
-        if (this.userManager != null) {
-            inventoryDB = this.userManager.getInventoryManager().getDatabase();
+    private void startBaking()
+    {
+        BakeProcess bakeprocess = bakeProcess;
+        if (bakeprocess != null)
+        {
+            bakeprocess.cancel();
         }
-        if (inventoryDB != null) {
-            sLInventoryEntry = inventoryDB.resolveLink(sLInventoryEntry);
-        }
-        if (sLInventoryEntry != null) {
-            if (sLInventoryEntry.assetType == SLAssetType.AT_CLOTHING.getTypeCode() || sLInventoryEntry.assetType == SLAssetType.AT_BODYPART.getTypeCode()) {
-                WearItem(sLInventoryEntry, z);
-                return;
-            }
-            Debug.Printf("Outfits: Attaching inventory item %s", sLInventoryEntry.uuid.toString());
-            Map map = this.wantedAttachments.get();
-            if (map == null || (!map.containsKey(sLInventoryEntry.uuid))) {
-                HashMap hashMap = new HashMap();
-                if (map != null) {
-                    hashMap.putAll(map);
-                }
-                hashMap.put(sLInventoryEntry.uuid, sLInventoryEntry.name);
-                this.wantedAttachments.set(ImmutableMap.copyOf(hashMap));
-                z2 = true;
-            } else {
-                z2 = false;
-            }
-            RezSingleAttachmentFromInv rezSingleAttachmentFromInv = new RezSingleAttachmentFromInv();
-            rezSingleAttachmentFromInv.AgentData_Field.AgentID = this.circuitInfo.agentID;
-            rezSingleAttachmentFromInv.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-            if (!z) {
-                i |= 128;
-            }
-            rezSingleAttachmentFromInv.ObjectData_Field.ItemID = sLInventoryEntry.uuid;
-            rezSingleAttachmentFromInv.ObjectData_Field.OwnerID = sLInventoryEntry.ownerUUID;
-            rezSingleAttachmentFromInv.ObjectData_Field.AttachmentPt = i;
-            rezSingleAttachmentFromInv.ObjectData_Field.ItemFlags = sLInventoryEntry.flags;
-            rezSingleAttachmentFromInv.ObjectData_Field.GroupMask = sLInventoryEntry.groupMask;
-            rezSingleAttachmentFromInv.ObjectData_Field.EveryoneMask = sLInventoryEntry.everyoneMask;
-            rezSingleAttachmentFromInv.ObjectData_Field.NextOwnerMask = sLInventoryEntry.nextOwnerMask;
-            rezSingleAttachmentFromInv.ObjectData_Field.Name = SLMessage.stringToVariableOEM(sLInventoryEntry.name);
-            rezSingleAttachmentFromInv.ObjectData_Field.Description = SLMessage.stringToVariableOEM(sLInventoryEntry.description);
-            rezSingleAttachmentFromInv.isReliable = true;
-            SendMessage(rezSingleAttachmentFromInv);
-            if (z2) {
-                this.needUpdateCOF.set(true);
-                UpdateCOFContents();
-            }
-        }
+        bakeProcess = new BakeProcess(wornWearables, this, agentCircuit.getModules().textureUploader, eventBus);
     }
 
-    public void ChangeOutfit(List<SLInventoryEntry> list, boolean z, SLInventoryEntry sLInventoryEntry) {
-        boolean z2;
-        boolean z3;
-        boolean z4;
-        RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv;
-        boolean z5;
-        boolean z6;
-        SLWearableType byCode;
-        boolean z7;
-        boolean z8;
-        SLWearable remove;
-        RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv2;
-        InventoryDB database = this.userManager != null ? this.userManager.getInventoryManager().getDatabase() : null;
-        Map map = this.wantedAttachments.get();
-        HashMap hashMap = map != null ? new HashMap(map) : new HashMap();
-        if (z) {
-            z2 = true;
-            hashMap.clear();
-        } else {
-            z2 = false;
-        }
-        if (sLInventoryEntry != null) {
-            if (z) {
-                if (this.wantedOutfitFolder == null) {
-                    this.wantedOutfitFolder = sLInventoryEntry;
-                    z3 = true;
-                } else if (!this.wantedOutfitFolder.uuid.equals(sLInventoryEntry.uuid)) {
-                    this.wantedOutfitFolder = sLInventoryEntry;
-                    z3 = true;
+    private void updateIfWearablesReady()
+    {
+label0:
+        {
+            if (areWearablesReady())
+            {
+                SendAvatarSetAppearance();
+                if (!needUpdateAppearance)
+                {
+                    break label0;
+                }
+                if (caps.getCapability(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.UpdateAvatarAppearance) == null)
+                {
+                    startBaking();
                 }
             }
-            z3 = z2;
-        } else {
-            z3 = z2;
+            return;
         }
-        UUID randomUUID = UUID.randomUUID();
-        ArrayList arrayList = new ArrayList();
-        for (SLInventoryEntry sLInventoryEntry2 : list) {
-            SLInventoryEntry resolveLink = database != null ? database.resolveLink(sLInventoryEntry2) : sLInventoryEntry2;
-            if (resolveLink != null) {
-                sLInventoryEntry2 = resolveLink;
+        UpdateCOFContents();
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearance_2D_mthref_2D_0(InventoryEntryList inventoryentrylist)
+    {
+        onCurrentOutfitFolder(inventoryentrylist);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearance_2D_mthref_2D_1(InventoryEntryList inventoryentrylist)
+    {
+        onCofFolderEntry(inventoryentrylist);
+    }
+
+    public void AttachInventoryItem(SLInventoryEntry slinventoryentry, int i, boolean flag)
+    {
+        InventoryDB inventorydb = null;
+        if (userManager != null)
+        {
+            inventorydb = userManager.getInventoryManager().getDatabase();
+        }
+        SLInventoryEntry slinventoryentry1 = slinventoryentry;
+        if (inventorydb != null)
+        {
+            slinventoryentry1 = inventorydb.resolveLink(slinventoryentry);
+        }
+        if (slinventoryentry1 == null)
+        {
+            return;
+        }
+        if (slinventoryentry1.assetType == SLAssetType.AT_CLOTHING.getTypeCode() || slinventoryentry1.assetType == SLAssetType.AT_BODYPART.getTypeCode())
+        {
+            WearItem(slinventoryentry1, flag);
+            return;
+        }
+        Debug.Printf("Outfits: Attaching inventory item %s", new Object[] {
+            slinventoryentry1.uuid.toString()
+        });
+        slinventoryentry = (Map)wantedAttachments.get();
+        boolean flag1;
+        int j;
+        if (slinventoryentry == null || slinventoryentry.containsKey(slinventoryentry1.uuid) ^ true)
+        {
+            HashMap hashmap = new HashMap();
+            if (slinventoryentry != null)
+            {
+                hashmap.putAll(slinventoryentry);
             }
-            if (sLInventoryEntry2 != null && (sLInventoryEntry2.assetType == SLAssetType.AT_OBJECT.getTypeCode() || (sLInventoryEntry2.isLink() && sLInventoryEntry2.invType == SLInventoryType.IT_OBJECT.getTypeCode()))) {
-                arrayList.add(sLInventoryEntry2);
-            }
+            hashmap.put(slinventoryentry1.uuid, slinventoryentry1.name);
+            wantedAttachments.set(ImmutableMap.copyOf(hashmap));
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
         }
-        RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv3 = new RezMultipleAttachmentsFromInv();
-        rezMultipleAttachmentsFromInv3.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        rezMultipleAttachmentsFromInv3.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        rezMultipleAttachmentsFromInv3.HeaderData_Field.CompoundMsgID = randomUUID;
-        rezMultipleAttachmentsFromInv3.HeaderData_Field.TotalObjects = arrayList.size();
-        rezMultipleAttachmentsFromInv3.HeaderData_Field.FirstDetachAll = z;
-        Debug.Printf("Wearing: totalAttachments %d", Integer.valueOf(arrayList.size()));
-        Iterator it = arrayList.iterator();
-        while (true) {
-            z4 = z3;
-            rezMultipleAttachmentsFromInv = rezMultipleAttachmentsFromInv3;
-            if (!it.hasNext()) {
-                break;
-            }
-            SLInventoryEntry sLInventoryEntry3 = (SLInventoryEntry) it.next();
-            if (rezMultipleAttachmentsFromInv == null) {
-                RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv4 = new RezMultipleAttachmentsFromInv();
-                rezMultipleAttachmentsFromInv4.AgentData_Field.AgentID = this.circuitInfo.agentID;
-                rezMultipleAttachmentsFromInv4.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-                rezMultipleAttachmentsFromInv4.HeaderData_Field.CompoundMsgID = randomUUID;
-                rezMultipleAttachmentsFromInv4.HeaderData_Field.TotalObjects = arrayList.size();
-                rezMultipleAttachmentsFromInv4.HeaderData_Field.FirstDetachAll = z;
-                rezMultipleAttachmentsFromInv2 = rezMultipleAttachmentsFromInv4;
-            } else {
-                rezMultipleAttachmentsFromInv2 = rezMultipleAttachmentsFromInv;
-            }
-            RezMultipleAttachmentsFromInv.ObjectData objectData = new RezMultipleAttachmentsFromInv.ObjectData();
-            UUID uuid = sLInventoryEntry3.uuid;
-            Debug.Printf("Wearing: entry '%s' actualUUID %s", sLInventoryEntry3.name, uuid);
-            hashMap.put(uuid, sLInventoryEntry3.name);
-            z3 = true;
-            objectData.ItemID = uuid;
-            objectData.OwnerID = sLInventoryEntry3.ownerUUID;
-            objectData.AttachmentPt = 128;
-            objectData.ItemFlags = sLInventoryEntry3.flags;
-            objectData.GroupMask = sLInventoryEntry3.groupMask;
-            objectData.EveryoneMask = sLInventoryEntry3.everyoneMask;
-            objectData.NextOwnerMask = sLInventoryEntry3.nextOwnerMask;
-            objectData.Name = SLMessage.stringToVariableOEM(sLInventoryEntry3.name);
-            objectData.Description = SLMessage.stringToVariableOEM(sLInventoryEntry3.description);
-            rezMultipleAttachmentsFromInv2.ObjectData_Fields.add(objectData);
-            if (rezMultipleAttachmentsFromInv2.ObjectData_Fields.size() >= 4) {
-                rezMultipleAttachmentsFromInv2.isReliable = true;
-                SendMessage(rezMultipleAttachmentsFromInv2);
-                rezMultipleAttachmentsFromInv3 = null;
-            } else {
-                rezMultipleAttachmentsFromInv3 = rezMultipleAttachmentsFromInv2;
-            }
+        slinventoryentry = new RezSingleAttachmentFromInv();
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        j = i;
+        if (!flag)
+        {
+            j = i | 0x80;
         }
-        if (rezMultipleAttachmentsFromInv != null) {
-            rezMultipleAttachmentsFromInv.isReliable = true;
-            SendMessage(rezMultipleAttachmentsFromInv);
-        }
-        boolean z9 = false;
-        RLVController rLVController = this.agentCircuit.getModules().rlvController;
-        HashSet hashSet = new HashSet();
-        HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables);
-        Iterator<T> it2 = list.iterator();
-        while (true) {
-            z5 = z9;
-            if (!it2.hasNext()) {
-                break;
-            }
-            SLInventoryEntry sLInventoryEntry4 = (SLInventoryEntry) it2.next();
-            SLInventoryEntry resolveLink2 = database != null ? database.resolveLink(sLInventoryEntry4) : sLInventoryEntry4;
-            if (resolveLink2 != null && ((resolveLink2.assetType == SLAssetType.AT_BODYPART.getTypeCode() || resolveLink2.assetType == SLAssetType.AT_CLOTHING.getTypeCode()) && (byCode = SLWearableType.getByCode(resolveLink2.flags & 255)) != null)) {
-                if (!rLVController.canWearItem(byCode)) {
-                    z7 = false;
-                } else if (byCode.isBodyPart()) {
-                    if (!rLVController.canTakeItemOff(byCode)) {
-                        boolean z10 = false;
-                        Iterator<T> it3 = create.row(byCode).keySet().iterator();
-                        while (true) {
-                            z8 = z10;
-                            if (!it3.hasNext()) {
-                                break;
-                            }
-                            z10 = !((UUID) it3.next()).equals(resolveLink2.assetUUID) ? true : z8;
-                        }
-                        if (z8) {
-                            z7 = false;
-                        }
-                    }
-                    z7 = true;
-                } else {
-                    z7 = true;
-                }
-                if (z7) {
-                    hashSet.add(resolveLink2.assetUUID);
-                    if (!create.contains(byCode, resolveLink2.assetUUID)) {
-                        addWearable(create, byCode, resolveLink2.uuid, resolveLink2.assetUUID, resolveLink2.name);
-                        z5 = true;
-                        if (byCode.isBodyPart()) {
-                            HashSet<UUID> hashSet2 = new HashSet<>();
-                            for (UUID uuid2 : create.row(byCode).keySet()) {
-                                if (!uuid2.equals(resolveLink2.assetUUID)) {
-                                    hashSet2.add(uuid2);
-                                }
-                            }
-                            for (UUID uuid3 : hashSet2) {
-                                if (create.row(byCode).size() > 1 && (remove = create.remove(byCode, uuid3)) != null) {
-                                    remove.dispose();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            z9 = z5;
-        }
-        if (z) {
-            z6 = z5;
-            for (SLWearableType sLWearableType : SLWearableType.values()) {
-                if (!sLWearableType.isBodyPart() && rLVController.canTakeItemOff(sLWearableType)) {
-                    Map<UUID, SLWearable> row = create.row(sLWearableType);
-                    HashSet<UUID> hashSet3 = new HashSet<>();
-                    for (UUID uuid4 : row.keySet()) {
-                        if (!hashSet.contains(uuid4)) {
-                            hashSet3.add(uuid4);
-                        }
-                    }
-                    boolean z11 = z6;
-                    for (UUID remove2 : hashSet3) {
-                        SLWearable remove3 = row.remove(remove2);
-                        if (remove3 != null) {
-                            remove3.dispose();
-                        }
-                        z11 = true;
-                    }
-                    z6 = z11;
-                }
-            }
-        } else {
-            z6 = z5;
-        }
-        if (z6) {
-            this.wornWearables = ImmutableTable.copyOf(create);
-            this.userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, this.wornWearables);
-            this.userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
-        }
-        if (z4) {
-            this.wantedAttachments.set(ImmutableMap.copyOf(hashMap));
-        }
-        if (z6) {
-            SendAgentIsNowWearing();
-            ForceUpdateAppearance(false);
-            z4 = false;
-        }
-        if (z4) {
-            this.needUpdateCOF.set(true);
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).ObjectData_Field.ItemID = slinventoryentry1.uuid;
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).ObjectData_Field.OwnerID = slinventoryentry1.ownerUUID;
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).ObjectData_Field.AttachmentPt = j;
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).ObjectData_Field.ItemFlags = slinventoryentry1.flags;
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).ObjectData_Field.GroupMask = slinventoryentry1.groupMask;
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).ObjectData_Field.EveryoneMask = slinventoryentry1.everyoneMask;
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).ObjectData_Field.NextOwnerMask = slinventoryentry1.nextOwnerMask;
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).ObjectData_Field.Name = SLMessage.stringToVariableOEM(slinventoryentry1.name);
+        ((RezSingleAttachmentFromInv) (slinventoryentry)).ObjectData_Field.Description = SLMessage.stringToVariableOEM(slinventoryentry1.description);
+        slinventoryentry.isReliable = true;
+        SendMessage(slinventoryentry);
+        if (flag1)
+        {
+            needUpdateCOF.set(true);
             UpdateCOFContents();
         }
     }
 
-    public void DetachInventoryItem(SLInventoryEntry sLInventoryEntry) {
-        boolean z;
-        if (canDetachItem(sLInventoryEntry)) {
-            UUID uuid = sLInventoryEntry.isLink() ? sLInventoryEntry.assetUUID : sLInventoryEntry.uuid;
-            Debug.Log("Outfits: Detaching inventory item " + uuid);
-            Map map = this.wantedAttachments.get();
-            if (map == null) {
-                z = false;
-            } else if (map.containsKey(uuid)) {
-                HashMap hashMap = new HashMap(map);
-                hashMap.remove(uuid);
-                this.wantedAttachments.set(ImmutableMap.copyOf(hashMap));
-                z = true;
-            } else {
-                z = false;
+    public void ChangeOutfit(List list, boolean flag, SLInventoryEntry slinventoryentry)
+    {
+        Object obj;
+        Object obj1;
+        Object obj2;
+        Object obj3;
+        Object obj4;
+        Object obj5;
+        boolean flag1;
+        if (userManager != null)
+        {
+            obj1 = userManager.getInventoryManager().getDatabase();
+        } else
+        {
+            obj1 = null;
+        }
+        obj = (Map)wantedAttachments.get();
+        if (obj != null)
+        {
+            obj = new HashMap(((Map) (obj)));
+        } else
+        {
+            obj = new HashMap();
+        }
+        Object obj6;
+        Object obj7;
+        UUID uuid;
+        int i;
+        boolean flag2;
+        boolean flag3;
+        int j;
+        if (flag)
+        {
+            flag1 = true;
+            ((Map) (obj)).clear();
+        } else
+        {
+            flag1 = false;
+        }
+        if (slinventoryentry == null || !flag) goto _L2; else goto _L1
+_L1:
+        if (wantedOutfitFolder != null) goto _L4; else goto _L3
+_L3:
+        wantedOutfitFolder = slinventoryentry;
+        flag1 = true;
+_L2:
+        obj3 = UUID.randomUUID();
+        obj4 = new ArrayList();
+        obj5 = list.iterator();
+        do
+        {
+            if (!((Iterator) (obj5)).hasNext())
+            {
+                break;
             }
-            DetachAttachmentIntoInv detachAttachmentIntoInv = new DetachAttachmentIntoInv();
-            detachAttachmentIntoInv.ObjectData_Field.AgentID = this.circuitInfo.agentID;
-            detachAttachmentIntoInv.ObjectData_Field.ItemID = uuid;
-            detachAttachmentIntoInv.isReliable = true;
-            SendMessage(detachAttachmentIntoInv);
-            if (z) {
-                this.needUpdateCOF.set(true);
+            obj2 = (SLInventoryEntry)((Iterator) (obj5)).next();
+            if (obj1 != null)
+            {
+                slinventoryentry = ((InventoryDB) (obj1)).resolveLink(((SLInventoryEntry) (obj2)));
+            } else
+            {
+                slinventoryentry = ((SLInventoryEntry) (obj2));
+            }
+            if (slinventoryentry != null)
+            {
+                obj2 = slinventoryentry;
+            }
+            if (obj2 != null && (((SLInventoryEntry) (obj2)).assetType == SLAssetType.AT_OBJECT.getTypeCode() || ((SLInventoryEntry) (obj2)).isLink() && ((SLInventoryEntry) (obj2)).invType == SLInventoryType.IT_OBJECT.getTypeCode()))
+            {
+                ((List) (obj4)).add(obj2);
+            }
+        } while (true);
+        break; /* Loop/switch isn't completed */
+_L4:
+        if (!wantedOutfitFolder.uuid.equals(slinventoryentry.uuid))
+        {
+            wantedOutfitFolder = slinventoryentry;
+            flag1 = true;
+        }
+        if (true) goto _L2; else goto _L5
+_L5:
+        slinventoryentry = new RezMultipleAttachmentsFromInv();
+        ((RezMultipleAttachmentsFromInv) (slinventoryentry)).AgentData_Field.AgentID = circuitInfo.agentID;
+        ((RezMultipleAttachmentsFromInv) (slinventoryentry)).AgentData_Field.SessionID = circuitInfo.sessionID;
+        ((RezMultipleAttachmentsFromInv) (slinventoryentry)).HeaderData_Field.CompoundMsgID = ((UUID) (obj3));
+        ((RezMultipleAttachmentsFromInv) (slinventoryentry)).HeaderData_Field.TotalObjects = ((List) (obj4)).size();
+        ((RezMultipleAttachmentsFromInv) (slinventoryentry)).HeaderData_Field.FirstDetachAll = flag;
+        Debug.Printf("Wearing: totalAttachments %d", new Object[] {
+            Integer.valueOf(((List) (obj4)).size())
+        });
+        obj2 = ((Iterable) (obj4)).iterator();
+        for (flag2 = flag1; ((Iterator) (obj2)).hasNext(); flag2 = true)
+        {
+            obj5 = (SLInventoryEntry)((Iterator) (obj2)).next();
+            if (slinventoryentry == null)
+            {
+                slinventoryentry = new RezMultipleAttachmentsFromInv();
+                ((RezMultipleAttachmentsFromInv) (slinventoryentry)).AgentData_Field.AgentID = circuitInfo.agentID;
+                ((RezMultipleAttachmentsFromInv) (slinventoryentry)).AgentData_Field.SessionID = circuitInfo.sessionID;
+                ((RezMultipleAttachmentsFromInv) (slinventoryentry)).HeaderData_Field.CompoundMsgID = ((UUID) (obj3));
+                ((RezMultipleAttachmentsFromInv) (slinventoryentry)).HeaderData_Field.TotalObjects = ((List) (obj4)).size();
+                ((RezMultipleAttachmentsFromInv) (slinventoryentry)).HeaderData_Field.FirstDetachAll = flag;
+            }
+            obj6 = new com.lumiyaviewer.lumiya.slproto.messages.RezMultipleAttachmentsFromInv.ObjectData();
+            obj7 = ((SLInventoryEntry) (obj5)).uuid;
+            Debug.Printf("Wearing: entry '%s' actualUUID %s", new Object[] {
+                ((SLInventoryEntry) (obj5)).name, obj7
+            });
+            ((Map) (obj)).put(obj7, ((SLInventoryEntry) (obj5)).name);
+            obj6.ItemID = ((UUID) (obj7));
+            obj6.OwnerID = ((SLInventoryEntry) (obj5)).ownerUUID;
+            obj6.AttachmentPt = 128;
+            obj6.ItemFlags = ((SLInventoryEntry) (obj5)).flags;
+            obj6.GroupMask = ((SLInventoryEntry) (obj5)).groupMask;
+            obj6.EveryoneMask = ((SLInventoryEntry) (obj5)).everyoneMask;
+            obj6.NextOwnerMask = ((SLInventoryEntry) (obj5)).nextOwnerMask;
+            obj6.Name = SLMessage.stringToVariableOEM(((SLInventoryEntry) (obj5)).name);
+            obj6.Description = SLMessage.stringToVariableOEM(((SLInventoryEntry) (obj5)).description);
+            ((RezMultipleAttachmentsFromInv) (slinventoryentry)).ObjectData_Fields.add(obj6);
+            if (((RezMultipleAttachmentsFromInv) (slinventoryentry)).ObjectData_Fields.size() >= 4)
+            {
+                slinventoryentry.isReliable = true;
+                SendMessage(slinventoryentry);
+                slinventoryentry = null;
+            }
+        }
+
+        if (slinventoryentry != null)
+        {
+            slinventoryentry.isReliable = true;
+            SendMessage(slinventoryentry);
+        }
+        slinventoryentry = agentCircuit.getModules().rlvController;
+        obj2 = new HashSet();
+        obj3 = HashBasedTable.create(wornWearables);
+        obj4 = list.iterator();
+        flag1 = false;
+_L11:
+        if (!((Iterator) (obj4)).hasNext()) goto _L7; else goto _L6
+_L6:
+        list = (SLInventoryEntry)((Iterator) (obj4)).next();
+        if (obj1 != null)
+        {
+            list = ((InventoryDB) (obj1)).resolveLink(list);
+        }
+        flag3 = flag1;
+        if (list == null) goto _L9; else goto _L8
+_L8:
+        if (((SLInventoryEntry) (list)).assetType != SLAssetType.AT_BODYPART.getTypeCode() && ((SLInventoryEntry) (list)).assetType != SLAssetType.AT_CLOTHING.getTypeCode()) goto _L11; else goto _L10
+_L10:
+        obj5 = SLWearableType.getByCode(((SLInventoryEntry) (list)).flags & 0xff);
+        flag3 = flag1;
+        if (obj5 == null) goto _L9; else goto _L12
+_L12:
+        if (!slinventoryentry.canWearItem(((SLWearableType) (obj5))))
+        {
+            i = 0;
+        } else
+        {
+label0:
+            {
+                if (((SLWearableType) (obj5)).isBodyPart())
+                {
+                    if (!(slinventoryentry.canTakeItemOff(((SLWearableType) (obj5))) ^ true))
+                    {
+                        break MISSING_BLOCK_LABEL_1449;
+                    }
+                    obj6 = ((Table) (obj3)).row(obj5).keySet().iterator();
+                    i = 0;
+                    do
+                    {
+                        if (!((Iterator) (obj6)).hasNext())
+                        {
+                            break;
+                        }
+                        if (!((UUID)((Iterator) (obj6)).next()).equals(((SLInventoryEntry) (list)).assetUUID))
+                        {
+                            i = 1;
+                        }
+                    } while (true);
+                    break label0;
+                }
+                i = 1;
+            }
+        }
+_L13:
+        flag3 = flag1;
+        if (i != 0)
+        {
+            ((Set) (obj2)).add(((SLInventoryEntry) (list)).assetUUID);
+            flag3 = flag1;
+            if (!((Table) (obj3)).contains(obj5, ((SLInventoryEntry) (list)).assetUUID))
+            {
+                addWearable(((Table) (obj3)), ((SLWearableType) (obj5)), ((SLInventoryEntry) (list)).uuid, ((SLInventoryEntry) (list)).assetUUID, ((SLInventoryEntry) (list)).name);
+                flag1 = true;
+                flag3 = flag1;
+                if (((SLWearableType) (obj5)).isBodyPart())
+                {
+                    obj6 = new HashSet();
+                    obj7 = ((Table) (obj3)).row(obj5).keySet().iterator();
+                    do
+                    {
+                        if (!((Iterator) (obj7)).hasNext())
+                        {
+                            break;
+                        }
+                        uuid = (UUID)((Iterator) (obj7)).next();
+                        if (!uuid.equals(((SLInventoryEntry) (list)).assetUUID))
+                        {
+                            ((Set) (obj6)).add(uuid);
+                        }
+                    } while (true);
+                    break MISSING_BLOCK_LABEL_1048;
+                }
+            }
+        }
+          goto _L9
+        if (i == 0)
+        {
+            break MISSING_BLOCK_LABEL_1449;
+        }
+        i = 0;
+          goto _L13
+        list = ((Iterable) (obj6)).iterator();
+        do
+        {
+            flag3 = flag1;
+            if (!list.hasNext())
+            {
+                break;
+            }
+            obj6 = (UUID)list.next();
+            if (((Table) (obj3)).row(obj5).size() > 1)
+            {
+                obj6 = (SLWearable)((Table) (obj3)).remove(obj5, obj6);
+                if (obj6 != null)
+                {
+                    ((SLWearable) (obj6)).dispose();
+                }
+            }
+        } while (true);
+          goto _L9
+_L7:
+        if (!flag) goto _L15; else goto _L14
+_L14:
+        list = SLWearableType.values();
+        j = list.length;
+        i = 0;
+_L20:
+        flag3 = flag1;
+        if (i >= j) goto _L17; else goto _L16
+_L16:
+        obj1 = list[i];
+        if (!((SLWearableType) (obj1)).isBodyPart()) goto _L19; else goto _L18
+_L18:
+        flag3 = flag1;
+_L22:
+        i++;
+        flag1 = flag3;
+          goto _L20
+_L19:
+        flag3 = flag1;
+        if (!slinventoryentry.canTakeItemOff(((SLWearableType) (obj1)))) goto _L22; else goto _L21
+_L21:
+        obj1 = ((Table) (obj3)).row(obj1);
+        obj4 = new HashSet();
+        obj5 = ((Map) (obj1)).keySet().iterator();
+        do
+        {
+            if (!((Iterator) (obj5)).hasNext())
+            {
+                break;
+            }
+            obj6 = (UUID)((Iterator) (obj5)).next();
+            if (!((Set) (obj2)).contains(obj6))
+            {
+                ((Set) (obj4)).add(obj6);
+            }
+        } while (true);
+        for (obj4 = ((Iterable) (obj4)).iterator(); ((Iterator) (obj4)).hasNext();)
+        {
+            obj5 = (SLWearable)((Map) (obj1)).remove((UUID)((Iterator) (obj4)).next());
+            if (obj5 != null)
+            {
+                ((SLWearable) (obj5)).dispose();
+            }
+            flag1 = true;
+        }
+
+        break MISSING_BLOCK_LABEL_1435;
+_L15:
+        flag3 = flag1;
+_L17:
+        if (flag3)
+        {
+            wornWearables = ImmutableTable.copyOf(((Table) (obj3)));
+            userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, wornWearables);
+            userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
+        }
+        if (flag2)
+        {
+            wantedAttachments.set(ImmutableMap.copyOf(((Map) (obj))));
+        }
+        if (flag3)
+        {
+            SendAgentIsNowWearing();
+            ForceUpdateAppearance(false);
+            flag2 = false;
+        }
+        if (flag2)
+        {
+            needUpdateCOF.set(true);
+            UpdateCOFContents();
+        }
+        return;
+        flag3 = flag1;
+          goto _L22
+_L9:
+        flag1 = flag3;
+          goto _L11
+        i = 1;
+          goto _L13
+    }
+
+    public void DetachInventoryItem(SLInventoryEntry slinventoryentry)
+    {
+        if (canDetachItem(slinventoryentry))
+        {
+            Object obj = slinventoryentry.uuid;
+            boolean flag;
+            if (slinventoryentry.isLink())
+            {
+                slinventoryentry = slinventoryentry.assetUUID;
+            } else
+            {
+                slinventoryentry = ((SLInventoryEntry) (obj));
+            }
+            Debug.Log((new StringBuilder()).append("Outfits: Detaching inventory item ").append(slinventoryentry).toString());
+            obj = (Map)wantedAttachments.get();
+            if (obj != null)
+            {
+                if (((Map) (obj)).containsKey(slinventoryentry))
+                {
+                    obj = new HashMap(((Map) (obj)));
+                    ((Map) (obj)).remove(slinventoryentry);
+                    wantedAttachments.set(ImmutableMap.copyOf(((Map) (obj))));
+                    flag = true;
+                } else
+                {
+                    flag = false;
+                }
+            } else
+            {
+                flag = false;
+            }
+            obj = new DetachAttachmentIntoInv();
+            ((DetachAttachmentIntoInv) (obj)).ObjectData_Field.AgentID = circuitInfo.agentID;
+            ((DetachAttachmentIntoInv) (obj)).ObjectData_Field.ItemID = slinventoryentry;
+            obj.isReliable = true;
+            SendMessage(((SLMessage) (obj)));
+            if (flag)
+            {
+                needUpdateCOF.set(true);
                 UpdateCOFContents();
             }
         }
     }
 
-    public void DetachItem(WornItem wornItem) {
-        if (canDetachItem(wornItem)) {
-            DetachItem(wornItem.objectLocalID);
+    public void DetachItem(WornItem wornitem)
+    {
+        if (canDetachItem(wornitem))
+        {
+            DetachItem(WornItem._2D_get0(wornitem));
         }
     }
 
-    public void DetachItemFromPoint(int i) {
-        SLObjectAvatarInfo agentAvatar;
-        HashSet<Integer> hashSet = null;
-        if (!(this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null)) {
-            try {
-                for (SLObjectInfo next : agentAvatar.treeNode) {
-                    if (next.attachedToUUID != null && (!next.isDead) && next.attachmentID == i && this.agentCircuit.getModules().rlvController.canDetachItem(i, next.getId())) {
-                        if (hashSet == null) {
-                            hashSet = new HashSet<>();
-                        }
-                        hashSet.add(Integer.valueOf(next.localID));
-                    }
-                    hashSet = hashSet;
-                }
-            } catch (NoSuchElementException e) {
-                Debug.Warning(e);
-            }
+    public void DetachItemFromPoint(int i)
+    {
+        HashSet hashset;
+        HashSet hashset1;
+        HashSet hashset2;
+        Object obj1;
+        hashset1 = null;
+        Object obj = null;
+        hashset = null;
+        hashset2 = obj;
+        if (parcelInfo == null)
+        {
+            break MISSING_BLOCK_LABEL_188;
         }
-        if (hashSet != null) {
-            for (Integer intValue : hashSet) {
-                DetachItem(intValue.intValue());
-            }
+        obj1 = parcelInfo.getAgentAvatar();
+        hashset2 = obj;
+        if (obj1 == null)
+        {
+            break MISSING_BLOCK_LABEL_188;
         }
+        Iterator iterator1 = ((SLObjectInfo) (obj1)).treeNode.iterator();
+_L2:
+        hashset1 = hashset;
+        hashset2 = hashset;
+        if (!iterator1.hasNext())
+        {
+            break MISSING_BLOCK_LABEL_188;
+        }
+        hashset1 = hashset;
+        obj1 = (SLObjectInfo)iterator1.next();
+        hashset1 = hashset;
+        if (((SLObjectInfo) (obj1)).attachedToUUID == null) goto _L2; else goto _L1
+_L1:
+        hashset1 = hashset;
+        if (!(((SLObjectInfo) (obj1)).isDead ^ true)) goto _L2; else goto _L3
+_L3:
+        hashset1 = hashset;
+        if (((SLObjectInfo) (obj1)).attachmentID != i) goto _L2; else goto _L4
+_L4:
+        hashset1 = hashset;
+        if (!agentCircuit.getModules().rlvController.canDetachItem(i, ((SLObjectInfo) (obj1)).getId())) goto _L2; else goto _L5
+_L5:
+        hashset2 = hashset;
+        if (hashset != null)
+        {
+            break MISSING_BLOCK_LABEL_152;
+        }
+        hashset1 = hashset;
+        hashset2 = new HashSet();
+        hashset1 = hashset2;
+        hashset2.add(Integer.valueOf(((SLObjectInfo) (obj1)).localID));
+        hashset = hashset2;
+          goto _L2
+        NoSuchElementException nosuchelementexception;
+        nosuchelementexception;
+        Debug.Warning(nosuchelementexception);
+        hashset2 = hashset1;
+        if (hashset2 != null)
+        {
+            for (Iterator iterator = hashset2.iterator(); iterator.hasNext(); DetachItem(((Integer)iterator.next()).intValue())) { }
+        }
+        return;
     }
 
-    public void ForceTakeItemOff(SLWearableType sLWearableType) {
-        boolean z;
-        if (!this.wornWearables.row(sLWearableType).isEmpty()) {
-            z = true;
-            HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables);
-            create.rowKeySet().remove(sLWearableType);
-            this.wornWearables = ImmutableTable.copyOf(create);
-            this.userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, this.wornWearables);
-            this.userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
-        } else {
-            z = false;
+    public void ForceTakeItemOff(SLWearableType slwearabletype)
+    {
+        boolean flag;
+        if (!wornWearables.row(slwearabletype).isEmpty())
+        {
+            flag = true;
+            HashBasedTable hashbasedtable = HashBasedTable.create(wornWearables);
+            hashbasedtable.rowKeySet().remove(slwearabletype);
+            wornWearables = ImmutableTable.copyOf(hashbasedtable);
+            userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, wornWearables);
+            userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
+        } else
+        {
+            flag = false;
         }
-        if (z) {
+        if (flag)
+        {
             SendAgentIsNowWearing();
             ForceUpdateAppearance(false);
         }
     }
 
-    @SLMessageHandler
-    public void HandleAgentWearablesUpdate(AgentWearablesUpdate agentWearablesUpdate) {
-        Debug.Log("AvatarAppearance: Got AgentWearablesUpdate, " + agentWearablesUpdate.WearableData_Fields.size() + " wearables.");
-        HashSet hashSet = new HashSet();
-        HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables);
-        for (AgentWearablesUpdate.WearableData wearableData : agentWearablesUpdate.WearableData_Fields) {
-            Debug.Log("Wearable: type = " + wearableData.WearableType + ", itemID = " + wearableData.ItemID + ", assetID = " + wearableData.AssetID);
-            if (wearableData.AssetID.getLeastSignificantBits() != 0 || wearableData.AssetID.getMostSignificantBits() != 0) {
-                hashSet.add(wearableData.AssetID);
-                SLWearableType byCode = SLWearableType.getByCode(wearableData.WearableType);
-                if (byCode != null && create.get(byCode, wearableData.AssetID) == null) {
-                    addWearable(create, byCode, wearableData.ItemID, wearableData.AssetID, (String) null);
+    public void HandleAgentWearablesUpdate(AgentWearablesUpdate agentwearablesupdate)
+    {
+        Debug.Log((new StringBuilder()).append("AvatarAppearance: Got AgentWearablesUpdate, ").append(agentwearablesupdate.WearableData_Fields.size()).append(" wearables.").toString());
+        HashSet hashset = new HashSet();
+        HashBasedTable hashbasedtable = HashBasedTable.create(wornWearables);
+        agentwearablesupdate = agentwearablesupdate.WearableData_Fields.iterator();
+        do
+        {
+            if (!agentwearablesupdate.hasNext())
+            {
+                break;
+            }
+            com.lumiyaviewer.lumiya.slproto.messages.AgentWearablesUpdate.WearableData wearabledata = (com.lumiyaviewer.lumiya.slproto.messages.AgentWearablesUpdate.WearableData)agentwearablesupdate.next();
+            Debug.Log((new StringBuilder()).append("Wearable: type = ").append(wearabledata.WearableType).append(", itemID = ").append(wearabledata.ItemID).append(", assetID = ").append(wearabledata.AssetID).toString());
+            if (wearabledata.AssetID.getLeastSignificantBits() != 0L || wearabledata.AssetID.getMostSignificantBits() != 0L)
+            {
+                hashset.add(wearabledata.AssetID);
+                SLWearableType slwearabletype = SLWearableType.getByCode(wearabledata.WearableType);
+                if (slwearabletype != null && (SLWearable)hashbasedtable.get(slwearabletype, wearabledata.AssetID) == null)
+                {
+                    addWearable(hashbasedtable, slwearabletype, wearabledata.ItemID, wearabledata.AssetID, null);
                 }
             }
-        }
-        Debug.Log("AvatarAppearance: AgentWearablesUpdate: wearing now: " + hashSet.size() + " ids");
-        HashSet<UUID> hashSet2 = new HashSet<>();
-        for (UUID uuid : create.columnKeySet()) {
-            if (!hashSet.contains(uuid)) {
-                hashSet2.add(uuid);
+        } while (true);
+        Debug.Log((new StringBuilder()).append("AvatarAppearance: AgentWearablesUpdate: wearing now: ").append(hashset.size()).append(" ids").toString());
+        agentwearablesupdate = new HashSet();
+        Iterator iterator = hashbasedtable.columnKeySet().iterator();
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break;
             }
-        }
-        for (UUID column : hashSet2) {
-            Map<SLWearableType, SLWearable> column2 = create.column(column);
-            for (SLWearable dispose : column2.values()) {
-                dispose.dispose();
+            UUID uuid = (UUID)iterator.next();
+            if (!hashset.contains(uuid))
+            {
+                agentwearablesupdate.add(uuid);
             }
-            column2.clear();
+        } while (true);
+        Map map;
+        for (agentwearablesupdate = agentwearablesupdate.iterator(); agentwearablesupdate.hasNext(); map.clear())
+        {
+            map = hashbasedtable.column((UUID)agentwearablesupdate.next());
+            for (Iterator iterator1 = map.values().iterator(); iterator1.hasNext(); ((SLWearable)iterator1.next()).dispose()) { }
         }
-        this.wornWearables = ImmutableTable.copyOf(create);
-        this.userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, this.wornWearables);
-        this.userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
+
+        wornWearables = ImmutableTable.copyOf(hashbasedtable);
+        userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, wornWearables);
+        userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
         UpdateWearableNames();
-        this.legacyAppearanceReady = true;
+        legacyAppearanceReady = true;
         ProcessMultiLayer();
         SendAgentIsNowWearing();
         StartUpdatingAppearance();
     }
 
-    public void HandleAvatarAppearance(AvatarAppearance avatarAppearance) {
-        if (avatarAppearance.AppearanceData_Fields.size() > 0) {
-            this.currentCofAppearanceVersion = avatarAppearance.AppearanceData_Fields.get(0).CofVersion;
-            Debug.Printf("AvatarAppearance: inventory COF %d, last updated COF %d, appearance COF %d", Integer.valueOf(this.currentCofInventoryVersion), Integer.valueOf(this.lastCofUpdatedVersion), Integer.valueOf(this.currentCofAppearanceVersion));
+    public void HandleAvatarAppearance(AvatarAppearance avatarappearance)
+    {
+        if (avatarappearance.AppearanceData_Fields.size() > 0)
+        {
+            currentCofAppearanceVersion = ((com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance.AppearanceData)avatarappearance.AppearanceData_Fields.get(0)).CofVersion;
+            Debug.Printf("AvatarAppearance: inventory COF %d, last updated COF %d, appearance COF %d", new Object[] {
+                Integer.valueOf(currentCofInventoryVersion), Integer.valueOf(lastCofUpdatedVersion), Integer.valueOf(currentCofAppearanceVersion)
+            });
         }
     }
 
-    public void HandleCircuitReady() {
-        SLInventoryEntry findSpecialFolder;
-        boolean z = true;
+    public void HandleCircuitReady()
+    {
+        boolean flag;
+        flag = true;
         super.HandleCircuitReady();
-        if (this.userManager != null) {
-            UUID rootFolder = this.userManager.getInventoryManager().getRootFolder();
-            if (rootFolder == null || (findSpecialFolder = this.userManager.getInventoryManager().getDatabase().findSpecialFolder(rootFolder, 46)) == null) {
-                z = false;
-            } else {
-                Debug.Printf("Found existing COF folder: %s", findSpecialFolder.uuid);
-                this.cofFolderUUID.set(findSpecialFolder.uuid);
-                this.currentOutfitFolder.subscribe(this.userManager.getInventoryManager().getInventoryEntries(), InventoryQuery.create(findSpecialFolder.uuid, (String) null, true, true, false, (SLAssetType) null));
-            }
-            if (!z) {
-                Debug.Printf("Existing COF folder not found, requesting.", new Object[0]);
-                this.findCofFolder.subscribe(this.userManager.getInventoryManager().getInventoryEntries(), InventoryQuery.findFolderWithType((UUID) null, 46));
-            }
+        if (userManager == null) goto _L2; else goto _L1
+_L1:
+        Object obj = userManager.getInventoryManager().getRootFolder();
+        if (obj == null) goto _L4; else goto _L3
+_L3:
+        obj = userManager.getInventoryManager().getDatabase().findSpecialFolder(((UUID) (obj)), 46);
+        if (obj == null) goto _L4; else goto _L5
+_L5:
+        Debug.Printf("Found existing COF folder: %s", new Object[] {
+            ((SLInventoryEntry) (obj)).uuid
+        });
+        cofFolderUUID.set(((SLInventoryEntry) (obj)).uuid);
+        currentOutfitFolder.subscribe(userManager.getInventoryManager().getInventoryEntries(), InventoryQuery.create(((SLInventoryEntry) (obj)).uuid, null, true, true, false, null));
+_L7:
+        if (!flag)
+        {
+            Debug.Printf("Existing COF folder not found, requesting.", new Object[0]);
+            findCofFolder.subscribe(userManager.getInventoryManager().getInventoryEntries(), InventoryQuery.findFolderWithType(null, 46));
         }
+_L2:
+        return;
+_L4:
+        flag = false;
+        if (true) goto _L7; else goto _L6
+_L6:
     }
 
-    public void HandleCloseCircuit() {
-        this.findCofFolder.unsubscribe();
-        this.currentOutfitFolder.unsubscribe();
-        if (this.userManager != null) {
-            this.userManager.getWornAttachmentsPool().setData(SubscriptionSingleKey.Value, null);
-            this.userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, null);
-            this.userManager.wornItems().detachRequestHandler(this.wornItemsRequestHandler);
+    public void HandleCloseCircuit()
+    {
+        findCofFolder.unsubscribe();
+        currentOutfitFolder.unsubscribe();
+        if (userManager != null)
+        {
+            userManager.getWornAttachmentsPool().setData(SubscriptionSingleKey.Value, null);
+            userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, null);
+            userManager.wornItems().detachRequestHandler(wornItemsRequestHandler);
         }
-        if (this.bakingThread != null) {
-            this.bakingThread.interrupt();
-            this.bakingThread = null;
+        if (bakingThread != null)
+        {
+            bakingThread.interrupt();
+            bakingThread = null;
         }
-        if (this.serverSideAppearanceUpdateTask != null) {
-            this.serverSideAppearanceUpdateTask.cancel(true);
+        if (serverSideAppearanceUpdateTask != null)
+        {
+            serverSideAppearanceUpdateTask.cancel(true);
         }
         super.HandleCloseCircuit();
     }
 
-    public void OnMyAvatarCreated(SLObjectAvatarInfo sLObjectAvatarInfo) {
-        if (this.agentVisualParams != null) {
-            sLObjectAvatarInfo.ApplyAvatarVisualParams(this.agentVisualParams);
+    public void OnMyAvatarCreated(SLObjectAvatarInfo slobjectavatarinfo)
+    {
+        if (agentVisualParams != null)
+        {
+            slobjectavatarinfo.ApplyAvatarVisualParams(agentVisualParams);
         }
     }
 
-    public void SendAgentWearablesRequest() {
-        AgentWearablesRequest agentWearablesRequest = new AgentWearablesRequest();
-        agentWearablesRequest.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        agentWearablesRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        agentWearablesRequest.isReliable = true;
-        SendMessage(agentWearablesRequest);
+    public void SendAgentWearablesRequest()
+    {
+        AgentWearablesRequest agentwearablesrequest = new AgentWearablesRequest();
+        agentwearablesrequest.AgentData_Field.AgentID = circuitInfo.agentID;
+        agentwearablesrequest.AgentData_Field.SessionID = circuitInfo.sessionID;
+        agentwearablesrequest.isReliable = true;
+        SendMessage(agentwearablesrequest);
     }
 
-    public void TakeItemOff(SLInventoryEntry sLInventoryEntry) {
-        InventoryDB inventoryDB = null;
-        if (this.userManager != null) {
-            inventoryDB = this.userManager.getInventoryManager().getDatabase();
+    public void TakeItemOff(SLInventoryEntry slinventoryentry)
+    {
+        InventoryDB inventorydb = null;
+        if (userManager != null)
+        {
+            inventorydb = userManager.getInventoryManager().getDatabase();
         }
-        if (inventoryDB != null) {
-            sLInventoryEntry = inventoryDB.resolveLink(sLInventoryEntry);
+        SLInventoryEntry slinventoryentry1 = slinventoryentry;
+        if (inventorydb != null)
+        {
+            slinventoryentry1 = inventorydb.resolveLink(slinventoryentry);
         }
-        if (sLInventoryEntry != null) {
-            TakeItemOff(sLInventoryEntry.assetUUID);
+        if (slinventoryentry1 != null)
+        {
+            TakeItemOff(slinventoryentry1.assetUUID);
         }
     }
 
-    public void TakeItemOff(UUID uuid) {
-        boolean z;
-        RLVController rLVController = this.agentCircuit.getModules().rlvController;
-        HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables);
-        SLWearableType[] values = SLWearableType.values();
-        int length = values.length;
+    public void TakeItemOff(UUID uuid)
+    {
+        RLVController rlvcontroller = agentCircuit.getModules().rlvController;
+        HashBasedTable hashbasedtable = HashBasedTable.create(wornWearables);
+        SLWearableType aslwearabletype[] = SLWearableType.values();
+        int j = aslwearabletype.length;
         int i = 0;
-        boolean z2 = false;
-        while (i < length) {
-            SLWearableType sLWearableType = values[i];
-            if (!rLVController.canTakeItemOff(sLWearableType)) {
-                z = z2;
-            } else {
-                SLWearable remove = create.remove(sLWearableType, uuid);
-                if (remove != null) {
-                    remove.dispose();
-                    create.columnKeySet().remove(uuid);
-                    z = true;
-                } else {
-                    z = z2;
+        boolean flag = false;
+        while (i < j) 
+        {
+            Object obj = aslwearabletype[i];
+            if (rlvcontroller.canTakeItemOff(((SLWearableType) (obj))))
+            {
+                obj = (SLWearable)hashbasedtable.remove(obj, uuid);
+                if (obj != null)
+                {
+                    ((SLWearable) (obj)).dispose();
+                    hashbasedtable.columnKeySet().remove(uuid);
+                    flag = true;
                 }
             }
             i++;
-            z2 = z;
         }
-        if (z2) {
-            this.wornWearables = ImmutableTable.copyOf(create);
-            this.userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, this.wornWearables);
-            this.userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
+        if (flag)
+        {
+            wornWearables = ImmutableTable.copyOf(hashbasedtable);
+            userManager.getWornWearablesPool().setData(SubscriptionSingleKey.Value, wornWearables);
+            userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
             SendAgentIsNowWearing();
             ForceUpdateAppearance(false);
         }
     }
 
-    public void UpdateMyAttachments() {
-        SLObjectAvatarInfo agentAvatar;
-        HashMap hashMap = new HashMap();
-        if (!(this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null)) {
-            try {
-                for (SLObjectInfo next : agentAvatar.treeNode) {
-                    if (next.attachedToUUID != null && (!next.isDead)) {
-                        hashMap.put(next.attachedToUUID, Strings.nullToEmpty(next.getName()));
-                    }
+    public void UpdateMyAttachments()
+    {
+        Object obj = new HashMap();
+        if (parcelInfo != null)
+        {
+            Object obj1 = parcelInfo.getAgentAvatar();
+            if (obj1 != null)
+            {
+                try
+                {
+                    obj1 = ((SLObjectInfo) (obj1)).treeNode.iterator();
+                    do
+                    {
+                        if (!((Iterator) (obj1)).hasNext())
+                        {
+                            break;
+                        }
+                        SLObjectInfo slobjectinfo = (SLObjectInfo)((Iterator) (obj1)).next();
+                        if (slobjectinfo.attachedToUUID != null && slobjectinfo.isDead ^ true)
+                        {
+                            ((Map) (obj)).put(slobjectinfo.attachedToUUID, Strings.nullToEmpty(slobjectinfo.getName()));
+                        }
+                    } while (true);
                 }
-            } catch (NoSuchElementException e) {
-                e.printStackTrace();
+                catch (NoSuchElementException nosuchelementexception)
+                {
+                    nosuchelementexception.printStackTrace();
+                }
             }
         }
-        ImmutableMap<UUID, String> copyOf = ImmutableMap.copyOf(hashMap);
-        if (!this.wornAttachments.equals(copyOf)) {
+        obj = ImmutableMap.copyOf(((Map) (obj)));
+        if (!wornAttachments.equals(obj))
+        {
             Debug.Log("AvatarAppearance: attachments changed.");
-            this.wornAttachments = copyOf;
-            this.userManager.getWornAttachmentsPool().setData(SubscriptionSingleKey.Value, this.wornAttachments);
-            this.userManager.getObjectsManager().myAvatarState().requestUpdate(SubscriptionSingleKey.Value);
-            this.userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
+            wornAttachments = ((ImmutableMap) (obj));
+            userManager.getWornAttachmentsPool().setData(SubscriptionSingleKey.Value, wornAttachments);
+            userManager.getObjectsManager().myAvatarState().requestUpdate(SubscriptionSingleKey.Value);
+            userManager.wornItems().requestUpdate(SubscriptionSingleKey.Value);
         }
     }
 
-    public void WearItem(SLInventoryEntry sLInventoryEntry, boolean z) {
-        InventoryDB inventoryDB = null;
-        if (this.userManager != null) {
-            inventoryDB = this.userManager.getInventoryManager().getDatabase();
+    public void WearItem(SLInventoryEntry slinventoryentry, boolean flag)
+    {
+        InventoryDB inventorydb = null;
+        if (userManager != null)
+        {
+            inventorydb = userManager.getInventoryManager().getDatabase();
         }
-        if (inventoryDB != null) {
-            WearItemList(inventoryDB, ImmutableList.of(sLInventoryEntry), z);
+        if (inventorydb != null)
+        {
+            WearItemList(inventorydb, ImmutableList.of(slinventoryentry), flag);
             SendAgentIsNowWearing();
             ForceUpdateAppearance(false);
         }
     }
 
-    public boolean canDetachItem(SLInventoryEntry sLInventoryEntry) {
-        if (sLInventoryEntry.assetType == SLAssetType.AT_LINK.getTypeCode()) {
-            if (sLInventoryEntry.invType == SLInventoryType.IT_WEARABLE.getTypeCode()) {
+    public boolean canDetachItem(SLInventoryEntry slinventoryentry)
+    {
+        if (slinventoryentry.assetType == SLAssetType.AT_LINK.getTypeCode())
+        {
+            if (slinventoryentry.invType == SLInventoryType.IT_WEARABLE.getTypeCode())
+            {
                 return true;
             }
-            if (sLInventoryEntry.invType == SLInventoryType.IT_OBJECT.getTypeCode() && this.wornAttachments.containsKey(sLInventoryEntry.assetUUID)) {
-                return canDetachItem(sLInventoryEntry.assetUUID);
+            if (slinventoryentry.invType == SLInventoryType.IT_OBJECT.getTypeCode() && wornAttachments.containsKey(slinventoryentry.assetUUID))
+            {
+                return canDetachItem(slinventoryentry.assetUUID);
             }
-        } else if (sLInventoryEntry.assetType == SLAssetType.AT_BODYPART.getTypeCode() || sLInventoryEntry.assetType == SLAssetType.AT_CLOTHING.getTypeCode()) {
-            return true;
-        } else {
-            if (sLInventoryEntry.assetType == SLAssetType.AT_OBJECT.getTypeCode()) {
-                if (!this.wornAttachments.containsKey(sLInventoryEntry.uuid) || canDetachItem(sLInventoryEntry.uuid)) {
-                    return !this.wornAttachments.containsKey(sLInventoryEntry.assetUUID) || canDetachItem(sLInventoryEntry.assetUUID);
+        } else
+        {
+            if (slinventoryentry.assetType == SLAssetType.AT_BODYPART.getTypeCode() || slinventoryentry.assetType == SLAssetType.AT_CLOTHING.getTypeCode())
+            {
+                return true;
+            }
+            if (slinventoryentry.assetType == SLAssetType.AT_OBJECT.getTypeCode())
+            {
+                if (wornAttachments.containsKey(slinventoryentry.uuid) && !canDetachItem(slinventoryentry.uuid))
+                {
+                    return false;
                 }
-                return false;
+                return !wornAttachments.containsKey(slinventoryentry.assetUUID) || canDetachItem(slinventoryentry.assetUUID);
             }
         }
         return false;
     }
 
-    public boolean canDetachItem(WornItem wornItem) {
-        return this.agentCircuit.getModules().rlvController.canDetachItem(wornItem.getAttachedTo(), wornItem.itemID());
+    public boolean canDetachItem(WornItem wornitem)
+    {
+        return agentCircuit.getModules().rlvController.canDetachItem(wornitem.getAttachedTo(), wornitem.itemID());
     }
 
-    public boolean canTakeItemOff(SLWearableType sLWearableType) {
-        return this.agentCircuit.getModules().rlvController.canTakeItemOff(sLWearableType);
+    public boolean canTakeItemOff(SLWearableType slwearabletype)
+    {
+        return agentCircuit.getModules().rlvController.canTakeItemOff(slwearabletype);
     }
 
-    public boolean canTakeItemOff(SLInventoryEntry sLInventoryEntry) {
-        Object whatIsItemWornOn = sLInventoryEntry.whatIsItemWornOn(this.wornAttachments, this.wornWearables, false);
-        if (whatIsItemWornOn == null) {
-            return true;
-        }
-        RLVController rLVController = this.agentCircuit.getModules().rlvController;
-        if (whatIsItemWornOn instanceof SLWearableType) {
-            return rLVController.canTakeItemOff((SLWearableType) whatIsItemWornOn);
+    public boolean canTakeItemOff(SLInventoryEntry slinventoryentry)
+    {
+        slinventoryentry = ((SLInventoryEntry) (slinventoryentry.whatIsItemWornOn(wornAttachments, wornWearables, false)));
+        if (slinventoryentry != null)
+        {
+            RLVController rlvcontroller = agentCircuit.getModules().rlvController;
+            if (slinventoryentry instanceof SLWearableType)
+            {
+                return rlvcontroller.canTakeItemOff((SLWearableType)slinventoryentry);
+            }
         }
         return true;
     }
 
-    public boolean canWearItem(SLInventoryEntry sLInventoryEntry) {
-        InventoryDB inventoryDB = null;
-        if (this.userManager != null) {
-            inventoryDB = this.userManager.getInventoryManager().getDatabase();
+    public boolean canWearItem(SLInventoryEntry slinventoryentry)
+    {
+        InventoryDB inventorydb = null;
+        if (userManager != null)
+        {
+            inventorydb = userManager.getInventoryManager().getDatabase();
         }
-        if (inventoryDB != null) {
-            sLInventoryEntry = inventoryDB.resolveLink(sLInventoryEntry);
+        SLInventoryEntry slinventoryentry1 = slinventoryentry;
+        if (inventorydb != null)
+        {
+            slinventoryentry1 = inventorydb.resolveLink(slinventoryentry);
         }
-        if (sLInventoryEntry == null) {
+        if (slinventoryentry1 == null)
+        {
             return false;
         }
-        SLWearableType byCode = SLWearableType.getByCode(sLInventoryEntry.flags & 255);
-        return byCode == null || canWearItem(byCode);
+        slinventoryentry = SLWearableType.getByCode(slinventoryentry1.flags & 0xff);
+        return slinventoryentry == null || canWearItem(((SLWearableType) (slinventoryentry)));
     }
 
-    public void finishBaking(BakeProcess bakeProcess2, SLTextureEntry sLTextureEntry) {
-        if (sLTextureEntry != null) {
-            this.agentBakedTextures = sLTextureEntry;
+    public void finishBaking(BakeProcess bakeprocess, SLTextureEntry sltextureentry)
+    {
+        if (sltextureentry != null)
+        {
+            agentBakedTextures = sltextureentry;
             SendAvatarSetAppearance();
         }
-        if (this.bakeProcess == bakeProcess2) {
-            this.bakeProcess = null;
+        if (bakeProcess == bakeprocess)
+        {
+            bakeProcess = null;
         }
     }
 
-    public UUID getAttachmentUUID(int i) {
-        SLObjectAvatarInfo agentAvatar;
-        if (!(this.parcelInfo == null || (agentAvatar = this.parcelInfo.getAgentAvatar()) == null)) {
-            try {
-                for (SLObjectInfo next : agentAvatar.treeNode) {
-                    if (next.attachedToUUID != null && (!next.isDead) && next.attachmentID == i) {
-                        return next.getId();
-                    }
-                }
-            } catch (NoSuchElementException e) {
-                Debug.Warning(e);
-            }
+    public UUID getAttachmentUUID(int i)
+    {
+        Object obj;
+        if (parcelInfo == null)
+        {
+            break MISSING_BLOCK_LABEL_84;
         }
+        obj = parcelInfo.getAgentAvatar();
+        if (obj == null)
+        {
+            break MISSING_BLOCK_LABEL_84;
+        }
+        obj = ((SLObjectInfo) (obj)).treeNode.iterator();
+        SLObjectInfo slobjectinfo;
+        do
+        {
+            if (!((Iterator) (obj)).hasNext())
+            {
+                break MISSING_BLOCK_LABEL_84;
+            }
+            slobjectinfo = (SLObjectInfo)((Iterator) (obj)).next();
+        } while (slobjectinfo.attachedToUUID == null || !(slobjectinfo.isDead ^ true) || slobjectinfo.attachmentID != i);
+        obj = slobjectinfo.getId();
+        return ((UUID) (obj));
+        NoSuchElementException nosuchelementexception;
+        nosuchelementexception;
+        Debug.Warning(nosuchelementexception);
         return null;
     }
 
-    public boolean hasWornWearable(SLWearableType sLWearableType) {
-        return this.wornWearables.containsRow(sLWearableType);
+    public boolean hasWornWearable(SLWearableType slwearabletype)
+    {
+        return wornWearables.containsRow(slwearabletype);
     }
 
-    public boolean isItemWorn(SLInventoryEntry sLInventoryEntry) {
-        return isItemWorn(sLInventoryEntry, false);
+    public boolean isItemWorn(SLInventoryEntry slinventoryentry)
+    {
+        return isItemWorn(slinventoryentry, false);
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void performServerSideAppearanceUpdate(int i, String str) {
-        LLSDXMLRequest lLSDXMLRequest = new LLSDXMLRequest();
-        LLSDMap lLSDMap = new LLSDMap(new LLSDMap.LLSDMapEntry("cof_version", new LLSDInt(i)));
-        int i2 = 3;
-        while (i2 > 0) {
-            try {
-                LLSDNode PerformRequest = lLSDXMLRequest.PerformRequest(str, lLSDMap);
-                if (PerformRequest != null && PerformRequest.keyExists("error")) {
-                    LLSDNode byKey = PerformRequest.byKey("error");
-                    if (byKey.isString()) {
-                        Debug.Printf("AvatarAppearance: server-side error: %s", byKey.asString());
-                    } else {
-                        Debug.Printf("AvatarAppearance: server-side update ok.", new Object[0]);
-                    }
-                }
-                this.lastCofUpdateError = false;
-                return;
-            } catch (Exception e) {
-                Debug.Printf("AvatarAppearance: server-side update error: [exception %s]", e.toString());
-                this.lastCofUpdateError = true;
-                int i3 = i2 - 1;
-                try {
-                    Thread.sleep(1000);
-                    i2 = i3;
-                } catch (InterruptedException e2) {
-                    return;
-                }
-            }
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearance_17963(int i, String s)
+    {
+        LLSDXMLRequest llsdxmlrequest;
+        LLSDMap llsdmap;
+        llsdxmlrequest = new LLSDXMLRequest();
+        llsdmap = new LLSDMap(new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[] {
+            new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry("cof_version", new LLSDInt(i))
+        });
+        i = 3;
+_L4:
+        if (i <= 0)
+        {
+            break; /* Loop/switch isn't completed */
         }
+        LLSDNode llsdnode;
+        try
+        {
+            llsdnode = llsdxmlrequest.PerformRequest(s, llsdmap);
+        }
+        catch (Exception exception)
+        {
+            Debug.Printf("AvatarAppearance: server-side update error: [exception %s]", new Object[] {
+                exception.toString()
+            });
+            lastCofUpdateError = true;
+            try
+            {
+                Thread.sleep(1000L);
+            }
+            // Misplaced declaration of an exception variable
+            catch (String s)
+            {
+                break; /* Loop/switch isn't completed */
+            }
+            i--;
+            continue; /* Loop/switch isn't completed */
+        }
+        if (llsdnode == null)
+        {
+            break MISSING_BLOCK_LABEL_109;
+        }
+        if (llsdnode.keyExists("error"))
+        {
+            llsdnode = llsdnode.byKey("error");
+            if (!llsdnode.isString())
+            {
+                break MISSING_BLOCK_LABEL_115;
+            }
+            Debug.Printf("AvatarAppearance: server-side error: %s", new Object[] {
+                llsdnode.asString()
+            });
+        }
+_L2:
+        lastCofUpdateError = false;
+        return;
+        Debug.Printf("AvatarAppearance: server-side update ok.", new Object[0]);
+        if (true) goto _L2; else goto _L1
+_L1:
+        if (true) goto _L4; else goto _L3
+_L3:
     }
 
-    public void onWearableStatusChanged(SLWearable sLWearable) {
+    public void onWearableStatusChanged(SLWearable slwearable)
+    {
         updateIfWearablesReady();
     }
 }

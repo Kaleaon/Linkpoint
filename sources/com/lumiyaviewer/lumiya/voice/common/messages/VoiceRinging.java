@@ -1,61 +1,83 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.voice.common.messages;
 
 import android.net.Uri;
 import android.os.Bundle;
-import com.lumiyaviewer.lumiya.BuildConfig;
 import com.lumiyaviewer.lumiya.voice.common.VoicePluginMessage;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChannelInfo;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class VoiceRinging implements VoicePluginMessage {
-    @Nullable
+public class VoiceRinging
+    implements VoicePluginMessage
+{
+
     public final UUID agentUUID;
-    @Nonnull
     public final String sessionHandle;
     public final VoiceChannelInfo voiceChannelInfo;
 
-    public VoiceRinging(Uri uri) {
+    public VoiceRinging(Uri uri)
+    {
         UUID uuid = null;
-        this.sessionHandle = uri.getQueryParameter("sessionHandle");
-        String queryParameter = uri.getQueryParameter("agentUUID");
-        this.agentUUID = queryParameter != null ? UUID.fromString(queryParameter) : uuid;
-        this.voiceChannelInfo = new VoiceChannelInfo(uri);
-    }
-
-    public VoiceRinging(Bundle bundle) {
-        UUID uuid = null;
-        this.sessionHandle = bundle.getString("sessionHandle");
-        this.voiceChannelInfo = new VoiceChannelInfo(bundle.getBundle("voiceChannelInfo"));
-        String string = bundle.getString("agentUUID");
-        this.agentUUID = string != null ? UUID.fromString(string) : uuid;
-    }
-
-    public VoiceRinging(@Nonnull String str, VoiceChannelInfo voiceChannelInfo2, @Nullable UUID uuid) {
-        this.sessionHandle = str;
-        this.voiceChannelInfo = voiceChannelInfo2;
-        this.agentUUID = uuid;
-    }
-
-    public Bundle toBundle() {
-        String str = null;
-        Bundle bundle = new Bundle();
-        bundle.putString("sessionHandle", this.sessionHandle);
-        bundle.putBundle("voiceChannelInfo", this.voiceChannelInfo.toBundle());
-        if (this.agentUUID != null) {
-            str = this.agentUUID.toString();
+        super();
+        sessionHandle = uri.getQueryParameter("sessionHandle");
+        String s = uri.getQueryParameter("agentUUID");
+        if (s != null)
+        {
+            uuid = UUID.fromString(s);
         }
-        bundle.putString("agentUUID", str);
+        agentUUID = uuid;
+        voiceChannelInfo = new VoiceChannelInfo(uri);
+    }
+
+    public VoiceRinging(Bundle bundle)
+    {
+        Object obj = null;
+        super();
+        sessionHandle = bundle.getString("sessionHandle");
+        voiceChannelInfo = new VoiceChannelInfo(bundle.getBundle("voiceChannelInfo"));
+        bundle = bundle.getString("agentUUID");
+        if (bundle == null)
+        {
+            bundle = obj;
+        } else
+        {
+            bundle = UUID.fromString(bundle);
+        }
+        agentUUID = bundle;
+    }
+
+    public VoiceRinging(String s, VoiceChannelInfo voicechannelinfo, UUID uuid)
+    {
+        sessionHandle = s;
+        voiceChannelInfo = voicechannelinfo;
+        agentUUID = uuid;
+    }
+
+    public Bundle toBundle()
+    {
+        String s = null;
+        Bundle bundle = new Bundle();
+        bundle.putString("sessionHandle", sessionHandle);
+        bundle.putBundle("voiceChannelInfo", voiceChannelInfo.toBundle());
+        if (agentUUID != null)
+        {
+            s = agentUUID.toString();
+        }
+        bundle.putString("agentUUID", s);
         return bundle;
     }
 
-    public Uri toUri() {
-        Uri.Builder appendQueryParameter = new Uri.Builder().scheme(BuildConfig.APPLICATION_ID).authority("voice").appendQueryParameter("sessionHandle", this.sessionHandle);
-        if (this.agentUUID != null) {
-            appendQueryParameter.appendQueryParameter("agentUUID", this.agentUUID.toString());
+    public Uri toUri()
+    {
+        android.net.Uri.Builder builder = (new android.net.Uri.Builder()).scheme("com.lumiyaviewer.lumiya").authority("voice").appendQueryParameter("sessionHandle", sessionHandle);
+        if (agentUUID != null)
+        {
+            builder.appendQueryParameter("agentUUID", agentUUID.toString());
         }
-        this.voiceChannelInfo.appendToUri(appendQueryParameter);
-        return appendQueryParameter.build();
+        voiceChannelInfo.appendToUri(builder);
+        return builder.build();
     }
 }

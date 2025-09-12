@@ -1,48 +1,69 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class TransferRequest extends SLMessage {
-    public TransferInfo TransferInfo_Field = new TransferInfo();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class TransferInfo {
+public class TransferRequest extends SLMessage
+{
+    public static class TransferInfo
+    {
+
         public int ChannelType;
-        public byte[] Params;
+        public byte Params[];
         public float Priority;
         public int SourceType;
         public UUID TransferID;
+
+        public TransferInfo()
+        {
+        }
     }
 
-    public TransferRequest() {
-        this.zeroCoded = true;
+
+    public TransferInfo TransferInfo_Field;
+
+    public TransferRequest()
+    {
+        zeroCoded = true;
+        TransferInfo_Field = new TransferInfo();
     }
 
-    public int CalcPayloadSize() {
-        return this.TransferInfo_Field.Params.length + 30 + 4;
+    public int CalcPayloadSize()
+    {
+        return TransferInfo_Field.Params.length + 30 + 4;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleTransferRequest(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleTransferRequest(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -103);
-        packUUID(byteBuffer, this.TransferInfo_Field.TransferID);
-        packInt(byteBuffer, this.TransferInfo_Field.ChannelType);
-        packInt(byteBuffer, this.TransferInfo_Field.SourceType);
-        packFloat(byteBuffer, this.TransferInfo_Field.Priority);
-        packVariable(byteBuffer, this.TransferInfo_Field.Params, 2);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-103);
+        packUUID(bytebuffer, TransferInfo_Field.TransferID);
+        packInt(bytebuffer, TransferInfo_Field.ChannelType);
+        packInt(bytebuffer, TransferInfo_Field.SourceType);
+        packFloat(bytebuffer, TransferInfo_Field.Priority);
+        packVariable(bytebuffer, TransferInfo_Field.Params, 2);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.TransferInfo_Field.TransferID = unpackUUID(byteBuffer);
-        this.TransferInfo_Field.ChannelType = unpackInt(byteBuffer);
-        this.TransferInfo_Field.SourceType = unpackInt(byteBuffer);
-        this.TransferInfo_Field.Priority = unpackFloat(byteBuffer);
-        this.TransferInfo_Field.Params = unpackVariable(byteBuffer, 2);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        TransferInfo_Field.TransferID = unpackUUID(bytebuffer);
+        TransferInfo_Field.ChannelType = unpackInt(bytebuffer);
+        TransferInfo_Field.SourceType = unpackInt(bytebuffer);
+        TransferInfo_Field.Priority = unpackFloat(bytebuffer);
+        TransferInfo_Field.Params = unpackVariable(bytebuffer, 2);
     }
 }

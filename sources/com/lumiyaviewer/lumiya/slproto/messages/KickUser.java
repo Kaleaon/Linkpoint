@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
@@ -5,49 +9,73 @@ import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class KickUser extends SLMessage {
-    public TargetBlock TargetBlock_Field = new TargetBlock();
-    public UserInfo UserInfo_Field = new UserInfo();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class TargetBlock {
+public class KickUser extends SLMessage
+{
+    public static class TargetBlock
+    {
+
         public Inet4Address TargetIP;
         public int TargetPort;
+
+        public TargetBlock()
+        {
+        }
     }
 
-    public static class UserInfo {
+    public static class UserInfo
+    {
+
         public UUID AgentID;
-        public byte[] Reason;
+        public byte Reason[];
         public UUID SessionID;
+
+        public UserInfo()
+        {
+        }
     }
 
-    public KickUser() {
-        this.zeroCoded = false;
+
+    public TargetBlock TargetBlock_Field;
+    public UserInfo UserInfo_Field;
+
+    public KickUser()
+    {
+        zeroCoded = false;
+        TargetBlock_Field = new TargetBlock();
+        UserInfo_Field = new UserInfo();
     }
 
-    public int CalcPayloadSize() {
-        return this.UserInfo_Field.Reason.length + 34 + 10;
+    public int CalcPayloadSize()
+    {
+        return UserInfo_Field.Reason.length + 34 + 10;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleKickUser(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleKickUser(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -93);
-        packIPAddress(byteBuffer, this.TargetBlock_Field.TargetIP);
-        packShort(byteBuffer, (short) this.TargetBlock_Field.TargetPort);
-        packUUID(byteBuffer, this.UserInfo_Field.AgentID);
-        packUUID(byteBuffer, this.UserInfo_Field.SessionID);
-        packVariable(byteBuffer, this.UserInfo_Field.Reason, 2);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-93);
+        packIPAddress(bytebuffer, TargetBlock_Field.TargetIP);
+        packShort(bytebuffer, (short)TargetBlock_Field.TargetPort);
+        packUUID(bytebuffer, UserInfo_Field.AgentID);
+        packUUID(bytebuffer, UserInfo_Field.SessionID);
+        packVariable(bytebuffer, UserInfo_Field.Reason, 2);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.TargetBlock_Field.TargetIP = unpackIPAddress(byteBuffer);
-        this.TargetBlock_Field.TargetPort = unpackShort(byteBuffer) & 65535;
-        this.UserInfo_Field.AgentID = unpackUUID(byteBuffer);
-        this.UserInfo_Field.SessionID = unpackUUID(byteBuffer);
-        this.UserInfo_Field.Reason = unpackVariable(byteBuffer, 2);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        TargetBlock_Field.TargetIP = unpackIPAddress(bytebuffer);
+        TargetBlock_Field.TargetPort = unpackShort(bytebuffer) & 0xffff;
+        UserInfo_Field.AgentID = unpackUUID(bytebuffer);
+        UserInfo_Field.SessionID = unpackUUID(bytebuffer);
+        UserInfo_Field.Reason = unpackVariable(bytebuffer, 2);
     }
 }

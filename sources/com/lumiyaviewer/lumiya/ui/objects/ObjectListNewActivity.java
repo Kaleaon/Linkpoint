@@ -1,65 +1,95 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.objects;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.ui.chat.profiles.UserProfileFragment;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory;
 import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
 
-public class ObjectListNewActivity extends MasterDetailsActivity {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.objects:
+//            ObjectSelectorFragment, ObjectDetailsFragment
 
-    public static class ObjectDetailsActivityFactory implements FragmentActivityFactory {
+public class ObjectListNewActivity extends MasterDetailsActivity
+{
+    public static class ObjectDetailsActivityFactory
+        implements FragmentActivityFactory
+    {
 
-        private static class InstanceHolder {
-            /* access modifiers changed from: private */
-            public static final ObjectDetailsActivityFactory Instance = new ObjectDetailsActivityFactory();
-
-            private InstanceHolder() {
-            }
+        public static ObjectDetailsActivityFactory getInstance()
+        {
+            return InstanceHolder._2D_get0();
         }
 
-        public static ObjectDetailsActivityFactory getInstance() {
-            return InstanceHolder.Instance;
+        public Intent createIntent(Context context, Bundle bundle)
+        {
+            context = new Intent(context, com/lumiyaviewer/lumiya/ui/objects/ObjectListNewActivity);
+            context.putExtra("selection", bundle);
+            ActivityUtils.setActiveAgentID(context, ActivityUtils.getActiveAgentID(bundle));
+            return context;
         }
 
-        public Intent createIntent(Context context, Bundle bundle) {
-            Intent intent = new Intent(context, ObjectListNewActivity.class);
-            intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, bundle);
-            ActivityUtils.setActiveAgentID(intent, ActivityUtils.getActiveAgentID(bundle));
-            return intent;
+        public Class getFragmentClass()
+        {
+            return com/lumiyaviewer/lumiya/ui/objects/ObjectDetailsFragment;
         }
 
-        public Class<? extends Fragment> getFragmentClass() {
-            return ObjectDetailsFragment.class;
+        public ObjectDetailsActivityFactory()
+        {
         }
     }
 
-    /* access modifiers changed from: protected */
-    public FragmentActivityFactory getDetailsFragmentFactory() {
+    private static class ObjectDetailsActivityFactory.InstanceHolder
+    {
+
+        private static final ObjectDetailsActivityFactory Instance = new ObjectDetailsActivityFactory();
+
+        static ObjectDetailsActivityFactory _2D_get0()
+        {
+            return Instance;
+        }
+
+
+        private ObjectDetailsActivityFactory.InstanceHolder()
+        {
+        }
+    }
+
+
+    public ObjectListNewActivity()
+    {
+    }
+
+    protected FragmentActivityFactory getDetailsFragmentFactory()
+    {
         return ObjectDetailsActivityFactory.getInstance();
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isRootDetailsFragment(Class<? extends Fragment> cls) {
-        if (cls != UserProfileFragment.class) {
-            return super.isRootDetailsFragment(cls);
+    protected boolean isRootDetailsFragment(Class class1)
+    {
+        if (class1 != com/lumiyaviewer/lumiya/ui/chat/profiles/UserProfileFragment)
+        {
+            return super.isRootDetailsFragment(class1);
+        } else
+        {
+            return true;
         }
-        return true;
     }
 
-    /* access modifiers changed from: protected */
-    public void onCreate(@Nullable Bundle bundle) {
+    protected void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
-        setDefaultTitle(getString(R.string.objects_activity_caption), (String) null);
+        setDefaultTitle(getString(0x7f09024b), null);
     }
 
-    /* access modifiers changed from: protected */
-    public Fragment onCreateMasterFragment(Intent intent, @Nullable Bundle bundle) {
-        return ObjectSelectorFragment.newInstance(ActivityUtils.makeFragmentArguments(ActivityUtils.getActiveAgentID(intent), (Bundle) null));
+    protected Fragment onCreateMasterFragment(Intent intent, Bundle bundle)
+    {
+        return ObjectSelectorFragment.newInstance(ActivityUtils.makeFragmentArguments(ActivityUtils.getActiveAgentID(intent), null));
     }
 }

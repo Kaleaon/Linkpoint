@@ -1,7 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.UiThread;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -9,50 +11,83 @@ import android.widget.TextView;
 import butterknife.Unbinder;
 import butterknife.internal.DebouncingOnClickListener;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
 
-public class GroupNoticeFragment_ViewBinding implements Unbinder {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat:
+//            GroupNoticeFragment
+
+public class GroupNoticeFragment_ViewBinding
+    implements Unbinder
+{
+
     private GroupNoticeFragment target;
     private View view2131755383;
     private View view2131755385;
 
-    @UiThread
-    public GroupNoticeFragment_ViewBinding(final GroupNoticeFragment groupNoticeFragment, View view) {
-        this.target = groupNoticeFragment;
-        View findRequiredView = Utils.findRequiredView(view, R.id.groupNoticeAttachmentButton, "field 'groupNoticeAttachmentButton' and method 'onGroupNoticeAttachmentButton'");
-        groupNoticeFragment.groupNoticeAttachmentButton = (Button) Utils.castView(findRequiredView, R.id.groupNoticeAttachmentButton, "field 'groupNoticeAttachmentButton'", Button.class);
-        this.view2131755383 = findRequiredView;
-        findRequiredView.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                groupNoticeFragment.onGroupNoticeAttachmentButton();
+    public GroupNoticeFragment_ViewBinding(final GroupNoticeFragment target, View view)
+    {
+        this.target = target;
+        View view1 = Utils.findRequiredView(view, 0x7f100177, "field 'groupNoticeAttachmentButton' and method 'onGroupNoticeAttachmentButton'");
+        target.groupNoticeAttachmentButton = (Button)Utils.castView(view1, 0x7f100177, "field 'groupNoticeAttachmentButton'", android/widget/Button);
+        view2131755383 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final GroupNoticeFragment_ViewBinding this$0;
+            final GroupNoticeFragment val$target;
+
+            public void doClick(View view2)
+            {
+                target.onGroupNoticeAttachmentButton();
+            }
+
+            
+            {
+                this$0 = GroupNoticeFragment_ViewBinding.this;
+                target = groupnoticefragment;
+                super();
             }
         });
-        groupNoticeFragment.groupNoticeAttachmentText = (TextView) Utils.findRequiredViewAsType(view, R.id.groupNoticeAttachmentText, "field 'groupNoticeAttachmentText'", TextView.class);
-        groupNoticeFragment.groupNoticeSubject = (EditText) Utils.findRequiredViewAsType(view, R.id.groupNoticeSubject, "field 'groupNoticeSubject'", EditText.class);
-        groupNoticeFragment.groupNoticeEditText = (EditText) Utils.findRequiredViewAsType(view, R.id.groupNoticeEditText, "field 'groupNoticeEditText'", EditText.class);
-        View findRequiredView2 = Utils.findRequiredView(view, R.id.groupNoticeSendButton, "method 'onGroupNoticeSendButton'");
-        this.view2131755385 = findRequiredView2;
-        findRequiredView2.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                groupNoticeFragment.onGroupNoticeSendButton();
+        target.groupNoticeAttachmentText = (TextView)Utils.findRequiredViewAsType(view, 0x7f100176, "field 'groupNoticeAttachmentText'", android/widget/TextView);
+        target.groupNoticeSubject = (EditText)Utils.findRequiredViewAsType(view, 0x7f100175, "field 'groupNoticeSubject'", android/widget/EditText);
+        target.groupNoticeEditText = (EditText)Utils.findRequiredViewAsType(view, 0x7f100178, "field 'groupNoticeEditText'", android/widget/EditText);
+        view = Utils.findRequiredView(view, 0x7f100179, "method 'onGroupNoticeSendButton'");
+        view2131755385 = view;
+        view.setOnClickListener(new DebouncingOnClickListener() {
+
+            final GroupNoticeFragment_ViewBinding this$0;
+            final GroupNoticeFragment val$target;
+
+            public void doClick(View view2)
+            {
+                target.onGroupNoticeSendButton();
+            }
+
+            
+            {
+                this$0 = GroupNoticeFragment_ViewBinding.this;
+                target = groupnoticefragment;
+                super();
             }
         });
     }
 
-    @CallSuper
-    public void unbind() {
-        GroupNoticeFragment groupNoticeFragment = this.target;
-        if (groupNoticeFragment == null) {
+    public void unbind()
+    {
+        GroupNoticeFragment groupnoticefragment = target;
+        if (groupnoticefragment == null)
+        {
             throw new IllegalStateException("Bindings already cleared.");
+        } else
+        {
+            target = null;
+            groupnoticefragment.groupNoticeAttachmentButton = null;
+            groupnoticefragment.groupNoticeAttachmentText = null;
+            groupnoticefragment.groupNoticeSubject = null;
+            groupnoticefragment.groupNoticeEditText = null;
+            view2131755383.setOnClickListener(null);
+            view2131755383 = null;
+            view2131755385.setOnClickListener(null);
+            view2131755385 = null;
+            return;
         }
-        this.target = null;
-        groupNoticeFragment.groupNoticeAttachmentButton = null;
-        groupNoticeFragment.groupNoticeAttachmentText = null;
-        groupNoticeFragment.groupNoticeSubject = null;
-        groupNoticeFragment.groupNoticeEditText = null;
-        this.view2131755383.setOnClickListener((View.OnClickListener) null);
-        this.view2131755383 = null;
-        this.view2131755385.setOnClickListener((View.OnClickListener) null);
-        this.view2131755385 = null;
     }
 }

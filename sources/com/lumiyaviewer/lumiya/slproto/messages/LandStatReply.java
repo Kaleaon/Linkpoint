@@ -1,91 +1,123 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class LandStatReply extends SLMessage {
-    public ArrayList<ReportData> ReportData_Fields = new ArrayList<>();
-    public RequestData RequestData_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class ReportData {
+public class LandStatReply extends SLMessage
+{
+    public static class ReportData
+    {
+
         public float LocationX;
         public float LocationY;
         public float LocationZ;
-        public byte[] OwnerName;
+        public byte OwnerName[];
         public float Score;
         public UUID TaskID;
         public int TaskLocalID;
-        public byte[] TaskName;
+        public byte TaskName[];
+
+        public ReportData()
+        {
+        }
     }
 
-    public static class RequestData {
+    public static class RequestData
+    {
+
         public int ReportType;
         public int RequestFlags;
         public int TotalObjectCount;
-    }
 
-    public LandStatReply() {
-        this.zeroCoded = false;
-        this.RequestData_Field = new RequestData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 17;
-        Iterator<T> it = this.ReportData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            ReportData reportData = (ReportData) it.next();
-            i = reportData.OwnerName.length + reportData.TaskName.length + 37 + 1 + i2;
+        public RequestData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleLandStatReply(this);
+
+    public ArrayList ReportData_Fields;
+    public RequestData RequestData_Field;
+
+    public LandStatReply()
+    {
+        ReportData_Fields = new ArrayList();
+        zeroCoded = false;
+        RequestData_Field = new RequestData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) -90);
-        packInt(byteBuffer, this.RequestData_Field.ReportType);
-        packInt(byteBuffer, this.RequestData_Field.RequestFlags);
-        packInt(byteBuffer, this.RequestData_Field.TotalObjectCount);
-        byteBuffer.put((byte) this.ReportData_Fields.size());
-        for (ReportData reportData : this.ReportData_Fields) {
-            packInt(byteBuffer, reportData.TaskLocalID);
-            packUUID(byteBuffer, reportData.TaskID);
-            packFloat(byteBuffer, reportData.LocationX);
-            packFloat(byteBuffer, reportData.LocationY);
-            packFloat(byteBuffer, reportData.LocationZ);
-            packFloat(byteBuffer, reportData.Score);
-            packVariable(byteBuffer, reportData.TaskName, 1);
-            packVariable(byteBuffer, reportData.OwnerName, 1);
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = ReportData_Fields.iterator();
+        ReportData reportdata;
+        int i;
+        int j;
+        for (i = 17; iterator.hasNext(); i = reportdata.OwnerName.length + (j + 37 + 1) + i)
+        {
+            reportdata = (ReportData)iterator.next();
+            j = reportdata.TaskName.length;
         }
+
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.RequestData_Field.ReportType = unpackInt(byteBuffer);
-        this.RequestData_Field.RequestFlags = unpackInt(byteBuffer);
-        this.RequestData_Field.TotalObjectCount = unpackInt(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            ReportData reportData = new ReportData();
-            reportData.TaskLocalID = unpackInt(byteBuffer);
-            reportData.TaskID = unpackUUID(byteBuffer);
-            reportData.LocationX = unpackFloat(byteBuffer);
-            reportData.LocationY = unpackFloat(byteBuffer);
-            reportData.LocationZ = unpackFloat(byteBuffer);
-            reportData.Score = unpackFloat(byteBuffer);
-            reportData.TaskName = unpackVariable(byteBuffer, 1);
-            reportData.OwnerName = unpackVariable(byteBuffer, 1);
-            this.ReportData_Fields.add(reportData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleLandStatReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)-90);
+        packInt(bytebuffer, RequestData_Field.ReportType);
+        packInt(bytebuffer, RequestData_Field.RequestFlags);
+        packInt(bytebuffer, RequestData_Field.TotalObjectCount);
+        bytebuffer.put((byte)ReportData_Fields.size());
+        ReportData reportdata;
+        for (Iterator iterator = ReportData_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, reportdata.OwnerName, 1))
+        {
+            reportdata = (ReportData)iterator.next();
+            packInt(bytebuffer, reportdata.TaskLocalID);
+            packUUID(bytebuffer, reportdata.TaskID);
+            packFloat(bytebuffer, reportdata.LocationX);
+            packFloat(bytebuffer, reportdata.LocationY);
+            packFloat(bytebuffer, reportdata.LocationZ);
+            packFloat(bytebuffer, reportdata.Score);
+            packVariable(bytebuffer, reportdata.TaskName, 1);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        RequestData_Field.ReportType = unpackInt(bytebuffer);
+        RequestData_Field.RequestFlags = unpackInt(bytebuffer);
+        RequestData_Field.TotalObjectCount = unpackInt(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            ReportData reportdata = new ReportData();
+            reportdata.TaskLocalID = unpackInt(bytebuffer);
+            reportdata.TaskID = unpackUUID(bytebuffer);
+            reportdata.LocationX = unpackFloat(bytebuffer);
+            reportdata.LocationY = unpackFloat(bytebuffer);
+            reportdata.LocationZ = unpackFloat(bytebuffer);
+            reportdata.Score = unpackFloat(bytebuffer);
+            reportdata.TaskName = unpackVariable(bytebuffer, 1);
+            reportdata.OwnerName = unpackVariable(bytebuffer, 1);
+            ReportData_Fields.add(reportdata);
+        }
+
     }
 }

@@ -1,30 +1,38 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.objects;
 
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectDisplayInfo;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class SLAvatarObjectDisplayInfo extends SLObjectDisplayInfo implements SLObjectDisplayInfo.HasChildrenObjects {
-    @Nonnull
-    public final ImmutableList<SLObjectDisplayInfo> children;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.objects:
+//            SLObjectDisplayInfo, SLObjectInfo
+
+public class SLAvatarObjectDisplayInfo extends SLObjectDisplayInfo
+    implements SLObjectDisplayInfo.HasChildrenObjects
+{
+
+    public final ImmutableList children;
     private final boolean implicitlyAdded;
-    @Nonnull
     public final UUID uuid;
 
-    public SLAvatarObjectDisplayInfo(@Nullable String str, SLObjectInfo sLObjectInfo, float f, @Nonnull ImmutableList<SLObjectDisplayInfo> immutableList, boolean z) {
-        super(sLObjectInfo.localID, str, f, sLObjectInfo.hierLevel);
-        this.children = immutableList;
-        this.implicitlyAdded = z;
-        this.uuid = sLObjectInfo.getId();
+    public SLAvatarObjectDisplayInfo(String s, SLObjectInfo slobjectinfo, float f, ImmutableList immutablelist, boolean flag)
+    {
+        super(slobjectinfo.localID, s, f, slobjectinfo.hierLevel);
+        children = immutablelist;
+        implicitlyAdded = flag;
+        uuid = slobjectinfo.getId();
     }
 
-    public ImmutableList<SLObjectDisplayInfo> getChildren() {
-        return this.children;
+    public ImmutableList getChildren()
+    {
+        return children;
     }
 
-    public boolean isImplicitlyAdded() {
-        return this.implicitlyAdded;
+    public boolean isImplicitlyAdded()
+    {
+        return implicitlyAdded;
     }
 }

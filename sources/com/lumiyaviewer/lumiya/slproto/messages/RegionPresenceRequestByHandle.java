@@ -1,45 +1,66 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class RegionPresenceRequestByHandle extends SLMessage {
-    public ArrayList<RegionData> RegionData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class RegionData {
+public class RegionPresenceRequestByHandle extends SLMessage
+{
+    public static class RegionData
+    {
+
         public long RegionHandle;
-    }
 
-    public RegionPresenceRequestByHandle() {
-        this.zeroCoded = false;
-    }
-
-    public int CalcPayloadSize() {
-        return (this.RegionData_Fields.size() * 8) + 5;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleRegionPresenceRequestByHandle(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 15);
-        byteBuffer.put((byte) this.RegionData_Fields.size());
-        for (RegionData regionData : this.RegionData_Fields) {
-            packLong(byteBuffer, regionData.RegionHandle);
+        public RegionData()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            RegionData regionData = new RegionData();
-            regionData.RegionHandle = unpackLong(byteBuffer);
-            this.RegionData_Fields.add(regionData);
+
+    public ArrayList RegionData_Fields;
+
+    public RegionPresenceRequestByHandle()
+    {
+        RegionData_Fields = new ArrayList();
+        zeroCoded = false;
+    }
+
+    public int CalcPayloadSize()
+    {
+        return RegionData_Fields.size() * 8 + 5;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleRegionPresenceRequestByHandle(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)15);
+        bytebuffer.put((byte)RegionData_Fields.size());
+        for (Iterator iterator = RegionData_Fields.iterator(); iterator.hasNext(); packLong(bytebuffer, ((RegionData)iterator.next()).RegionHandle)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            RegionData regiondata = new RegionData();
+            regiondata.RegionHandle = unpackLong(bytebuffer);
+            RegionData_Fields.add(regiondata);
         }
+
     }
 }

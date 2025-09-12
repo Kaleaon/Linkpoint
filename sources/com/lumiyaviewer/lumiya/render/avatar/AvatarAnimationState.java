@@ -1,107 +1,142 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.avatar;
 
-import com.google.common.collect.ImmutableList;
 import com.lumiyaviewer.lumiya.res.ResourceConsumer;
 import com.lumiyaviewer.lumiya.res.anim.AnimationCache;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class AvatarAnimationState implements ResourceConsumer {
-    private volatile AnimationData animationData;
-    @Nullable
-    private volatile AnimationPair animationPair = null;
-    @Nonnull
-    private final WeakReference<DrawableAvatar> drawableAvatar;
-    @Nonnull
-    private volatile AnimationSequenceInfo sequenceInfo;
+// Referenced classes of package com.lumiyaviewer.lumiya.render.avatar:
+//            AnimationSequenceInfo, AnimationData, DrawableAvatar, AvatarRunningSequence
 
-    private static class AnimationPair {
-        @Nullable
+public class AvatarAnimationState
+    implements ResourceConsumer
+{
+    private static class AnimationPair
+    {
+
         final AvatarRunningSequence runningAnimation;
-        @Nullable
         final AvatarRunningSequence stoppingAnimation;
 
-        AnimationPair(@Nonnull AnimationSequenceInfo animationSequenceInfo, @Nonnull AnimationData animationData) {
-            if (animationSequenceInfo.sequenceID != 0) {
-                this.runningAnimation = new AvatarRunningSequence(animationData, animationSequenceInfo.sequenceID, animationSequenceInfo.runningSince, -1, animationSequenceInfo.dontEaseIn);
-            } else {
-                this.runningAnimation = null;
+        void getRunningAnimations(com.google.common.collect.ImmutableList.Builder builder, Collection collection)
+        {
+            if (runningAnimation != null)
+            {
+                builder.add(runningAnimation);
+                runningAnimation.getRunningAnimations(collection);
             }
-            if (animationSequenceInfo.stoppingSequenceID != 0) {
-                this.stoppingAnimation = new AvatarRunningSequence(animationData, animationSequenceInfo.stoppingSequenceID, animationSequenceInfo.stoppingRunningSince, animationSequenceInfo.stoppingEasingOutSince, animationSequenceInfo.dontEaseIn);
-                return;
-            }
-            this.stoppingAnimation = null;
-        }
-
-        /* access modifiers changed from: package-private */
-        public void getRunningAnimations(ImmutableList.Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection) {
-            if (this.runningAnimation != null) {
-                builder.add((Object) this.runningAnimation);
-                this.runningAnimation.getRunningAnimations(collection);
-            }
-            if (this.stoppingAnimation != null) {
-                builder.add((Object) this.stoppingAnimation);
-                this.stoppingAnimation.getRunningAnimations(collection);
+            if (stoppingAnimation != null)
+            {
+                builder.add(stoppingAnimation);
+                stoppingAnimation.getRunningAnimations(collection);
             }
         }
 
-        /* access modifiers changed from: package-private */
-        public boolean hasStopped() {
-            if (this.runningAnimation != null) {
+        boolean hasStopped()
+        {
+            if (runningAnimation != null)
+            {
                 return false;
             }
-            if (this.stoppingAnimation != null) {
-                return this.stoppingAnimation.hasStopped();
+            if (stoppingAnimation != null)
+            {
+                return stoppingAnimation.hasStopped();
+            } else
+            {
+                return true;
             }
-            return true;
         }
-    }
 
-    AvatarAnimationState(@Nonnull AnimationSequenceInfo animationSequenceInfo, @Nonnull DrawableAvatar drawableAvatar2) {
-        this.sequenceInfo = animationSequenceInfo;
-        this.drawableAvatar = new WeakReference<>(drawableAvatar2);
-        AnimationCache.getInstance().RequestResource(animationSequenceInfo.animationID, this);
-    }
-
-    public void OnResourceReady(Object obj, boolean z) {
-        if (obj instanceof AnimationData) {
-            this.animationData = (AnimationData) obj;
-            DrawableAvatar drawableAvatar2 = (DrawableAvatar) this.drawableAvatar.get();
-            if (drawableAvatar2 != null) {
-                drawableAvatar2.updateRunningAnimations();
+        AnimationPair(AnimationSequenceInfo animationsequenceinfo, AnimationData animationdata)
+        {
+            if (animationsequenceinfo.sequenceID != 0)
+            {
+                runningAnimation = new AvatarRunningSequence(animationdata, animationsequenceinfo.sequenceID, animationsequenceinfo.runningSince, -1L, animationsequenceinfo.dontEaseIn);
+            } else
+            {
+                runningAnimation = null;
             }
-        } else if (obj == null) {
-            this.animationData = null;
+            if (animationsequenceinfo.stoppingSequenceID != 0)
+            {
+                stoppingAnimation = new AvatarRunningSequence(animationdata, animationsequenceinfo.stoppingSequenceID, animationsequenceinfo.stoppingRunningSince, animationsequenceinfo.stoppingEasingOutSince, animationsequenceinfo.dontEaseIn);
+                return;
+            } else
+            {
+                stoppingAnimation = null;
+                return;
+            }
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public void getRunningAnimations(ImmutableList.Builder<AvatarRunningSequence> builder, Collection<AvatarRunningAnimation> collection) {
-        AnimationPair animationPair2 = this.animationPair;
-        if (animationPair2 == null && this.animationData != null) {
-            animationPair2 = new AnimationPair(this.sequenceInfo, this.animationData);
-            this.animationPair = animationPair2;
-        }
-        if (animationPair2 != null) {
-            animationPair2.getRunningAnimations(builder, collection);
+
+    private volatile AnimationData animationData;
+    private volatile AnimationPair animationPair;
+    private final WeakReference drawableAvatar;
+    private volatile AnimationSequenceInfo sequenceInfo;
+
+    AvatarAnimationState(AnimationSequenceInfo animationsequenceinfo, DrawableAvatar drawableavatar)
+    {
+        animationPair = null;
+        sequenceInfo = animationsequenceinfo;
+        drawableAvatar = new WeakReference(drawableavatar);
+        AnimationCache.getInstance().RequestResource(animationsequenceinfo.animationID, this);
+    }
+
+    public void OnResourceReady(Object obj, boolean flag)
+    {
+        if (obj instanceof AnimationData)
+        {
+            animationData = (AnimationData)obj;
+            obj = (DrawableAvatar)drawableAvatar.get();
+            if (obj != null)
+            {
+                ((DrawableAvatar) (obj)).updateRunningAnimations();
+            }
+        } else
+        if (obj == null)
+        {
+            animationData = null;
+            return;
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public boolean hasStopped() {
-        AnimationPair animationPair2 = this.animationPair;
-        if (animationPair2 != null) {
-            return animationPair2.hasStopped();
+    void getRunningAnimations(com.google.common.collect.ImmutableList.Builder builder, Collection collection)
+    {
+        AnimationPair animationpair1 = animationPair;
+        AnimationPair animationpair = animationpair1;
+        if (animationpair1 == null)
+        {
+            animationpair = animationpair1;
+            if (animationData != null)
+            {
+                animationpair = new AnimationPair(sequenceInfo, animationData);
+                animationPair = animationpair;
+            }
         }
-        return false;
+        if (animationpair != null)
+        {
+            animationpair.getRunningAnimations(builder, collection);
+        }
     }
 
-    /* access modifiers changed from: package-private */
-    public void updateSequenceInfo(@Nonnull AnimationSequenceInfo animationSequenceInfo) {
-        this.sequenceInfo = animationSequenceInfo;
-        this.animationPair = null;
+    boolean hasStopped()
+    {
+        AnimationPair animationpair = animationPair;
+        if (animationpair != null)
+        {
+            return animationpair.hasStopped();
+        } else
+        {
+            return false;
+        }
+    }
+
+    void updateSequenceInfo(AnimationSequenceInfo animationsequenceinfo)
+    {
+        sequenceInfo = animationsequenceinfo;
+        animationPair = null;
     }
 }

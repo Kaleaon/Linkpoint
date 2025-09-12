@@ -1,71 +1,99 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
-import com.lumiyaviewer.lumiya.react.Subscription;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
 
-public class SubscriptionList<K, T> {
-    private T lastData = null;
-    private Throwable lastError = null;
-    private final Set<Subscription.SubscriptionReference<K, T>> subscriptions = new HashSet();
+// Referenced classes of package com.lumiyaviewer.lumiya.react:
+//            Subscription
 
-    public final void addSubscription(Subscription<K, T> subscription) {
-        this.subscriptions.add(subscription.getReference());
+public class SubscriptionList
+{
+
+    private Object lastData;
+    private Throwable lastError;
+    private final Set subscriptions = new HashSet();
+
+    public SubscriptionList()
+    {
+        lastData = null;
+        lastError = null;
     }
 
-    public final T getData() {
-        return this.lastData;
+    public final void addSubscription(Subscription subscription)
+    {
+        subscriptions.add(subscription.getReference());
     }
 
-    public final Throwable getError() {
-        return this.lastError;
+    public final Object getData()
+    {
+        return lastData;
     }
 
-    @Nullable
-    public final List<Subscription<K, T>> getSubscriptions(boolean z) {
-        ArrayList arrayList = null;
-        Iterator<Subscription.SubscriptionReference<K, T>> it = this.subscriptions.iterator();
-        while (true) {
-            ArrayList arrayList2 = arrayList;
-            if (!it.hasNext()) {
-                return arrayList2;
+    public final Throwable getError()
+    {
+        return lastError;
+    }
+
+    public final List getSubscriptions(boolean flag)
+    {
+        Iterator iterator = subscriptions.iterator();
+        ArrayList arraylist = null;
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break;
             }
-            Subscription subscription = (Subscription) it.next().get();
-            if (subscription != null) {
-                if (arrayList2 == null) {
-                    arrayList2 = new ArrayList(this.subscriptions.size());
+            Subscription subscription = (Subscription)((Subscription.SubscriptionReference)iterator.next()).get();
+            if (subscription != null)
+            {
+                ArrayList arraylist1 = arraylist;
+                if (arraylist == null)
+                {
+                    arraylist1 = new ArrayList(subscriptions.size());
                 }
-                arrayList2.add(subscription);
-            } else if (z) {
-                it.remove();
+                arraylist1.add(subscription);
+                arraylist = arraylist1;
+            } else
+            if (flag)
+            {
+                iterator.remove();
             }
-            arrayList = arrayList2;
-        }
+        } while (true);
+        return arraylist;
     }
 
-    public final boolean isEmpty() {
-        return this.subscriptions.isEmpty();
+    public final boolean isEmpty()
+    {
+        return subscriptions.isEmpty();
     }
 
-    public final void removeByReference(Subscription.SubscriptionReference subscriptionReference) {
-        this.subscriptions.remove(subscriptionReference);
+    public final void removeByReference(Subscription.SubscriptionReference subscriptionreference)
+    {
+        subscriptions.remove(subscriptionreference);
     }
 
-    public final void removeSubscription(Subscription<K, T> subscription) {
-        this.subscriptions.remove(subscription.getReference());
+    public final void removeSubscription(Subscription subscription)
+    {
+        subscriptions.remove(subscription.getReference());
     }
 
-    public final void setData(T t) {
-        this.lastData = t;
-        this.lastError = null;
+    public final void setData(Object obj)
+    {
+        lastData = obj;
+        lastError = null;
     }
 
-    public final void setError(Throwable th) {
-        this.lastData = null;
-        this.lastError = th;
+    public final void setError(Throwable throwable)
+    {
+        lastData = null;
+        lastError = throwable;
     }
 }

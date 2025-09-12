@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.objpopup;
 
 import android.os.Bundle;
@@ -7,78 +11,123 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectPopupsManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.chat.ChatLayoutManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class ObjectPopupsFragment extends Fragment {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.objpopup:
+//            ObjectPopupsAdapter
+
+public class ObjectPopupsFragment extends Fragment
+{
+
     private static final String AGENT_UUID_KEY = "agentUUID";
-    private final ItemTouchHelper.Callback itemTouchCallback = new ItemTouchHelper.SimpleCallback(0, 12) {
-        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder viewHolder2) {
+    private final android.support.v7.widget.helper.ItemTouchHelper.Callback itemTouchCallback = new android.support.v7.widget.helper.ItemTouchHelper.SimpleCallback(0, 12) {
+
+        final ObjectPopupsFragment this$0;
+
+        public boolean onMove(RecyclerView recyclerview, android.support.v7.widget.RecyclerView.ViewHolder viewholder, android.support.v7.widget.RecyclerView.ViewHolder viewholder1)
+        {
             return false;
         }
 
-        public void onSwiped(RecyclerView.ViewHolder viewHolder, int i) {
-            RecyclerView recyclerView;
-            RecyclerView.Adapter adapter;
-            UserManager r1 = ObjectPopupsFragment.this.getUserManager();
-            View view = ObjectPopupsFragment.this.getView();
-            if (view != null && r1 != null && (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) != null && (adapter = recyclerView.getAdapter()) != null) {
-                int adapterPosition = viewHolder.getAdapterPosition();
-                if (adapter instanceof ObjectPopupsAdapter) {
-                    r1.getObjectPopupsManager().cancelObjectPopup((SLChatEvent) ((ObjectPopupsAdapter) adapter).getObject(adapterPosition));
+        public void onSwiped(android.support.v7.widget.RecyclerView.ViewHolder viewholder, int i)
+        {
+            UserManager usermanager = ObjectPopupsFragment._2D_wrap0(ObjectPopupsFragment.this);
+            Object obj = getView();
+            if (obj != null && usermanager != null)
+            {
+                obj = (RecyclerView)((View) (obj)).findViewById(0x7f10023f);
+                if (obj != null)
+                {
+                    obj = ((RecyclerView) (obj)).getAdapter();
+                    if (obj != null)
+                    {
+                        i = viewholder.getAdapterPosition();
+                        if (obj instanceof ObjectPopupsAdapter)
+                        {
+                            viewholder = (SLChatEvent)((ObjectPopupsAdapter)obj).getObject(i);
+                            usermanager.getObjectPopupsManager().cancelObjectPopup(viewholder);
+                        }
+                    }
                 }
             }
         }
+
+            
+            {
+                this$0 = ObjectPopupsFragment.this;
+                super(i, j);
+            }
     };
 
-    public static ObjectPopupsFragment create(@Nonnull UUID uuid) {
-        ObjectPopupsFragment objectPopupsFragment = new ObjectPopupsFragment();
-        Bundle bundle = new Bundle();
-        bundle.putString(AGENT_UUID_KEY, uuid.toString());
-        objectPopupsFragment.setArguments(bundle);
-        return objectPopupsFragment;
+    static UserManager _2D_wrap0(ObjectPopupsFragment objectpopupsfragment)
+    {
+        return objectpopupsfragment.getUserManager();
     }
 
-    /* access modifiers changed from: private */
-    @Nullable
-    public UserManager getUserManager() {
-        Bundle arguments = getArguments();
-        if (arguments == null || !arguments.containsKey(AGENT_UUID_KEY)) {
+    public ObjectPopupsFragment()
+    {
+    }
+
+    public static ObjectPopupsFragment create(UUID uuid)
+    {
+        ObjectPopupsFragment objectpopupsfragment = new ObjectPopupsFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("agentUUID", uuid.toString());
+        objectpopupsfragment.setArguments(bundle);
+        return objectpopupsfragment;
+    }
+
+    private UserManager getUserManager()
+    {
+        Bundle bundle = getArguments();
+        if (bundle != null && bundle.containsKey("agentUUID"))
+        {
+            return UserManager.getUserManager(UUID.fromString(bundle.getString("agentUUID")));
+        } else
+        {
             return null;
         }
-        return UserManager.getUserManager(UUID.fromString(arguments.getString(AGENT_UUID_KEY)));
     }
 
-    @Nullable
-    public View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.object_popups_fragment_layout, viewGroup, false);
-        RecyclerView recyclerView = (RecyclerView) inflate.findViewById(R.id.objectPopupsList);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new ChatLayoutManager(layoutInflater.getContext(), 1, false));
-        new ItemTouchHelper(this.itemTouchCallback).attachToRecyclerView(recyclerView);
-        return inflate;
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        viewgroup = layoutinflater.inflate(0x7f04007a, viewgroup, false);
+        bundle = (RecyclerView)viewgroup.findViewById(0x7f10023f);
+        bundle.setHasFixedSize(true);
+        bundle.setLayoutManager(new ChatLayoutManager(layoutinflater.getContext(), 1, false));
+        (new ItemTouchHelper(itemTouchCallback)).attachToRecyclerView(bundle);
+        return viewgroup;
     }
 
-    public void onStart() {
-        RecyclerView recyclerView;
+    public void onStart()
+    {
         super.onStart();
-        UserManager userManager = getUserManager();
-        View view = getView();
-        if (userManager != null && view != null && (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) != null) {
-            recyclerView.setAdapter(new ObjectPopupsAdapter(getContext(), userManager.getObjectPopupsManager().getObjectPopups(), userManager));
+        UserManager usermanager = getUserManager();
+        Object obj = getView();
+        if (usermanager != null && obj != null)
+        {
+            obj = (RecyclerView)((View) (obj)).findViewById(0x7f10023f);
+            if (obj != null)
+            {
+                ((RecyclerView) (obj)).setAdapter(new ObjectPopupsAdapter(getContext(), usermanager.getObjectPopupsManager().getObjectPopups(), usermanager));
+            }
         }
     }
 
-    public void onStop() {
-        RecyclerView recyclerView;
-        View view = getView();
-        if (!(view == null || (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) == null)) {
-            recyclerView.setAdapter((RecyclerView.Adapter) null);
+    public void onStop()
+    {
+        Object obj = getView();
+        if (obj != null)
+        {
+            obj = (RecyclerView)((View) (obj)).findViewById(0x7f10023f);
+            if (obj != null)
+            {
+                ((RecyclerView) (obj)).setAdapter(null);
+            }
         }
         super.onStop();
     }

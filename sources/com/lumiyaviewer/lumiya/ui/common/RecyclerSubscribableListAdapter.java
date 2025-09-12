@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 import com.google.common.base.Optional;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
@@ -8,98 +11,101 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.SubscribableList;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 
-public abstract class RecyclerSubscribableListAdapter<T> extends RecyclerView.Adapter {
-    private final RecyclerSubscribableListAdapter<T>.LocalItemList<T> localItemList;
+public abstract class RecyclerSubscribableListAdapter extends android.support.v7.widget.RecyclerView.Adapter
+{
+    private class LocalItemList extends AbstractList
+    {
 
-    private class LocalItemList<T> extends AbstractList<T> {
-        private final List<T> backingList = new ArrayList();
+        private final List backingList = new ArrayList();
+        final RecyclerSubscribableListAdapter this$0;
 
-        /* JADX WARNING: type inference failed for: r5v0, types: [com.google.common.base.Optional<java.util.concurrent.Executor>, com.google.common.base.Optional] */
-        /* JADX WARNING: Unknown variable types count: 1 */
-        /* Code decompiled incorrectly, please refer to instructions dump. */
-        public LocalItemList(com.lumiyaviewer.lumiya.slproto.users.manager.SubscribableList<T> r4, com.google.common.base.Optional<java.util.concurrent.Executor> r5) {
-            /*
-                r2 = this;
-                com.lumiyaviewer.lumiya.ui.common.RecyclerSubscribableListAdapter.this = r3
-                r2.<init>()
-                java.util.ArrayList r0 = new java.util.ArrayList
-                r0.<init>()
-                r2.backingList = r0
-                java.util.List<T> r0 = r2.backingList
-                java.util.List r1 = r4.addSubscription(r2, r5)
-                r0.addAll(r1)
-                return
-            */
-            throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.common.RecyclerSubscribableListAdapter.LocalItemList.<init>(com.lumiyaviewer.lumiya.ui.common.RecyclerSubscribableListAdapter, com.lumiyaviewer.lumiya.slproto.users.manager.SubscribableList, com.google.common.base.Optional):void");
+        public void add(int i, Object obj)
+        {
+            backingList.add(i, obj);
+            notifyItemInserted(i);
         }
 
-        public void add(int i, T t) {
-            this.backingList.add(i, t);
-            RecyclerSubscribableListAdapter.this.notifyItemInserted(i);
+        public void clear()
+        {
+            backingList.clear();
+            notifyDataSetChanged();
         }
 
-        public void clear() {
-            this.backingList.clear();
-            RecyclerSubscribableListAdapter.this.notifyDataSetChanged();
+        public Object get(int i)
+        {
+            return backingList.get(i);
         }
 
-        public T get(int i) {
-            return this.backingList.get(i);
+        public Object remove(int i)
+        {
+            Object obj = backingList.remove(i);
+            notifyItemRemoved(i);
+            return obj;
         }
 
-        public T remove(int i) {
-            T remove = this.backingList.remove(i);
-            RecyclerSubscribableListAdapter.this.notifyItemRemoved(i);
-            return remove;
+        public Object set(int i, Object obj)
+        {
+            obj = backingList.set(i, obj);
+            notifyItemChanged(i);
+            return obj;
         }
 
-        public T set(int i, T t) {
-            T t2 = this.backingList.set(i, t);
-            RecyclerSubscribableListAdapter.this.notifyItemChanged(i);
-            return t2;
+        public int size()
+        {
+            return backingList.size();
         }
 
-        public int size() {
-            return this.backingList.size();
+        public LocalItemList(SubscribableList subscribablelist, Optional optional)
+        {
+            this$0 = RecyclerSubscribableListAdapter.this;
+            super();
+            backingList.addAll(subscribablelist.addSubscription(this, optional));
         }
     }
 
-    public RecyclerSubscribableListAdapter(SubscribableList<T> subscribableList) {
-        this.localItemList = new LocalItemList<>(subscribableList, Optional.of(UIThreadExecutor.getInstance()));
+
+    private final LocalItemList localItemList;
+
+    public RecyclerSubscribableListAdapter(SubscribableList subscribablelist)
+    {
+        localItemList = new LocalItemList(subscribablelist, Optional.of(UIThreadExecutor.getInstance()));
     }
 
-    /* access modifiers changed from: protected */
-    public abstract void bindObjectViewHolder(RecyclerView.ViewHolder viewHolder, T t);
+    protected abstract void bindObjectViewHolder(android.support.v7.widget.RecyclerView.ViewHolder viewholder, Object obj);
 
-    /* access modifiers changed from: protected */
-    public abstract RecyclerView.ViewHolder createObjectViewHolder(ViewGroup viewGroup, int i);
+    protected abstract android.support.v7.widget.RecyclerView.ViewHolder createObjectViewHolder(ViewGroup viewgroup, int i);
 
-    public int getItemCount() {
-        return this.localItemList.size();
+    public int getItemCount()
+    {
+        return localItemList.size();
     }
 
-    public int getItemViewType(int i) {
-        return getObjectViewType(this.localItemList.get(i));
+    public int getItemViewType(int i)
+    {
+        return getObjectViewType(localItemList.get(i));
     }
 
-    @Nullable
-    public T getObject(int i) {
-        if (i < 0 || i >= this.localItemList.size()) {
+    public Object getObject(int i)
+    {
+        if (i >= 0 && i < localItemList.size())
+        {
+            return localItemList.get(i);
+        } else
+        {
             return null;
         }
-        return this.localItemList.get(i);
     }
 
-    /* access modifiers changed from: protected */
-    public abstract int getObjectViewType(T t);
+    protected abstract int getObjectViewType(Object obj);
 
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-        bindObjectViewHolder(viewHolder, this.localItemList.get(i));
+    public void onBindViewHolder(android.support.v7.widget.RecyclerView.ViewHolder viewholder, int i)
+    {
+        bindObjectViewHolder(viewholder, localItemList.get(i));
     }
 
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        return createObjectViewHolder(viewGroup, i);
+    public android.support.v7.widget.RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewgroup, int i)
+    {
+        return createObjectViewHolder(viewgroup, i);
     }
 }
