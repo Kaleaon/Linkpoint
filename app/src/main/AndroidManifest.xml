@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="66" android:versionName="3.4.2" platformBuildVersionCode="26" platformBuildVersionName="8.0.0">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="66" android:versionName="3.4.2" package="com.lumiyaviewer.lumiya" platformBuildVersionCode="26" platformBuildVersionName="8.0.0">
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="26"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -24,7 +24,7 @@
         <activity android:label="Lumiya Viewer settings" android:name="com.lumiyaviewer.lumiya.ui.settings.SettingsActivity"/>
         <activity android:theme="@style/Theme.AppCompat.Dialog" android:label="Lumiya Viewer: Streaming media" android:name="com.lumiyaviewer.lumiya.ui.media.StreamingMediaActivity"/>
         <activity android:theme="@style/Theme.Lumiya.NoActionBar" android:label="World View" android:name="com.lumiyaviewer.lumiya.ui.render.WorldViewActivity"/>
-        <activity android:theme="@style/Theme.Lumiya.NoActionBar" android:label="VR View" android:name="com.lumiyaviewer.lumiya.ui.render.CardboardActivity" android:screenOrientation="landscape" android:enableVrMode="@string/gvr_vr_mode_component" android:exported="true">
+        <activity android:theme="@style/Theme.Lumiya.NoActionBar" android:label="VR View" android:name="com.lumiyaviewer.lumiya.ui.render.CardboardActivity" android:screenOrientation="landscape" android:enableVrMode="@string/gvr_vr_mode_component" android:exported="false">
             <intent-filter>
                 <action android:name="com.lumiyaviewer.lumiya.ui.render.CardboardActivity"/>
                 <category android:name="com.google.intent.category.CARDBOARD"/>
