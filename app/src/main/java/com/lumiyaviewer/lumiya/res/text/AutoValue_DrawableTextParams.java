@@ -17,7 +17,6 @@ final class AutoValue_DrawableTextParams extends DrawableTextParams {
     }
 
     public boolean equals(Object obj) {
-        boolean z = true;
         if (obj == this) {
             return true;
         }
@@ -25,12 +24,10 @@ final class AutoValue_DrawableTextParams extends DrawableTextParams {
             return false;
         }
         DrawableTextParams drawableTextParams = (DrawableTextParams) obj;
-        if (!this.text.equals(drawableTextParams.text())) {
-            z = false;
-        } else if (this.backgroundColor != drawableTextParams.backgroundColor()) {
-            z = false;
+        if (this.text.equals(drawableTextParams.text())) {
+            return this.backgroundColor == drawableTextParams.backgroundColor();
         }
-        return z;
+        return false;
     }
 
     public int hashCode() {

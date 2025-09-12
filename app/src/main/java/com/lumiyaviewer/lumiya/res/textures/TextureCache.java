@@ -3,7 +3,6 @@ package com.lumiyaviewer.lumiya.res.textures;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.GlobalOptions;
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
-import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG.ImageFormat;
 import com.lumiyaviewer.lumiya.render.tex.DrawableTextureParams;
 import com.lumiyaviewer.lumiya.render.tex.TextureClass;
 import com.lumiyaviewer.lumiya.res.ResourceConsumer;
@@ -18,6 +17,7 @@ import com.lumiyaviewer.lumiya.slproto.modules.texfetcher.SLTextureFetcher;
 import com.lumiyaviewer.lumiya.utils.HasPriority;
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -26,31 +26,36 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TextureCache extends ResourceMemoryCache<DrawableTextureParams, OpenJPEG> {
     private File baseDir;
     private final Object cacheDirLock = new Object();
-    private final ExecutorService decompressorExecutor = new WeakExecutor("TextureDecompressor", 1, new PriorityBlockingQueue());
+    /* access modifiers changed from: private */
+    public final ExecutorService decompressorExecutor = new WeakExecutor("TextureDecompressor", 1, new PriorityBlockingQueue());
     private final AtomicBoolean isLowMemory = new AtomicBoolean(false);
-    private final StartingExecutor memoryAwareExecutor = new StartingExecutor();
-    private final TextureCompressedCache textureCompressedCache = new TextureCompressedCache();
+    /* access modifiers changed from: private */
+    public final StartingExecutor memoryAwareExecutor = new StartingExecutor();
+    /* access modifiers changed from: private */
+    public final TextureCompressedCache textureCompressedCache = new TextureCompressedCache();
     private File textureTempDir;
 
     private static class InstanceHolder {
-        private static final TextureCache Instance = new TextureCache();
+        /* access modifiers changed from: private */
+        public static final TextureCache Instance = new TextureCache();
 
         private InstanceHolder() {
         }
     }
 
     private class TextureDecompressRequest extends ResourceRequest<DrawableTextureParams, OpenJPEG> implements ResourceConsumer, Runnable, HasPriority, Startable {
-        /* renamed from: -com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues */
-        private static final /* synthetic */ int[] f441-com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues = null;
+
+        /* renamed from: -com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
+        private static final /* synthetic */ int[] f52comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null;
         final /* synthetic */ int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$render$tex$TextureClass;
         private volatile File compressedFile;
         private volatile Future<?> decompressorFuture;
         private volatile boolean lowQualityDone = false;
 
-        /* renamed from: -getcom-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues */
-        private static /* synthetic */ int[] m7-getcom-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues() {
-            if (f441-com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues != null) {
-                return f441-com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues;
+        /* renamed from: -getcom-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
+        private static /* synthetic */ int[] m116getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues() {
+            if (f52comlumiyaviewerlumiyarendertexTextureClassSwitchesValues != null) {
+                return f52comlumiyaviewerlumiyarendertexTextureClassSwitchesValues;
             }
             int[] iArr = new int[TextureClass.values().length];
             try {
@@ -73,7 +78,7 @@ public class TextureCache extends ResourceMemoryCache<DrawableTextureParams, Ope
                 iArr[TextureClass.Terrain.ordinal()] = 5;
             } catch (NoSuchFieldError e5) {
             }
-            f441-com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues = iArr;
+            f52comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = iArr;
             return iArr;
         }
 
@@ -85,16 +90,15 @@ public class TextureCache extends ResourceMemoryCache<DrawableTextureParams, Ope
             try {
                 DrawableTextureParams drawableTextureParams = (DrawableTextureParams) getParams();
                 if (file2.exists()) {
-                    return new OpenJPEG(file2, drawableTextureParams.textureClass(), ImageFormat.Raw, z);
+                    return new OpenJPEG(file2, drawableTextureParams.textureClass(), OpenJPEG.ImageFormat.Raw, z);
                 }
-                String str = "Decompressing (%s) %s texture %s to %s";
                 Object[] objArr = new Object[4];
                 objArr[0] = z ? "high" : "low";
                 objArr[1] = drawableTextureParams.textureClass().toString();
                 objArr[2] = drawableTextureParams.uuid().toString();
                 objArr[3] = file2.getAbsolutePath();
-                Debug.Printf(str, objArr);
-                OpenJPEG openJPEG = new OpenJPEG(file, drawableTextureParams.textureClass(), ImageFormat.JPEG2000, z);
+                Debug.Printf("Decompressing (%s) %s texture %s to %s", objArr);
+                OpenJPEG openJPEG = new OpenJPEG(file, drawableTextureParams.textureClass(), OpenJPEG.ImageFormat.JPEG2000, z);
                 file2.getParentFile().mkdirs();
                 File file3 = new File(file2.getAbsolutePath() + ".tmpdec");
                 if (drawableTextureParams.textureClass() == TextureClass.Prim && GlobalOptions.getInstance().getCompressedTextures()) {
@@ -126,7 +130,7 @@ public class TextureCache extends ResourceMemoryCache<DrawableTextureParams, Ope
 
         public void cancelRequest() {
             Debug.Printf("DecompressRequest: cancelled (%s)", ((DrawableTextureParams) getParams()).uuid().toString());
-            Future future = this.decompressorFuture;
+            Future<?> future = this.decompressorFuture;
             if (future != null) {
                 future.cancel(false);
             }
@@ -144,7 +148,7 @@ public class TextureCache extends ResourceMemoryCache<DrawableTextureParams, Ope
             if (TextureCache.this.canBeLowQuality(drawableTextureParams) && this.lowQualityDone) {
                 return 4;
             }
-            switch (m7-getcom-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues()[drawableTextureParams.textureClass().ordinal()]) {
+            switch (m116getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues()[drawableTextureParams.textureClass().ordinal()]) {
                 case 1:
                     return 2;
                 case 2:
@@ -158,7 +162,7 @@ public class TextureCache extends ResourceMemoryCache<DrawableTextureParams, Ope
             DrawableTextureParams drawableTextureParams = (DrawableTextureParams) getParams();
             if (drawableTextureParams.textureClass() == TextureClass.Sculpt || drawableTextureParams.textureClass() == TextureClass.Baked) {
                 completeRequest(decompress(this.compressedFile, TextureCache.this.getResourceFile(drawableTextureParams, true), true));
-            } else if (!TextureCache.this.canBeLowQuality(drawableTextureParams) || (this.lowQualityDone ^ 1) == 0) {
+            } else if (!TextureCache.this.canBeLowQuality(drawableTextureParams) || !(!this.lowQualityDone)) {
                 completeRequest(decompress(this.compressedFile, TextureCache.this.getResourceFile(drawableTextureParams, true), true));
             } else {
                 OpenJPEG decompress = decompress(this.compressedFile, TextureCache.this.getResourceFile(drawableTextureParams, false), false);
@@ -204,8 +208,8 @@ public class TextureCache extends ResourceMemoryCache<DrawableTextureParams, Ope
 
         public void run() {
             try {
-                completeRequest(new OpenJPEG(this.rawFile.getAbsoluteFile(), ((DrawableTextureParams) getParams()).textureClass(), ImageFormat.Raw, true));
-            } catch (Throwable e) {
+                completeRequest(new OpenJPEG(this.rawFile.getAbsoluteFile(), ((DrawableTextureParams) getParams()).textureClass(), OpenJPEG.ImageFormat.Raw, true));
+            } catch (IOException e) {
                 Debug.Warning(e);
                 completeRequest(null);
             }
@@ -217,7 +221,8 @@ public class TextureCache extends ResourceMemoryCache<DrawableTextureParams, Ope
         }
     }
 
-    private boolean canBeLowQuality(DrawableTextureParams drawableTextureParams) {
+    /* access modifiers changed from: private */
+    public boolean canBeLowQuality(DrawableTextureParams drawableTextureParams) {
         return drawableTextureParams.textureClass() == TextureClass.Prim;
     }
 
@@ -225,24 +230,25 @@ public class TextureCache extends ResourceMemoryCache<DrawableTextureParams, Ope
         return InstanceHolder.Instance;
     }
 
-    protected ResourceRequest<DrawableTextureParams, OpenJPEG> CreateNewRequest(DrawableTextureParams drawableTextureParams, ResourceManager<DrawableTextureParams, OpenJPEG> resourceManager) {
-        File resourceFile;
-        if (GlobalOptions.getInstance().getHighQualityTextures() || (canBeLowQuality(drawableTextureParams) ^ 1) != 0) {
-            resourceFile = getResourceFile(drawableTextureParams, true);
+    /* access modifiers changed from: protected */
+    public ResourceRequest<DrawableTextureParams, OpenJPEG> CreateNewRequest(DrawableTextureParams drawableTextureParams, ResourceManager<DrawableTextureParams, OpenJPEG> resourceManager) {
+        if (GlobalOptions.getInstance().getHighQualityTextures() || (!canBeLowQuality(drawableTextureParams))) {
+            File resourceFile = getResourceFile(drawableTextureParams, true);
             if (resourceFile.exists()) {
                 return new TextureLoadRequest(drawableTextureParams, resourceManager, resourceFile);
             }
         }
-        if (canBeLowQuality(drawableTextureParams) && (GlobalOptions.getInstance().getHighQualityTextures() ^ 1) != 0) {
-            resourceFile = getResourceFile(drawableTextureParams, false);
-            if (resourceFile.exists()) {
-                return new TextureLoadRequest(drawableTextureParams, resourceManager, resourceFile);
+        if (canBeLowQuality(drawableTextureParams) && (!GlobalOptions.getInstance().getHighQualityTextures())) {
+            File resourceFile2 = getResourceFile(drawableTextureParams, false);
+            if (resourceFile2.exists()) {
+                return new TextureLoadRequest(drawableTextureParams, resourceManager, resourceFile2);
             }
         }
         return new TextureDecompressRequest(drawableTextureParams, resourceManager);
     }
 
-    protected File getBaseDir() {
+    /* access modifiers changed from: protected */
+    public File getBaseDir() {
         File file;
         synchronized (this.cacheDirLock) {
             if (this.baseDir == null) {
@@ -270,16 +276,17 @@ public class TextureCache extends ResourceMemoryCache<DrawableTextureParams, Ope
     }
 
     public File getTextureCompressedFile(DrawableTextureParams drawableTextureParams) {
-        int hashCode = drawableTextureParams.uuid().hashCode();
-        hashCode = ((hashCode >> 24) ^ (((hashCode >> 8) ^ hashCode) ^ (hashCode >> 16))) & 255;
-        return new File(getTextureTempDir(), String.format("%02x/%s.jp2", new Object[]{Integer.valueOf(hashCode), r0.toString()}));
+        UUID uuid = drawableTextureParams.uuid();
+        int hashCode = uuid.hashCode();
+        return new File(getTextureTempDir(), String.format("%02x/%s.jp2", new Object[]{Integer.valueOf(((hashCode >> 24) ^ (((hashCode >> 8) ^ hashCode) ^ (hashCode >> 16))) & 255), uuid.toString()}));
     }
 
     public File getTextureCompressedFileOld(DrawableTextureParams drawableTextureParams) {
         return new File(getTextureTempDir(), drawableTextureParams.uuid().toString() + ".jp2");
     }
 
-    protected File getTextureTempDir() {
+    /* access modifiers changed from: protected */
+    public File getTextureTempDir() {
         File file;
         synchronized (this.cacheDirLock) {
             if (this.textureTempDir == null) {

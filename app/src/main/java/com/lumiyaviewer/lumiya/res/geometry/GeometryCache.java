@@ -21,9 +21,9 @@ public class GeometryCache extends ResourceMemoryCache<PrimVolumeParams, Drawabl
         private final MeshCache meshCache;
         private volatile MeshData meshData;
 
-        public MeshGeometryRequest(MeshCache meshCache, PrimVolumeParams primVolumeParams, ResourceManager<PrimVolumeParams, DrawableGeometry> resourceManager) {
+        public MeshGeometryRequest(MeshCache meshCache2, PrimVolumeParams primVolumeParams, ResourceManager<PrimVolumeParams, DrawableGeometry> resourceManager) {
             super(primVolumeParams, resourceManager);
-            this.meshCache = meshCache;
+            this.meshCache = meshCache2;
         }
 
         public void OnResourceReady(Object obj, boolean z) {
@@ -105,18 +105,19 @@ public class GeometryCache extends ResourceMemoryCache<PrimVolumeParams, Drawabl
 
         public void run() {
             try {
-                completeRequest(new DrawableGeometry((PrimVolumeParams) getParams(), null));
+                completeRequest(new DrawableGeometry((PrimVolumeParams) getParams(), (OpenJPEG) null));
             } catch (Exception e) {
                 completeRequest(null);
             }
         }
     }
 
-    public GeometryCache(MeshCache meshCache) {
-        this.meshCache = meshCache;
+    public GeometryCache(MeshCache meshCache2) {
+        this.meshCache = meshCache2;
     }
 
-    protected ResourceRequest<PrimVolumeParams, DrawableGeometry> CreateNewRequest(PrimVolumeParams primVolumeParams, ResourceManager<PrimVolumeParams, DrawableGeometry> resourceManager) {
+    /* access modifiers changed from: protected */
+    public ResourceRequest<PrimVolumeParams, DrawableGeometry> CreateNewRequest(PrimVolumeParams primVolumeParams, ResourceManager<PrimVolumeParams, DrawableGeometry> resourceManager) {
         return primVolumeParams.isMesh() ? new MeshGeometryRequest(this.meshCache, primVolumeParams, resourceManager) : primVolumeParams.isSculpt() ? new SculptGeometryRequest(primVolumeParams, resourceManager) : new SimpleGeometryRequest(primVolumeParams, resourceManager);
     }
 }

@@ -5,7 +5,7 @@ import com.lumiyaviewer.lumiya.res.collections.WeakQueue;
 import javax.annotation.Nonnull;
 
 public abstract class GLLoadQueue {
-    final WeakQueue<GLLoadable> loadQueue = new WeakQueue();
+    final WeakQueue<GLLoadable> loadQueue = new WeakQueue<>();
 
     interface GLLoadHandler {
         void GLResourceLoaded(GLLoadable gLLoadable);

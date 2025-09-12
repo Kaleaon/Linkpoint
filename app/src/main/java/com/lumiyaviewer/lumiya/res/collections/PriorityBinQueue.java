@@ -26,12 +26,15 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
         Queue<T> getQueue();
     }
 
-    public PriorityBinQueue(QueueFactory<T> queueFactory) {
-        this.queueFactory = queueFactory;
+    public PriorityBinQueue(QueueFactory<T> queueFactory2) {
+        this.queueFactory = queueFactory2;
     }
 
     private int getPriority(Object obj) {
-        return obj instanceof HasPriority ? ((HasPriority) obj).getPriority() : 0;
+        if (obj instanceof HasPriority) {
+            return ((HasPriority) obj).getPriority();
+        }
+        return 0;
     }
 
     public boolean add(T t) {
@@ -39,7 +42,7 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
         try {
             int priority = getPriority(t);
             Debug.Printf("PriorityBinQueue: added %s with prio %d", t.toString(), Integer.valueOf(priority));
-            Queue queue = (Queue) this.queues.get(Integer.valueOf(priority));
+            Queue<T> queue = (Queue) this.queues.get(Integer.valueOf(priority));
             if (queue == null) {
                 queue = this.queueFactory.getQueue();
                 this.queues.put(Integer.valueOf(priority), queue);
@@ -55,17 +58,16 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
     public boolean addAll(Collection<? extends T> collection) {
         this.lock.lock();
         boolean z = false;
-        boolean z2;
         try {
-            Iterator it = collection.iterator();
+            Iterator<T> it = collection.iterator();
             while (true) {
-                z2 = z;
+                boolean z2 = z;
                 if (!it.hasNext()) {
-                    break;
+                    return z2;
                 }
-                Object next = it.next();
+                T next = it.next();
                 int priority = getPriority(next);
-                Queue queue = (Queue) this.queues.get(Integer.valueOf(priority));
+                Queue<T> queue = (Queue) this.queues.get(Integer.valueOf(priority));
                 if (queue == null) {
                     queue = this.queueFactory.getQueue();
                     this.queues.put(Integer.valueOf(priority), queue);
@@ -73,10 +75,8 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
                 z = queue.add(next) | z2;
                 this.notEmpty.signalAll();
             }
-            return z2;
         } finally {
-            z2 = this.lock;
-            z2.unlock();
+            this.lock.unlock();
         }
     }
 
@@ -94,8 +94,7 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
         try {
             Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(obj)));
             if (queue != null) {
-                boolean contains = queue.contains(obj);
-                return contains;
+                return queue.contains(obj);
             }
             this.lock.unlock();
             return false;
@@ -105,20 +104,24 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
     }
 
     public boolean containsAll(Collection<?> collection) {
+        boolean z;
         this.lock.lock();
         try {
-            boolean z;
-            for (Object next : collection) {
+            Iterator<T> it = collection.iterator();
+            while (true) {
+                if (!it.hasNext()) {
+                    z = true;
+                    break;
+                }
+                T next = it.next();
                 Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(next)));
                 if (queue != null && !queue.contains(next)) {
                     z = false;
                     break;
                 }
             }
-            z = true;
-            this.lock.unlock();
             return z;
-        } catch (Throwable th) {
+        } finally {
             this.lock.unlock();
         }
     }
@@ -139,35 +142,50 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
             this.queues.clear();
             return i;
         } finally {
-            i = this.lock;
-            i.unlock();
+            this.lock.unlock();
         }
     }
 
-    public int drainTo(Collection<? super T> collection, int maxElements) {
-        this.lock.lock();
-        try {
-            int drained = 0;
-            // Iterate through queues in priority order (TreeMap maintains sorted order)
-            for (Queue<T> queue : this.queues.values()) {
-                // Drain items from current priority queue until empty or limit reached
-                while (drained < maxElements) {
-                    T item = queue.poll();
-                    if (item == null) {
-                        break; // Queue is empty, move to next priority level
-                    }
-                    collection.add(item);
-                    drained++;
-                }
-                // Stop if we've reached the maximum number of elements to drain
-                if (drained >= maxElements) {
-                    break;
-                }
-            }
-            return drained;
-        } finally {
-            this.lock.unlock();
-        }
+    /* JADX WARNING: Removed duplicated region for block: B:20:0x002c A[SYNTHETIC] */
+    /* Code decompiled incorrectly, please refer to instructions dump. */
+    public int drainTo(java.util.Collection<? super T> r5, int r6) {
+        /*
+            r4 = this;
+            java.util.concurrent.locks.Lock r0 = r4.lock
+            r0.lock()
+            r1 = 0
+            java.util.SortedMap<java.lang.Integer, java.util.Queue<T>> r0 = r4.queues     // Catch:{ all -> 0x0033 }
+            java.util.Collection r0 = r0.values()     // Catch:{ all -> 0x0033 }
+            java.util.Iterator r2 = r0.iterator()     // Catch:{ all -> 0x0033 }
+        L_0x0010:
+            boolean r0 = r2.hasNext()     // Catch:{ all -> 0x0033 }
+            if (r0 == 0) goto L_0x003a
+            java.lang.Object r0 = r2.next()     // Catch:{ all -> 0x0033 }
+            java.util.Queue r0 = (java.util.Queue) r0     // Catch:{ all -> 0x0033 }
+        L_0x001c:
+            java.lang.Object r3 = r0.poll()     // Catch:{ all -> 0x0033 }
+            if (r3 == 0) goto L_0x002a
+            if (r1 >= r6) goto L_0x002a
+            r5.add(r3)     // Catch:{ all -> 0x0033 }
+            int r1 = r1 + 1
+            goto L_0x001c
+        L_0x002a:
+            if (r1 < r6) goto L_0x0010
+            r0 = r1
+        L_0x002d:
+            java.util.concurrent.locks.Lock r1 = r4.lock
+            r1.unlock()
+            return r0
+        L_0x0033:
+            r0 = move-exception
+            java.util.concurrent.locks.Lock r1 = r4.lock
+            r1.unlock()
+            throw r0
+        L_0x003a:
+            r0 = r1
+            goto L_0x002d
+        */
+        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.collections.PriorityBinQueue.drainTo(java.util.Collection, int):int");
     }
 
     public T element() {
@@ -179,19 +197,23 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
     }
 
     public boolean isEmpty() {
+        boolean z;
         this.lock.lock();
         try {
-            boolean z;
-            for (Queue isEmpty : this.queues.values()) {
-                if (!isEmpty.isEmpty()) {
-                    z = false;
+            Iterator<T> it = this.queues.values().iterator();
+            while (true) {
+                if (it.hasNext()) {
+                    if (!((Queue) it.next()).isEmpty()) {
+                        z = false;
+                        break;
+                    }
+                } else {
+                    z = true;
                     break;
                 }
             }
-            z = true;
-            this.lock.unlock();
             return z;
-        } catch (Throwable th) {
+        } finally {
             this.lock.unlock();
         }
     }
@@ -233,11 +255,13 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
         try {
             for (Queue it : this.queues.values()) {
                 Iterator it2 = it.iterator();
-                while (it2.hasNext()) {
-                    T next = it2.next();
-                    if (next != null) {
-                        it2.remove();
-                        return next;
+                while (true) {
+                    if (it2.hasNext()) {
+                        T next = it2.next();
+                        if (next != null) {
+                            it2.remove();
+                            return next;
+                        }
                     }
                 }
             }
@@ -249,24 +273,19 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
     }
 
     public T poll(long j, TimeUnit timeUnit) throws InterruptedException {
-        T t = null;
         this.lock.lock();
-        while (true) {
+        do {
             try {
                 T poll = poll();
-                if (poll == null) {
-                    if (!this.notEmpty.await(j, timeUnit)) {
-                        break;
-                    }
+                if (poll != null) {
+                    this.lock.unlock();
+                    return poll;
                 }
-                this.lock.unlock();
-                return poll;
             } finally {
-                t = this.lock;
-                t.unlock();
+                this.lock.unlock();
             }
-        }
-        return t;
+        } while (this.notEmpty.await(j, timeUnit));
+        return null;
     }
 
     public void put(T t) throws InterruptedException {
@@ -290,8 +309,7 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
         try {
             Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(obj)));
             if (queue != null) {
-                boolean remove = queue.remove(obj);
-                return remove;
+                return queue.remove(obj);
             }
             this.lock.unlock();
             return false;
@@ -304,85 +322,75 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
         this.lock.lock();
         boolean z = false;
         try {
-            for (Object next : collection) {
+            for (T next : collection) {
                 Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(next)));
                 z = queue != null ? queue.remove(next) | z : z;
             }
             return z;
         } finally {
-            z = this.lock;
-            z.unlock();
+            this.lock.unlock();
         }
     }
 
     public boolean retainAll(Collection<?> collection) {
         this.lock.lock();
         boolean z = false;
-        boolean z2;
         try {
-            Iterator it = this.queues.values().iterator();
+            Iterator<T> it = this.queues.values().iterator();
             while (true) {
-                z2 = z;
+                boolean z2 = z;
                 if (!it.hasNext()) {
-                    break;
+                    return z2;
                 }
                 z = ((Queue) it.next()).retainAll(collection) | z2;
             }
-            return z2;
         } finally {
-            z2 = this.lock;
-            z2.unlock();
+            this.lock.unlock();
         }
     }
 
     public int size() {
         this.lock.lock();
         int i = 0;
-        int i2;
         try {
-            Iterator it = this.queues.values().iterator();
+            Iterator<T> it = this.queues.values().iterator();
             while (true) {
-                i2 = i;
+                int i2 = i;
                 if (!it.hasNext()) {
-                    break;
+                    return i2;
                 }
                 i = ((Queue) it.next()).size() + i2;
             }
-            return i2;
         } finally {
-            i2 = this.lock;
-            i2.unlock();
+            this.lock.unlock();
         }
     }
 
     public T take() throws InterruptedException {
-        T poll;
         this.lock.lock();
         while (true) {
             try {
-                poll = poll();
+                T poll = poll();
                 if (poll != null) {
-                    break;
+                    return poll;
                 }
                 this.notEmpty.await();
             } finally {
                 this.lock.unlock();
             }
         }
-        return poll;
     }
 
     public Object[] toArray() {
         int i = 0;
         this.lock.lock();
         try {
-            Object<Object[]> arrayList = new ArrayList();
+            ArrayList<Object[]> arrayList = new ArrayList<>();
             int i2 = 0;
-            for (Queue toArray : this.queues.values()) {
-                Object toArray2 = toArray.toArray();
-                int length = toArray2.length + i2;
-                arrayList.add(toArray2);
-                i2 = length;
+            for (Queue array : this.queues.values()) {
+                Object[] array2 = array.toArray();
+                arrayList.add(array2);
+                i2 = array2.length + i2;
             }
             Object[] objArr = new Object[i2];
             for (Object[] objArr2 : arrayList) {
@@ -400,16 +408,15 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
         int i = 0;
         this.lock.lock();
         try {
-            Object<Object[]> arrayList = new ArrayList();
+            ArrayList<Object[]> arrayList = new ArrayList<>();
             int i2 = 0;
-            for (Queue toArray : this.queues.values()) {
-                Object toArray2 = toArray.toArray();
-                int length = toArray2.length + i2;
-                arrayList.add(toArray2);
-                i2 = length;
+            for (Queue array : this.queues.values()) {
+                Object[] array2 = array.toArray();
+                arrayList.add(array2);
+                i2 = array2.length + i2;
             }
             if (t1Arr.length >= i2) {
-                Arrays.fill(t1Arr, null);
+                Arrays.fill(t1Arr, (Object) null);
             } else {
                 t1Arr = new Object[i2];
             }

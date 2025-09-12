@@ -9,6 +9,7 @@ import android.opengl.GLUtils;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
 import com.lumiyaviewer.lumiya.render.RenderContext;
+import java.io.IOException;
 import java.io.InputStream;
 import javax.annotation.Nullable;
 
@@ -87,8 +88,11 @@ public class GLLoadedTexture extends GLResourceTexture {
             InputStream open = context.getAssets().open(str);
             Bitmap decodeStream = BitmapFactory.decodeStream(open);
             open.close();
-            return decodeStream != null ? new GLLoadedTexture(renderContext, decodeStream) : null;
-        } catch (Throwable e) {
+            if (decodeStream != null) {
+                return new GLLoadedTexture(renderContext, decodeStream);
+            }
+            return null;
+        } catch (IOException e) {
             Debug.Warning(e);
             return null;
         }

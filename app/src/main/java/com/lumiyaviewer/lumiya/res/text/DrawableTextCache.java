@@ -29,7 +29,8 @@ public class DrawableTextCache extends ResourceMemoryCache<DrawableTextParams, D
         this.fontSize = i;
     }
 
-    protected ResourceRequest<DrawableTextParams, DrawableTextBitmap> CreateNewRequest(DrawableTextParams drawableTextParams, ResourceManager<DrawableTextParams, DrawableTextBitmap> resourceManager) {
+    /* access modifiers changed from: protected */
+    public ResourceRequest<DrawableTextParams, DrawableTextBitmap> CreateNewRequest(DrawableTextParams drawableTextParams, ResourceManager<DrawableTextParams, DrawableTextBitmap> resourceManager) {
         return new TextGenRequest(drawableTextParams, this.fontSize, resourceManager);
     }
 }

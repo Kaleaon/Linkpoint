@@ -2,54 +2,60 @@ package com.lumiyaviewer.lumiya.render.glres;
 
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.render.RenderContext;
+import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue;
+import com.lumiyaviewer.lumiya.render.glres.GLSizedResource;
 import com.lumiyaviewer.lumiya.res.ResourceConsumer;
 import com.lumiyaviewer.lumiya.res.ResourceManager;
 import com.lumiyaviewer.lumiya.res.ResourceMemoryCache;
 import com.lumiyaviewer.lumiya.res.ResourceRequest;
 
 public abstract class GLResourceCache<ResourceParams, RawType, ResourceType extends GLSizedResource> extends ResourceMemoryCache<ResourceParams, ResourceType> {
-    private final GLLoadQueue loadQueue;
+    /* access modifiers changed from: private */
+    public final GLLoadQueue loadQueue;
 
-    private class LoadRequest<Raw extends RawType> extends ResourceRequest<ResourceParams, ResourceType> implements GLLoadable, ResourceConsumer {
+    private class LoadRequest<Raw extends RawType> extends ResourceRequest<ResourceParams, ResourceType> implements GLLoadQueue.GLLoadable, ResourceConsumer {
         private volatile boolean finalResult;
         private volatile boolean loadedFinal;
         private volatile ResourceType loadedResource;
         private volatile Raw rawResource;
 
-        public LoadRequest(ResourceParams resourceParams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
-            super(resourceParams, resourceManager);
+        public LoadRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
+            super(resourceparams, resourceManager);
         }
 
         public void GLCompleteLoad() {
-            GLSizedResource gLSizedResource;
+            ResourceType resourcetype;
             boolean z;
             synchronized (this) {
-                gLSizedResource = this.loadedResource;
+                resourcetype = this.loadedResource;
                 z = this.loadedFinal;
             }
             if (z) {
-                completeRequest(gLSizedResource);
+                completeRequest(resourcetype);
             } else {
-                intermediateResult(gLSizedResource);
+                intermediateResult(resourcetype);
             }
         }
 
         public int GLGetLoadSize() {
-            Object obj;
+            Raw raw;
             synchronized (this) {
-                obj = this.rawResource;
+                raw = this.rawResource;
             }
-            return obj != null ? GLResourceCache.this.GetResourceSize(obj) : 0;
+            if (raw != null) {
+                return GLResourceCache.this.GetResourceSize(raw);
+            }
+            return 0;
         }
 
-        public int GLLoad(RenderContext renderContext, GLLoadHandler gLLoadHandler) {
-            Object obj;
+        public int GLLoad(RenderContext renderContext, GLLoadQueue.GLLoadHandler gLLoadHandler) {
+            Raw raw;
             boolean z;
             synchronized (this) {
-                obj = this.rawResource;
+                raw = this.rawResource;
                 z = this.finalResult;
             }
-            GLSizedResource LoadResource = GLResourceCache.this.LoadResource(getParams(), obj, renderContext);
+            ResourceType LoadResource = GLResourceCache.this.LoadResource(getParams(), raw, renderContext);
             int loadedSize = LoadResource != null ? LoadResource.getLoadedSize() : 0;
             synchronized (this) {
                 this.loadedResource = LoadResource;
@@ -66,10 +72,10 @@ public abstract class GLResourceCache<ResourceParams, RawType, ResourceType exte
                 try {
                     synchronized (this) {
                         this.rawResource = obj;
-                        this.finalResult = z ^ 1;
+                        this.finalResult = !z;
                     }
                     GLResourceCache.this.loadQueue.add(this);
-                } catch (Throwable e) {
+                } catch (ClassCastException e) {
                     Debug.Warning(e);
                     completeRequest(null);
                 }
@@ -94,15 +100,20 @@ public abstract class GLResourceCache<ResourceParams, RawType, ResourceType exte
         this.loadQueue = gLLoadQueue;
     }
 
-    protected abstract void CancelRawResource(ResourceConsumer resourceConsumer);
+    /* access modifiers changed from: protected */
+    public abstract void CancelRawResource(ResourceConsumer resourceConsumer);
 
-    protected ResourceRequest<ResourceParams, ResourceType> CreateNewRequest(ResourceParams resourceParams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
-        return new LoadRequest(resourceParams, resourceManager);
+    /* access modifiers changed from: protected */
+    public ResourceRequest<ResourceParams, ResourceType> CreateNewRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
+        return new LoadRequest(resourceparams, resourceManager);
     }
 
-    protected abstract int GetResourceSize(RawType rawType);
+    /* access modifiers changed from: protected */
+    public abstract int GetResourceSize(RawType rawtype);
 
-    protected abstract ResourceType LoadResource(ResourceParams resourceParams, RawType rawType, RenderContext renderContext);
+    /* access modifiers changed from: protected */
+    public abstract ResourceType LoadResource(ResourceParams resourceparams, RawType rawtype, RenderContext renderContext);
 
-    protected abstract void RequestRawResource(ResourceParams resourceParams, ResourceConsumer resourceConsumer);
+    /* access modifiers changed from: protected */
+    public abstract void RequestRawResource(ResourceParams resourceparams, ResourceConsumer resourceConsumer);
 }

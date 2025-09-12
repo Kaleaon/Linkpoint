@@ -15,10 +15,10 @@ public class TerrainPatchGeometry {
     public static final int DrawPatchSize = 16;
     private static final int index_size_bytes = 3072;
     private static final int vertex_size_bytes = 9248;
-    private static float[] waterAmplitude = new float[]{0.5f, 0.5f, 0.3f, 0.4f};
-    private static float[] waterDirection = new float[]{1.0f, 0.3f, 0.4f, 0.75f, -0.5f, 0.7f, 0.63f, -0.3f};
-    private static float[] waterFrequency = new float[]{17.951958f, 12.566371f, 8.975979f, 15.707963f};
-    private static float[] waterPhase = new float[]{1.73f, 0.64f, 1.27f, 0.9f};
+    private static float[] waterAmplitude = {0.5f, 0.5f, 0.3f, 0.4f};
+    private static float[] waterDirection = {1.0f, 0.3f, 0.4f, 0.75f, -0.5f, 0.7f, 0.63f, -0.3f};
+    private static float[] waterFrequency = {17.951958f, 12.566371f, 8.975979f, 15.707963f};
+    private static float[] waterPhase = {1.73f, 0.64f, 1.27f, 0.9f};
     private static final int water_vertex_size_bytes = 3468;
     private final GLLoadableBuffer indexBuffer;
     private int index_count = 0;
@@ -28,7 +28,6 @@ public class TerrainPatchGeometry {
     private int water_index_count = 0;
 
     public TerrainPatchGeometry(TerrainPatchHeightMap terrainPatchHeightMap) {
-        int i;
         DirectByteBuffer directByteBuffer = new DirectByteBuffer((int) vertex_size_bytes);
         DirectByteBuffer directByteBuffer2 = new DirectByteBuffer((int) water_vertex_size_bytes);
         DirectByteBuffer directByteBuffer3 = new DirectByteBuffer((int) index_size_bytes);
@@ -41,63 +40,62 @@ public class TerrainPatchGeometry {
         float waterHeight = terrainPatchHeightMap.getWaterHeight();
         float[] heightArray = terrainPatchHeightMap.getHeightArray();
         float[] normalArray = terrainPatchHeightMap.getNormalArray();
+        int i = 0;
         int i2 = 0;
-        int i3 = 0;
         while (true) {
-            i = i2;
-            if (i >= 17) {
+            int i3 = i;
+            if (i3 >= 17) {
                 break;
             }
-            for (i2 = 0; i2 < 17; i2++) {
-                directByteBuffer.putFloat((float) i2);
-                directByteBuffer.putFloat((float) i);
-                directByteBuffer.putFloat(heightArray[i3 + i2]);
-                lLVector3.set(-normalArray[(i3 + i2) * 2], normalArray[((i3 + i2) * 2) + 1], 2.0f);
+            for (int i4 = 0; i4 < 17; i4++) {
+                directByteBuffer.putFloat((float) i4);
+                directByteBuffer.putFloat((float) i3);
+                directByteBuffer.putFloat(heightArray[i2 + i4]);
+                lLVector3.set(-normalArray[(i2 + i4) * 2], normalArray[((i2 + i4) * 2) + 1], 2.0f);
                 lLVector3.normVec();
                 directByteBuffer.putFloat(lLVector3.x);
                 directByteBuffer.putFloat(lLVector3.y);
                 directByteBuffer.putFloat(lLVector3.z);
-                float f = ((float) i) / 16.0f;
-                directByteBuffer.putFloat(((float) i2) / 16.0f);
-                directByteBuffer.putFloat(f);
-                directByteBuffer2.putFloat((float) i2);
-                directByteBuffer2.putFloat((float) i);
+                directByteBuffer.putFloat(((float) i4) / 16.0f);
+                directByteBuffer.putFloat(((float) i3) / 16.0f);
+                directByteBuffer2.putFloat((float) i4);
+                directByteBuffer2.putFloat((float) i3);
                 directByteBuffer2.putFloat(waterHeight);
             }
-            i3 += 17;
-            i2 = i + 1;
+            i2 += 17;
+            i = i3 + 1;
         }
         directByteBuffer3.position(0);
         directByteBuffer4.position(0);
-        i2 = 0;
-        i3 = 0;
+        int i5 = 0;
+        int i6 = 0;
         while (true) {
-            i = i2;
-            if (i < 16) {
-                for (i2 = 0; i2 < 16; i2++) {
-                    int i4 = i3 + i2;
-                    int i5 = i4 + 1;
-                    int i6 = i4 + 17;
-                    int i7 = i6 + 1;
-                    directByteBuffer3.putShort((short) i4);
-                    directByteBuffer3.putShort((short) i5);
-                    directByteBuffer3.putShort((short) i6);
-                    directByteBuffer3.putShort((short) i5);
-                    directByteBuffer3.putShort((short) i7);
-                    directByteBuffer3.putShort((short) i6);
+            int i7 = i5;
+            if (i7 < 16) {
+                for (int i8 = 0; i8 < 16; i8++) {
+                    int i9 = i6 + i8;
+                    int i10 = i9 + 1;
+                    int i11 = i9 + 17;
+                    int i12 = i11 + 1;
+                    directByteBuffer3.putShort((short) i9);
+                    directByteBuffer3.putShort((short) i10);
+                    directByteBuffer3.putShort((short) i11);
+                    directByteBuffer3.putShort((short) i10);
+                    directByteBuffer3.putShort((short) i12);
+                    directByteBuffer3.putShort((short) i11);
                     this.index_count += 6;
-                    if (Math.min(Math.min(Math.min(directByteBuffer.getFloat((i4 * 8) + 2), directByteBuffer.getFloat((i5 * 8) + 2)), directByteBuffer.getFloat((i6 * 8) + 2)), directByteBuffer.getFloat((i7 * 8) + 2)) <= waterHeight) {
-                        directByteBuffer4.putShort((short) i4);
-                        directByteBuffer4.putShort((short) i5);
-                        directByteBuffer4.putShort((short) i6);
-                        directByteBuffer4.putShort((short) i5);
-                        directByteBuffer4.putShort((short) i7);
-                        directByteBuffer4.putShort((short) i6);
+                    if (Math.min(Math.min(Math.min(directByteBuffer.getFloat((i9 * 8) + 2), directByteBuffer.getFloat((i10 * 8) + 2)), directByteBuffer.getFloat((i11 * 8) + 2)), directByteBuffer.getFloat((i12 * 8) + 2)) <= waterHeight) {
+                        directByteBuffer4.putShort((short) i9);
+                        directByteBuffer4.putShort((short) i10);
+                        directByteBuffer4.putShort((short) i11);
+                        directByteBuffer4.putShort((short) i10);
+                        directByteBuffer4.putShort((short) i12);
+                        directByteBuffer4.putShort((short) i11);
                         this.water_index_count += 6;
                     }
                 }
-                i3 += 17;
-                i2 = i + 1;
+                i6 += 17;
+                i5 = i7 + 1;
             } else {
                 this.vertexBuffer = new GLLoadableBuffer(directByteBuffer);
                 this.indexBuffer = new GLLoadableBuffer(directByteBuffer3);

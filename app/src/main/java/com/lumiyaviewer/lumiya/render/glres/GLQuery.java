@@ -4,14 +4,16 @@ import android.annotation.TargetApi;
 import android.opengl.GLES30;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.render.RenderContext;
-import com.lumiyaviewer.lumiya.render.glres.GLResourceManager.GLResourceReference;
+import com.lumiyaviewer.lumiya.render.glres.GLResourceManager;
 import javax.annotation.Nonnull;
 
 @TargetApi(18)
 public class GLQuery extends GLResource {
     private static final int MIN_OCCLUSION_QUERY_FRAMES = 0;
-    private static ThreadLocal<int[]> idQuery = new ThreadLocal<int[]>() {
-        protected int[] initialValue() {
+    /* access modifiers changed from: private */
+    public static ThreadLocal<int[]> idQuery = new ThreadLocal<int[]>() {
+        /* access modifiers changed from: protected */
+        public int[] initialValue() {
             return new int[1];
         }
     };
@@ -20,7 +22,7 @@ public class GLQuery extends GLResource {
     private OcclusionQueryResult queryResult = OcclusionQueryResult.NotReady;
     private int queryStartedFrameCount = 0;
 
-    private static class GLQueryReference extends GLResourceReference {
+    private static class GLQueryReference extends GLResourceManager.GLResourceReference {
         GLQueryReference(GLResource gLResource, int i, GLResourceManager gLResourceManager) {
             super(gLResource, i, gLResourceManager);
         }
@@ -41,11 +43,12 @@ public class GLQuery extends GLResource {
 
     public GLQuery(GLResourceManager gLResourceManager) {
         super(gLResourceManager);
-        GLQueryReference gLQueryReference = new GLQueryReference(this, this.handle, gLResourceManager);
+        new GLQueryReference(this, this.handle, gLResourceManager);
     }
 
-    protected int Allocate(GLResourceManager gLResourceManager) {
-        int[] iArr = (int[]) idQuery.get();
+    /* access modifiers changed from: protected */
+    public int Allocate(GLResourceManager gLResourceManager) {
+        int[] iArr = idQuery.get();
         GLES30.glGenQueries(1, iArr, 0);
         return iArr[0];
     }
@@ -63,18 +66,18 @@ public class GLQuery extends GLResource {
     }
 
     public boolean checkResult() {
-        if (this.isQueryRunning) {
-            int[] iArr = (int[]) idQuery.get();
-            GLES30.glGetQueryObjectuiv(this.handle, 34919, iArr, 0);
-            if (iArr[0] == 0) {
-                return false;
-            }
-            this.isQueryRunning = false;
-            GLES30.glGetQueryObjectuiv(this.handle, 34918, iArr, 0);
-            this.queryResult = iArr[0] != 0 ? OcclusionQueryResult.Visible : OcclusionQueryResult.Invisible;
+        if (!this.isQueryRunning) {
+            this.queryResult = OcclusionQueryResult.NotReady;
             return true;
         }
-        this.queryResult = OcclusionQueryResult.NotReady;
+        int[] iArr = idQuery.get();
+        GLES30.glGetQueryObjectuiv(this.handle, 34919, iArr, 0);
+        if (iArr[0] == 0) {
+            return false;
+        }
+        this.isQueryRunning = false;
+        GLES30.glGetQueryObjectuiv(this.handle, 34918, iArr, 0);
+        this.queryResult = iArr[0] != 0 ? OcclusionQueryResult.Visible : OcclusionQueryResult.Invisible;
         return true;
     }
 
