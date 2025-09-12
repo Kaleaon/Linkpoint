@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId "com.lumiyaviewer.lumiya"
-        minSdk 14
+        minSdk 21  // Updated minimum SDK for modern APIs
         targetSdk 34
         versionCode 67
         versionName "3.4.3"
@@ -24,17 +24,25 @@ android {
         // Enable multidex support for apps with more than 64K methods
         multiDexEnabled true
         
-        // NDK configuration for native code (temporarily disabled for testing resource conflicts)
-        // ndk {
-        //     abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-        // }
-        
+        // NDK configuration temporarily disabled to focus on resource conflicts
+        // Will be re-enabled once build system is stable
         // externalNativeBuild {
         //     cmake {
-        //         cppFlags "-std=c++17 -O3 -ffast-math"
+        //         cppFlags "-std=c++20 -O3 -ffast-math"  // Updated to C++20
         //         arguments "-DANDROID_STL=c++_shared"
         //     }
         // }
+    }
+
+    // Fix resource conflicts
+    packagingOptions {
+        pickFirst '**/libjnidispatch.so'
+        pickFirst '**/libopenjpeg.so'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE*'
+        exclude 'META-INF/NOTICE*'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
     }
 
     buildTypes {
@@ -49,20 +57,9 @@ android {
         }
     }
 
-    // Resolve resource conflicts
-    packagingOptions {
-        pickFirst '**/libjnidispatch.so'
-        pickFirst '**/libopenjpeg.so'
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/LICENSE*'
-        exclude 'META-INF/NOTICE*'
-        exclude 'META-INF/INDEX.LIST'
-        exclude 'META-INF/io.netty.versions.properties'
-    }
-
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11  // Updated Java version
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     // AndroidX migration settings
@@ -77,11 +74,12 @@ android {
         }
     }
 
-    // NDK build configuration (temporarily disabled for testing resource conflicts)
+    // NDK build configuration - temporarily disabled to focus on resource fixes
+    // Will be re-enabled once build system is stable
     // externalNativeBuild {
     //     cmake {
     //         path "src/main/cpp/CMakeLists.txt"
-    //         version "3.31.5"
+    //         version "3.22.1"  // Updated CMake version
     //     }
     // }
 }
@@ -111,10 +109,12 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     
-    // Global dependency exclusions to prevent conflicts
+    // Comprehensive dependency exclusions to prevent AndroidX conflicts
     configurations.all {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
         exclude group: 'commons-logging', module: 'commons-logging'  
+        exclude group: 'android.arch.lifecycle', module: 'common'
+        exclude group: 'com.android.support'  // Exclude entire old support library
         exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.android.support', module: 'support-v4'
         exclude group: 'com.android.support', module: 'appcompat-v7'

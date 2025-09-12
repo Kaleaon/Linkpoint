@@ -14,11 +14,20 @@ import androidx.core.app.NotificationCompat;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import com.lumiyaviewer.lumiya.fixes.ResourceConflictResolver;
 
+/**
+ * Main Application class for Lumiya Viewer.
+ * 
+ * Handles global application state, resource conflict resolution, and system-wide initialization.
+ * Updated to use AndroidX libraries and modern Android development practices.
+ * Extends MultiDexApplication to support large applications with 64K+ methods.
+ */
 public class LumiyaApp extends MultiDexApplication {
+    private static final String TAG = "LumiyaApp";
     private static DisplayMetrics displayMetrics = new DisplayMetrics();
     private static Context mContext;
     private static SharedPreferences prefs;
@@ -27,6 +36,7 @@ public class LumiyaApp extends MultiDexApplication {
         try {
             return mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionName;
         } catch (NameNotFoundException e) {
+            Log.w(TAG, "Could not get app version", e);
             return "";
         }
     }
@@ -54,34 +64,53 @@ public class LumiyaApp extends MultiDexApplication {
         if (string.equals("always")) {
             return true;
         }
-        Display defaultDisplay = ((WindowManager) context.getSystemService("window")).getDefaultDisplay();
+        Display defaultDisplay = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         if (string.equals("landscape")) {
             return defaultDisplay.getWidth() > defaultDisplay.getHeight();
         } else {
             defaultDisplay.getMetrics(displayMetrics);
             float f = ((float) displayMetrics.heightPixels) / displayMetrics.ydpi;
             float f2 = ((float) displayMetrics.widthPixels) / displayMetrics.xdpi;
-            if (Math.sqrt((double) ((f * f) + (f2 * f2))) <= 6.5d || f2 < 5.0f) {
+            double diagonalInches = Math.sqrt((double) ((f * f) + (f2 * f2)));
+            if (diagonalInches <= 6.5d || f2 < 5.0f) {
                 return false;
             }
-            Debug.Printf("LumiyaApp: Display width in dp: %f, xInches %.1f, diag %.1f", Float.valueOf(((float) defaultDisplay.getWidth()) / displayMetrics.density), Float.valueOf(f2), Double.valueOf(r4));
+            Debug.Printf("LumiyaApp: Display width in dp: %f, xInches %.1f, diag %.1f", 
+                ((float) defaultDisplay.getWidth()) / displayMetrics.density, f2, diagonalInches);
             return ((float) defaultDisplay.getWidth()) / displayMetrics.density >= 1000.0f;
         }
     }
 
     public static void restartApp() {
-        ((AlarmManager) getContext().getSystemService(NotificationCompat.CATEGORY_ALARM)).set(1, System.currentTimeMillis() + 1000, PendingIntent.getActivity(getContext(), 0, new Intent(getContext(), LauncherActivity.class), 268435456));
-        System.exit(0);
+        try {
+            AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+            PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, 
+                new Intent(getContext(), LauncherActivity.class), 
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent);
+            System.exit(0);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to restart app", e);
+        }
     }
 
+    @Override
     public void onCreate() {
         super.onCreate();
+        
+        Log.i(TAG, "Lumiya Application starting up");
+        
+        // Set global context
         mContext = this;
         
-        // Initialize resource conflict resolver
+        // CRITICAL: Initialize resource conflict resolver before any other initialization
+        // This fixes build-breaking resource conflicts between AndroidX and support libraries
         ResourceConflictResolver.initialize(this);
         
+        // Initialize global options after resource conflicts are resolved
         GlobalOptions.getInstance().initialize();
+        
+        Log.i(TAG, "Lumiya Application initialization complete");
     }
 
     @Override
