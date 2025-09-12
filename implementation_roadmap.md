@@ -53,6 +53,12 @@ import android.util.Log;
  * @since 1.0
  */
 public class HTTP2CapsClient extends AbstractCapsHandler {
+    private static final String TAG = "HTTP2CapsClient";
+    private static final String USER_AGENT = "Linkpoint-Mobile/1.0";
+    private static final int CONNECTION_POOL_SIZE = 5;
+    private static final long CONNECTION_KEEP_ALIVE_MINUTES = 5;
+    private static final int SHUTDOWN_TIMEOUT_SECONDS = 5;
+    
     private final OkHttpClient http2Client;
     private final ConcurrentHashMap<String, CompletableFuture<CapsResponse>> pendingRequests;
     private final ExecutorService asyncExecutor;
@@ -71,7 +77,7 @@ public class HTTP2CapsClient extends AbstractCapsHandler {
         this.legacyManager = Objects.requireNonNull(legacyManager, "legacyManager cannot be null");
         this.http2Client = new OkHttpClient.Builder()
             .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
-            .connectionPool(new ConnectionPool(5, 5, TimeUnit.MINUTES))
+            .connectionPool(new ConnectionPool(CONNECTION_POOL_SIZE, CONNECTION_KEEP_ALIVE_MINUTES, TimeUnit.MINUTES))
             .build();
         this.asyncExecutor = Executors.newCachedThreadPool(r -> {
             Thread thread = new Thread(r, "HTTP2CapsClient-Worker");
@@ -105,7 +111,7 @@ public class HTTP2CapsClient extends AbstractCapsHandler {
             Request http2Request = new Request.Builder()
                 .url(request.getUrl())
                 .method(request.getMethod(), createRequestBody(request))
-                .addHeader("User-Agent", "Linkpoint-Mobile/1.0")
+                .addHeader("User-Agent", USER_AGENT)
                 .build();
                 
             // Use try-with-resources for proper response cleanup
@@ -116,7 +122,7 @@ public class HTTP2CapsClient extends AbstractCapsHandler {
                 return parseCapsResponse(response);
             } catch (IOException e) {
                 // Fallback to legacy CAPS on network errors - use async chaining to avoid blocking
-                Log.w("HTTP2CapsClient", "HTTP/2 request failed, falling back to legacy", e);
+                Log.w(TAG, "HTTP/2 request failed, falling back to legacy", e);
                 return legacyManager.sendCapsRequest(request);
             }
         }, asyncExecutor);
@@ -150,8 +156,8 @@ public class HTTP2CapsClient extends AbstractCapsHandler {
         try {
             if (asyncExecutor != null && !asyncExecutor.isShutdown()) {
                 asyncExecutor.shutdown();
-                if (!asyncExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                    Log.w("HTTP2CapsClient", "Executor did not terminate gracefully, forcing shutdown");
+                if (!asyncExecutor.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                    Log.w(TAG, "Executor did not terminate gracefully, forcing shutdown");
                     asyncExecutor.shutdownNow();
                 }
             }
@@ -164,7 +170,7 @@ public class HTTP2CapsClient extends AbstractCapsHandler {
             pendingRequests.clear();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            Log.w("HTTP2CapsClient", "Interrupted during shutdown", e);
+            Log.w(TAG, "Interrupted during shutdown", e);
         }
     }
 }
@@ -188,6 +194,12 @@ import android.util.Log;
  * and designed for mobile network conditions.
  */
 public class WebSocketEventStream {
+    private static final String TAG = "WebSocketEventStream";
+    private static final int WEBSOCKET_CLOSE_CODE_NORMAL = 1000;
+    private static final String WEBSOCKET_CLOSE_REASON = "Client shutting down";
+    private static final float LOW_BATTERY_THRESHOLD = 0.2f;
+    private static final long BATTERY_OPTIMIZATION_RATE_LIMIT = 5000; // 5 seconds
+    
     private volatile WebSocket webSocket; // Use volatile for thread safety
     private final EventBus eventBus; // Use existing Linkpoint EventBus
     private final AtomicBoolean isConnected = new AtomicBoolean(false);
@@ -259,17 +271,37 @@ public class WebSocketEventStream {
             }
         } catch (JsonParseException | IllegalArgumentException e) {
             // Log specific parsing errors - more specific than generic Exception
-            Log.w("WebSocketEventStream", "Failed to parse WebSocket message", e);
+            Log.w(TAG, "Failed to parse WebSocket message", e);
         }
     }
     
     // Mobile battery optimization
     public void enableBatteryOptimization() {
-        if (getBatteryLevel() < 0.2f) { // Less than 20% battery
+        if (getBatteryLevel() < LOW_BATTERY_THRESHOLD) { // Less than 20% battery
             // Reduce WebSocket message frequency
-            setMessageRateLimit(5000); // 5 second intervals
+            setMessageRateLimit(BATTERY_OPTIMIZATION_RATE_LIMIT); // 5 second intervals
             // Fall back to UDP for critical messages only
             udpFallback.enableCriticalOnlyMode();
+        }
+    }
+    
+    /**
+     * Properly shuts down the WebSocket connection and releases resources.
+     * 
+     * <p>This method ensures graceful cleanup of the WebSocket connection
+     * and prevents resource leaks.
+     */
+    public void shutdown() {
+        isConnected.set(false);
+        
+        if (webSocket != null) {
+            try {
+                webSocket.close(WEBSOCKET_CLOSE_CODE_NORMAL, WEBSOCKET_CLOSE_REASON);
+            } catch (Exception e) {
+                Log.w(TAG, "Error during WebSocket shutdown", e);
+            } finally {
+                webSocket = null;
+            }
         }
     }
 }
@@ -640,8 +672,8 @@ public class EnhancedModernTextureManager extends ModernTextureManager {
             // Try disk cache
             return Optional.of(
                 CompletableFuture.supplyAsync(() -> {
-                    try {
-                        DiskLRUCache.Snapshot snapshot = diskCache.get(textureId.toString());
+                    // Use try-with-resources for proper snapshot cleanup
+                    try (DiskLRUCache.Snapshot snapshot = diskCache.get(textureId.toString())) {
                         if (snapshot != null) {
                             Texture diskTexture = loadTextureFromDisk(snapshot);
                             memoryCache.put(textureId, diskTexture); // Promote to memory
@@ -663,10 +695,12 @@ public class EnhancedModernTextureManager extends ModernTextureManager {
             
             // Store in disk cache asynchronously
             CompletableFuture.runAsync(() -> {
-                try {
-                    DiskLRUCache.Editor editor = diskCache.edit(textureId.toString());
+                // Use try-with-resources for proper editor cleanup
+                try (DiskLRUCache.Editor editor = diskCache.edit(textureId.toString())) {
                     if (editor != null) {
-                        saveTextureToDisk(texture, editor.newOutputStream(0));
+                        try (OutputStream outputStream = editor.newOutputStream(0)) {
+                            saveTextureToDisk(texture, outputStream);
+                        }
                         editor.commit();
                     }
                 } catch (IOException e) {
@@ -677,6 +711,27 @@ public class EnhancedModernTextureManager extends ModernTextureManager {
             // Optionally backup to cloud for high-priority textures
             if (priority == TexturePriority.HIGH && cloudBackup.isEnabled()) {
                 cloudBackup.backupAsync(textureId, texture);
+            }
+        }
+        
+        /**
+         * Properly closes the cache and releases all resources.
+         * 
+         * <p>This method should be called when the cache is no longer needed
+         * to prevent resource leaks and ensure data integrity.
+         */
+        public void close() {
+            try {
+                if (diskCache != null) {
+                    diskCache.close();
+                }
+                if (cloudBackup != null) {
+                    cloudBackup.shutdown();
+                }
+                // Memory cache will be garbage collected
+                memoryCache.evictAll();
+            } catch (IOException e) {
+                Log.w("TieredAssetCache", "Error closing cache resources", e);
             }
         }
     }
