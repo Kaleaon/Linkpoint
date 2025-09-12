@@ -20,6 +20,24 @@
         <item name="dashedSeparatorColor">@android:color/darker_gray</item>
         <item name="IconMaterialVoiceCallThemed">@android:drawable/ic_btn_speak_now</item>
         <item name="roundRectShape">@android:drawable/dialog_frame</item>
+        <!-- More Lumiya attributes -->
+        <item name="chatSessionSeparatorColor">@android:color/darker_gray</item>
+        <item name="outerRingGap">2dp</item>
+        <item name="innerRingThickness">2dp</item>
+        <item name="outerRingThickness">3dp</item>
+        <item name="onlineIndicatorColor">@android:color/holo_green_light</item>
+        <item name="withButteryProgressBar">true</item>
+        <!-- Icons -->
+        <item name="IconGridLocked">@android:drawable/ic_lock_lock</item>
+        <item name="IconMaterialCheckCircle">@android:drawable/checkbox_on_background</item>
+        <item name="IconUserObject">@android:drawable/ic_menu_info_details</item>
+        <item name="MenuIconCloseThemed">@android:drawable/ic_menu_close_clear_cancel</item>
+        <item name="MenuIconObjects">@android:drawable/ic_menu_agenda</item>
+        <item name="SmallIconDollar">@android:drawable/ic_dialog_info</item>
+        <item name="SmallIconHand">@android:drawable/ic_menu_manage</item>
+        <item name="IconExpandDown">@android:drawable/arrow_down_float</item>
+        <item name="IconExpandRight">@android:drawable/ic_media_play</item>
+        <item name="objectPopupsCounterBackground">@android:color/holo_orange_dark</item>
     </style>
     
     <style name="Theme.Lumiya.Light" parent="Theme.AppCompat.DayNight">
@@ -138,5 +156,16 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowDisablePreview">true</item>
         <item name="android:windowActionBar">false</item>
+    </style>
+    
+    <!-- Missing theme styles -->
+    <style name="Theme.Light.Panel" parent="Theme.AppCompat.Light">
+        <!-- Light panel style for inventory -->
+    </style>
+    
+    <style name="Widget.ProgressBar.Small" parent="Widget.AppCompat.ProgressBar">
+        <item name="android:layout_width">16dp</item>
+        <item name="android:layout_height">16dp</item>
+        <item name="android:indeterminateOnly">true</item>
     </style>
 </resources>
