@@ -748,6 +748,25 @@ _L6:
 
     public void requestUpdateAvatarParcelData()
     {
-        agentCircuit.execute(new _2D_.Lambda.eaDiotW55nmaHN5_b1ikeJpLLsk(this));
+        agentCircuit.execute(() -> m212com_lumiyaviewer_lumiya_slproto_modules_SLMinimapmthref0());
+    }
+
+    /* access modifiers changed from: private */
+    /* renamed from: updateAvatarParcelData */
+    public void m212com_lumiyaviewer_lumiya_slproto_modules_SLMinimapmthref0() {
+        ParcelData parcelData = null;
+        if (this.myAvatarParcelDataIndex >= 0) {
+            parcelData = this.parcels.get(Integer.valueOf(this.parcelIDs[this.myAvatarParcelDataIndex]));
+        }
+        if (parcelData != null && this.afterTeleport) {
+            this.afterTeleport = false;
+            this.userManager.getChatterList().getActiveChattersManager().notifyTeleportComplete(parcelData.getName());
+        }
+        SLVoice sLVoice = this.agentCircuit.getModules().voice;
+        if (parcelData != null) {
+            sLVoice.setParcelInfo(parcelData.getName(), parcelData.getVoiceChannelID());
+        } else {
+            sLVoice.setParcelInfo(null, null);
+        }
     }
 }

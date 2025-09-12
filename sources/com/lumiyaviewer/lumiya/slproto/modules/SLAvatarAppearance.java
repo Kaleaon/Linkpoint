@@ -240,8 +240,8 @@ public class SLAvatarAppearance extends SLModule
         inventory = slinventory;
         parcelInfo = slagentcircuit.getGridConnection().parcelInfo;
         userManager = UserManager.getUserManager(slagentcircuit.getAgentUUID());
-        currentOutfitFolder = new SubscriptionData(slagentcircuit, new _2D_.Lambda.Jp5Too8LbDpaKzeYKjkvQvC1hZo(this));
-        findCofFolder = new SubscriptionData(slagentcircuit, new _2D_.Lambda.Jp5Too8LbDpaKzeYKjkvQvC1hZo._cls1(this));
+        currentOutfitFolder = new SubscriptionData(slagentcircuit, obj -> m200com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearancemthref0((InventoryEntryList) obj));
+        findCofFolder = new SubscriptionData(slagentcircuit, obj -> onCofFolderEntry((InventoryEntryList) obj));
         if (userManager != null)
         {
             wornItemsResultHandler = userManager.wornItems().attachRequestHandler(wornItemsRequestHandler);
@@ -2309,5 +2309,20 @@ _L3:
     public void onWearableStatusChanged(SLWearable slwearable)
     {
         updateIfWearablesReady();
+    }
+
+    /* access modifiers changed from: private */
+    /* renamed from: onCurrentOutfitFolder */
+    public void m200com_lumiyaviewer_lumiya_slproto_modules_SLAvatarAppearancemthref0(InventoryEntryList inventoryEntryList) {
+        SLInventoryEntry folder;
+        if (inventoryEntryList != null && (folder = inventoryEntryList.getFolder()) != null && Objects.equal(folder.sessionID, this.agentCircuit.circuitInfo.sessionID)) {
+            Debug.Log("AvatarAppearance: COF has been fetched from inventory.");
+            UpdateWearableNames();
+            this.cofReady = true;
+            UpdateCurrentOutfitLink(inventoryEntryList);
+            ProcessMultiLayer();
+            UpdateCOFContents();
+            RequestServerRebake();
+        }
     }
 }
