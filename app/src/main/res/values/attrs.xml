@@ -49,4 +49,14 @@
     <attr name="IconExpandDown" format="reference" />
     <attr name="IconExpandRight" format="reference" />
     <attr name="objectPopupsCounterBackground" format="color|reference" />
+    
+    <!-- Missing attributes for layout files -->
+    <attr name="MenuIconSearchThemed" format="reference" />
+    <attr name="colorContentBackground" format="color|reference" />
+    <attr name="navDrawerBackgroundColor" format="color|reference" />
+    <attr name="IconMaterialMicLight" format="reference" />
+    <attr name="IconMaterialMicOffThemed" format="reference" />
+    <attr name="IconMaterialLoudspeakerThemed" format="reference" />
+    <attr name="IconMaterialBluetoothThemed" format="reference" />
+    
 </resources>

@@ -38,6 +38,15 @@
         <item name="IconExpandDown">@android:drawable/arrow_down_float</item>
         <item name="IconExpandRight">@android:drawable/ic_media_play</item>
         <item name="objectPopupsCounterBackground">@android:color/holo_orange_dark</item>
+        
+        <!-- Missing attributes for layout compatibility -->
+        <item name="MenuIconSearchThemed">@android:drawable/ic_menu_search</item>
+        <item name="colorContentBackground">@android:color/background_dark</item>
+        <item name="navDrawerBackgroundColor">@android:color/background_dark</item>
+        <item name="IconMaterialMicLight">@android:drawable/ic_btn_speak_now</item>
+        <item name="IconMaterialMicOffThemed">@android:drawable/ic_btn_speak_now</item>
+        <item name="IconMaterialLoudspeakerThemed">@android:drawable/stat_sys_speakerphone</item>
+        <item name="IconMaterialBluetoothThemed">@android:drawable/stat_sys_data_bluetooth</item>
     </style>
     
     <style name="Theme.Lumiya.Light" parent="Theme.AppCompat.DayNight">
@@ -59,6 +68,15 @@
         <item name="dashedSeparatorColor">@android:color/darker_gray</item>
         <item name="IconMaterialVoiceCallThemed">@android:drawable/ic_btn_speak_now</item>
         <item name="roundRectShape">@android:drawable/dialog_frame</item>
+        
+        <!-- Missing attributes for layout compatibility -->
+        <item name="MenuIconSearchThemed">@android:drawable/ic_menu_search</item>
+        <item name="colorContentBackground">@android:color/background_light</item>
+        <item name="navDrawerBackgroundColor">@android:color/background_light</item>
+        <item name="IconMaterialMicLight">@android:drawable/ic_btn_speak_now</item>
+        <item name="IconMaterialMicOffThemed">@android:drawable/ic_btn_speak_now</item>
+        <item name="IconMaterialLoudspeakerThemed">@android:drawable/stat_sys_speakerphone</item>
+        <item name="IconMaterialBluetoothThemed">@android:drawable/stat_sys_data_bluetooth</item>
     </style>
     
     <style name="Theme.Lumiya.Light.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
@@ -168,4 +186,24 @@
         <item name="android:layout_height">16dp</item>
         <item name="android:indeterminateOnly">true</item>
     </style>
+    
+    <!-- Missing styles causing build errors -->
+    <style name="TextAppearance.Material.Body2" parent="TextAppearance.AppCompat.Body2">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+    
+    <style name="Preference_TextAppearanceMaterialSubhead" parent="TextAppearance.AppCompat.Subhead">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+    
+    <style name="ThemeOverlay.Lumiya.PopupMenu" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:popupBackground">@android:drawable/dialog_frame</item>
+    </style>
+    
+    <style name="ThemeOverlay.Lumiya.ActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="colorControlNormal">?attr/colorOnPrimary</item>
+    </style>
+    
 </resources>
