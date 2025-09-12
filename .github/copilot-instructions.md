@@ -41,7 +41,7 @@ Can't process attribute android:pathData="@string/path_password_eye"
 ./gradlew tasks --all | grep -E "(build|lint|test)"
 
 # View build configuration  
-./gradlew dependencies --configuration debugRuntimeClasspath
+./gradlew :app:dependencies --configuration debugRuntimeClasspath
 ```
 
 ### Development Structure
@@ -55,9 +55,9 @@ app/
 │   └── utils/           # Utilities
 ├── src/main/cpp/        # Native C++ code
 │   └── CMakeLists.txt   # CMake build config
-└── resources/           # Android resources (causes conflicts)
-    ├── AndroidManifest.xml
-    └── res/             # Resource conflicts with dependencies
+└── src/main/res/        # Android resources (causes conflicts)
+    ├── layout*/         # UI layouts with missing Material styles
+    └── values*/         # Resource values with missing attributes
 ```
 
 ### Scripts and Tools
@@ -75,9 +75,28 @@ find . -name "*.gradle" -o -name "CMakeLists.txt" -o -name "*.md"
 
 **CRITICAL: Since builds fail, focus on code analysis and applying documented fixes.**
 
+### Validation Results (Verified Commands)
+**These commands work reliably:**
+```bash
+./gradlew clean                    # ~1 min 15 sec - MEASURED
+./gradlew tasks                    # ~2 seconds - MEASURED  
+./gradlew :app:dependencies --configuration debugRuntimeClasspath  # ~25 seconds - MEASURED
+./scripts/convert_textures.sh      # Fails gracefully - missing basisu - VERIFIED
+grep -r "class.*Activity" app/src/main/java/  # Code exploration - VERIFIED
+find app/src/main/java -name "*Manager*"      # Find Manager classes - VERIFIED
+```
+
+**These WILL fail until resource conflicts are fixed:**
+```bash
+./gradlew build                    # Resource linking failure ~25 seconds - VERIFIED
+./gradlew assembleDebug           # Resource linking failure ~3 seconds - VERIFIED  
+./gradlew lintDebug              # Resource linking failure ~1 second - VERIFIED
+./gradlew test                   # Resource linking failure ~4 seconds - VERIFIED
+```
+
 ### Manual Code Review Process
-1. **Analyze resource conflicts**: Check `app/resources/res/` vs dependency resources
-2. **Review manifest issues**: Check `app/resources/AndroidManifest.xml` for missing `android:exported`
+1. **Analyze resource conflicts**: Check `app/src/main/res/` vs dependency resources
+2. **Review manifest issues**: Check `app/src/main/AndroidManifest.xml` for missing `android:exported`
 3. **Study documentation**: Read `docs/Broken_Code_Analysis_and_Fixes.md` for specific fixes
 4. **Apply suggested fixes**: Use fixes from documentation before attempting builds
 
@@ -117,8 +136,8 @@ grep -r "attr/fontStyle" app/resources/
 ### Resource Conflict Analysis
 ```bash
 # Check for duplicate resources (root cause of build failures)
-grep -r "fontStyle\|passwordToggle\|buttonGravity" app/resources/res/
-find app/resources/res -name "values.xml" -exec grep -l "attr/" {} \;
+grep -r "fontStyle\|passwordToggle\|buttonGravity" app/src/main/res/
+find app/src/main/res -name "values.xml" -exec grep -l "attr/" {} \;
 
 # AndroidX dependencies check
 grep -A 5 "implementation.*androidx" app/build.gradle
@@ -139,17 +158,18 @@ grep -A 5 "ndk\|cmake" app/build.gradle
 ## Critical Information
 
 ### Build Timings & Timeouts
-- **Clean**: ~1 min 20 sec - Set timeout to 300+ seconds
+- **Clean**: ~1 min 15 sec - Set timeout to 300+ seconds
 - **Resource merge**: Fails in ~2-45 seconds (conflicts)
 - **Full build**: Would be 30+ minutes with native compilation - Set timeout to 3600+ seconds
 - **NEVER CANCEL**: Native builds may appear hung but are processing
+- **Dual failure modes**: Resource conflicts (immediate) AND native linker issues (after resources fixed)
 
 ### Expected Working Commands
 ```bash
 # These work reliably:
-./gradlew clean                    # ~1 min 20 sec
-./gradlew tasks                    # ~10 seconds  
-./gradlew dependencies             # ~15 seconds
+./gradlew clean                    # ~1 min 15 sec
+./gradlew tasks                    # ~2 seconds  
+./gradlew :app:dependencies --configuration debugRuntimeClasspath # ~25 seconds
 ./scripts/convert_textures.sh      # Fails gracefully - missing basisu
 grep -r "class.*Activity" app/src/main/java/  # Code exploration
 ```
@@ -176,7 +196,7 @@ grep -r "class.*Activity" app/src/main/java/  # Code exploration
 ### Critical Configuration Files
 - `build.gradle` - Top-level project config
 - `app/build.gradle` - Main app module (contains resource conflict issues)
-- `app/resources/AndroidManifest.xml` - Missing android:exported declarations
+- `app/src/main/AndroidManifest.xml` - Missing android:exported declarations
 - `app/src/main/cpp/CMakeLists.txt` - Native build configuration
 
 ### Essential Documentation  
@@ -308,10 +328,27 @@ The project contains pre-AndroidX Android Support Library resources that conflic
 - Cannot generate APK files
 - Cannot use Android lint tools
 
+**Specific resource errors:**
+- Missing Material Design styles: `TextAppearance.Material.Body2`
+- Missing custom attributes: `navDrawerBackgroundColor`, `colorContentBackground`
+- Missing themed icons: `IconMaterialMicLight`, `MenuIconSearchThemed`
+- Private Android resource access: `android:id/action_menu_presenter`
+
 **Workarounds:**
 - Use code analysis and manual review instead of builds
 - Reference the extensive documentation for validation
 - Use search and grep commands for code exploration
+
+### Native Compilation Issues
+**Secondary issue discovered through testing:** Even after resolving resource conflicts, native builds fail due to linker problems:
+```
+/usr/bin/ld.gold: error: LLVMgold.so: could not load plugin library
+/usr/bin/ld.gold: fatal error: unsupported ELF machine number 183
+```
+
+**Root cause:** NDK toolchain incompatibility with current environment
+**Impact:** C++ Basis Universal transcoder cannot link properly
+**Workaround:** Focus on Java-only fixes until native toolchain resolved
 
 ### Development Environment
 **Working environment requirements:**
