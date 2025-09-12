@@ -8,4 +8,25 @@
     <attr name="CardViewDisabledText" format="color|reference" />
     <attr name="CardableBackground" format="color|reference" />
     <attr name="ColorCardCaption" format="color|reference" />
+    
+    <!-- Material Design attributes -->
+    <attr name="textColorError" format="color|reference" />
+    <attr name="controlLabelColor" format="color|reference" />
+    
+    <!-- Lumiya-specific UI attributes -->
+    <attr name="buttonShapeMoveControl" format="reference" />
+    <attr name="TranslucentBackground" format="color|reference" />
+    <attr name="IconExpandMore" format="reference" />
+    <attr name="IconSendMessage" format="reference" />
+    <attr name="chatBubbleText" format="color|reference" />
+    
+    <!-- PagerSlidingTabStrip attributes -->
+    <attr name="pstsTabTextColor" format="color|reference" />
+    <attr name="pstsIndicatorColor" format="color|reference" />
+    <attr name="pstsShouldExpand" format="boolean" />
+    
+    <!-- Additional Lumiya attributes -->
+    <attr name="dashedSeparatorColor" format="color|reference" />
+    <attr name="IconMaterialVoiceCallThemed" format="reference" />
+    <attr name="roundRectShape" format="reference" />
 </resources>
