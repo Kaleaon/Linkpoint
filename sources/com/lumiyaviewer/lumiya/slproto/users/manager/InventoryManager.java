@@ -511,4 +511,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     public void setRootFolder(UUID uuid) {
         this.rootFolderID.set(uuid);
     }
+
+    public static boolean m325lambda$com_lumiyaviewer_lumiya_slproto_users_manager_InventoryManager_6838(InventoryQuery inventoryQuery) {
+        // Lambda method implementation for filtering or validation
+        return inventoryQuery != null;
+    }
 }

@@ -1347,4 +1347,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.generic.
         chatMessage.setViewType(getViewType().ordinal());
         this.source.serializeTo(chatMessage);
     }
+
+    public static ChatEventViewHolder m151com_lumiyaviewer_lumiya_slproto_chat_generic_SLChatEvent$ChatMessageViewTypemthref0(View view, RecyclerView.Adapter adapter) {
+        // Lambda method implementation for creating ChatEventViewHolder
+        return new ChatEventViewHolder(view, adapter);
+    }
 }

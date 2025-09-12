@@ -66,4 +66,8 @@ public class SLThreadingCircuit extends SLCircuit implements Executor {
     /* synthetic */ void handleMessage(SLMessage sLMessage) {
         sLMessage.Handle(this);
     }
+
+    public void m136lambda$com_lumiyaviewer_lumiya_slproto_SLThreadingCircuit_1833(SLMessage sLMessage) {
+        handleMessage(sLMessage);
+    }
 }

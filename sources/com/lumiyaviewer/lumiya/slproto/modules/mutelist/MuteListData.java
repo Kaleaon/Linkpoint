@@ -112,6 +112,10 @@ public class MuteListData {
         return false;
     }
 
+    public static boolean m228lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795(MuteListEntry muteListEntry, Map.Entry entry) {
+        return isEntryNameNotEqual(muteListEntry, entry);
+    }
+
     public MuteListData Block(MuteListEntry muteListEntry) {
         MuteListKey muteListKey = new MuteListKey(muteListEntry);
         if (muteListKey.muteType == MuteType.BY_NAME) {

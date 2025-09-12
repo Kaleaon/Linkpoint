@@ -33,4 +33,11 @@ public class SearchManager {
     public SubscriptionPool<SearchGridQuery, LazyList<SearchGridResult>> searchResults() {
         return this.searchResults;
     }
+
+    public static void m350lambda$com_lumiyaviewer_lumiya_slproto_users_manager_SearchManager_1019(LazyList lazyList) {
+        // Lambda method implementation for dispose handling
+        if (lazyList != null) {
+            lazyList.close();
+        }
+    }
 }
