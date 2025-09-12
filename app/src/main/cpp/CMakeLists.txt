@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-# Project configuration
+# Project name with modern language specification
 project("lumiya-native" LANGUAGES CXX C)
 
 # Modern C++ standard for better performance and features
@@ -8,16 +8,21 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Platform-specific optimizations
-if(ANDROID_ABI STREQUAL "arm64-v8a")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -march=armv8-a")
-elseif(ANDROID_ABI STREQUAL "armeabi-v7a")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -march=armv7-a -mfpu=neon")
-endif()
-
 # NDK configuration
 set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION clang)
 set(CMAKE_ANDROID_STL_TYPE c++_shared)
+
+# Platform-specific optimizations as required
+if(ANDROID_ABI STREQUAL "arm64-v8a")
+    set(OPT_FLAGS "-O3 -ffast-math -march=armv8-a")
+elseif(ANDROID_ABI STREQUAL "armeabi-v7a") 
+    set(OPT_FLAGS "-O3 -ffast-math -march=armv7-a -mfpu=neon")
+endif()
+
+if(DEFINED OPT_FLAGS)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT_FLAGS}")
+endif()
 
 # Available source files only - simplified for core functionality
 set(NATIVE_SOURCES
@@ -39,12 +44,15 @@ add_definitions(
     -DBASISU_SUPPORT_SSE=0
     -DBASISU_SUPPORT_OPENCL=0
     -DBASISU_NO_ITERATOR_DEBUG_LEVEL
-    -DBASISD_SUPPORT_KTX2=0  # Disable KTX2 until zstd sources are available
+    -DBASISD_SUPPORT_KTX2=1  # Enable KTX2 support with proper integration
+    -DBASISD_SUPPORT_KTX2_ZSTD=1
     -DANDROID
+    -DANDROID_PLATFORM_LEVEL=${ANDROID_PLATFORM_LEVEL}
+    -DUSE_OPENGL_ES3=1
     -DNDEBUG
 )
 
-# Compiler flags
+# Compiler flags for optimization and warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fno-strict-aliasing")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -ffunction-sections -fdata-sections")
 
@@ -56,6 +64,18 @@ if(ANDROID)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--gc-sections")
 endif()
 
+# Find required libraries
+find_library(log-lib log)
+find_library(android-lib android)
+find_library(EGL-lib EGL)
+find_library(GLESv3-lib GLESv3)
+
+# Vulkan support (optional for modern devices)
+if(ANDROID_PLATFORM_LEVEL GREATER_EQUAL 24)
+    find_library(vulkan-lib vulkan)
+    add_definitions(-DVULKAN_SUPPORT=1)
+endif()
+
 # Create the shared library (maintain compatibility with existing openjpeg usage)
 add_library(
     openjpeg
@@ -63,16 +83,19 @@ add_library(
     ${NATIVE_SOURCES}
 )
 
-# Find required Android libraries
-find_library(log-lib log)
-find_library(android-lib android)
-
 # Link libraries
 target_link_libraries(
     openjpeg
     ${log-lib}
     ${android-lib}
+    ${EGL-lib}
+    ${GLESv3-lib}
 )
+
+# Link Vulkan if available
+if(vulkan-lib)
+    target_link_libraries(openjpeg ${vulkan-lib})
+endif()
 
 # Set target properties for better optimization
 set_target_properties(openjpeg PROPERTIES

@@ -85,7 +85,7 @@ Java_com_lumiyaviewer_lumiya_openjpeg_OpenJPEG_getKTX2Dimensions(JNIEnv *env, jo
 }
 
 // Map target format from Java constants to Basis Universal format
-basist::transcoder_texture_format getTranscoderFormat(jint targetFormat) {
+static basist::transcoder_texture_format getTranscoderFormat(jint targetFormat) {
     switch (targetFormat) {
         case 0: // ASTC_4x4
             return basist::transcoder_texture_format::cTFASTC_4x4_RGBA;

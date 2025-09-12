@@ -24,25 +24,17 @@ android {
         // Enable multidex support for apps with more than 64K methods
         multiDexEnabled true
         
-        // NDK configuration temporarily disabled to focus on resource conflicts
-        // Will be re-enabled once build system is stable
-        // externalNativeBuild {
-        //     cmake {
-        //         cppFlags "-std=c++20 -O3 -ffast-math"  // Updated to C++20
-        //         arguments "-DANDROID_STL=c++_shared"
-        //     }
-        // }
-    }
-
-    // Fix resource conflicts
-    packagingOptions {
-        pickFirst '**/libjnidispatch.so'
-        pickFirst '**/libopenjpeg.so'
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/LICENSE*'
-        exclude 'META-INF/NOTICE*'
-        exclude 'META-INF/INDEX.LIST'
-        exclude 'META-INF/io.netty.versions.properties'
+        // NDK configuration for native code
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+        
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++20 -O3 -ffast-math"
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
     }
 
     buildTypes {
@@ -58,10 +50,21 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11  // Updated Java version
+        sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
 
+    // Fix resource conflicts
+    packagingOptions {
+        pickFirst '**/libjnidispatch.so'
+        pickFirst '**/libopenjpeg.so'
+        pickFirst '**/liblumiya-native.so'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE*'
+        exclude 'META-INF/NOTICE*'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
+    }
     // AndroidX migration settings
     useLibrary 'org.apache.http.legacy'
 
@@ -74,14 +77,13 @@ android {
         }
     }
 
-    // NDK build configuration - temporarily disabled to focus on resource fixes
-    // Will be re-enabled once build system is stable
-    // externalNativeBuild {
-    //     cmake {
-    //         path "src/main/cpp/CMakeLists.txt"
-    //         version "3.22.1"  // Updated CMake version
-    //     }
-    // }
+    // NDK build configuration - Updated to CMake 3.22.1+ requirement
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
 }
 
 dependencies {
@@ -114,13 +116,14 @@ dependencies {
     // Comprehensive dependency exclusions to prevent AndroidX conflicts
     configurations.all {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
-        exclude group: 'commons-logging', module: 'commons-logging'  
+        exclude group: 'commons-logging', module: 'commons-logging'
         exclude group: 'android.arch.lifecycle', module: 'common'
         exclude group: 'com.android.support'  // Exclude entire old support library
         exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.android.support', module: 'support-v4'
         exclude group: 'com.android.support', module: 'appcompat-v7'
         exclude group: 'com.android.support', module: 'design'
+        exclude group: 'com.android.support', module: 'support-compat'
         
         resolutionStrategy {
             force 'androidx.appcompat:appcompat:1.6.1'

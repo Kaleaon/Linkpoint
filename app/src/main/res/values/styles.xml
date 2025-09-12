@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Core Lumiya themes -->
+    <!-- Lumiya App Themes with proper AppCompat inheritance -->
     <style name="Theme.Lumiya" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="android:buttonStyle">@style/PrimaryButton</item>
     </style>
@@ -23,6 +23,7 @@
         <item name="windowNoTitle">true</item>
     </style>
     
+    <!-- Additional theme variants -->
     <style name="Theme.Lumiya.Pink" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="android:buttonStyle">@style/PrimaryButton</item>
     </style>
@@ -34,19 +35,24 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <!-- Custom button styles -->
-    <style name="PrimaryButton">
-        <item name="android:textColor">#ffffff</item>
+    <!-- App-specific button styles -->
+    <style name="PrimaryButton" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">?attr/colorPrimary</item>
         <item name="android:minWidth">88dp</item>
         <item name="android:minHeight">36dp</item>
     </style>
-
-    <style name="BorderlessButton">
+    
+    <!-- Additional button styles -->
+    <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?colorAccent</item>
     </style>
     
-    <style name="BorderlessCardButton">
+    <!-- Card view styles -->
+    <style name="BorderlessCardButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?colorAccent</item>
         <item name="android:paddingLeft">16dp</item>
@@ -54,12 +60,12 @@
         <item name="android:minWidth">16dp</item>
     </style>
 
-    <!-- Card styles -->
     <style name="CardCaption">
-        <item name="android:textSize">20sp</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
     
+    <!-- Additional card styles -->
     <style name="CardLargeDetails">
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
@@ -73,7 +79,13 @@
         <item name="cardBackgroundColor">@color/cardview_light_background</item>
     </style>
 
-    <!-- UI components -->
+    <!-- Tab Layout style -->
+    <style name="Widget.Design.TabLayout" parent="Widget.MaterialComponents.TabLayout">
+        <item name="tabMode">scrollable</item>
+        <item name="tabGravity">fill</item>
+    </style>
+    
+    <!-- Additional UI components -->
     <style name="NoSystemUI" />
     
     <style name="UiButton">

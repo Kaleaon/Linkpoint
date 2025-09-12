@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom attributes for Lumiya app -->
+    <attr name="CardViewDetailsBackground" format="color|reference" />
+    <attr name="CardViewDefaultBackground" format="color|reference" />
+    <attr name="CardViewDefaultText" format="color|reference" />
+    <attr name="CardViewDisabledBackground" format="color|reference" />
+    <attr name="CardViewDisabledText" format="color|reference" />
+    <attr name="CardableBackground" format="color|reference" />
+    <attr name="ColorCardCaption" format="color|reference" />
+</resources>
