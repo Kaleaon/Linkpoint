@@ -1,11 +1,25 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.22.1)
 
-# Project name
-project("basis_transcoder")
+# Project name with modern language specification
+project("lumiya" LANGUAGES CXX C)
 
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 17)
+# Modern C++ standard as required
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# NDK configuration
+set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION clang)
+set(CMAKE_ANDROID_STL_TYPE c++_shared)
+
+# Platform-specific optimizations as required
+if(ANDROID_ABI STREQUAL "arm64-v8a")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -march=armv8-a")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -ffast-math -march=armv8-a")
+elseif(ANDROID_ABI STREQUAL "armeabi-v7a") 
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -march=armv7-a -mfpu=neon")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -ffast-math -march=armv7-a -mfpu=neon")
+endif()
 
 # Add Basis Universal transcoder sources
 set(BASIS_TRANSCODER_SOURCES
@@ -31,15 +45,29 @@ add_definitions(
     -DBASISU_NO_ITERATOR_DEBUG_LEVEL
     -DBASISD_SUPPORT_KTX2_ZSTD=1
     -DANDROID
+    -DANDROID_PLATFORM_LEVEL=${ANDROID_PLATFORM_LEVEL}
+    -DUSE_OPENGL_ES3=1
 )
 
 # Compiler flags for optimization and warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
 # Android specific flags
 if(ANDROID)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif()
+
+# Find required libraries
+find_library(log-lib log)
+find_library(android-lib android)
+find_library(EGL-lib EGL)
+find_library(GLESv3-lib GLESv3)
+
+# Vulkan support (optional for modern devices)
+if(ANDROID_PLATFORM_LEVEL GREATER_EQUAL 24)
+    find_library(vulkan-lib vulkan)
+    add_definitions(-DVULKAN_SUPPORT=1)
 endif()
 
 # Create the shared library
@@ -51,13 +79,28 @@ add_library(
     ${NATIVE_SOURCES}
 )
 
-# Find required libraries
-find_library(log-lib log)
-find_library(android-lib android)
+# Include directories
+target_include_directories(${LIBRARY_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/basis_universal
+)
 
 # Link libraries
 target_link_libraries(
     ${LIBRARY_NAME}
     ${log-lib}
     ${android-lib}
+    ${EGL-lib}
+    ${GLESv3-lib}
+)
+
+# Link Vulkan if available
+if(vulkan-lib)
+    target_link_libraries(${LIBRARY_NAME} ${vulkan-lib})
+endif()
+
+# Compiler definitions
+target_compile_definitions(${LIBRARY_NAME} PRIVATE
+    -DANDROID_PLATFORM_LEVEL=${ANDROID_PLATFORM_LEVEL}
+    -DUSE_OPENGL_ES3=1
 )

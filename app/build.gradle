@@ -15,6 +15,9 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
+        // Enable multidex for large app
+        multiDexEnabled true
+        
         // NDK configuration for native code
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
@@ -22,7 +25,7 @@ android {
         
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++17 -O3 -ffast-math"
+                cppFlags "-std=c++20 -O3 -ffast-math"
                 arguments "-DANDROID_STL=c++_shared"
             }
         }
@@ -30,14 +33,31 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            shrinkResources false
         }
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // Fix resource conflicts
+    packagingOptions {
+        pickFirst '**/libjnidispatch.so'
+        pickFirst '**/libopenjpeg.so'
+        pickFirst '**/liblumiya-native.so'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE*'
+        exclude 'META-INF/NOTICE*'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
     }
 
     sourceSets {
@@ -49,11 +69,11 @@ android {
         }
     }
 
-    // NDK build configuration
+    // NDK build configuration - Updated to CMake 3.22.1+ requirement
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
-            version "3.10.2"
+            version "3.22.1"
         }
     }
 }
@@ -64,6 +84,9 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.google.guava:guava:32.1.2-android'
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    
+    // Multidex support
+    implementation 'androidx.multidex:multidex:2.0.1'
     
     // Google Play Services for Cloud Plugin
     implementation 'com.google.android.gms:play-services-drive:17.0.0'
@@ -76,4 +99,11 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    
+    // Remove conflicting dependencies
+    configurations.all {
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'com.android.support', module: 'support-compat'
+    }
 }
