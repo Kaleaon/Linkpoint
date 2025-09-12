@@ -6,10 +6,10 @@ This report documents the analysis of the Lumiya APK using Ghidra reverse engine
 
 ## Analysis Details
 
-**Date**: 2025-09-12T07:54:06+00:00
+**Date**: 2025-09-12T10:01:05+00:00
 **Ghidra Version**: 11.4.2 PUBLIC
-**APK Source**: Lumiya_3.4.2.zip
-**DEX File Size**: 7908640 bytes
+**APK Source**: Lumiya_3.4.2.zip (original APK file)
+**APK File Size**: 10981477 bytes
 **Analysis Duration**: Approximately 15-30 minutes
 
 ## Key Findings
@@ -26,7 +26,7 @@ This report documents the analysis of the Lumiya APK using Ghidra reverse engine
 
 ## Validation Results
 
-✅ **DEX file successfully analyzed by Ghidra**
+✅ **APK file successfully analyzed by Ghidra**
 ✅ **Symbol extraction completed**  
 ✅ **Class structure comparison completed**
 ✅ **Documentation generated**
@@ -34,16 +34,16 @@ This report documents the analysis of the Lumiya APK using Ghidra reverse engine
 ## Technical Implementation
 
 ### Ghidra Analysis Process
-1. **Headless Analysis**: Used analyzeHeadless for automated processing
+1. **Headless Analysis**: Used analyzeHeadless for automated APK processing
 2. **Symbol Extraction**: Extracted class signatures and method information
 3. **Structure Mapping**: Compared with active library organization
 4. **Report Generation**: Created comprehensive documentation
 
 ### Tools Used
 - **Ghidra 11.4.2**: NSA's Software Reverse Engineering Framework
-- **analyzeHeadless**: Ghidra's command-line analysis tool
-- **DEX Analysis**: Android Dalvik bytecode reverse engineering
-- **String Extraction**: Symbol and signature analysis
+- **analyzeHeadless**: Ghidra's command-line analysis tool for APK files
+- **APK Analysis**: Android Package reverse engineering
+- **String Extraction**: Symbol and signature analysis from DEX within APK
 
 ## Repository Integration
 
@@ -64,7 +64,7 @@ This analysis validates that the current Linkpoint repository contains:
 ## Files Generated
 
 - `dex_structure_analysis.json`: Detailed DEX file analysis
-- `source_structure_comparison.json`: Source comparison results  
+- `source_structure_comparison.json`: Source comparison results with APK analysis  
 - `README.md`: Analysis documentation
 - `ghidra_analysis_report.md`: This comprehensive report
 

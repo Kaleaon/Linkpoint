@@ -6,7 +6,7 @@ This directory contains the results of analyzing the Lumiya APK using Ghidra (fr
 The analysis compares the decompiled output from Ghidra with the existing active library source code.
 
 ## Analysis Date
-2025-09-12T07:54:06.914142
+2025-09-12T10:01:05.031076
 
 ## Files Generated
 
@@ -24,29 +24,29 @@ Ghidra 11.4.2 PUBLIC from NSA GitHub repository
 - Path: `/home/runner/work/Linkpoint/Linkpoint/app/src/main/java`
 - Contains the current working source code in the repository
 
-### Original Decompiled Source  
-- Source: `/home/runner/work/Linkpoint/Linkpoint/Lumiya_3.4.2.apk_Decompiler.com (1).zip`
-- Contains decompiled source from original APK analysis
+### Original APK File  
+- Source: `/home/runner/work/Linkpoint/Linkpoint/Lumiya_3.4.2.zip`
+- Original Lumiya viewer APK for direct analysis with Ghidra
 
-### Ghidra Decompiled Output
-- Generated fresh decompilation using Ghidra headless analyzer
-- Analyzed DEX file: `/tmp/lumiya_analysis/classes.dex`
+### Ghidra Analysis Output
+- Generated analysis using Ghidra headless analyzer on original APK
+- Analyzed APK file: `/home/runner/work/Linkpoint/Linkpoint/Lumiya_3.4.2.zip`
 
 ## Analysis Process
 
 1. **Ghidra Setup**: Downloaded and configured Ghidra 11.4.2 from NSA GitHub
-2. **DEX Analysis**: Used Ghidra headless analyzer on classes.dex
-3. **Source Extraction**: Extracted existing decompiled sources for comparison
-4. **Structure Analysis**: Compared directory structures and file inventories
+2. **APK Analysis**: Used Ghidra headless analyzer directly on the APK file
+3. **DEX Extraction**: Extracted classes.dex from APK for structure analysis
+4. **Structure Analysis**: Compared active library with APK contents
 5. **Report Generation**: Created detailed comparison reports
 
 ## Key Findings
 
 The analysis provides insights into:
-- Consistency between decompiled and active source code
-- Missing or extra files in each version  
-- Structural differences in package organization
-- Method and class signature validation
+- Consistency between active source code and compiled APK
+- APK structure validation and contents verification  
+- DEX file analysis and class signature extraction
+- Method and class signature validation from original APK
 
 ## Usage
 
@@ -60,7 +60,7 @@ unzip Lumiya_3.4.2.zip -d /tmp/lumiya_analysis
 /path/to/ghidra/support/analyzeHeadless /tmp/analysis LumiyaProject -import classes.dex -overwrite
 
 # Run comparison script
-python3 scripts/ghidra_comparison.py --repo-path . --ghidra-path /path/to/ghidra --dex-path /tmp/lumiya_analysis/classes.dex
+python3 scripts/ghidra_comparison.py --repo-path . --ghidra-path /path/to/ghidra --apk-path Lumiya_3.4.2.zip
 ```
 
 ## References
