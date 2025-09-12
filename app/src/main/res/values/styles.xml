@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Lumiya App Themes with proper AppCompat inheritance -->
-    <style name="Theme.Lumiya" parent="Theme.AppCompat.DayNight">
+    <style name="Theme.Lumiya" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="android:buttonStyle">@style/PrimaryButton</item>
     </style>
     
-    <style name="Theme.Lumiya.Light" parent="Theme.AppCompat.Light">
+    <style name="Theme.Lumiya.Light" parent="Theme.AppCompat.DayNight">
         <item name="android:buttonStyle">@style/PrimaryButton</item>
     </style>
     
-    <style name="Theme.Lumiya.Light.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.Lumiya.Light.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
     
-    <style name="Theme.Lumiya.NoActionBar" parent="Theme.AppCompat.NoActionBar">
+    <style name="Theme.Lumiya.NoActionBar" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
     
-    <!-- Additional theme variants from main -->
+    <!-- Additional theme variants -->
     <style name="Theme.Lumiya.Pink" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="android:buttonStyle">@style/PrimaryButton</item>
     </style>
@@ -34,16 +34,16 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-    
+
     <!-- App-specific button styles -->
     <style name="PrimaryButton" parent="Widget.AppCompat.Button">
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:background">?attr/colorPrimary</item>
-        <item name="android:minWidth">88dp</item>  <!-- From main -->
-        <item name="android:minHeight">36dp</item>  <!-- From main -->
+        <item name="android:minWidth">88dp</item>
+        <item name="android:minHeight">36dp</item>
     </style>
     
-    <!-- Additional button styles from main -->
+    <!-- Additional button styles -->
     <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:textStyle">bold</item>
@@ -55,17 +55,17 @@
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">?colorAccent</item>
-        <item name="android:paddingLeft">16dp</item>  <!-- From main -->
-        <item name="android:paddingRight">16dp</item>  <!-- From main -->
-        <item name="android:minWidth">16dp</item>  <!-- From main -->
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:minWidth">16dp</item>
     </style>
 
     <style name="CardCaption">
-        <item name="android:textSize">14sp</item>  <!-- Keep original size -->
+        <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
     
-    <!-- Additional card styles from main -->
+    <!-- Additional card styles -->
     <style name="CardLargeDetails">
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
@@ -85,7 +85,7 @@
         <item name="tabGravity">fill</item>
     </style>
     
-    <!-- Additional UI components from main -->
+    <!-- Additional UI components -->
     <style name="NoSystemUI" />
     
     <style name="UiButton">

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22.1)
 # Project name with modern language specification
 project("lumiya-native" LANGUAGES CXX C)
 
-# Modern C++ standard as required
+# Modern C++ standard for better performance and features
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -23,26 +23,23 @@ if(DEFINED OPT_FLAGS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_FLAGS}")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT_FLAGS}")
 endif()
-# Add Basis Universal transcoder sources
-set(BASIS_TRANSCODER_SOURCES
-    basis_universal/basisu_transcoder.cpp
-)
 
-# Native source files (should integrate with existing openjpeg if present)
+# Available source files only - simplified for core functionality
 set(NATIVE_SOURCES
-    ${BASIS_TRANSCODER_SOURCES}
-    jni/basis_transcoder_jni.cpp
-    jni/openjpeg_basis_integration.cpp
+    basis_universal/basisu_transcoder.cpp
+    # Temporarily exclude JNI files that have KTX2 dependencies
+    # jni/basis_transcoder_jni.cpp
+    # jni/openjpeg_basis_integration.cpp
 )
 
 # Include directories
 include_directories(
-    basis_universal
-    zstd  # From main branch
+    ${CMAKE_CURRENT_SOURCE_DIR}/basis_universal
+    ${CMAKE_CURRENT_SOURCE_DIR}/zstd
     ${CMAKE_CURRENT_SOURCE_DIR}  # Add root cpp directory so jni/ can find basis_universal/
 )
 
-# Add preprocessor definitions for Android
+# Preprocessor definitions
 add_definitions(
     -DBASISU_SUPPORT_SSE=0
     -DBASISU_SUPPORT_OPENCL=0
@@ -52,12 +49,11 @@ add_definitions(
     -DANDROID
     -DANDROID_PLATFORM_LEVEL=${ANDROID_PLATFORM_LEVEL}
     -DUSE_OPENGL_ES3=1
-    -DNDEBUG  # From main branch
+    -DNDEBUG
 )
 
 # Compiler flags for optimization and warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fno-strict-aliasing")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -ffunction-sections -fdata-sections")
 
 # Android specific flags
@@ -80,25 +76,16 @@ if(ANDROID_PLATFORM_LEVEL GREATER_EQUAL 24)
     add_definitions(-DVULKAN_SUPPORT=1)
 endif()
 
-# Create the shared library
-# Integrate with existing openjpeg library by using the same name
-set(LIBRARY_NAME "openjpeg")
+# Create the shared library (maintain compatibility with existing openjpeg usage)
 add_library(
-    ${LIBRARY_NAME}
+    openjpeg
     SHARED
     ${NATIVE_SOURCES}
 )
 
-# Include directories
-target_include_directories(${LIBRARY_NAME} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/basis_universal
-    ${CMAKE_CURRENT_SOURCE_DIR}/zstd
-)
-
 # Link libraries
 target_link_libraries(
-    ${LIBRARY_NAME}
+    openjpeg
     ${log-lib}
     ${android-lib}
     ${EGL-lib}
@@ -107,13 +94,10 @@ target_link_libraries(
 
 # Link Vulkan if available
 if(vulkan-lib)
-    target_link_libraries(${LIBRARY_NAME} ${vulkan-lib})
+    target_link_libraries(openjpeg ${vulkan-lib})
 endif()
 
-# Compiler definitions
-# (Redundant target_compile_definitions removed; definitions are set globally)
-
-# Set target properties for better optimization (from main)
+# Set target properties for better optimization
 set_target_properties(openjpeg PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION TRUE
 )
