@@ -8,7 +8,7 @@ set -e
 REPO_ROOT="/home/runner/work/Linkpoint/Linkpoint"
 GHIDRA_PATH="/tmp/ghidra/ghidra_11.4.2_PUBLIC"
 ANALYSIS_DIR="/tmp/lumiya_analysis"
-DEX_FILE="$ANALYSIS_DIR/classes.dex"
+APK_FILE="$REPO_ROOT/Lumiya_3.4.2.zip"  # This is actually the original APK file
 
 # Colors for output
 RED='\033[0;31m'
@@ -43,16 +43,15 @@ if [ ! -d "$GHIDRA_PATH" ]; then
     exit 1
 fi
 
-if [ ! -f "$DEX_FILE" ]; then
-    print_status "Extracting Lumiya APK..."
-    cd "$REPO_ROOT"
-    mkdir -p "$ANALYSIS_DIR"
-    unzip -q "Lumiya_3.4.2.zip" -d "$ANALYSIS_DIR"
+if [ ! -f "$APK_FILE" ]; then
+    print_error "Lumiya APK file not found at $APK_FILE"
+    exit 1
 fi
 
 # Step 2: Run Ghidra headless analysis
-print_status "Running Ghidra headless analysis on Lumiya DEX..."
+print_status "Running Ghidra headless analysis on Lumiya APK..."
 
+mkdir -p "$ANALYSIS_DIR"
 cd "$ANALYSIS_DIR"
 # Set JAVA_HOME if not already set
 if [ -z "$JAVA_HOME" ]; then
@@ -73,7 +72,7 @@ fi
 "$GHIDRA_PATH/support/analyzeHeadless" \
     "$ANALYSIS_DIR" \
     "LumiyaGhidraProject" \
-    -import "$DEX_FILE" \
+    -import "$APK_FILE" \
     -overwrite \
     -analysisTimeoutPerFile 600 \
     -deleteproject || print_warning "Ghidra analysis completed with warnings"
@@ -81,7 +80,14 @@ fi
 print_status "Ghidra analysis completed"
 
 # Step 3: Generate symbol listings and class information
-print_status "Extracting symbol information from DEX file..."
+print_status "Extracting symbol information from APK file..."
+
+# Extract DEX file from APK for analysis
+DEX_FILE="$ANALYSIS_DIR/classes.dex"
+if [ ! -f "$DEX_FILE" ]; then
+    print_status "Extracting DEX file from APK..."
+    unzip -j "$APK_FILE" "classes.dex" -d "$ANALYSIS_DIR" || print_warning "Could not extract classes.dex from APK"
+fi
 
 # Extract strings and class information
 strings "$DEX_FILE" > "$ANALYSIS_DIR/dex_strings.txt"
@@ -94,9 +100,9 @@ LUMIYA_CLASSES=$(wc -l < "$ANALYSIS_DIR/lumiya_classes.txt" || echo "0")
 print_status "Found $TOTAL_CLASSES total classes, $LUMIYA_CLASSES Lumiya classes"
 
 # Step 4: Run the Python comparison script
-print_status "Running comprehensive source comparison..."
+print_status "Running comprehensive APK comparison..."
 cd "$REPO_ROOT"
-python3 scripts/ghidra_comparison.py
+python3 scripts/ghidra_comparison.py --apk-path "$APK_FILE"
 
 # Step 5: Generate final report
 print_status "Generating final Ghidra analysis report..."
@@ -112,8 +118,8 @@ This report documents the analysis of the Lumiya APK using Ghidra reverse engine
 
 **Date**: $(date -Iseconds)
 **Ghidra Version**: 11.4.2 PUBLIC
-**APK Source**: Lumiya_3.4.2.zip
-**DEX File Size**: $(stat -c%s "$DEX_FILE" 2>/dev/null || echo "Unknown") bytes
+**APK Source**: Lumiya_3.4.2.zip (original APK file)
+**APK File Size**: $(stat -c%s "$APK_FILE" 2>/dev/null || echo "Unknown") bytes
 **Analysis Duration**: Approximately 15-30 minutes
 
 ## Key Findings
@@ -130,7 +136,7 @@ This report documents the analysis of the Lumiya APK using Ghidra reverse engine
 
 ## Validation Results
 
-✅ **DEX file successfully analyzed by Ghidra**
+✅ **APK file successfully analyzed by Ghidra**
 ✅ **Symbol extraction completed**  
 ✅ **Class structure comparison completed**
 ✅ **Documentation generated**
@@ -138,16 +144,16 @@ This report documents the analysis of the Lumiya APK using Ghidra reverse engine
 ## Technical Implementation
 
 ### Ghidra Analysis Process
-1. **Headless Analysis**: Used analyzeHeadless for automated processing
+1. **Headless Analysis**: Used analyzeHeadless for automated APK processing
 2. **Symbol Extraction**: Extracted class signatures and method information
 3. **Structure Mapping**: Compared with active library organization
 4. **Report Generation**: Created comprehensive documentation
 
 ### Tools Used
 - **Ghidra 11.4.2**: NSA's Software Reverse Engineering Framework
-- **analyzeHeadless**: Ghidra's command-line analysis tool
-- **DEX Analysis**: Android Dalvik bytecode reverse engineering
-- **String Extraction**: Symbol and signature analysis
+- **analyzeHeadless**: Ghidra's command-line analysis tool for APK files
+- **APK Analysis**: Android Package reverse engineering
+- **String Extraction**: Symbol and signature analysis from DEX within APK
 
 ## Repository Integration
 
@@ -168,7 +174,7 @@ This analysis validates that the current Linkpoint repository contains:
 ## Files Generated
 
 - \`dex_structure_analysis.json\`: Detailed DEX file analysis
-- \`source_structure_comparison.json\`: Source comparison results  
+- \`source_structure_comparison.json\`: Source comparison results with APK analysis  
 - \`README.md\`: Analysis documentation
 - \`ghidra_analysis_report.md\`: This comprehensive report
 
@@ -190,8 +196,8 @@ echo -e "\n${GREEN}========================================${NC}"
 echo -e "${GREEN}GHIDRA ANALYSIS COMPLETED${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo -e "📊 Analysis Results:"
-echo -e "   • Ghidra analysis: ${GREEN}✓ Completed${NC}"
-echo -e "   • DEX structure: ${GREEN}✓ Analyzed${NC}" 
+echo -e "   • Ghidra APK analysis: ${GREEN}✓ Completed${NC}"
+echo -e "   • APK structure: ${GREEN}✓ Analyzed${NC}" 
 echo -e "   • Source comparison: ${GREEN}✓ Completed${NC}"
 echo -e "   • Documentation: ${GREEN}✓ Generated${NC}"
 echo -e "\n📁 Generated Files:"
