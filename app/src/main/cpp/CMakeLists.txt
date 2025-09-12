@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22.1)
 
 # Project name with modern language specification
-project("lumiya" LANGUAGES CXX C)
+project("lumiya-native" LANGUAGES CXX C)
 
 # Modern C++ standard as required
 set(CMAKE_CXX_STANDARD 20)
@@ -36,6 +36,8 @@ set(NATIVE_SOURCES
 # Include directories
 include_directories(
     basis_universal
+    zstd  # From main branch
+    ${CMAKE_CURRENT_SOURCE_DIR}  # Add root cpp directory so jni/ can find basis_universal/
 )
 
 # Add preprocessor definitions for Android
@@ -43,19 +45,25 @@ add_definitions(
     -DBASISU_SUPPORT_SSE=0
     -DBASISU_SUPPORT_OPENCL=0
     -DBASISU_NO_ITERATOR_DEBUG_LEVEL
+    -DBASISD_SUPPORT_KTX2=1  # Enable KTX2 support with proper integration
     -DBASISD_SUPPORT_KTX2_ZSTD=1
     -DANDROID
     -DANDROID_PLATFORM_LEVEL=${ANDROID_PLATFORM_LEVEL}
     -DUSE_OPENGL_ES3=1
+    -DNDEBUG  # From main branch
 )
 
 # Compiler flags for optimization and warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -ffunction-sections -fdata-sections")
 
 # Android specific flags
 if(ANDROID)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+    
+    # Enable dead code elimination
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--gc-sections")
 endif()
 
 # Find required libraries
@@ -83,6 +91,7 @@ add_library(
 target_include_directories(${LIBRARY_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/basis_universal
+    ${CMAKE_CURRENT_SOURCE_DIR}/zstd
 )
 
 # Link libraries
@@ -103,4 +112,9 @@ endif()
 target_compile_definitions(${LIBRARY_NAME} PRIVATE
     -DANDROID_PLATFORM_LEVEL=${ANDROID_PLATFORM_LEVEL}
     -DUSE_OPENGL_ES3=1
+)
+
+# Set target properties for better optimization (from main)
+set_target_properties(openjpeg PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION TRUE
 )

@@ -23,25 +23,86 @@
         <item name="windowNoTitle">true</item>
     </style>
     
+    <!-- Additional theme variants from main -->
+    <style name="Theme.Lumiya.Pink" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <item name="android:buttonStyle">@style/PrimaryButton</item>
+    </style>
+    
+    <style name="Theme.Lumiya.Pink.NoActionBar" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    
     <!-- App-specific button styles -->
     <style name="PrimaryButton" parent="Widget.AppCompat.Button">
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:background">?attr/colorPrimary</item>
+        <item name="android:minWidth">88dp</item>  <!-- From main -->
+        <item name="android:minHeight">36dp</item>  <!-- From main -->
+    </style>
+    
+    <!-- Additional button styles from main -->
+    <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?colorAccent</item>
     </style>
     
     <!-- Card view styles -->
     <style name="BorderlessCardButton" parent="Widget.AppCompat.Button.Borderless">
         <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?colorAccent</item>
+        <item name="android:paddingLeft">16dp</item>  <!-- From main -->
+        <item name="android:paddingRight">16dp</item>  <!-- From main -->
+        <item name="android:minWidth">16dp</item>  <!-- From main -->
     </style>
-    
+
     <style name="CardCaption">
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">14sp</item>  <!-- Keep original size -->
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
     
+    <!-- Additional card styles from main -->
+    <style name="CardLargeDetails">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+    
+    <style name="CardView.Dark">
+        <item name="cardBackgroundColor">@color/cardview_dark_background</item>
+    </style>
+    
+    <style name="CardView.Light">
+        <item name="cardBackgroundColor">@color/cardview_light_background</item>
+    </style>
+
     <!-- Tab Layout style -->
     <style name="Widget.Design.TabLayout" parent="Widget.MaterialComponents.TabLayout">
         <item name="tabMode">scrollable</item>
         <item name="tabGravity">fill</item>
+    </style>
+    
+    <!-- Additional UI components from main -->
+    <style name="NoSystemUI" />
+    
+    <style name="UiButton">
+        <item name="android:padding">9dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    
+    <style name="GvrDialogTheme">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+    
+    <style name="VrActivityTheme">
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowActionBar">false</item>
     </style>
 </resources>

@@ -5,17 +5,23 @@ plugins {
 android {
     namespace 'com.lumiyaviewer.lumiya'
     compileSdk 34
+    
+    // Resource processing options
+    aaptOptions {
+        noCompress 'ktx2'  // Don't compress texture files
+        additionalParameters '--no-version-vectors'
+    }
 
     defaultConfig {
         applicationId "com.lumiyaviewer.lumiya"
-        minSdk 14
+        minSdk 21  // Updated minimum SDK for modern APIs
         targetSdk 34
         versionCode 67
         versionName "3.4.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
-        // Enable multidex for large app
+        // Enable multidex support for apps with more than 64K methods
         multiDexEnabled true
         
         // NDK configuration for native code
@@ -44,8 +50,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11  // Updated Java version from main
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     // Fix resource conflicts
@@ -59,6 +65,9 @@ android {
         exclude 'META-INF/INDEX.LIST'
         exclude 'META-INF/io.netty.versions.properties'
     }
+
+    // AndroidX migration settings
+    useLibrary 'org.apache.http.legacy'
 
     sourceSets {
         main {
@@ -80,10 +89,10 @@ android {
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'  // Use version from main
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.google.guava:guava:32.1.2-android'
-    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'com.google.guava:guava:32.1.3-android'  // Use version from main
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'  // Use version from main
     
     // Multidex support
     implementation 'androidx.multidex:multidex:2.0.1'
@@ -96,14 +105,30 @@ dependencies {
     // Support libraries for backward compatibility
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     
+    // Preference support (from main)
+    implementation 'androidx.preference:preference:1.2.1'
+    
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.robolectric:robolectric:4.10.3'  // From main
+    testImplementation 'org.mockito:mockito-core:4.11.0'  // From main
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     
-    // Remove conflicting dependencies
+    // Comprehensive dependency exclusions to prevent AndroidX conflicts
     configurations.all {
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
         exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'android.arch.lifecycle', module: 'common'
+        exclude group: 'com.android.support'  // Exclude entire old support library
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude group: 'com.android.support', module: 'appcompat-v7'
+        exclude group: 'com.android.support', module: 'design'
         exclude group: 'com.android.support', module: 'support-compat'
+        
+        resolutionStrategy {
+            force 'androidx.appcompat:appcompat:1.6.1'
+            force 'com.google.android.material:material:1.10.0'
+        }
     }
 }
