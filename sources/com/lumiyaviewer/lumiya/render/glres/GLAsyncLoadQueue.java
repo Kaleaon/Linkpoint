@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.glres;
 
 import android.opengl.GLES10;
@@ -5,192 +9,327 @@ import android.os.SystemClock;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.render.RenderContext;
 import com.lumiyaviewer.lumiya.render.TextureMemoryTracker;
-import com.lumiyaviewer.lumiya.render.avatar.AnimationSequenceInfo;
-import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue;
 import com.lumiyaviewer.lumiya.res.collections.WeakQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 
-public class GLAsyncLoadQueue extends GLLoadQueue implements GLLoadQueue.GLLoadHandler {
-    /* access modifiers changed from: private */
-    public volatile boolean contextFailed = true;
-    /* access modifiers changed from: private */
-    public volatile boolean contextReady = false;
-    /* access modifiers changed from: private */
-    public final Object contextReadyLock = new Object();
-    /* access modifiers changed from: private */
-    public final EGL10 egl10;
-    /* access modifiers changed from: private */
-    public final EGLContext eglBaseContext;
-    /* access modifiers changed from: private */
-    public final EGLConfig eglConfig;
-    /* access modifiers changed from: private */
-    public final EGLDisplay eglDisplay;
-    /* access modifiers changed from: private */
-    public final WeakQueue<GLLoadQueue.GLLoadable> loadedQueue = new WeakQueue<>();
-    /* access modifiers changed from: private */
-    public final AtomicBoolean mustExit = new AtomicBoolean(false);
-    /* access modifiers changed from: private */
-    public final boolean requestGL30;
-    private final Thread thread;
+// Referenced classes of package com.lumiyaviewer.lumiya.render.glres:
+//            GLLoadQueue
 
-    private class EGLLoadThread implements Runnable {
+public class GLAsyncLoadQueue extends GLLoadQueue
+    implements GLLoadQueue.GLLoadHandler
+{
+    private class EGLLoadThread
+        implements Runnable
+    {
+
         private EGLSurface eglSurface;
-        private final AtomicReference<RenderContext> renderContext;
+        private final AtomicReference renderContext;
+        final GLAsyncLoadQueue this$0;
 
-        private EGLLoadThread(RenderContext renderContext2) {
-            this.renderContext = new AtomicReference<>(renderContext2);
-        }
-
-        /* synthetic */ EGLLoadThread(GLAsyncLoadQueue gLAsyncLoadQueue, RenderContext renderContext2, EGLLoadThread eGLLoadThread) {
-            this(renderContext2);
-        }
-
-        @Nullable
-        private EGLContext createContext() {
-            int i = 3;
-            Debug.Printf("TexLoad: create[1]: eglGetError = %d", Integer.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()));
-            EGL10 r2 = GLAsyncLoadQueue.this.egl10;
-            EGLDisplay r3 = GLAsyncLoadQueue.this.eglDisplay;
-            EGLConfig r4 = GLAsyncLoadQueue.this.eglConfig;
-            EGLContext r5 = GLAsyncLoadQueue.this.eglBaseContext;
-            int[] iArr = new int[3];
-            iArr[0] = 12440;
-            if (!GLAsyncLoadQueue.this.requestGL30) {
-                i = 2;
+        private EGLContext createContext()
+        {
+            byte byte0 = 3;
+            Debug.Printf("TexLoad: create[1]: eglGetError = %d", new Object[] {
+                Integer.valueOf(GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglGetError())
+            });
+            Object obj = GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this);
+            Object obj1 = GLAsyncLoadQueue._2D_get4(GLAsyncLoadQueue.this);
+            EGLConfig eglconfig = GLAsyncLoadQueue._2D_get3(GLAsyncLoadQueue.this);
+            EGLContext eglcontext = GLAsyncLoadQueue._2D_get2(GLAsyncLoadQueue.this);
+            if (!GLAsyncLoadQueue._2D_get7(GLAsyncLoadQueue.this))
+            {
+                byte0 = 2;
             }
-            iArr[1] = i;
-            iArr[2] = 12344;
-            EGLContext eglCreateContext = r2.eglCreateContext(r3, r4, r5, iArr);
-            Debug.Printf("TexLoad: create[2]: eglGetError = %d", Integer.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()));
-            EGLSurface eglCreatePbufferSurface = GLAsyncLoadQueue.this.egl10.eglCreatePbufferSurface(GLAsyncLoadQueue.this.eglDisplay, GLAsyncLoadQueue.this.eglConfig, new int[]{12374, 128, 12375, 128, 12344});
-            Debug.Printf("TexLoad: create[3]: eglGetError = %d", Integer.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()));
-            if (eglCreateContext == null || eglCreateContext == EGL10.EGL_NO_CONTEXT) {
+            obj = ((EGL10) (obj)).eglCreateContext(((EGLDisplay) (obj1)), eglconfig, eglcontext, new int[] {
+                12440, byte0, 12344
+            });
+            Debug.Printf("TexLoad: create[2]: eglGetError = %d", new Object[] {
+                Integer.valueOf(GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglGetError())
+            });
+            obj1 = GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglCreatePbufferSurface(GLAsyncLoadQueue._2D_get4(GLAsyncLoadQueue.this), GLAsyncLoadQueue._2D_get3(GLAsyncLoadQueue.this), new int[] {
+                12374, 128, 12375, 128, 12344
+            });
+            Debug.Printf("TexLoad: create[3]: eglGetError = %d", new Object[] {
+                Integer.valueOf(GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglGetError())
+            });
+            if (obj != null && obj != EGL10.EGL_NO_CONTEXT)
+            {
+                Debug.Printf("TexLoad: texture loader context created (%s)", new Object[] {
+                    obj
+                });
+                eglSurface = ((EGLSurface) (obj1));
+                return ((EGLContext) (obj));
+            } else
+            {
                 Debug.Printf("TexLoad: Failed to create loader context", new Object[0]);
-                GLAsyncLoadQueue.this.egl10.eglDestroySurface(GLAsyncLoadQueue.this.eglDisplay, eglCreatePbufferSurface);
+                GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglDestroySurface(GLAsyncLoadQueue._2D_get4(GLAsyncLoadQueue.this), ((EGLSurface) (obj1)));
                 return null;
             }
-            Debug.Printf("TexLoad: texture loader context created (%s)", eglCreateContext);
-            this.eglSurface = eglCreatePbufferSurface;
-            return eglCreateContext;
         }
 
-        public void run() {
-            RenderContext andSet = this.renderContext.getAndSet((Object) null);
-            EGLContext createContext = createContext();
-            int i = 0;
-            long j = 0;
+        public void run()
+        {
+            Object obj;
+            RenderContext rendercontext;
+            long l;
+            rendercontext = (RenderContext)renderContext.getAndSet(null);
+            obj = createContext();
+            l = 0L;
             Debug.Printf("TexLoad: Signaling context readiness.", new Object[0]);
-            synchronized (GLAsyncLoadQueue.this.contextReadyLock) {
-                boolean unused = GLAsyncLoadQueue.this.contextFailed = createContext == null;
-                boolean unused2 = GLAsyncLoadQueue.this.contextReady = true;
-                GLAsyncLoadQueue.this.contextReadyLock.notifyAll();
+            Object obj1 = GLAsyncLoadQueue._2D_get0(GLAsyncLoadQueue.this);
+            obj1;
+            JVM INSTR monitorenter ;
+            GLAsyncLoadQueue glasyncloadqueue = GLAsyncLoadQueue.this;
+            int i;
+            int j;
+            long l1;
+            long l2;
+            boolean flag;
+            if (obj == null)
+            {
+                flag = true;
+            } else
+            {
+                flag = false;
             }
-            if (createContext != null) {
-                Debug.Printf("TexLoad: thread init: eglGetError = %d", Integer.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()));
-                Debug.Printf("TexLoad: thread init: rc = %b, eglGetError = %d", Boolean.valueOf(GLAsyncLoadQueue.this.egl10.eglMakeCurrent(GLAsyncLoadQueue.this.eglDisplay, this.eglSurface, this.eglSurface, createContext)), Integer.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()));
-                while (true) {
-                    int i2 = i;
-                    if (GLAsyncLoadQueue.this.mustExit.get()) {
-                        break;
-                    }
-                    try {
-                        GLLoadQueue.GLLoadable gLLoadable = (GLLoadQueue.GLLoadable) GLAsyncLoadQueue.this.loadQueue.take();
-                        if (!TextureMemoryTracker.canAllocateMemory(gLLoadable.GLGetLoadSize())) {
-                            GLAsyncLoadQueue.this.loadQueue.offer(gLLoadable);
-                            Thread.sleep(1000);
-                            i = i2 + 1;
-                            if (i >= 10) {
-                                long uptimeMillis = SystemClock.uptimeMillis();
-                                if (uptimeMillis - j >= AnimationSequenceInfo.MAX_ANIMATION_LENGTH) {
-                                    Debug.Printf("TexLoad: invoking GC.", new Object[0]);
-                                    System.gc();
-                                    i = 0;
-                                    j = uptimeMillis;
-                                }
-                            }
-                        } else {
-                            gLLoadable.GLLoad(andSet, GLAsyncLoadQueue.this);
-                            GLES10.glFinish();
-                            i = 0;
-                        }
-                    } catch (InterruptedException e) {
-                    }
-                }
-                GLAsyncLoadQueue.this.loadedQueue.clear();
-                Debug.Printf("TexLoad: Working thread exiting.", new Object[0]);
-                GLAsyncLoadQueue.this.egl10.eglMakeCurrent(GLAsyncLoadQueue.this.eglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
-                GLAsyncLoadQueue.this.egl10.eglDestroyContext(GLAsyncLoadQueue.this.eglDisplay, createContext);
-                GLAsyncLoadQueue.this.egl10.eglDestroySurface(GLAsyncLoadQueue.this.eglDisplay, this.eglSurface);
-                this.eglSurface = null;
+            GLAsyncLoadQueue._2D_set0(glasyncloadqueue, flag);
+            GLAsyncLoadQueue._2D_set1(GLAsyncLoadQueue.this, true);
+            GLAsyncLoadQueue._2D_get0(GLAsyncLoadQueue.this).notifyAll();
+            obj1;
+            JVM INSTR monitorexit ;
+            if (obj == null)
+            {
+                break MISSING_BLOCK_LABEL_440;
             }
+            Debug.Printf("TexLoad: thread init: eglGetError = %d", new Object[] {
+                Integer.valueOf(GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglGetError())
+            });
+            Debug.Printf("TexLoad: thread init: rc = %b, eglGetError = %d", new Object[] {
+                Boolean.valueOf(GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglMakeCurrent(GLAsyncLoadQueue._2D_get4(GLAsyncLoadQueue.this), eglSurface, eglSurface, ((EGLContext) (obj)))), Integer.valueOf(GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglGetError())
+            });
+            i = 0;
+_L2:
+            if (GLAsyncLoadQueue._2D_get6(GLAsyncLoadQueue.this).get())
+            {
+                break MISSING_BLOCK_LABEL_342;
+            }
+            obj1 = (GLLoadQueue.GLLoadable)loadQueue.take();
+            if (TextureMemoryTracker.canAllocateMemory(((GLLoadQueue.GLLoadable) (obj1)).GLGetLoadSize()))
+            {
+                break; /* Loop/switch isn't completed */
+            }
+            loadQueue.offer(obj1);
+            Thread.sleep(1000L);
+            j = i + 1;
+            i = j;
+            l1 = l;
+            if (j < 10)
+            {
+                break MISSING_BLOCK_LABEL_298;
+            }
+            l2 = SystemClock.uptimeMillis();
+            i = j;
+            l1 = l;
+            if (l2 - l < 60000L)
+            {
+                break MISSING_BLOCK_LABEL_298;
+            }
+            Debug.Printf("TexLoad: invoking GC.", new Object[0]);
+            System.gc();
+            i = 0;
+            l1 = l2;
+_L3:
+            l = l1;
+            if (true) goto _L2; else goto _L1
+            obj;
+            throw obj;
+_L1:
+            ((GLLoadQueue.GLLoadable) (obj1)).GLLoad(rendercontext, GLAsyncLoadQueue.this);
+            GLES10.glFinish();
+            i = 0;
+            l1 = l;
+              goto _L3
+            InterruptedException interruptedexception;
+            interruptedexception;
+            GLAsyncLoadQueue._2D_get5(GLAsyncLoadQueue.this).clear();
+            Debug.Printf("TexLoad: Working thread exiting.", new Object[0]);
+            GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglMakeCurrent(GLAsyncLoadQueue._2D_get4(GLAsyncLoadQueue.this), EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+            GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglDestroyContext(GLAsyncLoadQueue._2D_get4(GLAsyncLoadQueue.this), ((EGLContext) (obj)));
+            GLAsyncLoadQueue._2D_get1(GLAsyncLoadQueue.this).eglDestroySurface(GLAsyncLoadQueue._2D_get4(GLAsyncLoadQueue.this), eglSurface);
+            eglSurface = null;
+        }
+
+        private EGLLoadThread(RenderContext rendercontext)
+        {
+            this$0 = GLAsyncLoadQueue.this;
+            super();
+            renderContext = new AtomicReference(rendercontext);
+        }
+
+        EGLLoadThread(RenderContext rendercontext, EGLLoadThread eglloadthread)
+        {
+            this(rendercontext);
         }
     }
 
-    public GLAsyncLoadQueue(RenderContext renderContext, EGL10 egl102, EGLDisplay eGLDisplay, EGLConfig eGLConfig, boolean z) throws InstantiationException {
-        this.egl10 = egl102;
-        this.eglDisplay = eGLDisplay;
-        this.eglConfig = eGLConfig;
-        this.requestGL30 = z;
-        this.eglBaseContext = egl102.eglGetCurrentContext();
-        if (this.eglBaseContext == null || this.eglBaseContext == EGL10.EGL_NO_CONTEXT) {
-            throw new InstantiationException("TexLoad: current context was null");
-        }
-        this.thread = new Thread(new EGLLoadThread(this, renderContext, (EGLLoadThread) null), "EGLLoader");
-        this.thread.setPriority(4);
-        this.thread.start();
-        try {
-            Debug.Printf("TexLoad: Waiting for thread to create context", new Object[0]);
-            synchronized (this.contextReadyLock) {
-                while (!this.contextReady) {
-                    this.contextReadyLock.wait();
-                }
-            }
-            Debug.Printf("TexLoad: Context created, failed = %b", Boolean.valueOf(this.contextFailed));
-            if (this.contextFailed) {
-                throw new InstantiationException("TexLoad: failed to create context");
-            }
-        } catch (InterruptedException e) {
-            throw new InstantiationException("Interrupted: " + e.getMessage());
-        }
+
+    private volatile boolean contextFailed;
+    private volatile boolean contextReady;
+    private final Object contextReadyLock;
+    private final EGL10 egl10;
+    private final EGLContext eglBaseContext;
+    private final EGLConfig eglConfig;
+    private final EGLDisplay eglDisplay;
+    private final WeakQueue loadedQueue;
+    private final AtomicBoolean mustExit;
+    private final boolean requestGL30;
+    private final Thread thread;
+
+    static Object _2D_get0(GLAsyncLoadQueue glasyncloadqueue)
+    {
+        return glasyncloadqueue.contextReadyLock;
     }
 
-    public void GLResourceLoaded(GLLoadQueue.GLLoadable gLLoadable) {
-        this.loadedQueue.offer(gLLoadable);
+    static EGL10 _2D_get1(GLAsyncLoadQueue glasyncloadqueue)
+    {
+        return glasyncloadqueue.egl10;
     }
 
-    public void RunLoadQueue(@Nonnull RenderContext renderContext) {
-        while (true) {
-            GLLoadQueue.GLLoadable poll = this.loadedQueue.poll();
-            if (poll != null) {
-                poll.GLCompleteLoad();
-            } else {
+    static EGLContext _2D_get2(GLAsyncLoadQueue glasyncloadqueue)
+    {
+        return glasyncloadqueue.eglBaseContext;
+    }
+
+    static EGLConfig _2D_get3(GLAsyncLoadQueue glasyncloadqueue)
+    {
+        return glasyncloadqueue.eglConfig;
+    }
+
+    static EGLDisplay _2D_get4(GLAsyncLoadQueue glasyncloadqueue)
+    {
+        return glasyncloadqueue.eglDisplay;
+    }
+
+    static WeakQueue _2D_get5(GLAsyncLoadQueue glasyncloadqueue)
+    {
+        return glasyncloadqueue.loadedQueue;
+    }
+
+    static AtomicBoolean _2D_get6(GLAsyncLoadQueue glasyncloadqueue)
+    {
+        return glasyncloadqueue.mustExit;
+    }
+
+    static boolean _2D_get7(GLAsyncLoadQueue glasyncloadqueue)
+    {
+        return glasyncloadqueue.requestGL30;
+    }
+
+    static boolean _2D_set0(GLAsyncLoadQueue glasyncloadqueue, boolean flag)
+    {
+        glasyncloadqueue.contextFailed = flag;
+        return flag;
+    }
+
+    static boolean _2D_set1(GLAsyncLoadQueue glasyncloadqueue, boolean flag)
+    {
+        glasyncloadqueue.contextReady = flag;
+        return flag;
+    }
+
+    public GLAsyncLoadQueue(RenderContext rendercontext, EGL10 egl10_1, EGLDisplay egldisplay, EGLConfig eglconfig, boolean flag)
+        throws InstantiationException
+    {
+        mustExit = new AtomicBoolean(false);
+        contextReadyLock = new Object();
+        contextReady = false;
+        contextFailed = true;
+        loadedQueue = new WeakQueue();
+        egl10 = egl10_1;
+        eglDisplay = egldisplay;
+        eglConfig = eglconfig;
+        requestGL30 = flag;
+        eglBaseContext = egl10_1.eglGetCurrentContext();
+        if (eglBaseContext == null || eglBaseContext == EGL10.EGL_NO_CONTEXT)
+        {
+            break MISSING_BLOCK_LABEL_242;
+        }
+        thread = new Thread(new EGLLoadThread(rendercontext, null), "EGLLoader");
+        thread.setPriority(4);
+        thread.start();
+        Debug.Printf("TexLoad: Waiting for thread to create context", new Object[0]);
+        rendercontext = ((RenderContext) (contextReadyLock));
+        rendercontext;
+        JVM INSTR monitorenter ;
+        while (!contextReady) 
+        {
+            contextReadyLock.wait();
+        }
+        break MISSING_BLOCK_LABEL_204;
+        egl10_1;
+        rendercontext;
+        JVM INSTR monitorexit ;
+        throw egl10_1;
+        rendercontext;
+        throw new InstantiationException((new StringBuilder()).append("Interrupted: ").append(rendercontext.getMessage()).toString());
+        rendercontext;
+        JVM INSTR monitorexit ;
+        Debug.Printf("TexLoad: Context created, failed = %b", new Object[] {
+            Boolean.valueOf(contextFailed)
+        });
+        if (contextFailed)
+        {
+            throw new InstantiationException("TexLoad: failed to create context");
+        } else
+        {
+            return;
+        }
+        throw new InstantiationException("TexLoad: current context was null");
+    }
+
+    public void GLResourceLoaded(GLLoadQueue.GLLoadable glloadable)
+    {
+        loadedQueue.offer(glloadable);
+    }
+
+    public void RunLoadQueue(RenderContext rendercontext)
+    {
+        do
+        {
+            rendercontext = (GLLoadQueue.GLLoadable)loadedQueue.poll();
+            if (rendercontext != null)
+            {
+                rendercontext.GLCompleteLoad();
+            } else
+            {
                 return;
             }
-        }
+        } while (true);
     }
 
-    public void StopLoadQueue() {
+    public void StopLoadQueue()
+    {
         Debug.Printf("TexLoad: StopLoadQueue called.", new Object[0]);
-        this.mustExit.set(true);
-        this.thread.interrupt();
-        try {
-            this.thread.join();
-        } catch (InterruptedException e) {
+        mustExit.set(true);
+        thread.interrupt();
+        try
+        {
+            thread.join();
         }
+        catch (InterruptedException interruptedexception) { }
         super.StopLoadQueue();
         Debug.Printf("TexLoad: StopLoadQueue exiting.", new Object[0]);
     }
 
-    public void remove(@Nonnull GLLoadQueue.GLLoadable gLLoadable) {
-        this.loadedQueue.remove(gLLoadable);
-        super.remove(gLLoadable);
+    public void remove(GLLoadQueue.GLLoadable glloadable)
+    {
+        loadedQueue.remove(glloadable);
+        super.remove(glloadable);
     }
 }

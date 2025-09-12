@@ -1,32 +1,42 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType;
 import com.lumiyaviewer.lumiya.slproto.messages.ImprovedInstantMessage;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public final class SLChatInventoryItemOfferedByGroupNoticeEvent extends SLChatInventoryItemOfferedEvent {
-    public SLChatInventoryItemOfferedByGroupNoticeEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
-        super(chatMessage, uuid);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.chat:
+//            SLChatInventoryItemOfferedEvent
+
+public final class SLChatInventoryItemOfferedByGroupNoticeEvent extends SLChatInventoryItemOfferedEvent
+{
+
+    public SLChatInventoryItemOfferedByGroupNoticeEvent(ChatMessage chatmessage, UUID uuid)
+    {
+        super(chatmessage, uuid);
     }
 
-    public SLChatInventoryItemOfferedByGroupNoticeEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, ImprovedInstantMessage improvedInstantMessage, String str, SLAssetType sLAssetType) {
-        super(chatMessageSource, uuid, improvedInstantMessage, str, extractItemID(improvedInstantMessage), sLAssetType);
+    public SLChatInventoryItemOfferedByGroupNoticeEvent(ChatMessageSource chatmessagesource, UUID uuid, ImprovedInstantMessage improvedinstantmessage, String s, SLAssetType slassettype)
+    {
+        super(chatmessagesource, uuid, improvedinstantmessage, s, extractItemID(improvedinstantmessage), slassettype);
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.InventoryItemOfferedByGroupNotice;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.InventoryItemOfferedByGroupNotice;
     }
 
-    public String getText(Context context, @Nonnull UserManager userManager) {
-        return context.getString(R.string.group_notice_attachment_format, new Object[]{getItemName()});
+    public String getText(Context context, UserManager usermanager)
+    {
+        return context.getString(0x7f090147, new Object[] {
+            getItemName()
+        });
     }
 }

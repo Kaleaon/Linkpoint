@@ -1,67 +1,114 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.objects;
 
-final class AutoValue_SLObjectFilterInfo extends SLObjectFilterInfo {
+
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.objects:
+//            SLObjectFilterInfo
+
+final class AutoValue_SLObjectFilterInfo extends SLObjectFilterInfo
+{
+
     private final String filterText;
     private final float range;
     private final boolean showAttachments;
     private final boolean showNonDescriptive;
     private final boolean showNonTouchable;
 
-    AutoValue_SLObjectFilterInfo(String str, boolean z, boolean z2, boolean z3, float f) {
-        if (str == null) {
+    AutoValue_SLObjectFilterInfo(String s, boolean flag, boolean flag1, boolean flag2, float f)
+    {
+        if (s == null)
+        {
             throw new NullPointerException("Null filterText");
+        } else
+        {
+            filterText = s;
+            showAttachments = flag;
+            showNonDescriptive = flag1;
+            showNonTouchable = flag2;
+            range = f;
+            return;
         }
-        this.filterText = str;
-        this.showAttachments = z;
-        this.showNonDescriptive = z2;
-        this.showNonTouchable = z3;
-        this.range = f;
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object obj)
+    {
+        if (obj == this)
+        {
             return true;
         }
-        if (!(obj instanceof SLObjectFilterInfo)) {
+        if (obj instanceof SLObjectFilterInfo)
+        {
+            obj = (SLObjectFilterInfo)obj;
+            if (filterText.equals(((SLObjectFilterInfo) (obj)).filterText()) && showAttachments == ((SLObjectFilterInfo) (obj)).showAttachments() && showNonDescriptive == ((SLObjectFilterInfo) (obj)).showNonDescriptive() && showNonTouchable == ((SLObjectFilterInfo) (obj)).showNonTouchable())
+            {
+                return Float.floatToIntBits(range) == Float.floatToIntBits(((SLObjectFilterInfo) (obj)).range());
+            } else
+            {
+                return false;
+            }
+        } else
+        {
             return false;
         }
-        SLObjectFilterInfo sLObjectFilterInfo = (SLObjectFilterInfo) obj;
-        if (this.filterText.equals(sLObjectFilterInfo.filterText()) && this.showAttachments == sLObjectFilterInfo.showAttachments() && this.showNonDescriptive == sLObjectFilterInfo.showNonDescriptive() && this.showNonTouchable == sLObjectFilterInfo.showNonTouchable()) {
-            return Float.floatToIntBits(this.range) == Float.floatToIntBits(sLObjectFilterInfo.range());
+    }
+
+    public String filterText()
+    {
+        return filterText;
+    }
+
+    public int hashCode()
+    {
+        char c2 = '\u04CF';
+        int i = filterText.hashCode();
+        char c;
+        char c1;
+        if (showAttachments)
+        {
+            c = '\u04CF';
+        } else
+        {
+            c = '\u04D5';
         }
-        return false;
-    }
-
-    public String filterText() {
-        return this.filterText;
-    }
-
-    public int hashCode() {
-        int i = 1231;
-        int hashCode = ((this.showNonDescriptive ? 1231 : 1237) ^ (((this.showAttachments ? 1231 : 1237) ^ ((this.filterText.hashCode() ^ 1000003) * 1000003)) * 1000003)) * 1000003;
-        if (!this.showNonTouchable) {
-            i = 1237;
+        if (showNonDescriptive)
+        {
+            c1 = '\u04CF';
+        } else
+        {
+            c1 = '\u04D5';
         }
-        return ((hashCode ^ i) * 1000003) ^ Float.floatToIntBits(this.range);
+        if (!showNonTouchable)
+        {
+            c2 = '\u04D5';
+        }
+        return ((c1 ^ (c ^ (i ^ 0xf4243) * 0xf4243) * 0xf4243) * 0xf4243 ^ c2) * 0xf4243 ^ Float.floatToIntBits(range);
     }
 
-    public float range() {
-        return this.range;
+    public float range()
+    {
+        return range;
     }
 
-    public boolean showAttachments() {
-        return this.showAttachments;
+    public boolean showAttachments()
+    {
+        return showAttachments;
     }
 
-    public boolean showNonDescriptive() {
-        return this.showNonDescriptive;
+    public boolean showNonDescriptive()
+    {
+        return showNonDescriptive;
     }
 
-    public boolean showNonTouchable() {
-        return this.showNonTouchable;
+    public boolean showNonTouchable()
+    {
+        return showNonTouchable;
     }
 
-    public String toString() {
-        return "SLObjectFilterInfo{filterText=" + this.filterText + ", " + "showAttachments=" + this.showAttachments + ", " + "showNonDescriptive=" + this.showNonDescriptive + ", " + "showNonTouchable=" + this.showNonTouchable + ", " + "range=" + this.range + "}";
+    public String toString()
+    {
+        return (new StringBuilder()).append("SLObjectFilterInfo{filterText=").append(filterText).append(", ").append("showAttachments=").append(showAttachments).append(", ").append("showNonDescriptive=").append(showNonDescriptive).append(", ").append("showNonTouchable=").append(showNonTouchable).append(", ").append("range=").append(range).append("}").toString();
     }
 }

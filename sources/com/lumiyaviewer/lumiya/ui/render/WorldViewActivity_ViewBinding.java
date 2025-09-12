@@ -1,9 +1,12 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.render;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.UiThread;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -13,10 +16,15 @@ import android.widget.TextView;
 import butterknife.Unbinder;
 import butterknife.internal.DebouncingOnClickListener;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.ui.voice.VoiceStatusView;
 
-public class WorldViewActivity_ViewBinding implements Unbinder {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.render:
+//            WorldViewActivity
+
+public class WorldViewActivity_ViewBinding
+    implements Unbinder
+{
+
     private WorldViewActivity target;
     private View view2131755264;
     private View view2131755268;
@@ -30,185 +38,321 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
     private View view2131755762;
     private View view2131755763;
 
-    @UiThread
-    public WorldViewActivity_ViewBinding(WorldViewActivity worldViewActivity) {
-        this(worldViewActivity, worldViewActivity.getWindow().getDecorView());
+    public WorldViewActivity_ViewBinding(WorldViewActivity worldviewactivity)
+    {
+        this(worldviewactivity, worldviewactivity.getWindow().getDecorView());
     }
 
-    @UiThread
-    public WorldViewActivity_ViewBinding(final WorldViewActivity worldViewActivity, View view) {
-        this.target = worldViewActivity;
-        View findRequiredView = Utils.findRequiredView(view, R.id.object_pay_button, "field 'objectPayButton' and method 'onObjectPayButton'");
-        worldViewActivity.objectPayButton = (ImageButton) Utils.castView(findRequiredView, R.id.object_pay_button, "field 'objectPayButton'", ImageButton.class);
-        this.view2131755554 = findRequiredView;
-        findRequiredView.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onObjectPayButton();
+    public WorldViewActivity_ViewBinding(final WorldViewActivity target, View view)
+    {
+        this.target = target;
+        View view1 = Utils.findRequiredView(view, 0x7f100222, "field 'objectPayButton' and method 'onObjectPayButton'");
+        target.objectPayButton = (ImageButton)Utils.castView(view1, 0x7f100222, "field 'objectPayButton'", android/widget/ImageButton);
+        view2131755554 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onObjectPayButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
-        worldViewActivity.buttonFlyUpward = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_fly_upward, "field 'buttonFlyUpward'", ImageButton.class);
-        View findRequiredView2 = Utils.findRequiredView(view, R.id.button_hud, "field 'buttonHUD' and method 'onHUDButton'");
-        worldViewActivity.buttonHUD = (Button) Utils.castView(findRequiredView2, R.id.button_hud, "field 'buttonHUD'", Button.class);
-        this.view2131755763 = findRequiredView2;
-        findRequiredView2.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onHUDButton();
+        target.buttonFlyUpward = (ImageButton)Utils.findRequiredViewAsType(view, 0x7f1002ec, "field 'buttonFlyUpward'", android/widget/ImageButton);
+        view1 = Utils.findRequiredView(view, 0x7f1002f3, "field 'buttonHUD' and method 'onHUDButton'");
+        target.buttonHUD = (Button)Utils.castView(view1, 0x7f1002f3, "field 'buttonHUD'", android/widget/Button);
+        view2131755763 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onHUDButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
-        View findRequiredView3 = Utils.findRequiredView(view, R.id.button_stand_up, "field 'buttonStandUp' and method 'onObjectStandButton'");
-        worldViewActivity.buttonStandUp = (ImageButton) Utils.castView(findRequiredView3, R.id.button_stand_up, "field 'buttonStandUp'", ImageButton.class);
-        this.view2131755264 = findRequiredView3;
-        findRequiredView3.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onObjectStandButton();
+        view1 = Utils.findRequiredView(view, 0x7f100100, "field 'buttonStandUp' and method 'onObjectStandButton'");
+        target.buttonStandUp = (ImageButton)Utils.castView(view1, 0x7f100100, "field 'buttonStandUp'", android/widget/ImageButton);
+        view2131755264 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onObjectStandButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
-        View findRequiredView4 = Utils.findRequiredView(view, R.id.object_more_button, "field 'objectMoreButton' and method 'onObjectMoreButton'");
-        worldViewActivity.objectMoreButton = (ImageButton) Utils.castView(findRequiredView4, R.id.object_more_button, "field 'objectMoreButton'", ImageButton.class);
-        this.view2131755754 = findRequiredView4;
-        findRequiredView4.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onObjectMoreButton();
+        view1 = Utils.findRequiredView(view, 0x7f1002ea, "field 'objectMoreButton' and method 'onObjectMoreButton'");
+        target.objectMoreButton = (ImageButton)Utils.castView(view1, 0x7f1002ea, "field 'objectMoreButton'", android/widget/ImageButton);
+        view2131755754 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onObjectMoreButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
-        worldViewActivity.flyButtonsLayout = (LinearLayout) Utils.findRequiredViewAsType(view, R.id.fly_buttons_layout, "field 'flyButtonsLayout'", LinearLayout.class);
-        worldViewActivity.objectPopupLeftSpacer = Utils.findRequiredView(view, R.id.object_popup_left_spacer, "field 'objectPopupLeftSpacer'");
-        View findRequiredView5 = Utils.findRequiredView(view, R.id.object_touch_button, "field 'objectTouchButton' and method 'onObjectTouchButton'");
-        worldViewActivity.objectTouchButton = (ImageButton) Utils.castView(findRequiredView5, R.id.object_touch_button, "field 'objectTouchButton'", ImageButton.class);
-        this.view2131755268 = findRequiredView5;
-        findRequiredView5.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onObjectTouchButton();
+        target.flyButtonsLayout = (LinearLayout)Utils.findRequiredViewAsType(view, 0x7f1002eb, "field 'flyButtonsLayout'", android/widget/LinearLayout);
+        target.objectPopupLeftSpacer = Utils.findRequiredView(view, 0x7f1002f4, "field 'objectPopupLeftSpacer'");
+        view1 = Utils.findRequiredView(view, 0x7f100104, "field 'objectTouchButton' and method 'onObjectTouchButton'");
+        target.objectTouchButton = (ImageButton)Utils.castView(view1, 0x7f100104, "field 'objectTouchButton'", android/widget/ImageButton);
+        view2131755268 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onObjectTouchButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
-        worldViewActivity.buttonFlyDownward = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_fly_downward, "field 'buttonFlyDownward'", ImageButton.class);
-        worldViewActivity.chatsOverlayLayout = (LinearLayout) Utils.findRequiredViewAsType(view, R.id.chats_overlay_layout, "field 'chatsOverlayLayout'", LinearLayout.class);
-        worldViewActivity.moveButtonsLayout = Utils.findRequiredView(view, R.id.move_buttons_layout, "field 'moveButtonsLayout'");
-        worldViewActivity.avatarIconView = (ImageView) Utils.findRequiredViewAsType(view, R.id.avatarIconView, "field 'avatarIconView'", ImageView.class);
-        worldViewActivity.worldViewHolder = (FrameLayout) Utils.findRequiredViewAsType(view, R.id.world_view_holder, "field 'worldViewHolder'", FrameLayout.class);
-        worldViewActivity.worldOverlaysContainer = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.world_overlays_container, "field 'worldOverlaysContainer'", ViewGroup.class);
-        View findRequiredView6 = Utils.findRequiredView(view, R.id.object_chat_button, "field 'objectChatButton' and method 'onObjectChatButton'");
-        worldViewActivity.objectChatButton = (ImageButton) Utils.castView(findRequiredView6, R.id.object_chat_button, "field 'objectChatButton'", ImageButton.class);
-        this.view2131755270 = findRequiredView6;
-        findRequiredView6.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onObjectChatButton();
+        target.buttonFlyDownward = (ImageButton)Utils.findRequiredViewAsType(view, 0x7f1002ed, "field 'buttonFlyDownward'", android/widget/ImageButton);
+        target.chatsOverlayLayout = (LinearLayout)Utils.findRequiredViewAsType(view, 0x7f1002ef, "field 'chatsOverlayLayout'", android/widget/LinearLayout);
+        target.moveButtonsLayout = Utils.findRequiredView(view, 0x7f1000fb, "field 'moveButtonsLayout'");
+        target.avatarIconView = (ImageView)Utils.findRequiredViewAsType(view, 0x7f100238, "field 'avatarIconView'", android/widget/ImageView);
+        target.worldViewHolder = (FrameLayout)Utils.findRequiredViewAsType(view, 0x7f1002df, "field 'worldViewHolder'", android/widget/FrameLayout);
+        target.worldOverlaysContainer = (ViewGroup)Utils.findRequiredViewAsType(view, 0x7f1002e6, "field 'worldOverlaysContainer'", android/view/ViewGroup);
+        view1 = Utils.findRequiredView(view, 0x7f100106, "field 'objectChatButton' and method 'onObjectChatButton'");
+        target.objectChatButton = (ImageButton)Utils.castView(view1, 0x7f100106, "field 'objectChatButton'", android/widget/ImageButton);
+        view2131755270 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onObjectChatButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
-        worldViewActivity.detailsContainer = Utils.findRequiredView(view, R.id.details, "field 'detailsContainer'");
-        worldViewActivity.worldViewTouchReceiver = Utils.findRequiredView(view, R.id.world_view_touch_receiver, "field 'worldViewTouchReceiver'");
-        worldViewActivity.buttonTurnRight = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_turn_right, "field 'buttonTurnRight'", ImageButton.class);
-        View findRequiredView7 = Utils.findRequiredView(view, R.id.object_sit_button, "field 'objectSitButton' and method 'onObjectSitButton'");
-        worldViewActivity.objectSitButton = (ImageButton) Utils.castView(findRequiredView7, R.id.object_sit_button, "field 'objectSitButton'", ImageButton.class);
-        this.view2131755269 = findRequiredView7;
-        findRequiredView7.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onObjectSitButton();
+        target.detailsContainer = Utils.findRequiredView(view, 0x7f100114, "field 'detailsContainer'");
+        target.worldViewTouchReceiver = Utils.findRequiredView(view, 0x7f1002e2, "field 'worldViewTouchReceiver'");
+        target.buttonTurnRight = (ImageButton)Utils.findRequiredViewAsType(view, 0x7f1000ff, "field 'buttonTurnRight'", android/widget/ImageButton);
+        view1 = Utils.findRequiredView(view, 0x7f100105, "field 'objectSitButton' and method 'onObjectSitButton'");
+        target.objectSitButton = (ImageButton)Utils.castView(view1, 0x7f100105, "field 'objectSitButton'", android/widget/ImageButton);
+        view2131755269 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onObjectSitButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
-        worldViewActivity.buttonTurnLeft = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_turn_left, "field 'buttonTurnLeft'", ImageButton.class);
-        worldViewActivity.buttonMoveForward = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_move_forward, "field 'buttonMoveForward'", ImageButton.class);
-        worldViewActivity.objectControlsPanel = Utils.findRequiredView(view, R.id.object_controls_panel, "field 'objectControlsPanel'");
-        worldViewActivity.dragPointerLayout = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.drag_pointer_layout, "field 'dragPointerLayout'", ViewGroup.class);
-        View findRequiredView8 = Utils.findRequiredView(view, R.id.button_cam_off, "field 'buttonCamOff' and method 'onCamOffButton'");
-        worldViewActivity.buttonCamOff = (ImageButton) Utils.castView(findRequiredView8, R.id.button_cam_off, "field 'buttonCamOff'", ImageButton.class);
-        this.view2131755762 = findRequiredView8;
-        findRequiredView8.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onCamOffButton();
+        target.buttonTurnLeft = (ImageButton)Utils.findRequiredViewAsType(view, 0x7f1000fd, "field 'buttonTurnLeft'", android/widget/ImageButton);
+        target.buttonMoveForward = (ImageButton)Utils.findRequiredViewAsType(view, 0x7f1000fc, "field 'buttonMoveForward'", android/widget/ImageButton);
+        target.objectControlsPanel = Utils.findRequiredView(view, 0x7f1002e9, "field 'objectControlsPanel'");
+        target.dragPointerLayout = (ViewGroup)Utils.findRequiredViewAsType(view, 0x7f1002e3, "field 'dragPointerLayout'", android/view/ViewGroup);
+        view1 = Utils.findRequiredView(view, 0x7f1002f2, "field 'buttonCamOff' and method 'onCamOffButton'");
+        target.buttonCamOff = (ImageButton)Utils.castView(view1, 0x7f1002f2, "field 'buttonCamOff'", android/widget/ImageButton);
+        view2131755762 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onCamOffButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
-        worldViewActivity.voiceStatusView = (VoiceStatusView) Utils.findRequiredViewAsType(view, R.id.voice_status_view_3d, "field 'voiceStatusView'", VoiceStatusView.class);
-        worldViewActivity.insetsBackground = (FrameLayout) Utils.findRequiredViewAsType(view, R.id.insets_background, "field 'insetsBackground'", FrameLayout.class);
-        worldViewActivity.buttonMoveBackward = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_move_backward, "field 'buttonMoveBackward'", ImageButton.class);
-        View findRequiredView9 = Utils.findRequiredView(view, R.id.button_cam_on, "field 'buttonCamOn' and method 'onCamOnButton'");
-        worldViewActivity.buttonCamOn = (ImageButton) Utils.castView(findRequiredView9, R.id.button_cam_on, "field 'buttonCamOn'", ImageButton.class);
-        this.view2131755761 = findRequiredView9;
-        findRequiredView9.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onCamOnButton();
+        target.voiceStatusView = (VoiceStatusView)Utils.findRequiredViewAsType(view, 0x7f1002e8, "field 'voiceStatusView'", com/lumiyaviewer/lumiya/ui/voice/VoiceStatusView);
+        target.insetsBackground = (FrameLayout)Utils.findRequiredViewAsType(view, 0x7f1002e0, "field 'insetsBackground'", android/widget/FrameLayout);
+        target.buttonMoveBackward = (ImageButton)Utils.findRequiredViewAsType(view, 0x7f1000fe, "field 'buttonMoveBackward'", android/widget/ImageButton);
+        view1 = Utils.findRequiredView(view, 0x7f1002f1, "field 'buttonCamOn' and method 'onCamOnButton'");
+        target.buttonCamOn = (ImageButton)Utils.castView(view1, 0x7f1002f1, "field 'buttonCamOn'", android/widget/ImageButton);
+        view2131755761 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onCamOnButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
-        View findRequiredView10 = Utils.findRequiredView(view, R.id.object_stand_button, "field 'objectStandButton' and method 'onObjectStandButton'");
-        worldViewActivity.objectStandButton = (ImageButton) Utils.castView(findRequiredView10, R.id.object_stand_button, "field 'objectStandButton'", ImageButton.class);
-        this.view2131755538 = findRequiredView10;
-        findRequiredView10.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onObjectStandButton();
+        view1 = Utils.findRequiredView(view, 0x7f100212, "field 'objectStandButton' and method 'onObjectStandButton'");
+        target.objectStandButton = (ImageButton)Utils.castView(view1, 0x7f100212, "field 'objectStandButton'", android/widget/ImageButton);
+        view2131755538 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onObjectStandButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
-        worldViewActivity.dragPointer = Utils.findRequiredView(view, R.id.drag_pointer_view, "field 'dragPointer'");
-        worldViewActivity.objectNameTextView = (TextView) Utils.findRequiredViewAsType(view, R.id.objectNameTextView, "field 'objectNameTextView'", TextView.class);
-        View findRequiredView11 = Utils.findRequiredView(view, R.id.button_stop_flying, "field 'buttonStopFlying' and method 'onStopFlyingButton'");
-        worldViewActivity.buttonStopFlying = (ImageButton) Utils.castView(findRequiredView11, R.id.button_stop_flying, "field 'buttonStopFlying'", ImageButton.class);
-        this.view2131755758 = findRequiredView11;
-        findRequiredView11.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                worldViewActivity.onStopFlyingButton();
+        target.dragPointer = Utils.findRequiredView(view, 0x7f1002e4, "field 'dragPointer'");
+        target.objectNameTextView = (TextView)Utils.findRequiredViewAsType(view, 0x7f100239, "field 'objectNameTextView'", android/widget/TextView);
+        view = Utils.findRequiredView(view, 0x7f1002ee, "field 'buttonStopFlying' and method 'onStopFlyingButton'");
+        target.buttonStopFlying = (ImageButton)Utils.castView(view, 0x7f1002ee, "field 'buttonStopFlying'", android/widget/ImageButton);
+        view2131755758 = view;
+        view.setOnClickListener(new DebouncingOnClickListener() {
+
+            final WorldViewActivity_ViewBinding this$0;
+            final WorldViewActivity val$target;
+
+            public void doClick(View view2)
+            {
+                target.onStopFlyingButton();
+            }
+
+            
+            {
+                this$0 = WorldViewActivity_ViewBinding.this;
+                target = worldviewactivity;
+                super();
             }
         });
     }
 
-    @CallSuper
-    public void unbind() {
-        WorldViewActivity worldViewActivity = this.target;
-        if (worldViewActivity == null) {
+    public void unbind()
+    {
+        WorldViewActivity worldviewactivity = target;
+        if (worldviewactivity == null)
+        {
             throw new IllegalStateException("Bindings already cleared.");
+        } else
+        {
+            target = null;
+            worldviewactivity.objectPayButton = null;
+            worldviewactivity.buttonFlyUpward = null;
+            worldviewactivity.buttonHUD = null;
+            worldviewactivity.buttonStandUp = null;
+            worldviewactivity.objectMoreButton = null;
+            worldviewactivity.flyButtonsLayout = null;
+            worldviewactivity.objectPopupLeftSpacer = null;
+            worldviewactivity.objectTouchButton = null;
+            worldviewactivity.buttonFlyDownward = null;
+            worldviewactivity.chatsOverlayLayout = null;
+            worldviewactivity.moveButtonsLayout = null;
+            worldviewactivity.avatarIconView = null;
+            worldviewactivity.worldViewHolder = null;
+            worldviewactivity.worldOverlaysContainer = null;
+            worldviewactivity.objectChatButton = null;
+            worldviewactivity.detailsContainer = null;
+            worldviewactivity.worldViewTouchReceiver = null;
+            worldviewactivity.buttonTurnRight = null;
+            worldviewactivity.objectSitButton = null;
+            worldviewactivity.buttonTurnLeft = null;
+            worldviewactivity.buttonMoveForward = null;
+            worldviewactivity.objectControlsPanel = null;
+            worldviewactivity.dragPointerLayout = null;
+            worldviewactivity.buttonCamOff = null;
+            worldviewactivity.voiceStatusView = null;
+            worldviewactivity.insetsBackground = null;
+            worldviewactivity.buttonMoveBackward = null;
+            worldviewactivity.buttonCamOn = null;
+            worldviewactivity.objectStandButton = null;
+            worldviewactivity.dragPointer = null;
+            worldviewactivity.objectNameTextView = null;
+            worldviewactivity.buttonStopFlying = null;
+            view2131755554.setOnClickListener(null);
+            view2131755554 = null;
+            view2131755763.setOnClickListener(null);
+            view2131755763 = null;
+            view2131755264.setOnClickListener(null);
+            view2131755264 = null;
+            view2131755754.setOnClickListener(null);
+            view2131755754 = null;
+            view2131755268.setOnClickListener(null);
+            view2131755268 = null;
+            view2131755270.setOnClickListener(null);
+            view2131755270 = null;
+            view2131755269.setOnClickListener(null);
+            view2131755269 = null;
+            view2131755762.setOnClickListener(null);
+            view2131755762 = null;
+            view2131755761.setOnClickListener(null);
+            view2131755761 = null;
+            view2131755538.setOnClickListener(null);
+            view2131755538 = null;
+            view2131755758.setOnClickListener(null);
+            view2131755758 = null;
+            return;
         }
-        this.target = null;
-        worldViewActivity.objectPayButton = null;
-        worldViewActivity.buttonFlyUpward = null;
-        worldViewActivity.buttonHUD = null;
-        worldViewActivity.buttonStandUp = null;
-        worldViewActivity.objectMoreButton = null;
-        worldViewActivity.flyButtonsLayout = null;
-        worldViewActivity.objectPopupLeftSpacer = null;
-        worldViewActivity.objectTouchButton = null;
-        worldViewActivity.buttonFlyDownward = null;
-        worldViewActivity.chatsOverlayLayout = null;
-        worldViewActivity.moveButtonsLayout = null;
-        worldViewActivity.avatarIconView = null;
-        worldViewActivity.worldViewHolder = null;
-        worldViewActivity.worldOverlaysContainer = null;
-        worldViewActivity.objectChatButton = null;
-        worldViewActivity.detailsContainer = null;
-        worldViewActivity.worldViewTouchReceiver = null;
-        worldViewActivity.buttonTurnRight = null;
-        worldViewActivity.objectSitButton = null;
-        worldViewActivity.buttonTurnLeft = null;
-        worldViewActivity.buttonMoveForward = null;
-        worldViewActivity.objectControlsPanel = null;
-        worldViewActivity.dragPointerLayout = null;
-        worldViewActivity.buttonCamOff = null;
-        worldViewActivity.voiceStatusView = null;
-        worldViewActivity.insetsBackground = null;
-        worldViewActivity.buttonMoveBackward = null;
-        worldViewActivity.buttonCamOn = null;
-        worldViewActivity.objectStandButton = null;
-        worldViewActivity.dragPointer = null;
-        worldViewActivity.objectNameTextView = null;
-        worldViewActivity.buttonStopFlying = null;
-        this.view2131755554.setOnClickListener((View.OnClickListener) null);
-        this.view2131755554 = null;
-        this.view2131755763.setOnClickListener((View.OnClickListener) null);
-        this.view2131755763 = null;
-        this.view2131755264.setOnClickListener((View.OnClickListener) null);
-        this.view2131755264 = null;
-        this.view2131755754.setOnClickListener((View.OnClickListener) null);
-        this.view2131755754 = null;
-        this.view2131755268.setOnClickListener((View.OnClickListener) null);
-        this.view2131755268 = null;
-        this.view2131755270.setOnClickListener((View.OnClickListener) null);
-        this.view2131755270 = null;
-        this.view2131755269.setOnClickListener((View.OnClickListener) null);
-        this.view2131755269 = null;
-        this.view2131755762.setOnClickListener((View.OnClickListener) null);
-        this.view2131755762 = null;
-        this.view2131755761.setOnClickListener((View.OnClickListener) null);
-        this.view2131755761 = null;
-        this.view2131755538.setOnClickListener((View.OnClickListener) null);
-        this.view2131755538 = null;
-        this.view2131755758.setOnClickListener((View.OnClickListener) null);
-        this.view2131755758 = null;
     }
 }

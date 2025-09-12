@@ -1,15 +1,21 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class LogDwellTime extends SLMessage {
-    public DwellInfo DwellInfo_Field = new DwellInfo();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class DwellInfo {
+public class LogDwellTime extends SLMessage
+{
+    public static class DwellInfo
+    {
+
         public UUID AgentID;
         public int AvgAgentsInView;
         public int AvgViewerFPS;
@@ -17,43 +23,56 @@ public class LogDwellTime extends SLMessage {
         public int RegionX;
         public int RegionY;
         public UUID SessionID;
-        public byte[] SimName;
+        public byte SimName[];
+
+        public DwellInfo()
+        {
+        }
     }
 
-    public LogDwellTime() {
-        this.zeroCoded = false;
+
+    public DwellInfo DwellInfo_Field;
+
+    public LogDwellTime()
+    {
+        zeroCoded = false;
+        DwellInfo_Field = new DwellInfo();
     }
 
-    public int CalcPayloadSize() {
-        return this.DwellInfo_Field.SimName.length + 37 + 4 + 4 + 1 + 1 + 4;
+    public int CalcPayloadSize()
+    {
+        return DwellInfo_Field.SimName.length + 37 + 4 + 4 + 1 + 1 + 4;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleLogDwellTime(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleLogDwellTime(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put(Ascii.DC2);
-        packUUID(byteBuffer, this.DwellInfo_Field.AgentID);
-        packUUID(byteBuffer, this.DwellInfo_Field.SessionID);
-        packFloat(byteBuffer, this.DwellInfo_Field.Duration);
-        packVariable(byteBuffer, this.DwellInfo_Field.SimName, 1);
-        packInt(byteBuffer, this.DwellInfo_Field.RegionX);
-        packInt(byteBuffer, this.DwellInfo_Field.RegionY);
-        packByte(byteBuffer, (byte) this.DwellInfo_Field.AvgAgentsInView);
-        packByte(byteBuffer, (byte) this.DwellInfo_Field.AvgViewerFPS);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)18);
+        packUUID(bytebuffer, DwellInfo_Field.AgentID);
+        packUUID(bytebuffer, DwellInfo_Field.SessionID);
+        packFloat(bytebuffer, DwellInfo_Field.Duration);
+        packVariable(bytebuffer, DwellInfo_Field.SimName, 1);
+        packInt(bytebuffer, DwellInfo_Field.RegionX);
+        packInt(bytebuffer, DwellInfo_Field.RegionY);
+        packByte(bytebuffer, (byte)DwellInfo_Field.AvgAgentsInView);
+        packByte(bytebuffer, (byte)DwellInfo_Field.AvgViewerFPS);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.DwellInfo_Field.AgentID = unpackUUID(byteBuffer);
-        this.DwellInfo_Field.SessionID = unpackUUID(byteBuffer);
-        this.DwellInfo_Field.Duration = unpackFloat(byteBuffer);
-        this.DwellInfo_Field.SimName = unpackVariable(byteBuffer, 1);
-        this.DwellInfo_Field.RegionX = unpackInt(byteBuffer);
-        this.DwellInfo_Field.RegionY = unpackInt(byteBuffer);
-        this.DwellInfo_Field.AvgAgentsInView = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-        this.DwellInfo_Field.AvgViewerFPS = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        DwellInfo_Field.AgentID = unpackUUID(bytebuffer);
+        DwellInfo_Field.SessionID = unpackUUID(bytebuffer);
+        DwellInfo_Field.Duration = unpackFloat(bytebuffer);
+        DwellInfo_Field.SimName = unpackVariable(bytebuffer, 1);
+        DwellInfo_Field.RegionX = unpackInt(bytebuffer);
+        DwellInfo_Field.RegionY = unpackInt(bytebuffer);
+        DwellInfo_Field.AvgAgentsInView = unpackByte(bytebuffer) & 0xff;
+        DwellInfo_Field.AvgViewerFPS = unpackByte(bytebuffer) & 0xff;
     }
 }

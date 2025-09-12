@@ -1,47 +1,74 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class StateSave extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public DataBlock DataBlock_Field = new DataBlock();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class StateSave extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class DataBlock {
-        public byte[] Filename;
+    public static class DataBlock
+    {
+
+        public byte Filename[];
+
+        public DataBlock()
+        {
+        }
     }
 
-    public StateSave() {
-        this.zeroCoded = false;
+
+    public AgentData AgentData_Field;
+    public DataBlock DataBlock_Field;
+
+    public StateSave()
+    {
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
+        DataBlock_Field = new DataBlock();
     }
 
-    public int CalcPayloadSize() {
-        return this.DataBlock_Field.Filename.length + 1 + 36;
+    public int CalcPayloadSize()
+    {
+        return DataBlock_Field.Filename.length + 1 + 36;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleStateSave(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleStateSave(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put(Ascii.DEL);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packVariable(byteBuffer, this.DataBlock_Field.Filename, 1);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)127);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packVariable(bytebuffer, DataBlock_Field.Filename, 1);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.DataBlock_Field.Filename = unpackVariable(byteBuffer, 1);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        DataBlock_Field.Filename = unpackVariable(bytebuffer, 1);
     }
 }

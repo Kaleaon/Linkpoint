@@ -1,42 +1,68 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 
-public class LayerData extends SLMessage {
-    public LayerDataData LayerDataData_Field = new LayerDataData();
-    public LayerID LayerID_Field = new LayerID();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class LayerDataData {
-        public byte[] Data;
+public class LayerData extends SLMessage
+{
+    public static class LayerDataData
+    {
+
+        public byte Data[];
+
+        public LayerDataData()
+        {
+        }
     }
 
-    public static class LayerID {
+    public static class LayerID
+    {
+
         public int Type;
+
+        public LayerID()
+        {
+        }
     }
 
-    public LayerData() {
-        this.zeroCoded = false;
+
+    public LayerDataData LayerDataData_Field;
+    public LayerID LayerID_Field;
+
+    public LayerData()
+    {
+        zeroCoded = false;
+        LayerID_Field = new LayerID();
+        LayerDataData_Field = new LayerDataData();
     }
 
-    public int CalcPayloadSize() {
-        return this.LayerDataData_Field.Data.length + 2 + 2;
+    public int CalcPayloadSize()
+    {
+        return LayerDataData_Field.Data.length + 2 + 2;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleLayerData(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleLayerData(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put(Ascii.VT);
-        packByte(byteBuffer, (byte) this.LayerID_Field.Type);
-        packVariable(byteBuffer, this.LayerDataData_Field.Data, 2);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.put((byte)11);
+        packByte(bytebuffer, (byte)LayerID_Field.Type);
+        packVariable(bytebuffer, LayerDataData_Field.Data, 2);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.LayerID_Field.Type = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-        this.LayerDataData_Field.Data = unpackVariable(byteBuffer, 2);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        LayerID_Field.Type = unpackByte(bytebuffer) & 0xff;
+        LayerDataData_Field.Data = unpackVariable(bytebuffer, 2);
     }
 }

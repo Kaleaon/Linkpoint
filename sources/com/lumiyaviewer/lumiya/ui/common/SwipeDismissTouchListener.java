@@ -1,18 +1,37 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.res.Resources;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
+import android.view.ViewParent;
+import android.view.ViewPropertyAnimator;
 import com.lumiyaviewer.lumiya.Debug;
 
-@TargetApi(12)
-public class SwipeDismissTouchListener implements OnInterceptTouchEventListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.common:
+//            OnInterceptTouchEventListener
+
+public class SwipeDismissTouchListener
+    implements OnInterceptTouchEventListener
+{
+    public static interface DismissCallbacks
+    {
+
+        public abstract boolean canDismiss(Object obj);
+
+        public abstract void onDismiss(View view, Object obj);
+    }
+
+
     private final boolean canSwipeDown;
     private final boolean canSwipeLeft;
     private final boolean canSwipeRight;
@@ -20,8 +39,7 @@ public class SwipeDismissTouchListener implements OnInterceptTouchEventListener 
     private final boolean canSwipeX;
     private final boolean canSwipeY;
     private long mAnimationTime;
-    /* access modifiers changed from: private */
-    public DismissCallbacks mCallbacks;
+    private DismissCallbacks mCallbacks;
     private float mDownX;
     private float mDownY;
     private int mMaxFlingVelocity;
@@ -32,238 +50,485 @@ public class SwipeDismissTouchListener implements OnInterceptTouchEventListener 
     private int mSwipingSlopY;
     private boolean mSwipingX;
     private boolean mSwipingY;
-    /* access modifiers changed from: private */
-    public Object mToken;
+    private Object mToken;
     private float mTranslationX;
     private float mTranslationY;
     private VelocityTracker mVelocityTracker;
-    /* access modifiers changed from: private */
-    public View mView;
-    private int mViewHeight = 1;
-    private int mViewWidth = 1;
+    private View mView;
+    private int mViewHeight;
+    private int mViewWidth;
 
-    public interface DismissCallbacks {
-        boolean canDismiss(Object obj);
-
-        void onDismiss(View view, Object obj);
+    static DismissCallbacks _2D_get0(SwipeDismissTouchListener swipedismisstouchlistener)
+    {
+        return swipedismisstouchlistener.mCallbacks;
     }
 
-    public SwipeDismissTouchListener(View view, Object obj, DismissCallbacks dismissCallbacks, boolean z, boolean z2, boolean z3, boolean z4) {
-        boolean z5 = true;
-        this.canSwipeUp = z;
-        this.canSwipeDown = z2;
-        this.canSwipeLeft = z3;
-        this.canSwipeRight = z4;
-        this.canSwipeX = z3 ? true : z4;
-        this.canSwipeY = !z ? z2 : z5;
-        ViewConfiguration viewConfiguration = ViewConfiguration.get(view.getContext());
-        this.mSlop = viewConfiguration.getScaledTouchSlop();
-        this.mMinFlingVelocity = viewConfiguration.getScaledMinimumFlingVelocity() * 16;
-        this.mMaxFlingVelocity = viewConfiguration.getScaledMaximumFlingVelocity();
-        this.mAnimationTime = (long) view.getContext().getResources().getInteger(17694720);
-        this.mView = view;
-        this.mToken = obj;
-        this.mCallbacks = dismissCallbacks;
+    static Object _2D_get1(SwipeDismissTouchListener swipedismisstouchlistener)
+    {
+        return swipedismisstouchlistener.mToken;
     }
 
-    /* access modifiers changed from: private */
-    public void performDismiss() {
-        final ViewGroup.LayoutParams layoutParams = this.mView.getLayoutParams();
-        final int height = this.mView.getHeight();
-        ValueAnimator duration = ValueAnimator.ofInt(new int[]{height, 1}).setDuration(this.mAnimationTime);
-        duration.addListener(new AnimatorListenerAdapter() {
-            public void onAnimationEnd(Animator animator) {
-                SwipeDismissTouchListener.this.mCallbacks.onDismiss(SwipeDismissTouchListener.this.mView, SwipeDismissTouchListener.this.mToken);
-                SwipeDismissTouchListener.this.mView.setAlpha(1.0f);
-                SwipeDismissTouchListener.this.mView.setTranslationX(0.0f);
-                SwipeDismissTouchListener.this.mView.setTranslationY(0.0f);
-                layoutParams.height = height;
-                SwipeDismissTouchListener.this.mView.setLayoutParams(layoutParams);
+    static View _2D_get2(SwipeDismissTouchListener swipedismisstouchlistener)
+    {
+        return swipedismisstouchlistener.mView;
+    }
+
+    static void _2D_wrap0(SwipeDismissTouchListener swipedismisstouchlistener)
+    {
+        swipedismisstouchlistener.performDismiss();
+    }
+
+    public SwipeDismissTouchListener(View view, Object obj, DismissCallbacks dismisscallbacks, boolean flag, boolean flag1, boolean flag2, boolean flag3)
+    {
+        boolean flag4 = true;
+        super();
+        mViewWidth = 1;
+        mViewHeight = 1;
+        canSwipeUp = flag;
+        canSwipeDown = flag1;
+        canSwipeLeft = flag2;
+        canSwipeRight = flag3;
+        ViewConfiguration viewconfiguration;
+        if (flag2)
+        {
+            flag3 = true;
+        }
+        canSwipeX = flag3;
+        flag2 = flag4;
+        if (!flag)
+        {
+            flag2 = flag1;
+        }
+        canSwipeY = flag2;
+        viewconfiguration = ViewConfiguration.get(view.getContext());
+        mSlop = viewconfiguration.getScaledTouchSlop();
+        mMinFlingVelocity = viewconfiguration.getScaledMinimumFlingVelocity() * 16;
+        mMaxFlingVelocity = viewconfiguration.getScaledMaximumFlingVelocity();
+        mAnimationTime = view.getContext().getResources().getInteger(0x10e0000);
+        mView = view;
+        mToken = obj;
+        mCallbacks = dismisscallbacks;
+    }
+
+    private void performDismiss()
+    {
+        final android.view.ViewGroup.LayoutParams lp = mView.getLayoutParams();
+        final int originalHeight = mView.getHeight();
+        ValueAnimator valueanimator = ValueAnimator.ofInt(new int[] {
+            originalHeight, 1
+        }).setDuration(mAnimationTime);
+        valueanimator.addListener(new AnimatorListenerAdapter() {
+
+            final SwipeDismissTouchListener this$0;
+            final android.view.ViewGroup.LayoutParams val$lp;
+            final int val$originalHeight;
+
+            public void onAnimationEnd(Animator animator)
+            {
+                SwipeDismissTouchListener._2D_get0(SwipeDismissTouchListener.this).onDismiss(SwipeDismissTouchListener._2D_get2(SwipeDismissTouchListener.this), SwipeDismissTouchListener._2D_get1(SwipeDismissTouchListener.this));
+                SwipeDismissTouchListener._2D_get2(SwipeDismissTouchListener.this).setAlpha(1.0F);
+                SwipeDismissTouchListener._2D_get2(SwipeDismissTouchListener.this).setTranslationX(0.0F);
+                SwipeDismissTouchListener._2D_get2(SwipeDismissTouchListener.this).setTranslationY(0.0F);
+                lp.height = originalHeight;
+                SwipeDismissTouchListener._2D_get2(SwipeDismissTouchListener.this).setLayoutParams(lp);
+            }
+
+            
+            {
+                this$0 = SwipeDismissTouchListener.this;
+                lp = layoutparams;
+                originalHeight = i;
+                super();
             }
         });
-        duration.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                layoutParams.height = ((Integer) valueAnimator.getAnimatedValue()).intValue();
-                SwipeDismissTouchListener.this.mView.setLayoutParams(layoutParams);
+        valueanimator.addUpdateListener(new android.animation.ValueAnimator.AnimatorUpdateListener() {
+
+            final SwipeDismissTouchListener this$0;
+            final android.view.ViewGroup.LayoutParams val$lp;
+
+            public void onAnimationUpdate(ValueAnimator valueanimator1)
+            {
+                lp.height = ((Integer)valueanimator1.getAnimatedValue()).intValue();
+                SwipeDismissTouchListener._2D_get2(SwipeDismissTouchListener.this).setLayoutParams(lp);
+            }
+
+            
+            {
+                this$0 = SwipeDismissTouchListener.this;
+                lp = layoutparams;
+                super();
             }
         });
-        duration.start();
+        valueanimator.start();
     }
 
-    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+    public boolean dispatchTouchEvent(MotionEvent motionevent)
+    {
         return false;
     }
 
-    public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
-        boolean z;
-        boolean z2;
-        float f;
-        float f2;
-        boolean z3 = true;
-        motionEvent.offsetLocation(this.mTranslationX, this.mTranslationY);
-        if (this.mViewWidth < 2) {
-            this.mViewWidth = this.mView.getWidth();
+    public boolean onInterceptTouchEvent(MotionEvent motionevent)
+    {
+        boolean flag;
+        boolean flag2;
+        boolean flag3;
+        flag = true;
+        flag2 = true;
+        flag3 = true;
+        motionevent.offsetLocation(mTranslationX, mTranslationY);
+        if (mViewWidth < 2)
+        {
+            mViewWidth = mView.getWidth();
         }
-        if (this.mViewHeight < 2) {
-            this.mViewHeight = this.mView.getHeight();
+        if (mViewHeight < 2)
+        {
+            mViewHeight = mView.getHeight();
         }
-        switch (motionEvent.getActionMasked()) {
-            case 0:
-                this.mDownX = motionEvent.getRawX();
-                this.mDownY = motionEvent.getRawY();
-                Debug.Printf("SwipeSwipe: action down x %f y %f", Float.valueOf(this.mDownX), Float.valueOf(this.mDownY));
-                if (this.mCallbacks.canDismiss(this.mToken)) {
-                    this.mVelocityTracker = VelocityTracker.obtain();
-                    this.mVelocityTracker.addMovement(motionEvent);
+        motionevent.getActionMasked();
+        JVM INSTR tableswitch 0 3: default 92
+    //                   0 94
+    //                   1 172
+    //                   2 938
+    //                   3 851;
+           goto _L1 _L2 _L3 _L4 _L5
+_L1:
+        return false;
+_L2:
+        mDownX = motionevent.getRawX();
+        mDownY = motionevent.getRawY();
+        Debug.Printf("SwipeSwipe: action down x %f y %f", new Object[] {
+            Float.valueOf(mDownX), Float.valueOf(mDownY)
+        });
+        if (mCallbacks.canDismiss(mToken))
+        {
+            mVelocityTracker = VelocityTracker.obtain();
+            mVelocityTracker.addMovement(motionevent);
+        }
+        return true;
+_L3:
+        if (mVelocityTracker != null)
+        {
+            float f = motionevent.getRawX() - mDownX;
+            float f1 = motionevent.getRawY() - mDownY;
+            mVelocityTracker.addMovement(motionevent);
+            mVelocityTracker.computeCurrentVelocity(1000);
+            float f2 = mVelocityTracker.getXVelocity();
+            float f3 = mVelocityTracker.getYVelocity();
+            float f4 = Math.abs(f2);
+            float f5 = Math.abs(f3);
+            MotionEvent motionevent1;
+            int k;
+            boolean flag4;
+            boolean flag5;
+            boolean flag6;
+            if (mSwiping && mSwipingX && canSwipeRight && f > (float)(mViewWidth / 2))
+            {
+                f1 = mViewWidth;
+                f = 0.0F;
+            } else
+            if (mSwiping && mSwipingX && canSwipeLeft && f < (float)(-(mViewWidth / 2)))
+            {
+                f1 = -mViewWidth;
+                f = 0.0F;
+            } else
+            if (mSwiping && mSwipingY && canSwipeDown && f1 > (float)(mViewHeight / 2))
+            {
+                f = mViewHeight;
+                f1 = 0.0F;
+            } else
+            if (mSwiping && mSwipingY && canSwipeUp && f1 < (float)(-(mViewHeight / 2)))
+            {
+                f = -mViewHeight;
+                f1 = 0.0F;
+            } else
+            if ((float)mMinFlingVelocity <= f4 && f4 <= (float)mMaxFlingVelocity && f5 < f4 && mSwiping && mSwipingX)
+            {
+                int i;
+                if (f2 < 0.0F)
+                {
+                    flag3 = canSwipeLeft;
+                } else
+                {
+                    flag3 = canSwipeRight;
+                }
+                if (f2 < 0.0F)
+                {
+                    i = 1;
+                } else
+                {
+                    i = 0;
+                }
+                if (f >= 0.0F)
+                {
+                    flag = false;
+                }
+                if (i != flag)
+                {
+                    flag3 = false;
+                }
+                if (f2 < 0.0F)
+                {
+                    i = -mViewWidth;
+                } else
+                {
+                    i = mViewWidth;
+                }
+                f1 = i;
+                f = 0.0F;
+            } else
+            if ((float)mMinFlingVelocity <= f5 && f5 <= (float)mMaxFlingVelocity && f4 < f5 && mSwiping)
+            {
+                if (mSwipingY)
+                {
+                    int j;
+                    boolean flag1;
+                    if (f3 < 0.0F)
+                    {
+                        flag3 = canSwipeUp;
+                    } else
+                    {
+                        flag3 = canSwipeDown;
+                    }
+                    if (f3 < 0.0F)
+                    {
+                        j = 1;
+                    } else
+                    {
+                        j = 0;
+                    }
+                    if (f1 < 0.0F)
+                    {
+                        flag1 = flag2;
+                    } else
+                    {
+                        flag1 = false;
+                    }
+                    if (j != flag1)
+                    {
+                        flag3 = false;
+                    }
+                    if (f3 < 0.0F)
+                    {
+                        j = -mViewHeight;
+                    } else
+                    {
+                        j = mViewHeight;
+                    }
+                    f = j;
+                    f1 = 0.0F;
+                } else
+                {
+                    f = 0.0F;
+                    f1 = 0.0F;
+                    flag3 = false;
+                }
+            } else
+            {
+                f = 0.0F;
+                f1 = 0.0F;
+                flag3 = false;
+            }
+            if (flag3)
+            {
+                mView.animate().translationX(f1).translationY(f).alpha(0.0F).setDuration(mAnimationTime).setListener(new AnimatorListenerAdapter() {
+
+                    final SwipeDismissTouchListener this$0;
+
+                    public void onAnimationEnd(Animator animator)
+                    {
+                        SwipeDismissTouchListener._2D_wrap0(SwipeDismissTouchListener.this);
+                    }
+
+            
+            {
+                this$0 = SwipeDismissTouchListener.this;
+                super();
+            }
+                });
+            } else
+            if (mSwiping)
+            {
+                mView.animate().translationX(0.0F).translationY(0.0F).alpha(1.0F).setDuration(mAnimationTime).setListener(null);
+            }
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+            mTranslationX = 0.0F;
+            mTranslationY = 0.0F;
+            mDownX = 0.0F;
+            mDownY = 0.0F;
+            mSwiping = false;
+            mSwipingX = false;
+            mSwipingY = false;
+            return false;
+        }
+        continue; /* Loop/switch isn't completed */
+_L5:
+        if (mVelocityTracker != null)
+        {
+            mView.animate().translationX(0.0F).translationY(0.0F).alpha(1.0F).setDuration(mAnimationTime).setListener(null);
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+            mTranslationX = 0.0F;
+            mTranslationY = 0.0F;
+            mDownX = 0.0F;
+            mDownY = 0.0F;
+            mSwiping = false;
+            mSwipingX = false;
+            mSwipingY = false;
+            return false;
+        }
+        if (true) goto _L1; else goto _L4
+_L4:
+        Debug.Printf("SwipeSwipe: action move x %f y %f", new Object[] {
+            Float.valueOf(mDownX), Float.valueOf(mDownY)
+        });
+        if (mVelocityTracker != null)
+        {
+            mVelocityTracker.addMovement(motionevent);
+            f1 = motionevent.getRawX() - mDownX;
+            f2 = motionevent.getRawY() - mDownY;
+            if (!mSwiping)
+            {
+                if (f1 < (float)(-mSlop) && Math.abs(f2) < Math.abs(f1) / 2.0F)
+                {
+                    flag5 = canSwipeLeft;
+                } else
+                {
+                    flag5 = false;
+                }
+                if (f1 > (float)mSlop && Math.abs(f2) < Math.abs(f1) / 2.0F)
+                {
+                    flag3 = canSwipeRight;
+                } else
+                {
+                    flag3 = false;
+                }
+                if (f2 < (float)(-mSlop) && Math.abs(f1) < Math.abs(f2) / 2.0F)
+                {
+                    flag6 = canSwipeUp;
+                } else
+                {
+                    flag6 = false;
+                }
+                if (f2 > (float)mSlop && Math.abs(f1) < Math.abs(f2) / 2.0F)
+                {
+                    flag4 = canSwipeDown;
+                } else
+                {
+                    flag4 = false;
+                }
+                if (flag5)
+                {
+                    flag3 = true;
+                }
+                if (flag6)
+                {
+                    flag4 = true;
+                }
+                if (flag3 && flag4)
+                {
+                    if (Math.abs(f1) >= Math.abs(f2))
+                    {
+                        flag4 = false;
+                    } else
+                    {
+                        flag3 = false;
+                    }
+                }
+                if (flag3 || flag4)
+                {
+                    mSwiping = true;
+                    mSwipingX = flag3;
+                    mSwipingY = flag4;
+                    if (flag3)
+                    {
+                        if (f1 > 0.0F)
+                        {
+                            k = mSlop;
+                        } else
+                        {
+                            k = -mSlop;
+                        }
+                    } else
+                    {
+                        k = 0;
+                    }
+                    mSwipingSlopX = k;
+                    if (flag4)
+                    {
+                        if (f2 > 0.0F)
+                        {
+                            k = mSlop;
+                        } else
+                        {
+                            k = -mSlop;
+                        }
+                    } else
+                    {
+                        k = 0;
+                    }
+                    mSwipingSlopY = k;
+                    mView.getParent().requestDisallowInterceptTouchEvent(true);
+                    motionevent1 = MotionEvent.obtain(motionevent);
+                    motionevent1.setAction(motionevent.getActionIndex() << 8 | 3);
+                    mView.onTouchEvent(motionevent1);
+                    motionevent1.recycle();
+                }
+            }
+            if (mSwiping)
+            {
+                if (mSwipingX)
+                {
+                    f = f1;
+                } else
+                {
+                    f = 0.0F;
+                }
+                mTranslationX = f;
+                if (mSwipingY)
+                {
+                    f = f2;
+                } else
+                {
+                    f = 0.0F;
+                }
+                mTranslationY = f;
+                motionevent = mView;
+                if (mSwipingX)
+                {
+                    f = f1 - (float)mSwipingSlopX;
+                } else
+                {
+                    f = 0.0F;
+                }
+                motionevent.setTranslationX(f);
+                motionevent = mView;
+                if (mSwipingY)
+                {
+                    f = f2 - (float)mSwipingSlopY;
+                } else
+                {
+                    f = 0.0F;
+                }
+                motionevent.setTranslationY(f);
+                if (mSwipingX)
+                {
+                    mView.setAlpha(Math.max(0.0F, Math.min(1.0F, 1.0F - (Math.abs(f1) * 2.0F) / (float)mViewWidth)));
+                } else
+                if (mSwipingY)
+                {
+                    mView.setAlpha(Math.max(0.0F, Math.min(1.0F, 1.0F - (Math.abs(f2) * 2.0F) / (float)mViewHeight)));
+                    return true;
                 }
                 return true;
-            case 1:
-                if (this.mVelocityTracker != null) {
-                    float rawX = motionEvent.getRawX() - this.mDownX;
-                    float rawY = motionEvent.getRawY() - this.mDownY;
-                    this.mVelocityTracker.addMovement(motionEvent);
-                    this.mVelocityTracker.computeCurrentVelocity(1000);
-                    float xVelocity = this.mVelocityTracker.getXVelocity();
-                    float yVelocity = this.mVelocityTracker.getYVelocity();
-                    float abs = Math.abs(xVelocity);
-                    float abs2 = Math.abs(yVelocity);
-                    if (this.mSwiping && this.mSwipingX && this.canSwipeRight && rawX > ((float) (this.mViewWidth / 2))) {
-                        f2 = (float) this.mViewWidth;
-                        f = 0.0f;
-                    } else if (this.mSwiping && this.mSwipingX && this.canSwipeLeft && rawX < ((float) (-(this.mViewWidth / 2)))) {
-                        f2 = (float) (-this.mViewWidth);
-                        f = 0.0f;
-                    } else if (this.mSwiping && this.mSwipingY && this.canSwipeDown && rawY > ((float) (this.mViewHeight / 2))) {
-                        f = (float) this.mViewHeight;
-                        f2 = 0.0f;
-                    } else if (this.mSwiping && this.mSwipingY && this.canSwipeUp && rawY < ((float) (-(this.mViewHeight / 2)))) {
-                        f = (float) (-this.mViewHeight);
-                        f2 = 0.0f;
-                    } else if (((float) this.mMinFlingVelocity) <= abs && abs <= ((float) this.mMaxFlingVelocity) && abs2 < abs && this.mSwiping && this.mSwipingX) {
-                        boolean z4 = xVelocity < 0.0f ? this.canSwipeLeft : this.canSwipeRight;
-                        boolean z5 = xVelocity < 0.0f;
-                        if (rawX >= 0.0f) {
-                            z3 = false;
-                        }
-                        z3 = z5 == z3 ? z4 : false;
-                        f2 = (float) (xVelocity < 0.0f ? -this.mViewWidth : this.mViewWidth);
-                        f = 0.0f;
-                    } else if (((float) this.mMinFlingVelocity) > abs2 || abs2 > ((float) this.mMaxFlingVelocity) || abs >= abs2 || !this.mSwiping) {
-                        f = 0.0f;
-                        f2 = 0.0f;
-                        z3 = false;
-                    } else if (this.mSwipingY) {
-                        boolean z6 = yVelocity < 0.0f ? this.canSwipeUp : this.canSwipeDown;
-                        boolean z7 = yVelocity < 0.0f;
-                        if (rawY >= 0.0f) {
-                            z3 = false;
-                        }
-                        z3 = z7 == z3 ? z6 : false;
-                        f = (float) (yVelocity < 0.0f ? -this.mViewHeight : this.mViewHeight);
-                        f2 = 0.0f;
-                    } else {
-                        f = 0.0f;
-                        f2 = 0.0f;
-                        z3 = false;
-                    }
-                    if (z3) {
-                        this.mView.animate().translationX(f2).translationY(f).alpha(0.0f).setDuration(this.mAnimationTime).setListener(new AnimatorListenerAdapter() {
-                            public void onAnimationEnd(Animator animator) {
-                                SwipeDismissTouchListener.this.performDismiss();
-                            }
-                        });
-                    } else if (this.mSwiping) {
-                        this.mView.animate().translationX(0.0f).translationY(0.0f).alpha(1.0f).setDuration(this.mAnimationTime).setListener((Animator.AnimatorListener) null);
-                    }
-                    this.mVelocityTracker.recycle();
-                    this.mVelocityTracker = null;
-                    this.mTranslationX = 0.0f;
-                    this.mTranslationY = 0.0f;
-                    this.mDownX = 0.0f;
-                    this.mDownY = 0.0f;
-                    this.mSwiping = false;
-                    this.mSwipingX = false;
-                    this.mSwipingY = false;
-                    break;
-                }
-                break;
-            case 2:
-                Debug.Printf("SwipeSwipe: action move x %f y %f", Float.valueOf(this.mDownX), Float.valueOf(this.mDownY));
-                if (this.mVelocityTracker != null) {
-                    this.mVelocityTracker.addMovement(motionEvent);
-                    float rawX2 = motionEvent.getRawX() - this.mDownX;
-                    float rawY2 = motionEvent.getRawY() - this.mDownY;
-                    if (!this.mSwiping) {
-                        boolean z8 = (rawX2 >= ((float) (-this.mSlop)) || Math.abs(rawY2) >= Math.abs(rawX2) / 2.0f) ? false : this.canSwipeLeft;
-                        boolean z9 = (rawX2 <= ((float) this.mSlop) || Math.abs(rawY2) >= Math.abs(rawX2) / 2.0f) ? false : this.canSwipeRight;
-                        boolean z10 = (rawY2 >= ((float) (-this.mSlop)) || Math.abs(rawX2) >= Math.abs(rawY2) / 2.0f) ? false : this.canSwipeUp;
-                        boolean z11 = (rawY2 <= ((float) this.mSlop) || Math.abs(rawX2) >= Math.abs(rawY2) / 2.0f) ? false : this.canSwipeDown;
-                        if (z8) {
-                            z9 = true;
-                        }
-                        boolean z12 = !z10 ? z11 : true;
-                        if (!z9) {
-                            boolean z13 = z12;
-                            z = z9;
-                            z2 = z13;
-                        } else if (!z12) {
-                            boolean z14 = z12;
-                            z = z9;
-                            z2 = z14;
-                        } else if (Math.abs(rawX2) >= Math.abs(rawY2)) {
-                            z = z9;
-                            z2 = false;
-                        } else {
-                            z2 = z12;
-                            z = false;
-                        }
-                        if (z || z2) {
-                            this.mSwiping = true;
-                            this.mSwipingX = z;
-                            this.mSwipingY = z2;
-                            this.mSwipingSlopX = z ? rawX2 > 0.0f ? this.mSlop : -this.mSlop : 0;
-                            this.mSwipingSlopY = z2 ? rawY2 > 0.0f ? this.mSlop : -this.mSlop : 0;
-                            this.mView.getParent().requestDisallowInterceptTouchEvent(true);
-                            MotionEvent obtain = MotionEvent.obtain(motionEvent);
-                            obtain.setAction((motionEvent.getActionIndex() << 8) | 3);
-                            this.mView.onTouchEvent(obtain);
-                            obtain.recycle();
-                        }
-                    }
-                    if (this.mSwiping) {
-                        this.mTranslationX = this.mSwipingX ? rawX2 : 0.0f;
-                        this.mTranslationY = this.mSwipingY ? rawY2 : 0.0f;
-                        this.mView.setTranslationX(this.mSwipingX ? rawX2 - ((float) this.mSwipingSlopX) : 0.0f);
-                        this.mView.setTranslationY(this.mSwipingY ? rawY2 - ((float) this.mSwipingSlopY) : 0.0f);
-                        if (this.mSwipingX) {
-                            this.mView.setAlpha(Math.max(0.0f, Math.min(1.0f, 1.0f - ((Math.abs(rawX2) * 2.0f) / ((float) this.mViewWidth)))));
-                        } else if (this.mSwipingY) {
-                            this.mView.setAlpha(Math.max(0.0f, Math.min(1.0f, 1.0f - ((Math.abs(rawY2) * 2.0f) / ((float) this.mViewHeight)))));
-                        }
-                        return true;
-                    }
-                }
-                break;
-            case 3:
-                if (this.mVelocityTracker != null) {
-                    this.mView.animate().translationX(0.0f).translationY(0.0f).alpha(1.0f).setDuration(this.mAnimationTime).setListener((Animator.AnimatorListener) null);
-                    this.mVelocityTracker.recycle();
-                    this.mVelocityTracker = null;
-                    this.mTranslationX = 0.0f;
-                    this.mTranslationY = 0.0f;
-                    this.mDownX = 0.0f;
-                    this.mDownY = 0.0f;
-                    this.mSwiping = false;
-                    this.mSwipingX = false;
-                    this.mSwipingY = false;
-                    break;
-                }
-                break;
+            }
         }
-        return false;
+        if (true) goto _L1; else goto _L6
+_L6:
     }
 
-    public boolean onTouchEvent(MotionEvent motionEvent) {
+    public boolean onTouchEvent(MotionEvent motionevent)
+    {
         return false;
     }
 }

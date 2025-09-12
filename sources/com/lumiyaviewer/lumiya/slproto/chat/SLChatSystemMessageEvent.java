@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
@@ -6,44 +10,47 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public final class SLChatSystemMessageEvent extends SLChatEvent {
-    @Nonnull
+public final class SLChatSystemMessageEvent extends SLChatEvent
+{
+
     private final String text;
 
-    public SLChatSystemMessageEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
-        super(chatMessage, uuid);
-        this.text = chatMessage.getMessageText();
+    public SLChatSystemMessageEvent(ChatMessage chatmessage, UUID uuid)
+    {
+        super(chatmessage, uuid);
+        text = chatmessage.getMessageText();
     }
 
-    public SLChatSystemMessageEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, @Nonnull String str) {
-        super(chatMessageSource, uuid);
-        this.text = str;
+    public SLChatSystemMessageEvent(ChatMessageSource chatmessagesource, UUID uuid, String s)
+    {
+        super(chatmessagesource, uuid);
+        text = s;
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.SystemMessage;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.SystemMessage;
     }
 
-    /* access modifiers changed from: protected */
-    public String getText(Context context, @Nonnull UserManager userManager) {
-        return this.text;
+    protected String getText(Context context, UserManager usermanager)
+    {
+        return text;
     }
 
-    public SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_PLAIN;
+    public com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType getViewType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType.VIEW_TYPE_PLAIN;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isActionMessage(@Nonnull UserManager userManager) {
+    protected boolean isActionMessage(UserManager usermanager)
+    {
         return true;
     }
 
-    public void serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage);
-        chatMessage.setMessageText(this.text);
+    public void serializeToDatabaseObject(ChatMessage chatmessage)
+    {
+        super.serializeToDatabaseObject(chatmessage);
+        chatmessage.setMessageText(text);
     }
 }

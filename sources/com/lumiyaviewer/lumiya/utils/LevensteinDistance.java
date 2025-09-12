@@ -1,25 +1,60 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.utils;
 
 import java.lang.reflect.Array;
 
-public class LevensteinDistance {
-    public static int computeLevensteinDistance(CharSequence charSequence, CharSequence charSequence2) {
-        int[][] iArr = (int[][]) Array.newInstance(Integer.TYPE, new int[]{charSequence.length() + 1, charSequence2.length() + 1});
-        for (int i = 0; i <= charSequence.length(); i++) {
-            iArr[i][0] = i;
-        }
-        for (int i2 = 1; i2 <= charSequence2.length(); i2++) {
-            iArr[0][i2] = i2;
-        }
-        for (int i3 = 1; i3 <= charSequence.length(); i3++) {
-            for (int i4 = 1; i4 <= charSequence2.length(); i4++) {
-                iArr[i3][i4] = minimum(iArr[i3 - 1][i4] + 1, iArr[i3][i4 - 1] + 1, (charSequence.charAt(i3 + -1) == charSequence2.charAt(i4 + -1) ? 0 : 1) + iArr[i3 - 1][i4 - 1]);
-            }
-        }
-        return iArr[charSequence.length()][charSequence2.length()];
+public class LevensteinDistance
+{
+
+    public LevensteinDistance()
+    {
     }
 
-    private static int minimum(int i, int i2, int i3) {
-        return Math.min(Math.min(i, i2), i3);
+    public static int computeLevensteinDistance(CharSequence charsequence, CharSequence charsequence1)
+    {
+        int ai[][] = (int[][])Array.newInstance(Integer.TYPE, new int[] {
+            charsequence.length() + 1, charsequence1.length() + 1
+        });
+        for (int i = 0; i <= charsequence.length(); i++)
+        {
+            ai[i][0] = i;
+        }
+
+        for (int j = 1; j <= charsequence1.length(); j++)
+        {
+            ai[0][j] = j;
+        }
+
+        for (int k = 1; k <= charsequence.length(); k++)
+        {
+            int l = 1;
+            while (l <= charsequence1.length()) 
+            {
+                int ai1[] = ai[k];
+                int j1 = ai[k - 1][l];
+                int k1 = ai[k][l - 1];
+                int l1 = ai[k - 1][l - 1];
+                int i1;
+                if (charsequence.charAt(k - 1) == charsequence1.charAt(l - 1))
+                {
+                    i1 = 0;
+                } else
+                {
+                    i1 = 1;
+                }
+                ai1[l] = minimum(j1 + 1, k1 + 1, i1 + l1);
+                l++;
+            }
+        }
+
+        return ai[charsequence.length()][charsequence1.length()];
+    }
+
+    private static int minimum(int i, int j, int k)
+    {
+        return Math.min(Math.min(i, j), k);
     }
 }

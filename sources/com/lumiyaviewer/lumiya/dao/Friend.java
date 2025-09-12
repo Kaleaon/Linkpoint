@@ -1,8 +1,14 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import java.util.UUID;
 
-public class Friend {
+public class Friend
+{
+
     public static final int GRANT_MAP_LOCATION = 2;
     public static final int GRANT_MODIFY_OBJECTS = 4;
     public static final int GRANT_ONLINE_STATUS = 1;
@@ -11,49 +17,60 @@ public class Friend {
     private int rightsHas;
     private UUID uuid;
 
-    public Friend() {
+    public Friend()
+    {
     }
 
-    public Friend(UUID uuid2) {
-        this.uuid = uuid2;
+    public Friend(UUID uuid1)
+    {
+        uuid = uuid1;
     }
 
-    public Friend(UUID uuid2, int i, int i2, boolean z) {
-        this.uuid = uuid2;
-        this.rightsGiven = i;
-        this.rightsHas = i2;
-        this.isOnline = z;
+    public Friend(UUID uuid1, int i, int j, boolean flag)
+    {
+        uuid = uuid1;
+        rightsGiven = i;
+        rightsHas = j;
+        isOnline = flag;
     }
 
-    public boolean getIsOnline() {
-        return this.isOnline;
+    public boolean getIsOnline()
+    {
+        return isOnline;
     }
 
-    public int getRightsGiven() {
-        return this.rightsGiven;
+    public int getRightsGiven()
+    {
+        return rightsGiven;
     }
 
-    public int getRightsHas() {
-        return this.rightsHas;
+    public int getRightsHas()
+    {
+        return rightsHas;
     }
 
-    public UUID getUuid() {
-        return this.uuid;
+    public UUID getUuid()
+    {
+        return uuid;
     }
 
-    public void setIsOnline(boolean z) {
-        this.isOnline = z;
+    public void setIsOnline(boolean flag)
+    {
+        isOnline = flag;
     }
 
-    public void setRightsGiven(int i) {
-        this.rightsGiven = i;
+    public void setRightsGiven(int i)
+    {
+        rightsGiven = i;
     }
 
-    public void setRightsHas(int i) {
-        this.rightsHas = i;
+    public void setRightsHas(int i)
+    {
+        rightsHas = i;
     }
 
-    public void setUuid(UUID uuid2) {
-        this.uuid = uuid2;
+    public void setUuid(UUID uuid1)
+    {
+        uuid = uuid1;
     }
 }

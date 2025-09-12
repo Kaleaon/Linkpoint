@@ -1,112 +1,164 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import com.google.common.base.Objects;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import javax.annotation.Nullable;
 
-public abstract class ChatterFragment extends FragmentWithTitle implements ChatterNameRetriever.OnChatterNameUpdated {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.common:
+//            FragmentWithTitle
+
+public abstract class ChatterFragment extends FragmentWithTitle
+    implements com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever.OnChatterNameUpdated
+{
+
     public static final String CHATTER_ID_KEY = "chatterID";
-    /* access modifiers changed from: protected */
-    @Nullable
-    public ChatterID chatterID;
+    protected ChatterID chatterID;
     protected ChatterNameRetriever nameRetriever;
-    private boolean showChatterTitle = true;
-    /* access modifiers changed from: protected */
-    public UserManager userManager;
+    private boolean showChatterTitle;
+    protected UserManager userManager;
 
-    private ChatterNameRetriever getNameRetriever(ChatterID chatterID2) {
-        Object[] objArr = new Object[1];
-        objArr[0] = chatterID2 != null ? chatterID2.toString() : "null";
-        Debug.Printf("UserFunctionsFragment: ChatterNameRetriever: requesting for %s", objArr);
-        if (chatterID2 != null) {
-            return new ChatterNameRetriever(chatterID2, this, UIThreadExecutor.getInstance());
-        }
-        return null;
+    public ChatterFragment()
+    {
+        showChatterTitle = true;
     }
 
-    public static Bundle makeSelection(ChatterID chatterID2) {
+    private ChatterNameRetriever getNameRetriever(ChatterID chatterid)
+    {
+        String s;
+        if (chatterid != null)
+        {
+            s = chatterid.toString();
+        } else
+        {
+            s = "null";
+        }
+        Debug.Printf("UserFunctionsFragment: ChatterNameRetriever: requesting for %s", new Object[] {
+            s
+        });
+        if (chatterid != null)
+        {
+            return new ChatterNameRetriever(chatterid, this, UIThreadExecutor.getInstance());
+        } else
+        {
+            return null;
+        }
+    }
+
+    public static Bundle makeSelection(ChatterID chatterid)
+    {
         Bundle bundle = new Bundle();
-        bundle.putParcelable(CHATTER_ID_KEY, chatterID2);
+        bundle.putParcelable("chatterID", chatterid);
         return bundle;
     }
 
-    private void updateFragmentTitle(ChatterNameRetriever chatterNameRetriever) {
-        Debug.Printf("updateTitle: updating fragment title: retriever = %s, showChatterTitle %b", chatterNameRetriever, Boolean.valueOf(this.showChatterTitle));
-        if (!this.showChatterTitle) {
+    private void updateFragmentTitle(ChatterNameRetriever chatternameretriever)
+    {
+label0:
+        {
+            Debug.Printf("updateTitle: updating fragment title: retriever = %s, showChatterTitle %b", new Object[] {
+                chatternameretriever, Boolean.valueOf(showChatterTitle)
+            });
+            if (showChatterTitle)
+            {
+                if (chatternameretriever != null)
+                {
+                    break label0;
+                }
+                setTitle(null, null);
+            }
             return;
         }
-        if (chatterNameRetriever == null) {
-            setTitle((String) null, (String) null);
+        chatternameretriever = chatternameretriever.getResolvedName();
+        if (chatternameretriever != null)
+        {
+            setTitle(decorateFragmentTitle(chatternameretriever), null);
             return;
-        }
-        String resolvedName = chatterNameRetriever.getResolvedName();
-        if (resolvedName != null) {
-            setTitle(decorateFragmentTitle(resolvedName), (String) null);
-        } else {
-            setTitle(getString(R.string.name_loading_title), (String) null);
+        } else
+        {
+            setTitle(getString(0x7f0901c8), null);
+            return;
         }
     }
 
-    /* access modifiers changed from: protected */
-    public String decorateFragmentTitle(String str) {
-        return str;
+    protected String decorateFragmentTitle(String s)
+    {
+        return s;
     }
 
-    public void onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-        Object[] objArr = new Object[1];
-        objArr[0] = this.chatterID != null ? this.chatterID.toString() : "null";
-        Debug.Printf("updateTitle: ChatterNameRetriever: retrieved for %s", objArr);
-        if (this.chatterID != null && Objects.equal(chatterNameRetriever.chatterID, this.chatterID)) {
+    public void onChatterNameUpdated(ChatterNameRetriever chatternameretriever)
+    {
+        String s;
+        if (chatterID != null)
+        {
+            s = chatterID.toString();
+        } else
+        {
+            s = "null";
+        }
+        Debug.Printf("updateTitle: ChatterNameRetriever: retrieved for %s", new Object[] {
+            s
+        });
+        if (chatterID != null && Objects.equal(chatternameretriever.chatterID, chatterID))
+        {
             Debug.Printf("UserFunctionsFragment: updating fragment title", new Object[0]);
-            updateFragmentTitle(chatterNameRetriever);
-            FragmentActivity activity = getActivity();
-            if (activity != null) {
-                ActivityCompat.invalidateOptionsMenu(activity);
+            updateFragmentTitle(chatternameretriever);
+            chatternameretriever = getActivity();
+            if (chatternameretriever != null)
+            {
+                ActivityCompat.invalidateOptionsMenu(chatternameretriever);
             }
         }
     }
 
-    /* access modifiers changed from: protected */
-    public abstract void onShowUser(@Nullable ChatterID chatterID2);
+    protected abstract void onShowUser(ChatterID chatterid);
 
-    public void onStart() {
+    public void onStart()
+    {
         super.onStart();
-        setNewUser((ChatterID) getArguments().getParcelable(CHATTER_ID_KEY));
+        setNewUser((ChatterID)getArguments().getParcelable("chatterID"));
     }
 
-    public void onStop() {
-        setNewUser((ChatterID) null);
+    public void onStop()
+    {
+        setNewUser(null);
         super.onStop();
     }
 
-    /* access modifiers changed from: package-private */
-    public void setNewUser(@Nullable ChatterID chatterID2) {
-        UserManager userManager2 = null;
-        this.chatterID = chatterID2;
-        if (chatterID2 != null) {
-            userManager2 = chatterID2.getUserManager();
+    void setNewUser(ChatterID chatterid)
+    {
+        UserManager usermanager = null;
+        chatterID = chatterid;
+        if (chatterid != null)
+        {
+            usermanager = chatterid.getUserManager();
         }
-        this.userManager = userManager2;
-        if (this.nameRetriever == null) {
-            this.nameRetriever = getNameRetriever(chatterID2);
-        } else if (!Objects.equal(this.nameRetriever.chatterID, chatterID2)) {
-            this.nameRetriever.dispose();
-            this.nameRetriever = getNameRetriever(chatterID2);
+        userManager = usermanager;
+        if (nameRetriever != null)
+        {
+            if (!Objects.equal(nameRetriever.chatterID, chatterid))
+            {
+                nameRetriever.dispose();
+                nameRetriever = getNameRetriever(chatterid);
+            }
+        } else
+        {
+            nameRetriever = getNameRetriever(chatterid);
         }
-        updateFragmentTitle(this.nameRetriever);
-        onShowUser(chatterID2);
+        updateFragmentTitle(nameRetriever);
+        onShowUser(chatterid);
     }
 
-    /* access modifiers changed from: protected */
-    public void setShowChatterTitle(boolean z) {
-        this.showChatterTitle = z;
+    protected void setShowChatterTitle(boolean flag)
+    {
+        showChatterTitle = flag;
     }
 }

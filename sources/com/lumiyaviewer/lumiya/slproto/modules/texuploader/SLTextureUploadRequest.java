@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.texuploader;
 
-import com.google.common.net.HttpHeaders;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.slproto.https.LLSDXMLRequest;
 import com.lumiyaviewer.lumiya.slproto.https.SLHTTPSConnection;
@@ -10,66 +13,98 @@ import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUndefined;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+import okhttp3.Call;
 import okhttp3.MediaType;
-import okhttp3.Request;
+import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
-public class SLTextureUploadRequest implements Runnable {
+public class SLTextureUploadRequest
+    implements Runnable
+{
+    public static interface TextureUploadCompleteListener
+    {
+
+        public abstract void OnTextureUploadComplete(SLTextureUploadRequest sltextureuploadrequest);
+    }
+
+
     private static final MediaType MEDIA_TYPE_JP2 = MediaType.parse("image/x-j2c");
     private String capURL;
-    TextureUploadCompleteListener onUploadComplete = null;
+    TextureUploadCompleteListener onUploadComplete;
     private File sourceFile;
     private UUID textureID;
     private int textureLayer;
 
-    public interface TextureUploadCompleteListener {
-        void OnTextureUploadComplete(SLTextureUploadRequest sLTextureUploadRequest);
+    public SLTextureUploadRequest(File file, int i)
+    {
+        onUploadComplete = null;
+        sourceFile = file;
+        textureLayer = i;
     }
 
-    public SLTextureUploadRequest(File file, int i) {
-        this.sourceFile = file;
-        this.textureLayer = i;
+    public UUID getTextureID()
+    {
+        return textureID;
     }
 
-    public UUID getTextureID() {
-        return this.textureID;
-    }
-
-    public void run() {
-        Response execute;
-        try {
-            String asString = new LLSDXMLRequest().PerformRequest(this.capURL, new LLSDUndefined()).byKey("uploader").asString();
-            Debug.Log("TextureUploader: uploader URL = " + asString);
-            execute = SLHTTPSConnection.getOkHttpClient().newCall(new Request.Builder().url(asString).header(HttpHeaders.ACCEPT, "application/llsd+xml").post(RequestBody.create(MEDIA_TYPE_JP2, this.sourceFile)).build()).execute();
-            if (execute == null) {
-                throw new IOException("Null response");
-            } else if (!execute.isSuccessful()) {
-                throw new IOException("Error code " + execute.code());
-            } else {
-                LLSDNode parseXML = LLSDNode.parseXML(execute.body().byteStream(), (String) null);
-                Debug.Log("TextureUploader: LLSD response = " + parseXML.serializeToXML());
-                this.textureID = parseXML.byKey("new_asset").asUUID();
-                execute.close();
-                if (this.onUploadComplete != null) {
-                    this.onUploadComplete.OnTextureUploadComplete(this);
-                }
-            }
-        } catch (IOException e) {
-            Debug.Warning(e);
-        } catch (LLSDException e2) {
-            Debug.Warning(e2);
-        } catch (Throwable th) {
-            execute.close();
-            throw th;
+    public void run()
+    {
+        Object obj;
+        obj = new LLSDXMLRequest();
+        LLSDUndefined llsdundefined = new LLSDUndefined();
+        obj = ((LLSDXMLRequest) (obj)).PerformRequest(capURL, llsdundefined).byKey("uploader").asString();
+        Debug.Log((new StringBuilder()).append("TextureUploader: uploader URL = ").append(((String) (obj))).toString());
+        obj = (new okhttp3.Request.Builder()).url(((String) (obj))).header("Accept", "application/llsd+xml").post(RequestBody.create(MEDIA_TYPE_JP2, sourceFile)).build();
+        obj = SLHTTPSConnection.getOkHttpClient().newCall(((okhttp3.Request) (obj))).execute();
+        if (obj != null) goto _L2; else goto _L1
+_L1:
+        Exception exception;
+        try
+        {
+            throw new IOException("Null response");
         }
+        // Misplaced declaration of an exception variable
+        catch (Object obj)
+        {
+            Debug.Warning(((Throwable) (obj)));
+        }
+        // Misplaced declaration of an exception variable
+        catch (Object obj)
+        {
+            Debug.Warning(((Throwable) (obj)));
+        }
+_L3:
+        if (onUploadComplete != null)
+        {
+            onUploadComplete.OnTextureUploadComplete(this);
+        }
+        return;
+_L2:
+        if (!((Response) (obj)).isSuccessful())
+        {
+            throw new IOException((new StringBuilder()).append("Error code ").append(((Response) (obj)).code()).toString());
+        }
+        break MISSING_BLOCK_LABEL_193;
+        exception;
+        ((Response) (obj)).close();
+        throw exception;
+        LLSDNode llsdnode = LLSDNode.parseXML(((Response) (obj)).body().byteStream(), null);
+        Debug.Log((new StringBuilder()).append("TextureUploader: LLSD response = ").append(llsdnode.serializeToXML()).toString());
+        textureID = llsdnode.byKey("new_asset").asUUID();
+        ((Response) (obj)).close();
+          goto _L3
     }
 
-    public void setCapURL(String str) {
-        this.capURL = str;
+    public void setCapURL(String s)
+    {
+        capURL = s;
     }
 
-    public void setOnUploadComplete(TextureUploadCompleteListener textureUploadCompleteListener) {
-        this.onUploadComplete = textureUploadCompleteListener;
+    public void setOnUploadComplete(TextureUploadCompleteListener textureuploadcompletelistener)
+    {
+        onUploadComplete = textureuploadcompletelistener;
     }
+
 }

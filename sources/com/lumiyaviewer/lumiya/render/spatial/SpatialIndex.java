@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.spatial;
 
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar;
@@ -5,75 +9,127 @@ import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
 import com.lumiyaviewer.lumiya.slproto.terrain.TerrainData;
 import java.lang.ref.WeakReference;
 
-public class SpatialIndex {
-    private volatile WeakReference<Object> indexHolder;
-    private volatile SpatialObjectIndex objectIndex;
+// Referenced classes of package com.lumiyaviewer.lumiya.render.spatial:
+//            SpatialObjectIndex
 
-    private static class InstanceHolder {
-        /* access modifiers changed from: private */
-        public static final SpatialIndex instance = new SpatialIndex((SpatialIndex) null);
+public class SpatialIndex
+{
+    private static class InstanceHolder
+    {
 
-        private InstanceHolder() {
+        private static final SpatialIndex instance = new SpatialIndex(null);
+
+        static SpatialIndex _2D_get0()
+        {
+            return instance;
+        }
+
+
+        private InstanceHolder()
+        {
         }
     }
 
-    private SpatialIndex() {
-        this.indexHolder = null;
-        this.objectIndex = null;
+
+    private volatile WeakReference indexHolder;
+    private volatile SpatialObjectIndex objectIndex;
+
+    private SpatialIndex()
+    {
+        indexHolder = null;
+        objectIndex = null;
     }
 
-    /* synthetic */ SpatialIndex(SpatialIndex spatialIndex) {
+    SpatialIndex(SpatialIndex spatialindex)
+    {
         this();
     }
 
-    public static SpatialIndex getInstance() {
-        return InstanceHolder.instance;
+    public static SpatialIndex getInstance()
+    {
+        return InstanceHolder._2D_get0();
     }
 
-    public synchronized void DisableObjectIndex(Object obj) {
-        Object obj2 = null;
-        synchronized (this) {
-            SpatialObjectIndex spatialObjectIndex = this.objectIndex;
-            if (this.indexHolder != null) {
-                obj2 = this.indexHolder.get();
-            }
-            if (spatialObjectIndex != null && (obj2 == obj || obj2 == null)) {
-                spatialObjectIndex.disableIndex();
-            }
-            this.indexHolder = null;
-            this.objectIndex = null;
+    public void DisableObjectIndex(Object obj)
+    {
+        Object obj1 = null;
+        this;
+        JVM INSTR monitorenter ;
+        SpatialObjectIndex spatialobjectindex;
+        spatialobjectindex = objectIndex;
+        if (indexHolder != null)
+        {
+            obj1 = indexHolder.get();
+        }
+          goto _L1
+_L2:
+        spatialobjectindex.disableIndex();
+_L3:
+        indexHolder = null;
+        objectIndex = null;
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        obj;
+        throw obj;
+_L1:
+        if (spatialobjectindex == null || obj1 != obj && obj1 != null) goto _L3; else goto _L2
+    }
+
+    public SpatialObjectIndex EnableObjectIndex(SpatialObjectIndex spatialobjectindex, Object obj)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        objectIndex = spatialobjectindex;
+        indexHolder = new WeakReference(obj);
+        spatialobjectindex = objectIndex;
+        this;
+        JVM INSTR monitorexit ;
+        return spatialobjectindex;
+        spatialobjectindex;
+        throw spatialobjectindex;
+    }
+
+    public DrawableAvatar getDrawableAvatar(SLObjectInfo slobjectinfo)
+    {
+        SpatialObjectIndex spatialobjectindex = objectIndex;
+        if (spatialobjectindex != null)
+        {
+            return spatialobjectindex.getDrawableAvatar(slobjectinfo);
+        } else
+        {
+            return null;
         }
     }
 
-    public synchronized SpatialObjectIndex EnableObjectIndex(SpatialObjectIndex spatialObjectIndex, Object obj) {
-        this.objectIndex = spatialObjectIndex;
-        this.indexHolder = new WeakReference<>(obj);
-        return this.objectIndex;
+    public SpatialObjectIndex getObjectIndex()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        SpatialObjectIndex spatialobjectindex = objectIndex;
+        this;
+        JVM INSTR monitorexit ;
+        return spatialobjectindex;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public DrawableAvatar getDrawableAvatar(SLObjectInfo sLObjectInfo) {
-        SpatialObjectIndex spatialObjectIndex = this.objectIndex;
-        if (spatialObjectIndex != null) {
-            return spatialObjectIndex.getDrawableAvatar(sLObjectInfo);
-        }
-        return null;
-    }
-
-    public synchronized SpatialObjectIndex getObjectIndex() {
-        return this.objectIndex;
-    }
-
-    public void setAvatarCountLimit(int i) {
-        SpatialObjectIndex spatialObjectIndex = this.objectIndex;
-        if (spatialObjectIndex != null) {
-            spatialObjectIndex.setAvatarCountLimit(i);
+    public void setAvatarCountLimit(int i)
+    {
+        SpatialObjectIndex spatialobjectindex = objectIndex;
+        if (spatialobjectindex != null)
+        {
+            spatialobjectindex.setAvatarCountLimit(i);
         }
     }
 
-    public void updateTerrainPatch(int i, int i2, TerrainData terrainData) {
-        SpatialObjectIndex spatialObjectIndex = this.objectIndex;
-        if (spatialObjectIndex != null) {
-            spatialObjectIndex.updateTerrainPatch(i, i2, terrainData);
+    public void updateTerrainPatch(int i, int j, TerrainData terraindata)
+    {
+        SpatialObjectIndex spatialobjectindex = objectIndex;
+        if (spatialobjectindex != null)
+        {
+            spatialobjectindex.updateTerrainPatch(i, j, terraindata);
         }
     }
 }

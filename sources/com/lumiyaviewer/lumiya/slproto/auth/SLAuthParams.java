@@ -1,10 +1,16 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.auth;
 
 import android.content.Intent;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.util.UUID;
 
-public class SLAuthParams {
+public class SLAuthParams
+{
+
     public final UUID clientID;
     public final String gridName;
     public final String loginName;
@@ -12,60 +18,121 @@ public class SLAuthParams {
     public final String passwordHash;
     public final String startLocation;
 
-    public SLAuthParams(Intent intent) {
-        this.loginName = intent.getStringExtra("login");
-        this.passwordHash = intent.getStringExtra("password");
-        this.clientID = UUIDPool.getUUID(intent.getStringExtra("client_id"));
-        this.startLocation = intent.getStringExtra("start_location");
-        this.loginURL = intent.getStringExtra("login_url");
-        this.gridName = intent.getStringExtra("grid_name");
+    public SLAuthParams(Intent intent)
+    {
+        loginName = intent.getStringExtra("login");
+        passwordHash = intent.getStringExtra("password");
+        clientID = UUIDPool.getUUID(intent.getStringExtra("client_id"));
+        startLocation = intent.getStringExtra("start_location");
+        loginURL = intent.getStringExtra("login_url");
+        gridName = intent.getStringExtra("grid_name");
     }
 
-    public SLAuthParams(String str, String str2, UUID uuid, String str3, String str4, String str5) {
-        this.loginName = str;
-        this.passwordHash = str2;
-        this.clientID = uuid;
-        this.startLocation = str3;
-        this.loginURL = str4;
-        this.gridName = str5;
+    public SLAuthParams(String s, String s1, UUID uuid, String s2, String s3, String s4)
+    {
+        loginName = s;
+        passwordHash = s1;
+        clientID = uuid;
+        startLocation = s2;
+        loginURL = s3;
+        gridName = s4;
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(Object obj)
+    {
+        boolean flag = true;
+        if (this == obj)
+        {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass())
+        {
             return false;
         }
-        SLAuthParams sLAuthParams = (SLAuthParams) obj;
-        if (this.loginName == null ? sLAuthParams.loginName != null : (!this.loginName.equals(sLAuthParams.loginName))) {
+        obj = (SLAuthParams)obj;
+        if (loginName == null ? ((SLAuthParams) (obj)).loginName != null : loginName.equals(((SLAuthParams) (obj)).loginName) ^ true)
+        {
             return false;
         }
-        if (this.passwordHash == null ? sLAuthParams.passwordHash != null : (!this.passwordHash.equals(sLAuthParams.passwordHash))) {
+        if (passwordHash == null ? ((SLAuthParams) (obj)).passwordHash != null : passwordHash.equals(((SLAuthParams) (obj)).passwordHash) ^ true)
+        {
             return false;
         }
-        if (this.clientID == null ? sLAuthParams.clientID != null : (!this.clientID.equals(sLAuthParams.clientID))) {
+        if (clientID == null ? ((SLAuthParams) (obj)).clientID != null : clientID.equals(((SLAuthParams) (obj)).clientID) ^ true)
+        {
             return false;
         }
-        if (this.startLocation == null ? sLAuthParams.startLocation != null : (!this.startLocation.equals(sLAuthParams.startLocation))) {
+        if (startLocation == null ? ((SLAuthParams) (obj)).startLocation != null : startLocation.equals(((SLAuthParams) (obj)).startLocation) ^ true)
+        {
             return false;
         }
-        if (this.loginURL == null ? sLAuthParams.loginURL != null : (!this.loginURL.equals(sLAuthParams.loginURL))) {
+        if (loginURL == null ? ((SLAuthParams) (obj)).loginURL != null : loginURL.equals(((SLAuthParams) (obj)).loginURL) ^ true)
+        {
             return false;
         }
-        return this.gridName != null ? this.gridName.equals(sLAuthParams.gridName) : sLAuthParams.gridName == null;
+        if (gridName != null)
+        {
+            flag = gridName.equals(((SLAuthParams) (obj)).gridName);
+        } else
+        if (((SLAuthParams) (obj)).gridName != null)
+        {
+            return false;
+        }
+        return flag;
     }
 
-    public int hashCode() {
-        int i = 0;
-        int hashCode = ((this.loginURL != null ? this.loginURL.hashCode() : 0) + (((this.startLocation != null ? this.startLocation.hashCode() : 0) + (((this.clientID != null ? this.clientID.hashCode() : 0) + (((this.passwordHash != null ? this.passwordHash.hashCode() : 0) + ((this.loginName != null ? this.loginName.hashCode() : 0) * 31)) * 31)) * 31)) * 31)) * 31;
-        if (this.gridName != null) {
-            i = this.gridName.hashCode();
+    public int hashCode()
+    {
+        int j1 = 0;
+        int i;
+        int j;
+        int k;
+        int l;
+        int i1;
+        if (loginName != null)
+        {
+            i = loginName.hashCode();
+        } else
+        {
+            i = 0;
         }
-        return hashCode + i;
+        if (passwordHash != null)
+        {
+            j = passwordHash.hashCode();
+        } else
+        {
+            j = 0;
+        }
+        if (clientID != null)
+        {
+            k = clientID.hashCode();
+        } else
+        {
+            k = 0;
+        }
+        if (startLocation != null)
+        {
+            l = startLocation.hashCode();
+        } else
+        {
+            l = 0;
+        }
+        if (loginURL != null)
+        {
+            i1 = loginURL.hashCode();
+        } else
+        {
+            i1 = 0;
+        }
+        if (gridName != null)
+        {
+            j1 = gridName.hashCode();
+        }
+        return (i1 + (l + (k + (j + i * 31) * 31) * 31) * 31) * 31 + j1;
     }
 
-    public SLAuthParams withLocation(String str) {
-        return new SLAuthParams(this.loginName, this.passwordHash, this.clientID, str, this.loginURL, this.gridName);
+    public SLAuthParams withLocation(String s)
+    {
+        return new SLAuthParams(loginName, passwordHash, clientID, s, loginURL, gridName);
     }
 }

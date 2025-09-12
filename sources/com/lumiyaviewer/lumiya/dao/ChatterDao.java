@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import android.database.Cursor;
@@ -8,126 +12,294 @@ import de.greenrobot.dao.Property;
 import de.greenrobot.dao.internal.DaoConfig;
 import java.util.UUID;
 
-public class ChatterDao extends AbstractDao<Chatter, Long> {
+// Referenced classes of package com.lumiyaviewer.lumiya.dao:
+//            Chatter, DaoSession
+
+public class ChatterDao extends AbstractDao
+{
+    public static class Properties
+    {
+
+        public static final Property Active;
+        public static final Property Id = new Property(0, java/lang/Long, "id", true, "_id");
+        public static final Property LastMessageID = new Property(6, java/lang/Long, "lastMessageID", false, "LAST_MESSAGE_ID");
+        public static final Property LastSessionID = new Property(7, java/util/UUID, "lastSessionID", false, "LAST_SESSION_ID");
+        public static final Property Muted;
+        public static final Property Type;
+        public static final Property UnreadCount;
+        public static final Property Uuid = new Property(2, java/util/UUID, "uuid", false, "UUID");
+
+        static 
+        {
+            Type = new Property(1, Integer.TYPE, "type", false, "TYPE");
+            Active = new Property(3, Boolean.TYPE, "active", false, "ACTIVE");
+            Muted = new Property(4, Boolean.TYPE, "muted", false, "MUTED");
+            UnreadCount = new Property(5, Integer.TYPE, "unreadCount", false, "UNREAD_COUNT");
+        }
+
+        public Properties()
+        {
+        }
+    }
+
+
     public static final String TABLENAME = "CHATTER";
 
-    public static class Properties {
-        public static final Property Active = new Property(3, Boolean.TYPE, "active", false, "ACTIVE");
-        public static final Property Id = new Property(0, Long.class, "id", true, "_id");
-        public static final Property LastMessageID = new Property(6, Long.class, "lastMessageID", false, "LAST_MESSAGE_ID");
-        public static final Property LastSessionID = new Property(7, UUID.class, "lastSessionID", false, "LAST_SESSION_ID");
-        public static final Property Muted = new Property(4, Boolean.TYPE, "muted", false, "MUTED");
-        public static final Property Type = new Property(1, Integer.TYPE, "type", false, "TYPE");
-        public static final Property UnreadCount = new Property(5, Integer.TYPE, "unreadCount", false, "UNREAD_COUNT");
-        public static final Property Uuid = new Property(2, UUID.class, "uuid", false, "UUID");
+    public ChatterDao(DaoConfig daoconfig)
+    {
+        super(daoconfig);
     }
 
-    public ChatterDao(DaoConfig daoConfig) {
-        super(daoConfig);
+    public ChatterDao(DaoConfig daoconfig, DaoSession daosession)
+    {
+        super(daoconfig, daosession);
     }
 
-    public ChatterDao(DaoConfig daoConfig, DaoSession daoSession) {
-        super(daoConfig, daoSession);
-    }
-
-    public static void createTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        String str = z ? "IF NOT EXISTS " : "";
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'CHATTER' (" + "'_id' INTEGER PRIMARY KEY ," + "'TYPE' INTEGER NOT NULL ," + "'UUID' TEXT," + "'ACTIVE' INTEGER NOT NULL ," + "'MUTED' INTEGER NOT NULL ," + "'UNREAD_COUNT' INTEGER NOT NULL ," + "'LAST_MESSAGE_ID' INTEGER," + "'LAST_SESSION_ID' TEXT);");
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHATTER_TYPE_UUID ON CHATTER" + " (TYPE,UUID);");
-    }
-
-    public static void dropTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CHATTER'");
-    }
-
-    /* access modifiers changed from: protected */
-    public void bindValues(SQLiteStatement sQLiteStatement, Chatter chatter) {
-        long j = 1;
-        sQLiteStatement.clearBindings();
-        Long id = chatter.getId();
-        if (id != null) {
-            sQLiteStatement.bindLong(1, id.longValue());
+    public static void createTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        String s;
+        if (flag)
+        {
+            s = "IF NOT EXISTS ";
+        } else
+        {
+            s = "";
         }
-        sQLiteStatement.bindLong(2, (long) chatter.getType());
-        UUID uuid = chatter.getUuid();
-        if (uuid != null) {
-            sQLiteStatement.bindString(3, uuid.toString());
+        sqlitedatabase.execSQL((new StringBuilder()).append("CREATE TABLE ").append(s).append("'CHATTER' (").append("'_id' INTEGER PRIMARY KEY ,").append("'TYPE' INTEGER NOT NULL ,").append("'UUID' TEXT,").append("'ACTIVE' INTEGER NOT NULL ,").append("'MUTED' INTEGER NOT NULL ,").append("'UNREAD_COUNT' INTEGER NOT NULL ,").append("'LAST_MESSAGE_ID' INTEGER,").append("'LAST_SESSION_ID' TEXT);").toString());
+        sqlitedatabase.execSQL((new StringBuilder()).append("CREATE INDEX ").append(s).append("IDX_CHATTER_TYPE_UUID ON CHATTER").append(" (TYPE,UUID);").toString());
+    }
+
+    public static void dropTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        StringBuilder stringbuilder = (new StringBuilder()).append("DROP TABLE ");
+        String s;
+        if (flag)
+        {
+            s = "IF EXISTS ";
+        } else
+        {
+            s = "";
         }
-        sQLiteStatement.bindLong(4, chatter.getActive() ? 1 : 0);
-        if (!chatter.getMuted()) {
-            j = 0;
+        sqlitedatabase.execSQL(stringbuilder.append(s).append("'CHATTER'").toString());
+    }
+
+    protected void bindValues(SQLiteStatement sqlitestatement, Chatter chatter)
+    {
+        long l1 = 1L;
+        sqlitestatement.clearBindings();
+        Object obj = chatter.getId();
+        if (obj != null)
+        {
+            sqlitestatement.bindLong(1, ((Long) (obj)).longValue());
         }
-        sQLiteStatement.bindLong(5, j);
-        sQLiteStatement.bindLong(6, (long) chatter.getUnreadCount());
-        Long lastMessageID = chatter.getLastMessageID();
-        if (lastMessageID != null) {
-            sQLiteStatement.bindLong(7, lastMessageID.longValue());
+        sqlitestatement.bindLong(2, chatter.getType());
+        obj = chatter.getUuid();
+        if (obj != null)
+        {
+            sqlitestatement.bindString(3, ((UUID) (obj)).toString());
         }
-        UUID lastSessionID = chatter.getLastSessionID();
-        if (lastSessionID != null) {
-            sQLiteStatement.bindString(8, lastSessionID.toString());
+        long l;
+        if (chatter.getActive())
+        {
+            l = 1L;
+        } else
+        {
+            l = 0L;
+        }
+        sqlitestatement.bindLong(4, l);
+        if (chatter.getMuted())
+        {
+            l = l1;
+        } else
+        {
+            l = 0L;
+        }
+        sqlitestatement.bindLong(5, l);
+        sqlitestatement.bindLong(6, chatter.getUnreadCount());
+        obj = chatter.getLastMessageID();
+        if (obj != null)
+        {
+            sqlitestatement.bindLong(7, ((Long) (obj)).longValue());
+        }
+        chatter = chatter.getLastSessionID();
+        if (chatter != null)
+        {
+            sqlitestatement.bindString(8, chatter.toString());
         }
     }
 
-    public Long getKey(Chatter chatter) {
-        if (chatter != null) {
+    protected volatile void bindValues(SQLiteStatement sqlitestatement, Object obj)
+    {
+        bindValues(sqlitestatement, (Chatter)obj);
+    }
+
+    public Long getKey(Chatter chatter)
+    {
+        if (chatter != null)
+        {
             return chatter.getId();
+        } else
+        {
+            return null;
         }
-        return null;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isEntityUpdateable() {
+    public volatile Object getKey(Object obj)
+    {
+        return getKey((Chatter)obj);
+    }
+
+    protected boolean isEntityUpdateable()
+    {
         return true;
     }
 
-    public Chatter readEntity(Cursor cursor, int i) {
-        boolean z = true;
-        UUID uuid = null;
-        Long valueOf = cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0));
-        int i2 = cursor.getInt(i + 1);
-        UUID fromString = cursor.isNull(i + 2) ? null : UUID.fromString(cursor.getString(i + 2));
-        boolean z2 = cursor.getShort(i + 3) != 0;
-        if (cursor.getShort(i + 4) == 0) {
-            z = false;
+    public Chatter readEntity(Cursor cursor, int i)
+    {
+        boolean flag1 = true;
+        Object obj = null;
+        Long long1;
+        UUID uuid;
+        Long long2;
+        int j;
+        int k;
+        boolean flag;
+        if (cursor.isNull(i + 0))
+        {
+            long1 = null;
+        } else
+        {
+            long1 = Long.valueOf(cursor.getLong(i + 0));
         }
-        int i3 = cursor.getInt(i + 5);
-        Long valueOf2 = cursor.isNull(i + 6) ? null : Long.valueOf(cursor.getLong(i + 6));
-        if (!cursor.isNull(i + 7)) {
-            uuid = UUID.fromString(cursor.getString(i + 7));
+        j = cursor.getInt(i + 1);
+        if (cursor.isNull(i + 2))
+        {
+            uuid = null;
+        } else
+        {
+            uuid = UUID.fromString(cursor.getString(i + 2));
         }
-        return new Chatter(valueOf, i2, fromString, z2, z, i3, valueOf2, uuid);
+        if (cursor.getShort(i + 3) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (cursor.getShort(i + 4) == 0)
+        {
+            flag1 = false;
+        }
+        k = cursor.getInt(i + 5);
+        if (cursor.isNull(i + 6))
+        {
+            long2 = null;
+        } else
+        {
+            long2 = Long.valueOf(cursor.getLong(i + 6));
+        }
+        if (cursor.isNull(i + 7))
+        {
+            cursor = obj;
+        } else
+        {
+            cursor = UUID.fromString(cursor.getString(i + 7));
+        }
+        return new Chatter(long1, j, uuid, flag, flag1, k, long2, cursor);
     }
 
-    public void readEntity(Cursor cursor, Chatter chatter, int i) {
-        boolean z = true;
-        UUID uuid = null;
-        chatter.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)));
+    public volatile Object readEntity(Cursor cursor, int i)
+    {
+        return readEntity(cursor, i);
+    }
+
+    public void readEntity(Cursor cursor, Chatter chatter, int i)
+    {
+        boolean flag1 = true;
+        Object obj1 = null;
+        Object obj;
+        boolean flag;
+        if (cursor.isNull(i + 0))
+        {
+            obj = null;
+        } else
+        {
+            obj = Long.valueOf(cursor.getLong(i + 0));
+        }
+        chatter.setId(((Long) (obj)));
         chatter.setType(cursor.getInt(i + 1));
-        chatter.setUuid(cursor.isNull(i + 2) ? null : UUID.fromString(cursor.getString(i + 2)));
-        chatter.setActive(cursor.getShort(i + 3) != 0);
-        if (cursor.getShort(i + 4) == 0) {
-            z = false;
+        if (cursor.isNull(i + 2))
+        {
+            obj = null;
+        } else
+        {
+            obj = UUID.fromString(cursor.getString(i + 2));
         }
-        chatter.setMuted(z);
+        chatter.setUuid(((UUID) (obj)));
+        if (cursor.getShort(i + 3) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        chatter.setActive(flag);
+        if (cursor.getShort(i + 4) != 0)
+        {
+            flag = flag1;
+        } else
+        {
+            flag = false;
+        }
+        chatter.setMuted(flag);
         chatter.setUnreadCount(cursor.getInt(i + 5));
-        chatter.setLastMessageID(cursor.isNull(i + 6) ? null : Long.valueOf(cursor.getLong(i + 6)));
-        if (!cursor.isNull(i + 7)) {
-            uuid = UUID.fromString(cursor.getString(i + 7));
+        if (cursor.isNull(i + 6))
+        {
+            obj = null;
+        } else
+        {
+            obj = Long.valueOf(cursor.getLong(i + 6));
         }
-        chatter.setLastSessionID(uuid);
+        chatter.setLastMessageID(((Long) (obj)));
+        if (cursor.isNull(i + 7))
+        {
+            cursor = obj1;
+        } else
+        {
+            cursor = UUID.fromString(cursor.getString(i + 7));
+        }
+        chatter.setLastSessionID(cursor);
     }
 
-    public Long readKey(Cursor cursor, int i) {
-        if (cursor.isNull(i + 0)) {
+    public volatile void readEntity(Cursor cursor, Object obj, int i)
+    {
+        readEntity(cursor, (Chatter)obj, i);
+    }
+
+    public Long readKey(Cursor cursor, int i)
+    {
+        if (cursor.isNull(i + 0))
+        {
             return null;
+        } else
+        {
+            return Long.valueOf(cursor.getLong(i + 0));
         }
-        return Long.valueOf(cursor.getLong(i + 0));
     }
 
-    /* access modifiers changed from: protected */
-    public Long updateKeyAfterInsert(Chatter chatter, long j) {
-        chatter.setId(Long.valueOf(j));
-        return Long.valueOf(j);
+    public volatile Object readKey(Cursor cursor, int i)
+    {
+        return readKey(cursor, i);
+    }
+
+    protected Long updateKeyAfterInsert(Chatter chatter, long l)
+    {
+        chatter.setId(Long.valueOf(l));
+        return Long.valueOf(l);
+    }
+
+    protected volatile Object updateKeyAfterInsert(Object obj, long l)
+    {
+        return updateKeyAfterInsert((Chatter)obj, l);
     }
 }

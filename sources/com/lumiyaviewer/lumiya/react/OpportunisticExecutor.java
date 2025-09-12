@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -10,114 +14,169 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.annotation.Nonnull;
 
-public class OpportunisticExecutor implements Executor {
-    /* access modifiers changed from: private */
-    public final Lock lock = new ReentrantLock();
-    /* access modifiers changed from: private */
-    public final Condition notEmpty = this.lock.newCondition();
-    /* access modifiers changed from: private */
-    public final Queue<Runnable> queue = new LinkedList();
-    /* access modifiers changed from: private */
-    public final Set<Runnable> runOnceRunnables = new HashSet();
-    private final Thread thread;
-    private final Runnable worker = new Runnable() {
-        public void run() {
-            Runnable runnable;
-            while (true) {
-                try {
-                    OpportunisticExecutor.this.lock.lock();
-                    while (true) {
-                        runnable = (Runnable) OpportunisticExecutor.this.queue.poll();
-                        if (runnable != null) {
-                            break;
-                        }
-                        boolean z = false;
-                        while (true) {
-                            if (OpportunisticExecutor.this.runOnceRunnables.isEmpty()) {
-                                break;
-                            }
-                            Iterator it = OpportunisticExecutor.this.runOnceRunnables.iterator();
-                            if (!it.hasNext()) {
-                                z = true;
-                                break;
-                            }
-                            Runnable runnable2 = (Runnable) it.next();
-                            it.remove();
-                            try {
-                                runnable2.run();
-                            } catch (Exception e) {
-                                Debug.Warning(e);
-                            } catch (Throwable th) {
-                                OpportunisticExecutor.this.lock.lock();
-                                throw th;
-                            }
-                            OpportunisticExecutor.this.lock.lock();
-                            z = true;
-                        }
-                        if (!z) {
-                            OpportunisticExecutor.this.notEmpty.await();
-                        }
-                    }
-                    OpportunisticExecutor.this.lock.unlock();
-                    runnable.run();
-                } finally {
-                    try {
-                        OpportunisticExecutor.this.lock.unlock();
-                    } catch (Exception e2) {
-                        Debug.Warning(e2);
-                    }
-                }
-            }
-        }
-    };
+public class OpportunisticExecutor
+    implements Executor
+{
+    private class RunOnceExecutor
+        implements Executor
+    {
 
-    private class RunOnceExecutor implements Executor {
-        private RunOnceExecutor() {
+        final OpportunisticExecutor this$0;
+
+        public void execute(Runnable runnable)
+        {
+            OpportunisticExecutor._2D_get0(OpportunisticExecutor.this).lock();
+            OpportunisticExecutor._2D_get3(OpportunisticExecutor.this).add(runnable);
+            OpportunisticExecutor._2D_get1(OpportunisticExecutor.this).signalAll();
+            OpportunisticExecutor._2D_get0(OpportunisticExecutor.this).unlock();
+            return;
+            runnable;
+            OpportunisticExecutor._2D_get0(OpportunisticExecutor.this).unlock();
+            throw runnable;
         }
 
-        /* synthetic */ RunOnceExecutor(OpportunisticExecutor opportunisticExecutor, RunOnceExecutor runOnceExecutor) {
+        private RunOnceExecutor()
+        {
+            this$0 = OpportunisticExecutor.this;
+            super();
+        }
+
+        RunOnceExecutor(RunOnceExecutor runonceexecutor)
+        {
             this();
         }
+    }
 
-        public void execute(@Nonnull Runnable runnable) {
-            try {
-                OpportunisticExecutor.this.lock.lock();
-                OpportunisticExecutor.this.runOnceRunnables.add(runnable);
-                OpportunisticExecutor.this.notEmpty.signalAll();
-            } finally {
-                OpportunisticExecutor.this.lock.unlock();
+
+    private final Lock lock = new ReentrantLock();
+    private final Condition notEmpty;
+    private final Queue queue = new LinkedList();
+    private final Set runOnceRunnables = new HashSet();
+    private final Thread thread;
+    private final Runnable worker = new Runnable() {
+
+        final OpportunisticExecutor this$0;
+
+        public void run()
+        {
+_L5:
+            OpportunisticExecutor._2D_get0(OpportunisticExecutor.this).lock();
+_L7:
+            Object obj = (Runnable)OpportunisticExecutor._2D_get2(OpportunisticExecutor.this).poll();
+            boolean flag;
+            if (obj != null)
+            {
+                break MISSING_BLOCK_LABEL_189;
             }
-        }
-    }
-
-    public OpportunisticExecutor(String str) {
-        this.thread = new Thread(this.worker, str);
-        this.thread.start();
-    }
-
-    public void execute(@Nonnull Runnable runnable) {
-        try {
-            this.lock.lock();
-            if (Thread.currentThread().getId() != this.thread.getId() || !this.queue.isEmpty()) {
-                this.queue.offer(runnable);
-                this.notEmpty.signalAll();
-            } else {
-                this.lock.unlock();
-                runnable.run();
-                this.lock.lock();
+            flag = false;
+_L3:
+            if (OpportunisticExecutor._2D_get3(OpportunisticExecutor.this).isEmpty()) goto _L2; else goto _L1
+_L1:
+            Runnable runnable;
+            obj = OpportunisticExecutor._2D_get3(OpportunisticExecutor.this).iterator();
+            if (!((Iterator) (obj)).hasNext())
+            {
+                break MISSING_BLOCK_LABEL_168;
             }
-        } catch (Exception e) {
-            Debug.Warning(e);
-        } catch (Throwable th) {
-            this.lock.unlock();
-            throw th;
+            runnable = (Runnable)((Iterator) (obj)).next();
+            ((Iterator) (obj)).remove();
+            OpportunisticExecutor._2D_get0(OpportunisticExecutor.this).unlock();
+            runnable.run();
+_L4:
+            OpportunisticExecutor._2D_get0(OpportunisticExecutor.this).lock();
+            flag = true;
+              goto _L3
+            obj;
+            Debug.Warning(((Throwable) (obj)));
+              goto _L4
+            obj;
+            OpportunisticExecutor._2D_get0(OpportunisticExecutor.this).lock();
+            throw obj;
+            obj;
+            try
+            {
+                OpportunisticExecutor._2D_get0(OpportunisticExecutor.this).unlock();
+                throw obj;
+            }
+            // Misplaced declaration of an exception variable
+            catch (Object obj)
+            {
+                Debug.Warning(((Throwable) (obj)));
+            }
+              goto _L5
+            flag = true;
+_L2:
+            if (flag) goto _L7; else goto _L6
+_L6:
+            OpportunisticExecutor._2D_get1(OpportunisticExecutor.this).await();
+              goto _L7
+            OpportunisticExecutor._2D_get0(OpportunisticExecutor.this).unlock();
+            ((Runnable) (obj)).run();
+              goto _L5
         }
-        this.lock.unlock();
+
+            
+            {
+                this$0 = OpportunisticExecutor.this;
+                super();
+            }
+    };
+
+    static Lock _2D_get0(OpportunisticExecutor opportunisticexecutor)
+    {
+        return opportunisticexecutor.lock;
     }
 
-    public RunOnceExecutor getRunOnceExecutor() {
-        return new RunOnceExecutor(this, (RunOnceExecutor) null);
+    static Condition _2D_get1(OpportunisticExecutor opportunisticexecutor)
+    {
+        return opportunisticexecutor.notEmpty;
+    }
+
+    static Queue _2D_get2(OpportunisticExecutor opportunisticexecutor)
+    {
+        return opportunisticexecutor.queue;
+    }
+
+    static Set _2D_get3(OpportunisticExecutor opportunisticexecutor)
+    {
+        return opportunisticexecutor.runOnceRunnables;
+    }
+
+    public OpportunisticExecutor(String s)
+    {
+        notEmpty = lock.newCondition();
+        thread = new Thread(worker, s);
+        thread.start();
+    }
+
+    public void execute(Runnable runnable)
+    {
+        lock.lock();
+        if (Thread.currentThread().getId() != thread.getId() || !queue.isEmpty())
+        {
+            break MISSING_BLOCK_LABEL_92;
+        }
+        lock.unlock();
+        runnable.run();
+_L1:
+        lock.lock();
+_L2:
+        lock.unlock();
+        return;
+        runnable;
+        Debug.Warning(runnable);
+          goto _L1
+        runnable;
+        lock.unlock();
+        throw runnable;
+        queue.offer(runnable);
+        notEmpty.signalAll();
+          goto _L2
+    }
+
+    public RunOnceExecutor getRunOnceExecutor()
+    {
+        return new RunOnceExecutor(null);
     }
 }

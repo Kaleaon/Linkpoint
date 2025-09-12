@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.text.Spannable;
@@ -6,62 +10,100 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.widget.TextView;
 
-public class LinkMovementMethodSafe extends LinkMovementMethod {
-    private OnLinkOpenErrorListener onLinkOpenErrorListener = null;
+public class LinkMovementMethodSafe extends LinkMovementMethod
+{
+    public static interface OnLinkOpenErrorListener
+    {
 
-    public interface OnLinkOpenErrorListener {
-        void OnLinkOpenError(String str);
+        public abstract void OnLinkOpenError(String s);
     }
 
-    public boolean onKeyDown(TextView textView, Spannable spannable, int i, KeyEvent keyEvent) {
-        try {
-            return super.onKeyDown(textView, spannable, i, keyEvent);
-        } catch (Exception e) {
-            if (this.onLinkOpenErrorListener == null) {
-                return false;
+
+    private OnLinkOpenErrorListener onLinkOpenErrorListener;
+
+    public LinkMovementMethodSafe()
+    {
+        onLinkOpenErrorListener = null;
+    }
+
+    public boolean onKeyDown(TextView textview, Spannable spannable, int i, KeyEvent keyevent)
+    {
+        boolean flag;
+        try
+        {
+            flag = super.onKeyDown(textview, spannable, i, keyevent);
+        }
+        // Misplaced declaration of an exception variable
+        catch (TextView textview)
+        {
+            if (onLinkOpenErrorListener != null)
+            {
+                onLinkOpenErrorListener.OnLinkOpenError("Failed to open selected URL.");
             }
-            this.onLinkOpenErrorListener.OnLinkOpenError("Failed to open selected URL.");
             return false;
         }
+        return flag;
     }
 
-    public boolean onKeyUp(TextView textView, Spannable spannable, int i, KeyEvent keyEvent) {
-        try {
-            return super.onKeyUp(textView, spannable, i, keyEvent);
-        } catch (Exception e) {
-            if (this.onLinkOpenErrorListener == null) {
-                return false;
+    public boolean onKeyUp(TextView textview, Spannable spannable, int i, KeyEvent keyevent)
+    {
+        boolean flag;
+        try
+        {
+            flag = super.onKeyUp(textview, spannable, i, keyevent);
+        }
+        // Misplaced declaration of an exception variable
+        catch (TextView textview)
+        {
+            if (onLinkOpenErrorListener != null)
+            {
+                onLinkOpenErrorListener.OnLinkOpenError("Failed to open selected URL.");
             }
-            this.onLinkOpenErrorListener.OnLinkOpenError("Failed to open selected URL.");
             return false;
         }
+        return flag;
     }
 
-    public boolean onTouchEvent(TextView textView, Spannable spannable, MotionEvent motionEvent) {
-        try {
-            return super.onTouchEvent(textView, spannable, motionEvent);
-        } catch (Exception e) {
-            if (this.onLinkOpenErrorListener == null) {
-                return false;
+    public boolean onTouchEvent(TextView textview, Spannable spannable, MotionEvent motionevent)
+    {
+        boolean flag;
+        try
+        {
+            flag = super.onTouchEvent(textview, spannable, motionevent);
+        }
+        // Misplaced declaration of an exception variable
+        catch (TextView textview)
+        {
+            if (onLinkOpenErrorListener != null)
+            {
+                onLinkOpenErrorListener.OnLinkOpenError("Failed to open selected URL.");
             }
-            this.onLinkOpenErrorListener.OnLinkOpenError("Failed to open selected URL.");
             return false;
         }
+        return flag;
     }
 
-    public boolean onTrackballEvent(TextView textView, Spannable spannable, MotionEvent motionEvent) {
-        try {
-            return super.onTrackballEvent(textView, spannable, motionEvent);
-        } catch (Exception e) {
-            if (this.onLinkOpenErrorListener == null) {
-                return false;
+    public boolean onTrackballEvent(TextView textview, Spannable spannable, MotionEvent motionevent)
+    {
+        boolean flag;
+        try
+        {
+            flag = super.onTrackballEvent(textview, spannable, motionevent);
+        }
+        // Misplaced declaration of an exception variable
+        catch (TextView textview)
+        {
+            if (onLinkOpenErrorListener != null)
+            {
+                onLinkOpenErrorListener.OnLinkOpenError("Failed to open selected URL.");
             }
-            this.onLinkOpenErrorListener.OnLinkOpenError("Failed to open selected URL.");
             return false;
         }
+        return flag;
     }
 
-    public void setOnLinkOpenErrorListener(OnLinkOpenErrorListener onLinkOpenErrorListener2) {
-        this.onLinkOpenErrorListener = onLinkOpenErrorListener2;
+    public void setOnLinkOpenErrorListener(OnLinkOpenErrorListener onlinkopenerrorlistener)
+    {
+        onLinkOpenErrorListener = onlinkopenerrorlistener;
     }
 }

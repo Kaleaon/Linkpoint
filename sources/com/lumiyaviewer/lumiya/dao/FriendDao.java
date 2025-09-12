@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import android.database.Cursor;
@@ -8,83 +12,197 @@ import de.greenrobot.dao.Property;
 import de.greenrobot.dao.internal.DaoConfig;
 import java.util.UUID;
 
-public class FriendDao extends AbstractDao<Friend, UUID> {
+// Referenced classes of package com.lumiyaviewer.lumiya.dao:
+//            Friend, DaoSession
+
+public class FriendDao extends AbstractDao
+{
+    public static class Properties
+    {
+
+        public static final Property IsOnline;
+        public static final Property RightsGiven;
+        public static final Property RightsHas;
+        public static final Property Uuid = new Property(0, java/util/UUID, "uuid", true, "UUID");
+
+        static 
+        {
+            RightsGiven = new Property(1, Integer.TYPE, "rightsGiven", false, "RIGHTS_GIVEN");
+            RightsHas = new Property(2, Integer.TYPE, "rightsHas", false, "RIGHTS_HAS");
+            IsOnline = new Property(3, Boolean.TYPE, "isOnline", false, "IS_ONLINE");
+        }
+
+        public Properties()
+        {
+        }
+    }
+
+
     public static final String TABLENAME = "Friends";
 
-    public static class Properties {
-        public static final Property IsOnline = new Property(3, Boolean.TYPE, "isOnline", false, "IS_ONLINE");
-        public static final Property RightsGiven = new Property(1, Integer.TYPE, "rightsGiven", false, "RIGHTS_GIVEN");
-        public static final Property RightsHas = new Property(2, Integer.TYPE, "rightsHas", false, "RIGHTS_HAS");
-        public static final Property Uuid = new Property(0, UUID.class, "uuid", true, "UUID");
+    public FriendDao(DaoConfig daoconfig)
+    {
+        super(daoconfig);
     }
 
-    public FriendDao(DaoConfig daoConfig) {
-        super(daoConfig);
+    public FriendDao(DaoConfig daoconfig, DaoSession daosession)
+    {
+        super(daoconfig, daosession);
     }
 
-    public FriendDao(DaoConfig daoConfig, DaoSession daoSession) {
-        super(daoConfig, daoSession);
+    public static void createTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        String s;
+        if (flag)
+        {
+            s = "IF NOT EXISTS ";
+        } else
+        {
+            s = "";
+        }
+        sqlitedatabase.execSQL((new StringBuilder()).append("CREATE TABLE ").append(s).append("'Friends' (").append("'UUID' TEXT PRIMARY KEY ,").append("'RIGHTS_GIVEN' INTEGER NOT NULL ,").append("'RIGHTS_HAS' INTEGER NOT NULL ,").append("'IS_ONLINE' INTEGER NOT NULL );").toString());
     }
 
-    public static void createTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'Friends' (" + "'UUID' TEXT PRIMARY KEY ," + "'RIGHTS_GIVEN' INTEGER NOT NULL ," + "'RIGHTS_HAS' INTEGER NOT NULL ," + "'IS_ONLINE' INTEGER NOT NULL );");
+    public static void dropTable(SQLiteDatabase sqlitedatabase, boolean flag)
+    {
+        StringBuilder stringbuilder = (new StringBuilder()).append("DROP TABLE ");
+        String s;
+        if (flag)
+        {
+            s = "IF EXISTS ";
+        } else
+        {
+            s = "";
+        }
+        sqlitedatabase.execSQL(stringbuilder.append(s).append("'Friends'").toString());
     }
 
-    public static void dropTable(SQLiteDatabase sQLiteDatabase, boolean z) {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'Friends'");
-    }
-
-    /* access modifiers changed from: protected */
-    public void bindValues(SQLiteStatement sQLiteStatement, Friend friend) {
-        sQLiteStatement.clearBindings();
+    protected void bindValues(SQLiteStatement sqlitestatement, Friend friend)
+    {
+        sqlitestatement.clearBindings();
         UUID uuid = friend.getUuid();
-        if (uuid != null) {
-            sQLiteStatement.bindString(1, uuid.toString());
+        if (uuid != null)
+        {
+            sqlitestatement.bindString(1, uuid.toString());
         }
-        sQLiteStatement.bindLong(2, (long) friend.getRightsGiven());
-        sQLiteStatement.bindLong(3, (long) friend.getRightsHas());
-        sQLiteStatement.bindLong(4, friend.getIsOnline() ? 1 : 0);
+        sqlitestatement.bindLong(2, friend.getRightsGiven());
+        sqlitestatement.bindLong(3, friend.getRightsHas());
+        long l;
+        if (friend.getIsOnline())
+        {
+            l = 1L;
+        } else
+        {
+            l = 0L;
+        }
+        sqlitestatement.bindLong(4, l);
     }
 
-    public UUID getKey(Friend friend) {
-        if (friend != null) {
+    protected volatile void bindValues(SQLiteStatement sqlitestatement, Object obj)
+    {
+        bindValues(sqlitestatement, (Friend)obj);
+    }
+
+    public volatile Object getKey(Object obj)
+    {
+        return getKey((Friend)obj);
+    }
+
+    public UUID getKey(Friend friend)
+    {
+        if (friend != null)
+        {
             return friend.getUuid();
+        } else
+        {
+            return null;
         }
-        return null;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isEntityUpdateable() {
+    protected boolean isEntityUpdateable()
+    {
         return true;
     }
 
-    public Friend readEntity(Cursor cursor, int i) {
-        boolean z = false;
-        UUID fromString = cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0));
-        int i2 = cursor.getInt(i + 1);
-        int i3 = cursor.getInt(i + 2);
-        if (cursor.getShort(i + 3) != 0) {
-            z = true;
+    public Friend readEntity(Cursor cursor, int i)
+    {
+        boolean flag = false;
+        UUID uuid;
+        int j;
+        int k;
+        if (cursor.isNull(i + 0))
+        {
+            uuid = null;
+        } else
+        {
+            uuid = UUID.fromString(cursor.getString(i + 0));
         }
-        return new Friend(fromString, i2, i3, z);
+        j = cursor.getInt(i + 1);
+        k = cursor.getInt(i + 2);
+        if (cursor.getShort(i + 3) != 0)
+        {
+            flag = true;
+        }
+        return new Friend(uuid, j, k, flag);
     }
 
-    public void readEntity(Cursor cursor, Friend friend, int i) {
-        friend.setUuid(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)));
+    public volatile Object readEntity(Cursor cursor, int i)
+    {
+        return readEntity(cursor, i);
+    }
+
+    public void readEntity(Cursor cursor, Friend friend, int i)
+    {
+        UUID uuid;
+        boolean flag;
+        if (cursor.isNull(i + 0))
+        {
+            uuid = null;
+        } else
+        {
+            uuid = UUID.fromString(cursor.getString(i + 0));
+        }
+        friend.setUuid(uuid);
         friend.setRightsGiven(cursor.getInt(i + 1));
         friend.setRightsHas(cursor.getInt(i + 2));
-        friend.setIsOnline(cursor.getShort(i + 3) != 0);
-    }
-
-    public UUID readKey(Cursor cursor, int i) {
-        if (cursor.isNull(i + 0)) {
-            return null;
+        if (cursor.getShort(i + 3) != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
         }
-        return UUID.fromString(cursor.getString(i + 0));
+        friend.setIsOnline(flag);
     }
 
-    /* access modifiers changed from: protected */
-    public UUID updateKeyAfterInsert(Friend friend, long j) {
+    public volatile void readEntity(Cursor cursor, Object obj, int i)
+    {
+        readEntity(cursor, (Friend)obj, i);
+    }
+
+    public volatile Object readKey(Cursor cursor, int i)
+    {
+        return readKey(cursor, i);
+    }
+
+    public UUID readKey(Cursor cursor, int i)
+    {
+        if (cursor.isNull(i + 0))
+        {
+            return null;
+        } else
+        {
+            return UUID.fromString(cursor.getString(i + 0));
+        }
+    }
+
+    protected volatile Object updateKeyAfterInsert(Object obj, long l)
+    {
+        return updateKeyAfterInsert((Friend)obj, l);
+    }
+
+    protected UUID updateKeyAfterInsert(Friend friend, long l)
+    {
         return friend.getUuid();
     }
 }

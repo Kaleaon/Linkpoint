@@ -1,13 +1,15 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import com.lumiyaviewer.lumiya.R;
+import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleDataPool;
-import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ParcelData;
@@ -21,96 +23,123 @@ import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
 import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory;
 import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
-import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public class ChatNewActivity extends MasterDetailsActivity implements UnreadNotificationManager.NotifyCapture {
-    private Subscription<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfoSubscription;
-    private final Subscription.OnData<CurrentLocationInfo> onCurrentLocation = new $Lambda$NRCeOQvyeRY8P8t9O3BV_sPyX4(this);
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat:
+//            ChatFragment, ContactsFragment
 
-    /* access modifiers changed from: protected */
-    public FragmentActivityFactory getDetailsFragmentFactory() {
+public class ChatNewActivity extends MasterDetailsActivity
+    implements com.lumiyaviewer.lumiya.slproto.users.manager.UnreadNotificationManager.NotifyCapture
+{
+
+    private Subscription currentLocationInfoSubscription;
+    private final com.lumiyaviewer.lumiya.react.Subscription.OnData onCurrentLocation = new _2D_.Lambda.NRCeOQv_2D_yeRY8P8t9O3BV_sPyX4(this);
+
+    public ChatNewActivity()
+    {
+    }
+
+    protected FragmentActivityFactory getDetailsFragmentFactory()
+    {
         return ChatFragmentActivityFactory.getInstance();
     }
 
-    /* access modifiers changed from: protected */
-    public Bundle getNewDetailsFragmentArguments(@Nullable Bundle bundle, @Nullable Bundle bundle2) {
-        if (bundle2 != null) {
-            return super.getNewDetailsFragmentArguments(bundle, bundle2);
+    protected Bundle getNewDetailsFragmentArguments(Bundle bundle, Bundle bundle1)
+    {
+        if (bundle1 != null)
+        {
+            return super.getNewDetailsFragmentArguments(bundle, bundle1);
         }
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getIntent());
-        return activeAgentID != null ? ChatFragment.makeSelection(ChatterID.getLocalChatterID(activeAgentID)) : super.getNewDetailsFragmentArguments(bundle, (Bundle) null);
+        bundle1 = ActivityUtils.getActiveAgentID(getIntent());
+        if (bundle1 != null)
+        {
+            return ChatFragment.makeSelection(ChatterID.getLocalChatterID(bundle1));
+        } else
+        {
+            return super.getNewDetailsFragmentArguments(bundle, null);
+        }
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_ChatNewActivity_4384  reason: not valid java name */
-    public /* synthetic */ void m414lambda$com_lumiyaviewer_lumiya_ui_chat_ChatNewActivity_4384(CurrentLocationInfo currentLocationInfo) {
-        ParcelData parcelData = currentLocationInfo.parcelData();
-        String name = parcelData != null ? parcelData.getName() : null;
-        if (name == null) {
-            name = getString(R.string.name_loading_title);
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_chat_ChatNewActivity_4384(CurrentLocationInfo currentlocationinfo)
+    {
+        currentlocationinfo = currentlocationinfo.parcelData();
+        if (currentlocationinfo != null)
+        {
+            currentlocationinfo = currentlocationinfo.getName();
+        } else
+        {
+            currentlocationinfo = null;
         }
-        setDefaultTitle(name, (String) null);
+        if (currentlocationinfo == null)
+        {
+            currentlocationinfo = getString(0x7f0901c8);
+        }
+        setDefaultTitle(currentlocationinfo, null);
     }
 
-    /* access modifiers changed from: protected */
-    public void onCreate(@Nullable Bundle bundle) {
+    protected void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
-        setDefaultTitle(getString(R.string.app_name), (String) null);
+        setDefaultTitle(getString(0x7f090044), null);
     }
 
-    /* access modifiers changed from: protected */
-    public Fragment onCreateMasterFragment(Intent intent, @Nullable Bundle bundle) {
-        return ContactsFragment.newInstance(ActivityUtils.makeFragmentArguments(ActivityUtils.getActiveAgentID(intent), (Bundle) null));
+    protected Fragment onCreateMasterFragment(Intent intent, Bundle bundle)
+    {
+        return ContactsFragment.newInstance(ActivityUtils.makeFragmentArguments(ActivityUtils.getActiveAgentID(intent), null));
     }
 
-    @javax.annotation.Nullable
-    public Intent onGetNotifyCaptureIntent(@Nonnull UnreadNotificationInfo unreadNotificationInfo, Intent intent) {
-        intent.addFlags(536870912);
+    public Intent onGetNotifyCaptureIntent(UnreadNotificationInfo unreadnotificationinfo, Intent intent)
+    {
+        intent.addFlags(0x20000000);
         intent.putExtra("fromSameActivity", true);
         return intent;
     }
 
-    /* access modifiers changed from: protected */
-    public void onPause() {
-        UserManager userManager = ActivityUtils.getUserManager(getIntent());
-        if (userManager != null) {
-            userManager.getUnreadNotificationManager().clearNotifyCapture(this);
+    protected void onPause()
+    {
+        UserManager usermanager = ActivityUtils.getUserManager(getIntent());
+        if (usermanager != null)
+        {
+            usermanager.getUnreadNotificationManager().clearNotifyCapture(this);
         }
         super.onPause();
     }
 
-    /* access modifiers changed from: protected */
-    public void onResume() {
+    protected void onResume()
+    {
         super.onResume();
-        UserManager userManager = ActivityUtils.getUserManager(getIntent());
-        if (userManager != null) {
-            userManager.getUnreadNotificationManager().setNotifyCapture(this);
+        UserManager usermanager = ActivityUtils.getUserManager(getIntent());
+        if (usermanager != null)
+        {
+            usermanager.getUnreadNotificationManager().setNotifyCapture(this);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onStart() {
+    protected void onStart()
+    {
         super.onStart();
-        UserManager userManager = ActivityUtils.getUserManager(getIntent());
-        if (userManager != null) {
-            this.currentLocationInfoSubscription = userManager.getCurrentLocationInfo().subscribe(SubscriptionSingleDataPool.getSingleDataKey(), UIThreadExecutor.getInstance(), this.onCurrentLocation);
+        UserManager usermanager = ActivityUtils.getUserManager(getIntent());
+        if (usermanager != null)
+        {
+            currentLocationInfoSubscription = usermanager.getCurrentLocationInfo().subscribe(SubscriptionSingleDataPool.getSingleDataKey(), UIThreadExecutor.getInstance(), onCurrentLocation);
         }
         Intent intent = getIntent();
-        if (intent.hasExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY)) {
-            ParcelData parcelData = (ParcelData) intent.getSerializableExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY);
-            intent.removeExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY);
-            if (userManager != null) {
-                DetailsActivity.showEmbeddedDetails(this, ParcelPropertiesFragment.class, ParcelPropertiesFragment.makeSelection(userManager.getUserID(), parcelData));
+        if (intent.hasExtra("parcelData"))
+        {
+            ParcelData parceldata = (ParcelData)intent.getSerializableExtra("parcelData");
+            intent.removeExtra("parcelData");
+            if (usermanager != null)
+            {
+                DetailsActivity.showEmbeddedDetails(this, com/lumiyaviewer/lumiya/ui/chat/profiles/ParcelPropertiesFragment, ParcelPropertiesFragment.makeSelection(usermanager.getUserID(), parceldata));
             }
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onStop() {
-        if (this.currentLocationInfoSubscription != null) {
-            this.currentLocationInfoSubscription.unsubscribe();
-            this.currentLocationInfoSubscription = null;
+    protected void onStop()
+    {
+        if (currentLocationInfoSubscription != null)
+        {
+            currentLocationInfoSubscription.unsubscribe();
+            currentLocationInfoSubscription = null;
         }
         super.onStop();
     }

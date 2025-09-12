@@ -1,61 +1,92 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class ObjectUpdateCached extends SLMessage {
-    public ArrayList<ObjectData> ObjectData_Fields = new ArrayList<>();
-    public RegionData RegionData_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class ObjectData {
+public class ObjectUpdateCached extends SLMessage
+{
+    public static class ObjectData
+    {
+
         public int CRC;
         public int ID;
         public int UpdateFlags;
+
+        public ObjectData()
+        {
+        }
     }
 
-    public static class RegionData {
+    public static class RegionData
+    {
+
         public long RegionHandle;
         public int TimeDilation;
-    }
 
-    public ObjectUpdateCached() {
-        this.zeroCoded = false;
-        this.RegionData_Field = new RegionData();
-    }
-
-    public int CalcPayloadSize() {
-        return (this.ObjectData_Fields.size() * 12) + 12;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleObjectUpdateCached(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put(Ascii.SO);
-        packLong(byteBuffer, this.RegionData_Field.RegionHandle);
-        packShort(byteBuffer, (short) this.RegionData_Field.TimeDilation);
-        byteBuffer.put((byte) this.ObjectData_Fields.size());
-        for (ObjectData objectData : this.ObjectData_Fields) {
-            packInt(byteBuffer, objectData.ID);
-            packInt(byteBuffer, objectData.CRC);
-            packInt(byteBuffer, objectData.UpdateFlags);
+        public RegionData()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.RegionData_Field.RegionHandle = unpackLong(byteBuffer);
-        this.RegionData_Field.TimeDilation = unpackShort(byteBuffer) & 65535;
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            ObjectData objectData = new ObjectData();
-            objectData.ID = unpackInt(byteBuffer);
-            objectData.CRC = unpackInt(byteBuffer);
-            objectData.UpdateFlags = unpackInt(byteBuffer);
-            this.ObjectData_Fields.add(objectData);
+
+    public ArrayList ObjectData_Fields;
+    public RegionData RegionData_Field;
+
+    public ObjectUpdateCached()
+    {
+        ObjectData_Fields = new ArrayList();
+        zeroCoded = false;
+        RegionData_Field = new RegionData();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return ObjectData_Fields.size() * 12 + 12;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleObjectUpdateCached(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.put((byte)14);
+        packLong(bytebuffer, RegionData_Field.RegionHandle);
+        packShort(bytebuffer, (short)RegionData_Field.TimeDilation);
+        bytebuffer.put((byte)ObjectData_Fields.size());
+        ObjectData objectdata;
+        for (Iterator iterator = ObjectData_Fields.iterator(); iterator.hasNext(); packInt(bytebuffer, objectdata.UpdateFlags))
+        {
+            objectdata = (ObjectData)iterator.next();
+            packInt(bytebuffer, objectdata.ID);
+            packInt(bytebuffer, objectdata.CRC);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        RegionData_Field.RegionHandle = unpackLong(bytebuffer);
+        RegionData_Field.TimeDilation = unpackShort(bytebuffer) & 0xffff;
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            ObjectData objectdata = new ObjectData();
+            objectdata.ID = unpackInt(bytebuffer);
+            objectdata.CRC = unpackInt(bytebuffer);
+            objectdata.UpdateFlags = unpackInt(bytebuffer);
+            ObjectData_Fields.add(objectdata);
+        }
+
     }
 }

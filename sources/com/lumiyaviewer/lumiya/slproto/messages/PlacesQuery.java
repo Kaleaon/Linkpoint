@@ -1,66 +1,100 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class PlacesQuery extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public QueryData QueryData_Field = new QueryData();
-    public TransactionData TransactionData_Field = new TransactionData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class PlacesQuery extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID QueryID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class QueryData {
+    public static class QueryData
+    {
+
         public int Category;
         public int QueryFlags;
-        public byte[] QueryText;
-        public byte[] SimName;
+        public byte QueryText[];
+        public byte SimName[];
+
+        public QueryData()
+        {
+        }
     }
 
-    public static class TransactionData {
+    public static class TransactionData
+    {
+
         public UUID TransactionID;
+
+        public TransactionData()
+        {
+        }
     }
 
-    public PlacesQuery() {
-        this.zeroCoded = true;
+
+    public AgentData AgentData_Field;
+    public QueryData QueryData_Field;
+    public TransactionData TransactionData_Field;
+
+    public PlacesQuery()
+    {
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        TransactionData_Field = new TransactionData();
+        QueryData_Field = new QueryData();
     }
 
-    public int CalcPayloadSize() {
-        return this.QueryData_Field.QueryText.length + 1 + 4 + 1 + 1 + this.QueryData_Field.SimName.length + 68;
+    public int CalcPayloadSize()
+    {
+        return QueryData_Field.QueryText.length + 1 + 4 + 1 + 1 + QueryData_Field.SimName.length + 68;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandlePlacesQuery(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandlePlacesQuery(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put(Ascii.GS);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packUUID(byteBuffer, this.AgentData_Field.QueryID);
-        packUUID(byteBuffer, this.TransactionData_Field.TransactionID);
-        packVariable(byteBuffer, this.QueryData_Field.QueryText, 1);
-        packInt(byteBuffer, this.QueryData_Field.QueryFlags);
-        packByte(byteBuffer, (byte) this.QueryData_Field.Category);
-        packVariable(byteBuffer, this.QueryData_Field.SimName, 1);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)29);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packUUID(bytebuffer, AgentData_Field.QueryID);
+        packUUID(bytebuffer, TransactionData_Field.TransactionID);
+        packVariable(bytebuffer, QueryData_Field.QueryText, 1);
+        packInt(bytebuffer, QueryData_Field.QueryFlags);
+        packByte(bytebuffer, (byte)QueryData_Field.Category);
+        packVariable(bytebuffer, QueryData_Field.SimName, 1);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.AgentData_Field.QueryID = unpackUUID(byteBuffer);
-        this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer);
-        this.QueryData_Field.QueryText = unpackVariable(byteBuffer, 1);
-        this.QueryData_Field.QueryFlags = unpackInt(byteBuffer);
-        this.QueryData_Field.Category = unpackByte(byteBuffer);
-        this.QueryData_Field.SimName = unpackVariable(byteBuffer, 1);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        AgentData_Field.QueryID = unpackUUID(bytebuffer);
+        TransactionData_Field.TransactionID = unpackUUID(bytebuffer);
+        QueryData_Field.QueryText = unpackVariable(bytebuffer, 1);
+        QueryData_Field.QueryFlags = unpackInt(bytebuffer);
+        QueryData_Field.Category = unpackByte(bytebuffer);
+        QueryData_Field.SimName = unpackVariable(bytebuffer, 1);
     }
 }

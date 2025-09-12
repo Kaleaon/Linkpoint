@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.avatar;
 
-import android.annotation.SuppressLint;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
@@ -8,120 +11,167 @@ import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.render.DrawableObject;
 import com.lumiyaviewer.lumiya.render.RenderContext;
 import com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer;
+import com.lumiyaviewer.lumiya.render.shaders.RiggedMeshProgram30;
 import com.lumiyaviewer.lumiya.slproto.avatar.SLSkeletonBoneID;
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
+import java.util.Iterator;
 
-@Immutable
-class DrawableAttachments {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.avatar:
+//            AvatarSkeleton
+
+class DrawableAttachments
+{
+
     private GLLoadableBuffer glAnimationDataBuffer;
-    @Nonnull
-    private final ImmutableMultimap<Integer, DrawableObject> nonRigged;
-    @Nonnull
-    private final ImmutableList<DrawableObject> rigged;
+    private final ImmutableMultimap nonRigged;
+    private final ImmutableList rigged;
 
-    DrawableAttachments() {
-        this.glAnimationDataBuffer = null;
-        this.nonRigged = ImmutableMultimap.of();
-        this.rigged = ImmutableList.of();
+    DrawableAttachments()
+    {
+        glAnimationDataBuffer = null;
+        nonRigged = ImmutableMultimap.of();
+        rigged = ImmutableList.of();
     }
 
-    DrawableAttachments(@Nullable Multimap<Integer, DrawableObject> multimap) {
-        this.glAnimationDataBuffer = null;
-        ImmutableMultimap.Builder builder = ImmutableMultimap.builder();
-        ImmutableList.Builder builder2 = ImmutableList.builder();
-        if (multimap != null) {
-            for (Integer num : multimap.keySet()) {
-                for (DrawableObject drawableObject : multimap.get(num)) {
-                    if (drawableObject.isRiggedMesh()) {
-                        builder2.add((Object) drawableObject);
-                    } else {
-                        builder.put(num, drawableObject);
+    DrawableAttachments(Multimap multimap)
+    {
+        glAnimationDataBuffer = null;
+        com.google.common.collect.ImmutableMultimap.Builder builder = ImmutableMultimap.builder();
+        com.google.common.collect.ImmutableList.Builder builder1 = ImmutableList.builder();
+        if (multimap != null)
+        {
+            for (Iterator iterator = multimap.keySet().iterator(); iterator.hasNext();)
+            {
+                Integer integer = (Integer)iterator.next();
+                Iterator iterator1 = multimap.get(integer).iterator();
+                while (iterator1.hasNext()) 
+                {
+                    DrawableObject drawableobject = (DrawableObject)iterator1.next();
+                    if (drawableobject.isRiggedMesh())
+                    {
+                        builder1.add(drawableobject);
+                    } else
+                    {
+                        builder.put(integer, drawableobject);
                     }
                 }
             }
+
         }
-        this.nonRigged = builder.build();
-        this.rigged = builder2.build();
-        Debug.Printf("Created drawableAttachments: %d rigged, %d non-rigged", Integer.valueOf(this.rigged.size()), Integer.valueOf(this.nonRigged.size()));
+        nonRigged = builder.build();
+        rigged = builder1.build();
+        Debug.Printf("Created drawableAttachments: %d rigged, %d non-rigged", new Object[] {
+            Integer.valueOf(rigged.size()), Integer.valueOf(nonRigged.size())
+        });
     }
 
-    DrawableAttachments(@Nonnull DrawableAttachments drawableAttachments) {
-        this.glAnimationDataBuffer = null;
-        ImmutableMultimap.Builder builder = ImmutableMultimap.builder();
-        ImmutableList.Builder builder2 = ImmutableList.builder();
-        builder2.addAll((Iterable) drawableAttachments.rigged);
-        for (Integer num : drawableAttachments.nonRigged.keySet()) {
-            for (DrawableObject drawableObject : drawableAttachments.nonRigged.get(num)) {
-                if (drawableObject.isRiggedMesh()) {
-                    builder2.add((Object) drawableObject);
-                } else {
-                    builder.put(num, drawableObject);
+    DrawableAttachments(DrawableAttachments drawableattachments)
+    {
+        glAnimationDataBuffer = null;
+        com.google.common.collect.ImmutableMultimap.Builder builder = ImmutableMultimap.builder();
+        com.google.common.collect.ImmutableList.Builder builder1 = ImmutableList.builder();
+        builder1.addAll(drawableattachments.rigged);
+        for (Iterator iterator = drawableattachments.nonRigged.keySet().iterator(); iterator.hasNext();)
+        {
+            Integer integer = (Integer)iterator.next();
+            Iterator iterator1 = drawableattachments.nonRigged.get(integer).iterator();
+            while (iterator1.hasNext()) 
+            {
+                DrawableObject drawableobject = (DrawableObject)iterator1.next();
+                if (drawableobject.isRiggedMesh())
+                {
+                    builder1.add(drawableobject);
+                } else
+                {
+                    builder.put(integer, drawableobject);
                 }
             }
         }
-        this.nonRigged = builder.build();
-        this.rigged = builder2.build();
-        this.glAnimationDataBuffer = drawableAttachments.glAnimationDataBuffer;
-        Debug.Printf("Updated drawableAttachments: %d rigged, %d non-rigged", Integer.valueOf(this.rigged.size()), Integer.valueOf(this.nonRigged.size()));
+
+        nonRigged = builder.build();
+        rigged = builder1.build();
+        glAnimationDataBuffer = drawableattachments.glAnimationDataBuffer;
+        Debug.Printf("Updated drawableAttachments: %d rigged, %d non-rigged", new Object[] {
+            Integer.valueOf(rigged.size()), Integer.valueOf(nonRigged.size())
+        });
     }
 
-    /* access modifiers changed from: package-private */
-    @SuppressLint({"NewApi"})
-    public boolean Draw(RenderContext renderContext, AvatarSkeleton avatarSkeleton, boolean z) {
-        boolean z2;
-        if (!this.rigged.isEmpty()) {
-            if (renderContext.hasGL30) {
-                renderContext.setupRiggedMeshProgram(true);
-                if (this.glAnimationDataBuffer == null) {
-                    this.glAnimationDataBuffer = new GLLoadableBuffer(new DirectByteBuffer(renderContext.currentRiggedMeshProgram.uAnimationDataBlockSize));
-                    z2 = true;
-                } else {
-                    z2 = false;
+    boolean Draw(RenderContext rendercontext, AvatarSkeleton avatarskeleton, boolean flag)
+    {
+        if (!rigged.isEmpty())
+        {
+            if (rendercontext.hasGL30)
+            {
+                rendercontext.setupRiggedMeshProgram(true);
+                Object obj;
+                Object obj1;
+                float af[];
+                DrawableObject drawableobject;
+                int i;
+                boolean flag1;
+                if (glAnimationDataBuffer == null)
+                {
+                    glAnimationDataBuffer = new GLLoadableBuffer(new DirectByteBuffer(rendercontext.currentRiggedMeshProgram.uAnimationDataBlockSize));
+                    flag1 = true;
+                } else
+                {
+                    flag1 = false;
                 }
-                if (z || z2) {
-                    this.glAnimationDataBuffer.getRawBuffer().loadFromFloatArray(0, avatarSkeleton.jointWorldMatrix, 0, (SLSkeletonBoneID.VALUES.length + 47) * 16);
+                if (flag || flag1)
+                {
+                    glAnimationDataBuffer.getRawBuffer().loadFromFloatArray(0, avatarskeleton.jointWorldMatrix, 0, (SLSkeletonBoneID.VALUES.length + 47) * 16);
                 }
-                GLLoadableBuffer gLLoadableBuffer = this.glAnimationDataBuffer;
-                if (z) {
-                    z2 = true;
+                obj = glAnimationDataBuffer;
+                if (flag)
+                {
+                    flag1 = true;
                 }
-                gLLoadableBuffer.BindUniformDynamic(renderContext, 1, z2);
-                int i = 0;
-                for (DrawableObject DrawRigged30 : this.rigged) {
-                    i = DrawRigged30.DrawRigged30(renderContext, 1) | i;
+                ((GLLoadableBuffer) (obj)).BindUniformDynamic(rendercontext, 1, flag1);
+                obj = rigged.iterator();
+                for (i = 0; ((Iterator) (obj)).hasNext(); i = ((DrawableObject)((Iterator) (obj)).next()).DrawRigged30(rendercontext, 1) | i) { }
+                if ((i & 2) != 0)
+                {
+                    rendercontext.setupRiggedMeshProgram(false);
+                    for (obj = rigged.iterator(); ((Iterator) (obj)).hasNext(); ((DrawableObject)((Iterator) (obj)).next()).DrawRigged30(rendercontext, 2)) { }
                 }
-                if ((i & 2) != 0) {
-                    renderContext.setupRiggedMeshProgram(false);
-                    for (DrawableObject DrawRigged302 : this.rigged) {
-                        DrawRigged302.DrawRigged30(renderContext, 2);
-                    }
-                }
-                renderContext.clearRiggedMeshProgram();
-            } else {
-                for (DrawableObject DrawRigged : this.rigged) {
-                    DrawRigged.DrawRigged(renderContext, avatarSkeleton, 3);
+                rendercontext.clearRiggedMeshProgram();
+            } else
+            {
+                obj = rigged.iterator();
+                while (((Iterator) (obj)).hasNext()) 
+                {
+                    ((DrawableObject)((Iterator) (obj)).next()).DrawRigged(rendercontext, avatarskeleton, 3);
                 }
             }
         }
-        boolean z3 = false;
-        for (Integer num : this.nonRigged.keySet()) {
-            float[] attachmentMatrix = avatarSkeleton.getAttachmentMatrix(num.intValue());
-            if (attachmentMatrix != null) {
-                renderContext.glObjWorldPushAndMultMatrixf(attachmentMatrix, 0);
-                for (DrawableObject drawableObject : this.nonRigged.get(num)) {
-                    if (drawableObject.isRiggedMesh()) {
-                        z3 = true;
-                    } else {
-                        drawableObject.Draw(renderContext, 3);
+        obj = nonRigged.keySet().iterator();
+        flag = false;
+        do
+        {
+            if (!((Iterator) (obj)).hasNext())
+            {
+                break;
+            }
+            obj1 = (Integer)((Iterator) (obj)).next();
+            af = avatarskeleton.getAttachmentMatrix(((Integer) (obj1)).intValue());
+            if (af != null)
+            {
+                rendercontext.glObjWorldPushAndMultMatrixf(af, 0);
+                for (obj1 = nonRigged.get(obj1).iterator(); ((Iterator) (obj1)).hasNext();)
+                {
+                    drawableobject = (DrawableObject)((Iterator) (obj1)).next();
+                    if (drawableobject.isRiggedMesh())
+                    {
+                        flag = true;
+                    } else
+                    {
+                        drawableobject.Draw(rendercontext, 3);
                     }
                 }
-                renderContext.glObjWorldPopMatrix();
+
+                rendercontext.glObjWorldPopMatrix();
             }
-            z3 = z3;
-        }
-        return z3;
+        } while (true);
+        return flag;
     }
 }

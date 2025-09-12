@@ -1,6 +1,10 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
-import com.lumiyaviewer.lumiya.dao.MoneyTransaction;
+import com.lumiyaviewer.lumiya.dao.DaoSession;
 import com.lumiyaviewer.lumiya.dao.MoneyTransactionDao;
 import com.lumiyaviewer.lumiya.react.AsyncRequestHandler;
 import com.lumiyaviewer.lumiya.react.SimpleRequestHandler;
@@ -8,231 +12,199 @@ import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.SubscriptionPool;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
 import com.lumiyaviewer.lumiya.slproto.modules.finance.SLFinancialInfo;
+import de.greenrobot.dao.Property;
 import de.greenrobot.dao.query.LazyList;
+import de.greenrobot.dao.query.QueryBuilder;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
 
-public class BalanceManager {
-    /* access modifiers changed from: private */
-    public final SubscriptionPool<SubscriptionSingleKey, Integer> balancePool = new SubscriptionPool<>();
-    private final SimpleRequestHandler<SubscriptionSingleKey> balanceRequestHandler = new SimpleRequestHandler<SubscriptionSingleKey>() {
-        public void onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
-            SLFinancialInfo sLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get();
-            if (sLFinancialInfo == null) {
-                BalanceManager.this.balancePool.onResultError(SubscriptionSingleKey.Value, new SLGridConnection.NotConnectedException());
-            } else if (sLFinancialInfo.getBalanceKnown()) {
-                BalanceManager.this.balancePool.onResultData(SubscriptionSingleKey.Value, Integer.valueOf(sLFinancialInfo.getBalance()));
-            } else {
-                SLAgentCircuit activeAgentCircuit = BalanceManager.this.userManager.getActiveAgentCircuit();
-                if (activeAgentCircuit != null) {
-                    activeAgentCircuit.execute(BalanceManager.this.requestBalanceRunnable);
-                } else {
-                    BalanceManager.this.balancePool.onResultError(SubscriptionSingleKey.Value, new SLGridConnection.NotConnectedException());
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            UserManager
+
+public class BalanceManager
+{
+
+    private final SubscriptionPool balancePool = new SubscriptionPool();
+    private final SimpleRequestHandler balanceRequestHandler = new SimpleRequestHandler() {
+
+        final BalanceManager this$0;
+
+        public void onRequest(SubscriptionSingleKey subscriptionsinglekey)
+        {
+            subscriptionsinglekey = (SLFinancialInfo)BalanceManager._2D_get1(BalanceManager.this).get();
+            if (subscriptionsinglekey != null)
+            {
+                if (subscriptionsinglekey.getBalanceKnown())
+                {
+                    int i = subscriptionsinglekey.getBalance();
+                    BalanceManager._2D_get0(BalanceManager.this).onResultData(SubscriptionSingleKey.Value, Integer.valueOf(i));
+                    return;
                 }
+                subscriptionsinglekey = BalanceManager._2D_get5(BalanceManager.this).getActiveAgentCircuit();
+                if (subscriptionsinglekey != null)
+                {
+                    subscriptionsinglekey.execute(BalanceManager._2D_get4(BalanceManager.this));
+                    return;
+                } else
+                {
+                    BalanceManager._2D_get0(BalanceManager.this).onResultError(SubscriptionSingleKey.Value, new com.lumiyaviewer.lumiya.slproto.SLGridConnection.NotConnectedException());
+                    return;
+                }
+            } else
+            {
+                BalanceManager._2D_get0(BalanceManager.this).onResultError(SubscriptionSingleKey.Value, new com.lumiyaviewer.lumiya.slproto.SLGridConnection.NotConnectedException());
+                return;
             }
         }
-    };
-    /* access modifiers changed from: private */
-    public final AtomicReference<SLFinancialInfo> financialInfo = new AtomicReference<>((Object) null);
-    /* access modifiers changed from: private */
-    public final MoneyTransactionDao moneyTransactionDao;
-    /* access modifiers changed from: private */
-    public final SubscriptionPool<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactionPool = new SubscriptionPool<>();
-    /* access modifiers changed from: private */
-    public final Runnable requestBalanceRunnable = new Runnable() {
-        public void run() {
-            SLFinancialInfo sLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get();
-            if (sLFinancialInfo != null) {
-                sLFinancialInfo.AskForMoneyBalance();
-            } else {
-                BalanceManager.this.balancePool.onResultError(SubscriptionSingleKey.Value, new SLGridConnection.NotConnectedException());
-            }
-        }
-    };
-    /* access modifiers changed from: private */
-    public final UserManager userManager;
 
-    BalanceManager(UserManager userManager2) {
-        this.userManager = userManager2;
-        this.moneyTransactionDao = userManager2.getDaoSession().getMoneyTransactionDao();
-        this.balancePool.attachRequestHandler(this.balanceRequestHandler);
-        this.moneyTransactionPool.attachRequestHandler(new AsyncRequestHandler(userManager2.getDatabaseExecutor(), new SimpleRequestHandler<SubscriptionSingleKey>() {
-            public void onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
-                BalanceManager.this.moneyTransactionPool.onResultData(subscriptionSingleKey, BalanceManager.this.moneyTransactionDao.queryBuilder().orderAsc(MoneyTransactionDao.Properties.Timestamp).listLazy());
+        public volatile void onRequest(Object obj)
+        {
+            onRequest((SubscriptionSingleKey)obj);
+        }
+
+            
+            {
+                this$0 = BalanceManager.this;
+                super();
+            }
+    };
+    private final AtomicReference financialInfo = new AtomicReference(null);
+    private final MoneyTransactionDao moneyTransactionDao;
+    private final SubscriptionPool moneyTransactionPool = new SubscriptionPool();
+    private final Runnable requestBalanceRunnable = new Runnable() {
+
+        final BalanceManager this$0;
+
+        public void run()
+        {
+            SLFinancialInfo slfinancialinfo = (SLFinancialInfo)BalanceManager._2D_get1(BalanceManager.this).get();
+            if (slfinancialinfo != null)
+            {
+                slfinancialinfo.AskForMoneyBalance();
+                return;
+            } else
+            {
+                BalanceManager._2D_get0(BalanceManager.this).onResultError(SubscriptionSingleKey.Value, new com.lumiyaviewer.lumiya.slproto.SLGridConnection.NotConnectedException());
+                return;
+            }
+        }
+
+            
+            {
+                this$0 = BalanceManager.this;
+                super();
+            }
+    };
+    private final UserManager userManager;
+
+    static SubscriptionPool _2D_get0(BalanceManager balancemanager)
+    {
+        return balancemanager.balancePool;
+    }
+
+    static AtomicReference _2D_get1(BalanceManager balancemanager)
+    {
+        return balancemanager.financialInfo;
+    }
+
+    static MoneyTransactionDao _2D_get2(BalanceManager balancemanager)
+    {
+        return balancemanager.moneyTransactionDao;
+    }
+
+    static SubscriptionPool _2D_get3(BalanceManager balancemanager)
+    {
+        return balancemanager.moneyTransactionPool;
+    }
+
+    static Runnable _2D_get4(BalanceManager balancemanager)
+    {
+        return balancemanager.requestBalanceRunnable;
+    }
+
+    static UserManager _2D_get5(BalanceManager balancemanager)
+    {
+        return balancemanager.userManager;
+    }
+
+    BalanceManager(UserManager usermanager)
+    {
+        userManager = usermanager;
+        moneyTransactionDao = usermanager.getDaoSession().getMoneyTransactionDao();
+        balancePool.attachRequestHandler(balanceRequestHandler);
+        moneyTransactionPool.attachRequestHandler(new AsyncRequestHandler(usermanager.getDatabaseExecutor(), new SimpleRequestHandler() {
+
+            final BalanceManager this$0;
+
+            public void onRequest(SubscriptionSingleKey subscriptionsinglekey)
+            {
+                LazyList lazylist = BalanceManager._2D_get2(BalanceManager.this).queryBuilder().orderAsc(new Property[] {
+                    com.lumiyaviewer.lumiya.dao.MoneyTransactionDao.Properties.Timestamp
+                }).listLazy();
+                BalanceManager._2D_get3(BalanceManager.this).onResultData(subscriptionsinglekey, lazylist);
+            }
+
+            public volatile void onRequest(Object obj)
+            {
+                onRequest((SubscriptionSingleKey)obj);
+            }
+
+            
+            {
+                this$0 = BalanceManager.this;
+                super();
             }
         }));
-        this.moneyTransactionPool.setDisposeHandler(new $Lambda$xo_DO1h0hLJizWUYkWN5MuOYxk(), userManager2.getDatabaseExecutor());
+        moneyTransactionPool.setDisposeHandler(new _2D_.Lambda.xo_DO1h0hLJizWUYkWN5MuOY_2D_xk(), usermanager.getDatabaseExecutor());
     }
 
-    static /* synthetic */ void closeLazyListHandler(LazyList lazyList) {
-        if (!lazyList.isClosed()) {
-            lazyList.close();
+    static void lambda$_2D_com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705(LazyList lazylist)
+    {
+        if (!lazylist.isClosed())
+        {
+            lazylist.close();
         }
     }
 
-    public void clearFinancialInfo(SLFinancialInfo sLFinancialInfo) {
-        this.financialInfo.compareAndSet(sLFinancialInfo, (Object) null);
+    public void clearFinancialInfo(SLFinancialInfo slfinancialinfo)
+    {
+        financialInfo.compareAndSet(slfinancialinfo, null);
     }
 
-    public void clearMoneyTransactions() {
-        this.userManager.getDatabaseExecutor().execute(new Runnable(this) {
-
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f224$f0;
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$xo_DO1h0hLJizWUYkWN5MuOY-xk.1.$m$0():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$xo_DO1h0hLJizWUYkWN5MuOY-xk.1.$m$0():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$xo_DO1h0hLJizWUYkWN5MuOY-xk.1.run():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$xo_DO1h0hLJizWUYkWN5MuOY-xk.1.run():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        });
+    public void clearMoneyTransactions()
+    {
+        userManager.getDatabaseExecutor().execute(new _2D_.Lambda.xo_DO1h0hLJizWUYkWN5MuOY_2D_xk._cls1(this));
     }
 
-    public Subscribable<SubscriptionSingleKey, Integer> getBalance() {
-        return this.balancePool;
+    public Subscribable getBalance()
+    {
+        return balancePool;
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void clearAllMoneyTransactions() {
-        this.moneyTransactionDao.deleteAll();
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_4293()
+    {
+        moneyTransactionDao.deleteAll();
         updateMoneyTransactions();
     }
 
-    public Subscribable<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactions() {
-        return this.moneyTransactionPool;
+    public Subscribable moneyTransactions()
+    {
+        return moneyTransactionPool;
     }
 
-    public void setFinancialInfo(SLFinancialInfo sLFinancialInfo) {
-        this.financialInfo.set(sLFinancialInfo);
+    public void setFinancialInfo(SLFinancialInfo slfinancialinfo)
+    {
+        financialInfo.set(slfinancialinfo);
     }
 
-    public void updateBalance(int i) {
-        this.balancePool.onResultData(SubscriptionSingleKey.Value, Integer.valueOf(i));
+    public void updateBalance(int i)
+    {
+        balancePool.onResultData(SubscriptionSingleKey.Value, Integer.valueOf(i));
     }
 
-    public void updateMoneyTransactions() {
-        this.moneyTransactionPool.requestUpdate(SubscriptionSingleKey.Value);
+    public void updateMoneyTransactions()
+    {
+        moneyTransactionPool.requestUpdate(SubscriptionSingleKey.Value);
     }
 }

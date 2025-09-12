@@ -1,506 +1,965 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.base64;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import java.util.Arrays;
 
-public class Base64 {
-    private static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
-    private static final int[] IA = new int[256];
+public class Base64
+{
 
-    static {
+    private static final char CA[];
+    private static final int IA[];
+
+    public Base64()
+    {
+    }
+
+    public static final byte[] decode(String s)
+    {
+        byte abyte0[];
+        int i;
+        int j;
+        int k;
+        int i1;
+        int l1;
+        if (s == null)
+        {
+            i = 0;
+        } else
+        {
+            i = s.length();
+        }
+        if (i == 0) goto _L2; else goto _L1
+_L1:
+        k = 0;
+        j = 0;
+_L10:
+        if (k < i) goto _L4; else goto _L3
+_L3:
+        if ((i - j) % 4 != 0) goto _L6; else goto _L5
+_L5:
+        k = i;
+        i1 = 0;
+_L12:
+        if (k > 1) goto _L8; else goto _L7
+_L7:
+        l1 = ((i - j) * 6 >> 3) - i1;
+        abyte0 = new byte[l1];
+        k = 0;
+        i = 0;
+          goto _L9
+_L2:
+        return new byte[0];
+_L4:
+        if (IA[s.charAt(k)] < 0)
+        {
+            j++;
+        }
+        k++;
+          goto _L10
+_L6:
+        return null;
+_L8:
+        abyte0 = IA;
+        j1 = k - 1;
+        if (abyte0[s.charAt(j1)] > 0) goto _L7; else goto _L11
+_L11:
+        k = j1;
+        if (s.charAt(j1) == '=')
+        {
+            i1++;
+            k = j1;
+        }
+          goto _L12
+_L9:
+        int j1;
+        if (k >= l1)
+        {
+            return abyte0;
+        }
+        i1 = 0;
+        j1 = 0;
+        j = i;
+        i = j1;
+_L14:
+label0:
+        {
+            if (i < 4)
+            {
+                break label0;
+            }
+            i = k + 1;
+            abyte0[k] = (byte)(byte)(i1 >> 16);
+            int k1;
+            if (i < l1)
+            {
+                int l = i + 1;
+                abyte0[i] = (byte)(byte)(i1 >> 8);
+                if (l >= l1)
+                {
+                    i = l;
+                } else
+                {
+                    i = l + 1;
+                    abyte0[l] = (byte)(byte)i1;
+                }
+            }
+            k = i;
+            i = j;
+        }
+        if (true) goto _L9; else goto _L13
+_L13:
+        k1 = IA[s.charAt(j)];
+        if (k1 < 0)
+        {
+            i--;
+        } else
+        {
+            i1 |= k1 << 18 - i * 6;
+        }
+        i++;
+        j++;
+          goto _L14
+    }
+
+    public static final byte[] decode(byte abyte0[])
+    {
+        int i;
+        int j;
+        int i1;
+        i1 = abyte0.length;
+        j = 0;
+        i = 0;
+_L8:
+        if (j < i1) goto _L2; else goto _L1
+_L1:
+        if ((i1 - i) % 4 != 0) goto _L4; else goto _L3
+_L3:
+        int k;
+        j = i1;
+        k = 0;
+_L10:
+        if (j > 1) goto _L6; else goto _L5
+_L5:
+        byte abyte1[];
+        int l1;
+        l1 = ((i1 - i) * 6 >> 3) - k;
+        abyte1 = new byte[l1];
+        k = 0;
+        i = 0;
+          goto _L7
+_L2:
+        if (IA[abyte0[j] & 0xff] < 0)
+        {
+            i++;
+        }
+        j++;
+          goto _L8
+_L4:
+        return null;
+_L6:
+        abyte1 = IA;
+        j1 = j - 1;
+        if (abyte1[abyte0[j1] & 0xff] > 0) goto _L5; else goto _L9
+_L9:
+        j = j1;
+        if (abyte0[j1] == 61)
+        {
+            k++;
+            j = j1;
+        }
+          goto _L10
+_L7:
+        int j1;
+        if (k >= l1)
+        {
+            return abyte1;
+        }
+        i1 = 0;
+        j1 = 0;
+        j = i;
+        i = j1;
+_L12:
+label0:
+        {
+            if (i < 4)
+            {
+                break label0;
+            }
+            i = k + 1;
+            abyte1[k] = (byte)(byte)(i1 >> 16);
+            int k1;
+            if (i < l1)
+            {
+                int l = i + 1;
+                abyte1[i] = (byte)(byte)(i1 >> 8);
+                if (l >= l1)
+                {
+                    i = l;
+                } else
+                {
+                    i = l + 1;
+                    abyte1[l] = (byte)(byte)i1;
+                }
+            }
+            k = i;
+            i = j;
+        }
+        if (true) goto _L7; else goto _L11
+_L11:
+        k1 = IA[abyte0[j] & 0xff];
+        if (k1 < 0)
+        {
+            i--;
+        } else
+        {
+            i1 |= k1 << 18 - i * 6;
+        }
+        i++;
+        j++;
+          goto _L12
+    }
+
+    public static final byte[] decode(char ac[])
+    {
+        byte abyte0[];
+        int i;
+        int j;
+        int k;
+        int i1;
+        int l1;
+        if (ac == null)
+        {
+            i = 0;
+        } else
+        {
+            i = ac.length;
+        }
+        if (i == 0) goto _L2; else goto _L1
+_L1:
+        k = 0;
+        j = 0;
+_L10:
+        if (k < i) goto _L4; else goto _L3
+_L3:
+        if ((i - j) % 4 != 0) goto _L6; else goto _L5
+_L5:
+        k = i;
+        i1 = 0;
+_L12:
+        if (k > 1) goto _L8; else goto _L7
+_L7:
+        l1 = ((i - j) * 6 >> 3) - i1;
+        abyte0 = new byte[l1];
+        k = 0;
+        i = 0;
+          goto _L9
+_L2:
+        return new byte[0];
+_L4:
+        if (IA[ac[k]] < 0)
+        {
+            j++;
+        }
+        k++;
+          goto _L10
+_L6:
+        return null;
+_L8:
+        abyte0 = IA;
+        j1 = k - 1;
+        if (abyte0[ac[j1]] > 0) goto _L7; else goto _L11
+_L11:
+        k = j1;
+        if (ac[j1] == '=')
+        {
+            i1++;
+            k = j1;
+        }
+          goto _L12
+_L9:
+        int j1;
+        if (k >= l1)
+        {
+            return abyte0;
+        }
+        i1 = 0;
+        j1 = 0;
+        j = i;
+        i = j1;
+_L14:
+label0:
+        {
+            if (i < 4)
+            {
+                break label0;
+            }
+            i = k + 1;
+            abyte0[k] = (byte)(byte)(i1 >> 16);
+            int k1;
+            if (i < l1)
+            {
+                int l = i + 1;
+                abyte0[i] = (byte)(byte)(i1 >> 8);
+                if (l >= l1)
+                {
+                    i = l;
+                } else
+                {
+                    i = l + 1;
+                    abyte0[l] = (byte)(byte)i1;
+                }
+            }
+            k = i;
+            i = j;
+        }
+        if (true) goto _L9; else goto _L13
+_L13:
+        k1 = IA[ac[j]];
+        if (k1 < 0)
+        {
+            i--;
+        } else
+        {
+            i1 |= k1 << 18 - i * 6;
+        }
+        i++;
+        j++;
+          goto _L14
+    }
+
+    public static final byte[] decodeFast(String s)
+    {
+        int k;
+        int k1;
+        k1 = 0;
+        k = s.length();
+        if (k == 0) goto _L2; else goto _L1
+_L1:
+        byte abyte0[];
+        int i;
+        int j;
+        int l;
+        int i1;
+        int j1;
+        int i3;
+        i1 = k - 1;
+        i = 0;
+        int j3;
+        while (i < i1 && IA[s.charAt(i) & 0xff] < 0) 
+        {
+            i++;
+        }
+        while (i1 > 0 && IA[s.charAt(i1) & 0xff] < 0) 
+        {
+            i1--;
+        }
+        if (s.charAt(i1) != '=')
+        {
+            j = 0;
+        } else
+        if (s.charAt(i1 - 1) != '=')
+        {
+            j = 1;
+        } else
+        {
+            j = 2;
+        }
+        l = (i1 - i) + 1;
+        if (k <= 76)
+        {
+            j1 = 0;
+        } else
+        {
+            if (s.charAt(76) != '\r')
+            {
+                k = 0;
+            } else
+            {
+                k = l / 78;
+            }
+            j1 = k << 1;
+        }
+        i3 = ((l - j1) * 6 >> 3) - j;
+        abyte0 = new byte[i3];
+        j3 = i3 / 3;
+        l = 0;
+        k = 0;
+_L7:
+        if (k < j3 * 3) goto _L4; else goto _L3
+_L3:
+        if (k < i3) goto _L6; else goto _L5
+_L5:
+        return abyte0;
+_L2:
+        return new byte[0];
+_L4:
+        int ai[] = IA;
+        int j2 = i + 1;
+        i = ai[s.charAt(i)];
+        ai = IA;
+        int l1 = j2 + 1;
+        j2 = ai[s.charAt(j2)];
+        ai = IA;
+        int k2 = l1 + 1;
+        int k3 = ai[s.charAt(l1)];
+        ai = IA;
+        l1 = k2 + 1;
+        i = k3 << 6 | (i << 18 | j2 << 12) | ai[s.charAt(k2)];
+        j2 = k + 1;
+        abyte0[k] = (byte)(i >> 16);
+        k = j2 + 1;
+        abyte0[j2] = (byte)(i >> 8);
+        j2 = k + 1;
+        abyte0[k] = (byte)i;
+        i = l1;
+        k = j2;
+        if (j1 > 0)
+        {
+            int l2 = l + 1;
+            l = l2;
+            i = l1;
+            k = j2;
+            if (l2 == 19)
+            {
+                i = l1 + 2;
+                l = 0;
+                k = j2;
+            }
+        }
+          goto _L7
+_L6:
+        l = 0;
+        j1 = i;
+        i = k1;
+_L8:
+label0:
+        {
+            k1 = i;
+            if (j1 <= i1 - j)
+            {
+                break label0;
+            }
+            j = 16;
+            i = k;
+            while (i < i3) 
+            {
+                abyte0[i] = (byte)(l >> j);
+                j -= 8;
+                i++;
+            }
+        }
+          goto _L5
+        int i2 = IA[s.charAt(j1)];
+        i = k1 + 1;
+        l = i2 << 18 - k1 * 6 | l;
+        j1++;
+          goto _L8
+    }
+
+    public static final byte[] decodeFast(byte abyte0[])
+    {
+        int k;
+        int k1;
+        k1 = 0;
+        k = abyte0.length;
+        if (k == 0) goto _L2; else goto _L1
+_L1:
+        byte abyte1[];
+        int i;
+        int j;
+        int l;
+        int i1;
+        int j1;
+        int i3;
+        i1 = k - 1;
+        i = 0;
+        int j3;
+        while (i < i1 && IA[abyte0[i] & 0xff] < 0) 
+        {
+            i++;
+        }
+        while (i1 > 0 && IA[abyte0[i1] & 0xff] < 0) 
+        {
+            i1--;
+        }
+        if (abyte0[i1] != 61)
+        {
+            j = 0;
+        } else
+        if (abyte0[i1 - 1] != 61)
+        {
+            j = 1;
+        } else
+        {
+            j = 2;
+        }
+        l = (i1 - i) + 1;
+        if (k <= 76)
+        {
+            j1 = 0;
+        } else
+        {
+            if (abyte0[76] != 13)
+            {
+                k = 0;
+            } else
+            {
+                k = l / 78;
+            }
+            j1 = k << 1;
+        }
+        i3 = ((l - j1) * 6 >> 3) - j;
+        abyte1 = new byte[i3];
+        j3 = i3 / 3;
+        l = 0;
+        k = 0;
+_L7:
+        if (k < j3 * 3) goto _L4; else goto _L3
+_L3:
+        if (k < i3) goto _L6; else goto _L5
+_L5:
+        return abyte1;
+_L2:
+        return new byte[0];
+_L4:
+        int ai[] = IA;
+        int j2 = i + 1;
+        i = ai[abyte0[i]];
+        ai = IA;
+        int l1 = j2 + 1;
+        j2 = ai[abyte0[j2]];
+        ai = IA;
+        int k2 = l1 + 1;
+        int k3 = ai[abyte0[l1]];
+        ai = IA;
+        l1 = k2 + 1;
+        i = k3 << 6 | (i << 18 | j2 << 12) | ai[abyte0[k2]];
+        j2 = k + 1;
+        abyte1[k] = (byte)(i >> 16);
+        k = j2 + 1;
+        abyte1[j2] = (byte)(i >> 8);
+        j2 = k + 1;
+        abyte1[k] = (byte)i;
+        i = l1;
+        k = j2;
+        if (j1 > 0)
+        {
+            int l2 = l + 1;
+            l = l2;
+            i = l1;
+            k = j2;
+            if (l2 == 19)
+            {
+                i = l1 + 2;
+                l = 0;
+                k = j2;
+            }
+        }
+          goto _L7
+_L6:
+        l = 0;
+        j1 = i;
+        i = k1;
+_L8:
+label0:
+        {
+            k1 = i;
+            if (j1 <= i1 - j)
+            {
+                break label0;
+            }
+            j = 16;
+            i = k;
+            while (i < i3) 
+            {
+                abyte1[i] = (byte)(l >> j);
+                j -= 8;
+                i++;
+            }
+        }
+          goto _L5
+        int i2 = IA[abyte0[j1]];
+        i = k1 + 1;
+        l = i2 << 18 - k1 * 6 | l;
+        j1++;
+          goto _L8
+    }
+
+    public static final byte[] decodeFast(char ac[])
+    {
+        int k;
+        int k1;
+        k1 = 0;
+        k = ac.length;
+        if (k == 0) goto _L2; else goto _L1
+_L1:
+        byte abyte0[];
+        int i;
+        int j;
+        int l;
+        int i1;
+        int j1;
+        int i3;
+        i1 = k - 1;
+        i = 0;
+        int j3;
+        while (i < i1 && IA[ac[i]] < 0) 
+        {
+            i++;
+        }
+        while (i1 > 0 && IA[ac[i1]] < 0) 
+        {
+            i1--;
+        }
+        if (ac[i1] != '=')
+        {
+            j = 0;
+        } else
+        if (ac[i1 - 1] != '=')
+        {
+            j = 1;
+        } else
+        {
+            j = 2;
+        }
+        l = (i1 - i) + 1;
+        if (k <= 76)
+        {
+            j1 = 0;
+        } else
+        {
+            if (ac[76] != '\r')
+            {
+                k = 0;
+            } else
+            {
+                k = l / 78;
+            }
+            j1 = k << 1;
+        }
+        i3 = ((l - j1) * 6 >> 3) - j;
+        abyte0 = new byte[i3];
+        j3 = i3 / 3;
+        l = 0;
+        k = 0;
+_L7:
+        if (k < j3 * 3) goto _L4; else goto _L3
+_L3:
+        if (k < i3) goto _L6; else goto _L5
+_L5:
+        return abyte0;
+_L2:
+        return new byte[0];
+_L4:
+        int ai[] = IA;
+        int j2 = i + 1;
+        i = ai[ac[i]];
+        ai = IA;
+        int l1 = j2 + 1;
+        j2 = ai[ac[j2]];
+        ai = IA;
+        int k2 = l1 + 1;
+        int k3 = ai[ac[l1]];
+        ai = IA;
+        l1 = k2 + 1;
+        i = k3 << 6 | (i << 18 | j2 << 12) | ai[ac[k2]];
+        j2 = k + 1;
+        abyte0[k] = (byte)(i >> 16);
+        k = j2 + 1;
+        abyte0[j2] = (byte)(i >> 8);
+        j2 = k + 1;
+        abyte0[k] = (byte)i;
+        i = l1;
+        k = j2;
+        if (j1 > 0)
+        {
+            int l2 = l + 1;
+            l = l2;
+            i = l1;
+            k = j2;
+            if (l2 == 19)
+            {
+                i = l1 + 2;
+                l = 0;
+                k = j2;
+            }
+        }
+          goto _L7
+_L6:
+        l = 0;
+        j1 = i;
+        i = k1;
+_L8:
+label0:
+        {
+            k1 = i;
+            if (j1 <= i1 - j)
+            {
+                break label0;
+            }
+            j = 16;
+            i = k;
+            while (i < i3) 
+            {
+                abyte0[i] = (byte)(l >> j);
+                j -= 8;
+                i++;
+            }
+        }
+          goto _L5
+        int i2 = IA[ac[j1]];
+        i = k1 + 1;
+        l = i2 << 18 - k1 * 6 | l;
+        j1++;
+          goto _L8
+    }
+
+    public static final byte[] encodeToByte(byte abyte0[], boolean flag)
+    {
+        byte abyte1[];
+        int i;
+        int j;
+        int k;
+        int l;
+        boolean flag1;
+        int i2;
+        int j2;
+        flag1 = false;
+        if (abyte0 == null)
+        {
+            k = 0;
+        } else
+        {
+            k = abyte0.length;
+        }
+        if (k == 0) goto _L2; else goto _L1
+_L1:
+        j2 = (k / 3) * 3;
+        j = (k - 1) / 3 + 1 << 2;
+        if (!flag)
+        {
+            i = 0;
+        } else
+        {
+            i = (j - 1) / 76 << 1;
+        }
+        i2 = j + i;
+        abyte1 = new byte[i2];
+        i = 0;
+        j = 0;
+        l = 0;
+_L4:
+        if (l >= j2)
+        {
+            j = k - j2;
+            if (j <= 0)
+            {
+                return abyte1;
+            }
+            break; /* Loop/switch isn't completed */
+        }
+        int i1 = l + 1;
+        l = abyte0[l];
+        int j1 = i1 + 1;
+        int k1 = abyte0[i1];
+        i1 = j1 + 1;
+        l = (k1 & 0xff) << 8 | (l & 0xff) << 16 | abyte0[j1] & 0xff;
+        j1 = j + 1;
+        abyte1[j] = (byte)CA[l >>> 18 & 0x3f];
+        j = j1 + 1;
+        abyte1[j1] = (byte)CA[l >>> 12 & 0x3f];
+        k1 = j + 1;
+        abyte1[j] = (byte)CA[l >>> 6 & 0x3f];
+        j1 = k1 + 1;
+        abyte1[k1] = (byte)CA[l & 0x3f];
+        j = j1;
+        l = i1;
+        if (flag)
+        {
+            int l1 = i + 1;
+            i = l1;
+            j = j1;
+            l = i1;
+            if (l1 == 19)
+            {
+                i = l1;
+                j = j1;
+                l = i1;
+                if (j1 < i2 - 2)
+                {
+                    i = j1 + 1;
+                    abyte1[j1] = 13;
+                    abyte1[i] = 10;
+                    j = i + 1;
+                    i = 0;
+                    l = i1;
+                }
+            }
+        }
+        continue; /* Loop/switch isn't completed */
+_L2:
+        return new byte[0];
+        if (true) goto _L4; else goto _L3
+_L3:
+        byte byte1 = abyte0[j2];
+        byte byte0;
+        if (j != 2)
+        {
+            byte0 = flag1;
+        } else
+        {
+            byte0 = (abyte0[k - 1] & 0xff) << 2;
+        }
+        byte0 = (byte1 & 0xff) << 10 | byte0;
+        abyte1[i2 - 4] = (byte)CA[byte0 >> 12];
+        abyte1[i2 - 3] = (byte)CA[byte0 >>> 6 & 0x3f];
+        if (j != 2)
+        {
+            byte0 = 61;
+        } else
+        {
+            byte0 = (byte)CA[byte0 & 0x3f];
+        }
+        abyte1[i2 - 2] = (byte)byte0;
+        abyte1[i2 - 1] = 61;
+        return abyte1;
+    }
+
+    public static final char[] encodeToChar(byte abyte0[], boolean flag)
+    {
+        char ac[];
+        int i;
+        int k;
+        int l;
+        int i1;
+        boolean flag1;
+        int j2;
+        int k2;
+        flag1 = false;
+        if (abyte0 == null)
+        {
+            l = 0;
+        } else
+        {
+            l = abyte0.length;
+        }
+        if (l == 0) goto _L2; else goto _L1
+_L1:
+        k2 = (l / 3) * 3;
+        k = (l - 1) / 3 + 1 << 2;
+        if (!flag)
+        {
+            i = 0;
+        } else
+        {
+            i = (k - 1) / 76 << 1;
+        }
+        j2 = k + i;
+        ac = new char[j2];
+        i = 0;
+        k = 0;
+        i1 = 0;
+_L4:
+        if (i1 >= k2)
+        {
+            k = l - k2;
+            if (k <= 0)
+            {
+                return ac;
+            }
+            break; /* Loop/switch isn't completed */
+        }
+        int j1 = i1 + 1;
+        i1 = abyte0[i1];
+        int k1 = j1 + 1;
+        int l1 = abyte0[j1];
+        j1 = k1 + 1;
+        i1 = (l1 & 0xff) << 8 | (i1 & 0xff) << 16 | abyte0[k1] & 0xff;
+        k1 = k + 1;
+        ac[k] = CA[i1 >>> 18 & 0x3f];
+        k = k1 + 1;
+        ac[k1] = CA[i1 >>> 12 & 0x3f];
+        l1 = k + 1;
+        ac[k] = CA[i1 >>> 6 & 0x3f];
+        k1 = l1 + 1;
+        ac[l1] = CA[i1 & 0x3f];
+        k = k1;
+        i1 = j1;
+        if (flag)
+        {
+            int i2 = i + 1;
+            i = i2;
+            k = k1;
+            i1 = j1;
+            if (i2 == 19)
+            {
+                i = i2;
+                k = k1;
+                i1 = j1;
+                if (k1 < j2 - 2)
+                {
+                    i = k1 + 1;
+                    ac[k1] = '\r';
+                    ac[i] = '\n';
+                    k = i + 1;
+                    i = 0;
+                    i1 = j1;
+                }
+            }
+        }
+        continue; /* Loop/switch isn't completed */
+_L2:
+        return new char[0];
+        if (true) goto _L4; else goto _L3
+_L3:
+        byte byte0 = abyte0[k2];
+        int j;
+        if (k != 2)
+        {
+            j = ((flag1) ? 1 : 0);
+        } else
+        {
+            j = (abyte0[l - 1] & 0xff) << 2;
+        }
+        j = (byte0 & 0xff) << 10 | j;
+        ac[j2 - 4] = CA[j >> 12];
+        ac[j2 - 3] = CA[j >>> 6 & 0x3f];
+        if (k != 2)
+        {
+            j = 61;
+        } else
+        {
+            j = CA[j & 0x3f];
+        }
+        ac[j2 - 2] = (char)j;
+        ac[j2 - 1] = '=';
+        return ac;
+    }
+
+    public static final String encodeToString(byte abyte0[], boolean flag)
+    {
+        return new String(encodeToChar(abyte0, flag));
+    }
+
+    static 
+    {
+        CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
+        IA = new int[256];
         Arrays.fill(IA, -1);
-        int length = CA.length;
-        for (int i = 0; i < length; i++) {
+        int j = CA.length;
+        int i = 0;
+        do
+        {
+            if (i >= j)
+            {
+                IA[61] = 0;
+                return;
+            }
             IA[CA[i]] = i;
-        }
-        IA[61] = 0;
-    }
-
-    public static final byte[] decode(String str) {
-        int length = str == null ? 0 : str.length();
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i = 0;
-        for (int i2 = 0; i2 < length; i2++) {
-            if (IA[str.charAt(i2)] < 0) {
-                i++;
-            }
-        }
-        if ((length - i) % 4 != 0) {
-            return null;
-        }
-        int i3 = length;
-        int i4 = 0;
-        while (i3 > 1) {
-            i3--;
-            if (IA[str.charAt(i3)] > 0) {
-                break;
-            } else if (str.charAt(i3) == '=') {
-                i4++;
-            }
-        }
-        int i5 = (((length - i) * 6) >> 3) - i4;
-        byte[] bArr = new byte[i5];
-        int i6 = 0;
-        int i7 = 0;
-        while (i6 < i5) {
-            int i8 = 0;
-            int i9 = i7;
-            int i10 = 0;
-            while (i10 < 4) {
-                int i11 = i9 + 1;
-                int i12 = IA[str.charAt(i9)];
-                if (i12 < 0) {
-                    i10--;
-                } else {
-                    i8 |= i12 << (18 - (i10 * 6));
-                }
-                i10++;
-                i9 = i11;
-            }
-            int i13 = i6 + 1;
-            bArr[i6] = (byte) ((byte) (i8 >> 16));
-            if (i13 < i5) {
-                int i14 = i13 + 1;
-                bArr[i13] = (byte) ((byte) (i8 >> 8));
-                if (i14 >= i5) {
-                    i13 = i14;
-                } else {
-                    i13 = i14 + 1;
-                    bArr[i14] = (byte) ((byte) i8);
-                }
-            }
-            i6 = i13;
-            i7 = i9;
-        }
-        return bArr;
-    }
-
-    public static final byte[] decode(byte[] bArr) {
-        int i = 0;
-        for (byte b : bArr) {
-            if (IA[b & UnsignedBytes.MAX_VALUE] < 0) {
-                i++;
-            }
-        }
-        if ((r2 - i) % 4 != 0) {
-            return null;
-        }
-        int i2 = r2;
-        int i3 = 0;
-        while (i2 > 1) {
-            i2--;
-            if (IA[bArr[i2] & UnsignedBytes.MAX_VALUE] > 0) {
-                break;
-            } else if (bArr[i2] == 61) {
-                i3++;
-            }
-        }
-        int i4 = (((r2 - i) * 6) >> 3) - i3;
-        byte[] bArr2 = new byte[i4];
-        int i5 = 0;
-        int i6 = 0;
-        while (i5 < i4) {
-            int i7 = 0;
-            int i8 = i6;
-            int i9 = 0;
-            while (i9 < 4) {
-                int i10 = i8 + 1;
-                int i11 = IA[bArr[i8] & UnsignedBytes.MAX_VALUE];
-                if (i11 < 0) {
-                    i9--;
-                } else {
-                    i7 |= i11 << (18 - (i9 * 6));
-                }
-                i9++;
-                i8 = i10;
-            }
-            int i12 = i5 + 1;
-            bArr2[i5] = (byte) ((byte) (i7 >> 16));
-            if (i12 < i4) {
-                int i13 = i12 + 1;
-                bArr2[i12] = (byte) ((byte) (i7 >> 8));
-                if (i13 >= i4) {
-                    i12 = i13;
-                } else {
-                    i12 = i13 + 1;
-                    bArr2[i13] = (byte) ((byte) i7);
-                }
-            }
-            i5 = i12;
-            i6 = i8;
-        }
-        return bArr2;
-    }
-
-    public static final byte[] decode(char[] cArr) {
-        int length = cArr == null ? 0 : cArr.length;
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i = 0;
-        for (int i2 = 0; i2 < length; i2++) {
-            if (IA[cArr[i2]] < 0) {
-                i++;
-            }
-        }
-        if ((length - i) % 4 != 0) {
-            return null;
-        }
-        int i3 = length;
-        int i4 = 0;
-        while (i3 > 1) {
-            i3--;
-            if (IA[cArr[i3]] > 0) {
-                break;
-            } else if (cArr[i3] == '=') {
-                i4++;
-            }
-        }
-        int i5 = (((length - i) * 6) >> 3) - i4;
-        byte[] bArr = new byte[i5];
-        int i6 = 0;
-        int i7 = 0;
-        while (i6 < i5) {
-            int i8 = 0;
-            int i9 = i7;
-            int i10 = 0;
-            while (i10 < 4) {
-                int i11 = i9 + 1;
-                int i12 = IA[cArr[i9]];
-                if (i12 < 0) {
-                    i10--;
-                } else {
-                    i8 |= i12 << (18 - (i10 * 6));
-                }
-                i10++;
-                i9 = i11;
-            }
-            int i13 = i6 + 1;
-            bArr[i6] = (byte) ((byte) (i8 >> 16));
-            if (i13 < i5) {
-                int i14 = i13 + 1;
-                bArr[i13] = (byte) ((byte) (i8 >> 8));
-                if (i14 >= i5) {
-                    i13 = i14;
-                } else {
-                    i13 = i14 + 1;
-                    bArr[i14] = (byte) ((byte) i8);
-                }
-            }
-            i6 = i13;
-            i7 = i9;
-        }
-        return bArr;
-    }
-
-    public static final byte[] decodeFast(String str) {
-        int i;
-        int i2;
-        int i3 = 0;
-        int length = str.length();
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i4 = length - 1;
-        int i5 = 0;
-        while (i < i4 && IA[str.charAt(i) & 255] < 0) {
-            i5 = i + 1;
-        }
-        int i6 = i4;
-        while (i6 > 0 && IA[str.charAt(i6) & 255] < 0) {
-            i6--;
-        }
-        int i7 = str.charAt(i6) != '=' ? 0 : str.charAt(i6 + -1) != '=' ? 1 : 2;
-        int i8 = (i6 - i) + 1;
-        if (length <= 76) {
-            i2 = 0;
-        } else {
-            i2 = (str.charAt(76) != 13 ? 0 : i8 / 78) << 1;
-        }
-        int i9 = (((i8 - i2) * 6) >> 3) - i7;
-        byte[] bArr = new byte[i9];
-        int i10 = (i9 / 3) * 3;
-        int i11 = 0;
-        int i12 = 0;
-        while (i12 < i10) {
-            int i13 = i + 1;
-            int i14 = i13 + 1;
-            int i15 = (IA[str.charAt(i)] << 18) | (IA[str.charAt(i13)] << 12);
-            int i16 = i14 + 1;
-            int i17 = (IA[str.charAt(i14)] << 6) | i15;
-            i = i16 + 1;
-            int i18 = i17 | IA[str.charAt(i16)];
-            int i19 = i12 + 1;
-            bArr[i12] = (byte) ((byte) (i18 >> 16));
-            int i20 = i19 + 1;
-            bArr[i19] = (byte) ((byte) (i18 >> 8));
-            i12 = i20 + 1;
-            bArr[i20] = (byte) ((byte) i18);
-            if (i2 > 0 && (i11 = i11 + 1) == 19) {
-                i += 2;
-                i11 = 0;
-            }
-        }
-        if (i12 < i9) {
-            int i21 = 0;
-            while (true) {
-                int i22 = i;
-                if (i22 > i6 - i7) {
-                    break;
-                }
-                i = i22 + 1;
-                i3++;
-                i21 = (IA[str.charAt(i22)] << (18 - (i3 * 6))) | i21;
-            }
-            int i23 = 16;
-            for (int i24 = i12; i24 < i9; i24++) {
-                bArr[i24] = (byte) ((byte) (i21 >> i23));
-                i23 -= 8;
-            }
-        }
-        return bArr;
-    }
-
-    public static final byte[] decodeFast(byte[] bArr) {
-        int i;
-        int i2;
-        int i3 = 0;
-        int length = bArr.length;
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i4 = length - 1;
-        int i5 = 0;
-        while (i < i4 && IA[bArr[i] & UnsignedBytes.MAX_VALUE] < 0) {
-            i5 = i + 1;
-        }
-        int i6 = i4;
-        while (i6 > 0 && IA[bArr[i6] & UnsignedBytes.MAX_VALUE] < 0) {
-            i6--;
-        }
-        int i7 = bArr[i6] != 61 ? 0 : bArr[i6 + -1] != 61 ? 1 : 2;
-        int i8 = (i6 - i) + 1;
-        if (length <= 76) {
-            i2 = 0;
-        } else {
-            i2 = (bArr[76] != 13 ? 0 : i8 / 78) << 1;
-        }
-        int i9 = (((i8 - i2) * 6) >> 3) - i7;
-        byte[] bArr2 = new byte[i9];
-        int i10 = (i9 / 3) * 3;
-        int i11 = 0;
-        int i12 = 0;
-        while (i12 < i10) {
-            int i13 = i + 1;
-            int i14 = i13 + 1;
-            int i15 = (IA[bArr[i]] << 18) | (IA[bArr[i13]] << 12);
-            int i16 = i14 + 1;
-            int i17 = (IA[bArr[i14]] << 6) | i15;
-            i = i16 + 1;
-            int i18 = i17 | IA[bArr[i16]];
-            int i19 = i12 + 1;
-            bArr2[i12] = (byte) ((byte) (i18 >> 16));
-            int i20 = i19 + 1;
-            bArr2[i19] = (byte) ((byte) (i18 >> 8));
-            i12 = i20 + 1;
-            bArr2[i20] = (byte) ((byte) i18);
-            if (i2 > 0 && (i11 = i11 + 1) == 19) {
-                i += 2;
-                i11 = 0;
-            }
-        }
-        if (i12 < i9) {
-            int i21 = 0;
-            while (true) {
-                int i22 = i;
-                if (i22 > i6 - i7) {
-                    break;
-                }
-                i = i22 + 1;
-                i3++;
-                i21 = (IA[bArr[i22]] << (18 - (i3 * 6))) | i21;
-            }
-            int i23 = 16;
-            for (int i24 = i12; i24 < i9; i24++) {
-                bArr2[i24] = (byte) ((byte) (i21 >> i23));
-                i23 -= 8;
-            }
-        }
-        return bArr2;
-    }
-
-    public static final byte[] decodeFast(char[] cArr) {
-        int i;
-        int i2;
-        int i3 = 0;
-        int length = cArr.length;
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i4 = length - 1;
-        int i5 = 0;
-        while (i < i4 && IA[cArr[i]] < 0) {
-            i5 = i + 1;
-        }
-        int i6 = i4;
-        while (i6 > 0 && IA[cArr[i6]] < 0) {
-            i6--;
-        }
-        int i7 = cArr[i6] != '=' ? 0 : cArr[i6 + -1] != '=' ? 1 : 2;
-        int i8 = (i6 - i) + 1;
-        if (length <= 76) {
-            i2 = 0;
-        } else {
-            i2 = (cArr[76] != 13 ? 0 : i8 / 78) << 1;
-        }
-        int i9 = (((i8 - i2) * 6) >> 3) - i7;
-        byte[] bArr = new byte[i9];
-        int i10 = (i9 / 3) * 3;
-        int i11 = 0;
-        int i12 = 0;
-        while (i12 < i10) {
-            int i13 = i + 1;
-            int i14 = i13 + 1;
-            int i15 = (IA[cArr[i]] << 18) | (IA[cArr[i13]] << 12);
-            int i16 = i14 + 1;
-            int i17 = (IA[cArr[i14]] << 6) | i15;
-            i = i16 + 1;
-            int i18 = i17 | IA[cArr[i16]];
-            int i19 = i12 + 1;
-            bArr[i12] = (byte) ((byte) (i18 >> 16));
-            int i20 = i19 + 1;
-            bArr[i19] = (byte) ((byte) (i18 >> 8));
-            i12 = i20 + 1;
-            bArr[i20] = (byte) ((byte) i18);
-            if (i2 > 0 && (i11 = i11 + 1) == 19) {
-                i += 2;
-                i11 = 0;
-            }
-        }
-        if (i12 < i9) {
-            int i21 = 0;
-            while (true) {
-                int i22 = i;
-                if (i22 > i6 - i7) {
-                    break;
-                }
-                i = i22 + 1;
-                i3++;
-                i21 = (IA[cArr[i22]] << (18 - (i3 * 6))) | i21;
-            }
-            int i23 = 16;
-            for (int i24 = i12; i24 < i9; i24++) {
-                bArr[i24] = (byte) ((byte) (i21 >> i23));
-                i23 -= 8;
-            }
-        }
-        return bArr;
-    }
-
-    public static final byte[] encodeToByte(byte[] bArr, boolean z) {
-        int i = 0;
-        int length = bArr == null ? 0 : bArr.length;
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i2 = (length / 3) * 3;
-        int i3 = (((length - 1) / 3) + 1) << 2;
-        int i4 = i3 + (!z ? 0 : ((i3 - 1) / 76) << 1);
-        byte[] bArr2 = new byte[i4];
-        int i5 = 0;
-        int i6 = 0;
-        int i7 = 0;
-        while (i7 < i2) {
-            int i8 = i7 + 1;
-            int i9 = i8 + 1;
-            byte b = ((bArr[i8] & UnsignedBytes.MAX_VALUE) << 8) | ((bArr[i7] & UnsignedBytes.MAX_VALUE) << 16);
-            i7 = i9 + 1;
-            byte b2 = b | (bArr[i9] & UnsignedBytes.MAX_VALUE);
-            int i10 = i6 + 1;
-            bArr2[i6] = (byte) ((byte) CA[(b2 >>> Ascii.DC2) & 63]);
-            int i11 = i10 + 1;
-            bArr2[i10] = (byte) ((byte) CA[(b2 >>> Ascii.FF) & 63]);
-            int i12 = i11 + 1;
-            bArr2[i11] = (byte) ((byte) CA[(b2 >>> 6) & 63]);
-            i6 = i12 + 1;
-            bArr2[i12] = (byte) ((byte) CA[b2 & 63]);
-            if (z && (i5 = i5 + 1) == 19 && i6 < i4 - 2) {
-                int i13 = i6 + 1;
-                bArr2[i6] = Ascii.CR;
-                bArr2[i13] = 10;
-                i6 = i13 + 1;
-                i5 = 0;
-            }
-        }
-        int i14 = length - i2;
-        if (i14 > 0) {
-            int i15 = (bArr[i2] & UnsignedBytes.MAX_VALUE) << 10;
-            if (i14 == 2) {
-                i = (bArr[length - 1] & UnsignedBytes.MAX_VALUE) << 2;
-            }
-            int i16 = i15 | i;
-            bArr2[i4 - 4] = (byte) ((byte) CA[i16 >> 12]);
-            bArr2[i4 - 3] = (byte) ((byte) CA[(i16 >>> 6) & 63]);
-            bArr2[i4 - 2] = (byte) (i14 != 2 ? 61 : (byte) CA[i16 & 63]);
-            bArr2[i4 - 1] = 61;
-        }
-        return bArr2;
-    }
-
-    public static final char[] encodeToChar(byte[] bArr, boolean z) {
-        int i = 0;
-        int length = bArr == null ? 0 : bArr.length;
-        if (length == 0) {
-            return new char[0];
-        }
-        int i2 = (length / 3) * 3;
-        int i3 = (((length - 1) / 3) + 1) << 2;
-        int i4 = i3 + (!z ? 0 : ((i3 - 1) / 76) << 1);
-        char[] cArr = new char[i4];
-        int i5 = 0;
-        int i6 = 0;
-        int i7 = 0;
-        while (i7 < i2) {
-            int i8 = i7 + 1;
-            int i9 = i8 + 1;
-            byte b = ((bArr[i8] & UnsignedBytes.MAX_VALUE) << 8) | ((bArr[i7] & UnsignedBytes.MAX_VALUE) << 16);
-            i7 = i9 + 1;
-            byte b2 = b | (bArr[i9] & UnsignedBytes.MAX_VALUE);
-            int i10 = i6 + 1;
-            cArr[i6] = (char) CA[(b2 >>> Ascii.DC2) & 63];
-            int i11 = i10 + 1;
-            cArr[i10] = (char) CA[(b2 >>> Ascii.FF) & 63];
-            int i12 = i11 + 1;
-            cArr[i11] = (char) CA[(b2 >>> 6) & 63];
-            i6 = i12 + 1;
-            cArr[i12] = (char) CA[b2 & 63];
-            if (z && (i5 = i5 + 1) == 19 && i6 < i4 - 2) {
-                int i13 = i6 + 1;
-                cArr[i6] = 13;
-                cArr[i13] = 10;
-                i6 = i13 + 1;
-                i5 = 0;
-            }
-        }
-        int i14 = length - i2;
-        if (i14 > 0) {
-            int i15 = (bArr[i2] & UnsignedBytes.MAX_VALUE) << 10;
-            if (i14 == 2) {
-                i = (bArr[length - 1] & UnsignedBytes.MAX_VALUE) << 2;
-            }
-            int i16 = i15 | i;
-            cArr[i4 - 4] = (char) CA[i16 >> 12];
-            cArr[i4 - 3] = (char) CA[(i16 >>> 6) & 63];
-            cArr[i4 - 2] = (char) (i14 != 2 ? '=' : CA[i16 & 63]);
-            cArr[i4 - 1] = '=';
-        }
-        return cArr;
-    }
-
-    public static final String encodeToString(byte[] bArr, boolean z) {
-        return new String(encodeToChar(bArr, z));
+            i++;
+        } while (true);
     }
 }

@@ -1,41 +1,60 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.shaders;
 
 import android.opengl.GLES20;
 import com.lumiyaviewer.lumiya.Debug;
 
-abstract class ShaderProgram {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.shaders:
+//            ShaderCompileException, Shader, ShaderPreprocessor
+
+abstract class ShaderProgram
+{
+
     private final Shader fragmentShader;
     protected int handle;
     private final Shader vertexShader;
 
-    ShaderProgram(Shader shader, Shader shader2) {
-        this.vertexShader = shader;
-        this.fragmentShader = shader2;
+    ShaderProgram(Shader shader, Shader shader1)
+    {
+        vertexShader = shader;
+        fragmentShader = shader1;
     }
 
-    public int Compile(ShaderPreprocessor shaderPreprocessor) throws ShaderCompileException {
-        this.vertexShader.Compile(shaderPreprocessor);
-        this.fragmentShader.Compile(shaderPreprocessor);
+    public int Compile(ShaderPreprocessor shaderpreprocessor)
+        throws ShaderCompileException
+    {
+        vertexShader.Compile(shaderpreprocessor);
+        fragmentShader.Compile(shaderpreprocessor);
         Debug.Printf("Shaders: Linking...", new Object[0]);
-        this.handle = GLES20.glCreateProgram();
-        GLES20.glAttachShader(this.handle, this.vertexShader.getHandle());
-        GLES20.glAttachShader(this.handle, this.fragmentShader.getHandle());
-        GLES20.glLinkProgram(this.handle);
-        int[] iArr = new int[1];
-        GLES20.glGetProgramiv(this.handle, 35714, iArr, 0);
-        if (iArr[0] != 1) {
-            throw new ShaderCompileException(String.format("Shader link error: '%s'", new Object[]{GLES20.glGetProgramInfoLog(this.handle)}));
+        handle = GLES20.glCreateProgram();
+        GLES20.glAttachShader(handle, vertexShader.getHandle());
+        GLES20.glAttachShader(handle, fragmentShader.getHandle());
+        GLES20.glLinkProgram(handle);
+        shaderpreprocessor = new int[1];
+        GLES20.glGetProgramiv(handle, 35714, shaderpreprocessor, 0);
+        if (shaderpreprocessor[0] != 1)
+        {
+            throw new ShaderCompileException(String.format("Shader link error: '%s'", new Object[] {
+                GLES20.glGetProgramInfoLog(handle)
+            }));
+        } else
+        {
+            Debug.Printf("Shaders: Binding variables...", new Object[0]);
+            bindVariables();
+            Debug.Printf("Shaders: Compiled, handle %d", new Object[] {
+                Integer.valueOf(handle)
+            });
+            return handle;
         }
-        Debug.Printf("Shaders: Binding variables...", new Object[0]);
-        bindVariables();
-        Debug.Printf("Shaders: Compiled, handle %d", Integer.valueOf(this.handle));
-        return this.handle;
     }
 
-    /* access modifiers changed from: protected */
-    public abstract void bindVariables();
+    protected abstract void bindVariables();
 
-    public int getHandle() {
-        return this.handle;
+    public int getHandle()
+    {
+        return handle;
     }
 }

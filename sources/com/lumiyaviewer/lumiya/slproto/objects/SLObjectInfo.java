@@ -1,10 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.objects;
 
 import android.opengl.Matrix;
-import com.google.common.base.Ascii;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.google.common.primitives.UnsignedBytes;
+import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.render.DrawableObject;
 import com.lumiyaviewer.lumiya.render.MatrixStack;
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar;
@@ -13,10 +16,6 @@ import com.lumiyaviewer.lumiya.render.spatial.DrawListPrimEntry;
 import com.lumiyaviewer.lumiya.render.spatial.SpatialIndex;
 import com.lumiyaviewer.lumiya.render.spatial.SpatialObjectIndex;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
-import com.lumiyaviewer.lumiya.slproto.messages.ImprovedTerseObjectUpdate;
-import com.lumiyaviewer.lumiya.slproto.messages.ObjectProperties;
-import com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate;
-import com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed;
 import com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams;
 import com.lumiyaviewer.lumiya.slproto.prims.PrimParamsPool;
 import com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams;
@@ -28,23 +27,30 @@ import com.lumiyaviewer.lumiya.utils.Identifiable;
 import com.lumiyaviewer.lumiya.utils.IdentityMatrix;
 import com.lumiyaviewer.lumiya.utils.LinkedTreeNode;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public abstract class SLObjectInfo implements Identifiable<UUID> {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.objects:
+//            UnsupportedObjectTypeException, SLObjectPrimInfo, SLObjectAvatarInfo, HoverText, 
+//            PayInfo
+
+public abstract class SLObjectInfo
+    implements Identifiable
+{
+
     private static final int AGENT_ATTACH_MASK = 240;
     private static final int AGENT_ATTACH_OFFSET = 4;
-    public static final int FLAGS_ALLOW_INVENTORY_DROP = 65536;
-    public static final int FLAGS_ANIM_SOURCE = 2097152;
-    public static final int FLAGS_CAMERA_DECOUPLED = 1048576;
-    public static final int FLAGS_CAMERA_SOURCE = 4194304;
-    public static final int FLAGS_CAST_SHADOWS = 8388608;
+    public static final int FLAGS_ALLOW_INVENTORY_DROP = 0x10000;
+    public static final int FLAGS_ANIM_SOURCE = 0x200000;
+    public static final int FLAGS_CAMERA_DECOUPLED = 0x100000;
+    public static final int FLAGS_CAMERA_SOURCE = 0x400000;
+    public static final int FLAGS_CAST_SHADOWS = 0x800000;
     public static final int FLAGS_CREATE_SELECTED = 2;
     public static final int FLAGS_HANDLE_TOUCH = 128;
     public static final int FLAGS_INCLUDE_IN_SEARCH = 32768;
@@ -54,19 +60,19 @@ public abstract class SLObjectInfo implements Identifiable<UUID> {
     public static final int FLAGS_JOINT_P2P = 8192;
     public static final int FLAGS_OBJECT_ANY_OWNER = 16;
     public static final int FLAGS_OBJECT_COPY = 8;
-    public static final int FLAGS_OBJECT_GROUP_OWNED = 262144;
+    public static final int FLAGS_OBJECT_GROUP_OWNED = 0x40000;
     public static final int FLAGS_OBJECT_MODIFY = 4;
     public static final int FLAGS_OBJECT_MOVE = 256;
-    public static final int FLAGS_OBJECT_OWNER_MODIFY = 268435456;
-    public static final int FLAGS_OBJECT_TRANSFER = 131072;
+    public static final int FLAGS_OBJECT_OWNER_MODIFY = 0x10000000;
+    public static final int FLAGS_OBJECT_TRANSFER = 0x20000;
     public static final int FLAGS_OBJECT_YOU_OWNER = 32;
     public static final int FLAGS_PHANTOM = 1024;
     public static final int FLAGS_SCRIPTED = 64;
     public static final int FLAGS_TAKES_MONEY = 512;
-    public static final int FLAGS_TEMPORARY = 1073741824;
-    public static final int FLAGS_TEMPORARY_ON_REZ = 536870912;
+    public static final int FLAGS_TEMPORARY = 0x40000000;
+    public static final int FLAGS_TEMPORARY_ON_REZ = 0x20000000;
     public static final int FLAGS_USE_PHYSICS = 1;
-    public static final int FLAGS_ZLIB_COMPRESSED = Integer.MIN_VALUE;
+    public static final int FLAGS_ZLIB_COMPRESSED = 0x80000000;
     public static final int OBJ_COORD_POSITION = 0;
     public static final int OBJ_COORD_SCALE = 1;
     public static final int OBJ_COORD_VELOCITY = 2;
@@ -74,498 +80,536 @@ public abstract class SLObjectInfo implements Identifiable<UUID> {
     public static final int PAY_DEFAULT = -2;
     public static final int PAY_HIDE = -1;
     public int UpdateFlags;
-    public UUID attachedToUUID = null;
-    public int attachmentID = 0;
-    public UUID creatorUUID = null;
-    public String description = "";
-    @Nullable
-    private volatile WeakReference<DrawListObjectEntry> drawListEntry;
-    public int hierLevel = 0;
-    private volatile HoverText hoverText = null;
-    public boolean isAttachment = false;
-    public volatile boolean isDead = false;
+    public UUID attachedToUUID;
+    public int attachmentID;
+    public UUID creatorUUID;
+    public String description;
+    private volatile WeakReference drawListEntry;
+    public int hierLevel;
+    private volatile HoverText hoverText;
+    public boolean isAttachment;
+    public volatile boolean isDead;
     public int localID;
-    public String name = "(loading)";
-    public boolean nameKnown = false;
-    public boolean nameRequested = false;
-    public long nameRequestedAt = 0;
+    public String name;
+    public boolean nameKnown;
+    public boolean nameRequested;
+    public long nameRequestedAt;
     public float objRadius;
     private final Vector3Array objectCoords = new Vector3Array(4);
-    public UUID ownerUUID = null;
-    public int parentID = 0;
-    @Nullable
+    public UUID ownerUUID;
+    public int parentID;
     private PayInfo payInfo;
     private PrimDrawParams primDrawParams;
     private LLQuaternion rotation;
     public int salePrice;
-    public byte saleType = 0;
-    public String touchName = "";
-    public final LinkedTreeNode<SLObjectInfo> treeNode = new LinkedTreeNode<>(this);
+    public byte saleType;
+    public String touchName;
+    public final LinkedTreeNode treeNode = new LinkedTreeNode(this);
     protected UUID uuid;
-    public float[] worldMatrix;
+    public float worldMatrix[];
 
-    private void ParseObjectData(ByteBuffer buffer) {
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
-        int bufferSize = buffer.limit();
-        
-        switch (bufferSize) {
-            case 76:
-                // Skip first 16 bytes for this size
-                buffer.position(buffer.position() + 16);
-                // Fall through to 60 case
-            case 60:
-                // Parse position and scale as float vectors
-                this.objectCoords.set(0, LLVector3.parseFloatVec(buffer));
-                this.objectCoords.set(2, LLVector3.parseFloatVec(buffer));
-                // Skip 12 bytes
-                buffer.position(buffer.position() + 12);
-                // Parse rotation as float quaternion
-                this.rotation = LLQuaternion.parseFloatVec3(buffer);
-                break;
-                
-            case 48:
-                // Skip first 16 bytes for this size
-                buffer.position(buffer.position() + 16);
-                // Fall through to 32 case
-            case 32:
-                // Parse position and scale as U16 vectors with specific ranges
-                this.objectCoords.set(0, LLVector3.parseU16Vec(buffer, -128.0f, 384.0f, -256.0f, 4096.0f));
-                this.objectCoords.set(2, LLVector3.parseU16Vec(buffer, -256.0f, 256.0f, -256.0f, 256.0f));
-                // Skip 6 bytes
-                buffer.position(buffer.position() + 6);
-                // Parse rotation as U16 quaternion
-                this.rotation = LLQuaternion.parseU16Vec3(buffer, -1.0f, 1.0f);
-                break;
-                
-            case 16:
-                // Parse position and scale as U8 vectors with specific ranges
-                this.objectCoords.set(0, LLVector3.parseU8Vec(buffer, 384.0f, 384.0f, -256.0f, 4096.0f));
-                this.objectCoords.set(2, LLVector3.parseU8Vec(buffer, -256.0f, 256.0f, -256.0f, 256.0f));
-                // Skip 3 bytes
-                buffer.position(buffer.position() + 3);
-                // Parse rotation as U8 quaternion
-                this.rotation = LLQuaternion.parseU8Vec3(buffer, -1.0f, 1.0f);
-                break;
-                
-            default:
-                // Unknown buffer size, do nothing
-                break;
-        }
+    public SLObjectInfo()
+    {
+        parentID = 0;
+        name = "(loading)";
+        description = "";
+        touchName = "";
+        attachedToUUID = null;
+        ownerUUID = null;
+        creatorUUID = null;
+        saleType = 0;
+        attachmentID = 0;
+        hoverText = null;
+        isDead = false;
+        isAttachment = false;
+        nameKnown = false;
+        nameRequested = false;
+        nameRequestedAt = 0L;
+        hierLevel = 0;
     }
 
-    private void applyHoverText(@Nullable HoverText hoverText2) {
-        if (!Objects.equal(this.hoverText, hoverText2)) {
-            this.hoverText = hoverText2;
-            DrawableObject drawableObject = getDrawableObject();
-            if (drawableObject != null) {
-                drawableObject.setHoverText(hoverText2);
-            }
-        }
-    }
+    private void ParseObjectData(ByteBuffer bytebuffer)
+    {
+        bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
+        switch (bytebuffer.limit())
+        {
+        default:
+            return;
 
-    private static int attachmentIDFromState(int i) {
-        return (((i & 255) & AGENT_ATTACH_MASK) >> 4) | (((i & 255) & -241) << 4);
-    }
+        case 76: // 'L'
+            bytebuffer.position(bytebuffer.position() + 16);
+            // fall through
 
-    private float[] calculateWorldMatrix(float[] fArr) {
-        LLQuaternion lLQuaternion = this.rotation;
-        if (lLQuaternion == null) {
-            return null;
-        }
-        float[] fArr2 = new float[16];
-        float[] fArr3 = new float[16];
-        this.objectCoords.MatrixTranslate(fArr3, 0, fArr, 0, 0);
-        Matrix.multiplyMM(fArr2, 0, fArr3, 0, lLQuaternion.getInverseMatrix(), 0);
-        return fArr2;
-    }
+        case 60: // '<'
+            objectCoords.set(0, LLVector3.parseFloatVec(bytebuffer));
+            objectCoords.set(2, LLVector3.parseFloatVec(bytebuffer));
+            bytebuffer.position(bytebuffer.position() + 12);
+            rotation = LLQuaternion.parseFloatVec3(bytebuffer);
+            return;
 
-    public static SLObjectInfo create(ObjectUpdateCompressed.ObjectData objectData) throws UnsupportedObjectTypeException {
-        SLObjectPrimInfo sLObjectPrimInfo = new SLObjectPrimInfo();
-        sLObjectPrimInfo.ApplyObjectUpdate(objectData);
-        return sLObjectPrimInfo;
-    }
+        case 48: // '0'
+            bytebuffer.position(bytebuffer.position() + 16);
+            // fall through
 
-    public static SLObjectInfo create(UUID uuid2, ObjectUpdate.ObjectData objectData, UUID uuid3) {
-        SLObjectInfo sLObjectAvatarInfo = objectData.PCode == 47 ? new SLObjectAvatarInfo(uuid2, UUIDPool.getUUID(objectData.FullID), uuid3.equals(objectData.FullID)) : new SLObjectPrimInfo();
-        sLObjectAvatarInfo.ApplyObjectUpdate(objectData);
-        return sLObjectAvatarInfo;
-    }
+        case 32: // ' '
+            objectCoords.set(0, LLVector3.parseU16Vec(bytebuffer, -128F, 384F, -256F, 4096F));
+            objectCoords.set(2, LLVector3.parseU16Vec(bytebuffer, -256F, 256F, -256F, 256F));
+            bytebuffer.position(bytebuffer.position() + 6);
+            rotation = LLQuaternion.parseU16Vec3(bytebuffer, -1F, 1.0F);
+            return;
 
-    @Nullable
-    private DrawableObject getDrawableObject() {
-        DrawListObjectEntry existingDrawListEntry = getExistingDrawListEntry();
-        if (existingDrawListEntry instanceof DrawListPrimEntry) {
-            return ((DrawListPrimEntry) existingDrawListEntry).getDrawableObject();
-        }
-        return null;
-    }
-
-    public static int getLocalID(ImprovedTerseObjectUpdate.ObjectData objectData) {
-        ByteBuffer wrap = ByteBuffer.wrap(objectData.Data);
-        wrap.order(ByteOrder.LITTLE_ENDIAN);
-        return wrap.getInt();
-    }
-
-    public static int getLocalID(ObjectUpdateCompressed.ObjectData objectData) {
-        ByteBuffer wrap = ByteBuffer.wrap(objectData.Data);
-        wrap.position(16);
-        wrap.order(ByteOrder.LITTLE_ENDIAN);
-        return wrap.getInt();
-    }
-
-    private void parseNameValuePairs(String str) {
-        for (String str2 : str.split("\n")) {
-            if (str2.startsWith("AttachItemID ")) {
-                int i = 0;
-                while (i < 4) {
-                    int indexOf = str2.indexOf(32);
-                    if (indexOf >= 0) {
-                        str2 = str2.substring(indexOf + 1);
-                    }
-                    i++;
-                    str2 = str2.trim();
-                }
-                try {
-                    this.attachedToUUID = UUIDPool.getUUID(UUID.fromString(str2));
-                } catch (Exception e) {
-                    this.attachedToUUID = null;
-                }
-            } else if (str2.startsWith("DisplayName ")) {
-                int i2 = 0;
-                while (i2 < 4) {
-                    int indexOf2 = str2.indexOf(32);
-                    if (indexOf2 >= 0) {
-                        str2 = str2.substring(indexOf2 + 1);
-                    }
-                    i2++;
-                    str2 = str2.trim();
-                }
-                this.name = str2;
-                this.nameKnown = true;
-            }
-        }
-    }
-
-    private void updateAttachments() {
-        DrawableAvatar drawableAvatar;
-        if (isAvatar() && (drawableAvatar = SpatialIndex.getInstance().getDrawableAvatar(this)) != null) {
-            drawableAvatar.updateAttachments();
-        }
-    }
-
-    private void updateSpatialIndex(SpatialObjectIndex spatialObjectIndex, boolean z) {
-        updateWorldMatrix(false);
-        if (z) {
-            synchronized (this) {
-                this.drawListEntry = null;
-            }
-        }
-        if (spatialObjectIndex != null && (!this.isDead)) {
-            spatialObjectIndex.updateObject(getDrawListEntry());
-        }
-        if (!isAvatar()) {
-            for (SLObjectInfo updateSpatialIndex : this.treeNode) {
-                updateSpatialIndex.updateSpatialIndex(z);
-            }
+        case 16: // '\020'
+            objectCoords.set(0, LLVector3.parseU8Vec(bytebuffer, 384F, 384F, -256F, 4096F));
+            objectCoords.set(2, LLVector3.parseU8Vec(bytebuffer, -256F, 256F, -256F, 256F));
+            bytebuffer.position(bytebuffer.position() + 3);
+            rotation = LLQuaternion.parseU8Vec3(bytebuffer, -1F, 1.0F);
             return;
         }
-        for (SLObjectInfo updateWorldMatrix : this.treeNode) {
-            updateWorldMatrix.updateWorldMatrix(true);
-        }
     }
 
-    public void ApplyObjectProperties(ObjectProperties.ObjectData objectData) {
-        this.name = SLMessage.stringFromVariableOEM(objectData.Name);
-        this.description = SLMessage.stringFromVariableUTF(objectData.Description);
-        this.touchName = SLMessage.stringFromVariableUTF(objectData.TouchName);
-        this.creatorUUID = objectData.CreatorID;
-        this.ownerUUID = objectData.OwnerID;
-        this.saleType = (byte) objectData.SaleType;
-        this.salePrice = objectData.SalePrice;
-        this.nameKnown = true;
-        this.nameRequested = false;
-    }
-
-    public void ApplyObjectUpdate(ObjectUpdate.ObjectData objectData) {
-        PrimVolumeParams primVolumeParams = null;
-        this.localID = objectData.ID;
-        this.uuid = UUIDPool.getUUID(objectData.FullID);
-        this.UpdateFlags = objectData.UpdateFlags;
-        this.parentID = objectData.ParentID;
-        this.attachmentID = attachmentIDFromState(objectData.State);
-        if (!(objectData.OwnerID.getLeastSignificantBits() == 0 && objectData.OwnerID.getMostSignificantBits() == 0)) {
-            this.ownerUUID = UUIDPool.getUUID(objectData.OwnerID);
-        }
-        this.objectCoords.set(1, objectData.Scale);
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(objectData.Text);
-        applyHoverText(Strings.isNullOrEmpty(stringFromVariableOEM) ? null : HoverText.create(stringFromVariableOEM, objectData.TextColor.length >= 4 ? (objectData.TextColor[0] & UnsignedBytes.MAX_VALUE) | ((objectData.TextColor[1] << 8) & 65280) | ((objectData.TextColor[2] << 16) & 16711680) | ((objectData.TextColor[3] << Ascii.CAN) & -16777216) : 0));
-        PrimVolumeParams createFromObjectUpdate = PrimVolumeParams.createFromObjectUpdate(objectData);
-        if (!(createFromObjectUpdate == null || objectData.ExtraParams == null)) {
-            createFromObjectUpdate.unpackExtraParams(ByteBuffer.wrap(objectData.ExtraParams).order(ByteOrder.LITTLE_ENDIAN));
-        }
-        ParseObjectData(ByteBuffer.wrap(objectData.ObjectData));
-        if (createFromObjectUpdate != null) {
-            primVolumeParams = PrimParamsPool.get(createFromObjectUpdate);
-        }
-        PrimDrawParams primDrawParams2 = PrimParamsPool.get(new PrimDrawParams(primVolumeParams, SLTextureEntry.create(ByteBuffer.wrap(objectData.TextureEntry), objectData.TextureEntry.length)));
-        onTexturesUpdate(primDrawParams2.getTextures());
-        if (!Objects.equal(this.primDrawParams, primDrawParams2)) {
-            this.primDrawParams = primDrawParams2;
-            DrawableObject drawableObject = getDrawableObject();
-            if (drawableObject != null) {
-                drawableObject.setPrimDrawParams(this.primDrawParams);
+    private void applyHoverText(HoverText hovertext)
+    {
+        if (!Objects.equal(hoverText, hovertext))
+        {
+            hoverText = hovertext;
+            DrawableObject drawableobject = getDrawableObject();
+            if (drawableobject != null)
+            {
+                drawableobject.setHoverText(hovertext);
             }
         }
-        this.primDrawParams = PrimParamsPool.get(primDrawParams2);
-        parseNameValuePairs(SLMessage.stringFromVariableUTF(objectData.NameValue));
+    }
+
+    private static int attachmentIDFromState(int i)
+    {
+        return (i & 0xff & 0xf0) >> 4 | (i & 0xff & 0xffffff0f) << 4;
+    }
+
+    private float[] calculateWorldMatrix(float af[])
+    {
+        LLQuaternion llquaternion = rotation;
+        if (llquaternion != null)
+        {
+            float af1[] = new float[16];
+            float af2[] = new float[16];
+            objectCoords.MatrixTranslate(af2, 0, af, 0, 0);
+            Matrix.multiplyMM(af1, 0, af2, 0, llquaternion.getInverseMatrix(), 0);
+            return af1;
+        } else
+        {
+            return null;
+        }
+    }
+
+    public static SLObjectInfo create(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed.ObjectData objectdata)
+        throws UnsupportedObjectTypeException
+    {
+        SLObjectPrimInfo slobjectpriminfo = new SLObjectPrimInfo();
+        slobjectpriminfo.ApplyObjectUpdate(objectdata);
+        return slobjectpriminfo;
+    }
+
+    public static SLObjectInfo create(UUID uuid1, com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate.ObjectData objectdata, UUID uuid2)
+    {
+        boolean flag;
+        if (objectdata.PCode == 47)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (flag)
+        {
+            uuid1 = new SLObjectAvatarInfo(uuid1, UUIDPool.getUUID(objectdata.FullID), uuid2.equals(objectdata.FullID));
+        } else
+        {
+            uuid1 = new SLObjectPrimInfo();
+        }
+        uuid1.ApplyObjectUpdate(objectdata);
+        return uuid1;
+    }
+
+    private DrawableObject getDrawableObject()
+    {
+        DrawListObjectEntry drawlistobjectentry = getExistingDrawListEntry();
+        if (drawlistobjectentry instanceof DrawListPrimEntry)
+        {
+            return ((DrawListPrimEntry)drawlistobjectentry).getDrawableObject();
+        } else
+        {
+            return null;
+        }
+    }
+
+    public static int getLocalID(com.lumiyaviewer.lumiya.slproto.messages.ImprovedTerseObjectUpdate.ObjectData objectdata)
+    {
+        objectdata = ByteBuffer.wrap(objectdata.Data);
+        objectdata.order(ByteOrder.LITTLE_ENDIAN);
+        return objectdata.getInt();
+    }
+
+    public static int getLocalID(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed.ObjectData objectdata)
+    {
+        objectdata = ByteBuffer.wrap(objectdata.Data);
+        objectdata.position(16);
+        objectdata.order(ByteOrder.LITTLE_ENDIAN);
+        return objectdata.getInt();
+    }
+
+    private void parseNameValuePairs(String s)
+    {
+        String as[] = s.split("\n");
+        int l = as.length;
+        int i = 0;
+        while (i < l) 
+        {
+            s = as[i];
+            if (s.startsWith("AttachItemID "))
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    int i1 = s.indexOf(' ');
+                    String s1 = s;
+                    if (i1 >= 0)
+                    {
+                        s1 = s.substring(i1 + 1);
+                    }
+                    s = s1.trim();
+                }
+
+                try
+                {
+                    attachedToUUID = UUIDPool.getUUID(UUID.fromString(s));
+                }
+                // Misplaced declaration of an exception variable
+                catch (String s)
+                {
+                    attachedToUUID = null;
+                }
+            } else
+            if (s.startsWith("DisplayName "))
+            {
+                for (int k = 0; k < 4; k++)
+                {
+                    int j1 = s.indexOf(' ');
+                    String s2 = s;
+                    if (j1 >= 0)
+                    {
+                        s2 = s.substring(j1 + 1);
+                    }
+                    s = s2.trim();
+                }
+
+                name = s;
+                nameKnown = true;
+            }
+            i++;
+        }
+    }
+
+    private void updateAttachments()
+    {
+        if (isAvatar())
+        {
+            DrawableAvatar drawableavatar = SpatialIndex.getInstance().getDrawableAvatar(this);
+            if (drawableavatar != null)
+            {
+                drawableavatar.updateAttachments();
+            }
+        }
+    }
+
+    private void updateSpatialIndex(SpatialObjectIndex spatialobjectindex, boolean flag)
+    {
+        updateWorldMatrix(false);
+        if (!flag) goto _L2; else goto _L1
+_L1:
+        this;
+        JVM INSTR monitorenter ;
+        drawListEntry = null;
+        this;
+        JVM INSTR monitorexit ;
+_L2:
+        if (spatialobjectindex != null && isDead ^ true)
+        {
+            spatialobjectindex.updateObject(getDrawListEntry());
+        }
+        if (!isAvatar())
+        {
+            for (spatialobjectindex = treeNode.iterator(); spatialobjectindex.hasNext(); ((SLObjectInfo)spatialobjectindex.next()).updateSpatialIndex(flag)) { }
+        } else
+        {
+            for (spatialobjectindex = treeNode.iterator(); spatialobjectindex.hasNext(); ((SLObjectInfo)spatialobjectindex.next()).updateWorldMatrix(true)) { }
+        }
+        break MISSING_BLOCK_LABEL_121;
+        spatialobjectindex;
+        throw spatialobjectindex;
+    }
+
+    public void ApplyObjectProperties(com.lumiyaviewer.lumiya.slproto.messages.ObjectProperties.ObjectData objectdata)
+    {
+        name = SLMessage.stringFromVariableOEM(objectdata.Name);
+        description = SLMessage.stringFromVariableUTF(objectdata.Description);
+        touchName = SLMessage.stringFromVariableUTF(objectdata.TouchName);
+        creatorUUID = objectdata.CreatorID;
+        ownerUUID = objectdata.OwnerID;
+        saleType = (byte)objectdata.SaleType;
+        salePrice = objectdata.SalePrice;
+        nameKnown = true;
+        nameRequested = false;
+    }
+
+    public void ApplyObjectUpdate(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate.ObjectData objectdata)
+    {
+        Object obj1 = null;
+        localID = objectdata.ID;
+        uuid = UUIDPool.getUUID(objectdata.FullID);
+        UpdateFlags = objectdata.UpdateFlags;
+        parentID = objectdata.ParentID;
+        attachmentID = attachmentIDFromState(objectdata.State);
+        if (objectdata.OwnerID.getLeastSignificantBits() != 0L || objectdata.OwnerID.getMostSignificantBits() != 0L)
+        {
+            ownerUUID = UUIDPool.getUUID(objectdata.OwnerID);
+        }
+        objectCoords.set(1, objectdata.Scale);
+        Object obj = SLMessage.stringFromVariableOEM(objectdata.Text);
+        PrimVolumeParams primvolumeparams;
+        int i;
+        if (objectdata.TextColor.length >= 4)
+        {
+            i = objectdata.TextColor[0] & 0xff | objectdata.TextColor[1] << 8 & 0xff00 | objectdata.TextColor[2] << 16 & 0xff0000 | objectdata.TextColor[3] << 24 & 0xff000000;
+        } else
+        {
+            i = 0;
+        }
+        if (Strings.isNullOrEmpty(((String) (obj))))
+        {
+            obj = null;
+        } else
+        {
+            obj = HoverText.create(((String) (obj)), i);
+        }
+        applyHoverText(((HoverText) (obj)));
+        primvolumeparams = PrimVolumeParams.createFromObjectUpdate(objectdata);
+        if (primvolumeparams != null && objectdata.ExtraParams != null)
+        {
+            primvolumeparams.unpackExtraParams(ByteBuffer.wrap(objectdata.ExtraParams).order(ByteOrder.LITTLE_ENDIAN));
+        }
+        ParseObjectData(ByteBuffer.wrap(objectdata.ObjectData));
+        obj = obj1;
+        if (primvolumeparams != null)
+        {
+            obj = PrimParamsPool.get(primvolumeparams);
+        }
+        obj = PrimParamsPool.get(new PrimDrawParams(((PrimVolumeParams) (obj)), SLTextureEntry.create(ByteBuffer.wrap(objectdata.TextureEntry), objectdata.TextureEntry.length)));
+        onTexturesUpdate(((PrimDrawParams) (obj)).getTextures());
+        if (!Objects.equal(primDrawParams, obj))
+        {
+            primDrawParams = ((PrimDrawParams) (obj));
+            DrawableObject drawableobject = getDrawableObject();
+            if (drawableobject != null)
+            {
+                drawableobject.setPrimDrawParams(primDrawParams);
+            }
+        }
+        primDrawParams = PrimParamsPool.get(((PrimDrawParams) (obj)));
+        parseNameValuePairs(SLMessage.stringFromVariableUTF(objectdata.NameValue));
         updateSpatialIndex(false);
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:65:0x017e  */
-    /* JADX WARNING: Removed duplicated region for block: B:68:0x0188  */
-    /* JADX WARNING: Removed duplicated region for block: B:71:0x019b  */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public void ApplyObjectUpdate(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed.ObjectData r13) throws com.lumiyaviewer.lumiya.slproto.objects.UnsupportedObjectTypeException {
-        /*
-            r12 = this;
-            r10 = 0
-            r3 = 0
-            r1 = 0
-            int r0 = r13.UpdateFlags
-            r12.UpdateFlags = r0
-            byte[] r0 = r13.Data
-            java.nio.ByteBuffer r4 = java.nio.ByteBuffer.wrap(r0)
-            java.nio.ByteOrder r0 = java.nio.ByteOrder.BIG_ENDIAN
-            r4.order(r0)
-            long r6 = r4.getLong()
-            long r8 = r4.getLong()
-            java.util.UUID r0 = r12.uuid
-            java.util.UUID r0 = com.lumiyaviewer.lumiya.utils.UUIDPool.setUUID(r0, r6, r8)
-            r12.uuid = r0
-            java.nio.ByteOrder r0 = java.nio.ByteOrder.LITTLE_ENDIAN
-            r4.order(r0)
-            int r0 = r4.getInt()
-            r12.localID = r0
-            byte r0 = r4.get()
-            r2 = 9
-            if (r0 == r2) goto L_0x003c
-            com.lumiyaviewer.lumiya.slproto.objects.UnsupportedObjectTypeException r1 = new com.lumiyaviewer.lumiya.slproto.objects.UnsupportedObjectTypeException
-            r1.<init>(r0)
-            throw r1
-        L_0x003c:
-            byte r0 = r4.get()
-            int r0 = attachmentIDFromState(r0)
-            r12.attachmentID = r0
-            int r0 = r4.position()
-            int r0 = r0 + 4
-            int r0 = r0 + 1
-            int r0 = r0 + 1
-            r4.position(r0)
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r0 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r4)
-            com.lumiyaviewer.lumiya.slproto.types.LLVector3 r2 = com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r4)
-            com.lumiyaviewer.lumiya.slproto.types.Vector3Array r5 = r12.objectCoords
-            r6 = 1
-            r5.set(r6, r0)
-            com.lumiyaviewer.lumiya.slproto.types.Vector3Array r0 = r12.objectCoords
-            r0.set(r1, r2)
-            com.lumiyaviewer.lumiya.slproto.types.LLQuaternion r0 = com.lumiyaviewer.lumiya.slproto.types.LLQuaternion.parseFloatVec3(r4)
-            r12.rotation = r0
-            int r5 = r4.getInt()
-            java.nio.ByteOrder r0 = java.nio.ByteOrder.BIG_ENDIAN
-            r4.order(r0)
-            long r6 = r4.getLong()
-            long r8 = r4.getLong()
-            java.util.UUID r0 = r12.ownerUUID
-            if (r0 == 0) goto L_0x0089
-            int r0 = (r6 > r10 ? 1 : (r6 == r10 ? 0 : -1))
-            if (r0 == 0) goto L_0x0091
-            int r0 = (r8 > r10 ? 1 : (r8 == r10 ? 0 : -1))
-            if (r0 == 0) goto L_0x0091
-        L_0x0089:
-            java.util.UUID r0 = r12.ownerUUID
-            java.util.UUID r0 = com.lumiyaviewer.lumiya.utils.UUIDPool.setUUID(r0, r6, r8)
-            r12.ownerUUID = r0
-        L_0x0091:
-            java.nio.ByteOrder r0 = java.nio.ByteOrder.LITTLE_ENDIAN
-            r4.order(r0)
-            r0 = r5 & 128(0x80, float:1.794E-43)
-            if (r0 == 0) goto L_0x00a3
-            int r0 = r4.position()
-            int r0 = r0 + 12
-            r4.position(r0)
-        L_0x00a3:
-            r0 = r5 & 32
-            if (r0 == 0) goto L_0x00ad
-            int r0 = r4.getInt()
-            r12.parentID = r0
-        L_0x00ad:
-            r0 = r5 & 2
-            if (r0 == 0) goto L_0x012c
-            int r0 = r4.position()
-            int r0 = r0 + 1
-            r4.position(r0)
-        L_0x00ba:
-            r0 = r5 & 4
-            if (r0 == 0) goto L_0x00f6
-            int r6 = r4.position()
-            r0 = r1
-        L_0x00c3:
-            int r2 = r6 + r0
-            int r7 = r4.capacity()
-            if (r2 >= r7) goto L_0x00d3
-            int r2 = r6 + r0
-            byte r2 = r4.get(r2)
-            if (r2 != 0) goto L_0x013e
-        L_0x00d3:
-            if (r0 == 0) goto L_0x01b7
-            byte[] r7 = new byte[r0]
-            r4.get(r7, r1, r0)
-            java.lang.String r2 = new java.lang.String     // Catch:{ UnsupportedEncodingException -> 0x0141 }
-            java.lang.String r8 = "ISO-8859-1"
-            r2.<init>(r7, r8)     // Catch:{ UnsupportedEncodingException -> 0x0141 }
-        L_0x00e2:
-            int r0 = r0 + r6
-            int r0 = r0 + 1
-            r4.position(r0)
-            int r0 = r4.getInt()
-            boolean r6 = com.google.common.base.Strings.isNullOrEmpty(r2)
-            if (r6 == 0) goto L_0x0144
-            r0 = r3
-        L_0x00f3:
-            r12.applyHoverText(r0)
-        L_0x00f6:
-            r0 = r5 & 512(0x200, float:7.175E-43)
-            if (r0 == 0) goto L_0x0100
-        L_0x00fa:
-            byte r0 = r4.get()
-            if (r0 != 0) goto L_0x00fa
-        L_0x0100:
-            r0 = r5 & 8
-            if (r0 == 0) goto L_0x010d
-            int r0 = r4.position()
-            int r0 = r0 + 86
-            r4.position(r0)
-        L_0x010d:
-            int r2 = r4.position()
-            byte r0 = r4.get()
-            r6 = r0 & 255(0xff, float:3.57E-43)
-            r0 = r1
-        L_0x0118:
-            if (r0 >= r6) goto L_0x0149
-            r4.getShort()
-            int r7 = r4.getInt()
-            int r8 = r4.position()
-            int r7 = r7 + r8
-            r4.position(r7)
-            int r0 = r0 + 1
-            goto L_0x0118
-        L_0x012c:
-            r0 = r5 & 1
-            if (r0 == 0) goto L_0x00ba
-            byte r0 = r4.get()
-            int r2 = r4.position()
-            int r0 = r0 + r2
-            r4.position(r0)
-            goto L_0x00ba
-        L_0x013e:
-            int r0 = r0 + 1
-            goto L_0x00c3
-        L_0x0141:
-            r2 = move-exception
-            r2 = r3
-            goto L_0x00e2
-        L_0x0144:
-            com.lumiyaviewer.lumiya.slproto.objects.HoverText r0 = com.lumiyaviewer.lumiya.slproto.objects.HoverText.create(r2, r0)
-            goto L_0x00f3
-        L_0x0149:
-            r0 = r5 & 16
-            if (r0 == 0) goto L_0x0163
-            int r0 = r4.position()
-            int r0 = r0 + 16
-            r4.position(r0)
-            int r0 = r4.position()
-            int r0 = r0 + 4
-            int r0 = r0 + 1
-            int r0 = r0 + 4
-            r4.position(r0)
-        L_0x0163:
-            r0 = r5 & 256(0x100, float:3.59E-43)
-            if (r0 == 0) goto L_0x016d
-        L_0x0167:
-            byte r0 = r4.get()
-            if (r0 != 0) goto L_0x0167
-        L_0x016d:
-            com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams r5 = com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams.createFromPackedData(r4)
-            int r0 = r4.getInt()     // Catch:{ Exception -> 0x01ac }
-            com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry r0 = com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry.create((java.nio.ByteBuffer) r4, (int) r0)     // Catch:{ Exception -> 0x01ac }
-            r12.onTexturesUpdate(r0)     // Catch:{ Exception -> 0x01b5 }
-        L_0x017c:
-            if (r5 == 0) goto L_0x0184
-            r4.position(r2)
-            r5.unpackExtraParams(r4)
-        L_0x0184:
-            com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams r2 = new com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams
-            if (r5 == 0) goto L_0x018c
-            com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams r3 = com.lumiyaviewer.lumiya.slproto.prims.PrimParamsPool.get((com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams) r5)
-        L_0x018c:
-            r2.<init>(r3, r0)
-            com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams r0 = com.lumiyaviewer.lumiya.slproto.prims.PrimParamsPool.get((com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams) r2)
-            com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams r2 = r12.primDrawParams
-            boolean r2 = com.google.common.base.Objects.equal(r2, r0)
-            if (r2 != 0) goto L_0x01a8
-            r12.primDrawParams = r0
-            com.lumiyaviewer.lumiya.render.DrawableObject r0 = r12.getDrawableObject()
-            if (r0 == 0) goto L_0x01a8
-            com.lumiyaviewer.lumiya.slproto.prims.PrimDrawParams r2 = r12.primDrawParams
-            r0.setPrimDrawParams(r2)
-        L_0x01a8:
-            r12.updateSpatialIndex(r1)
-            return
-        L_0x01ac:
-            r0 = move-exception
-            r0 = r3
-        L_0x01ae:
-            java.lang.String r6 = "Failed to retrieve textures in compressed update"
-            com.lumiyaviewer.lumiya.Debug.Log(r6)
-            goto L_0x017c
-        L_0x01b5:
-            r6 = move-exception
-            goto L_0x01ae
-        L_0x01b7:
-            r2 = r3
-            goto L_0x00e2
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo.ApplyObjectUpdate(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed$ObjectData):void");
+    public void ApplyObjectUpdate(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed.ObjectData objectdata)
+        throws UnsupportedObjectTypeException
+    {
+        PrimVolumeParams primvolumeparams;
+        ByteBuffer bytebuffer;
+        int i;
+        int j;
+        primvolumeparams = null;
+        UpdateFlags = objectdata.UpdateFlags;
+        bytebuffer = ByteBuffer.wrap(objectdata.Data);
+        bytebuffer.order(ByteOrder.BIG_ENDIAN);
+        long l1 = bytebuffer.getLong();
+        long l2 = bytebuffer.getLong();
+        uuid = UUIDPool.setUUID(uuid, l1, l2);
+        bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
+        localID = bytebuffer.getInt();
+        byte byte0 = bytebuffer.get();
+        if (byte0 != 9)
+        {
+            throw new UnsupportedObjectTypeException(byte0);
+        }
+        attachmentID = attachmentIDFromState(bytebuffer.get());
+        bytebuffer.position(bytebuffer.position() + 4 + 1 + 1);
+        objectdata = LLVector3.parseFloatVec(bytebuffer);
+        LLVector3 llvector3 = LLVector3.parseFloatVec(bytebuffer);
+        objectCoords.set(1, objectdata);
+        objectCoords.set(0, llvector3);
+        rotation = LLQuaternion.parseFloatVec3(bytebuffer);
+        j = bytebuffer.getInt();
+        bytebuffer.order(ByteOrder.BIG_ENDIAN);
+        l1 = bytebuffer.getLong();
+        l2 = bytebuffer.getLong();
+        if (ownerUUID == null || l1 != 0L && l2 != 0L)
+        {
+            ownerUUID = UUIDPool.setUUID(ownerUUID, l1, l2);
+        }
+        bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
+        if ((j & 0x80) != 0)
+        {
+            bytebuffer.position(bytebuffer.position() + 12);
+        }
+        if ((j & 0x20) != 0)
+        {
+            parentID = bytebuffer.getInt();
+        }
+        int k;
+        byte byte1;
+        if ((j & 2) != 0)
+        {
+            bytebuffer.position(bytebuffer.position() + 1);
+        } else
+        if ((j & 1) != 0)
+        {
+            bytebuffer.position(bytebuffer.get() + bytebuffer.position());
+        }
+        if ((j & 4) == 0) goto _L2; else goto _L1
+_L1:
+        k = bytebuffer.position();
+        i = 0;
+_L6:
+        if (k + i < bytebuffer.capacity() && bytebuffer.get(k + i) != 0) goto _L4; else goto _L3
+_L3:
+        PrimVolumeParams primvolumeparams1;
+        Exception exception;
+        int l;
+        if (i != 0)
+        {
+            objectdata = new byte[i];
+            bytebuffer.get(objectdata, 0, i);
+            try
+            {
+                objectdata = new String(objectdata, "ISO-8859-1");
+            }
+            // Misplaced declaration of an exception variable
+            catch (com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed.ObjectData objectdata)
+            {
+                objectdata = null;
+            }
+        } else
+        {
+            objectdata = null;
+        }
+        bytebuffer.position(i + k + 1);
+        i = bytebuffer.getInt();
+        if (Strings.isNullOrEmpty(objectdata))
+        {
+            objectdata = null;
+        } else
+        {
+            objectdata = HoverText.create(objectdata, i);
+        }
+        applyHoverText(objectdata);
+_L2:
+        if ((j & 0x200) != 0)
+        {
+            while (bytebuffer.get() != 0) ;
+        }
+        if ((j & 8) != 0)
+        {
+            bytebuffer.position(bytebuffer.position() + 86);
+        }
+        l = bytebuffer.position();
+        byte1 = bytebuffer.get();
+        for (i = 0; i < (byte1 & 0xff); i++)
+        {
+            bytebuffer.getShort();
+            bytebuffer.position(bytebuffer.getInt() + bytebuffer.position());
+        }
+
+        break; /* Loop/switch isn't completed */
+_L4:
+        i++;
+        if (true) goto _L6; else goto _L5
+_L5:
+        if ((j & 0x10) != 0)
+        {
+            bytebuffer.position(bytebuffer.position() + 16);
+            bytebuffer.position(bytebuffer.position() + 4 + 1 + 4);
+        }
+        if ((j & 0x100) != 0)
+        {
+            while (bytebuffer.get() != 0) ;
+        }
+        primvolumeparams1 = PrimVolumeParams.createFromPackedData(bytebuffer);
+        objectdata = SLTextureEntry.create(bytebuffer, bytebuffer.getInt());
+        onTexturesUpdate(objectdata);
+_L8:
+        if (primvolumeparams1 != null)
+        {
+            bytebuffer.position(l);
+            primvolumeparams1.unpackExtraParams(bytebuffer);
+        }
+        if (primvolumeparams1 != null)
+        {
+            primvolumeparams = PrimParamsPool.get(primvolumeparams1);
+        }
+        objectdata = PrimParamsPool.get(new PrimDrawParams(primvolumeparams, objectdata));
+        if (!Objects.equal(primDrawParams, objectdata))
+        {
+            primDrawParams = objectdata;
+            objectdata = getDrawableObject();
+            if (objectdata != null)
+            {
+                objectdata.setPrimDrawParams(primDrawParams);
+            }
+        }
+        updateSpatialIndex(false);
+        return;
+        objectdata;
+        objectdata = null;
+_L9:
+        Debug.Log("Failed to retrieve textures in compressed update");
+        if (true) goto _L8; else goto _L7
+_L7:
+        exception;
+          goto _L9
     }
 
-    public void ApplyTerseObjectUpdate(ImprovedTerseObjectUpdate.ObjectData objectData) {
-        ByteBuffer wrap = ByteBuffer.wrap(objectData.Data);
-        wrap.order(ByteOrder.LITTLE_ENDIAN);
-        wrap.getInt();
-        this.attachmentID = attachmentIDFromState(wrap.get());
-        if (wrap.get() != 0) {
-            wrap.position(wrap.position() + 16);
+    public void ApplyTerseObjectUpdate(com.lumiyaviewer.lumiya.slproto.messages.ImprovedTerseObjectUpdate.ObjectData objectdata)
+    {
+        ByteBuffer bytebuffer = ByteBuffer.wrap(objectdata.Data);
+        bytebuffer.order(ByteOrder.LITTLE_ENDIAN);
+        bytebuffer.getInt();
+        attachmentID = attachmentIDFromState(bytebuffer.get());
+        if (bytebuffer.get() != 0)
+        {
+            bytebuffer.position(bytebuffer.position() + 16);
         }
-        LLVector3 parseFloatVec = LLVector3.parseFloatVec(wrap);
-        LLVector3 parseU16Vec = LLVector3.parseU16Vec(wrap, -128.0f, 128.0f, -128.0f, 128.0f);
-        this.objectCoords.set(0, parseFloatVec);
-        this.objectCoords.set(2, parseU16Vec);
-        wrap.position(wrap.position() + 6);
-        this.rotation = LLQuaternion.parseU16Vec3(wrap, -1.0f, 1.0f);
-        wrap.position(wrap.position() + 6);
-        if (objectData.TextureEntry.length > 4) {
-            ByteBuffer wrap2 = ByteBuffer.wrap(objectData.TextureEntry);
-            wrap2.position(4);
-            SLTextureEntry create = SLTextureEntry.create(wrap2, wrap2.remaining());
-            onTexturesUpdate(create);
-            PrimDrawParams primDrawParams2 = this.primDrawParams;
-            if (primDrawParams2 != null && !create.equals(primDrawParams2.getTextures())) {
-                PrimDrawParams primDrawParams3 = PrimParamsPool.get(new PrimDrawParams(primDrawParams2.getVolumeParams(), create));
-                if (!Objects.equal(this.primDrawParams, primDrawParams3)) {
-                    this.primDrawParams = primDrawParams3;
-                    DrawableObject drawableObject = getDrawableObject();
-                    if (drawableObject != null) {
-                        drawableObject.setPrimDrawParams(this.primDrawParams);
+        LLVector3 llvector3 = LLVector3.parseFloatVec(bytebuffer);
+        LLVector3 llvector3_1 = LLVector3.parseU16Vec(bytebuffer, -128F, 128F, -128F, 128F);
+        objectCoords.set(0, llvector3);
+        objectCoords.set(2, llvector3_1);
+        bytebuffer.position(bytebuffer.position() + 6);
+        rotation = LLQuaternion.parseU16Vec3(bytebuffer, -1F, 1.0F);
+        bytebuffer.position(bytebuffer.position() + 6);
+        if (objectdata.TextureEntry.length > 4)
+        {
+            objectdata = ByteBuffer.wrap(objectdata.TextureEntry);
+            objectdata.position(4);
+            objectdata = SLTextureEntry.create(objectdata, objectdata.remaining());
+            onTexturesUpdate(objectdata);
+            PrimDrawParams primdrawparams = primDrawParams;
+            if (primdrawparams != null && !objectdata.equals(primdrawparams.getTextures()))
+            {
+                objectdata = PrimParamsPool.get(new PrimDrawParams(primdrawparams.getVolumeParams(), objectdata));
+                if (!Objects.equal(primDrawParams, objectdata))
+                {
+                    primDrawParams = objectdata;
+                    objectdata = getDrawableObject();
+                    if (objectdata != null)
+                    {
+                        objectdata.setPrimDrawParams(primDrawParams);
                     }
                 }
             }
@@ -573,277 +617,459 @@ public abstract class SLObjectInfo implements Identifiable<UUID> {
         updateSpatialIndex(false);
     }
 
-    public synchronized void addChild(SLObjectInfo sLObjectInfo) {
-        SLObjectInfo attachedTo;
-        this.treeNode.addChild(sLObjectInfo.treeNode);
-        if (sLObjectInfo.isAttachment && (attachedTo = sLObjectInfo.getAttachedTo()) != null) {
-            attachedTo.updateAttachments();
+    public void addChild(SLObjectInfo slobjectinfo)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        treeNode.addChild(slobjectinfo.treeNode);
+        if (!slobjectinfo.isAttachment)
+        {
+            break MISSING_BLOCK_LABEL_33;
         }
+        slobjectinfo = slobjectinfo.getAttachedTo();
+        if (slobjectinfo == null)
+        {
+            break MISSING_BLOCK_LABEL_33;
+        }
+        slobjectinfo.updateAttachments();
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        slobjectinfo;
+        throw slobjectinfo;
     }
 
-    public void clearDrawListEntry() {
-        synchronized (this) {
-            this.drawListEntry = null;
-        }
+    public void clearDrawListEntry()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        drawListEntry = null;
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public abstract DrawListObjectEntry createDrawListEntry();
+    protected abstract DrawListObjectEntry createDrawListEntry();
 
-    public LLVector3 getAbsolutePosition() {
-        SLObjectInfo parentObject = getParentObject();
-        LLVector3 lLVector3 = this.objectCoords.get(0);
-        if (parentObject == null) {
-            return lLVector3;
+    public LLVector3 getAbsolutePosition()
+    {
+        SLObjectInfo slobjectinfo1 = getParentObject();
+        LLVector3 llvector3 = objectCoords.get(0);
+        SLObjectInfo slobjectinfo = slobjectinfo1;
+        if (slobjectinfo1 == null)
+        {
+            return llvector3;
         }
-        while (parentObject != null) {
-            parentObject.objectCoords.addToVector(0, lLVector3);
-            parentObject = parentObject.getParentObject();
+        for (; slobjectinfo != null; slobjectinfo = slobjectinfo.getParentObject())
+        {
+            slobjectinfo.objectCoords.addToVector(0, llvector3);
         }
-        return lLVector3;
+
+        return llvector3;
     }
 
-    public SLObjectInfo getAttachedTo() {
-        SLObjectInfo parentObject = getParentObject();
-        if (parentObject != null) {
-            return parentObject.isAvatar() ? parentObject : parentObject.getAttachedTo();
-        }
-        return null;
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-
-    @Nonnull
-    public DrawListObjectEntry getDrawListEntry() {
-        WeakReference<DrawListObjectEntry> weakReference = this.drawListEntry;
-        DrawListObjectEntry drawListObjectEntry = weakReference != null ? (DrawListObjectEntry) weakReference.get() : null;
-        if (drawListObjectEntry == null) {
-            synchronized (this) {
-                WeakReference<DrawListObjectEntry> weakReference2 = this.drawListEntry;
-                drawListObjectEntry = weakReference2 != null ? (DrawListObjectEntry) weakReference2.get() : null;
-                if (drawListObjectEntry == null) {
-                    drawListObjectEntry = createDrawListEntry();
-                    this.drawListEntry = new WeakReference<>(drawListObjectEntry);
-                }
+    public SLObjectInfo getAttachedTo()
+    {
+        SLObjectInfo slobjectinfo = getParentObject();
+        if (slobjectinfo != null)
+        {
+            if (slobjectinfo.isAvatar())
+            {
+                return slobjectinfo;
+            } else
+            {
+                return slobjectinfo.getAttachedTo();
             }
+        } else
+        {
+            return null;
         }
-        return drawListObjectEntry;
     }
 
-    @Nullable
-    public DrawListObjectEntry getExistingDrawListEntry() {
-        WeakReference<DrawListObjectEntry> weakReference = this.drawListEntry;
-        if (weakReference != null) {
-            return (DrawListObjectEntry) weakReference.get();
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public DrawListObjectEntry getDrawListEntry()
+    {
+        Object obj;
+        obj = drawListEntry;
+        DrawListObjectEntry drawlistobjectentry;
+        if (obj != null)
+        {
+            obj = (DrawListObjectEntry)((WeakReference) (obj)).get();
+        } else
+        {
+            obj = null;
         }
-        return null;
-    }
-
-    @Nullable
-    public HoverText getHoverText() {
-        return this.hoverText;
-    }
-
-    public UUID getId() {
-        return this.uuid;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public Vector3Array getObjectCoords() {
-        return this.objectCoords;
-    }
-
-    public void getObjectExtents(MatrixStack matrixStack, boolean z, LLVector3 lLVector3, LLVector3 lLVector32) {
-        float[] fArr = new float[8];
-        int elementOffset = this.objectCoords.getElementOffset(0);
-        int elementOffset2 = this.objectCoords.getElementOffset(1);
-        float[] data = this.objectCoords.getData();
-        matrixStack.glPushMatrix();
-        matrixStack.glTranslatef(data[elementOffset + 0], data[elementOffset + 1], data[elementOffset + 2]);
-        matrixStack.glMultMatrixf(this.rotation.getInverseMatrix(), 0);
-        fArr[0] = (-data[elementOffset2 + 0]) / 2.0f;
-        fArr[1] = (-data[elementOffset2 + 1]) / 2.0f;
-        fArr[2] = (-data[elementOffset2 + 2]) / 2.0f;
-        fArr[3] = 1.0f;
-        Matrix.multiplyMV(fArr, 4, matrixStack.getMatrixData(), matrixStack.getMatrixDataOffset(), fArr, 0);
-        if (z) {
-            lLVector3.x = fArr[4];
-            lLVector3.y = fArr[5];
-            lLVector3.z = fArr[6];
-            lLVector32.x = fArr[4];
-            lLVector32.y = fArr[5];
-            lLVector32.z = fArr[6];
-        } else {
-            lLVector3.x = Math.min(lLVector3.x, fArr[4]);
-            lLVector3.y = Math.min(lLVector3.y, fArr[5]);
-            lLVector3.z = Math.min(lLVector3.z, fArr[6]);
-            lLVector32.x = Math.max(lLVector32.x, fArr[4]);
-            lLVector32.y = Math.max(lLVector32.y, fArr[5]);
-            lLVector32.z = Math.max(lLVector32.z, fArr[6]);
+        drawlistobjectentry = ((DrawListObjectEntry) (obj));
+        if (obj != null) goto _L2; else goto _L1
+_L1:
+        this;
+        JVM INSTR monitorenter ;
+        obj = drawListEntry;
+        if (obj == null) goto _L4; else goto _L3
+_L3:
+        obj = (DrawListObjectEntry)((WeakReference) (obj)).get();
+_L6:
+        drawlistobjectentry = ((DrawListObjectEntry) (obj));
+        if (obj != null)
+        {
+            break MISSING_BLOCK_LABEL_65;
         }
-        fArr[0] = data[elementOffset2 + 0] / 2.0f;
-        fArr[1] = data[elementOffset2 + 1] / 2.0f;
-        fArr[2] = data[elementOffset2 + 2] / 2.0f;
-        fArr[3] = 1.0f;
-        Matrix.multiplyMV(fArr, 4, matrixStack.getMatrixData(), matrixStack.getMatrixDataOffset(), fArr, 0);
-        lLVector3.x = Math.min(lLVector3.x, fArr[4]);
-        lLVector3.y = Math.min(lLVector3.y, fArr[5]);
-        lLVector3.z = Math.min(lLVector3.z, fArr[6]);
-        lLVector32.x = Math.max(lLVector32.x, fArr[4]);
-        lLVector32.y = Math.max(lLVector32.y, fArr[5]);
-        lLVector32.z = Math.max(lLVector32.z, fArr[6]);
-        try {
-            for (SLObjectInfo objectExtents : this.treeNode) {
-                objectExtents.getObjectExtents(matrixStack, false, lLVector3, lLVector32);
+        drawlistobjectentry = createDrawListEntry();
+        drawListEntry = new WeakReference(drawlistobjectentry);
+        this;
+        JVM INSTR monitorexit ;
+_L2:
+        return drawlistobjectentry;
+_L4:
+        obj = null;
+        if (true) goto _L6; else goto _L5
+_L5:
+        Exception exception;
+        exception;
+        throw exception;
+    }
+
+    public DrawListObjectEntry getExistingDrawListEntry()
+    {
+        DrawListObjectEntry drawlistobjectentry = null;
+        WeakReference weakreference = drawListEntry;
+        if (weakreference != null)
+        {
+            drawlistobjectentry = (DrawListObjectEntry)weakreference.get();
+        }
+        return drawlistobjectentry;
+    }
+
+    public HoverText getHoverText()
+    {
+        return hoverText;
+    }
+
+    public volatile Object getId()
+    {
+        return getId();
+    }
+
+    public UUID getId()
+    {
+        return uuid;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public Vector3Array getObjectCoords()
+    {
+        return objectCoords;
+    }
+
+    public void getObjectExtents(MatrixStack matrixstack, boolean flag, LLVector3 llvector3, LLVector3 llvector3_1)
+    {
+        Object obj = new float[8];
+        int i = objectCoords.getElementOffset(0);
+        int j = objectCoords.getElementOffset(1);
+        float af[] = objectCoords.getData();
+        matrixstack.glPushMatrix();
+        matrixstack.glTranslatef(af[i + 0], af[i + 1], af[i + 2]);
+        matrixstack.glMultMatrixf(rotation.getInverseMatrix(), 0);
+        obj[0] = -af[j + 0] / 2.0F;
+        obj[1] = -af[j + 1] / 2.0F;
+        obj[2] = -af[j + 2] / 2.0F;
+        obj[3] = 1.0F;
+        Matrix.multiplyMV(((float []) (obj)), 4, matrixstack.getMatrixData(), matrixstack.getMatrixDataOffset(), ((float []) (obj)), 0);
+        if (flag)
+        {
+            llvector3.x = obj[4];
+            llvector3.y = obj[5];
+            llvector3.z = obj[6];
+            llvector3_1.x = obj[4];
+            llvector3_1.y = obj[5];
+            llvector3_1.z = obj[6];
+        } else
+        {
+            llvector3.x = Math.min(llvector3.x, obj[4]);
+            llvector3.y = Math.min(llvector3.y, obj[5]);
+            llvector3.z = Math.min(llvector3.z, obj[6]);
+            llvector3_1.x = Math.max(llvector3_1.x, obj[4]);
+            llvector3_1.y = Math.max(llvector3_1.y, obj[5]);
+            llvector3_1.z = Math.max(llvector3_1.z, obj[6]);
+        }
+        obj[0] = af[j + 0] / 2.0F;
+        obj[1] = af[j + 1] / 2.0F;
+        obj[2] = af[j + 2] / 2.0F;
+        obj[3] = 1.0F;
+        Matrix.multiplyMV(((float []) (obj)), 4, matrixstack.getMatrixData(), matrixstack.getMatrixDataOffset(), ((float []) (obj)), 0);
+        llvector3.x = Math.min(llvector3.x, obj[4]);
+        llvector3.y = Math.min(llvector3.y, obj[5]);
+        llvector3.z = Math.min(llvector3.z, obj[6]);
+        llvector3_1.x = Math.max(llvector3_1.x, obj[4]);
+        llvector3_1.y = Math.max(llvector3_1.y, obj[5]);
+        llvector3_1.z = Math.max(llvector3_1.z, obj[6]);
+        try
+        {
+            for (obj = treeNode.iterator(); ((Iterator) (obj)).hasNext(); ((SLObjectInfo)((Iterator) (obj)).next()).getObjectExtents(matrixstack, false, llvector3, llvector3_1)) { }
+        }
+        // Misplaced declaration of an exception variable
+        catch (LLVector3 llvector3)
+        {
+            llvector3.printStackTrace();
+        }
+        matrixstack.glPopMatrix();
+    }
+
+    public UUID getOwnerUUID()
+    {
+        if (ownerUUID != null && ownerUUID.getLeastSignificantBits() == 0L && ownerUUID.getMostSignificantBits() == 0L)
+        {
+            return creatorUUID;
+        } else
+        {
+            return ownerUUID;
+        }
+    }
+
+    public SLObjectInfo getParentObject()
+    {
+        return (SLObjectInfo)treeNode.getParent();
+    }
+
+    public PayInfo getPayInfo()
+    {
+        return payInfo;
+    }
+
+    public PrimDrawParams getPrimDrawParams()
+    {
+        return primDrawParams;
+    }
+
+    public SLObjectInfo getRootPrim()
+    {
+        SLObjectInfo slobjectinfo = (SLObjectInfo)treeNode.getParent();
+        if (slobjectinfo == null)
+        {
+            return this;
+        }
+        if (slobjectinfo.isAvatar())
+        {
+            return this;
+        } else
+        {
+            return slobjectinfo.getRootPrim();
+        }
+    }
+
+    public final LLQuaternion getRotation()
+    {
+        return rotation;
+    }
+
+    public String getTouchName()
+    {
+        return touchName;
+    }
+
+    public boolean hasTouchableChildren()
+    {
+        Iterator iterator = treeNode.iterator();
+        boolean flag;
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_43;
             }
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-        }
-        matrixStack.glPopMatrix();
-    }
-
-    public UUID getOwnerUUID() {
-        return (this.ownerUUID != null && this.ownerUUID.getLeastSignificantBits() == 0 && this.ownerUUID.getMostSignificantBits() == 0) ? this.creatorUUID : this.ownerUUID;
-    }
-
-    public SLObjectInfo getParentObject() {
-        return this.treeNode.getParent();
-    }
-
-    @Nullable
-    public PayInfo getPayInfo() {
-        return this.payInfo;
-    }
-
-    public PrimDrawParams getPrimDrawParams() {
-        return this.primDrawParams;
-    }
-
-    public SLObjectInfo getRootPrim() {
-        SLObjectInfo parent = this.treeNode.getParent();
-        return (parent != null && !parent.isAvatar()) ? parent.getRootPrim() : this;
-    }
-
-    public final LLQuaternion getRotation() {
-        return this.rotation;
-    }
-
-    public String getTouchName() {
-        return this.touchName;
-    }
-
-    public boolean hasTouchableChildren() {
-        try {
-            for (SLObjectInfo isTouchable : this.treeNode) {
-                if (isTouchable.isTouchable()) {
-                    return true;
-                }
-            }
-            return false;
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-            return false;
-        }
+            flag = ((SLObjectInfo)iterator.next()).isTouchable();
+        } while (!flag);
+        return true;
+        NoSuchElementException nosuchelementexception;
+        nosuchelementexception;
+        nosuchelementexception.printStackTrace();
+        return false;
     }
 
     public abstract boolean isAvatar();
 
-    public synchronized boolean isAvatarSittingOn() {
-        try {
-            for (SLObjectInfo next : this.treeNode) {
-                if ((next instanceof SLObjectAvatarInfo) && ((SLObjectAvatarInfo) next).isMyAvatar()) {
-                    return true;
+    public boolean isAvatarSittingOn()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        Iterator iterator = treeNode.iterator();
+        boolean flag;
+        do
+        {
+            SLObjectInfo slobjectinfo;
+            do
+            {
+                if (!iterator.hasNext())
+                {
+                    break MISSING_BLOCK_LABEL_59;
                 }
-            }
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
-        }
+                slobjectinfo = (SLObjectInfo)iterator.next();
+            } while (!(slobjectinfo instanceof SLObjectAvatarInfo));
+            flag = ((SLObjectAvatarInfo)slobjectinfo).isMyAvatar();
+        } while (!flag);
+        this;
+        JVM INSTR monitorexit ;
+        return true;
+        Object obj;
+        obj;
+        ((NoSuchElementException) (obj)).printStackTrace();
+        this;
+        JVM INSTR monitorexit ;
         return false;
+        obj;
+        throw obj;
     }
 
-    public boolean isMyAttachment() {
-        SLObjectInfo parentObject = getParentObject();
-        if (parentObject instanceof SLObjectAvatarInfo) {
-            return ((SLObjectAvatarInfo) parentObject).isMyAvatar();
-        }
-        return false;
-    }
-
-    public final boolean isPayable() {
-        return (this.UpdateFlags & 512) != 0;
-    }
-
-    public final boolean isTouchable() {
-        return (this.UpdateFlags & 128) != 0;
-    }
-
-    /* access modifiers changed from: protected */
-    public void onTexturesUpdate(SLTextureEntry sLTextureEntry) {
-    }
-
-    public synchronized void removeChild(SLObjectInfo sLObjectInfo) {
-        SLObjectInfo attachedTo;
-        if (sLObjectInfo.isAttachment && (attachedTo = sLObjectInfo.getAttachedTo()) != null) {
-            attachedTo.updateAttachments();
-        }
-        this.treeNode.removeChild(sLObjectInfo.treeNode);
-    }
-
-    public void removeFromSpatialIndex() {
-        DrawListObjectEntry existingDrawListEntry = getExistingDrawListEntry();
-        if (existingDrawListEntry != null) {
-            existingDrawListEntry.requestEntryRemoval();
-        }
-        if (!isAvatar()) {
-            for (SLObjectInfo removeFromSpatialIndex : this.treeNode) {
-                removeFromSpatialIndex.removeFromSpatialIndex();
-            }
+    public boolean isMyAttachment()
+    {
+        SLObjectInfo slobjectinfo = getParentObject();
+        if (slobjectinfo instanceof SLObjectAvatarInfo)
+        {
+            return ((SLObjectAvatarInfo)slobjectinfo).isMyAvatar();
+        } else
+        {
+            return false;
         }
     }
 
-    public synchronized void setIsAttachmentAll(boolean z) {
-        this.isAttachment = z;
-        try {
-            for (SLObjectInfo next : this.treeNode) {
-                if (!next.isAvatar()) {
-                    next.setIsAttachmentAll(z);
-                }
-            }
-        } catch (NoSuchElementException e) {
-            e.printStackTrace();
+    public final boolean isPayable()
+    {
+        boolean flag = false;
+        if ((UpdateFlags & 0x200) != 0)
+        {
+            flag = true;
         }
+        return flag;
+    }
+
+    public final boolean isTouchable()
+    {
+        boolean flag = false;
+        if ((UpdateFlags & 0x80) != 0)
+        {
+            flag = true;
+        }
+        return flag;
+    }
+
+    protected void onTexturesUpdate(SLTextureEntry sltextureentry)
+    {
+    }
+
+    public void removeChild(SLObjectInfo slobjectinfo)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        SLObjectInfo slobjectinfo1;
+        if (!slobjectinfo.isAttachment)
+        {
+            break MISSING_BLOCK_LABEL_22;
+        }
+        slobjectinfo1 = slobjectinfo.getAttachedTo();
+        if (slobjectinfo1 == null)
+        {
+            break MISSING_BLOCK_LABEL_22;
+        }
+        slobjectinfo1.updateAttachments();
+        treeNode.removeChild(slobjectinfo.treeNode);
+        this;
+        JVM INSTR monitorexit ;
         return;
+        slobjectinfo;
+        throw slobjectinfo;
     }
 
-    public void setPayInfo(@Nullable PayInfo payInfo2) {
-        this.payInfo = payInfo2;
+    public void removeFromSpatialIndex()
+    {
+        DrawListObjectEntry drawlistobjectentry = getExistingDrawListEntry();
+        if (drawlistobjectentry != null)
+        {
+            drawlistobjectentry.requestEntryRemoval();
+        }
+        if (!isAvatar())
+        {
+            for (Iterator iterator = treeNode.iterator(); iterator.hasNext(); ((SLObjectInfo)iterator.next()).removeFromSpatialIndex()) { }
+        }
     }
 
-    public void updateSpatialIndex(boolean z) {
-        updateSpatialIndex(SpatialIndex.getInstance().getObjectIndex(), z);
+    public void setIsAttachmentAll(boolean flag)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        isAttachment = flag;
+        Iterator iterator = treeNode.iterator();
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break;
+            }
+            SLObjectInfo slobjectinfo = (SLObjectInfo)iterator.next();
+            if (!slobjectinfo.isAvatar())
+            {
+                slobjectinfo.setIsAttachmentAll(flag);
+            }
+        } while (true);
+        break MISSING_BLOCK_LABEL_56;
+        Object obj;
+        obj;
+        ((NoSuchElementException) (obj)).printStackTrace();
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        obj;
+        throw obj;
     }
 
-    public void updateWorldMatrix(boolean z) {
-        SLObjectInfo parentObject = getParentObject();
-        float[] matrix = parentObject == null ? IdentityMatrix.getMatrix() : parentObject.isAvatar() ? IdentityMatrix.getMatrix() : parentObject.worldMatrix;
-        if (matrix != null) {
-            this.objRadius = this.objectCoords.getMaxComponent(1) / 2.0f;
-            float[] calculateWorldMatrix = calculateWorldMatrix(matrix);
-            float[] fArr = this.worldMatrix;
-            if (fArr == null || !Arrays.equals(calculateWorldMatrix, fArr)) {
-                this.worldMatrix = calculateWorldMatrix;
-                this.objectCoords.set(3, this.worldMatrix[12], this.worldMatrix[13], this.worldMatrix[14]);
-                if (z) {
-                    for (SLObjectInfo updateWorldMatrix : this.treeNode) {
-                        updateWorldMatrix.updateWorldMatrix(true);
-                    }
-                }
+    public void setPayInfo(PayInfo payinfo)
+    {
+        payInfo = payinfo;
+    }
+
+    public void updateSpatialIndex(boolean flag)
+    {
+        updateSpatialIndex(SpatialIndex.getInstance().getObjectIndex(), flag);
+    }
+
+    public void updateWorldMatrix(boolean flag)
+    {
+        float af[] = getParentObject();
+        if (af == null)
+        {
+            af = IdentityMatrix.getMatrix();
+        } else
+        if (af.isAvatar())
+        {
+            af = IdentityMatrix.getMatrix();
+        } else
+        {
+            af = ((SLObjectInfo) (af)).worldMatrix;
+        }
+        if (af != null)
+        {
+            objRadius = objectCoords.getMaxComponent(1) / 2.0F;
+            af = calculateWorldMatrix(af);
+            float af1[] = worldMatrix;
+            if (af1 != null && Arrays.equals(af, af1))
+            {
+                return;
+            }
+            worldMatrix = af;
+            objectCoords.set(3, worldMatrix[12], worldMatrix[13], worldMatrix[14]);
+            if (flag)
+            {
+                for (Iterator iterator = treeNode.iterator(); iterator.hasNext(); ((SLObjectInfo)iterator.next()).updateWorldMatrix(true)) { }
             }
         }
     }

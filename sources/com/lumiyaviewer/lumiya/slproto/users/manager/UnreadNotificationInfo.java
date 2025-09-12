@@ -1,89 +1,145 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType;
 import java.util.List;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public abstract class UnreadNotificationInfo {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            AutoValue_UnreadNotificationInfo, AutoValue_UnreadNotificationInfo_ObjectPopupMessage, AutoValue_UnreadNotificationInfo_ObjectPopupNotification, AutoValue_UnreadNotificationInfo_UnreadMessageSource
 
-    public static abstract class ObjectPopupMessage {
-        public static ObjectPopupMessage create(@Nullable String str, @Nullable String str2) {
-            return new AutoValue_UnreadNotificationInfo_ObjectPopupMessage(Strings.nullToEmpty(str), Strings.nullToEmpty(str2));
+public abstract class UnreadNotificationInfo
+{
+    public static abstract class ObjectPopupMessage
+    {
+
+        public static ObjectPopupMessage create(String s, String s1)
+        {
+            return new AutoValue_UnreadNotificationInfo_ObjectPopupMessage(Strings.nullToEmpty(s), Strings.nullToEmpty(s1));
         }
 
         public abstract String message();
 
         public abstract String objectName();
+
+        public ObjectPopupMessage()
+        {
+        }
     }
 
-    public static abstract class ObjectPopupNotification {
+    public static abstract class ObjectPopupNotification
+    {
+
         private static ObjectPopupNotification empty = new AutoValue_UnreadNotificationInfo_ObjectPopupNotification(0, 0, Optional.absent());
 
-        public static ObjectPopupNotification create(int i, int i2, @Nullable ObjectPopupMessage objectPopupMessage) {
-            return (i == 0 && i2 == 0 && objectPopupMessage == null) ? empty : new AutoValue_UnreadNotificationInfo_ObjectPopupNotification(i, i2, Optional.fromNullable(objectPopupMessage));
+        public static ObjectPopupNotification create(int i, int j, ObjectPopupMessage objectpopupmessage)
+        {
+            if (i == 0 && j == 0 && objectpopupmessage == null)
+            {
+                return empty;
+            } else
+            {
+                return new AutoValue_UnreadNotificationInfo_ObjectPopupNotification(i, j, Optional.fromNullable(objectpopupmessage));
+            }
         }
 
         public abstract int freshObjectPopupsCount();
 
-        public boolean isEmpty() {
+        public boolean isEmpty()
+        {
             return equals(empty);
         }
 
-        @Nonnull
-        public abstract Optional<ObjectPopupMessage> lastObjectPopup();
+        public abstract Optional lastObjectPopup();
 
         public abstract int objectPopupsCount();
+
+
+        public ObjectPopupNotification()
+        {
+        }
     }
 
-    public static abstract class UnreadMessageSource {
-        public static UnreadMessageSource create(@Nonnull ChatterID chatterID, @Nullable String str, @Nullable List<SLChatEvent> list, int i) {
-            return new AutoValue_UnreadNotificationInfo_UnreadMessageSource(chatterID, Optional.fromNullable(str), list != null ? ImmutableList.copyOf(list) : ImmutableList.of(), i);
+    public static abstract class UnreadMessageSource
+    {
+
+        public static UnreadMessageSource create(ChatterID chatterid, String s, List list, int i)
+        {
+            Optional optional = Optional.fromNullable(s);
+            if (list != null)
+            {
+                s = ImmutableList.copyOf(list);
+            } else
+            {
+                s = ImmutableList.of();
+            }
+            return new AutoValue_UnreadNotificationInfo_UnreadMessageSource(chatterid, optional, s, i);
         }
 
-        @Nonnull
         public abstract ChatterID chatterID();
 
-        public abstract Optional<String> chatterName();
+        public abstract Optional chatterName();
 
-        @Nonnull
-        public abstract ImmutableList<SLChatEvent> unreadMessages();
+        public abstract ImmutableList unreadMessages();
 
         public abstract int unreadMessagesCount();
 
-        public UnreadMessageSource withMessages(@Nullable List<SLChatEvent> list) {
-            return new AutoValue_UnreadNotificationInfo_UnreadMessageSource(chatterID(), chatterName(), list != null ? ImmutableList.copyOf(list) : ImmutableList.of(), unreadMessagesCount());
+        public UnreadMessageSource withMessages(List list)
+        {
+            ChatterID chatterid = chatterID();
+            Optional optional = chatterName();
+            if (list != null)
+            {
+                list = ImmutableList.copyOf(list);
+            } else
+            {
+                list = ImmutableList.of();
+            }
+            return new AutoValue_UnreadNotificationInfo_UnreadMessageSource(chatterid, optional, list, unreadMessagesCount());
+        }
+
+        public UnreadMessageSource()
+        {
         }
     }
 
-    public static UnreadNotificationInfo create(@Nonnull UUID uuid, int i, @Nullable List<UnreadMessageSource> list, @Nullable NotificationType notificationType, int i2, @Nullable NotificationType notificationType2, @Nullable UnreadMessageSource unreadMessageSource, @Nonnull ObjectPopupNotification objectPopupNotification) {
-        return new AutoValue_UnreadNotificationInfo(uuid, i, list != null ? ImmutableList.copyOf(list) : ImmutableList.of(), Optional.fromNullable(notificationType), i2, Optional.fromNullable(notificationType2), Optional.fromNullable(unreadMessageSource), objectPopupNotification);
+
+    public UnreadNotificationInfo()
+    {
+    }
+
+    public static UnreadNotificationInfo create(UUID uuid, int i, List list, NotificationType notificationtype, int j, NotificationType notificationtype1, UnreadMessageSource unreadmessagesource, ObjectPopupNotification objectpopupnotification)
+    {
+        if (list != null)
+        {
+            list = ImmutableList.copyOf(list);
+        } else
+        {
+            list = ImmutableList.of();
+        }
+        return new AutoValue_UnreadNotificationInfo(uuid, i, list, Optional.fromNullable(notificationtype), j, Optional.fromNullable(notificationtype1), Optional.fromNullable(unreadmessagesource), objectpopupnotification);
     }
 
     public abstract UUID agentUUID();
 
     public abstract int freshMessagesCount();
 
-    @Nonnull
-    public abstract Optional<NotificationType> mostImportantFreshType();
+    public abstract Optional mostImportantFreshType();
 
-    @Nonnull
-    public abstract Optional<NotificationType> mostImportantType();
+    public abstract Optional mostImportantType();
 
-    @Nonnull
     public abstract ObjectPopupNotification objectPopupInfo();
 
-    @Nonnull
-    public abstract Optional<UnreadMessageSource> singleFreshSource();
+    public abstract Optional singleFreshSource();
 
     public abstract int totalUnreadCount();
 
-    @Nonnull
-    public abstract ImmutableList<UnreadMessageSource> unreadSources();
+    public abstract ImmutableList unreadSources();
 }

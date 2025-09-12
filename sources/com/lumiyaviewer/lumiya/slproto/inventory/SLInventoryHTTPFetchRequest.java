@@ -1,983 +1,1364 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.inventory;
 
+import android.database.sqlite.SQLiteStatement;
 import com.lumiyaviewer.lumiya.Debug;
+import com.lumiyaviewer.lumiya.orm.InventoryDB;
 import com.lumiyaviewer.lumiya.slproto.https.GenericHTTPExecutor;
 import com.lumiyaviewer.lumiya.slproto.https.LLSDStreamingXMLRequest;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLInventory;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode;
-import com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDValueTypeException;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDXMLException;
+import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDArray;
+import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBoolean;
+import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap;
+import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUUID;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-class SLInventoryHTTPFetchRequest extends SLInventoryFetchRequest {
-    /* access modifiers changed from: private */
-    public final String capURL;
-    private final AtomicReference<Future<?>> futureRef = new AtomicReference<>((Object) null);
-    private final Runnable httpRequest = new Runnable() {
-        /* JADX WARNING: Removed duplicated region for block: B:16:0x00f9  */
-        /* JADX WARNING: Removed duplicated region for block: B:19:0x0114  */
-        /* JADX WARNING: Removed duplicated region for block: B:39:0x0170  */
-        /* JADX WARNING: Removed duplicated region for block: B:40:0x0172  */
-        /* Code decompiled incorrectly, please refer to instructions dump. */
-        public void run() {
-            /*
-                r15 = this;
-                r14 = 3
-                r13 = 2
-                r2 = 0
-                r3 = 1
-                long r6 = java.lang.System.currentTimeMillis()     // Catch:{ Exception -> 0x0176 }
-                java.lang.String r0 = "InventoryFetcher: Going to fetch folder: %s"
-                r1 = 1
-                java.lang.Object[] r1 = new java.lang.Object[r1]     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r4 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x0176 }
-                java.util.UUID r4 = r4.folderUUID     // Catch:{ Exception -> 0x0176 }
-                r5 = 0
-                r1[r5] = r4     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.https.LLSDStreamingXMLRequest r5 = new com.lumiyaviewer.lumiya.slproto.https.LLSDStreamingXMLRequest     // Catch:{ Exception -> 0x0176 }
-                r5.<init>()     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDArray r0 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDArray     // Catch:{ Exception -> 0x0176 }
-                r0.<init>()     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap r1 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap     // Catch:{ Exception -> 0x0176 }
-                r4 = 3
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry[] r4 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[r4]     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry r8 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry     // Catch:{ Exception -> 0x0176 }
-                java.lang.String r9 = "folder_id"
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUUID r10 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUUID     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r11 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x0176 }
-                java.util.UUID r11 = r11.folderUUID     // Catch:{ Exception -> 0x0176 }
-                r10.<init>((java.util.UUID) r11)     // Catch:{ Exception -> 0x0176 }
-                r8.<init>(r9, r10)     // Catch:{ Exception -> 0x0176 }
-                r9 = 0
-                r4[r9] = r8     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry r8 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry     // Catch:{ Exception -> 0x0176 }
-                java.lang.String r9 = "fetch_folders"
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBoolean r10 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBoolean     // Catch:{ Exception -> 0x0176 }
-                r11 = 1
-                r10.<init>((boolean) r11)     // Catch:{ Exception -> 0x0176 }
-                r8.<init>(r9, r10)     // Catch:{ Exception -> 0x0176 }
-                r9 = 1
-                r4[r9] = r8     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry r8 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry     // Catch:{ Exception -> 0x0176 }
-                java.lang.String r9 = "fetch_items"
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBoolean r10 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBoolean     // Catch:{ Exception -> 0x0176 }
-                r11 = 1
-                r10.<init>((boolean) r11)     // Catch:{ Exception -> 0x0176 }
-                r8.<init>(r9, r10)     // Catch:{ Exception -> 0x0176 }
-                r9 = 2
-                r4[r9] = r8     // Catch:{ Exception -> 0x0176 }
-                r1.<init>((com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[]) r4)     // Catch:{ Exception -> 0x0176 }
-                r0.add(r1)     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap r8 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap     // Catch:{ Exception -> 0x0176 }
-                r1 = 1
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry[] r1 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[r1]     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry r4 = new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap$LLSDMapEntry     // Catch:{ Exception -> 0x0176 }
-                java.lang.String r9 = "folders"
-                r4.<init>(r9, r0)     // Catch:{ Exception -> 0x0176 }
-                r0 = 0
-                r1[r0] = r4     // Catch:{ Exception -> 0x0176 }
-                r8.<init>((com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[]) r1)     // Catch:{ Exception -> 0x0176 }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x0176 }
-                java.util.concurrent.atomic.AtomicReference r0 = r0.streamingXmlReqRef     // Catch:{ Exception -> 0x0176 }
-                r0.set(r5)     // Catch:{ Exception -> 0x0176 }
-                r4 = r2
-                r1 = r2
-            L_0x0081:
-                if (r4 >= r14) goto L_0x00c8
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest$DatabaseCommitThread r9 = new com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest$DatabaseCommitThread     // Catch:{ Exception -> 0x012d }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x012d }
-                r10 = 0
-                r9.<init>(r0, r10)     // Catch:{ Exception -> 0x012d }
-                r9.start()     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                java.lang.String r0 = "InventoryFetcher: Starting HTTP request for folder: %s"
-                r10 = 1
-                java.lang.Object[] r10 = new java.lang.Object[r10]     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r11 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                java.util.UUID r11 = r11.folderUUID     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                r12 = 0
-                r10[r12] = r11     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                com.lumiyaviewer.lumiya.Debug.Printf(r0, r10)     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                java.lang.String r0 = r0.capURL     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest$RootContentHandler r10 = new com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest$RootContentHandler     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r11 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                r12 = 0
-                r10.<init>(r11, r9, r12)     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                r5.PerformRequest(r0, r8, r10)     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                java.lang.String r0 = "InvFetch: done parsing,  waiting for commit thread"
-                r10 = 0
-                java.lang.Object[] r10 = new java.lang.Object[r10]     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                com.lumiyaviewer.lumiya.Debug.Printf(r0, r10)     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                r0 = 1
-                r9.stopAndWait(r0)     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                java.lang.String r0 = "InvFetch: commit thread finished"
-                r10 = 0
-                java.lang.Object[] r10 = new java.lang.Object[r10]     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                com.lumiyaviewer.lumiya.Debug.Printf(r0, r10)     // Catch:{ LLSDXMLException -> 0x0132, IOException -> 0x0128 }
-                r1 = r3
-            L_0x00c6:
-                if (r1 == 0) goto L_0x0156
-            L_0x00c8:
-                java.lang.String r0 = "InventoryFetcher: Fetched folder: %s (fetch time = %d)"
-                r4 = 2
-                java.lang.Object[] r4 = new java.lang.Object[r4]     // Catch:{ Exception -> 0x012d }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r5 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x012d }
-                java.util.UUID r5 = r5.folderUUID     // Catch:{ Exception -> 0x012d }
-                java.lang.String r5 = r5.toString()     // Catch:{ Exception -> 0x012d }
-                r8 = 0
-                r4[r8] = r5     // Catch:{ Exception -> 0x012d }
-                long r8 = java.lang.System.currentTimeMillis()     // Catch:{ Exception -> 0x012d }
-                long r6 = r8 - r6
-                java.lang.Long r5 = java.lang.Long.valueOf(r6)     // Catch:{ Exception -> 0x012d }
-                r6 = 1
-                r4[r6] = r5     // Catch:{ Exception -> 0x012d }
-                com.lumiyaviewer.lumiya.Debug.Printf(r0, r4)     // Catch:{ Exception -> 0x012d }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x012d }
-                java.util.concurrent.atomic.AtomicReference r0 = r0.streamingXmlReqRef     // Catch:{ Exception -> 0x012d }
-                r4 = 0
-                r0.set(r4)     // Catch:{ Exception -> 0x012d }
-            L_0x00f3:
-                boolean r0 = java.lang.Thread.interrupted()
-                if (r0 != 0) goto L_0x0170
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
-                java.util.concurrent.atomic.AtomicBoolean r0 = r0.isCancelled
-                boolean r0 = r0.get()
-            L_0x0103:
-                java.lang.String r4 = "InventoryFetcher: done processing folder %s: success %s cancelled %b"
-                java.lang.Object[] r5 = new java.lang.Object[r14]
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r6 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
-                java.util.UUID r6 = r6.folderUUID
-                java.lang.String r6 = r6.toString()
-                r5[r2] = r6
-                if (r1 == 0) goto L_0x0172
-                java.lang.String r2 = "true"
-            L_0x0117:
-                r5[r3] = r2
-                java.lang.Boolean r2 = java.lang.Boolean.valueOf(r0)
-                r5[r13] = r2
-                com.lumiyaviewer.lumiya.Debug.Printf(r4, r5)
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r2 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
-                r2.completeFetch(r1, r0)
-                return
-            L_0x0128:
-                r0 = move-exception
-                r0.printStackTrace()     // Catch:{ Exception -> 0x012d }
-                goto L_0x00c6
-            L_0x012d:
-                r0 = move-exception
-            L_0x012e:
-                com.lumiyaviewer.lumiya.Debug.Warning(r0)
-                goto L_0x00f3
-            L_0x0132:
-                r0 = move-exception
-                r0.printStackTrace()     // Catch:{ Exception -> 0x012d }
-                java.lang.StringBuilder r0 = new java.lang.StringBuilder     // Catch:{ Exception -> 0x0153 }
-                r0.<init>()     // Catch:{ Exception -> 0x0153 }
-                java.lang.String r10 = "InventoryFetcher: malformed xml after req = "
-                java.lang.StringBuilder r0 = r0.append(r10)     // Catch:{ Exception -> 0x0153 }
-                java.lang.String r10 = r8.serializeToXML()     // Catch:{ Exception -> 0x0153 }
-                java.lang.StringBuilder r0 = r0.append(r10)     // Catch:{ Exception -> 0x0153 }
-                java.lang.String r0 = r0.toString()     // Catch:{ Exception -> 0x0153 }
-                com.lumiyaviewer.lumiya.Debug.Log(r0)     // Catch:{ Exception -> 0x0153 }
-                goto L_0x00c6
-            L_0x0153:
-                r0 = move-exception
-                goto L_0x00c6
-            L_0x0156:
-                r9.interrupt()     // Catch:{ Exception -> 0x012d }
-                boolean r0 = java.lang.Thread.interrupted()     // Catch:{ Exception -> 0x012d }
-                if (r0 != 0) goto L_0x00c8
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ Exception -> 0x012d }
-                java.util.concurrent.atomic.AtomicBoolean r0 = r0.isCancelled     // Catch:{ Exception -> 0x012d }
-                boolean r0 = r0.get()     // Catch:{ Exception -> 0x012d }
-                if (r0 != 0) goto L_0x00c8
-                int r0 = r4 + 1
-                r4 = r0
-                goto L_0x0081
-            L_0x0170:
-                r0 = r3
-                goto L_0x0103
-            L_0x0172:
-                java.lang.String r2 = "false"
-                goto L_0x0117
-            L_0x0176:
-                r0 = move-exception
-                r1 = r2
-                goto L_0x012e
-            */
-            throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.AnonymousClass1.run():void");
-        }
-    };
-    /* access modifiers changed from: private */
-    public final AtomicBoolean isCancelled = new AtomicBoolean(false);
-    /* access modifiers changed from: private */
-    public final AtomicReference<LLSDStreamingXMLRequest> streamingXmlReqRef = new AtomicReference<>((Object) null);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.inventory:
+//            SLInventoryFetchRequest, SLInventory, SLInventoryEntry, SLAssetType, 
+//            SLInventoryType, SLSaleType
 
-    private final class DatabaseCommitThread extends Thread {
+class SLInventoryHTTPFetchRequest extends SLInventoryFetchRequest
+{
+    private final class DatabaseCommitThread extends Thread
+    {
+
         private volatile boolean aborted;
-        private final BlockingQueue<SLInventoryEntry> commitEntryQueue;
+        private final BlockingQueue commitEntryQueue;
         private final SLInventoryEntry stopEntry;
+        final SLInventoryHTTPFetchRequest this$0;
 
-        private DatabaseCommitThread() {
-            this.commitEntryQueue = new LinkedBlockingQueue(100);
-            this.stopEntry = new SLInventoryEntry();
-            this.aborted = false;
+        void addEntry(SLInventoryEntry slinventoryentry)
+            throws InterruptedException
+        {
+            commitEntryQueue.put(slinventoryentry);
         }
 
-        /* synthetic */ DatabaseCommitThread(SLInventoryHTTPFetchRequest sLInventoryHTTPFetchRequest, DatabaseCommitThread databaseCommitThread) {
-            this();
-        }
-
-        /* access modifiers changed from: package-private */
-        public void addEntry(SLInventoryEntry sLInventoryEntry) throws InterruptedException {
-            this.commitEntryQueue.put(sLInventoryEntry);
-        }
-
-        /* JADX WARNING: Removed duplicated region for block: B:16:0x0045  */
-        /* JADX WARNING: Removed duplicated region for block: B:21:0x006f  */
-        /* JADX WARNING: Removed duplicated region for block: B:23:0x0074  */
-        /* JADX WARNING: Removed duplicated region for block: B:27:0x007f  */
-        /* JADX WARNING: Removed duplicated region for block: B:65:? A[RETURN, SYNTHETIC] */
-        /* Code decompiled incorrectly, please refer to instructions dump. */
-        public void run() {
-            /*
-                r11 = this;
-                r3 = 1
-                r1 = 0
-                r4 = 0
-                java.util.HashSet r8 = new java.util.HashSet
-                r8.<init>()
-                r2 = r1
-                r5 = r4
-                r6 = r4
-            L_0x000b:
-                boolean r0 = java.lang.Thread.interrupted()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                if (r0 != 0) goto L_0x003b
-                java.util.concurrent.BlockingQueue<com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry> r0 = r11.commitEntryQueue     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                java.lang.Object r0 = r0.poll()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r0 = (com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry) r0     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                if (r0 != 0) goto L_0x010c
-                if (r5 == 0) goto L_0x002d
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                com.lumiyaviewer.lumiya.orm.InventoryDB r0 = r0.db     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r0.setTransactionSuccessful()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                com.lumiyaviewer.lumiya.orm.InventoryDB r0 = r0.db     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r0.endTransaction()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r5 = r4
-                r6 = r4
-            L_0x002d:
-                java.util.concurrent.BlockingQueue<com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry> r0 = r11.commitEntryQueue     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                java.lang.Object r0 = r0.take()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r0 = (com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry) r0     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r7 = r0
-                r0 = r6
-            L_0x0037:
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r6 = r11.stopEntry     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                if (r7 != r6) goto L_0x0093
-            L_0x003b:
-                boolean r0 = java.lang.Thread.interrupted()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                if (r0 != 0) goto L_0x0105
-                r0 = r3
-            L_0x0042:
-                r6 = r0
-            L_0x0043:
-                if (r5 == 0) goto L_0x006d
-                java.lang.String r5 = "InvFetch: commit thread ending transaction (success: %s, count %d)."
-                r0 = 2
-                java.lang.Object[] r7 = new java.lang.Object[r0]
-                if (r6 == 0) goto L_0x00f6
-                java.lang.String r0 = "true"
-            L_0x0050:
-                r7[r4] = r0
-                int r0 = r8.size()
-                java.lang.Integer r0 = java.lang.Integer.valueOf(r0)
-                r7[r3] = r0
-                com.lumiyaviewer.lumiya.Debug.Printf(r5, r7)
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
-                com.lumiyaviewer.lumiya.orm.InventoryDB r0 = r0.db
-                r0.setTransactionSuccessful()
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
-                com.lumiyaviewer.lumiya.orm.InventoryDB r0 = r0.db
-                r0.endTransaction()
-            L_0x006d:
-                if (r2 == 0) goto L_0x0072
-                r2.close()
-            L_0x0072:
-                if (r1 == 0) goto L_0x0077
-                r1.close()
-            L_0x0077:
-                if (r6 == 0) goto L_0x0092
-                boolean r0 = r11.aborted
-                r0 = r0 ^ 1
-                if (r0 == 0) goto L_0x0092
-                java.lang.String r0 = "InvFetch: commit thread successful, calling retainChildren."
-                java.lang.Object[] r1 = new java.lang.Object[r4]
-                com.lumiyaviewer.lumiya.Debug.Printf(r0, r1)
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
-                com.lumiyaviewer.lumiya.orm.InventoryDB r0 = r0.db
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r1 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this
-                long r2 = r1.folderId
-                r0.retainChildren(r2, r8)
-            L_0x0092:
-                return
-            L_0x0093:
-                if (r5 != 0) goto L_0x009d
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r6 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                com.lumiyaviewer.lumiya.orm.InventoryDB r6 = r6.db     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r6.beginTransaction()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r5 = r3
-            L_0x009d:
-                int r0 = r0 + 1
-                r6 = 16
-                if (r0 < r6) goto L_0x010a
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                com.lumiyaviewer.lumiya.orm.InventoryDB r0 = r0.db     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r0.yieldIfContendedSafely()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r6 = r4
-            L_0x00ab:
-                java.util.UUID r0 = r7.uuid     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r8.add(r0)     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                int r0 = android.os.Build.VERSION.SDK_INT     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r9 = 11
-                if (r0 < r9) goto L_0x00da
-                if (r2 != 0) goto L_0x00c4
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                com.lumiyaviewer.lumiya.orm.InventoryDB r0 = r0.db     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                android.database.sqlite.SQLiteDatabase r0 = r0.getDatabase()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                android.database.sqlite.SQLiteStatement r2 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry.getInsertStatement(r0)     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-            L_0x00c4:
-                if (r1 != 0) goto L_0x0108
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                com.lumiyaviewer.lumiya.orm.InventoryDB r0 = r0.db     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                android.database.sqlite.SQLiteDatabase r0 = r0.getDatabase()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                android.database.sqlite.SQLiteStatement r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry.getUpdateStatement(r0)     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-            L_0x00d2:
-                r7.updateOrInsert(r0, r2)     // Catch:{ InterruptedException -> 0x00fb, DatabaseBindingException -> 0x0100 }
-                r1 = r2
-            L_0x00d6:
-                r2 = r1
-                r1 = r0
-                goto L_0x000b
-            L_0x00da:
-                com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.this     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                com.lumiyaviewer.lumiya.orm.InventoryDB r0 = r0.db     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                android.database.sqlite.SQLiteDatabase r0 = r0.getDatabase()     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r7.updateOrInsert(r0)     // Catch:{ InterruptedException -> 0x00ef, DatabaseBindingException -> 0x00e8 }
-                r0 = r1
-                r1 = r2
-                goto L_0x00d6
-            L_0x00e8:
-                r0 = move-exception
-            L_0x00e9:
-                com.lumiyaviewer.lumiya.Debug.Warning(r0)
-                r6 = r4
-                goto L_0x0043
-            L_0x00ef:
-                r0 = move-exception
-            L_0x00f0:
-                com.lumiyaviewer.lumiya.Debug.Warning(r0)
-                r6 = r4
-                goto L_0x0043
-            L_0x00f6:
-                java.lang.String r0 = "false"
-                goto L_0x0050
-            L_0x00fb:
-                r1 = move-exception
-                r10 = r1
-                r1 = r0
-                r0 = r10
-                goto L_0x00f0
-            L_0x0100:
-                r1 = move-exception
-                r10 = r1
-                r1 = r0
-                r0 = r10
-                goto L_0x00e9
-            L_0x0105:
-                r0 = r4
-                goto L_0x0042
-            L_0x0108:
-                r0 = r1
-                goto L_0x00d2
-            L_0x010a:
-                r6 = r0
-                goto L_0x00ab
-            L_0x010c:
-                r7 = r0
-                r0 = r6
-                goto L_0x0037
-            */
-            throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryHTTPFetchRequest.DatabaseCommitThread.run():void");
-        }
-
-        /* access modifiers changed from: package-private */
-        public void stopAndWait(boolean z) throws InterruptedException {
-            if (!z) {
-                this.aborted = true;
+        public void run()
+        {
+            SQLiteStatement sqlitestatement;
+            Object obj1;
+            HashSet hashset;
+            boolean flag;
+            int i;
+            sqlitestatement = null;
+            hashset = new HashSet();
+            obj1 = null;
+            flag = false;
+            i = 0;
+_L6:
+            SQLiteStatement sqlitestatement1;
+            SQLiteStatement sqlitestatement2;
+            boolean flag1;
+            boolean flag2;
+            boolean flag3;
+            flag3 = flag;
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag;
+            if (Thread.interrupted()) goto _L2; else goto _L1
+_L1:
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag;
+            SLInventoryEntry slinventoryentry = (SLInventoryEntry)commitEntryQueue.poll();
+            if (slinventoryentry != null)
+            {
+                break MISSING_BLOCK_LABEL_656;
             }
-            this.commitEntryQueue.put(this.stopEntry);
+            flag3 = flag;
+            if (!flag)
+            {
+                break MISSING_BLOCK_LABEL_139;
+            }
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag;
+            db.setTransactionSuccessful();
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag;
+            db.endTransaction();
+            flag3 = false;
+            i = 0;
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag3;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag3;
+            slinventoryentry = (SLInventoryEntry)commitEntryQueue.take();
+_L12:
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag3;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag3;
+            if (slinventoryentry != stopEntry) goto _L3; else goto _L2
+_L2:
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag3;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag3;
+            boolean flag4 = Thread.interrupted();
+            if (!flag4)
+            {
+                flag = true;
+            } else
+            {
+                flag = false;
+            }
+            if (flag3)
+            {
+                Object obj;
+                InterruptedException interruptedexception;
+                if (flag)
+                {
+                    obj = "true";
+                } else
+                {
+                    obj = "false";
+                }
+                Debug.Printf("InvFetch: commit thread ending transaction (success: %s, count %d).", new Object[] {
+                    obj, Integer.valueOf(hashset.size())
+                });
+                db.setTransactionSuccessful();
+                db.endTransaction();
+            }
+            if (obj1 != null)
+            {
+                ((SQLiteStatement) (obj1)).close();
+            }
+            if (sqlitestatement != null)
+            {
+                sqlitestatement.close();
+            }
+            if (flag && aborted ^ true)
+            {
+                Debug.Printf("InvFetch: commit thread successful, calling retainChildren.", new Object[0]);
+                db.retainChildren(folderId, hashset);
+            }
+            return;
+_L3:
+            flag = flag3;
+            if (flag3)
+            {
+                break MISSING_BLOCK_LABEL_371;
+            }
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag3;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag3;
+            db.beginTransaction();
+            flag = true;
+            i++;
+            if (i < 16)
+            {
+                break MISSING_BLOCK_LABEL_411;
+            }
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag;
+            db.yieldIfContendedSafely();
+            i = 0;
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag;
+            hashset.add(slinventoryentry.uuid);
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag;
+            if (android.os.Build.VERSION.SDK_INT < 11) goto _L5; else goto _L4
+_L4:
+            obj = obj1;
+            if (obj1 != null)
+            {
+                break MISSING_BLOCK_LABEL_494;
+            }
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag;
+            obj = SLInventoryEntry.getInsertStatement(db.getDatabase());
+            if (sqlitestatement != null)
+            {
+                break MISSING_BLOCK_LABEL_528;
+            }
+            sqlitestatement1 = ((SQLiteStatement) (obj));
+            flag1 = flag;
+            sqlitestatement2 = ((SQLiteStatement) (obj));
+            flag2 = flag;
+            obj1 = SLInventoryEntry.getUpdateStatement(db.getDatabase());
+            sqlitestatement = ((SQLiteStatement) (obj1));
+            slinventoryentry.updateOrInsert(sqlitestatement, ((SQLiteStatement) (obj)));
+_L7:
+            obj1 = obj;
+              goto _L6
+_L5:
+            sqlitestatement1 = ((SQLiteStatement) (obj1));
+            flag1 = flag;
+            sqlitestatement2 = ((SQLiteStatement) (obj1));
+            flag2 = flag;
+            slinventoryentry.updateOrInsert(db.getDatabase());
+            obj = obj1;
+              goto _L7
+            obj1;
+            flag = flag1;
+            obj = sqlitestatement1;
+_L11:
+            Debug.Warning(((Throwable) (obj1)));
+            flag1 = false;
+            obj1 = obj;
+            flag3 = flag;
+            flag = flag1;
+            break MISSING_BLOCK_LABEL_217;
+            interruptedexception;
+            flag = flag2;
+            obj = sqlitestatement2;
+_L9:
+            Debug.Warning(interruptedexception);
+            flag1 = false;
+            interruptedexception = ((InterruptedException) (obj));
+            flag3 = flag;
+            flag = flag1;
+            break MISSING_BLOCK_LABEL_217;
+            interruptedexception;
+            if (true) goto _L9; else goto _L8
+_L8:
+            interruptedexception;
+            if (true) goto _L11; else goto _L10
+_L10:
+            flag3 = flag;
+              goto _L12
+        }
+
+        void stopAndWait(boolean flag)
+            throws InterruptedException
+        {
+            if (!flag)
+            {
+                aborted = true;
+            }
+            commitEntryQueue.put(stopEntry);
             join();
         }
+
+        private DatabaseCommitThread()
+        {
+            this$0 = SLInventoryHTTPFetchRequest.this;
+            super();
+            commitEntryQueue = new LinkedBlockingQueue(100);
+            stopEntry = new SLInventoryEntry();
+            aborted = false;
+        }
+
+        DatabaseCommitThread(DatabaseCommitThread databasecommitthread)
+        {
+            this();
+        }
     }
 
-    private class FolderDataContentHandler extends LLSDStreamingParser.LLSDDefaultContentHandler {
-        /* access modifiers changed from: private */
-        public final DatabaseCommitThread commitThread;
+    private class FolderDataContentHandler extends com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDDefaultContentHandler
+    {
+
+        private final DatabaseCommitThread commitThread;
         private UUID gotUUID;
         private int gotVersion;
+        final SLInventoryHTTPFetchRequest this$0;
 
-        private FolderDataContentHandler(DatabaseCommitThread databaseCommitThread) {
-            this.commitThread = databaseCommitThread;
+        static DatabaseCommitThread _2D_get0(FolderDataContentHandler folderdatacontenthandler)
+        {
+            return folderdatacontenthandler.commitThread;
         }
 
-        /* synthetic */ FolderDataContentHandler(SLInventoryHTTPFetchRequest sLInventoryHTTPFetchRequest, DatabaseCommitThread databaseCommitThread, FolderDataContentHandler folderDataContentHandler) {
-            this(databaseCommitThread);
-        }
+        public com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler onArrayBegin(String s)
+            throws LLSDXMLException
+        {
+            if (s.equals("categories"))
+            {
+                return new com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDDefaultContentHandler() {
 
-        public LLSDStreamingParser.LLSDContentHandler onArrayBegin(String str) throws LLSDXMLException {
-            return str.equals("categories") ? new LLSDStreamingParser.LLSDDefaultContentHandler() {
-                public LLSDStreamingParser.LLSDContentHandler onMapBegin(String str) throws LLSDXMLException {
-                    return new FolderEntryContentHandler(FolderDataContentHandler.this.commitThread);
-                }
-            } : str.equals("items") ? new LLSDStreamingParser.LLSDDefaultContentHandler() {
-                public LLSDStreamingParser.LLSDContentHandler onMapBegin(String str) throws LLSDXMLException {
-                    return new ItemEntryContentHandler(FolderDataContentHandler.this.commitThread);
-                }
-            } : super.onArrayBegin(str);
-        }
+                    final FolderDataContentHandler this$1;
 
-        public void onMapEnd(String str) throws LLSDXMLException, InterruptedException {
-            if (this.gotUUID != null && this.gotUUID.equals(SLInventoryHTTPFetchRequest.this.folderUUID) && this.gotVersion != SLInventoryHTTPFetchRequest.this.folderEntry.version) {
-                SLInventoryHTTPFetchRequest.this.folderEntry.version = this.gotVersion;
-                this.commitThread.addEntry(SLInventoryHTTPFetchRequest.this.folderEntry);
+                    public com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler onMapBegin(String s)
+                        throws LLSDXMLException
+                    {
+                        return new FolderEntryContentHandler(FolderDataContentHandler._2D_get0(FolderDataContentHandler.this));
+                    }
+
+            
+            {
+                this$1 = FolderDataContentHandler.this;
+                super();
+            }
+                };
+            }
+            if (s.equals("items"))
+            {
+                return new com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDDefaultContentHandler() {
+
+                    final FolderDataContentHandler this$1;
+
+                    public com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler onMapBegin(String s)
+                        throws LLSDXMLException
+                    {
+                        return new ItemEntryContentHandler(FolderDataContentHandler._2D_get0(FolderDataContentHandler.this));
+                    }
+
+            
+            {
+                this$1 = FolderDataContentHandler.this;
+                super();
+            }
+                };
+            } else
+            {
+                return super.onArrayBegin(s);
             }
         }
 
-        public void onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
-            Debug.Printf("InvFetch: FolderDataContentHandler: key '%s' value '%s'", str, lLSDNode);
-            if (str.equals("version")) {
-                this.gotVersion = lLSDNode.asInt();
-            } else if (str.equals("folder_id")) {
-                this.gotUUID = lLSDNode.asUUID();
+        public void onMapEnd(String s)
+            throws LLSDXMLException, InterruptedException
+        {
+            if (gotUUID != null && gotUUID.equals(folderUUID) && gotVersion != folderEntry.version)
+            {
+                folderEntry.version = gotVersion;
+                commitThread.addEntry(folderEntry);
             }
+        }
+
+        public void onPrimitiveValue(String s, LLSDNode llsdnode)
+            throws LLSDXMLException, LLSDValueTypeException
+        {
+            Debug.Printf("InvFetch: FolderDataContentHandler: key '%s' value '%s'", new Object[] {
+                s, llsdnode
+            });
+            if (s.equals("version"))
+            {
+                gotVersion = llsdnode.asInt();
+            } else
+            if (s.equals("folder_id"))
+            {
+                gotUUID = llsdnode.asUUID();
+                return;
+            }
+        }
+
+        private FolderDataContentHandler(DatabaseCommitThread databasecommitthread)
+        {
+            this$0 = SLInventoryHTTPFetchRequest.this;
+            super();
+            commitThread = databasecommitthread;
+        }
+
+        FolderDataContentHandler(DatabaseCommitThread databasecommitthread, FolderDataContentHandler folderdatacontenthandler)
+        {
+            this(databasecommitthread);
         }
     }
 
-    private class FolderEntryContentHandler extends LLSDStreamingParser.LLSDDefaultContentHandler {
+    private class FolderEntryContentHandler extends com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDDefaultContentHandler
+    {
 
-        /* renamed from: -com-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues  reason: not valid java name */
-        private static final /* synthetic */ int[] f111comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues = null;
-        final /* synthetic */ int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$FolderValueKey;
+        private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues[];
+        final int $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$FolderValueKey[];
         private final DatabaseCommitThread commitThread;
         private final SLInventoryEntry entry = new SLInventoryEntry();
+        final SLInventoryHTTPFetchRequest this$0;
 
-        /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues  reason: not valid java name */
-        private static /* synthetic */ int[] m189getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues() {
-            if (f111comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues != null) {
-                return f111comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues;
+        private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues()
+        {
+            if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues != null)
+            {
+                return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues;
             }
-            int[] iArr = new int[FolderValueKey.values().length];
-            try {
-                iArr[FolderValueKey.agent_id.ordinal()] = 1;
-            } catch (NoSuchFieldError e) {
+            int ai[] = new int[FolderValueKey.values().length];
+            try
+            {
+                ai[FolderValueKey.agent_id.ordinal()] = 1;
             }
-            try {
-                iArr[FolderValueKey.category_id.ordinal()] = 2;
-            } catch (NoSuchFieldError e2) {
+            catch (NoSuchFieldError nosuchfielderror8) { }
+            try
+            {
+                ai[FolderValueKey.category_id.ordinal()] = 2;
             }
-            try {
-                iArr[FolderValueKey.folder_id.ordinal()] = 3;
-            } catch (NoSuchFieldError e3) {
+            catch (NoSuchFieldError nosuchfielderror7) { }
+            try
+            {
+                ai[FolderValueKey.folder_id.ordinal()] = 3;
             }
-            try {
-                iArr[FolderValueKey.name.ordinal()] = 4;
-            } catch (NoSuchFieldError e4) {
+            catch (NoSuchFieldError nosuchfielderror6) { }
+            try
+            {
+                ai[FolderValueKey.name.ordinal()] = 4;
             }
-            try {
-                iArr[FolderValueKey.parent_id.ordinal()] = 5;
-            } catch (NoSuchFieldError e5) {
+            catch (NoSuchFieldError nosuchfielderror5) { }
+            try
+            {
+                ai[FolderValueKey.parent_id.ordinal()] = 5;
             }
-            try {
-                iArr[FolderValueKey.preferred_type.ordinal()] = 6;
-            } catch (NoSuchFieldError e6) {
+            catch (NoSuchFieldError nosuchfielderror4) { }
+            try
+            {
+                ai[FolderValueKey.preferred_type.ordinal()] = 6;
             }
-            try {
-                iArr[FolderValueKey.type.ordinal()] = 7;
-            } catch (NoSuchFieldError e7) {
+            catch (NoSuchFieldError nosuchfielderror3) { }
+            try
+            {
+                ai[FolderValueKey.type.ordinal()] = 7;
             }
-            try {
-                iArr[FolderValueKey.type_default.ordinal()] = 8;
-            } catch (NoSuchFieldError e8) {
+            catch (NoSuchFieldError nosuchfielderror2) { }
+            try
+            {
+                ai[FolderValueKey.type_default.ordinal()] = 8;
             }
-            try {
-                iArr[FolderValueKey.version.ordinal()] = 9;
-            } catch (NoSuchFieldError e9) {
+            catch (NoSuchFieldError nosuchfielderror1) { }
+            try
+            {
+                ai[FolderValueKey.version.ordinal()] = 9;
             }
-            f111comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues = iArr;
-            return iArr;
+            catch (NoSuchFieldError nosuchfielderror) { }
+            _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues = ai;
+            return ai;
         }
 
-        FolderEntryContentHandler(DatabaseCommitThread databaseCommitThread) {
-            this.commitThread = databaseCommitThread;
-            this.entry.isFolder = true;
+        public void onMapEnd(String s)
+            throws LLSDXMLException, InterruptedException
+        {
+            if (entry.parentUUID == null)
+            {
+                entry.parentUUID = folderEntry.parentUUID;
+                entry.parent_id = folderEntry.getId();
+            }
+            if (entry.agentUUID == null)
+            {
+                entry.agentUUID = folderEntry.agentUUID;
+            }
+            commitThread.addEntry(entry);
         }
 
-        public void onMapEnd(String str) throws LLSDXMLException, InterruptedException {
-            if (this.entry.parentUUID == null) {
-                this.entry.parentUUID = SLInventoryHTTPFetchRequest.this.folderEntry.parentUUID;
-                this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId();
-            }
-            if (this.entry.agentUUID == null) {
-                this.entry.agentUUID = SLInventoryHTTPFetchRequest.this.folderEntry.agentUUID;
-            }
-            this.commitThread.addEntry(this.entry);
-        }
+        public void onPrimitiveValue(String s, LLSDNode llsdnode)
+            throws LLSDXMLException, LLSDValueTypeException
+        {
+            FolderValueKey foldervaluekey = FolderValueKey.byTag(s);
+            if (foldervaluekey != null)
+            {
+                switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues()[foldervaluekey.ordinal()])
+                {
+                case 6: // '\006'
+                default:
+                    return;
 
-        public void onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
-            FolderValueKey byTag = FolderValueKey.byTag(str);
-            if (byTag != null) {
-                switch (m189getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues()[byTag.ordinal()]) {
-                    case 1:
-                        this.entry.agentUUID = lLSDNode.asUUID();
+                case 1: // '\001'
+                    entry.agentUUID = llsdnode.asUUID();
+                    return;
+
+                case 2: // '\002'
+                    entry.uuid = llsdnode.asUUID();
+                    return;
+
+                case 3: // '\003'
+                    entry.uuid = llsdnode.asUUID();
+                    return;
+
+                case 4: // '\004'
+                    entry.name = llsdnode.asString();
+                    return;
+
+                case 5: // '\005'
+                    entry.parentUUID = llsdnode.asUUID();
+                    if (entry.parentUUID.equals(folderUUID))
+                    {
+                        entry.parent_id = folderEntry.getId();
                         return;
-                    case 2:
-                        this.entry.uuid = lLSDNode.asUUID();
+                    }
+                    s = db.findEntry(entry.parentUUID);
+                    if (s != null)
+                    {
+                        entry.parent_id = s.getId();
                         return;
-                    case 3:
-                        this.entry.uuid = lLSDNode.asUUID();
+                    } else
+                    {
+                        entry.parent_id = 0L;
                         return;
-                    case 4:
-                        this.entry.name = lLSDNode.asString();
+                    }
+
+                case 7: // '\007'
+                    if (llsdnode.isInt())
+                    {
+                        entry.typeDefault = llsdnode.asInt();
                         return;
-                    case 5:
-                        this.entry.parentUUID = lLSDNode.asUUID();
-                        if (this.entry.parentUUID.equals(SLInventoryHTTPFetchRequest.this.folderUUID)) {
-                            this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId();
-                            return;
-                        }
-                        SLInventoryEntry findEntry = SLInventoryHTTPFetchRequest.this.db.findEntry(this.entry.parentUUID);
-                        if (findEntry != null) {
-                            this.entry.parent_id = findEntry.getId();
-                            return;
-                        }
-                        this.entry.parent_id = 0;
+                    }
+                    s = SLAssetType.getByString(llsdnode.asString());
+                    if (s != SLAssetType.AT_UNKNOWN)
+                    {
+                        entry.typeDefault = s.getInventoryType().getTypeCode();
                         return;
-                    case 7:
-                        if (lLSDNode.isInt()) {
-                            this.entry.typeDefault = lLSDNode.asInt();
-                            return;
-                        }
-                        SLAssetType byString = SLAssetType.getByString(lLSDNode.asString());
-                        if (byString != SLAssetType.AT_UNKNOWN) {
-                            this.entry.typeDefault = byString.getInventoryType().getTypeCode();
-                            return;
-                        }
-                        this.entry.typeDefault = SLInventoryType.getByString(lLSDNode.asString()).getTypeCode();
+                    } else
+                    {
+                        entry.typeDefault = SLInventoryType.getByString(llsdnode.asString()).getTypeCode();
                         return;
-                    case 8:
-                        this.entry.typeDefault = lLSDNode.asInt();
-                        return;
-                    case 9:
-                        this.entry.version = lLSDNode.asInt();
-                        return;
-                    default:
-                        return;
+                    }
+
+                case 8: // '\b'
+                    entry.typeDefault = llsdnode.asInt();
+                    return;
+
+                case 9: // '\t'
+                    entry.version = llsdnode.asInt();
+                    return;
                 }
-            } else {
-                Debug.Printf("InvFetch: Folder unknown key '%s'", str);
+            } else
+            {
+                Debug.Printf("InvFetch: Folder unknown key '%s'", new Object[] {
+                    s
+                });
+                return;
             }
+        }
+
+        FolderEntryContentHandler(DatabaseCommitThread databasecommitthread)
+        {
+            this$0 = SLInventoryHTTPFetchRequest.this;
+            super();
+            commitThread = databasecommitthread;
+            entry.isFolder = true;
         }
     }
 
-    private enum FolderValueKey {
-        category_id,
-        folder_id,
-        agent_id,
-        name,
-        type_default,
-        type,
-        version,
-        parent_id,
-        preferred_type;
-        
-        private static final Map<String, FolderValueKey> tagMap = null;
+    private static final class FolderValueKey extends Enum
+    {
 
-        static {
-            int i;
+        private static final FolderValueKey $VALUES[];
+        public static final FolderValueKey agent_id;
+        public static final FolderValueKey category_id;
+        public static final FolderValueKey folder_id;
+        public static final FolderValueKey name;
+        public static final FolderValueKey parent_id;
+        public static final FolderValueKey preferred_type;
+        private static final Map tagMap;
+        public static final FolderValueKey type;
+        public static final FolderValueKey type_default;
+        public static final FolderValueKey version;
+
+        public static FolderValueKey byTag(String s)
+        {
+            return (FolderValueKey)tagMap.get(s);
+        }
+
+        public static FolderValueKey valueOf(String s)
+        {
+            return (FolderValueKey)Enum.valueOf(com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryHTTPFetchRequest$FolderValueKey, s);
+        }
+
+        public static FolderValueKey[] values()
+        {
+            return $VALUES;
+        }
+
+        static 
+        {
+            int i = 0;
+            category_id = new FolderValueKey("category_id", 0);
+            folder_id = new FolderValueKey("folder_id", 1);
+            agent_id = new FolderValueKey("agent_id", 2);
+            name = new FolderValueKey("name", 3);
+            type_default = new FolderValueKey("type_default", 4);
+            type = new FolderValueKey("type", 5);
+            version = new FolderValueKey("version", 6);
+            parent_id = new FolderValueKey("parent_id", 7);
+            preferred_type = new FolderValueKey("preferred_type", 8);
+            $VALUES = (new FolderValueKey[] {
+                category_id, folder_id, agent_id, name, type_default, type, version, parent_id, preferred_type
+            });
             tagMap = new HashMap(values().length * 2);
-            for (FolderValueKey folderValueKey : values()) {
-                tagMap.put(folderValueKey.toString(), folderValueKey);
+            FolderValueKey afoldervaluekey[] = values();
+            for (int j = afoldervaluekey.length; i < j; i++)
+            {
+                FolderValueKey foldervaluekey = afoldervaluekey[i];
+                tagMap.put(foldervaluekey.toString(), foldervaluekey);
             }
+
         }
 
-        public static FolderValueKey byTag(String str) {
-            return tagMap.get(str);
+        private FolderValueKey(String s, int i)
+        {
+            super(s, i);
         }
     }
 
-    private class ItemEntryContentHandler extends LLSDStreamingParser.LLSDDefaultContentHandler {
+    private class ItemEntryContentHandler extends com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDDefaultContentHandler
+    {
 
-        /* renamed from: -com-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues  reason: not valid java name */
-        private static final /* synthetic */ int[] f112comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues = null;
-        final /* synthetic */ int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$ItemValueKey;
+        private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues[];
+        final int $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$ItemValueKey[];
         private final DatabaseCommitThread commitThread;
-        /* access modifiers changed from: private */
-        public final SLInventoryEntry entry;
-        private final LLSDStreamingParser.LLSDContentHandler permissionsHandler = new LLSDStreamingParser.LLSDDefaultContentHandler() {
+        private final SLInventoryEntry entry = new SLInventoryEntry();
+        private final com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler permissionsHandler = new _cls1();
+        private final com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler saleInfoHandler = new _cls2();
+        final SLInventoryHTTPFetchRequest this$0;
 
-            /* renamed from: -com-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues  reason: not valid java name */
-            private static final /* synthetic */ int[] f113comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues = null;
-            final /* synthetic */ int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$PermissionsValueKey;
+        static SLInventoryEntry _2D_get0(ItemEntryContentHandler itementrycontenthandler)
+        {
+            return itementrycontenthandler.entry;
+        }
 
-            /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues  reason: not valid java name */
-            private static /* synthetic */ int[] m192getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues() {
-                if (f113comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues != null) {
-                    return f113comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues;
-                }
-                int[] iArr = new int[PermissionsValueKey.values().length];
-                try {
-                    iArr[PermissionsValueKey.base_mask.ordinal()] = 1;
-                } catch (NoSuchFieldError e) {
-                }
-                try {
-                    iArr[PermissionsValueKey.creator_id.ordinal()] = 2;
-                } catch (NoSuchFieldError e2) {
-                }
-                try {
-                    iArr[PermissionsValueKey.everyone_mask.ordinal()] = 3;
-                } catch (NoSuchFieldError e3) {
-                }
-                try {
-                    iArr[PermissionsValueKey.group_id.ordinal()] = 4;
-                } catch (NoSuchFieldError e4) {
-                }
-                try {
-                    iArr[PermissionsValueKey.group_mask.ordinal()] = 5;
-                } catch (NoSuchFieldError e5) {
-                }
-                try {
-                    iArr[PermissionsValueKey.is_owner_group.ordinal()] = 6;
-                } catch (NoSuchFieldError e6) {
-                }
-                try {
-                    iArr[PermissionsValueKey.last_owner_id.ordinal()] = 7;
-                } catch (NoSuchFieldError e7) {
-                }
-                try {
-                    iArr[PermissionsValueKey.next_owner_mask.ordinal()] = 8;
-                } catch (NoSuchFieldError e8) {
-                }
-                try {
-                    iArr[PermissionsValueKey.owner_id.ordinal()] = 9;
-                } catch (NoSuchFieldError e9) {
-                }
-                try {
-                    iArr[PermissionsValueKey.owner_mask.ordinal()] = 10;
-                } catch (NoSuchFieldError e10) {
-                }
-                f113comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues = iArr;
-                return iArr;
+        private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues()
+        {
+            if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues != null)
+            {
+                return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues;
             }
+            int ai[] = new int[ItemValueKey.values().length];
+            try
+            {
+                ai[ItemValueKey.agent_id.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError nosuchfielderror9) { }
+            try
+            {
+                ai[ItemValueKey.asset_id.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError nosuchfielderror8) { }
+            try
+            {
+                ai[ItemValueKey.created_at.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError nosuchfielderror7) { }
+            try
+            {
+                ai[ItemValueKey.desc.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError nosuchfielderror6) { }
+            try
+            {
+                ai[ItemValueKey.flags.ordinal()] = 5;
+            }
+            catch (NoSuchFieldError nosuchfielderror5) { }
+            try
+            {
+                ai[ItemValueKey.inv_type.ordinal()] = 6;
+            }
+            catch (NoSuchFieldError nosuchfielderror4) { }
+            try
+            {
+                ai[ItemValueKey.item_id.ordinal()] = 7;
+            }
+            catch (NoSuchFieldError nosuchfielderror3) { }
+            try
+            {
+                ai[ItemValueKey.name.ordinal()] = 8;
+            }
+            catch (NoSuchFieldError nosuchfielderror2) { }
+            try
+            {
+                ai[ItemValueKey.parent_id.ordinal()] = 9;
+            }
+            catch (NoSuchFieldError nosuchfielderror1) { }
+            try
+            {
+                ai[ItemValueKey.type.ordinal()] = 10;
+            }
+            catch (NoSuchFieldError nosuchfielderror) { }
+            _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues = ai;
+            return ai;
+        }
 
-            public void onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
-                PermissionsValueKey byTag = PermissionsValueKey.byTag(str);
-                if (byTag != null) {
-                    switch (m192getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues()[byTag.ordinal()]) {
-                        case 1:
-                            ItemEntryContentHandler.this.entry.baseMask = lLSDNode.asInt();
-                            return;
-                        case 2:
-                            ItemEntryContentHandler.this.entry.creatorUUID = lLSDNode.asUUID();
-                            return;
-                        case 3:
-                            ItemEntryContentHandler.this.entry.everyoneMask = lLSDNode.asInt();
-                            return;
-                        case 4:
-                            ItemEntryContentHandler.this.entry.groupUUID = lLSDNode.asUUID();
-                            return;
-                        case 5:
-                            ItemEntryContentHandler.this.entry.groupMask = lLSDNode.asInt();
-                            return;
-                        case 6:
-                            ItemEntryContentHandler.this.entry.isGroupOwned = lLSDNode.asBoolean();
-                            return;
-                        case 7:
-                            ItemEntryContentHandler.this.entry.lastOwnerUUID = lLSDNode.asUUID();
-                            return;
-                        case 8:
-                            ItemEntryContentHandler.this.entry.nextOwnerMask = lLSDNode.asInt();
-                            return;
-                        case 9:
-                            ItemEntryContentHandler.this.entry.ownerUUID = lLSDNode.asUUID();
-                            return;
-                        case 10:
-                            ItemEntryContentHandler.this.entry.ownerMask = lLSDNode.asInt();
-                            return;
-                        default:
-                            return;
+        public com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler onMapBegin(String s)
+            throws LLSDXMLException
+        {
+            if (s.equals("permissions"))
+            {
+                return permissionsHandler;
+            }
+            if (s.equals("sale_info"))
+            {
+                return saleInfoHandler;
+            } else
+            {
+                return super.onMapBegin(s);
+            }
+        }
+
+        public void onMapEnd(String s)
+            throws LLSDXMLException, InterruptedException
+        {
+            if (entry.parentUUID == null)
+            {
+                entry.parentUUID = folderEntry.parentUUID;
+                entry.parent_id = folderEntry.getId();
+            }
+            if (entry.agentUUID == null)
+            {
+                entry.agentUUID = folderEntry.agentUUID;
+            }
+            commitThread.addEntry(entry);
+        }
+
+        public void onPrimitiveValue(String s, LLSDNode llsdnode)
+            throws LLSDXMLException, LLSDValueTypeException
+        {
+            ItemValueKey itemvaluekey = ItemValueKey.byTag(s);
+            if (itemvaluekey != null)
+            {
+                switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues()[itemvaluekey.ordinal()])
+                {
+                default:
+                    return;
+
+                case 1: // '\001'
+                    entry.agentUUID = llsdnode.asUUID();
+                    return;
+
+                case 7: // '\007'
+                    entry.uuid = llsdnode.asUUID();
+                    return;
+
+                case 8: // '\b'
+                    entry.name = llsdnode.asString();
+                    return;
+
+                case 2: // '\002'
+                    entry.assetUUID = llsdnode.asUUID();
+                    return;
+
+                case 9: // '\t'
+                    entry.parentUUID = llsdnode.asUUID();
+                    if (entry.parentUUID.equals(folderUUID))
+                    {
+                        entry.parent_id = folderEntry.getId();
+                        return;
                     }
-                } else {
-                    Debug.Printf("InvFetch: Permissions unknown key '%s'", str);
-                }
-            }
-        };
-        private final LLSDStreamingParser.LLSDContentHandler saleInfoHandler = new LLSDStreamingParser.LLSDDefaultContentHandler() {
-            public void onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
-                if (str.equals("sale_type")) {
-                    if (lLSDNode.isString()) {
-                        ItemEntryContentHandler.this.entry.saleType = SLSaleType.getByString(lLSDNode.asString()).getTypeCode();
+                    s = db.findEntry(entry.parentUUID);
+                    if (s != null)
+                    {
+                        entry.parent_id = s.getId();
+                        return;
+                    } else
+                    {
+                        entry.parent_id = 0L;
                         return;
                     }
-                    ItemEntryContentHandler.this.entry.saleType = lLSDNode.asInt();
-                } else if (str.equals("sale_price")) {
-                    ItemEntryContentHandler.this.entry.salePrice = lLSDNode.asInt();
-                } else {
-                    Debug.Printf("InvFetch: Sale info unknown key '%s'", str);
+
+                case 10: // '\n'
+                    if (llsdnode.isInt())
+                    {
+                        entry.assetType = llsdnode.asInt();
+                        return;
+                    } else
+                    {
+                        entry.assetType = SLAssetType.getByString(llsdnode.asString()).getTypeCode();
+                        return;
+                    }
+
+                case 6: // '\006'
+                    if (llsdnode.isInt())
+                    {
+                        entry.invType = llsdnode.asInt();
+                        return;
+                    } else
+                    {
+                        entry.invType = SLInventoryType.getByString(llsdnode.asString()).getTypeCode();
+                        return;
+                    }
+
+                case 4: // '\004'
+                    entry.description = llsdnode.asString();
+                    return;
+
+                case 3: // '\003'
+                    entry.creationDate = llsdnode.asInt();
+                    return;
+
+                case 5: // '\005'
+                    entry.flags = llsdnode.asInt();
+                    return;
                 }
+            } else
+            {
+                Debug.Printf("InvFetch: Item unknown key '%s'", new Object[] {
+                    s
+                });
+                return;
             }
-        };
-
-        /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-inventory-SLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues  reason: not valid java name */
-        private static /* synthetic */ int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues() {
-            if (f112comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues != null) {
-                return f112comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues;
-            }
-            int[] iArr = new int[ItemValueKey.values().length];
-            try {
-                iArr[ItemValueKey.agent_id.ordinal()] = 1;
-            } catch (NoSuchFieldError e) {
-            }
-            try {
-                iArr[ItemValueKey.asset_id.ordinal()] = 2;
-            } catch (NoSuchFieldError e2) {
-            }
-            try {
-                iArr[ItemValueKey.created_at.ordinal()] = 3;
-            } catch (NoSuchFieldError e3) {
-            }
-            try {
-                iArr[ItemValueKey.desc.ordinal()] = 4;
-            } catch (NoSuchFieldError e4) {
-            }
-            try {
-                iArr[ItemValueKey.flags.ordinal()] = 5;
-            } catch (NoSuchFieldError e5) {
-            }
-            try {
-                iArr[ItemValueKey.inv_type.ordinal()] = 6;
-            } catch (NoSuchFieldError e6) {
-            }
-            try {
-                iArr[ItemValueKey.item_id.ordinal()] = 7;
-            } catch (NoSuchFieldError e7) {
-            }
-            try {
-                iArr[ItemValueKey.name.ordinal()] = 8;
-            } catch (NoSuchFieldError e8) {
-            }
-            try {
-                iArr[ItemValueKey.parent_id.ordinal()] = 9;
-            } catch (NoSuchFieldError e9) {
-            }
-            try {
-                iArr[ItemValueKey.type.ordinal()] = 10;
-            } catch (NoSuchFieldError e10) {
-            }
-            f112comlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues = iArr;
-            return iArr;
         }
 
-        ItemEntryContentHandler(DatabaseCommitThread databaseCommitThread) {
-            this.commitThread = databaseCommitThread;
-            this.entry = new SLInventoryEntry();
-            this.entry.isFolder = false;
-        }
-
-        public LLSDStreamingParser.LLSDContentHandler onMapBegin(String str) throws LLSDXMLException {
-            return str.equals("permissions") ? this.permissionsHandler : str.equals("sale_info") ? this.saleInfoHandler : super.onMapBegin(str);
-        }
-
-        public void onMapEnd(String str) throws LLSDXMLException, InterruptedException {
-            if (this.entry.parentUUID == null) {
-                this.entry.parentUUID = SLInventoryHTTPFetchRequest.this.folderEntry.parentUUID;
-                this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId();
-            }
-            if (this.entry.agentUUID == null) {
-                this.entry.agentUUID = SLInventoryHTTPFetchRequest.this.folderEntry.agentUUID;
-            }
-            this.commitThread.addEntry(this.entry);
-        }
-
-        public void onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
-            ItemValueKey byTag = ItemValueKey.byTag(str);
-            if (byTag != null) {
-                switch (m191getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues()[byTag.ordinal()]) {
-                    case 1:
-                        this.entry.agentUUID = lLSDNode.asUUID();
-                        return;
-                    case 2:
-                        this.entry.assetUUID = lLSDNode.asUUID();
-                        return;
-                    case 3:
-                        this.entry.creationDate = lLSDNode.asInt();
-                        return;
-                    case 4:
-                        this.entry.description = lLSDNode.asString();
-                        return;
-                    case 5:
-                        this.entry.flags = lLSDNode.asInt();
-                        return;
-                    case 6:
-                        if (lLSDNode.isInt()) {
-                            this.entry.invType = lLSDNode.asInt();
-                            return;
-                        }
-                        this.entry.invType = SLInventoryType.getByString(lLSDNode.asString()).getTypeCode();
-                        return;
-                    case 7:
-                        this.entry.uuid = lLSDNode.asUUID();
-                        return;
-                    case 8:
-                        this.entry.name = lLSDNode.asString();
-                        return;
-                    case 9:
-                        this.entry.parentUUID = lLSDNode.asUUID();
-                        if (this.entry.parentUUID.equals(SLInventoryHTTPFetchRequest.this.folderUUID)) {
-                            this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId();
-                            return;
-                        }
-                        SLInventoryEntry findEntry = SLInventoryHTTPFetchRequest.this.db.findEntry(this.entry.parentUUID);
-                        if (findEntry != null) {
-                            this.entry.parent_id = findEntry.getId();
-                            return;
-                        }
-                        this.entry.parent_id = 0;
-                        return;
-                    case 10:
-                        if (lLSDNode.isInt()) {
-                            this.entry.assetType = lLSDNode.asInt();
-                            return;
-                        }
-                        this.entry.assetType = SLAssetType.getByString(lLSDNode.asString()).getTypeCode();
-                        return;
-                    default:
-                        return;
-                }
-            } else {
-                Debug.Printf("InvFetch: Item unknown key '%s'", str);
-            }
+        ItemEntryContentHandler(DatabaseCommitThread databasecommitthread)
+        {
+            this$0 = SLInventoryHTTPFetchRequest.this;
+            super();
+            commitThread = databasecommitthread;
+            entry.isFolder = false;
         }
     }
 
-    private enum ItemValueKey {
-        item_id,
-        name,
-        parent_id,
-        agent_id,
-        type,
-        inv_type,
-        desc,
-        flags,
-        created_at,
-        asset_id;
-        
-        private static final Map<String, ItemValueKey> tagMap = null;
+    private static final class ItemValueKey extends Enum
+    {
 
-        static {
-            int i;
+        private static final ItemValueKey $VALUES[];
+        public static final ItemValueKey agent_id;
+        public static final ItemValueKey asset_id;
+        public static final ItemValueKey created_at;
+        public static final ItemValueKey desc;
+        public static final ItemValueKey flags;
+        public static final ItemValueKey inv_type;
+        public static final ItemValueKey item_id;
+        public static final ItemValueKey name;
+        public static final ItemValueKey parent_id;
+        private static final Map tagMap;
+        public static final ItemValueKey type;
+
+        public static ItemValueKey byTag(String s)
+        {
+            return (ItemValueKey)tagMap.get(s);
+        }
+
+        public static ItemValueKey valueOf(String s)
+        {
+            return (ItemValueKey)Enum.valueOf(com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryHTTPFetchRequest$ItemValueKey, s);
+        }
+
+        public static ItemValueKey[] values()
+        {
+            return $VALUES;
+        }
+
+        static 
+        {
+            int i = 0;
+            item_id = new ItemValueKey("item_id", 0);
+            name = new ItemValueKey("name", 1);
+            parent_id = new ItemValueKey("parent_id", 2);
+            agent_id = new ItemValueKey("agent_id", 3);
+            type = new ItemValueKey("type", 4);
+            inv_type = new ItemValueKey("inv_type", 5);
+            desc = new ItemValueKey("desc", 6);
+            flags = new ItemValueKey("flags", 7);
+            created_at = new ItemValueKey("created_at", 8);
+            asset_id = new ItemValueKey("asset_id", 9);
+            $VALUES = (new ItemValueKey[] {
+                item_id, name, parent_id, agent_id, type, inv_type, desc, flags, created_at, asset_id
+            });
             tagMap = new HashMap(values().length * 2);
-            for (ItemValueKey itemValueKey : values()) {
-                tagMap.put(itemValueKey.toString(), itemValueKey);
+            ItemValueKey aitemvaluekey[] = values();
+            for (int j = aitemvaluekey.length; i < j; i++)
+            {
+                ItemValueKey itemvaluekey = aitemvaluekey[i];
+                tagMap.put(itemvaluekey.toString(), itemvaluekey);
             }
+
         }
 
-        public static ItemValueKey byTag(String str) {
-            return tagMap.get(str);
+        private ItemValueKey(String s, int i)
+        {
+            super(s, i);
         }
     }
 
-    private enum PermissionsValueKey {
-        creator_id,
-        group_id,
-        owner_id,
-        last_owner_id,
-        is_owner_group,
-        base_mask,
-        owner_mask,
-        next_owner_mask,
-        group_mask,
-        everyone_mask;
-        
-        private static final Map<String, PermissionsValueKey> tagMap = null;
+    private static final class PermissionsValueKey extends Enum
+    {
 
-        static {
-            int i;
+        private static final PermissionsValueKey $VALUES[];
+        public static final PermissionsValueKey base_mask;
+        public static final PermissionsValueKey creator_id;
+        public static final PermissionsValueKey everyone_mask;
+        public static final PermissionsValueKey group_id;
+        public static final PermissionsValueKey group_mask;
+        public static final PermissionsValueKey is_owner_group;
+        public static final PermissionsValueKey last_owner_id;
+        public static final PermissionsValueKey next_owner_mask;
+        public static final PermissionsValueKey owner_id;
+        public static final PermissionsValueKey owner_mask;
+        private static final Map tagMap;
+
+        public static PermissionsValueKey byTag(String s)
+        {
+            return (PermissionsValueKey)tagMap.get(s);
+        }
+
+        public static PermissionsValueKey valueOf(String s)
+        {
+            return (PermissionsValueKey)Enum.valueOf(com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryHTTPFetchRequest$PermissionsValueKey, s);
+        }
+
+        public static PermissionsValueKey[] values()
+        {
+            return $VALUES;
+        }
+
+        static 
+        {
+            int i = 0;
+            creator_id = new PermissionsValueKey("creator_id", 0);
+            group_id = new PermissionsValueKey("group_id", 1);
+            owner_id = new PermissionsValueKey("owner_id", 2);
+            last_owner_id = new PermissionsValueKey("last_owner_id", 3);
+            is_owner_group = new PermissionsValueKey("is_owner_group", 4);
+            base_mask = new PermissionsValueKey("base_mask", 5);
+            owner_mask = new PermissionsValueKey("owner_mask", 6);
+            next_owner_mask = new PermissionsValueKey("next_owner_mask", 7);
+            group_mask = new PermissionsValueKey("group_mask", 8);
+            everyone_mask = new PermissionsValueKey("everyone_mask", 9);
+            $VALUES = (new PermissionsValueKey[] {
+                creator_id, group_id, owner_id, last_owner_id, is_owner_group, base_mask, owner_mask, next_owner_mask, group_mask, everyone_mask
+            });
             tagMap = new HashMap(values().length * 2);
-            for (PermissionsValueKey permissionsValueKey : values()) {
-                tagMap.put(permissionsValueKey.toString(), permissionsValueKey);
+            PermissionsValueKey apermissionsvaluekey[] = values();
+            for (int j = apermissionsvaluekey.length; i < j; i++)
+            {
+                PermissionsValueKey permissionsvaluekey = apermissionsvaluekey[i];
+                tagMap.put(permissionsvaluekey.toString(), permissionsvaluekey);
             }
+
         }
 
-        public static PermissionsValueKey byTag(String str) {
-            return tagMap.get(str);
+        private PermissionsValueKey(String s, int i)
+        {
+            super(s, i);
         }
     }
 
-    private class RootContentHandler extends LLSDStreamingParser.LLSDDefaultContentHandler {
-        /* access modifiers changed from: private */
-        public final DatabaseCommitThread commitThread;
+    private class RootContentHandler extends com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDDefaultContentHandler
+    {
 
-        private RootContentHandler(DatabaseCommitThread databaseCommitThread) {
-            this.commitThread = databaseCommitThread;
+        private final DatabaseCommitThread commitThread;
+        final SLInventoryHTTPFetchRequest this$0;
+
+        static DatabaseCommitThread _2D_get0(RootContentHandler rootcontenthandler)
+        {
+            return rootcontenthandler.commitThread;
         }
 
-        /* synthetic */ RootContentHandler(SLInventoryHTTPFetchRequest sLInventoryHTTPFetchRequest, DatabaseCommitThread databaseCommitThread, RootContentHandler rootContentHandler) {
-            this(databaseCommitThread);
-        }
+        public com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler onMapBegin(String s)
+            throws LLSDXMLException
+        {
+            return new com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDDefaultContentHandler() {
 
-        public LLSDStreamingParser.LLSDContentHandler onMapBegin(String str) throws LLSDXMLException {
-            return new LLSDStreamingParser.LLSDDefaultContentHandler() {
-                public LLSDStreamingParser.LLSDContentHandler onArrayBegin(String str) throws LLSDXMLException {
-                    return str.equals("folders") ? new LLSDStreamingParser.LLSDDefaultContentHandler() {
-                        public LLSDStreamingParser.LLSDContentHandler onMapBegin(String str) throws LLSDXMLException {
-                            return new FolderDataContentHandler(SLInventoryHTTPFetchRequest.this, RootContentHandler.this.commitThread, (FolderDataContentHandler) null);
-                        }
-                    } : super.onArrayBegin(str);
+                final RootContentHandler this$1;
+
+                public com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler onArrayBegin(String s)
+                    throws LLSDXMLException
+                {
+                    if (s.equals("folders"))
+                    {
+                        return new com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDDefaultContentHandler() {
+
+                            final RootContentHandler._cls1 this$2;
+
+                            public com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDContentHandler onMapBegin(String s)
+                                throws LLSDXMLException
+                            {
+                                return new FolderDataContentHandler(RootContentHandler._2D_get0(_fld1), null);
+                            }
+
+            
+            {
+                this$2 = RootContentHandler._cls1.this;
+                super();
+            }
+                        };
+                    } else
+                    {
+                        return super.onArrayBegin(s);
+                    }
                 }
+
+            
+            {
+                this$1 = RootContentHandler.this;
+                super();
+            }
             };
         }
-    }
 
-    SLInventoryHTTPFetchRequest(SLInventory sLInventory, UUID uuid, String str) throws SLInventory.NoInventoryItemException {
-        super(sLInventory, uuid);
-        this.capURL = str;
-    }
-
-    public void cancel() {
-        this.isCancelled.set(true);
-        LLSDStreamingXMLRequest lLSDStreamingXMLRequest = this.streamingXmlReqRef.get();
-        if (lLSDStreamingXMLRequest != null) {
-            lLSDStreamingXMLRequest.InterruptRequest();
+        private RootContentHandler(DatabaseCommitThread databasecommitthread)
+        {
+            this$0 = SLInventoryHTTPFetchRequest.this;
+            super();
+            commitThread = databasecommitthread;
         }
-        Future andSet = this.futureRef.getAndSet((Object) null);
-        if (andSet != null) {
-            andSet.cancel(true);
+
+        RootContentHandler(DatabaseCommitThread databasecommitthread, RootContentHandler rootcontenthandler)
+        {
+            this(databasecommitthread);
         }
     }
 
-    public void start() {
-        if (!this.isCancelled.get() && this.futureRef.get() == null) {
-            this.futureRef.set(GenericHTTPExecutor.getInstance().submit(this.httpRequest));
+
+    private final String capURL;
+    private final AtomicReference futureRef = new AtomicReference(null);
+    private final Runnable httpRequest = new Runnable() {
+
+        final SLInventoryHTTPFetchRequest this$0;
+
+        public void run()
+        {
+            Object obj;
+            Object obj1;
+            long l;
+            l = System.currentTimeMillis();
+            Debug.Printf("InventoryFetcher: Going to fetch folder: %s", new Object[] {
+                folderUUID
+            });
+            obj = new LLSDStreamingXMLRequest();
+            obj1 = new LLSDArray();
+            ((LLSDArray) (obj1)).add(new LLSDMap(new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[] {
+                new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry("folder_id", new LLSDUUID(folderUUID)), new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry("fetch_folders", new LLSDBoolean(true)), new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry("fetch_items", new LLSDBoolean(true))
+            }));
+            obj1 = new LLSDMap(new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[] {
+                new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry("folders", ((LLSDNode) (obj1)))
+            });
+            SLInventoryHTTPFetchRequest._2D_get2(SLInventoryHTTPFetchRequest.this).set(obj);
+            int i;
+            boolean flag2;
+            i = 0;
+            flag2 = false;
+_L9:
+            boolean flag = flag2;
+            if (i >= 3) goto _L2; else goto _L1
+_L1:
+            boolean flag1 = flag2;
+            DatabaseCommitThread databasecommitthread = new DatabaseCommitThread(null);
+            flag1 = flag2;
+            databasecommitthread.start();
+            flag1 = flag2;
+            Debug.Printf("InventoryFetcher: Starting HTTP request for folder: %s", new Object[] {
+                folderUUID
+            });
+            flag1 = flag2;
+            ((LLSDStreamingXMLRequest) (obj)).PerformRequest(SLInventoryHTTPFetchRequest._2D_get0(SLInventoryHTTPFetchRequest.this), ((LLSDNode) (obj1)), new RootContentHandler(databasecommitthread, null));
+            flag1 = flag2;
+            Debug.Printf("InvFetch: done parsing,  waiting for commit thread", new Object[0]);
+            flag1 = flag2;
+            databasecommitthread.stopAndWait(true);
+            flag1 = flag2;
+            Debug.Printf("InvFetch: commit thread finished", new Object[0]);
+            flag2 = true;
+_L5:
+            if (!flag2) goto _L4; else goto _L3
+_L3:
+            flag = flag2;
+_L2:
+            flag1 = flag;
+            Debug.Printf("InventoryFetcher: Fetched folder: %s (fetch time = %d)", new Object[] {
+                folderUUID.toString(), Long.valueOf(System.currentTimeMillis() - l)
+            });
+            flag1 = flag;
+            SLInventoryHTTPFetchRequest._2D_get2(SLInventoryHTTPFetchRequest.this).set(null);
+_L6:
+            Object obj2;
+            boolean flag3;
+            if (!Thread.interrupted())
+            {
+                flag1 = SLInventoryHTTPFetchRequest._2D_get1(SLInventoryHTTPFetchRequest.this).get();
+            } else
+            {
+                flag1 = true;
+            }
+            obj1 = folderUUID.toString();
+            if (flag)
+            {
+                obj = "true";
+            } else
+            {
+                obj = "false";
+            }
+            Debug.Printf("InventoryFetcher: done processing folder %s: success %s cancelled %b", new Object[] {
+                obj1, obj, Boolean.valueOf(flag1)
+            });
+            completeFetch(flag, flag1);
+            return;
+            obj2;
+            flag1 = flag2;
+            ((IOException) (obj2)).printStackTrace();
+              goto _L5
+            obj;
+_L10:
+            Debug.Warning(((Throwable) (obj)));
+            flag = flag1;
+              goto _L6
+            obj2;
+            flag1 = flag2;
+            ((LLSDXMLException) (obj2)).printStackTrace();
+            try
+            {
+                Debug.Log((new StringBuilder()).append("InventoryFetcher: malformed xml after req = ").append(((LLSDNode) (obj1)).serializeToXML()).toString());
+            }
+            // Misplaced declaration of an exception variable
+            catch (Object obj2) { }
+              goto _L5
+_L4:
+            flag1 = flag2;
+            databasecommitthread.interrupt();
+            flag = flag2;
+            flag1 = flag2;
+            if (Thread.interrupted()) goto _L2; else goto _L7
+_L7:
+            flag1 = flag2;
+            flag3 = SLInventoryHTTPFetchRequest._2D_get1(SLInventoryHTTPFetchRequest.this).get();
+            flag = flag2;
+            if (flag3) goto _L2; else goto _L8
+_L8:
+            i++;
+              goto _L9
+            obj;
+            flag1 = false;
+              goto _L10
+        }
+
+            
+            {
+                this$0 = SLInventoryHTTPFetchRequest.this;
+                super();
+            }
+    };
+    private final AtomicBoolean isCancelled = new AtomicBoolean(false);
+    private final AtomicReference streamingXmlReqRef = new AtomicReference(null);
+
+    static String _2D_get0(SLInventoryHTTPFetchRequest slinventoryhttpfetchrequest)
+    {
+        return slinventoryhttpfetchrequest.capURL;
+    }
+
+    static AtomicBoolean _2D_get1(SLInventoryHTTPFetchRequest slinventoryhttpfetchrequest)
+    {
+        return slinventoryhttpfetchrequest.isCancelled;
+    }
+
+    static AtomicReference _2D_get2(SLInventoryHTTPFetchRequest slinventoryhttpfetchrequest)
+    {
+        return slinventoryhttpfetchrequest.streamingXmlReqRef;
+    }
+
+    SLInventoryHTTPFetchRequest(SLInventory slinventory, UUID uuid, String s)
+        throws SLInventory.NoInventoryItemException
+    {
+        super(slinventory, uuid);
+        capURL = s;
+    }
+
+    public void cancel()
+    {
+        isCancelled.set(true);
+        Object obj = (LLSDStreamingXMLRequest)streamingXmlReqRef.get();
+        if (obj != null)
+        {
+            ((LLSDStreamingXMLRequest) (obj)).InterruptRequest();
+        }
+        obj = (Future)futureRef.getAndSet(null);
+        if (obj != null)
+        {
+            ((Future) (obj)).cancel(true);
         }
     }
+
+    public void start()
+    {
+        if (!isCancelled.get() && futureRef.get() == null)
+        {
+            futureRef.set(GenericHTTPExecutor.getInstance().submit(httpRequest));
+        }
+    }
+
+    // Unreferenced inner class com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryHTTPFetchRequest$ItemEntryContentHandler$1
+
+/* anonymous class */
+    class ItemEntryContentHandler._cls1 extends com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDDefaultContentHandler
+    {
+
+        private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues[];
+        final int $SWITCH_TABLE$com$lumiyaviewer$lumiya$slproto$inventory$SLInventoryHTTPFetchRequest$PermissionsValueKey[];
+        final ItemEntryContentHandler this$1;
+
+        private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues()
+        {
+            if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues != null)
+            {
+                return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues;
+            }
+            int ai[] = new int[PermissionsValueKey.values().length];
+            try
+            {
+                ai[PermissionsValueKey.base_mask.ordinal()] = 1;
+            }
+            catch (NoSuchFieldError nosuchfielderror9) { }
+            try
+            {
+                ai[PermissionsValueKey.creator_id.ordinal()] = 2;
+            }
+            catch (NoSuchFieldError nosuchfielderror8) { }
+            try
+            {
+                ai[PermissionsValueKey.everyone_mask.ordinal()] = 3;
+            }
+            catch (NoSuchFieldError nosuchfielderror7) { }
+            try
+            {
+                ai[PermissionsValueKey.group_id.ordinal()] = 4;
+            }
+            catch (NoSuchFieldError nosuchfielderror6) { }
+            try
+            {
+                ai[PermissionsValueKey.group_mask.ordinal()] = 5;
+            }
+            catch (NoSuchFieldError nosuchfielderror5) { }
+            try
+            {
+                ai[PermissionsValueKey.is_owner_group.ordinal()] = 6;
+            }
+            catch (NoSuchFieldError nosuchfielderror4) { }
+            try
+            {
+                ai[PermissionsValueKey.last_owner_id.ordinal()] = 7;
+            }
+            catch (NoSuchFieldError nosuchfielderror3) { }
+            try
+            {
+                ai[PermissionsValueKey.next_owner_mask.ordinal()] = 8;
+            }
+            catch (NoSuchFieldError nosuchfielderror2) { }
+            try
+            {
+                ai[PermissionsValueKey.owner_id.ordinal()] = 9;
+            }
+            catch (NoSuchFieldError nosuchfielderror1) { }
+            try
+            {
+                ai[PermissionsValueKey.owner_mask.ordinal()] = 10;
+            }
+            catch (NoSuchFieldError nosuchfielderror) { }
+            _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues = ai;
+            return ai;
+        }
+
+        public void onPrimitiveValue(String s, LLSDNode llsdnode)
+            throws LLSDXMLException, LLSDValueTypeException
+        {
+            PermissionsValueKey permissionsvaluekey = PermissionsValueKey.byTag(s);
+            if (permissionsvaluekey != null)
+            {
+                switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_inventory_2D_SLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues()[permissionsvaluekey.ordinal()])
+                {
+                default:
+                    return;
+
+                case 1: // '\001'
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).baseMask = llsdnode.asInt();
+                    return;
+
+                case 3: // '\003'
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).everyoneMask = llsdnode.asInt();
+                    return;
+
+                case 5: // '\005'
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).groupMask = llsdnode.asInt();
+                    return;
+
+                case 8: // '\b'
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).nextOwnerMask = llsdnode.asInt();
+                    return;
+
+                case 10: // '\n'
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).ownerMask = llsdnode.asInt();
+                    return;
+
+                case 2: // '\002'
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).creatorUUID = llsdnode.asUUID();
+                    return;
+
+                case 4: // '\004'
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).groupUUID = llsdnode.asUUID();
+                    return;
+
+                case 7: // '\007'
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).lastOwnerUUID = llsdnode.asUUID();
+                    return;
+
+                case 9: // '\t'
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).ownerUUID = llsdnode.asUUID();
+                    return;
+
+                case 6: // '\006'
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).isGroupOwned = llsdnode.asBoolean();
+                    return;
+                }
+            } else
+            {
+                Debug.Printf("InvFetch: Permissions unknown key '%s'", new Object[] {
+                    s
+                });
+                return;
+            }
+        }
+
+            
+            {
+                this$1 = ItemEntryContentHandler.this;
+                super();
+            }
+    }
+
+
+    // Unreferenced inner class com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryHTTPFetchRequest$ItemEntryContentHandler$2
+
+/* anonymous class */
+    class ItemEntryContentHandler._cls2 extends com.lumiyaviewer.lumiya.slproto.llsd.LLSDStreamingParser.LLSDDefaultContentHandler
+    {
+
+        final ItemEntryContentHandler this$1;
+
+        public void onPrimitiveValue(String s, LLSDNode llsdnode)
+            throws LLSDXMLException, LLSDValueTypeException
+        {
+            if (s.equals("sale_type"))
+            {
+                if (llsdnode.isString())
+                {
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).saleType = SLSaleType.getByString(llsdnode.asString()).getTypeCode();
+                    return;
+                } else
+                {
+                    ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).saleType = llsdnode.asInt();
+                    return;
+                }
+            }
+            if (s.equals("sale_price"))
+            {
+                ItemEntryContentHandler._2D_get0(ItemEntryContentHandler.this).salePrice = llsdnode.asInt();
+                return;
+            } else
+            {
+                Debug.Printf("InvFetch: Sale info unknown key '%s'", new Object[] {
+                    s
+                });
+                return;
+            }
+        }
+
+            
+            {
+                this$1 = ItemEntryContentHandler.this;
+                super();
+            }
+    }
+
 }

@@ -1,58 +1,86 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class MapItemRequest extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public RequestData RequestData_Field = new RequestData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class MapItemRequest extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public int EstateID;
         public int Flags;
         public boolean Godlike;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class RequestData {
+    public static class RequestData
+    {
+
         public int ItemType;
         public long RegionHandle;
+
+        public RequestData()
+        {
+        }
     }
 
-    public MapItemRequest() {
-        this.zeroCoded = false;
+
+    public AgentData AgentData_Field;
+    public RequestData RequestData_Field;
+
+    public MapItemRequest()
+    {
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
+        RequestData_Field = new RequestData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 57;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleMapItemRequest(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleMapItemRequest(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) -102);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packInt(byteBuffer, this.AgentData_Field.Flags);
-        packInt(byteBuffer, this.AgentData_Field.EstateID);
-        packBoolean(byteBuffer, this.AgentData_Field.Godlike);
-        packInt(byteBuffer, this.RequestData_Field.ItemType);
-        packLong(byteBuffer, this.RequestData_Field.RegionHandle);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)-102);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packInt(bytebuffer, AgentData_Field.Flags);
+        packInt(bytebuffer, AgentData_Field.EstateID);
+        packBoolean(bytebuffer, AgentData_Field.Godlike);
+        packInt(bytebuffer, RequestData_Field.ItemType);
+        packLong(bytebuffer, RequestData_Field.RegionHandle);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.AgentData_Field.Flags = unpackInt(byteBuffer);
-        this.AgentData_Field.EstateID = unpackInt(byteBuffer);
-        this.AgentData_Field.Godlike = unpackBoolean(byteBuffer);
-        this.RequestData_Field.ItemType = unpackInt(byteBuffer);
-        this.RequestData_Field.RegionHandle = unpackLong(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        AgentData_Field.Flags = unpackInt(bytebuffer);
+        AgentData_Field.EstateID = unpackInt(bytebuffer);
+        AgentData_Field.Godlike = unpackBoolean(bytebuffer);
+        RequestData_Field.ItemType = unpackInt(bytebuffer);
+        RequestData_Field.RegionHandle = unpackLong(bytebuffer);
     }
 }

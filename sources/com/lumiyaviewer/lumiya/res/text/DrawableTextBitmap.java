@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.text;
 
 import android.graphics.Bitmap;
@@ -5,61 +9,93 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
-public class DrawableTextBitmap {
+// Referenced classes of package com.lumiyaviewer.lumiya.res.text:
+//            DrawableTextParams
+
+public class DrawableTextBitmap
+{
+
     private final float baselineOffset;
     private final Bitmap bitmap;
 
-    DrawableTextBitmap(DrawableTextParams drawableTextParams, int i) {
+    DrawableTextBitmap(DrawableTextParams drawabletextparams, int i)
+    {
+        boolean flag = false;
+        super();
         Paint paint = new Paint();
-        Rect rect = new Rect();
-        paint.setTextSize((float) i);
+        Object obj = new Rect();
+        paint.setTextSize(i);
         paint.setAntiAlias(true);
-        paint.setTextAlign(Paint.Align.CENTER);
-        String[] split = drawableTextParams.text().split("\n");
-        int length = split.length;
-        int i2 = 0;
-        int i3 = 1;
-        while (i2 < length) {
-            String str = split[i2];
-            paint.getTextBounds(str, 0, str.length(), rect);
-            i2++;
-            i3 = rect.width() > i3 ? rect.width() : i3;
+        paint.setTextAlign(android.graphics.Paint.Align.CENTER);
+        String as[] = drawabletextparams.text().split("\n");
+        int l = as.length;
+        int k = 0;
+        int j = 1;
+        for (; k < l; k++)
+        {
+            String s = as[k];
+            paint.getTextBounds(s, 0, s.length(), ((Rect) (obj)));
+            if (((Rect) (obj)).width() > j)
+            {
+                j = ((Rect) (obj)).width();
+            }
         }
-        float descent = paint.descent() - paint.ascent();
-        int round = Math.round((((float) split.length) * descent) + 1.0f);
-        int i4 = drawableTextParams.backgroundColor() != 0 ? i : 0;
-        int i5 = drawableTextParams.backgroundColor() != 0 ? i / 2 : 0;
-        int i6 = 1;
-        while (i6 < i3 + i4 && i6 < 512) {
-            i6 <<= 1;
+
+        float f = paint.descent() - paint.ascent();
+        int j1 = Math.round((float)as.length * f + 1.0F);
+        if (drawabletextparams.backgroundColor() != 0)
+        {
+            k = i;
+        } else
+        {
+            k = 0;
         }
-        int i7 = 1;
-        while (i7 < round + i5 && i7 < 256) {
-            i7 <<= 1;
+        if (drawabletextparams.backgroundColor() != 0)
+        {
+            i /= 2;
+        } else
+        {
+            i = 0;
         }
-        int max = Math.max(i6, i7);
-        this.bitmap = Bitmap.createBitmap(max, max, drawableTextParams.backgroundColor() == 0 ? Bitmap.Config.ALPHA_8 : Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(this.bitmap);
-        if (drawableTextParams.backgroundColor() != 0) {
-            paint.setColor(drawableTextParams.backgroundColor());
-            int i8 = i3 + i4;
-            int i9 = round + i5;
-            canvas.drawRect((float) ((max - i8) / 2), (float) ((max - i9) / 2), (float) (max - ((max - i8) / 2)), (float) (max - ((max - i9) / 2)), paint);
+        for (l = 1; l < j + k && l < 512; l <<= 1) { }
+        int i1;
+        for (i1 = 1; i1 < j1 + i && i1 < 256; i1 <<= 1) { }
+        l = Math.max(l, i1);
+        if (drawabletextparams.backgroundColor() == 0)
+        {
+            obj = android.graphics.Bitmap.Config.ALPHA_8;
+        } else
+        {
+            obj = android.graphics.Bitmap.Config.ARGB_8888;
+        }
+        bitmap = Bitmap.createBitmap(l, l, ((android.graphics.Bitmap.Config) (obj)));
+        obj = new Canvas(bitmap);
+        if (drawabletextparams.backgroundColor() != 0)
+        {
+            paint.setColor(drawabletextparams.backgroundColor());
+            j += k;
+            i = j1 + i;
+            ((Canvas) (obj)).drawRect((l - j) / 2, (l - i) / 2, l - (l - j) / 2, l - (l - i) / 2, paint);
         }
         paint.setARGB(255, 255, 255, 255);
-        int i10 = (max - round) / 2;
-        for (String drawText : split) {
-            canvas.drawText(drawText, (float) (max / 2), ((float) i10) - paint.ascent(), paint);
-            i10 = (int) (((float) i10) + (paint.descent() - paint.ascent()));
+        j = (l - j1) / 2;
+        k = as.length;
+        for (i = ((flag) ? 1 : 0); i < k; i++)
+        {
+            ((Canvas) (obj)).drawText(as[i], l / 2, (float)j - paint.ascent(), paint);
+            j = (int)((float)j + (paint.descent() - paint.ascent()));
         }
-        this.baselineOffset = (((float) round) + descent) / ((float) max);
+
+        baselineOffset = ((float)j1 + f) / (float)l;
     }
 
-    public float getBaselineOffset() {
-        return this.baselineOffset;
+    public float getBaselineOffset()
+    {
+        return baselineOffset;
     }
 
-    public Bitmap getBitmap() {
-        return this.bitmap;
+    public Bitmap getBitmap()
+    {
+        return bitmap;
     }
 }

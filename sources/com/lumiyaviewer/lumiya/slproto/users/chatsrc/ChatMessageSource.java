@@ -1,92 +1,137 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.chatsrc;
 
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public abstract class ChatMessageSource {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.chatsrc:
+//            ChatMessageSourceUnknown, ChatMessageSourceSystem, ChatMessageSourceUser, ChatMessageSourceGroup, 
+//            ChatMessageSourceObject
 
-    /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-chatsrc-ChatMessageSource$ChatMessageSourceTypeSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues = null;
+public abstract class ChatMessageSource
+{
+    public static final class ChatMessageSourceType extends Enum
+    {
 
-    public enum ChatMessageSourceType {
-        Unknown,
-        System,
-        User,
-        Group,
-        Object;
-        
-        public static final ChatMessageSourceType[] VALUES = null;
+        private static final ChatMessageSourceType $VALUES[];
+        public static final ChatMessageSourceType Group;
+        public static final ChatMessageSourceType Object;
+        public static final ChatMessageSourceType System;
+        public static final ChatMessageSourceType Unknown;
+        public static final ChatMessageSourceType User;
+        public static final ChatMessageSourceType VALUES[] = values();
 
-        static {
-            VALUES = values();
+        public static ChatMessageSourceType valueOf(String s)
+        {
+            return (ChatMessageSourceType)Enum.valueOf(com/lumiyaviewer/lumiya/slproto/users/chatsrc/ChatMessageSource$ChatMessageSourceType, s);
+        }
+
+        public static ChatMessageSourceType[] values()
+        {
+            return $VALUES;
+        }
+
+        static 
+        {
+            Unknown = new ChatMessageSourceType("Unknown", 0);
+            System = new ChatMessageSourceType("System", 1);
+            User = new ChatMessageSourceType("User", 2);
+            Group = new ChatMessageSourceType("Group", 3);
+            Object = new ChatMessageSourceType("Object", 4);
+            $VALUES = (new ChatMessageSourceType[] {
+                Unknown, System, User, Group, Object
+            });
+        }
+
+        private ChatMessageSourceType(String s, int i)
+        {
+            super(s, i);
         }
     }
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-chatsrc-ChatMessageSource$ChatMessageSourceTypeSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m268getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues() {
-        if (f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues != null) {
-            return f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues;
+
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_chatsrc_2D_ChatMessageSource$ChatMessageSourceTypeSwitchesValues[];
+
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_chatsrc_2D_ChatMessageSource$ChatMessageSourceTypeSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_chatsrc_2D_ChatMessageSource$ChatMessageSourceTypeSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_chatsrc_2D_ChatMessageSource$ChatMessageSourceTypeSwitchesValues;
         }
-        int[] iArr = new int[ChatMessageSourceType.values().length];
-        try {
-            iArr[ChatMessageSourceType.Group.ordinal()] = 1;
-        } catch (NoSuchFieldError e) {
+        int ai[] = new int[ChatMessageSourceType.values().length];
+        try
+        {
+            ai[ChatMessageSourceType.Group.ordinal()] = 1;
         }
-        try {
-            iArr[ChatMessageSourceType.Object.ordinal()] = 2;
-        } catch (NoSuchFieldError e2) {
+        catch (NoSuchFieldError nosuchfielderror4) { }
+        try
+        {
+            ai[ChatMessageSourceType.Object.ordinal()] = 2;
         }
-        try {
-            iArr[ChatMessageSourceType.System.ordinal()] = 3;
-        } catch (NoSuchFieldError e3) {
+        catch (NoSuchFieldError nosuchfielderror3) { }
+        try
+        {
+            ai[ChatMessageSourceType.System.ordinal()] = 3;
         }
-        try {
-            iArr[ChatMessageSourceType.Unknown.ordinal()] = 4;
-        } catch (NoSuchFieldError e4) {
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[ChatMessageSourceType.Unknown.ordinal()] = 4;
         }
-        try {
-            iArr[ChatMessageSourceType.User.ordinal()] = 5;
-        } catch (NoSuchFieldError e5) {
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[ChatMessageSourceType.User.ordinal()] = 5;
         }
-        f151comlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues = iArr;
-        return iArr;
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_chatsrc_2D_ChatMessageSource$ChatMessageSourceTypeSwitchesValues = ai;
+        return ai;
     }
 
-    @Nonnull
-    public static ChatMessageSource loadFrom(@Nonnull ChatMessage chatMessage) {
-        switch (m268getcomlumiyaviewerlumiyaslprotouserschatsrcChatMessageSource$ChatMessageSourceTypeSwitchesValues()[ChatMessageSourceType.VALUES[chatMessage.getSenderType().intValue()].ordinal()]) {
-            case 1:
-                return new ChatMessageSourceGroup(chatMessage);
-            case 2:
-                return new ChatMessageSourceObject(chatMessage);
-            case 3:
-                return new ChatMessageSourceSystem();
-            case 4:
-                return ChatMessageSourceUnknown.getInstance();
-            case 5:
-                return new ChatMessageSourceUser(chatMessage);
-            default:
-                throw new IllegalArgumentException("Unknown message type");
+    public ChatMessageSource()
+    {
+    }
+
+    public static ChatMessageSource loadFrom(ChatMessage chatmessage)
+    {
+        ChatMessageSourceType chatmessagesourcetype = ChatMessageSourceType.VALUES[chatmessage.getSenderType().intValue()];
+        switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_chatsrc_2D_ChatMessageSource$ChatMessageSourceTypeSwitchesValues()[chatmessagesourcetype.ordinal()])
+        {
+        default:
+            throw new IllegalArgumentException("Unknown message type");
+
+        case 4: // '\004'
+            return ChatMessageSourceUnknown.getInstance();
+
+        case 3: // '\003'
+            return new ChatMessageSourceSystem();
+
+        case 5: // '\005'
+            return new ChatMessageSourceUser(chatmessage);
+
+        case 1: // '\001'
+            return new ChatMessageSourceGroup(chatmessage);
+
+        case 2: // '\002'
+            return new ChatMessageSourceObject(chatmessage);
         }
     }
 
-    @Nonnull
     public abstract ChatterID getDefaultChatter(UUID uuid);
 
-    @Nullable
-    public abstract String getSourceName(@Nonnull UserManager userManager);
+    public abstract String getSourceName(UserManager usermanager);
 
-    @Nonnull
     public abstract ChatMessageSourceType getSourceType();
 
-    @Nullable
     public abstract UUID getSourceUUID();
 
-    public void serializeTo(@Nonnull ChatMessage chatMessage) {
-        chatMessage.setSenderType(Integer.valueOf(getSourceType().ordinal()));
+    public void serializeTo(ChatMessage chatmessage)
+    {
+        chatmessage.setSenderType(Integer.valueOf(getSourceType().ordinal()));
     }
 }

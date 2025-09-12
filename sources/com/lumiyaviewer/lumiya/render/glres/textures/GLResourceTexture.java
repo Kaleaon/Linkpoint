@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.glres.textures;
 
 import android.opengl.GLES11;
@@ -6,41 +10,60 @@ import com.lumiyaviewer.lumiya.render.glres.GLResource;
 import com.lumiyaviewer.lumiya.render.glres.GLResourceManager;
 import com.lumiyaviewer.lumiya.render.glres.GLSizedResource;
 
-public class GLResourceTexture extends GLSizedResource {
-    /* access modifiers changed from: private */
-    public static ThreadLocal<int[]> idBuffer = new ThreadLocal<int[]>() {
-        /* access modifiers changed from: protected */
-        public int[] initialValue() {
-            return new int[1];
-        }
-    };
+public class GLResourceTexture extends GLSizedResource
+{
+    private static class GLResourceTexturesReference extends com.lumiyaviewer.lumiya.render.glres.GLResourceManager.GLResourceReference
+    {
 
-    private static class GLResourceTexturesReference extends GLResourceManager.GLResourceReference {
         private final int loadedSize;
 
-        public GLResourceTexturesReference(GLResource gLResource, int i, GLResourceManager gLResourceManager, int i2) {
-            super(gLResource, i, gLResourceManager);
-            this.loadedSize = i2;
-            TextureMemoryTracker.allocTextureMemory(i2);
+        public void GLFree()
+        {
+            TextureMemoryTracker.releaseTextureMemory(loadedSize);
+            int ai[] = (int[])GLResourceTexture._2D_get0().get();
+            ai[0] = handle;
+            GLES11.glDeleteTextures(1, ai, 0);
         }
 
-        public void GLFree() {
-            TextureMemoryTracker.releaseTextureMemory(this.loadedSize);
-            int[] iArr = (int[]) GLResourceTexture.idBuffer.get();
-            iArr[0] = this.handle;
-            GLES11.glDeleteTextures(1, iArr, 0);
+        public GLResourceTexturesReference(GLResource glresource, int i, GLResourceManager glresourcemanager, int j)
+        {
+            super(glresource, i, glresourcemanager);
+            loadedSize = j;
+            TextureMemoryTracker.allocTextureMemory(j);
         }
     }
 
-    public GLResourceTexture(GLResourceManager gLResourceManager, int i) {
-        super(gLResourceManager, i);
-        new GLResourceTexturesReference(this, this.handle, gLResourceManager, i);
+
+    private static ThreadLocal idBuffer = new ThreadLocal() {
+
+        protected volatile Object initialValue()
+        {
+            return initialValue();
+        }
+
+        protected int[] initialValue()
+        {
+            return new int[1];
+        }
+
+    };
+
+    static ThreadLocal _2D_get0()
+    {
+        return idBuffer;
     }
 
-    /* access modifiers changed from: protected */
-    public int Allocate(GLResourceManager gLResourceManager) {
-        int[] iArr = idBuffer.get();
-        GLES11.glGenTextures(1, iArr, 0);
-        return iArr[0];
+    public GLResourceTexture(GLResourceManager glresourcemanager, int i)
+    {
+        super(glresourcemanager, i);
+        new GLResourceTexturesReference(this, handle, glresourcemanager, i);
     }
+
+    protected int Allocate(GLResourceManager glresourcemanager)
+    {
+        glresourcemanager = (int[])idBuffer.get();
+        GLES11.glGenTextures(1, glresourcemanager, 0);
+        return glresourcemanager[0];
+    }
+
 }

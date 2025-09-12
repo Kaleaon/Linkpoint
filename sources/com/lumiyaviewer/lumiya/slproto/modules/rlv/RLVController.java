@@ -1,8 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.rlv;
 
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.GlobalOptions;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
+import com.lumiyaviewer.lumiya.slproto.SLCircuitInfo;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.assets.SLWearableType;
 import com.lumiyaviewer.lumiya.slproto.avatar.SLAttachmentPoint;
@@ -14,236 +19,399 @@ import com.lumiyaviewer.lumiya.slproto.modules.SLModule;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
 import com.lumiyaviewer.lumiya.slproto.modules.rlv.commands.RLVCmdVersion;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
-import java.util.Set;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class RLVController extends SLModule {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.modules.rlv:
+//            RLVRestrictions, RLVCommands, RLVCommand, RLVRestrictionType
+
+public class RLVController extends SLModule
+{
+
     private boolean RLVEnabled;
     private String RLVEnablingCommand;
     private boolean RLVEnablingOffered;
     private UUID RLVEnablingUUID;
     private RLVRestrictions restrictions;
 
-    public RLVController(SLAgentCircuit sLAgentCircuit) {
-        super(sLAgentCircuit);
-        this.RLVEnabled = false;
-        this.RLVEnablingOffered = false;
-        this.RLVEnablingCommand = null;
-        this.RLVEnablingUUID = null;
-        this.restrictions = new RLVRestrictions();
-        this.RLVEnabled = GlobalOptions.getInstance().getRLVEnabled();
+    public RLVController(SLAgentCircuit slagentcircuit)
+    {
+        super(slagentcircuit);
+        RLVEnabled = false;
+        RLVEnablingOffered = false;
+        RLVEnablingCommand = null;
+        RLVEnablingUUID = null;
+        restrictions = new RLVRestrictions();
+        RLVEnabled = GlobalOptions.getInstance().getRLVEnabled();
     }
 
-    private void handleRLVCommand(UUID uuid, String str) {
-        Debug.Printf("RLV command: '%s'", str);
-        String str2 = "";
-        String str3 = "";
-        int indexOf = str.indexOf(61);
-        if (indexOf >= 0) {
-            str2 = str.substring(indexOf + 1);
-            str = str.substring(0, indexOf);
+    private void handleRLVCommand(UUID uuid, String s)
+    {
+        Debug.Printf("RLV command: '%s'", new Object[] {
+            s
+        });
+        String s2 = "";
+        String s3 = "";
+        int i = s.indexOf('=');
+        String s1 = s;
+        if (i >= 0)
+        {
+            s2 = s.substring(i + 1);
+            s1 = s.substring(0, i);
         }
-        int indexOf2 = str.indexOf(58);
-        if (indexOf2 >= 0) {
-            str3 = str.substring(indexOf2 + 1);
-            str = str.substring(0, indexOf2);
+        i = s1.indexOf(':');
+        s = s1;
+        if (i >= 0)
+        {
+            s3 = s1.substring(i + 1);
+            s = s1.substring(0, i);
         }
-        handleRLVCommandParsed(uuid, str, str2, str3);
+        handleRLVCommandParsed(uuid, s, s2, s3);
     }
 
-    private void handleRLVCommandParsed(UUID uuid, String str, String str2, String str3) {
-        RLVCommand handler;
-        Debug.Printf("RLV command: '%s' param '%s' option '%s'", str, str2, str3);
-        RLVCommands command = RLVCommands.getCommand(str);
-        if (command != null && (handler = command.getHandler()) != null) {
-            handler.Handle(this, uuid, command, str2, str3);
+    private void handleRLVCommandParsed(UUID uuid, String s, String s1, String s2)
+    {
+        Debug.Printf("RLV command: '%s' param '%s' option '%s'", new Object[] {
+            s, s1, s2
+        });
+        s = RLVCommands.getCommand(s);
+        if (s != null)
+        {
+            RLVCommand rlvcommand = s.getHandler();
+            if (rlvcommand != null)
+            {
+                rlvcommand.Handle(this, uuid, s, s1, s2);
+            }
         }
     }
 
-    private void handleRLVCommands(UUID uuid, String str) {
-        for (String handleRLVCommand : str.split(",")) {
-            handleRLVCommand(uuid, handleRLVCommand);
+    private void handleRLVCommands(UUID uuid, String s)
+    {
+        s = s.split(",");
+        int i = 0;
+        for (int j = s.length; i < j; i++)
+        {
+            handleRLVCommand(uuid, s[i]);
         }
+
     }
 
-    private void offerRLVEnable(ChatFromSimulator chatFromSimulator) {
-        this.agentCircuit.HandleChatEvent(this.agentCircuit.getLocalChatterID(), new SLEnableRLVOfferEvent(chatFromSimulator, this.agentCircuit.getAgentUUID()), true);
+    private void offerRLVEnable(ChatFromSimulator chatfromsimulator)
+    {
+        agentCircuit.HandleChatEvent(agentCircuit.getLocalChatterID(), new SLEnableRLVOfferEvent(chatfromsimulator, agentCircuit.getAgentUUID()), true);
     }
 
-    public void HandleGlobalOptionsChange() {
-        boolean rLVEnabled = GlobalOptions.getInstance().getRLVEnabled();
-        if (rLVEnabled && (!this.RLVEnabled) && this.RLVEnablingOffered && this.RLVEnablingCommand != null) {
-            this.RLVEnablingOffered = false;
-            Debug.Printf("Enabling accepted, original command: '%s'", this.RLVEnablingCommand);
-            handleRLVCommands(this.RLVEnablingUUID, this.RLVEnablingCommand);
+    public void HandleGlobalOptionsChange()
+    {
+        boolean flag = GlobalOptions.getInstance().getRLVEnabled();
+        if (flag && RLVEnabled ^ true && RLVEnablingOffered && RLVEnablingCommand != null)
+        {
+            RLVEnablingOffered = false;
+            Debug.Printf("Enabling accepted, original command: '%s'", new Object[] {
+                RLVEnablingCommand
+            });
+            handleRLVCommands(RLVEnablingUUID, RLVEnablingCommand);
         }
-        this.RLVEnabled = rLVEnabled;
+        RLVEnabled = flag;
     }
 
-    public boolean autoAcceptTeleport(UUID uuid) {
-        return this.RLVEnabled && this.restrictions.isAllowed(RLVRestrictionType.accepttp, uuid.toString(), (UUID) null);
+    public boolean autoAcceptTeleport(UUID uuid)
+    {
+        if (!RLVEnabled)
+        {
+            return false;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.accepttp, uuid.toString(), null);
     }
 
-    public boolean canDetachItem(int i, UUID uuid) {
-        SLAttachmentPoint sLAttachmentPoint;
-        String str = null;
-        if (!this.RLVEnabled) {
+    public boolean canDetachItem(int i, UUID uuid)
+    {
+        Object obj = null;
+        if (!RLVEnabled)
+        {
             return true;
         }
-        if (i >= 0 && i < 56 && (sLAttachmentPoint = SLAttachmentPoint.attachmentPoints[i]) != null) {
-            str = sLAttachmentPoint.name;
-        }
-        return str == null || this.restrictions.isAllowed(RLVRestrictionType.detach, str, uuid);
-    }
-
-    public boolean canRecvChat(String str, UUID uuid) {
-        return !this.RLVEnabled || str.startsWith("/") || this.restrictions.isAllowed(RLVRestrictionType.recvchat, uuid.toString(), (UUID) null);
-    }
-
-    public boolean canRecvIM(UUID uuid) {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.recvim, uuid.toString(), (UUID) null);
-    }
-
-    public boolean canSendIM(UUID uuid) {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.sendim, uuid.toString(), (UUID) null);
-    }
-
-    public boolean canShowInventory() {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.showinv, "", (UUID) null);
-    }
-
-    public boolean canSit() {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.sit, "", (UUID) null);
-    }
-
-    public boolean canStandUp() {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.unsit, "", (UUID) null);
-    }
-
-    public boolean canTakeItemOff(SLWearableType sLWearableType) {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.remoutfit, sLWearableType.getName(), (UUID) null);
-    }
-
-    public boolean canTeleportBySitting() {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.sittp, "", (UUID) null);
-    }
-
-    public boolean canTeleportToLandmark() {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.tplm, "", (UUID) null);
-    }
-
-    public boolean canTeleportToLocation() {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.tploc, "", (UUID) null);
-    }
-
-    public boolean canTeleportToLure(UUID uuid) {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.tplure, uuid.toString(), (UUID) null);
-    }
-
-    public boolean canViewNotecard() {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.viewnote, "", (UUID) null);
-    }
-
-    public boolean canWearItem(SLWearableType sLWearableType) {
-        return !this.RLVEnabled || this.restrictions.isAllowed(RLVRestrictionType.addoutfit, sLWearableType.getName(), (UUID) null);
-    }
-
-    public SLModules getModules() {
-        return this.agentCircuit.getModules();
-    }
-
-    public RLVRestrictions getRestrictions() {
-        return this.restrictions;
-    }
-
-    public boolean onIncomingChat(ChatFromSimulator chatFromSimulator) {
-        if (chatFromSimulator.ChatData_Field.SourceType != 2 || chatFromSimulator.ChatData_Field.ChatType != 8) {
-            return false;
-        }
-        String stringFromVariableUTF = SLMessage.stringFromVariableUTF(chatFromSimulator.ChatData_Field.Message);
-        if (!stringFromVariableUTF.startsWith("@")) {
-            return false;
-        }
-        UUID uuid = chatFromSimulator.ChatData_Field.SourceID;
-        if (this.RLVEnabled) {
-            handleRLVCommands(uuid, stringFromVariableUTF.substring(1));
-        } else if (!this.RLVEnablingOffered) {
-            this.RLVEnablingOffered = true;
-            this.RLVEnablingUUID = uuid;
-            this.RLVEnablingCommand = stringFromVariableUTF.substring(1);
-            offerRLVEnable(chatFromSimulator);
-        }
-        return true;
-    }
-
-    public boolean onIncomingIM(ImprovedInstantMessage improvedInstantMessage) {
-        if (!this.RLVEnabled) {
-            return false;
-        }
-        int i = improvedInstantMessage.MessageBlock_Field.Dialog;
-        String stringFromVariableOEM = SLMessage.stringFromVariableOEM(improvedInstantMessage.MessageBlock_Field.FromAgentName);
-        String stringFromVariableUTF = SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message);
-        Debug.Printf("IM: type %d from '%s' text '%s'", Integer.valueOf(i), stringFromVariableOEM, stringFromVariableUTF);
-        switch (i) {
-            case 0:
-                if (stringFromVariableUTF.equalsIgnoreCase("@version")) {
-                    this.agentCircuit.SendInstantMessage(improvedInstantMessage.AgentData_Field.AgentID, RLVCmdVersion.getManualVersionReply());
-                    return true;
+        String s = obj;
+        if (i >= 0)
+        {
+            s = obj;
+            if (i < 56)
+            {
+                SLAttachmentPoint slattachmentpoint = SLAttachmentPoint.attachmentPoints[i];
+                s = obj;
+                if (slattachmentpoint != null)
+                {
+                    s = slattachmentpoint.name;
                 }
-                break;
+            }
         }
+        return s == null || restrictions.isAllowed(RLVRestrictionType.detach, s, uuid);
+    }
+
+    public boolean canRecvChat(String s, UUID uuid)
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return s.startsWith("/") || restrictions.isAllowed(RLVRestrictionType.recvchat, uuid.toString(), null);
+    }
+
+    public boolean canRecvIM(UUID uuid)
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.recvim, uuid.toString(), null);
+    }
+
+    public boolean canSendIM(UUID uuid)
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.sendim, uuid.toString(), null);
+    }
+
+    public boolean canShowInventory()
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.showinv, "", null);
+    }
+
+    public boolean canSit()
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.sit, "", null);
+    }
+
+    public boolean canStandUp()
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.unsit, "", null);
+    }
+
+    public boolean canTakeItemOff(SLWearableType slwearabletype)
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.remoutfit, slwearabletype.getName(), null);
+    }
+
+    public boolean canTeleportBySitting()
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.sittp, "", null);
+    }
+
+    public boolean canTeleportToLandmark()
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.tplm, "", null);
+    }
+
+    public boolean canTeleportToLocation()
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.tploc, "", null);
+    }
+
+    public boolean canTeleportToLure(UUID uuid)
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.tplure, uuid.toString(), null);
+    }
+
+    public boolean canViewNotecard()
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.viewnote, "", null);
+    }
+
+    public boolean canWearItem(SLWearableType slwearabletype)
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        return restrictions.isAllowed(RLVRestrictionType.addoutfit, slwearabletype.getName(), null);
+    }
+
+    public SLModules getModules()
+    {
+        return agentCircuit.getModules();
+    }
+
+    public RLVRestrictions getRestrictions()
+    {
+        return restrictions;
+    }
+
+    public boolean onIncomingChat(ChatFromSimulator chatfromsimulator)
+    {
+        String s;
+        UUID uuid;
+        if (chatfromsimulator.ChatData_Field.SourceType != 2 || chatfromsimulator.ChatData_Field.ChatType != 8)
+        {
+            break MISSING_BLOCK_LABEL_104;
+        }
+        s = SLMessage.stringFromVariableUTF(chatfromsimulator.ChatData_Field.Message);
+        if (!s.startsWith("@"))
+        {
+            break MISSING_BLOCK_LABEL_104;
+        }
+        uuid = chatfromsimulator.ChatData_Field.SourceID;
+        if (!RLVEnabled) goto _L2; else goto _L1
+_L1:
+        handleRLVCommands(uuid, s.substring(1));
+_L4:
+        return true;
+_L2:
+        if (RLVEnablingOffered) goto _L4; else goto _L3
+_L3:
+        RLVEnablingOffered = true;
+        RLVEnablingUUID = uuid;
+        RLVEnablingCommand = s.substring(1);
+        offerRLVEnable(chatfromsimulator);
+        return true;
         return false;
     }
 
-    public boolean onSendLocalChat(int i, String str) {
-        if (!this.RLVEnabled) {
+    public boolean onIncomingIM(ImprovedInstantMessage improvedinstantmessage)
+    {
+        String s2;
+        int i;
+        if (!RLVEnabled)
+        {
+            return false;
+        }
+        i = improvedinstantmessage.MessageBlock_Field.Dialog;
+        String s = SLMessage.stringFromVariableOEM(improvedinstantmessage.MessageBlock_Field.FromAgentName);
+        s2 = SLMessage.stringFromVariableUTF(improvedinstantmessage.MessageBlock_Field.Message);
+        Debug.Printf("IM: type %d from '%s' text '%s'", new Object[] {
+            Integer.valueOf(i), s, s2
+        });
+        i;
+        JVM INSTR tableswitch 0 0: default 88
+    //                   0 90;
+           goto _L1 _L2
+_L1:
+        return false;
+_L2:
+        if (s2.equalsIgnoreCase("@version"))
+        {
+            String s1 = RLVCmdVersion.getManualVersionReply();
+            agentCircuit.SendInstantMessage(improvedinstantmessage.AgentData_Field.AgentID, s1);
             return true;
         }
-        if (i == 0) {
-            if (!str.startsWith("/")) {
-                Set<String> targetsForRestriction = this.restrictions.getTargetsForRestriction(RLVRestrictionType.redirchat);
-                if (targetsForRestriction != null) {
-                    for (String parseInt : targetsForRestriction) {
-                        try {
-                            int parseInt2 = Integer.parseInt(parseInt);
-                            ChatFromViewer chatFromViewer = new ChatFromViewer();
-                            chatFromViewer.AgentData_Field.AgentID = this.circuitInfo.agentID;
-                            chatFromViewer.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-                            chatFromViewer.ChatData_Field.Channel = parseInt2;
-                            chatFromViewer.ChatData_Field.Type = 1;
-                            chatFromViewer.ChatData_Field.Message = SLMessage.stringToVariableUTF(str);
-                            chatFromViewer.isReliable = true;
-                            SendMessage(chatFromViewer);
-                        } catch (NumberFormatException e) {
-                            Debug.Warning(e);
+        if (true) goto _L1; else goto _L3
+_L3:
+    }
+
+    public boolean onSendLocalChat(int i, String s)
+    {
+        if (!RLVEnabled)
+        {
+            return true;
+        }
+        if (i == 0)
+        {
+            if (!s.startsWith("/"))
+            {
+                Object obj = restrictions.getTargetsForRestriction(RLVRestrictionType.redirchat);
+                if (obj != null)
+                {
+                    for (obj = ((Iterable) (obj)).iterator(); ((Iterator) (obj)).hasNext();)
+                    {
+                        Object obj1 = (String)((Iterator) (obj)).next();
+                        try
+                        {
+                            i = Integer.parseInt(((String) (obj1)));
+                            obj1 = new ChatFromViewer();
+                            ((ChatFromViewer) (obj1)).AgentData_Field.AgentID = circuitInfo.agentID;
+                            ((ChatFromViewer) (obj1)).AgentData_Field.SessionID = circuitInfo.sessionID;
+                            ((ChatFromViewer) (obj1)).ChatData_Field.Channel = i;
+                            ((ChatFromViewer) (obj1)).ChatData_Field.Type = 1;
+                            ((ChatFromViewer) (obj1)).ChatData_Field.Message = SLMessage.stringToVariableUTF(s);
+                            obj1.isReliable = true;
+                            SendMessage(((SLMessage) (obj1)));
+                        }
+                        catch (NumberFormatException numberformatexception)
+                        {
+                            Debug.Warning(numberformatexception);
                         }
                     }
+
                 }
-                if (!this.restrictions.isAllowed(RLVRestrictionType.sendchat, "", (UUID) null)) {
+                if (!restrictions.isAllowed(RLVRestrictionType.sendchat, "", null))
+                {
                     return false;
                 }
             }
-        } else if (!this.restrictions.isAllowed(RLVRestrictionType.sendchannel, Integer.toString(i), (UUID) null)) {
+        } else
+        if (!restrictions.isAllowed(RLVRestrictionType.sendchannel, Integer.toString(i), null))
+        {
             return false;
         }
         return true;
     }
 
-    public void sayOnChannel(int i, String str) {
-        Debug.Printf("RLV reply (%d): '%s'", Integer.valueOf(i), str);
-        ChatFromViewer chatFromViewer = new ChatFromViewer();
-        chatFromViewer.AgentData_Field.AgentID = this.circuitInfo.agentID;
-        chatFromViewer.AgentData_Field.SessionID = this.circuitInfo.sessionID;
-        chatFromViewer.ChatData_Field.Channel = i;
-        chatFromViewer.ChatData_Field.Type = 1;
-        chatFromViewer.ChatData_Field.Message = SLMessage.stringToVariableUTF(str);
-        chatFromViewer.isReliable = true;
-        SendMessage(chatFromViewer);
+    public void sayOnChannel(int i, String s)
+    {
+        Debug.Printf("RLV reply (%d): '%s'", new Object[] {
+            Integer.valueOf(i), s
+        });
+        ChatFromViewer chatfromviewer = new ChatFromViewer();
+        chatfromviewer.AgentData_Field.AgentID = circuitInfo.agentID;
+        chatfromviewer.AgentData_Field.SessionID = circuitInfo.sessionID;
+        chatfromviewer.ChatData_Field.Channel = i;
+        chatfromviewer.ChatData_Field.Type = 1;
+        chatfromviewer.ChatData_Field.Message = SLMessage.stringToVariableUTF(s);
+        chatfromviewer.isReliable = true;
+        SendMessage(chatfromviewer);
     }
 
-    public void teleportToGlobalPos(UUID uuid, LLVector3 lLVector3) {
-        if (this.RLVEnabled && this.restrictions.isAllowed(RLVRestrictionType.tploc, "", (UUID) null, uuid)) {
-            this.agentCircuit.TeleportToGlobalPosition(lLVector3);
+    public void teleportToGlobalPos(UUID uuid, LLVector3 llvector3)
+    {
+        if (!RLVEnabled)
+        {
+            return;
+        }
+        if (!restrictions.isAllowed(RLVRestrictionType.tploc, "", null, uuid))
+        {
+            return;
+        } else
+        {
+            agentCircuit.TeleportToGlobalPosition(llvector3);
+            return;
         }
     }
 }

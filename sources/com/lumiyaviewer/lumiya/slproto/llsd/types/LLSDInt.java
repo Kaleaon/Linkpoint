@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.llsd.types;
 
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode;
@@ -5,37 +9,57 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import org.xmlpull.v1.XmlSerializer;
 
-public class LLSDInt extends LLSDNode {
+public class LLSDInt extends LLSDNode
+{
+
     private int value;
 
-    public LLSDInt(int i) {
-        this.value = i;
+    public LLSDInt(int i)
+    {
+        value = i;
     }
 
-    public LLSDInt(String str) {
-        try {
-            this.value = Integer.parseInt(str);
-        } catch (Exception e) {
-            this.value = 0;
+    public LLSDInt(String s)
+    {
+        try
+        {
+            value = Integer.parseInt(s);
+            return;
+        }
+        // Misplaced declaration of an exception variable
+        catch (String s)
+        {
+            value = 0;
         }
     }
 
-    public boolean asBoolean() {
-        return this.value != 0;
+    public boolean asBoolean()
+    {
+        boolean flag = false;
+        if (value != 0)
+        {
+            flag = true;
+        }
+        return flag;
     }
 
-    public int asInt() {
-        return this.value;
+    public int asInt()
+    {
+        return value;
     }
 
-    public void toBinary(DataOutputStream dataOutputStream) throws IOException {
-        dataOutputStream.writeByte(105);
-        dataOutputStream.writeInt(this.value);
+    public void toBinary(DataOutputStream dataoutputstream)
+        throws IOException
+    {
+        dataoutputstream.writeByte(105);
+        dataoutputstream.writeInt(value);
     }
 
-    public void toXML(XmlSerializer xmlSerializer) throws IOException {
-        xmlSerializer.startTag("", "integer");
-        xmlSerializer.text(Integer.toString(this.value));
-        xmlSerializer.endTag("", "integer");
+    public void toXML(XmlSerializer xmlserializer)
+        throws IOException
+    {
+        xmlserializer.startTag("", "integer");
+        xmlserializer.text(Integer.toString(value));
+        xmlserializer.endTag("", "integer");
     }
 }

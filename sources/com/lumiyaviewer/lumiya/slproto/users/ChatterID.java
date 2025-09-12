@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users;
 
 import android.os.Bundle;
@@ -5,643 +9,698 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.common.base.Objects;
 import com.lumiyaviewer.lumiya.dao.Chatter;
+import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.GridConnectionManager;
 import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
+import com.lumiyaviewer.lumiya.slproto.messages.AvatarPropertiesReply;
+import com.lumiyaviewer.lumiya.slproto.messages.GroupProfileReply;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
 import java.util.UUID;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public abstract class ChatterID implements Parcelable, Comparable<ChatterID> {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users:
+//            SLMessageResponseCacher
 
-    /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null;
-    @Nonnull
-    public final UUID agentUUID;
+public abstract class ChatterID
+    implements Parcelable, Comparable
+{
+    public static class ChatterIDGroup extends ChatterIDWithUUID
+    {
 
-    public static class ChatterIDGroup extends ChatterIDWithUUID {
-        public static final Parcelable.Creator<ChatterIDGroup> CREATOR = new Parcelable.Creator<ChatterIDGroup>() {
-            public ChatterIDGroup createFromParcel(Parcel parcel) {
-                return new ChatterIDGroup(parcel, (ChatterIDGroup) null);
+        public static final android.os.Parcelable.Creator CREATOR = new android.os.Parcelable.Creator() {
+
+            public ChatterIDGroup createFromParcel(Parcel parcel)
+            {
+                return new ChatterIDGroup(parcel, null);
             }
 
-            public ChatterIDGroup[] newArray(int i) {
+            public volatile Object createFromParcel(Parcel parcel)
+            {
+                return createFromParcel(parcel);
+            }
+
+            public ChatterIDGroup[] newArray(int i)
+            {
                 return new ChatterIDGroup[i];
             }
+
+            public volatile Object[] newArray(int i)
+            {
+                return newArray(i);
+            }
+
         };
 
-        private ChatterIDGroup(Parcel parcel) {
-            super(parcel, (ChatterIDWithUUID) null);
+        static void lambda$_2D_com_lumiyaviewer_lumiya_slproto_users_ChatterID$ChatterIDGroup_7487(OnChatterPictureIDListener onchatterpictureidlistener, GroupProfileReply groupprofilereply)
+        {
+            onchatterpictureidlistener.onChatterPictureID(groupprofilereply.GroupData_Field.InsigniaID);
         }
 
-        /* synthetic */ ChatterIDGroup(Parcel parcel, ChatterIDGroup chatterIDGroup) {
-            this(parcel);
+        public volatile int compareTo(ChatterID chatterid)
+        {
+            return super.compareTo(chatterid);
         }
 
-        private ChatterIDGroup(@Nonnull UUID uuid, @Nonnull UUID uuid2) {
-            super(uuid, uuid2, (ChatterIDWithUUID) null);
-        }
-
-        /* synthetic */ ChatterIDGroup(UUID uuid, UUID uuid2, ChatterIDGroup chatterIDGroup) {
-            this(uuid, uuid2);
-        }
-
-        public /* bridge */ /* synthetic */ int compareTo(@Nonnull ChatterID chatterID) {
-            return super.compareTo(chatterID);
-        }
-
-        public boolean equals(Object obj) {
-            if (obj instanceof ChatterIDGroup) {
+        public boolean equals(Object obj)
+        {
+            if (obj instanceof ChatterIDGroup)
+            {
                 return super.equals(obj);
+            } else
+            {
+                return false;
             }
-            return false;
         }
 
-        @Nonnull
-        public ChatterType getChatterType() {
+        public ChatterType getChatterType()
+        {
             return ChatterType.Group;
         }
 
-        @Nonnull
-        public /* bridge */ /* synthetic */ UUID getChatterUUID() {
+        public volatile UUID getChatterUUID()
+        {
             return super.getChatterUUID();
         }
 
-        @Nullable
-        public /* bridge */ /* synthetic */ UUID getOptionalChatterUUID() {
+        public volatile UUID getOptionalChatterUUID()
+        {
             return super.getOptionalChatterUUID();
         }
 
-        public Subscription getPictureID(@Nonnull UserManager userManager, @Nullable Executor executor, @Nonnull OnChatterPictureIDListener onChatterPictureIDListener) {
-            return userManager.getCachedGroupProfiles().getPool().subscribe(this.uuid, UIThreadExecutor.getInstance(), new $Lambda$0dEDWURupJXcv_HDGgfxSQl02DE(onChatterPictureIDListener));
+        public Subscription getPictureID(UserManager usermanager, Executor executor, OnChatterPictureIDListener onchatterpictureidlistener)
+        {
+            return usermanager.getCachedGroupProfiles().getPool().subscribe(uuid, UIThreadExecutor.getInstance(), new _2D_.Lambda._cls0dEDWURupJXcv_HDGgfxSQl02DE(onchatterpictureidlistener));
         }
 
-        public /* bridge */ /* synthetic */ int hashCode() {
+        public volatile int hashCode()
+        {
             return super.hashCode();
         }
 
-        public /* bridge */ /* synthetic */ boolean isValidUUID() {
+        public volatile boolean isValidUUID()
+        {
             return super.isValidUUID();
         }
 
-        public /* bridge */ /* synthetic */ Bundle toBundle() {
+        public volatile Bundle toBundle()
+        {
             return super.toBundle();
         }
 
-        public /* bridge */ /* synthetic */ String toString() {
+        public volatile String toString()
+        {
             return super.toString();
         }
 
-        public /* bridge */ /* synthetic */ void writeToParcel(Parcel parcel, int i) {
+        public volatile void writeToParcel(Parcel parcel, int i)
+        {
             super.writeToParcel(parcel, i);
         }
+
+
+        private ChatterIDGroup(Parcel parcel)
+        {
+            super(parcel, null);
+        }
+
+        ChatterIDGroup(Parcel parcel, ChatterIDGroup chatteridgroup)
+        {
+            this(parcel);
+        }
+
+        private ChatterIDGroup(UUID uuid, UUID uuid1)
+        {
+            super(uuid, uuid1, null);
+        }
+
+        ChatterIDGroup(UUID uuid, UUID uuid1, ChatterIDGroup chatteridgroup)
+        {
+            this(uuid, uuid1);
+        }
     }
 
-    public static class ChatterIDLocal extends ChatterID {
-        public static final Parcelable.Creator<ChatterIDLocal> CREATOR = new Parcelable.Creator<ChatterIDLocal>() {
-            public ChatterIDLocal createFromParcel(Parcel parcel) {
-                return new ChatterIDLocal(parcel, (ChatterIDLocal) null);
+    public static class ChatterIDLocal extends ChatterID
+    {
+
+        public static final android.os.Parcelable.Creator CREATOR = new android.os.Parcelable.Creator() {
+
+            public ChatterIDLocal createFromParcel(Parcel parcel)
+            {
+                return new ChatterIDLocal(parcel, null);
             }
 
-            public ChatterIDLocal[] newArray(int i) {
+            public volatile Object createFromParcel(Parcel parcel)
+            {
+                return createFromParcel(parcel);
+            }
+
+            public ChatterIDLocal[] newArray(int i)
+            {
                 return new ChatterIDLocal[i];
             }
+
+            public volatile Object[] newArray(int i)
+            {
+                return newArray(i);
+            }
+
         };
 
-        private ChatterIDLocal(Parcel parcel) {
-            super(parcel, (ChatterID) null);
+        public boolean equals(Object obj)
+        {
+            if (obj instanceof ChatterIDLocal)
+            {
+                return equals(obj);
+            } else
+            {
+                return false;
+            }
         }
 
-        /* synthetic */ ChatterIDLocal(Parcel parcel, ChatterIDLocal chatterIDLocal) {
+        public ChatterType getChatterType()
+        {
+            return ChatterType.Local;
+        }
+
+
+        private ChatterIDLocal(Parcel parcel)
+        {
+            super(parcel, null);
+        }
+
+        ChatterIDLocal(Parcel parcel, ChatterIDLocal chatteridlocal)
+        {
             this(parcel);
         }
 
-        private ChatterIDLocal(@Nonnull UUID uuid) {
-            super(uuid, (ChatterID) null);
+        private ChatterIDLocal(UUID uuid)
+        {
+            super(uuid, null);
         }
 
-        /* synthetic */ ChatterIDLocal(UUID uuid, ChatterIDLocal chatterIDLocal) {
+        ChatterIDLocal(UUID uuid, ChatterIDLocal chatteridlocal)
+        {
             this(uuid);
-        }
-
-        public boolean equals(Object obj) {
-            if (obj instanceof ChatterIDLocal) {
-                return ChatterID.super.equals(obj);
-            }
-            return false;
-        }
-
-        @Nonnull
-        public ChatterType getChatterType() {
-            return ChatterType.Local;
         }
     }
 
-    public static class ChatterIDUser extends ChatterIDWithUUID {
-        public static final Parcelable.Creator<ChatterIDUser> CREATOR = new Parcelable.Creator<ChatterIDUser>() {
-            public ChatterIDUser createFromParcel(Parcel parcel) {
-                return new ChatterIDUser(parcel, (ChatterIDUser) null);
+    public static class ChatterIDUser extends ChatterIDWithUUID
+    {
+
+        public static final android.os.Parcelable.Creator CREATOR = new android.os.Parcelable.Creator() {
+
+            public ChatterIDUser createFromParcel(Parcel parcel)
+            {
+                return new ChatterIDUser(parcel, null);
             }
 
-            public ChatterIDUser[] newArray(int i) {
+            public volatile Object createFromParcel(Parcel parcel)
+            {
+                return createFromParcel(parcel);
+            }
+
+            public ChatterIDUser[] newArray(int i)
+            {
                 return new ChatterIDUser[i];
             }
+
+            public volatile Object[] newArray(int i)
+            {
+                return newArray(i);
+            }
+
         };
 
-        private ChatterIDUser(Parcel parcel) {
-            super(parcel, (ChatterIDWithUUID) null);
+        static void lambda$_2D_com_lumiyaviewer_lumiya_slproto_users_ChatterID$ChatterIDUser_6120(OnChatterPictureIDListener onchatterpictureidlistener, AvatarPropertiesReply avatarpropertiesreply)
+        {
+            onchatterpictureidlistener.onChatterPictureID(avatarpropertiesreply.PropertiesData_Field.ImageID);
         }
 
-        /* synthetic */ ChatterIDUser(Parcel parcel, ChatterIDUser chatterIDUser) {
-            this(parcel);
+        public volatile int compareTo(ChatterID chatterid)
+        {
+            return super.compareTo(chatterid);
         }
 
-        private ChatterIDUser(@Nonnull UUID uuid, @Nonnull UUID uuid2) {
-            super(uuid, uuid2, (ChatterIDWithUUID) null);
-        }
-
-        /* synthetic */ ChatterIDUser(UUID uuid, UUID uuid2, ChatterIDUser chatterIDUser) {
-            this(uuid, uuid2);
-        }
-
-        public /* bridge */ /* synthetic */ int compareTo(@Nonnull ChatterID chatterID) {
-            return super.compareTo(chatterID);
-        }
-
-        public boolean equals(Object obj) {
-            if (obj instanceof ChatterIDUser) {
+        public boolean equals(Object obj)
+        {
+            if (obj instanceof ChatterIDUser)
+            {
                 return super.equals(obj);
+            } else
+            {
+                return false;
             }
-            return false;
         }
 
-        @Nonnull
-        public ChatterType getChatterType() {
+        public ChatterType getChatterType()
+        {
             return ChatterType.User;
         }
 
-        @Nonnull
-        public /* bridge */ /* synthetic */ UUID getChatterUUID() {
+        public volatile UUID getChatterUUID()
+        {
             return super.getChatterUUID();
         }
 
-        @Nullable
-        public /* bridge */ /* synthetic */ UUID getOptionalChatterUUID() {
+        public volatile UUID getOptionalChatterUUID()
+        {
             return super.getOptionalChatterUUID();
         }
 
-        public Subscription getPictureID(@Nonnull UserManager userManager, @Nullable Executor executor, @Nonnull OnChatterPictureIDListener onChatterPictureIDListener) {
-            return userManager.getAvatarProperties().getPool().subscribe(this.uuid, executor, new Subscription.OnData(onChatterPictureIDListener) {
-
-                /* renamed from: -$f0 */
-                private final /* synthetic */ Object f145$f0;
-
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambda$0dEDWURupJXcv_HDGgfxSQl02DE.1.$m$0(java.lang.Object):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.users.-$Lambda$0dEDWURupJXcv_HDGgfxSQl02DE.1.$m$0(java.lang.Object):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:314)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.addInnerClass(ClassGen.java:249)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:238)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambda$0dEDWURupJXcv_HDGgfxSQl02DE.1.onData(java.lang.Object):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.users.-$Lambda$0dEDWURupJXcv_HDGgfxSQl02DE.1.onData(java.lang.Object):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:314)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.addInnerClass(ClassGen.java:249)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:238)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-            });
+        public Subscription getPictureID(UserManager usermanager, Executor executor, OnChatterPictureIDListener onchatterpictureidlistener)
+        {
+            return usermanager.getAvatarProperties().getPool().subscribe(uuid, executor, new _2D_.Lambda._cls0dEDWURupJXcv_HDGgfxSQl02DE._cls1(onchatterpictureidlistener));
         }
 
-        public /* bridge */ /* synthetic */ int hashCode() {
+        public volatile int hashCode()
+        {
             return super.hashCode();
         }
 
-        public /* bridge */ /* synthetic */ boolean isValidUUID() {
+        public volatile boolean isValidUUID()
+        {
             return super.isValidUUID();
         }
 
-        public /* bridge */ /* synthetic */ Bundle toBundle() {
+        public volatile Bundle toBundle()
+        {
             return super.toBundle();
         }
 
-        public /* bridge */ /* synthetic */ String toString() {
+        public volatile String toString()
+        {
             return super.toString();
         }
 
-        public /* bridge */ /* synthetic */ void writeToParcel(Parcel parcel, int i) {
+        public volatile void writeToParcel(Parcel parcel, int i)
+        {
             super.writeToParcel(parcel, i);
         }
-    }
 
-    private static abstract class ChatterIDWithUUID extends ChatterID {
-        @Nonnull
-        protected final UUID uuid;
 
-        private ChatterIDWithUUID(Parcel parcel) {
-            super(parcel, (ChatterID) null);
-            this.uuid = UUIDPool.getUUID(parcel.readLong(), parcel.readLong());
+        private ChatterIDUser(Parcel parcel)
+        {
+            super(parcel, null);
         }
 
-        /* synthetic */ ChatterIDWithUUID(Parcel parcel, ChatterIDWithUUID chatterIDWithUUID) {
+        ChatterIDUser(Parcel parcel, ChatterIDUser chatteriduser)
+        {
             this(parcel);
         }
 
-        private ChatterIDWithUUID(@Nonnull UUID uuid2, @Nonnull UUID uuid3) {
-            super(uuid2, (ChatterID) null);
-            this.uuid = uuid3 == null ? UUIDPool.ZeroUUID : uuid3;
+        private ChatterIDUser(UUID uuid, UUID uuid1)
+        {
+            super(uuid, uuid1, null);
         }
 
-        /* synthetic */ ChatterIDWithUUID(UUID uuid2, UUID uuid3, ChatterIDWithUUID chatterIDWithUUID) {
-            this(uuid2, uuid3);
+        ChatterIDUser(UUID uuid, UUID uuid1, ChatterIDUser chatteriduser)
+        {
+            this(uuid, uuid1);
         }
+    }
 
-        public int compareTo(@Nonnull ChatterID chatterID) {
-            int compareTo = ChatterID.super.compareTo(chatterID);
-            if (compareTo != 0) {
-                return compareTo;
+    private static abstract class ChatterIDWithUUID extends ChatterID
+    {
+
+        protected final UUID uuid;
+
+        public int compareTo(ChatterID chatterid)
+        {
+            int i = compareTo(chatterid);
+            if (i != 0)
+            {
+                return i;
             }
-            if (chatterID instanceof ChatterIDWithUUID) {
-                return this.uuid.compareTo(((ChatterIDWithUUID) chatterID).uuid);
+            if (chatterid instanceof ChatterIDWithUUID)
+            {
+                return uuid.compareTo(((ChatterIDWithUUID)chatterid).uuid);
+            } else
+            {
+                return 0;
             }
-            return 0;
         }
 
-        public boolean equals(Object obj) {
-            if (!ChatterID.super.equals(obj) || !(obj instanceof ChatterIDWithUUID)) {
+        public boolean equals(Object obj)
+        {
+            if (equals(obj) && (obj instanceof ChatterIDWithUUID))
+            {
+                return Objects.equal(uuid, ((ChatterIDWithUUID)obj).uuid);
+            } else
+            {
                 return false;
             }
-            return Objects.equal(this.uuid, ((ChatterIDWithUUID) obj).uuid);
         }
 
-        @Nonnull
-        public UUID getChatterUUID() {
-            return this.uuid;
+        public UUID getChatterUUID()
+        {
+            return uuid;
         }
 
-        @Nullable
-        public UUID getOptionalChatterUUID() {
-            return this.uuid;
+        public UUID getOptionalChatterUUID()
+        {
+            return uuid;
         }
 
-        public int hashCode() {
-            return (this.uuid != null ? this.uuid.hashCode() : 0) + ChatterID.super.hashCode();
-        }
-
-        public boolean isValidUUID() {
-            if (this.uuid != null) {
-                return !UUIDPool.ZeroUUID.equals(this.uuid);
+        public int hashCode()
+        {
+            int j = hashCode();
+            int i;
+            if (uuid != null)
+            {
+                i = uuid.hashCode();
+            } else
+            {
+                i = 0;
             }
-            return false;
+            return i + j;
         }
 
-        public Bundle toBundle() {
-            Bundle bundle = ChatterID.super.toBundle();
-            bundle.putString("chatterUUID", this.uuid != null ? this.uuid.toString() : UUIDPool.ZeroUUID.toString());
+        public boolean isValidUUID()
+        {
+            if (uuid != null)
+            {
+                return UUIDPool.ZeroUUID.equals(uuid) ^ true;
+            } else
+            {
+                return false;
+            }
+        }
+
+        public Bundle toBundle()
+        {
+            Bundle bundle = toBundle();
+            String s;
+            if (uuid != null)
+            {
+                s = uuid.toString();
+            } else
+            {
+                s = UUIDPool.ZeroUUID.toString();
+            }
+            bundle.putString("chatterUUID", s);
             return bundle;
         }
 
-        public String toString() {
-            return ChatterID.super.toString() + ":" + (this.uuid != null ? this.uuid.toString() : "null");
+        public String toString()
+        {
+            StringBuilder stringbuilder = (new StringBuilder()).append(toString()).append(":");
+            String s;
+            if (uuid != null)
+            {
+                s = uuid.toString();
+            } else
+            {
+                s = "null";
+            }
+            return stringbuilder.append(s).toString();
         }
 
-        public void writeToParcel(Parcel parcel, int i) {
-            ChatterID.super.writeToParcel(parcel, i);
-            if (this.uuid != null) {
-                parcel.writeLong(this.uuid.getMostSignificantBits());
-                parcel.writeLong(this.uuid.getLeastSignificantBits());
+        public void writeToParcel(Parcel parcel, int i)
+        {
+            writeToParcel(parcel, i);
+            if (uuid != null)
+            {
+                parcel.writeLong(uuid.getMostSignificantBits());
+                parcel.writeLong(uuid.getLeastSignificantBits());
+                return;
+            } else
+            {
+                parcel.writeLong(0L);
+                parcel.writeLong(0L);
                 return;
             }
-            parcel.writeLong(0);
-            parcel.writeLong(0);
+        }
+
+        private ChatterIDWithUUID(Parcel parcel)
+        {
+            super(parcel, null);
+            uuid = UUIDPool.getUUID(parcel.readLong(), parcel.readLong());
+        }
+
+        ChatterIDWithUUID(Parcel parcel, ChatterIDWithUUID chatteridwithuuid)
+        {
+            this(parcel);
+        }
+
+        private ChatterIDWithUUID(UUID uuid1, UUID uuid2)
+        {
+            super(uuid1, null);
+            if (uuid2 == null)
+            {
+                uuid2 = UUIDPool.ZeroUUID;
+            }
+            uuid = uuid2;
+        }
+
+        ChatterIDWithUUID(UUID uuid1, UUID uuid2, ChatterIDWithUUID chatteridwithuuid)
+        {
+            this(uuid1, uuid2);
         }
     }
 
-    public enum ChatterType {
-        Local(NotificationType.LocalChat),
-        User(NotificationType.Private),
-        Group(NotificationType.Group);
-        
-        public static final ChatterType[] VALUES = null;
-        @Nonnull
+    public static final class ChatterType extends Enum
+    {
+
+        private static final ChatterType $VALUES[];
+        public static final ChatterType Group;
+        public static final ChatterType Local;
+        public static final ChatterType User;
+        public static final ChatterType VALUES[] = values();
         private final NotificationType notificationType;
 
-        static {
-            VALUES = values();
+        public static ChatterType valueOf(String s)
+        {
+            return (ChatterType)Enum.valueOf(com/lumiyaviewer/lumiya/slproto/users/ChatterID$ChatterType, s);
         }
 
-        private ChatterType(NotificationType notificationType2) {
-            this.notificationType = notificationType2;
+        public static ChatterType[] values()
+        {
+            return $VALUES;
         }
 
-        @Nonnull
-        public NotificationType getNotificationType() {
-            return this.notificationType;
+        public NotificationType getNotificationType()
+        {
+            return notificationType;
+        }
+
+        static 
+        {
+            Local = new ChatterType("Local", 0, NotificationType.LocalChat);
+            User = new ChatterType("User", 1, NotificationType.Private);
+            Group = new ChatterType("Group", 2, NotificationType.Group);
+            $VALUES = (new ChatterType[] {
+                Local, User, Group
+            });
+        }
+
+        private ChatterType(String s, int i, NotificationType notificationtype)
+        {
+            super(s, i);
+            notificationType = notificationtype;
         }
     }
 
-    public interface OnChatterPictureIDListener {
-        void onChatterPictureID(UUID uuid);
+    public static interface OnChatterPictureIDListener
+    {
+
+        public abstract void onChatterPictureID(UUID uuid);
     }
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
-        if (f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues != null) {
-            return f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues;
+
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues[];
+    public final UUID agentUUID;
+
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues;
         }
-        int[] iArr = new int[ChatterType.values().length];
-        try {
-            iArr[ChatterType.Group.ordinal()] = 1;
-        } catch (NoSuchFieldError e) {
+        int ai[] = new int[ChatterType.values().length];
+        try
+        {
+            ai[ChatterType.Group.ordinal()] = 1;
         }
-        try {
-            iArr[ChatterType.Local.ordinal()] = 2;
-        } catch (NoSuchFieldError e2) {
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[ChatterType.Local.ordinal()] = 2;
         }
-        try {
-            iArr[ChatterType.User.ordinal()] = 3;
-        } catch (NoSuchFieldError e3) {
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[ChatterType.User.ordinal()] = 3;
         }
-        f150comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = iArr;
-        return iArr;
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues = ai;
+        return ai;
     }
 
-    private ChatterID(Parcel parcel) {
-        this.agentUUID = UUIDPool.getUUID(parcel.readLong(), parcel.readLong());
+    private ChatterID(Parcel parcel)
+    {
+        agentUUID = UUIDPool.getUUID(parcel.readLong(), parcel.readLong());
     }
 
-    /* synthetic */ ChatterID(Parcel parcel, ChatterID chatterID) {
+    ChatterID(Parcel parcel, ChatterID chatterid)
+    {
         this(parcel);
     }
 
-    private ChatterID(@Nonnull UUID uuid) {
-        this.agentUUID = uuid;
+    private ChatterID(UUID uuid)
+    {
+        agentUUID = uuid;
     }
 
-    /* synthetic */ ChatterID(UUID uuid, ChatterID chatterID) {
+    ChatterID(UUID uuid, ChatterID chatterid)
+    {
         this(uuid);
     }
 
-    public static ChatterID fromBundle(Bundle bundle) {
-        UUID fromString = UUID.fromString(bundle.getString("chatterAgentUUID"));
-        switch (m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues()[ChatterType.VALUES[bundle.getInt("chatterType", 0)].ordinal()]) {
-            case 1:
-                return getGroupChatterID(fromString, UUID.fromString(bundle.getString("chatterUUID")));
-            case 2:
-                return getLocalChatterID(fromString);
-            case 3:
-                return getUserChatterID(fromString, UUID.fromString(bundle.getString("chatterUUID")));
-            default:
-                return null;
+    public static ChatterID fromBundle(Bundle bundle)
+    {
+        UUID uuid = UUID.fromString(bundle.getString("chatterAgentUUID"));
+        ChatterType chattertype = ChatterType.VALUES[bundle.getInt("chatterType", 0)];
+        switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues()[chattertype.ordinal()])
+        {
+        default:
+            return null;
+
+        case 2: // '\002'
+            return getLocalChatterID(uuid);
+
+        case 3: // '\003'
+            return getUserChatterID(uuid, UUID.fromString(bundle.getString("chatterUUID")));
+
+        case 1: // '\001'
+            return getGroupChatterID(uuid, UUID.fromString(bundle.getString("chatterUUID")));
         }
     }
 
-    public static ChatterID fromDatabaseObject(UUID uuid, Chatter chatter) {
-        switch (m259getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues()[ChatterType.VALUES[chatter.getType()].ordinal()]) {
-            case 1:
-                return getGroupChatterID(uuid, chatter.getUuid());
-            case 2:
-                return getLocalChatterID(uuid);
-            case 3:
-                return getUserChatterID(uuid, chatter.getUuid());
-            default:
-                return null;
+    public static ChatterID fromDatabaseObject(UUID uuid, Chatter chatter)
+    {
+        ChatterType chattertype = ChatterType.VALUES[chatter.getType()];
+        switch (_2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_users_2D_ChatterID$ChatterTypeSwitchesValues()[chattertype.ordinal()])
+        {
+        default:
+            return null;
+
+        case 2: // '\002'
+            return getLocalChatterID(uuid);
+
+        case 3: // '\003'
+            return getUserChatterID(uuid, chatter.getUuid());
+
+        case 1: // '\001'
+            return getGroupChatterID(uuid, chatter.getUuid());
         }
     }
 
-    @Nonnull
-    public static ChatterID getGroupChatterID(@Nonnull UUID uuid, @Nonnull UUID uuid2) {
-        return new ChatterIDGroup(uuid, uuid2, (ChatterIDGroup) null);
+    public static ChatterID getGroupChatterID(UUID uuid, UUID uuid1)
+    {
+        return new ChatterIDGroup(uuid, uuid1, null);
     }
 
-    @Nonnull
-    public static ChatterID getLocalChatterID(@Nonnull UUID uuid) {
-        return new ChatterIDLocal(uuid, (ChatterIDLocal) null);
+    public static ChatterID getLocalChatterID(UUID uuid)
+    {
+        return new ChatterIDLocal(uuid, null);
     }
 
-    @Nonnull
-    public static ChatterIDUser getUserChatterID(@Nonnull UUID uuid, @Nonnull UUID uuid2) {
-        return new ChatterIDUser(uuid, uuid2, (ChatterIDUser) null);
+    public static ChatterIDUser getUserChatterID(UUID uuid, UUID uuid1)
+    {
+        return new ChatterIDUser(uuid, uuid1, null);
     }
 
-    public int compareTo(@Nonnull ChatterID chatterID) {
-        int compareTo = this.agentUUID.compareTo(chatterID.agentUUID);
-        return compareTo != 0 ? compareTo : getChatterType().compareTo(chatterID.getChatterType());
+    public int compareTo(ChatterID chatterid)
+    {
+        int i = agentUUID.compareTo(chatterid.agentUUID);
+        if (i != 0)
+        {
+            return i;
+        } else
+        {
+            return getChatterType().compareTo(chatterid.getChatterType());
+        }
     }
 
-    public int describeContents() {
+    public volatile int compareTo(Object obj)
+    {
+        return compareTo((ChatterID)obj);
+    }
+
+    public int describeContents()
+    {
         return 0;
     }
 
-    public boolean equals(Object obj) {
-        if (obj instanceof ChatterID) {
-            return ((ChatterID) obj).agentUUID.equals(this.agentUUID);
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof ChatterID)
+        {
+            return ((ChatterID)obj).agentUUID.equals(agentUUID);
+        } else
+        {
+            return false;
         }
-        return false;
     }
 
-    @Nonnull
     public abstract ChatterType getChatterType();
 
-    @Nullable
-    public SLGridConnection getConnection() {
-        return GridConnectionManager.getConnection(this.agentUUID);
+    public SLGridConnection getConnection()
+    {
+        return GridConnectionManager.getConnection(agentUUID);
     }
 
-    @Nullable
-    public UUID getOptionalChatterUUID() {
+    public UUID getOptionalChatterUUID()
+    {
         return null;
     }
 
-    public Subscription getPictureID(@Nonnull UserManager userManager, @Nullable Executor executor, @Nonnull OnChatterPictureIDListener onChatterPictureIDListener) {
+    public Subscription getPictureID(UserManager usermanager, Executor executor, OnChatterPictureIDListener onchatterpictureidlistener)
+    {
         return null;
     }
 
-    @Nullable
-    public UserManager getUserManager() {
-        return UserManager.getUserManager(this.agentUUID);
+    public UserManager getUserManager()
+    {
+        return UserManager.getUserManager(agentUUID);
     }
 
-    public int hashCode() {
-        return this.agentUUID.hashCode() + 1 + getChatterType().ordinal();
+    public int hashCode()
+    {
+        return agentUUID.hashCode() + 1 + getChatterType().ordinal();
     }
 
-    public boolean isValidUUID() {
+    public boolean isValidUUID()
+    {
         return false;
     }
 
-    public Bundle toBundle() {
+    public Bundle toBundle()
+    {
         Bundle bundle = new Bundle();
         bundle.putInt("chatterType", getChatterType().ordinal());
-        bundle.putString("chatterAgentUUID", this.agentUUID.toString());
+        bundle.putString("chatterAgentUUID", agentUUID.toString());
         return bundle;
     }
 
-    public void toDatabaseObject(Chatter chatter) {
+    public void toDatabaseObject(Chatter chatter)
+    {
         chatter.setType(getChatterType().ordinal());
         chatter.setUuid(getOptionalChatterUUID());
     }
 
-    public String toString() {
-        return "Chatter:" + getChatterType().toString();
+    public String toString()
+    {
+        return (new StringBuilder()).append("Chatter:").append(getChatterType().toString()).toString();
     }
 
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeLong(this.agentUUID.getMostSignificantBits());
-        parcel.writeLong(this.agentUUID.getLeastSignificantBits());
+    public void writeToParcel(Parcel parcel, int i)
+    {
+        parcel.writeLong(agentUUID.getMostSignificantBits());
+        parcel.writeLong(agentUUID.getLeastSignificantBits());
     }
 }

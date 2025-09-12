@@ -1,65 +1,98 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class AcceptCallingCard extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<FolderData> FolderData_Fields = new ArrayList<>();
-    public TransactionBlock TransactionBlock_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class AcceptCallingCard extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class FolderData {
+    public static class FolderData
+    {
+
         public UUID FolderID;
+
+        public FolderData()
+        {
+        }
     }
 
-    public static class TransactionBlock {
+    public static class TransactionBlock
+    {
+
         public UUID TransactionID;
-    }
 
-    public AcceptCallingCard() {
-        this.zeroCoded = false;
-        this.AgentData_Field = new AgentData();
-        this.TransactionBlock_Field = new TransactionBlock();
-    }
-
-    public int CalcPayloadSize() {
-        return (this.FolderData_Fields.size() * 16) + 53;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleAcceptCallingCard(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 46);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packUUID(byteBuffer, this.TransactionBlock_Field.TransactionID);
-        byteBuffer.put((byte) this.FolderData_Fields.size());
-        for (FolderData folderData : this.FolderData_Fields) {
-            packUUID(byteBuffer, folderData.FolderID);
+        public TransactionBlock()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.TransactionBlock_Field.TransactionID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            FolderData folderData = new FolderData();
-            folderData.FolderID = unpackUUID(byteBuffer);
-            this.FolderData_Fields.add(folderData);
+
+    public AgentData AgentData_Field;
+    public ArrayList FolderData_Fields;
+    public TransactionBlock TransactionBlock_Field;
+
+    public AcceptCallingCard()
+    {
+        FolderData_Fields = new ArrayList();
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
+        TransactionBlock_Field = new TransactionBlock();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return FolderData_Fields.size() * 16 + 53;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleAcceptCallingCard(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)46);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packUUID(bytebuffer, TransactionBlock_Field.TransactionID);
+        bytebuffer.put((byte)FolderData_Fields.size());
+        for (Iterator iterator = FolderData_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, ((FolderData)iterator.next()).FolderID)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        TransactionBlock_Field.TransactionID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            FolderData folderdata = new FolderData();
+            folderdata.FolderID = unpackUUID(bytebuffer);
+            FolderData_Fields.add(folderdata);
         }
+
     }
 }

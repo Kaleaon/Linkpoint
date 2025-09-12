@@ -1,32 +1,54 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class SubscriptionSingleDataPool<T> extends SubscriptionGenericDataPool<SubscriptionSingleKey, T> {
-    private final SubscriptionList<SubscriptionSingleKey, T> entry = new SubscriptionList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.react:
+//            SubscriptionGenericDataPool, SubscriptionList, SubscriptionSingleKey
 
-    public static SubscriptionSingleKey getSingleDataKey() {
+public class SubscriptionSingleDataPool extends SubscriptionGenericDataPool
+{
+
+    private final SubscriptionList entry = new SubscriptionList();
+
+    public SubscriptionSingleDataPool()
+    {
+    }
+
+    public static SubscriptionSingleKey getSingleDataKey()
+    {
         return SubscriptionSingleKey.Value;
     }
 
-    public T getData() {
-        return this.entry.getData();
+    public Object getData()
+    {
+        return entry.getData();
     }
 
-    /* access modifiers changed from: protected */
-    @Nullable
-    public SubscriptionList<SubscriptionSingleKey, T> getExistingSubscriptions(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
-        return this.entry;
+    protected SubscriptionList getExistingSubscriptions(SubscriptionSingleKey subscriptionsinglekey)
+    {
+        return entry;
     }
 
-    public SubscriptionSingleKey getKey() {
+    protected volatile SubscriptionList getExistingSubscriptions(Object obj)
+    {
+        return getExistingSubscriptions((SubscriptionSingleKey)obj);
+    }
+
+    public SubscriptionSingleKey getKey()
+    {
         return SubscriptionSingleKey.Value;
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SubscriptionList<SubscriptionSingleKey, T> getSubscriptions(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
-        return this.entry;
+    protected SubscriptionList getSubscriptions(SubscriptionSingleKey subscriptionsinglekey)
+    {
+        return entry;
+    }
+
+    protected volatile SubscriptionList getSubscriptions(Object obj)
+    {
+        return getSubscriptions((SubscriptionSingleKey)obj);
     }
 }

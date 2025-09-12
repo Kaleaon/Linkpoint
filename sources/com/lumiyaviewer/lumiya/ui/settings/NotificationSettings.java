@@ -1,105 +1,185 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.support.v4.view.ViewCompat;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.lumiyaviewer.lumiya.R;
+import com.google.common.collect.ImmutableMap;
 import com.lumiyaviewer.lumiya.ui.media.NotificationSounds;
 import com.lumiyaviewer.lumiya.utils.LEDAction;
 
-public class NotificationSettings {
-    private LEDAction blinkAction = LEDAction.None;
-    private String blinkColor = "red";
-    private boolean notificationEnabled = false;
-    private String ringtone = "";
-    private boolean soundEnabled = false;
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.settings:
+//            NotificationType
+
+public class NotificationSettings
+{
+
+    private LEDAction blinkAction;
+    private String blinkColor;
+    private boolean notificationEnabled;
+    private String ringtone;
+    private boolean soundEnabled;
     private NotificationType type;
 
-    public NotificationSettings(NotificationType notificationType) {
-        this.type = notificationType;
+    public NotificationSettings(NotificationType notificationtype)
+    {
+        type = notificationtype;
+        notificationEnabled = false;
+        soundEnabled = false;
+        ringtone = "";
+        blinkAction = LEDAction.None;
+        blinkColor = "red";
     }
 
-    private int getPrefColor(String str) {
-        if (str.length() != 6) {
+    private int getPrefColor(String s)
+    {
+        if (s.length() != 6)
+        {
             return 0;
         }
-        try {
-            return Integer.parseInt(str, 16) | ViewCompat.MEASURED_STATE_MASK;
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
+        int i;
+        try
+        {
+            i = Integer.parseInt(s, 16);
+        }
+        // Misplaced declaration of an exception variable
+        catch (String s)
+        {
+            s.printStackTrace();
             return 0;
         }
+        return i | 0xff000000;
     }
 
-    private String getPreferenceValueName(Context context, String str, int i, int i2) {
-        String[] stringArray = context.getResources().getStringArray(i);
-        String[] stringArray2 = context.getResources().getStringArray(i2);
-        for (int i3 = 0; i3 < stringArray.length; i3++) {
-            if (stringArray[i3].equals(str)) {
-                return stringArray2[i3];
+    private String getPreferenceValueName(Context context, String s, int i, int j)
+    {
+        String as[] = context.getResources().getStringArray(i);
+        context = context.getResources().getStringArray(j);
+        for (i = 0; i < as.length; i++)
+        {
+            if (as[i].equals(s))
+            {
+                return context[i];
             }
         }
+
         return "";
     }
 
-    public void Load(SharedPreferences sharedPreferences) {
-        this.notificationEnabled = sharedPreferences.getBoolean(this.type.getEnableKey(), true);
-        this.soundEnabled = sharedPreferences.getBoolean(this.type.getPlaySoundKey(), true);
-        NotificationSounds notificationSounds = NotificationSounds.defaultSounds.get(this.type);
-        this.ringtone = sharedPreferences.getString(this.type.getRingtoneKey(), notificationSounds != null ? notificationSounds.getUri().toString() : null);
-        this.blinkAction = LEDAction.getByPreferenceString(sharedPreferences.getString(this.type.getBlinkKey(), "none"));
-        this.blinkColor = sharedPreferences.getString(this.type.getBlinkColorKey(), "FF0000");
-    }
-
-    public LEDAction getLEDAction() {
-        return this.blinkAction;
-    }
-
-    public int getLEDColor() {
-        return getPrefColor(this.blinkColor);
-    }
-
-    public String getRingtone() {
-        if (this.soundEnabled) {
-            return this.ringtone;
+    public void Load(SharedPreferences sharedpreferences)
+    {
+        notificationEnabled = sharedpreferences.getBoolean(type.getEnableKey(), true);
+        soundEnabled = sharedpreferences.getBoolean(type.getPlaySoundKey(), true);
+        Object obj = (NotificationSounds)NotificationSounds.defaultSounds.get(type);
+        String s = type.getRingtoneKey();
+        if (obj != null)
+        {
+            obj = ((NotificationSounds) (obj)).getUri().toString();
+        } else
+        {
+            obj = null;
         }
-        return null;
+        ringtone = sharedpreferences.getString(s, ((String) (obj)));
+        blinkAction = LEDAction.getByPreferenceString(sharedpreferences.getString(type.getBlinkKey(), "none"));
+        blinkColor = sharedpreferences.getString(type.getBlinkColorKey(), "FF0000");
     }
 
-    /* access modifiers changed from: package-private */
-    public String getSummary(Context context) {
-        String str;
-        if (this.ringtone != null) {
-            Uri parse = Uri.parse(this.ringtone);
-            NotificationSounds notificationSounds = NotificationSounds.defaultSounds.get(this.type);
-            if (Objects.equal(notificationSounds != null ? notificationSounds.getUri() : null, parse)) {
-                str = "Default";
-            } else if (this.ringtone.isEmpty()) {
-                str = "Silent";
-            } else {
-                Ringtone ringtone2 = RingtoneManager.getRingtone(context, parse);
-                str = ringtone2 != null ? ringtone2.getTitle(context) : "No sound selected";
+    public LEDAction getLEDAction()
+    {
+        return blinkAction;
+    }
+
+    public int getLEDColor()
+    {
+        return getPrefColor(blinkColor);
+    }
+
+    public String getRingtone()
+    {
+        if (soundEnabled)
+        {
+            return ringtone;
+        } else
+        {
+            return null;
+        }
+    }
+
+    String getSummary(Context context)
+    {
+        if (ringtone != null)
+        {
+            Object obj1 = Uri.parse(ringtone);
+            Object obj = (NotificationSounds)NotificationSounds.defaultSounds.get(type);
+            if (obj != null)
+            {
+                obj = ((NotificationSounds) (obj)).getUri();
+            } else
+            {
+                obj = null;
             }
-        } else {
-            str = "Default";
+            if (Objects.equal(obj, obj1))
+            {
+                obj = "Default";
+            } else
+            if (ringtone.isEmpty())
+            {
+                obj = "Silent";
+            } else
+            {
+                obj = RingtoneManager.getRingtone(context, ((Uri) (obj1)));
+                if (obj != null)
+                {
+                    obj = ((Ringtone) (obj)).getTitle(context);
+                } else
+                {
+                    obj = "No sound selected";
+                }
+            }
+        } else
+        {
+            obj = "Default";
         }
-        String preferenceValueName = getPreferenceValueName(context, this.blinkColor, R.array.pref_led_color_values, R.array.pref_led_color);
-        if (!this.notificationEnabled) {
+        obj1 = getPreferenceValueName(context, blinkColor, 0x7f0f0012, 0x7f0f0011);
+        if (notificationEnabled)
+        {
+            if (soundEnabled)
+            {
+                context = (new StringBuilder()).append("Notify").append(", play sound (").append(((String) (obj))).append(")").toString();
+            } else
+            {
+                context = "Notify";
+            }
+            obj = context;
+            if (blinkAction != LEDAction.None)
+            {
+                obj = (new StringBuilder()).append(context).append(", blink ");
+                if (!Strings.isNullOrEmpty(((String) (obj1))))
+                {
+                    context = (new StringBuilder()).append(((String) (obj1)).toLowerCase()).append(" ").toString();
+                } else
+                {
+                    context = "";
+                }
+                obj = ((StringBuilder) (obj)).append(context).append("LED").toString();
+            }
+            return ((String) (obj));
+        } else
+        {
             return "Do nothing";
         }
-        String str2 = this.soundEnabled ? "Notify" + ", play sound (" + str + ")" : "Notify";
-        if (this.blinkAction == LEDAction.None) {
-            return str2;
-        }
-        return str2 + ", blink " + (!Strings.isNullOrEmpty(preferenceValueName) ? preferenceValueName.toLowerCase() + " " : "") + "LED";
     }
 
-    public boolean isEnabled() {
-        return this.notificationEnabled;
+    public boolean isEnabled()
+    {
+        return notificationEnabled;
     }
 }

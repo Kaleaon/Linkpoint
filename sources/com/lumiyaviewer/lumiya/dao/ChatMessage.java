@@ -1,15 +1,22 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import com.lumiyaviewer.lumiya.utils.Identifiable;
 import java.util.Date;
 import java.util.UUID;
 
-public class ChatMessage implements Identifiable<Long> {
+public class ChatMessage
+    implements Identifiable
+{
+
     private Boolean accepted;
     private Integer assetType;
     private Integer chatChannel;
     private long chatterID;
-    private byte[] dialogButtons;
+    private byte dialogButtons[];
     private Boolean dialogIgnored;
     private String dialogSelectedOption;
     private Integer eventState;
@@ -36,283 +43,355 @@ public class ChatMessage implements Identifiable<Long> {
     private UUID userID;
     private int viewType;
 
-    public ChatMessage() {
+    public ChatMessage()
+    {
     }
 
-    public ChatMessage(Long l) {
-        this.id = l;
+    public ChatMessage(Long long1)
+    {
+        id = long1;
     }
 
-    public ChatMessage(Long l, long j, Date date, int i, Date date2, Boolean bool, UUID uuid, Integer num, String str, String str2, String str3, int i2, Integer num2, Integer num3, UUID uuid2, UUID uuid3, String str4, Integer num4, Integer num5, Integer num6, Integer num7, Boolean bool2, Boolean bool3, UUID uuid4, String str5, Integer num8, byte[] bArr, String str6, Integer num9, boolean z) {
-        this.id = l;
-        this.chatterID = j;
-        this.timestamp = date;
-        this.viewType = i;
-        this.origTimestamp = date2;
-        this.isOffline = bool;
-        this.senderUUID = uuid;
-        this.senderType = num;
-        this.senderName = str;
-        this.senderLegacyName = str2;
-        this.messageText = str3;
-        this.messageType = i2;
-        this.eventState = num2;
-        this.origIMType = num3;
-        this.sessionID = uuid2;
-        this.itemID = uuid3;
-        this.itemName = str4;
-        this.assetType = num4;
-        this.transactionAmount = num5;
-        this.newBalance = num6;
-        this.chatChannel = num7;
-        this.dialogIgnored = bool2;
-        this.accepted = bool3;
-        this.userID = uuid4;
-        this.objectName = str5;
-        this.questionMask = num8;
-        this.dialogButtons = bArr;
-        this.dialogSelectedOption = str6;
-        this.textBoxButtonIndex = num9;
-        this.syncedToGoogleDrive = z;
+    public ChatMessage(Long long1, long l, Date date, int i, Date date1, Boolean boolean1, 
+            UUID uuid, Integer integer, String s, String s1, String s2, int j, Integer integer1, 
+            Integer integer2, UUID uuid1, UUID uuid2, String s3, Integer integer3, Integer integer4, Integer integer5, 
+            Integer integer6, Boolean boolean2, Boolean boolean3, UUID uuid3, String s4, Integer integer7, byte abyte0[], 
+            String s5, Integer integer8, boolean flag)
+    {
+        id = long1;
+        chatterID = l;
+        timestamp = date;
+        viewType = i;
+        origTimestamp = date1;
+        isOffline = boolean1;
+        senderUUID = uuid;
+        senderType = integer;
+        senderName = s;
+        senderLegacyName = s1;
+        messageText = s2;
+        messageType = j;
+        eventState = integer1;
+        origIMType = integer2;
+        sessionID = uuid1;
+        itemID = uuid2;
+        itemName = s3;
+        assetType = integer3;
+        transactionAmount = integer4;
+        newBalance = integer5;
+        chatChannel = integer6;
+        dialogIgnored = boolean2;
+        accepted = boolean3;
+        userID = uuid3;
+        objectName = s4;
+        questionMask = integer7;
+        dialogButtons = abyte0;
+        dialogSelectedOption = s5;
+        textBoxButtonIndex = integer8;
+        syncedToGoogleDrive = flag;
     }
 
-    public Boolean getAccepted() {
-        return this.accepted;
+    public Boolean getAccepted()
+    {
+        return accepted;
     }
 
-    public Integer getAssetType() {
-        return this.assetType;
+    public Integer getAssetType()
+    {
+        return assetType;
     }
 
-    public Integer getChatChannel() {
-        return this.chatChannel;
+    public Integer getChatChannel()
+    {
+        return chatChannel;
     }
 
-    public long getChatterID() {
-        return this.chatterID;
+    public long getChatterID()
+    {
+        return chatterID;
     }
 
-    public byte[] getDialogButtons() {
-        return this.dialogButtons;
+    public byte[] getDialogButtons()
+    {
+        return dialogButtons;
     }
 
-    public Boolean getDialogIgnored() {
-        return this.dialogIgnored;
+    public Boolean getDialogIgnored()
+    {
+        return dialogIgnored;
     }
 
-    public String getDialogSelectedOption() {
-        return this.dialogSelectedOption;
+    public String getDialogSelectedOption()
+    {
+        return dialogSelectedOption;
     }
 
-    public Integer getEventState() {
-        return this.eventState;
+    public Integer getEventState()
+    {
+        return eventState;
     }
 
-    public Long getId() {
-        return this.id;
+    public Long getId()
+    {
+        return id;
     }
 
-    public Boolean getIsOffline() {
-        return this.isOffline;
+    public volatile Object getId()
+    {
+        return getId();
     }
 
-    public UUID getItemID() {
-        return this.itemID;
+    public Boolean getIsOffline()
+    {
+        return isOffline;
     }
 
-    public String getItemName() {
-        return this.itemName;
+    public UUID getItemID()
+    {
+        return itemID;
     }
 
-    public String getMessageText() {
-        return this.messageText;
+    public String getItemName()
+    {
+        return itemName;
     }
 
-    public int getMessageType() {
-        return this.messageType;
+    public String getMessageText()
+    {
+        return messageText;
     }
 
-    public Integer getNewBalance() {
-        return this.newBalance;
+    public int getMessageType()
+    {
+        return messageType;
     }
 
-    public String getObjectName() {
-        return this.objectName;
+    public Integer getNewBalance()
+    {
+        return newBalance;
     }
 
-    public Integer getOrigIMType() {
-        return this.origIMType;
+    public String getObjectName()
+    {
+        return objectName;
     }
 
-    public Date getOrigTimestamp() {
-        return this.origTimestamp;
+    public Integer getOrigIMType()
+    {
+        return origIMType;
     }
 
-    public Integer getQuestionMask() {
-        return this.questionMask;
+    public Date getOrigTimestamp()
+    {
+        return origTimestamp;
     }
 
-    public String getSenderLegacyName() {
-        return this.senderLegacyName;
+    public Integer getQuestionMask()
+    {
+        return questionMask;
     }
 
-    public String getSenderName() {
-        return this.senderName;
+    public String getSenderLegacyName()
+    {
+        return senderLegacyName;
     }
 
-    public Integer getSenderType() {
-        return this.senderType;
+    public String getSenderName()
+    {
+        return senderName;
     }
 
-    public UUID getSenderUUID() {
-        return this.senderUUID;
+    public Integer getSenderType()
+    {
+        return senderType;
     }
 
-    public UUID getSessionID() {
-        return this.sessionID;
+    public UUID getSenderUUID()
+    {
+        return senderUUID;
     }
 
-    public boolean getSyncedToGoogleDrive() {
-        return this.syncedToGoogleDrive;
+    public UUID getSessionID()
+    {
+        return sessionID;
     }
 
-    public Integer getTextBoxButtonIndex() {
-        return this.textBoxButtonIndex;
+    public boolean getSyncedToGoogleDrive()
+    {
+        return syncedToGoogleDrive;
     }
 
-    public Date getTimestamp() {
-        return this.timestamp;
+    public Integer getTextBoxButtonIndex()
+    {
+        return textBoxButtonIndex;
     }
 
-    public Integer getTransactionAmount() {
-        return this.transactionAmount;
+    public Date getTimestamp()
+    {
+        return timestamp;
     }
 
-    public UUID getUserID() {
-        return this.userID;
+    public Integer getTransactionAmount()
+    {
+        return transactionAmount;
     }
 
-    public int getViewType() {
-        return this.viewType;
+    public UUID getUserID()
+    {
+        return userID;
     }
 
-    public void setAccepted(Boolean bool) {
-        this.accepted = bool;
+    public int getViewType()
+    {
+        return viewType;
     }
 
-    public void setAssetType(Integer num) {
-        this.assetType = num;
+    public void setAccepted(Boolean boolean1)
+    {
+        accepted = boolean1;
     }
 
-    public void setChatChannel(Integer num) {
-        this.chatChannel = num;
+    public void setAssetType(Integer integer)
+    {
+        assetType = integer;
     }
 
-    public void setChatterID(long j) {
-        this.chatterID = j;
+    public void setChatChannel(Integer integer)
+    {
+        chatChannel = integer;
     }
 
-    public void setDialogButtons(byte[] bArr) {
-        this.dialogButtons = bArr;
+    public void setChatterID(long l)
+    {
+        chatterID = l;
     }
 
-    public void setDialogIgnored(Boolean bool) {
-        this.dialogIgnored = bool;
+    public void setDialogButtons(byte abyte0[])
+    {
+        dialogButtons = abyte0;
     }
 
-    public void setDialogSelectedOption(String str) {
-        this.dialogSelectedOption = str;
+    public void setDialogIgnored(Boolean boolean1)
+    {
+        dialogIgnored = boolean1;
     }
 
-    public void setEventState(Integer num) {
-        this.eventState = num;
+    public void setDialogSelectedOption(String s)
+    {
+        dialogSelectedOption = s;
     }
 
-    public void setId(Long l) {
-        this.id = l;
+    public void setEventState(Integer integer)
+    {
+        eventState = integer;
     }
 
-    public void setIsOffline(Boolean bool) {
-        this.isOffline = bool;
+    public void setId(Long long1)
+    {
+        id = long1;
     }
 
-    public void setItemID(UUID uuid) {
-        this.itemID = uuid;
+    public void setIsOffline(Boolean boolean1)
+    {
+        isOffline = boolean1;
     }
 
-    public void setItemName(String str) {
-        this.itemName = str;
+    public void setItemID(UUID uuid)
+    {
+        itemID = uuid;
     }
 
-    public void setMessageText(String str) {
-        this.messageText = str;
+    public void setItemName(String s)
+    {
+        itemName = s;
     }
 
-    public void setMessageType(int i) {
-        this.messageType = i;
+    public void setMessageText(String s)
+    {
+        messageText = s;
     }
 
-    public void setNewBalance(Integer num) {
-        this.newBalance = num;
+    public void setMessageType(int i)
+    {
+        messageType = i;
     }
 
-    public void setObjectName(String str) {
-        this.objectName = str;
+    public void setNewBalance(Integer integer)
+    {
+        newBalance = integer;
     }
 
-    public void setOrigIMType(Integer num) {
-        this.origIMType = num;
+    public void setObjectName(String s)
+    {
+        objectName = s;
     }
 
-    public void setOrigTimestamp(Date date) {
-        this.origTimestamp = date;
+    public void setOrigIMType(Integer integer)
+    {
+        origIMType = integer;
     }
 
-    public void setQuestionMask(Integer num) {
-        this.questionMask = num;
+    public void setOrigTimestamp(Date date)
+    {
+        origTimestamp = date;
     }
 
-    public void setSenderLegacyName(String str) {
-        this.senderLegacyName = str;
+    public void setQuestionMask(Integer integer)
+    {
+        questionMask = integer;
     }
 
-    public void setSenderName(String str) {
-        this.senderName = str;
+    public void setSenderLegacyName(String s)
+    {
+        senderLegacyName = s;
     }
 
-    public void setSenderType(Integer num) {
-        this.senderType = num;
+    public void setSenderName(String s)
+    {
+        senderName = s;
     }
 
-    public void setSenderUUID(UUID uuid) {
-        this.senderUUID = uuid;
+    public void setSenderType(Integer integer)
+    {
+        senderType = integer;
     }
 
-    public void setSessionID(UUID uuid) {
-        this.sessionID = uuid;
+    public void setSenderUUID(UUID uuid)
+    {
+        senderUUID = uuid;
     }
 
-    public void setSyncedToGoogleDrive(boolean z) {
-        this.syncedToGoogleDrive = z;
+    public void setSessionID(UUID uuid)
+    {
+        sessionID = uuid;
     }
 
-    public void setTextBoxButtonIndex(Integer num) {
-        this.textBoxButtonIndex = num;
+    public void setSyncedToGoogleDrive(boolean flag)
+    {
+        syncedToGoogleDrive = flag;
     }
 
-    public void setTimestamp(Date date) {
-        this.timestamp = date;
+    public void setTextBoxButtonIndex(Integer integer)
+    {
+        textBoxButtonIndex = integer;
     }
 
-    public void setTransactionAmount(Integer num) {
-        this.transactionAmount = num;
+    public void setTimestamp(Date date)
+    {
+        timestamp = date;
     }
 
-    public void setUserID(UUID uuid) {
-        this.userID = uuid;
+    public void setTransactionAmount(Integer integer)
+    {
+        transactionAmount = integer;
     }
 
-    public void setViewType(int i) {
-        this.viewType = i;
+    public void setUserID(UUID uuid)
+    {
+        userID = uuid;
+    }
+
+    public void setViewType(int i)
+    {
+        viewType = i;
     }
 }

@@ -1,73 +1,105 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class ObjectImage extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<ObjectData> ObjectData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class ObjectImage extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class ObjectData {
-        public byte[] MediaURL;
+    public static class ObjectData
+    {
+
+        public byte MediaURL[];
         public int ObjectLocalID;
-        public byte[] TextureEntry;
-    }
+        public byte TextureEntry[];
 
-    public ObjectImage() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 37;
-        Iterator<T> it = this.ObjectData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            ObjectData objectData = (ObjectData) it.next();
-            i = objectData.TextureEntry.length + objectData.MediaURL.length + 5 + 2 + i2;
+        public ObjectData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleObjectImage(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList ObjectData_Fields;
+
+    public ObjectImage()
+    {
+        ObjectData_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 96);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        byteBuffer.put((byte) this.ObjectData_Fields.size());
-        for (ObjectData objectData : this.ObjectData_Fields) {
-            packInt(byteBuffer, objectData.ObjectLocalID);
-            packVariable(byteBuffer, objectData.MediaURL, 1);
-            packVariable(byteBuffer, objectData.TextureEntry, 2);
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = ObjectData_Fields.iterator();
+        ObjectData objectdata;
+        int i;
+        int j;
+        for (i = 37; iterator.hasNext(); i = objectdata.TextureEntry.length + (j + 5 + 2) + i)
+        {
+            objectdata = (ObjectData)iterator.next();
+            j = objectdata.MediaURL.length;
         }
+
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            ObjectData objectData = new ObjectData();
-            objectData.ObjectLocalID = unpackInt(byteBuffer);
-            objectData.MediaURL = unpackVariable(byteBuffer, 1);
-            objectData.TextureEntry = unpackVariable(byteBuffer, 2);
-            this.ObjectData_Fields.add(objectData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleObjectImage(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)96);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        bytebuffer.put((byte)ObjectData_Fields.size());
+        ObjectData objectdata;
+        for (Iterator iterator = ObjectData_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, objectdata.TextureEntry, 2))
+        {
+            objectdata = (ObjectData)iterator.next();
+            packInt(bytebuffer, objectdata.ObjectLocalID);
+            packVariable(bytebuffer, objectdata.MediaURL, 1);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            ObjectData objectdata = new ObjectData();
+            objectdata.ObjectLocalID = unpackInt(bytebuffer);
+            objectdata.MediaURL = unpackVariable(bytebuffer, 1);
+            objectdata.TextureEntry = unpackVariable(bytebuffer, 2);
+            ObjectData_Fields.add(objectdata);
+        }
+
     }
 }

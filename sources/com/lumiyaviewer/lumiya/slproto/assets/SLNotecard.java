@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.assets;
 
 import android.graphics.Canvas;
@@ -16,332 +20,435 @@ import com.lumiyaviewer.lumiya.slproto.inventory.SLSaleType;
 import com.lumiyaviewer.lumiya.utils.SimpleStringParser;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
-public class SLNotecard {
-    private static final String DELIM_ANY = " \t\n";
-    private static final String DELIM_EOL = "\n";
-    private List<NotecardAttachment> attachments;
-    private boolean isScript;
-    private String notecardText;
+public class SLNotecard
+{
+    private static class AttachmentClickableSpan extends ClickableSpan
+        implements InventoryEntrySpan
+    {
 
-    private static class AttachmentClickableSpan extends ClickableSpan implements InventoryEntrySpan {
         private OnAttachmentClickListener clickListener;
         private SLInventoryEntry entry;
 
-        public AttachmentClickableSpan(SLInventoryEntry sLInventoryEntry, OnAttachmentClickListener onAttachmentClickListener) {
-            this.entry = sLInventoryEntry;
-            this.clickListener = onAttachmentClickListener;
+        public SLInventoryEntry getEntry()
+        {
+            return entry;
         }
 
-        public SLInventoryEntry getEntry() {
-            return this.entry;
-        }
-
-        public void onClick(View view) {
-            if (this.clickListener != null) {
-                this.clickListener.onAttachmentClick(this.entry);
+        public void onClick(View view)
+        {
+            if (clickListener != null)
+            {
+                clickListener.onAttachmentClick(entry);
             }
+        }
+
+        public AttachmentClickableSpan(SLInventoryEntry slinventoryentry, OnAttachmentClickListener onattachmentclicklistener)
+        {
+            entry = slinventoryentry;
+            clickListener = onattachmentclicklistener;
         }
     }
 
-    private static class AttachmentSpan extends ReplacementSpan implements InventoryEntrySpan {
+    private static class AttachmentSpan extends ReplacementSpan
+        implements InventoryEntrySpan
+    {
+
         private SLInventoryEntry entry;
         private String linkText;
 
-        public AttachmentSpan(SLInventoryEntry sLInventoryEntry) {
-            this.entry = sLInventoryEntry;
-            this.linkText = sLInventoryEntry.getReadableTextForLink();
-        }
-
-        public void draw(Canvas canvas, CharSequence charSequence, int i, int i2, float f, int i3, int i4, int i5, Paint paint) {
-            if (i != i2) {
-                Paint paint2 = new Paint(paint);
-                paint2.setUnderlineText(true);
-                paint2.setColor(Color.rgb(0, 50, 100));
-                canvas.drawText(this.linkText, 0, this.linkText.length(), f, (float) i4, paint2);
+        public void draw(Canvas canvas, CharSequence charsequence, int i, int j, float f, int k, int l, 
+                int i1, Paint paint)
+        {
+            if (i != j)
+            {
+                charsequence = new Paint(paint);
+                charsequence.setUnderlineText(true);
+                charsequence.setColor(Color.rgb(0, 50, 100));
+                canvas.drawText(linkText, 0, linkText.length(), f, l, charsequence);
             }
         }
 
-        public SLInventoryEntry getEntry() {
-            return this.entry;
+        public SLInventoryEntry getEntry()
+        {
+            return entry;
         }
 
-        public int getSize(Paint paint, CharSequence charSequence, int i, int i2, Paint.FontMetricsInt fontMetricsInt) {
-            if (fontMetricsInt != null) {
-                Paint.FontMetricsInt fontMetricsInt2 = paint.getFontMetricsInt();
-                fontMetricsInt.ascent = fontMetricsInt2.ascent;
-                fontMetricsInt.bottom = fontMetricsInt2.bottom;
-                fontMetricsInt.descent = fontMetricsInt2.descent;
-                fontMetricsInt.leading = fontMetricsInt2.leading;
-                fontMetricsInt.top = fontMetricsInt2.top;
+        public int getSize(Paint paint, CharSequence charsequence, int i, int j, android.graphics.Paint.FontMetricsInt fontmetricsint)
+        {
+            if (fontmetricsint != null)
+            {
+                charsequence = paint.getFontMetricsInt();
+                fontmetricsint.ascent = ((android.graphics.Paint.FontMetricsInt) (charsequence)).ascent;
+                fontmetricsint.bottom = ((android.graphics.Paint.FontMetricsInt) (charsequence)).bottom;
+                fontmetricsint.descent = ((android.graphics.Paint.FontMetricsInt) (charsequence)).descent;
+                fontmetricsint.leading = ((android.graphics.Paint.FontMetricsInt) (charsequence)).leading;
+                fontmetricsint.top = ((android.graphics.Paint.FontMetricsInt) (charsequence)).top;
             }
-            if (i != i2) {
-                return (int) paint.measureText(this.linkText, 0, this.linkText.length());
+            if (i != j)
+            {
+                return (int)paint.measureText(linkText, 0, linkText.length());
+            } else
+            {
+                return 0;
             }
-            return 0;
+        }
+
+        public AttachmentSpan(SLInventoryEntry slinventoryentry)
+        {
+            entry = slinventoryentry;
+            linkText = slinventoryentry.getReadableTextForLink();
         }
     }
 
-    private interface InventoryEntrySpan {
-        SLInventoryEntry getEntry();
+    private static interface InventoryEntrySpan
+    {
+
+        public abstract SLInventoryEntry getEntry();
     }
 
-    private static class NotecardAttachment {
+    private static class NotecardAttachment
+    {
+
         SLInventoryEntry entry;
         int extCharIndex;
 
-        public NotecardAttachment(int i, SLInventoryEntry sLInventoryEntry) {
-            this.extCharIndex = i;
-            this.entry = sLInventoryEntry;
+        public NotecardAttachment(int i, SLInventoryEntry slinventoryentry)
+        {
+            extCharIndex = i;
+            entry = slinventoryentry;
         }
     }
 
-    public interface OnAttachmentClickListener {
-        void onAttachmentClick(SLInventoryEntry sLInventoryEntry);
+    public static interface OnAttachmentClickListener
+    {
+
+        public abstract void onAttachmentClick(SLInventoryEntry slinventoryentry);
     }
 
-    public SLNotecard(Spanned spanned, boolean z) {
-        this.isScript = z;
-        StringBuilder sb = new StringBuilder();
-        this.attachments = new ArrayList(0);
-        InventoryEntrySpan[] inventoryEntrySpanArr = (InventoryEntrySpan[]) spanned.getSpans(0, spanned.length(), InventoryEntrySpan.class);
-        int[] iArr = new int[inventoryEntrySpanArr.length];
-        int[] iArr2 = new int[inventoryEntrySpanArr.length];
-        for (int i = 0; i < inventoryEntrySpanArr.length; i++) {
-            iArr[i] = spanned.getSpanStart(inventoryEntrySpanArr[i]);
-            iArr2[i] = spanned.getSpanEnd(inventoryEntrySpanArr[i]);
+
+    private static final String DELIM_ANY = " \t\n";
+    private static final String DELIM_EOL = "\n";
+    private List attachments;
+    private boolean isScript;
+    private String notecardText;
+
+    public SLNotecard(Spanned spanned, boolean flag)
+    {
+        StringBuilder stringbuilder;
+        InventoryEntrySpan ainventoryentryspan[];
+        int ai[];
+        int ai1[];
+        int j;
+        int l;
+        isScript = flag;
+        stringbuilder = new StringBuilder();
+        attachments = new ArrayList(0);
+        ainventoryentryspan = (InventoryEntrySpan[])spanned.getSpans(0, spanned.length(), com/lumiyaviewer/lumiya/slproto/assets/SLNotecard$InventoryEntrySpan);
+        ai = new int[ainventoryentryspan.length];
+        ai1 = new int[ainventoryentryspan.length];
+        for (int i = 0; i < ainventoryentryspan.length; i++)
+        {
+            ai[i] = spanned.getSpanStart(ainventoryentryspan[i]);
+            ai1[i] = spanned.getSpanEnd(ainventoryentryspan[i]);
         }
-        int i2 = 0;
-        int i3 = 0;
-        while (i3 < spanned.length()) {
-            int i4 = 0;
-            while (true) {
-                if (i4 >= inventoryEntrySpanArr.length) {
-                    i4 = -1;
-                    break;
-                } else if (iArr[i4] >= i3) {
-                    break;
-                } else {
-                    i4++;
+
+        l = 0;
+        j = 0;
+_L5:
+        if (j >= spanned.length()) goto _L2; else goto _L1
+_L1:
+        int k = 0;
+_L6:
+        if (k >= ainventoryentryspan.length)
+        {
+            break MISSING_BLOCK_LABEL_287;
+        }
+        if (ai[k] < j) goto _L4; else goto _L3
+_L3:
+        int i1 = k;
+_L7:
+        k = spanned.length();
+        if (i1 != -1)
+        {
+            k = ai[i1];
+        }
+        stringbuilder.append(spanned.subSequence(j, k));
+        if (i1 != -1)
+        {
+            attachments.add(new NotecardAttachment(l, ainventoryentryspan[i1].getEntry()));
+            stringbuilder.append('\uDBC0');
+            stringbuilder.append((char)(56320 + l));
+            l++;
+            j = ai1[i1];
+        } else
+        {
+            j = k;
+        }
+          goto _L5
+_L4:
+        k++;
+          goto _L6
+_L2:
+        notecardText = stringbuilder.toString();
+        return;
+        i1 = -1;
+          goto _L7
+    }
+
+    public SLNotecard(boolean flag)
+    {
+        isScript = flag;
+        attachments = new ArrayList(0);
+        notecardText = "";
+    }
+
+    public SLNotecard(byte abyte0[], boolean flag)
+        throws com.lumiyaviewer.lumiya.utils.SimpleStringParser.StringParsingException
+    {
+        abyte0 = SLMessage.stringFromVariableUTF(abyte0);
+        isScript = flag;
+        if (!flag) goto _L2; else goto _L1
+_L1:
+        notecardText = abyte0;
+_L4:
+        if (attachments == null)
+        {
+            attachments = new ArrayList(0);
+        }
+        return;
+_L2:
+        abyte0 = new SimpleStringParser(abyte0, " \t\n");
+        abyte0.expectToken("Linden text version 2", "\n");
+        abyte0.expectToken("{", "\n");
+        do
+        {
+            String s = abyte0.nextToken(" \t\n");
+            if (s.equals("}"))
+            {
+                continue; /* Loop/switch isn't completed */
+            }
+            if (s.equals("LLEmbeddedItems"))
+            {
+                abyte0.nextToken("\n");
+                attachments = parseEmbeddedItems(abyte0);
+            } else
+            if (s.equals("Text"))
+            {
+                abyte0.expectToken("length", " \t\n");
+                int i = abyte0.getIntToken("\n");
+                abyte0.skipOneDelimiter("\n");
+                notecardText = abyte0.getSubstring(i);
+            } else
+            {
+                throw new com.lumiyaviewer.lumiya.utils.SimpleStringParser.StringParsingException((new StringBuilder()).append("Unknown tag type: ").append(s).toString());
+            }
+        } while (true);
+        if (true) goto _L4; else goto _L3
+_L3:
+    }
+
+    public static Spanned createSingleEditableAttachment(SLInventoryEntry slinventoryentry)
+    {
+        SpannableStringBuilder spannablestringbuilder = new SpannableStringBuilder();
+        spannablestringbuilder.append("\u27F9");
+        spannablestringbuilder.setSpan(new AttachmentSpan(slinventoryentry), 0, spannablestringbuilder.length(), 33);
+        return spannablestringbuilder;
+    }
+
+    private SLInventoryEntry findAttachmentByCode(int i)
+    {
+label0:
+        {
+            if (attachments == null)
+            {
+                break label0;
+            }
+            Iterator iterator = attachments.iterator();
+            NotecardAttachment notecardattachment;
+            do
+            {
+                if (!iterator.hasNext())
+                {
+                    break label0;
                 }
-            }
-            int length = i4 != -1 ? iArr[i4] : spanned.length();
-            sb.append(spanned.subSequence(i3, length));
-            if (i4 != -1) {
-                this.attachments.add(new NotecardAttachment(i2, inventoryEntrySpanArr[i4].getEntry()));
-                sb.append(56256);
-                sb.append((char) (56320 + i2));
-                i2++;
-                i3 = iArr2[i4];
-            } else {
-                i3 = length;
-            }
-        }
-        this.notecardText = sb.toString();
-    }
-
-    public SLNotecard(boolean z) {
-        this.isScript = z;
-        this.attachments = new ArrayList(0);
-        this.notecardText = "";
-    }
-
-    public SLNotecard(byte[] bArr, boolean z) throws SimpleStringParser.StringParsingException {
-        String stringFromVariableUTF = SLMessage.stringFromVariableUTF(bArr);
-        this.isScript = z;
-        if (!z) {
-            SimpleStringParser simpleStringParser = new SimpleStringParser(stringFromVariableUTF, DELIM_ANY);
-            simpleStringParser.expectToken("Linden text version 2", DELIM_EOL);
-            simpleStringParser.expectToken("{", DELIM_EOL);
-            while (true) {
-                String nextToken = simpleStringParser.nextToken(DELIM_ANY);
-                if (nextToken.equals("}")) {
-                    break;
-                } else if (nextToken.equals("LLEmbeddedItems")) {
-                    simpleStringParser.nextToken(DELIM_EOL);
-                    this.attachments = parseEmbeddedItems(simpleStringParser);
-                } else if (nextToken.equals("Text")) {
-                    simpleStringParser.expectToken("length", DELIM_ANY);
-                    int intToken = simpleStringParser.getIntToken(DELIM_EOL);
-                    simpleStringParser.skipOneDelimiter(DELIM_EOL);
-                    this.notecardText = simpleStringParser.getSubstring(intToken);
-                } else {
-                    throw new SimpleStringParser.StringParsingException("Unknown tag type: " + nextToken);
-                }
-            }
-        } else {
-            this.notecardText = stringFromVariableUTF;
-        }
-        if (this.attachments == null) {
-            this.attachments = new ArrayList(0);
-        }
-    }
-
-    public static Spanned createSingleEditableAttachment(SLInventoryEntry sLInventoryEntry) {
-        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-        spannableStringBuilder.append("⟹");
-        spannableStringBuilder.setSpan(new AttachmentSpan(sLInventoryEntry), 0, spannableStringBuilder.length(), 33);
-        return spannableStringBuilder;
-    }
-
-    private SLInventoryEntry findAttachmentByCode(int i) {
-        if (this.attachments != null) {
-            for (NotecardAttachment notecardAttachment : this.attachments) {
-                if (notecardAttachment.extCharIndex == i) {
-                    return notecardAttachment.entry;
-                }
-            }
+                notecardattachment = (NotecardAttachment)iterator.next();
+            } while (notecardattachment.extCharIndex != i);
+            return notecardattachment.entry;
         }
         return null;
     }
 
-    private List<NotecardAttachment> parseEmbeddedItems(SimpleStringParser simpleStringParser) throws SimpleStringParser.StringParsingException {
-        simpleStringParser.expectToken("{", DELIM_EOL);
-        simpleStringParser.expectToken("count", DELIM_ANY);
-        int intToken = simpleStringParser.getIntToken(DELIM_EOL);
-        ArrayList arrayList = new ArrayList(intToken);
-        for (int i = 0; i < intToken; i++) {
-            simpleStringParser.expectToken("{", DELIM_EOL);
-            simpleStringParser.expectToken("ext", DELIM_ANY).expectToken("char", DELIM_ANY).expectToken("index", DELIM_ANY);
-            int intToken2 = simpleStringParser.getIntToken(DELIM_EOL);
-            simpleStringParser.expectToken("inv_item", DELIM_ANY);
-            simpleStringParser.getIntToken(DELIM_EOL);
-            arrayList.add(new NotecardAttachment(intToken2, SLInventoryEntry.parseString(simpleStringParser)));
-            simpleStringParser.expectToken("}", DELIM_EOL);
+    private List parseEmbeddedItems(SimpleStringParser simplestringparser)
+        throws com.lumiyaviewer.lumiya.utils.SimpleStringParser.StringParsingException
+    {
+        simplestringparser.expectToken("{", "\n");
+        simplestringparser.expectToken("count", " \t\n");
+        int j = simplestringparser.getIntToken("\n");
+        ArrayList arraylist = new ArrayList(j);
+        for (int i = 0; i < j; i++)
+        {
+            simplestringparser.expectToken("{", "\n");
+            simplestringparser.expectToken("ext", " \t\n").expectToken("char", " \t\n").expectToken("index", " \t\n");
+            int k = simplestringparser.getIntToken("\n");
+            simplestringparser.expectToken("inv_item", " \t\n");
+            simplestringparser.getIntToken("\n");
+            arraylist.add(new NotecardAttachment(k, SLInventoryEntry.parseString(simplestringparser)));
+            simplestringparser.expectToken("}", "\n");
         }
-        simpleStringParser.expectToken("}", DELIM_EOL);
-        return arrayList;
+
+        simplestringparser.expectToken("}", "\n");
+        return arraylist;
     }
 
-    public byte[] toLindenText() {
-        StringBuilder sb = new StringBuilder();
-        if (this.isScript) {
-            sb.append(this.notecardText);
-        } else {
-            sb.append("Linden text version 2\n{\n");
-            sb.append("LLEmbeddedItems version 1\n{\n");
-            sb.append("count ").append(this.attachments.size()).append(DELIM_EOL);
-            for (NotecardAttachment notecardAttachment : this.attachments) {
-                sb.append("{\n").append("ext char index ").append(notecardAttachment.extCharIndex).append(DELIM_EOL);
-                sb.append("\tinv_item\t0\n").append("\t{\n");
-                sb.append("\t\t").append("item_id").append("\t").append(notecardAttachment.entry.uuid.toString()).append(DELIM_EOL);
-                if (notecardAttachment.entry.parentUUID != null) {
-                    sb.append("\t\t").append("parent_id").append("\t").append(notecardAttachment.entry.parentUUID.toString()).append(DELIM_EOL);
+    public byte[] toLindenText()
+    {
+        StringBuilder stringbuilder = new StringBuilder();
+        if (isScript)
+        {
+            stringbuilder.append(notecardText);
+        } else
+        {
+            stringbuilder.append("Linden text version 2\n{\n");
+            stringbuilder.append("LLEmbeddedItems version 1\n{\n");
+            stringbuilder.append("count ").append(attachments.size()).append("\n");
+            for (Iterator iterator = attachments.iterator(); iterator.hasNext(); stringbuilder.append("}\n"))
+            {
+                NotecardAttachment notecardattachment = (NotecardAttachment)iterator.next();
+                stringbuilder.append("{\n").append("ext char index ").append(notecardattachment.extCharIndex).append("\n");
+                stringbuilder.append("\tinv_item\t0\n").append("\t{\n");
+                stringbuilder.append("\t\t").append("item_id").append("\t").append(notecardattachment.entry.uuid.toString()).append("\n");
+                if (notecardattachment.entry.parentUUID != null)
+                {
+                    stringbuilder.append("\t\t").append("parent_id").append("\t").append(notecardattachment.entry.parentUUID.toString()).append("\n");
                 }
-                sb.append("\t").append("permissions").append(" 0\n");
-                sb.append("\t").append("{\n");
-                sb.append("\t\t").append("base_mask").append("\t").append(String.format("%08x", new Object[]{Integer.valueOf(notecardAttachment.entry.baseMask)})).append(DELIM_EOL);
-                sb.append("\t\t").append("owner_mask").append("\t").append(String.format("%08x", new Object[]{Integer.valueOf(notecardAttachment.entry.ownerMask)})).append(DELIM_EOL);
-                sb.append("\t\t").append("group_mask").append("\t").append(String.format("%08x", new Object[]{Integer.valueOf(notecardAttachment.entry.groupMask)})).append(DELIM_EOL);
-                sb.append("\t\t").append("everyone_mask").append("\t").append(String.format("%08x", new Object[]{Integer.valueOf(notecardAttachment.entry.everyoneMask)})).append(DELIM_EOL);
-                sb.append("\t\t").append("next_owner_mask").append("\t").append(String.format("%08x", new Object[]{Integer.valueOf(notecardAttachment.entry.nextOwnerMask)})).append(DELIM_EOL);
-                if (notecardAttachment.entry.creatorUUID != null) {
-                    sb.append("\t\t").append("creator_id").append("\t").append(notecardAttachment.entry.creatorUUID.toString()).append(DELIM_EOL);
+                stringbuilder.append("\t").append("permissions").append(" 0\n");
+                stringbuilder.append("\t").append("{\n");
+                stringbuilder.append("\t\t").append("base_mask").append("\t").append(String.format("%08x", new Object[] {
+                    Integer.valueOf(notecardattachment.entry.baseMask)
+                })).append("\n");
+                stringbuilder.append("\t\t").append("owner_mask").append("\t").append(String.format("%08x", new Object[] {
+                    Integer.valueOf(notecardattachment.entry.ownerMask)
+                })).append("\n");
+                stringbuilder.append("\t\t").append("group_mask").append("\t").append(String.format("%08x", new Object[] {
+                    Integer.valueOf(notecardattachment.entry.groupMask)
+                })).append("\n");
+                stringbuilder.append("\t\t").append("everyone_mask").append("\t").append(String.format("%08x", new Object[] {
+                    Integer.valueOf(notecardattachment.entry.everyoneMask)
+                })).append("\n");
+                stringbuilder.append("\t\t").append("next_owner_mask").append("\t").append(String.format("%08x", new Object[] {
+                    Integer.valueOf(notecardattachment.entry.nextOwnerMask)
+                })).append("\n");
+                if (notecardattachment.entry.creatorUUID != null)
+                {
+                    stringbuilder.append("\t\t").append("creator_id").append("\t").append(notecardattachment.entry.creatorUUID.toString()).append("\n");
                 }
-                if (notecardAttachment.entry.ownerUUID != null) {
-                    sb.append("\t\t").append("owner_id").append("\t").append(notecardAttachment.entry.ownerUUID.toString()).append(DELIM_EOL);
+                if (notecardattachment.entry.ownerUUID != null)
+                {
+                    stringbuilder.append("\t\t").append("owner_id").append("\t").append(notecardattachment.entry.ownerUUID.toString()).append("\n");
                 }
-                if (notecardAttachment.entry.lastOwnerUUID != null) {
-                    sb.append("\t\t").append("last_owner_id").append("\t").append(notecardAttachment.entry.lastOwnerUUID.toString()).append(DELIM_EOL);
+                if (notecardattachment.entry.lastOwnerUUID != null)
+                {
+                    stringbuilder.append("\t\t").append("last_owner_id").append("\t").append(notecardattachment.entry.lastOwnerUUID.toString()).append("\n");
                 }
-                if (notecardAttachment.entry.groupUUID != null) {
-                    sb.append("\t\t").append("group_id").append("\t").append(notecardAttachment.entry.groupUUID.toString()).append(DELIM_EOL);
+                if (notecardattachment.entry.groupUUID != null)
+                {
+                    stringbuilder.append("\t\t").append("group_id").append("\t").append(notecardattachment.entry.groupUUID.toString()).append("\n");
                 }
-                sb.append("\t").append("}\n");
-                if (notecardAttachment.entry.assetUUID != null) {
-                    sb.append("\t\t").append("asset_id").append("\t").append(notecardAttachment.entry.assetUUID.toString()).append(DELIM_EOL);
+                stringbuilder.append("\t").append("}\n");
+                if (notecardattachment.entry.assetUUID != null)
+                {
+                    stringbuilder.append("\t\t").append("asset_id").append("\t").append(notecardattachment.entry.assetUUID.toString()).append("\n");
                 }
-                sb.append("\t\t").append("type").append("\t").append(SLAssetType.getByType(notecardAttachment.entry.assetType).getStringCode()).append(DELIM_EOL);
-                sb.append("\t\t").append("inv_type").append("\t").append(SLInventoryType.getByType(notecardAttachment.entry.invType).getStringCode()).append(DELIM_EOL);
-                sb.append("\t\t").append("flags").append("\t").append(String.format("%08x", new Object[]{Integer.valueOf(notecardAttachment.entry.flags)})).append(DELIM_EOL);
-                sb.append("\t").append("sale_info").append("\t0\n");
-                sb.append("\t").append("{\n");
-                sb.append("\t\t").append("sale_type").append("\t").append(SLSaleType.getByType(notecardAttachment.entry.saleType).getStringCode()).append(DELIM_EOL);
-                sb.append("\t\t").append("sale_price").append("\t").append(notecardAttachment.entry.salePrice).append(DELIM_EOL);
-                sb.append("\t").append("}\n");
-                sb.append("\t\t").append("name").append("\t").append(notecardAttachment.entry.name).append("|\n");
-                sb.append("\t\t").append("desc").append("\t").append(notecardAttachment.entry.description).append("|\n");
-                sb.append("\t\t").append("creation_date").append("\t").append(notecardAttachment.entry.creationDate).append(DELIM_EOL);
-                sb.append("\t}\n");
-                sb.append("}\n");
+                stringbuilder.append("\t\t").append("type").append("\t").append(SLAssetType.getByType(notecardattachment.entry.assetType).getStringCode()).append("\n");
+                stringbuilder.append("\t\t").append("inv_type").append("\t").append(SLInventoryType.getByType(notecardattachment.entry.invType).getStringCode()).append("\n");
+                stringbuilder.append("\t\t").append("flags").append("\t").append(String.format("%08x", new Object[] {
+                    Integer.valueOf(notecardattachment.entry.flags)
+                })).append("\n");
+                stringbuilder.append("\t").append("sale_info").append("\t0\n");
+                stringbuilder.append("\t").append("{\n");
+                stringbuilder.append("\t\t").append("sale_type").append("\t").append(SLSaleType.getByType(notecardattachment.entry.saleType).getStringCode()).append("\n");
+                stringbuilder.append("\t\t").append("sale_price").append("\t").append(notecardattachment.entry.salePrice).append("\n");
+                stringbuilder.append("\t").append("}\n");
+                stringbuilder.append("\t\t").append("name").append("\t").append(notecardattachment.entry.name).append("|\n");
+                stringbuilder.append("\t\t").append("desc").append("\t").append(notecardattachment.entry.description).append("|\n");
+                stringbuilder.append("\t\t").append("creation_date").append("\t").append(notecardattachment.entry.creationDate).append("\n");
+                stringbuilder.append("\t}\n");
             }
-            sb.append("}\n");
-            try {
-                sb.append("Text length ").append(this.notecardText.getBytes("UTF-8").length).append(DELIM_EOL);
-                sb.append(this.notecardText);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+
+            stringbuilder.append("}\n");
+            try
+            {
+                byte abyte0[] = notecardText.getBytes("UTF-8");
+                stringbuilder.append("Text length ").append(abyte0.length).append("\n");
+                stringbuilder.append(notecardText);
             }
-            sb.append("}\n");
+            catch (UnsupportedEncodingException unsupportedencodingexception)
+            {
+                unsupportedencodingexception.printStackTrace();
+            }
+            stringbuilder.append("}\n");
         }
-        return SLMessage.stringToVariableUTF(sb.toString());
+        return SLMessage.stringToVariableUTF(stringbuilder.toString());
     }
 
-    /* JADX WARNING: CFG modification limit reached, blocks count: 127 */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public android.text.SpannableStringBuilder toSpannableString(boolean r7, com.lumiyaviewer.lumiya.slproto.assets.SLNotecard.OnAttachmentClickListener r8) {
-        /*
-            r6 = this;
-            r0 = 0
-            android.text.SpannableStringBuilder r2 = new android.text.SpannableStringBuilder
-            r2.<init>()
-            boolean r1 = r6.isScript
-            if (r1 == 0) goto L_0x003c
-            java.lang.String r0 = r6.notecardText
-            r2.append(r0)
-            return r2
-        L_0x0010:
-            java.lang.String r0 = r6.notecardText
-            char r0 = r0.charAt(r3)
-            r1 = 56320(0xdc00, float:7.8921E-41)
-            int r0 = r0 - r1
-            com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r0 = r6.findAttachmentByCode(r0)
-            if (r0 == 0) goto L_0x003a
-            if (r7 == 0) goto L_0x0071
-            com.lumiyaviewer.lumiya.slproto.assets.SLNotecard$AttachmentSpan r1 = new com.lumiyaviewer.lumiya.slproto.assets.SLNotecard$AttachmentSpan
-            r1.<init>(r0)
-            java.lang.String r0 = "⟹"
-        L_0x002a:
-            int r4 = r2.length()
-            r2.append(r0)
-            int r0 = r2.length()
-            r5 = 33
-            r2.setSpan(r1, r4, r0, r5)
-        L_0x003a:
-            int r0 = r3 + 1
-        L_0x003c:
-            java.lang.String r1 = r6.notecardText
-            int r1 = r1.length()
-            if (r0 >= r1) goto L_0x0070
-            java.lang.String r1 = r6.notecardText
-            r3 = 56256(0xdbc0, float:7.8831E-41)
-            int r1 = r1.indexOf(r3, r0)
-            if (r1 >= 0) goto L_0x0055
-            java.lang.String r1 = r6.notecardText
-            int r1 = r1.length()
-        L_0x0055:
-            java.lang.String r3 = r6.notecardText
-            java.lang.String r0 = r3.substring(r0, r1)
-            r2.append(r0)
-            java.lang.String r0 = r6.notecardText
-            int r0 = r0.length()
-            if (r1 >= r0) goto L_0x007b
-            int r3 = r1 + 1
-            java.lang.String r0 = r6.notecardText
-            int r0 = r0.length()
-            if (r3 < r0) goto L_0x0010
-        L_0x0070:
-            return r2
-        L_0x0071:
-            com.lumiyaviewer.lumiya.slproto.assets.SLNotecard$AttachmentClickableSpan r1 = new com.lumiyaviewer.lumiya.slproto.assets.SLNotecard$AttachmentClickableSpan
-            r1.<init>(r0, r8)
-            java.lang.String r0 = r0.getReadableTextForLink()
-            goto L_0x002a
-        L_0x007b:
-            r0 = r1
-            goto L_0x003c
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.assets.SLNotecard.toSpannableString(boolean, com.lumiyaviewer.lumiya.slproto.assets.SLNotecard$OnAttachmentClickListener):android.text.SpannableStringBuilder");
+    public SpannableStringBuilder toSpannableString(boolean flag, OnAttachmentClickListener onattachmentclicklistener)
+    {
+        SpannableStringBuilder spannablestringbuilder;
+        int i;
+        i = 0;
+        spannablestringbuilder = new SpannableStringBuilder();
+        if (isScript)
+        {
+            spannablestringbuilder.append(notecardText);
+            return spannablestringbuilder;
+        }
+          goto _L1
+_L3:
+        int j;
+        Object obj = findAttachmentByCode(notecardText.charAt(j) - 56320);
+        if (obj != null)
+        {
+            Object obj1;
+            int k;
+            if (flag)
+            {
+                obj1 = new AttachmentSpan(((SLInventoryEntry) (obj)));
+                obj = "\u27F9";
+            } else
+            {
+                obj1 = new AttachmentClickableSpan(((SLInventoryEntry) (obj)), onattachmentclicklistener);
+                obj = ((SLInventoryEntry) (obj)).getReadableTextForLink();
+            }
+            i = spannablestringbuilder.length();
+            spannablestringbuilder.append(((CharSequence) (obj)));
+            spannablestringbuilder.setSpan(obj1, i, spannablestringbuilder.length(), 33);
+        }
+        i = j + 1;
+_L1:
+        if (i >= notecardText.length())
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        k = notecardText.indexOf('\uDBC0', i);
+        j = k;
+        if (k < 0)
+        {
+            j = notecardText.length();
+        }
+        spannablestringbuilder.append(notecardText.substring(i, j));
+        if (j >= notecardText.length())
+        {
+            break MISSING_BLOCK_LABEL_218;
+        }
+        j++;
+        if (j < notecardText.length()) goto _L3; else goto _L2
+_L2:
+        return spannablestringbuilder;
+        i = j;
+          goto _L1
     }
 }

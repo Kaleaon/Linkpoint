@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.texfetcher;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -10,120 +14,158 @@ import com.lumiyaviewer.lumiya.slproto.messages.RequestImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TextureUDPTransfer {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.modules.texfetcher:
+//            SLTextureFetchRequest
+
+public class TextureUDPTransfer
+{
+
     private static final int MAX_RETRIES = 2;
-    private static final long PACKET_TIMEOUT = 15000;
-    private boolean completed = false;
+    private static final long PACKET_TIMEOUT = 15000L;
+    private boolean completed;
     public SLTextureFetchRequest fetchReq;
-    private int gotSize = 0;
-    private boolean headerReceived = false;
-    private long lastReceivedPacket = 0;
-    private int nextExpectedPacket = 0;
-    private Map<Integer, byte[]> outOfOrderPackets = new HashMap();
+    private int gotSize;
+    private boolean headerReceived;
+    private long lastReceivedPacket;
+    private int nextExpectedPacket;
+    private Map outOfOrderPackets;
     private File outputFile;
     private FileOutputStream outputStream;
     private int packets;
-    private int retries = 0;
+    private int retries;
     private int size;
 
-    public TextureUDPTransfer(File file, SLTextureFetchRequest sLTextureFetchRequest) {
-        this.fetchReq = sLTextureFetchRequest;
-        this.outputFile = file;
+    public TextureUDPTransfer(File file, SLTextureFetchRequest sltexturefetchrequest)
+    {
+        completed = false;
+        headerReceived = false;
+        nextExpectedPacket = 0;
+        gotSize = 0;
+        retries = 0;
+        lastReceivedPacket = 0L;
+        outOfOrderPackets = new HashMap();
+        fetchReq = sltexturefetchrequest;
+        outputFile = file;
     }
 
-    private void HandleDataPacket(int i, byte[] bArr) {
-        this.lastReceivedPacket = System.currentTimeMillis();
-        if (!this.headerReceived || this.nextExpectedPacket != i) {
-            this.outOfOrderPackets.put(Integer.valueOf(i), bArr);
+    private void HandleDataPacket(int i, byte abyte0[])
+    {
+        lastReceivedPacket = System.currentTimeMillis();
+        if (headerReceived && nextExpectedPacket == i)
+        {
+            HandleNextDataPacket(abyte0);
+            do
+            {
+                abyte0 = (byte[])outOfOrderPackets.remove(Integer.valueOf(nextExpectedPacket));
+                if (abyte0 == null)
+                {
+                    break;
+                }
+                HandleNextDataPacket(abyte0);
+            } while (true);
+        } else
+        {
+            outOfOrderPackets.put(Integer.valueOf(i), abyte0);
+        }
+    }
+
+    private void HandleNextDataPacket(byte abyte0[])
+    {
+        lastReceivedPacket = System.currentTimeMillis();
+        try
+        {
+            if (nextExpectedPacket == 0 && outputStream == null)
+            {
+                outputStream = new FileOutputStream(outputFile);
+            }
+            if (outputStream != null)
+            {
+                outputStream.write(abyte0);
+            }
+            gotSize = gotSize + abyte0.length;
+            if (gotSize >= size)
+            {
+                outputStream.close();
+                completed = true;
+                Debug.Log((new StringBuilder()).append("TextureUDP: completed download, size = ").append(gotSize).toString());
+            }
+            nextExpectedPacket = nextExpectedPacket + 1;
             return;
         }
-        HandleNextDataPacket(bArr);
-        while (true) {
-            byte[] remove = this.outOfOrderPackets.remove(Integer.valueOf(this.nextExpectedPacket));
-            if (remove != null) {
-                HandleNextDataPacket(remove);
-            } else {
-                return;
-            }
+        // Misplaced declaration of an exception variable
+        catch (byte abyte0[])
+        {
+            abyte0.printStackTrace();
         }
     }
 
-    private void HandleNextDataPacket(byte[] bArr) {
-        this.lastReceivedPacket = System.currentTimeMillis();
-        try {
-            if (this.nextExpectedPacket == 0 && this.outputStream == null) {
-                this.outputStream = new FileOutputStream(this.outputFile);
-            }
-            if (this.outputStream != null) {
-                this.outputStream.write(bArr);
-            }
-            this.gotSize += bArr.length;
-            if (this.gotSize >= this.size) {
-                this.outputStream.close();
-                this.completed = true;
-                Debug.Log("TextureUDP: completed download, size = " + this.gotSize);
-            }
-            this.nextExpectedPacket++;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void HandleImageData(ImageData imagedata)
+    {
+        lastReceivedPacket = System.currentTimeMillis();
+        headerReceived = true;
+        size = imagedata.ImageID_Field.Size;
+        packets = imagedata.ImageID_Field.Packets;
+        Debug.Log((new StringBuilder()).append("TextureUDP: header received, size = ").append(size).append(", packets = ").append(packets).append(", initial size = ").append(imagedata.ImageDataData_Field.Data.length).toString());
+        HandleDataPacket(0, imagedata.ImageDataData_Field.Data);
     }
 
-    public void HandleImageData(ImageData imageData) {
-        this.lastReceivedPacket = System.currentTimeMillis();
-        this.headerReceived = true;
-        this.size = imageData.ImageID_Field.Size;
-        this.packets = imageData.ImageID_Field.Packets;
-        Debug.Log("TextureUDP: header received, size = " + this.size + ", packets = " + this.packets + ", initial size = " + imageData.ImageDataData_Field.Data.length);
-        HandleDataPacket(0, imageData.ImageDataData_Field.Data);
+    public void HandleImagePacket(ImagePacket imagepacket)
+    {
+        HandleDataPacket(imagepacket.ImageID_Field.Packet, imagepacket.ImageData_Field.Data);
     }
 
-    public void HandleImagePacket(ImagePacket imagePacket) {
-        HandleDataPacket(imagePacket.ImageID_Field.Packet, imagePacket.ImageData_Field.Data);
-    }
-
-    public boolean RetryTransfer(SLAgentCircuit sLAgentCircuit, SLCircuitInfo sLCircuitInfo) {
-        this.retries++;
-        if (this.retries > 2) {
+    public boolean RetryTransfer(SLAgentCircuit slagentcircuit, SLCircuitInfo slcircuitinfo)
+    {
+        retries = retries + 1;
+        if (retries > 2)
+        {
             return false;
+        } else
+        {
+            StartTransfer(slagentcircuit, slcircuitinfo);
+            return true;
         }
-        StartTransfer(sLAgentCircuit, sLCircuitInfo);
-        return true;
     }
 
-    public void StartTransfer(SLAgentCircuit sLAgentCircuit, SLCircuitInfo sLCircuitInfo) {
+    public void StartTransfer(SLAgentCircuit slagentcircuit, SLCircuitInfo slcircuitinfo)
+    {
         int i = 0;
-        Debug.Log("TextureUDP: starting transfer, image ID = " + this.fetchReq.textureID);
-        this.lastReceivedPacket = System.currentTimeMillis();
-        RequestImage requestImage = new RequestImage();
-        requestImage.AgentData_Field.AgentID = sLCircuitInfo.agentID;
-        requestImage.AgentData_Field.SessionID = sLCircuitInfo.sessionID;
-        RequestImage.RequestImageData requestImageData = new RequestImage.RequestImageData();
-        requestImageData.Image = this.fetchReq.textureID;
-        requestImageData.DiscardLevel = 0;
-        requestImageData.DownloadPriority = 1013000.0f;
-        requestImageData.Packet = 0;
-        if (this.fetchReq.textureClass == TextureClass.Baked) {
+        Debug.Log((new StringBuilder()).append("TextureUDP: starting transfer, image ID = ").append(fetchReq.textureID).toString());
+        lastReceivedPacket = System.currentTimeMillis();
+        RequestImage requestimage = new RequestImage();
+        requestimage.AgentData_Field.AgentID = slcircuitinfo.agentID;
+        requestimage.AgentData_Field.SessionID = slcircuitinfo.sessionID;
+        slcircuitinfo = new com.lumiyaviewer.lumiya.slproto.messages.RequestImage.RequestImageData();
+        slcircuitinfo.Image = fetchReq.textureID;
+        slcircuitinfo.DiscardLevel = 0;
+        slcircuitinfo.DownloadPriority = 1013000F;
+        slcircuitinfo.Packet = 0;
+        if (fetchReq.textureClass == TextureClass.Baked)
+        {
             i = 1;
         }
-        requestImageData.Type = i;
-        requestImage.RequestImageData_Fields.add(requestImageData);
-        requestImage.isReliable = true;
-        sLAgentCircuit.SendMessage(requestImage);
+        slcircuitinfo.Type = i;
+        requestimage.RequestImageData_Fields.add(slcircuitinfo);
+        requestimage.isReliable = true;
+        slagentcircuit.SendMessage(requestimage);
     }
 
-    public File getOutputFile() {
-        return this.outputFile;
+    public File getOutputFile()
+    {
+        return outputFile;
     }
 
-    public boolean hasStalled() {
-        return System.currentTimeMillis() > this.lastReceivedPacket + PACKET_TIMEOUT;
+    public boolean hasStalled()
+    {
+        return System.currentTimeMillis() > lastReceivedPacket + 15000L;
     }
 
-    public boolean isCompleted() {
-        return this.completed;
+    public boolean isCompleted()
+    {
+        return completed;
     }
 }

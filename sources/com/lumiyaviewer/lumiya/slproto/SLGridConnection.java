@@ -1,6 +1,11 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto;
 
 import com.lumiyaviewer.lumiya.Debug;
+import com.lumiyaviewer.lumiya.GlobalOptions;
 import com.lumiyaviewer.lumiya.eventbus.EventBus;
 import com.lumiyaviewer.lumiya.res.textures.TextureCache;
 import com.lumiyaviewer.lumiya.slproto.auth.SLAuth;
@@ -11,404 +16,675 @@ import com.lumiyaviewer.lumiya.slproto.caps.SLCaps;
 import com.lumiyaviewer.lumiya.slproto.events.SLConnectionStateChangedEvent;
 import com.lumiyaviewer.lumiya.slproto.events.SLDisconnectEvent;
 import com.lumiyaviewer.lumiya.slproto.events.SLLoginResultEvent;
+import com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
-import com.lumiyaviewer.lumiya.slproto.modules.texfetcher.SLTextureFetcher;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
+import com.lumiyaviewer.lumiya.slproto.users.manager.FriendManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
-public class SLGridConnection extends SLConnection {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto:
+//            SLConnection, SLParcelInfo, GridConnectionManager, SLCircuitInfo, 
+//            SLAgentCircuit, SLTempCircuit
 
-    /* renamed from: -com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues  reason: not valid java name */
-    private static final /* synthetic */ int[] f62comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues = null;
+public class SLGridConnection extends SLConnection
+{
+    public static final class ConnectionState extends Enum
+    {
+
+        private static final ConnectionState $VALUES[];
+        public static final ConnectionState Connected;
+        public static final ConnectionState Connecting;
+        public static final ConnectionState Idle;
+
+        public static ConnectionState valueOf(String s)
+        {
+            return (ConnectionState)Enum.valueOf(com/lumiyaviewer/lumiya/slproto/SLGridConnection$ConnectionState, s);
+        }
+
+        public static ConnectionState[] values()
+        {
+            return $VALUES;
+        }
+
+        static 
+        {
+            Idle = new ConnectionState("Idle", 0);
+            Connecting = new ConnectionState("Connecting", 1);
+            Connected = new ConnectionState("Connected", 2);
+            $VALUES = (new ConnectionState[] {
+                Idle, Connecting, Connected
+            });
+        }
+
+        private ConnectionState(String s, int i)
+        {
+            super(s, i);
+        }
+    }
+
+    public static class NotConnectedException extends Exception
+    {
+
+        private static final long serialVersionUID = 0x1e0880fec7da93a6L;
+
+        public NotConnectedException()
+        {
+            super("Grid not connected");
+        }
+    }
+
+
+    private static final int _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_SLGridConnection$ConnectionStateSwitchesValues[];
     private static final String DEFAULT_SYSTEM_ACCOUNT = "Second Life";
     private static boolean autoresponseEnabled = false;
     private static String autoresponseText = "";
     private UUID activeAgentUUID;
     private SLAgentCircuit agentCircuit;
-    /* access modifiers changed from: private */
-    public SLAuthParams authParams;
+    private SLAuthParams authParams;
     public SLAuthReply authReply;
     public SLCapEventQueue capEventQueue;
-    private ConnectionState connectionState = ConnectionState.Idle;
+    private ConnectionState connectionState;
     private final EventBus eventBus = EventBus.getInstance();
-    private volatile boolean firstConnect = true;
-    private volatile boolean hadConnected = false;
-    private volatile boolean isReconnecting = false;
-    /* access modifiers changed from: private */
-    public volatile Thread loginThread = null;
+    private volatile boolean firstConnect;
+    private volatile boolean hadConnected;
+    private volatile boolean isReconnecting;
+    private volatile Thread loginThread;
     private SLModules modules;
     public final SLParcelInfo parcelInfo = new SLParcelInfo();
-    private volatile int reconnectAttempts = 0;
-    private Map<SLAuthReply, SLTempCircuit> tempCircuits = Collections.synchronizedMap(new HashMap());
+    private volatile int reconnectAttempts;
+    private Map tempCircuits;
     private UserManager userManager;
-    private volatile boolean userWantsConnected = false;
+    private volatile boolean userWantsConnected;
 
-    public enum ConnectionState {
-        Idle,
-        Connecting,
-        Connected
+    static SLAuthParams _2D_get0(SLGridConnection slgridconnection)
+    {
+        return slgridconnection.authParams;
     }
 
-    public static class NotConnectedException extends Exception {
-        private static final long serialVersionUID = 2164121452714562470L;
-
-        public NotConnectedException() {
-            super("Grid not connected");
+    private static int[] _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_SLGridConnection$ConnectionStateSwitchesValues()
+    {
+        if (_2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_SLGridConnection$ConnectionStateSwitchesValues != null)
+        {
+            return _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_SLGridConnection$ConnectionStateSwitchesValues;
         }
+        int ai[] = new int[ConnectionState.values().length];
+        try
+        {
+            ai[ConnectionState.Connected.ordinal()] = 1;
+        }
+        catch (NoSuchFieldError nosuchfielderror2) { }
+        try
+        {
+            ai[ConnectionState.Connecting.ordinal()] = 2;
+        }
+        catch (NoSuchFieldError nosuchfielderror1) { }
+        try
+        {
+            ai[ConnectionState.Idle.ordinal()] = 3;
+        }
+        catch (NoSuchFieldError nosuchfielderror) { }
+        _2D_com_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_SLGridConnection$ConnectionStateSwitchesValues = ai;
+        return ai;
     }
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues  reason: not valid java name */
-    private static /* synthetic */ int[] m130getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues() {
-        if (f62comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues != null) {
-            return f62comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues;
-        }
-        int[] iArr = new int[ConnectionState.values().length];
-        try {
-            iArr[ConnectionState.Connected.ordinal()] = 1;
-        } catch (NoSuchFieldError e) {
-        }
-        try {
-            iArr[ConnectionState.Connecting.ordinal()] = 2;
-        } catch (NoSuchFieldError e2) {
-        }
-        try {
-            iArr[ConnectionState.Idle.ordinal()] = 3;
-        } catch (NoSuchFieldError e3) {
-        }
-        f62comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues = iArr;
-        return iArr;
+    static Thread _2D_set0(SLGridConnection slgridconnection, Thread thread)
+    {
+        slgridconnection.loginThread = thread;
+        return thread;
     }
 
-    /* access modifiers changed from: private */
-    public void DoConnect(SLAuthParams sLAuthParams, String str) {
-        try {
-            SLAuthReply Login = new SLAuth().Login(sLAuthParams.withLocation(str));
-            if (!Login.success) {
-                setConnectionState(ConnectionState.Idle);
-                reconnectOrDrop(true, false, Login.message);
-                return;
-            }
-            synchronized (this) {
-                if (this.connectionState != ConnectionState.Idle) {
-                    this.authReply = Login;
-                    this.activeAgentUUID = this.authReply.agentID;
-                    this.userManager = UserManager.getUserManager(this.activeAgentUUID);
-                    if (this.userManager != null) {
-                        this.userManager.getChatterList().getFriendManager().updateFriendList(this.authReply.friends);
-                    }
-                    this.parcelInfo.reset(this.userManager);
-                    startCircuit(Login, (SLTempCircuit) null);
-                }
-            }
-        } catch (Exception e) {
+    static void _2D_wrap0(SLGridConnection slgridconnection, SLAuthParams slauthparams, String s)
+    {
+        slgridconnection.DoConnect(slauthparams, s);
+    }
+
+    public SLGridConnection()
+    {
+        connectionState = ConnectionState.Idle;
+        firstConnect = true;
+        userWantsConnected = false;
+        hadConnected = false;
+        isReconnecting = false;
+        reconnectAttempts = 0;
+        loginThread = null;
+        tempCircuits = Collections.synchronizedMap(new HashMap());
+    }
+
+    private void DoConnect(SLAuthParams slauthparams, String s)
+    {
+        SLAuth slauth = new SLAuth();
+        try
+        {
+            slauthparams = slauth.Login(slauthparams.withLocation(s));
+        }
+        // Misplaced declaration of an exception variable
+        catch (SLAuthParams slauthparams)
+        {
             setConnectionState(ConnectionState.Idle);
             reconnectOrDrop(true, false, "Failed to connect to login server.");
+            return;
         }
+        if (!((SLAuthReply) (slauthparams)).success)
+        {
+            setConnectionState(ConnectionState.Idle);
+            reconnectOrDrop(true, false, ((SLAuthReply) (slauthparams)).message);
+            return;
+        }
+        this;
+        JVM INSTR monitorenter ;
+        ConnectionState connectionstate;
+        s = connectionState;
+        connectionstate = ConnectionState.Idle;
+        if (s != connectionstate)
+        {
+            break MISSING_BLOCK_LABEL_79;
+        }
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        authReply = slauthparams;
+        activeAgentUUID = authReply.agentID;
+        userManager = UserManager.getUserManager(activeAgentUUID);
+        if (userManager != null)
+        {
+            userManager.getChatterList().getFriendManager().updateFriendList(authReply.friends);
+        }
+        parcelInfo.reset(userManager);
+        startCircuit(slauthparams, null);
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        slauthparams;
+        throw slauthparams;
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:17:0x0048, code lost:
+    private boolean Reconnect()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        if (!userWantsConnected || !hadConnected || !GlobalOptions.getInstance().getAutoReconnect() || reconnectAttempts >= GlobalOptions.getInstance().getMaxReconnectAttempts())
+        {
+            break MISSING_BLOCK_LABEL_99;
+        }
+        if (connectionState == ConnectionState.Idle && authParams != null)
+        {
+            reconnectAttempts = reconnectAttempts + 1;
+            isReconnecting = true;
+            eventBus.publish(new SLReconnectingEvent(reconnectAttempts));
+            startConnecting(true, "last");
+        }
+        this;
+        JVM INSTR monitorexit ;
         return true;
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    private synchronized boolean Reconnect() {
-        /*
-            r4 = this;
-            r2 = 0
-            r3 = 1
-            monitor-enter(r4)
-            boolean r0 = r4.userWantsConnected     // Catch:{ all -> 0x004e }
-            if (r0 == 0) goto L_0x0049
-            boolean r0 = r4.hadConnected     // Catch:{ all -> 0x004e }
-            if (r0 == 0) goto L_0x0049
-            com.lumiyaviewer.lumiya.GlobalOptions r0 = com.lumiyaviewer.lumiya.GlobalOptions.getInstance()     // Catch:{ all -> 0x004e }
-            boolean r0 = r0.getAutoReconnect()     // Catch:{ all -> 0x004e }
-            if (r0 == 0) goto L_0x0049
-            int r0 = r4.reconnectAttempts     // Catch:{ all -> 0x004e }
-            com.lumiyaviewer.lumiya.GlobalOptions r1 = com.lumiyaviewer.lumiya.GlobalOptions.getInstance()     // Catch:{ all -> 0x004e }
-            int r1 = r1.getMaxReconnectAttempts()     // Catch:{ all -> 0x004e }
-            if (r0 >= r1) goto L_0x0049
-            com.lumiyaviewer.lumiya.slproto.SLGridConnection$ConnectionState r0 = r4.connectionState     // Catch:{ all -> 0x004e }
-            com.lumiyaviewer.lumiya.slproto.SLGridConnection$ConnectionState r1 = com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState.Idle     // Catch:{ all -> 0x004e }
-            if (r0 != r1) goto L_0x0047
-            com.lumiyaviewer.lumiya.slproto.auth.SLAuthParams r0 = r4.authParams     // Catch:{ all -> 0x004e }
-            if (r0 == 0) goto L_0x0047
-            int r0 = r4.reconnectAttempts     // Catch:{ all -> 0x004e }
-            int r0 = r0 + 1
-            r4.reconnectAttempts = r0     // Catch:{ all -> 0x004e }
-            r0 = 1
-            r4.isReconnecting = r0     // Catch:{ all -> 0x004e }
-            com.lumiyaviewer.lumiya.eventbus.EventBus r0 = r4.eventBus     // Catch:{ all -> 0x004e }
-            com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent r1 = new com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent     // Catch:{ all -> 0x004e }
-            int r2 = r4.reconnectAttempts     // Catch:{ all -> 0x004e }
-            r1.<init>(r2)     // Catch:{ all -> 0x004e }
-            r0.publish(r1)     // Catch:{ all -> 0x004e }
-            java.lang.String r0 = "last"
-            r1 = 1
-            r4.startConnecting(r1, r0)     // Catch:{ all -> 0x004e }
-        L_0x0047:
-            monitor-exit(r4)
-            return r3
-        L_0x0049:
-            r0 = 0
-            r4.isReconnecting = r0     // Catch:{ all -> 0x004e }
-            monitor-exit(r4)
-            return r2
-        L_0x004e:
-            r0 = move-exception
-            monitor-exit(r4)
-            throw r0
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.SLGridConnection.Reconnect():boolean");
+        isReconnecting = false;
+        this;
+        JVM INSTR monitorexit ;
+        return false;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public static String getAutoresponse() {
-        if (!autoresponseEnabled) {
+    public static String getAutoresponse()
+    {
+        if (!autoresponseEnabled)
+        {
             return null;
+        } else
+        {
+            return autoresponseText;
         }
-        return autoresponseText;
     }
 
-    private void reconnectOrDrop(boolean z, boolean z2, String str) {
-        if (!Reconnect()) {
-            if (this.activeAgentUUID != null) {
-                GridConnectionManager.removeConnection(this.activeAgentUUID, this);
+    private void reconnectOrDrop(boolean flag, boolean flag1, String s)
+    {
+label0:
+        {
+            if (!Reconnect())
+            {
+                if (activeAgentUUID != null)
+                {
+                    GridConnectionManager.removeConnection(activeAgentUUID, this);
+                }
+                if (!flag)
+                {
+                    break label0;
+                }
+                eventBus.publish(new SLLoginResultEvent(false, s, activeAgentUUID));
             }
-            if (z) {
-                this.eventBus.publish(new SLLoginResultEvent(false, str, this.activeAgentUUID));
-            } else {
-                this.eventBus.publish(new SLDisconnectEvent(z2, str));
-            }
+            return;
+        }
+        eventBus.publish(new SLDisconnectEvent(flag1, s));
+    }
+
+    public static void setAutoresponseInfo(boolean flag, String s)
+    {
+        autoresponseEnabled = flag;
+        autoresponseText = s;
+    }
+
+    private void setConnectionState(ConnectionState connectionstate)
+    {
+        if (connectionState != connectionstate)
+        {
+            connectionState = connectionstate;
+            eventBus.publish(new SLConnectionStateChangedEvent(connectionstate));
         }
     }
 
-    public static void setAutoresponseInfo(boolean z, String str) {
-        autoresponseEnabled = z;
-        autoresponseText = str;
-    }
-
-    private void setConnectionState(ConnectionState connectionState2) {
-        if (this.connectionState != connectionState2) {
-            this.connectionState = connectionState2;
-            this.eventBus.publish(new SLConnectionStateChangedEvent(connectionState2));
-        }
-    }
-
-    private void startCircuit(SLAuthReply sLAuthReply, SLTempCircuit sLTempCircuit) {
-        Debug.Log("login reply: ip = " + sLAuthReply.simAddress.toString() + ", port = " + sLAuthReply.simPort + ", ccode = " + sLAuthReply.circuitCode);
-        if (sLAuthReply.inventoryRoot != null) {
-            Debug.Log("inventory root: " + sLAuthReply.inventoryRoot.toString());
-        } else {
+    private void startCircuit(SLAuthReply slauthreply, SLTempCircuit sltempcircuit)
+    {
+        Debug.Log((new StringBuilder()).append("login reply: ip = ").append(slauthreply.simAddress.toString()).append(", port = ").append(slauthreply.simPort).append(", ccode = ").append(slauthreply.circuitCode).toString());
+        SLCaps slcaps;
+        SLCircuitInfo slcircuitinfo;
+        if (slauthreply.inventoryRoot != null)
+        {
+            Debug.Log((new StringBuilder()).append("inventory root: ").append(slauthreply.inventoryRoot.toString()).toString());
+        } else
+        {
             Debug.Log("inventory root is null");
         }
-        SLCaps sLCaps = new SLCaps();
-        sLCaps.GetCapabilites(this.authReply.loginURL, this.authReply.seedCapability);
-        try {
-            this.agentCircuit = new SLAgentCircuit(this, new SLCircuitInfo(sLAuthReply), sLAuthReply, sLCaps, sLTempCircuit);
-            this.modules = this.agentCircuit.getModules();
-            try {
-                this.capEventQueue = new SLCapEventQueue(sLCaps.getCapabilityOrThrow(SLCaps.SLCapability.EventQueueGet), this.agentCircuit);
-            } catch (SLCaps.NoSuchCapabilityException e) {
-                e.printStackTrace();
-            }
-            this.parcelInfo.reset(this.userManager);
-            TextureCache.getInstance().setFetcher(this.modules.textureFetcher);
-            AddCircuit(this.agentCircuit);
-            this.agentCircuit.SendUseCode();
-            this.firstConnect = false;
-        } catch (IOException e2) {
+        slcaps = new SLCaps();
+        slcaps.GetCapabilites(authReply.loginURL, authReply.seedCapability);
+        slcircuitinfo = new SLCircuitInfo(slauthreply);
+        try
+        {
+            agentCircuit = new SLAgentCircuit(this, slcircuitinfo, slauthreply, slcaps, sltempcircuit);
+        }
+        // Misplaced declaration of an exception variable
+        catch (SLAuthReply slauthreply)
+        {
             setConnectionState(ConnectionState.Idle);
             reconnectOrDrop(true, false, "Failed to connect to the simulator.");
+            return;
         }
+        modules = agentCircuit.getModules();
+        try
+        {
+            capEventQueue = new SLCapEventQueue(slcaps.getCapabilityOrThrow(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.EventQueueGet), agentCircuit);
+        }
+        // Misplaced declaration of an exception variable
+        catch (SLAuthReply slauthreply)
+        {
+            slauthreply.printStackTrace();
+        }
+        parcelInfo.reset(userManager);
+        TextureCache.getInstance().setFetcher(modules.textureFetcher);
+        AddCircuit(agentCircuit);
+        agentCircuit.SendUseCode();
+        firstConnect = false;
     }
 
-    private void startConnecting(final boolean z, final String str) {
-        this.loginThread = new Thread(new Runnable() {
-            public void run() {
-                if (z) {
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+    private void startConnecting(final boolean pauseBeforeConnecting, final String location)
+    {
+        loginThread = new Thread(new Runnable() {
+
+            final SLGridConnection this$0;
+            final String val$location;
+            final boolean val$pauseBeforeConnecting;
+
+            public void run()
+            {
+                if (pauseBeforeConnecting)
+                {
+                    try
+                    {
+                        Thread.sleep(3000L);
+                    }
+                    catch (InterruptedException interruptedexception)
+                    {
+                        interruptedexception.printStackTrace();
                     }
                 }
-                SLGridConnection.this.DoConnect(SLGridConnection.this.authParams, str);
-                Thread unused = SLGridConnection.this.loginThread = null;
+                SLGridConnection._2D_wrap0(SLGridConnection.this, SLGridConnection._2D_get0(SLGridConnection.this), location);
+                SLGridConnection._2D_set0(SLGridConnection.this, null);
+            }
+
+            
+            {
+                this$0 = SLGridConnection.this;
+                pauseBeforeConnecting = flag;
+                location = s;
+                super();
             }
         });
         setConnectionState(ConnectionState.Connecting);
-        this.loginThread.start();
+        loginThread.start();
     }
 
-    public synchronized void CancelConnect() {
-        this.userWantsConnected = false;
-        this.isReconnecting = false;
-        this.hadConnected = false;
+    public void CancelConnect()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        userWantsConnected = false;
+        isReconnecting = false;
+        hadConnected = false;
         closeConnectionObjects();
-    }
-
-    public synchronized void Connect(SLAuthParams sLAuthParams) {
-        if (this.connectionState == ConnectionState.Idle) {
-            this.authParams = sLAuthParams;
-            this.userWantsConnected = true;
-            this.reconnectAttempts = 0;
-            this.isReconnecting = false;
-            this.hadConnected = false;
-            this.firstConnect = true;
-            startConnecting(false, sLAuthParams.startLocation);
-        }
-    }
-
-    public synchronized void Disconnect() {
-        this.userWantsConnected = false;
-        this.isReconnecting = false;
-        this.hadConnected = false;
-        if (this.agentCircuit != null) {
-            this.agentCircuit.SendLogoutRequest();
-        } else {
-            processDisconnect(true, "Logged out");
-        }
-    }
-
-    public synchronized void HandleTeleportFinish(SLAuthReply sLAuthReply) {
-        if (this.agentCircuit != null) {
-            this.agentCircuit.CloseCircuit();
-            this.agentCircuit = null;
-        }
-        if (this.capEventQueue != null) {
-            this.capEventQueue.stopQueue();
-            this.capEventQueue = null;
-        }
-        this.authReply = sLAuthReply;
-        startCircuit(sLAuthReply, this.tempCircuits.remove(this.authReply));
-    }
-
-    /* access modifiers changed from: package-private */
-    public synchronized void addTempCircuit(SLAuthReply sLAuthReply) {
-        if (!this.tempCircuits.containsKey(sLAuthReply)) {
-            try {
-                SLTempCircuit sLTempCircuit = new SLTempCircuit(this, new SLCircuitInfo(sLAuthReply), sLAuthReply);
-                this.tempCircuits.put(sLAuthReply, sLTempCircuit);
-                AddCircuit(sLTempCircuit);
-                sLTempCircuit.SendUseCode();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        this;
+        JVM INSTR monitorexit ;
         return;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public synchronized void closeConnectionObjects() {
-        Thread thread = this.loginThread;
-        if (thread != null) {
-            thread.interrupt();
+    public void Connect(SLAuthParams slauthparams)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        if (connectionState == ConnectionState.Idle)
+        {
+            authParams = slauthparams;
+            userWantsConnected = true;
+            reconnectAttempts = 0;
+            isReconnecting = false;
+            hadConnected = false;
+            firstConnect = true;
+            startConnecting(false, slauthparams.startLocation);
         }
-        this.loginThread = null;
-        this.modules = null;
-        if (this.agentCircuit != null) {
-            this.agentCircuit.CloseCircuit();
-            this.agentCircuit = null;
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        slauthparams;
+        throw slauthparams;
+    }
+
+    public void Disconnect()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        userWantsConnected = false;
+        isReconnecting = false;
+        hadConnected = false;
+        if (agentCircuit == null) goto _L2; else goto _L1
+_L1:
+        agentCircuit.SendLogoutRequest();
+_L4:
+        this;
+        JVM INSTR monitorexit ;
+        return;
+_L2:
+        processDisconnect(true, "Logged out");
+        if (true) goto _L4; else goto _L3
+_L3:
+        Exception exception;
+        exception;
+        throw exception;
+    }
+
+    public void HandleTeleportFinish(SLAuthReply slauthreply)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        if (agentCircuit != null)
+        {
+            agentCircuit.CloseCircuit();
+            agentCircuit = null;
         }
-        if (this.capEventQueue != null) {
-            this.capEventQueue.stopQueue();
-            this.capEventQueue = null;
+        if (capEventQueue != null)
+        {
+            capEventQueue.stopQueue();
+            capEventQueue = null;
         }
-        TextureCache.getInstance().setFetcher((SLTextureFetcher) null);
-        for (SLTempCircuit CloseCircuit : this.tempCircuits.values()) {
-            CloseCircuit.CloseCircuit();
+        authReply = slauthreply;
+        startCircuit(slauthreply, (SLTempCircuit)tempCircuits.remove(authReply));
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        slauthreply;
+        throw slauthreply;
+    }
+
+    void addTempCircuit(SLAuthReply slauthreply)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        boolean flag = tempCircuits.containsKey(slauthreply);
+        if (flag)
+        {
+            break MISSING_BLOCK_LABEL_56;
         }
-        this.tempCircuits.clear();
+        SLTempCircuit sltempcircuit = new SLTempCircuit(this, new SLCircuitInfo(slauthreply), slauthreply);
+        tempCircuits.put(slauthreply, sltempcircuit);
+        AddCircuit(sltempcircuit);
+        sltempcircuit.SendUseCode();
+_L2:
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        slauthreply;
+        slauthreply.printStackTrace();
+        if (true) goto _L2; else goto _L1
+_L1:
+        slauthreply;
+        throw slauthreply;
+    }
+
+    public void closeConnectionObjects()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        Thread thread = loginThread;
+        if (thread == null)
+        {
+            break MISSING_BLOCK_LABEL_15;
+        }
+        thread.interrupt();
+        loginThread = null;
+        modules = null;
+        if (agentCircuit != null)
+        {
+            agentCircuit.CloseCircuit();
+            agentCircuit = null;
+        }
+        if (capEventQueue != null)
+        {
+            capEventQueue.stopQueue();
+            capEventQueue = null;
+        }
+        TextureCache.getInstance().setFetcher(null);
+        for (Iterator iterator = tempCircuits.values().iterator(); iterator.hasNext(); ((SLTempCircuit)iterator.next()).CloseCircuit()) { }
+        break MISSING_BLOCK_LABEL_114;
+        Exception exception;
+        exception;
+        throw exception;
+        tempCircuits.clear();
         setConnectionState(ConnectionState.Idle);
+        this;
+        JVM INSTR monitorexit ;
     }
 
-    public synchronized void forceDisconnect(boolean z) {
-        if (z) {
-            this.userWantsConnected = false;
-            this.isReconnecting = false;
-            this.hadConnected = false;
+    public void forceDisconnect(boolean flag)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        if (!flag)
+        {
+            break MISSING_BLOCK_LABEL_21;
         }
-        Debug.Log("GridConnection: forceDisconnect() called, fromLogoutRequest = " + (z ? "true" : "false"));
-        switch (m130getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues()[this.connectionState.ordinal()]) {
-            case 1:
-                closeConnectionObjects();
-                reconnectOrDrop(false, z, "Network connection lost.");
-                break;
-            case 2:
-                closeConnectionObjects();
-                reconnectOrDrop(true, z, "Network connection lost.");
-                break;
+        userWantsConnected = false;
+        isReconnecting = false;
+        hadConnected = false;
+        StringBuilder stringbuilder = (new StringBuilder()).append("GridConnection: forceDisconnect() called, fromLogoutRequest = ");
+        String s;
+        int i;
+        if (flag)
+        {
+            s = "true";
+        } else
+        {
+            s = "false";
         }
+        Debug.Log(stringbuilder.append(s).toString());
+        i = _2D_getcom_2D_lumiyaviewer_2D_lumiya_2D_slproto_2D_SLGridConnection$ConnectionStateSwitchesValues()[connectionState.ordinal()];
+        i;
+        JVM INSTR tableswitch 1 3: default 96
+    //                   1 127
+    //                   2 106
+    //                   3 96;
+           goto _L1 _L2 _L3 _L1
+_L1:
+        this;
+        JVM INSTR monitorexit ;
+        return;
+_L3:
+        closeConnectionObjects();
+        reconnectOrDrop(true, flag, "Network connection lost.");
+          goto _L1
+        Exception exception;
+        exception;
+        throw exception;
+_L2:
+        closeConnectionObjects();
+        reconnectOrDrop(false, flag, "Network connection lost.");
+          goto _L1
     }
 
-    public UUID getActiveAgentUUID() {
-        return this.activeAgentUUID;
+    public UUID getActiveAgentUUID()
+    {
+        return activeAgentUUID;
     }
 
-    public SLAgentCircuit getAgentCircuit() throws NotConnectedException {
-        if (this.agentCircuit != null) {
-            return this.agentCircuit;
-        }
-        throw new NotConnectedException();
-    }
-
-    public synchronized ConnectionState getConnectionState() {
-        return this.connectionState;
-    }
-
-    public boolean getIsReconnecting() {
-        return this.isReconnecting;
-    }
-
-    public synchronized SLModules getModules() throws NotConnectedException {
-        if (this.modules == null) {
+    public SLAgentCircuit getAgentCircuit()
+        throws NotConnectedException
+    {
+        if (agentCircuit != null)
+        {
+            return agentCircuit;
+        } else
+        {
             throw new NotConnectedException();
         }
-        return this.modules;
     }
 
-    public int getReconnectAttempt() {
-        return this.reconnectAttempts;
+    public ConnectionState getConnectionState()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        ConnectionState connectionstate = connectionState;
+        this;
+        JVM INSTR monitorexit ;
+        return connectionstate;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public boolean isFirstConnect() {
-        return this.firstConnect;
+    public boolean getIsReconnecting()
+    {
+        return isReconnecting;
     }
 
-    public synchronized void notifyLoginError(String str) {
+    public SLModules getModules()
+        throws NotConnectedException
+    {
+        this;
+        JVM INSTR monitorenter ;
+        if (modules == null)
+        {
+            throw new NotConnectedException();
+        }
+        break MISSING_BLOCK_LABEL_22;
+        Exception exception;
+        exception;
+        this;
+        JVM INSTR monitorexit ;
+        throw exception;
+        SLModules slmodules = modules;
+        this;
+        JVM INSTR monitorexit ;
+        return slmodules;
+    }
+
+    public int getReconnectAttempt()
+    {
+        return reconnectAttempts;
+    }
+
+    public boolean isFirstConnect()
+    {
+        return firstConnect;
+    }
+
+    public void notifyLoginError(String s)
+    {
+        this;
+        JVM INSTR monitorenter ;
         closeConnectionObjects();
-        reconnectOrDrop(true, false, str);
+        reconnectOrDrop(true, false, s);
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        s;
+        throw s;
     }
 
-    public synchronized void notifyLoginSuccess() {
-        this.hadConnected = true;
-        this.reconnectAttempts = 0;
-        this.isReconnecting = false;
+    public void notifyLoginSuccess()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        hadConnected = true;
+        reconnectAttempts = 0;
+        isReconnecting = false;
         setConnectionState(ConnectionState.Connected);
-        if (this.activeAgentUUID != null) {
-            GridConnectionManager.setConnection(this.activeAgentUUID, this);
+        if (activeAgentUUID != null)
+        {
+            GridConnectionManager.setConnection(activeAgentUUID, this);
         }
-        this.eventBus.publish(new SLLoginResultEvent(true, (String) null, this.activeAgentUUID));
+        eventBus.publish(new SLLoginResultEvent(true, null, activeAgentUUID));
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public synchronized void processDisconnect(boolean z, String str) {
-        if (this.connectionState != ConnectionState.Idle) {
+    public void processDisconnect(boolean flag, String s)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        if (connectionState != ConnectionState.Idle)
+        {
             closeConnectionObjects();
-            reconnectOrDrop(false, z, str);
+            reconnectOrDrop(false, flag, s);
         }
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        s;
+        throw s;
     }
 
-    /* access modifiers changed from: package-private */
-    public synchronized void removeTempCircuit(SLTempCircuit sLTempCircuit) {
-        Iterator<Map.Entry<SLAuthReply, SLTempCircuit>> it = this.tempCircuits.entrySet().iterator();
-        while (it.hasNext()) {
-            if (it.next().getValue() == sLTempCircuit) {
-                it.remove();
+    void removeTempCircuit(SLTempCircuit sltempcircuit)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        Iterator iterator = tempCircuits.entrySet().iterator();
+        do
+        {
+            if (!iterator.hasNext())
+            {
+                break;
             }
-        }
-        sLTempCircuit.CloseCircuit();
+            if (((java.util.Map.Entry)iterator.next()).getValue() == sltempcircuit)
+            {
+                iterator.remove();
+            }
+        } while (true);
+        break MISSING_BLOCK_LABEL_58;
+        sltempcircuit;
+        throw sltempcircuit;
+        sltempcircuit.CloseCircuit();
+        this;
+        JVM INSTR monitorexit ;
     }
+
 }

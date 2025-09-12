@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.geometry;
 
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
@@ -14,110 +18,172 @@ import com.lumiyaviewer.lumiya.res.textures.TextureCache;
 import com.lumiyaviewer.lumiya.slproto.mesh.MeshData;
 import com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams;
 
-public class GeometryCache extends ResourceMemoryCache<PrimVolumeParams, DrawableGeometry> {
-    private final MeshCache meshCache;
+public class GeometryCache extends ResourceMemoryCache
+{
+    private static class MeshGeometryRequest extends ResourceRequest
+        implements Runnable, ResourceConsumer
+    {
 
-    private static class MeshGeometryRequest extends ResourceRequest<PrimVolumeParams, DrawableGeometry> implements Runnable, ResourceConsumer {
         private final MeshCache meshCache;
         private volatile MeshData meshData;
 
-        public MeshGeometryRequest(MeshCache meshCache2, PrimVolumeParams primVolumeParams, ResourceManager<PrimVolumeParams, DrawableGeometry> resourceManager) {
-            super(primVolumeParams, resourceManager);
-            this.meshCache = meshCache2;
-        }
-
-        public void OnResourceReady(Object obj, boolean z) {
-            if (obj instanceof MeshData) {
-                this.meshData = (MeshData) obj;
+        public void OnResourceReady(Object obj, boolean flag)
+        {
+            if (obj instanceof MeshData)
+            {
+                meshData = (MeshData)obj;
                 PrimComputeExecutor.getInstance().execute(this);
                 return;
+            } else
+            {
+                completeRequest(null);
+                return;
             }
-            completeRequest(null);
         }
 
-        public void cancelRequest() {
+        public void cancelRequest()
+        {
             PrimComputeExecutor.getInstance().remove(this);
             super.cancelRequest();
         }
 
-        public void execute() {
-            this.meshCache.RequestResource(((PrimVolumeParams) getParams()).SculptID, this);
+        public void execute()
+        {
+            meshCache.RequestResource(((PrimVolumeParams)getParams()).SculptID, this);
         }
 
-        public void run() {
-            try {
-                completeRequest(new DrawableGeometry(this.meshData));
-            } catch (Exception e) {
+        public void run()
+        {
+            try
+            {
+                completeRequest(new DrawableGeometry(meshData));
+                return;
+            }
+            catch (Exception exception)
+            {
                 completeRequest(null);
             }
         }
+
+        public MeshGeometryRequest(MeshCache meshcache, PrimVolumeParams primvolumeparams, ResourceManager resourcemanager)
+        {
+            super(primvolumeparams, resourcemanager);
+            meshCache = meshcache;
+        }
     }
 
-    private static class SculptGeometryRequest extends ResourceRequest<PrimVolumeParams, DrawableGeometry> implements Runnable, ResourceConsumer {
+    private static class SculptGeometryRequest extends ResourceRequest
+        implements Runnable, ResourceConsumer
+    {
+
         private volatile OpenJPEG sculptData;
-        private final DrawableTextureParams sculptTextureParams = DrawableTextureParams.create(((PrimVolumeParams) getParams()).SculptID, TextureClass.Sculpt);
+        private final DrawableTextureParams sculptTextureParams;
 
-        public SculptGeometryRequest(PrimVolumeParams primVolumeParams, ResourceManager<PrimVolumeParams, DrawableGeometry> resourceManager) {
-            super(primVolumeParams, resourceManager);
-        }
-
-        public void OnResourceReady(Object obj, boolean z) {
-            if (obj instanceof OpenJPEG) {
-                this.sculptData = (OpenJPEG) obj;
+        public void OnResourceReady(Object obj, boolean flag)
+        {
+            if (obj instanceof OpenJPEG)
+            {
+                sculptData = (OpenJPEG)obj;
                 PrimComputeExecutor.getInstance().execute(this);
                 return;
+            } else
+            {
+                completeRequest(null);
+                return;
             }
-            completeRequest(null);
         }
 
-        public void cancelRequest() {
+        public void cancelRequest()
+        {
             PrimComputeExecutor.getInstance().remove(this);
             TextureCache.getInstance().CancelRequest(this);
             super.cancelRequest();
         }
 
-        public void execute() {
-            TextureCache.getInstance().RequestResource(this.sculptTextureParams, this);
+        public void execute()
+        {
+            TextureCache.getInstance().RequestResource(sculptTextureParams, this);
         }
 
-        public void run() {
-            try {
-                completeRequest(new DrawableGeometry((PrimVolumeParams) getParams(), this.sculptData));
-            } catch (Exception e) {
+        public void run()
+        {
+            try
+            {
+                completeRequest(new DrawableGeometry((PrimVolumeParams)getParams(), sculptData));
+                return;
+            }
+            catch (Exception exception)
+            {
                 completeRequest(null);
             }
         }
+
+        public SculptGeometryRequest(PrimVolumeParams primvolumeparams, ResourceManager resourcemanager)
+        {
+            super(primvolumeparams, resourcemanager);
+            sculptTextureParams = DrawableTextureParams.create(((PrimVolumeParams)getParams()).SculptID, TextureClass.Sculpt);
+        }
     }
 
-    private static class SimpleGeometryRequest extends ResourceRequest<PrimVolumeParams, DrawableGeometry> implements Runnable {
-        public SimpleGeometryRequest(PrimVolumeParams primVolumeParams, ResourceManager<PrimVolumeParams, DrawableGeometry> resourceManager) {
-            super(primVolumeParams, resourceManager);
-        }
+    private static class SimpleGeometryRequest extends ResourceRequest
+        implements Runnable
+    {
 
-        public void cancelRequest() {
+        public void cancelRequest()
+        {
             PrimComputeExecutor.getInstance().remove(this);
             super.cancelRequest();
         }
 
-        public void execute() {
+        public void execute()
+        {
             PrimComputeExecutor.getInstance().execute(this);
         }
 
-        public void run() {
-            try {
-                completeRequest(new DrawableGeometry((PrimVolumeParams) getParams(), (OpenJPEG) null));
-            } catch (Exception e) {
+        public void run()
+        {
+            try
+            {
+                completeRequest(new DrawableGeometry((PrimVolumeParams)getParams(), null));
+                return;
+            }
+            catch (Exception exception)
+            {
                 completeRequest(null);
             }
         }
+
+        public SimpleGeometryRequest(PrimVolumeParams primvolumeparams, ResourceManager resourcemanager)
+        {
+            super(primvolumeparams, resourcemanager);
+        }
     }
 
-    public GeometryCache(MeshCache meshCache2) {
-        this.meshCache = meshCache2;
+
+    private final MeshCache meshCache;
+
+    public GeometryCache(MeshCache meshcache)
+    {
+        meshCache = meshcache;
     }
 
-    /* access modifiers changed from: protected */
-    public ResourceRequest<PrimVolumeParams, DrawableGeometry> CreateNewRequest(PrimVolumeParams primVolumeParams, ResourceManager<PrimVolumeParams, DrawableGeometry> resourceManager) {
-        return primVolumeParams.isMesh() ? new MeshGeometryRequest(this.meshCache, primVolumeParams, resourceManager) : primVolumeParams.isSculpt() ? new SculptGeometryRequest(primVolumeParams, resourceManager) : new SimpleGeometryRequest(primVolumeParams, resourceManager);
+    protected ResourceRequest CreateNewRequest(PrimVolumeParams primvolumeparams, ResourceManager resourcemanager)
+    {
+        if (primvolumeparams.isMesh())
+        {
+            return new MeshGeometryRequest(meshCache, primvolumeparams, resourcemanager);
+        }
+        if (primvolumeparams.isSculpt())
+        {
+            return new SculptGeometryRequest(primvolumeparams, resourcemanager);
+        } else
+        {
+            return new SimpleGeometryRequest(primvolumeparams, resourcemanager);
+        }
+    }
+
+    protected volatile ResourceRequest CreateNewRequest(Object obj, ResourceManager resourcemanager)
+    {
+        return CreateNewRequest((PrimVolumeParams)obj, resourcemanager);
     }
 }

@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager.assets;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -11,71 +15,124 @@ import com.lumiyaviewer.lumiya.react.RequestSource;
 import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.SubscriptionPool;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class AssetResponseCacher implements Refreshable<AssetKey> {
-    /* access modifiers changed from: private */
-    public final CachedAssetDao cachedAssetDao;
-    private final SubscriptionPool<AssetKey, AssetData> pool = new SubscriptionPool<>();
-    private final RateLimitRequestHandler<AssetKey, AssetData> requestHandler;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager.assets:
+//            AssetKey, AssetData
 
-    public AssetResponseCacher(DaoSession daoSession, Executor executor) {
-        this.cachedAssetDao = daoSession.getCachedAssetDao();
-        this.pool.setCacheInvalidateHandler(new $Lambda$9LOU8pkPwNYFJNwesblYMTVNE0(this), executor);
-        this.requestHandler = new RateLimitRequestHandler<>(new RequestProcessor<AssetKey, AssetData, AssetData>(this.pool, executor) {
-            /* access modifiers changed from: protected */
-            public boolean isRequestComplete(@Nonnull AssetKey assetKey, AssetData assetData) {
-                CachedAsset cachedAsset = (CachedAsset) AssetResponseCacher.this.cachedAssetDao.load(assetKey.toString());
-                if (cachedAsset != null) {
-                    return !cachedAsset.getMustRevalidate();
+public class AssetResponseCacher
+    implements Refreshable
+{
+
+    private final CachedAssetDao cachedAssetDao;
+    private final SubscriptionPool pool = new SubscriptionPool();
+    private final RateLimitRequestHandler requestHandler;
+
+    static CachedAssetDao _2D_get0(AssetResponseCacher assetresponsecacher)
+    {
+        return assetresponsecacher.cachedAssetDao;
+    }
+
+    public AssetResponseCacher(DaoSession daosession, Executor executor)
+    {
+        cachedAssetDao = daosession.getCachedAssetDao();
+        pool.setCacheInvalidateHandler(new _2D_.Lambda._cls9LOU8pkPwNY_2D_FJNwesblYMTVNE0(this), executor);
+        requestHandler = new RateLimitRequestHandler(new RequestProcessor(pool, executor) {
+
+            final AssetResponseCacher this$0;
+
+            protected boolean isRequestComplete(AssetKey assetkey, AssetData assetdata)
+            {
+                assetkey = (CachedAsset)AssetResponseCacher._2D_get0(AssetResponseCacher.this).load(assetkey.toString());
+                if (assetkey != null)
+                {
+                    return assetkey.getMustRevalidate() ^ true;
+                } else
+                {
+                    return false;
                 }
-                return false;
             }
 
-            /* access modifiers changed from: protected */
-            @Nullable
-            public AssetData processRequest(@Nonnull AssetKey assetKey) {
-                CachedAsset cachedAsset = (CachedAsset) AssetResponseCacher.this.cachedAssetDao.load(assetKey.toString());
-                if (cachedAsset != null) {
-                    AssetData assetData = new AssetData(cachedAsset.getStatus(), cachedAsset.getData());
-                    Debug.Printf("AssetCache: returning cached response for key %s", assetKey);
-                    return assetData;
-                }
-                Debug.Printf("AssetCache: no cached data for key %s", assetKey);
-                return null;
+            protected volatile boolean isRequestComplete(Object obj, Object obj1)
+            {
+                return isRequestComplete((AssetKey)obj, (AssetData)obj1);
             }
 
-            /* access modifiers changed from: protected */
-            public AssetData processResult(@Nonnull AssetKey assetKey, AssetData assetData) {
-                Debug.Printf("AssetCache: saving cached data for key %s", assetKey.toString());
-                if (assetData != null) {
-                    AssetResponseCacher.this.cachedAssetDao.insertOrReplace(new CachedAsset(assetKey.toString(), assetData.getStatus(), assetData.getData(), false));
+            protected AssetData processRequest(AssetKey assetkey)
+            {
+                Object obj = (CachedAsset)AssetResponseCacher._2D_get0(AssetResponseCacher.this).load(assetkey.toString());
+                if (obj != null)
+                {
+                    obj = new AssetData(((CachedAsset) (obj)).getStatus(), ((CachedAsset) (obj)).getData());
+                    Debug.Printf("AssetCache: returning cached response for key %s", new Object[] {
+                        assetkey
+                    });
+                    return ((AssetData) (obj));
+                } else
+                {
+                    Debug.Printf("AssetCache: no cached data for key %s", new Object[] {
+                        assetkey
+                    });
+                    return null;
                 }
-                return assetData;
+            }
+
+            protected volatile Object processRequest(Object obj)
+            {
+                return processRequest((AssetKey)obj);
+            }
+
+            protected AssetData processResult(AssetKey assetkey, AssetData assetdata)
+            {
+                Debug.Printf("AssetCache: saving cached data for key %s", new Object[] {
+                    assetkey.toString()
+                });
+                if (assetdata != null)
+                {
+                    AssetResponseCacher._2D_get0(AssetResponseCacher.this).insertOrReplace(new CachedAsset(assetkey.toString(), assetdata.getStatus(), assetdata.getData(), false));
+                }
+                return assetdata;
+            }
+
+            protected volatile Object processResult(Object obj, Object obj1)
+            {
+                return processResult((AssetKey)obj, (AssetData)obj1);
+            }
+
+            
+            {
+                this$0 = AssetResponseCacher.this;
+                super(requestsource, executor);
             }
         });
     }
 
-    public Subscribable<AssetKey, AssetData> getPool() {
-        return this.pool;
+    public Subscribable getPool()
+    {
+        return pool;
     }
 
-    public RequestSource<AssetKey, AssetData> getRequestSource() {
-        return this.requestHandler;
+    public RequestSource getRequestSource()
+    {
+        return requestHandler;
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_assets_AssetResponseCacher_872  reason: not valid java name */
-    public /* synthetic */ void m378lambda$com_lumiyaviewer_lumiya_slproto_users_manager_assets_AssetResponseCacher_872(AssetKey assetKey) {
-        CachedAsset cachedAsset = (CachedAsset) this.cachedAssetDao.load(assetKey.toString());
-        if (cachedAsset != null) {
-            cachedAsset.setMustRevalidate(true);
-            this.cachedAssetDao.update(cachedAsset);
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_users_manager_assets_AssetResponseCacher_872(AssetKey assetkey)
+    {
+        assetkey = (CachedAsset)cachedAssetDao.load(assetkey.toString());
+        if (assetkey != null)
+        {
+            assetkey.setMustRevalidate(true);
+            cachedAssetDao.update(assetkey);
         }
     }
 
-    public void requestUpdate(AssetKey assetKey) {
-        this.pool.requestUpdate(assetKey);
+    public void requestUpdate(AssetKey assetkey)
+    {
+        pool.requestUpdate(assetkey);
+    }
+
+    public volatile void requestUpdate(Object obj)
+    {
+        requestUpdate((AssetKey)obj);
     }
 }

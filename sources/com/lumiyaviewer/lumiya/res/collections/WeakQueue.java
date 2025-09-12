@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.collections;
 
 import com.google.common.collect.ObjectArrays;
@@ -13,322 +17,503 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import javax.annotation.Nonnull;
 
-public class WeakQueue<T> implements BlockingQueue<T> {
-    private final Lock lock = new ReentrantLock();
-    private final Set<T> lowPriorityQueue = Collections.newSetFromMap(new WeakHashMap());
-    private final Condition notEmpty = this.lock.newCondition();
-    private final Set<T> queue = Collections.newSetFromMap(new WeakHashMap());
-
-    public interface LowPriority {
+public class WeakQueue
+    implements BlockingQueue
+{
+    public static interface LowPriority
+    {
     }
 
-    public boolean add(T t) {
-        if (t == null) {
+
+    private final Lock lock = new ReentrantLock();
+    private final Set lowPriorityQueue = Collections.newSetFromMap(new WeakHashMap());
+    private final Condition notEmpty;
+    private final Set queue = Collections.newSetFromMap(new WeakHashMap());
+
+    public WeakQueue()
+    {
+        notEmpty = lock.newCondition();
+    }
+
+    public boolean add(Object obj)
+    {
+        if (obj == null)
+        {
             return false;
         }
-        this.lock.lock();
-        try {
-            if (t instanceof LowPriority) {
-                this.lowPriorityQueue.add(t);
-            } else {
-                this.queue.add(t);
+        lock.lock();
+        if (!(obj instanceof LowPriority))
+        {
+            break MISSING_BLOCK_LABEL_53;
+        }
+        lowPriorityQueue.add(obj);
+_L1:
+        notEmpty.signalAll();
+        lock.unlock();
+        return true;
+        queue.add(obj);
+          goto _L1
+        obj;
+        lock.unlock();
+        throw obj;
+    }
+
+    public boolean addAll(Collection collection)
+    {
+        lock.lock();
+        collection = collection.iterator();
+_L1:
+        Object obj;
+        do
+        {
+            if (!collection.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_79;
             }
-            this.notEmpty.signalAll();
-            return true;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public boolean addAll(Collection<? extends T> collection) {
-        this.lock.lock();
-        try {
-            for (T next : collection) {
-                if (next instanceof LowPriority) {
-                    this.lowPriorityQueue.add(next);
-                } else {
-                    this.queue.add(next);
-                }
+            obj = collection.next();
+            if (!(obj instanceof LowPriority))
+            {
+                break MISSING_BLOCK_LABEL_65;
             }
-            this.notEmpty.signalAll();
-            return true;
-        } finally {
-            this.lock.unlock();
-        }
+            lowPriorityQueue.add(obj);
+        } while (true);
+        collection;
+        lock.unlock();
+        throw collection;
+        queue.add(obj);
+          goto _L1
+        notEmpty.signalAll();
+        lock.unlock();
+        return true;
     }
 
-    public void clear() {
-        this.lock.lock();
-        try {
-            this.queue.clear();
-            this.lowPriorityQueue.clear();
-        } finally {
-            this.lock.unlock();
-        }
+    public void clear()
+    {
+        lock.lock();
+        queue.clear();
+        lowPriorityQueue.clear();
+        lock.unlock();
+        return;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public boolean contains(Object obj) {
-        this.lock.lock();
-        try {
-            return !this.queue.contains(obj) ? this.lowPriorityQueue.contains(obj) : true;
-        } finally {
-            this.lock.unlock();
-        }
+    public boolean contains(Object obj)
+    {
+        lock.lock();
+        if (queue.contains(obj)) goto _L2; else goto _L1
+_L1:
+        boolean flag = lowPriorityQueue.contains(obj);
+_L4:
+        lock.unlock();
+        return flag;
+_L2:
+        flag = true;
+        if (true) goto _L4; else goto _L3
+_L3:
+        obj;
+        lock.unlock();
+        throw obj;
     }
 
-    public boolean containsAll(Collection<?> collection) {
-        this.lock.lock();
-        try {
-            return !this.queue.containsAll(collection) ? this.lowPriorityQueue.containsAll(collection) : true;
-        } finally {
-            this.lock.unlock();
-        }
+    public boolean containsAll(Collection collection)
+    {
+        lock.lock();
+        if (queue.containsAll(collection)) goto _L2; else goto _L1
+_L1:
+        boolean flag = lowPriorityQueue.containsAll(collection);
+_L4:
+        lock.unlock();
+        return flag;
+_L2:
+        flag = true;
+        if (true) goto _L4; else goto _L3
+_L3:
+        collection;
+        lock.unlock();
+        throw collection;
     }
 
-    public int drainTo(Collection<? super T> collection) {
-        this.lock.lock();
-        int i = 0;
-        try {
-            for (T next : this.queue) {
-                if (next != null) {
-                    collection.add(next);
-                    i++;
-                }
+    public int drainTo(Collection collection)
+    {
+        int i;
+        lock.lock();
+        i = 0;
+        Iterator iterator1 = queue.iterator();
+_L2:
+        Object obj;
+        do
+        {
+            if (!iterator1.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_59;
             }
-            this.queue.clear();
-            for (T next2 : this.lowPriorityQueue) {
-                if (next2 != null) {
-                    collection.add(next2);
-                    i++;
-                }
+            obj = iterator1.next();
+        } while (obj == null);
+        collection.add(obj);
+        i++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        queue.clear();
+        iterator1 = lowPriorityQueue.iterator();
+_L4:
+        do
+        {
+            if (!iterator1.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_115;
             }
-            this.lowPriorityQueue.clear();
-            return i;
-        } finally {
-            this.lock.unlock();
+            obj = iterator1.next();
+        } while (obj == null);
+        collection.add(obj);
+        i++;
+        if (true) goto _L4; else goto _L3
+_L3:
+        lowPriorityQueue.clear();
+        lock.unlock();
+        return i;
+        collection;
+        lock.unlock();
+        throw collection;
+    }
+
+    public int drainTo(Collection collection, int i)
+    {
+        int j;
+        lock.lock();
+        j = 0;
+        Iterator iterator1 = queue.iterator();
+_L2:
+        if (!iterator1.hasNext() || j >= i)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        Object obj = iterator1.next();
+        int k;
+        k = j;
+        if (obj == null)
+        {
+            break MISSING_BLOCK_LABEL_69;
+        }
+        collection.add(obj);
+        k = j + 1;
+        iterator1.remove();
+        j = k;
+        if (true) goto _L2; else goto _L1
+        collection;
+        lock.unlock();
+        throw collection;
+_L1:
+        iterator1 = lowPriorityQueue.iterator();
+_L4:
+        if (!iterator1.hasNext() || j >= i)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        obj = iterator1.next();
+        k = j;
+        if (obj == null)
+        {
+            break MISSING_BLOCK_LABEL_151;
+        }
+        collection.add(obj);
+        k = j + 1;
+        iterator1.remove();
+        j = k;
+        if (true) goto _L4; else goto _L3
+_L3:
+        lock.unlock();
+        return j;
+    }
+
+    public Object element()
+    {
+        Object obj = peek();
+        if (obj == null)
+        {
+            throw new NoSuchElementException();
+        } else
+        {
+            return obj;
         }
     }
 
-    public int drainTo(Collection<? super T> collection, int i) {
-        this.lock.lock();
-        int i2 = 0;
-        try {
-            Iterator<T> it = this.queue.iterator();
-            while (it.hasNext() && i2 < i) {
-                T next = it.next();
-                if (next != null) {
-                    collection.add(next);
-                    i2++;
-                }
-                it.remove();
-            }
-            Iterator<T> it2 = this.lowPriorityQueue.iterator();
-            while (it2.hasNext() && i2 < i) {
-                T next2 = it2.next();
-                if (next2 != null) {
-                    collection.add(next2);
-                    i2++;
-                }
-                it2.remove();
-            }
-            return i2;
-        } finally {
-            this.lock.unlock();
-        }
+    public boolean isEmpty()
+    {
+        lock.lock();
+        if (!queue.isEmpty()) goto _L2; else goto _L1
+_L1:
+        boolean flag = lowPriorityQueue.isEmpty();
+_L4:
+        lock.unlock();
+        return flag;
+_L2:
+        flag = false;
+        if (true) goto _L4; else goto _L3
+_L3:
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public T element() {
-        T peek = peek();
-        if (peek != null) {
-            return peek;
-        }
-        throw new NoSuchElementException();
-    }
-
-    public boolean isEmpty() {
-        this.lock.lock();
-        try {
-            return this.queue.isEmpty() ? this.lowPriorityQueue.isEmpty() : false;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public Iterator<T> iterator() {
+    public Iterator iterator()
+    {
         throw new UnsupportedOperationException("Iterating over WeakQueue is not supported");
     }
 
-    public boolean offer(T t) {
-        return add(t);
+    public boolean offer(Object obj)
+    {
+        return add(obj);
     }
 
-    public boolean offer(T t, long j, TimeUnit timeUnit) throws InterruptedException {
-        return add(t);
+    public boolean offer(Object obj, long l, TimeUnit timeunit)
+        throws InterruptedException
+    {
+        return add(obj);
     }
 
-    public T peek() {
-        this.lock.lock();
-        try {
-            if (!this.queue.isEmpty()) {
-                for (T next : this.queue) {
-                    if (next != null) {
-                        return next;
-                    }
-                }
-            }
-            if (!this.lowPriorityQueue.isEmpty()) {
-                for (T next2 : this.lowPriorityQueue) {
-                    if (next2 != null) {
-                        this.lock.unlock();
-                        return next2;
-                    }
-                }
-            }
-            this.lock.unlock();
-            return null;
-        } finally {
-            this.lock.unlock();
+    public Object peek()
+    {
+        lock.lock();
+        Iterator iterator1;
+        if (queue.isEmpty())
+        {
+            break MISSING_BLOCK_LABEL_62;
         }
-    }
-
-    public T poll() {
-        this.lock.lock();
-        try {
-            if (!this.queue.isEmpty()) {
-                Iterator<T> it = this.queue.iterator();
-                while (it.hasNext()) {
-                    T next = it.next();
-                    if (next != null) {
-                        it.remove();
-                        return next;
-                    }
-                }
+        iterator1 = queue.iterator();
+        Object obj;
+        do
+        {
+            if (!iterator1.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_62;
             }
-            if (!this.lowPriorityQueue.isEmpty()) {
-                Iterator<T> it2 = this.lowPriorityQueue.iterator();
-                while (it2.hasNext()) {
-                    T next2 = it2.next();
-                    if (next2 != null) {
-                        it2.remove();
-                        this.lock.unlock();
-                        return next2;
-                    }
-                }
-            }
-            this.lock.unlock();
-            return null;
-        } finally {
-            this.lock.unlock();
+            obj = iterator1.next();
+        } while (obj == null);
+        lock.unlock();
+        return obj;
+        if (lowPriorityQueue.isEmpty())
+        {
+            break MISSING_BLOCK_LABEL_115;
         }
-    }
-
-    public T poll(long j, TimeUnit timeUnit) throws InterruptedException {
-        this.lock.lock();
-        do {
-            try {
-                T poll = poll();
-                if (poll != null) {
-                    this.lock.unlock();
-                    return poll;
-                }
-            } finally {
-                this.lock.unlock();
+        iterator1 = lowPriorityQueue.iterator();
+        Object obj1;
+        do
+        {
+            if (!iterator1.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_115;
             }
-        } while (this.notEmpty.await(j, timeUnit));
+            obj1 = iterator1.next();
+        } while (obj1 == null);
+        lock.unlock();
+        return obj1;
+        lock.unlock();
         return null;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public void put(T t) throws InterruptedException {
-        add(t);
-    }
-
-    public int remainingCapacity() {
-        return Integer.MAX_VALUE;
-    }
-
-    public T remove() {
-        T poll = poll();
-        if (poll != null) {
-            return poll;
+    public Object poll()
+    {
+        lock.lock();
+        Iterator iterator1;
+        if (queue.isEmpty())
+        {
+            break MISSING_BLOCK_LABEL_68;
         }
-        throw new NoSuchElementException();
-    }
-
-    public boolean remove(Object obj) {
-        this.lock.lock();
-        try {
-            return this.queue.remove(obj) | this.lowPriorityQueue.remove(obj);
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public boolean removeAll(@Nonnull Collection<?> collection) {
-        this.lock.lock();
-        try {
-            return this.queue.removeAll(collection) | this.lowPriorityQueue.removeAll(collection);
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public boolean retainAll(Collection<?> collection) {
-        this.lock.lock();
-        try {
-            return this.queue.retainAll(collection) | this.lowPriorityQueue.retainAll(collection);
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public int size() {
-        this.lock.lock();
-        try {
-            return this.queue.size() + this.lowPriorityQueue.size();
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public T take() throws InterruptedException {
-        this.lock.lock();
-        while (true) {
-            try {
-                T poll = poll();
-                if (poll != null) {
-                    return poll;
-                }
-                this.notEmpty.await();
-            } finally {
-                this.lock.unlock();
+        iterator1 = queue.iterator();
+        Object obj;
+        do
+        {
+            if (!iterator1.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_68;
             }
+            obj = iterator1.next();
+        } while (obj == null);
+        iterator1.remove();
+        lock.unlock();
+        return obj;
+        if (lowPriorityQueue.isEmpty())
+        {
+            break MISSING_BLOCK_LABEL_127;
         }
-    }
-
-    public Object[] toArray() {
-        this.lock.lock();
-        try {
-            return ObjectArrays.concat(this.queue.toArray(), this.lowPriorityQueue.toArray(), Object.class);
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public <T1> T1[] toArray(T1[] t1Arr) {
-        this.lock.lock();
-        try {
-            T1[] array = toArray();
-            if (array.length <= t1Arr.length) {
-                Arrays.fill(t1Arr, (Object) null);
-                System.arraycopy(array, 0, t1Arr, 0, array.length);
-                return t1Arr;
+        iterator1 = lowPriorityQueue.iterator();
+        do
+        {
+            if (!iterator1.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_127;
             }
-            this.lock.unlock();
-            return array;
-        } finally {
-            this.lock.unlock();
+            obj = iterator1.next();
+        } while (obj == null);
+        iterator1.remove();
+        lock.unlock();
+        return obj;
+        lock.unlock();
+        return null;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
+    }
+
+    public Object poll(long l, TimeUnit timeunit)
+        throws InterruptedException
+    {
+        lock.lock();
+_L2:
+        Object obj = poll();
+        if (obj != null)
+        {
+            lock.unlock();
+            return obj;
         }
+        boolean flag = notEmpty.await(l, timeunit);
+        if (flag) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
+        return null;
+        timeunit;
+        lock.unlock();
+        throw timeunit;
+    }
+
+    public void put(Object obj)
+        throws InterruptedException
+    {
+        add(obj);
+    }
+
+    public int remainingCapacity()
+    {
+        return 0x7fffffff;
+    }
+
+    public Object remove()
+    {
+        Object obj = poll();
+        if (obj == null)
+        {
+            throw new NoSuchElementException();
+        } else
+        {
+            return obj;
+        }
+    }
+
+    public boolean remove(Object obj)
+    {
+        lock.lock();
+        boolean flag;
+        boolean flag1;
+        flag = queue.remove(obj);
+        flag1 = lowPriorityQueue.remove(obj);
+        lock.unlock();
+        return flag | flag1;
+        obj;
+        lock.unlock();
+        throw obj;
+    }
+
+    public boolean removeAll(Collection collection)
+    {
+        lock.lock();
+        boolean flag;
+        boolean flag1;
+        flag = queue.removeAll(collection);
+        flag1 = lowPriorityQueue.removeAll(collection);
+        lock.unlock();
+        return flag | flag1;
+        collection;
+        lock.unlock();
+        throw collection;
+    }
+
+    public boolean retainAll(Collection collection)
+    {
+        lock.lock();
+        boolean flag;
+        boolean flag1;
+        flag = queue.retainAll(collection);
+        flag1 = lowPriorityQueue.retainAll(collection);
+        lock.unlock();
+        return flag | flag1;
+        collection;
+        lock.unlock();
+        throw collection;
+    }
+
+    public int size()
+    {
+        lock.lock();
+        int i;
+        int j;
+        i = queue.size();
+        j = lowPriorityQueue.size();
+        lock.unlock();
+        return i + j;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
+    }
+
+    public Object take()
+        throws InterruptedException
+    {
+        lock.lock();
+_L1:
+        Object obj = poll();
+        if (obj != null)
+        {
+            lock.unlock();
+            return obj;
+        }
+        notEmpty.await();
+          goto _L1
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
+    }
+
+    public Object[] toArray()
+    {
+        lock.lock();
+        Object aobj[] = ObjectArrays.concat(queue.toArray(), lowPriorityQueue.toArray(), java/lang/Object);
+        lock.unlock();
+        return aobj;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
+    }
+
+    public Object[] toArray(Object aobj[])
+    {
+        lock.lock();
+        Object aobj1[];
+        aobj1 = toArray();
+        if (aobj1.length > aobj.length)
+        {
+            break MISSING_BLOCK_LABEL_46;
+        }
+        Arrays.fill(aobj, null);
+        System.arraycopy(((Object) (aobj1)), 0, ((Object) (aobj)), 0, aobj1.length);
+        lock.unlock();
+        return aobj;
+        lock.unlock();
+        return aobj1;
+        aobj;
+        lock.unlock();
+        throw aobj;
     }
 }

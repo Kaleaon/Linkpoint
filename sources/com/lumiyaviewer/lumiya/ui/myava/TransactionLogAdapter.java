@@ -1,20 +1,16 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.myava;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.support.annotation.CallSuper;
-import android.support.annotation.UiThread;
-import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.Unbinder;
-import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.MoneyTransaction;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
@@ -22,136 +18,157 @@ import com.lumiyaviewer.lumiya.ui.common.ChatterNameDisplayer;
 import de.greenrobot.dao.query.LazyList;
 import java.util.Calendar;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
-public class TransactionLogAdapter extends RecyclerView.Adapter<TransactionViewHolder> {
-    /* access modifiers changed from: private */
-    public final UUID agentUUID;
-    /* access modifiers changed from: private */
-    public final Context context;
-    @Nullable
-    private LazyList<MoneyTransaction> data;
-    private final LayoutInflater inflater;
-    /* access modifiers changed from: private */
-    public final OnTransactionClickListener onTransactionClickListener;
+public class TransactionLogAdapter extends android.support.v7.widget.RecyclerView.Adapter
+{
+    static interface OnTransactionClickListener
+    {
 
-    interface OnTransactionClickListener {
-        void onTransactionClicked(MoneyTransaction moneyTransaction);
+        public abstract void onTransactionClicked(MoneyTransaction moneytransaction);
     }
 
-    class TransactionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        @BindView(2131755679)
+    class TransactionViewHolder extends android.support.v7.widget.RecyclerView.ViewHolder
+        implements android.view.View.OnClickListener
+    {
+
         TextView amountTextView;
         private Calendar calendar;
         private final ChatterNameDisplayer chatterNameDisplayer = new ChatterNameDisplayer();
-        @BindView(2131755680)
         TextView finalBalanceTextView;
         private MoneyTransaction moneyTransaction;
-        @BindView(2131755677)
+        final TransactionLogAdapter this$0;
         TextView timestampTextView;
-        @BindView(2131755678)
         TextView userName;
-        @BindView(2131755327)
         ChatterPicView userPicView;
 
-        TransactionViewHolder(View view) {
+        void bindToData(MoneyTransaction moneytransaction)
+        {
+            moneyTransaction = moneytransaction;
+            chatterNameDisplayer.setChatterID(ChatterID.getUserChatterID(TransactionLogAdapter._2D_get0(TransactionLogAdapter.this), moneytransaction.getAgentUUID()));
+            amountTextView.setText(TransactionLogAdapter._2D_get1(TransactionLogAdapter.this).getString(0x7f090359, new Object[] {
+                Integer.valueOf(moneytransaction.getTransactionAmount())
+            }));
+            finalBalanceTextView.setText(TransactionLogAdapter._2D_get1(TransactionLogAdapter.this).getString(0x7f09035c, new Object[] {
+                Integer.valueOf(moneytransaction.getNewBalance())
+            }));
+            calendar.setTime(moneytransaction.getTimestamp());
+            timestampTextView.setText(DateUtils.getRelativeTimeSpanString(TransactionLogAdapter._2D_get1(TransactionLogAdapter.this), calendar.getTimeInMillis(), false));
+        }
+
+        public void onClick(View view)
+        {
+            if (TransactionLogAdapter._2D_get2(TransactionLogAdapter.this) != null && moneyTransaction != null)
+            {
+                TransactionLogAdapter._2D_get2(TransactionLogAdapter.this).onTransactionClicked(moneyTransaction);
+            }
+        }
+
+        void onRecycled()
+        {
+            chatterNameDisplayer.setChatterID(null);
+            moneyTransaction = null;
+        }
+
+        TransactionViewHolder(View view)
+        {
+            this$0 = TransactionLogAdapter.this;
             super(view);
-            ButterKnife.bind((Object) this, view);
-            this.chatterNameDisplayer.bindViews(this.userName, this.userPicView);
+            ButterKnife.bind(this, view);
+            chatterNameDisplayer.bindViews(userName, userPicView);
             view.setOnClickListener(this);
-            this.calendar = Calendar.getInstance();
-        }
-
-        /* access modifiers changed from: package-private */
-        @SuppressLint({"DefaultLocale", "SetTextI18n"})
-        public void bindToData(MoneyTransaction moneyTransaction2) {
-            this.moneyTransaction = moneyTransaction2;
-            this.chatterNameDisplayer.setChatterID(ChatterID.getUserChatterID(TransactionLogAdapter.this.agentUUID, moneyTransaction2.getAgentUUID()));
-            this.amountTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_amount_format, new Object[]{Integer.valueOf(moneyTransaction2.getTransactionAmount())}));
-            this.finalBalanceTextView.setText(TransactionLogAdapter.this.context.getString(R.string.transaction_balance_amount, new Object[]{Integer.valueOf(moneyTransaction2.getNewBalance())}));
-            this.calendar.setTime(moneyTransaction2.getTimestamp());
-            this.timestampTextView.setText(DateUtils.getRelativeTimeSpanString(TransactionLogAdapter.this.context, this.calendar.getTimeInMillis(), false));
-        }
-
-        public void onClick(View view) {
-            if (TransactionLogAdapter.this.onTransactionClickListener != null && this.moneyTransaction != null) {
-                TransactionLogAdapter.this.onTransactionClickListener.onTransactionClicked(this.moneyTransaction);
-            }
-        }
-
-        /* access modifiers changed from: package-private */
-        public void onRecycled() {
-            this.chatterNameDisplayer.setChatterID((ChatterID) null);
-            this.moneyTransaction = null;
+            calendar = Calendar.getInstance();
         }
     }
 
-    public class TransactionViewHolder_ViewBinding implements Unbinder {
-        private TransactionViewHolder target;
 
-        @UiThread
-        public TransactionViewHolder_ViewBinding(TransactionViewHolder transactionViewHolder, View view) {
-            this.target = transactionViewHolder;
-            transactionViewHolder.userName = (TextView) Utils.findRequiredViewAsType(view, R.id.user_name, "field 'userName'", TextView.class);
-            transactionViewHolder.userPicView = (ChatterPicView) Utils.findRequiredViewAsType(view, R.id.userPicView, "field 'userPicView'", ChatterPicView.class);
-            transactionViewHolder.timestampTextView = (TextView) Utils.findRequiredViewAsType(view, R.id.timeStampTextView, "field 'timestampTextView'", TextView.class);
-            transactionViewHolder.amountTextView = (TextView) Utils.findRequiredViewAsType(view, R.id.amountTextView, "field 'amountTextView'", TextView.class);
-            transactionViewHolder.finalBalanceTextView = (TextView) Utils.findRequiredViewAsType(view, R.id.finalBalanceTextView, "field 'finalBalanceTextView'", TextView.class);
-        }
+    private final UUID agentUUID;
+    private final Context context;
+    private LazyList data;
+    private final LayoutInflater inflater;
+    private final OnTransactionClickListener onTransactionClickListener;
 
-        @CallSuper
-        public void unbind() {
-            TransactionViewHolder transactionViewHolder = this.target;
-            if (transactionViewHolder == null) {
-                throw new IllegalStateException("Bindings already cleared.");
-            }
-            this.target = null;
-            transactionViewHolder.userName = null;
-            transactionViewHolder.userPicView = null;
-            transactionViewHolder.timestampTextView = null;
-            transactionViewHolder.amountTextView = null;
-            transactionViewHolder.finalBalanceTextView = null;
-        }
+    static UUID _2D_get0(TransactionLogAdapter transactionlogadapter)
+    {
+        return transactionlogadapter.agentUUID;
     }
 
-    TransactionLogAdapter(Context context2, UUID uuid, OnTransactionClickListener onTransactionClickListener2) {
-        this.context = context2;
-        this.agentUUID = uuid;
-        this.inflater = LayoutInflater.from(context2);
-        this.onTransactionClickListener = onTransactionClickListener2;
+    static Context _2D_get1(TransactionLogAdapter transactionlogadapter)
+    {
+        return transactionlogadapter.context;
+    }
+
+    static OnTransactionClickListener _2D_get2(TransactionLogAdapter transactionlogadapter)
+    {
+        return transactionlogadapter.onTransactionClickListener;
+    }
+
+    TransactionLogAdapter(Context context1, UUID uuid, OnTransactionClickListener ontransactionclicklistener)
+    {
+        context = context1;
+        agentUUID = uuid;
+        inflater = LayoutInflater.from(context1);
+        onTransactionClickListener = ontransactionclicklistener;
         setHasStableIds(true);
     }
 
-    public int getItemCount() {
-        if (this.data != null) {
-            return this.data.size();
-        }
-        return 0;
-    }
-
-    public long getItemId(int i) {
-        if (this.data == null || i < 0 || i >= this.data.size()) {
-            return -1;
-        }
-        return this.data.get(i).getId().longValue();
-    }
-
-    public void onBindViewHolder(TransactionViewHolder transactionViewHolder, int i) {
-        if (this.data != null && i >= 0 && i < this.data.size()) {
-            transactionViewHolder.bindToData(this.data.get(i));
+    public int getItemCount()
+    {
+        if (data != null)
+        {
+            return data.size();
+        } else
+        {
+            return 0;
         }
     }
 
-    public TransactionViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        return new TransactionViewHolder(this.inflater.inflate(R.layout.transaction_log_item, viewGroup, false));
+    public long getItemId(int i)
+    {
+        if (data != null && i >= 0 && i < data.size())
+        {
+            return ((MoneyTransaction)data.get(i)).getId().longValue();
+        } else
+        {
+            return -1L;
+        }
     }
 
-    public void onViewRecycled(TransactionViewHolder transactionViewHolder) {
-        transactionViewHolder.onRecycled();
+    public volatile void onBindViewHolder(android.support.v7.widget.RecyclerView.ViewHolder viewholder, int i)
+    {
+        onBindViewHolder((TransactionViewHolder)viewholder, i);
     }
 
-    public void setData(@Nullable LazyList<MoneyTransaction> lazyList) {
-        this.data = lazyList;
+    public void onBindViewHolder(TransactionViewHolder transactionviewholder, int i)
+    {
+        if (data != null && i >= 0 && i < data.size())
+        {
+            transactionviewholder.bindToData((MoneyTransaction)data.get(i));
+        }
+    }
+
+    public volatile android.support.v7.widget.RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewgroup, int i)
+    {
+        return onCreateViewHolder(viewgroup, i);
+    }
+
+    public TransactionViewHolder onCreateViewHolder(ViewGroup viewgroup, int i)
+    {
+        return new TransactionViewHolder(inflater.inflate(0x7f0400b0, viewgroup, false));
+    }
+
+    public volatile void onViewRecycled(android.support.v7.widget.RecyclerView.ViewHolder viewholder)
+    {
+        onViewRecycled((TransactionViewHolder)viewholder);
+    }
+
+    public void onViewRecycled(TransactionViewHolder transactionviewholder)
+    {
+        transactionviewholder.onRecycled();
+    }
+
+    public void setData(LazyList lazylist)
+    {
+        data = lazylist;
         notifyDataSetChanged();
     }
 }

@@ -1,50 +1,58 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.dao.ChatMessage;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public final class SLChatGroupInvitationSentEvent extends SLChatEvent {
-    public SLChatGroupInvitationSentEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
-        super(chatMessage, uuid);
+public final class SLChatGroupInvitationSentEvent extends SLChatEvent
+{
+
+    public SLChatGroupInvitationSentEvent(ChatMessage chatmessage, UUID uuid)
+    {
+        super(chatmessage, uuid);
     }
 
-    public SLChatGroupInvitationSentEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid) {
-        super(chatMessageSource, uuid);
+    public SLChatGroupInvitationSentEvent(ChatMessageSource chatmessagesource, UUID uuid)
+    {
+        super(chatmessagesource, uuid);
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.GroupInvitationSent;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.GroupInvitationSent;
     }
 
-    /* access modifiers changed from: protected */
-    public String getText(Context context, @Nonnull UserManager userManager) {
-        String sourceName = this.source.getSourceName(userManager);
-        Object[] objArr = new Object[1];
-        if (sourceName == null) {
-            sourceName = "(unknown)";
+    protected String getText(Context context, UserManager usermanager)
+    {
+        usermanager = source.getSourceName(usermanager);
+        if (usermanager == null)
+        {
+            usermanager = "(unknown)";
         }
-        objArr[0] = sourceName;
-        return context.getString(R.string.invitation_sent_text, objArr);
+        return context.getString(0x7f09017e, new Object[] {
+            usermanager
+        });
     }
 
-    public SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
+    public com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType getViewType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isActionMessage(@Nonnull UserManager userManager) {
+    protected boolean isActionMessage(UserManager usermanager)
+    {
         return false;
     }
 
-    public void serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage);
+    public void serializeToDatabaseObject(ChatMessage chatmessage)
+    {
+        super.serializeToDatabaseObject(chatmessage);
     }
 }

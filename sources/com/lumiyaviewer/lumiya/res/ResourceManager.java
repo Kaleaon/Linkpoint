@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res;
 
 import com.google.common.cache.Cache;
@@ -8,142 +12,259 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.lumiyaviewer.lumiya.res.executors.ResourceCleanupExecutor;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 
-public abstract class ResourceManager<ResourceParams, ResourceType> {
-    /* access modifiers changed from: private */
-    public final Queue<ResourceRequest<ResourceParams, ResourceType>> cancelledRequests = new ConcurrentLinkedQueue();
+// Referenced classes of package com.lumiyaviewer.lumiya.res:
+//            ResourceConsumer, ResourceRequest
+
+public abstract class ResourceManager
+{
+
+    private final Queue cancelledRequests = new ConcurrentLinkedQueue();
     private final Runnable cleanup = new Runnable() {
-        public void run() {
-            ResourceManager.this.collectReferences();
+
+        final ResourceManager this$0;
+
+        public void run()
+        {
+            collectReferences();
         }
+
+            
+            {
+                this$0 = ResourceManager.this;
+                super();
+            }
     };
-    private volatile ScheduledFuture<?> cleanupFuture = null;
-    private final Cache<ResourceConsumer, ResourceRequest<ResourceParams, ResourceType>> consumerMap = CacheBuilder.newBuilder().weakKeys().removalListener(this.removalListener).build();
+    private volatile ScheduledFuture cleanupFuture;
+    private final Cache consumerMap;
     private final Object lock = new Object();
-    private final RemovalListener<ResourceConsumer, ResourceRequest<ResourceParams, ResourceType>> removalListener = new RemovalListener<ResourceConsumer, ResourceRequest<ResourceParams, ResourceType>>() {
-        public void onRemoval(@Nonnull RemovalNotification<ResourceConsumer, ResourceRequest<ResourceParams, ResourceType>> removalNotification) {
-            ResourceConsumer key = removalNotification.getKey();
-            ResourceRequest value = removalNotification.getValue();
-            if (value != null && !value.isCompleted() && (!value.isCancelled())) {
-                if (key != null) {
-                    value.removeConsumer(key);
+    private final RemovalListener removalListener = new RemovalListener() {
+
+        final ResourceManager this$0;
+
+        public void onRemoval(RemovalNotification removalnotification)
+        {
+            ResourceConsumer resourceconsumer = (ResourceConsumer)removalnotification.getKey();
+            removalnotification = (ResourceRequest)removalnotification.getValue();
+            if (removalnotification != null && !removalnotification.isCompleted() && removalnotification.isCancelled() ^ true)
+            {
+                if (resourceconsumer != null)
+                {
+                    removalnotification.removeConsumer(resourceconsumer);
                 }
-                if (value.isStale()) {
-                    value.setCancelled(true);
-                    ResourceManager.this.cancelledRequests.add(value);
-                    if (((ResourceRequest) ResourceManager.this.requestMap.getIfPresent(value.getParams())) == value) {
-                        ResourceManager.this.requestMap.invalidate(value.getParams());
+                if (removalnotification.isStale())
+                {
+                    removalnotification.setCancelled(true);
+                    ResourceManager._2D_get0(ResourceManager.this).add(removalnotification);
+                    if ((ResourceRequest)ResourceManager._2D_get1(ResourceManager.this).getIfPresent(removalnotification.getParams()) == removalnotification)
+                    {
+                        ResourceManager._2D_get1(ResourceManager.this).invalidate(removalnotification.getParams());
                     }
                 }
             }
         }
+
+            
+            {
+                this$0 = ResourceManager.this;
+                super();
+            }
     };
-    /* access modifiers changed from: private */
-    public final LoadingCache<ResourceParams, ResourceRequest<ResourceParams, ResourceType>> requestMap = CacheBuilder.newBuilder().weakValues().build(new CacheLoader<ResourceParams, ResourceRequest<ResourceParams, ResourceType>>() {
-        public ResourceRequest<ResourceParams, ResourceType> load(@Nonnull ResourceParams resourceparams) throws Exception {
-            return ResourceManager.this.CreateNewRequest(resourceparams, ResourceManager.this);
+    private final LoadingCache requestMap = CacheBuilder.newBuilder().weakValues().build(new CacheLoader() {
+
+        final ResourceManager this$0;
+
+        public ResourceRequest load(Object obj)
+            throws Exception
+        {
+            return CreateNewRequest(obj, ResourceManager.this);
         }
+
+        public volatile Object load(Object obj)
+            throws Exception
+        {
+            return load(obj);
+        }
+
+            
+            {
+                this$0 = ResourceManager.this;
+                super();
+            }
     });
 
-    public void CancelRequest(ResourceConsumer resourceConsumer) {
-        if (resourceConsumer != null) {
-            synchronized (this.lock) {
-                this.consumerMap.invalidate(resourceConsumer);
-            }
-            collectReferences();
-        }
+    static Queue _2D_get0(ResourceManager resourcemanager)
+    {
+        return resourcemanager.cancelledRequests;
     }
 
-    public void CompleteRequest(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
-        ArrayList<ResourceConsumer> arrayList;
-        synchronized (this.lock) {
-            this.requestMap.invalidate(resourceparams);
-            arrayList = new ArrayList<>(set.size());
-            for (ResourceConsumer resourceConsumer : set) {
-                if (resourceConsumer != null) {
-                    arrayList.add(resourceConsumer);
-                    this.consumerMap.invalidate(resourceConsumer);
-                }
-            }
+    static LoadingCache _2D_get1(ResourceManager resourcemanager)
+    {
+        return resourcemanager.requestMap;
+    }
+
+    public ResourceManager()
+    {
+        cleanupFuture = null;
+        consumerMap = CacheBuilder.newBuilder().weakKeys().removalListener(removalListener).build();
+    }
+
+    public void CancelRequest(ResourceConsumer resourceconsumer)
+    {
+        if (resourceconsumer == null)
+        {
+            break MISSING_BLOCK_LABEL_27;
         }
-        for (ResourceConsumer OnResourceReady : arrayList) {
-            OnResourceReady.OnResourceReady(resourcetype, false);
-        }
-        arrayList.clear();
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        consumerMap.invalidate(resourceconsumer);
+        obj;
+        JVM INSTR monitorexit ;
         collectReferences();
+        return;
+        resourceconsumer;
+        throw resourceconsumer;
     }
 
-    /* access modifiers changed from: protected */
-    public abstract ResourceRequest<ResourceParams, ResourceType> CreateNewRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager);
-
-    public void IntermediateResult(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
-        ArrayList<ResourceConsumer> arrayList;
-        synchronized (this.lock) {
-            arrayList = new ArrayList<>(set.size());
-            for (ResourceConsumer resourceConsumer : set) {
-                if (resourceConsumer != null) {
-                    arrayList.add(resourceConsumer);
-                }
+    public void CompleteRequest(Object obj, Object obj1, Set set)
+    {
+        Object obj2 = lock;
+        obj2;
+        JVM INSTR monitorenter ;
+        requestMap.invalidate(obj);
+        obj = new ArrayList(set.size());
+        set = set.iterator();
+_L2:
+        ResourceConsumer resourceconsumer;
+        do
+        {
+            if (!set.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_94;
             }
-        }
-        for (ResourceConsumer OnResourceReady : arrayList) {
-            OnResourceReady.OnResourceReady(resourcetype, true);
-        }
-        arrayList.clear();
+            resourceconsumer = (ResourceConsumer)set.next();
+        } while (resourceconsumer == null);
+        ((List) (obj)).add(resourceconsumer);
+        consumerMap.invalidate(resourceconsumer);
+        if (true) goto _L2; else goto _L1
+_L1:
+        obj;
+        throw obj;
+        obj2;
+        JVM INSTR monitorexit ;
+        for (set = ((Iterable) (obj)).iterator(); set.hasNext(); ((ResourceConsumer)set.next()).OnResourceReady(obj1, false)) { }
+        ((List) (obj)).clear();
         collectReferences();
+        return;
     }
 
-    public void RequestResource(ResourceParams resourceparams, ResourceConsumer resourceConsumer) {
-        ResourceRequest unchecked;
-        boolean willStart;
-        synchronized (this.lock) {
-            unchecked = this.requestMap.getUnchecked(resourceparams);
-            this.consumerMap.put(resourceConsumer, unchecked);
-            unchecked.addConsumer(resourceConsumer);
-            willStart = unchecked.willStart();
-            if (this.cleanupFuture == null) {
-                this.cleanupFuture = ResourceCleanupExecutor.getInstance().scheduleAtFixedRate(this.cleanup, 1, 1, TimeUnit.SECONDS);
+    protected abstract ResourceRequest CreateNewRequest(Object obj, ResourceManager resourcemanager);
+
+    public void IntermediateResult(Object obj, Object obj1, Set set)
+    {
+        obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        ArrayList arraylist;
+        arraylist = new ArrayList(set.size());
+        set = set.iterator();
+_L2:
+        ResourceConsumer resourceconsumer;
+        do
+        {
+            if (!set.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_72;
             }
-        }
-        if (willStart) {
-            unchecked.execute();
-        }
+            resourceconsumer = (ResourceConsumer)set.next();
+        } while (resourceconsumer == null);
+        arraylist.add(resourceconsumer);
+        if (true) goto _L2; else goto _L1
+_L1:
+        obj1;
+        throw obj1;
+        obj;
+        JVM INSTR monitorexit ;
+        for (obj = arraylist.iterator(); ((Iterator) (obj)).hasNext(); ((ResourceConsumer)((Iterator) (obj)).next()).OnResourceReady(obj1, true)) { }
+        arraylist.clear();
+        collectReferences();
+        return;
     }
 
-    /* access modifiers changed from: protected */
-    public void collectReferences() {
-        ArrayList<ResourceRequest> arrayList = null;
-        synchronized (this.lock) {
-            this.requestMap.cleanUp();
-            this.consumerMap.cleanUp();
-            while (true) {
-                ResourceRequest poll = this.cancelledRequests.poll();
-                if (poll == null) {
-                    break;
-                }
-                if (arrayList == null) {
-                    arrayList = new ArrayList<>();
-                }
-                arrayList.add(poll);
-            }
-            if (this.requestMap.size() == 0 && this.consumerMap.size() == 0 && this.cancelledRequests.size() == 0) {
-                if (this.cleanupFuture != null) {
-                    this.cleanupFuture.cancel(false);
-                }
-                this.cleanupFuture = null;
-            }
+    public void RequestResource(Object obj, ResourceConsumer resourceconsumer)
+    {
+        Object obj1 = lock;
+        obj1;
+        JVM INSTR monitorenter ;
+        boolean flag;
+        obj = (ResourceRequest)requestMap.getUnchecked(obj);
+        consumerMap.put(resourceconsumer, obj);
+        ((ResourceRequest) (obj)).addConsumer(resourceconsumer);
+        flag = ((ResourceRequest) (obj)).willStart();
+        if (cleanupFuture == null)
+        {
+            cleanupFuture = ResourceCleanupExecutor.getInstance().scheduleAtFixedRate(cleanup, 1L, 1L, TimeUnit.SECONDS);
         }
-        if (arrayList != null) {
-            for (ResourceRequest cancelRequest : arrayList) {
-                cancelRequest.cancelRequest();
-            }
-            arrayList.clear();
+        obj1;
+        JVM INSTR monitorexit ;
+        if (flag)
+        {
+            ((ResourceRequest) (obj)).execute();
         }
+        return;
+        obj;
+        throw obj;
+    }
+
+    protected void collectReferences()
+    {
+        Object obj = null;
+        Object obj2 = lock;
+        obj2;
+        JVM INSTR monitorenter ;
+        requestMap.cleanUp();
+        consumerMap.cleanUp();
+_L1:
+        ResourceRequest resourcerequest = (ResourceRequest)cancelledRequests.poll();
+        Object obj1;
+        if (resourcerequest == null)
+        {
+            break MISSING_BLOCK_LABEL_79;
+        }
+        obj1 = obj;
+        if (obj != null)
+        {
+            break MISSING_BLOCK_LABEL_60;
+        }
+        obj1 = new ArrayList();
+        ((List) (obj1)).add(resourcerequest);
+        obj = obj1;
+          goto _L1
+        obj;
+        throw obj;
+        if (requestMap.size() == 0L && consumerMap.size() == 0L && cancelledRequests.size() == 0)
+        {
+            if (cleanupFuture != null)
+            {
+                cleanupFuture.cancel(false);
+            }
+            cleanupFuture = null;
+        }
+        obj2;
+        JVM INSTR monitorexit ;
+        if (obj != null)
+        {
+            for (Iterator iterator = ((Iterable) (obj)).iterator(); iterator.hasNext(); ((ResourceRequest)iterator.next()).cancelRequest()) { }
+            ((List) (obj)).clear();
+        }
+        return;
     }
 }

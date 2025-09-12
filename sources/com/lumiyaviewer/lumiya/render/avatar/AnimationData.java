@@ -1,7 +1,12 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.avatar;
 
 import android.util.SparseArray;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.slproto.avatar.SLSkeletonBone;
 import com.lumiyaviewer.lumiya.slproto.avatar.SLSkeletonBoneID;
@@ -12,8 +17,373 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 
-public class AnimationData {
-    private static final float LL_MAX_PELVIS_OFFSET = 5.0f;
+// Referenced classes of package com.lumiyaviewer.lumiya.render.avatar:
+//            AvatarRunningAnimation, AnimationTiming, AvatarRunningSequence, AvatarSkeleton
+
+public class AnimationData
+{
+    private static class AnimationJointData
+    {
+
+        private final int Priority;
+        private final AnimationPosKeyframe posKeyframes[];
+        private final AnimationRotKeyframe rotKeyframes[];
+
+        static int _2D_get0(AnimationJointData animationjointdata)
+        {
+            return animationjointdata.Priority;
+        }
+
+        private static boolean animateArray(float f, float f1, Object obj, AnimationKeyframe aanimationkeyframe[])
+        {
+            if (aanimationkeyframe.length == 1)
+            {
+                aanimationkeyframe[0].setTransform(obj);
+                return true;
+            }
+            for (int i = 0; i < aanimationkeyframe.length; i++)
+            {
+                if (f1 <= aanimationkeyframe[i].time)
+                {
+                    if (f1 == aanimationkeyframe[i].time)
+                    {
+                        aanimationkeyframe[i].setTransform(obj);
+                        return true;
+                    }
+                    int k = i - 1;
+                    int j = k;
+                    if (k < 0)
+                    {
+                        j = 0;
+                    }
+                    if (j == i)
+                    {
+                        aanimationkeyframe[i].setTransform(obj);
+                        return true;
+                    }
+                    float f4 = aanimationkeyframe[i].time;
+                    float f3 = aanimationkeyframe[j].time;
+                    float f2 = f3;
+                    if (f3 > f4)
+                    {
+                        f2 = f3 - f;
+                    }
+                    if (f2 == f4)
+                    {
+                        aanimationkeyframe[i].setTransform(obj);
+                        return true;
+                    } else
+                    {
+                        f = (f4 - f1) / (f4 - f2);
+                        f1 = (f1 - f2) / (f4 - f2);
+                        aanimationkeyframe[j].setInterpolated(obj, f, aanimationkeyframe[i], f1);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static float uint16ToFloat(int i, float f, float f1)
+        {
+            float f3 = i;
+            float f2 = f1 - f;
+            f1 = f3 * 1.525902E-05F * f2 + f;
+            f = f1;
+            if (Math.abs(f1) < f2 * 1.525902E-05F)
+            {
+                f = 0.0F;
+            }
+            return f;
+        }
+
+        void animate(SLSkeletonBone slskeletonbone, float f, float f1, LLQuaternion allquaternion[], LLVector3 allvector3[], int i, float f2, 
+                float af[], float af1[], LLQuaternion llquaternion, LLVector3 llvector3)
+        {
+            if (posKeyframes.length != 0)
+            {
+                float f3 = af1[i] * f2;
+                animateArray(f, f1, llvector3, posKeyframes);
+                if (slskeletonbone != null && slskeletonbone.boneID != SLSkeletonBoneID.mPelvis)
+                {
+                    llvector3.sub(slskeletonbone.getBasePosition());
+                }
+                allvector3[i].addMul(llvector3, f3);
+                af1[i] = af1[i] - f3;
+            }
+            if (rotKeyframes.length != 0)
+            {
+                f2 = af[i] * f2;
+                animateArray(f, f1, llquaternion, rotKeyframes);
+                allquaternion[i].addMul(llquaternion, f2);
+                af[i] = af[i] - f2;
+            }
+        }
+
+        public String toString()
+        {
+            boolean flag = false;
+            StringBuilder stringbuilder = new StringBuilder();
+            stringbuilder.append("Priority ").append(Priority);
+            stringbuilder.append(", pos frames ").append(posKeyframes.length).append("[");
+            Object aobj[] = posKeyframes;
+            int k = aobj.length;
+            for (int i = 0; i < k; i++)
+            {
+                stringbuilder.append(aobj[i].toString());
+            }
+
+            stringbuilder.append("], rot frames ").append(rotKeyframes.length).append("[");
+            aobj = rotKeyframes;
+            k = aobj.length;
+            for (int j = ((flag) ? 1 : 0); j < k; j++)
+            {
+                stringbuilder.append(aobj[j].toString());
+            }
+
+            stringbuilder.append("]");
+            return stringbuilder.toString();
+        }
+
+        AnimationJointData(LittleEndianDataInputStream littleendiandatainputstream, float f)
+            throws IOException
+        {
+            int i;
+label0:
+            {
+                super();
+                Priority = littleendiandatainputstream.readInt();
+                int j = littleendiandatainputstream.readInt();
+                if (j >= 0)
+                {
+                    i = j;
+                    if (j <= 10000)
+                    {
+                        break label0;
+                    }
+                }
+                i = 0;
+            }
+label1:
+            {
+                rotKeyframes = new AnimationRotKeyframe[i];
+                for (int k = 0; k < i; k++)
+                {
+                    float f1 = uint16ToFloat(littleendiandatainputstream.readUnsignedShort(), 0.0F, f);
+                    float f3 = uint16ToFloat(littleendiandatainputstream.readUnsignedShort(), -1F, 1.0F);
+                    float f5 = uint16ToFloat(littleendiandatainputstream.readUnsignedShort(), -1F, 1.0F);
+                    float f7 = uint16ToFloat(littleendiandatainputstream.readUnsignedShort(), -1F, 1.0F);
+                    rotKeyframes[k] = new AnimationRotKeyframe(f1, LLQuaternion.unpackFromVector3(new LLVector3(f3, f5, f7)));
+                }
+
+                int l = littleendiandatainputstream.readInt();
+                if (l >= 0)
+                {
+                    i = l;
+                    if (l <= 10000)
+                    {
+                        break label1;
+                    }
+                }
+                i = 0;
+            }
+            posKeyframes = new AnimationPosKeyframe[i];
+            for (int i1 = 0; i1 < i; i1++)
+            {
+                float f2 = uint16ToFloat(littleendiandatainputstream.readUnsignedShort(), 0.0F, f);
+                float f4 = uint16ToFloat(littleendiandatainputstream.readUnsignedShort(), -5F, 5F);
+                float f6 = uint16ToFloat(littleendiandatainputstream.readUnsignedShort(), -5F, 5F);
+                float f8 = uint16ToFloat(littleendiandatainputstream.readUnsignedShort(), -5F, 5F);
+                posKeyframes[i1] = new AnimationPosKeyframe(f2, new LLVector3(f4, f6, f8));
+            }
+
+        }
+    }
+
+    static class AnimationJointSet
+    {
+
+        private final float animLength;
+        private final UUID animationUUID;
+        private final SparseArray jointAnims;
+        private final int priority;
+
+        void addJointData(int i, AnimationJointData animationjointdata)
+        {
+            jointAnims.put(i, animationjointdata);
+        }
+
+        void animate(AvatarSkeleton avatarskeleton, AnimationTiming animationtiming, float af[], float af1[], LLQuaternion allquaternion[], LLVector3 allvector3[])
+        {
+            float f = animationtiming.inAnimationTime;
+            float f1 = animationtiming.inFactor * animationtiming.outFactor;
+            if (f1 > 0.0F)
+            {
+                animationtiming = new LLQuaternion();
+                LLVector3 llvector3 = new LLVector3();
+                int j = jointAnims.size();
+                for (int i = 0; i < j; i++)
+                {
+                    int k = jointAnims.keyAt(i);
+                    ((AnimationJointData)jointAnims.valueAt(i)).animate(avatarskeleton.getAnimatedBone(k), animLength, f, allquaternion, allvector3, k, f1, af, af1, animationtiming, llvector3);
+                }
+
+            }
+        }
+
+        void dumpJoints()
+        {
+            Debug.Printf("Anim -- joint set -- length %f prio %d joints %d", new Object[] {
+                Float.valueOf(animLength), Integer.valueOf(priority), Integer.valueOf(jointAnims.size())
+            });
+            int j = jointAnims.size();
+            for (int i = 0; i < j; i++)
+            {
+                Debug.Printf("Anim -- joint[%d] - jointIndex %d, %s", new Object[] {
+                    Integer.valueOf(i), Integer.valueOf(jointAnims.keyAt(i)), ((AnimationJointData)jointAnims.valueAt(i)).toString()
+                });
+            }
+
+        }
+
+        public int getPriority()
+        {
+            return priority;
+        }
+
+        private AnimationJointSet(UUID uuid, float f, int i)
+        {
+            jointAnims = new SparseArray();
+            animationUUID = uuid;
+            animLength = f;
+            priority = i;
+        }
+
+        AnimationJointSet(UUID uuid, float f, int i, AnimationJointSet animationjointset)
+        {
+            this(uuid, f, i);
+        }
+    }
+
+    private static abstract class AnimationKeyframe
+    {
+
+        public final float time;
+
+        protected abstract Object getTransform();
+
+        public abstract void setInterpolated(Object obj, float f, AnimationKeyframe animationkeyframe, float f1);
+
+        public abstract void setTransform(Object obj);
+
+        private AnimationKeyframe(float f)
+        {
+            time = f;
+        }
+
+        AnimationKeyframe(float f, AnimationKeyframe animationkeyframe)
+        {
+            this(f);
+        }
+    }
+
+    private static class AnimationPosKeyframe extends AnimationKeyframe
+    {
+
+        private final LLVector3 position;
+
+        protected LLVector3 getTransform()
+        {
+            return position;
+        }
+
+        protected volatile Object getTransform()
+        {
+            return getTransform();
+        }
+
+        public void setInterpolated(LLVector3 llvector3, float f, AnimationKeyframe animationkeyframe, float f1)
+        {
+            llvector3.setLerp(position, f, (LLVector3)animationkeyframe.getTransform(), f1);
+        }
+
+        public volatile void setInterpolated(Object obj, float f, AnimationKeyframe animationkeyframe, float f1)
+        {
+            setInterpolated((LLVector3)obj, f, animationkeyframe, f1);
+        }
+
+        public void setTransform(LLVector3 llvector3)
+        {
+            llvector3.set(position);
+        }
+
+        public volatile void setTransform(Object obj)
+        {
+            setTransform((LLVector3)obj);
+        }
+
+        public String toString()
+        {
+            return position.toString();
+        }
+
+        AnimationPosKeyframe(float f, LLVector3 llvector3)
+        {
+            super(f, null);
+            position = llvector3;
+        }
+    }
+
+    private static class AnimationRotKeyframe extends AnimationKeyframe
+    {
+
+        private final LLQuaternion quaternion;
+
+        protected LLQuaternion getTransform()
+        {
+            return quaternion;
+        }
+
+        protected volatile Object getTransform()
+        {
+            return getTransform();
+        }
+
+        public void setInterpolated(LLQuaternion llquaternion, float f, AnimationKeyframe animationkeyframe, float f1)
+        {
+            llquaternion.setLerp(quaternion, f, (LLQuaternion)animationkeyframe.getTransform(), f1);
+        }
+
+        public volatile void setInterpolated(Object obj, float f, AnimationKeyframe animationkeyframe, float f1)
+        {
+            setInterpolated((LLQuaternion)obj, f, animationkeyframe, f1);
+        }
+
+        public void setTransform(LLQuaternion llquaternion)
+        {
+            llquaternion.set(quaternion);
+        }
+
+        public volatile void setTransform(Object obj)
+        {
+            setTransform((LLQuaternion)obj);
+        }
+
+        public String toString()
+        {
+            return quaternion.toString();
+        }
+
+        AnimationRotKeyframe(float f, LLQuaternion llquaternion)
+        {
+            super(f, null);
+            quaternion = llquaternion;
+        }
+    }
+
+
+    private static final float LL_MAX_PELVIS_OFFSET = 5F;
     private final float animLength;
     private final int animPriority;
     private final UUID animationUUID;
@@ -22,383 +392,266 @@ public class AnimationData {
     private final String expressionName;
     private final int handPose;
     private final float inPoint;
-    private final SparseArray<AnimationJointSet> jointSets = new SparseArray<>();
+    private final SparseArray jointSets = new SparseArray();
     private final boolean loop;
     private final float outPoint;
 
-    private static class AnimationJointData {
-        /* access modifiers changed from: private */
-        public final int Priority;
-        private final AnimationPosKeyframe[] posKeyframes;
-        private final AnimationRotKeyframe[] rotKeyframes;
-
-        AnimationJointData(LittleEndianDataInputStream littleEndianDataInputStream, float f) throws IOException {
-            this.Priority = littleEndianDataInputStream.readInt();
-            int readInt = littleEndianDataInputStream.readInt();
-            readInt = (readInt < 0 || readInt > 10000) ? 0 : readInt;
-            this.rotKeyframes = new AnimationRotKeyframe[readInt];
-            for (int i = 0; i < readInt; i++) {
-                this.rotKeyframes[i] = new AnimationRotKeyframe(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), 0.0f, f), LLQuaternion.unpackFromVector3(new LLVector3(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -1.0f, 1.0f), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -1.0f, 1.0f), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -1.0f, 1.0f))));
+    public AnimationData(UUID uuid, InputStream inputstream)
+        throws IOException
+    {
+        int i = 0;
+        super();
+        animationUUID = uuid;
+        LittleEndianDataInputStream littleendiandatainputstream = new LittleEndianDataInputStream(inputstream);
+        littleendiandatainputstream.skipBytes(4);
+        animPriority = littleendiandatainputstream.readInt();
+        animLength = littleendiandatainputstream.readFloat();
+        expressionName = littleendiandatainputstream.readZeroTerminatedString();
+        inPoint = littleendiandatainputstream.readFloat();
+        outPoint = littleendiandatainputstream.readFloat();
+        boolean flag;
+        if (littleendiandatainputstream.readInt() != 0)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        loop = flag;
+        easeInTime = littleendiandatainputstream.readFloat();
+        easeOutTime = littleendiandatainputstream.readFloat();
+        handPose = littleendiandatainputstream.readInt();
+        for (int j = littleendiandatainputstream.readInt(); i < j; i++)
+        {
+            inputstream = littleendiandatainputstream.readZeroTerminatedString();
+            inputstream = (SLSkeletonBoneID)SLSkeletonBoneID.bones.get(inputstream);
+            AnimationJointData animationjointdata = new AnimationJointData(littleendiandatainputstream, animLength);
+            if (inputstream == null)
+            {
+                continue;
             }
-            int readInt2 = littleEndianDataInputStream.readInt();
-            readInt2 = (readInt2 < 0 || readInt2 > 10000) ? 0 : readInt2;
-            this.posKeyframes = new AnimationPosKeyframe[readInt2];
-            for (int i2 = 0; i2 < readInt2; i2++) {
-                this.posKeyframes[i2] = new AnimationPosKeyframe(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), 0.0f, f), new LLVector3(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -5.0f, AnimationData.LL_MAX_PELVIS_OFFSET), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -5.0f, AnimationData.LL_MAX_PELVIS_OFFSET), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -5.0f, AnimationData.LL_MAX_PELVIS_OFFSET)));
+            int k = ((SLSkeletonBoneID) (inputstream)).animatedIndex;
+            if (k < 0)
+            {
+                continue;
             }
+            AnimationJointSet animationjointset = (AnimationJointSet)jointSets.get(AnimationJointData._2D_get0(animationjointdata));
+            inputstream = animationjointset;
+            if (animationjointset == null)
+            {
+                inputstream = new AnimationJointSet(uuid, animLength, AnimationJointData._2D_get0(animationjointdata), null);
+                jointSets.put(AnimationJointData._2D_get0(animationjointdata), inputstream);
+            }
+            inputstream.addJointData(k, animationjointdata);
         }
 
-        private static <T> boolean animateArray(float f, float f2, T t, AnimationKeyframe<T>[] animationKeyframeArr) {
-            if (animationKeyframeArr.length == 1) {
-                animationKeyframeArr[0].setTransform(t);
-                return true;
+    }
+
+    private static float cubicStep(float f)
+    {
+        f = Math.max(0.0F, Math.min(1.0F, f));
+        return (3F - f * 2.0F) * (f * f);
+    }
+
+    private float getInAnimationTime(float f, float f1)
+    {
+        if (loop)
+        {
+            if (f < inPoint)
+            {
+                return f;
             }
-            for (int i = 0; i < animationKeyframeArr.length; i++) {
-                if (f2 <= animationKeyframeArr[i].time) {
-                    if (f2 == animationKeyframeArr[i].time) {
-                        animationKeyframeArr[i].setTransform(t);
-                    } else {
-                        int i2 = i - 1;
-                        if (i2 < 0) {
-                            i2 = 0;
-                        }
-                        if (i2 == i) {
-                            animationKeyframeArr[i].setTransform(t);
-                        } else {
-                            float f3 = animationKeyframeArr[i].time;
-                            float f4 = animationKeyframeArr[i2].time;
-                            if (f4 > f3) {
-                                f4 -= f;
-                            }
-                            if (f4 == f3) {
-                                animationKeyframeArr[i].setTransform(t);
-                            } else {
-                                animationKeyframeArr[i2].setInterpolated(t, (f3 - f2) / (f3 - f4), animationKeyframeArr[i], (f2 - f4) / (f3 - f4));
-                            }
-                        }
-                    }
-                    return true;
+            if (f1 >= 0.0F)
+            {
+                if (outPoint > inPoint)
+                {
+                    f -= f1;
+                    f = (f - (float)Math.floor((f - inPoint) / (outPoint - inPoint)) * (outPoint - inPoint)) + f1;
+                } else
+                {
+                    f = outPoint + f1;
+                }
+                return Math.min(f, animLength);
+            }
+            if (outPoint > inPoint)
+            {
+                return inPoint + (f - inPoint) % (outPoint - inPoint);
+            } else
+            {
+                return inPoint;
+            }
+        } else
+        {
+            return Math.min(f, animLength);
+        }
+    }
+
+    private float getInFactor(float f)
+    {
+label0:
+        {
+            if (f < easeInTime && easeInTime >= 0.001F)
+            {
+                f = cubicStep(f / easeInTime);
+                if (f <= 1.0F)
+                {
+                    break label0;
                 }
             }
-            return false;
+            return 1.0F;
         }
-
-        private static float uint16ToFloat(int i, float f, float f2) {
-            float f3 = f2 - f;
-            float f4 = (((float) i) * 1.5259022E-5f * f3) + f;
-            if (Math.abs(f4) < f3 * 1.5259022E-5f) {
-                return 0.0f;
-            }
-            return f4;
-        }
-
-        /* access modifiers changed from: package-private */
-        public void animate(SLSkeletonBone sLSkeletonBone, float f, float f2, LLQuaternion[] lLQuaternionArr, LLVector3[] lLVector3Arr, int i, float f3, float[] fArr, float[] fArr2, LLQuaternion lLQuaternion, LLVector3 lLVector3) {
-            if (this.posKeyframes.length != 0) {
-                float f4 = fArr2[i] * f3;
-                animateArray(f, f2, lLVector3, this.posKeyframes);
-                if (!(sLSkeletonBone == null || sLSkeletonBone.boneID == SLSkeletonBoneID.mPelvis)) {
-                    lLVector3.sub(sLSkeletonBone.getBasePosition());
-                }
-                lLVector3Arr[i].addMul(lLVector3, f4);
-                fArr2[i] = fArr2[i] - f4;
-            }
-            if (this.rotKeyframes.length != 0) {
-                float f5 = fArr[i] * f3;
-                animateArray(f, f2, lLQuaternion, this.rotKeyframes);
-                lLQuaternionArr[i].addMul(lLQuaternion, f5);
-                fArr[i] = fArr[i] - f5;
-            }
-        }
-
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Priority ").append(this.Priority);
-            sb.append(", pos frames ").append(this.posKeyframes.length).append("[");
-            for (AnimationPosKeyframe animationPosKeyframe : this.posKeyframes) {
-                sb.append(animationPosKeyframe.toString());
-            }
-            sb.append("], rot frames ").append(this.rotKeyframes.length).append("[");
-            for (AnimationRotKeyframe animationRotKeyframe : this.rotKeyframes) {
-                sb.append(animationRotKeyframe.toString());
-            }
-            sb.append("]");
-            return sb.toString();
-        }
+        return f;
     }
 
-    static class AnimationJointSet {
-        private final float animLength;
-        private final UUID animationUUID;
-        private final SparseArray<AnimationJointData> jointAnims;
-        private final int priority;
-
-        private AnimationJointSet(UUID uuid, float f, int i) {
-            this.jointAnims = new SparseArray<>();
-            this.animationUUID = uuid;
-            this.animLength = f;
-            this.priority = i;
-        }
-
-        /* synthetic */ AnimationJointSet(UUID uuid, float f, int i, AnimationJointSet animationJointSet) {
-            this(uuid, f, i);
-        }
-
-        /* access modifiers changed from: package-private */
-        public void addJointData(int i, AnimationJointData animationJointData) {
-            this.jointAnims.put(i, animationJointData);
-        }
-
-        /* access modifiers changed from: package-private */
-        public void animate(AvatarSkeleton avatarSkeleton, AnimationTiming animationTiming, float[] fArr, float[] fArr2, LLQuaternion[] lLQuaternionArr, LLVector3[] lLVector3Arr) {
-            float f = animationTiming.inAnimationTime;
-            float f2 = animationTiming.inFactor * animationTiming.outFactor;
-            if (f2 > 0.0f) {
-                LLQuaternion lLQuaternion = new LLQuaternion();
-                LLVector3 lLVector3 = new LLVector3();
-                int size = this.jointAnims.size();
-                for (int i = 0; i < size; i++) {
-                    int keyAt = this.jointAnims.keyAt(i);
-                    this.jointAnims.valueAt(i).animate(avatarSkeleton.getAnimatedBone(keyAt), this.animLength, f, lLQuaternionArr, lLVector3Arr, keyAt, f2, fArr, fArr2, lLQuaternion, lLVector3);
+    private float getOutFactor(float f)
+    {
+        float f1;
+label0:
+        {
+            f1 = 1.0F;
+            if (f < 0.0F)
+            {
+                break label0;
+            }
+            if (easeOutTime >= 0.001F)
+            {
+                f = cubicStep(1.0F - f / easeOutTime);
+                f1 = f;
+                if (f >= 0.0F)
+                {
+                    break label0;
                 }
             }
+            return 0.0F;
         }
+        return f1;
+    }
 
-        /* access modifiers changed from: package-private */
-        public void dumpJoints() {
-            Debug.Printf("Anim -- joint set -- length %f prio %d joints %d", Float.valueOf(this.animLength), Integer.valueOf(this.priority), Integer.valueOf(this.jointAnims.size()));
-            int size = this.jointAnims.size();
-            for (int i = 0; i < size; i++) {
-                Debug.Printf("Anim -- joint[%d] - jointIndex %d, %s", Integer.valueOf(i), Integer.valueOf(this.jointAnims.keyAt(i)), this.jointAnims.valueAt(i).toString());
+    private float getOutFactor(float f, float f1)
+    {
+        float f2 = 1.0F;
+        if (f1 < 0.0F) goto _L2; else goto _L1
+_L1:
+        if (!loop) goto _L4; else goto _L3
+_L3:
+        if (outPoint < animLength) goto _L6; else goto _L5
+_L5:
+        f1 = getOutFactor(f1);
+_L8:
+        return f1;
+_L6:
+        f2 = f - f1;
+        if (outPoint > inPoint)
+        {
+            f1 = (float)Math.floor((f2 - inPoint) / (outPoint - inPoint)) * (outPoint - inPoint) + inPoint + animLength;
+        } else
+        {
+            f1 = animLength + f2;
+        }
+        return getOutFactor(f - Math.max(f1 - easeOutTime, f2));
+_L4:
+        f2 = f - (animLength - easeOutTime);
+        f = f1;
+        if (f2 > 0.0F)
+        {
+            f = Math.max(f1, f2);
+        }
+        return getOutFactor(f);
+_L2:
+        f1 = f2;
+        if (!loop)
+        {
+            f -= animLength - easeOutTime;
+            f1 = f2;
+            if (f >= 0.0F)
+            {
+                return getOutFactor(f);
             }
         }
-
-        public int getPriority() {
-            return this.priority;
-        }
+        if (true) goto _L8; else goto _L7
+_L7:
     }
 
-    private static abstract class AnimationKeyframe<T> {
-        public final float time;
-
-        private AnimationKeyframe(float f) {
-            this.time = f;
+    ImmutableList createRunningAnimations(AvatarRunningSequence avatarrunningsequence)
+    {
+        int j = jointSets.size();
+        Debug.Printf("Animation: creating anims: %d anims", new Object[] {
+            Integer.valueOf(j)
+        });
+        com.google.common.collect.ImmutableList.Builder builder = ImmutableList.builder();
+        for (int i = 0; i < j; i++)
+        {
+            builder.add(new AvatarRunningAnimation(avatarrunningsequence, (AnimationJointSet)jointSets.valueAt(i)));
         }
 
-        /* synthetic */ AnimationKeyframe(float f, AnimationKeyframe animationKeyframe) {
-            this(f);
-        }
-
-        /* access modifiers changed from: protected */
-        public abstract T getTransform();
-
-        public abstract void setInterpolated(T t, float f, AnimationKeyframe<T> animationKeyframe, float f2);
-
-        public abstract void setTransform(T t);
-    }
-
-    private static class AnimationPosKeyframe extends AnimationKeyframe<LLVector3> {
-        private final LLVector3 position;
-
-        AnimationPosKeyframe(float f, LLVector3 lLVector3) {
-            super(f, (AnimationKeyframe) null);
-            this.position = lLVector3;
-        }
-
-        /* access modifiers changed from: protected */
-        public LLVector3 getTransform() {
-            return this.position;
-        }
-
-        public void setInterpolated(LLVector3 lLVector3, float f, AnimationKeyframe<LLVector3> animationKeyframe, float f2) {
-            lLVector3.setLerp(this.position, f, animationKeyframe.getTransform(), f2);
-        }
-
-        public void setTransform(LLVector3 lLVector3) {
-            lLVector3.set(this.position);
-        }
-
-        public String toString() {
-            return this.position.toString();
-        }
-    }
-
-    private static class AnimationRotKeyframe extends AnimationKeyframe<LLQuaternion> {
-        private final LLQuaternion quaternion;
-
-        AnimationRotKeyframe(float f, LLQuaternion lLQuaternion) {
-            super(f, (AnimationKeyframe) null);
-            this.quaternion = lLQuaternion;
-        }
-
-        /* access modifiers changed from: protected */
-        public LLQuaternion getTransform() {
-            return this.quaternion;
-        }
-
-        public void setInterpolated(LLQuaternion lLQuaternion, float f, AnimationKeyframe<LLQuaternion> animationKeyframe, float f2) {
-            lLQuaternion.setLerp(this.quaternion, f, animationKeyframe.getTransform(), f2);
-        }
-
-        public void setTransform(LLQuaternion lLQuaternion) {
-            lLQuaternion.set(this.quaternion);
-        }
-
-        public String toString() {
-            return this.quaternion.toString();
-        }
-    }
-
-    public AnimationData(UUID uuid, InputStream inputStream) throws IOException {
-        int i;
-        this.animationUUID = uuid;
-        LittleEndianDataInputStream littleEndianDataInputStream = new LittleEndianDataInputStream(inputStream);
-        littleEndianDataInputStream.skipBytes(4);
-        this.animPriority = littleEndianDataInputStream.readInt();
-        this.animLength = littleEndianDataInputStream.readFloat();
-        this.expressionName = littleEndianDataInputStream.readZeroTerminatedString();
-        this.inPoint = littleEndianDataInputStream.readFloat();
-        this.outPoint = littleEndianDataInputStream.readFloat();
-        this.loop = littleEndianDataInputStream.readInt() != 0;
-        this.easeInTime = littleEndianDataInputStream.readFloat();
-        this.easeOutTime = littleEndianDataInputStream.readFloat();
-        this.handPose = littleEndianDataInputStream.readInt();
-        int readInt = littleEndianDataInputStream.readInt();
-        for (int i2 = 0; i2 < readInt; i2++) {
-            SLSkeletonBoneID sLSkeletonBoneID = SLSkeletonBoneID.bones.get(littleEndianDataInputStream.readZeroTerminatedString());
-            AnimationJointData animationJointData = new AnimationJointData(littleEndianDataInputStream, this.animLength);
-            if (sLSkeletonBoneID != null && (i = sLSkeletonBoneID.animatedIndex) >= 0) {
-                AnimationJointSet animationJointSet = this.jointSets.get(animationJointData.Priority);
-                if (animationJointSet == null) {
-                    animationJointSet = new AnimationJointSet(uuid, this.animLength, animationJointData.Priority, (AnimationJointSet) null);
-                    this.jointSets.put(animationJointData.Priority, animationJointSet);
-                }
-                animationJointSet.addJointData(i, animationJointData);
-            }
-        }
-    }
-
-    private static float cubicStep(float f) {
-        float max = Math.max(0.0f, Math.min(1.0f, f));
-        return (3.0f - (max * 2.0f)) * max * max;
-    }
-
-    private float getInAnimationTime(float f, float f2) {
-        float f3;
-        if (!this.loop) {
-            return Math.min(f, this.animLength);
-        }
-        if (f < this.inPoint) {
-            return f;
-        }
-        if (f2 < 0.0f) {
-            return this.outPoint > this.inPoint ? this.inPoint + ((f - this.inPoint) % (this.outPoint - this.inPoint)) : this.inPoint;
-        }
-        if (this.outPoint > this.inPoint) {
-            float f4 = f - f2;
-            f3 = (f4 - (((float) Math.floor((double) ((f4 - this.inPoint) / (this.outPoint - this.inPoint)))) * (this.outPoint - this.inPoint))) + f2;
-        } else {
-            f3 = this.outPoint + f2;
-        }
-        return Math.min(f3, this.animLength);
-    }
-
-    private float getInFactor(float f) {
-        if (f >= this.easeInTime || this.easeInTime < 0.001f) {
-            return 1.0f;
-        }
-        float cubicStep = cubicStep(f / this.easeInTime);
-        if (cubicStep > 1.0f) {
-            return 1.0f;
-        }
-        return cubicStep;
-    }
-
-    private float getOutFactor(float f) {
-        float f2 = 1.0f;
-        if (f >= 0.0f) {
-            if (this.easeOutTime < 0.001f) {
-                return 0.0f;
-            }
-            f2 = cubicStep(1.0f - (f / this.easeOutTime));
-            if (f2 < 0.0f) {
-                return 0.0f;
-            }
-        }
-        return f2;
-    }
-
-    private float getOutFactor(float f, float f2) {
-        if (f2 >= 0.0f) {
-            if (!this.loop) {
-                float f3 = f - (this.animLength - this.easeOutTime);
-                if (f3 > 0.0f) {
-                    f2 = Math.max(f2, f3);
-                }
-                return getOutFactor(f2);
-            } else if (this.outPoint >= this.animLength) {
-                return getOutFactor(f2);
-            } else {
-                float f4 = f - f2;
-                return getOutFactor(f - Math.max((this.outPoint > this.inPoint ? ((((float) Math.floor((double) ((f4 - this.inPoint) / (this.outPoint - this.inPoint)))) * (this.outPoint - this.inPoint)) + this.inPoint) + this.animLength : this.animLength + f4) - this.easeOutTime, f4));
-            }
-        } else if (this.loop) {
-            return 1.0f;
-        } else {
-            float f5 = f - (this.animLength - this.easeOutTime);
-            if (f5 >= 0.0f) {
-                return getOutFactor(f5);
-            }
-            return 1.0f;
-        }
-    }
-
-    /* access modifiers changed from: package-private */
-    public ImmutableList<AvatarRunningAnimation> createRunningAnimations(AvatarRunningSequence avatarRunningSequence) {
-        int size = this.jointSets.size();
-        Debug.Printf("Animation: creating anims: %d anims", Integer.valueOf(size));
-        ImmutableList.Builder builder = ImmutableList.builder();
-        for (int i = 0; i < size; i++) {
-            builder.add((Object) new AvatarRunningAnimation(avatarRunningSequence, this.jointSets.valueAt(i)));
-        }
         return builder.build();
     }
 
-    public void dumpAnimationData() {
-        Debug.Printf("Animation -- dump -- priority %d length %f joint sets %d (inPoint %f outPoint %f loop %b easeIn %f easeOut %f)", Integer.valueOf(this.animPriority), Float.valueOf(this.animLength), Integer.valueOf(this.jointSets.size()), Float.valueOf(this.inPoint), Float.valueOf(this.outPoint), Boolean.valueOf(this.loop), Float.valueOf(this.easeInTime), Float.valueOf(this.easeOutTime));
-        for (int i = 0; i < this.jointSets.size(); i++) {
-            Debug.Printf("Anim -- joint set %d: prio %d", Integer.valueOf(i), Integer.valueOf(this.jointSets.keyAt(i)));
-            this.jointSets.valueAt(i).dumpJoints();
+    public void dumpAnimationData()
+    {
+        Debug.Printf("Animation -- dump -- priority %d length %f joint sets %d (inPoint %f outPoint %f loop %b easeIn %f easeOut %f)", new Object[] {
+            Integer.valueOf(animPriority), Float.valueOf(animLength), Integer.valueOf(jointSets.size()), Float.valueOf(inPoint), Float.valueOf(outPoint), Boolean.valueOf(loop), Float.valueOf(easeInTime), Float.valueOf(easeOutTime)
+        });
+        for (int i = 0; i < jointSets.size(); i++)
+        {
+            Debug.Printf("Anim -- joint set %d: prio %d", new Object[] {
+                Integer.valueOf(i), Integer.valueOf(jointSets.keyAt(i))
+            });
+            ((AnimationJointSet)jointSets.valueAt(i)).dumpJoints();
         }
+
         Debug.Printf("Animation -- dump end", new Object[0]);
     }
 
-    public int getPriority() {
-        return this.animPriority;
+    public int getPriority()
+    {
+        return animPriority;
     }
 
-    /* access modifiers changed from: package-private */
-    public boolean updateAnimationTiming(long j, long j2, long j3, boolean z, AnimationTiming animationTiming) {
-        float f = ((float) (j - j2)) / 1000.0f;
-        float f2 = (j3 == -1 || j < j3) ? -1.0f : ((float) (j - j3)) / 1000.0f;
-        float inAnimationTime = getInAnimationTime(f, f2);
-        float inFactor = getInFactor(f);
-        float outFactor = getOutFactor(f, f2);
-        float f3 = z ? 1.0f : inFactor;
-        boolean z2 = false;
-        animationTiming.runningTime = f;
-        if (animationTiming.inAnimationTime != inAnimationTime) {
-            animationTiming.inAnimationTime = inAnimationTime;
-            z2 = true;
+    boolean updateAnimationTiming(long l, long l1, long l2, boolean flag, 
+            AnimationTiming animationtiming)
+    {
+        float f2 = (float)(l - l1) / 1000F;
+        float f;
+        float f1;
+        float f3;
+        float f4;
+        if (l2 != -1L && l >= l2)
+        {
+            f = (float)(l - l2) / 1000F;
+        } else
+        {
+            f = -1F;
         }
-        if (animationTiming.inFactor != f3) {
-            animationTiming.inFactor = f3;
-            z2 = true;
+        f3 = getInAnimationTime(f2, f);
+        f1 = getInFactor(f2);
+        f4 = getOutFactor(f2, f);
+        if (flag)
+        {
+            f = 1.0F;
+        } else
+        {
+            f = f1;
         }
-        if (animationTiming.outFactor == outFactor) {
-            return z2;
+        flag = false;
+        animationtiming.runningTime = f2;
+        if (animationtiming.inAnimationTime != f3)
+        {
+            animationtiming.inAnimationTime = f3;
+            flag = true;
         }
-        animationTiming.outFactor = outFactor;
-        return true;
+        if (animationtiming.inFactor != f)
+        {
+            animationtiming.inFactor = f;
+            flag = true;
+        }
+        if (animationtiming.outFactor != f4)
+        {
+            animationtiming.outFactor = f4;
+            return true;
+        } else
+        {
+            return flag;
+        }
     }
 }

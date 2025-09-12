@@ -1,15 +1,22 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class SoundTrigger extends SLMessage {
-    public SoundData SoundData_Field = new SoundData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class SoundData {
+public class SoundTrigger extends SLMessage
+{
+    public static class SoundData
+    {
+
         public float Gain;
         public long Handle;
         public UUID ObjectID;
@@ -17,38 +24,51 @@ public class SoundTrigger extends SLMessage {
         public UUID ParentID;
         public LLVector3 Position;
         public UUID SoundID;
+
+        public SoundData()
+        {
+        }
     }
 
-    public SoundTrigger() {
-        this.zeroCoded = false;
+
+    public SoundData SoundData_Field;
+
+    public SoundTrigger()
+    {
+        zeroCoded = false;
+        SoundData_Field = new SoundData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 89;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleSoundTrigger(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleSoundTrigger(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.put(Ascii.GS);
-        packUUID(byteBuffer, this.SoundData_Field.SoundID);
-        packUUID(byteBuffer, this.SoundData_Field.OwnerID);
-        packUUID(byteBuffer, this.SoundData_Field.ObjectID);
-        packUUID(byteBuffer, this.SoundData_Field.ParentID);
-        packLong(byteBuffer, this.SoundData_Field.Handle);
-        packLLVector3(byteBuffer, this.SoundData_Field.Position);
-        packFloat(byteBuffer, this.SoundData_Field.Gain);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.put((byte)29);
+        packUUID(bytebuffer, SoundData_Field.SoundID);
+        packUUID(bytebuffer, SoundData_Field.OwnerID);
+        packUUID(bytebuffer, SoundData_Field.ObjectID);
+        packUUID(bytebuffer, SoundData_Field.ParentID);
+        packLong(bytebuffer, SoundData_Field.Handle);
+        packLLVector3(bytebuffer, SoundData_Field.Position);
+        packFloat(bytebuffer, SoundData_Field.Gain);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.SoundData_Field.SoundID = unpackUUID(byteBuffer);
-        this.SoundData_Field.OwnerID = unpackUUID(byteBuffer);
-        this.SoundData_Field.ObjectID = unpackUUID(byteBuffer);
-        this.SoundData_Field.ParentID = unpackUUID(byteBuffer);
-        this.SoundData_Field.Handle = unpackLong(byteBuffer);
-        this.SoundData_Field.Position = unpackLLVector3(byteBuffer);
-        this.SoundData_Field.Gain = unpackFloat(byteBuffer);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        SoundData_Field.SoundID = unpackUUID(bytebuffer);
+        SoundData_Field.OwnerID = unpackUUID(bytebuffer);
+        SoundData_Field.ObjectID = unpackUUID(bytebuffer);
+        SoundData_Field.ParentID = unpackUUID(bytebuffer);
+        SoundData_Field.Handle = unpackLong(bytebuffer);
+        SoundData_Field.Position = unpackLLVector3(bytebuffer);
+        SoundData_Field.Gain = unpackFloat(bytebuffer);
     }
 }

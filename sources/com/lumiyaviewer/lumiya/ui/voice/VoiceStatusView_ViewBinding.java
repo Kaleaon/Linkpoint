@@ -1,7 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.voice;
 
-import android.support.annotation.CallSuper;
-import android.support.annotation.UiThread;
 import android.support.v7.widget.CardView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,9 +15,14 @@ import android.widget.TextView;
 import butterknife.Unbinder;
 import butterknife.internal.DebouncingOnClickListener;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
 
-public class VoiceStatusView_ViewBinding implements Unbinder {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.voice:
+//            VoiceStatusView
+
+public class VoiceStatusView_ViewBinding
+    implements Unbinder
+{
+
     private VoiceStatusView target;
     private View view2131755728;
     private View view2131755729;
@@ -25,111 +32,199 @@ public class VoiceStatusView_ViewBinding implements Unbinder {
     private View view2131755739;
     private View view2131755740;
 
-    @UiThread
-    public VoiceStatusView_ViewBinding(VoiceStatusView voiceStatusView) {
-        this(voiceStatusView, voiceStatusView);
+    public VoiceStatusView_ViewBinding(VoiceStatusView voicestatusview)
+    {
+        this(voicestatusview, ((View) (voicestatusview)));
     }
 
-    @UiThread
-    public VoiceStatusView_ViewBinding(final VoiceStatusView voiceStatusView, View view) {
-        this.target = voiceStatusView;
-        View findRequiredView = Utils.findRequiredView(view, R.id.voice_answer_button, "field 'voiceAnswerButton' and method 'onVoiceAnswerButton'");
-        voiceStatusView.voiceAnswerButton = (ImageButton) Utils.castView(findRequiredView, R.id.voice_answer_button, "field 'voiceAnswerButton'", ImageButton.class);
-        this.view2131755731 = findRequiredView;
-        findRequiredView.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                voiceStatusView.onVoiceAnswerButton();
+    public VoiceStatusView_ViewBinding(final VoiceStatusView target, View view)
+    {
+        this.target = target;
+        View view1 = Utils.findRequiredView(view, 0x7f1002d3, "field 'voiceAnswerButton' and method 'onVoiceAnswerButton'");
+        target.voiceAnswerButton = (ImageButton)Utils.castView(view1, 0x7f1002d3, "field 'voiceAnswerButton'", android/widget/ImageButton);
+        view2131755731 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final VoiceStatusView_ViewBinding this$0;
+            final VoiceStatusView val$target;
+
+            public void doClick(View view2)
+            {
+                target.onVoiceAnswerButton();
+            }
+
+            
+            {
+                this$0 = VoiceStatusView_ViewBinding.this;
+                target = voicestatusview;
+                super();
             }
         });
-        View findRequiredView2 = Utils.findRequiredView(view, R.id.voice_terminate_button, "field 'voiceTerminateButton' and method 'onVoiceTerminateButton'");
-        voiceStatusView.voiceTerminateButton = (ImageButton) Utils.castView(findRequiredView2, R.id.voice_terminate_button, "field 'voiceTerminateButton'", ImageButton.class);
-        this.view2131755736 = findRequiredView2;
-        findRequiredView2.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                voiceStatusView.onVoiceTerminateButton();
+        view1 = Utils.findRequiredView(view, 0x7f1002d8, "field 'voiceTerminateButton' and method 'onVoiceTerminateButton'");
+        target.voiceTerminateButton = (ImageButton)Utils.castView(view1, 0x7f1002d8, "field 'voiceTerminateButton'", android/widget/ImageButton);
+        view2131755736 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final VoiceStatusView_ViewBinding this$0;
+            final VoiceStatusView val$target;
+
+            public void doClick(View view2)
+            {
+                target.onVoiceTerminateButton();
+            }
+
+            
+            {
+                this$0 = VoiceStatusView_ViewBinding.this;
+                target = voicestatusview;
+                super();
             }
         });
-        voiceStatusView.voiceStatusSmallText = (TextView) Utils.findRequiredViewAsType(view, R.id.voice_status_small_text, "field 'voiceStatusSmallText'", TextView.class);
-        View findRequiredView3 = Utils.findRequiredView(view, R.id.voice_bluetooth_button, "field 'voiceBluetoothButton' and method 'onVoiceBluetoothButton'");
-        voiceStatusView.voiceBluetoothButton = (Button) Utils.castView(findRequiredView3, R.id.voice_bluetooth_button, "field 'voiceBluetoothButton'", Button.class);
-        this.view2131755740 = findRequiredView3;
-        findRequiredView3.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                voiceStatusView.onVoiceBluetoothButton();
+        target.voiceStatusSmallText = (TextView)Utils.findRequiredViewAsType(view, 0x7f1002d6, "field 'voiceStatusSmallText'", android/widget/TextView);
+        view1 = Utils.findRequiredView(view, 0x7f1002dc, "field 'voiceBluetoothButton' and method 'onVoiceBluetoothButton'");
+        target.voiceBluetoothButton = (Button)Utils.castView(view1, 0x7f1002dc, "field 'voiceBluetoothButton'", android/widget/Button);
+        view2131755740 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final VoiceStatusView_ViewBinding this$0;
+            final VoiceStatusView val$target;
+
+            public void doClick(View view2)
+            {
+                target.onVoiceBluetoothButton();
+            }
+
+            
+            {
+                this$0 = VoiceStatusView_ViewBinding.this;
+                target = voicestatusview;
+                super();
             }
         });
-        voiceStatusView.voiceSpeakIndicatorLeft = (ImageView) Utils.findRequiredViewAsType(view, R.id.voice_speak_indicator_left, "field 'voiceSpeakIndicatorLeft'", ImageView.class);
-        View findRequiredView4 = Utils.findRequiredView(view, R.id.voice_mic_on_button, "field 'voiceMicOnButton' and method 'onVoiceMicOnButton'");
-        voiceStatusView.voiceMicOnButton = (ImageButton) Utils.castView(findRequiredView4, R.id.voice_mic_on_button, "field 'voiceMicOnButton'", ImageButton.class);
-        this.view2131755729 = findRequiredView4;
-        findRequiredView4.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                voiceStatusView.onVoiceMicOnButton();
+        target.voiceSpeakIndicatorLeft = (ImageView)Utils.findRequiredViewAsType(view, 0x7f1002d4, "field 'voiceSpeakIndicatorLeft'", android/widget/ImageView);
+        view1 = Utils.findRequiredView(view, 0x7f1002d1, "field 'voiceMicOnButton' and method 'onVoiceMicOnButton'");
+        target.voiceMicOnButton = (ImageButton)Utils.castView(view1, 0x7f1002d1, "field 'voiceMicOnButton'", android/widget/ImageButton);
+        view2131755729 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final VoiceStatusView_ViewBinding this$0;
+            final VoiceStatusView val$target;
+
+            public void doClick(View view2)
+            {
+                target.onVoiceMicOnButton();
+            }
+
+            
+            {
+                this$0 = VoiceStatusView_ViewBinding.this;
+                target = voicestatusview;
+                super();
             }
         });
-        voiceStatusView.voiceStatusControls = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.voice_status_controls, "field 'voiceStatusControls'", ViewGroup.class);
-        View findRequiredView5 = Utils.findRequiredView(view, R.id.voice_loudspeaker_button, "field 'voiceLoudspeakerButton' and method 'onLoudspeakerButton'");
-        voiceStatusView.voiceLoudspeakerButton = (Button) Utils.castView(findRequiredView5, R.id.voice_loudspeaker_button, "field 'voiceLoudspeakerButton'", Button.class);
-        this.view2131755739 = findRequiredView5;
-        findRequiredView5.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                voiceStatusView.onLoudspeakerButton();
+        target.voiceStatusControls = (ViewGroup)Utils.findRequiredViewAsType(view, 0x7f1002d9, "field 'voiceStatusControls'", android/view/ViewGroup);
+        view1 = Utils.findRequiredView(view, 0x7f1002db, "field 'voiceLoudspeakerButton' and method 'onLoudspeakerButton'");
+        target.voiceLoudspeakerButton = (Button)Utils.castView(view1, 0x7f1002db, "field 'voiceLoudspeakerButton'", android/widget/Button);
+        view2131755739 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final VoiceStatusView_ViewBinding this$0;
+            final VoiceStatusView val$target;
+
+            public void doClick(View view2)
+            {
+                target.onLoudspeakerButton();
+            }
+
+            
+            {
+                this$0 = VoiceStatusView_ViewBinding.this;
+                target = voicestatusview;
+                super();
             }
         });
-        voiceStatusView.voiceStatusText = (TextView) Utils.findRequiredViewAsType(view, R.id.voice_status_text, "field 'voiceStatusText'", TextView.class);
-        voiceStatusView.voiceSpeakIndicatorRight = (ImageView) Utils.findRequiredViewAsType(view, R.id.voice_speak_indicator_right, "field 'voiceSpeakIndicatorRight'", ImageView.class);
-        View findRequiredView6 = Utils.findRequiredView(view, R.id.voice_mic_off_button, "field 'voiceMicOffButton' and method 'onVoiceMicOffButton'");
-        voiceStatusView.voiceMicOffButton = (ImageButton) Utils.castView(findRequiredView6, R.id.voice_mic_off_button, "field 'voiceMicOffButton'", ImageButton.class);
-        this.view2131755730 = findRequiredView6;
-        findRequiredView6.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                voiceStatusView.onVoiceMicOffButton();
+        target.voiceStatusText = (TextView)Utils.findRequiredViewAsType(view, 0x7f1002d5, "field 'voiceStatusText'", android/widget/TextView);
+        target.voiceSpeakIndicatorRight = (ImageView)Utils.findRequiredViewAsType(view, 0x7f1002d7, "field 'voiceSpeakIndicatorRight'", android/widget/ImageView);
+        view1 = Utils.findRequiredView(view, 0x7f1002d2, "field 'voiceMicOffButton' and method 'onVoiceMicOffButton'");
+        target.voiceMicOffButton = (ImageButton)Utils.castView(view1, 0x7f1002d2, "field 'voiceMicOffButton'", android/widget/ImageButton);
+        view2131755730 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final VoiceStatusView_ViewBinding this$0;
+            final VoiceStatusView val$target;
+
+            public void doClick(View view2)
+            {
+                target.onVoiceMicOffButton();
+            }
+
+            
+            {
+                this$0 = VoiceStatusView_ViewBinding.this;
+                target = voicestatusview;
+                super();
             }
         });
-        View findRequiredView7 = Utils.findRequiredView(view, R.id.voice_status_card_view, "field 'voiceStatusCardView' and method 'onVoiceStatusCardClick'");
-        voiceStatusView.voiceStatusCardView = (CardView) Utils.castView(findRequiredView7, R.id.voice_status_card_view, "field 'voiceStatusCardView'", CardView.class);
-        this.view2131755728 = findRequiredView7;
-        findRequiredView7.setOnClickListener(new DebouncingOnClickListener() {
-            public void doClick(View view) {
-                voiceStatusView.onVoiceStatusCardClick();
+        view1 = Utils.findRequiredView(view, 0x7f1002d0, "field 'voiceStatusCardView' and method 'onVoiceStatusCardClick'");
+        target.voiceStatusCardView = (CardView)Utils.castView(view1, 0x7f1002d0, "field 'voiceStatusCardView'", android/support/v7/widget/CardView);
+        view2131755728 = view1;
+        view1.setOnClickListener(new DebouncingOnClickListener() {
+
+            final VoiceStatusView_ViewBinding this$0;
+            final VoiceStatusView val$target;
+
+            public void doClick(View view2)
+            {
+                target.onVoiceStatusCardClick();
+            }
+
+            
+            {
+                this$0 = VoiceStatusView_ViewBinding.this;
+                target = voicestatusview;
+                super();
             }
         });
-        voiceStatusView.voiceSpeakerVolumeControl = (SeekBar) Utils.findRequiredViewAsType(view, R.id.voice_speaker_volume_control, "field 'voiceSpeakerVolumeControl'", SeekBar.class);
+        target.voiceSpeakerVolumeControl = (SeekBar)Utils.findRequiredViewAsType(view, 0x7f1002da, "field 'voiceSpeakerVolumeControl'", android/widget/SeekBar);
     }
 
-    @CallSuper
-    public void unbind() {
-        VoiceStatusView voiceStatusView = this.target;
-        if (voiceStatusView == null) {
+    public void unbind()
+    {
+        VoiceStatusView voicestatusview = target;
+        if (voicestatusview == null)
+        {
             throw new IllegalStateException("Bindings already cleared.");
+        } else
+        {
+            target = null;
+            voicestatusview.voiceAnswerButton = null;
+            voicestatusview.voiceTerminateButton = null;
+            voicestatusview.voiceStatusSmallText = null;
+            voicestatusview.voiceBluetoothButton = null;
+            voicestatusview.voiceSpeakIndicatorLeft = null;
+            voicestatusview.voiceMicOnButton = null;
+            voicestatusview.voiceStatusControls = null;
+            voicestatusview.voiceLoudspeakerButton = null;
+            voicestatusview.voiceStatusText = null;
+            voicestatusview.voiceSpeakIndicatorRight = null;
+            voicestatusview.voiceMicOffButton = null;
+            voicestatusview.voiceStatusCardView = null;
+            voicestatusview.voiceSpeakerVolumeControl = null;
+            view2131755731.setOnClickListener(null);
+            view2131755731 = null;
+            view2131755736.setOnClickListener(null);
+            view2131755736 = null;
+            view2131755740.setOnClickListener(null);
+            view2131755740 = null;
+            view2131755729.setOnClickListener(null);
+            view2131755729 = null;
+            view2131755739.setOnClickListener(null);
+            view2131755739 = null;
+            view2131755730.setOnClickListener(null);
+            view2131755730 = null;
+            view2131755728.setOnClickListener(null);
+            view2131755728 = null;
+            return;
         }
-        this.target = null;
-        voiceStatusView.voiceAnswerButton = null;
-        voiceStatusView.voiceTerminateButton = null;
-        voiceStatusView.voiceStatusSmallText = null;
-        voiceStatusView.voiceBluetoothButton = null;
-        voiceStatusView.voiceSpeakIndicatorLeft = null;
-        voiceStatusView.voiceMicOnButton = null;
-        voiceStatusView.voiceStatusControls = null;
-        voiceStatusView.voiceLoudspeakerButton = null;
-        voiceStatusView.voiceStatusText = null;
-        voiceStatusView.voiceSpeakIndicatorRight = null;
-        voiceStatusView.voiceMicOffButton = null;
-        voiceStatusView.voiceStatusCardView = null;
-        voiceStatusView.voiceSpeakerVolumeControl = null;
-        this.view2131755731.setOnClickListener((View.OnClickListener) null);
-        this.view2131755731 = null;
-        this.view2131755736.setOnClickListener((View.OnClickListener) null);
-        this.view2131755736 = null;
-        this.view2131755740.setOnClickListener((View.OnClickListener) null);
-        this.view2131755740 = null;
-        this.view2131755729.setOnClickListener((View.OnClickListener) null);
-        this.view2131755729 = null;
-        this.view2131755739.setOnClickListener((View.OnClickListener) null);
-        this.view2131755739 = null;
-        this.view2131755730.setOnClickListener((View.OnClickListener) null);
-        this.view2131755730 = null;
-        this.view2131755728.setOnClickListener((View.OnClickListener) null);
-        this.view2131755728 = null;
     }
 }

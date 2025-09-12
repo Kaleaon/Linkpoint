@@ -1,8 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.lumiyaviewer.lumiya.render.avatar.AvatarVisualState;
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar;
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatarStub;
 import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue;
@@ -18,42 +23,83 @@ import com.lumiyaviewer.lumiya.res.terrain.TerrainGeometryCache;
 import com.lumiyaviewer.lumiya.res.terrain.TerrainTextureCache;
 import com.lumiyaviewer.lumiya.res.text.DrawableTextCache;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo;
-import javax.annotation.Nonnull;
 
-public class DrawableStore {
-    public final LoadingCache<SLObjectAvatarInfo, DrawableAvatar> drawableAvatarCache = CacheBuilder.newBuilder().weakKeys().weakValues().build(new CacheLoader<SLObjectAvatarInfo, DrawableAvatar>() {
-        public DrawableAvatar load(@Nonnull SLObjectAvatarInfo sLObjectAvatarInfo) {
-            return sLObjectAvatarInfo.getAvatarVisualState().createDrawableAvatar(DrawableStore.this);
+public class DrawableStore
+{
+
+    public final LoadingCache drawableAvatarCache = CacheBuilder.newBuilder().weakKeys().weakValues().build(new CacheLoader() {
+
+        final DrawableStore this$0;
+
+        public DrawableAvatar load(SLObjectAvatarInfo slobjectavatarinfo)
+        {
+            return slobjectavatarinfo.getAvatarVisualState().createDrawableAvatar(DrawableStore.this);
         }
+
+        public volatile Object load(Object obj1)
+            throws Exception
+        {
+            return load((SLObjectAvatarInfo)obj1);
+        }
+
+            
+            {
+                this$0 = DrawableStore.this;
+                super();
+            }
     });
-    public final LoadingCache<SLObjectAvatarInfo, DrawableAvatarStub> drawableAvatarStubCache = CacheBuilder.newBuilder().weakKeys().weakValues().build(new CacheLoader<SLObjectAvatarInfo, DrawableAvatarStub>() {
-        public DrawableAvatarStub load(@Nonnull SLObjectAvatarInfo sLObjectAvatarInfo) {
-            return sLObjectAvatarInfo.getAvatarVisualState().createDrawableAvatarStub(DrawableStore.this);
+    public final LoadingCache drawableAvatarStubCache = CacheBuilder.newBuilder().weakKeys().weakValues().build(new CacheLoader() {
+
+        final DrawableStore this$0;
+
+        public DrawableAvatarStub load(SLObjectAvatarInfo slobjectavatarinfo)
+        {
+            return slobjectavatarinfo.getAvatarVisualState().createDrawableAvatarStub(DrawableStore.this);
         }
+
+        public volatile Object load(Object obj1)
+            throws Exception
+        {
+            return load((SLObjectAvatarInfo)obj1);
+        }
+
+            
+            {
+                this$0 = DrawableStore.this;
+                super();
+            }
     });
     public final GeometryCache geometryCache;
     public final GLTerrainTextureCache glTerrainTextureCache;
     public final GLTextureCache glTextureCache;
     public final boolean hasGL20;
-    public final MeshCache meshCache;
+    public final MeshCache meshCache = new MeshCache();
     public final PrimCache primCache;
     public final SpatialObjectIndex spatialObjectIndex;
     public final TerrainGeometryCache terrainGeometryCache = new TerrainGeometryCache();
     public final GLTextTextureCache textTextureCache;
 
-    public DrawableStore(GLLoadQueue gLLoadQueue, boolean z, int i, boolean z2, int i2, Object obj) {
-        this.hasGL20 = z;
-        this.glTextureCache = new GLTextureCache(gLLoadQueue);
-        this.textTextureCache = new GLTextTextureCache(gLLoadQueue, new DrawableTextCache(i2));
-        this.meshCache = new MeshCache();
-        this.geometryCache = new GeometryCache(this.meshCache);
-        this.primCache = new PrimCache(this.glTextureCache, this.geometryCache);
-        this.spatialObjectIndex = new SpatialObjectIndex(this, i);
-        this.glTerrainTextureCache = z2 ? new GLTerrainTextureCache(gLLoadQueue, new TerrainTextureCache()) : null;
-        SpatialIndex.getInstance().EnableObjectIndex(this.spatialObjectIndex, obj);
+    public DrawableStore(GLLoadQueue glloadqueue, boolean flag, int i, boolean flag1, int j, Object obj)
+    {
+        hasGL20 = flag;
+        glTextureCache = new GLTextureCache(glloadqueue);
+        textTextureCache = new GLTextTextureCache(glloadqueue, new DrawableTextCache(j));
+        geometryCache = new GeometryCache(meshCache);
+        primCache = new PrimCache(glTextureCache, geometryCache);
+        spatialObjectIndex = new SpatialObjectIndex(this, i);
+        if (flag1)
+        {
+            glloadqueue = new GLTerrainTextureCache(glloadqueue, new TerrainTextureCache());
+        } else
+        {
+            glloadqueue = null;
+        }
+        glTerrainTextureCache = glloadqueue;
+        SpatialIndex.getInstance().EnableObjectIndex(spatialObjectIndex, obj);
     }
 
-    public void setMeshCapURL(String str) {
-        this.meshCache.setCapURL(str);
+    public void setMeshCapURL(String s)
+    {
+        meshCache.setCapURL(s);
     }
 }

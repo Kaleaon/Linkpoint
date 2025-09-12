@@ -1,6 +1,11 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.objects;
 
-import android.os.Build;
+import android.content.Context;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
@@ -16,19 +21,18 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
+import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
+import com.lumiyaviewer.lumiya.slproto.modules.SLDrawDistance;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
 import com.lumiyaviewer.lumiya.slproto.objects.SLAvatarObjectDisplayInfo;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectDisplayInfo;
@@ -41,337 +45,443 @@ import com.lumiyaviewer.lumiya.ui.chat.profiles.UserProfileFragment;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
 import com.lumiyaviewer.lumiya.ui.common.ButteryProgressBar;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
-import com.lumiyaviewer.lumiya.ui.objects.ObjectListNewActivity;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.UUID;
-import javax.annotation.Nullable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
-public class ObjectSelectorFragment extends Fragment implements SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener, ExpandableListView.OnGroupClickListener, ExpandableListView.OnChildClickListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.objects:
+//            ObjectDetailsFragment, ObjectListAdapter
+
+public class ObjectSelectorFragment extends Fragment
+    implements android.widget.SeekBar.OnSeekBarChangeListener, android.widget.CompoundButton.OnCheckedChangeListener, android.widget.ExpandableListView.OnGroupClickListener, android.widget.ExpandableListView.OnChildClickListener
+{
+
     private static final int MAX_FILTER_DISTANCE = 256;
     private static final int PROGRESS_BAR_SIZE_DIP = 4;
-    private SLObjectFilterInfo filterInfo = SLObjectFilterInfo.create();
-    private final Subscription.OnData<ObjectsManager.ObjectDisplayList> onObjectListData = new $Lambda$rXtKRyOts6GGB3GxWNYA5oEvU2Y(this);
-    private final Subscription.OnError onObjectListError = new Subscription.OnError(this) {
-
-        /* renamed from: -$f0  reason: not valid java name */
-        private final /* synthetic */ Object f500$f0;
-
-        private final /* synthetic */ void $m$0(Throwable th) {
-            ((ObjectSelectorFragment) this.f500$f0).m682lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10042(th);
-        }
-
-        {
-            /*
-                r0 = this;
-                r0.<init>()
-                r0.f500$f0 = r1
-                return
-            */
-            throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.objects.$Lambda$rXtKRyOts6GGB3GxWNYA5oEvU2Y.AnonymousClass1.<init>(java.lang.Object):void");
-        }
-
-        public final void onError(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$rXtKRyOts6GGB3GxWNYA5oEvU2Y.1.onError(java.lang.Throwable):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$rXtKRyOts6GGB3GxWNYA5oEvU2Y.1.onError(java.lang.Throwable):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    };
+    private SLObjectFilterInfo filterInfo;
+    private final com.lumiyaviewer.lumiya.react.Subscription.OnData onObjectListData = new _2D_.Lambda.rXtKRyOts6GGB3GxWNYA5oEvU2Y(this);
+    private final com.lumiyaviewer.lumiya.react.Subscription.OnError onObjectListError = new _2D_.Lambda.rXtKRyOts6GGB3GxWNYA5oEvU2Y._cls1(this);
     private SearchView searchView;
-    private Subscription<SubscriptionSingleKey, ObjectsManager.ObjectDisplayList> subscription;
+    private Subscription subscription;
 
-    private SLObjectFilterInfo getFilter() {
-        float f = 1.0f;
-        View view = getView();
-        if (view == null) {
-            return SLObjectFilterInfo.create();
-        }
-        if (view.findViewById(R.id.filterPanel).getVisibility() != 0) {
-            return SLObjectFilterInfo.create();
-        }
-        float progress = (float) ((SeekBar) view.findViewById(R.id.objectListSeekBar)).getProgress();
-        if (progress >= 1.0f) {
-            f = progress;
-        }
-        return SLObjectFilterInfo.create(this.searchView.getQuery().toString(), ((CheckBox) view.findViewById(R.id.includeAttachments)).isChecked(), ((CheckBox) view.findViewById(R.id.includeStubs)).isChecked(), ((CheckBox) view.findViewById(R.id.includeNonTouchable)).isChecked(), f);
+    static void _2D_wrap0(ObjectSelectorFragment objectselectorfragment)
+    {
+        objectselectorfragment.updateFilter();
     }
 
-    @Nullable
-    private UserManager getUserManager() {
+    public ObjectSelectorFragment()
+    {
+        filterInfo = SLObjectFilterInfo.create();
+    }
+
+    private SLObjectFilterInfo getFilter()
+    {
+        float f = 1.0F;
+        View view = getView();
+        if (view == null)
+        {
+            return SLObjectFilterInfo.create();
+        }
+        if (view.findViewById(0x7f100229).getVisibility() == 0)
+        {
+            float f1 = ((SeekBar)view.findViewById(0x7f10022b)).getProgress();
+            if (f1 >= 1.0F)
+            {
+                f = f1;
+            }
+            return SLObjectFilterInfo.create(searchView.getQuery().toString(), ((CheckBox)view.findViewById(0x7f10022f)).isChecked(), ((CheckBox)view.findViewById(0x7f100230)).isChecked(), ((CheckBox)view.findViewById(0x7f10022e)).isChecked(), f);
+        } else
+        {
+            return SLObjectFilterInfo.create();
+        }
+    }
+
+    private UserManager getUserManager()
+    {
         return ActivityUtils.getUserManager(getArguments());
     }
 
-    public static ObjectSelectorFragment newInstance(Bundle bundle) {
-        ObjectSelectorFragment objectSelectorFragment = new ObjectSelectorFragment();
-        objectSelectorFragment.setArguments(bundle);
-        return objectSelectorFragment;
+    public static ObjectSelectorFragment newInstance(Bundle bundle)
+    {
+        ObjectSelectorFragment objectselectorfragment = new ObjectSelectorFragment();
+        objectselectorfragment.setArguments(bundle);
+        return objectselectorfragment;
     }
 
-    private void showObjectDetails(SLObjectDisplayInfo sLObjectDisplayInfo) {
-        UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments());
-        if (activeAgentID == null) {
+    private void showObjectDetails(SLObjectDisplayInfo slobjectdisplayinfo)
+    {
+        java.util.UUID uuid;
+label0:
+        {
+            uuid = ActivityUtils.getActiveAgentID(getArguments());
+            if (uuid != null)
+            {
+                if (!(slobjectdisplayinfo instanceof SLAvatarObjectDisplayInfo))
+                {
+                    break label0;
+                }
+                slobjectdisplayinfo = ((SLAvatarObjectDisplayInfo)slobjectdisplayinfo).uuid;
+                DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/chat/profiles/UserProfileFragment, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(uuid, slobjectdisplayinfo)));
+            }
             return;
         }
-        if (sLObjectDisplayInfo instanceof SLAvatarObjectDisplayInfo) {
-            DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(activeAgentID, ((SLAvatarObjectDisplayInfo) sLObjectDisplayInfo).uuid)));
-            return;
-        }
-        DetailsActivity.showDetails(getActivity(), ObjectListNewActivity.ObjectDetailsActivityFactory.getInstance(), ObjectDetailsFragment.makeSelection(activeAgentID, sLObjectDisplayInfo.localID));
+        DetailsActivity.showDetails(getActivity(), ObjectListNewActivity.ObjectDetailsActivityFactory.getInstance(), ObjectDetailsFragment.makeSelection(uuid, slobjectdisplayinfo.localID));
     }
 
-    /* access modifiers changed from: private */
-    public void updateFilter() {
-        SLAgentCircuit activeAgentCircuit;
-        SLModules modules;
-        SLObjectFilterInfo filter = getFilter();
-        if (!filter.equals(this.filterInfo)) {
-            this.filterInfo = filter;
-            UserManager userManager = getUserManager();
-            if (userManager != null) {
-                userManager.getObjectsManager().setFilter(this.filterInfo);
-                if (this.filterInfo.range() != 0.0f && (activeAgentCircuit = userManager.getActiveAgentCircuit()) != null && (modules = activeAgentCircuit.getModules()) != null) {
-                    modules.drawDistance.setObjectSelectRange(this.filterInfo.range());
+    private void updateFilter()
+    {
+        Object obj = getFilter();
+        if (!((SLObjectFilterInfo) (obj)).equals(filterInfo))
+        {
+            filterInfo = ((SLObjectFilterInfo) (obj));
+            obj = getUserManager();
+            if (obj != null)
+            {
+                ((UserManager) (obj)).getObjectsManager().setFilter(filterInfo);
+                if (filterInfo.range() != 0.0F)
+                {
+                    obj = ((UserManager) (obj)).getActiveAgentCircuit();
+                    if (obj != null)
+                    {
+                        obj = ((SLAgentCircuit) (obj)).getModules();
+                        if (obj != null)
+                        {
+                            ((SLModules) (obj)).drawDistance.setObjectSelectRange(filterInfo.range());
+                        }
+                    }
                 }
             }
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onObjectLoadError(Throwable th) {
-        View view;
-        if ((th instanceof SLGridConnection.NotConnectedException) && (view = getView()) != null) {
-            View findViewById = view.findViewById(R.id.object_progress_bar);
-            if (findViewById != null) {
-                findViewById.setVisibility(8);
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10042(Throwable throwable)
+    {
+        if (throwable instanceof com.lumiyaviewer.lumiya.slproto.SLGridConnection.NotConnectedException)
+        {
+            throwable = getView();
+            if (throwable != null)
+            {
+                View view = throwable.findViewById(0x7f100021);
+                if (view != null)
+                {
+                    view.setVisibility(8);
+                }
+                throwable.findViewById(0x7f100234).setVisibility(8);
+                ((TextView)throwable.findViewById(0x7f100233)).setText(0x7f090231);
+                throwable.findViewById(0x7f100232).setVisibility(0);
+                throwable.findViewById(0x7f100231).setVisibility(8);
             }
-            view.findViewById(R.id.empty_object_list_progress).setVisibility(8);
-            ((TextView) view.findViewById(R.id.empty_object_list_message)).setText(R.string.object_list_not_connected);
-            view.findViewById(R.id.empty_object_list).setVisibility(0);
-            view.findViewById(R.id.objectListView).setVisibility(8);
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void onObjectListUpdated(ObjectsManager.ObjectDisplayList objectDisplayList) {
-        int i = 8;
-        ImmutableList<SLObjectDisplayInfo> immutableList = objectDisplayList.objects;
-        View view = getView();
-        if (view != null) {
-            View findViewById = view.findViewById(R.id.object_progress_bar);
-            if (findViewById != null) {
-                findViewById.setVisibility(objectDisplayList.isLoading ? 0 : 8);
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_objects_ObjectSelectorFragment_10971(com.lumiyaviewer.lumiya.slproto.users.manager.ObjectsManager.ObjectDisplayList objectdisplaylist)
+    {
+        byte byte0 = 8;
+        boolean flag = false;
+        ImmutableList immutablelist = objectdisplaylist.objects;
+        Object obj = getView();
+        if (obj != null)
+        {
+            Object obj1 = ((View) (obj)).findViewById(0x7f100021);
+            int i;
+            if (obj1 != null)
+            {
+                Iterator iterator1;
+                SLObjectDisplayInfo slobjectdisplayinfo;
+                if (objectdisplaylist.isLoading)
+                {
+                    i = 0;
+                } else
+                {
+                    i = 8;
+                }
+                ((View) (obj1)).setVisibility(i);
             }
-            view.findViewById(R.id.empty_object_list_progress).setVisibility(objectDisplayList.isLoading ? 0 : 8);
-            ((TextView) view.findViewById(R.id.empty_object_list_message)).setText(objectDisplayList.isLoading ? R.string.object_list_loading : R.string.object_list_result_empty);
-            view.findViewById(R.id.empty_object_list).setVisibility(immutableList.isEmpty() ? 0 : 8);
-            View findViewById2 = view.findViewById(R.id.objectListView);
-            if (!immutableList.isEmpty()) {
+            obj1 = ((View) (obj)).findViewById(0x7f100234);
+            if (objectdisplaylist.isLoading)
+            {
+                i = 0;
+            } else
+            {
+                i = 8;
+            }
+            ((View) (obj1)).setVisibility(i);
+            obj1 = (TextView)((View) (obj)).findViewById(0x7f100233);
+            if (objectdisplaylist.isLoading)
+            {
+                i = 0x7f090230;
+            } else
+            {
+                i = 0x7f090232;
+            }
+            ((TextView) (obj1)).setText(i);
+            objectdisplaylist = ((View) (obj)).findViewById(0x7f100232);
+            if (immutablelist.isEmpty())
+            {
+                i = 0;
+            } else
+            {
+                i = 8;
+            }
+            objectdisplaylist.setVisibility(i);
+            objectdisplaylist = ((View) (obj)).findViewById(0x7f100231);
+            if (immutablelist.isEmpty())
+            {
+                i = byte0;
+            } else
+            {
                 i = 0;
             }
-            findViewById2.setVisibility(i);
-            ExpandableListView expandableListView = (ExpandableListView) view.findViewById(R.id.objectListView);
-            ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter();
-            if (expandableListAdapter instanceof ObjectListAdapter) {
-                HashSet hashSet = new HashSet();
-                for (SLObjectDisplayInfo sLObjectDisplayInfo : ((ObjectListAdapter) expandableListAdapter).getData()) {
-                    if ((sLObjectDisplayInfo instanceof SLPrimObjectDisplayInfoWithChildren) && !((SLPrimObjectDisplayInfoWithChildren) sLObjectDisplayInfo).isImplicitlyAdded()) {
-                        hashSet.add(Integer.valueOf(sLObjectDisplayInfo.localID));
+            objectdisplaylist.setVisibility(i);
+            objectdisplaylist = (ExpandableListView)((View) (obj)).findViewById(0x7f100231);
+            obj = objectdisplaylist.getExpandableListAdapter();
+            if (obj instanceof ObjectListAdapter)
+            {
+                HashSet hashset = new HashSet();
+                iterator1 = ((ObjectListAdapter)obj).getData().iterator();
+                do
+                {
+                    if (!iterator1.hasNext())
+                    {
+                        break;
+                    }
+                    slobjectdisplayinfo = (SLObjectDisplayInfo)iterator1.next();
+                    if ((slobjectdisplayinfo instanceof SLPrimObjectDisplayInfoWithChildren) && !((SLPrimObjectDisplayInfoWithChildren)slobjectdisplayinfo).isImplicitlyAdded())
+                    {
+                        hashset.add(Integer.valueOf(slobjectdisplayinfo.localID));
+                    }
+                } while (true);
+                ArrayList arraylist = new ArrayList();
+                for (int j = ((flag) ? 1 : 0); j < immutablelist.size(); j++)
+                {
+                    SLObjectDisplayInfo slobjectdisplayinfo1 = (SLObjectDisplayInfo)immutablelist.get(j);
+                    if ((slobjectdisplayinfo1 instanceof SLPrimObjectDisplayInfoWithChildren) && ((SLPrimObjectDisplayInfoWithChildren)slobjectdisplayinfo1).isImplicitlyAdded() && !hashset.contains(Integer.valueOf(slobjectdisplayinfo1.localID)))
+                    {
+                        arraylist.add(Integer.valueOf(j));
                     }
                 }
-                ArrayList<Integer> arrayList = new ArrayList<>();
-                for (int i2 = 0; i2 < immutableList.size(); i2++) {
-                    SLObjectDisplayInfo sLObjectDisplayInfo2 = (SLObjectDisplayInfo) immutableList.get(i2);
-                    if ((sLObjectDisplayInfo2 instanceof SLPrimObjectDisplayInfoWithChildren) && ((SLPrimObjectDisplayInfoWithChildren) sLObjectDisplayInfo2).isImplicitlyAdded() && !hashSet.contains(Integer.valueOf(sLObjectDisplayInfo2.localID))) {
-                        arrayList.add(Integer.valueOf(i2));
-                    }
-                }
-                ((ObjectListAdapter) expandableListAdapter).setData(immutableList);
-                for (Integer intValue : arrayList) {
-                    expandableListView.expandGroup(intValue.intValue());
-                }
+
+                ((ObjectListAdapter)obj).setData(immutablelist);
+                for (Iterator iterator = arraylist.iterator(); iterator.hasNext(); objectdisplaylist.expandGroup(((Integer)iterator.next()).intValue())) { }
             }
         }
     }
 
-    public void onCheckedChanged(CompoundButton compoundButton, boolean z) {
+    public void onCheckedChanged(CompoundButton compoundbutton, boolean flag)
+    {
         updateFilter();
     }
 
-    public boolean onChildClick(ExpandableListView expandableListView, View view, int i, int i2, long j) {
-        SLObjectDisplayInfo child;
-        ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter();
-        if (!(expandableListAdapter instanceof ObjectListAdapter) || (child = ((ObjectListAdapter) expandableListAdapter).getChild(i, i2)) == null) {
-            return true;
+    public boolean onChildClick(ExpandableListView expandablelistview, View view, int i, int j, long l)
+    {
+        expandablelistview = expandablelistview.getExpandableListAdapter();
+        if (expandablelistview instanceof ObjectListAdapter)
+        {
+            expandablelistview = ((ObjectListAdapter)expandablelistview).getChild(i, j);
+            if (expandablelistview != null)
+            {
+                showObjectDetails(expandablelistview);
+            }
         }
-        showObjectDetails(child);
         return true;
     }
 
-    public void onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    public void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
         setHasOptionsMenu(true);
     }
 
-    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        super.onCreateOptionsMenu(menu, menuInflater);
-        menuInflater.inflate(R.menu.menu_object_selector, menu);
-        this.searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
-        this.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            public boolean onQueryTextChange(String str) {
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuinflater)
+    {
+        super.onCreateOptionsMenu(menu, menuinflater);
+        menuinflater.inflate(0x7f120012, menu);
+        searchView = (SearchView)MenuItemCompat.getActionView(menu.findItem(0x7f100330));
+        searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+
+            final ObjectSelectorFragment this$0;
+
+            public boolean onQueryTextChange(String s)
+            {
                 Debug.Printf("searchview: textchange", new Object[0]);
-                ObjectSelectorFragment.this.updateFilter();
+                ObjectSelectorFragment._2D_wrap0(ObjectSelectorFragment.this);
                 return true;
             }
 
-            public boolean onQueryTextSubmit(String str) {
+            public boolean onQueryTextSubmit(String s)
+            {
                 return true;
             }
+
+            
+            {
+                this$0 = ObjectSelectorFragment.this;
+                super();
+            }
         });
-        MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.action_search), new MenuItemCompat.OnActionExpandListener() {
-            public boolean onMenuItemActionCollapse(MenuItem menuItem) {
-                View view = ObjectSelectorFragment.this.getView();
-                if (view != null) {
-                    view.findViewById(R.id.filterPanel).setVisibility(8);
-                    Animation animation = view.findViewById(R.id.filterPanel).getAnimation();
-                    if (animation != null) {
-                        animation.cancel();
+        MenuItemCompat.setOnActionExpandListener(menu.findItem(0x7f100330), new android.support.v4.view.MenuItemCompat.OnActionExpandListener() {
+
+            final ObjectSelectorFragment this$0;
+
+            public boolean onMenuItemActionCollapse(MenuItem menuitem)
+            {
+                menuitem = getView();
+                if (menuitem != null)
+                {
+                    menuitem.findViewById(0x7f100229).setVisibility(8);
+                    menuitem = menuitem.findViewById(0x7f100229).getAnimation();
+                    if (menuitem != null)
+                    {
+                        menuitem.cancel();
                     }
                 }
-                ObjectSelectorFragment.this.updateFilter();
+                ObjectSelectorFragment._2D_wrap0(ObjectSelectorFragment.this);
                 return true;
             }
 
-            public boolean onMenuItemActionExpand(MenuItem menuItem) {
-                View view = ObjectSelectorFragment.this.getView();
-                if (view != null) {
-                    view.findViewById(R.id.filterPanel).setVisibility(0);
-                    view.findViewById(R.id.filterPanel).startAnimation(AnimationUtils.loadAnimation(ObjectSelectorFragment.this.getContext(), R.anim.slide_from_above));
+            public boolean onMenuItemActionExpand(MenuItem menuitem)
+            {
+                menuitem = getView();
+                if (menuitem != null)
+                {
+                    menuitem.findViewById(0x7f100229).setVisibility(0);
+                    Animation animation = AnimationUtils.loadAnimation(getContext(), 0x7f05000f);
+                    menuitem.findViewById(0x7f100229).startAnimation(animation);
                 }
-                ObjectSelectorFragment.this.updateFilter();
+                ObjectSelectorFragment._2D_wrap0(ObjectSelectorFragment.this);
                 return true;
+            }
+
+            
+            {
+                this$0 = ObjectSelectorFragment.this;
+                super();
             }
         });
     }
 
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        super.onCreateView(layoutInflater, viewGroup, bundle);
-        View inflate = layoutInflater.inflate(R.layout.object_list, viewGroup, false);
-        ((ExpandableListView) inflate.findViewById(R.id.objectListView)).setAdapter(new ObjectListAdapter(layoutInflater.getContext()));
-        ((ExpandableListView) inflate.findViewById(R.id.objectListView)).setOnGroupClickListener(this);
-        ((ExpandableListView) inflate.findViewById(R.id.objectListView)).setOnChildClickListener(this);
-        ((SeekBar) inflate.findViewById(R.id.objectListSeekBar)).setMax(256);
-        ((SeekBar) inflate.findViewById(R.id.objectListSeekBar)).setOnSeekBarChangeListener(this);
-        ((CheckBox) inflate.findViewById(R.id.includeAttachments)).setOnCheckedChangeListener(this);
-        ((CheckBox) inflate.findViewById(R.id.includeStubs)).setOnCheckedChangeListener(this);
-        ((CheckBox) inflate.findViewById(R.id.includeNonTouchable)).setOnCheckedChangeListener(this);
-        if (Build.VERSION.SDK_INT >= 14) {
-            ButteryProgressBar butteryProgressBar = new ButteryProgressBar(layoutInflater.getContext());
-            butteryProgressBar.setId(R.id.object_progress_bar);
-            ((FrameLayout) inflate.findViewById(R.id.object_list_root_layout)).addView(butteryProgressBar, new FrameLayout.LayoutParams(-1, (int) TypedValue.applyDimension(1, 4.0f, layoutInflater.getContext().getResources().getDisplayMetrics())));
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        super.onCreateView(layoutinflater, viewgroup, bundle);
+        viewgroup = layoutinflater.inflate(0x7f040076, viewgroup, false);
+        ((ExpandableListView)viewgroup.findViewById(0x7f100231)).setAdapter(new ObjectListAdapter(layoutinflater.getContext()));
+        ((ExpandableListView)viewgroup.findViewById(0x7f100231)).setOnGroupClickListener(this);
+        ((ExpandableListView)viewgroup.findViewById(0x7f100231)).setOnChildClickListener(this);
+        ((SeekBar)viewgroup.findViewById(0x7f10022b)).setMax(256);
+        ((SeekBar)viewgroup.findViewById(0x7f10022b)).setOnSeekBarChangeListener(this);
+        ((CheckBox)viewgroup.findViewById(0x7f10022f)).setOnCheckedChangeListener(this);
+        ((CheckBox)viewgroup.findViewById(0x7f100230)).setOnCheckedChangeListener(this);
+        ((CheckBox)viewgroup.findViewById(0x7f10022e)).setOnCheckedChangeListener(this);
+        if (android.os.Build.VERSION.SDK_INT >= 14)
+        {
+            bundle = new ButteryProgressBar(layoutinflater.getContext());
+            bundle.setId(0x7f100021);
+            ((FrameLayout)viewgroup.findViewById(0x7f100228)).addView(bundle, new android.widget.FrameLayout.LayoutParams(-1, (int)TypedValue.applyDimension(1, 4F, layoutinflater.getContext().getResources().getDisplayMetrics())));
         }
-        return inflate;
+        return viewgroup;
     }
 
-    public boolean onGroupClick(ExpandableListView expandableListView, View view, int i, long j) {
-        SLObjectDisplayInfo group;
-        Debug.Printf("displayObjects: onGroupClick: view %s id %d", view, Integer.valueOf(view.getId()));
-        ExpandableListAdapter expandableListAdapter = expandableListView.getExpandableListAdapter();
-        if ((expandableListAdapter instanceof ObjectListAdapter) && (group = ((ObjectListAdapter) expandableListAdapter).getGroup(i)) != null) {
-            showObjectDetails(group);
+    public boolean onGroupClick(ExpandableListView expandablelistview, View view, int i, long l)
+    {
+        Debug.Printf("displayObjects: onGroupClick: view %s id %d", new Object[] {
+            view, Integer.valueOf(view.getId())
+        });
+        expandablelistview = expandablelistview.getExpandableListAdapter();
+        if (expandablelistview instanceof ObjectListAdapter)
+        {
+            expandablelistview = ((ObjectListAdapter)expandablelistview).getGroup(i);
+            if (expandablelistview != null)
+            {
+                showObjectDetails(expandablelistview);
+            }
         }
         return true;
     }
 
-    public void onProgressChanged(SeekBar seekBar, int i, boolean z) {
-        View view = getView();
-        if (view != null) {
-            ((TextView) view.findViewById(R.id.objectListRangeDisplay)).setText(getString(R.string.object_range_format, Integer.valueOf(i)));
-            if (z) {
+    public void onProgressChanged(SeekBar seekbar, int i, boolean flag)
+    {
+        seekbar = getView();
+        if (seekbar != null)
+        {
+            ((TextView)seekbar.findViewById(0x7f10022c)).setText(getString(0x7f090244, new Object[] {
+                Integer.valueOf(i)
+            }));
+            if (flag)
+            {
                 updateFilter();
             }
         }
     }
 
-    public void onStart() {
-        SLModules modules;
-        int i = 256;
+    public void onStart()
+    {
+        Object obj;
+        int i;
+        i = 256;
         super.onStart();
-        UserManager userManager = getUserManager();
-        if (userManager != null) {
-            userManager.getObjectsManager().setFilter(this.filterInfo);
-            this.subscription = userManager.getObjectsManager().getObjectDisplayList().subscribe(SubscriptionSingleKey.Value, UIThreadExecutor.getInstance(), this.onObjectListData, this.onObjectListError);
-            SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit();
-            if (activeAgentCircuit != null && (modules = activeAgentCircuit.getModules()) != null) {
-                modules.drawDistance.EnableObjectSelect();
-                View view = getView();
-                if (view != null) {
-                    int objectSelectRange = (int) modules.drawDistance.getObjectSelectRange();
-                    if (objectSelectRange < 1) {
-                        i = 1;
-                    } else if (objectSelectRange <= 256) {
-                        i = objectSelectRange;
-                    }
-                    ((SeekBar) view.findViewById(R.id.objectListSeekBar)).setProgress(i);
+        obj = getUserManager();
+        if (obj == null) goto _L2; else goto _L1
+_L1:
+        ((UserManager) (obj)).getObjectsManager().setFilter(filterInfo);
+        subscription = ((UserManager) (obj)).getObjectsManager().getObjectDisplayList().subscribe(SubscriptionSingleKey.Value, UIThreadExecutor.getInstance(), onObjectListData, onObjectListError);
+        obj = ((UserManager) (obj)).getActiveAgentCircuit();
+        if (obj == null) goto _L2; else goto _L3
+_L3:
+        obj = ((SLAgentCircuit) (obj)).getModules();
+        if (obj == null) goto _L2; else goto _L4
+_L4:
+        View view;
+        ((SLModules) (obj)).drawDistance.EnableObjectSelect();
+        view = getView();
+        if (view == null) goto _L2; else goto _L5
+_L5:
+        int j = (int)((SLModules) (obj)).drawDistance.getObjectSelectRange();
+        if (j >= 1) goto _L7; else goto _L6
+_L6:
+        i = 1;
+_L9:
+        ((SeekBar)view.findViewById(0x7f10022b)).setProgress(i);
+_L2:
+        return;
+_L7:
+        if (j <= 256)
+        {
+            i = j;
+        }
+        if (true) goto _L9; else goto _L8
+_L8:
+    }
+
+    public void onStartTrackingTouch(SeekBar seekbar)
+    {
+    }
+
+    public void onStop()
+    {
+        if (subscription != null)
+        {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+        Object obj = getUserManager();
+        if (obj != null)
+        {
+            obj = ((UserManager) (obj)).getActiveAgentCircuit();
+            if (obj != null)
+            {
+                obj = ((SLAgentCircuit) (obj)).getModules();
+                if (obj != null)
+                {
+                    ((SLModules) (obj)).drawDistance.DisableObjectSelect();
                 }
             }
-        }
-    }
-
-    public void onStartTrackingTouch(SeekBar seekBar) {
-    }
-
-    public void onStop() {
-        SLAgentCircuit activeAgentCircuit;
-        SLModules modules;
-        if (this.subscription != null) {
-            this.subscription.unsubscribe();
-            this.subscription = null;
-        }
-        UserManager userManager = getUserManager();
-        if (!(userManager == null || (activeAgentCircuit = userManager.getActiveAgentCircuit()) == null || (modules = activeAgentCircuit.getModules()) == null)) {
-            modules.drawDistance.DisableObjectSelect();
         }
         super.onStop();
     }
 
-    public void onStopTrackingTouch(SeekBar seekBar) {
+    public void onStopTrackingTouch(SeekBar seekbar)
+    {
     }
 }

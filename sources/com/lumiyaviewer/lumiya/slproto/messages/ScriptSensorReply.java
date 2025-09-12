@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.types.LLQuaternion;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
@@ -9,17 +12,26 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class ScriptSensorReply extends SLMessage {
-    public Requester Requester_Field;
-    public ArrayList<SensedData> SensedData_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class Requester {
+public class ScriptSensorReply extends SLMessage
+{
+    public static class Requester
+    {
+
         public UUID SourceID;
+
+        public Requester()
+        {
+        }
     }
 
-    public static class SensedData {
+    public static class SensedData
+    {
+
         public UUID GroupID;
-        public byte[] Name;
+        public byte Name[];
         public UUID ObjectID;
         public UUID OwnerID;
         public LLVector3 Position;
@@ -27,63 +39,77 @@ public class ScriptSensorReply extends SLMessage {
         public LLQuaternion Rotation;
         public int Type;
         public LLVector3 Velocity;
-    }
 
-    public ScriptSensorReply() {
-        this.zeroCoded = true;
-        this.Requester_Field = new Requester();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 21;
-        Iterator<T> it = this.SensedData_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            i = ((SensedData) it.next()).Name.length + 85 + 4 + 4 + i2;
+        public SensedData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleScriptSensorReply(this);
+
+    public Requester Requester_Field;
+    public ArrayList SensedData_Fields;
+
+    public ScriptSensorReply()
+    {
+        SensedData_Fields = new ArrayList();
+        zeroCoded = true;
+        Requester_Field = new Requester();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -8);
-        packUUID(byteBuffer, this.Requester_Field.SourceID);
-        byteBuffer.put((byte) this.SensedData_Fields.size());
-        for (SensedData sensedData : this.SensedData_Fields) {
-            packUUID(byteBuffer, sensedData.ObjectID);
-            packUUID(byteBuffer, sensedData.OwnerID);
-            packUUID(byteBuffer, sensedData.GroupID);
-            packLLVector3(byteBuffer, sensedData.Position);
-            packLLVector3(byteBuffer, sensedData.Velocity);
-            packLLQuaternion(byteBuffer, sensedData.Rotation);
-            packVariable(byteBuffer, sensedData.Name, 1);
-            packInt(byteBuffer, sensedData.Type);
-            packFloat(byteBuffer, sensedData.Range);
-        }
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = SensedData_Fields.iterator();
+        int i;
+        for (i = 21; iterator.hasNext(); i = ((SensedData)iterator.next()).Name.length + 85 + 4 + 4 + i) { }
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.Requester_Field.SourceID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            SensedData sensedData = new SensedData();
-            sensedData.ObjectID = unpackUUID(byteBuffer);
-            sensedData.OwnerID = unpackUUID(byteBuffer);
-            sensedData.GroupID = unpackUUID(byteBuffer);
-            sensedData.Position = unpackLLVector3(byteBuffer);
-            sensedData.Velocity = unpackLLVector3(byteBuffer);
-            sensedData.Rotation = unpackLLQuaternion(byteBuffer);
-            sensedData.Name = unpackVariable(byteBuffer, 1);
-            sensedData.Type = unpackInt(byteBuffer);
-            sensedData.Range = unpackFloat(byteBuffer);
-            this.SensedData_Fields.add(sensedData);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleScriptSensorReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-8);
+        packUUID(bytebuffer, Requester_Field.SourceID);
+        bytebuffer.put((byte)SensedData_Fields.size());
+        SensedData senseddata;
+        for (Iterator iterator = SensedData_Fields.iterator(); iterator.hasNext(); packFloat(bytebuffer, senseddata.Range))
+        {
+            senseddata = (SensedData)iterator.next();
+            packUUID(bytebuffer, senseddata.ObjectID);
+            packUUID(bytebuffer, senseddata.OwnerID);
+            packUUID(bytebuffer, senseddata.GroupID);
+            packLLVector3(bytebuffer, senseddata.Position);
+            packLLVector3(bytebuffer, senseddata.Velocity);
+            packLLQuaternion(bytebuffer, senseddata.Rotation);
+            packVariable(bytebuffer, senseddata.Name, 1);
+            packInt(bytebuffer, senseddata.Type);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        Requester_Field.SourceID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            SensedData senseddata = new SensedData();
+            senseddata.ObjectID = unpackUUID(bytebuffer);
+            senseddata.OwnerID = unpackUUID(bytebuffer);
+            senseddata.GroupID = unpackUUID(bytebuffer);
+            senseddata.Position = unpackLLVector3(bytebuffer);
+            senseddata.Velocity = unpackLLVector3(bytebuffer);
+            senseddata.Rotation = unpackLLQuaternion(bytebuffer);
+            senseddata.Name = unpackVariable(bytebuffer, 1);
+            senseddata.Type = unpackInt(bytebuffer);
+            senseddata.Range = unpackFloat(bytebuffer);
+            SensedData_Fields.add(senseddata);
+        }
+
     }
 }

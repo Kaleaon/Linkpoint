@@ -1,14 +1,16 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.voice;
 
-import android.support.v4.app.NotificationCompat;
+import android.content.Context;
 import com.google.common.base.Objects;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.GlobalOptions;
 import com.lumiyaviewer.lumiya.GridConnectionService;
 import com.lumiyaviewer.lumiya.LumiyaApp;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.eventbus.EventBus;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
@@ -22,6 +24,8 @@ import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap;
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDString;
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUUID;
 import com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDUndefined;
+import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarControl;
+import com.lumiyaviewer.lumiya.slproto.modules.SLMinimap;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModule;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3d;
@@ -43,1317 +47,514 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nullable;
+import java.util.concurrent.Executor;
 
-public class SLVoice extends SLModule {
+public class SLVoice extends SLModule
+{
+
     private static final int INVALID_PARCEL_ID = -1;
     private static final int LOGIN_DELAY = 5;
     private static final int MAX_LOGIN_ATTEMPTS = 3;
     private final String capURL;
     private final String chatSessionRequestURL;
-    private volatile VoiceChannelInfo connectedVoiceChannel = null;
-    private int currentParcelID = -1;
-    private VoiceChannelInfo currentParcelVoiceChannel = null;
-    private int loginAttempts = 0;
+    private volatile VoiceChannelInfo connectedVoiceChannel;
+    private int currentParcelID;
+    private VoiceChannelInfo currentParcelVoiceChannel;
+    private int loginAttempts;
     private final String parcelVoiceCapURL;
     private final Object parcelVoiceChannelLock = new Object();
-    private final Set<UUID> requestedGroupChats = Collections.synchronizedSet(new HashSet());
-    private int requestedParcelID = -1;
-    private volatile boolean shutdown = false;
-    /* access modifiers changed from: private */
-    public final UserManager userManager = UserManager.getUserManager(this.agentCircuit.getAgentUUID());
-    private boolean voiceCredentialsRequested = false;
-    /* access modifiers changed from: private */
-    public volatile boolean voiceEnabled = false;
-    /* access modifiers changed from: private */
-    public volatile boolean voiceLoggedIn = false;
-    private final SubscriptionData<SubscriptionSingleKey, Boolean> voiceLoggedInSubscription = new SubscriptionData<>(UIThreadExecutor.getInstance(), new $Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY(this));
-    @Nullable
-    private volatile VoiceLoginInfo voiceLoginInfo = null;
-    /* access modifiers changed from: private */
-    @Nullable
-    public volatile VoicePluginServiceConnection voicePluginServiceConnection = null;
+    private final Set requestedGroupChats = Collections.synchronizedSet(new HashSet());
+    private int requestedParcelID;
+    private volatile boolean shutdown;
+    private final UserManager userManager;
+    private boolean voiceCredentialsRequested;
+    private volatile boolean voiceEnabled;
+    private volatile boolean voiceLoggedIn;
+    private final SubscriptionData voiceLoggedInSubscription = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.RETWaU3Ta92aG3GeBeXvI3Y9viY(this));
+    private volatile VoiceLoginInfo voiceLoginInfo;
+    private volatile VoicePluginServiceConnection voicePluginServiceConnection;
 
-    public SLVoice(SLAgentCircuit sLAgentCircuit, SLCaps sLCaps) {
-        super(sLAgentCircuit);
-        this.capURL = sLCaps.getCapability(SLCaps.SLCapability.ProvisionVoiceAccountRequest);
-        this.parcelVoiceCapURL = sLCaps.getCapability(SLCaps.SLCapability.ParcelVoiceInfoRequest);
-        this.chatSessionRequestURL = sLCaps.getCapability(SLCaps.SLCapability.ChatSessionRequest);
-        if (this.userManager != null) {
-            this.voiceLoggedInSubscription.subscribe(this.userManager.getVoiceLoggedIn(), SubscriptionSingleKey.Value);
+    static SLAgentCircuit _2D_get0(SLVoice slvoice)
+    {
+        return slvoice.agentCircuit;
+    }
+
+    static UserManager _2D_get1(SLVoice slvoice)
+    {
+        return slvoice.userManager;
+    }
+
+    static boolean _2D_get2(SLVoice slvoice)
+    {
+        return slvoice.voiceEnabled;
+    }
+
+    static boolean _2D_get3(SLVoice slvoice)
+    {
+        return slvoice.voiceLoggedIn;
+    }
+
+    static VoicePluginServiceConnection _2D_get4(SLVoice slvoice)
+    {
+        return slvoice.voicePluginServiceConnection;
+    }
+
+    public SLVoice(SLAgentCircuit slagentcircuit, SLCaps slcaps)
+    {
+        super(slagentcircuit);
+        voiceLoggedIn = false;
+        voiceEnabled = false;
+        voiceCredentialsRequested = false;
+        voicePluginServiceConnection = null;
+        connectedVoiceChannel = null;
+        shutdown = false;
+        loginAttempts = 0;
+        requestedParcelID = -1;
+        currentParcelID = -1;
+        currentParcelVoiceChannel = null;
+        voiceLoginInfo = null;
+        userManager = UserManager.getUserManager(agentCircuit.getAgentUUID());
+        capURL = slcaps.getCapability(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.ProvisionVoiceAccountRequest);
+        parcelVoiceCapURL = slcaps.getCapability(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.ParcelVoiceInfoRequest);
+        chatSessionRequestURL = slcaps.getCapability(com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability.ChatSessionRequest);
+        if (userManager != null)
+        {
+            voiceLoggedInSubscription.subscribe(userManager.getVoiceLoggedIn(), SubscriptionSingleKey.Value);
         }
-        if (this.capURL != null) {
-            Debug.Printf("Voice cap: '%s'", this.capURL);
-        } else {
+        if (capURL != null)
+        {
+            Debug.Printf("Voice cap: '%s'", new Object[] {
+                capURL
+            });
+        } else
+        {
             Debug.Printf("Voice cap not supported", new Object[0]);
         }
-        EventBus.getInstance().subscribe((Object) this);
+        EventBus.getInstance().subscribe(this);
         updateVoiceEnabledStatus();
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onParcelVoiceInfoResult */
-    public void m253com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref3(LLSDNode lLSDNode) {
-        if (lLSDNode != null) {
-            try {
-                Debug.Printf("SLVoice: parcel voice info '%s'", lLSDNode.serializeToXML());
-            } catch (Exception e) {
-                Debug.Warning(e);
-            }
+    private void onParcelVoiceInfoResult(LLSDNode llsdnode)
+    {
+        if (llsdnode == null)
+        {
+            break MISSING_BLOCK_LABEL_20;
         }
+        Debug.Printf("SLVoice: parcel voice info '%s'", new Object[] {
+            llsdnode.serializeToXML()
+        });
+        return;
+        llsdnode;
+        Debug.Warning(llsdnode);
+        return;
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onProvisionVoiceAccountResult */
-    public void m252com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref2(LLSDNode lLSDNode) {
-        if (lLSDNode != null) {
-            try {
-                Debug.Printf("SLVoice: result '%s'", lLSDNode.serializeToXML());
-                this.voiceLoginInfo = new VoiceLoginInfo(lLSDNode.byKey("voice_sip_uri_hostname").asString(), lLSDNode.byKey("voice_account_server_name").asString(), this.agentCircuit.getAgentUUID(), lLSDNode.byKey("username").asString(), lLSDNode.byKey("password").asString());
-                updateVoiceEnabledStatus();
-            } catch (Exception e) {
-                Debug.Warning(e);
+    private void onProvisionVoiceAccountResult(LLSDNode llsdnode)
+    {
+        if (llsdnode == null)
+        {
+            break MISSING_BLOCK_LABEL_85;
+        }
+        Debug.Printf("SLVoice: result '%s'", new Object[] {
+            llsdnode.serializeToXML()
+        });
+        voiceLoginInfo = new VoiceLoginInfo(llsdnode.byKey("voice_sip_uri_hostname").asString(), llsdnode.byKey("voice_account_server_name").asString(), agentCircuit.getAgentUUID(), llsdnode.byKey("username").asString(), llsdnode.byKey("password").asString());
+        updateVoiceEnabledStatus();
+_L1:
+        return;
+        llsdnode;
+        Debug.Warning(llsdnode);
+        return;
+        Debug.Printf("SLVoice: null result", new Object[0]);
+        if (!shutdown && loginAttempts < 3 && voiceEnabled)
+        {
+            loginAttempts = loginAttempts + 1;
+            try
+            {
+                Thread.sleep(5000L);
+                if (!shutdown && voiceEnabled)
+                {
+                    new LLSDXMLAsyncRequest(capURL, new LLSDUndefined(), new _2D_.Lambda.RETWaU3Ta92aG3GeBeXvI3Y9viY._cls2(this));
+                    return;
+                }
             }
-        } else {
-            Debug.Printf("SLVoice: null result", new Object[0]);
-            if (this.shutdown || this.loginAttempts >= 3 || !this.voiceEnabled) {
-                Debug.Printf("SLVoice: giving up", new Object[0]);
+            // Misplaced declaration of an exception variable
+            catch (LLSDNode llsdnode)
+            {
+                Debug.Warning(llsdnode);
                 return;
             }
-            this.loginAttempts++;
-            try {
-                Thread.sleep(5000);
-                if (!this.shutdown && this.voiceEnabled) {
-                    new LLSDXMLAsyncRequest(this.capURL, new LLSDUndefined(), new LLSDXMLAsyncRequest.LLSDXMLResultListener(this) {
-
-                        /* renamed from: -$f0 */
-                        private final /* synthetic */ Object f133$f0;
-
-                        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.2.$m$0(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, dex: classes.dex
-                        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.2.$m$0(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, class status: UNLOADED
-                        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                        	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeTryCatch(RegionGen.java:311)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:68)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:156)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                        	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                        
-*/
-
-                        public final void onLLSDXMLResult(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.2.onLLSDXMLResult(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, dex: classes.dex
-                        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.2.onLLSDXMLResult(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, class status: UNLOADED
-                        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                        	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeTryCatch(RegionGen.java:311)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:68)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:156)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                        	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                        
-*/
-                    });
-                }
-            } catch (InterruptedException e2) {
-                Debug.Warning(e2);
-            }
+        } else
+        {
+            Debug.Printf("SLVoice: giving up", new Object[0]);
+            return;
         }
+          goto _L1
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onVoiceLoginStatusChanged */
-    public void m250com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref0(Boolean bool) {
-        this.voiceLoggedIn = bool != null ? bool.booleanValue() : false;
+    private void onVoiceLoginStatusChanged(Boolean boolean1)
+    {
+        boolean flag;
+        if (boolean1 != null)
+        {
+            flag = boolean1.booleanValue();
+        } else
+        {
+            flag = false;
+        }
+        voiceLoggedIn = flag;
     }
 
-    public void HandleCloseCircuit() {
-        this.shutdown = true;
-        this.voiceLoggedInSubscription.unsubscribe();
+    void _2D_com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_2D_mthref_2D_0(Boolean boolean1)
+    {
+        onVoiceLoginStatusChanged(boolean1);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_2D_mthref_2D_1(LLSDNode llsdnode)
+    {
+        onProvisionVoiceAccountResult(llsdnode);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_2D_mthref_2D_2(LLSDNode llsdnode)
+    {
+        onProvisionVoiceAccountResult(llsdnode);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_2D_mthref_2D_3(LLSDNode llsdnode)
+    {
+        onParcelVoiceInfoResult(llsdnode);
+    }
+
+    public void HandleCloseCircuit()
+    {
+        shutdown = true;
+        voiceLoggedInSubscription.unsubscribe();
         super.HandleCloseCircuit();
     }
 
-    public VoiceChannelInfo getCurrentParcelVoiceChannel() {
-        VoiceChannelInfo voiceChannelInfo;
-        synchronized (this.parcelVoiceChannelLock) {
-            voiceChannelInfo = this.currentParcelVoiceChannel;
-        }
-        return voiceChannelInfo;
+    public VoiceChannelInfo getCurrentParcelVoiceChannel()
+    {
+        Object obj = parcelVoiceChannelLock;
+        obj;
+        JVM INSTR monitorenter ;
+        VoiceChannelInfo voicechannelinfo = currentParcelVoiceChannel;
+        obj;
+        JVM INSTR monitorexit ;
+        return voicechannelinfo;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    @Nullable
-    public VoiceLoginInfo getVoiceLoginInfo() {
-        return this.voiceLoginInfo;
+    public VoiceLoginInfo getVoiceLoginInfo()
+    {
+        return voiceLoginInfo;
     }
 
-    public boolean groupVoiceChatRequest(UUID uuid) {
-        if (!this.voiceEnabled || !this.voiceLoggedIn || this.chatSessionRequestURL == null) {
+    public boolean groupVoiceChatRequest(UUID uuid)
+    {
+        if (voiceEnabled && voiceLoggedIn && chatSessionRequestURL != null)
+        {
+            requestedGroupChats.add(uuid);
+            agentCircuit.StartGroupSessionForVoice(uuid);
+            return true;
+        } else
+        {
             return false;
         }
-        this.requestedGroupChats.add(uuid);
-        this.agentCircuit.StartGroupSessionForVoice(uuid);
-        return true;
     }
 
-    /* synthetic */ void handleParcelVoiceInfo(int i, LLSDNode lLSDNode) {
-        boolean z;
-        VoiceChannelInfo voiceChannelInfo;
-        this.currentParcelID = i;
-        if (lLSDNode != null) {
-            synchronized (this.parcelVoiceChannelLock) {
-                try {
-                    voiceChannelInfo = new VoiceChannelInfo(lLSDNode.byKey("voice_credentials").byKey("channel_uri").asString(), true, true);
-                } catch (LLSDException e) {
-                    Debug.Printf("Voice: error retrieving parcel voice info for %d (%s)", Integer.valueOf(i), e.getMessage());
-                    voiceChannelInfo = null;
-                }
-                if (!Objects.equal(this.currentParcelVoiceChannel, voiceChannelInfo)) {
-                    this.currentParcelVoiceChannel = voiceChannelInfo;
-                    z = true;
-                } else {
-                    z = false;
-                }
-            }
-        } else {
-            Debug.Printf("Voice: error retrieving parcel voice info for %d", Integer.valueOf(i));
-            z = false;
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_12525(int i, LLSDNode llsdnode)
+    {
+        currentParcelID = i;
+        if (llsdnode == null) goto _L2; else goto _L1
+_L1:
+        Object obj = parcelVoiceChannelLock;
+        obj;
+        JVM INSTR monitorenter ;
+        llsdnode = new VoiceChannelInfo(llsdnode.byKey("voice_credentials").byKey("channel_uri").asString(), true, true);
+_L3:
+        if (Objects.equal(currentParcelVoiceChannel, llsdnode))
+        {
+            break MISSING_BLOCK_LABEL_137;
         }
-        if (z) {
-            this.agentCircuit.getModules().minimap.requestUpdateAvatarParcelData();
+        currentParcelVoiceChannel = llsdnode;
+        i = 1;
+_L5:
+        obj;
+        JVM INSTR monitorexit ;
+_L4:
+        if (i != 0)
+        {
+            agentCircuit.getModules().minimap.requestUpdateAvatarParcelData();
         }
+        return;
+        llsdnode;
+        Debug.Printf("Voice: error retrieving parcel voice info for %d (%s)", new Object[] {
+            Integer.valueOf(i), llsdnode.getMessage()
+        });
+        llsdnode = null;
+          goto _L3
+        llsdnode;
+        throw llsdnode;
+_L2:
+        Debug.Printf("Voice: error retrieving parcel voice info for %d", new Object[] {
+            Integer.valueOf(i)
+        });
+        i = 0;
+          goto _L4
+        i = 0;
+          goto _L5
     }
 
-    /* synthetic */ void handleVoiceLoginStatus(VoiceLoginStatus voiceLoginStatus, VoicePluginServiceConnection voicePluginServiceConnection2) {
-        if (voiceLoginStatus.loggedIn) {
-            this.voicePluginServiceConnection = voicePluginServiceConnection2;
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_14030(VoiceLoginStatus voiceloginstatus, VoicePluginServiceConnection voicepluginserviceconnection)
+    {
+        if (voiceloginstatus.loggedIn)
+        {
+            voicePluginServiceConnection = voicepluginserviceconnection;
+            return;
+        } else
+        {
+            voicePluginServiceConnection = null;
+            connectedVoiceChannel = null;
             return;
         }
-        this.voicePluginServiceConnection = null;
-        this.connectedVoiceChannel = null;
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void handleVoiceChannelStatusUpdate(VoiceChannelStatus voiceChannelStatus) {
-        if (voiceChannelStatus.errorMessage != null) {
-            if (this.connectedVoiceChannel != null && Objects.equal(this.connectedVoiceChannel.voiceChannelURI, voiceChannelStatus.channelInfo.voiceChannelURI)) {
-                this.connectedVoiceChannel = null;
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_14408(VoiceChannelStatus voicechannelstatus)
+    {
+        if (voicechannelstatus.errorMessage == null) goto _L2; else goto _L1
+_L1:
+        if (connectedVoiceChannel != null && Objects.equal(connectedVoiceChannel.voiceChannelURI, voicechannelstatus.channelInfo.voiceChannelURI))
+        {
+            connectedVoiceChannel = null;
+        }
+_L4:
+        return;
+_L2:
+        if (voicechannelstatus.chatInfo.state != com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo.VoiceChatState.None)
+        {
+            continue; /* Loop/switch isn't completed */
+        }
+        if (connectedVoiceChannel != null && Objects.equal(connectedVoiceChannel.voiceChannelURI, voicechannelstatus.channelInfo.voiceChannelURI))
+        {
+            connectedVoiceChannel = null;
+            return;
+        }
+        continue; /* Loop/switch isn't completed */
+        if (voicechannelstatus.chatInfo.state != com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo.VoiceChatState.Active) goto _L4; else goto _L3
+_L3:
+        connectedVoiceChannel = voicechannelstatus.channelInfo;
+        if (voiceLoggedIn && voicechannelstatus.channelInfo.isSpatial)
+        {
+            updateSpatialVoicePosition();
+            return;
+        }
+        if (true) goto _L4; else goto _L5
+_L5:
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_4388()
+    {
+        voiceEnabled = GlobalOptions.getInstance().getVoiceEnabled();
+        if (!voiceEnabled) goto _L2; else goto _L1
+_L1:
+        if (voiceCredentialsRequested) goto _L4; else goto _L3
+_L3:
+        voiceCredentialsRequested = true;
+        if (capURL != null)
+        {
+            new LLSDXMLAsyncRequest(capURL, new LLSDUndefined(), new _2D_.Lambda.RETWaU3Ta92aG3GeBeXvI3Y9viY._cls1(this));
+        }
+_L6:
+        return;
+_L4:
+        if (voiceLoginInfo != null && voiceLoggedIn ^ true)
+        {
+            GridConnectionService gridconnectionservice = GridConnectionService.getServiceInstance();
+            if (gridconnectionservice != null)
+            {
+                gridconnectionservice.startVoice(voiceLoginInfo, UserManager.getUserManager(agentCircuit.getAgentUUID()));
+                return;
             }
-        } else if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.None) {
-            if (this.connectedVoiceChannel != null && Objects.equal(this.connectedVoiceChannel.voiceChannelURI, voiceChannelStatus.channelInfo.voiceChannelURI)) {
-                this.connectedVoiceChannel = null;
-            }
-        } else if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.Active) {
-            this.connectedVoiceChannel = voiceChannelStatus.channelInfo;
-            if (this.voiceLoggedIn && voiceChannelStatus.channelInfo.isSpatial) {
-                updateSpatialVoicePosition();
-            }
+        }
+        continue; /* Loop/switch isn't completed */
+_L2:
+        GridConnectionService gridconnectionservice1 = GridConnectionService.getServiceInstance();
+        if (gridconnectionservice1 != null)
+        {
+            gridconnectionservice1.stopVoice();
+            return;
+        }
+        if (true) goto _L6; else goto _L5
+_L5:
+    }
+
+    public void nearbyVoiceChatRequest(VoiceChannelInfo voicechannelinfo)
+    {
+        VoicePluginServiceConnection voicepluginserviceconnection = voicePluginServiceConnection;
+        if (voiceEnabled && voiceLoggedIn && voicepluginserviceconnection != null)
+        {
+            voicepluginserviceconnection.addChannel(ChatterID.getLocalChatterID(userManager.getUserID()), voicechannelinfo);
+            voicepluginserviceconnection.sendMessage(VoicePluginMessageType.VoiceConnectChannel, new VoiceConnectChannel(voicechannelinfo, null));
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void processVoiceConfigurationUpdate() {
-        GridConnectionService serviceInstance;
-        this.voiceEnabled = GlobalOptions.getInstance().getVoiceEnabled();
-        if (!this.voiceEnabled) {
-            GridConnectionService serviceInstance2 = GridConnectionService.getServiceInstance();
-            if (serviceInstance2 != null) {
-                serviceInstance2.stopVoice();
-            }
-        } else if (!this.voiceCredentialsRequested) {
-            this.voiceCredentialsRequested = true;
-            if (this.capURL != null) {
-                new LLSDXMLAsyncRequest(this.capURL, new LLSDUndefined(), new LLSDXMLAsyncRequest.LLSDXMLResultListener(this) {
-
-                    /* renamed from: -$f0 */
-                    private final /* synthetic */ Object f132$f0;
-
-                    private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.1.$m$0(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.1.$m$0(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.connectElseIf(RegionGen.java:175)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:152)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
-
-                    public final void onLLSDXMLResult(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.1.onLLSDXMLResult(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.1.onLLSDXMLResult(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.connectElseIf(RegionGen.java:175)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:152)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
-                });
-            }
-        } else if (this.voiceLoginInfo != null && (!this.voiceLoggedIn) && (serviceInstance = GridConnectionService.getServiceInstance()) != null) {
-            serviceInstance.startVoice(this.voiceLoginInfo, UserManager.getUserManager(this.agentCircuit.getAgentUUID()));
-        }
-    }
-
-    public void nearbyVoiceChatRequest(VoiceChannelInfo voiceChannelInfo) {
-        VoicePluginServiceConnection voicePluginServiceConnection2 = this.voicePluginServiceConnection;
-        if (this.voiceEnabled && this.voiceLoggedIn && voicePluginServiceConnection2 != null) {
-            voicePluginServiceConnection2.addChannel(ChatterID.getLocalChatterID(this.userManager.getUserID()), voiceChannelInfo);
-            voicePluginServiceConnection2.sendMessage(VoicePluginMessageType.VoiceConnectChannel, new VoiceConnectChannel(voiceChannelInfo, (String) null));
-        }
-    }
-
-    @EventHandler
-    public void onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
+    public void onGlobalOptionsChanged(com.lumiyaviewer.lumiya.GlobalOptions.GlobalOptionsChangedEvent globaloptionschangedevent)
+    {
         updateVoiceEnabledStatus();
     }
 
-    public void onGroupSessionReady(final UUID uuid) {
-        if (this.requestedGroupChats.remove(uuid) && this.chatSessionRequestURL != null) {
-            new LLSDXMLAsyncRequest(this.chatSessionRequestURL, new LLSDMap(new LLSDMap.LLSDMapEntry("method", new LLSDString(NotificationCompat.CATEGORY_CALL)), new LLSDMap.LLSDMapEntry("session-id", new LLSDUUID(uuid))), new LLSDXMLAsyncRequest.LLSDXMLResultListener() {
-                public void onLLSDXMLResult(LLSDNode lLSDNode) {
-                    ChatterID groupChatterID = ChatterID.getGroupChatterID(SLVoice.this.userManager.getUserID(), uuid);
-                    if (lLSDNode == null) {
-                        try {
-                            throw new LLSDException("Null result");
-                        } catch (LLSDException e) {
-                            SLVoice.this.agentCircuit.HandleChatEvent(groupChatterID, new SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), SLVoice.this.userManager.getUserID(), LumiyaApp.getContext().getString(R.string.failed_to_connect_group_voice)), false);
-                            Debug.Warning(e);
-                        }
-                    } else {
-                        String asString = lLSDNode.byKey("voice_credentials").byKey("channel_uri").asString();
-                        String asString2 = lLSDNode.byKey("voice_credentials").byKey("channel_credentials").asString();
-                        VoicePluginServiceConnection r3 = SLVoice.this.voicePluginServiceConnection;
-                        if (SLVoice.this.voiceEnabled && SLVoice.this.voiceLoggedIn && r3 != null) {
-                            VoiceChannelInfo voiceChannelInfo = new VoiceChannelInfo(asString, false, true);
-                            r3.addChannel(groupChatterID, voiceChannelInfo);
-                            r3.sendMessage(VoicePluginMessageType.VoiceConnectChannel, new VoiceConnectChannel(voiceChannelInfo, asString2));
-                        }
+    public void onGroupSessionReady(final UUID groupID)
+    {
+        if (requestedGroupChats.remove(groupID) && chatSessionRequestURL != null)
+        {
+            LLSDMap llsdmap = new LLSDMap(new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry[] {
+                new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry("method", new LLSDString("call")), new com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDMap.LLSDMapEntry("session-id", new LLSDUUID(groupID))
+            });
+            new LLSDXMLAsyncRequest(chatSessionRequestURL, llsdmap, new com.lumiyaviewer.lumiya.slproto.https.LLSDXMLAsyncRequest.LLSDXMLResultListener() {
+
+                final SLVoice this$0;
+                final UUID val$groupID;
+
+                public void onLLSDXMLResult(LLSDNode llsdnode)
+                {
+                    ChatterID chatterid = ChatterID.getGroupChatterID(SLVoice._2D_get1(SLVoice.this).getUserID(), groupID);
+                    if (llsdnode != null) goto _L2; else goto _L1
+_L1:
+                    try
+                    {
+                        throw new LLSDException("Null result");
                     }
+                    // Misplaced declaration of an exception variable
+                    catch (LLSDNode llsdnode)
+                    {
+                        SLVoice._2D_get0(SLVoice.this).HandleChatEvent(chatterid, new SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), SLVoice._2D_get1(SLVoice.this).getUserID(), LumiyaApp.getContext().getString(0x7f09011a)), false);
+                    }
+                    Debug.Warning(llsdnode);
+_L4:
+                    return;
+_L2:
+                    Object obj;
+                    VoicePluginServiceConnection voicepluginserviceconnection;
+                    obj = llsdnode.byKey("voice_credentials").byKey("channel_uri").asString();
+                    llsdnode = llsdnode.byKey("voice_credentials").byKey("channel_credentials").asString();
+                    voicepluginserviceconnection = SLVoice._2D_get4(SLVoice.this);
+                    if (!SLVoice._2D_get2(SLVoice.this) || !SLVoice._2D_get3(SLVoice.this) || voicepluginserviceconnection == null) goto _L4; else goto _L3
+_L3:
+                    obj = new VoiceChannelInfo(((String) (obj)), false, true);
+                    voicepluginserviceconnection.addChannel(chatterid, ((VoiceChannelInfo) (obj)));
+                    voicepluginserviceconnection.sendMessage(VoicePluginMessageType.VoiceConnectChannel, new VoiceConnectChannel(((VoiceChannelInfo) (obj)), llsdnode));
+                    return;
                 }
+
+            
+            {
+                this$0 = SLVoice.this;
+                groupID = uuid;
+                super();
+            }
             });
         }
     }
 
-    public void onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus) {
-        this.agentCircuit.execute(new Runnable(this, voiceChannelStatus) {
-
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f136$f0;
-
-            /* renamed from: -$f1 */
-            private final /* synthetic */ Object f137$f1;
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.5.$m$0():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.5.$m$0():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.5.run():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.5.run():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        });
+    public void onVoiceChannelStatus(VoiceChannelStatus voicechannelstatus)
+    {
+        agentCircuit.execute(new _2D_.Lambda.RETWaU3Ta92aG3GeBeXvI3Y9viY._cls5(this, voicechannelstatus));
     }
 
-    public void onVoiceLoginStatus(VoicePluginServiceConnection voicePluginServiceConnection2, VoiceLoginStatus voiceLoginStatus) {
-        this.agentCircuit.execute(new Runnable(this, voiceLoginStatus, voicePluginServiceConnection2) {
-
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f138$f0;
-
-            /* renamed from: -$f1 */
-            private final /* synthetic */ Object f139$f1;
-
-            /* renamed from: -$f2 */
-            private final /* synthetic */ Object f140$f2;
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.6.$m$0():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.6.$m$0():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.6.run():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.6.run():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        });
+    public void onVoiceLoginStatus(VoicePluginServiceConnection voicepluginserviceconnection, VoiceLoginStatus voiceloginstatus)
+    {
+        agentCircuit.execute(new _2D_.Lambda.RETWaU3Ta92aG3GeBeXvI3Y9viY._cls6(this, voiceloginstatus, voicepluginserviceconnection));
     }
 
-    public boolean requestParcelVoiceInfo() {
-        if (this.parcelVoiceCapURL == null) {
+    public boolean requestParcelVoiceInfo()
+    {
+        if (parcelVoiceCapURL != null)
+        {
+            new LLSDXMLAsyncRequest(parcelVoiceCapURL, new LLSDUndefined(), new _2D_.Lambda.RETWaU3Ta92aG3GeBeXvI3Y9viY._cls3(this));
+            return true;
+        } else
+        {
             return false;
         }
-        new LLSDXMLAsyncRequest(this.parcelVoiceCapURL, new LLSDUndefined(), new LLSDXMLAsyncRequest.LLSDXMLResultListener(this) {
-
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f134$f0;
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.3.$m$0(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.3.$m$0(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void onLLSDXMLResult(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.3.onLLSDXMLResult(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.3.onLLSDXMLResult(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        });
-        return true;
     }
 
-    public void setCurrentParcel(int i) {
-        boolean z = false;
-        synchronized (this.parcelVoiceChannelLock) {
-            if (!(this.parcelVoiceCapURL == null || this.capURL == null || this.requestedParcelID == i)) {
-                this.requestedParcelID = i;
-                z = true;
-            }
+    public void setCurrentParcel(int i)
+    {
+        boolean flag1 = false;
+        Object obj = parcelVoiceChannelLock;
+        obj;
+        JVM INSTR monitorenter ;
+        boolean flag = flag1;
+        if (parcelVoiceCapURL == null)
+        {
+            break MISSING_BLOCK_LABEL_52;
         }
-        if (z) {
-            new LLSDXMLAsyncRequest(this.parcelVoiceCapURL, new LLSDUndefined(), new LLSDXMLAsyncRequest.LLSDXMLResultListener(i, this) {
-
-                /* renamed from: -$f0 */
-                private final /* synthetic */ int f141$f0;
-
-                /* renamed from: -$f1 */
-                private final /* synthetic */ Object f142$f1;
-
-                private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.7.$m$0(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.7.$m$0(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-
-                public final void onLLSDXMLResult(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.7.onLLSDXMLResult(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.7.onLLSDXMLResult(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode):void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
-            });
+        flag = flag1;
+        if (capURL == null)
+        {
+            break MISSING_BLOCK_LABEL_52;
         }
+        flag = flag1;
+        if (requestedParcelID == i)
+        {
+            break MISSING_BLOCK_LABEL_52;
+        }
+        requestedParcelID = i;
+        flag = true;
+        obj;
+        JVM INSTR monitorexit ;
+        if (flag)
+        {
+            new LLSDXMLAsyncRequest(parcelVoiceCapURL, new LLSDUndefined(), new _2D_.Lambda.RETWaU3Ta92aG3GeBeXvI3Y9viY._cls7(i, this));
+        }
+        return;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public void updateSpatialVoicePosition() {
-        VoicePluginServiceConnection voicePluginServiceConnection2 = this.voicePluginServiceConnection;
-        VoiceChannelInfo voiceChannelInfo = this.connectedVoiceChannel;
-        if (voicePluginServiceConnection2 != null && voiceChannelInfo != null && voiceChannelInfo.isSpatial) {
-            LLVector3d agentGlobalPosition = this.agentCircuit.getAgentGlobalPosition();
-            SLModules modules = this.agentCircuit.getModules();
-            if (agentGlobalPosition != null && modules != null) {
-                float agentHeading = modules.avatarControl.getAgentHeading() * 0.017453292f;
-                float cos = (float) Math.cos((double) agentHeading);
-                float sin = (float) Math.sin((double) agentHeading);
-                Voice3DVector fromLLCoords = Voice3DVector.fromLLCoords(cos, sin, 0.0f);
-                Voice3DVector fromLLCoords2 = Voice3DVector.fromLLCoords(-sin, cos, 0.0f);
-                Voice3DPosition voice3DPosition = new Voice3DPosition(Voice3DVector.fromLLCoords((float) agentGlobalPosition.x, (float) agentGlobalPosition.y, (float) agentGlobalPosition.z), new Voice3DVector(0.0f, 0.0f, 0.0f), fromLLCoords, Voice3DVector.fromLLCoords(0.0f, 0.0f, 1.0f), fromLLCoords2);
-                voicePluginServiceConnection2.sendMessage(VoicePluginMessageType.VoiceSet3DPosition, new VoiceSet3DPosition(voiceChannelInfo, voice3DPosition, voice3DPosition));
+    public void updateSpatialVoicePosition()
+    {
+        VoicePluginServiceConnection voicepluginserviceconnection = voicePluginServiceConnection;
+        VoiceChannelInfo voicechannelinfo = connectedVoiceChannel;
+        if (voicepluginserviceconnection != null && voicechannelinfo != null && voicechannelinfo.isSpatial)
+        {
+            Object obj = agentCircuit.getAgentGlobalPosition();
+            Object obj1 = agentCircuit.getModules();
+            if (obj != null && obj1 != null)
+            {
+                float f1 = ((SLModules) (obj1)).avatarControl.getAgentHeading() * 0.01745329F;
+                float f = (float)Math.cos(f1);
+                f1 = (float)Math.sin(f1);
+                obj1 = Voice3DVector.fromLLCoords(f, f1, 0.0F);
+                Voice3DVector voice3dvector = Voice3DVector.fromLLCoords(-f1, f, 0.0F);
+                Voice3DVector voice3dvector1 = Voice3DVector.fromLLCoords(0.0F, 0.0F, 1.0F);
+                obj = new Voice3DPosition(Voice3DVector.fromLLCoords((float)((LLVector3d) (obj)).x, (float)((LLVector3d) (obj)).y, (float)((LLVector3d) (obj)).z), new Voice3DVector(0.0F, 0.0F, 0.0F), ((Voice3DVector) (obj1)), voice3dvector1, voice3dvector);
+                voicepluginserviceconnection.sendMessage(VoicePluginMessageType.VoiceSet3DPosition, new VoiceSet3DPosition(voicechannelinfo, ((Voice3DPosition) (obj)), ((Voice3DPosition) (obj))));
             }
         }
     }
 
-    public void updateVoiceEnabledStatus() {
-        UIThreadExecutor.getInstance().execute(new Runnable(this) {
-
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f135$f0;
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.4.$m$0():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.4.$m$0():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.4.run():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.modules.voice.-$Lambda$RETWaU3Ta92aG3GeBeXvI3Y9viY.4.run():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        });
+    public void updateVoiceEnabledStatus()
+    {
+        UIThreadExecutor.getInstance().execute(new _2D_.Lambda.RETWaU3Ta92aG3GeBeXvI3Y9viY._cls4(this));
     }
 
-    public boolean userVoiceChatRequest(UUID uuid) {
-        VoicePluginServiceConnection voicePluginServiceConnection2 = this.voicePluginServiceConnection;
-        VoiceLoginInfo voiceLoginInfo2 = this.voiceLoginInfo;
-        if (!this.voiceEnabled || !this.voiceLoggedIn || uuid == null || voicePluginServiceConnection2 == null || voiceLoginInfo2 == null || this.userManager == null) {
+    public boolean userVoiceChatRequest(UUID uuid)
+    {
+        VoicePluginServiceConnection voicepluginserviceconnection = voicePluginServiceConnection;
+        Object obj = voiceLoginInfo;
+        if (voiceEnabled && voiceLoggedIn && uuid != null && voicepluginserviceconnection != null && obj != null && userManager != null)
+        {
+            obj = new VoiceChannelInfo(uuid, ((VoiceLoginInfo) (obj)).voiceSipUriHostname);
+            voicepluginserviceconnection.addChannel(ChatterID.getUserChatterID(userManager.getUserID(), uuid), ((VoiceChannelInfo) (obj)));
+            voicepluginserviceconnection.sendMessage(VoicePluginMessageType.VoiceConnectChannel, new VoiceConnectChannel(((VoiceChannelInfo) (obj)), null));
+            return true;
+        } else
+        {
             return false;
         }
-        VoiceChannelInfo voiceChannelInfo = new VoiceChannelInfo(uuid, voiceLoginInfo2.voiceSipUriHostname);
-        voicePluginServiceConnection2.addChannel(ChatterID.getUserChatterID(this.userManager.getUserID(), uuid), voiceChannelInfo);
-        voicePluginServiceConnection2.sendMessage(VoicePluginMessageType.VoiceConnectChannel, new VoiceConnectChannel(voiceChannelInfo, (String) null));
-        return true;
     }
 }

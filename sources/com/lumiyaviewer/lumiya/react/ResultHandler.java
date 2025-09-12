@@ -1,9 +1,14 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
-import javax.annotation.Nonnull;
 
-public interface ResultHandler<K, T> {
-    void onResultData(@Nonnull K k, T t);
+public interface ResultHandler
+{
 
-    void onResultError(@Nonnull K k, Throwable th);
+    public abstract void onResultData(Object obj, Object obj1);
+
+    public abstract void onResultError(Object obj, Throwable throwable);
 }

@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
@@ -5,59 +9,90 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class AgentMovementComplete extends SLMessage {
-    public AgentData AgentData_Field = new AgentData();
-    public Data Data_Field = new Data();
-    public SimData SimData_Field = new SimData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class AgentMovementComplete extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class Data {
+    public static class Data
+    {
+
         public LLVector3 LookAt;
         public LLVector3 Position;
         public long RegionHandle;
         public int Timestamp;
+
+        public Data()
+        {
+        }
     }
 
-    public static class SimData {
-        public byte[] ChannelVersion;
+    public static class SimData
+    {
+
+        public byte ChannelVersion[];
+
+        public SimData()
+        {
+        }
     }
 
-    public AgentMovementComplete() {
-        this.zeroCoded = false;
+
+    public AgentData AgentData_Field;
+    public Data Data_Field;
+    public SimData SimData_Field;
+
+    public AgentMovementComplete()
+    {
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
+        Data_Field = new Data();
+        SimData_Field = new SimData();
     }
 
-    public int CalcPayloadSize() {
-        return this.SimData_Field.ChannelVersion.length + 2 + 72;
+    public int CalcPayloadSize()
+    {
+        return SimData_Field.ChannelVersion.length + 2 + 72;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleAgentMovementComplete(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleAgentMovementComplete(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -6);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packLLVector3(byteBuffer, this.Data_Field.Position);
-        packLLVector3(byteBuffer, this.Data_Field.LookAt);
-        packLong(byteBuffer, this.Data_Field.RegionHandle);
-        packInt(byteBuffer, this.Data_Field.Timestamp);
-        packVariable(byteBuffer, this.SimData_Field.ChannelVersion, 2);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-6);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packLLVector3(bytebuffer, Data_Field.Position);
+        packLLVector3(bytebuffer, Data_Field.LookAt);
+        packLong(bytebuffer, Data_Field.RegionHandle);
+        packInt(bytebuffer, Data_Field.Timestamp);
+        packVariable(bytebuffer, SimData_Field.ChannelVersion, 2);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.Data_Field.Position = unpackLLVector3(byteBuffer);
-        this.Data_Field.LookAt = unpackLLVector3(byteBuffer);
-        this.Data_Field.RegionHandle = unpackLong(byteBuffer);
-        this.Data_Field.Timestamp = unpackInt(byteBuffer);
-        this.SimData_Field.ChannelVersion = unpackVariable(byteBuffer, 2);
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        Data_Field.Position = unpackLLVector3(bytebuffer);
+        Data_Field.LookAt = unpackLLVector3(bytebuffer);
+        Data_Field.RegionHandle = unpackLong(bytebuffer);
+        Data_Field.Timestamp = unpackInt(bytebuffer);
+        SimData_Field.ChannelVersion = unpackVariable(bytebuffer, 2);
     }
 }

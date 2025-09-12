@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
 import android.content.Context;
@@ -7,7 +11,10 @@ import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo;
 import com.lumiyaviewer.lumiya.ui.chat.contacts.ChatterItemViewBuilder;
 import java.util.UUID;
 
-public class User implements ChatterDisplayInfo {
+public class User
+    implements ChatterDisplayInfo
+{
+
     private boolean badUUID;
     private String displayName;
     private Long id;
@@ -17,101 +24,127 @@ public class User implements ChatterDisplayInfo {
     private String userName;
     private UUID uuid;
 
-    public User() {
+    public User()
+    {
     }
 
-    public User(Long l) {
-        this.id = l;
+    public User(Long long1)
+    {
+        id = long1;
     }
 
-    public User(Long l, UUID uuid2, String str, String str2, boolean z, boolean z2, int i, int i2) {
-        this.id = l;
-        this.uuid = uuid2;
-        this.userName = str;
-        this.displayName = str2;
-        this.badUUID = z;
-        this.isFriend = z2;
-        this.rightsGiven = i;
-        this.rightsHas = i2;
+    public User(Long long1, UUID uuid1, String s, String s1, boolean flag, boolean flag1, int i, 
+            int j)
+    {
+        id = long1;
+        uuid = uuid1;
+        userName = s;
+        displayName = s1;
+        badUUID = flag;
+        isFriend = flag1;
+        rightsGiven = i;
+        rightsHas = j;
     }
 
-    public void buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
-        chatterItemViewBuilder.setLabel(this.displayName);
-        chatterItemViewBuilder.setThumbnailChatterID(getChatterID(userManager), this.displayName);
+    public void buildView(Context context, ChatterItemViewBuilder chatteritemviewbuilder, UserManager usermanager)
+    {
+        chatteritemviewbuilder.setLabel(displayName);
+        chatteritemviewbuilder.setThumbnailChatterID(getChatterID(usermanager), displayName);
     }
 
-    public boolean getBadUUID() {
-        return this.badUUID;
+    public boolean getBadUUID()
+    {
+        return badUUID;
     }
 
-    public ChatterID getChatterID(UserManager userManager) {
-        return ChatterID.getUserChatterID(userManager.getUserID(), this.uuid);
+    public ChatterID getChatterID(UserManager usermanager)
+    {
+        return ChatterID.getUserChatterID(usermanager.getUserID(), uuid);
     }
 
-    public String getDisplayName() {
-        return this.displayName;
+    public String getDisplayName()
+    {
+        return displayName;
     }
 
-    public Long getId() {
-        return this.id;
+    public Long getId()
+    {
+        return id;
     }
 
-    public boolean getIsFriend() {
-        return this.isFriend;
+    public boolean getIsFriend()
+    {
+        return isFriend;
     }
 
-    public int getRightsGiven() {
-        return this.rightsGiven;
+    public int getRightsGiven()
+    {
+        return rightsGiven;
     }
 
-    public int getRightsHas() {
-        return this.rightsHas;
+    public int getRightsHas()
+    {
+        return rightsHas;
     }
 
-    public String getUserName() {
-        return this.userName;
+    public String getUserName()
+    {
+        return userName;
     }
 
-    public UUID getUuid() {
-        return this.uuid;
+    public UUID getUuid()
+    {
+        return uuid;
     }
 
-    public boolean nameNeedsFetching() {
-        if (this.userName == null || this.displayName == null) {
-            return !this.badUUID;
+    public boolean nameNeedsFetching()
+    {
+        if (userName == null || displayName == null)
+        {
+            return badUUID ^ true;
+        } else
+        {
+            return false;
         }
-        return false;
     }
 
-    public void setBadUUID(boolean z) {
-        this.badUUID = z;
+    public void setBadUUID(boolean flag)
+    {
+        badUUID = flag;
     }
 
-    public void setDisplayName(String str) {
-        this.displayName = str;
+    public void setDisplayName(String s)
+    {
+        displayName = s;
     }
 
-    public void setId(Long l) {
-        this.id = l;
+    public void setId(Long long1)
+    {
+        id = long1;
     }
 
-    public void setIsFriend(boolean z) {
-        this.isFriend = z;
+    public void setIsFriend(boolean flag)
+    {
+        isFriend = flag;
     }
 
-    public void setRightsGiven(int i) {
-        this.rightsGiven = i;
+    public void setRightsGiven(int i)
+    {
+        rightsGiven = i;
     }
 
-    public void setRightsHas(int i) {
-        this.rightsHas = i;
+    public void setRightsHas(int i)
+    {
+        rightsHas = i;
     }
 
-    public void setUserName(String str) {
-        this.userName = str;
+    public void setUserName(String s)
+    {
+        userName = s;
     }
 
-    public void setUuid(UUID uuid2) {
-        this.uuid = uuid2;
+    public void setUuid(UUID uuid1)
+    {
+        uuid = uuid1;
     }
 }

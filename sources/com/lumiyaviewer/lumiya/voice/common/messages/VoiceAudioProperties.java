@@ -1,39 +1,50 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.voice.common.messages;
 
 import android.os.Bundle;
 import com.lumiyaviewer.lumiya.voice.common.VoicePluginMessage;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceBluetoothState;
-import javax.annotation.Nonnull;
 
-public class VoiceAudioProperties implements VoicePluginMessage {
-    @Nonnull
+public class VoiceAudioProperties
+    implements VoicePluginMessage
+{
+
     public final VoiceBluetoothState bluetoothState;
     public final float speakerVolume;
     public final boolean speakerphoneOn;
 
-    public VoiceAudioProperties(float f, boolean z, @Nonnull VoiceBluetoothState voiceBluetoothState) {
-        this.speakerVolume = f;
-        this.speakerphoneOn = z;
-        this.bluetoothState = voiceBluetoothState;
+    public VoiceAudioProperties(float f, boolean flag, VoiceBluetoothState voicebluetoothstate)
+    {
+        speakerVolume = f;
+        speakerphoneOn = flag;
+        bluetoothState = voicebluetoothstate;
     }
 
-    public VoiceAudioProperties(Bundle bundle) {
-        VoiceBluetoothState voiceBluetoothState;
-        this.speakerVolume = bundle.getFloat("speakerVolume");
-        this.speakerphoneOn = bundle.getBoolean("speakerphoneOn");
-        try {
-            voiceBluetoothState = VoiceBluetoothState.valueOf(bundle.getString("bluetoothState"));
-        } catch (IllegalArgumentException e) {
-            voiceBluetoothState = VoiceBluetoothState.Error;
+    public VoiceAudioProperties(Bundle bundle)
+    {
+        speakerVolume = bundle.getFloat("speakerVolume");
+        speakerphoneOn = bundle.getBoolean("speakerphoneOn");
+        try
+        {
+            bundle = VoiceBluetoothState.valueOf(bundle.getString("bluetoothState"));
         }
-        this.bluetoothState = voiceBluetoothState;
+        // Misplaced declaration of an exception variable
+        catch (Bundle bundle)
+        {
+            bundle = VoiceBluetoothState.Error;
+        }
+        bluetoothState = bundle;
     }
 
-    public Bundle toBundle() {
+    public Bundle toBundle()
+    {
         Bundle bundle = new Bundle();
-        bundle.putFloat("speakerVolume", this.speakerVolume);
-        bundle.putBoolean("speakerphoneOn", this.speakerphoneOn);
-        bundle.putString("bluetoothState", this.bluetoothState.name());
+        bundle.putFloat("speakerVolume", speakerVolume);
+        bundle.putBoolean("speakerphoneOn", speakerphoneOn);
+        bundle.putString("bluetoothState", bluetoothState.name());
         return bundle;
     }
 }

@@ -1,87 +1,127 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class DirPeopleReply extends SLMessage {
-    public AgentData AgentData_Field;
-    public QueryData QueryData_Field;
-    public ArrayList<QueryReplies> QueryReplies_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class DirPeopleReply extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class QueryData {
+    public static class QueryData
+    {
+
         public UUID QueryID;
+
+        public QueryData()
+        {
+        }
     }
 
-    public static class QueryReplies {
+    public static class QueryReplies
+    {
+
         public UUID AgentID;
-        public byte[] FirstName;
-        public byte[] Group;
-        public byte[] LastName;
+        public byte FirstName[];
+        public byte Group[];
+        public byte LastName[];
         public boolean Online;
         public int Reputation;
-    }
 
-    public DirPeopleReply() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-        this.QueryData_Field = new QueryData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 37;
-        Iterator<T> it = this.QueryReplies_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            QueryReplies queryReplies = (QueryReplies) it.next();
-            i = queryReplies.Group.length + queryReplies.FirstName.length + 17 + 1 + queryReplies.LastName.length + 1 + 1 + 4 + i2;
+        public QueryReplies()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleDirPeopleReply(this);
+
+    public AgentData AgentData_Field;
+    public QueryData QueryData_Field;
+    public ArrayList QueryReplies_Fields;
+
+    public DirPeopleReply()
+    {
+        QueryReplies_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        QueryData_Field = new QueryData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) 36);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.QueryData_Field.QueryID);
-        byteBuffer.put((byte) this.QueryReplies_Fields.size());
-        for (QueryReplies queryReplies : this.QueryReplies_Fields) {
-            packUUID(byteBuffer, queryReplies.AgentID);
-            packVariable(byteBuffer, queryReplies.FirstName, 1);
-            packVariable(byteBuffer, queryReplies.LastName, 1);
-            packVariable(byteBuffer, queryReplies.Group, 1);
-            packBoolean(byteBuffer, queryReplies.Online);
-            packInt(byteBuffer, queryReplies.Reputation);
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = QueryReplies_Fields.iterator();
+        QueryReplies queryreplies;
+        int i;
+        int j;
+        int k;
+        for (i = 37; iterator.hasNext(); i = queryreplies.Group.length + (j + 17 + 1 + k + 1) + 1 + 4 + i)
+        {
+            queryreplies = (QueryReplies)iterator.next();
+            j = queryreplies.FirstName.length;
+            k = queryreplies.LastName.length;
         }
+
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.QueryData_Field.QueryID = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            QueryReplies queryReplies = new QueryReplies();
-            queryReplies.AgentID = unpackUUID(byteBuffer);
-            queryReplies.FirstName = unpackVariable(byteBuffer, 1);
-            queryReplies.LastName = unpackVariable(byteBuffer, 1);
-            queryReplies.Group = unpackVariable(byteBuffer, 1);
-            queryReplies.Online = unpackBoolean(byteBuffer);
-            queryReplies.Reputation = unpackInt(byteBuffer);
-            this.QueryReplies_Fields.add(queryReplies);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleDirPeopleReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)36);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, QueryData_Field.QueryID);
+        bytebuffer.put((byte)QueryReplies_Fields.size());
+        QueryReplies queryreplies;
+        for (Iterator iterator = QueryReplies_Fields.iterator(); iterator.hasNext(); packInt(bytebuffer, queryreplies.Reputation))
+        {
+            queryreplies = (QueryReplies)iterator.next();
+            packUUID(bytebuffer, queryreplies.AgentID);
+            packVariable(bytebuffer, queryreplies.FirstName, 1);
+            packVariable(bytebuffer, queryreplies.LastName, 1);
+            packVariable(bytebuffer, queryreplies.Group, 1);
+            packBoolean(bytebuffer, queryreplies.Online);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        QueryData_Field.QueryID = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            QueryReplies queryreplies = new QueryReplies();
+            queryreplies.AgentID = unpackUUID(bytebuffer);
+            queryreplies.FirstName = unpackVariable(bytebuffer, 1);
+            queryreplies.LastName = unpackVariable(bytebuffer, 1);
+            queryreplies.Group = unpackVariable(bytebuffer, 1);
+            queryreplies.Online = unpackBoolean(bytebuffer);
+            queryreplies.Reputation = unpackInt(bytebuffer);
+            QueryReplies_Fields.add(queryreplies);
+        }
+
     }
 }

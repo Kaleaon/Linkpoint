@@ -1,16 +1,22 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-public class LogFailedMoneyTransaction extends SLMessage {
-    public TransactionData TransactionData_Field = new TransactionData();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class TransactionData {
+public class LogFailedMoneyTransaction extends SLMessage
+{
+    public static class TransactionData
+    {
+
         public int Amount;
         public UUID DestID;
         public int FailureType;
@@ -22,48 +28,61 @@ public class LogFailedMoneyTransaction extends SLMessage {
         public UUID TransactionID;
         public int TransactionTime;
         public int TransactionType;
+
+        public TransactionData()
+        {
+        }
     }
 
-    public LogFailedMoneyTransaction() {
-        this.zeroCoded = false;
+
+    public TransactionData TransactionData_Field;
+
+    public LogFailedMoneyTransaction()
+    {
+        zeroCoded = false;
+        TransactionData_Field = new TransactionData();
     }
 
-    public int CalcPayloadSize() {
+    public int CalcPayloadSize()
+    {
         return 78;
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleLogFailedMoneyTransaction(this);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleLogFailedMoneyTransaction(this);
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put(Ascii.DC4);
-        packUUID(byteBuffer, this.TransactionData_Field.TransactionID);
-        packInt(byteBuffer, this.TransactionData_Field.TransactionTime);
-        packInt(byteBuffer, this.TransactionData_Field.TransactionType);
-        packUUID(byteBuffer, this.TransactionData_Field.SourceID);
-        packUUID(byteBuffer, this.TransactionData_Field.DestID);
-        packByte(byteBuffer, (byte) this.TransactionData_Field.Flags);
-        packInt(byteBuffer, this.TransactionData_Field.Amount);
-        packIPAddress(byteBuffer, this.TransactionData_Field.SimulatorIP);
-        packInt(byteBuffer, this.TransactionData_Field.GridX);
-        packInt(byteBuffer, this.TransactionData_Field.GridY);
-        packByte(byteBuffer, (byte) this.TransactionData_Field.FailureType);
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)20);
+        packUUID(bytebuffer, TransactionData_Field.TransactionID);
+        packInt(bytebuffer, TransactionData_Field.TransactionTime);
+        packInt(bytebuffer, TransactionData_Field.TransactionType);
+        packUUID(bytebuffer, TransactionData_Field.SourceID);
+        packUUID(bytebuffer, TransactionData_Field.DestID);
+        packByte(bytebuffer, (byte)TransactionData_Field.Flags);
+        packInt(bytebuffer, TransactionData_Field.Amount);
+        packIPAddress(bytebuffer, TransactionData_Field.SimulatorIP);
+        packInt(bytebuffer, TransactionData_Field.GridX);
+        packInt(bytebuffer, TransactionData_Field.GridY);
+        packByte(bytebuffer, (byte)TransactionData_Field.FailureType);
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.TransactionData_Field.TransactionID = unpackUUID(byteBuffer);
-        this.TransactionData_Field.TransactionTime = unpackInt(byteBuffer);
-        this.TransactionData_Field.TransactionType = unpackInt(byteBuffer);
-        this.TransactionData_Field.SourceID = unpackUUID(byteBuffer);
-        this.TransactionData_Field.DestID = unpackUUID(byteBuffer);
-        this.TransactionData_Field.Flags = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-        this.TransactionData_Field.Amount = unpackInt(byteBuffer);
-        this.TransactionData_Field.SimulatorIP = unpackIPAddress(byteBuffer);
-        this.TransactionData_Field.GridX = unpackInt(byteBuffer);
-        this.TransactionData_Field.GridY = unpackInt(byteBuffer);
-        this.TransactionData_Field.FailureType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        TransactionData_Field.TransactionID = unpackUUID(bytebuffer);
+        TransactionData_Field.TransactionTime = unpackInt(bytebuffer);
+        TransactionData_Field.TransactionType = unpackInt(bytebuffer);
+        TransactionData_Field.SourceID = unpackUUID(bytebuffer);
+        TransactionData_Field.DestID = unpackUUID(bytebuffer);
+        TransactionData_Field.Flags = unpackByte(bytebuffer) & 0xff;
+        TransactionData_Field.Amount = unpackInt(bytebuffer);
+        TransactionData_Field.SimulatorIP = unpackIPAddress(bytebuffer);
+        TransactionData_Field.GridX = unpackInt(bytebuffer);
+        TransactionData_Field.GridY = unpackInt(bytebuffer);
+        TransactionData_Field.FailureType = unpackByte(bytebuffer) & 0xff;
     }
 }

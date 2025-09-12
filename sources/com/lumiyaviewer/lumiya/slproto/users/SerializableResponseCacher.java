@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users;
 
 import com.lumiyaviewer.lumiya.dao.DaoSession;
@@ -10,48 +14,82 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
 
-public class SerializableResponseCacher<Key, MessageType extends Serializable> extends ResponseCacher<Key, MessageType> {
-    public SerializableResponseCacher(DaoSession daoSession, Executor executor, String str) {
-        super(daoSession, executor, str);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users:
+//            ResponseCacher
+
+public class SerializableResponseCacher extends ResponseCacher
+{
+
+    public SerializableResponseCacher(DaoSession daosession, Executor executor, String s)
+    {
+        super(daosession, executor, s);
     }
 
-    public /* bridge */ /* synthetic */ Subscribable getPool() {
+    public volatile Subscribable getPool()
+    {
         return super.getPool();
     }
 
-    public /* bridge */ /* synthetic */ RequestSource getRequestSource() {
+    public volatile RequestSource getRequestSource()
+    {
         return super.getRequestSource();
     }
 
-    /* access modifiers changed from: protected */
-    public MessageType loadCached(byte[] bArr) {
-        try {
-            return (Serializable) new ObjectInputStream(new ByteArrayInputStream(bArr)).readObject();
-        } catch (IOException e) {
-            return null;
-        } catch (ClassNotFoundException e2) {
-            return null;
-        } catch (ClassCastException e3) {
+    protected Serializable loadCached(byte abyte0[])
+    {
+        try
+        {
+            abyte0 = (Serializable)(new ObjectInputStream(new ByteArrayInputStream(abyte0))).readObject();
+        }
+        // Misplaced declaration of an exception variable
+        catch (byte abyte0[])
+        {
             return null;
         }
+        // Misplaced declaration of an exception variable
+        catch (byte abyte0[])
+        {
+            return null;
+        }
+        // Misplaced declaration of an exception variable
+        catch (byte abyte0[])
+        {
+            return null;
+        }
+        return abyte0;
     }
 
-    public /* bridge */ /* synthetic */ void requestUpdate(Object obj) {
+    protected volatile Object loadCached(byte abyte0[])
+    {
+        return loadCached(abyte0);
+    }
+
+    public volatile void requestUpdate(Object obj)
+    {
         super.requestUpdate(obj);
     }
 
-    /* access modifiers changed from: protected */
-    public byte[] storeCached(@Nonnull MessageType messagetype) {
-        try {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-            objectOutputStream.writeObject(messagetype);
-            objectOutputStream.flush();
-            return byteArrayOutputStream.toByteArray();
-        } catch (IOException e) {
+    protected byte[] storeCached(Serializable serializable)
+    {
+        try
+        {
+            ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
+            ObjectOutputStream objectoutputstream = new ObjectOutputStream(bytearrayoutputstream);
+            objectoutputstream.writeObject(serializable);
+            objectoutputstream.flush();
+            serializable = bytearrayoutputstream.toByteArray();
+        }
+        // Misplaced declaration of an exception variable
+        catch (Serializable serializable)
+        {
             return null;
         }
+        return serializable;
+    }
+
+    protected volatile byte[] storeCached(Object obj)
+    {
+        return storeCached((Serializable)obj);
     }
 }

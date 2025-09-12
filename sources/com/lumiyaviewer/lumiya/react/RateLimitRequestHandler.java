@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -6,172 +10,279 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class RateLimitRequestHandler<K, T> implements RequestHandler<K>, RequestQueue<K, T>, RequestSource<K, T>, ResultHandler<K, T> {
-    private boolean cancellable = false;
+// Referenced classes of package com.lumiyaviewer.lumiya.react:
+//            RequestHandler, RequestQueue, RequestSource, ResultHandler, 
+//            RequestHandlerLimits
+
+public class RateLimitRequestHandler
+    implements RequestHandler, RequestQueue, RequestSource, ResultHandler
+{
+
+    private boolean cancellable;
     private final Object lock = new Object();
-    private int maxInFlight = Integer.MAX_VALUE;
-    private final Set<K> pendingRequests = new HashSet();
-    @Nullable
-    private RequestHandler<K> requestHandler = null;
-    private long requestTimeout = Long.MAX_VALUE;
-    private final Map<K, Long> requestsInFlight = new HashMap();
-    @Nonnull
-    private final ResultHandler<K, T> resultHandler;
+    private int maxInFlight;
+    private final Set pendingRequests = new HashSet();
+    private RequestHandler requestHandler;
+    private long requestTimeout;
+    private final Map requestsInFlight = new HashMap();
+    private final ResultHandler resultHandler;
 
-    public RateLimitRequestHandler(@Nonnull RequestSource<K, T> requestSource) {
-        this.resultHandler = requestSource.attachRequestHandler(this);
+    public RateLimitRequestHandler(RequestSource requestsource)
+    {
+        cancellable = false;
+        maxInFlight = 0x7fffffff;
+        requestTimeout = 0x7fffffffffffffffL;
+        requestHandler = null;
+        resultHandler = requestsource.attachRequestHandler(this);
     }
 
-    private void runPendingRequests() {
-        synchronized (this.lock) {
-            Debug.Printf("UserPic: RateLimitHandler: pending count %d, in flight %d", Integer.valueOf(this.pendingRequests.size()), Integer.valueOf(this.requestsInFlight.size()));
-            if (this.requestHandler != null) {
-                long currentTimeMillis = System.currentTimeMillis();
-                if (this.requestsInFlight.size() >= this.maxInFlight && this.requestTimeout != Long.MAX_VALUE) {
-                    Iterator<Map.Entry<K, Long>> it = this.requestsInFlight.entrySet().iterator();
-                    while (it.hasNext()) {
-                        Map.Entry next = it.next();
-                        if (currentTimeMillis >= ((Long) next.getValue()).longValue() + this.requestTimeout) {
-                            Object key = next.getKey();
-                            it.remove();
-                            if (this.cancellable) {
-                                this.requestHandler.onRequestCancelled(key);
-                            }
-                            this.pendingRequests.remove(key);
-                        }
-                    }
+    private void runPendingRequests()
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        long l;
+        Debug.Printf("UserPic: RateLimitHandler: pending count %d, in flight %d", new Object[] {
+            Integer.valueOf(pendingRequests.size()), Integer.valueOf(requestsInFlight.size())
+        });
+        if (requestHandler == null)
+        {
+            break MISSING_BLOCK_LABEL_265;
+        }
+        l = System.currentTimeMillis();
+        if (requestsInFlight.size() >= maxInFlight && requestTimeout != 0x7fffffffffffffffL)
+        {
+            Iterator iterator = requestsInFlight.entrySet().iterator();
+            do
+            {
+                if (!iterator.hasNext())
+                {
+                    break;
                 }
-                if (this.requestsInFlight.size() < this.maxInFlight) {
-                    Iterator<K> it2 = this.pendingRequests.iterator();
-                    if (it2.hasNext()) {
-                        K next2 = it2.next();
-                        it2.remove();
-                        this.requestsInFlight.put(next2, Long.valueOf(currentTimeMillis));
-                        this.requestHandler.onRequest(next2);
+                Object obj1 = (java.util.Map.Entry)iterator.next();
+                if (l >= ((Long)((java.util.Map.Entry) (obj1)).getValue()).longValue() + requestTimeout)
+                {
+                    obj1 = ((java.util.Map.Entry) (obj1)).getKey();
+                    iterator.remove();
+                    if (cancellable)
+                    {
+                        requestHandler.onRequestCancelled(obj1);
                     }
+                    pendingRequests.remove(obj1);
                 }
-            }
-            if (!this.pendingRequests.isEmpty()) {
-                this.lock.notifyAll();
+            } while (true);
+        }
+        break MISSING_BLOCK_LABEL_191;
+        Exception exception;
+        exception;
+        throw exception;
+        if (requestsInFlight.size() < maxInFlight)
+        {
+            Iterator iterator1 = pendingRequests.iterator();
+            if (iterator1.hasNext())
+            {
+                Object obj2 = iterator1.next();
+                iterator1.remove();
+                requestsInFlight.put(obj2, Long.valueOf(l));
+                requestHandler.onRequest(obj2);
             }
         }
+        if (!pendingRequests.isEmpty())
+        {
+            lock.notifyAll();
+        }
+        obj;
+        JVM INSTR monitorexit ;
     }
 
-    public ResultHandler<K, T> attachRequestHandler(@Nonnull RequestHandler<K> requestHandler2) {
-        synchronized (this.lock) {
-            if (this.requestHandler != requestHandler2) {
-                if (this.requestHandler != null) {
-                    this.requestHandler = null;
-                    this.requestsInFlight.clear();
-                }
-                this.requestHandler = requestHandler2;
-                if (requestHandler2 instanceof RequestHandlerLimits) {
-                    RequestHandlerLimits requestHandlerLimits = (RequestHandlerLimits) requestHandler2;
-                    this.cancellable = requestHandlerLimits.isRequestCancellable();
-                    this.maxInFlight = requestHandlerLimits.getMaxRequestsInFlight();
-                    this.requestTimeout = requestHandlerLimits.getRequestTimeout();
-                } else {
-                    this.cancellable = true;
-                    this.maxInFlight = Integer.MAX_VALUE;
-                    this.requestTimeout = Long.MAX_VALUE;
-                }
-            }
+    public ResultHandler attachRequestHandler(RequestHandler requesthandler)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (requestHandler == requesthandler) goto _L2; else goto _L1
+_L1:
+        if (requestHandler != null)
+        {
+            requestHandler = null;
+            requestsInFlight.clear();
         }
+        requestHandler = requesthandler;
+        if (!(requesthandler instanceof RequestHandlerLimits)) goto _L4; else goto _L3
+_L3:
+        requesthandler = (RequestHandlerLimits)requesthandler;
+        cancellable = requesthandler.isRequestCancellable();
+        maxInFlight = requesthandler.getMaxRequestsInFlight();
+        requestTimeout = requesthandler.getRequestTimeout();
+_L2:
+        obj;
+        JVM INSTR monitorexit ;
         runPendingRequests();
+        return this;
+_L4:
+        cancellable = true;
+        maxInFlight = 0x7fffffff;
+        requestTimeout = 0x7fffffffffffffffL;
+        if (true) goto _L2; else goto _L5
+_L5:
+        requesthandler;
+        throw requesthandler;
+    }
+
+    public void detachRequestHandler(RequestHandler requesthandler)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (requestHandler == requesthandler)
+        {
+            requestHandler = null;
+            requestsInFlight.clear();
+        }
+        obj;
+        JVM INSTR monitorexit ;
+        return;
+        requesthandler;
+        throw requesthandler;
+    }
+
+    public Object getNextRequest()
+    {
+        Object obj = null;
+        Object obj1 = lock;
+        obj1;
+        JVM INSTR monitorenter ;
+        Iterator iterator = pendingRequests.iterator();
+        if (iterator.hasNext())
+        {
+            obj = iterator.next();
+            iterator.remove();
+            requestsInFlight.put(obj, Long.valueOf(System.currentTimeMillis()));
+        }
+        obj1;
+        JVM INSTR monitorexit ;
+        return obj;
+        Exception exception;
+        exception;
+        throw exception;
+    }
+
+    public ResultHandler getResultHandler()
+    {
         return this;
     }
 
-    public void detachRequestHandler(@Nonnull RequestHandler<K> requestHandler2) {
-        synchronized (this.lock) {
-            if (this.requestHandler == requestHandler2) {
-                this.requestHandler = null;
-                this.requestsInFlight.clear();
-            }
-        }
-    }
-
-    @Nullable
-    public K getNextRequest() {
-        K k = null;
-        synchronized (this.lock) {
-            Iterator<K> it = this.pendingRequests.iterator();
-            if (it.hasNext()) {
-                k = it.next();
-                it.remove();
-                this.requestsInFlight.put(k, Long.valueOf(System.currentTimeMillis()));
-            }
-        }
-        return k;
-    }
-
-    @Nonnull
-    public ResultHandler<K, T> getResultHandler() {
-        return this;
-    }
-
-    public void onRequest(@Nonnull K k) {
-        Debug.Printf("UserPic: RateLimitHandler: new for %s", k.toString());
-        synchronized (this.lock) {
-            this.pendingRequests.add(k);
-        }
+    public void onRequest(Object obj)
+    {
+        Debug.Printf("UserPic: RateLimitHandler: new for %s", new Object[] {
+            obj.toString()
+        });
+        Object obj1 = lock;
+        obj1;
+        JVM INSTR monitorenter ;
+        pendingRequests.add(obj);
+        obj1;
+        JVM INSTR monitorexit ;
         runPendingRequests();
+        return;
+        obj;
+        throw obj;
     }
 
-    public void onRequestCancelled(@Nonnull K k) {
-        Debug.Printf("UserPic: RateLimitHandler: cancelled for %s", k.toString());
-        synchronized (this.lock) {
-            this.pendingRequests.remove(k);
-            if (!(this.requestHandler == null || !this.cancellable || this.requestsInFlight.remove(k) == null)) {
-                this.requestHandler.onRequestCancelled(k);
-            }
+    public void onRequestCancelled(Object obj)
+    {
+        Debug.Printf("UserPic: RateLimitHandler: cancelled for %s", new Object[] {
+            obj.toString()
+        });
+        Object obj1 = lock;
+        obj1;
+        JVM INSTR monitorenter ;
+        pendingRequests.remove(obj);
+        if (requestHandler != null && cancellable && requestsInFlight.remove(obj) != null)
+        {
+            requestHandler.onRequestCancelled(obj);
         }
+        obj1;
+        JVM INSTR monitorexit ;
         runPendingRequests();
+        return;
+        obj;
+        throw obj;
     }
 
-    public void onResultData(@Nonnull K k, T t) {
-        synchronized (this.lock) {
-            this.pendingRequests.remove(k);
-            this.requestsInFlight.remove(k);
-        }
-        this.resultHandler.onResultData(k, t);
+    public void onResultData(Object obj, Object obj1)
+    {
+        Object obj2 = lock;
+        obj2;
+        JVM INSTR monitorenter ;
+        pendingRequests.remove(obj);
+        requestsInFlight.remove(obj);
+        obj2;
+        JVM INSTR monitorexit ;
+        resultHandler.onResultData(obj, obj1);
         runPendingRequests();
+        return;
+        obj;
+        throw obj;
     }
 
-    public void onResultError(@Nonnull K k, Throwable th) {
-        synchronized (this.lock) {
-            this.pendingRequests.remove(k);
-            this.requestsInFlight.remove(k);
-        }
-        this.resultHandler.onResultError(k, th);
+    public void onResultError(Object obj, Throwable throwable)
+    {
+        Object obj1 = lock;
+        obj1;
+        JVM INSTR monitorenter ;
+        pendingRequests.remove(obj);
+        requestsInFlight.remove(obj);
+        obj1;
+        JVM INSTR monitorexit ;
+        resultHandler.onResultError(obj, throwable);
         runPendingRequests();
+        return;
+        obj;
+        throw obj;
     }
 
-    public void returnRequest(@Nonnull K k) {
-        synchronized (this.lock) {
-            if (this.requestsInFlight.remove(k) != null) {
-                this.pendingRequests.add(k);
-            }
+    public void returnRequest(Object obj)
+    {
+        Object obj1 = lock;
+        obj1;
+        JVM INSTR monitorenter ;
+        if (requestsInFlight.remove(obj) != null)
+        {
+            pendingRequests.add(obj);
         }
+        obj1;
+        JVM INSTR monitorexit ;
         runPendingRequests();
+        return;
+        obj;
+        throw obj;
     }
 
-    @Nullable
-    public K waitForRequest() throws InterruptedException {
-        K next;
-        synchronized (this.lock) {
-            while (true) {
-                Iterator<K> it = this.pendingRequests.iterator();
-                if (it.hasNext()) {
-                    next = it.next();
-                    it.remove();
-                } else {
-                    this.lock.wait();
-                }
-            }
+    public Object waitForRequest()
+        throws InterruptedException
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+_L2:
+        Object obj1;
+        Iterator iterator = pendingRequests.iterator();
+        if (!iterator.hasNext())
+        {
+            break MISSING_BLOCK_LABEL_43;
         }
-        return next;
+        obj1 = iterator.next();
+        iterator.remove();
+        obj;
+        JVM INSTR monitorexit ;
+        return obj1;
+        lock.wait();
+        if (true) goto _L2; else goto _L1
+_L1:
+        Exception exception;
+        exception;
+        throw exception;
     }
 }

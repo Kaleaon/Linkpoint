@@ -1,42 +1,64 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat.contacts;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.ui.chat.ChatFragment;
 import com.lumiyaviewer.lumiya.ui.chat.ChatNewActivity;
 import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.ChatterFragment;
 import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory;
-import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
 
-public class ChatFragmentActivityFactory implements FragmentActivityFactory {
+public class ChatFragmentActivityFactory
+    implements FragmentActivityFactory
+{
+    private static class InstanceHolder
+    {
 
-    private static class InstanceHolder {
-        /* access modifiers changed from: private */
-        public static final ChatFragmentActivityFactory Instance = new ChatFragmentActivityFactory();
+        private static final ChatFragmentActivityFactory Instance = new ChatFragmentActivityFactory();
 
-        private InstanceHolder() {
+        static ChatFragmentActivityFactory _2D_get0()
+        {
+            return Instance;
+        }
+
+
+        private InstanceHolder()
+        {
         }
     }
 
-    public static ChatFragmentActivityFactory getInstance() {
-        return InstanceHolder.Instance;
+
+    public ChatFragmentActivityFactory()
+    {
     }
 
-    public Intent createIntent(Context context, Bundle bundle) {
-        ChatterID chatterID;
-        Intent intent = new Intent(context, ChatNewActivity.class);
-        intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, bundle);
-        if (!(bundle == null || !bundle.containsKey(ChatterFragment.CHATTER_ID_KEY) || (chatterID = (ChatterID) bundle.getParcelable(ChatterFragment.CHATTER_ID_KEY)) == null)) {
-            ActivityUtils.setActiveAgentID(intent, chatterID.agentUUID);
+    public static ChatFragmentActivityFactory getInstance()
+    {
+        return InstanceHolder._2D_get0();
+    }
+
+    public Intent createIntent(Context context, Bundle bundle)
+    {
+        context = new Intent(context, com/lumiyaviewer/lumiya/ui/chat/ChatNewActivity);
+        context.putExtra("selection", bundle);
+        if (bundle != null && bundle.containsKey("chatterID"))
+        {
+            bundle = (ChatterID)bundle.getParcelable("chatterID");
+            if (bundle != null)
+            {
+                ActivityUtils.setActiveAgentID(context, ((ChatterID) (bundle)).agentUUID);
+            }
         }
-        return intent;
+        return context;
     }
 
-    public Class<? extends Fragment> getFragmentClass() {
-        return ChatFragment.class;
+    public Class getFragmentClass()
+    {
+        return com/lumiyaviewer/lumiya/ui/chat/ChatFragment;
     }
 }

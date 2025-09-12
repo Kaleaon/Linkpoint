@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -9,116 +13,188 @@ import java.nio.channels.Selector;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.Timer;
 
-public class SLConnection implements Runnable {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto:
+//            SLCircuit
+
+public class SLConnection
+    implements Runnable
+{
+
     private static final int DEFAULT_IDLE_INTERVAL = 1000;
     private Selector selector;
     private volatile Timer timer;
     private Thread workingThread;
 
-    public SLConnection() {
+    public SLConnection()
+    {
         System.setProperty("java.net.preferIPv4Stack", "true");
         System.setProperty("java.net.preferIPv6Addresses", "false");
-        try {
-            this.selector = Selector.open();
-        } catch (IOException e) {
-            e.printStackTrace();
+        try
+        {
+            selector = Selector.open();
         }
-        this.workingThread = null;
-        this.timer = null;
-    }
-
-    public void AddCircuit(SLCircuit sLCircuit) {
-        synchronized (this) {
-            if (this.workingThread == null) {
-                this.workingThread = new Thread(this, "SLConnection");
-                this.workingThread.start();
-            }
+        catch (IOException ioexception)
+        {
+            ioexception.printStackTrace();
         }
+        workingThread = null;
+        timer = null;
     }
 
-    public Selector getSelector() {
-        return this.selector;
-    }
-
-    public Timer getTimer() {
-        Timer timer2;
-        synchronized (this) {
-            if (this.timer == null) {
-                this.timer = new Timer("SLConnectionTimer", true);
-            }
-            timer2 = this.timer;
+    public void AddCircuit(SLCircuit slcircuit)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        if (workingThread == null)
+        {
+            workingThread = new Thread(this, "SLConnection");
+            workingThread.start();
         }
-        return timer2;
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        slcircuit;
+        throw slcircuit;
     }
 
-    public void run() {
-        int i;
+    public Selector getSelector()
+    {
+        return selector;
+    }
+
+    public Timer getTimer()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        Timer timer1;
+        if (timer == null)
+        {
+            timer = new Timer("SLConnectionTimer", true);
+        }
+        timer1 = timer;
+        this;
+        JVM INSTR monitorexit ;
+        return timer1;
+        Exception exception;
+        exception;
+        throw exception;
+    }
+
+    public void run()
+    {
         Debug.Log("working thread started");
-        while (!this.selector.keys().isEmpty()) {
-            int i2 = 1000;
-            for (SelectionKey next : this.selector.keys()) {
-                try {
-                    SLCircuit sLCircuit = (SLCircuit) next.attachment();
-                    if (sLCircuit != null) {
-                        if (next.isValid()) {
-                            sLCircuit.ProcessWakeup();
-                            i = sLCircuit.getIdleInterval();
-                            if (i < i2) {
-                            }
-                        }
-                        i = i2;
-                    } else {
-                        i = i2;
-                    }
-                    i2 = i;
-                } catch (ConcurrentModificationException | NoSuchElementException e) {
-                }
-            }
-            Iterator<SelectionKey> it = this.selector.selectedKeys().iterator();
-            while (it.hasNext()) {
-                try {
-                    SelectionKey next2 = it.next();
-                    it.remove();
-                    SLCircuit sLCircuit2 = (SLCircuit) next2.attachment();
-                    if (sLCircuit2 != null) {
-                        if (next2.isValid() && next2.isReadable()) {
-                            sLCircuit2.ProcessReceive();
-                        }
-                        if (next2.isValid() && next2.isWritable()) {
-                            sLCircuit2.ProcessTransmit();
-                        }
-                        if (next2.isValid()) {
-                            sLCircuit2.UpdateSelectorOps();
-                            sLCircuit2.TryProcessIdle();
-                        }
-                    }
-                } catch (CancelledKeyException | ClosedSelectorException | ConcurrentModificationException | NoSuchElementException e2) {
-                }
-            }
-            try {
-                this.selector.select((long) i2);
-            } catch (IOException e3) {
-                e3.printStackTrace();
-                for (SelectionKey next3 : this.selector.keys()) {
-                    try {
-                        SLCircuit sLCircuit3 = (SLCircuit) next3.attachment();
-                        if (sLCircuit3 != null && next3.isValid()) {
-                            sLCircuit3.ProcessNetworkError();
-                        }
-                    } catch (CancelledKeyException | ClosedSelectorException | ConcurrentModificationException | NoSuchElementException e4) {
-                    }
-                }
-            }
+_L6:
+        if (selector.keys().isEmpty()) goto _L2; else goto _L1
+_L1:
+        int i = 1000;
+        Iterator iterator = selector.keys().iterator();
+_L4:
+        SelectionKey selectionkey;
+        SLCircuit slcircuit;
+        if (!iterator.hasNext())
+        {
+            break; /* Loop/switch isn't completed */
         }
+        selectionkey = (SelectionKey)iterator.next();
+        slcircuit = (SLCircuit)selectionkey.attachment();
+        if (slcircuit == null)
+        {
+            continue; /* Loop/switch isn't completed */
+        }
+        int j;
+        if (!selectionkey.isValid())
+        {
+            continue; /* Loop/switch isn't completed */
+        }
+        slcircuit.ProcessWakeup();
+        j = slcircuit.getIdleInterval();
+        if (j < i)
+        {
+            i = j;
+        }
+        continue; /* Loop/switch isn't completed */
+        Object obj;
+        obj;
+        break; /* Loop/switch isn't completed */
+        if (true) goto _L4; else goto _L3
+_L3:
+        obj = selector.selectedKeys().iterator();
+_L5:
+        do
+        {
+            if (!((Iterator) (obj)).hasNext())
+            {
+                break MISSING_BLOCK_LABEL_211;
+            }
+            selectionkey = (SelectionKey)((Iterator) (obj)).next();
+            ((Iterator) (obj)).remove();
+            slcircuit = (SLCircuit)selectionkey.attachment();
+        } while (slcircuit == null);
+        if (selectionkey.isValid() && selectionkey.isReadable())
+        {
+            slcircuit.ProcessReceive();
+        }
+        if (selectionkey.isValid() && selectionkey.isWritable())
+        {
+            slcircuit.ProcessTransmit();
+        }
+        if (selectionkey.isValid())
+        {
+            slcircuit.UpdateSelectorOps();
+            slcircuit.TryProcessIdle();
+        }
+          goto _L5
+        obj;
+_L12:
+        selector.select(i);
+          goto _L6
+        obj;
+        ((IOException) (obj)).printStackTrace();
+        obj = selector.keys().iterator();
+_L9:
+        if (!((Iterator) (obj)).hasNext()) goto _L2; else goto _L7
+_L7:
+        selectionkey = (SelectionKey)((Iterator) (obj)).next();
+        slcircuit = (SLCircuit)selectionkey.attachment();
+        if (slcircuit == null) goto _L9; else goto _L8
+_L8:
+        if (!selectionkey.isValid()) goto _L9; else goto _L10
+_L10:
+        slcircuit.ProcessNetworkError();
+          goto _L9
+        obj;
+_L2:
         Debug.Log("working thread exiting");
-        synchronized (this) {
-            this.workingThread = null;
-            if (this.timer != null) {
-                this.timer.cancel();
-                this.timer = null;
-            }
+        this;
+        JVM INSTR monitorenter ;
+        workingThread = null;
+        if (timer != null)
+        {
+            timer.cancel();
+            timer = null;
         }
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        obj;
+        throw obj;
+        obj;
+        continue; /* Loop/switch isn't completed */
+        obj;
+        continue; /* Loop/switch isn't completed */
+        obj;
+        if (true) goto _L2; else goto _L11
+_L11:
+        obj;
+          goto _L12
+        obj;
+          goto _L12
+        obj;
+          goto _L12
+        obj;
+          goto _L3
     }
 }

@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -11,84 +15,118 @@ import com.lumiyaviewer.lumiya.react.RequestSource;
 import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.SubscriptionPool;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-abstract class ResponseCacher<KeyType, MessageType> implements Refreshable<KeyType> {
+abstract class ResponseCacher
+    implements Refreshable
+{
+
     private final Executor cacheExecutor;
-    /* access modifiers changed from: private */
-    public final CachedResponseDao cachedresponseDao;
+    private final CachedResponseDao cachedresponseDao;
     private final String keyPrefix;
-    private final SubscriptionPool<KeyType, MessageType> pool = new SubscriptionPool<>();
-    private final RateLimitRequestHandler<KeyType, MessageType> requestHandler;
+    private final SubscriptionPool pool = new SubscriptionPool();
+    private final RateLimitRequestHandler requestHandler;
 
-    ResponseCacher(DaoSession daoSession, Executor executor, final String str) {
-        this.cacheExecutor = executor;
-        this.cachedresponseDao = daoSession.getCachedResponseDao();
-        this.keyPrefix = str;
-        this.pool.setCacheInvalidateHandler(new $Lambda$Tb8OaRVtYXRJ6N6ca7skHX1PNws(this), executor);
-        this.requestHandler = new RateLimitRequestHandler<>(new RequestProcessor<KeyType, MessageType, MessageType>(this.pool, executor) {
-            /* access modifiers changed from: protected */
-            public boolean isRequestComplete(@Nonnull KeyType keytype, MessageType messagetype) {
-                CachedResponse cachedResponse = (CachedResponse) ResponseCacher.this.cachedresponseDao.load(ResponseCacher.this.getKeyString(keytype));
-                if (cachedResponse != null) {
-                    return !cachedResponse.getMustRevalidate();
+    static CachedResponseDao _2D_get0(ResponseCacher responsecacher)
+    {
+        return responsecacher.cachedresponseDao;
+    }
+
+    static String _2D_wrap0(ResponseCacher responsecacher, Object obj)
+    {
+        return responsecacher.getKeyString(obj);
+    }
+
+    ResponseCacher(DaoSession daosession, Executor executor, String s)
+    {
+        cacheExecutor = executor;
+        cachedresponseDao = daosession.getCachedResponseDao();
+        keyPrefix = s;
+        pool.setCacheInvalidateHandler(new _2D_.Lambda.Tb8OaRVtYXRJ6N6ca7skHX1PNws(this), executor);
+        requestHandler = new RateLimitRequestHandler(new RequestProcessor(executor, s) {
+
+            final ResponseCacher this$0;
+            final String val$keyPrefix;
+
+            protected boolean isRequestComplete(Object obj, Object obj1)
+            {
+                obj = (CachedResponse)ResponseCacher._2D_get0(ResponseCacher.this).load(ResponseCacher._2D_wrap0(ResponseCacher.this, obj));
+                if (obj != null)
+                {
+                    return ((CachedResponse) (obj)).getMustRevalidate() ^ true;
+                } else
+                {
+                    return false;
                 }
-                return false;
             }
 
-            /* access modifiers changed from: protected */
-            @Nullable
-            public MessageType processRequest(@Nonnull KeyType keytype) {
-                CachedResponse cachedResponse = (CachedResponse) ResponseCacher.this.cachedresponseDao.load(ResponseCacher.this.getKeyString(keytype));
-                if (cachedResponse == null || cachedResponse.getData() == null) {
+            protected Object processRequest(Object obj)
+            {
+                Object obj1 = (CachedResponse)ResponseCacher._2D_get0(ResponseCacher.this).load(ResponseCacher._2D_wrap0(ResponseCacher.this, obj));
+                if (obj1 != null && ((CachedResponse) (obj1)).getData() != null)
+                {
+                    obj1 = loadCached(((CachedResponse) (obj1)).getData());
+                    Debug.Printf("%s: returning cached response for key %s (%s)", new Object[] {
+                        keyPrefix, obj.toString(), obj1
+                    });
+                    return obj1;
+                } else
+                {
                     return null;
                 }
-                MessageType loadCached = ResponseCacher.this.loadCached(cachedResponse.getData());
-                Debug.Printf("%s: returning cached response for key %s (%s)", str, keytype.toString(), loadCached);
-                return loadCached;
             }
 
-            /* access modifiers changed from: protected */
-            public MessageType processResult(@Nonnull KeyType keytype, MessageType messagetype) {
-                Debug.Printf("%s: saving cached data for key %s", str, keytype.toString());
-                if (messagetype != null) {
-                    ResponseCacher.this.cachedresponseDao.insertOrReplace(new CachedResponse(ResponseCacher.this.getKeyString(keytype), ResponseCacher.this.storeCached(messagetype), false));
+            protected Object processResult(Object obj, Object obj1)
+            {
+                Debug.Printf("%s: saving cached data for key %s", new Object[] {
+                    keyPrefix, obj.toString()
+                });
+                if (obj1 != null)
+                {
+                    ResponseCacher._2D_get0(ResponseCacher.this).insertOrReplace(new CachedResponse(ResponseCacher._2D_wrap0(ResponseCacher.this, obj), storeCached(obj1), false));
                 }
-                return messagetype;
+                return obj1;
+            }
+
+            
+            {
+                this$0 = ResponseCacher.this;
+                keyPrefix = s;
+                super(final_requestsource, executor);
             }
         });
     }
 
-    /* access modifiers changed from: private */
-    public String getKeyString(@Nonnull KeyType keytype) {
-        return this.keyPrefix + ":" + keytype.toString();
+    private String getKeyString(Object obj)
+    {
+        return (new StringBuilder()).append(keyPrefix).append(":").append(obj.toString()).toString();
     }
 
-    public Subscribable<KeyType, MessageType> getPool() {
-        return this.pool;
+    public Subscribable getPool()
+    {
+        return pool;
     }
 
-    public RequestSource<KeyType, MessageType> getRequestSource() {
-        return this.requestHandler;
+    public RequestSource getRequestSource()
+    {
+        return requestHandler;
     }
 
-    /* access modifiers changed from: package-private */
-    public /* synthetic */ void invalidateCachedResponse(Object obj) {
-        CachedResponse cachedResponse = (CachedResponse) this.cachedresponseDao.load(getKeyString(obj));
-        if (cachedResponse != null) {
-            cachedResponse.setMustRevalidate(true);
-            this.cachedresponseDao.update(cachedResponse);
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_users_ResponseCacher_1058(Object obj)
+    {
+        obj = (CachedResponse)cachedresponseDao.load(getKeyString(obj));
+        if (obj != null)
+        {
+            ((CachedResponse) (obj)).setMustRevalidate(true);
+            cachedresponseDao.update(obj);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public abstract MessageType loadCached(byte[] bArr);
+    protected abstract Object loadCached(byte abyte0[]);
 
-    public void requestUpdate(KeyType keytype) {
-        this.pool.requestUpdate(keytype);
+    public void requestUpdate(Object obj)
+    {
+        pool.requestUpdate(obj);
     }
 
-    /* access modifiers changed from: protected */
-    public abstract byte[] storeCached(@Nonnull MessageType messagetype);
+    protected abstract byte[] storeCached(Object obj);
 }

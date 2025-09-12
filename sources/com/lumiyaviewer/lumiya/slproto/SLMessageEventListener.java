@@ -1,16 +1,34 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto;
 
-public interface SLMessageEventListener {
 
-    public static abstract class SLMessageBaseEventListener implements SLMessageEventListener {
-        public void onMessageAcknowledged(SLMessage sLMessage) {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto:
+//            SLMessage
+
+public interface SLMessageEventListener
+{
+    public static abstract class SLMessageBaseEventListener
+        implements SLMessageEventListener
+    {
+
+        public void onMessageAcknowledged(SLMessage slmessage)
+        {
         }
 
-        public void onMessageTimeout(SLMessage sLMessage) {
+        public void onMessageTimeout(SLMessage slmessage)
+        {
+        }
+
+        public SLMessageBaseEventListener()
+        {
         }
     }
 
-    void onMessageAcknowledged(SLMessage sLMessage);
 
-    void onMessageTimeout(SLMessage sLMessage);
+    public abstract void onMessageAcknowledged(SLMessage slmessage);
+
+    public abstract void onMessageTimeout(SLMessage slmessage);
 }

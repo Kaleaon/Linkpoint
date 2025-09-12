@@ -1,59 +1,83 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat.contacts;
 
 import android.content.Context;
 import com.google.common.collect.ImmutableList;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo;
-import javax.annotation.Nullable;
 
-class ChatterListSimpleAdapter extends ChatterListAdapter {
-    @Nullable
-    private ImmutableList<? extends ChatterDisplayInfo> data = null;
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat.contacts:
+//            ChatterListAdapter
 
-    ChatterListSimpleAdapter(Context context, UserManager userManager) {
-        super(context, userManager);
+class ChatterListSimpleAdapter extends ChatterListAdapter
+{
+
+    private ImmutableList data;
+
+    ChatterListSimpleAdapter(Context context, UserManager usermanager)
+    {
+        super(context, usermanager);
+        data = null;
     }
 
-    public boolean areAllItemsEnabled() {
+    public boolean areAllItemsEnabled()
+    {
         return true;
     }
 
-    public int getCount() {
-        if (this.data != null) {
-            return this.data.size();
+    public int getCount()
+    {
+        if (data != null)
+        {
+            return data.size();
+        } else
+        {
+            return 0;
         }
-        return 0;
     }
 
-    public Object getItem(int i) {
-        if (this.data == null || i < 0 || i >= this.data.size()) {
+    public Object getItem(int i)
+    {
+        if (data != null && i >= 0 && i < data.size())
+        {
+            return data.get(i);
+        } else
+        {
             return null;
         }
-        return this.data.get(i);
     }
 
-    public long getItemId(int i) {
-        return 0;
+    public long getItemId(int i)
+    {
+        return 0L;
     }
 
-    public boolean hasStableIds() {
+    public boolean hasStableIds()
+    {
         return false;
     }
 
-    public boolean isEmpty() {
-        if (this.data != null) {
-            return this.data.isEmpty();
+    public boolean isEmpty()
+    {
+        if (data != null)
+        {
+            return data.isEmpty();
+        } else
+        {
+            return true;
         }
+    }
+
+    public boolean isEnabled(int i)
+    {
         return true;
     }
 
-    public boolean isEnabled(int i) {
-        return true;
-    }
-
-    /* access modifiers changed from: protected */
-    public void setData(@Nullable ImmutableList<? extends ChatterDisplayInfo> immutableList) {
-        this.data = immutableList;
+    protected void setData(ImmutableList immutablelist)
+    {
+        data = immutablelist;
         notifyDataSetChanged();
     }
 }

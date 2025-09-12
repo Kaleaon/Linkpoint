@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.rawbuffers;
 
 import java.io.IOException;
@@ -9,191 +13,243 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
-public class DirectByteBuffer {
+public class DirectByteBuffer
+{
+
     private ByteBuffer buf;
 
-    static {
-        System.loadLibrary("rawbuf");
+    public DirectByteBuffer(int i)
+    {
+        buf = allocate(i);
+        if (buf != null)
+        {
+            buf.order(ByteOrder.nativeOrder());
+            return;
+        } else
+        {
+            throw new OutOfMemoryError((new StringBuilder()).append("DirectByteBuffer: Failed to allocate ").append(i).append(" bytes").toString());
+        }
     }
 
-    public DirectByteBuffer(int i) {
-        this.buf = allocate(i);
-        if (this.buf != null) {
-            this.buf.order(ByteOrder.nativeOrder());
+    public DirectByteBuffer(DirectByteBuffer directbytebuffer)
+    {
+        buf = allocate(directbytebuffer.asByteBuffer().capacity());
+        if (buf != null)
+        {
+            buf.order(ByteOrder.nativeOrder());
+            copyFrom(0, directbytebuffer, 0, directbytebuffer.asByteBuffer().capacity());
             return;
+        } else
+        {
+            throw new OutOfMemoryError((new StringBuilder()).append("DirectByteBuffer: Failed to allocate ").append(directbytebuffer.asByteBuffer().capacity()).append(" bytes").toString());
         }
-        throw new OutOfMemoryError("DirectByteBuffer: Failed to allocate " + i + " bytes");
-    }
-
-    public DirectByteBuffer(DirectByteBuffer directByteBuffer) {
-        this.buf = allocate(directByteBuffer.asByteBuffer().capacity());
-        if (this.buf != null) {
-            this.buf.order(ByteOrder.nativeOrder());
-            copyFrom(0, directByteBuffer, 0, directByteBuffer.asByteBuffer().capacity());
-            return;
-        }
-        throw new OutOfMemoryError("DirectByteBuffer: Failed to allocate " + directByteBuffer.asByteBuffer().capacity() + " bytes");
     }
 
     private native ByteBuffer allocate(int i);
 
-    private native void copyByteArray(ByteBuffer byteBuffer, int i, byte[] bArr, int i2, int i3);
+    private native void copyByteArray(ByteBuffer bytebuffer, int i, byte abyte0[], int j, int k);
 
-    private native void copyFloatArray(ByteBuffer byteBuffer, int i, float[] fArr, int i2, int i3);
+    private native void copyFloatArray(ByteBuffer bytebuffer, int i, float af[], int j, int k);
 
-    private native void copyPart(ByteBuffer byteBuffer, ByteBuffer byteBuffer2, int i, int i2, int i3);
+    private native void copyPart(ByteBuffer bytebuffer, ByteBuffer bytebuffer1, int i, int j, int k);
 
-    private native void copyShortArray(ByteBuffer byteBuffer, int i, short[] sArr, int i2, int i3);
+    private native void copyShortArray(ByteBuffer bytebuffer, int i, short aword0[], int j, int k);
 
-    private native void copyShortArrayOffset(ByteBuffer byteBuffer, int i, short[] sArr, int i2, int i3, short s);
+    private native void copyShortArrayOffset(ByteBuffer bytebuffer, int i, short aword0[], int j, int k, short word0);
 
-    private native void release(ByteBuffer byteBuffer);
+    private native void release(ByteBuffer bytebuffer);
 
-    public static int zeroDecode(byte[] bArr, int i, int i2, byte[] bArr2, int i3, int i4) throws IndexOutOfBoundsException {
-        int zeroDecodeArray = zeroDecodeArray(bArr, i, i2, bArr2, i3, i4);
-        if (zeroDecodeArray >= 0) {
-            return zeroDecodeArray;
+    public static int zeroDecode(byte abyte0[], int i, int j, byte abyte1[], int k, int l)
+        throws IndexOutOfBoundsException
+    {
+        k = zeroDecodeArray(abyte0, i, j, abyte1, k, l);
+        if (k >= 0)
+        {
+            return k;
+        } else
+        {
+            throw new IndexOutOfBoundsException((new StringBuilder()).append("zeroDecode: out of dest buffer, destStart ").append(Integer.toString(i)).append(" destMaxLen ").append(Integer.toString(j)).toString());
         }
-        throw new IndexOutOfBoundsException("zeroDecode: out of dest buffer, destStart " + Integer.toString(i) + " destMaxLen " + Integer.toString(i2));
     }
 
-    private static native int zeroDecodeArray(byte[] bArr, int i, int i2, byte[] bArr2, int i3, int i4);
+    private static native int zeroDecodeArray(byte abyte0[], int i, int j, byte abyte1[], int k, int l);
 
-    public ByteBuffer asByteBuffer() {
-        return this.buf;
+    public ByteBuffer asByteBuffer()
+    {
+        return buf;
     }
 
-    public FloatBuffer asFloatBuffer() {
-        return this.buf.asFloatBuffer();
+    public FloatBuffer asFloatBuffer()
+    {
+        return buf.asFloatBuffer();
     }
 
-    public IntBuffer asIntBuffer() {
-        return this.buf.asIntBuffer();
+    public IntBuffer asIntBuffer()
+    {
+        return buf.asIntBuffer();
     }
 
-    public ShortBuffer asShortBuffer() {
-        return this.buf.asShortBuffer();
+    public ShortBuffer asShortBuffer()
+    {
+        return buf.asShortBuffer();
     }
 
-    public void copyFrom(int i, DirectByteBuffer directByteBuffer, int i2, int i3) {
-        copyPart(this.buf, directByteBuffer.buf, i, i2, i3);
+    public void copyFrom(int i, DirectByteBuffer directbytebuffer, int j, int k)
+    {
+        copyPart(buf, directbytebuffer.buf, i, j, k);
     }
 
-    public void copyFromFloat(int i, DirectByteBuffer directByteBuffer, int i2, int i3) {
-        copyPart(this.buf, directByteBuffer.buf, i * 4, i2 * 4, i3 * 4);
+    public void copyFromFloat(int i, DirectByteBuffer directbytebuffer, int j, int k)
+    {
+        copyPart(buf, directbytebuffer.buf, i * 4, j * 4, k * 4);
     }
 
-    public void copyFromShort(int i, DirectByteBuffer directByteBuffer, int i2, int i3) {
-        copyPart(this.buf, directByteBuffer.buf, i * 2, i2 * 2, i3 * 2);
+    public void copyFromShort(int i, DirectByteBuffer directbytebuffer, int j, int k)
+    {
+        copyPart(buf, directbytebuffer.buf, i * 2, j * 2, k * 2);
     }
 
-    /* access modifiers changed from: protected */
-    public void finalize() throws Throwable {
-        if (this.buf != null) {
-            release(this.buf);
-            this.buf = null;
+    protected void finalize()
+        throws Throwable
+    {
+        if (buf != null)
+        {
+            release(buf);
+            buf = null;
         }
         super.finalize();
     }
 
-    public int getCapacity() {
-        return this.buf.capacity();
+    public int getCapacity()
+    {
+        return buf.capacity();
     }
 
-    public float getFloat(int i) {
-        return this.buf.getFloat(i * 4);
+    public float getFloat(int i)
+    {
+        return buf.getFloat(i * 4);
     }
 
-    public short getShort(int i) {
-        return this.buf.getShort(i * 2);
+    public short getShort(int i)
+    {
+        return buf.getShort(i * 2);
     }
 
-    public void loadFromByteArray(int i, byte[] bArr, int i2, int i3) {
-        int i4 = i + i3;
-        if (i >= 0 && i <= this.buf.capacity() && i4 >= 0 && i4 <= this.buf.capacity()) {
-            copyByteArray(this.buf, i, bArr, i2, i3);
-            return;
+    public void loadFromByteArray(int i, byte abyte0[], int j, int k)
+    {
+        for (int l = i + k; i < 0 || i > buf.capacity() || l < 0 || l > buf.capacity();)
+        {
+            throw new IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", new Object[] {
+                Integer.valueOf(buf.capacity()), Integer.valueOf(i), Integer.valueOf(l)
+            }));
         }
-        throw new IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", new Object[]{Integer.valueOf(this.buf.capacity()), Integer.valueOf(i), Integer.valueOf(i4)}));
+
+        copyByteArray(buf, i, abyte0, j, k);
     }
 
-    public void loadFromFloatArray(int i, float[] fArr, int i2, int i3) {
-        int i4 = i * 4;
-        int i5 = (i + i3) * 4;
-        if (i4 >= 0 && i4 <= this.buf.capacity() && i5 >= 0 && i5 <= this.buf.capacity()) {
-            copyFloatArray(this.buf, i, fArr, i2, i3);
-            return;
+    public void loadFromFloatArray(int i, float af[], int j, int k)
+    {
+        int l = i * 4;
+        for (int i1 = (i + k) * 4; l < 0 || l > buf.capacity() || i1 < 0 || i1 > buf.capacity();)
+        {
+            throw new IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", new Object[] {
+                Integer.valueOf(buf.capacity()), Integer.valueOf(l), Integer.valueOf(i1)
+            }));
         }
-        throw new IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", new Object[]{Integer.valueOf(this.buf.capacity()), Integer.valueOf(i4), Integer.valueOf(i5)}));
+
+        copyFloatArray(buf, i, af, j, k);
     }
 
-    public void loadFromShortArray(int i, short[] sArr, int i2, int i3) {
-        int i4 = i * 2;
-        int i5 = (i + i3) * 2;
-        if (i4 >= 0 && i4 <= this.buf.capacity() && i5 >= 0 && i5 <= this.buf.capacity()) {
-            copyShortArray(this.buf, i, sArr, i2, i3);
-            return;
+    public void loadFromShortArray(int i, short aword0[], int j, int k)
+    {
+        int l = i * 2;
+        for (int i1 = (i + k) * 2; l < 0 || l > buf.capacity() || i1 < 0 || i1 > buf.capacity();)
+        {
+            throw new IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", new Object[] {
+                Integer.valueOf(buf.capacity()), Integer.valueOf(l), Integer.valueOf(i1)
+            }));
         }
-        throw new IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", new Object[]{Integer.valueOf(this.buf.capacity()), Integer.valueOf(i4), Integer.valueOf(i5)}));
+
+        copyShortArray(buf, i, aword0, j, k);
     }
 
-    public void loadFromShortArrayOffset(int i, short[] sArr, int i2, int i3, short s) {
-        int i4 = i * 2;
-        int i5 = (i + i3) * 2;
-        if (i4 >= 0 && i4 <= this.buf.capacity() && i5 >= 0 && i5 <= this.buf.capacity()) {
-            copyShortArrayOffset(this.buf, i, sArr, i2, i3, s);
-            return;
+    public void loadFromShortArrayOffset(int i, short aword0[], int j, int k, short word0)
+    {
+        int l = i * 2;
+        for (int i1 = (i + k) * 2; l < 0 || l > buf.capacity() || i1 < 0 || i1 > buf.capacity();)
+        {
+            throw new IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", new Object[] {
+                Integer.valueOf(buf.capacity()), Integer.valueOf(l), Integer.valueOf(i1)
+            }));
         }
-        throw new IndexOutOfBoundsException(String.format("capacity %d, posStart %d, posEnd %d", new Object[]{Integer.valueOf(this.buf.capacity()), Integer.valueOf(i4), Integer.valueOf(i5)}));
+
+        copyShortArrayOffset(buf, i, aword0, j, k, word0);
     }
 
-    public int position() {
-        return this.buf.position();
+    public int position()
+    {
+        return buf.position();
     }
 
-    public Buffer position(int i) {
-        return this.buf.position(i);
+    public Buffer position(int i)
+    {
+        return buf.position(i);
     }
 
-    public int positionFloat() {
-        return this.buf.position() / 4;
+    public int positionFloat()
+    {
+        return buf.position() / 4;
     }
 
-    public Buffer positionFloat(int i) {
-        return this.buf.position(i * 4);
+    public Buffer positionFloat(int i)
+    {
+        return buf.position(i * 4);
     }
 
-    public Buffer positionShort(int i) {
-        return this.buf.position(i * 2);
+    public Buffer positionShort(int i)
+    {
+        return buf.position(i * 2);
     }
 
-    public void putFloat(float f) {
-        this.buf.putFloat(f);
+    public void putFloat(float f)
+    {
+        buf.putFloat(f);
     }
 
-    public void putFloat(int i, float f) {
-        this.buf.putFloat(i * 4, f);
+    public void putFloat(int i, float f)
+    {
+        buf.putFloat(i * 4, f);
     }
 
-    public void putRawFloat(int i, float f) {
-        this.buf.putFloat(i, f);
+    public void putRawFloat(int i, float f)
+    {
+        buf.putFloat(i, f);
     }
 
-    public void putRawInt(int i, int i2) {
-        this.buf.putInt(i, i2);
+    public void putRawInt(int i, int j)
+    {
+        buf.putInt(i, j);
     }
 
-    public void putShort(short s) {
-        this.buf.putShort(s);
+    public void putShort(short word0)
+    {
+        buf.putShort(word0);
     }
 
-    public void read(InputStream inputStream) throws IOException {
-        ByteBuffer asByteBuffer = asByteBuffer();
-        byte[] bArr = new byte[asByteBuffer.capacity()];
-        inputStream.read(bArr);
-        int position = asByteBuffer.position();
-        asByteBuffer.position(0);
-        asByteBuffer.put(bArr);
-        asByteBuffer.position(position);
+    public void read(InputStream inputstream)
+        throws IOException
+    {
+        ByteBuffer bytebuffer = asByteBuffer();
+        byte abyte0[] = new byte[bytebuffer.capacity()];
+        inputstream.read(abyte0);
+        int i = bytebuffer.position();
+        bytebuffer.position(0);
+        bytebuffer.put(abyte0);
+        bytebuffer.position(i);
+    }
+
+    static 
+    {
+        System.loadLibrary("rawbuf");
     }
 }

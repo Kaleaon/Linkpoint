@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.mutelist;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -13,191 +16,203 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.UUID;
-import javax.annotation.concurrent.Immutable;
 
-@Immutable
-public class MuteListData {
-    private static final Ordering<MuteListEntry> ordering = new Ordering<MuteListEntry>() {
-        public int compare(MuteListEntry muteListEntry, MuteListEntry muteListEntry2) {
-            int viewOrder = muteListEntry.type.getViewOrder() - muteListEntry2.type.getViewOrder();
-            return viewOrder != 0 ? viewOrder : muteListEntry.name.compareToIgnoreCase(muteListEntry2.name);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.modules.mutelist:
+//            MuteType, MuteListEntry, MuteListKey
+
+public class MuteListData
+{
+
+    private static final Ordering ordering = new Ordering() {
+
+        public int compare(MuteListEntry mutelistentry, MuteListEntry mutelistentry1)
+        {
+            int i = mutelistentry.type.getViewOrder() - mutelistentry1.type.getViewOrder();
+            if (i != 0)
+            {
+                return i;
+            } else
+            {
+                return mutelistentry.name.compareToIgnoreCase(mutelistentry1.name);
+            }
         }
+
+        public volatile int compare(Object obj, Object obj1)
+        {
+            return compare((MuteListEntry)obj, (MuteListEntry)obj1);
+        }
+
     };
-    private final ImmutableMap<MuteListKey, MuteListEntry> muteList;
-    private final ImmutableMap<String, MuteListEntry> muteListNames;
+    private final ImmutableMap muteList;
+    private final ImmutableMap muteListNames;
 
-    public MuteListData() {
-        this.muteList = ImmutableMap.of();
-        this.muteListNames = ImmutableMap.of();
+    public MuteListData()
+    {
+        muteList = ImmutableMap.of();
+        muteListNames = ImmutableMap.of();
     }
 
-    public MuteListData(Map<MuteListKey, MuteListEntry> map, Map<String, MuteListEntry> map2) {
-        this.muteList = ImmutableMap.copyOf(map);
-        this.muteListNames = ImmutableMap.copyOf(map2);
+    public MuteListData(Map map, Map map1)
+    {
+        muteList = ImmutableMap.copyOf(map);
+        muteListNames = ImmutableMap.copyOf(map1);
     }
 
-    public MuteListData(byte[] bArr) {
+    public MuteListData(byte abyte0[])
+    {
+        com.google.common.collect.ImmutableMap.Builder builder;
+        com.google.common.collect.ImmutableMap.Builder builder1;
+        builder = ImmutableMap.builder();
+        builder1 = ImmutableMap.builder();
+        if (abyte0 == null) goto _L2; else goto _L1
+_L1:
+        abyte0 = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(abyte0)));
+_L5:
+        String s1 = abyte0.readLine();
+        if (s1 == null) goto _L2; else goto _L3
+_L3:
+        SimpleStringParser simplestringparser = new SimpleStringParser(s1.trim(), " ");
+        String s;
+        Object obj;
+        int j;
+        j = simplestringparser.getIntToken(" ");
+        obj = simplestringparser.nextToken(" ");
+        simplestringparser.skipAllDelimiters(" ");
+        s = simplestringparser.nextToken("|");
+        simplestringparser.skipAllDelimiters("|");
+        com.lumiyaviewer.lumiya.utils.SimpleStringParser.StringParsingException stringparsingexception;
         int i;
-        ImmutableMap.Builder builder = ImmutableMap.builder();
-        ImmutableMap.Builder builder2 = ImmutableMap.builder();
-        if (bArr != null) {
-            try {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bArr)));
-                while (true) {
-                    String readLine = bufferedReader.readLine();
-                    if (readLine == null) {
-                        break;
-                    }
-                    SimpleStringParser simpleStringParser = new SimpleStringParser(readLine.trim(), " ");
-                    try {
-                        int intToken = simpleStringParser.getIntToken(" ");
-                        String nextToken = simpleStringParser.nextToken(" ");
-                        simpleStringParser.skipAllDelimiters(" ");
-                        String nextToken2 = simpleStringParser.nextToken("|");
-                        simpleStringParser.skipAllDelimiters("|");
-                        try {
-                            i = simpleStringParser.getIntToken(" ");
-                        } catch (SimpleStringParser.StringParsingException e) {
-                            i = 0;
-                        }
-                        Debug.Printf("MuteList: line '%s' type %d idstring '%s' name '%s' flags %d", readLine.trim(), Integer.valueOf(intToken), nextToken, nextToken2, Integer.valueOf(i));
-                        if (intToken >= 0 && intToken < MuteType.values().length) {
-                            MuteType muteType = MuteType.values()[intToken];
-                            MuteListEntry muteListEntry = new MuteListEntry(muteType, UUID.fromString(nextToken), nextToken2, i);
-                            if (muteType == MuteType.BY_NAME) {
-                                builder2.put(nextToken2, muteListEntry);
-                            } else {
-                                builder.put(new MuteListKey(muteListEntry), muteListEntry);
-                            }
-                        }
-                    } catch (SimpleStringParser.StringParsingException e2) {
-                        Debug.Warning(e2);
-                    }
-                }
-            } catch (IOException e3) {
-                Debug.Warning(e3);
-            }
+        try
+        {
+            i = simplestringparser.getIntToken(" ");
         }
-        this.muteList = builder.build();
-        this.muteListNames = builder2.build();
+        catch (com.lumiyaviewer.lumiya.utils.SimpleStringParser.StringParsingException stringparsingexception1)
+        {
+            i = 0;
+        }
+        Debug.Printf("MuteList: line '%s' type %d idstring '%s' name '%s' flags %d", new Object[] {
+            s1.trim(), Integer.valueOf(j), obj, s, Integer.valueOf(i)
+        });
+        if (j < 0) goto _L5; else goto _L4
+_L4:
+        if (j >= MuteType.values().length) goto _L5; else goto _L6
+_L6:
+        MuteType mutetype = MuteType.values()[j];
+        obj = new MuteListEntry(mutetype, UUID.fromString(((String) (obj))), s, i);
+        if (mutetype != MuteType.BY_NAME)
+        {
+            break MISSING_BLOCK_LABEL_261;
+        }
+        builder1.put(s, obj);
+          goto _L5
+        stringparsingexception;
+        Debug.Warning(stringparsingexception);
+          goto _L5
+        abyte0;
+        Debug.Warning(abyte0);
+_L2:
+        muteList = builder.build();
+        muteListNames = builder1.build();
+        return;
+        builder.put(new MuteListKey(((MuteListEntry) (obj))), obj);
+          goto _L5
     }
 
-    /* renamed from: isEntryNameNotEqual - checks if mute list entry name doesn't match the given entry key */
-    static /* synthetic */ boolean isEntryNameNotEqual(MuteListEntry muteListEntry, Map.Entry entry) {
-        if (entry != null) {
-            return !((String) entry.getKey()).equals(muteListEntry.name);
+    static boolean lambda$_2D_com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_3795(MuteListEntry mutelistentry, java.util.Map.Entry entry)
+    {
+        if (entry != null)
+        {
+            return ((String)entry.getKey()).equals(mutelistentry.name) ^ true;
+        } else
+        {
+            return false;
         }
-        return false;
     }
 
-    /* renamed from: isMuteKeyNotEqual - checks if mute list key doesn't match the given entry key */
-    static /* synthetic */ boolean isMuteKeyNotEqual(MuteListKey muteListKey, Map.Entry entry) {
-        if (entry != null) {
-            return !((MuteListKey) entry.getKey()).equals(muteListKey);
+    static boolean lambda$_2D_com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4217(MuteListKey mutelistkey, java.util.Map.Entry entry)
+    {
+        if (entry != null)
+        {
+            return ((MuteListKey)entry.getKey()).equals(mutelistkey) ^ true;
+        } else
+        {
+            return false;
         }
-        return false;
     }
 
-    static /* synthetic */ boolean isEntryNameNotEqual(MuteListEntry muteListEntry, Map.Entry entry) {
-        if (entry != null) {
-            return !((String) entry.getKey()).equals(muteListEntry.name);
+    static boolean lambda$_2D_com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795(MuteListEntry mutelistentry, java.util.Map.Entry entry)
+    {
+        if (entry != null)
+        {
+            return ((String)entry.getKey()).equals(mutelistentry.name) ^ true;
+        } else
+        {
+            return false;
         }
-        return false;
     }
 
-    static /* synthetic */ boolean isMuteKeyNotEqual(MuteListKey muteListKey, Map.Entry entry) {
-        if (entry != null) {
-            return !((MuteListKey) entry.getKey()).equals(muteListKey);
+    static boolean lambda$_2D_com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_5273(MuteListKey mutelistkey, java.util.Map.Entry entry)
+    {
+        if (entry != null)
+        {
+            return ((MuteListKey)entry.getKey()).equals(mutelistkey) ^ true;
+        } else
+        {
+            return false;
         }
-        return false;
     }
 
-    public MuteListData Block(MuteListEntry muteListEntry) {
-        MuteListKey muteListKey = new MuteListKey(muteListEntry);
-        if (muteListKey.muteType == MuteType.BY_NAME) {
-            ImmutableMap.Builder builder = ImmutableMap.builder();
-            builder.putAll(FluentIterable.from(this.muteListNames.entrySet()).filter(new $Lambda$pgqqKd1WN3Cb6t0a10SOVDLtoOA(muteListEntry)));
-            builder.put(muteListEntry.name, muteListEntry);
-            return new MuteListData(this.muteList, builder.build());
+    public MuteListData Block(MuteListEntry mutelistentry)
+    {
+        Object obj = new MuteListKey(mutelistentry);
+        if (((MuteListKey) (obj)).muteType == MuteType.BY_NAME)
+        {
+            obj = ImmutableMap.builder();
+            ((com.google.common.collect.ImmutableMap.Builder) (obj)).putAll(FluentIterable.from(muteListNames.entrySet()).filter(new _2D_.Lambda.pgqqKd1WN3Cb6t0a10SOVDLtoOA(mutelistentry)));
+            ((com.google.common.collect.ImmutableMap.Builder) (obj)).put(mutelistentry.name, mutelistentry);
+            return new MuteListData(muteList, ((com.google.common.collect.ImmutableMap.Builder) (obj)).build());
+        } else
+        {
+            com.google.common.collect.ImmutableMap.Builder builder = ImmutableMap.builder();
+            builder.putAll(FluentIterable.from(muteList.entrySet()).filter(new _2D_.Lambda.pgqqKd1WN3Cb6t0a10SOVDLtoOA._cls1(obj)));
+            builder.put(obj, mutelistentry);
+            return new MuteListData(builder.build(), muteListNames);
         }
-        ImmutableMap.Builder builder2 = ImmutableMap.builder();
-        builder2.putAll(FluentIterable.from(this.muteList.entrySet()).filter(new Predicate(muteListKey) {
-
-            /* renamed from: -$f0  reason: not valid java name */
-            private final /* synthetic */ Object f124$f0;
-
-            private final /* synthetic */ boolean $m$0(Object obj) {
-                return MuteListData.isMuteKeyNotEqual((MuteListKey) this.f124$f0, (Map.Entry) obj);
-            }
-
-            {
-                this.f124$f0 = r1;
-            }
-
-            public final boolean apply(Object obj) {
-                return $m$0(obj);
-            }
-        }));
-        builder2.put(muteListKey, muteListEntry);
-        return new MuteListData(builder2.build(), this.muteListNames);
     }
 
-    public MuteListData Unblock(MuteListEntry muteListEntry) {
-        MuteListKey muteListKey = new MuteListKey(muteListEntry);
-        if (muteListKey.muteType == MuteType.BY_NAME) {
-            ImmutableMap.Builder builder = ImmutableMap.builder();
-            builder.putAll(FluentIterable.from(this.muteListNames.entrySet()).filter(new Predicate(muteListEntry) {
-
-                /* renamed from: -$f0  reason: not valid java name */
-                private final /* synthetic */ Object f125$f0;
-
-                private final /* synthetic */ boolean $m$0(Object obj) {
-                    return MuteListData.isEntryNameNotEqual((MuteListEntry) this.f125$f0, (Map.Entry) obj);
-                }
-
-                {
-                    this.f125$f0 = r1;
-                }
-
-                public final boolean apply(Object obj) {
-                    return $m$0(obj);
-                }
-            }));
-            return new MuteListData(this.muteList, builder.build());
+    public MuteListData Unblock(MuteListEntry mutelistentry)
+    {
+        Object obj = new MuteListKey(mutelistentry);
+        if (((MuteListKey) (obj)).muteType == MuteType.BY_NAME)
+        {
+            obj = ImmutableMap.builder();
+            ((com.google.common.collect.ImmutableMap.Builder) (obj)).putAll(FluentIterable.from(muteListNames.entrySet()).filter(new _2D_.Lambda.pgqqKd1WN3Cb6t0a10SOVDLtoOA._cls2(mutelistentry)));
+            return new MuteListData(muteList, ((com.google.common.collect.ImmutableMap.Builder) (obj)).build());
+        } else
+        {
+            mutelistentry = ImmutableMap.builder();
+            mutelistentry.putAll(FluentIterable.from(muteList.entrySet()).filter(new _2D_.Lambda.pgqqKd1WN3Cb6t0a10SOVDLtoOA._cls3(obj)));
+            return new MuteListData(mutelistentry.build(), muteListNames);
         }
-        ImmutableMap.Builder builder2 = ImmutableMap.builder();
-        builder2.putAll(FluentIterable.from(this.muteList.entrySet()).filter(new Predicate(muteListKey) {
-
-            /* renamed from: -$f0  reason: not valid java name */
-            private final /* synthetic */ Object f126$f0;
-
-            private final /* synthetic */ boolean $m$0(Object obj) {
-                return MuteListData.isMuteKeyNotEqual((MuteListKey) this.f126$f0, (Map.Entry) obj);
-            }
-
-            {
-                this.f126$f0 = r1;
-            }
-
-            public final boolean apply(Object obj) {
-                return $m$0(obj);
-            }
-        }));
-        return new MuteListData(builder2.build(), this.muteListNames);
     }
 
-    public ImmutableList<MuteListEntry> getMuteList() {
-        ImmutableList.Builder builder = ImmutableList.builder();
-        builder.addAll((Iterable) this.muteList.values());
-        builder.addAll((Iterable) this.muteListNames.values());
+    public ImmutableList getMuteList()
+    {
+        com.google.common.collect.ImmutableList.Builder builder = ImmutableList.builder();
+        builder.addAll(muteList.values());
+        builder.addAll(muteListNames.values());
         return ordering.immutableSortedCopy(builder.build());
     }
 
-    public boolean isMuted(UUID uuid, MuteType muteType) {
-        return this.muteList.containsKey(new MuteListKey(muteType, uuid));
+    public boolean isMuted(UUID uuid, MuteType mutetype)
+    {
+        uuid = new MuteListKey(mutetype, uuid);
+        return muteList.containsKey(uuid);
     }
 
-    public boolean isMutedByName(String str) {
-        return this.muteListNames.containsKey(str);
+    public boolean isMutedByName(String s)
+    {
+        return muteListNames.containsKey(s);
     }
+
 }

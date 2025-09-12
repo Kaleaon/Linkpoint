@@ -1,6 +1,5 @@
 package com.lumiyaviewer.lumiya.react;
 
-import com.lumiyaviewer.lumiya.react.-$Lambda$rbwdofHzZNihI1HZoTkj8gWFECo.AnonymousClass1;
 import java.util.concurrent.Executor;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,11 +20,15 @@ public abstract class ResultOperator<K, Tin, Tout> implements ResultHandler<K, T
         this.executor = executor;
     }
 
-    /* synthetic */ void handleResultError(Object obj, Throwable th) {
+    /* access modifiers changed from: package-private */
+    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_ResultOperator_1065  reason: not valid java name */
+    public /* synthetic */ void m36lambda$com_lumiyaviewer_lumiya_react_ResultOperator_1065(Object obj, Throwable th) {
         this.toHandler.onResultError(obj, th);
     }
 
-    /* synthetic */ void handleResultData(Object obj, Object obj2) {
+    /* access modifiers changed from: package-private */
+    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_ResultOperator_796  reason: not valid java name */
+    public /* synthetic */ void m37lambda$com_lumiyaviewer_lumiya_react_ResultOperator_796(Object obj, Object obj2) {
         this.toHandler.onResultData(obj, onData(obj2));
     }
 
@@ -33,7 +36,7 @@ public abstract class ResultOperator<K, Tin, Tout> implements ResultHandler<K, T
 
     public void onResultData(@Nonnull K k, Tin tin) {
         if (this.executor != null) {
-            this.executor.execute(new -$Lambda$rbwdofHzZNihI1HZoTkj8gWFECo(this, k, tin));
+            this.executor.execute(() -> this.toHandler.onResultData(k, onData(tin)));
         } else {
             this.toHandler.onResultData(k, onData(tin));
         }
@@ -41,7 +44,7 @@ public abstract class ResultOperator<K, Tin, Tout> implements ResultHandler<K, T
 
     public void onResultError(@Nonnull K k, Throwable th) {
         if (this.executor != null) {
-            this.executor.execute(new AnonymousClass1(this, k, th));
+            this.executor.execute(() -> this.toHandler.onResultError(k, th));
         } else {
             this.toHandler.onResultError(k, th);
         }

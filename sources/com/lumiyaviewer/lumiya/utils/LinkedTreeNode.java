@@ -1,116 +1,252 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.utils;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class LinkedTreeNode<T> implements Iterable<T> {
-    /* access modifiers changed from: private */
-    public T dataObject;
-    /* access modifiers changed from: private */
-    public LinkedTreeNode<T> firstChild;
-    /* access modifiers changed from: private */
-    public LinkedTreeNode<T> nextChild;
-    private LinkedTreeNode<T> parentObject;
-    private LinkedTreeNode<T> prevChild;
+public class LinkedTreeNode
+    implements Iterable
+{
+    public static class LinkedTreeIterator
+        implements Iterator
+    {
 
-    public static class LinkedTreeIterator<T> implements Iterator<T> {
-        private boolean isFirst = true;
-        private LinkedTreeNode<T> node;
+        private boolean isFirst;
+        private LinkedTreeNode node;
 
-        public LinkedTreeIterator(LinkedTreeNode<T> linkedTreeNode) {
-            this.node = linkedTreeNode;
+        public boolean hasNext()
+        {
+            if (isFirst)
+            {
+                return LinkedTreeNode._2D_get1(node) != null;
+            }
+            return LinkedTreeNode._2D_get2(node) != null;
         }
 
-        public boolean hasNext() {
-            return this.isFirst ? this.node.firstChild != null : this.node.nextChild != null;
-        }
-
-        public T next() {
-            if (this.node == null) {
+        public Object next()
+        {
+            if (node == null)
+            {
                 throw new NoSuchElementException();
             }
-            if (this.isFirst) {
-                this.node = this.node.firstChild;
-                this.isFirst = false;
-            } else {
-                this.node = this.node.nextChild;
+            if (isFirst)
+            {
+                node = LinkedTreeNode._2D_get1(node);
+                isFirst = false;
+            } else
+            {
+                node = LinkedTreeNode._2D_get2(node);
             }
-            if (this.node != null) {
-                return this.node.dataObject;
+            if (node == null)
+            {
+                throw new NoSuchElementException();
+            } else
+            {
+                return LinkedTreeNode._2D_get0(node);
             }
-            throw new NoSuchElementException();
         }
 
-        public void remove() {
+        public void remove()
+        {
             throw new UnsupportedOperationException("remove() not supported by LinkedTreeNode");
         }
+
+        public LinkedTreeIterator(LinkedTreeNode linkedtreenode)
+        {
+            node = linkedtreenode;
+            isFirst = true;
+        }
     }
 
-    public LinkedTreeNode(T t) {
-        this.dataObject = t;
+
+    private Object dataObject;
+    private LinkedTreeNode firstChild;
+    private LinkedTreeNode nextChild;
+    private LinkedTreeNode parentObject;
+    private LinkedTreeNode prevChild;
+
+    static Object _2D_get0(LinkedTreeNode linkedtreenode)
+    {
+        return linkedtreenode.dataObject;
     }
 
-    public synchronized void addChild(LinkedTreeNode<T> linkedTreeNode) {
-        if (linkedTreeNode.parentObject != this) {
-            linkedTreeNode.unlinkFromParent();
-            linkedTreeNode.parentObject = this;
-            linkedTreeNode.prevChild = null;
-            linkedTreeNode.nextChild = this.firstChild;
-            this.firstChild = linkedTreeNode;
-            if (linkedTreeNode.nextChild != null) {
-                linkedTreeNode.nextChild.prevChild = linkedTreeNode;
+    static LinkedTreeNode _2D_get1(LinkedTreeNode linkedtreenode)
+    {
+        return linkedtreenode.firstChild;
+    }
+
+    static LinkedTreeNode _2D_get2(LinkedTreeNode linkedtreenode)
+    {
+        return linkedtreenode.nextChild;
+    }
+
+    public LinkedTreeNode(Object obj)
+    {
+        dataObject = obj;
+    }
+
+    public void addChild(LinkedTreeNode linkedtreenode)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        if (linkedtreenode.parentObject != this)
+        {
+            linkedtreenode.unlinkFromParent();
+            linkedtreenode.parentObject = this;
+            linkedtreenode.prevChild = null;
+            linkedtreenode.nextChild = firstChild;
+            firstChild = linkedtreenode;
+            if (linkedtreenode.nextChild != null)
+            {
+                linkedtreenode.nextChild.prevChild = linkedtreenode;
             }
         }
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        linkedtreenode;
+        throw linkedtreenode;
     }
 
-    public T getDataObject() {
-        return this.dataObject;
+    public Object getDataObject()
+    {
+        return dataObject;
     }
 
-    public synchronized LinkedTreeNode<T> getFirstChild() {
-        return this.firstChild;
+    public LinkedTreeNode getFirstChild()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        LinkedTreeNode linkedtreenode = firstChild;
+        this;
+        JVM INSTR monitorexit ;
+        return linkedtreenode;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public synchronized LinkedTreeNode<T> getNextChild() {
-        return this.nextChild;
+    public LinkedTreeNode getNextChild()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        LinkedTreeNode linkedtreenode = nextChild;
+        this;
+        JVM INSTR monitorexit ;
+        return linkedtreenode;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public synchronized T getParent() {
-        if (this.parentObject == null) {
-            return null;
+    public Object getParent()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        Object obj;
+        if (parentObject == null)
+        {
+            break MISSING_BLOCK_LABEL_21;
         }
-        return this.parentObject.getDataObject();
+        obj = parentObject.getDataObject();
+        return obj;
+        this;
+        JVM INSTR monitorexit ;
+        return null;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public synchronized boolean hasChild(LinkedTreeNode<?> linkedTreeNode) {
-        return linkedTreeNode.parentObject == this;
+    public boolean hasChild(LinkedTreeNode linkedtreenode)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        linkedtreenode = linkedtreenode.parentObject;
+        boolean flag;
+        if (linkedtreenode == this)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        this;
+        JVM INSTR monitorexit ;
+        return flag;
+        linkedtreenode;
+        throw linkedtreenode;
     }
 
-    public synchronized boolean hasChildren() {
-        return this.firstChild != null;
+    public boolean hasChildren()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        LinkedTreeNode linkedtreenode = firstChild;
+        boolean flag;
+        if (linkedtreenode != null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        this;
+        JVM INSTR monitorexit ;
+        return flag;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    public Iterator<T> iterator() {
+    public Iterator iterator()
+    {
         return new LinkedTreeIterator(this);
     }
 
-    public synchronized void removeChild(LinkedTreeNode<T> linkedTreeNode) {
-        if (linkedTreeNode.parentObject == this) {
-            linkedTreeNode.unlinkFromParent();
+    public void removeChild(LinkedTreeNode linkedtreenode)
+    {
+        this;
+        JVM INSTR monitorenter ;
+        if (linkedtreenode.parentObject == this)
+        {
+            linkedtreenode.unlinkFromParent();
         }
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        linkedtreenode;
+        throw linkedtreenode;
     }
 
-    public synchronized void unlinkFromParent() {
-        if (this.parentObject != null) {
-            if (this.prevChild != null) {
-                this.prevChild.nextChild = this.nextChild;
-            } else {
-                this.parentObject.firstChild = this.nextChild;
-            }
-            if (this.nextChild != null) {
-                this.nextChild.prevChild = this.prevChild;
-            }
-            this.parentObject = null;
+    public void unlinkFromParent()
+    {
+        this;
+        JVM INSTR monitorenter ;
+        if (parentObject == null) goto _L2; else goto _L1
+_L1:
+        if (prevChild == null)
+        {
+            break MISSING_BLOCK_LABEL_53;
         }
+        prevChild.nextChild = nextChild;
+_L3:
+        if (nextChild != null)
+        {
+            nextChild.prevChild = prevChild;
+        }
+        parentObject = null;
+_L2:
+        this;
+        JVM INSTR monitorexit ;
+        return;
+        parentObject.firstChild = nextChild;
+          goto _L3
+        Exception exception;
+        exception;
+        throw exception;
     }
 }

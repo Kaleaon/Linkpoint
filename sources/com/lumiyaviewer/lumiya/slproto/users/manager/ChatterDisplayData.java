@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import android.content.Context;
@@ -7,88 +11,120 @@ import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo;
 import com.lumiyaviewer.lumiya.ui.chat.contacts.ChatterItemViewBuilder;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class ChatterDisplayData implements ChatterDisplayInfo, Comparable<ChatterDisplayData> {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            UnreadMessageInfo, UserManager
+
+public class ChatterDisplayData
+    implements ChatterDisplayInfo, Comparable
+{
+
     public final ChatterID chatterID;
     public final String displayName;
     final float distanceToUser;
     final boolean isOnline;
-    @Nullable
     private final SLChatEvent lastMessage;
     private final int unreadCount;
     private final boolean voiceActive;
 
-    ChatterDisplayData(ChatterID chatterID2, String str, boolean z, int i, @Nullable SLChatEvent sLChatEvent, float f, boolean z2) {
-        this.chatterID = chatterID2;
-        this.displayName = str;
-        this.isOnline = z;
-        this.unreadCount = i;
-        this.lastMessage = sLChatEvent;
-        this.distanceToUser = f;
-        this.voiceActive = z2;
+    ChatterDisplayData(ChatterID chatterid, String s, boolean flag, int i, SLChatEvent slchatevent, float f, boolean flag1)
+    {
+        chatterID = chatterid;
+        displayName = s;
+        isOnline = flag;
+        unreadCount = i;
+        lastMessage = slchatevent;
+        distanceToUser = f;
+        voiceActive = flag1;
     }
 
-    public void buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
-        chatterItemViewBuilder.setLabel(this.displayName);
-        chatterItemViewBuilder.setThumbnailChatterID(this.chatterID, this.displayName);
-        chatterItemViewBuilder.setOnlineStatusIcon(this.isOnline, this.isOnline);
-        chatterItemViewBuilder.setUnreadCount(this.unreadCount);
-        chatterItemViewBuilder.setVoiceActive(this.voiceActive);
-        if (this.lastMessage != null) {
-            chatterItemViewBuilder.setLastMessage(this.lastMessage.getPlainTextMessage(context, userManager, true).toString());
-        } else {
-            chatterItemViewBuilder.setLastMessage((String) null);
+    public void buildView(Context context, ChatterItemViewBuilder chatteritemviewbuilder, UserManager usermanager)
+    {
+        chatteritemviewbuilder.setLabel(displayName);
+        chatteritemviewbuilder.setThumbnailChatterID(chatterID, displayName);
+        chatteritemviewbuilder.setOnlineStatusIcon(isOnline, isOnline);
+        chatteritemviewbuilder.setUnreadCount(unreadCount);
+        chatteritemviewbuilder.setVoiceActive(voiceActive);
+        if (lastMessage != null)
+        {
+            chatteritemviewbuilder.setLastMessage(lastMessage.getPlainTextMessage(context, usermanager, true).toString());
+        } else
+        {
+            chatteritemviewbuilder.setLastMessage(null);
         }
-        chatterItemViewBuilder.setDistance(this.distanceToUser);
+        chatteritemviewbuilder.setDistance(distanceToUser);
     }
 
-    public int compareTo(@Nonnull ChatterDisplayData chatterDisplayData) {
-        int compare = Booleans.compare(Strings.isNullOrEmpty(this.displayName), Strings.isNullOrEmpty(chatterDisplayData.displayName));
-        if (compare != 0) {
-            return compare;
+    public int compareTo(ChatterDisplayData chatterdisplaydata)
+    {
+        int i = Booleans.compare(Strings.isNullOrEmpty(displayName), Strings.isNullOrEmpty(chatterdisplaydata.displayName));
+        if (i != 0)
+        {
+            return i;
         }
-        int compareTo = (this.displayName != null ? this.displayName : "").compareTo(chatterDisplayData.displayName != null ? chatterDisplayData.displayName : "");
-        return compareTo != 0 ? compareTo : this.chatterID.compareTo(chatterDisplayData.chatterID);
+        String s;
+        String s1;
+        if (displayName != null)
+        {
+            s = displayName;
+        } else
+        {
+            s = "";
+        }
+        if (chatterdisplaydata.displayName != null)
+        {
+            s1 = chatterdisplaydata.displayName;
+        } else
+        {
+            s1 = "";
+        }
+        i = s.compareTo(s1);
+        if (i != 0)
+        {
+            return i;
+        } else
+        {
+            return chatterID.compareTo(chatterdisplaydata.chatterID);
+        }
     }
 
-    public ChatterID getChatterID(UserManager userManager) {
-        return this.chatterID;
+    public volatile int compareTo(Object obj)
+    {
+        return compareTo((ChatterDisplayData)obj);
     }
 
-    @Nullable
-    public String getDisplayName() {
-        return this.displayName;
+    public ChatterID getChatterID(UserManager usermanager)
+    {
+        return chatterID;
     }
 
-    /* access modifiers changed from: package-private */
-    @Nonnull
-    public ChatterDisplayData withDisplayName(String str) {
-        return new ChatterDisplayData(this.chatterID, str, this.isOnline, this.unreadCount, this.lastMessage, this.distanceToUser, this.voiceActive);
+    public String getDisplayName()
+    {
+        return displayName;
     }
 
-    /* access modifiers changed from: package-private */
-    @Nonnull
-    public ChatterDisplayData withDistanceToUser(float f) {
-        return new ChatterDisplayData(this.chatterID, this.displayName, this.isOnline, this.unreadCount, this.lastMessage, f, this.voiceActive);
+    ChatterDisplayData withDisplayName(String s)
+    {
+        return new ChatterDisplayData(chatterID, s, isOnline, unreadCount, lastMessage, distanceToUser, voiceActive);
     }
 
-    /* access modifiers changed from: package-private */
-    @Nonnull
-    public ChatterDisplayData withOnlineStatus(boolean z) {
-        return new ChatterDisplayData(this.chatterID, this.displayName, z, this.unreadCount, this.lastMessage, this.distanceToUser, this.voiceActive);
+    ChatterDisplayData withDistanceToUser(float f)
+    {
+        return new ChatterDisplayData(chatterID, displayName, isOnline, unreadCount, lastMessage, f, voiceActive);
     }
 
-    /* access modifiers changed from: package-private */
-    @Nonnull
-    public ChatterDisplayData withUnreadInfo(@Nonnull UnreadMessageInfo unreadMessageInfo) {
-        return new ChatterDisplayData(this.chatterID, this.displayName, this.isOnline, unreadMessageInfo.unreadCount(), unreadMessageInfo.lastMessage(), this.distanceToUser, this.voiceActive);
+    ChatterDisplayData withOnlineStatus(boolean flag)
+    {
+        return new ChatterDisplayData(chatterID, displayName, flag, unreadCount, lastMessage, distanceToUser, voiceActive);
     }
 
-    /* access modifiers changed from: package-private */
-    @Nonnull
-    public ChatterDisplayData withVoiceActive(boolean z) {
-        return new ChatterDisplayData(this.chatterID, this.displayName, this.isOnline, this.unreadCount, this.lastMessage, this.distanceToUser, z);
+    ChatterDisplayData withUnreadInfo(UnreadMessageInfo unreadmessageinfo)
+    {
+        return new ChatterDisplayData(chatterID, displayName, isOnline, unreadmessageinfo.unreadCount(), unreadmessageinfo.lastMessage(), distanceToUser, voiceActive);
+    }
+
+    ChatterDisplayData withVoiceActive(boolean flag)
+    {
+        return new ChatterDisplayData(chatterID, displayName, isOnline, unreadCount, lastMessage, distanceToUser, flag);
     }
 }

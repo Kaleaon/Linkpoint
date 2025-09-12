@@ -1,64 +1,96 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class FindAgent extends SLMessage {
-    public AgentBlock AgentBlock_Field;
-    public ArrayList<LocationBlock> LocationBlock_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentBlock {
+public class FindAgent extends SLMessage
+{
+    public static class AgentBlock
+    {
+
         public UUID Hunter;
         public UUID Prey;
         public Inet4Address SpaceIP;
+
+        public AgentBlock()
+        {
+        }
     }
 
-    public static class LocationBlock {
+    public static class LocationBlock
+    {
+
         public double GlobalX;
         public double GlobalY;
-    }
 
-    public FindAgent() {
-        this.zeroCoded = false;
-        this.AgentBlock_Field = new AgentBlock();
-    }
-
-    public int CalcPayloadSize() {
-        return (this.LocationBlock_Fields.size() * 16) + 41;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleFindAgent(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 0);
-        packUUID(byteBuffer, this.AgentBlock_Field.Hunter);
-        packUUID(byteBuffer, this.AgentBlock_Field.Prey);
-        packIPAddress(byteBuffer, this.AgentBlock_Field.SpaceIP);
-        byteBuffer.put((byte) this.LocationBlock_Fields.size());
-        for (LocationBlock locationBlock : this.LocationBlock_Fields) {
-            packDouble(byteBuffer, locationBlock.GlobalX);
-            packDouble(byteBuffer, locationBlock.GlobalY);
+        public LocationBlock()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentBlock_Field.Hunter = unpackUUID(byteBuffer);
-        this.AgentBlock_Field.Prey = unpackUUID(byteBuffer);
-        this.AgentBlock_Field.SpaceIP = unpackIPAddress(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            LocationBlock locationBlock = new LocationBlock();
-            locationBlock.GlobalX = unpackDouble(byteBuffer);
-            locationBlock.GlobalY = unpackDouble(byteBuffer);
-            this.LocationBlock_Fields.add(locationBlock);
+
+    public AgentBlock AgentBlock_Field;
+    public ArrayList LocationBlock_Fields;
+
+    public FindAgent()
+    {
+        LocationBlock_Fields = new ArrayList();
+        zeroCoded = false;
+        AgentBlock_Field = new AgentBlock();
+    }
+
+    public int CalcPayloadSize()
+    {
+        return LocationBlock_Fields.size() * 16 + 41;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleFindAgent(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)0);
+        packUUID(bytebuffer, AgentBlock_Field.Hunter);
+        packUUID(bytebuffer, AgentBlock_Field.Prey);
+        packIPAddress(bytebuffer, AgentBlock_Field.SpaceIP);
+        bytebuffer.put((byte)LocationBlock_Fields.size());
+        LocationBlock locationblock;
+        for (Iterator iterator = LocationBlock_Fields.iterator(); iterator.hasNext(); packDouble(bytebuffer, locationblock.GlobalY))
+        {
+            locationblock = (LocationBlock)iterator.next();
+            packDouble(bytebuffer, locationblock.GlobalX);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentBlock_Field.Hunter = unpackUUID(bytebuffer);
+        AgentBlock_Field.Prey = unpackUUID(bytebuffer);
+        AgentBlock_Field.SpaceIP = unpackIPAddress(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            LocationBlock locationblock = new LocationBlock();
+            locationblock.GlobalX = unpackDouble(bytebuffer);
+            locationblock.GlobalY = unpackDouble(bytebuffer);
+            LocationBlock_Fields.add(locationblock);
+        }
+
     }
 }

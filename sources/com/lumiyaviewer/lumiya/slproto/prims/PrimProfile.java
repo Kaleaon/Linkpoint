@@ -1,24 +1,21 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.prims;
 
 import com.lumiyaviewer.lumiya.slproto.types.LLVector2;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import java.util.ArrayList;
 
-public class PrimProfile {
-    public static final int MIN_DETAIL_FACES = 6;
-    private static final float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f};
-    public boolean Concave = false;
-    public boolean Dirty = true;
-    public LLVector3[] EdgeCenters;
-    public LLVector3[] EdgeNormals;
-    public ArrayList<Face> Faces = new ArrayList<>();
-    public LLVector2[] Normals;
-    public boolean Open = false;
-    public ArrayList<LLVector3> Profile = new ArrayList<>();
-    public int Total = 2;
-    public int TotalOut = 0;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.prims:
+//            PrimProfileParams
 
-    public static class Face {
+public class PrimProfile
+{
+    public static class Face
+    {
+
         public static final short LL_FACE_INNER_SIDE = 4;
         public static final short LL_FACE_OUTER_SIDE_0 = 32;
         public static final short LL_FACE_OUTER_SIDE_1 = 64;
@@ -34,464 +31,712 @@ public class PrimProfile {
         public boolean Flat;
         public int Index;
         public float ScaleU;
+
+        public Face()
+        {
+        }
     }
 
-    private Face addCap(short s) {
+
+    public static final int MIN_DETAIL_FACES = 6;
+    private static final float tableScale[] = {
+        1.0F, 1.0F, 1.0F, 0.5F, 0.707107F, 0.53F, 0.525F, 0.5F
+    };
+    public boolean Concave;
+    public boolean Dirty;
+    public LLVector3 EdgeCenters[];
+    public LLVector3 EdgeNormals[];
+    public ArrayList Faces;
+    public LLVector2 Normals[];
+    public boolean Open;
+    public ArrayList Profile;
+    public int Total;
+    public int TotalOut;
+
+    public PrimProfile()
+    {
+        Open = false;
+        Concave = false;
+        Dirty = true;
+        TotalOut = 0;
+        Total = 2;
+        Profile = new ArrayList();
+        Faces = new ArrayList();
+    }
+
+    private Face addCap(short word0)
+    {
         Face face = new Face();
         face.Index = 0;
-        face.Count = this.Total;
-        face.ScaleU = 1.0f;
+        face.Count = Total;
+        face.ScaleU = 1.0F;
         face.Cap = true;
-        face.FaceID = s;
-        this.Faces.add(face);
+        face.FaceID = word0;
+        Faces.add(face);
         return face;
     }
 
-    private Face addFace(int i, int i2, float f, short s, boolean z) {
+    private Face addFace(int i, int j, float f, short word0, boolean flag)
+    {
         Face face = new Face();
         face.Index = i;
-        face.Count = i2;
+        face.Count = j;
         face.ScaleU = f;
-        face.Flat = z;
+        face.Flat = flag;
         face.Cap = false;
-        face.FaceID = s;
-        this.Faces.add(face);
+        face.FaceID = word0;
+        Faces.add(face);
         return face;
     }
 
-    private Face addHole(PrimProfileParams primProfileParams, boolean z, float f, float f2, float f3, float f4, int i) {
-        this.TotalOut = this.Total;
-        genNGon(primProfileParams, (int) Math.floor((double) f), f2, -1.0f, f4, i);
-        Face addFace = addFace(this.TotalOut, this.Total - this.TotalOut, 0.0f, 4, z);
-        LLVector3[] lLVector3Arr = new LLVector3[this.Total];
-        int i2 = this.TotalOut;
-        while (true) {
-            int i3 = i2;
-            if (i3 >= this.Total) {
-                break;
-            }
-            lLVector3Arr[i3] = new LLVector3(this.Profile.get(i3));
-            lLVector3Arr[i3].mul(f3);
-            i2 = i3 + 1;
+    private Face addHole(PrimProfileParams primprofileparams, boolean flag, float f, float f1, float f2, float f3, int i)
+    {
+        TotalOut = Total;
+        genNGon(primprofileparams, (int)Math.floor(f), f1, -1F, f3, i);
+        primprofileparams = addFace(TotalOut, Total - TotalOut, 0.0F, (short)4, flag);
+        LLVector3 allvector3[] = new LLVector3[Total];
+        for (i = TotalOut; i < Total; i++)
+        {
+            allvector3[i] = new LLVector3((LLVector3)Profile.get(i));
+            allvector3[i].mul(f2);
         }
-        int i4 = this.Total - 1;
-        int i5 = this.TotalOut;
-        while (i5 < this.Total) {
-            this.Profile.set(i5, lLVector3Arr[i4]);
-            i5++;
-            i4--;
+
+        i = Total - 1;
+        for (int j = TotalOut; j < Total;)
+        {
+            Profile.set(j, allvector3[i]);
+            j++;
+            i--;
         }
-        int i6 = 0;
-        while (true) {
-            int i7 = i6;
-            if (i7 >= this.Faces.size()) {
-                return addFace;
+
+        for (i = 0; i < Faces.size(); i++)
+        {
+            if (((Face)Faces.get(i)).Cap)
+            {
+                Face face = (Face)Faces.get(i);
+                face.Count = face.Count * 2;
             }
-            if (this.Faces.get(i7).Cap) {
-                this.Faces.get(i7).Count *= 2;
-            }
-            i6 = i7 + 1;
         }
+
+        return primprofileparams;
     }
 
-    private void genNGon(PrimProfileParams primProfileParams, int i, float f, float f2, float f3, int i2) {
-        float f4;
-        float f5;
-        float f6 = primProfileParams.Begin;
-        float f7 = primProfileParams.End;
-        float f8 = 1.0f / ((float) i);
-        float f9 = 6.2831855f * f8 * f3;
-        int round = Math.round(((float) i) / f3);
-        float f10 = round < 8 ? tableScale[round] : 0.5f;
-        float floor = (float) (Math.floor((double) (((float) i) * f6)) / ((double) ((float) i)));
-        float f11 = 6.2831855f * ((floor * f3) + f);
-        LLVector3 lLVector3 = new LLVector3(((float) Math.cos((double) f11)) * f10, ((float) Math.sin((double) f11)) * f10, floor);
-        float f12 = floor + f8;
-        float f13 = f11 + f9;
-        LLVector3 lLVector32 = new LLVector3(((float) Math.cos((double) f13)) * f10, ((float) Math.sin((double) f13)) * f10, f12);
-        float f14 = (f6 - floor) * ((float) i);
-        if (f14 < 0.9999f) {
-            this.Profile.add(LLVector3.lerp(lLVector3, lLVector32, f14));
-            f5 = f13;
-            f4 = f12;
-        } else {
-            f5 = f13;
-            f4 = f12;
-        }
-        while (f4 < f7) {
-            LLVector3 lLVector33 = new LLVector3(((float) Math.cos((double) f5)) * f10, ((float) Math.sin((double) f5)) * f10, f4);
-            if (this.Profile.size() > 0) {
-                LLVector3 lLVector34 = this.Profile.get(this.Profile.size() - 1);
-                for (int i3 = 0; i3 < i2; i3++) {
-                    this.Profile.add(LLVector3.lerp(lLVector34, lLVector33, (1.0f / ((float) (i2 + 1))) * ((float) (i3 + 1))));
-                }
-            }
-            this.Profile.add(lLVector33);
-            f5 += f9;
-            f4 += f8;
-            lLVector3 = lLVector33;
-        }
-        LLVector3 lLVector35 = new LLVector3(((float) Math.cos((double) f5)) * f10, f10 * ((float) Math.sin((double) f5)), f4);
-        float f15 = (f7 - (f4 - f8)) * ((float) i);
-        if (f15 > 1.0E-4f) {
-            LLVector3 lerp = LLVector3.lerp(lLVector3, lLVector35, f15);
-            if (this.Profile.size() > 0) {
-                LLVector3 lLVector36 = this.Profile.get(this.Profile.size() - 1);
-                for (int i4 = 0; i4 < i2; i4++) {
-                    this.Profile.add(LLVector3.lerp(lLVector36, lerp, (1.0f / ((float) (i2 + 1))) * ((float) (i4 + 1))));
-                }
-            }
-            this.Profile.add(lerp);
-        }
-        if ((f7 - f6) * f3 < 0.99f) {
-            this.Open = true;
-            this.Concave = (f7 - f6) * f3 > 0.5f;
-            if (primProfileParams.Hollow <= 0.0f) {
-                this.Profile.add(new LLVector3(0.0f, 0.0f, 0.0f));
-            }
-        } else {
-            this.Open = false;
-            this.Concave = false;
-        }
-        this.Total = this.Profile.size();
-    }
-
-    private static int getNumNGonPoints(PrimProfileParams primProfileParams, int i, float f, float f2, float f3, int i2) {
-        float f4;
-        int i3;
-        float f5 = primProfileParams.Begin;
-        float f6 = primProfileParams.End;
-        float f7 = 1.0f / ((float) i);
-        float floor = (float) (Math.floor((double) (((float) i) * f5)) / ((double) ((float) i)));
-        float f8 = floor + f7;
-        if ((f5 - floor) * ((float) i) < 0.9999f) {
-            float f9 = f8;
-            i3 = 1;
-            f4 = f9;
-        } else {
-            float f10 = f8;
-            i3 = 0;
-            f4 = f10;
-        }
-        while (f4 < f6) {
-            f4 += f7;
-            i3++;
-        }
-        if ((f6 - (f4 - f7)) * ((float) i) > 1.0E-4f) {
-            i3++;
-        }
-        return ((f6 - f5) * f3 >= 0.99f || primProfileParams.Hollow > 0.0f) ? i3 : i3 + 1;
-    }
-
-    public static int getNumPoints(PrimProfileParams primProfileParams, boolean z, float f, int i, boolean z2, int i2) {
-        if (f < 0.0f) {
-            f = 0.0f;
-        }
-        float f2 = primProfileParams.Hollow;
-        switch (primProfileParams.CurveType & 15) {
-            case 0:
-                float f3 = 6.0f * f;
-                if (f2 != 0.0f && (primProfileParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK) == 32) {
-                    f3 = (float) (Math.ceil((double) (f3 / 4.0f)) * 4.0d);
-                }
-                int i3 = (int) f3;
-                if (z2) {
-                    i3 = i2;
-                }
-                int numNGonPoints = getNumNGonPoints(primProfileParams, i3, 0.0f, 0.0f, 1.0f, 0);
-                return f2 != 0.0f ? numNGonPoints * 2 : numNGonPoints;
-            case 1:
-                int numNGonPoints2 = getNumNGonPoints(primProfileParams, 4, -0.375f, 0.0f, 1.0f, i);
-                return f2 != 0.0f ? numNGonPoints2 * 2 : numNGonPoints2;
-            case 2:
-            case 3:
-            case 4:
-                int numNGonPoints3 = getNumNGonPoints(primProfileParams, 3, 0.0f, 0.0f, 1.0f, i);
-                return f2 != 0.0f ? numNGonPoints3 * 2 : numNGonPoints3;
-            case 5:
-                float f4 = 6.0f * f * 0.5f;
-                if (f2 != 0.0f && (primProfileParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK) == 32) {
-                    f4 = (float) (Math.ceil((double) (f4 / 2.0f)) * 2.0d);
-                }
-                int numNGonPoints4 = getNumNGonPoints(primProfileParams, (int) Math.floor((double) f4), 0.5f, 0.0f, 0.5f, 0);
-                if (f2 != 0.0f) {
-                    numNGonPoints4 *= 2;
-                }
-                return ((((primProfileParams.End - primProfileParams.Begin) > 1.0f ? 1 : ((primProfileParams.End - primProfileParams.Begin) == 1.0f ? 0 : -1)) < 0) || f2 != 0.0f) ? numNGonPoints4 : numNGonPoints4 + 1;
-            default:
-                return 0;
-        }
-    }
-
-    /* access modifiers changed from: protected */
-    public void genNormals(PrimProfileParams primProfileParams) {
-        LLVector3 lLVector3;
-        int size = this.Profile.size();
-        int i = this.TotalOut != 0 ? this.TotalOut : this.Total / 2;
-        this.EdgeNormals = new LLVector3[(size * 2)];
-        this.EdgeCenters = new LLVector3[(size * 2)];
-        this.Normals = new LLVector2[size];
-        boolean z = primProfileParams.Hollow > 0.0f;
-        for (int i2 = 0; i2 < size; i2++) {
-            this.Normals[i2] = new LLVector2(this.Profile.get(i2).x, this.Profile.get(i2).y);
-            if (z && i2 >= i) {
-                this.Normals[i2].mul(-1.0f);
-            }
-            if (((double) this.Normals[i2].magVec()) < 0.001d) {
-                int i3 = i2 + -1 >= 0 ? i2 - 1 : size - 1;
-                int i4 = i3 + -1 >= 0 ? i3 - 1 : size - 1;
-                int i5 = i2 + 1 < size ? i2 + 1 : 0;
-                int i6 = i5 + 1 < size ? i5 + 1 : 0;
-                this.Normals[i2] = LLVector2.sum(new LLVector2((this.Profile.get(i3).x + this.Profile.get(i3).x) - this.Profile.get(i4).x, (this.Profile.get(i3).y + this.Profile.get(i3).y) - this.Profile.get(i4).y), new LLVector2((this.Profile.get(i5).x + this.Profile.get(i5).x) - this.Profile.get(i6).x, (this.Profile.get(i5).y + this.Profile.get(i5).y) - this.Profile.get(i6).y));
-                this.Normals[i2].mul(0.5f);
-            }
-            this.Normals[i2].normVec();
-        }
-        int i7 = this.Concave ? 2 : 1;
-        for (int i8 = 0; i8 < i7; i8++) {
-            int i9 = 0;
-            while (true) {
-                int i10 = i9;
-                if (i10 >= this.Total) {
-                    break;
-                }
-                LLVector3 lLVector32 = new LLVector3(this.Profile.get(i10));
-                lLVector32.z = 0.0f;
-                if (this.Concave && i8 == 0 && i10 == (this.Total - 1) / 2) {
-                    lLVector3 = this.Profile.get(this.Total - 1);
-                } else if (!this.Concave || i8 != 1 || i10 != this.Total - 1) {
-                    LLVector3 lLVector33 = new LLVector3();
-                    LLVector3 lLVector34 = new LLVector3();
-                    lLVector3 = lLVector33;
-                    int i11 = (i10 + 1) % this.Total;
-                    while (lLVector34.magVecSquared() < 1.0E-4f) {
-                        lLVector3 = this.Profile.get(i11);
-                        lLVector34.setSub(lLVector3, lLVector32);
-                        i11 = (i11 + 1) % this.Total;
-                        if (i11 == i10) {
-                            break;
-                        }
-                    }
-                } else {
-                    lLVector3 = this.Profile.get((this.Total - 1) / 2);
-                }
-                lLVector3.z = 0.0f;
-                LLVector3 sub = LLVector3.sub(lLVector3, lLVector32);
-                sub.setCross(LLVector3.z_axis);
-                sub.normVec();
-                this.EdgeNormals[(i8 * size) + i10] = sub;
-                this.EdgeCenters[(i8 * size) + i10] = LLVector3.lerp(lLVector32, lLVector3, 0.5f);
-                i9 = i10 + 1;
-            }
-        }
-    }
-
-    public boolean generate(PrimProfileParams primProfileParams, boolean z, float f, int i, boolean z2, int i2) {
-        float f2;
-        byte b;
+    private void genNGon(PrimProfileParams primprofileparams, int i, float f, float f1, float f2, int j)
+    {
+        float f6 = primprofileparams.Begin;
+        float f7 = primprofileparams.End;
+        float f8 = 1.0F / (float)i;
+        float f9 = 6.283185F * f8 * f2;
+        int k = Math.round((float)i / f2);
         float f3;
-        byte b2;
-        if (!this.Dirty && (!z2)) {
-            return false;
+        float f4;
+        LLVector3 llvector3;
+        LLVector3 llvector3_1;
+        if (k < 8)
+        {
+            f3 = tableScale[k];
+        } else
+        {
+            f3 = 0.5F;
         }
-        this.Dirty = false;
-        if (f < 0.0f) {
-            f = 0.0f;
+        f4 = (float)(Math.floor((float)i * f6) / (double)(float)i);
+        f1 = 6.283185F * (f4 * f2 + f);
+        llvector3 = new LLVector3((float)Math.cos(f1) * f3, (float)Math.sin(f1) * f3, f4);
+        f = f4 + f8;
+        f1 += f9;
+        llvector3_1 = new LLVector3((float)Math.cos(f1) * f3, (float)Math.sin(f1) * f3, f);
+        f4 = (f6 - f4) * (float)i;
+        if (f4 < 0.9999F)
+        {
+            Profile.add(LLVector3.lerp(llvector3, llvector3_1, f4));
+            f4 = f1;
+            f1 = f;
+            f = f4;
+        } else
+        {
+            float f5 = f;
+            f = f1;
+            f1 = f5;
         }
-        this.Profile.clear();
-        this.Faces.clear();
-        float f4 = primProfileParams.Begin;
-        float f5 = primProfileParams.End;
-        float f6 = primProfileParams.Hollow;
-        if (f4 > f5 - 0.01f) {
-            return false;
+        for (; f1 < f7; f1 += f8)
+        {
+            llvector3 = new LLVector3((float)Math.cos(f) * f3, (float)Math.sin(f) * f3, f1);
+            if (Profile.size() > 0)
+            {
+                llvector3_1 = (LLVector3)Profile.get(Profile.size() - 1);
+                for (int l = 0; l < j; l++)
+                {
+                    Profile.add(LLVector3.lerp(llvector3_1, llvector3, (1.0F / (float)(j + 1)) * (float)(l + 1)));
+                }
+
+            }
+            Profile.add(llvector3);
+            f += f9;
         }
-        int i3 = 0;
-        switch (primProfileParams.CurveType & 15) {
-            case 0:
-                float f7 = 6.0f * f;
-                if (f6 != 0.0f) {
-                    byte b3 = (byte) (primProfileParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK);
-                    if (b3 == 32) {
-                        f3 = (float) (Math.ceil((double) (f7 / 4.0f)) * 4.0d);
-                        b2 = b3;
-                    } else {
-                        f3 = f7;
-                        b2 = b3;
-                    }
-                } else {
-                    f3 = f7;
-                    b2 = 0;
+
+        llvector3_1 = new LLVector3((float)Math.cos(f) * f3, f3 * (float)Math.sin(f), f1);
+        f = (f7 - (f1 - f8)) * (float)i;
+        if (f > 1E-04F)
+        {
+            llvector3 = LLVector3.lerp(llvector3, llvector3_1, f);
+            if (Profile.size() > 0)
+            {
+                LLVector3 llvector3_2 = (LLVector3)Profile.get(Profile.size() - 1);
+                for (i = 0; i < j; i++)
+                {
+                    Profile.add(LLVector3.lerp(llvector3_2, llvector3, (1.0F / (float)(j + 1)) * (float)(i + 1)));
                 }
-                int i4 = (int) f3;
-                if (z2) {
-                    i4 = i2;
-                }
-                genNGon(primProfileParams, i4, 0.0f, 0.0f, 1.0f, 0);
-                if (z) {
-                    addCap(1);
-                }
-                if (!this.Open || f6 != 0.0f) {
-                    addFace(0, this.Total, 0.0f, 32, false);
-                } else {
-                    addFace(0, this.Total - 1, 0.0f, 32, false);
-                }
-                if (f6 != 0.0f) {
-                    switch (b2) {
-                        case 32:
-                            addHole(primProfileParams, true, 4.0f, 0.0f, f6, 1.0f, i);
-                            break;
-                        case 48:
-                            addHole(primProfileParams, true, 3.0f, 0.0f, f6, 1.0f, i);
-                            break;
-                        default:
-                            addHole(primProfileParams, false, f3, 0.0f, f6, 1.0f, 0);
-                            break;
-                    }
-                }
-                break;
-            case 1:
-                genNGon(primProfileParams, 4, -0.375f, 0.0f, 1.0f, i);
-                if (z) {
-                    addCap(1);
-                }
-                int floor = (int) Math.floor((double) (4.0f * f4));
-                while (true) {
-                    int i5 = floor;
-                    int i6 = i3;
-                    if (i5 >= ((int) Math.floor((double) ((4.0f * f5) + 0.999f)))) {
-                        int i7 = 0;
-                        while (true) {
-                            int i8 = i7;
-                            if (i8 >= this.Profile.size()) {
-                                if (f6 != 0.0f) {
-                                    switch (primProfileParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK) {
-                                        case 16:
-                                            addHole(primProfileParams, false, 6.0f * f, -0.375f, f6, 1.0f, 0);
-                                            break;
-                                        case 48:
-                                            addHole(primProfileParams, true, 3.0f, -0.375f, f6, 1.0f, i);
-                                            break;
-                                        default:
-                                            addHole(primProfileParams, true, 4.0f, -0.375f, f6, 1.0f, i);
-                                            break;
-                                    }
-                                }
-                                if (z) {
-                                    this.Faces.get(0).Count = this.Total;
-                                    break;
-                                }
-                            } else {
-                                this.Profile.get(i8).z *= 4.0f;
-                                i7 = i8 + 1;
-                            }
-                        }
-                    } else {
-                        i3 = i6 + 1;
-                        addFace((i + 1) * i6, i + 2, 1.0f, (short) (32 << i5), true);
-                        floor = i5 + 1;
-                    }
-                }
-                break;
-            case 2:
-            case 3:
-            case 4:
-                genNGon(primProfileParams, 3, 0.0f, 0.0f, 1.0f, i);
-                int i9 = 0;
-                while (true) {
-                    int i10 = i9;
-                    if (i10 >= this.Profile.size()) {
-                        if (z) {
-                            addCap(1);
-                        }
-                        int floor2 = (int) Math.floor((double) (3.0f * f4));
-                        while (floor2 < ((int) Math.floor((double) ((3.0f * f5) + 0.999f)))) {
-                            addFace(i3 * (i + 1), i + 2, 1.0f, (short) (32 << floor2), true);
-                            floor2++;
-                            i3++;
-                        }
-                        if (f6 != 0.0f) {
-                            float f8 = f6 / 2.0f;
-                            switch (primProfileParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK) {
-                                case 16:
-                                    addHole(primProfileParams, false, 6.0f * f, 0.0f, f8, 1.0f, 0);
-                                    break;
-                                case 32:
-                                    addHole(primProfileParams, true, 4.0f, 0.0f, f8, 1.0f, i);
-                                    break;
-                                default:
-                                    addHole(primProfileParams, true, 3.0f, 0.0f, f8, 1.0f, i);
-                                    break;
-                            }
-                        }
-                    } else {
-                        this.Profile.get(i10).z *= 3.0f;
-                        i9 = i10 + 1;
-                    }
-                }
-                break;
-            case 5:
-                float f9 = 6.0f * f * 0.5f;
-                if (f6 != 0.0f) {
-                    byte b4 = (byte) (primProfileParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK);
-                    if (b4 == 32) {
-                        f2 = (float) (Math.ceil((double) (f9 / 2.0f)) * 2.0d);
-                        b = b4;
-                    } else {
-                        f2 = f9;
-                        b = b4;
-                    }
-                } else {
-                    f2 = f9;
-                    b = 0;
-                }
-                genNGon(primProfileParams, (int) Math.floor((double) f2), 0.5f, 0.0f, 0.5f, 0);
-                if (z) {
-                    addCap(1);
-                }
-                if (!this.Open || f6 != 0.0f) {
-                    addFace(0, this.Total, 0.0f, 32, false);
-                } else {
-                    addFace(0, this.Total - 1, 0.0f, 32, false);
-                }
-                if (f6 != 0.0f) {
-                    switch (b) {
-                        case 32:
-                            addHole(primProfileParams, true, 2.0f, 0.5f, f6, 0.5f, i);
-                            break;
-                        case 48:
-                            addHole(primProfileParams, true, 3.0f, 0.5f, f6, 0.5f, i);
-                            break;
-                        default:
-                            addHole(primProfileParams, false, f2, 0.5f, f6, 0.5f, 0);
-                            break;
-                    }
-                }
-                if (f5 - f4 >= 1.0f) {
-                    if (f6 == 0.0f) {
-                        this.Open = false;
-                        this.Profile.add(new LLVector3(this.Profile.get(0)));
-                        this.Total++;
-                        break;
-                    }
-                } else {
-                    this.Open = true;
-                    break;
-                }
-                break;
+
+            }
+            Profile.add(llvector3);
         }
-        if (z) {
-            addCap(2);
+        if ((f7 - f6) * f2 < 0.99F)
+        {
+            Open = true;
+            boolean flag;
+            if ((f7 - f6) * f2 > 0.5F)
+            {
+                flag = true;
+            } else
+            {
+                flag = false;
+            }
+            Concave = flag;
+            if (primprofileparams.Hollow <= 0.0F)
+            {
+                Profile.add(new LLVector3(0.0F, 0.0F, 0.0F));
+            }
+        } else
+        {
+            Open = false;
+            Concave = false;
         }
-        if (!this.Open) {
-            return true;
-        }
-        addFace(this.Total - 1, 2, 0.5f, 8, true);
-        if (f6 != 0.0f) {
-            addFace(this.TotalOut - 1, 2, 0.5f, 16, true);
-            return true;
-        }
-        addFace(this.Total - 2, 2, 0.5f, 16, true);
-        return true;
+        Total = Profile.size();
     }
+
+    private static int getNumNGonPoints(PrimProfileParams primprofileparams, int i, float f, float f1, float f2, int j)
+    {
+        f1 = primprofileparams.Begin;
+        float f3 = primprofileparams.End;
+        float f4 = 1.0F / (float)i;
+        float f5 = (float)(Math.floor((float)i * f1) / (double)(float)i);
+        f = f5 + f4;
+        int k;
+        if ((f1 - f5) * (float)i < 0.9999F)
+        {
+            j = 1;
+        } else
+        {
+            j = 0;
+        }
+        while (f < f3) 
+        {
+            f += f4;
+            j++;
+        }
+        k = j;
+        if ((f3 - (f - f4)) * (float)i > 1E-04F)
+        {
+            k = j + 1;
+        }
+        i = k;
+        if ((f3 - f1) * f2 < 0.99F)
+        {
+            i = k;
+            if (primprofileparams.Hollow <= 0.0F)
+            {
+                i = k + 1;
+            }
+        }
+        return i;
+    }
+
+    public static int getNumPoints(PrimProfileParams primprofileparams, boolean flag, float f, int i, boolean flag1, int j)
+    {
+        float f1;
+        float f2;
+        boolean flag2;
+        f1 = f;
+        if (f < 0.0F)
+        {
+            f1 = 0.0F;
+        }
+        f2 = primprofileparams.Hollow;
+        flag2 = false;
+        primprofileparams.CurveType & 0xf;
+        JVM INSTR tableswitch 0 5: default 68
+    //                   0 126
+    //                   1 73
+    //                   2 100
+    //                   3 100
+    //                   4 100
+    //                   5 210;
+           goto _L1 _L2 _L3 _L4 _L4 _L4 _L5
+_L1:
+        i = ((flag2) ? 1 : 0);
+_L7:
+        return i;
+_L3:
+        j = getNumNGonPoints(primprofileparams, 4, -0.375F, 0.0F, 1.0F, i);
+        i = j;
+        if (f2 != 0.0F)
+        {
+            return j * 2;
+        }
+        continue; /* Loop/switch isn't completed */
+_L4:
+        j = getNumNGonPoints(primprofileparams, 3, 0.0F, 0.0F, 1.0F, i);
+        i = j;
+        if (f2 != 0.0F)
+        {
+            return j * 2;
+        }
+        continue; /* Loop/switch isn't completed */
+_L2:
+        f1 = 6F * f1;
+        f = f1;
+        if (f2 != 0.0F)
+        {
+            f = f1;
+            if ((primprofileparams.CurveType & 0xfffffff0) == 32)
+            {
+                f = (float)(Math.ceil(f1 / 4F) * 4D);
+            }
+        }
+        i = (int)f;
+        if (flag1)
+        {
+            i = j;
+        }
+        j = getNumNGonPoints(primprofileparams, i, 0.0F, 0.0F, 1.0F, 0);
+        i = j;
+        if (f2 != 0.0F)
+        {
+            return j * 2;
+        }
+        continue; /* Loop/switch isn't completed */
+_L5:
+        f1 = 6F * f1 * 0.5F;
+        f = f1;
+        if (f2 != 0.0F)
+        {
+            f = f1;
+            if ((primprofileparams.CurveType & 0xfffffff0) == 32)
+            {
+                f = (float)(Math.ceil(f1 / 2.0F) * 2D);
+            }
+        }
+        i = getNumNGonPoints(primprofileparams, (int)Math.floor(f), 0.5F, 0.0F, 0.5F, 0);
+        j = i;
+        if (f2 != 0.0F)
+        {
+            j = i * 2;
+        }
+        boolean flag3;
+        if (primprofileparams.End - primprofileparams.Begin < 1.0F)
+        {
+            flag3 = true;
+        } else
+        {
+            flag3 = false;
+        }
+        i = j;
+        if (!flag3)
+        {
+            i = j;
+            if (f2 == 0.0F)
+            {
+                return j + 1;
+            }
+        }
+        if (true) goto _L7; else goto _L6
+_L6:
+    }
+
+    protected void genNormals(PrimProfileParams primprofileparams)
+    {
+        LLVector3 llvector3_2;
+        int j;
+        int k;
+        int j2 = Profile.size();
+        int i;
+        if (TotalOut != 0)
+        {
+            i = TotalOut;
+        } else
+        {
+            i = Total / 2;
+        }
+        EdgeNormals = new LLVector3[j2 * 2];
+        EdgeCenters = new LLVector3[j2 * 2];
+        Normals = new LLVector2[j2];
+        if (primprofileparams.Hollow > 0.0F)
+        {
+            j = 1;
+        } else
+        {
+            j = 0;
+        }
+        k = 0;
+        while (k < j2) 
+        {
+            Normals[k] = new LLVector2(((LLVector3)Profile.get(k)).x, ((LLVector3)Profile.get(k)).y);
+            if (j && k >= i)
+            {
+                Normals[k].mul(-1F);
+            }
+            if ((double)Normals[k].magVec() < 0.001D)
+            {
+                LLVector2 llvector2;
+                int l;
+                int j1;
+                int l1;
+                int i2;
+                if (k - 1 >= 0)
+                {
+                    l = k - 1;
+                } else
+                {
+                    l = j2 - 1;
+                }
+                if (l - 1 >= 0)
+                {
+                    j1 = l - 1;
+                } else
+                {
+                    j1 = j2 - 1;
+                }
+                if (k + 1 < j2)
+                {
+                    l1 = k + 1;
+                } else
+                {
+                    l1 = 0;
+                }
+                if (l1 + 1 < j2)
+                {
+                    i2 = l1 + 1;
+                } else
+                {
+                    i2 = 0;
+                }
+                primprofileparams = new LLVector2((((LLVector3)Profile.get(l)).x + ((LLVector3)Profile.get(l)).x) - ((LLVector3)Profile.get(j1)).x, (((LLVector3)Profile.get(l)).y + ((LLVector3)Profile.get(l)).y) - ((LLVector3)Profile.get(j1)).y);
+                llvector2 = new LLVector2((((LLVector3)Profile.get(l1)).x + ((LLVector3)Profile.get(l1)).x) - ((LLVector3)Profile.get(i2)).x, (((LLVector3)Profile.get(l1)).y + ((LLVector3)Profile.get(l1)).y) - ((LLVector3)Profile.get(i2)).y);
+                Normals[k] = LLVector2.sum(primprofileparams, llvector2);
+                Normals[k].mul(0.5F);
+            }
+            Normals[k].normVec();
+            k++;
+        }
+        LLVector3 llvector3;
+        if (Concave)
+        {
+            i = 2;
+        } else
+        {
+            i = 1;
+        }
+        j = 0;
+_L8:
+        if (j >= i)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        k = 0;
+_L2:
+        if (k >= Total)
+        {
+            break MISSING_BLOCK_LABEL_821;
+        }
+        llvector3_2 = new LLVector3((LLVector3)Profile.get(k));
+        llvector3_2.z = 0.0F;
+        if (!Concave || j != 0 || k != (Total - 1) / 2)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        primprofileparams = (LLVector3)Profile.get(Total - 1);
+_L3:
+        primprofileparams.z = 0.0F;
+        llvector3 = LLVector3.sub(primprofileparams, llvector3_2);
+        llvector3.setCross(LLVector3.z_axis);
+        llvector3.normVec();
+        EdgeNormals[j * j2 + k] = llvector3;
+        EdgeCenters[j * j2 + k] = LLVector3.lerp(llvector3_2, primprofileparams, 0.5F);
+        k++;
+        if (true) goto _L2; else goto _L1
+_L1:
+label0:
+        {
+            if (!Concave || j != 1 || k != Total - 1)
+            {
+                break label0;
+            }
+            primprofileparams = (LLVector3)Profile.get((Total - 1) / 2);
+        }
+          goto _L3
+        LLVector3 llvector3_3;
+        int i1;
+        primprofileparams = new LLVector3();
+        llvector3_3 = new LLVector3();
+        i1 = Total;
+        i1 = (k + 1) % i1;
+_L6:
+        if (llvector3_3.magVecSquared() >= 1E-04F) goto _L3; else goto _L4
+_L4:
+        LLVector3 llvector3_1;
+        int k1;
+        llvector3_1 = (LLVector3)Profile.get(i1);
+        llvector3_3.setSub(llvector3_1, llvector3_2);
+        k1 = (i1 + 1) % Total;
+        primprofileparams = llvector3_1;
+        i1 = k1;
+        if (k1 != k) goto _L6; else goto _L5
+_L5:
+        primprofileparams = llvector3_1;
+          goto _L3
+        j++;
+        if (true) goto _L8; else goto _L7
+_L7:
+    }
+
+    public boolean generate(PrimProfileParams primprofileparams, boolean flag, float f, int i, boolean flag1, int j)
+    {
+        float f1;
+        float f2;
+        float f3;
+        float f4;
+        int k;
+        if (!Dirty && flag1 ^ true)
+        {
+            return false;
+        }
+        Dirty = false;
+        f1 = f;
+        if (f < 0.0F)
+        {
+            f1 = 0.0F;
+        }
+        Profile.clear();
+        Faces.clear();
+        f3 = primprofileparams.Begin;
+        f4 = primprofileparams.End;
+        f2 = primprofileparams.Hollow;
+        if (f3 > f4 - 0.01F)
+        {
+            return false;
+        }
+        k = 0;
+        primprofileparams.CurveType & 0xf;
+        JVM INSTR tableswitch 0 5: default 128
+    //                   0 701
+    //                   1 188
+    //                   2 453
+    //                   3 453
+    //                   4 453
+    //                   5 913;
+           goto _L1 _L2 _L3 _L4 _L4 _L4 _L5
+_L12:
+        if (flag)
+        {
+            addCap((short)2);
+        }
+        if (Open)
+        {
+            addFace(Total - 1, 2, 0.5F, (short)8, true);
+            LLVector3 llvector3;
+            int l;
+            if (f2 != 0.0F)
+            {
+                addFace(TotalOut - 1, 2, 0.5F, (short)16, true);
+            } else
+            {
+                addFace(Total - 2, 2, 0.5F, (short)16, true);
+            }
+        }
+        return true;
+_L3:
+        genNGon(primprofileparams, 4, -0.375F, 0.0F, 1.0F, i);
+        if (flag)
+        {
+            addCap((short)1);
+        }
+        k = (int)Math.floor(4F * f3);
+        for (j = 0; k < (int)Math.floor(4F * f4 + 0.999F); j++)
+        {
+            addFace((i + 1) * j, i + 2, 1.0F, (short)(32 << k), true);
+            k++;
+        }
+
+        for (j = 0; j < Profile.size(); j++)
+        {
+            llvector3 = (LLVector3)Profile.get(j);
+            llvector3.z = llvector3.z * 4F;
+        }
+
+        if (f2 == 0.0F) goto _L7; else goto _L6
+_L6:
+        primprofileparams.CurveType & 0xfffffff0;
+        JVM INSTR lookupswitch 2: default 372
+    //                   16: 432
+    //                   48: 413;
+           goto _L8 _L9 _L10
+_L8:
+        addHole(primprofileparams, true, 4F, -0.375F, f2, 1.0F, i);
+_L7:
+        if (flag)
+        {
+            ((Face)Faces.get(0)).Count = Total;
+        }
+          goto _L1
+_L10:
+        addHole(primprofileparams, true, 3F, -0.375F, f2, 1.0F, i);
+          goto _L7
+_L9:
+        addHole(primprofileparams, false, 6F * f1, -0.375F, f2, 1.0F, 0);
+          goto _L7
+_L4:
+        genNGon(primprofileparams, 3, 0.0F, 0.0F, 1.0F, i);
+        for (j = 0; j < Profile.size(); j++)
+        {
+            llvector3 = (LLVector3)Profile.get(j);
+            llvector3.z = llvector3.z * 3F;
+        }
+
+        if (flag)
+        {
+            addCap((short)1);
+        }
+        l = (int)Math.floor(3F * f3);
+        j = k;
+        for (k = l; k < (int)Math.floor(3F * f4 + 0.999F);)
+        {
+            addFace(j * (i + 1), i + 2, 1.0F, (short)(32 << k), true);
+            k++;
+            j++;
+        }
+
+        if (f2 != 0.0F)
+        {
+            f = f2 / 2.0F;
+            switch (primprofileparams.CurveType & 0xfffffff0)
+            {
+            default:
+                addHole(primprofileparams, true, 3F, 0.0F, f, 1.0F, i);
+                break;
+
+            case 16: // '\020'
+                addHole(primprofileparams, false, 6F * f1, 0.0F, f, 1.0F, 0);
+                break;
+
+            case 32: // ' '
+                addHole(primprofileparams, true, 4F, 0.0F, f, 1.0F, i);
+                break;
+            }
+        }
+_L1:
+        if (true) goto _L12; else goto _L11
+_L11:
+_L2:
+        f = 6F * f1;
+        byte byte0;
+        if (f2 != 0.0F)
+        {
+            byte0 = (byte)(primprofileparams.CurveType & 0xfffffff0);
+            if (byte0 == 32)
+            {
+                f = (float)(Math.ceil(f / 4F) * 4D);
+            }
+        } else
+        {
+            byte0 = 0;
+        }
+        l = (int)f;
+        if (flag1)
+        {
+            l = j;
+        }
+        genNGon(primprofileparams, l, 0.0F, 0.0F, 1.0F, 0);
+        if (flag)
+        {
+            addCap((short)1);
+        }
+        if (Open && f2 == 0.0F)
+        {
+            addFace(0, Total - 1, 0.0F, (short)32, false);
+        } else
+        {
+            addFace(0, Total, 0.0F, (short)32, false);
+        }
+        if (f2 == 0.0F) goto _L12; else goto _L13
+_L13:
+        switch (byte0)
+        {
+        default:
+            addHole(primprofileparams, false, f, 0.0F, f2, 1.0F, 0);
+            break;
+
+        case 32: // ' '
+            addHole(primprofileparams, true, 4F, 0.0F, f2, 1.0F, i);
+            break;
+
+        case 48: // '0'
+            addHole(primprofileparams, true, 3F, 0.0F, f2, 1.0F, i);
+            break;
+        }
+        if (true) goto _L12; else goto _L14
+_L14:
+_L5:
+        f = 6F * f1 * 0.5F;
+        if (f2 != 0.0F)
+        {
+            j = (byte)(primprofileparams.CurveType & 0xfffffff0);
+            if (j == 32)
+            {
+                f = (float)(Math.ceil(f / 2.0F) * 2D);
+            }
+        } else
+        {
+            j = 0;
+        }
+        genNGon(primprofileparams, (int)Math.floor(f), 0.5F, 0.0F, 0.5F, 0);
+        if (flag)
+        {
+            addCap((short)1);
+        }
+        if (Open && f2 == 0.0F)
+        {
+            addFace(0, Total - 1, 0.0F, (short)32, false);
+        } else
+        {
+            addFace(0, Total, 0.0F, (short)32, false);
+        }
+        if (f2 == 0.0F) goto _L16; else goto _L15
+_L15:
+        j;
+        JVM INSTR lookupswitch 2: default 1052
+    //                   32: 1102
+    //                   48: 1121;
+           goto _L17 _L18 _L19
+_L17:
+        addHole(primprofileparams, false, f, 0.5F, f2, 0.5F, 0);
+_L16:
+        if (f4 - f3 < 1.0F)
+        {
+            Open = true;
+        } else
+        if (f2 == 0.0F)
+        {
+            Open = false;
+            Profile.add(new LLVector3((LLVector3)Profile.get(0)));
+            Total = Total + 1;
+        }
+          goto _L12
+_L18:
+        addHole(primprofileparams, true, 2.0F, 0.5F, f2, 0.5F, i);
+          goto _L16
+_L19:
+        addHole(primprofileparams, true, 3F, 0.5F, f2, 0.5F, i);
+          goto _L16
+    }
+
 }

@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.prims;
 
-import com.lumiyaviewer.lumiya.slproto.prims.PrimPath;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector2;
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3;
 import com.lumiyaviewer.lumiya.slproto.types.Vector2Array;
@@ -8,7 +11,13 @@ import com.lumiyaviewer.lumiya.slproto.types.Vector3Array;
 import com.lumiyaviewer.lumiya.slproto.types.VertexArray;
 import java.util.ArrayList;
 
-public class PrimVolumeFace {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.prims:
+//            PrimVolume, PrimVolumeParams, PrimPathParams, PrimProfile, 
+//            PrimPath
+
+public class PrimVolumeFace
+{
+
     public static final int BOTTOM_MASK = 1024;
     public static final int CAP_MASK = 2;
     public static final int END_MASK = 4;
@@ -23,593 +32,1015 @@ public class PrimVolumeFace {
     public int BeginS;
     public int BeginT;
     public LLVector3 Center;
-    public int[] Edge;
-    public LLVector3[] Extents = {new LLVector3(), new LLVector3()};
+    public int Edge[];
+    public LLVector3 Extents[] = {
+        new LLVector3(), new LLVector3()
+    };
     public int ID;
-    public short[] Indices;
+    public short Indices[];
     public Vector3Array Normals;
     public int NumIndices;
     public int NumS;
     public int NumT;
     public int NumVertices;
     public Vector3Array Positions;
-    public LLVector2[] TexCoordExtents = {new LLVector2(), new LLVector2()};
+    public LLVector2 TexCoordExtents[] = {
+        new LLVector2(), new LLVector2()
+    };
     public Vector2Array TexCoords;
     public int TypeMask;
     public VertexArray vertexArray;
 
-    private boolean createCap(PrimVolume primVolume) {
-        int i;
-        boolean z;
-        boolean z2;
-        if ((this.TypeMask & 64) == 0 && (this.TypeMask & 128) == 0 && primVolume.volumeParams.PathParams.Begin == 0.0f && primVolume.volumeParams.PathParams.End == 1.0f && primVolume.getProfileType() == 1 && primVolume.getPathType() == 16) {
-            return createUnCutCubeCap(primVolume);
-        }
-        Vector3Array vector3Array = primVolume.Mesh;
-        ArrayList<LLVector3> arrayList = primVolume.Profile.Profile;
-        int size = arrayList.size();
-        int size2 = (arrayList.size() - 2) * 3;
-        if ((this.TypeMask & 64) == 0 && (this.TypeMask & 128) == 0) {
-            resizeVertices(size + 1);
-            resizeIndices(size2 + 3);
-        } else {
-            resizeVertices(size);
-            resizeIndices(size2);
-        }
-        int size3 = (this.TypeMask & 512) != 0 ? primVolume.Profile.Total * (primVolume.Path.Path.size() - 1) : this.BeginS;
-        LLVector2 lLVector2 = new LLVector2();
-        LLVector2 lLVector22 = new LLVector2();
-        LLVector3 lLVector3 = this.Extents[0];
-        LLVector3 lLVector32 = this.Extents[1];
-        Vector2Array vector2Array = this.TexCoords;
-        Vector3Array vector3Array2 = this.Positions;
-        Vector3Array vector3Array3 = this.Normals;
-        for (int i2 = 0; i2 < size; i2++) {
-            if ((this.TypeMask & 512) != 0) {
-                vector2Array.set(i2, 0.5f + arrayList.get(i2).x, arrayList.get(i2).y + 0.5f);
-            } else {
-                vector2Array.set(i2, 0.5f + arrayList.get(i2).x, 0.5f - arrayList.get(i2).y);
-            }
-            vector3Array2.set(i2, vector3Array, i2 + size3);
-            if (i2 == 0) {
-                vector3Array2.get(i2, lLVector3);
-                vector3Array2.get(i2, lLVector32);
-                vector2Array.get(i2, lLVector2);
-                vector2Array.get(i2, lLVector22);
-            } else {
-                vector3Array2.minMaxVector(i2, lLVector3, lLVector32);
-                vector2Array.minMaxVector(i2, lLVector2, lLVector22);
-            }
-        }
-        this.Center = new LLVector3(lLVector3);
-        this.Center.add(lLVector32);
-        this.Center.mul(0.5f);
-        LLVector2 sum = LLVector2.sum(lLVector2, lLVector22);
-        sum.mul(0.5f);
-        LLVector3 lLVector33 = new LLVector3(this.Center);
-        LLVector3 lLVector34 = new LLVector3(this.Center);
-        vector3Array2.subFromVector(lLVector33, 0);
-        vector3Array2.subFromVector(lLVector34, 1);
-        LLVector3 cross = (this.TypeMask & 512) != 0 ? LLVector3.cross(lLVector33, lLVector34) : LLVector3.cross(lLVector34, lLVector33);
-        cross.normVec();
-        if ((this.TypeMask & 64) == 0 && (this.TypeMask & 128) == 0) {
-            vector3Array2.set(size, this.Center);
-            vector2Array.set(size, sum.x, sum.y);
-            i = size + 1;
-        } else {
-            i = size;
-        }
-        vector3Array3.fill(0, i, cross);
-        if ((this.TypeMask & 64) == 0) {
-            int i3 = 2;
-            int i4 = 1;
-            if ((this.TypeMask & 512) != 0) {
-                i3 = 1;
-                i4 = 2;
-            }
-            for (int i5 = 0; i5 < i - 2; i5++) {
-                this.Indices[i5 * 3] = (short) (i - 1);
-                this.Indices[(i5 * 3) + i3] = (short) i5;
-                this.Indices[(i5 * 3) + i4] = (short) (i5 + 1);
-            }
-            return true;
-        } else if ((this.TypeMask & 512) != 0) {
-            int i6 = 0;
-            int i7 = i - 1;
-            int i8 = 0;
-            while (true) {
-                int i9 = i8;
-                if (i7 - i6 <= 1) {
-                    return true;
-                }
-                LLVector3 lLVector35 = new LLVector3(arrayList.get(i6));
-                LLVector3 lLVector36 = new LLVector3(arrayList.get(i7));
-                LLVector3 lLVector37 = new LLVector3(arrayList.get(i6 + 1));
-                LLVector3 lLVector38 = new LLVector3(arrayList.get(i7 - 1));
-                lLVector35.z = 0.0f;
-                lLVector36.z = 0.0f;
-                lLVector37.z = 0.0f;
-                lLVector38.z = 0.0f;
-                float f = ((lLVector35.x * lLVector37.y) - (lLVector37.x * lLVector35.y)) + ((lLVector37.x * lLVector36.y) - (lLVector36.x * lLVector37.y)) + ((lLVector36.x * lLVector35.y) - (lLVector35.x * lLVector36.y));
-                float f2 = ((lLVector35.x * lLVector38.y) - (lLVector38.x * lLVector35.y)) + ((lLVector38.x * lLVector37.y) - (lLVector37.x * lLVector38.y)) + ((lLVector37.x * lLVector35.y) - (lLVector35.x * lLVector37.y));
-                float f3 = ((lLVector36.x * lLVector35.y) - (lLVector35.x * lLVector36.y)) + ((lLVector35.x * lLVector38.y) - (lLVector38.x * lLVector35.y)) + ((lLVector38.x * lLVector36.y) - (lLVector36.x * lLVector38.y));
-                float f4 = ((lLVector36.x * lLVector37.y) - (lLVector37.x * lLVector36.y)) + ((lLVector37.x * lLVector38.y) - (lLVector38.x * lLVector37.y)) + ((lLVector38.x * lLVector36.y) - (lLVector36.x * lLVector38.y));
-                boolean z3 = true;
-                boolean z4 = true;
-                if (f < 0.0f) {
-                    z3 = false;
-                }
-                if (f4 < 0.0f) {
-                    z3 = false;
-                }
-                if (f3 < 0.0f) {
-                    z4 = false;
-                }
-                if (f2 < 0.0f) {
-                    z4 = false;
-                }
-                if (!z3) {
-                    z2 = false;
-                } else if (!z4) {
-                    z2 = true;
-                } else {
-                    z2 = LLVector3.sub(lLVector35, lLVector37).magVecSquared() < LLVector3.sub(lLVector36, lLVector38).magVecSquared();
-                }
-                if (z2) {
-                    int i10 = i9 + 1;
-                    this.Indices[i9] = (short) i6;
-                    int i11 = i10 + 1;
-                    this.Indices[i10] = (short) (i6 + 1);
-                    i8 = i11 + 1;
-                    this.Indices[i11] = (short) i7;
-                    i6++;
-                } else {
-                    int i12 = i9 + 1;
-                    this.Indices[i9] = (short) i6;
-                    int i13 = i12 + 1;
-                    this.Indices[i12] = (short) (i7 - 1);
-                    i8 = i13 + 1;
-                    this.Indices[i13] = (short) i7;
-                    i7--;
-                }
-            }
-        } else {
-            int i14 = 0;
-            int i15 = i - 1;
-            int i16 = 0;
-            while (true) {
-                int i17 = i16;
-                if (i15 - i14 <= 1) {
-                    return true;
-                }
-                LLVector3 lLVector39 = new LLVector3(arrayList.get(i14));
-                LLVector3 lLVector310 = new LLVector3(arrayList.get(i15));
-                LLVector3 lLVector311 = new LLVector3(arrayList.get(i14 + 1));
-                LLVector3 lLVector312 = new LLVector3(arrayList.get(i15 - 1));
-                lLVector39.z = 0.0f;
-                lLVector310.z = 0.0f;
-                lLVector311.z = 0.0f;
-                lLVector312.z = 0.0f;
-                float f5 = ((lLVector39.x * lLVector311.y) - (lLVector311.x * lLVector39.y)) + ((lLVector311.x * lLVector310.y) - (lLVector310.x * lLVector311.y)) + ((lLVector310.x * lLVector39.y) - (lLVector39.x * lLVector310.y));
-                float f6 = ((lLVector39.x * lLVector312.y) - (lLVector312.x * lLVector39.y)) + ((lLVector312.x * lLVector311.y) - (lLVector311.x * lLVector312.y)) + ((lLVector311.x * lLVector39.y) - (lLVector39.x * lLVector311.y));
-                float f7 = ((lLVector310.x * lLVector39.y) - (lLVector39.x * lLVector310.y)) + ((lLVector39.x * lLVector312.y) - (lLVector312.x * lLVector39.y)) + ((lLVector312.x * lLVector310.y) - (lLVector310.x * lLVector312.y));
-                float f8 = ((lLVector310.x * lLVector311.y) - (lLVector311.x * lLVector310.y)) + ((lLVector311.x * lLVector312.y) - (lLVector312.x * lLVector311.y)) + ((lLVector312.x * lLVector310.y) - (lLVector310.x * lLVector312.y));
-                boolean z5 = true;
-                boolean z6 = true;
-                if (f5 < 0.0f) {
-                    z5 = false;
-                }
-                if (f8 < 0.0f) {
-                    z5 = false;
-                }
-                if (f7 < 0.0f) {
-                    z6 = false;
-                }
-                if (f6 < 0.0f) {
-                    z6 = false;
-                }
-                if (!z5) {
-                    z = false;
-                } else if (!z6) {
-                    z = true;
-                } else {
-                    z = LLVector3.sub(lLVector39, lLVector311).magVecSquared() < LLVector3.sub(lLVector310, lLVector312).magVecSquared();
-                }
-                if (z) {
-                    int i18 = i17 + 1;
-                    this.Indices[i17] = (short) i14;
-                    int i19 = i18 + 1;
-                    this.Indices[i18] = (short) i15;
-                    i16 = i19 + 1;
-                    this.Indices[i19] = (short) (i14 + 1);
-                    i14++;
-                } else {
-                    int i20 = i17 + 1;
-                    this.Indices[i17] = (short) i14;
-                    int i21 = i20 + 1;
-                    this.Indices[i20] = (short) i15;
-                    i16 = i21 + 1;
-                    this.Indices[i21] = (short) (i15 - 1);
-                    i15--;
-                }
-            }
-        }
+    public PrimVolumeFace()
+    {
     }
 
-    private boolean createSide(PrimVolume primVolume) {
-        int i;
-        int i2;
-        int i3;
-        int i4;
-        int i5;
-        boolean z = (this.TypeMask & 256) != 0;
-        byte b = primVolume.volumeParams.SculptType;
-        byte b2 = (byte) (b & 7);
-        boolean z2 = (b & 64) != 0;
-        boolean z3 = (b & Byte.MIN_VALUE) != 0;
-        boolean z4 = z2 ? !z3 : z3;
-        Vector3Array vector3Array = primVolume.Mesh;
-        ArrayList<LLVector3> arrayList = primVolume.Profile.Profile;
-        ArrayList<PrimPath.PathPoint> arrayList2 = primVolume.Path.Path;
-        int i6 = primVolume.Profile.Total;
-        int i7 = (this.NumS - 1) * (this.NumT - 1) * 6;
-        resizeVertices(this.NumS * this.NumT);
-        resizeIndices(i7);
-        this.Edge = new int[i7];
-        Vector3Array vector3Array2 = this.Positions;
-        Vector3Array vector3Array3 = this.Normals;
-        Vector2Array vector2Array = this.TexCoords;
-        int floor = (int) Math.floor((double) arrayList.get(this.BeginS).z);
-        int i8 = ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2) ? this.NumS : this.NumS / 2;
-        int i9 = this.BeginT;
-        int i10 = 0;
-        while (true) {
-            int i11 = i9;
-            if (i11 >= this.BeginT + this.NumT) {
-                break;
-            }
-            float f = arrayList2.get(i11).TexT;
-            int i12 = 0;
-            int i13 = i10;
-            while (i12 < i8) {
-                float f2 = ((this.TypeMask & 4) != 0 || this.BeginS + i12 >= arrayList.size()) ? i12 != 0 ? 1.0f : 0.0f : !z ? arrayList.get(this.BeginS + i12).z : arrayList.get(this.BeginS + i12).z - ((float) floor);
-                if (z4) {
-                    f2 = 1.0f - f2;
-                }
-                int i14 = this.BeginS + i12 >= i6 ? this.BeginS + i12 + ((i11 - 1) * i6) : this.BeginS + i12 + (i6 * i11);
-                vector3Array2.set(i13, vector3Array, i14);
-                vector2Array.set(i13, f2, f);
-                int i15 = i13 + 1;
-                if ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2 || i12 <= 0) {
-                    i5 = i15;
-                } else {
-                    vector3Array2.set(i15, vector3Array, i14);
-                    vector2Array.set(i15, f2, f);
-                    i5 = i15 + 1;
-                }
-                i12++;
-                i13 = i5;
-            }
-            if ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2) {
-                i10 = i13;
-            } else {
-                int i16 = (this.TypeMask & 128) != 0 ? i8 - 1 : 0;
-                int i17 = this.BeginS + i16 + (i6 * i11);
-                float f3 = this.BeginS + i16 < arrayList.size() ? arrayList.get(i16 + this.BeginS).z - ((float) floor) : i16 != 0 ? 1.0f : 0.0f;
-                vector3Array2.set(i13, vector3Array, i17);
-                vector2Array.set(i13, f3, f);
-                i10 = i13 + 1;
-            }
-            i9 = i11 + 1;
+    private boolean createCap(PrimVolume primvolume)
+    {
+        if ((TypeMask & 0x40) == 0 && (TypeMask & 0x80) == 0 && primvolume.volumeParams.PathParams.Begin == 0.0F && primvolume.volumeParams.PathParams.End == 1.0F && primvolume.getProfileType() == 1 && primvolume.getPathType() == 16)
+        {
+            return createUnCutCubeCap(primvolume);
         }
-        LLVector3 lLVector3 = this.Extents[0];
-        LLVector3 lLVector32 = this.Extents[1];
-        vector3Array2.get(0, lLVector3);
-        vector3Array2.get(0, lLVector32);
-        vector3Array2.minMaxVector(lLVector3, lLVector32);
-        this.Center = new LLVector3(lLVector3);
-        this.Center.add(lLVector32);
-        this.Center.mul(0.5f);
-        int i18 = 0;
-        int i19 = 0;
-        boolean z5 = (this.TypeMask & 256) != 0;
-        for (int i20 = 0; i20 < this.NumT - 1; i20++) {
-            for (int i21 = 0; i21 < this.NumS - 1; i21++) {
-                int i22 = i18 + 1;
-                this.Indices[i18] = (short) ((this.NumS * i20) + i21);
-                int i23 = i22 + 1;
-                this.Indices[i22] = (short) (i21 + 1 + (this.NumS * (i20 + 1)));
-                int i24 = i23 + 1;
-                this.Indices[i23] = (short) ((this.NumS * (i20 + 1)) + i21);
-                int i25 = i24 + 1;
-                this.Indices[i24] = (short) ((this.NumS * i20) + i21);
-                int i26 = i25 + 1;
-                this.Indices[i25] = (short) (i21 + 1 + (this.NumS * i20));
-                i18 = i26 + 1;
-                this.Indices[i26] = (short) (i21 + 1 + (this.NumS * (i20 + 1)));
-                int i27 = i19 + 1;
-                this.Edge[i19] = ((this.NumS - 1) * 2 * i20) + (i21 * 2) + 1;
-                if (i20 < this.NumT - 2) {
-                    this.Edge[i27] = ((this.NumS - 1) * 2 * (i20 + 1)) + (i21 * 2) + 1;
-                    i = i27 + 1;
-                } else if (this.NumT <= 3 || primVolume.Path.Open) {
-                    this.Edge[i27] = -1;
-                    i = i27 + 1;
-                } else {
-                    this.Edge[i27] = (i21 * 2) + 1;
-                    i = i27 + 1;
-                }
-                if (i21 > 0) {
-                    this.Edge[i] = ((((this.NumS - 1) * 2) * i20) + (i21 * 2)) - 1;
-                    i2 = i + 1;
-                } else if (z5 || primVolume.Path.Open) {
-                    this.Edge[i] = -1;
-                    i2 = i + 1;
-                } else {
-                    this.Edge[i] = ((this.NumS - 1) * 2 * i20) + ((this.NumS - 2) * 2) + 1;
-                    i2 = i + 1;
-                }
-                if (i20 > 0) {
-                    i3 = i2 + 1;
-                    this.Edge[i2] = ((this.NumS - 1) * 2 * (i20 - 1)) + (i21 * 2);
-                } else if (this.NumT <= 3 || primVolume.Path.Open) {
-                    i3 = i2 + 1;
-                    this.Edge[i2] = -1;
-                } else {
-                    i3 = i2 + 1;
-                    this.Edge[i2] = ((this.NumS - 1) * 2 * (this.NumT - 2)) + (i21 * 2);
-                }
-                if (i21 < this.NumS - 2) {
-                    i4 = i3 + 1;
-                    this.Edge[i3] = ((this.NumS - 1) * 2 * i20) + ((i21 + 1) * 2);
-                } else if (z5 || primVolume.Path.Open) {
-                    i4 = i3 + 1;
-                    this.Edge[i3] = -1;
-                } else {
-                    i4 = i3 + 1;
-                    this.Edge[i3] = (this.NumS - 1) * 2 * i20;
-                }
-                i19 = i4 + 1;
-                this.Edge[i4] = ((this.NumS - 1) * 2 * i20) + (i21 * 2);
-            }
+        Object obj = primvolume.Mesh;
+        ArrayList arraylist = primvolume.Profile.Profile;
+        int i1 = arraylist.size();
+        int i = (arraylist.size() - 2) * 3;
+        Vector2Array vector2array;
+        Vector3Array vector3array;
+        Vector3Array vector3array1;
+        Object obj1;
+        LLVector3 llvector3_6;
+        LLVector3 llvector3_7;
+        int j;
+        if ((TypeMask & 0x40) == 0 && (TypeMask & 0x80) == 0)
+        {
+            resizeVertices(i1 + 1);
+            resizeIndices(i + 3);
+        } else
+        {
+            resizeVertices(i1);
+            resizeIndices(i);
         }
-        this.Normals.clear();
-        LLVector3[] lLVector3Arr = new LLVector3[3];
-        short[] sArr = new short[3];
-        for (int i28 = 0; i28 < 3; i28++) {
-            lLVector3Arr[i28] = new LLVector3();
+        i = primvolume.Profile.Total;
+        j = primvolume.Path.Path.size();
+        if ((TypeMask & 0x200) != 0)
+        {
+            i *= j - 1;
+        } else
+        {
+            i = BeginS;
         }
-        LLVector3 lLVector33 = new LLVector3();
-        LLVector3 lLVector34 = new LLVector3();
-        for (int i29 = 0; i29 < this.NumIndices / 3; i29++) {
-            for (int i30 = 0; i30 < 3; i30++) {
-                sArr[i30] = this.Indices[(i29 * 3) + i30];
-                vector3Array2.get(sArr[i30], lLVector3Arr[i30]);
+        primvolume = new LLVector2();
+        obj1 = new LLVector2();
+        llvector3_6 = Extents[0];
+        llvector3_7 = Extents[1];
+        vector2array = TexCoords;
+        vector3array = Positions;
+        vector3array1 = Normals;
+        j = 0;
+        while (j < i1) 
+        {
+            if ((TypeMask & 0x200) != 0)
+            {
+                vector2array.set(j, 0.5F + ((LLVector3)arraylist.get(j)).x, ((LLVector3)arraylist.get(j)).y + 0.5F);
+            } else
+            {
+                vector2array.set(j, 0.5F + ((LLVector3)arraylist.get(j)).x, 0.5F - ((LLVector3)arraylist.get(j)).y);
             }
-            lLVector33.setSub(lLVector3Arr[0], lLVector3Arr[1]);
-            lLVector34.setSub(lLVector3Arr[0], lLVector3Arr[2]);
-            lLVector33.setCross(lLVector34);
-            for (int i31 = 0; i31 < 3; i31++) {
-                this.Normals.add(sArr[i31], lLVector33);
+            vector3array.set(j, ((Vector3Array) (obj)), j + i);
+            if (j == 0)
+            {
+                vector3array.get(j, llvector3_6);
+                vector3array.get(j, llvector3_7);
+                vector2array.get(j, primvolume);
+                vector2array.get(j, ((LLVector2) (obj1)));
+            } else
+            {
+                vector3array.minMaxVector(j, llvector3_6, llvector3_7);
+                vector2array.minMaxVector(j, primvolume, ((LLVector2) (obj1)));
             }
-            this.Normals.add(sArr[(i29 & 1) + 1], lLVector33);
+            j++;
         }
-        LLVector3 lLVector35 = new LLVector3();
-        LLVector3 lLVector36 = new LLVector3();
-        LLVector3 lLVector37 = new LLVector3();
-        vector3Array2.get(0, lLVector36);
-        vector3Array2.get(this.NumS * (this.NumT - 2), lLVector37);
-        lLVector35.setSub(lLVector36, lLVector37);
-        boolean z6 = lLVector35.dot(lLVector35) < 1.0E-6f;
-        vector3Array2.get(this.NumS - 1, lLVector36);
-        vector3Array2.get(((this.NumS * (this.NumT - 2)) + this.NumS) - 1, lLVector37);
-        lLVector35.setSub(lLVector36, lLVector37);
-        boolean z7 = lLVector35.dot(lLVector35) < 1.0E-6f;
-        if (b2 == 0) {
-            if (!primVolume.Path.Open) {
-                for (int i32 = 0; i32 < this.NumS; i32++) {
-                    vector3Array3.setAdd(i32, (this.NumS * (this.NumT - 1)) + i32);
+        Center = new LLVector3(llvector3_6);
+        Center.add(llvector3_7);
+        Center.mul(0.5F);
+        obj = LLVector2.sum(primvolume, ((LLVector2) (obj1)));
+        ((LLVector2) (obj)).mul(0.5F);
+        primvolume = new LLVector3(Center);
+        obj1 = new LLVector3(Center);
+        vector3array.subFromVector(primvolume, 0);
+        vector3array.subFromVector(((LLVector3) (obj1)), 1);
+        if ((TypeMask & 0x200) != 0)
+        {
+            primvolume = LLVector3.cross(primvolume, ((LLVector3) (obj1)));
+        } else
+        {
+            primvolume = LLVector3.cross(((LLVector3) (obj1)), primvolume);
+        }
+        primvolume.normVec();
+        if ((TypeMask & 0x40) == 0 && (TypeMask & 0x80) == 0)
+        {
+            vector3array.set(i1, Center);
+            vector2array.set(i1, ((LLVector2) (obj)).x, ((LLVector2) (obj)).y);
+            i = i1 + 1;
+        } else
+        {
+            i = i1;
+        }
+        vector3array1.fill(0, i, primvolume);
+        if ((TypeMask & 0x40) != 0)
+        {
+            if ((TypeMask & 0x200) != 0)
+            {
+                int k = 0;
+                i1 = i - 1;
+                int k1 = 0;
+                while (i1 - k > 1) 
+                {
+                    LLVector3 llvector3_2 = new LLVector3((LLVector3)arraylist.get(k));
+                    primvolume = new LLVector3((LLVector3)arraylist.get(i1));
+                    LLVector3 llvector3_4 = new LLVector3((LLVector3)arraylist.get(k + 1));
+                    LLVector3 llvector3 = new LLVector3((LLVector3)arraylist.get(i1 - 1));
+                    llvector3_2.z = 0.0F;
+                    primvolume.z = 0.0F;
+                    llvector3_4.z = 0.0F;
+                    llvector3.z = 0.0F;
+                    float f = llvector3_2.x;
+                    float f2 = llvector3_4.y;
+                    float f4 = llvector3_4.x;
+                    float f6 = llvector3_2.y;
+                    float f8 = llvector3_4.x;
+                    float f10 = ((LLVector3) (primvolume)).y;
+                    float f12 = ((LLVector3) (primvolume)).x;
+                    float f14 = llvector3_4.y;
+                    float f16 = ((LLVector3) (primvolume)).x;
+                    float f18 = llvector3_2.y;
+                    float f20 = llvector3_2.x;
+                    float f22 = ((LLVector3) (primvolume)).y;
+                    float f24 = llvector3_2.x;
+                    float f26 = llvector3.y;
+                    float f28 = llvector3.x;
+                    float f30 = llvector3_2.y;
+                    float f32 = llvector3.x;
+                    float f34 = llvector3_4.y;
+                    float f36 = llvector3_4.x;
+                    float f38 = llvector3.y;
+                    float f40 = llvector3_4.x;
+                    float f42 = llvector3_2.y;
+                    float f44 = llvector3_2.x;
+                    float f46 = llvector3_4.y;
+                    float f48 = ((LLVector3) (primvolume)).x;
+                    float f50 = llvector3_2.y;
+                    float f52 = llvector3_2.x;
+                    float f54 = ((LLVector3) (primvolume)).y;
+                    float f56 = llvector3_2.x;
+                    float f58 = llvector3.y;
+                    float f60 = llvector3.x;
+                    float f62 = llvector3_2.y;
+                    float f64 = llvector3.x;
+                    float f66 = ((LLVector3) (primvolume)).y;
+                    float f68 = ((LLVector3) (primvolume)).x;
+                    float f70 = llvector3.y;
+                    float f72 = ((LLVector3) (primvolume)).x;
+                    float f74 = llvector3_4.y;
+                    float f76 = llvector3_4.x;
+                    float f78 = ((LLVector3) (primvolume)).y;
+                    float f80 = llvector3_4.x;
+                    float f82 = llvector3.y;
+                    float f84 = llvector3.x;
+                    float f86 = llvector3_4.y;
+                    float f88 = llvector3.x;
+                    float f90 = ((LLVector3) (primvolume)).y;
+                    float f92 = ((LLVector3) (primvolume)).x;
+                    float f94 = llvector3.y;
+                    i = 1;
+                    boolean flag = true;
+                    if ((f * f2 - f4 * f6) + (f8 * f10 - f12 * f14) + (f16 * f18 - f20 * f22) < 0.0F)
+                    {
+                        i = 0;
+                    }
+                    int j2 = i;
+                    if ((f72 * f74 - f76 * f78) + (f80 * f82 - f84 * f86) + (f88 * f90 - f92 * f94) < 0.0F)
+                    {
+                        j2 = 0;
+                    }
+                    i = ((flag) ? 1 : 0);
+                    if ((f48 * f50 - f52 * f54) + (f56 * f58 - f60 * f62) + (f64 * f66 - f68 * f70) < 0.0F)
+                    {
+                        i = 0;
+                    }
+                    if ((f24 * f26 - f28 * f30) + (f32 * f34 - f36 * f38) + (f40 * f42 - f44 * f46) < 0.0F)
+                    {
+                        i = 0;
+                    }
+                    if (j2 == 0)
+                    {
+                        i = 0;
+                    } else
+                    if (i == 0)
+                    {
+                        i = 1;
+                    } else
+                    {
+                        llvector3_2 = LLVector3.sub(llvector3_2, llvector3_4);
+                        primvolume = LLVector3.sub(primvolume, llvector3);
+                        if (llvector3_2.magVecSquared() < primvolume.magVecSquared())
+                        {
+                            i = 1;
+                        } else
+                        {
+                            i = 0;
+                        }
+                    }
+                    if (i != 0)
+                    {
+                        primvolume = Indices;
+                        i = k1 + 1;
+                        primvolume[k1] = (short)k;
+                        primvolume = Indices;
+                        k1 = i + 1;
+                        primvolume[i] = (short)(k + 1);
+                        primvolume = Indices;
+                        i = k1 + 1;
+                        primvolume[k1] = (short)i1;
+                        k++;
+                    } else
+                    {
+                        primvolume = Indices;
+                        i = k1 + 1;
+                        primvolume[k1] = (short)k;
+                        primvolume = Indices;
+                        k1 = i + 1;
+                        primvolume[i] = (short)(i1 - 1);
+                        primvolume = Indices;
+                        i = k1 + 1;
+                        primvolume[k1] = (short)i1;
+                        i1--;
+                    }
+                    k1 = i;
+                }
+            } else
+            {
+                int l = 0;
+                int j1 = i - 1;
+                int l1 = 0;
+                while (j1 - l > 1) 
+                {
+                    LLVector3 llvector3_3 = new LLVector3((LLVector3)arraylist.get(l));
+                    primvolume = new LLVector3((LLVector3)arraylist.get(j1));
+                    LLVector3 llvector3_5 = new LLVector3((LLVector3)arraylist.get(l + 1));
+                    LLVector3 llvector3_1 = new LLVector3((LLVector3)arraylist.get(j1 - 1));
+                    llvector3_3.z = 0.0F;
+                    primvolume.z = 0.0F;
+                    llvector3_5.z = 0.0F;
+                    llvector3_1.z = 0.0F;
+                    float f1 = llvector3_3.x;
+                    float f3 = llvector3_5.y;
+                    float f5 = llvector3_5.x;
+                    float f7 = llvector3_3.y;
+                    float f9 = llvector3_5.x;
+                    float f11 = ((LLVector3) (primvolume)).y;
+                    float f13 = ((LLVector3) (primvolume)).x;
+                    float f15 = llvector3_5.y;
+                    float f17 = ((LLVector3) (primvolume)).x;
+                    float f19 = llvector3_3.y;
+                    float f21 = llvector3_3.x;
+                    float f23 = ((LLVector3) (primvolume)).y;
+                    float f25 = llvector3_3.x;
+                    float f27 = llvector3_1.y;
+                    float f29 = llvector3_1.x;
+                    float f31 = llvector3_3.y;
+                    float f33 = llvector3_1.x;
+                    float f35 = llvector3_5.y;
+                    float f37 = llvector3_5.x;
+                    float f39 = llvector3_1.y;
+                    float f41 = llvector3_5.x;
+                    float f43 = llvector3_3.y;
+                    float f45 = llvector3_3.x;
+                    float f47 = llvector3_5.y;
+                    float f49 = ((LLVector3) (primvolume)).x;
+                    float f51 = llvector3_3.y;
+                    float f53 = llvector3_3.x;
+                    float f55 = ((LLVector3) (primvolume)).y;
+                    float f57 = llvector3_3.x;
+                    float f59 = llvector3_1.y;
+                    float f61 = llvector3_1.x;
+                    float f63 = llvector3_3.y;
+                    float f65 = llvector3_1.x;
+                    float f67 = ((LLVector3) (primvolume)).y;
+                    float f69 = ((LLVector3) (primvolume)).x;
+                    float f71 = llvector3_1.y;
+                    float f73 = ((LLVector3) (primvolume)).x;
+                    float f75 = llvector3_5.y;
+                    float f77 = llvector3_5.x;
+                    float f79 = ((LLVector3) (primvolume)).y;
+                    float f81 = llvector3_5.x;
+                    float f83 = llvector3_1.y;
+                    float f85 = llvector3_1.x;
+                    float f87 = llvector3_5.y;
+                    float f89 = llvector3_1.x;
+                    float f91 = ((LLVector3) (primvolume)).y;
+                    float f93 = ((LLVector3) (primvolume)).x;
+                    float f95 = llvector3_1.y;
+                    i = 1;
+                    boolean flag1 = true;
+                    if ((f1 * f3 - f5 * f7) + (f9 * f11 - f13 * f15) + (f17 * f19 - f21 * f23) < 0.0F)
+                    {
+                        i = 0;
+                    }
+                    int k2 = i;
+                    if ((f73 * f75 - f77 * f79) + (f81 * f83 - f85 * f87) + (f89 * f91 - f93 * f95) < 0.0F)
+                    {
+                        k2 = 0;
+                    }
+                    i = ((flag1) ? 1 : 0);
+                    if ((f49 * f51 - f53 * f55) + (f57 * f59 - f61 * f63) + (f65 * f67 - f69 * f71) < 0.0F)
+                    {
+                        i = 0;
+                    }
+                    if ((f25 * f27 - f29 * f31) + (f33 * f35 - f37 * f39) + (f41 * f43 - f45 * f47) < 0.0F)
+                    {
+                        i = 0;
+                    }
+                    if (k2 == 0)
+                    {
+                        i = 0;
+                    } else
+                    if (i == 0)
+                    {
+                        i = 1;
+                    } else
+                    {
+                        llvector3_3 = LLVector3.sub(llvector3_3, llvector3_5);
+                        primvolume = LLVector3.sub(primvolume, llvector3_1);
+                        if (llvector3_3.magVecSquared() < primvolume.magVecSquared())
+                        {
+                            i = 1;
+                        } else
+                        {
+                            i = 0;
+                        }
+                    }
+                    if (i != 0)
+                    {
+                        primvolume = Indices;
+                        i = l1 + 1;
+                        primvolume[l1] = (short)l;
+                        primvolume = Indices;
+                        l1 = i + 1;
+                        primvolume[i] = (short)j1;
+                        primvolume = Indices;
+                        i = l1 + 1;
+                        primvolume[l1] = (short)(l + 1);
+                        l++;
+                    } else
+                    {
+                        primvolume = Indices;
+                        i = l1 + 1;
+                        primvolume[l1] = (short)l;
+                        primvolume = Indices;
+                        l1 = i + 1;
+                        primvolume[i] = (short)j1;
+                        primvolume = Indices;
+                        i = l1 + 1;
+                        primvolume[l1] = (short)(j1 - 1);
+                        j1--;
+                    }
+                    l1 = i;
                 }
             }
-            if (!primVolume.Path.Open && (!z6)) {
-                for (int i33 = 0; i33 < this.NumT; i33++) {
-                    vector3Array3.setAdd(this.NumS * i33, ((this.NumS * i33) + this.NumS) - 1);
-                }
+        } else
+        {
+            byte byte1 = 2;
+            byte byte0 = 1;
+            if ((TypeMask & 0x200) != 0)
+            {
+                byte1 = 1;
+                byte0 = 2;
             }
-            if (primVolume.getPathType() != 32 || (primVolume.getProfileType() & 15) != 5) {
-                return true;
+            for (int i2 = 0; i2 < i - 2; i2++)
+            {
+                Indices[i2 * 3] = (short)(i - 1);
+                Indices[i2 * 3 + byte1] = (short)i2;
+                Indices[i2 * 3 + byte0] = (short)(i2 + 1);
             }
-            if (z6) {
-                for (int i34 = 0; i34 < this.NumT; i34++) {
-                    vector3Array3.set(this.NumS * i34, 1.0f, 0.0f, 0.0f);
-                }
-            }
-            if (!z7) {
-                return true;
-            }
-            for (int i35 = 0; i35 < this.NumT; i35++) {
-                vector3Array3.set(((this.NumS * i35) + this.NumS) - 1, -1.0f, 0.0f, 0.0f);
-            }
-            return true;
-        }
-        boolean z8 = b2 == 1;
-        boolean z9 = b2 == 1 || b2 == 2 || b2 == 4;
-        boolean z10 = b2 == 2;
-        if (z8) {
-            LLVector3 lLVector38 = new LLVector3();
-            for (int i36 = 0; i36 < this.NumS; i36++) {
-                vector3Array3.addToVector(i36, lLVector38);
-            }
-            for (int i37 = 0; i37 < this.NumS; i37++) {
-                vector3Array3.set(i37, lLVector38);
-            }
-            lLVector38.set(0.0f, 0.0f, 0.0f);
-            for (int i38 = 0; i38 < this.NumS; i38++) {
-                vector3Array3.addToVector((this.NumS * (this.NumT - 1)) + i38, lLVector38);
-            }
-            for (int i39 = 0; i39 < this.NumS; i39++) {
-                vector3Array3.set((this.NumS * (this.NumT - 1)) + i39, lLVector38);
-            }
-        }
-        if (z9) {
-            for (int i40 = 0; i40 < this.NumT; i40++) {
-                vector3Array3.setAdd(this.NumS * i40, ((this.NumS * i40) + this.NumS) - 1);
-            }
-        }
-        if (!z10) {
-            return true;
-        }
-        for (int i41 = 0; i41 < this.NumS; i41++) {
-            vector3Array3.setAdd(i41, (this.NumS * (this.NumT - 1)) + i41);
+
         }
         return true;
     }
 
-    private boolean createUnCutCubeCap(PrimVolume primVolume) {
+    private boolean createSide(PrimVolume primvolume)
+    {
+        Vector3Array vector3array;
+        Vector3Array vector3array1;
+        Object obj;
+        Object obj1;
+        Object obj2;
+        Object obj3;
         int i;
-        Vector3Array vector3Array = primVolume.Mesh;
-        ArrayList<LLVector3> arrayList = primVolume.Profile.Profile;
-        int i2 = primVolume.Profile.Total;
-        int size = primVolume.Path.Path.size();
-        int size2 = (arrayList.size() - 1) / 4;
-        LLVector3 lLVector3 = this.Extents[0];
-        LLVector3 lLVector32 = this.Extents[1];
-        int i3 = (this.TypeMask & 512) != 0 ? i2 * (size - 1) : this.BeginS;
-        VertexArray vertexArray2 = new VertexArray(4);
-        LLVector3 lLVector33 = new LLVector3();
-        Vector3Array vertices = vertexArray2.getVertices();
-        Vector2Array texCoords = vertexArray2.getTexCoords();
-        int i4 = 0;
-        while (true) {
-            int i5 = i4;
-            if (i5 >= 4) {
-                break;
-            }
-            vertices.set(i5, vector3Array, (size2 * i5) + i3);
-            texCoords.set(i5, 0.5f + arrayList.get(size2 * i5).x, 0.5f - arrayList.get(size2 * i5).y);
-            i4 = i5 + 1;
+        boolean flag1;
+        int i1;
+        int j1;
+        int l1;
+        byte byte0;
+        int j4;
+        int k4;
+        if ((TypeMask & 0x100) != 0)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
         }
-        LLVector3 lLVector34 = new LLVector3();
-        vertices.getSub(1, 0, lLVector33);
-        vertices.getSub(2, 1, lLVector34);
-        lLVector33.setCross(lLVector34);
-        lLVector33.normVec();
-        if ((this.TypeMask & 512) == 0) {
-            lLVector33.mul(-1.0f);
-        } else {
-            texCoords.swap(0, 3);
-            texCoords.swap(1, 2);
+        i = primvolume.volumeParams.SculptType;
+        byte0 = (byte)(i & 7);
+        if ((i & 0x40) != 0)
+        {
+            i1 = 1;
+        } else
+        {
+            i1 = 0;
         }
-        resizeVertices((size2 + 1) * (size2 + 1));
-        Vector3Array vector3Array2 = this.Positions;
-        int i6 = 0;
-        LLVector3 lLVector35 = new LLVector3();
-        LLVector3 lLVector36 = new LLVector3();
-        LLVector2 lLVector2 = new LLVector2();
-        LLVector2 lLVector22 = new LLVector2();
-        int i7 = 0;
-        while (true) {
-            int i8 = i7;
-            if (i8 >= size2 + 1) {
-                break;
-            }
-            int i9 = 0;
-            while (true) {
-                int i10 = i9;
-                if (i10 >= size2 + 1) {
-                    break;
-                }
-                this.vertexArray.LerpPlanarVertex(i6, vertexArray2, 0, vertexArray2, 1, vertexArray2, 3, ((float) i8) / ((float) size2), ((float) i10) / ((float) size2), lLVector35, lLVector36, lLVector2, lLVector22);
-                this.vertexArray.getNormals().set(i6, lLVector33);
-                if (i8 == 0 && i10 == 0) {
-                    vector3Array2.get(i6, lLVector3);
-                    vector3Array2.get(i6, lLVector32);
-                } else {
-                    vector3Array2.minMaxVector(i6, lLVector3, lLVector32);
-                }
-                i6++;
-                i9 = i10 + 1;
-            }
-            i7 = i8 + 1;
+        if ((i & 0xffffff80) != 0)
+        {
+            i = 1;
+        } else
+        {
+            i = 0;
         }
-        this.Center = new LLVector3(lLVector3);
-        this.Center.add(lLVector32);
-        this.Center.mul(0.5f);
-        resizeIndices(size2 * size2 * 6);
-        short[] sArr = this.Indices;
-        short[] sArr2 = {0, 1, (short) (size2 + 1 + 1), (short) (size2 + 1 + 1), (short) (size2 + 1), 0};
-        int i11 = 0;
-        int i12 = 0;
-        while (true) {
-            int i13 = i12;
-            if (i13 >= size2) {
-                return true;
-            }
-            int i14 = 0;
-            while (i14 < size2) {
-                if ((this.TypeMask & 512) != 0) {
-                    i = i11;
-                    int i15 = 5;
-                    while (i15 >= 0) {
-                        sArr[i] = (short) (((size2 + 1) * i14) + i13 + sArr2[i15]);
-                        i15--;
-                        i++;
+        if (i1 != 0)
+        {
+            i1 = i ^ 1;
+        } else
+        {
+            i1 = i;
+        }
+        obj = primvolume.Mesh;
+        obj1 = primvolume.Profile.Profile;
+        obj2 = primvolume.Path.Path;
+        j4 = primvolume.Profile.Total;
+        i = NumS;
+        j1 = NumT;
+        l1 = (NumS - 1) * (NumT - 1) * 6;
+        resizeVertices(i * j1);
+        resizeIndices(l1);
+        Edge = new int[l1];
+        vector3array1 = Positions;
+        vector3array = Normals;
+        obj3 = TexCoords;
+        k4 = (int)Math.floor(((LLVector3)((ArrayList) (obj1)).get(BeginS)).z);
+        if ((TypeMask & 0x10) != 0 && (TypeMask & 0x100) != 0 && NumS > 2)
+        {
+            j1 = NumS / 2;
+        } else
+        {
+            j1 = NumS;
+        }
+        l1 = BeginT;
+        i = 0;
+        while (l1 < BeginT + NumT) 
+        {
+            float f3 = ((PrimPath.PathPoint)((ArrayList) (obj2)).get(l1)).TexT;
+            int i2 = 0;
+            while (i2 < j1) 
+            {
+                float f;
+                float f2;
+                int l3;
+                if ((TypeMask & 4) != 0 || BeginS + i2 >= ((ArrayList) (obj1)).size())
+                {
+                    if (i2 != 0)
+                    {
+                        f = 1.0F;
+                    } else
+                    {
+                        f = 0.0F;
                     }
-                } else {
-                    int i16 = i11;
-                    int i17 = 0;
-                    while (i17 < 6) {
-                        sArr[i] = (short) (((size2 + 1) * i14) + i13 + sArr2[i17]);
-                        i17++;
-                        i16 = i + 1;
-                    }
+                } else
+                if (!flag1)
+                {
+                    f = ((LLVector3)((ArrayList) (obj1)).get(BeginS + i2)).z;
+                } else
+                {
+                    f = ((LLVector3)((ArrayList) (obj1)).get(BeginS + i2)).z - (float)k4;
                 }
-                i14++;
-                i11 = i;
+                f2 = f;
+                if (i1 != 0)
+                {
+                    f2 = 1.0F - f;
+                }
+                if (BeginS + i2 >= j4)
+                {
+                    l3 = BeginS + i2 + (l1 - 1) * j4;
+                } else
+                {
+                    l3 = BeginS + i2 + j4 * l1;
+                }
+                vector3array1.set(i, ((Vector3Array) (obj)), l3);
+                ((Vector2Array) (obj3)).set(i, f2, f3);
+                i++;
+                if ((TypeMask & 0x10) != 0 && (TypeMask & 0x100) != 0 && NumS > 2 && i2 > 0)
+                {
+                    vector3array1.set(i, ((Vector3Array) (obj)), l3);
+                    ((Vector2Array) (obj3)).set(i, f2, f3);
+                    i++;
+                }
+                i2++;
             }
-            i12 = i13 + 1;
+            if ((TypeMask & 0x10) != 0 && (TypeMask & 0x100) != 0 && NumS > 2)
+            {
+                float f1;
+                int j2;
+                int i4;
+                if ((TypeMask & 0x80) != 0)
+                {
+                    j2 = j1 - 1;
+                } else
+                {
+                    j2 = 0;
+                }
+                i4 = BeginS;
+                if (BeginS + j2 < ((ArrayList) (obj1)).size())
+                {
+                    f1 = ((LLVector3)((ArrayList) (obj1)).get(j2 + BeginS)).z - (float)k4;
+                } else
+                if (j2 != 0)
+                {
+                    f1 = 1.0F;
+                } else
+                {
+                    f1 = 0.0F;
+                }
+                vector3array1.set(i, ((Vector3Array) (obj)), i4 + j2 + j4 * l1);
+                ((Vector2Array) (obj3)).set(i, f1, f3);
+                i++;
+            }
+            l1++;
+        }
+        obj = Extents[0];
+        obj1 = Extents[1];
+        vector3array1.get(0, ((LLVector3) (obj)));
+        vector3array1.get(0, ((LLVector3) (obj1)));
+        vector3array1.minMaxVector(((LLVector3) (obj)), ((LLVector3) (obj1)));
+        Center = new LLVector3(((LLVector3) (obj)));
+        Center.add(((LLVector3) (obj1)));
+        Center.mul(0.5F);
+        l1 = 0;
+        i = 0;
+        if ((TypeMask & 0x100) != 0)
+        {
+            flag1 = true;
+        } else
+        {
+            flag1 = false;
+        }
+        for (i1 = 0; i1 < NumT - 1; i1++)
+        {
+            int k1 = 0;
+            while (k1 < NumS - 1) 
+            {
+                int ai[] = Indices;
+                int k2 = l1 + 1;
+                ai[l1] = (short)(NumS * i1 + k1);
+                ai = Indices;
+                l1 = k2 + 1;
+                ai[k2] = (short)(k1 + 1 + NumS * (i1 + 1));
+                ai = Indices;
+                k2 = l1 + 1;
+                ai[l1] = (short)(NumS * (i1 + 1) + k1);
+                ai = Indices;
+                l1 = k2 + 1;
+                ai[k2] = (short)(NumS * i1 + k1);
+                ai = Indices;
+                k2 = l1 + 1;
+                ai[l1] = (short)(k1 + 1 + NumS * i1);
+                ai = Indices;
+                l1 = k2 + 1;
+                ai[k2] = (short)(k1 + 1 + NumS * (i1 + 1));
+                ai = Edge;
+                k2 = i + 1;
+                ai[i] = (NumS - 1) * 2 * i1 + k1 * 2 + 1;
+                if (i1 < NumT - 2)
+                {
+                    Edge[k2] = (NumS - 1) * 2 * (i1 + 1) + k1 * 2 + 1;
+                    i = k2 + 1;
+                } else
+                if (NumT <= 3 || primvolume.Path.Open)
+                {
+                    Edge[k2] = -1;
+                    i = k2 + 1;
+                } else
+                {
+                    Edge[k2] = k1 * 2 + 1;
+                    i = k2 + 1;
+                }
+                if (k1 > 0)
+                {
+                    Edge[i] = ((NumS - 1) * 2 * i1 + k1 * 2) - 1;
+                    i++;
+                } else
+                if (flag1 || primvolume.Path.Open)
+                {
+                    Edge[i] = -1;
+                    i++;
+                } else
+                {
+                    Edge[i] = (NumS - 1) * 2 * i1 + (NumS - 2) * 2 + 1;
+                    i++;
+                }
+                if (i1 > 0)
+                {
+                    ai = Edge;
+                    k2 = i + 1;
+                    ai[i] = (NumS - 1) * 2 * (i1 - 1) + k1 * 2;
+                    i = k2;
+                } else
+                if (NumT <= 3 || primvolume.Path.Open)
+                {
+                    int ai1[] = Edge;
+                    int l2 = i + 1;
+                    ai1[i] = -1;
+                    i = l2;
+                } else
+                {
+                    int ai2[] = Edge;
+                    int i3 = i + 1;
+                    ai2[i] = (NumS - 1) * 2 * (NumT - 2) + k1 * 2;
+                    i = i3;
+                }
+                if (k1 < NumS - 2)
+                {
+                    ai = Edge;
+                    k2 = i + 1;
+                    ai[i] = (NumS - 1) * 2 * i1 + (k1 + 1) * 2;
+                    i = k2;
+                } else
+                if (flag1 || primvolume.Path.Open)
+                {
+                    int ai3[] = Edge;
+                    int j3 = i + 1;
+                    ai3[i] = -1;
+                    i = j3;
+                } else
+                {
+                    int ai4[] = Edge;
+                    int k3 = i + 1;
+                    ai4[i] = (NumS - 1) * 2 * i1;
+                    i = k3;
+                }
+                ai = Edge;
+                k2 = i + 1;
+                ai[i] = (NumS - 1) * 2 * i1 + k1 * 2;
+                k1++;
+                i = k2;
+            }
+        }
+
+        Normals.clear();
+        LLVector3 allvector3[] = new LLVector3[3];
+        short aword0[] = new short[3];
+        for (i = 0; i < 3; i++)
+        {
+            allvector3[i] = new LLVector3();
+        }
+
+        obj2 = new LLVector3();
+        obj3 = new LLVector3();
+        for (i = 0; i < NumIndices / 3; i++)
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                aword0[j] = Indices[i * 3 + j];
+                vector3array1.get(aword0[j], allvector3[j]);
+            }
+
+            ((LLVector3) (obj2)).setSub(allvector3[0], allvector3[1]);
+            ((LLVector3) (obj3)).setSub(allvector3[0], allvector3[2]);
+            ((LLVector3) (obj2)).setCross(((LLVector3) (obj3)));
+            for (int k = 0; k < 3; k++)
+            {
+                Normals.add(aword0[k], ((LLVector3) (obj2)));
+            }
+
+            Normals.add(aword0[(i & 1) + 1], ((LLVector3) (obj2)));
+        }
+
+        allvector3 = new LLVector3();
+        aword0 = new LLVector3();
+        obj2 = new LLVector3();
+        vector3array1.get(0, aword0);
+        vector3array1.get(NumS * (NumT - 2), ((LLVector3) (obj2)));
+        allvector3.setSub(aword0, ((LLVector3) (obj2)));
+        boolean flag;
+        if (allvector3.dot(allvector3) < 1E-06F)
+        {
+            k = 1;
+        } else
+        {
+            k = 0;
+        }
+        vector3array1.get(NumS - 1, aword0);
+        vector3array1.get((NumS * (NumT - 2) + NumS) - 1, ((LLVector3) (obj2)));
+        allvector3.setSub(aword0, ((LLVector3) (obj2)));
+        if (allvector3.dot(allvector3) < 1E-06F)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (byte0 == 0)
+        {
+            if (!primvolume.Path.Open)
+            {
+                for (i1 = 0; i1 < NumS; i1++)
+                {
+                    vector3array.setAdd(i1, NumS * (NumT - 1) + i1);
+                }
+
+            }
+            if (!primvolume.Path.Open && k ^ true)
+            {
+                for (i1 = 0; i1 < NumT; i1++)
+                {
+                    vector3array.setAdd(NumS * i1, (NumS * i1 + NumS) - 1);
+                }
+
+            }
+            if (primvolume.getPathType() == 32 && (primvolume.getProfileType() & 0xf) == 5)
+            {
+                if (k)
+                {
+                    for (int l = 0; l < NumT; l++)
+                    {
+                        vector3array.set(NumS * l, 1.0F, 0.0F, 0.0F);
+                    }
+
+                }
+                if (flag)
+                {
+                    for (flag = false; flag < NumT; flag++)
+                    {
+                        vector3array.set((NumS * flag + NumS) - 1, -1F, 0.0F, 0.0F);
+                    }
+
+                }
+            }
+            break MISSING_BLOCK_LABEL_2487;
+        }
+        if (byte0 == 1)
+        {
+            i1 = 1;
+        } else
+        {
+            i1 = 0;
+        }
+        break MISSING_BLOCK_LABEL_2192;
+        if (byte0 == 1 || byte0 == 2 || byte0 == 4)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        if (byte0 == 2)
+        {
+            l = 1;
+        } else
+        {
+            l = 0;
+        }
+        if (i1 == 0)
+        {
+            break MISSING_BLOCK_LABEL_2388;
+        }
+        primvolume = new LLVector3();
+        for (i1 = 0; i1 < NumS; i1++)
+        {
+            vector3array.addToVector(i1, primvolume);
+        }
+
+        break MISSING_BLOCK_LABEL_2270;
+        for (i1 = 0; i1 < NumS; i1++)
+        {
+            vector3array.set(i1, primvolume);
+        }
+
+        primvolume.set(0.0F, 0.0F, 0.0F);
+        for (i1 = 0; i1 < NumS; i1++)
+        {
+            vector3array.addToVector(NumS * (NumT - 1) + i1, primvolume);
+        }
+
+        for (i1 = 0; i1 < NumS; i1++)
+        {
+            vector3array.set(NumS * (NumT - 1) + i1, primvolume);
+        }
+
+        if (flag)
+        {
+            for (flag = false; flag < NumT; flag++)
+            {
+                vector3array.setAdd(NumS * flag, (NumS * flag + NumS) - 1);
+            }
+
+        }
+        if (l)
+        {
+            for (flag = false; flag < NumS; flag++)
+            {
+                vector3array.setAdd(flag, NumS * (NumT - 1) + flag);
+            }
+
+        }
+        return true;
+    }
+
+    private boolean createUnCutCubeCap(PrimVolume primvolume)
+    {
+        Object obj = primvolume.Mesh;
+        Object obj1 = primvolume.Profile.Profile;
+        int i = primvolume.Profile.Total;
+        int j = primvolume.Path.Path.size();
+        int j2 = (((ArrayList) (obj1)).size() - 1) / 4;
+        primvolume = Extents[0];
+        LLVector3 llvector3 = Extents[1];
+        VertexArray vertexarray;
+        LLVector3 llvector3_1;
+        Object obj2;
+        Object obj3;
+        if ((TypeMask & 0x200) != 0)
+        {
+            i *= j - 1;
+        } else
+        {
+            i = BeginS;
+        }
+        vertexarray = new VertexArray(4);
+        llvector3_1 = new LLVector3();
+        obj2 = vertexarray.getVertices();
+        obj3 = vertexarray.getTexCoords();
+        for (j = 0; j < 4; j++)
+        {
+            ((Vector3Array) (obj2)).set(j, ((Vector3Array) (obj)), j2 * j + i);
+            ((Vector2Array) (obj3)).set(j, 0.5F + ((LLVector3)((ArrayList) (obj1)).get(j2 * j)).x, 0.5F - ((LLVector3)((ArrayList) (obj1)).get(j2 * j)).y);
+        }
+
+        obj = new LLVector3();
+        ((Vector3Array) (obj2)).getSub(1, 0, llvector3_1);
+        ((Vector3Array) (obj2)).getSub(2, 1, ((LLVector3) (obj)));
+        llvector3_1.setCross(((LLVector3) (obj)));
+        llvector3_1.normVec();
+        LLVector2 llvector2;
+        if ((TypeMask & 0x200) == 0)
+        {
+            llvector3_1.mul(-1F);
+        } else
+        {
+            ((Vector2Array) (obj3)).swap(0, 3);
+            ((Vector2Array) (obj3)).swap(1, 2);
+        }
+        resizeVertices((j2 + 1) * (j2 + 1));
+        obj = Positions;
+        j = 0;
+        obj1 = new LLVector3();
+        obj2 = new LLVector3();
+        obj3 = new LLVector2();
+        llvector2 = new LLVector2();
+        for (i = 0; i < j2 + 1; i++)
+        {
+            int i1 = 0;
+            while (i1 < j2 + 1) 
+            {
+                vertexArray.LerpPlanarVertex(j, vertexarray, 0, vertexarray, 1, vertexarray, 3, (float)i / (float)j2, (float)i1 / (float)j2, ((LLVector3) (obj1)), ((LLVector3) (obj2)), ((LLVector2) (obj3)), llvector2);
+                vertexArray.getNormals().set(j, llvector3_1);
+                if (i == 0 && i1 == 0)
+                {
+                    ((Vector3Array) (obj)).get(j, primvolume);
+                    ((Vector3Array) (obj)).get(j, llvector3);
+                } else
+                {
+                    ((Vector3Array) (obj)).minMaxVector(j, primvolume, llvector3);
+                }
+                j++;
+                i1++;
+            }
+        }
+
+        Center = new LLVector3(primvolume);
+        Center.add(llvector3);
+        Center.mul(0.5F);
+        resizeIndices(j2 * j2 * 6);
+        primvolume = Indices;
+        short aword0[] = new short[6];
+        aword0[0] = 0;
+        aword0[1] = 1;
+        aword0[2] = (short)(j2 + 1 + 1);
+        aword0[3] = (short)(j2 + 1 + 1);
+        aword0[4] = (short)(j2 + 1);
+        aword0[5] = 0;
+        i = 0;
+        for (int j1 = 0; j1 < j2; j1++)
+        {
+label0:
+            for (int k1 = 0; k1 < j2; k1++)
+            {
+                if ((TypeMask & 0x200) != 0)
+                {
+                    int l1 = 5;
+                    int k = i;
+                    do
+                    {
+                        i = k;
+                        if (l1 < 0)
+                        {
+                            continue label0;
+                        }
+                        primvolume[k] = (short)((j2 + 1) * k1 + j1 + aword0[l1]);
+                        l1--;
+                        k++;
+                    } while (true);
+                }
+                int i2 = 0;
+                int l = i;
+                do
+                {
+                    i = l;
+                    if (i2 >= 6)
+                    {
+                        continue label0;
+                    }
+                    primvolume[l] = (short)((j2 + 1) * k1 + j1 + aword0[i2]);
+                    i2++;
+                    l++;
+                } while (true);
+            }
+
+        }
+
+        return true;
+    }
+
+    private void resizeIndices(int i)
+    {
+        if (i != NumIndices)
+        {
+            if (i != 0)
+            {
+                Indices = new short[i];
+            } else
+            {
+                Indices = null;
+            }
+            NumIndices = i;
         }
     }
 
-    private void resizeIndices(int i) {
-        if (i != this.NumIndices) {
-            if (i != 0) {
-                this.Indices = new short[i];
-            } else {
-                this.Indices = null;
+    private void resizeVertices(int i)
+    {
+        if (NumVertices != i)
+        {
+            if (i != 0)
+            {
+                vertexArray = new VertexArray(i);
+                Positions = vertexArray.getVertices();
+                Normals = vertexArray.getNormals();
+                TexCoords = vertexArray.getTexCoords();
+            } else
+            {
+                Positions = null;
+                Normals = null;
+                TexCoords = null;
+                vertexArray = null;
             }
-            this.NumIndices = i;
+            NumVertices = i;
         }
     }
 
-    private void resizeVertices(int i) {
-        if (this.NumVertices != i) {
-            if (i != 0) {
-                this.vertexArray = new VertexArray(i);
-                this.Positions = this.vertexArray.getVertices();
-                this.Normals = this.vertexArray.getNormals();
-                this.TexCoords = this.vertexArray.getTexCoords();
-            } else {
-                this.Positions = null;
-                this.Normals = null;
-                this.TexCoords = null;
-                this.vertexArray = null;
-            }
-            this.NumVertices = i;
+    public boolean create(PrimVolume primvolume)
+    {
+        boolean flag;
+        if ((TypeMask & 2) != 0)
+        {
+            flag = createCap(primvolume);
+        } else
+        if ((TypeMask & 4) != 0 || (TypeMask & 8) != 0)
+        {
+            flag = createSide(primvolume);
+        } else
+        {
+            flag = false;
         }
-    }
-
-    public boolean create(PrimVolume primVolume) {
-        boolean createCap = (this.TypeMask & 2) != 0 ? createCap(primVolume) : ((this.TypeMask & 4) == 0 && (this.TypeMask & 8) == 0) ? false : createSide(primVolume);
-        if (createCap) {
-            this.TexCoordExtents[0] = new LLVector2(1.0f, 1.0f);
-            this.TexCoordExtents[1] = new LLVector2(0.0f, 0.0f);
-            this.TexCoords.minMaxVector(this.TexCoordExtents[0], this.TexCoordExtents[1]);
-            this.TexCoordExtents[0].x = Math.max(0.0f, this.TexCoordExtents[0].x);
-            this.TexCoordExtents[0].y = Math.max(0.0f, this.TexCoordExtents[0].y);
-            this.TexCoordExtents[1].x = Math.min(1.0f, this.TexCoordExtents[1].x);
-            this.TexCoordExtents[1].y = Math.min(1.0f, this.TexCoordExtents[1].y);
+        if (flag)
+        {
+            TexCoordExtents[0] = new LLVector2(1.0F, 1.0F);
+            TexCoordExtents[1] = new LLVector2(0.0F, 0.0F);
+            TexCoords.minMaxVector(TexCoordExtents[0], TexCoordExtents[1]);
+            TexCoordExtents[0].x = Math.max(0.0F, TexCoordExtents[0].x);
+            TexCoordExtents[0].y = Math.max(0.0F, TexCoordExtents[0].y);
+            TexCoordExtents[1].x = Math.min(1.0F, TexCoordExtents[1].x);
+            TexCoordExtents[1].y = Math.min(1.0F, TexCoordExtents[1].y);
         }
-        return createCap;
+        return flag;
     }
 }

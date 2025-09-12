@@ -1,7 +1,10 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.react.RequestSource;
 import com.lumiyaviewer.lumiya.react.SimpleRequestHandler;
@@ -12,572 +15,403 @@ import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
 import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
 import com.lumiyaviewer.lumiya.slproto.SLParcelInfo;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLTaskInventory;
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectDisplayInfo;
+import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarControl;
+import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectFilterInfo;
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData;
 import com.lumiyaviewer.lumiya.slproto.types.AgentPosition;
-import com.lumiyaviewer.lumiya.slproto.types.ImmutableVector;
 import com.lumiyaviewer.lumiya.slproto.users.MultipleChatterNameRetriever;
 import java.util.UUID;
-import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class ObjectsManager {
-    /* access modifiers changed from: private */
-    public SLObjectFilterInfo filterInfo = SLObjectFilterInfo.create();
-    /* access modifiers changed from: private */
-    public final Object filterLock = new Object();
-    private final SubscriptionPool<SubscriptionSingleKey, MyAvatarState> myAvatarStatePool = new SubscriptionPool<>();
-    /* access modifiers changed from: private */
-    public final MultipleChatterNameRetriever nameRetriever;
-    /* access modifiers changed from: private */
-    public final SubscriptionPool<SubscriptionSingleKey, ObjectDisplayList> objectDisplayListPool = new SubscriptionPool<>();
-    /* access modifiers changed from: private */
-    public final SubscriptionPool<Integer, SLObjectProfileData> objectProfilePool = new SubscriptionPool<>();
-    private final SimpleRequestHandler<Integer> objectProfileRequestHandler = new SimpleRequestHandler<Integer>() {
-        /* access modifiers changed from: package-private */
-        /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager$2_3438  reason: not valid java name */
-        public /* synthetic */ void m348lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager$2_3438(SLAgentCircuit sLAgentCircuit, Integer num) {
-            SLObjectProfileData objectProfile = sLAgentCircuit.getObjectProfile(num.intValue());
-            if (objectProfile != null) {
-                ObjectsManager.this.objectProfilePool.onResultData(num, objectProfile);
-            } else {
-                ObjectsManager.this.objectProfilePool.onResultError(num, new ObjectDoesNotExistException(num.intValue(), (ObjectDoesNotExistException) null));
-            }
-        }
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            UserManager
 
-        public void onRequest(@Nonnull Integer num) {
-            SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit();
-            if (activeAgentCircuit != null) {
-                activeAgentCircuit.execute(new Runnable(this, activeAgentCircuit, num) {
+public class ObjectsManager
+{
+    public static class ObjectDisplayList
+    {
 
-                    /* renamed from: -$f0 */
-                    private final /* synthetic */ Object f209$f0;
-
-                    /* renamed from: -$f1 */
-                    private final /* synthetic */ Object f210$f1;
-
-                    /* renamed from: -$f2 */
-                    private final /* synthetic */ Object f211$f2;
-
-                    private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$n3FxEEuksYOCADj00lseQFiZ3z4.1.$m$0():void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$n3FxEEuksYOCADj00lseQFiZ3z4.1.$m$0():void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                    	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                    	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
-
-                    public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$n3FxEEuksYOCADj00lseQFiZ3z4.1.run():void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$n3FxEEuksYOCADj00lseQFiZ3z4.1.run():void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                    	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                    	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
-                });
-            } else {
-                ObjectsManager.this.objectProfilePool.onResultError(num, new SLGridConnection.NotConnectedException());
-            }
-        }
-    };
-    private final MultipleChatterNameRetriever.OnChatterNameUpdated onChatterNameUpdated = new $Lambda$n3FxEEuksYOCADj00lseQFiZ3z4(this);
-    /* access modifiers changed from: private */
-    public final AtomicReference<SLParcelInfo> parcelInfo = new AtomicReference<>((Object) null);
-    private final SubscriptionSingleDataPool<ImmutableSet<UUID>> runningAnimationsPool = new SubscriptionSingleDataPool<>();
-    private final SubscriptionPool<Integer, SLTaskInventory> taskInventoryPool = new SubscriptionPool<>();
-    /* access modifiers changed from: private */
-    public final SubscriptionPool<UUID, ImmutableList<SLObjectInfo>> touchableObjectsPool = new SubscriptionPool<>();
-    private final SimpleRequestHandler<UUID> touchableObjectsRequestHandler = new SimpleRequestHandler<UUID>() {
-        /* access modifiers changed from: package-private */
-        /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager$3_4319  reason: not valid java name */
-        public /* synthetic */ void m349lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager$3_4319(SLAgentCircuit sLAgentCircuit, UUID uuid) {
-            ImmutableList<SLObjectInfo> userTouchableObjects = sLAgentCircuit.getGridConnection().parcelInfo.getUserTouchableObjects(sLAgentCircuit, uuid);
-            if (userTouchableObjects != null) {
-                ObjectsManager.this.touchableObjectsPool.onResultData(uuid, userTouchableObjects);
-            } else {
-                ObjectsManager.this.touchableObjectsPool.onResultError(uuid, new ObjectDoesNotExistException(uuid, (ObjectDoesNotExistException) null));
-            }
-        }
-
-        public void onRequest(@Nonnull UUID uuid) {
-            SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit();
-            if (activeAgentCircuit != null) {
-                activeAgentCircuit.execute(new Runnable(this, activeAgentCircuit, uuid) {
-
-                    /* renamed from: -$f0 */
-                    private final /* synthetic */ Object f212$f0;
-
-                    /* renamed from: -$f1 */
-                    private final /* synthetic */ Object f213$f1;
-
-                    /* renamed from: -$f2 */
-                    private final /* synthetic */ Object f214$f2;
-
-                    private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$n3FxEEuksYOCADj00lseQFiZ3z4.2.$m$0():void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$n3FxEEuksYOCADj00lseQFiZ3z4.2.$m$0():void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                    	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                    	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
-
-                    public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$n3FxEEuksYOCADj00lseQFiZ3z4.2.run():void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$n3FxEEuksYOCADj00lseQFiZ3z4.2.run():void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                    	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                    	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
-                });
-            } else {
-                ObjectsManager.this.touchableObjectsPool.onResultError(uuid, new SLGridConnection.NotConnectedException());
-            }
-        }
-    };
-    /* access modifiers changed from: private */
-    public final Runnable updateObjectListRunnable = new Runnable() {
-        public void run() {
-            SLObjectFilterInfo r2;
-            synchronized (ObjectsManager.this.filterLock) {
-                r2 = ObjectsManager.this.filterInfo;
-            }
-            SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit();
-            AgentPosition agentPosition = activeAgentCircuit != null ? activeAgentCircuit.getModules().avatarControl.getAgentPosition() : null;
-            ImmutableVector immutablePosition = agentPosition != null ? agentPosition.getImmutablePosition() : null;
-            SLParcelInfo sLParcelInfo = (SLParcelInfo) ObjectsManager.this.parcelInfo.get();
-            Debug.Printf("ObjectList: updating object list, parcelInfo %s, agentPosVector %s", sLParcelInfo, immutablePosition);
-            ObjectsManager.this.objectDisplayListPool.onResultData(SubscriptionSingleKey.Value, (sLParcelInfo == null || immutablePosition == null) ? new ObjectDisplayList(ImmutableList.of(), false) : sLParcelInfo.getDisplayObjects(immutablePosition, r2, ObjectsManager.this.nameRetriever));
-        }
-    };
-    private final SimpleRequestHandler<SubscriptionSingleKey> updateRequestHandler = new SimpleRequestHandler<SubscriptionSingleKey>() {
-        public void onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
-            SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit();
-            if (activeAgentCircuit != null) {
-                activeAgentCircuit.execute(ObjectsManager.this.updateObjectListRunnable);
-            } else {
-                ObjectsManager.this.objectDisplayListPool.onResultError(SubscriptionSingleKey.Value, new SLGridConnection.NotConnectedException());
-            }
-        }
-
-        public void onRequestCancelled(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
-            ObjectsManager.this.nameRetriever.clearChatters();
-        }
-    };
-    /* access modifiers changed from: private */
-    public final UserManager userManager;
-
-    public static class ObjectDisplayList {
         public final boolean isLoading;
-        public final ImmutableList<SLObjectDisplayInfo> objects;
+        public final ImmutableList objects;
 
-        public ObjectDisplayList(ImmutableList<SLObjectDisplayInfo> immutableList, boolean z) {
-            this.objects = immutableList;
-            this.isLoading = z;
+        public ObjectDisplayList(ImmutableList immutablelist, boolean flag)
+        {
+            objects = immutablelist;
+            isLoading = flag;
         }
     }
 
-    public static class ObjectDoesNotExistException extends Exception {
+    public static class ObjectDoesNotExistException extends Exception
+    {
+
         private final int localID;
-        @Nullable
         private final UUID uuid;
 
-        private ObjectDoesNotExistException(int i) {
-            this.localID = i;
-            this.uuid = null;
+        public int getLocalID()
+        {
+            return localID;
         }
 
-        /* synthetic */ ObjectDoesNotExistException(int i, ObjectDoesNotExistException objectDoesNotExistException) {
+        private ObjectDoesNotExistException(int i)
+        {
+            localID = i;
+            uuid = null;
+        }
+
+        ObjectDoesNotExistException(int i, ObjectDoesNotExistException objectdoesnotexistexception)
+        {
             this(i);
         }
 
-        private ObjectDoesNotExistException(@Nullable UUID uuid2) {
-            this.localID = 0;
-            this.uuid = uuid2;
+        private ObjectDoesNotExistException(UUID uuid1)
+        {
+            localID = 0;
+            uuid = uuid1;
         }
 
-        /* synthetic */ ObjectDoesNotExistException(UUID uuid2, ObjectDoesNotExistException objectDoesNotExistException) {
-            this(uuid2);
-        }
-
-        public int getLocalID() {
-            return this.localID;
+        ObjectDoesNotExistException(UUID uuid1, ObjectDoesNotExistException objectdoesnotexistexception)
+        {
+            this(uuid1);
         }
     }
 
-    ObjectsManager(UserManager userManager2) {
-        this.userManager = userManager2;
-        this.nameRetriever = new MultipleChatterNameRetriever(userManager2.getUserID(), this.onChatterNameUpdated, (Executor) null);
-        this.objectDisplayListPool.attachRequestHandler(this.updateRequestHandler);
-        this.objectProfilePool.attachRequestHandler(this.objectProfileRequestHandler);
-        this.touchableObjectsPool.attachRequestHandler(this.touchableObjectsRequestHandler);
-    }
 
-    public void clearParcelInfo(@Nullable SLParcelInfo sLParcelInfo) {
-        this.parcelInfo.compareAndSet(sLParcelInfo, (Object) null);
-    }
+    private SLObjectFilterInfo filterInfo;
+    private final Object filterLock = new Object();
+    private final SubscriptionPool myAvatarStatePool = new SubscriptionPool();
+    private final MultipleChatterNameRetriever nameRetriever;
+    private final SubscriptionPool objectDisplayListPool = new SubscriptionPool();
+    private final SubscriptionPool objectProfilePool = new SubscriptionPool();
+    private final SimpleRequestHandler objectProfileRequestHandler = new SimpleRequestHandler() {
 
-    public Subscribable<SubscriptionSingleKey, ObjectDisplayList> getObjectDisplayList() {
-        return this.objectDisplayListPool;
-    }
+        final ObjectsManager this$0;
 
-    public Subscribable<Integer, SLObjectProfileData> getObjectProfile() {
-        return this.objectProfilePool;
-    }
-
-    public Subscribable<Integer, SLTaskInventory> getObjectTaskInventory() {
-        return this.taskInventoryPool;
-    }
-
-    public RequestSource<Integer, SLTaskInventory> getTaskInventoryRequestSource() {
-        return this.taskInventoryPool;
-    }
-
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager_2320  reason: not valid java name */
-    public /* synthetic */ void m347lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager_2320(MultipleChatterNameRetriever multipleChatterNameRetriever) {
-        requestObjectListUpdate();
-    }
-
-    public SubscriptionPool<SubscriptionSingleKey, MyAvatarState> myAvatarState() {
-        return this.myAvatarStatePool;
-    }
-
-    public void requestObjectListUpdate() {
-        this.objectDisplayListPool.requestUpdate(SubscriptionSingleKey.Value);
-    }
-
-    public void requestObjectProfileUpdate(int i) {
-        this.objectProfilePool.requestUpdate(Integer.valueOf(i));
-    }
-
-    public void requestTaskInventoryUpdate(int i) {
-        this.taskInventoryPool.requestUpdate(Integer.valueOf(i));
-    }
-
-    public void requestTouchableChildrenUpdate(UUID uuid) {
-        this.touchableObjectsPool.requestUpdate(uuid);
-    }
-
-    public SubscriptionSingleDataPool<ImmutableSet<UUID>> runningAnimations() {
-        return this.runningAnimationsPool;
-    }
-
-    public void setFilter(SLObjectFilterInfo sLObjectFilterInfo) {
-        boolean z = false;
-        synchronized (this.filterLock) {
-            if (!this.filterInfo.equals(sLObjectFilterInfo)) {
-                this.filterInfo = sLObjectFilterInfo;
-                z = true;
+        void lambda$_2D_com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager$2_3438(SLAgentCircuit slagentcircuit, Integer integer)
+        {
+            slagentcircuit = slagentcircuit.getObjectProfile(integer.intValue());
+            if (slagentcircuit != null)
+            {
+                ObjectsManager._2D_get4(ObjectsManager.this).onResultData(integer, slagentcircuit);
+                return;
+            } else
+            {
+                ObjectsManager._2D_get4(ObjectsManager.this).onResultError(integer, new ObjectDoesNotExistException(integer.intValue(), null));
+                return;
             }
         }
-        if (z) {
-            requestObjectListUpdate();
+
+        public void onRequest(Integer integer)
+        {
+            SLAgentCircuit slagentcircuit = ObjectsManager._2D_get8(ObjectsManager.this).getActiveAgentCircuit();
+            if (slagentcircuit != null)
+            {
+                slagentcircuit.execute(new _2D_.Lambda.n3FxEEuksYOCADj00lseQFiZ3z4._cls1(this, slagentcircuit, integer));
+                return;
+            } else
+            {
+                ObjectsManager._2D_get4(ObjectsManager.this).onResultError(integer, new com.lumiyaviewer.lumiya.slproto.SLGridConnection.NotConnectedException());
+                return;
+            }
         }
+
+        public volatile void onRequest(Object obj)
+        {
+            onRequest((Integer)obj);
+        }
+
+            
+            {
+                this$0 = ObjectsManager.this;
+                super();
+            }
+    };
+    private final com.lumiyaviewer.lumiya.slproto.users.MultipleChatterNameRetriever.OnChatterNameUpdated onChatterNameUpdated = new _2D_.Lambda.n3FxEEuksYOCADj00lseQFiZ3z4(this);
+    private final AtomicReference parcelInfo = new AtomicReference(null);
+    private final SubscriptionSingleDataPool runningAnimationsPool = new SubscriptionSingleDataPool();
+    private final SubscriptionPool taskInventoryPool = new SubscriptionPool();
+    private final SubscriptionPool touchableObjectsPool = new SubscriptionPool();
+    private final SimpleRequestHandler touchableObjectsRequestHandler = new SimpleRequestHandler() {
+
+        final ObjectsManager this$0;
+
+        void lambda$_2D_com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager$3_4319(SLAgentCircuit slagentcircuit, UUID uuid)
+        {
+            slagentcircuit = slagentcircuit.getGridConnection().parcelInfo.getUserTouchableObjects(slagentcircuit, uuid);
+            if (slagentcircuit != null)
+            {
+                ObjectsManager._2D_get6(ObjectsManager.this).onResultData(uuid, slagentcircuit);
+                return;
+            } else
+            {
+                ObjectsManager._2D_get6(ObjectsManager.this).onResultError(uuid, new ObjectDoesNotExistException(uuid, null));
+                return;
+            }
+        }
+
+        public volatile void onRequest(Object obj)
+        {
+            onRequest((UUID)obj);
+        }
+
+        public void onRequest(UUID uuid)
+        {
+            SLAgentCircuit slagentcircuit = ObjectsManager._2D_get8(ObjectsManager.this).getActiveAgentCircuit();
+            if (slagentcircuit != null)
+            {
+                slagentcircuit.execute(new _2D_.Lambda.n3FxEEuksYOCADj00lseQFiZ3z4._cls2(this, slagentcircuit, uuid));
+                return;
+            } else
+            {
+                ObjectsManager._2D_get6(ObjectsManager.this).onResultError(uuid, new com.lumiyaviewer.lumiya.slproto.SLGridConnection.NotConnectedException());
+                return;
+            }
+        }
+
+            
+            {
+                this$0 = ObjectsManager.this;
+                super();
+            }
+    };
+    private final Runnable updateObjectListRunnable = new Runnable() {
+
+        final ObjectsManager this$0;
+
+        public void run()
+        {
+            Object obj = ObjectsManager._2D_get1(ObjectsManager.this);
+            obj;
+            JVM INSTR monitorenter ;
+            SLObjectFilterInfo slobjectfilterinfo = ObjectsManager._2D_get0(ObjectsManager.this);
+            obj;
+            JVM INSTR monitorexit ;
+            obj = ObjectsManager._2D_get8(ObjectsManager.this).getActiveAgentCircuit();
+            Exception exception;
+            SLParcelInfo slparcelinfo;
+            if (obj != null)
+            {
+                obj = ((SLAgentCircuit) (obj)).getModules().avatarControl.getAgentPosition();
+            } else
+            {
+                obj = null;
+            }
+            if (obj != null)
+            {
+                obj = ((AgentPosition) (obj)).getImmutablePosition();
+            } else
+            {
+                obj = null;
+            }
+            slparcelinfo = (SLParcelInfo)ObjectsManager._2D_get5(ObjectsManager.this).get();
+            Debug.Printf("ObjectList: updating object list, parcelInfo %s, agentPosVector %s", new Object[] {
+                slparcelinfo, obj
+            });
+            if (slparcelinfo != null && obj != null)
+            {
+                obj = slparcelinfo.getDisplayObjects(((com.lumiyaviewer.lumiya.slproto.types.ImmutableVector) (obj)), slobjectfilterinfo, ObjectsManager._2D_get2(ObjectsManager.this));
+            } else
+            {
+                obj = new ObjectDisplayList(ImmutableList.of(), false);
+            }
+            ObjectsManager._2D_get3(ObjectsManager.this).onResultData(SubscriptionSingleKey.Value, obj);
+            return;
+            exception;
+            throw exception;
+        }
+
+            
+            {
+                this$0 = ObjectsManager.this;
+                super();
+            }
+    };
+    private final SimpleRequestHandler updateRequestHandler = new SimpleRequestHandler() {
+
+        final ObjectsManager this$0;
+
+        public void onRequest(SubscriptionSingleKey subscriptionsinglekey)
+        {
+            subscriptionsinglekey = ObjectsManager._2D_get8(ObjectsManager.this).getActiveAgentCircuit();
+            if (subscriptionsinglekey != null)
+            {
+                subscriptionsinglekey.execute(ObjectsManager._2D_get7(ObjectsManager.this));
+                return;
+            } else
+            {
+                ObjectsManager._2D_get3(ObjectsManager.this).onResultError(SubscriptionSingleKey.Value, new com.lumiyaviewer.lumiya.slproto.SLGridConnection.NotConnectedException());
+                return;
+            }
+        }
+
+        public volatile void onRequest(Object obj)
+        {
+            onRequest((SubscriptionSingleKey)obj);
+        }
+
+        public void onRequestCancelled(SubscriptionSingleKey subscriptionsinglekey)
+        {
+            ObjectsManager._2D_get2(ObjectsManager.this).clearChatters();
+        }
+
+        public volatile void onRequestCancelled(Object obj)
+        {
+            onRequestCancelled((SubscriptionSingleKey)obj);
+        }
+
+            
+            {
+                this$0 = ObjectsManager.this;
+                super();
+            }
+    };
+    private final UserManager userManager;
+
+    static SLObjectFilterInfo _2D_get0(ObjectsManager objectsmanager)
+    {
+        return objectsmanager.filterInfo;
     }
 
-    public void setParcelInfo(@Nullable SLParcelInfo sLParcelInfo) {
-        this.parcelInfo.set(sLParcelInfo);
+    static Object _2D_get1(ObjectsManager objectsmanager)
+    {
+        return objectsmanager.filterLock;
+    }
+
+    static MultipleChatterNameRetriever _2D_get2(ObjectsManager objectsmanager)
+    {
+        return objectsmanager.nameRetriever;
+    }
+
+    static SubscriptionPool _2D_get3(ObjectsManager objectsmanager)
+    {
+        return objectsmanager.objectDisplayListPool;
+    }
+
+    static SubscriptionPool _2D_get4(ObjectsManager objectsmanager)
+    {
+        return objectsmanager.objectProfilePool;
+    }
+
+    static AtomicReference _2D_get5(ObjectsManager objectsmanager)
+    {
+        return objectsmanager.parcelInfo;
+    }
+
+    static SubscriptionPool _2D_get6(ObjectsManager objectsmanager)
+    {
+        return objectsmanager.touchableObjectsPool;
+    }
+
+    static Runnable _2D_get7(ObjectsManager objectsmanager)
+    {
+        return objectsmanager.updateObjectListRunnable;
+    }
+
+    static UserManager _2D_get8(ObjectsManager objectsmanager)
+    {
+        return objectsmanager.userManager;
+    }
+
+    ObjectsManager(UserManager usermanager)
+    {
+        filterInfo = SLObjectFilterInfo.create();
+        userManager = usermanager;
+        nameRetriever = new MultipleChatterNameRetriever(usermanager.getUserID(), onChatterNameUpdated, null);
+        objectDisplayListPool.attachRequestHandler(updateRequestHandler);
+        objectProfilePool.attachRequestHandler(objectProfileRequestHandler);
+        touchableObjectsPool.attachRequestHandler(touchableObjectsRequestHandler);
+    }
+
+    public void clearParcelInfo(SLParcelInfo slparcelinfo)
+    {
+        parcelInfo.compareAndSet(slparcelinfo, null);
+    }
+
+    public Subscribable getObjectDisplayList()
+    {
+        return objectDisplayListPool;
+    }
+
+    public Subscribable getObjectProfile()
+    {
+        return objectProfilePool;
+    }
+
+    public Subscribable getObjectTaskInventory()
+    {
+        return taskInventoryPool;
+    }
+
+    public RequestSource getTaskInventoryRequestSource()
+    {
+        return taskInventoryPool;
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_slproto_users_manager_ObjectsManager_2320(MultipleChatterNameRetriever multiplechatternameretriever)
+    {
         requestObjectListUpdate();
     }
 
-    public Subscribable<UUID, ImmutableList<SLObjectInfo>> touchableObjects() {
-        return this.touchableObjectsPool;
+    public SubscriptionPool myAvatarState()
+    {
+        return myAvatarStatePool;
+    }
+
+    public void requestObjectListUpdate()
+    {
+        objectDisplayListPool.requestUpdate(SubscriptionSingleKey.Value);
+    }
+
+    public void requestObjectProfileUpdate(int i)
+    {
+        objectProfilePool.requestUpdate(Integer.valueOf(i));
+    }
+
+    public void requestTaskInventoryUpdate(int i)
+    {
+        taskInventoryPool.requestUpdate(Integer.valueOf(i));
+    }
+
+    public void requestTouchableChildrenUpdate(UUID uuid)
+    {
+        touchableObjectsPool.requestUpdate(uuid);
+    }
+
+    public SubscriptionSingleDataPool runningAnimations()
+    {
+        return runningAnimationsPool;
+    }
+
+    public void setFilter(SLObjectFilterInfo slobjectfilterinfo)
+    {
+        boolean flag = false;
+        Object obj = filterLock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (filterInfo.equals(slobjectfilterinfo))
+        {
+            break MISSING_BLOCK_LABEL_27;
+        }
+        filterInfo = slobjectfilterinfo;
+        flag = true;
+        obj;
+        JVM INSTR monitorexit ;
+        if (flag)
+        {
+            requestObjectListUpdate();
+        }
+        return;
+        slobjectfilterinfo;
+        throw slobjectfilterinfo;
+    }
+
+    public void setParcelInfo(SLParcelInfo slparcelinfo)
+    {
+        parcelInfo.set(slparcelinfo);
+        requestObjectListUpdate();
+    }
+
+    public Subscribable touchableObjects()
+    {
+        return touchableObjectsPool;
     }
 }

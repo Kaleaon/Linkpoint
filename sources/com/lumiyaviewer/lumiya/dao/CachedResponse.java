@@ -1,44 +1,60 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.dao;
 
-public class CachedResponse {
-    private byte[] data;
+
+public class CachedResponse
+{
+
+    private byte data[];
     private String key;
     private boolean mustRevalidate;
 
-    public CachedResponse() {
+    public CachedResponse()
+    {
     }
 
-    public CachedResponse(String str) {
-        this.key = str;
+    public CachedResponse(String s)
+    {
+        key = s;
     }
 
-    public CachedResponse(String str, byte[] bArr, boolean z) {
-        this.key = str;
-        this.data = bArr;
-        this.mustRevalidate = z;
+    public CachedResponse(String s, byte abyte0[], boolean flag)
+    {
+        key = s;
+        data = abyte0;
+        mustRevalidate = flag;
     }
 
-    public byte[] getData() {
-        return this.data;
+    public byte[] getData()
+    {
+        return data;
     }
 
-    public String getKey() {
-        return this.key;
+    public String getKey()
+    {
+        return key;
     }
 
-    public boolean getMustRevalidate() {
-        return this.mustRevalidate;
+    public boolean getMustRevalidate()
+    {
+        return mustRevalidate;
     }
 
-    public void setData(byte[] bArr) {
-        this.data = bArr;
+    public void setData(byte abyte0[])
+    {
+        data = abyte0;
     }
 
-    public void setKey(String str) {
-        this.key = str;
+    public void setKey(String s)
+    {
+        key = s;
     }
 
-    public void setMustRevalidate(boolean z) {
-        this.mustRevalidate = z;
+    public void setMustRevalidate(boolean flag)
+    {
+        mustRevalidate = flag;
     }
 }

@@ -1,40 +1,53 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.voice.common.messages;
 
 import android.os.Bundle;
 import com.lumiyaviewer.lumiya.voice.common.VoicePluginMessage;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceLoginInfo;
-import javax.annotation.Nullable;
 
-public class VoiceLoginStatus implements VoicePluginMessage {
-    @Nullable
+public class VoiceLoginStatus
+    implements VoicePluginMessage
+{
+
     public final String errorMessage;
     public final boolean loggedIn;
-    @Nullable
     public final VoiceLoginInfo voiceLoginInfo;
 
-    public VoiceLoginStatus(Bundle bundle) {
-        VoiceLoginInfo voiceLoginInfo2 = null;
-        Bundle bundle2 = bundle.getBundle("voiceLoginInfo");
-        this.voiceLoginInfo = bundle2 != null ? new VoiceLoginInfo(bundle2) : voiceLoginInfo2;
-        this.loggedIn = bundle.getBoolean("loggedIn");
-        this.errorMessage = bundle.getString("errorMessage");
-    }
-
-    public VoiceLoginStatus(@Nullable VoiceLoginInfo voiceLoginInfo2, boolean z, @Nullable String str) {
-        this.voiceLoginInfo = voiceLoginInfo2;
-        this.loggedIn = z;
-        this.errorMessage = str;
-    }
-
-    public Bundle toBundle() {
-        Bundle bundle = null;
-        Bundle bundle2 = new Bundle();
-        if (this.voiceLoginInfo != null) {
-            bundle = this.voiceLoginInfo.toBundle();
+    public VoiceLoginStatus(Bundle bundle)
+    {
+        VoiceLoginInfo voicelogininfo = null;
+        super();
+        Bundle bundle1 = bundle.getBundle("voiceLoginInfo");
+        if (bundle1 != null)
+        {
+            voicelogininfo = new VoiceLoginInfo(bundle1);
         }
-        bundle2.putBundle("voiceLoginInfo", bundle);
-        bundle2.putBoolean("loggedIn", this.loggedIn);
-        bundle2.putString("errorMessage", this.errorMessage);
-        return bundle2;
+        voiceLoginInfo = voicelogininfo;
+        loggedIn = bundle.getBoolean("loggedIn");
+        errorMessage = bundle.getString("errorMessage");
+    }
+
+    public VoiceLoginStatus(VoiceLoginInfo voicelogininfo, boolean flag, String s)
+    {
+        voiceLoginInfo = voicelogininfo;
+        loggedIn = flag;
+        errorMessage = s;
+    }
+
+    public Bundle toBundle()
+    {
+        Bundle bundle = null;
+        Bundle bundle1 = new Bundle();
+        if (voiceLoginInfo != null)
+        {
+            bundle = voiceLoginInfo.toBundle();
+        }
+        bundle1.putBundle("voiceLoginInfo", bundle);
+        bundle1.putBoolean("loggedIn", loggedIn);
+        bundle1.putString("errorMessage", errorMessage);
+        return bundle1;
     }
 }

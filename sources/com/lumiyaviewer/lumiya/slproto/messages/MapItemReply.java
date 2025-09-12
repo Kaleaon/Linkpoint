@@ -1,89 +1,121 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class MapItemReply extends SLMessage {
-    public AgentData AgentData_Field;
-    public ArrayList<Data> Data_Fields = new ArrayList<>();
-    public RequestData RequestData_Field;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class MapItemReply extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public int Flags;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class Data {
+    public static class Data
+    {
+
         public int Extra;
         public int Extra2;
         public UUID ID;
-        public byte[] Name;
+        public byte Name[];
         public int X;
         public int Y;
+
+        public Data()
+        {
+        }
     }
 
-    public static class RequestData {
+    public static class RequestData
+    {
+
         public int ItemType;
-    }
 
-    public MapItemReply() {
-        this.zeroCoded = false;
-        this.AgentData_Field = new AgentData();
-        this.RequestData_Field = new RequestData();
-    }
-
-    public int CalcPayloadSize() {
-        int i = 29;
-        Iterator<T> it = this.Data_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            i = ((Data) it.next()).Name.length + 33 + i2;
+        public RequestData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleMapItemReply(this);
+
+    public AgentData AgentData_Field;
+    public ArrayList Data_Fields;
+    public RequestData RequestData_Field;
+
+    public MapItemReply()
+    {
+        Data_Fields = new ArrayList();
+        zeroCoded = false;
+        AgentData_Field = new AgentData();
+        RequestData_Field = new RequestData();
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) -101);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packInt(byteBuffer, this.AgentData_Field.Flags);
-        packInt(byteBuffer, this.RequestData_Field.ItemType);
-        byteBuffer.put((byte) this.Data_Fields.size());
-        for (Data data : this.Data_Fields) {
-            packInt(byteBuffer, data.X);
-            packInt(byteBuffer, data.Y);
-            packUUID(byteBuffer, data.ID);
-            packInt(byteBuffer, data.Extra);
-            packInt(byteBuffer, data.Extra2);
-            packVariable(byteBuffer, data.Name, 1);
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = Data_Fields.iterator();
+        int i;
+        for (i = 29; iterator.hasNext(); i = ((Data)iterator.next()).Name.length + 33 + i) { }
+        return i;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleMapItemReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)-101);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packInt(bytebuffer, AgentData_Field.Flags);
+        packInt(bytebuffer, RequestData_Field.ItemType);
+        bytebuffer.put((byte)Data_Fields.size());
+        Data data;
+        for (Iterator iterator = Data_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, data.Name, 1))
+        {
+            data = (Data)iterator.next();
+            packInt(bytebuffer, data.X);
+            packInt(bytebuffer, data.Y);
+            packUUID(bytebuffer, data.ID);
+            packInt(bytebuffer, data.Extra);
+            packInt(bytebuffer, data.Extra2);
         }
+
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.Flags = unpackInt(byteBuffer);
-        this.RequestData_Field.ItemType = unpackInt(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.Flags = unpackInt(bytebuffer);
+        RequestData_Field.ItemType = unpackInt(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
             Data data = new Data();
-            data.X = unpackInt(byteBuffer);
-            data.Y = unpackInt(byteBuffer);
-            data.ID = unpackUUID(byteBuffer);
-            data.Extra = unpackInt(byteBuffer);
-            data.Extra2 = unpackInt(byteBuffer);
-            data.Name = unpackVariable(byteBuffer, 1);
-            this.Data_Fields.add(data);
+            data.X = unpackInt(bytebuffer);
+            data.Y = unpackInt(bytebuffer);
+            data.ID = unpackUUID(bytebuffer);
+            data.Extra = unpackInt(bytebuffer);
+            data.Extra2 = unpackInt(bytebuffer);
+            data.Name = unpackVariable(bytebuffer, 1);
+            Data_Fields.add(data);
         }
+
     }
 }

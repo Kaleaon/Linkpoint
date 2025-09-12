@@ -1,30 +1,57 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.google.common.collect.ImmutableList;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
+import com.lumiyaviewer.lumiya.slproto.modules.SLMinimap;
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import java.util.List;
-import javax.annotation.Nonnull;
 
-class NearbyChattersDisplayDataList extends ChatterDisplayDataList {
-    public NearbyChattersDisplayDataList(@Nonnull UserManager userManager, OnListUpdated onListUpdated) {
-        super(userManager, onListUpdated, new $Lambda$D8uG4BZ932XmwoX97ZE2tEBU1gE());
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            ChatterDisplayDataList, ChatterDisplayData, UserManager, OnListUpdated
+
+class NearbyChattersDisplayDataList extends ChatterDisplayDataList
+{
+
+    public NearbyChattersDisplayDataList(UserManager usermanager, OnListUpdated onlistupdated)
+    {
+        super(usermanager, onlistupdated, new _2D_.Lambda.D8uG4BZ932XmwoX97ZE2tEBU1gE());
     }
 
-    static /* synthetic */ int compareByDistanceToUser(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2) {
-        int compare = Float.compare(chatterDisplayData.distanceToUser, chatterDisplayData2.distanceToUser);
-        return compare != 0 ? compare : chatterDisplayData.compareTo(chatterDisplayData2);
-    }
-
-    /* access modifiers changed from: protected */
-    public List<ChatterID> getChatters() {
-        SLModules modules;
-        List<ChatterID> list = null;
-        SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit();
-        if (!(activeAgentCircuit == null || (modules = activeAgentCircuit.getModules()) == null)) {
-            list = modules.minimap.getNearbyChatterList();
+    static int lambda$_2D_com_lumiyaviewer_lumiya_slproto_users_manager_NearbyChattersDisplayDataList_807(ChatterDisplayData chatterdisplaydata, ChatterDisplayData chatterdisplaydata1)
+    {
+        int i = Float.compare(chatterdisplaydata.distanceToUser, chatterdisplaydata1.distanceToUser);
+        if (i != 0)
+        {
+            return i;
+        } else
+        {
+            return chatterdisplaydata.compareTo(chatterdisplaydata1);
         }
-        return list == null ? ImmutableList.of() : list;
+    }
+
+    protected List getChatters()
+    {
+        Object obj = null;
+        Object obj1 = userManager.getActiveAgentCircuit();
+        List list = ((List) (obj));
+        if (obj1 != null)
+        {
+            obj1 = ((SLAgentCircuit) (obj1)).getModules();
+            list = ((List) (obj));
+            if (obj1 != null)
+            {
+                list = ((SLModules) (obj1)).minimap.getNearbyChatterList();
+            }
+        }
+        obj = list;
+        if (list == null)
+        {
+            obj = ImmutableList.of();
+        }
+        return ((List) (obj));
     }
 }

@@ -1,45 +1,66 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 
-public class PacketAck extends SLMessage {
-    public ArrayList<Packets> Packets_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class Packets {
+public class PacketAck extends SLMessage
+{
+    public static class Packets
+    {
+
         public int ID;
-    }
 
-    public PacketAck() {
-        this.zeroCoded = false;
-    }
-
-    public int CalcPayloadSize() {
-        return (this.Packets_Fields.size() * 4) + 5;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandlePacketAck(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) -1);
-        byteBuffer.put((byte) -5);
-        byteBuffer.put((byte) this.Packets_Fields.size());
-        for (Packets packets : this.Packets_Fields) {
-            packInt(byteBuffer, packets.ID);
+        public Packets()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
+
+    public ArrayList Packets_Fields;
+
+    public PacketAck()
+    {
+        Packets_Fields = new ArrayList();
+        zeroCoded = false;
+    }
+
+    public int CalcPayloadSize()
+    {
+        return Packets_Fields.size() * 4 + 5;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandlePacketAck(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)-1);
+        bytebuffer.put((byte)-5);
+        bytebuffer.put((byte)Packets_Fields.size());
+        for (Iterator iterator = Packets_Fields.iterator(); iterator.hasNext(); packInt(bytebuffer, ((Packets)iterator.next()).ID)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
             Packets packets = new Packets();
-            packets.ID = unpackInt(byteBuffer);
-            this.Packets_Fields.add(packets);
+            packets.ID = unpackInt(bytebuffer);
+            Packets_Fields.add(packets);
         }
+
     }
 }

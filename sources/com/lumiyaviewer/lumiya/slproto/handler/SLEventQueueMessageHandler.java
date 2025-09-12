@@ -1,13 +1,14 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.handler;
 
-import com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.Annotation;
 
-@Target({ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-public @interface SLEventQueueMessageHandler {
-    SLCapEventQueue.CapsEventType eventName();
+public interface SLEventQueueMessageHandler
+    extends Annotation
+{
+
+    public abstract com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType eventName();
 }

@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.chat;
 
 import android.content.Context;
@@ -9,62 +13,89 @@ import com.lumiyaviewer.lumiya.slproto.messages.LoadURL;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public class SLChatTextEvent extends SLChatEvent {
+public class SLChatTextEvent extends SLChatEvent
+{
+
     protected final String text;
 
-    public SLChatTextEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
-        super(chatMessage, uuid);
-        this.text = chatMessage.getMessageText();
+    public SLChatTextEvent(ChatMessage chatmessage, UUID uuid)
+    {
+        super(chatmessage, uuid);
+        text = chatmessage.getMessageText();
     }
 
-    public SLChatTextEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, ImprovedInstantMessage improvedInstantMessage, String str) {
-        super(improvedInstantMessage, uuid, chatMessageSource);
-        if (str != null) {
-            this.text = str;
-        } else if (improvedInstantMessage != null) {
-            this.text = SLMessage.stringFromVariableUTF(improvedInstantMessage.MessageBlock_Field.Message);
-        } else {
-            this.text = null;
+    public SLChatTextEvent(ChatMessageSource chatmessagesource, UUID uuid, ImprovedInstantMessage improvedinstantmessage, String s)
+    {
+        super(improvedinstantmessage, uuid, chatmessagesource);
+        if (s != null)
+        {
+            text = s;
+            return;
+        }
+        if (improvedinstantmessage != null)
+        {
+            text = SLMessage.stringFromVariableUTF(improvedinstantmessage.MessageBlock_Field.Message);
+            return;
+        } else
+        {
+            text = null;
+            return;
         }
     }
 
-    public SLChatTextEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, LoadURL loadURL) {
-        super(chatMessageSource, uuid);
-        this.text = SLMessage.stringFromVariableUTF(loadURL.Data_Field.Message) + ": " + SLMessage.stringFromVariableUTF(loadURL.Data_Field.URL);
+    public SLChatTextEvent(ChatMessageSource chatmessagesource, UUID uuid, LoadURL loadurl)
+    {
+        super(chatmessagesource, uuid);
+        text = (new StringBuilder()).append(SLMessage.stringFromVariableUTF(loadurl.Data_Field.Message)).append(": ").append(SLMessage.stringFromVariableUTF(loadurl.Data_Field.URL)).toString();
     }
 
-    public SLChatTextEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, String str) {
-        super(chatMessageSource, uuid);
-        this.text = str;
+    public SLChatTextEvent(ChatMessageSource chatmessagesource, UUID uuid, String s)
+    {
+        super(chatmessagesource, uuid);
+        text = s;
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public SLChatEvent.ChatMessageType getMessageType() {
-        return SLChatEvent.ChatMessageType.Text;
+    protected com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType getMessageType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageType.Text;
     }
 
-    public String getRawText() {
-        return (this.text == null || !this.text.startsWith("/me ")) ? this.text : this.text.substring(4);
+    public String getRawText()
+    {
+        if (text != null && text.startsWith("/me "))
+        {
+            return text.substring(4);
+        } else
+        {
+            return text;
+        }
     }
 
-    public String getText(Context context, @Nonnull UserManager userManager) {
-        return (this.text == null || !this.text.startsWith("/me ")) ? this.text : this.text.substring(4);
+    public String getText(Context context, UserManager usermanager)
+    {
+        if (text != null && text.startsWith("/me "))
+        {
+            return text.substring(4);
+        } else
+        {
+            return text;
+        }
     }
 
-    public SLChatEvent.ChatMessageViewType getViewType() {
-        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
+    public com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType getViewType()
+    {
+        return com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent.ChatMessageViewType.VIEW_TYPE_NORMAL;
     }
 
-    /* access modifiers changed from: protected */
-    public boolean isActionMessage(@Nonnull UserManager userManager) {
-        return this.text != null && this.text.startsWith("/me ");
+    protected boolean isActionMessage(UserManager usermanager)
+    {
+        return text != null && text.startsWith("/me ");
     }
 
-    public void serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
-        super.serializeToDatabaseObject(chatMessage);
-        chatMessage.setMessageText(this.text);
+    public void serializeToDatabaseObject(ChatMessage chatmessage)
+    {
+        super.serializeToDatabaseObject(chatmessage);
+        chatmessage.setMessageText(text);
     }
 }

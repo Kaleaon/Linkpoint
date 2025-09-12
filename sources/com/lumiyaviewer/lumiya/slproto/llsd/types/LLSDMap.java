@@ -1,9 +1,11 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.llsd.types;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.logging.nano.Vr;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDException;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDInvalidKeyException;
@@ -16,163 +18,262 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
-public class LLSDMap extends LLSDNode {
-    @Nonnull
-    private final ImmutableMap<String, LLSDNode> items;
+public class LLSDMap extends LLSDNode
+{
+    public static class LLSDMapEntry
+    {
 
-    public static class LLSDMapEntry {
         final String key;
         final LLSDNode value;
 
-        public LLSDMapEntry(String str, LLSDNode lLSDNode) {
-            this.key = str;
-            this.value = lLSDNode;
+        public LLSDMapEntry(String s, LLSDNode llsdnode)
+        {
+            key = s;
+            value = llsdnode;
         }
     }
 
-    public LLSDMap(Map<String, LLSDNode> map) {
-        this.items = ImmutableMap.copyOf(map);
+
+    private final ImmutableMap items;
+
+    public LLSDMap(Map map)
+    {
+        items = ImmutableMap.copyOf(map);
     }
 
-    public LLSDMap(XmlPullParser xmlPullParser) throws LLSDXMLException, XmlPullParserException, IOException {
-        HashMap hashMap = new HashMap();
-        while (xmlPullParser.nextTag() != 3) {
-            xmlPullParser.require(2, (String) null, "key");
-            String nextText = xmlPullParser.nextText();
-            xmlPullParser.nextTag();
-            hashMap.put(nextText, LLSDNodeFactory.parseNode(xmlPullParser));
+    public LLSDMap(XmlPullParser xmlpullparser)
+        throws LLSDXMLException, XmlPullParserException, IOException
+    {
+        HashMap hashmap = new HashMap();
+        String s;
+        for (; xmlpullparser.nextTag() != 3; hashmap.put(s, LLSDNodeFactory.parseNode(xmlpullparser)))
+        {
+            xmlpullparser.require(2, null, "key");
+            s = xmlpullparser.nextText();
+            xmlpullparser.nextTag();
         }
-        this.items = ImmutableMap.copyOf(hashMap);
+
+        items = ImmutableMap.copyOf(hashmap);
     }
 
-    public LLSDMap(LLSDMapEntry... lLSDMapEntryArr) {
-        HashMap hashMap = new HashMap(lLSDMapEntryArr.length);
-        for (LLSDMapEntry lLSDMapEntry : lLSDMapEntryArr) {
-            hashMap.put(lLSDMapEntry.key, lLSDMapEntry.value);
+    public transient LLSDMap(LLSDMapEntry allsdmapentry[])
+    {
+        HashMap hashmap = new HashMap(allsdmapentry.length);
+        int i = 0;
+        for (int j = allsdmapentry.length; i < j; i++)
+        {
+            LLSDMapEntry llsdmapentry = allsdmapentry[i];
+            hashmap.put(llsdmapentry.key, llsdmapentry.value);
         }
-        this.items = ImmutableMap.copyOf(hashMap);
+
+        items = ImmutableMap.copyOf(hashmap);
     }
 
-    public LLSDNode byKey(String str) throws LLSDInvalidKeyException {
-        LLSDNode lLSDNode = this.items.get(str);
-        if (lLSDNode != null) {
-            return lLSDNode;
-        }
-        throw new LLSDInvalidKeyException("Map key not found, requested \"" + str + "\"");
-    }
-
-    public Set<Map.Entry<String, LLSDNode>> entrySet() {
-        return this.items.entrySet();
-    }
-
-    public boolean keyExists(String str) {
-        return this.items.containsKey(str);
-    }
-
-    public void toBinary(DataOutputStream dataOutputStream) throws IOException {
-        dataOutputStream.writeByte(Vr.VREvent.VrCore.ErrorCode.CONTROLLER_GATT_CHARACTERISTIC_NOT_FOUND);
-        ImmutableSet<Map.Entry<String, LLSDNode>> entrySet = this.items.entrySet();
-        dataOutputStream.writeInt(entrySet.size());
-        for (Map.Entry entry : entrySet) {
-            dataOutputStream.writeByte(107);
-            byte[] stringToVariableUTF = SLMessage.stringToVariableUTF((String) entry.getKey());
-            dataOutputStream.writeInt(stringToVariableUTF.length);
-            dataOutputStream.write(stringToVariableUTF);
-            ((LLSDNode) entry.getValue()).toBinary(dataOutputStream);
-        }
-        dataOutputStream.writeByte(Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED);
-    }
-
-    public <T> T toObject(Class<? extends T> cls) throws LLSDException {
-        try {
-            T newInstance = cls.newInstance();
-            for (Field field : cls.getDeclaredFields()) {
-                LLSDSerialized lLSDSerialized = (LLSDSerialized) field.getAnnotation(LLSDSerialized.class);
-                if (lLSDSerialized != null) {
-                    String name = lLSDSerialized.name();
-                    if (Strings.isNullOrEmpty(name)) {
-                        name = field.getName();
-                    }
-                    Class<?> type = field.getType();
-                    if (keyExists(name)) {
-                        LLSDNode byKey = byKey(name);
-                        if (type.equals(Boolean.TYPE)) {
-                            field.setBoolean(newInstance, byKey.asBoolean());
-                        } else if (type.equals(Integer.TYPE)) {
-                            field.setInt(newInstance, byKey.asInt());
-                        } else if (type.equals(Double.TYPE)) {
-                            field.setDouble(newInstance, byKey.asDouble());
-                        } else if (type.equals(Long.TYPE)) {
-                            field.setLong(newInstance, byKey.asLong());
-                        } else if (type.equals(String.class)) {
-                            field.set(newInstance, byKey.asString());
-                        } else if (type.equals(UUID.class)) {
-                            field.set(newInstance, byKey.asUUID());
-                        } else if (type.equals(URI.class)) {
-                            field.set(newInstance, byKey.asURI());
-                        } else if (type.equals(Date.class)) {
-                            field.set(newInstance, byKey.asDate());
-                        } else if (type.equals(byte[].class)) {
-                            field.set(newInstance, byKey.asBinary());
-                        } else if (type.isAssignableFrom(List.class)) {
-                            Type genericType = field.getGenericType();
-                            if (genericType instanceof ParameterizedType) {
-                                Type[] actualTypeArguments = ((ParameterizedType) genericType).getActualTypeArguments();
-                                if (actualTypeArguments.length != 1) {
-                                    throw new LLSDValueTypeException(type.getName(), byKey);
-                                }
-                                Type type2 = actualTypeArguments[0];
-                                if (type2 instanceof Class) {
-                                    int count = byKey.getCount();
-                                    ArrayList arrayList = new ArrayList(count);
-                                    for (int i = 0; i < count; i++) {
-                                        arrayList.add(byKey.byIndex(i).toObject((Class) type2));
-                                    }
-                                    field.set(newInstance, arrayList);
-                                } else {
-                                    throw new LLSDValueTypeException(type.getName(), byKey);
-                                }
-                            } else {
-                                throw new LLSDValueTypeException(type.getName(), byKey);
-                            }
-                        } else {
-                            continue;
-                        }
-                    } else {
-                        continue;
-                    }
-                }
-            }
-            return newInstance;
-        } catch (IllegalAccessException e) {
-            throw new LLSDException(e.getMessage());
-        } catch (InstantiationException e2) {
-            throw new LLSDException(e2.getMessage());
+    public LLSDNode byKey(String s)
+        throws LLSDInvalidKeyException
+    {
+        LLSDNode llsdnode = (LLSDNode)items.get(s);
+        if (llsdnode != null)
+        {
+            return llsdnode;
+        } else
+        {
+            throw new LLSDInvalidKeyException((new StringBuilder()).append("Map key not found, requested \"").append(s).append("\"").toString());
         }
     }
 
-    public void toXML(XmlSerializer xmlSerializer) throws IOException {
-        xmlSerializer.startTag("", "map");
-        for (Map.Entry entry : this.items.entrySet()) {
-            xmlSerializer.startTag("", "key");
-            xmlSerializer.text((String) entry.getKey());
-            xmlSerializer.endTag("", "key");
-            ((LLSDNode) entry.getValue()).toXML(xmlSerializer);
+    public Set entrySet()
+    {
+        return items.entrySet();
+    }
+
+    public boolean keyExists(String s)
+    {
+        return items.containsKey(s);
+    }
+
+    public void toBinary(DataOutputStream dataoutputstream)
+        throws IOException
+    {
+        dataoutputstream.writeByte(123);
+        Object obj = items.entrySet();
+        dataoutputstream.writeInt(((Set) (obj)).size());
+        java.util.Map.Entry entry;
+        for (obj = ((Iterable) (obj)).iterator(); ((Iterator) (obj)).hasNext(); ((LLSDNode)entry.getValue()).toBinary(dataoutputstream))
+        {
+            entry = (java.util.Map.Entry)((Iterator) (obj)).next();
+            dataoutputstream.writeByte(107);
+            byte abyte0[] = SLMessage.stringToVariableUTF((String)entry.getKey());
+            dataoutputstream.writeInt(abyte0.length);
+            dataoutputstream.write(abyte0);
         }
-        xmlSerializer.endTag("", "map");
+
+        dataoutputstream.writeByte(125);
+    }
+
+    public Object toObject(Class class1)
+        throws LLSDException
+    {
+        Object obj;
+        Object obj1;
+        Field field;
+        int i;
+        Field afield[];
+        int k;
+        try
+        {
+            obj1 = class1.newInstance();
+            afield = class1.getDeclaredFields();
+            k = afield.length;
+        }
+        // Misplaced declaration of an exception variable
+        catch (Class class1)
+        {
+            throw new LLSDException(class1.getMessage());
+        }
+        // Misplaced declaration of an exception variable
+        catch (Class class1)
+        {
+            throw new LLSDException(class1.getMessage());
+        }
+        i = 0;
+_L4:
+        if (i >= k)
+        {
+            break MISSING_BLOCK_LABEL_485;
+        }
+        field = afield[i];
+        class1 = (LLSDSerialized)field.getAnnotation(com/lumiyaviewer/lumiya/slproto/llsd/LLSDSerialized);
+        if (class1 == null)
+        {
+            break MISSING_BLOCK_LABEL_487;
+        }
+        obj = class1.name();
+        class1 = ((Class) (obj));
+        if (Strings.isNullOrEmpty(((String) (obj))))
+        {
+            class1 = field.getName();
+        }
+        obj = field.getType();
+        if (!keyExists(class1))
+        {
+            break MISSING_BLOCK_LABEL_487;
+        }
+        class1 = byKey(class1);
+        if (((Class) (obj)).equals(Boolean.TYPE))
+        {
+            field.setBoolean(obj1, class1.asBoolean());
+            break MISSING_BLOCK_LABEL_487;
+        }
+        if (((Class) (obj)).equals(Integer.TYPE))
+        {
+            field.setInt(obj1, class1.asInt());
+            break MISSING_BLOCK_LABEL_487;
+        }
+        if (((Class) (obj)).equals(Double.TYPE))
+        {
+            field.setDouble(obj1, class1.asDouble());
+            break MISSING_BLOCK_LABEL_487;
+        }
+        if (((Class) (obj)).equals(Long.TYPE))
+        {
+            field.setLong(obj1, class1.asLong());
+            break MISSING_BLOCK_LABEL_487;
+        }
+        if (((Class) (obj)).equals(java/lang/String))
+        {
+            field.set(obj1, class1.asString());
+            break MISSING_BLOCK_LABEL_487;
+        }
+        if (((Class) (obj)).equals(java/util/UUID))
+        {
+            field.set(obj1, class1.asUUID());
+            break MISSING_BLOCK_LABEL_487;
+        }
+        if (((Class) (obj)).equals(java/net/URI))
+        {
+            field.set(obj1, class1.asURI());
+            break MISSING_BLOCK_LABEL_487;
+        }
+        if (((Class) (obj)).equals(java/util/Date))
+        {
+            field.set(obj1, class1.asDate());
+            break MISSING_BLOCK_LABEL_487;
+        }
+        if (((Class) (obj)).equals([B))
+        {
+            field.set(obj1, class1.asBinary());
+            break MISSING_BLOCK_LABEL_487;
+        }
+        java.lang.reflect.Type atype[];
+        if (!((Class) (obj)).isAssignableFrom(java/util/List))
+        {
+            break MISSING_BLOCK_LABEL_487;
+        }
+        java.lang.reflect.Type type = field.getGenericType();
+        if (!(type instanceof ParameterizedType))
+        {
+            break MISSING_BLOCK_LABEL_472;
+        }
+        atype = ((ParameterizedType)type).getActualTypeArguments();
+        if (atype.length != 1)
+        {
+            throw new LLSDValueTypeException(((Class) (obj)).getName(), class1);
+        }
+        java.lang.reflect.Type type1 = atype[0];
+        int l;
+        if (!(type1 instanceof Class))
+        {
+            break MISSING_BLOCK_LABEL_459;
+        }
+        l = class1.getCount();
+        obj = new ArrayList(l);
+        int j = 0;
+_L2:
+        if (j >= l)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        ((List) (obj)).add(class1.byIndex(j).toObject((Class)type1));
+        j++;
+        if (true) goto _L2; else goto _L1
+_L1:
+        field.set(obj1, obj);
+        break MISSING_BLOCK_LABEL_487;
+        throw new LLSDValueTypeException(((Class) (obj)).getName(), class1);
+        throw new LLSDValueTypeException(((Class) (obj)).getName(), class1);
+        return obj1;
+        i++;
+        if (true) goto _L4; else goto _L3
+_L3:
+    }
+
+    public void toXML(XmlSerializer xmlserializer)
+        throws IOException
+    {
+        xmlserializer.startTag("", "map");
+        java.util.Map.Entry entry;
+        for (Iterator iterator = items.entrySet().iterator(); iterator.hasNext(); ((LLSDNode)entry.getValue()).toXML(xmlserializer))
+        {
+            entry = (java.util.Map.Entry)iterator.next();
+            xmlserializer.startTag("", "key");
+            xmlserializer.text((String)entry.getKey());
+            xmlserializer.endTag("", "key");
+        }
+
+        xmlserializer.endTag("", "map");
     }
 }

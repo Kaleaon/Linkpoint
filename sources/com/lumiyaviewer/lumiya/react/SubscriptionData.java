@@ -1,186 +1,319 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
 
-@ThreadSafe
-public class SubscriptionData<K, T> implements Subscription.OnData<T>, Subscription.OnError, Loadable, RefreshableOne, UnsubscribableOne {
-    @Nullable
-    private T data = null;
-    @Nullable
-    private Throwable error = null;
-    @Nullable
+// Referenced classes of package com.lumiyaviewer.lumiya.react:
+//            RefreshableOne, UnsubscribableOne, Subscription, Subscribable
+
+public class SubscriptionData
+    implements Subscription.OnData, Subscription.OnError, Loadable, RefreshableOne, UnsubscribableOne
+{
+    public static class DataNotReadyException extends Exception
+    {
+
+        public DataNotReadyException(String s)
+        {
+            super(s);
+        }
+
+        public DataNotReadyException(String s, Throwable throwable)
+        {
+            super(s, throwable);
+        }
+    }
+
+
+    private Object data;
+    private Throwable error;
     private final Executor executor;
-    private final AtomicBoolean inLoadableListeners = new AtomicBoolean(false);
-    private final AtomicInteger listenersInvokeAgain = new AtomicInteger(0);
-    private final List<Loadable.LoadableStatusListener> loadableStatusListeners = new LinkedList();
-    private final Object lock = new Object();
-    @Nullable
-    private final Subscription.OnData<T> onData;
-    @Nullable
+    private final AtomicBoolean inLoadableListeners;
+    private final AtomicInteger listenersInvokeAgain;
+    private final List loadableStatusListeners;
+    private final Object lock;
+    private final Subscription.OnData onData;
     private final Subscription.OnError onError;
-    private final AtomicReference<Subscription<K, T>> subscription = new AtomicReference<>();
+    private final AtomicReference subscription;
 
-    public static class DataNotReadyException extends Exception {
-        public DataNotReadyException(String str) {
-            super(str);
+    public SubscriptionData(Executor executor1)
+    {
+        lock = new Object();
+        subscription = new AtomicReference();
+        data = null;
+        error = null;
+        loadableStatusListeners = new LinkedList();
+        inLoadableListeners = new AtomicBoolean(false);
+        listenersInvokeAgain = new AtomicInteger(0);
+        executor = executor1;
+        onData = null;
+        onError = null;
+    }
+
+    public SubscriptionData(Executor executor1, Subscription.OnData ondata)
+    {
+        lock = new Object();
+        subscription = new AtomicReference();
+        data = null;
+        error = null;
+        loadableStatusListeners = new LinkedList();
+        inLoadableListeners = new AtomicBoolean(false);
+        listenersInvokeAgain = new AtomicInteger(0);
+        executor = executor1;
+        onData = ondata;
+        onError = null;
+    }
+
+    public SubscriptionData(Executor executor1, Subscription.OnData ondata, Subscription.OnError onerror)
+    {
+        lock = new Object();
+        subscription = new AtomicReference();
+        data = null;
+        error = null;
+        loadableStatusListeners = new LinkedList();
+        inLoadableListeners = new AtomicBoolean(false);
+        listenersInvokeAgain = new AtomicInteger(0);
+        executor = executor1;
+        onData = ondata;
+        onError = onerror;
+    }
+
+    private void invokeLoadableListeners()
+    {
+        if (inLoadableListeners.getAndSet(true))
+        {
+            break MISSING_BLOCK_LABEL_91;
         }
-
-        public DataNotReadyException(String str, Throwable th) {
-            super(str, th);
-        }
+_L2:
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        ImmutableList immutablelist = ImmutableList.copyOf(loadableStatusListeners);
+        obj;
+        JVM INSTR monitorexit ;
+        for (obj = immutablelist.iterator(); ((Iterator) (obj)).hasNext(); ((com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable.LoadableStatusListener)((Iterator) (obj)).next()).onLoadableStatusChange(this, getLoadableStatus())) { }
+        continue; /* Loop/switch isn't completed */
+        Exception exception;
+        exception;
+        throw exception;
+        if (listenersInvokeAgain.getAndSet(0) != 0) goto _L2; else goto _L1
+_L1:
+        inLoadableListeners.set(false);
+        return;
+        listenersInvokeAgain.incrementAndGet();
+        return;
     }
 
-    public SubscriptionData(@Nullable Executor executor2) {
-        this.executor = executor2;
-        this.onData = null;
-        this.onError = null;
+    public void addLoadableStatusListener(com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable.LoadableStatusListener loadablestatuslistener)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        loadableStatusListeners.add(loadablestatuslistener);
+        obj;
+        JVM INSTR monitorexit ;
+        return;
+        loadablestatuslistener;
+        throw loadablestatuslistener;
     }
 
-    public SubscriptionData(@Nullable Executor executor2, @Nullable Subscription.OnData<T> onData2) {
-        this.executor = executor2;
-        this.onData = onData2;
-        this.onError = null;
-    }
-
-    public SubscriptionData(@Nullable Executor executor2, @Nullable Subscription.OnData<T> onData2, @Nullable Subscription.OnError onError2) {
-        this.executor = executor2;
-        this.onData = onData2;
-        this.onError = onError2;
-    }
-
-    private void invokeLoadableListeners() {
-        ImmutableList<Loadable.LoadableStatusListener> copyOf;
-        if (!this.inLoadableListeners.getAndSet(true)) {
-            do {
-                synchronized (this.lock) {
-                    copyOf = ImmutableList.copyOf(this.loadableStatusListeners);
-                }
-                for (Loadable.LoadableStatusListener onLoadableStatusChange : copyOf) {
-                    onLoadableStatusChange.onLoadableStatusChange(this, getLoadableStatus());
-                }
-            } while (this.listenersInvokeAgain.getAndSet(0) != 0);
-            this.inLoadableListeners.set(false);
-            return;
-        }
-        this.listenersInvokeAgain.incrementAndGet();
-    }
-
-    public void addLoadableStatusListener(Loadable.LoadableStatusListener loadableStatusListener) {
-        synchronized (this.lock) {
-            this.loadableStatusListeners.add(loadableStatusListener);
-        }
-    }
-
-    public void assertHasData() throws DataNotReadyException {
+    public void assertHasData()
+        throws DataNotReadyException
+    {
         get();
     }
 
-    @Nonnull
-    public T get() throws DataNotReadyException {
-        T t;
-        synchronized (this.lock) {
-            if (this.data != null) {
-                t = this.data;
-            } else {
-                throw (this.error != null ? new DataNotReadyException(this.error.getMessage(), this.error) : new DataNotReadyException("Data not ready"));
-            }
+    public Object get()
+        throws DataNotReadyException
+    {
+        Object obj1 = lock;
+        obj1;
+        JVM INSTR monitorenter ;
+        Object obj;
+        if (data == null)
+        {
+            break MISSING_BLOCK_LABEL_23;
         }
-        return t;
-    }
-
-    @Nullable
-    public T getData() {
-        T t;
-        synchronized (this.lock) {
-            t = this.data;
+        obj = data;
+        obj1;
+        JVM INSTR monitorexit ;
+        return obj;
+        if (error == null)
+        {
+            break MISSING_BLOCK_LABEL_56;
         }
-        return t;
+        obj = new DataNotReadyException(error.getMessage(), error);
+_L1:
+        throw obj;
+        obj;
+        obj1;
+        JVM INSTR monitorexit ;
+        throw obj;
+        obj = new DataNotReadyException("Data not ready");
+          goto _L1
     }
 
-    @Nullable
-    public Throwable getError() {
-        return this.error;
+    public Object getData()
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        Object obj1 = data;
+        obj;
+        JVM INSTR monitorexit ;
+        return obj1;
+        Exception exception;
+        exception;
+        throw exception;
     }
 
-    @Nonnull
-    public Loadable.Status getLoadableStatus() {
-        return this.subscription.get() == null ? Loadable.Status.Idle : this.error != null ? Loadable.Status.Error : this.data != null ? Loadable.Status.Loaded : Loadable.Status.Loading;
+    public Throwable getError()
+    {
+        return error;
     }
 
-    public boolean hasData() {
-        boolean z;
-        synchronized (this.lock) {
-            z = this.data != null;
+    public com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable.Status getLoadableStatus()
+    {
+        if (subscription.get() == null)
+        {
+            return com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable.Status.Idle;
         }
-        return z;
-    }
-
-    public boolean isSubscribed() {
-        return this.subscription.get() != null;
-    }
-
-    public void onData(T t) {
-        synchronized (this.lock) {
-            this.data = t;
-            this.error = null;
+        if (error != null)
+        {
+            return com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable.Status.Error;
         }
-        if (this.onData != null) {
-            this.onData.onData(t);
+        if (data != null)
+        {
+            return com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable.Status.Loaded;
+        } else
+        {
+            return com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable.Status.Loading;
+        }
+    }
+
+    public boolean hasData()
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        Object obj1 = data;
+        boolean flag;
+        if (obj1 != null)
+        {
+            flag = true;
+        } else
+        {
+            flag = false;
+        }
+        obj;
+        JVM INSTR monitorexit ;
+        return flag;
+        Exception exception;
+        exception;
+        throw exception;
+    }
+
+    public boolean isSubscribed()
+    {
+        return subscription.get() != null;
+    }
+
+    public void onData(Object obj)
+    {
+        Object obj1 = lock;
+        obj1;
+        JVM INSTR monitorenter ;
+        data = obj;
+        error = null;
+        obj1;
+        JVM INSTR monitorexit ;
+        if (onData != null)
+        {
+            onData.onData(obj);
         }
         invokeLoadableListeners();
+        return;
+        obj;
+        throw obj;
     }
 
-    public void onError(Throwable th) {
-        synchronized (this.lock) {
-            this.data = null;
-            this.error = th;
-        }
-        if (this.onError != null) {
-            this.onError.onError(th);
+    public void onError(Throwable throwable)
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        data = null;
+        error = throwable;
+        obj;
+        JVM INSTR monitorexit ;
+        if (onError != null)
+        {
+            onError.onError(throwable);
         }
         invokeLoadableListeners();
+        return;
+        throwable;
+        throw throwable;
     }
 
-    public void requestRefresh() {
-        Subscription subscription2 = this.subscription.get();
-        if (subscription2 != null) {
-            subscription2.requestRefresh();
+    public void requestRefresh()
+    {
+        Subscription subscription1 = (Subscription)subscription.get();
+        if (subscription1 != null)
+        {
+            subscription1.requestRefresh();
         }
     }
 
-    public void subscribe(@Nonnull Subscribable<K, T> subscribable, @Nonnull K k) {
-        Subscription andSet = this.subscription.getAndSet((Object) null);
-        if (andSet != null) {
-            andSet.unsubscribe();
-            synchronized (this.lock) {
-                this.data = null;
-                this.error = null;
-            }
-        }
-        this.subscription.set(subscribable.subscribe(k, this.executor, this, this));
+    public void subscribe(Subscribable subscribable, Object obj)
+    {
+        Object obj1 = (Subscription)subscription.getAndSet(null);
+        if (obj1 == null) goto _L2; else goto _L1
+_L1:
+        ((Subscription) (obj1)).unsubscribe();
+        obj1 = lock;
+        obj1;
+        JVM INSTR monitorenter ;
+        data = null;
+        error = null;
+        obj1;
+        JVM INSTR monitorexit ;
+_L2:
+        subscription.set(subscribable.subscribe(obj, executor, this, this));
         invokeLoadableListeners();
+        return;
+        subscribable;
+        throw subscribable;
     }
 
-    public void unsubscribe() {
-        Subscription andSet = this.subscription.getAndSet((Object) null);
-        if (andSet != null) {
-            andSet.unsubscribe();
+    public void unsubscribe()
+    {
+        Subscription subscription1 = (Subscription)subscription.getAndSet(null);
+        if (subscription1 != null)
+        {
+            subscription1.unsubscribe();
         }
-        synchronized (this.lock) {
-            this.data = null;
-            this.error = null;
-        }
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        data = null;
+        error = null;
+        obj;
+        JVM INSTR monitorexit ;
         invokeLoadableListeners();
+        return;
+        Exception exception;
+        exception;
+        throw exception;
     }
 }

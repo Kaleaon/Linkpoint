@@ -1,57 +1,77 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class ScriptDataReply extends SLMessage {
-    public ArrayList<DataBlock> DataBlock_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class DataBlock {
+public class ScriptDataReply extends SLMessage
+{
+    public static class DataBlock
+    {
+
         public long Hash;
-        public byte[] Reply;
-    }
+        public byte Reply[];
 
-    public ScriptDataReply() {
-        this.zeroCoded = false;
-    }
-
-    public int CalcPayloadSize() {
-        int i = 5;
-        Iterator<T> it = this.DataBlock_Fields.iterator();
-        while (true) {
-            int i2 = i;
-            if (!it.hasNext()) {
-                return i2;
-            }
-            i = ((DataBlock) it.next()).Reply.length + 10 + i2;
+        public DataBlock()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleScriptDataReply(this);
+
+    public ArrayList DataBlock_Fields;
+
+    public ScriptDataReply()
+    {
+        DataBlock_Fields = new ArrayList();
+        zeroCoded = false;
     }
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 82);
-        byteBuffer.put((byte) this.DataBlock_Fields.size());
-        for (DataBlock dataBlock : this.DataBlock_Fields) {
-            packLong(byteBuffer, dataBlock.Hash);
-            packVariable(byteBuffer, dataBlock.Reply, 2);
-        }
+    public int CalcPayloadSize()
+    {
+        Iterator iterator = DataBlock_Fields.iterator();
+        int i;
+        for (i = 5; iterator.hasNext(); i = ((DataBlock)iterator.next()).Reply.length + 10 + i) { }
+        return i;
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            DataBlock dataBlock = new DataBlock();
-            dataBlock.Hash = unpackLong(byteBuffer);
-            dataBlock.Reply = unpackVariable(byteBuffer, 2);
-            this.DataBlock_Fields.add(dataBlock);
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleScriptDataReply(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)82);
+        bytebuffer.put((byte)DataBlock_Fields.size());
+        DataBlock datablock;
+        for (Iterator iterator = DataBlock_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, datablock.Reply, 2))
+        {
+            datablock = (DataBlock)iterator.next();
+            packLong(bytebuffer, datablock.Hash);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            DataBlock datablock = new DataBlock();
+            datablock.Hash = unpackLong(bytebuffer);
+            datablock.Reply = unpackVariable(bytebuffer, 2);
+            DataBlock_Fields.add(datablock);
+        }
+
     }
 }

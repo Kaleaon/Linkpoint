@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.assets;
 
 import com.google.common.collect.ImmutableList;
@@ -5,136 +9,210 @@ import com.lumiyaviewer.lumiya.Debug;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
-public class SLWearableData {
-    public final String name;
-    public final ImmutableList<WearableParam> params;
-    public final ImmutableList<WearableTexture> textures;
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.assets:
+//            AssetFormatException
 
-    static class WearableFormatException extends AssetFormatException {
-        WearableFormatException() {
+public class SLWearableData
+{
+    static class WearableFormatException extends AssetFormatException
+    {
+
+        WearableFormatException()
+        {
             super("Unsupported wearable format");
         }
 
-        WearableFormatException(Throwable th) {
-            super("Unsupported wearable format", th);
+        WearableFormatException(Throwable throwable)
+        {
+            super("Unsupported wearable format", throwable);
         }
     }
 
-    public static class WearableParam {
+    public static class WearableParam
+    {
+
         public final int paramIndex;
         public final float paramValue;
 
-        WearableParam(int i, float f) {
-            this.paramIndex = i;
-            this.paramValue = f;
+        WearableParam(int i, float f)
+        {
+            paramIndex = i;
+            paramValue = f;
         }
     }
 
-    public static class WearableTexture {
+    public static class WearableTexture
+    {
+
         public final int layer;
         public final UUID textureID;
 
-        WearableTexture(int i, UUID uuid) {
-            this.layer = i;
-            this.textureID = uuid;
+        WearableTexture(int i, UUID uuid)
+        {
+            layer = i;
+            textureID = uuid;
         }
     }
 
-    SLWearableData(byte[] bArr) throws WearableFormatException {
+
+    public final String name;
+    public final ImmutableList params;
+    public final ImmutableList textures;
+
+    SLWearableData(byte abyte0[])
+        throws WearableFormatException
+    {
+        com.google.common.collect.ImmutableList.Builder builder;
+        com.google.common.collect.ImmutableList.Builder builder1;
+        Object obj;
         int i;
-        try {
-            String[] split = new String(bArr, "ISO-8859-1").trim().split("\n+");
-            if (split.length < 2) {
-                throw new WearableFormatException();
-            } else if (!split[0].trim().startsWith("LLWearable")) {
-                throw new WearableFormatException();
-            } else {
-                try {
-                    this.name = split[1];
-                    ImmutableList.Builder builder = ImmutableList.builder();
-                    ImmutableList.Builder builder2 = ImmutableList.builder();
-                    int i2 = 2;
-                    while (i2 < split.length) {
-                        String[] split2 = split[i2].trim().split("\\s+");
-                        if (split2.length < 1) {
-                            i2++;
-                        } else if (split2[0].equalsIgnoreCase("permissions") || split2[0].equalsIgnoreCase("sale_info")) {
-                            i2++;
-                            if (i2 >= split.length) {
-                                throw new WearableFormatException();
-                            } else if (!split[i2].trim().equalsIgnoreCase("{")) {
-                                throw new WearableFormatException();
-                            } else {
-                                while (true) {
-                                    if (i2 >= split.length) {
-                                        break;
-                                    } else if (split[i2].trim().equalsIgnoreCase("}")) {
-                                        i2++;
-                                        break;
-                                    } else {
-                                        i2++;
-                                    }
-                                }
-                            }
-                        } else {
-                            if (split2[0].equalsIgnoreCase("parameters")) {
-                                int parseInt = Integer.parseInt(split2[1]);
-                                i = i2 + 1;
-                                int i3 = 0;
-                                while (i3 < parseInt) {
-                                    if (i >= split.length) {
-                                        throw new WearableFormatException();
-                                    }
-                                    try {
-                                        String[] split3 = split[i].trim().split("\\s+");
-                                        if (split3.length < 2) {
-                                            throw new WearableFormatException();
-                                        }
-                                        builder.add((Object) new WearableParam(Integer.parseInt(split3[0]), Float.parseFloat(split3[1])));
-                                        i++;
-                                        i3++;
-                                    } catch (WearableFormatException e) {
-                                        Debug.Warning(e);
-                                    } catch (NumberFormatException e2) {
-                                        Debug.Warning(e2);
-                                    }
-                                }
-                            } else if (split2[0].equalsIgnoreCase("textures")) {
-                                int parseInt2 = Integer.parseInt(split2[1]);
-                                int i4 = i2 + 1;
-                                int i5 = 0;
-                                while (i5 < parseInt2) {
-                                    if (i >= split.length) {
-                                        throw new WearableFormatException();
-                                    }
-                                    try {
-                                        String[] split4 = split[i].trim().split("\\s+");
-                                        if (split4.length < 2) {
-                                            throw new WearableFormatException();
-                                        }
-                                        builder2.add((Object) new WearableTexture(Integer.parseInt(split4[0]), UUID.fromString(split4[1])));
-                                        i4 = i + 1;
-                                        i5++;
-                                    } catch (WearableFormatException e3) {
-                                        Debug.Warning(e3);
-                                    } catch (NumberFormatException e4) {
-                                        Debug.Warning(e4);
-                                    }
-                                }
-                            } else {
-                                i2++;
-                            }
-                            i2 = i;
-                        }
-                    }
-                    this.params = builder.build();
-                    this.textures = builder2.build();
-                } catch (NumberFormatException e5) {
-                    throw new WearableFormatException(e5);
-                }
-            }
-        } catch (UnsupportedEncodingException e6) {
-            throw new WearableFormatException(e6);
+        try
+        {
+            abyte0 = new String(abyte0, "ISO-8859-1");
         }
+        // Misplaced declaration of an exception variable
+        catch (byte abyte0[])
+        {
+            throw new WearableFormatException(abyte0);
+        }
+        abyte0 = abyte0.trim().split("\n+");
+        if (abyte0.length < 2)
+        {
+            throw new WearableFormatException();
+        }
+        if (!abyte0[0].trim().startsWith("LLWearable"))
+        {
+            throw new WearableFormatException();
+        }
+        try
+        {
+            name = abyte0[1];
+            builder = ImmutableList.builder();
+            builder1 = ImmutableList.builder();
+        }
+        // Misplaced declaration of an exception variable
+        catch (byte abyte0[])
+        {
+            throw new WearableFormatException(abyte0);
+        }
+        i = 2;
+_L14:
+        if (i >= abyte0.length) goto _L2; else goto _L1
+_L1:
+        obj = abyte0[i].trim().split("\\s+");
+        if (obj.length < 1)
+        {
+            break MISSING_BLOCK_LABEL_564;
+        }
+        if (!obj[0].equalsIgnoreCase("permissions") && !obj[0].equalsIgnoreCase("sale_info")) goto _L4; else goto _L3
+_L3:
+        i++;
+        if (i >= abyte0.length)
+        {
+            throw new WearableFormatException();
+        }
+        int j = i;
+        if (!abyte0[i].trim().equalsIgnoreCase("{"))
+        {
+            throw new WearableFormatException();
+        }
+_L12:
+        i = j;
+        if (j >= abyte0.length)
+        {
+            continue; /* Loop/switch isn't completed */
+        }
+        NumberFormatException numberformatexception;
+        int k;
+        int l;
+        if (abyte0[j].trim().equalsIgnoreCase("}"))
+        {
+            i = j + 1;
+            continue; /* Loop/switch isn't completed */
+        }
+        j++;
+        continue; /* Loop/switch isn't completed */
+_L4:
+        if (!obj[0].equalsIgnoreCase("parameters"))
+        {
+            break MISSING_BLOCK_LABEL_380;
+        }
+        l = Integer.parseInt(obj[1]);
+        j = i + 1;
+        k = 0;
+_L6:
+        i = j;
+        if (k >= l)
+        {
+            continue; /* Loop/switch isn't completed */
+        }
+        if (j >= abyte0.length)
+        {
+            throw new WearableFormatException();
+        }
+        obj = abyte0[j].trim().split("\\s+");
+        if (obj.length < 2)
+        {
+            throw new WearableFormatException();
+        }
+        break; /* Loop/switch isn't completed */
+        obj;
+        Debug.Warning(((Throwable) (obj)));
+_L7:
+        j++;
+        k++;
+        if (true) goto _L6; else goto _L5
+_L5:
+        builder.add(new WearableParam(Integer.parseInt(obj[0]), Float.parseFloat(obj[1])));
+          goto _L7
+        obj;
+        Debug.Warning(((Throwable) (obj)));
+          goto _L7
+        if (!obj[0].equalsIgnoreCase("textures"))
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        l = Integer.parseInt(obj[1]);
+        j = i + 1;
+        k = 0;
+_L9:
+        i = j;
+        if (k >= l)
+        {
+            continue; /* Loop/switch isn't completed */
+        }
+        if (j >= abyte0.length)
+        {
+            throw new WearableFormatException();
+        }
+        obj = abyte0[j].trim().split("\\s+");
+        if (obj.length < 2)
+        {
+            throw new WearableFormatException();
+        }
+        break; /* Loop/switch isn't completed */
+        obj;
+        Debug.Warning(((Throwable) (obj)));
+_L10:
+        j++;
+        k++;
+        if (true) goto _L9; else goto _L8
+_L8:
+        builder1.add(new WearableTexture(Integer.parseInt(obj[0]), UUID.fromString(obj[1])));
+          goto _L10
+        numberformatexception;
+        Debug.Warning(numberformatexception);
+          goto _L10
+_L2:
+        params = builder.build();
+        textures = builder1.build();
+        return;
+        if (true) goto _L12; else goto _L11
+_L11:
+        i++;
+        continue; /* Loop/switch isn't completed */
+        i++;
+        if (true) goto _L14; else goto _L13
+_L13:
     }
 }

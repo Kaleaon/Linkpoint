@@ -1,27 +1,42 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
-import javax.annotation.Nonnull;
 
-class GroupDisplayDataList extends ChatterDisplayDataList {
-    public GroupDisplayDataList(@Nonnull UserManager userManager, OnListUpdated onListUpdated) {
-        super(userManager, onListUpdated, (Comparator<? super ChatterDisplayData>) null);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.users.manager:
+//            ChatterDisplayDataList, UserManager, ChatterList, GroupManager, 
+//            OnListUpdated
+
+class GroupDisplayDataList extends ChatterDisplayDataList
+{
+
+    public GroupDisplayDataList(UserManager usermanager, OnListUpdated onlistupdated)
+    {
+        super(usermanager, onlistupdated, null);
     }
 
-    /* access modifiers changed from: protected */
-    public List<ChatterID> getChatters() {
-        AvatarGroupList avatarGroupList = this.userManager.getChatterList().getGroupManager().getAvatarGroupList();
-        if (avatarGroupList == null) {
+    protected List getChatters()
+    {
+        Object obj = userManager.getChatterList().getGroupManager().getAvatarGroupList();
+        if (obj == null)
+        {
             return ImmutableList.of();
         }
-        ImmutableList.Builder builder = new ImmutableList.Builder();
-        for (AvatarGroupList.AvatarGroupEntry avatarGroupEntry : avatarGroupList.Groups.values()) {
-            builder.add((Object) ChatterID.getGroupChatterID(this.userManager.getUserID(), avatarGroupEntry.GroupID));
+        com.google.common.collect.ImmutableList.Builder builder = new com.google.common.collect.ImmutableList.Builder();
+        com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry avatargroupentry;
+        for (obj = ((AvatarGroupList) (obj)).Groups.values().iterator(); ((Iterator) (obj)).hasNext(); builder.add(ChatterID.getGroupChatterID(userManager.getUserID(), avatargroupentry.GroupID)))
+        {
+            avatargroupentry = (com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry)((Iterator) (obj)).next();
         }
+
         return builder.build();
     }
 }

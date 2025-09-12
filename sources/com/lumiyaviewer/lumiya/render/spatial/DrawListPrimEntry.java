@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.spatial;
 
 import com.lumiyaviewer.lumiya.render.DrawableObject;
@@ -5,45 +9,67 @@ import com.lumiyaviewer.lumiya.render.DrawableStore;
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar;
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
 import java.lang.ref.WeakReference;
-import javax.annotation.Nonnull;
+import java.util.ArrayList;
 
-public class DrawListPrimEntry extends DrawListObjectEntry {
-    private volatile WeakReference<DrawableObject> drawableObject = null;
+// Referenced classes of package com.lumiyaviewer.lumiya.render.spatial:
+//            DrawListObjectEntry, DrawList
 
-    public DrawListPrimEntry(@Nonnull SLObjectInfo sLObjectInfo) {
-        super(sLObjectInfo);
+public class DrawListPrimEntry extends DrawListObjectEntry
+{
+
+    private volatile WeakReference drawableObject;
+
+    public DrawListPrimEntry(SLObjectInfo slobjectinfo)
+    {
+        super(slobjectinfo);
+        drawableObject = null;
     }
 
-    public void addToDrawList(@Nonnull DrawList drawList) {
-        WeakReference<DrawableObject> weakReference = this.drawableObject;
-        DrawableObject drawableObject2 = weakReference != null ? (DrawableObject) weakReference.get() : null;
-        if (drawableObject2 == null) {
-            drawableObject2 = new DrawableObject(drawList.drawableStore, this.objectInfo, (DrawableAvatar) null);
-            this.drawableObject = new WeakReference<>(drawableObject2);
+    public void addToDrawList(DrawList drawlist)
+    {
+        Object obj = drawableObject;
+        DrawableObject drawableobject;
+        if (obj != null)
+        {
+            obj = (DrawableObject)((WeakReference) (obj)).get();
+        } else
+        {
+            obj = null;
         }
-        drawList.objects.add(drawableObject2);
+        drawableobject = ((DrawableObject) (obj));
+        if (obj == null)
+        {
+            drawableobject = new DrawableObject(drawlist.drawableStore, objectInfo, null);
+            drawableObject = new WeakReference(drawableobject);
+        }
+        drawlist.objects.add(drawableobject);
     }
 
-    @Nonnull
-    public DrawableObject getDrawableAttachment(DrawableStore drawableStore, DrawableAvatar drawableAvatar) {
-        DrawableObject drawableObject2 = null;
-        WeakReference<DrawableObject> weakReference = this.drawableObject;
-        if (weakReference != null) {
-            drawableObject2 = (DrawableObject) weakReference.get();
+    public DrawableObject getDrawableAttachment(DrawableStore drawablestore, DrawableAvatar drawableavatar)
+    {
+        DrawableObject drawableobject = null;
+        Object obj = drawableObject;
+        if (obj != null)
+        {
+            drawableobject = (DrawableObject)((WeakReference) (obj)).get();
         }
-        if (drawableObject2 != null) {
-            return drawableObject2;
+        obj = drawableobject;
+        if (drawableobject == null)
+        {
+            obj = new DrawableObject(drawablestore, objectInfo, drawableavatar);
+            drawableObject = new WeakReference(obj);
         }
-        DrawableObject drawableObject3 = new DrawableObject(drawableStore, this.objectInfo, drawableAvatar);
-        this.drawableObject = new WeakReference<>(drawableObject3);
-        return drawableObject3;
+        return ((DrawableObject) (obj));
     }
 
-    public DrawableObject getDrawableObject() {
-        WeakReference<DrawableObject> weakReference = this.drawableObject;
-        if (weakReference != null) {
-            return (DrawableObject) weakReference.get();
+    public DrawableObject getDrawableObject()
+    {
+        DrawableObject drawableobject = null;
+        WeakReference weakreference = drawableObject;
+        if (weakreference != null)
+        {
+            drawableobject = (DrawableObject)weakreference.get();
         }
-        return null;
+        return drawableobject;
     }
 }

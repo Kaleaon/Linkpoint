@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.rlv.commands;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -8,49 +12,70 @@ import com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictionType;
 import com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictions;
 import java.util.UUID;
 
-public class RLVCmdGenericRestriction implements RLVCommand {
+public class RLVCmdGenericRestriction
+    implements RLVCommand
+{
+
     private boolean canHaveExceptions;
     private RLVRestrictionType restrictionType;
 
-    public RLVCmdGenericRestriction(RLVRestrictionType rLVRestrictionType, boolean z) {
-        this.restrictionType = rLVRestrictionType;
-        this.canHaveExceptions = z;
+    public RLVCmdGenericRestriction(RLVRestrictionType rlvrestrictiontype, boolean flag)
+    {
+        restrictionType = rlvrestrictiontype;
+        canHaveExceptions = flag;
     }
 
-    public void Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
-        String str3;
-        String str4;
-        if (str2 == null) {
-            str2 = "";
+    public void Handle(RLVController rlvcontroller, UUID uuid, RLVCommands rlvcommands, String s, String s1)
+    {
+        rlvcommands = s1;
+        if (s1 == null)
+        {
+            rlvcommands = "";
         }
-        if (this.restrictionType.getRuleMatchType() == RLVRestrictionType.RLVRuleMatchType.TargetSpecifiesAllowance) {
-            str3 = "y";
-            str4 = "n";
-        } else {
-            str3 = "n";
-            str4 = "y";
+        String s2;
+        if (restrictionType.getRuleMatchType() == com.lumiyaviewer.lumiya.slproto.modules.rlv.RLVRestrictionType.RLVRuleMatchType.TargetSpecifiesAllowance)
+        {
+            s2 = "y";
+            s1 = "n";
+        } else
+        {
+            s2 = "n";
+            s1 = "y";
         }
-        if (str.equals(str3) || str.equals("add")) {
-            RLVRestrictions restrictions = rLVController.getRestrictions();
-            RLVRestrictionType rLVRestrictionType = this.restrictionType;
-            if (!this.canHaveExceptions) {
-                str2 = "";
+        if (s.equals(s2) || s.equals("add"))
+        {
+            rlvcontroller = rlvcontroller.getRestrictions();
+            s = restrictionType;
+            if (!canHaveExceptions)
+            {
+                rlvcommands = "";
             }
-            restrictions.addRestriction(rLVRestrictionType, uuid, str2);
-        } else if (str.equals(str4) || str.equals("rem")) {
-            RLVRestrictions restrictions2 = rLVController.getRestrictions();
-            RLVRestrictionType rLVRestrictionType2 = this.restrictionType;
-            if (!this.canHaveExceptions) {
-                str2 = "";
+            rlvcontroller.addRestriction(s, uuid, rlvcommands);
+        } else
+        {
+            if (s.equals(s1) || s.equals("rem"))
+            {
+                rlvcontroller = rlvcontroller.getRestrictions();
+                s = restrictionType;
+                if (!canHaveExceptions)
+                {
+                    rlvcommands = "";
+                }
+                rlvcontroller.removeRestriction(s, uuid, rlvcommands);
+                return;
             }
-            restrictions2.removeRestriction(rLVRestrictionType2, uuid, str2);
-        } else if (str.equals("force")) {
-            HandleForce(rLVController, uuid, str2);
+            if (s.equals("force"))
+            {
+                HandleForce(rlvcontroller, uuid, rlvcommands);
+                return;
+            }
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void HandleForce(RLVController rLVController, UUID uuid, String str) {
-        Debug.Printf("RLV: force option not supported for restriction '%s'", this.restrictionType.toString());
+    protected void HandleForce(RLVController rlvcontroller, UUID uuid, String s)
+    {
+        Debug.Printf("RLV: force option not supported for restriction '%s'", new Object[] {
+            restrictionType.toString()
+        });
     }
 }

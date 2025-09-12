@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.res.collections;
 
 import com.lumiyaviewer.lumiya.Debug;
@@ -6,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.SortedMap;
@@ -16,418 +21,591 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class PriorityBinQueue<T> implements BlockingQueue<T> {
+public class PriorityBinQueue
+    implements BlockingQueue
+{
+    public static interface QueueFactory
+    {
+
+        public abstract Queue getQueue();
+    }
+
+
     private final Lock lock = new ReentrantLock();
-    private final Condition notEmpty = this.lock.newCondition();
-    private final QueueFactory<T> queueFactory;
-    private final SortedMap<Integer, Queue<T>> queues = new TreeMap();
+    private final Condition notEmpty;
+    private final QueueFactory queueFactory;
+    private final SortedMap queues = new TreeMap();
 
-    public interface QueueFactory<T> {
-        Queue<T> getQueue();
+    public PriorityBinQueue(QueueFactory queuefactory)
+    {
+        notEmpty = lock.newCondition();
+        queueFactory = queuefactory;
     }
 
-    public PriorityBinQueue(QueueFactory<T> queueFactory2) {
-        this.queueFactory = queueFactory2;
-    }
-
-    private int getPriority(Object obj) {
-        if (obj instanceof HasPriority) {
-            return ((HasPriority) obj).getPriority();
-        }
-        return 0;
-    }
-
-    public boolean add(T t) {
-        this.lock.lock();
-        try {
-            int priority = getPriority(t);
-            Debug.Printf("PriorityBinQueue: added %s with prio %d", t.toString(), Integer.valueOf(priority));
-            Queue<T> queue = (Queue) this.queues.get(Integer.valueOf(priority));
-            if (queue == null) {
-                queue = this.queueFactory.getQueue();
-                this.queues.put(Integer.valueOf(priority), queue);
-            }
-            boolean add = queue.add(t);
-            this.notEmpty.signalAll();
-            return add;
-        } finally {
-            this.lock.unlock();
+    private int getPriority(Object obj)
+    {
+        if (obj instanceof HasPriority)
+        {
+            return ((HasPriority)obj).getPriority();
+        } else
+        {
+            return 0;
         }
     }
 
-    public boolean addAll(Collection<? extends T> collection) {
-        this.lock.lock();
-        boolean z = false;
-        try {
-            Iterator<T> it = collection.iterator();
-            while (true) {
-                boolean z2 = z;
-                if (!it.hasNext()) {
-                    return z2;
-                }
-                T next = it.next();
-                int priority = getPriority(next);
-                Queue<T> queue = (Queue) this.queues.get(Integer.valueOf(priority));
-                if (queue == null) {
-                    queue = this.queueFactory.getQueue();
-                    this.queues.put(Integer.valueOf(priority), queue);
-                }
-                z = queue.add(next) | z2;
-                this.notEmpty.signalAll();
-            }
-        } finally {
-            this.lock.unlock();
+    public boolean add(Object obj)
+    {
+        lock.lock();
+        Queue queue1;
+        int i;
+        i = getPriority(obj);
+        Debug.Printf("PriorityBinQueue: added %s with prio %d", new Object[] {
+            obj.toString(), Integer.valueOf(i)
+        });
+        queue1 = (Queue)queues.get(Integer.valueOf(i));
+        Queue queue;
+        queue = queue1;
+        if (queue1 != null)
+        {
+            break MISSING_BLOCK_LABEL_90;
+        }
+        queue = queueFactory.getQueue();
+        queues.put(Integer.valueOf(i), queue);
+        boolean flag;
+        flag = queue.add(obj);
+        notEmpty.signalAll();
+        lock.unlock();
+        return flag;
+        obj;
+        lock.unlock();
+        throw obj;
+    }
+
+    public boolean addAll(Collection collection)
+    {
+        lock.lock();
+        Iterator iterator1 = collection.iterator();
+        boolean flag = false;
+_L2:
+        Queue queue;
+        Object obj;
+        int i;
+        if (!iterator1.hasNext())
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        obj = iterator1.next();
+        i = getPriority(obj);
+        queue = (Queue)queues.get(Integer.valueOf(i));
+        collection = queue;
+        if (queue != null)
+        {
+            break MISSING_BLOCK_LABEL_94;
+        }
+        collection = queueFactory.getQueue();
+        queues.put(Integer.valueOf(i), collection);
+        boolean flag1;
+        flag1 = collection.add(obj);
+        notEmpty.signalAll();
+        flag = flag1 | flag;
+        if (true) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
+        return flag;
+        collection;
+        lock.unlock();
+        throw collection;
+    }
+
+    public void clear()
+    {
+        lock.lock();
+        queues.clear();
+        lock.unlock();
+        return;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
+    }
+
+    public boolean contains(Object obj)
+    {
+        lock.lock();
+        Queue queue;
+        int i = getPriority(obj);
+        queue = (Queue)queues.get(Integer.valueOf(i));
+        if (queue == null)
+        {
+            break MISSING_BLOCK_LABEL_57;
+        }
+        boolean flag = queue.contains(obj);
+        lock.unlock();
+        return flag;
+        lock.unlock();
+        return false;
+        obj;
+        lock.unlock();
+        throw obj;
+    }
+
+    public boolean containsAll(Collection collection)
+    {
+        lock.lock();
+        collection = collection.iterator();
+_L4:
+        if (!collection.hasNext()) goto _L2; else goto _L1
+_L1:
+        Object obj;
+        Queue queue;
+        obj = collection.next();
+        int i = getPriority(obj);
+        queue = (Queue)queues.get(Integer.valueOf(i));
+        if (queue == null) goto _L4; else goto _L3
+_L3:
+        boolean flag = queue.contains(obj);
+        if (flag) goto _L4; else goto _L5
+_L5:
+        flag = false;
+_L7:
+        lock.unlock();
+        return flag;
+        collection;
+        lock.unlock();
+        throw collection;
+_L2:
+        flag = true;
+        if (true) goto _L7; else goto _L6
+_L6:
+    }
+
+    public int drainTo(Collection collection)
+    {
+        int i;
+        lock.lock();
+        i = 0;
+        Iterator iterator1 = queues.values().iterator();
+_L2:
+        Queue queue;
+        if (!iterator1.hasNext())
+        {
+            break MISSING_BLOCK_LABEL_85;
+        }
+        queue = (Queue)iterator1.next();
+        int j = i;
+_L3:
+        Object obj = queue.poll();
+        i = j;
+        if (obj == null) goto _L2; else goto _L1
+_L1:
+        collection.add(obj);
+        j++;
+          goto _L3
+        queues.clear();
+        lock.unlock();
+        return i;
+        collection;
+        lock.unlock();
+        throw collection;
+    }
+
+    public int drainTo(Collection collection, int i)
+    {
+        int j;
+        lock.lock();
+        j = 0;
+        Iterator iterator1 = queues.values().iterator();
+_L6:
+        if (!iterator1.hasNext()) goto _L2; else goto _L1
+_L1:
+        Queue queue = (Queue)iterator1.next();
+        int k = j;
+_L4:
+        Object obj = queue.poll();
+        if (obj == null || k >= i)
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        collection.add(obj);
+        k++;
+        if (true) goto _L4; else goto _L3
+_L3:
+        j = k;
+        if (k < i) goto _L6; else goto _L5
+_L5:
+        lock.unlock();
+        return k;
+        collection;
+        lock.unlock();
+        throw collection;
+_L2:
+        k = j;
+        if (true) goto _L5; else goto _L7
+_L7:
+    }
+
+    public Object element()
+    {
+        Object obj = peek();
+        if (obj == null)
+        {
+            throw new NoSuchElementException();
+        } else
+        {
+            return obj;
         }
     }
 
-    public void clear() {
-        this.lock.lock();
-        try {
-            this.queues.clear();
-        } finally {
-            this.lock.unlock();
-        }
+    public boolean isEmpty()
+    {
+        lock.lock();
+        Iterator iterator1 = queues.values().iterator();
+_L4:
+        if (!iterator1.hasNext()) goto _L2; else goto _L1
+_L1:
+        boolean flag = ((Queue)iterator1.next()).isEmpty();
+        if (flag) goto _L4; else goto _L3
+_L3:
+        flag = false;
+_L6:
+        lock.unlock();
+        return flag;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
+_L2:
+        flag = true;
+        if (true) goto _L6; else goto _L5
+_L5:
     }
 
-    public boolean contains(Object obj) {
-        this.lock.lock();
-        try {
-            Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(obj)));
-            if (queue != null) {
-                return queue.contains(obj);
-            }
-            this.lock.unlock();
-            return false;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public boolean containsAll(Collection<?> collection) {
-        boolean z;
-        this.lock.lock();
-        try {
-            Iterator<T> it = collection.iterator();
-            while (true) {
-                if (!it.hasNext()) {
-                    z = true;
-                    break;
-                }
-                T next = it.next();
-                Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(next)));
-                if (queue != null && !queue.contains(next)) {
-                    z = false;
-                    break;
-                }
-            }
-            return z;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public int drainTo(Collection<? super T> collection) {
-        this.lock.lock();
-        int i = 0;
-        try {
-            for (Queue queue : this.queues.values()) {
-                while (true) {
-                    Object poll = queue.poll();
-                    if (poll != null) {
-                        collection.add(poll);
-                        i++;
-                    }
-                }
-            }
-            this.queues.clear();
-            return i;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    /* JADX WARNING: Removed duplicated region for block: B:20:0x002c A[SYNTHETIC] */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public int drainTo(java.util.Collection<? super T> r5, int r6) {
-        /*
-            r4 = this;
-            java.util.concurrent.locks.Lock r0 = r4.lock
-            r0.lock()
-            r1 = 0
-            java.util.SortedMap<java.lang.Integer, java.util.Queue<T>> r0 = r4.queues     // Catch:{ all -> 0x0033 }
-            java.util.Collection r0 = r0.values()     // Catch:{ all -> 0x0033 }
-            java.util.Iterator r2 = r0.iterator()     // Catch:{ all -> 0x0033 }
-        L_0x0010:
-            boolean r0 = r2.hasNext()     // Catch:{ all -> 0x0033 }
-            if (r0 == 0) goto L_0x003a
-            java.lang.Object r0 = r2.next()     // Catch:{ all -> 0x0033 }
-            java.util.Queue r0 = (java.util.Queue) r0     // Catch:{ all -> 0x0033 }
-        L_0x001c:
-            java.lang.Object r3 = r0.poll()     // Catch:{ all -> 0x0033 }
-            if (r3 == 0) goto L_0x002a
-            if (r1 >= r6) goto L_0x002a
-            r5.add(r3)     // Catch:{ all -> 0x0033 }
-            int r1 = r1 + 1
-            goto L_0x001c
-        L_0x002a:
-            if (r1 < r6) goto L_0x0010
-            r0 = r1
-        L_0x002d:
-            java.util.concurrent.locks.Lock r1 = r4.lock
-            r1.unlock()
-            return r0
-        L_0x0033:
-            r0 = move-exception
-            java.util.concurrent.locks.Lock r1 = r4.lock
-            r1.unlock()
-            throw r0
-        L_0x003a:
-            r0 = r1
-            goto L_0x002d
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.collections.PriorityBinQueue.drainTo(java.util.Collection, int):int");
-    }
-
-    public T element() {
-        T peek = peek();
-        if (peek != null) {
-            return peek;
-        }
-        throw new NoSuchElementException();
-    }
-
-    public boolean isEmpty() {
-        boolean z;
-        this.lock.lock();
-        try {
-            Iterator<T> it = this.queues.values().iterator();
-            while (true) {
-                if (it.hasNext()) {
-                    if (!((Queue) it.next()).isEmpty()) {
-                        z = false;
-                        break;
-                    }
-                } else {
-                    z = true;
-                    break;
-                }
-            }
-            return z;
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public Iterator<T> iterator() {
+    public Iterator iterator()
+    {
         throw new UnsupportedOperationException("Iterator not supported");
     }
 
-    public boolean offer(T t) {
-        return add(t);
+    public boolean offer(Object obj)
+    {
+        return add(obj);
     }
 
-    public boolean offer(T t, long j, TimeUnit timeUnit) throws InterruptedException {
-        return add(t);
+    public boolean offer(Object obj, long l, TimeUnit timeunit)
+        throws InterruptedException
+    {
+        return add(obj);
     }
 
-    public T peek() {
-        this.lock.lock();
-        try {
-            for (Queue queue : this.queues.values()) {
-                if (!queue.isEmpty()) {
-                    for (T next : queue) {
-                        if (next != null) {
-                            return next;
-                        }
-                    }
-                    continue;
-                }
-            }
-            this.lock.unlock();
-            return null;
-        } finally {
-            this.lock.unlock();
+    public Object peek()
+    {
+        lock.lock();
+        Iterator iterator1 = queues.values().iterator();
+_L2:
+        Object obj;
+        if (!iterator1.hasNext())
+        {
+            break MISSING_BLOCK_LABEL_90;
         }
-    }
-
-    public T poll() {
-        this.lock.lock();
-        try {
-            for (Queue it : this.queues.values()) {
-                Iterator it2 = it.iterator();
-                while (true) {
-                    if (it2.hasNext()) {
-                        T next = it2.next();
-                        if (next != null) {
-                            it2.remove();
-                            return next;
-                        }
-                    }
-                }
-            }
-            this.lock.unlock();
-            return null;
-        } finally {
-            this.lock.unlock();
+        obj = (Queue)iterator1.next();
+        if (((Queue) (obj)).isEmpty())
+        {
+            continue; /* Loop/switch isn't completed */
         }
-    }
-
-    public T poll(long j, TimeUnit timeUnit) throws InterruptedException {
-        this.lock.lock();
-        do {
-            try {
-                T poll = poll();
-                if (poll != null) {
-                    this.lock.unlock();
-                    return poll;
-                }
-            } finally {
-                this.lock.unlock();
+        obj = ((Queue) (obj)).iterator();
+        Object obj1;
+        do
+        {
+            if (!((Iterator) (obj)).hasNext())
+            {
+                continue; /* Loop/switch isn't completed */
             }
-        } while (this.notEmpty.await(j, timeUnit));
+            obj1 = ((Iterator) (obj)).next();
+        } while (obj1 == null);
+        break; /* Loop/switch isn't completed */
+        if (true) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
+        return obj1;
+        lock.unlock();
         return null;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public void put(T t) throws InterruptedException {
-        add(t);
-    }
-
-    public int remainingCapacity() {
-        return Integer.MAX_VALUE;
-    }
-
-    public T remove() {
-        T poll = poll();
-        if (poll != null) {
-            return poll;
+    public Object poll()
+    {
+        lock.lock();
+        Iterator iterator1 = queues.values().iterator();
+_L2:
+        Iterator iterator2;
+        if (!iterator1.hasNext())
+        {
+            break MISSING_BLOCK_LABEL_85;
         }
-        throw new NoSuchElementException();
+        iterator2 = ((Queue)iterator1.next()).iterator();
+_L4:
+        if (!iterator2.hasNext()) goto _L2; else goto _L1
+_L1:
+        Object obj = iterator2.next();
+        if (obj == null) goto _L4; else goto _L3
+_L3:
+        iterator2.remove();
+        lock.unlock();
+        return obj;
+        lock.unlock();
+        return null;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public boolean remove(Object obj) {
-        this.lock.lock();
-        try {
-            Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(obj)));
-            if (queue != null) {
-                return queue.remove(obj);
+    public Object poll(long l, TimeUnit timeunit)
+        throws InterruptedException
+    {
+        lock.lock();
+_L2:
+        Object obj = poll();
+        if (obj != null)
+        {
+            lock.unlock();
+            return obj;
+        }
+        boolean flag = notEmpty.await(l, timeunit);
+        if (flag) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
+        return null;
+        timeunit;
+        lock.unlock();
+        throw timeunit;
+    }
+
+    public void put(Object obj)
+        throws InterruptedException
+    {
+        add(obj);
+    }
+
+    public int remainingCapacity()
+    {
+        return 0x7fffffff;
+    }
+
+    public Object remove()
+    {
+        Object obj = poll();
+        if (obj == null)
+        {
+            throw new NoSuchElementException();
+        } else
+        {
+            return obj;
+        }
+    }
+
+    public boolean remove(Object obj)
+    {
+        lock.lock();
+        Queue queue;
+        int i = getPriority(obj);
+        queue = (Queue)queues.get(Integer.valueOf(i));
+        if (queue == null)
+        {
+            break MISSING_BLOCK_LABEL_57;
+        }
+        boolean flag = queue.remove(obj);
+        lock.unlock();
+        return flag;
+        lock.unlock();
+        return false;
+        obj;
+        lock.unlock();
+        throw obj;
+    }
+
+    public boolean removeAll(Collection collection)
+    {
+        boolean flag;
+        lock.lock();
+        flag = false;
+        collection = collection.iterator();
+_L2:
+        Object obj;
+        Queue queue;
+        do
+        {
+            if (!collection.hasNext())
+            {
+                break MISSING_BLOCK_LABEL_83;
             }
-            this.lock.unlock();
-            return false;
-        } finally {
-            this.lock.unlock();
-        }
+            obj = collection.next();
+            int i = getPriority(obj);
+            queue = (Queue)queues.get(Integer.valueOf(i));
+        } while (queue == null);
+        boolean flag1 = queue.remove(obj);
+        flag = flag1 | flag;
+        if (true) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
+        return flag;
+        collection;
+        lock.unlock();
+        throw collection;
     }
 
-    public boolean removeAll(Collection<?> collection) {
-        this.lock.lock();
-        boolean z = false;
-        try {
-            for (T next : collection) {
-                Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(next)));
-                z = queue != null ? queue.remove(next) | z : z;
-            }
-            return z;
-        } finally {
-            this.lock.unlock();
+    public boolean retainAll(Collection collection)
+    {
+        lock.lock();
+        Iterator iterator1 = queues.values().iterator();
+        boolean flag = false;
+_L2:
+        boolean flag1;
+        if (!iterator1.hasNext())
+        {
+            break; /* Loop/switch isn't completed */
         }
+        flag1 = ((Queue)iterator1.next()).retainAll(collection);
+        flag = flag1 | flag;
+        if (true) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
+        return flag;
+        collection;
+        lock.unlock();
+        throw collection;
     }
 
-    public boolean retainAll(Collection<?> collection) {
-        this.lock.lock();
-        boolean z = false;
-        try {
-            Iterator<T> it = this.queues.values().iterator();
-            while (true) {
-                boolean z2 = z;
-                if (!it.hasNext()) {
-                    return z2;
-                }
-                z = ((Queue) it.next()).retainAll(collection) | z2;
-            }
-        } finally {
-            this.lock.unlock();
-        }
-    }
-
-    public int size() {
-        this.lock.lock();
+    public int size()
+    {
+        lock.lock();
+        Iterator iterator1 = queues.values().iterator();
         int i = 0;
-        try {
-            Iterator<T> it = this.queues.values().iterator();
-            while (true) {
-                int i2 = i;
-                if (!it.hasNext()) {
-                    return i2;
-                }
-                i = ((Queue) it.next()).size() + i2;
-            }
-        } finally {
-            this.lock.unlock();
+_L2:
+        int j;
+        if (!iterator1.hasNext())
+        {
+            break; /* Loop/switch isn't completed */
         }
+        j = ((Queue)iterator1.next()).size();
+        i = j + i;
+        if (true) goto _L2; else goto _L1
+_L1:
+        lock.unlock();
+        return i;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public T take() throws InterruptedException {
-        this.lock.lock();
-        while (true) {
-            try {
-                T poll = poll();
-                if (poll != null) {
-                    return poll;
-                }
-                this.notEmpty.await();
-            } finally {
-                this.lock.unlock();
-            }
+    public Object take()
+        throws InterruptedException
+    {
+        lock.lock();
+_L1:
+        Object obj = poll();
+        if (obj != null)
+        {
+            lock.unlock();
+            return obj;
         }
+        notEmpty.await();
+          goto _L1
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public Object[] toArray() {
+    public Object[] toArray()
+    {
+        boolean flag;
+        flag = false;
+        lock.lock();
+        ArrayList arraylist;
+        Iterator iterator1;
+        arraylist = new ArrayList();
+        iterator1 = queues.values().iterator();
         int i = 0;
-        this.lock.lock();
-        try {
-            ArrayList<Object[]> arrayList = new ArrayList<>();
-            int i2 = 0;
-            for (Queue array : this.queues.values()) {
-                Object[] array2 = array.toArray();
-                arrayList.add(array2);
-                i2 = array2.length + i2;
-            }
-            Object[] objArr = new Object[i2];
-            for (Object[] objArr2 : arrayList) {
-                System.arraycopy(objArr2, 0, objArr, i, objArr2.length);
-                i = objArr2.length + i;
-            }
-            arrayList.clear();
-            return objArr;
-        } finally {
-            this.lock.unlock();
+_L2:
+        int j;
+        if (!iterator1.hasNext())
+        {
+            break; /* Loop/switch isn't completed */
         }
+        Object aobj1[] = ((Queue)iterator1.next()).toArray();
+        j = aobj1.length;
+        arraylist.add(((Object) (aobj1)));
+        i = j + i;
+        if (true) goto _L2; else goto _L1
+_L1:
+        Object aobj[];
+        Iterator iterator2;
+        aobj = new Object[i];
+        iterator2 = arraylist.iterator();
+        i = ((flag) ? 1 : 0);
+        while (iterator2.hasNext()) 
+        {
+            Object aobj2[] = (Object[])iterator2.next();
+            System.arraycopy(((Object) (aobj2)), 0, ((Object) (aobj)), i, aobj2.length);
+            i = aobj2.length + i;
+        }
+        arraylist.clear();
+        lock.unlock();
+        return aobj;
+        Exception exception;
+        exception;
+        lock.unlock();
+        throw exception;
     }
 
-    public <T1> T1[] toArray(T1[] t1Arr) {
+    public Object[] toArray(Object aobj[])
+    {
+        boolean flag;
+        flag = false;
+        lock.lock();
+        ArrayList arraylist;
+        Iterator iterator1;
+        arraylist = new ArrayList();
+        iterator1 = queues.values().iterator();
         int i = 0;
-        this.lock.lock();
-        try {
-            ArrayList<Object[]> arrayList = new ArrayList<>();
-            int i2 = 0;
-            for (Queue array : this.queues.values()) {
-                Object[] array2 = array.toArray();
-                arrayList.add(array2);
-                i2 = array2.length + i2;
-            }
-            if (t1Arr.length >= i2) {
-                Arrays.fill(t1Arr, (Object) null);
-            } else {
-                t1Arr = new Object[i2];
-            }
-            for (Object[] objArr : arrayList) {
-                System.arraycopy(objArr, 0, t1Arr, i, objArr.length);
-                i = objArr.length + i;
-            }
-            arrayList.clear();
-            return t1Arr;
-        } finally {
-            this.lock.unlock();
+_L2:
+        int j;
+        if (!iterator1.hasNext())
+        {
+            break; /* Loop/switch isn't completed */
         }
+        Object aobj1[] = ((Queue)iterator1.next()).toArray();
+        j = aobj1.length;
+        arraylist.add(((Object) (aobj1)));
+        i = j + i;
+        if (true) goto _L2; else goto _L1
+_L1:
+        if (aobj.length < i)
+        {
+            break MISSING_BLOCK_LABEL_153;
+        }
+        Arrays.fill(aobj, null);
+_L3:
+        iterator1 = arraylist.iterator();
+        i = ((flag) ? 1 : 0);
+        while (iterator1.hasNext()) 
+        {
+            Object aobj2[] = (Object[])iterator1.next();
+            System.arraycopy(((Object) (aobj2)), 0, ((Object) (aobj)), i, aobj2.length);
+            i = aobj2.length + i;
+        }
+        break MISSING_BLOCK_LABEL_162;
+        aobj = new Object[i];
+          goto _L3
+        arraylist.clear();
+        lock.unlock();
+        return aobj;
+        aobj;
+        lock.unlock();
+        throw aobj;
     }
 }

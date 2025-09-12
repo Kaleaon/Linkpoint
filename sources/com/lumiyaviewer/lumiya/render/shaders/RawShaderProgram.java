@@ -1,33 +1,60 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.shaders;
 
 import android.opengl.GLES20;
 
-public class RawShaderProgram extends ShaderProgram {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.shaders:
+//            ShaderProgram, Shader, ShaderPreprocessor
+
+public class RawShaderProgram extends ShaderProgram
+{
+
     public int textureSampler;
     public int uMVPMatrix;
     public int vPosition;
     public int vTexCoord;
     public int vTextureTransformMatrix;
 
-    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    public RawShaderProgram(boolean z) {
-        super(z ? Shader.ExtTextureVertexShader : Shader.RawVertexShader, z ? Shader.ExtTextureFragmentShader : Shader.RawFragmentShader);
+    public RawShaderProgram(boolean flag)
+    {
+        Shader shader;
+        Shader shader1;
+        if (flag)
+        {
+            shader = Shader.ExtTextureVertexShader;
+        } else
+        {
+            shader = Shader.RawVertexShader;
+        }
+        if (flag)
+        {
+            shader1 = Shader.ExtTextureFragmentShader;
+        } else
+        {
+            shader1 = Shader.RawFragmentShader;
+        }
+        super(shader, shader1);
     }
 
-    public /* bridge */ /* synthetic */ int Compile(ShaderPreprocessor shaderPreprocessor) {
-        return super.Compile(shaderPreprocessor);
+    public volatile int Compile(ShaderPreprocessor shaderpreprocessor)
+    {
+        return super.Compile(shaderpreprocessor);
     }
 
-    /* access modifiers changed from: protected */
-    public void bindVariables() {
-        this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition");
-        this.vTexCoord = GLES20.glGetAttribLocation(this.handle, "vTexCoord");
-        this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix");
-        this.textureSampler = GLES20.glGetUniformLocation(this.handle, "vTexture");
-        this.vTextureTransformMatrix = GLES20.glGetUniformLocation(this.handle, "vTextureTransformMatrix");
+    protected void bindVariables()
+    {
+        vPosition = GLES20.glGetAttribLocation(handle, "vPosition");
+        vTexCoord = GLES20.glGetAttribLocation(handle, "vTexCoord");
+        uMVPMatrix = GLES20.glGetUniformLocation(handle, "uMVPMatrix");
+        textureSampler = GLES20.glGetUniformLocation(handle, "vTexture");
+        vTextureTransformMatrix = GLES20.glGetUniformLocation(handle, "vTextureTransformMatrix");
     }
 
-    public /* bridge */ /* synthetic */ int getHandle() {
+    public volatile int getHandle()
+    {
         return super.getHandle();
     }
 }

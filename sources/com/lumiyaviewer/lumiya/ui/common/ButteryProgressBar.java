@@ -1,20 +1,43 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.common;
 
 import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.GradientDrawable;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.animation.Interpolator;
-import com.lumiyaviewer.lumiya.R;
 
-@TargetApi(14)
-public class ButteryProgressBar extends View {
+public class ButteryProgressBar extends View
+{
+    private static class ExponentialInterpolator
+        implements Interpolator
+    {
+
+        public float getInterpolation(float f)
+        {
+            return (float)Math.pow(2D, f) - 1.0F;
+        }
+
+        private ExponentialInterpolator()
+        {
+        }
+
+        ExponentialInterpolator(ExponentialInterpolator exponentialinterpolator)
+        {
+            this();
+        }
+    }
+
+
     private static final int BASE_DURATION_MS = 500;
     private static final int BASE_SEGMENT_COUNT = 5;
     private static final int BASE_WIDTH_DP = 300;
@@ -29,97 +52,126 @@ public class ButteryProgressBar extends View {
     private final int mSolidBarDetentWidth;
     private final int mSolidBarHeight;
 
-    private static class ExponentialInterpolator implements Interpolator {
-        private ExponentialInterpolator() {
-        }
-
-        /* synthetic */ ExponentialInterpolator(ExponentialInterpolator exponentialInterpolator) {
-            this();
-        }
-
-        public float getInterpolation(float f) {
-            return ((float) Math.pow(2.0d, (double) f)) - 1.0f;
-        }
+    public ButteryProgressBar(Context context)
+    {
+        this(context, null);
     }
 
-    public ButteryProgressBar(Context context) {
-        this(context, (AttributeSet) null);
-    }
+    public ButteryProgressBar(Context context, AttributeSet attributeset)
+    {
+        super(context, attributeset);
+        mPaint = new Paint();
+        mDensity = context.getResources().getDisplayMetrics().density;
+        attributeset = context.obtainStyledAttributes(attributeset, com.lumiyaviewer.lumiya.R.styleable.ButteryProgressBar);
+        mBarColor = attributeset.getColor(0, context.getResources().getColor(0x1060012));
+        mSolidBarHeight = attributeset.getDimensionPixelSize(1, Math.round(mDensity * 4F));
+        mSolidBarDetentWidth = attributeset.getDimensionPixelSize(2, Math.round(mDensity * 3F));
+        attributeset.recycle();
+        mAnimator = new ValueAnimator();
+        mAnimator.setFloatValues(new float[] {
+            1.0F, 2.0F
+        });
+        mAnimator.setRepeatCount(-1);
+        mAnimator.setInterpolator(new ExponentialInterpolator(null));
+        mAnimator.addUpdateListener(new android.animation.ValueAnimator.AnimatorUpdateListener() {
 
-    /* JADX INFO: finally extract failed */
-    public ButteryProgressBar(Context context, AttributeSet attributeSet) {
-        super(context, attributeSet);
-        this.mPaint = new Paint();
-        this.mDensity = context.getResources().getDisplayMetrics().density;
-        TypedArray obtainStyledAttributes = context.obtainStyledAttributes(attributeSet, R.styleable.ButteryProgressBar);
-        try {
-            this.mBarColor = obtainStyledAttributes.getColor(0, context.getResources().getColor(17170450));
-            this.mSolidBarHeight = obtainStyledAttributes.getDimensionPixelSize(1, Math.round(this.mDensity * 4.0f));
-            this.mSolidBarDetentWidth = obtainStyledAttributes.getDimensionPixelSize(2, Math.round(this.mDensity * 3.0f));
-            obtainStyledAttributes.recycle();
-            this.mAnimator = new ValueAnimator();
-            this.mAnimator.setFloatValues(new float[]{1.0f, 2.0f});
-            this.mAnimator.setRepeatCount(-1);
-            this.mAnimator.setInterpolator(new ExponentialInterpolator((ExponentialInterpolator) null));
-            this.mAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    ButteryProgressBar.this.invalidate();
-                }
-            });
-            this.mPaint.setColor(this.mBarColor);
-            this.mShadow = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{(this.mBarColor & ViewCompat.MEASURED_SIZE_MASK) | 570425344, 0});
-        } catch (Throwable th) {
-            obtainStyledAttributes.recycle();
-            throw th;
-        }
-    }
+            final ButteryProgressBar this$0;
 
-    private void start() {
-        if (this.mAnimator != null) {
-            this.mAnimator.start();
-        }
-    }
-
-    private void stop() {
-        if (this.mAnimator != null) {
-            this.mAnimator.cancel();
-        }
-    }
-
-    /* access modifiers changed from: protected */
-    public void onDraw(Canvas canvas) {
-        if (this.mAnimator.isStarted()) {
-            this.mShadow.draw(canvas);
-            float floatValue = ((Float) this.mAnimator.getAnimatedValue()).floatValue();
-            int width = getWidth();
-            int i = width >> (this.mSegmentCount - 1);
-            int i2 = 0;
-            while (i2 < this.mSegmentCount) {
-                float f = floatValue * ((float) (width >> (i2 + 1)));
-                canvas.drawRect((f + ((float) this.mSolidBarDetentWidth)) - ((float) i), 0.0f, (i2 == 0 ? (float) (width + i) : 2.0f * f) - ((float) i), (float) this.mSolidBarHeight, this.mPaint);
-                i2++;
+            public void onAnimationUpdate(ValueAnimator valueanimator)
+            {
+                invalidate();
             }
+
+            
+            {
+                this$0 = ButteryProgressBar.this;
+                super();
+            }
+        });
+        mPaint.setColor(mBarColor);
+        mShadow = new GradientDrawable(android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM, new int[] {
+            mBarColor & 0xffffff | 0x22000000, 0
+        });
+        return;
+        context;
+        attributeset.recycle();
+        throw context;
+    }
+
+    private void start()
+    {
+        if (mAnimator == null)
+        {
+            return;
+        } else
+        {
+            mAnimator.start();
+            return;
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onLayout(boolean z, int i, int i2, int i3, int i4) {
-        if (z) {
-            int width = getWidth();
-            this.mShadow.setBounds(0, this.mSolidBarHeight, width, getHeight() - this.mSolidBarHeight);
-            float f = (((float) width) / this.mDensity) / 300.0f;
-            this.mAnimator.setDuration((long) ((int) ((((f - 1.0f) * 0.3f) + 1.0f) * 500.0f)));
-            this.mSegmentCount = (int) ((((f - 1.0f) * 0.1f) + 1.0f) * 5.0f);
+    private void stop()
+    {
+        if (mAnimator == null)
+        {
+            return;
+        } else
+        {
+            mAnimator.cancel();
+            return;
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onVisibilityChanged(View view, int i) {
+    protected void onDraw(Canvas canvas)
+    {
+        if (!mAnimator.isStarted())
+        {
+            return;
+        }
+        mShadow.draw(canvas);
+        float f1 = ((Float)mAnimator.getAnimatedValue()).floatValue();
+        int j = getWidth();
+        int k = j >> mSegmentCount - 1;
+        int i = 0;
+        while (i < mSegmentCount) 
+        {
+            float f2 = f1 * (float)(j >> i + 1);
+            float f;
+            if (i == 0)
+            {
+                f = j + k;
+            } else
+            {
+                f = 2.0F * f2;
+            }
+            canvas.drawRect((f2 + (float)mSolidBarDetentWidth) - (float)k, 0.0F, f - (float)k, mSolidBarHeight, mPaint);
+            i++;
+        }
+    }
+
+    protected void onLayout(boolean flag, int i, int j, int k, int l)
+    {
+        if (flag)
+        {
+            i = getWidth();
+            mShadow.setBounds(0, mSolidBarHeight, i, getHeight() - mSolidBarHeight);
+            float f = (float)i / mDensity / 300F;
+            mAnimator.setDuration((int)(((f - 1.0F) * 0.3F + 1.0F) * 500F));
+            mSegmentCount = (int)(((f - 1.0F) * 0.1F + 1.0F) * 5F);
+        }
+    }
+
+    protected void onVisibilityChanged(View view, int i)
+    {
         super.onVisibilityChanged(view, i);
-        if (i == 0) {
+        if (i == 0)
+        {
             start();
-        } else {
+            return;
+        } else
+        {
             stop();
+            return;
         }
     }
 }

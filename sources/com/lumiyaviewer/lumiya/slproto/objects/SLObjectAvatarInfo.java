@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.objects;
 
 import com.lumiyaviewer.lumiya.render.avatar.AvatarVisualState;
@@ -7,58 +11,75 @@ import com.lumiyaviewer.lumiya.slproto.messages.AvatarAnimation;
 import com.lumiyaviewer.lumiya.slproto.messages.AvatarAppearance;
 import com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry;
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public class SLObjectAvatarInfo extends SLObjectInfo {
-    @Nonnull
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.objects:
+//            SLObjectInfo
+
+public class SLObjectAvatarInfo extends SLObjectInfo
+{
+
     private final AvatarVisualState avatarVisualState;
     private final boolean isMyAvatar;
 
-    public SLObjectAvatarInfo(UUID uuid, UUID uuid2, boolean z) {
-        this.isMyAvatar = z;
-        this.avatarVisualState = new AvatarVisualState(uuid, this, uuid2);
+    public SLObjectAvatarInfo(UUID uuid, UUID uuid1, boolean flag)
+    {
+        isMyAvatar = flag;
+        avatarVisualState = new AvatarVisualState(uuid, this, uuid1);
     }
 
-    public void ApplyAvatarAnimation(AvatarAnimation avatarAnimation) {
-        this.avatarVisualState.ApplyAvatarAnimation(avatarAnimation);
+    public void ApplyAvatarAnimation(AvatarAnimation avataranimation)
+    {
+        avatarVisualState.ApplyAvatarAnimation(avataranimation);
     }
 
-    public void ApplyAvatarAppearance(AvatarAppearance avatarAppearance) {
-        this.avatarVisualState.ApplyAvatarAppearance(avatarAppearance);
+    public void ApplyAvatarAppearance(AvatarAppearance avatarappearance)
+    {
+        avatarVisualState.ApplyAvatarAppearance(avatarappearance);
     }
 
-    public void ApplyAvatarTextures(SLTextureEntry sLTextureEntry, boolean z) {
-        this.avatarVisualState.ApplyTextures(sLTextureEntry, z);
+    public void ApplyAvatarTextures(SLTextureEntry sltextureentry, boolean flag)
+    {
+        avatarVisualState.ApplyTextures(sltextureentry, flag);
     }
 
-    public void ApplyAvatarVisualParams(int[] iArr) {
-        this.avatarVisualState.ApplyVisualParams(iArr);
+    public void ApplyAvatarVisualParams(int ai[])
+    {
+        avatarVisualState.ApplyVisualParams(ai);
     }
 
-    /* access modifiers changed from: protected */
-    @Nonnull
-    public DrawListObjectEntry createDrawListEntry() {
+    protected DrawListObjectEntry createDrawListEntry()
+    {
         return new DrawListAvatarEntry(this);
     }
 
-    @Nonnull
-    public AvatarVisualState getAvatarVisualState() {
-        return this.avatarVisualState;
+    public AvatarVisualState getAvatarVisualState()
+    {
+        return avatarVisualState;
     }
 
-    public String getName() {
-        return this.isMyAvatar ? "(my avatar)" : "(avatar)";
+    public String getName()
+    {
+        if (isMyAvatar)
+        {
+            return "(my avatar)";
+        } else
+        {
+            return "(avatar)";
+        }
     }
 
-    public boolean isAvatar() {
+    public boolean isAvatar()
+    {
         return true;
     }
 
-    public boolean isMyAvatar() {
-        return this.isMyAvatar;
+    public boolean isMyAvatar()
+    {
+        return isMyAvatar;
     }
 
-    public void onTexturesUpdate(SLTextureEntry sLTextureEntry) {
-        this.avatarVisualState.ApplyTextures(sLTextureEntry, false);
+    public void onTexturesUpdate(SLTextureEntry sltextureentry)
+    {
+        avatarVisualState.ApplyTextures(sltextureentry, false);
     }
 }

@@ -1,8 +1,17 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.shaders;
 
 import android.opengl.GLES20;
 
-public class QuadProgram extends ShaderProgram {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.shaders:
+//            ShaderProgram, Shader, ShaderPreprocessor
+
+public class QuadProgram extends ShaderProgram
+{
+
     public int sTexture;
     public int uColor;
     public int uColorize;
@@ -12,27 +21,30 @@ public class QuadProgram extends ShaderProgram {
     public int vPosition;
     public int vTexCoord;
 
-    public QuadProgram() {
+    public QuadProgram()
+    {
         super(Shader.QuadVertexShader, Shader.QuadFragmentShader);
     }
 
-    public /* bridge */ /* synthetic */ int Compile(ShaderPreprocessor shaderPreprocessor) {
-        return super.Compile(shaderPreprocessor);
+    public volatile int Compile(ShaderPreprocessor shaderpreprocessor)
+    {
+        return super.Compile(shaderpreprocessor);
     }
 
-    /* access modifiers changed from: protected */
-    public void bindVariables() {
-        this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition");
-        this.vTexCoord = GLES20.glGetAttribLocation(this.handle, "vTexCoord");
-        this.sTexture = GLES20.glGetUniformLocation(this.handle, "sTexture");
-        this.uColor = GLES20.glGetUniformLocation(this.handle, "uColor");
-        this.uColorize = GLES20.glGetUniformLocation(this.handle, "uColorize");
-        this.uPreTranslate = GLES20.glGetUniformLocation(this.handle, "uPreTranslate");
-        this.uScale = GLES20.glGetUniformLocation(this.handle, "uScale");
-        this.uPostTranslate = GLES20.glGetUniformLocation(this.handle, "uPostTranslate");
+    protected void bindVariables()
+    {
+        vPosition = GLES20.glGetAttribLocation(handle, "vPosition");
+        vTexCoord = GLES20.glGetAttribLocation(handle, "vTexCoord");
+        sTexture = GLES20.glGetUniformLocation(handle, "sTexture");
+        uColor = GLES20.glGetUniformLocation(handle, "uColor");
+        uColorize = GLES20.glGetUniformLocation(handle, "uColorize");
+        uPreTranslate = GLES20.glGetUniformLocation(handle, "uPreTranslate");
+        uScale = GLES20.glGetUniformLocation(handle, "uScale");
+        uPostTranslate = GLES20.glGetUniformLocation(handle, "uPostTranslate");
     }
 
-    public /* bridge */ /* synthetic */ int getHandle() {
+    public volatile int getHandle()
+    {
         return super.getHandle();
     }
 }

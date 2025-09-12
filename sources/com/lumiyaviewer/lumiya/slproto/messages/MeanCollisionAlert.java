@@ -1,58 +1,84 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class MeanCollisionAlert extends SLMessage {
-    public ArrayList<MeanCollision> MeanCollision_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class MeanCollision {
+public class MeanCollisionAlert extends SLMessage
+{
+    public static class MeanCollision
+    {
+
         public float Mag;
         public UUID Perp;
         public int Time;
         public int Type;
         public UUID Victim;
-    }
 
-    public MeanCollisionAlert() {
-        this.zeroCoded = true;
-    }
-
-    public int CalcPayloadSize() {
-        return (this.MeanCollision_Fields.size() * 41) + 5;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleMeanCollisionAlert(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -120);
-        byteBuffer.put((byte) this.MeanCollision_Fields.size());
-        for (MeanCollision meanCollision : this.MeanCollision_Fields) {
-            packUUID(byteBuffer, meanCollision.Victim);
-            packUUID(byteBuffer, meanCollision.Perp);
-            packInt(byteBuffer, meanCollision.Time);
-            packFloat(byteBuffer, meanCollision.Mag);
-            packByte(byteBuffer, (byte) meanCollision.Type);
+        public MeanCollision()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            MeanCollision meanCollision = new MeanCollision();
-            meanCollision.Victim = unpackUUID(byteBuffer);
-            meanCollision.Perp = unpackUUID(byteBuffer);
-            meanCollision.Time = unpackInt(byteBuffer);
-            meanCollision.Mag = unpackFloat(byteBuffer);
-            meanCollision.Type = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE;
-            this.MeanCollision_Fields.add(meanCollision);
+
+    public ArrayList MeanCollision_Fields;
+
+    public MeanCollisionAlert()
+    {
+        MeanCollision_Fields = new ArrayList();
+        zeroCoded = true;
+    }
+
+    public int CalcPayloadSize()
+    {
+        return MeanCollision_Fields.size() * 41 + 5;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleMeanCollisionAlert(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-120);
+        bytebuffer.put((byte)MeanCollision_Fields.size());
+        MeanCollision meancollision;
+        for (Iterator iterator = MeanCollision_Fields.iterator(); iterator.hasNext(); packByte(bytebuffer, (byte)meancollision.Type))
+        {
+            meancollision = (MeanCollision)iterator.next();
+            packUUID(bytebuffer, meancollision.Victim);
+            packUUID(bytebuffer, meancollision.Perp);
+            packInt(bytebuffer, meancollision.Time);
+            packFloat(bytebuffer, meancollision.Mag);
         }
+
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            MeanCollision meancollision = new MeanCollision();
+            meancollision.Victim = unpackUUID(bytebuffer);
+            meancollision.Perp = unpackUUID(bytebuffer);
+            meancollision.Time = unpackInt(bytebuffer);
+            meancollision.Mag = unpackFloat(bytebuffer);
+            meancollision.Type = unpackByte(bytebuffer) & 0xff;
+            MeanCollision_Fields.add(meancollision);
+        }
+
     }
 }

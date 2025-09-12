@@ -1,7 +1,13 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.utils;
 
 import java.util.List;
 
-public interface HasList<V> {
-    List<V> getList(boolean z);
+public interface HasList
+{
+
+    public abstract List getList(boolean flag);
 }

@@ -1,97 +1,151 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.assets;
 
 import com.lumiyaviewer.lumiya.Debug;
+import com.lumiyaviewer.lumiya.react.Subscribable;
 import com.lumiyaviewer.lumiya.react.Subscription;
-import com.lumiyaviewer.lumiya.slproto.assets.SLWearableData;
+import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.slproto.users.manager.assets.AssetData;
 import com.lumiyaviewer.lumiya.slproto.users.manager.assets.AssetKey;
+import com.lumiyaviewer.lumiya.slproto.users.manager.assets.AssetResponseCacher;
 import java.util.UUID;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class SLWearable implements Subscription.OnData<AssetData>, Subscription.OnError {
-    @Nonnull
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.assets:
+//            SLWearableType, SLWearableData
+
+public class SLWearable
+    implements com.lumiyaviewer.lumiya.react.Subscription.OnData, com.lumiyaviewer.lumiya.react.Subscription.OnError
+{
+    public static interface OnWearableStatusChangeListener
+    {
+
+        public abstract void onWearableStatusChanged(SLWearable slwearable);
+    }
+
+
     public final UUID assetID;
-    private final Subscription<AssetKey, AssetData> assetSubscription;
+    private final Subscription assetSubscription;
     private String inventoryName;
-    private volatile boolean isFailed = false;
-    @Nonnull
+    private volatile boolean isFailed;
     public final UUID itemID;
-    @Nullable
     private final OnWearableStatusChangeListener statusChangeListener;
-    @Nullable
     private volatile SLWearableData wearableData;
 
-    public interface OnWearableStatusChangeListener {
-        void onWearableStatusChanged(SLWearable sLWearable);
+    public SLWearable(UserManager usermanager, Executor executor, UUID uuid, UUID uuid1, SLWearableType slwearabletype, OnWearableStatusChangeListener onwearablestatuschangelistener)
+    {
+        itemID = uuid;
+        assetID = uuid1;
+        isFailed = false;
+        statusChangeListener = onwearablestatuschangelistener;
+        Debug.Printf("Wearable: subscribing for wearable %s", new Object[] {
+            uuid1
+        });
+        assetSubscription = usermanager.getAssetResponseCacher().getPool().subscribe(AssetKey.createAssetKey(null, null, uuid1, slwearabletype.getAssetType().getTypeCode()), executor, this, this);
     }
 
-    public SLWearable(@Nonnull UserManager userManager, @Nullable Executor executor, @Nonnull UUID uuid, @Nonnull UUID uuid2, @Nonnull SLWearableType sLWearableType, @Nullable OnWearableStatusChangeListener onWearableStatusChangeListener) {
-        this.itemID = uuid;
-        this.assetID = uuid2;
-        this.statusChangeListener = onWearableStatusChangeListener;
-        Debug.Printf("Wearable: subscribing for wearable %s", uuid2);
-        this.assetSubscription = userManager.getAssetResponseCacher().getPool().subscribe(AssetKey.createAssetKey((UUID) null, (UUID) null, uuid2, sLWearableType.getAssetType().getTypeCode()), executor, this, this);
+    public void dispose()
+    {
+        Debug.Printf("Wearable: unsubscribing for wearable %s", new Object[] {
+            assetID
+        });
+        assetSubscription.unsubscribe();
     }
 
-    public void dispose() {
-        Debug.Printf("Wearable: unsubscribing for wearable %s", this.assetID);
-        this.assetSubscription.unsubscribe();
+    public boolean getIsFailed()
+    {
+        return isFailed;
     }
 
-    public boolean getIsFailed() {
-        return this.isFailed;
+    public boolean getIsValid()
+    {
+        return wearableData != null;
     }
 
-    public boolean getIsValid() {
-        return this.wearableData != null;
-    }
-
-    public String getName() {
-        if (this.inventoryName != null) {
-            return this.inventoryName;
+    public String getName()
+    {
+        if (inventoryName != null)
+        {
+            return inventoryName;
         }
-        SLWearableData sLWearableData = this.wearableData;
-        return sLWearableData != null ? sLWearableData.name : this.isFailed ? "(Failed to load)" : "(loading)";
+        SLWearableData slwearabledata = wearableData;
+        if (slwearabledata != null)
+        {
+            return slwearabledata.name;
+        }
+        if (isFailed)
+        {
+            return "(Failed to load)";
+        } else
+        {
+            return "(loading)";
+        }
     }
 
-    @Nullable
-    public SLWearableData getWearableData() {
-        return this.wearableData;
+    public SLWearableData getWearableData()
+    {
+        return wearableData;
     }
 
-    public void onData(AssetData assetData) {
-        if (assetData != null) {
-            if (assetData.getStatus() != 1 || assetData.getData() == null) {
-                Debug.Printf("Wearable: asset transfer failed for asset %s", this.assetID);
-                this.isFailed = true;
-            } else {
-                try {
-                    this.wearableData = new SLWearableData(assetData.getData());
-                    Debug.Printf("Wearable: retrieved wearable data for asset %s", this.assetID);
-                    this.isFailed = false;
-                } catch (SLWearableData.WearableFormatException e) {
-                    Debug.Printf("Wearable: failed to parse wearable data for asset %s", this.assetID);
-                    this.isFailed = true;
+    public void onData(AssetData assetdata)
+    {
+        if (assetdata != null)
+        {
+            if (assetdata.getStatus() != 1 || assetdata.getData() == null)
+            {
+                Debug.Printf("Wearable: asset transfer failed for asset %s", new Object[] {
+                    assetID
+                });
+                isFailed = true;
+            } else
+            {
+                try
+                {
+                    wearableData = new SLWearableData(assetdata.getData());
+                    Debug.Printf("Wearable: retrieved wearable data for asset %s", new Object[] {
+                        assetID
+                    });
+                    isFailed = false;
+                }
+                // Misplaced declaration of an exception variable
+                catch (AssetData assetdata)
+                {
+                    Debug.Printf("Wearable: failed to parse wearable data for asset %s", new Object[] {
+                        assetID
+                    });
+                    isFailed = true;
                 }
             }
-            if (this.statusChangeListener != null) {
-                this.statusChangeListener.onWearableStatusChanged(this);
+            if (statusChangeListener != null)
+            {
+                statusChangeListener.onWearableStatusChanged(this);
             }
         }
     }
 
-    public void onError(Throwable th) {
-        Debug.Printf("Wearable: got error for asset %s", this.assetID);
-        this.isFailed = true;
-        if (this.statusChangeListener != null) {
-            this.statusChangeListener.onWearableStatusChanged(this);
+    public volatile void onData(Object obj)
+    {
+        onData((AssetData)obj);
+    }
+
+    public void onError(Throwable throwable)
+    {
+        Debug.Printf("Wearable: got error for asset %s", new Object[] {
+            assetID
+        });
+        isFailed = true;
+        if (statusChangeListener != null)
+        {
+            statusChangeListener.onWearableStatusChanged(this);
         }
     }
 
-    public void setInventoryName(String str) {
-        this.inventoryName = str;
+    public void setInventoryName(String s)
+    {
+        inventoryName = s;
     }
 }

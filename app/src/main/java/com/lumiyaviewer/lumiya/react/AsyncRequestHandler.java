@@ -15,8 +15,9 @@ public class AsyncRequestHandler<K> implements RequestHandler<K> {
         this.baseHandler = requestHandler;
     }
 
-    /* renamed from: handleAsyncRequest */
-    /* synthetic */ void handleAsyncRequest(Object obj) {
+    /* access modifiers changed from: private */
+    /* renamed from: handleAsyncRequestInternal */
+    public /* synthetic */ void m17lambda$com_lumiyaviewer_lumiya_react_AsyncRequestHandler_553(Object obj) {
         this.baseHandler.onRequest(obj);
     }
 

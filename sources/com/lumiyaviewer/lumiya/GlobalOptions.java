@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya;
 
 import android.content.Context;
@@ -6,6 +10,7 @@ import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.lumiyaviewer.lumiya.eventbus.EventBus;
 import com.lumiyaviewer.lumiya.render.TextureMemoryTracker;
 import com.lumiyaviewer.lumiya.res.mesh.MeshCache;
@@ -20,427 +25,678 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class GlobalOptions implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private boolean RLVEnabled = false;
-    private boolean advancedRendering = true;
-    private boolean autoReconnect = true;
-    private final AtomicReference<ImmutableList<File>> availableCacheDirs = new AtomicReference<>(ImmutableList.of());
-    private final AtomicReference<File> baseCacheDir = new AtomicReference<>();
-    private final AtomicBoolean cacheDirUsed = new AtomicBoolean(false);
-    private boolean cloudSyncEnabled = false;
-    private boolean compressedTextures = true;
-    private float forceDaylightHour = 0.5f;
-    private boolean forceDaylightTime = false;
-    private boolean highQualityTextures = false;
-    private boolean hoverTextEnableHUDs = true;
-    private boolean hoverTextEnableObjects = false;
-    private boolean keepWifiOn = false;
-    private boolean legacyUserNames = false;
-    private int maxReconnectAttempts = 10;
-    private int maxTextureDownloads = 2;
-    private MeshRendering meshRendering = MeshRendering.medium;
-    private boolean renderClouds = true;
-    private boolean showTimestamps = true;
-    private boolean terrainTextures = true;
-    private int themeResourceId = R.style.Theme_Lumiya_Light;
-    private boolean useFXAA = false;
-    private boolean voiceEnabled = false;
+// Referenced classes of package com.lumiyaviewer.lumiya:
+//            Debug, LumiyaApp
 
-    public static class GlobalOptionsChangedEvent {
+public class GlobalOptions
+    implements android.content.SharedPreferences.OnSharedPreferenceChangeListener
+{
+    public static class GlobalOptionsChangedEvent
+    {
+
         public final SharedPreferences preferences;
 
-        public GlobalOptionsChangedEvent(SharedPreferences sharedPreferences) {
-            this.preferences = sharedPreferences;
+        public GlobalOptionsChangedEvent(SharedPreferences sharedpreferences)
+        {
+            preferences = sharedpreferences;
         }
     }
 
-    private static class InstanceHolder {
-        /* access modifiers changed from: private */
-        public static final GlobalOptions Instance = new GlobalOptions();
+    private static class InstanceHolder
+    {
 
-        private InstanceHolder() {
+        private static final GlobalOptions Instance = new GlobalOptions();
+
+        static GlobalOptions _2D_get0()
+        {
+            return Instance;
+        }
+
+
+        private InstanceHolder()
+        {
         }
     }
 
-    public enum MeshRendering {
-        high("high_lod"),
-        medium("medium_lod"),
-        low("low_lod"),
-        lowest("lowest_lod"),
-        disabled((String) null);
-        
+    public static final class MeshRendering extends Enum
+    {
+
+        private static final MeshRendering $VALUES[];
+        public static final MeshRendering disabled;
+        public static final MeshRendering high;
+        public static final MeshRendering low;
+        public static final MeshRendering lowest;
+        public static final MeshRendering medium;
         private String lodName;
 
-        private MeshRendering(String str) {
-            this.lodName = str;
+        public static MeshRendering valueOf(String s)
+        {
+            return (MeshRendering)Enum.valueOf(com/lumiyaviewer/lumiya/GlobalOptions$MeshRendering, s);
         }
 
-        public String getLODName() {
-            return this.lodName;
+        public static MeshRendering[] values()
+        {
+            return $VALUES;
+        }
+
+        public String getLODName()
+        {
+            return lodName;
+        }
+
+        static 
+        {
+            high = new MeshRendering("high", 0, "high_lod");
+            medium = new MeshRendering("medium", 1, "medium_lod");
+            low = new MeshRendering("low", 2, "low_lod");
+            lowest = new MeshRendering("lowest", 3, "lowest_lod");
+            disabled = new MeshRendering("disabled", 4, null);
+            $VALUES = (new MeshRendering[] {
+                high, medium, low, lowest, disabled
+            });
+        }
+
+        private MeshRendering(String s, int i, String s1)
+        {
+            super(s, i);
+            lodName = s1;
         }
     }
 
-    public static GlobalOptions getInstance() {
-        return InstanceHolder.Instance;
+
+    private boolean RLVEnabled;
+    private boolean advancedRendering;
+    private boolean autoReconnect;
+    private final AtomicReference availableCacheDirs = new AtomicReference(ImmutableList.of());
+    private final AtomicReference baseCacheDir = new AtomicReference();
+    private final AtomicBoolean cacheDirUsed = new AtomicBoolean(false);
+    private boolean cloudSyncEnabled;
+    private boolean compressedTextures;
+    private float forceDaylightHour;
+    private boolean forceDaylightTime;
+    private boolean highQualityTextures;
+    private boolean hoverTextEnableHUDs;
+    private boolean hoverTextEnableObjects;
+    private boolean keepWifiOn;
+    private boolean legacyUserNames;
+    private int maxReconnectAttempts;
+    private int maxTextureDownloads;
+    private MeshRendering meshRendering;
+    private boolean renderClouds;
+    private boolean showTimestamps;
+    private boolean terrainTextures;
+    private int themeResourceId;
+    private boolean useFXAA;
+    private boolean voiceEnabled;
+
+    public GlobalOptions()
+    {
+        themeResourceId = 0x7f0b002c;
+        legacyUserNames = false;
+        showTimestamps = true;
+        highQualityTextures = false;
+        compressedTextures = true;
+        maxTextureDownloads = 2;
+        terrainTextures = true;
+        meshRendering = MeshRendering.medium;
+        RLVEnabled = false;
+        keepWifiOn = false;
+        autoReconnect = true;
+        maxReconnectAttempts = 10;
+        hoverTextEnableHUDs = true;
+        hoverTextEnableObjects = false;
+        advancedRendering = true;
+        useFXAA = false;
+        renderClouds = true;
+        forceDaylightTime = false;
+        forceDaylightHour = 0.5F;
+        cloudSyncEnabled = false;
+        voiceEnabled = false;
     }
 
-    private static long getTotalMemory() {
-        long j = 0;
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader("/proc/meminfo"), 8192);
-            while (true) {
-                String readLine = bufferedReader.readLine();
-                if (readLine == null) {
-                    break;
-                } else if (readLine.startsWith("MemTotal:")) {
-                    String[] split = readLine.split("\\s+");
-                    if (split.length >= 2) {
-                        j = Long.parseLong(split[1]);
-                    }
-                    for (int i = 0; i < split.length; i++) {
-                        Debug.Log("Memory " + i + ":" + split[i]);
-                    }
-                }
-            }
-            bufferedReader.close();
-        } catch (Exception e) {
+    public static GlobalOptions getInstance()
+    {
+        return InstanceHolder._2D_get0();
+    }
+
+    private static long getTotalMemory()
+    {
+        int i;
+        long l2 = 0L;
+        long l1 = l2;
+        BufferedReader bufferedreader;
+        String s;
+        String as[];
+        long l;
+        long l3;
+        try
+        {
+            bufferedreader = new BufferedReader(new FileReader("/proc/meminfo"), 8192);
         }
-        return j;
+        catch (Exception exception)
+        {
+            return l1;
+        }
+        l1 = l2;
+        s = bufferedreader.readLine();
+        l3 = l2;
+        if (s == null) goto _L2; else goto _L1
+_L1:
+        l1 = l2;
+        if (!s.startsWith("MemTotal:"))
+        {
+            break MISSING_BLOCK_LABEL_27;
+        }
+        l1 = l2;
+        as = s.split("\\s+");
+        l1 = l2;
+        l = l2;
+        if (as.length < 2) goto _L4; else goto _L3
+_L3:
+        l1 = l2;
+        l = Long.parseLong(as[1]);
+          goto _L4
+_L7:
+        l3 = l;
+        l1 = l;
+        if (i >= as.length) goto _L2; else goto _L5
+_L5:
+        l1 = l;
+        Debug.Log((new StringBuilder()).append("Memory ").append(i).append(":").append(as[i]).toString());
+        i++;
+        continue; /* Loop/switch isn't completed */
+_L2:
+        l1 = l3;
+        bufferedreader.close();
+        return l3;
+_L4:
+        i = 0;
+        if (true) goto _L7; else goto _L6
+_L6:
     }
 
-    private boolean isCacheDirectoryWriteable(@Nullable File file) {
-        if (file == null) {
+    private boolean isCacheDirectoryWriteable(File file)
+    {
+        if (file == null)
+        {
             return false;
         }
-        try {
-            file.mkdirs();
-            if (!file.exists()) {
-                return false;
-            }
-            File file2 = new File(file, ".tmp");
-            if (file2.exists()) {
-                file2.delete();
-                if (file2.exists()) {
-                    return false;
-                }
-            }
-            file2.createNewFile();
-            if (!file2.exists()) {
-                return false;
-            }
-            file2.delete();
-            return true;
-        } catch (IOException e) {
+        file.mkdirs();
+        if (!file.exists())
+        {
             return false;
         }
+        file = new File(file, ".tmp");
+        if (!file.exists())
+        {
+            break MISSING_BLOCK_LABEL_52;
+        }
+        file.delete();
+        if (file.exists())
+        {
+            return false;
+        }
+        file.createNewFile();
+        if (!file.exists())
+        {
+            return false;
+        }
+        try
+        {
+            file.delete();
+        }
+        // Misplaced declaration of an exception variable
+        catch (File file)
+        {
+            return false;
+        }
+        return true;
     }
 
-    private void updateCacheDir(Context context, SharedPreferences sharedPreferences) {
+    private void updateCacheDir(Context context, SharedPreferences sharedpreferences)
+    {
         File file;
-        File file2;
-        File file3 = null;
-        File file4 = this.baseCacheDir.get();
-        String string = sharedPreferences.getString("cache_location", "");
-        if (file4 != null && isCacheDirectoryWriteable(file4) && string.isEmpty()) {
-            file3 = file4;
-        }
-        ArrayList arrayList = new ArrayList();
-        File[] externalCacheDirs = ContextCompat.getExternalCacheDirs(context);
-        if (externalCacheDirs != null) {
-            for (File file5 : externalCacheDirs) {
-                if (file5 != null) {
-                    arrayList.add(file5);
+        String s;
+        com.google.common.collect.ImmutableList.Builder builder;
+        Iterator iterator;
+        ArrayList arraylist = null;
+        file = (File)baseCacheDir.get();
+        s = sharedpreferences.getString("cache_location", "");
+        sharedpreferences = arraylist;
+        if (file != null)
+        {
+            sharedpreferences = arraylist;
+            if (isCacheDirectoryWriteable(file))
+            {
+                sharedpreferences = arraylist;
+                if (s.isEmpty())
+                {
+                    sharedpreferences = file;
                 }
             }
         }
-        File cacheDir = context.getCacheDir();
-        if (cacheDir != null) {
-            arrayList.add(cacheDir);
-        }
-        ImmutableList.Builder builder = ImmutableList.builder();
-        Iterator it = arrayList.iterator();
-        while (true) {
-            file2 = file;
-            if (!it.hasNext()) {
-                break;
-            }
-            file = (File) it.next();
-            Debug.Printf("Cache: checking cache location %s", file);
-            if (isCacheDirectoryWriteable(file)) {
-                builder.add((Object) file);
-                if (file2 != null) {
-                    if (string.isEmpty()) {
-                        file = file2;
-                    } else if (file.getAbsolutePath().equals(string)) {
-                    }
+        arraylist = new ArrayList();
+        File afile[] = ContextCompat.getExternalCacheDirs(context);
+        if (afile != null)
+        {
+            int j = afile.length;
+            for (int i = 0; i < j; i++)
+            {
+                File file3 = afile[i];
+                if (file3 != null)
+                {
+                    arraylist.add(file3);
                 }
             }
-            file = file2;
+
         }
-        if (file2 == null) {
-            file2 = context.getCacheDir();
+        File file1 = context.getCacheDir();
+        if (file1 != null)
+        {
+            arraylist.add(file1);
         }
-        Debug.Printf("Cache: cache location set to %s", file2.getAbsolutePath());
-        this.availableCacheDirs.set(builder.build());
-        this.baseCacheDir.set(file2);
-        try {
-            file2.mkdirs();
-            if (file2.exists()) {
-                new File(file2, ".nomedia").createNewFile();
+        builder = ImmutableList.builder();
+        iterator = arraylist.iterator();
+_L2:
+        Object obj;
+        if (!iterator.hasNext())
+        {
+            break; /* Loop/switch isn't completed */
+        }
+        File file2 = (File)iterator.next();
+        Debug.Printf("Cache: checking cache location %s", new Object[] {
+            file2
+        });
+        if (!isCacheDirectoryWriteable(file2))
+        {
+            break MISSING_BLOCK_LABEL_362;
+        }
+        builder.add(file2);
+        obj = file2;
+        if (sharedpreferences != null)
+        {
+            if (!s.isEmpty())
+            {
+                if (!file2.getAbsolutePath().equals(s))
+                {
+                    break MISSING_BLOCK_LABEL_362;
+                }
+                obj = file2;
+            } else
+            {
+                obj = sharedpreferences;
             }
-        } catch (Exception e) {
         }
-        if (file4 != null && !file4.equals(file2)) {
+_L3:
+        sharedpreferences = ((SharedPreferences) (obj));
+        if (true) goto _L2; else goto _L1
+_L1:
+        obj = sharedpreferences;
+        if (sharedpreferences == null)
+        {
+            obj = context.getCacheDir();
+        }
+        Debug.Printf("Cache: cache location set to %s", new Object[] {
+            ((File) (obj)).getAbsolutePath()
+        });
+        availableCacheDirs.set(builder.build());
+        baseCacheDir.set(obj);
+        try
+        {
+            ((File) (obj)).mkdirs();
+            if (((File) (obj)).exists())
+            {
+                (new File(((File) (obj)), ".nomedia")).createNewFile();
+            }
+        }
+        // Misplaced declaration of an exception variable
+        catch (Context context) { }
+        if (file != null && !file.equals(obj))
+        {
             Debug.Printf("Cache: Cache location has been changed.", new Object[0]);
             TextureCache.getInstance().onCacheDirChanged();
             MeshCache.onCacheDirChanged();
         }
+        return;
+        obj = sharedpreferences;
+          goto _L3
     }
 
-    private void updateNotificationSoundDefault(SharedPreferences sharedPreferences, NotificationType notificationType) {
-        NotificationSounds notificationSounds;
-        if (!sharedPreferences.contains(notificationType.getRingtoneKey()) && (notificationSounds = NotificationSounds.defaultSounds.get(notificationType)) != null) {
-            Uri uri = notificationSounds.getUri();
-            SharedPreferences.Editor edit = sharedPreferences.edit();
-            edit.putString(notificationType.getRingtoneKey(), uri.toString());
-            edit.apply();
-            Debug.Printf("NotificationSounds: Updated %s preference to %s", notificationType.getRingtoneKey(), uri);
+    private void updateNotificationSoundDefault(SharedPreferences sharedpreferences, NotificationType notificationtype)
+    {
+        if (!sharedpreferences.contains(notificationtype.getRingtoneKey()))
+        {
+            Object obj = (NotificationSounds)NotificationSounds.defaultSounds.get(notificationtype);
+            if (obj != null)
+            {
+                obj = ((NotificationSounds) (obj)).getUri();
+                sharedpreferences = sharedpreferences.edit();
+                sharedpreferences.putString(notificationtype.getRingtoneKey(), ((Uri) (obj)).toString());
+                sharedpreferences.apply();
+                Debug.Printf("NotificationSounds: Updated %s preference to %s", new Object[] {
+                    notificationtype.getRingtoneKey(), obj
+                });
+            }
         }
     }
 
-    public void enableVoice() {
-        SharedPreferences.Editor edit = LumiyaApp.getDefaultSharedPreferences().edit();
-        edit.putBoolean("enableVoice", true);
-        edit.apply();
+    public void enableVoice()
+    {
+        android.content.SharedPreferences.Editor editor = LumiyaApp.getDefaultSharedPreferences().edit();
+        editor.putBoolean("enableVoice", true);
+        editor.apply();
     }
 
-    public boolean getAdvancedRendering() {
-        return this.advancedRendering;
+    public boolean getAdvancedRendering()
+    {
+        return advancedRendering;
     }
 
-    public final boolean getAutoReconnect() {
-        return this.autoReconnect;
+    public final boolean getAutoReconnect()
+    {
+        return autoReconnect;
     }
 
-    public ImmutableList<File> getAvailableCacheDirs() {
-        return this.availableCacheDirs.get();
+    public ImmutableList getAvailableCacheDirs()
+    {
+        return (ImmutableList)availableCacheDirs.get();
     }
 
-    public File getBaseCacheDir() {
-        return this.baseCacheDir.get();
+    public File getBaseCacheDir()
+    {
+        return (File)baseCacheDir.get();
     }
 
-    public final File getCacheDir(@Nonnull String str) {
-        this.cacheDirUsed.set(true);
-        File file = this.baseCacheDir.get();
-        if (file == null) {
+    public final File getCacheDir(String s)
+    {
+        cacheDirUsed.set(true);
+        File file1 = (File)baseCacheDir.get();
+        File file = file1;
+        if (file1 == null)
+        {
             file = LumiyaApp.getContext().getCacheDir();
         }
-        File file2 = new File(file, str);
-        try {
-            file2.mkdirs();
-        } catch (Exception e) {
+        s = new File(file, s);
+        try
+        {
+            s.mkdirs();
         }
-        return file2;
+        catch (Exception exception)
+        {
+            return s;
+        }
+        return s;
     }
 
-    public final boolean getCompressedTextures() {
-        return this.compressedTextures;
+    public final boolean getCompressedTextures()
+    {
+        return compressedTextures;
     }
 
-    public float getForceDaylightHour() {
-        return this.forceDaylightHour;
+    public float getForceDaylightHour()
+    {
+        return forceDaylightHour;
     }
 
-    public boolean getForceDaylightTime() {
-        return this.forceDaylightTime;
+    public boolean getForceDaylightTime()
+    {
+        return forceDaylightTime;
     }
 
-    public final boolean getHighQualityTextures() {
-        return this.highQualityTextures;
+    public final boolean getHighQualityTextures()
+    {
+        return highQualityTextures;
     }
 
-    public final boolean getHoverTextEnableHUDs() {
-        return this.hoverTextEnableHUDs;
+    public final boolean getHoverTextEnableHUDs()
+    {
+        return hoverTextEnableHUDs;
     }
 
-    public final boolean getHoverTextEnableObjects() {
-        return this.hoverTextEnableObjects;
+    public final boolean getHoverTextEnableObjects()
+    {
+        return hoverTextEnableObjects;
     }
 
-    public boolean getKeepWifiOn() {
-        return this.keepWifiOn;
+    public boolean getKeepWifiOn()
+    {
+        return keepWifiOn;
     }
 
-    public final int getMaxReconnectAttempts() {
-        return this.maxReconnectAttempts;
+    public final int getMaxReconnectAttempts()
+    {
+        return maxReconnectAttempts;
     }
 
-    public final int getMaxTextureDownloads() {
-        return this.maxTextureDownloads;
+    public final int getMaxTextureDownloads()
+    {
+        return maxTextureDownloads;
     }
 
-    public final MeshRendering getMeshRendering() {
-        return this.meshRendering;
+    public final MeshRendering getMeshRendering()
+    {
+        return meshRendering;
     }
 
-    public final boolean getRLVEnabled() {
-        return this.RLVEnabled;
+    public final boolean getRLVEnabled()
+    {
+        return RLVEnabled;
     }
 
-    public boolean getRenderClouds() {
-        return this.renderClouds;
+    public boolean getRenderClouds()
+    {
+        return renderClouds;
     }
 
-    public boolean getShowTimestamps() {
-        return this.showTimestamps;
+    public boolean getShowTimestamps()
+    {
+        return showTimestamps;
     }
 
-    public final boolean getTerrainTextures() {
-        return this.terrainTextures;
+    public final boolean getTerrainTextures()
+    {
+        return terrainTextures;
     }
 
-    public int getThemeResourceId() {
-        return this.themeResourceId;
+    public int getThemeResourceId()
+    {
+        return themeResourceId;
     }
 
-    public boolean getUseFXAA() {
-        return this.useFXAA;
+    public boolean getUseFXAA()
+    {
+        return useFXAA;
     }
 
-    public boolean getVoiceEnabled() {
-        return this.voiceEnabled;
+    public boolean getVoiceEnabled()
+    {
+        return voiceEnabled;
     }
 
-    public void initialize() {
-        SharedPreferences defaultSharedPreferences = LumiyaApp.getDefaultSharedPreferences();
-        updateFromPreferences(LumiyaApp.getContext(), defaultSharedPreferences);
-        defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this);
+    public void initialize()
+    {
+        SharedPreferences sharedpreferences = LumiyaApp.getDefaultSharedPreferences();
+        updateFromPreferences(LumiyaApp.getContext(), sharedpreferences);
+        sharedpreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
-    public boolean isCacheDirUsed() {
-        return this.cacheDirUsed.get();
+    public boolean isCacheDirUsed()
+    {
+        return cacheDirUsed.get();
     }
 
-    public boolean isLegacyUserNames() {
-        return this.legacyUserNames;
+    public boolean isLegacyUserNames()
+    {
+        return legacyUserNames;
     }
 
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String str) {
-        updateFromPreferences(LumiyaApp.getContext(), sharedPreferences);
-        EventBus.getInstance().publish(new GlobalOptionsChangedEvent(sharedPreferences));
+    public void onSharedPreferenceChanged(SharedPreferences sharedpreferences, String s)
+    {
+        updateFromPreferences(LumiyaApp.getContext(), sharedpreferences);
+        EventBus.getInstance().publish(new GlobalOptionsChangedEvent(sharedpreferences));
     }
 
-    public void updateFromPreferences(Context context, SharedPreferences sharedPreferences) {
+    public void updateFromPreferences(Context context, SharedPreferences sharedpreferences)
+    {
         int i;
         Debug.Printf("Updating options from preferences.", new Object[0]);
-        updateNotificationSoundDefault(sharedPreferences, NotificationType.Private);
-        updateNotificationSoundDefault(sharedPreferences, NotificationType.Group);
-        updateNotificationSoundDefault(sharedPreferences, NotificationType.LocalChat);
-        if (!sharedPreferences.getBoolean("system_defaults_set", false)) {
-            SharedPreferences.Editor edit = sharedPreferences.edit();
-            long totalMemory = getTotalMemory();
-            int availableProcessors = Runtime.getRuntime().availableProcessors();
-            if (availableProcessors < 2 || totalMemory <= 524288) {
-                edit.putBoolean("high_quality_textures", false);
-            } else {
-                edit.putBoolean("high_quality_textures", true);
+        updateNotificationSoundDefault(sharedpreferences, NotificationType.Private);
+        updateNotificationSoundDefault(sharedpreferences, NotificationType.Group);
+        updateNotificationSoundDefault(sharedpreferences, NotificationType.LocalChat);
+        Object obj;
+        boolean flag;
+        if (!sharedpreferences.getBoolean("system_defaults_set", false))
+        {
+            obj = sharedpreferences.edit();
+            long l = getTotalMemory();
+            int j = Runtime.getRuntime().availableProcessors();
+            int k;
+            if (j >= 2 && l > 0x80000L)
+            {
+                ((android.content.SharedPreferences.Editor) (obj)).putBoolean("high_quality_textures", true);
+            } else
+            {
+                ((android.content.SharedPreferences.Editor) (obj)).putBoolean("high_quality_textures", false);
             }
-            int i2 = 64;
-            if (totalMemory != 0) {
-                i2 = totalMemory <= 262144 ? 32 : totalMemory <= 524288 ? 64 : 128;
+            i = 64;
+            if (l != 0L)
+            {
+                if (l <= 0x40000L)
+                {
+                    i = 32;
+                } else
+                if (l <= 0x80000L)
+                {
+                    i = 64;
+                } else
+                {
+                    i = 128;
+                }
             }
-            edit.putString("texture_memory_limit", Integer.toString(i2));
-            int i3 = 2;
-            if (availableProcessors >= 4 && totalMemory > 524288) {
-                i3 = 8;
-            } else if (availableProcessors >= 2) {
-                i3 = 4;
-            }
-            edit.putString("max_texture_downloads", Integer.toString(i3));
-            edit.putBoolean("system_defaults_set", true);
-            edit.commit();
-        }
-        int i4 = this.themeResourceId;
-        String nullToEmpty = Strings.nullToEmpty(sharedPreferences.getString("theme", "light"));
-        if (nullToEmpty.equals("dark")) {
-            this.themeResourceId = R.style.Theme_Lumiya;
-        } else if (nullToEmpty.equals("pink")) {
-            this.themeResourceId = R.style.Theme_Lumiya_Pink;
-        } else {
-            this.themeResourceId = R.style.Theme_Lumiya_Light;
-        }
-        this.legacyUserNames = sharedPreferences.getBoolean("legacyUserNames", false);
-        this.showTimestamps = sharedPreferences.getBoolean("chatTimestamps", true);
-        this.highQualityTextures = sharedPreferences.getBoolean("high_quality_textures", false);
-        this.compressedTextures = sharedPreferences.getBoolean("compressed_textures", true);
-        this.keepWifiOn = sharedPreferences.getBoolean("keep_wifi_on", true);
-        this.cloudSyncEnabled = sharedPreferences.getBoolean("sync_to_gdrive", false);
-        this.voiceEnabled = sharedPreferences.getBoolean("enableVoice", false) ? VoicePluginServiceConnection.isPluginSupported() : false;
-        try {
-            i = Integer.parseInt(sharedPreferences.getString("max_texture_downloads", "2"));
-            if (i < 1) {
-                i = 1;
-            }
-        } catch (Exception e) {
+            ((android.content.SharedPreferences.Editor) (obj)).putString("texture_memory_limit", Integer.toString(i));
             i = 2;
+            if (j >= 4 && l > 0x80000L)
+            {
+                i = 8;
+            } else
+            if (j >= 2)
+            {
+                i = 4;
+            }
+            ((android.content.SharedPreferences.Editor) (obj)).putString("max_texture_downloads", Integer.toString(i));
+            ((android.content.SharedPreferences.Editor) (obj)).putBoolean("system_defaults_set", true);
+            ((android.content.SharedPreferences.Editor) (obj)).commit();
         }
-        if (i != this.maxTextureDownloads) {
-            this.maxTextureDownloads = i;
-            TextureCache.getInstance().setMaxTextureDownloads(this.maxTextureDownloads);
+        k = themeResourceId;
+        obj = Strings.nullToEmpty(sharedpreferences.getString("theme", "light"));
+        if (((String) (obj)).equals("dark"))
+        {
+            themeResourceId = 0x7f0b002b;
+        } else
+        if (((String) (obj)).equals("pink"))
+        {
+            themeResourceId = 0x7f0b002f;
+        } else
+        {
+            themeResourceId = 0x7f0b002c;
         }
-        this.terrainTextures = sharedPreferences.getBoolean("terrain_textures", true);
-        int i5 = 64;
-        try {
-            i5 = Integer.parseInt(sharedPreferences.getString("texture_memory_limit", "64"));
-        } catch (Exception e2) {
+        legacyUserNames = sharedpreferences.getBoolean("legacyUserNames", false);
+        showTimestamps = sharedpreferences.getBoolean("chatTimestamps", true);
+        highQualityTextures = sharedpreferences.getBoolean("high_quality_textures", false);
+        compressedTextures = sharedpreferences.getBoolean("compressed_textures", true);
+        keepWifiOn = sharedpreferences.getBoolean("keep_wifi_on", true);
+        cloudSyncEnabled = sharedpreferences.getBoolean("sync_to_gdrive", false);
+        if (sharedpreferences.getBoolean("enableVoice", false))
+        {
+            flag = VoicePluginServiceConnection.isPluginSupported();
+        } else
+        {
+            flag = false;
         }
-        try {
-            this.meshRendering = MeshRendering.valueOf(sharedPreferences.getString("mesh_rendering", "high"));
-        } catch (Exception e3) {
+        voiceEnabled = flag;
+        j = Integer.parseInt(sharedpreferences.getString("max_texture_downloads", "2"));
+        i = j;
+        if (j < 1)
+        {
+            i = 1;
         }
-        TextureMemoryTracker.setMemoryLimit(i5 * 1024 * 1024);
-        this.RLVEnabled = sharedPreferences.getBoolean("rlv_enabled", false);
-        this.autoReconnect = sharedPreferences.getBoolean("auto_reconnect", true);
-        try {
-            this.maxReconnectAttempts = Integer.parseInt(sharedPreferences.getString("reconnect_attempts", "10"));
-        } catch (Exception e4) {
+_L1:
+        if (i != maxTextureDownloads)
+        {
+            maxTextureDownloads = i;
+            TextureCache.getInstance().setMaxTextureDownloads(maxTextureDownloads);
         }
-        updateCacheDir(context, sharedPreferences);
-        String string = sharedPreferences.getString("hover_text", "huds");
-        if (string.equals("all")) {
-            this.hoverTextEnableHUDs = true;
-            this.hoverTextEnableObjects = true;
-        } else if (string.equals("none")) {
-            this.hoverTextEnableHUDs = false;
-            this.hoverTextEnableObjects = false;
-        } else {
-            this.hoverTextEnableHUDs = true;
-            this.hoverTextEnableObjects = false;
+        terrainTextures = sharedpreferences.getBoolean("terrain_textures", true);
+        i = 64;
+        j = Integer.parseInt(sharedpreferences.getString("texture_memory_limit", "64"));
+        i = j;
+_L2:
+        Exception exception;
+        try
+        {
+            meshRendering = MeshRendering.valueOf(sharedpreferences.getString("mesh_rendering", "high"));
         }
-        this.advancedRendering = sharedPreferences.getBoolean("advanced_rendering", true);
-        this.useFXAA = sharedPreferences.getBoolean("fxaa_enable", false);
-        this.renderClouds = sharedPreferences.getBoolean("clouds_enable", true);
-        String string2 = sharedPreferences.getString("render_time_of_day", "sim");
-        if (string2.equalsIgnoreCase("sim")) {
-            this.forceDaylightTime = false;
-            this.forceDaylightHour = 0.5f;
-        } else {
-            try {
-                this.forceDaylightTime = true;
-                this.forceDaylightHour = Float.parseFloat(string2);
-            } catch (Exception e5) {
-                this.forceDaylightTime = false;
-                this.forceDaylightHour = 0.5f;
+        catch (Exception exception2) { }
+        TextureMemoryTracker.setMemoryLimit(i * 1024 * 1024);
+        RLVEnabled = sharedpreferences.getBoolean("rlv_enabled", false);
+        autoReconnect = sharedpreferences.getBoolean("auto_reconnect", true);
+        try
+        {
+            maxReconnectAttempts = Integer.parseInt(sharedpreferences.getString("reconnect_attempts", "10"));
+        }
+        catch (Exception exception1) { }
+        updateCacheDir(context, sharedpreferences);
+        context = sharedpreferences.getString("hover_text", "huds");
+        if (context.equals("all"))
+        {
+            hoverTextEnableHUDs = true;
+            hoverTextEnableObjects = true;
+        } else
+        if (context.equals("none"))
+        {
+            hoverTextEnableHUDs = false;
+            hoverTextEnableObjects = false;
+        } else
+        {
+            hoverTextEnableHUDs = true;
+            hoverTextEnableObjects = false;
+        }
+        advancedRendering = sharedpreferences.getBoolean("advanced_rendering", true);
+        useFXAA = sharedpreferences.getBoolean("fxaa_enable", false);
+        renderClouds = sharedpreferences.getBoolean("clouds_enable", true);
+        context = sharedpreferences.getString("render_time_of_day", "sim");
+        if (context.equalsIgnoreCase("sim"))
+        {
+            forceDaylightTime = false;
+            forceDaylightHour = 0.5F;
+        } else
+        {
+            try
+            {
+                forceDaylightTime = true;
+                forceDaylightHour = Float.parseFloat(context);
+            }
+            // Misplaced declaration of an exception variable
+            catch (Context context)
+            {
+                forceDaylightTime = false;
+                forceDaylightHour = 0.5F;
             }
         }
-        if (i4 != this.themeResourceId) {
-            EventBus.getInstance().publish(new ThemeChangedEvent(this.themeResourceId));
+        if (k != themeResourceId)
+        {
+            EventBus.getInstance().publish(new ThemeChangedEvent(themeResourceId));
         }
+        return;
+        exception;
+        i = 2;
+          goto _L1
+        Exception exception3;
+        exception3;
+          goto _L2
     }
 }

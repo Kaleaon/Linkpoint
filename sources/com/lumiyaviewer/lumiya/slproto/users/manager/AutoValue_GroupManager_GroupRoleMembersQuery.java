@@ -1,59 +1,88 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.users.manager;
 
-import com.lumiyaviewer.lumiya.slproto.users.manager.GroupManager;
 import java.util.UUID;
 
-final class AutoValue_GroupManager_GroupRoleMembersQuery extends GroupManager.GroupRoleMembersQuery {
+final class AutoValue_GroupManager_GroupRoleMembersQuery extends GroupManager.GroupRoleMembersQuery
+{
+
     private final UUID groupID;
     private final UUID requestID;
     private final UUID roleID;
 
-    AutoValue_GroupManager_GroupRoleMembersQuery(UUID uuid, UUID uuid2, UUID uuid3) {
-        if (uuid == null) {
+    AutoValue_GroupManager_GroupRoleMembersQuery(UUID uuid, UUID uuid1, UUID uuid2)
+    {
+        if (uuid == null)
+        {
             throw new NullPointerException("Null groupID");
         }
-        this.groupID = uuid;
-        if (uuid2 == null) {
+        groupID = uuid;
+        if (uuid1 == null)
+        {
             throw new NullPointerException("Null roleID");
         }
-        this.roleID = uuid2;
-        if (uuid3 == null) {
+        roleID = uuid1;
+        if (uuid2 == null)
+        {
             throw new NullPointerException("Null requestID");
+        } else
+        {
+            requestID = uuid2;
+            return;
         }
-        this.requestID = uuid3;
     }
 
-    public boolean equals(Object obj) {
-        if (obj == this) {
+    public boolean equals(Object obj)
+    {
+        boolean flag1 = false;
+        if (obj == this)
+        {
             return true;
         }
-        if (!(obj instanceof GroupManager.GroupRoleMembersQuery)) {
+        if (obj instanceof GroupManager.GroupRoleMembersQuery)
+        {
+            obj = (GroupManager.GroupRoleMembersQuery)obj;
+            boolean flag = flag1;
+            if (groupID.equals(((GroupManager.GroupRoleMembersQuery) (obj)).groupID()))
+            {
+                flag = flag1;
+                if (roleID.equals(((GroupManager.GroupRoleMembersQuery) (obj)).roleID()))
+                {
+                    flag = requestID.equals(((GroupManager.GroupRoleMembersQuery) (obj)).requestID());
+                }
+            }
+            return flag;
+        } else
+        {
             return false;
         }
-        GroupManager.GroupRoleMembersQuery groupRoleMembersQuery = (GroupManager.GroupRoleMembersQuery) obj;
-        if (!this.groupID.equals(groupRoleMembersQuery.groupID()) || !this.roleID.equals(groupRoleMembersQuery.roleID())) {
-            return false;
-        }
-        return this.requestID.equals(groupRoleMembersQuery.requestID());
     }
 
-    public UUID groupID() {
-        return this.groupID;
+    public UUID groupID()
+    {
+        return groupID;
     }
 
-    public int hashCode() {
-        return ((((this.groupID.hashCode() ^ 1000003) * 1000003) ^ this.roleID.hashCode()) * 1000003) ^ this.requestID.hashCode();
+    public int hashCode()
+    {
+        return ((groupID.hashCode() ^ 0xf4243) * 0xf4243 ^ roleID.hashCode()) * 0xf4243 ^ requestID.hashCode();
     }
 
-    public UUID requestID() {
-        return this.requestID;
+    public UUID requestID()
+    {
+        return requestID;
     }
 
-    public UUID roleID() {
-        return this.roleID;
+    public UUID roleID()
+    {
+        return roleID;
     }
 
-    public String toString() {
-        return "GroupRoleMembersQuery{groupID=" + this.groupID + ", " + "roleID=" + this.roleID + ", " + "requestID=" + this.requestID + "}";
+    public String toString()
+    {
+        return (new StringBuilder()).append("GroupRoleMembersQuery{groupID=").append(groupID).append(", ").append("roleID=").append(roleID).append(", ").append("requestID=").append(requestID).append("}").toString();
     }
 }

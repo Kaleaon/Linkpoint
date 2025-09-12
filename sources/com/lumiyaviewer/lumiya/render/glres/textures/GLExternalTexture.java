@@ -1,73 +1,91 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.glres.textures;
 
-import android.annotation.TargetApi;
 import android.graphics.Canvas;
-import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES11;
 import android.view.Surface;
-import java.nio.Buffer;
 
-@TargetApi(15)
-public class GLExternalTexture {
+public class GLExternalTexture
+{
+
     private final int handle;
     private final int height;
-    private final SurfaceTexture.OnFrameAvailableListener onFrameAvailableListener = new SurfaceTexture.OnFrameAvailableListener() {
-        public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+    private final android.graphics.SurfaceTexture.OnFrameAvailableListener onFrameAvailableListener = new android.graphics.SurfaceTexture.OnFrameAvailableListener() {
+
+        final GLExternalTexture this$0;
+
+        public void onFrameAvailable(SurfaceTexture surfacetexture)
+        {
         }
+
+            
+            {
+                this$0 = GLExternalTexture.this;
+                super();
+            }
     };
     private final Surface surface;
     private final SurfaceTexture surfaceTexture;
     private final int width;
 
-    @TargetApi(15)
-    public GLExternalTexture(int i, int i2) {
-        this.width = i;
-        this.height = i2;
-        int[] iArr = new int[1];
-        GLES11.glGenTextures(1, iArr, 0);
-        this.handle = iArr[0];
+    public GLExternalTexture(int i, int j)
+    {
+        width = i;
+        height = j;
+        int ai[] = new int[1];
+        GLES11.glGenTextures(1, ai, 0);
+        handle = ai[0];
         bind();
-        GLES11.glTexImage2D(36197, 0, 6408, i, i2, 0, 6408, 5121, (Buffer) null);
+        GLES11.glTexImage2D(36197, 0, 6408, i, j, 0, 6408, 5121, null);
         GLES11.glTexParameteri(36197, 10241, 9729);
         GLES11.glTexParameteri(36197, 10240, 9729);
-        this.surfaceTexture = new SurfaceTexture(this.handle);
-        this.surfaceTexture.setDefaultBufferSize(i, i2);
-        this.surfaceTexture.setOnFrameAvailableListener(this.onFrameAvailableListener);
-        this.surface = new Surface(this.surfaceTexture);
+        surfaceTexture = new SurfaceTexture(handle);
+        surfaceTexture.setDefaultBufferSize(i, j);
+        surfaceTexture.setOnFrameAvailableListener(onFrameAvailableListener);
+        surface = new Surface(surfaceTexture);
     }
 
-    @TargetApi(15)
-    public void bind() {
-        GLES11.glBindTexture(36197, this.handle);
+    public void bind()
+    {
+        GLES11.glBindTexture(36197, handle);
     }
 
-    public Canvas getCanvas() {
-        return this.surface.lockCanvas((Rect) null);
+    public Canvas getCanvas()
+    {
+        return surface.lockCanvas(null);
     }
 
-    public int getHeight() {
-        return this.height;
+    public int getHeight()
+    {
+        return height;
     }
 
-    public int getWidth() {
-        return this.width;
+    public int getWidth()
+    {
+        return width;
     }
 
-    public void postCanvas(Canvas canvas) {
-        this.surface.unlockCanvasAndPost(canvas);
+    public void postCanvas(Canvas canvas)
+    {
+        surface.unlockCanvasAndPost(canvas);
     }
 
-    @TargetApi(15)
-    public void release() {
-        this.surface.release();
-        this.surfaceTexture.release();
-        GLES11.glDeleteTextures(1, new int[]{this.handle}, 0);
+    public void release()
+    {
+        surface.release();
+        surfaceTexture.release();
+        GLES11.glDeleteTextures(1, new int[] {
+            handle
+        }, 0);
     }
 
-    @TargetApi(11)
-    public void update(float[] fArr) {
-        this.surfaceTexture.updateTexImage();
-        this.surfaceTexture.getTransformMatrix(fArr);
+    public void update(float af[])
+    {
+        surfaceTexture.updateTexImage();
+        surfaceTexture.getTransformMatrix(af);
     }
 }

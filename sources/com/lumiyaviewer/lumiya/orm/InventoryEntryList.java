@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.orm;
 
 import android.database.Cursor;
@@ -8,115 +12,170 @@ import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
 import java.util.AbstractList;
 import java.util.concurrent.ExecutionException;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public class InventoryEntryList extends AbstractList<SLInventoryEntry> {
-    /* access modifiers changed from: private */
-    @Nullable
-    public final Cursor cursor;
-    private final LoadingCache<Integer, SLInventoryEntry> entryCache;
-    @Nullable
+public class InventoryEntryList extends AbstractList
+{
+
+    private final Cursor cursor;
+    private final LoadingCache entryCache;
     private final SLInventoryEntry folder;
-    /* access modifiers changed from: private */
-    public final Object lock;
+    private final Object lock;
     private final int size;
-    @Nullable
     private final String title;
 
-    public InventoryEntryList() {
-        this.lock = new Object();
-        this.entryCache = CacheBuilder.newBuilder().maximumSize(1000).weakValues().build(new CacheLoader<Integer, SLInventoryEntry>() {
-            public SLInventoryEntry load(@Nonnull Integer num) {
-                SLInventoryEntry sLInventoryEntry;
-                if (InventoryEntryList.this.cursor == null) {
-                    sLInventoryEntry = null;
-                } else if (!InventoryEntryList.this.cursor.isClosed()) {
-                    synchronized (InventoryEntryList.this.lock) {
-                        try {
-                            InventoryEntryList.this.cursor.moveToPosition(num.intValue());
-                            sLInventoryEntry = new SLInventoryEntry(InventoryEntryList.this.cursor);
-                        } catch (Exception e) {
-                            Debug.Warning(e);
-                            sLInventoryEntry = null;
-                        }
-                    }
-                } else {
-                    sLInventoryEntry = null;
+    static Cursor _2D_get0(InventoryEntryList inventoryentrylist)
+    {
+        return inventoryentrylist.cursor;
+    }
+
+    static Object _2D_get1(InventoryEntryList inventoryentrylist)
+    {
+        return inventoryentrylist.lock;
+    }
+
+    public InventoryEntryList()
+    {
+        lock = new Object();
+        entryCache = CacheBuilder.newBuilder().maximumSize(1000L).weakValues().build(new CacheLoader() {
+
+            final InventoryEntryList this$0;
+
+            public SLInventoryEntry load(Integer integer)
+            {
+                if (InventoryEntryList._2D_get0(InventoryEntryList.this) == null) goto _L2; else goto _L1
+_L1:
+                if (!(InventoryEntryList._2D_get0(InventoryEntryList.this).isClosed() ^ true))
+                {
+                    break MISSING_BLOCK_LABEL_107;
                 }
-                return sLInventoryEntry == null ? new SLInventoryEntry() : sLInventoryEntry;
+                Object obj = InventoryEntryList._2D_get1(InventoryEntryList.this);
+                obj;
+                JVM INSTR monitorenter ;
+                InventoryEntryList._2D_get0(InventoryEntryList.this).moveToPosition(integer.intValue());
+                integer = new SLInventoryEntry(InventoryEntryList._2D_get0(InventoryEntryList.this));
+_L4:
+                obj;
+                JVM INSTR monitorexit ;
+_L3:
+                obj = integer;
+                if (integer == null)
+                {
+                    obj = new SLInventoryEntry();
+                }
+                return ((SLInventoryEntry) (obj));
+_L2:
+                integer = null;
+                  goto _L3
+                integer;
+                Debug.Warning(integer);
+                integer = null;
+                  goto _L4
+                integer;
+                throw integer;
+                integer = null;
+                  goto _L3
+            }
+
+            public volatile Object load(Object obj)
+                throws Exception
+            {
+                return load((Integer)obj);
+            }
+
+            
+            {
+                this$0 = InventoryEntryList.this;
+                super();
             }
         });
-        this.title = null;
-        this.cursor = null;
-        this.folder = null;
-        this.size = 0;
+        title = null;
+        cursor = null;
+        folder = null;
+        size = 0;
     }
 
-    InventoryEntryList(@Nullable String str, @Nullable SLInventoryEntry sLInventoryEntry, @Nullable Cursor cursor2) {
-        this.lock = new Object();
-        this.entryCache = CacheBuilder.newBuilder().maximumSize(1000).weakValues().build(new CacheLoader<Integer, SLInventoryEntry>() {
-            public SLInventoryEntry load(@Nonnull Integer num) {
-                SLInventoryEntry sLInventoryEntry;
-                if (InventoryEntryList.this.cursor == null) {
-                    sLInventoryEntry = null;
-                } else if (!InventoryEntryList.this.cursor.isClosed()) {
-                    synchronized (InventoryEntryList.this.lock) {
-                        try {
-                            InventoryEntryList.this.cursor.moveToPosition(num.intValue());
-                            sLInventoryEntry = new SLInventoryEntry(InventoryEntryList.this.cursor);
-                        } catch (Exception e) {
-                            Debug.Warning(e);
-                            sLInventoryEntry = null;
-                        }
-                    }
-                } else {
-                    sLInventoryEntry = null;
-                }
-                return sLInventoryEntry == null ? new SLInventoryEntry() : sLInventoryEntry;
+    InventoryEntryList(String s, SLInventoryEntry slinventoryentry, Cursor cursor1)
+    {
+        lock = new Object();
+        entryCache = CacheBuilder.newBuilder().maximumSize(1000L).weakValues().build(new _cls1());
+        title = s;
+        folder = slinventoryentry;
+        cursor = cursor1;
+        int i;
+        if (cursor1 != null)
+        {
+            i = cursor1.getCount();
+        } else
+        {
+            i = 0;
+        }
+        size = i;
+    }
+
+    public void close()
+    {
+        Object obj = lock;
+        obj;
+        JVM INSTR monitorenter ;
+        if (cursor != null && !cursor.isClosed())
+        {
+            cursor.close();
+        }
+        obj;
+        JVM INSTR monitorexit ;
+        return;
+        Exception exception;
+        exception;
+        throw exception;
+    }
+
+    public SLInventoryEntry get(int i)
+    {
+        if (cursor != null && cursor.isClosed() ^ true)
+        {
+            SLInventoryEntry slinventoryentry;
+            try
+            {
+                slinventoryentry = (SLInventoryEntry)entryCache.get(Integer.valueOf(i));
             }
+            catch (ExecutionException executionexception)
+            {
+                Debug.Warning(executionexception);
+                return null;
+            }
+            return slinventoryentry;
+        }
+        String s;
+        if (cursor == null)
+        {
+            s = "null";
+        } else
+        {
+            s = "closed";
+        }
+        Debug.Printf("InventoryEntryList: returning null for %d because cursor is %s", new Object[] {
+            Integer.valueOf(i), s
         });
-        this.title = str;
-        this.folder = sLInventoryEntry;
-        this.cursor = cursor2;
-        this.size = cursor2 != null ? cursor2.getCount() : 0;
+        return null;
     }
 
-    public void close() {
-        synchronized (this.lock) {
-            if (this.cursor != null && !this.cursor.isClosed()) {
-                this.cursor.close();
-            }
-        }
+    public volatile Object get(int i)
+    {
+        return get(i);
     }
 
-    public SLInventoryEntry get(int i) {
-        if (this.cursor == null || !(!this.cursor.isClosed())) {
-            Object[] objArr = new Object[2];
-            objArr[0] = Integer.valueOf(i);
-            objArr[1] = this.cursor == null ? "null" : "closed";
-            Debug.Printf("InventoryEntryList: returning null for %d because cursor is %s", objArr);
-            return null;
-        }
-        try {
-            return this.entryCache.get(Integer.valueOf(i));
-        } catch (ExecutionException e) {
-            Debug.Warning(e);
-            return null;
-        }
+    public SLInventoryEntry getFolder()
+    {
+        return folder;
     }
 
-    @Nullable
-    public SLInventoryEntry getFolder() {
-        return this.folder;
+    public String getTitle()
+    {
+        return title;
     }
 
-    @Nullable
-    public String getTitle() {
-        return this.title;
-    }
-
-    public int size() {
-        return this.size;
+    public int size()
+    {
+        return size;
     }
 }

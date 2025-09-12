@@ -1,46 +1,67 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.UUID;
 
-public class UUIDNameRequest extends SLMessage {
-    public ArrayList<UUIDNameBlock> UUIDNameBlock_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class UUIDNameBlock {
+public class UUIDNameRequest extends SLMessage
+{
+    public static class UUIDNameBlock
+    {
+
         public UUID ID;
-    }
 
-    public UUIDNameRequest() {
-        this.zeroCoded = false;
-    }
-
-    public int CalcPayloadSize() {
-        return (this.UUIDNameBlock_Fields.size() * 16) + 5;
-    }
-
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleUUIDNameRequest(this);
-    }
-
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 0);
-        byteBuffer.put((byte) -21);
-        byteBuffer.put((byte) this.UUIDNameBlock_Fields.size());
-        for (UUIDNameBlock uUIDNameBlock : this.UUIDNameBlock_Fields) {
-            packUUID(byteBuffer, uUIDNameBlock.ID);
+        public UUIDNameBlock()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            UUIDNameBlock uUIDNameBlock = new UUIDNameBlock();
-            uUIDNameBlock.ID = unpackUUID(byteBuffer);
-            this.UUIDNameBlock_Fields.add(uUIDNameBlock);
+
+    public ArrayList UUIDNameBlock_Fields;
+
+    public UUIDNameRequest()
+    {
+        UUIDNameBlock_Fields = new ArrayList();
+        zeroCoded = false;
+    }
+
+    public int CalcPayloadSize()
+    {
+        return UUIDNameBlock_Fields.size() * 16 + 5;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleUUIDNameRequest(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)0);
+        bytebuffer.put((byte)-21);
+        bytebuffer.put((byte)UUIDNameBlock_Fields.size());
+        for (Iterator iterator = UUIDNameBlock_Fields.iterator(); iterator.hasNext(); packUUID(bytebuffer, ((UUIDNameBlock)iterator.next()).ID)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            UUIDNameBlock uuidnameblock = new UUIDNameBlock();
+            uuidnameblock.ID = unpackUUID(bytebuffer);
+            UUIDNameBlock_Fields.add(uuidnameblock);
         }
+
     }
 }

@@ -1,80 +1,107 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.messages;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 
-public class EstateOwnerMessage extends SLMessage {
-    public AgentData AgentData_Field;
-    public MethodData MethodData_Field;
-    public ArrayList<ParamList> ParamList_Fields = new ArrayList<>();
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.messages:
+//            SLMessageHandler
 
-    public static class AgentData {
+public class EstateOwnerMessage extends SLMessage
+{
+    public static class AgentData
+    {
+
         public UUID AgentID;
         public UUID SessionID;
         public UUID TransactionID;
+
+        public AgentData()
+        {
+        }
     }
 
-    public static class MethodData {
+    public static class MethodData
+    {
+
         public UUID Invoice;
-        public byte[] Method;
-    }
+        public byte Method[];
 
-    public static class ParamList {
-        public byte[] Parameter;
-    }
-
-    public EstateOwnerMessage() {
-        this.zeroCoded = true;
-        this.AgentData_Field = new AgentData();
-        this.MethodData_Field = new MethodData();
-    }
-
-    public int CalcPayloadSize() {
-        int length = this.MethodData_Field.Method.length + 1 + 16 + 52 + 1;
-        Iterator<T> it = this.ParamList_Fields.iterator();
-        while (true) {
-            int i = length;
-            if (!it.hasNext()) {
-                return i;
-            }
-            length = ((ParamList) it.next()).Parameter.length + 1 + i;
+        public MethodData()
+        {
         }
     }
 
-    public void Handle(SLMessageHandler sLMessageHandler) {
-        sLMessageHandler.HandleEstateOwnerMessage(this);
-    }
+    public static class ParamList
+    {
 
-    public void PackPayload(ByteBuffer byteBuffer) {
-        byteBuffer.putShort(-1);
-        byteBuffer.put((byte) 1);
-        byteBuffer.put((byte) 4);
-        packUUID(byteBuffer, this.AgentData_Field.AgentID);
-        packUUID(byteBuffer, this.AgentData_Field.SessionID);
-        packUUID(byteBuffer, this.AgentData_Field.TransactionID);
-        packVariable(byteBuffer, this.MethodData_Field.Method, 1);
-        packUUID(byteBuffer, this.MethodData_Field.Invoice);
-        byteBuffer.put((byte) this.ParamList_Fields.size());
-        for (ParamList paramList : this.ParamList_Fields) {
-            packVariable(byteBuffer, paramList.Parameter, 1);
+        public byte Parameter[];
+
+        public ParamList()
+        {
         }
     }
 
-    public void UnpackPayload(ByteBuffer byteBuffer) {
-        this.AgentData_Field.AgentID = unpackUUID(byteBuffer);
-        this.AgentData_Field.SessionID = unpackUUID(byteBuffer);
-        this.AgentData_Field.TransactionID = unpackUUID(byteBuffer);
-        this.MethodData_Field.Method = unpackVariable(byteBuffer, 1);
-        this.MethodData_Field.Invoice = unpackUUID(byteBuffer);
-        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE;
-        for (int i = 0; i < b; i++) {
-            ParamList paramList = new ParamList();
-            paramList.Parameter = unpackVariable(byteBuffer, 1);
-            this.ParamList_Fields.add(paramList);
+
+    public AgentData AgentData_Field;
+    public MethodData MethodData_Field;
+    public ArrayList ParamList_Fields;
+
+    public EstateOwnerMessage()
+    {
+        ParamList_Fields = new ArrayList();
+        zeroCoded = true;
+        AgentData_Field = new AgentData();
+        MethodData_Field = new MethodData();
+    }
+
+    public int CalcPayloadSize()
+    {
+        int i = MethodData_Field.Method.length;
+        Iterator iterator = ParamList_Fields.iterator();
+        for (i = i + 1 + 16 + 52 + 1; iterator.hasNext(); i = ((ParamList)iterator.next()).Parameter.length + 1 + i) { }
+        return i;
+    }
+
+    public void Handle(SLMessageHandler slmessagehandler)
+    {
+        slmessagehandler.HandleEstateOwnerMessage(this);
+    }
+
+    public void PackPayload(ByteBuffer bytebuffer)
+    {
+        bytebuffer.putShort((short)-1);
+        bytebuffer.put((byte)1);
+        bytebuffer.put((byte)4);
+        packUUID(bytebuffer, AgentData_Field.AgentID);
+        packUUID(bytebuffer, AgentData_Field.SessionID);
+        packUUID(bytebuffer, AgentData_Field.TransactionID);
+        packVariable(bytebuffer, MethodData_Field.Method, 1);
+        packUUID(bytebuffer, MethodData_Field.Invoice);
+        bytebuffer.put((byte)ParamList_Fields.size());
+        for (Iterator iterator = ParamList_Fields.iterator(); iterator.hasNext(); packVariable(bytebuffer, ((ParamList)iterator.next()).Parameter, 1)) { }
+    }
+
+    public void UnpackPayload(ByteBuffer bytebuffer)
+    {
+        AgentData_Field.AgentID = unpackUUID(bytebuffer);
+        AgentData_Field.SessionID = unpackUUID(bytebuffer);
+        AgentData_Field.TransactionID = unpackUUID(bytebuffer);
+        MethodData_Field.Method = unpackVariable(bytebuffer, 1);
+        MethodData_Field.Invoice = unpackUUID(bytebuffer);
+        byte byte0 = bytebuffer.get();
+        for (int i = 0; i < (byte0 & 0xff); i++)
+        {
+            ParamList paramlist = new ParamList();
+            paramlist.Parameter = unpackVariable(bytebuffer, 1);
+            ParamList_Fields.add(paramlist);
         }
+
     }
 }

@@ -1,69 +1,105 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat.profiles;
 
 import android.content.Context;
 import android.os.Bundle;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
 import com.lumiyaviewer.lumiya.slproto.messages.AvatarPropertiesReply;
+import com.lumiyaviewer.lumiya.slproto.modules.SLModules;
 import com.lumiyaviewer.lumiya.slproto.modules.SLUserProfiles;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.ui.common.ChatterFragment;
-import java.util.UUID;
 
-public class UserAboutTextEditFragment extends ProfileTextFieldEditFragment {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat.profiles:
+//            ProfileTextFieldEditFragment
+
+public class UserAboutTextEditFragment extends ProfileTextFieldEditFragment
+{
+
     private static final String IS_FIRST_LIFE_KEY = "isFirstLife";
     private AvatarPropertiesReply avatarProperties;
 
-    private boolean isFirstLife() {
-        Bundle arguments = getArguments();
-        if (arguments != null) {
-            return arguments.getBoolean(IS_FIRST_LIFE_KEY);
+    public UserAboutTextEditFragment()
+    {
+    }
+
+    private boolean isFirstLife()
+    {
+        Bundle bundle = getArguments();
+        if (bundle != null)
+        {
+            return bundle.getBoolean("isFirstLife");
+        } else
+        {
+            return false;
         }
-        return false;
     }
 
-    public static Bundle makeSelection(ChatterID chatterID, boolean z) {
-        Bundle makeSelection = ChatterFragment.makeSelection(chatterID);
-        makeSelection.putBoolean(IS_FIRST_LIFE_KEY, z);
-        return makeSelection;
+    public static Bundle makeSelection(ChatterID chatterid, boolean flag)
+    {
+        chatterid = ChatterFragment.makeSelection(chatterid);
+        chatterid.putBoolean("isFirstLife", flag);
+        return chatterid;
     }
 
-    /* access modifiers changed from: protected */
-    public String decorateFragmentTitle(String str) {
-        return getString(R.string.edit_about_title, str);
+    protected String decorateFragmentTitle(String s)
+    {
+        return getString(0x7f090105, new Object[] {
+            s
+        });
     }
 
-    /* access modifiers changed from: protected */
-    public String getFieldHint(Context context) {
-        return getString(R.string.edit_about_hint);
+    protected String getFieldHint(Context context)
+    {
+        return getString(0x7f090104);
     }
 
-    /* access modifiers changed from: protected */
-    public void onAvatarProperties(AvatarPropertiesReply avatarPropertiesReply) {
-        this.avatarProperties = avatarPropertiesReply;
-        setOriginalText(isFirstLife() ? SLMessage.stringFromVariableOEM(this.avatarProperties.PropertiesData_Field.FLAboutText) : SLMessage.stringFromVariableUTF(avatarPropertiesReply.PropertiesData_Field.AboutText));
+    protected void onAvatarProperties(AvatarPropertiesReply avatarpropertiesreply)
+    {
+        avatarProperties = avatarpropertiesreply;
+        if (isFirstLife())
+        {
+            avatarpropertiesreply = SLMessage.stringFromVariableOEM(avatarProperties.PropertiesData_Field.FLAboutText);
+        } else
+        {
+            avatarpropertiesreply = SLMessage.stringFromVariableUTF(avatarpropertiesreply.PropertiesData_Field.AboutText);
+        }
+        setOriginalText(avatarpropertiesreply);
     }
 
-    /* access modifiers changed from: protected */
-    public void saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
-        boolean z = true;
-        if (this.avatarProperties != null) {
-            String stringFromVariableUTF = SLMessage.stringFromVariableUTF(this.avatarProperties.PropertiesData_Field.AboutText);
-            String stringFromVariableOEM = SLMessage.stringFromVariableOEM(this.avatarProperties.PropertiesData_Field.FLAboutText);
-            if (isFirstLife()) {
-                stringFromVariableOEM = str;
-            } else {
-                stringFromVariableUTF = str;
+    protected void saveEditedText(SLAgentCircuit slagentcircuit, ChatterID chatterid, String s)
+    {
+        boolean flag1 = true;
+        if (avatarProperties != null)
+        {
+            chatterid = SLMessage.stringFromVariableUTF(avatarProperties.PropertiesData_Field.AboutText);
+            Object obj = SLMessage.stringFromVariableOEM(avatarProperties.PropertiesData_Field.FLAboutText);
+            java.util.UUID uuid;
+            boolean flag;
+            if (!isFirstLife())
+            {
+                chatterid = s;
+                s = ((String) (obj));
             }
-            SLUserProfiles sLUserProfiles = sLAgentCircuit.getModules().userProfiles;
-            UUID uuid = this.avatarProperties.PropertiesData_Field.ImageID;
-            UUID uuid2 = this.avatarProperties.PropertiesData_Field.FLImageID;
-            boolean z2 = (this.avatarProperties.PropertiesData_Field.Flags & 1) != 0;
-            if ((this.avatarProperties.PropertiesData_Field.Flags & 2) == 0) {
-                z = false;
+            slagentcircuit = slagentcircuit.getModules().userProfiles;
+            obj = avatarProperties.PropertiesData_Field.ImageID;
+            uuid = avatarProperties.PropertiesData_Field.FLImageID;
+            if ((avatarProperties.PropertiesData_Field.Flags & 1) != 0)
+            {
+                flag = true;
+            } else
+            {
+                flag = false;
             }
-            sLUserProfiles.UpdateAvatarProperties(uuid, uuid2, stringFromVariableUTF, stringFromVariableOEM, z2, z, SLMessage.stringFromVariableOEM(this.avatarProperties.PropertiesData_Field.ProfileURL));
+            if ((avatarProperties.PropertiesData_Field.Flags & 2) == 0)
+            {
+                flag1 = false;
+            }
+            slagentcircuit.UpdateAvatarProperties(((java.util.UUID) (obj)), uuid, chatterid, s, flag, flag1, SLMessage.stringFromVariableOEM(avatarProperties.PropertiesData_Field.ProfileURL));
         }
     }
 }

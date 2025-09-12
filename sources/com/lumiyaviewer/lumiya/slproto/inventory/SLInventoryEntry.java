@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.inventory;
 
 import android.database.Cursor;
@@ -8,25 +12,43 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
-import com.lumiyaviewer.lumiya.R;
 import com.lumiyaviewer.lumiya.orm.DBHandle;
-import com.lumiyaviewer.lumiya.orm.DBObject;
 import com.lumiyaviewer.lumiya.orm.InventoryEntryDBObject;
 import com.lumiyaviewer.lumiya.slproto.assets.SLWearable;
 import com.lumiyaviewer.lumiya.slproto.assets.SLWearableType;
 import com.lumiyaviewer.lumiya.utils.SimpleStringParser;
+import java.util.Iterator;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
-public class SLInventoryEntry extends InventoryEntryDBObject implements Parcelable {
-    public static final Parcelable.Creator<SLInventoryEntry> CREATOR = new Parcelable.Creator<SLInventoryEntry>() {
-        public SLInventoryEntry createFromParcel(Parcel parcel) {
-            return new SLInventoryEntry(parcel, (SLInventoryEntry) null);
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.inventory:
+//            SLSaleType, SLAssetType, SLInventoryType
+
+public class SLInventoryEntry extends InventoryEntryDBObject
+    implements Parcelable
+{
+
+    public static final android.os.Parcelable.Creator CREATOR = new android.os.Parcelable.Creator() {
+
+        public SLInventoryEntry createFromParcel(Parcel parcel)
+        {
+            return new SLInventoryEntry(parcel, null);
         }
 
-        public SLInventoryEntry[] newArray(int i) {
+        public volatile Object createFromParcel(Parcel parcel)
+        {
+            return createFromParcel(parcel);
+        }
+
+        public SLInventoryEntry[] newArray(int i)
+        {
             return new SLInventoryEntry[i];
         }
+
+        public volatile Object[] newArray(int i)
+        {
+            return newArray(i);
+        }
+
     };
     private static final String DELIM_ANY = " \t\n";
     private static final String DELIM_EOL = "\n";
@@ -79,495 +101,731 @@ public class SLInventoryEntry extends InventoryEntryDBObject implements Parcelab
     public static final int IT_TRASH = 14;
     public static final int IT_WEARABLE = 18;
     public static final int PERM_COPY = 32768;
-    public static final int PERM_FULL = Integer.MAX_VALUE;
+    public static final int PERM_FULL = 0x7fffffff;
     public static final int PERM_MODIFY = 16384;
     public static final int PERM_TRANSFER = 8192;
 
-    public SLInventoryEntry() {
+    public SLInventoryEntry()
+    {
     }
 
-    public SLInventoryEntry(Cursor cursor) {
+    public SLInventoryEntry(Cursor cursor)
+    {
         super(cursor);
     }
 
-    public SLInventoryEntry(SQLiteDatabase sQLiteDatabase, long j) throws DBObject.DatabaseBindingException {
-        super(sQLiteDatabase, j);
+    public SLInventoryEntry(SQLiteDatabase sqlitedatabase, long l)
+        throws com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException
+    {
+        super(sqlitedatabase, l);
     }
 
-    private SLInventoryEntry(Parcel parcel) {
+    private SLInventoryEntry(Parcel parcel)
+    {
         super(parcel);
     }
 
-    /* synthetic */ SLInventoryEntry(Parcel parcel, SLInventoryEntry sLInventoryEntry) {
+    SLInventoryEntry(Parcel parcel, SLInventoryEntry slinventoryentry)
+    {
         this(parcel);
     }
 
-    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    public SLInventoryEntry(DBHandle dBHandle, long j) throws DBObject.DatabaseBindingException {
-        super(dBHandle != null ? dBHandle.getDB() : null, j);
-    }
-
-    public static SLInventoryEntry find(SQLiteDatabase sQLiteDatabase, UUID uuid) {
-        try {
-            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", new String[]{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null);
-            if (query.moveToFirst()) {
-                SLInventoryEntry sLInventoryEntry = new SLInventoryEntry(query);
-                query.close();
-                return sLInventoryEntry;
-            }
-            query.close();
-            return null;
-        } catch (SQLiteException e) {
-            e.printStackTrace();
-            return null;
+    public SLInventoryEntry(DBHandle dbhandle, long l)
+        throws com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException
+    {
+        SQLiteDatabase sqlitedatabase = null;
+        if (dbhandle != null)
+        {
+            sqlitedatabase = dbhandle.getDB();
         }
+        super(sqlitedatabase, l);
     }
 
-    public static SLInventoryEntry findOrCreate(SQLiteDatabase sQLiteDatabase, UUID uuid) throws DBObject.DatabaseBindingException {
-        if (sQLiteDatabase == null) {
-            throw new DBObject.DatabaseBindingException(SLInventoryEntry.class, "database is null");
-        } else if (uuid == null) {
-            throw new DBObject.DatabaseBindingException(SLInventoryEntry.class, "folderUUID is null");
-        } else {
-            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", new String[]{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null);
-            if (query.moveToFirst()) {
-                SLInventoryEntry sLInventoryEntry = new SLInventoryEntry(query);
-                query.close();
-                return sLInventoryEntry;
-            }
-            query.close();
-            SLInventoryEntry sLInventoryEntry2 = new SLInventoryEntry();
-            sLInventoryEntry2.uuid = uuid;
-            return sLInventoryEntry2;
+    public static SLInventoryEntry find(SQLiteDatabase sqlitedatabase, UUID uuid)
+    {
+        try
+        {
+            sqlitedatabase = sqlitedatabase.query("Entries", fieldNames, "uuid_low = ? AND uuid_high = ?", new String[] {
+                Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())
+            }, null, null, null);
         }
-    }
-
-    public static SLInventoryEntry findOrCreateForUpdate(SQLiteDatabase sQLiteDatabase, UUID uuid) throws DBObject.DatabaseBindingException {
-        if (sQLiteDatabase == null) {
-            throw new DBObject.DatabaseBindingException(SLInventoryEntry.class, "database is null");
-        } else if (uuid == null) {
-            throw new DBObject.DatabaseBindingException(SLInventoryEntry.class, "folderUUID is null");
-        } else {
-            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, new String[]{"_id"}, "uuid_low = ? AND uuid_high = ?", new String[]{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null);
-            if (query.moveToFirst()) {
-                SLInventoryEntry sLInventoryEntry = new SLInventoryEntry();
-                sLInventoryEntry._id = query.getLong(0);
-                sLInventoryEntry.uuid = uuid;
-                query.close();
-                return sLInventoryEntry;
-            }
-            query.close();
-            SLInventoryEntry sLInventoryEntry2 = new SLInventoryEntry();
-            sLInventoryEntry2.uuid = uuid;
-            return sLInventoryEntry2;
-        }
-    }
-
-    private static int getDrawableResourceForType(int i) {
-        switch (i) {
-            case 0:
-            case 12:
-            case 15:
-                return R.drawable.inv_image;
-            case 1:
-                return R.drawable.inv_sound;
-            case 2:
-                return R.drawable.inv_vcard;
-            case 3:
-                return R.drawable.inv_landmark;
-            case 4:
-            case 10:
-            case 11:
-                return R.drawable.inv_script;
-            case 5:
-            case 17:
-            case 18:
-                return R.drawable.inv_clothes;
-            case 6:
-                return R.drawable.inv_object;
-            case 7:
-                return R.drawable.inv_notecard;
-            case 8:
-            case 9:
-                return R.drawable.inv_folder;
-            case 13:
-                return R.drawable.inv_human;
-            case 14:
-                return R.drawable.inv_trash;
-            case 16:
-                return R.drawable.inv_recycle;
-            case 19:
-                return R.drawable.inv_animation;
-            case 20:
-                return R.drawable.inv_smile;
-            default:
-                return -1;
-        }
-    }
-
-    public static SQLiteStatement getInsertStatement(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
-        if (sQLiteDatabase == null) {
-            throw new DBObject.DatabaseBindingException("Database is closed");
-        } else if (!sQLiteDatabase.isOpen()) {
-            throw new DBObject.DatabaseBindingException("Database is closed");
-        } else {
-            try {
-                return sQLiteDatabase.compileStatement(InventoryEntryDBObject.insertQuery);
-            } catch (SQLiteException e) {
-                DBObject.DatabaseBindingException databaseBindingException = new DBObject.DatabaseBindingException(e.getMessage());
-                databaseBindingException.initCause(e);
-                throw databaseBindingException;
-            }
-        }
-    }
-
-    public static SQLiteStatement getUpdateStatement(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
-        if (sQLiteDatabase == null) {
-            throw new DBObject.DatabaseBindingException("Database is closed");
-        } else if (!sQLiteDatabase.isOpen()) {
-            throw new DBObject.DatabaseBindingException("Database is closed");
-        } else {
-            try {
-                return sQLiteDatabase.compileStatement("UPDATE Entries SET parent_id=?,uuid_high=?,uuid_low=?,parentUUID_high=?,parentUUID_low=?,name=?,isFolder=?,typeDefault=?,version=?,sessionID_high=?,sessionID_low=?,fetchFailed=?,description=?,flags=?,invType=?,assetType=?,creationDate=?,_blobField=? WHERE uuid_high = ? AND uuid_low = ?");
-            } catch (SQLiteException e) {
-                DBObject.DatabaseBindingException databaseBindingException = new DBObject.DatabaseBindingException(e.getMessage());
-                databaseBindingException.initCause(e);
-                throw databaseBindingException;
-            }
-        }
-    }
-
-    private static void parsePermissions(SimpleStringParser simpleStringParser, SLInventoryEntry sLInventoryEntry) throws SimpleStringParser.StringParsingException {
-        simpleStringParser.expectToken("{", DELIM_EOL);
-        while (true) {
-            String nextToken = simpleStringParser.nextToken(DELIM_ANY);
-            if (!nextToken.equals("}")) {
-                if (nextToken.equals("base_mask")) {
-                    sLInventoryEntry.baseMask = simpleStringParser.getHexToken(DELIM_EOL);
-                } else if (nextToken.equals("owner_mask")) {
-                    sLInventoryEntry.ownerMask = simpleStringParser.getHexToken(DELIM_EOL);
-                } else if (nextToken.equals("group_mask")) {
-                    sLInventoryEntry.groupMask = simpleStringParser.getHexToken(DELIM_EOL);
-                } else if (nextToken.equals("everyone_mask")) {
-                    sLInventoryEntry.everyoneMask = simpleStringParser.getHexToken(DELIM_EOL);
-                } else if (nextToken.equals("next_owner_mask")) {
-                    sLInventoryEntry.nextOwnerMask = simpleStringParser.getHexToken(DELIM_EOL);
-                } else if (nextToken.equals("creator_id")) {
-                    sLInventoryEntry.creatorUUID = UUID.fromString(simpleStringParser.nextToken(DELIM_EOL));
-                } else if (nextToken.equals("owner_id")) {
-                    sLInventoryEntry.ownerUUID = UUID.fromString(simpleStringParser.nextToken(DELIM_EOL));
-                } else if (nextToken.equals("last_owner_id")) {
-                    sLInventoryEntry.lastOwnerUUID = UUID.fromString(simpleStringParser.nextToken(DELIM_EOL));
-                } else if (nextToken.equals("group_id")) {
-                    sLInventoryEntry.groupUUID = UUID.fromString(simpleStringParser.nextToken(DELIM_EOL));
-                } else {
-                    simpleStringParser.nextToken(DELIM_EOL);
-                }
-            } else {
-                return;
-            }
-        }
-    }
-
-    private static void parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEntry sLInventoryEntry) throws SimpleStringParser.StringParsingException {
-        simpleStringParser.expectToken("{", DELIM_EOL);
-        while (true) {
-            String nextToken = simpleStringParser.nextToken(DELIM_ANY);
-            if (!nextToken.equals("}")) {
-                if (nextToken.equals("sale_type")) {
-                    sLInventoryEntry.saleType = SLSaleType.getByString(simpleStringParser.nextToken(DELIM_EOL)).getTypeCode();
-                } else if (nextToken.equals("sale_price")) {
-                    sLInventoryEntry.salePrice = simpleStringParser.getIntToken(DELIM_EOL);
-                } else {
-                    simpleStringParser.nextToken(DELIM_EOL);
-                }
-            } else {
-                return;
-            }
-        }
-    }
-
-    public static SLInventoryEntry parseString(SimpleStringParser simpleStringParser) throws SimpleStringParser.StringParsingException {
-        SLInventoryEntry sLInventoryEntry = new SLInventoryEntry();
-        simpleStringParser.expectToken("{", DELIM_EOL);
-        while (true) {
-            String nextToken = simpleStringParser.nextToken(DELIM_ANY);
-            if (nextToken.equals("}")) {
-                return sLInventoryEntry;
-            }
-            if (nextToken.equals("item_id")) {
-                sLInventoryEntry.uuid = UUID.fromString(simpleStringParser.nextToken(DELIM_EOL));
-            } else if (nextToken.equals("parent_id")) {
-                sLInventoryEntry.parentUUID = UUID.fromString(simpleStringParser.nextToken(DELIM_EOL));
-            } else if (nextToken.equals("asset_id")) {
-                sLInventoryEntry.assetUUID = UUID.fromString(simpleStringParser.nextToken(DELIM_EOL));
-            } else if (nextToken.equals("type")) {
-                sLInventoryEntry.assetType = SLAssetType.getByString(simpleStringParser.nextToken(DELIM_EOL)).getTypeCode();
-            } else if (nextToken.equals("inv_type")) {
-                sLInventoryEntry.invType = SLInventoryType.getByString(simpleStringParser.nextToken(DELIM_EOL)).getTypeCode();
-            } else if (nextToken.equals("flags")) {
-                sLInventoryEntry.flags = simpleStringParser.getHexToken(DELIM_EOL);
-            } else if (nextToken.equals("name")) {
-                sLInventoryEntry.name = simpleStringParser.getPipeTerminatedString(DELIM_EOL);
-            } else if (nextToken.equals("desc")) {
-                sLInventoryEntry.description = simpleStringParser.getPipeTerminatedString(DELIM_EOL);
-            } else if (nextToken.equals("creation_date")) {
-                sLInventoryEntry.creationDate = simpleStringParser.getIntToken(DELIM_EOL);
-            } else if (nextToken.equals("permissions")) {
-                simpleStringParser.nextToken(DELIM_EOL);
-                parsePermissions(simpleStringParser, sLInventoryEntry);
-            } else if (nextToken.equals("sale_info")) {
-                simpleStringParser.nextToken(DELIM_EOL);
-                parseSaleInfo(simpleStringParser, sLInventoryEntry);
-            } else {
-                simpleStringParser.nextToken(DELIM_EOL);
-            }
-        }
-    }
-
-    public static Cursor query(SQLiteDatabase sQLiteDatabase, String str, String[] strArr, String str2) {
-        if (sQLiteDatabase == null) {
+        // Misplaced declaration of an exception variable
+        catch (SQLiteDatabase sqlitedatabase)
+        {
+            sqlitedatabase.printStackTrace();
             return null;
         }
-        try {
-            return InventoryEntryDBObject.query(sQLiteDatabase, str, strArr, str2);
-        } catch (DBObject.DatabaseBindingException e) {
-            e.printStackTrace();
+        if (sqlitedatabase.moveToFirst())
+        {
+            uuid = new SLInventoryEntry(sqlitedatabase);
+            sqlitedatabase.close();
+            return uuid;
+        } else
+        {
+            sqlitedatabase.close();
             return null;
         }
     }
 
-    public static Cursor query(DBHandle dBHandle, String str, String[] strArr, String str2) {
-        if (dBHandle == null) {
-            return null;
+    public static SLInventoryEntry findOrCreate(SQLiteDatabase sqlitedatabase, UUID uuid)
+        throws com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException
+    {
+        if (sqlitedatabase == null)
+        {
+            throw new com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException(com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryEntry, "database is null");
         }
-        try {
-            return InventoryEntryDBObject.query(dBHandle, str, strArr, str2);
-        } catch (DBObject.DatabaseBindingException e) {
-            e.printStackTrace();
-            return null;
+        if (uuid == null)
+        {
+            throw new com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException(com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryEntry, "folderUUID is null");
         }
-    }
-
-    public int getActionDescriptionResId() {
-        SLAssetType byType = SLAssetType.getByType(this.assetType);
-        if (byType != null) {
-            return byType.getActionDescription();
-        }
-        switch (this.invType) {
-            case 0:
-            case 15:
-                return this.assetType == SLAssetType.AT_TEXTURE.getTypeCode() ? R.string.asset_action_view : R.string.asset_action_rez;
-            case 3:
-                return R.string.asset_action_teleport;
-            case 6:
-                return R.string.asset_action_rez;
-            case 7:
-                return R.string.asset_action_edit;
-            case 10:
-                return R.string.asset_action_edit;
-            default:
-                return -1;
+        sqlitedatabase = sqlitedatabase.query("Entries", fieldNames, "uuid_low = ? AND uuid_high = ?", new String[] {
+            Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())
+        }, null, null, null);
+        if (sqlitedatabase.moveToFirst())
+        {
+            uuid = new SLInventoryEntry(sqlitedatabase);
+            sqlitedatabase.close();
+            return uuid;
+        } else
+        {
+            sqlitedatabase.close();
+            sqlitedatabase = new SLInventoryEntry();
+            sqlitedatabase.uuid = uuid;
+            return sqlitedatabase;
         }
     }
 
-    /* JADX WARNING: Code restructure failed: missing block: B:5:0x000e, code lost:
-        r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType.getByType(r1.assetType);
-     */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    public int getDrawableResource() {
-        /*
-            r1 = this;
-            boolean r0 = r1.isFolder
-            if (r0 == 0) goto L_0x0008
-            r0 = 2130837696(0x7f0200c0, float:1.7280353E38)
-            return r0
-        L_0x0008:
-            boolean r0 = r1.isLink()
-            if (r0 != 0) goto L_0x001b
-            int r0 = r1.assetType
-            com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType r0 = com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType.getByType(r0)
-            if (r0 == 0) goto L_0x001b
-            int r0 = r0.getDrawableResource()
-            return r0
-        L_0x001b:
-            int r0 = r1.invType
-            int r0 = getDrawableResourceForType(r0)
-            return r0
-        */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry.getDrawableResource():int");
+    public static SLInventoryEntry findOrCreateForUpdate(SQLiteDatabase sqlitedatabase, UUID uuid)
+        throws com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException
+    {
+        if (sqlitedatabase == null)
+        {
+            throw new com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException(com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryEntry, "database is null");
+        }
+        if (uuid == null)
+        {
+            throw new com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException(com/lumiyaviewer/lumiya/slproto/inventory/SLInventoryEntry, "folderUUID is null");
+        }
+        String s = Long.toString(uuid.getLeastSignificantBits());
+        String s1 = Long.toString(uuid.getMostSignificantBits());
+        sqlitedatabase = sqlitedatabase.query("Entries", new String[] {
+            "_id"
+        }, "uuid_low = ? AND uuid_high = ?", new String[] {
+            s, s1
+        }, null, null, null);
+        if (sqlitedatabase.moveToFirst())
+        {
+            SLInventoryEntry slinventoryentry = new SLInventoryEntry();
+            slinventoryentry._id = sqlitedatabase.getLong(0);
+            slinventoryentry.uuid = uuid;
+            sqlitedatabase.close();
+            return slinventoryentry;
+        } else
+        {
+            sqlitedatabase.close();
+            sqlitedatabase = new SLInventoryEntry();
+            sqlitedatabase.uuid = uuid;
+            return sqlitedatabase;
+        }
     }
 
-    public String getReadableTextForLink() {
-        return SLInventoryType.getByType(this.invType).getReadableName() + ": " + this.name;
-    }
-
-    public int getSubtypeDrawableResource() {
-        if (this.isFolder) {
-            switch (this.typeDefault) {
-                case 0:
-                case 15:
-                    return R.drawable.inv_image;
-                case 1:
-                    return R.drawable.inv_sound;
-                case 2:
-                    return R.drawable.inv_vcard;
-                case 3:
-                case 23:
-                    return R.drawable.inv_landmark;
-                case 5:
-                case 46:
-                case 47:
-                case 48:
-                    return R.drawable.inv_clothes;
-                case 6:
-                case 49:
-                    return R.drawable.inv_object;
-                case 7:
-                    return R.drawable.inv_notecard;
-                case 10:
-                    return R.drawable.inv_script;
-                case 13:
-                    return R.drawable.inv_human;
-                case 14:
-                    return R.drawable.inv_trash;
-                case 16:
-                    return R.drawable.inv_recycle;
-                case 20:
-                    return R.drawable.inv_animation;
-                case 21:
-                    return R.drawable.inv_smile;
-                default:
-                    return -1;
-            }
-        } else if (this.assetType == SLAssetType.AT_LINK.getTypeCode() || this.assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode()) {
-            return R.drawable.inv_link;
-        } else {
+    private static int getDrawableResourceForType(int i)
+    {
+        switch (i)
+        {
+        default:
             return -1;
+
+        case 3: // '\003'
+            return 0x7f0200c3;
+
+        case 0: // '\0'
+        case 12: // '\f'
+        case 15: // '\017'
+            return 0x7f0200c2;
+
+        case 1: // '\001'
+            return 0x7f0200ca;
+
+        case 2: // '\002'
+            return 0x7f0200cd;
+
+        case 4: // '\004'
+        case 10: // '\n'
+        case 11: // '\013'
+            return 0x7f0200c8;
+
+        case 5: // '\005'
+        case 17: // '\021'
+        case 18: // '\022'
+            return 0x7f0200bf;
+
+        case 6: // '\006'
+            return 0x7f0200c6;
+
+        case 7: // '\007'
+            return 0x7f0200c5;
+
+        case 8: // '\b'
+        case 9: // '\t'
+            return 0x7f0200c0;
+
+        case 13: // '\r'
+            return 0x7f0200c1;
+
+        case 14: // '\016'
+            return 0x7f0200cb;
+
+        case 16: // '\020'
+            return 0x7f0200c7;
+
+        case 19: // '\023'
+            return 0x7f0200bd;
+
+        case 20: // '\024'
+            return 0x7f0200c9;
         }
     }
 
-    public int getTypeDescriptionResId() {
-        SLAssetType byType = SLAssetType.getByType(this.assetType);
-        if (byType != null) {
-            return byType.getTypeDescription();
+    public static SQLiteStatement getInsertStatement(SQLiteDatabase sqlitedatabase)
+        throws com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException
+    {
+        if (sqlitedatabase == null)
+        {
+            throw new com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException("Database is closed");
         }
-        switch (this.invType) {
-            case 0:
-                return R.string.asset_type_texture;
-            case 1:
-                return R.string.asset_type_sound;
-            case 2:
-                return R.string.asset_type_calling_card;
-            case 3:
-                return R.string.asset_type_landmark;
-            case 4:
-                return R.string.asset_type_script;
-            case 5:
-                return R.string.asset_type_clothing;
-            case 6:
-                return R.string.asset_type_object;
-            case 7:
-                return R.string.asset_type_notecard;
-            case 8:
-                return R.string.asset_type_folder;
-            case 9:
-                return R.string.asset_type_root_folder;
-            case 10:
-                return R.string.asset_type_lsl;
-            case 11:
-                return R.string.asset_type_lsl_bytecode;
-            case 12:
-                return R.string.asset_type_texture_tga;
-            case 13:
-                return R.string.asset_type_bodypart;
-            case 14:
-                return R.string.asset_type_trash;
-            case 15:
-                return R.string.asset_type_snapshot;
-            case 16:
-                return R.string.asset_type_lost_and_found;
-            case 17:
-                return R.string.asset_type_attachment;
-            case 18:
-                return R.string.asset_type_wearable;
-            case 19:
-                return R.string.asset_type_animation;
-            case 20:
-                return R.string.asset_type_gesture;
-            default:
-                return R.string.asset_type_unknown;
+        if (!sqlitedatabase.isOpen())
+        {
+            throw new com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException("Database is closed");
+        }
+        try
+        {
+            sqlitedatabase = sqlitedatabase.compileStatement("INSERT INTO Entries (parent_id,uuid_high,uuid_low,parentUUID_high,parentUUID_low,name,isFolder,typeDefault,version,sessionID_high,sessionID_low,fetchFailed,description,flags,invType,assetType,creationDate,_blobField) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);");
+        }
+        // Misplaced declaration of an exception variable
+        catch (SQLiteDatabase sqlitedatabase)
+        {
+            com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException databasebindingexception = new com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException(sqlitedatabase.getMessage());
+            databasebindingexception.initCause(sqlitedatabase);
+            throw databasebindingexception;
+        }
+        return sqlitedatabase;
+    }
+
+    public static SQLiteStatement getUpdateStatement(SQLiteDatabase sqlitedatabase)
+        throws com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException
+    {
+        if (sqlitedatabase == null)
+        {
+            throw new com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException("Database is closed");
+        }
+        if (!sqlitedatabase.isOpen())
+        {
+            throw new com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException("Database is closed");
+        }
+        try
+        {
+            sqlitedatabase = sqlitedatabase.compileStatement("UPDATE Entries SET parent_id=?,uuid_high=?,uuid_low=?,parentUUID_high=?,parentUUID_low=?,name=?,isFolder=?,typeDefault=?,version=?,sessionID_high=?,sessionID_low=?,fetchFailed=?,description=?,flags=?,invType=?,assetType=?,creationDate=?,_blobField=? WHERE uuid_high = ? AND uuid_low = ?");
+        }
+        // Misplaced declaration of an exception variable
+        catch (SQLiteDatabase sqlitedatabase)
+        {
+            com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException databasebindingexception = new com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException(sqlitedatabase.getMessage());
+            databasebindingexception.initCause(sqlitedatabase);
+            throw databasebindingexception;
+        }
+        return sqlitedatabase;
+    }
+
+    private static void parsePermissions(SimpleStringParser simplestringparser, SLInventoryEntry slinventoryentry)
+        throws com.lumiyaviewer.lumiya.utils.SimpleStringParser.StringParsingException
+    {
+        simplestringparser.expectToken("{", "\n");
+        do
+        {
+            String s = simplestringparser.nextToken(" \t\n");
+            if (s.equals("}"))
+            {
+                return;
+            }
+            if (s.equals("base_mask"))
+            {
+                slinventoryentry.baseMask = simplestringparser.getHexToken("\n");
+            } else
+            if (s.equals("owner_mask"))
+            {
+                slinventoryentry.ownerMask = simplestringparser.getHexToken("\n");
+            } else
+            if (s.equals("group_mask"))
+            {
+                slinventoryentry.groupMask = simplestringparser.getHexToken("\n");
+            } else
+            if (s.equals("everyone_mask"))
+            {
+                slinventoryentry.everyoneMask = simplestringparser.getHexToken("\n");
+            } else
+            if (s.equals("next_owner_mask"))
+            {
+                slinventoryentry.nextOwnerMask = simplestringparser.getHexToken("\n");
+            } else
+            if (s.equals("creator_id"))
+            {
+                slinventoryentry.creatorUUID = UUID.fromString(simplestringparser.nextToken("\n"));
+            } else
+            if (s.equals("owner_id"))
+            {
+                slinventoryentry.ownerUUID = UUID.fromString(simplestringparser.nextToken("\n"));
+            } else
+            if (s.equals("last_owner_id"))
+            {
+                slinventoryentry.lastOwnerUUID = UUID.fromString(simplestringparser.nextToken("\n"));
+            } else
+            if (s.equals("group_id"))
+            {
+                slinventoryentry.groupUUID = UUID.fromString(simplestringparser.nextToken("\n"));
+            } else
+            {
+                simplestringparser.nextToken("\n");
+            }
+        } while (true);
+    }
+
+    private static void parseSaleInfo(SimpleStringParser simplestringparser, SLInventoryEntry slinventoryentry)
+        throws com.lumiyaviewer.lumiya.utils.SimpleStringParser.StringParsingException
+    {
+        simplestringparser.expectToken("{", "\n");
+        do
+        {
+            String s = simplestringparser.nextToken(" \t\n");
+            if (s.equals("}"))
+            {
+                return;
+            }
+            if (s.equals("sale_type"))
+            {
+                slinventoryentry.saleType = SLSaleType.getByString(simplestringparser.nextToken("\n")).getTypeCode();
+            } else
+            if (s.equals("sale_price"))
+            {
+                slinventoryentry.salePrice = simplestringparser.getIntToken("\n");
+            } else
+            {
+                simplestringparser.nextToken("\n");
+            }
+        } while (true);
+    }
+
+    public static SLInventoryEntry parseString(SimpleStringParser simplestringparser)
+        throws com.lumiyaviewer.lumiya.utils.SimpleStringParser.StringParsingException
+    {
+        SLInventoryEntry slinventoryentry = new SLInventoryEntry();
+        simplestringparser.expectToken("{", "\n");
+        do
+        {
+            String s = simplestringparser.nextToken(" \t\n");
+            if (s.equals("}"))
+            {
+                return slinventoryentry;
+            }
+            if (s.equals("item_id"))
+            {
+                slinventoryentry.uuid = UUID.fromString(simplestringparser.nextToken("\n"));
+            } else
+            if (s.equals("parent_id"))
+            {
+                slinventoryentry.parentUUID = UUID.fromString(simplestringparser.nextToken("\n"));
+            } else
+            if (s.equals("asset_id"))
+            {
+                slinventoryentry.assetUUID = UUID.fromString(simplestringparser.nextToken("\n"));
+            } else
+            if (s.equals("type"))
+            {
+                slinventoryentry.assetType = SLAssetType.getByString(simplestringparser.nextToken("\n")).getTypeCode();
+            } else
+            if (s.equals("inv_type"))
+            {
+                slinventoryentry.invType = SLInventoryType.getByString(simplestringparser.nextToken("\n")).getTypeCode();
+            } else
+            if (s.equals("flags"))
+            {
+                slinventoryentry.flags = simplestringparser.getHexToken("\n");
+            } else
+            if (s.equals("name"))
+            {
+                slinventoryentry.name = simplestringparser.getPipeTerminatedString("\n");
+            } else
+            if (s.equals("desc"))
+            {
+                slinventoryentry.description = simplestringparser.getPipeTerminatedString("\n");
+            } else
+            if (s.equals("creation_date"))
+            {
+                slinventoryentry.creationDate = simplestringparser.getIntToken("\n");
+            } else
+            if (s.equals("permissions"))
+            {
+                simplestringparser.nextToken("\n");
+                parsePermissions(simplestringparser, slinventoryentry);
+            } else
+            if (s.equals("sale_info"))
+            {
+                simplestringparser.nextToken("\n");
+                parseSaleInfo(simplestringparser, slinventoryentry);
+            } else
+            {
+                simplestringparser.nextToken("\n");
+            }
+        } while (true);
+    }
+
+    public static Cursor query(SQLiteDatabase sqlitedatabase, String s, String as[], String s1)
+    {
+        if (sqlitedatabase == null)
+        {
+            return null;
+        }
+        try
+        {
+            sqlitedatabase = InventoryEntryDBObject.query(sqlitedatabase, s, as, s1);
+        }
+        // Misplaced declaration of an exception variable
+        catch (SQLiteDatabase sqlitedatabase)
+        {
+            sqlitedatabase.printStackTrace();
+            return null;
+        }
+        return sqlitedatabase;
+    }
+
+    public static Cursor query(DBHandle dbhandle, String s, String as[], String s1)
+    {
+        if (dbhandle == null)
+        {
+            return null;
+        }
+        try
+        {
+            dbhandle = InventoryEntryDBObject.query(dbhandle, s, as, s1);
+        }
+        // Misplaced declaration of an exception variable
+        catch (DBHandle dbhandle)
+        {
+            dbhandle.printStackTrace();
+            return null;
+        }
+        return dbhandle;
+    }
+
+    public int getActionDescriptionResId()
+    {
+        SLAssetType slassettype = SLAssetType.getByType(assetType);
+        if (slassettype != null)
+        {
+            return slassettype.getActionDescription();
+        }
+        switch (invType)
+        {
+        default:
+            return -1;
+
+        case 3: // '\003'
+            return 0x7f09004f;
+
+        case 7: // '\007'
+            return 0x7f09004d;
+
+        case 10: // '\n'
+            return 0x7f09004d;
+
+        case 0: // '\0'
+        case 15: // '\017'
+            if (assetType == SLAssetType.AT_TEXTURE.getTypeCode())
+            {
+                return 0x7f090050;
+            }
+            // fall through
+
+        case 6: // '\006'
+            return 0x7f09004e;
         }
     }
 
-    public boolean isAnimation() {
-        if (this.assetType == SLAssetType.AT_ANIMATION.getTypeCode()) {
+    public int getDrawableResource()
+    {
+        if (isFolder)
+        {
+            return 0x7f0200c0;
+        }
+        if (!isLink())
+        {
+            SLAssetType slassettype = SLAssetType.getByType(assetType);
+            if (slassettype != null)
+            {
+                return slassettype.getDrawableResource();
+            }
+        }
+        return getDrawableResourceForType(invType);
+    }
+
+    public String getReadableTextForLink()
+    {
+        SLInventoryType slinventorytype = SLInventoryType.getByType(invType);
+        return (new StringBuilder()).append(slinventorytype.getReadableName()).append(": ").append(name).toString();
+    }
+
+    public int getSubtypeDrawableResource()
+    {
+        if (!isFolder) goto _L2; else goto _L1
+_L1:
+        typeDefault;
+        JVM INSTR lookupswitch 19: default 172
+    //                   0: 174
+    //                   1: 177
+    //                   2: 180
+    //                   3: 183
+    //                   5: 186
+    //                   6: 192
+    //                   7: 189
+    //                   10: 195
+    //                   13: 198
+    //                   14: 201
+    //                   15: 174
+    //                   16: 204
+    //                   20: 207
+    //                   21: 210
+    //                   23: 183
+    //                   46: 186
+    //                   47: 186
+    //                   48: 186
+    //                   49: 192;
+           goto _L3 _L4 _L5 _L6 _L7 _L8 _L9 _L10 _L11 _L12 _L13 _L4 _L14 _L15 _L16 _L7 _L8 _L8 _L8 _L9
+_L3:
+        return -1;
+_L4:
+        return 0x7f0200c2;
+_L5:
+        return 0x7f0200ca;
+_L6:
+        return 0x7f0200cd;
+_L7:
+        return 0x7f0200c3;
+_L8:
+        return 0x7f0200bf;
+_L10:
+        return 0x7f0200c5;
+_L9:
+        return 0x7f0200c6;
+_L11:
+        return 0x7f0200c8;
+_L12:
+        return 0x7f0200c1;
+_L13:
+        return 0x7f0200cb;
+_L14:
+        return 0x7f0200c7;
+_L15:
+        return 0x7f0200bd;
+_L16:
+        return 0x7f0200c9;
+_L2:
+        if (assetType == SLAssetType.AT_LINK.getTypeCode() || assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode())
+        {
+            return 0x7f0200c4;
+        }
+        if (true) goto _L3; else goto _L17
+_L17:
+    }
+
+    public int getTypeDescriptionResId()
+    {
+        SLAssetType slassettype = SLAssetType.getByType(assetType);
+        if (slassettype != null)
+        {
+            return slassettype.getTypeDescription();
+        }
+        switch (invType)
+        {
+        default:
+            return 0x7f090078;
+
+        case 0: // '\0'
+            return 0x7f090075;
+
+        case 1: // '\001'
+            return 0x7f090074;
+
+        case 2: // '\002'
+            return 0x7f090065;
+
+        case 3: // '\003'
+            return 0x7f090069;
+
+        case 4: // '\004'
+            return 0x7f090071;
+
+        case 5: // '\005'
+            return 0x7f090066;
+
+        case 6: // '\006'
+            return 0x7f09006f;
+
+        case 7: // '\007'
+            return 0x7f09006e;
+
+        case 8: // '\b'
+            return 0x7f090067;
+
+        case 9: // '\t'
+            return 0x7f090070;
+
+        case 10: // '\n'
+            return 0x7f09006c;
+
+        case 11: // '\013'
+            return 0x7f09006d;
+
+        case 12: // '\f'
+            return 0x7f090076;
+
+        case 13: // '\r'
+            return 0x7f090064;
+
+        case 14: // '\016'
+            return 0x7f090077;
+
+        case 15: // '\017'
+            return 0x7f090073;
+
+        case 16: // '\020'
+            return 0x7f09006b;
+
+        case 17: // '\021'
+            return 0x7f090063;
+
+        case 18: // '\022'
+            return 0x7f090079;
+
+        case 19: // '\023'
+            return 0x7f090062;
+
+        case 20: // '\024'
+            return 0x7f090068;
+        }
+    }
+
+    public boolean isAnimation()
+    {
+        if (assetType == SLAssetType.AT_ANIMATION.getTypeCode())
+        {
             return true;
         }
-        return this.assetType == SLAssetType.AT_LINK.getTypeCode() && this.invType == 19;
+        return assetType == SLAssetType.AT_LINK.getTypeCode() && invType == 19;
     }
 
-    public boolean isCopyable() {
-        return ((this.ownerMask & this.baseMask) & 32768) != 0;
+    public boolean isCopyable()
+    {
+        boolean flag = false;
+        if ((ownerMask & baseMask & 0x8000) != 0)
+        {
+            flag = true;
+        }
+        return flag;
     }
 
-    public boolean isFolderOrFolderLink() {
-        return this.isFolder || this.assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode();
+    public boolean isFolderOrFolderLink()
+    {
+        return isFolder || assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode();
     }
 
-    public boolean isLink() {
-        return this.assetType == SLAssetType.AT_LINK.getTypeCode() || this.assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode();
+    public boolean isLink()
+    {
+        return assetType == SLAssetType.AT_LINK.getTypeCode() || assetType == SLAssetType.AT_LINK_FOLDER.getTypeCode();
     }
 
-    public boolean isWearable() {
-        if (this.assetType == SLAssetType.AT_BODYPART.getTypeCode() || this.assetType == SLAssetType.AT_CLOTHING.getTypeCode()) {
+    public boolean isWearable()
+    {
+        while (assetType == SLAssetType.AT_BODYPART.getTypeCode() || assetType == SLAssetType.AT_CLOTHING.getTypeCode() || assetType == SLAssetType.AT_LINK.getTypeCode() && invType == SLInventoryType.IT_WEARABLE.getTypeCode()) 
+        {
             return true;
         }
-        return this.assetType == SLAssetType.AT_LINK.getTypeCode() && this.invType == SLInventoryType.IT_WEARABLE.getTypeCode();
+        return false;
     }
 
-    public void updateOrInsert(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
-        super.updateOrInsert(sQLiteDatabase, "uuid_low = ? AND uuid_high = ?", new String[]{Long.toString(this.uuid.getLeastSignificantBits()), Long.toString(this.uuid.getMostSignificantBits())});
+    public void updateOrInsert(SQLiteDatabase sqlitedatabase)
+        throws com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException
+    {
+        super.updateOrInsert(sqlitedatabase, "uuid_low = ? AND uuid_high = ?", new String[] {
+            Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())
+        });
     }
 
-    public void updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) throws DBObject.DatabaseBindingException {
-        sQLiteStatement.bindLong(19, this.uuid.getMostSignificantBits());
-        sQLiteStatement.bindLong(20, this.uuid.getLeastSignificantBits());
-        super.updateOrInsert(sQLiteStatement, sQLiteStatement2);
+    public void updateOrInsert(SQLiteStatement sqlitestatement, SQLiteStatement sqlitestatement1)
+        throws com.lumiyaviewer.lumiya.orm.DBObject.DatabaseBindingException
+    {
+        sqlitestatement.bindLong(19, uuid.getMostSignificantBits());
+        sqlitestatement.bindLong(20, uuid.getLeastSignificantBits());
+        super.updateOrInsert(sqlitestatement, sqlitestatement1);
     }
 
-    public Object whatIsItemWornOn(@Nullable ImmutableMap<UUID, String> immutableMap, @Nullable Table<SLWearableType, UUID, SLWearable> table, boolean z) {
-        if (this.assetType == SLAssetType.AT_LINK.getTypeCode()) {
-            if (this.invType == SLInventoryType.IT_WEARABLE.getTypeCode()) {
-                if (table != null) {
-                    for (Table.Cell cell : table.cellSet()) {
-                        SLWearableType sLWearableType = (SLWearableType) cell.getRowKey();
-                        UUID uuid = (UUID) cell.getColumnKey();
-                        if (!(sLWearableType == null || uuid == null)) {
-                            if (!z || sLWearableType.isBodyPart()) {
-                                if (uuid.equals(this.assetUUID)) {
-                                    return sLWearableType;
-                                }
-                                SLWearable sLWearable = (SLWearable) cell.getValue();
-                                if (sLWearable != null && sLWearable.itemID.equals(this.assetUUID)) {
-                                    return sLWearableType;
-                                }
-                            }
-                        }
-                    }
+    public Object whatIsItemWornOn(ImmutableMap immutablemap, Table table, boolean flag)
+    {
+        if (assetType == SLAssetType.AT_LINK.getTypeCode())
+        {
+            if (invType == SLInventoryType.IT_WEARABLE.getTypeCode())
+            {
+                if (table == null)
+                {
+                    break MISSING_BLOCK_LABEL_287;
                 }
-            } else if (immutableMap != null && !z && immutableMap.containsKey(this.assetUUID)) {
+                immutablemap = table.cellSet().iterator();
+                Object obj;
+                do
+                {
+                    UUID uuid;
+                    do
+                    {
+                        if (!immutablemap.hasNext())
+                        {
+                            break MISSING_BLOCK_LABEL_287;
+                        }
+                        obj = (com.google.common.collect.Table.Cell)immutablemap.next();
+                        table = (SLWearableType)((com.google.common.collect.Table.Cell) (obj)).getRowKey();
+                        uuid = (UUID)((com.google.common.collect.Table.Cell) (obj)).getColumnKey();
+                    } while (table == null || uuid == null || flag && !table.isBodyPart());
+                    if (uuid.equals(assetUUID))
+                    {
+                        return table;
+                    }
+                    obj = (SLWearable)((com.google.common.collect.Table.Cell) (obj)).getValue();
+                } while (obj == null || !((SLWearable) (obj)).itemID.equals(assetUUID));
+                return table;
+            }
+            if (immutablemap != null && !flag && immutablemap.containsKey(assetUUID))
+            {
                 return Boolean.TRUE;
             }
-        } else if (this.assetType == SLAssetType.AT_BODYPART.getTypeCode() || this.assetType == SLAssetType.AT_CLOTHING.getTypeCode()) {
-            SLWearableType byCode = SLWearableType.getByCode(this.flags & 255);
-            if (byCode == null || table == null || ((z && (!byCode.isBodyPart())) || !table.contains(byCode, this.assetUUID))) {
-                return null;
+        } else
+        if (assetType == SLAssetType.AT_BODYPART.getTypeCode() || assetType == SLAssetType.AT_CLOTHING.getTypeCode())
+        {
+            immutablemap = SLWearableType.getByCode(flags & 0xff);
+            if (immutablemap != null && table != null)
+            {
+                if (flag && immutablemap.isBodyPart() ^ true)
+                {
+                    return null;
+                }
+                if (table.contains(immutablemap, assetUUID))
+                {
+                    return immutablemap;
+                }
             }
-            return byCode;
-        } else if (immutableMap != null && !z && (immutableMap.containsKey(this.uuid) || immutableMap.containsKey(this.assetUUID))) {
+        } else
+        if (immutablemap != null && !flag && (immutablemap.containsKey(this.uuid) || immutablemap.containsKey(assetUUID)))
+        {
             return Boolean.TRUE;
         }
         return null;
     }
+
 }

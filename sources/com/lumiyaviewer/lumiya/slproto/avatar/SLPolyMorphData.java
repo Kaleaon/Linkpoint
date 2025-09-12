@@ -1,6 +1,9 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.avatar;
 
-import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
 import com.lumiyaviewer.lumiya.render.GLTexture;
@@ -11,7 +14,12 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-public class SLPolyMorphData {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.avatar:
+//            SLMeshData, SLPolyMesh, SLVisualParamID
+
+public class SLPolyMorphData
+{
+
     private DirectByteBuffer indexBuffer;
     private boolean isMasked;
     private SLPolyMesh mesh;
@@ -20,70 +28,129 @@ public class SLPolyMorphData {
     private DirectByteBuffer texCoordsBuffer;
     private DirectByteBuffer vertexBuffer;
 
-    public SLPolyMorphData(SLVisualParamID sLVisualParamID, SLPolyMesh sLPolyMesh, DataInputStream dataInputStream) throws IOException {
-        boolean z = false;
-        this.morphID = sLVisualParamID;
-        this.mesh = sLPolyMesh;
-        this.isMasked = dataInputStream.readByte() != 0 ? true : z;
-        this.numVertices = dataInputStream.readInt();
-        this.vertexBuffer = new DirectByteBuffer(this.numVertices * 24);
-        this.texCoordsBuffer = new DirectByteBuffer(this.numVertices * 8);
-        this.indexBuffer = new DirectByteBuffer(this.numVertices * 4);
-        this.vertexBuffer.read(dataInputStream);
-        this.texCoordsBuffer.read(dataInputStream);
-        this.indexBuffer.read(dataInputStream);
-        Debug.Log("SLPolyMorphData: Loaded morph '" + sLVisualParamID + "', vertices = " + this.numVertices);
+    public SLPolyMorphData(SLVisualParamID slvisualparamid, SLPolyMesh slpolymesh, DataInputStream datainputstream)
+        throws IOException
+    {
+        boolean flag = false;
+        super();
+        morphID = slvisualparamid;
+        mesh = slpolymesh;
+        if (datainputstream.readByte() != 0)
+        {
+            flag = true;
+        }
+        isMasked = flag;
+        numVertices = datainputstream.readInt();
+        vertexBuffer = new DirectByteBuffer(numVertices * 24);
+        texCoordsBuffer = new DirectByteBuffer(numVertices * 8);
+        indexBuffer = new DirectByteBuffer(numVertices * 4);
+        vertexBuffer.read(datainputstream);
+        texCoordsBuffer.read(datainputstream);
+        indexBuffer.read(datainputstream);
+        Debug.Log((new StringBuilder()).append("SLPolyMorphData: Loaded morph '").append(slvisualparamid).append("', vertices = ").append(numVertices).toString());
     }
 
-    public void applyMorphData(SLMeshData sLMeshData, float f, GLTexture gLTexture) {
+    public void applyMorphData(SLMeshData slmeshdata, float f, GLTexture gltexture)
+    {
+        ByteBuffer bytebuffer = null;
+        int k = 0;
         int i;
-        int i2;
-        ByteBuffer byteBuffer = null;
-        int i3 = 0;
-        if (this.isMasked && gLTexture != null) {
-            i2 = gLTexture.getWidth();
-            i = gLTexture.getHeight();
-            byteBuffer = gLTexture.getExtraComponentsBuffer();
-            if (byteBuffer != null) {
-                i3 = byteBuffer.position();
-            }
-        } else {
+        int j;
+        if (isMasked && gltexture != null)
+        {
+            i = 1;
+        } else
+        {
             i = 0;
-            i2 = 0;
         }
-        OpenJPEG.applyMeshMorph(f, sLMeshData.vertexBuffer.asByteBuffer(), sLMeshData.texCoordsBuffer.asByteBuffer(), this.numVertices, this.indexBuffer.asByteBuffer(), this.vertexBuffer.asByteBuffer(), this.texCoordsBuffer.asByteBuffer(), i2, i, i3, byteBuffer);
+        if (i != 0)
+        {
+            int l = gltexture.getWidth();
+            int i1 = gltexture.getHeight();
+            bytebuffer = gltexture.getExtraComponentsBuffer();
+            i = l;
+            j = i1;
+            gltexture = bytebuffer;
+            if (bytebuffer != null)
+            {
+                k = bytebuffer.position();
+                gltexture = bytebuffer;
+                j = i1;
+                i = l;
+            }
+        } else
+        {
+            j = 0;
+            i = 0;
+            gltexture = bytebuffer;
+        }
+        OpenJPEG.applyMeshMorph(f, slmeshdata.vertexBuffer.asByteBuffer(), slmeshdata.texCoordsBuffer.asByteBuffer(), numVertices, indexBuffer.asByteBuffer(), vertexBuffer.asByteBuffer(), texCoordsBuffer.asByteBuffer(), i, j, k, gltexture);
     }
 
-    public void applyMorphDataSlow(SLMeshData sLMeshData, float f, GLTexture gLTexture) {
-        FloatBuffer asFloatBuffer = this.vertexBuffer.asFloatBuffer();
-        FloatBuffer asFloatBuffer2 = this.texCoordsBuffer.asFloatBuffer();
-        IntBuffer asIntBuffer = this.indexBuffer.asIntBuffer();
-        FloatBuffer asFloatBuffer3 = sLMeshData.vertexBuffer.asFloatBuffer();
-        FloatBuffer asFloatBuffer4 = sLMeshData.texCoordsBuffer.asFloatBuffer();
-        boolean z = this.isMasked && gLTexture != null;
-        int i = 0;
-        int i2 = 0;
-        ByteBuffer byteBuffer = null;
-        int i3 = 0;
-        if (z) {
-            i = gLTexture.getWidth();
-            i2 = gLTexture.getHeight();
-            byteBuffer = gLTexture.getExtraComponentsBuffer();
-            if (byteBuffer != null) {
-                i3 = byteBuffer.position();
-            } else {
-                z = false;
+    public void applyMorphDataSlow(SLMeshData slmeshdata, float f, GLTexture gltexture)
+    {
+        FloatBuffer floatbuffer = vertexBuffer.asFloatBuffer();
+        FloatBuffer floatbuffer1 = texCoordsBuffer.asFloatBuffer();
+        IntBuffer intbuffer = indexBuffer.asIntBuffer();
+        FloatBuffer floatbuffer2 = slmeshdata.vertexBuffer.asFloatBuffer();
+        FloatBuffer floatbuffer3 = slmeshdata.texCoordsBuffer.asFloatBuffer();
+        int i;
+        int j;
+        int k;
+        int l;
+        boolean flag;
+        int i1;
+        if (isMasked && gltexture != null)
+        {
+            i = 1;
+        } else
+        {
+            i = 0;
+        }
+        l = 0;
+        k = 0;
+        slmeshdata = null;
+        i1 = 0;
+        j = i1;
+        flag = i;
+        if (i != 0)
+        {
+            l = gltexture.getWidth();
+            k = gltexture.getHeight();
+            slmeshdata = gltexture.getExtraComponentsBuffer();
+            if (slmeshdata != null)
+            {
+                j = slmeshdata.position();
+                flag = i;
+            } else
+            {
+                flag = false;
+                j = i1;
             }
         }
-        for (int i4 = 0; i4 < this.numVertices; i4++) {
-            int i5 = asIntBuffer.get(i4);
-            float f2 = z ? (((float) (byteBuffer.get(((int) Math.floor((double) (asFloatBuffer4.get((i5 * 2) + 0) * ((float) i)))) + ((((int) Math.floor((double) (asFloatBuffer4.get((i5 * 2) + 1) * ((float) i2)))) * i) + i3)) & UnsignedBytes.MAX_VALUE)) / 255.0f) * f : f;
-            for (int i6 = 0; i6 < 6; i6++) {
-                asFloatBuffer3.put((i5 * 6) + i6, asFloatBuffer3.get((i5 * 6) + i6) + (asFloatBuffer.get((i4 * 6) + i6) * f2));
+        i = 0;
+        while (i < numVertices) 
+        {
+            int k1 = intbuffer.get(i);
+            float f1;
+            if (flag)
+            {
+                f1 = ((float)(slmeshdata.get((int)Math.floor(floatbuffer3.get(k1 * 2 + 0) * (float)l) + ((int)Math.floor(floatbuffer3.get(k1 * 2 + 1) * (float)k) * l + j)) & 0xff) / 255F) * f;
+            } else
+            {
+                f1 = f;
             }
-            for (int i7 = 0; i7 < 2; i7++) {
-                asFloatBuffer4.put((i5 * 2) + i7, asFloatBuffer4.get((i5 * 2) + i7) + (asFloatBuffer2.get((i4 * 2) + i7) * f2));
+            for (i1 = 0; i1 < 6; i1++)
+            {
+                floatbuffer2.put(k1 * 6 + i1, floatbuffer2.get(k1 * 6 + i1) + floatbuffer.get(i * 6 + i1) * f1);
             }
+
+            for (int j1 = 0; j1 < 2; j1++)
+            {
+                floatbuffer3.put(k1 * 2 + j1, floatbuffer3.get(k1 * 2 + j1) + floatbuffer1.get(i * 2 + j1) * f1);
+            }
+
+            i++;
         }
     }
 }

@@ -1,3 +1,7 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.login;
 
 import android.content.Intent;
@@ -12,25 +16,26 @@ import android.text.method.PasswordTransformationMethod;
 import android.text.method.SingleLineTransformationMethod;
 import android.text.style.URLSpan;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.GridConnectionService;
 import com.lumiyaviewer.lumiya.LumiyaApp;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
 import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
 import com.lumiyaviewer.lumiya.slproto.SLURL;
 import com.lumiyaviewer.lumiya.slproto.auth.SLAuth;
-import com.lumiyaviewer.lumiya.slproto.avatar.SLMoveEvents;
 import com.lumiyaviewer.lumiya.slproto.events.SLLoginResultEvent;
 import com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent;
 import com.lumiyaviewer.lumiya.ui.accounts.AccountList;
@@ -42,133 +47,235 @@ import com.lumiyaviewer.lumiya.ui.grids.GridList;
 import com.lumiyaviewer.lumiya.ui.grids.ManageGridsActivity;
 import com.lumiyaviewer.lumiya.ui.settings.SettingsActivity;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-public class LoginActivity extends ThemedActivity implements View.OnClickListener, TextWatcher, GridEditDialog.OnGridEditResultListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.login:
+//            TOSActivity, WhatsNewActivity
+
+public class LoginActivity extends ThemedActivity
+    implements android.view.View.OnClickListener, TextWatcher, com.lumiyaviewer.lumiya.ui.grids.GridEditDialog.OnGridEditResultListener
+{
+
     private static final String KEY_CLIENT_ID = "client_id";
     private static final String KEY_LOGIN = "login";
     private static final String KEY_PASSWORD = "password";
     private static final String KEY_SAVE_PASSWORD = "save_password";
     private static final String KEY_SELECTED_GRID = "selected_grid";
     private static final String KEY_TOS_ACCEPTED = "tos_accepted";
-    private AccountList accountList = null;
-    private boolean enableAutoClear = false;
-    private GridList.GridArrayAdapter gridDisplayAdapter = null;
-    private List<GridList.GridInfo> gridDisplayList = new ArrayList();
-    /* access modifiers changed from: private */
-    public GridList gridList = null;
-    /* access modifiers changed from: private */
-    public int lastSelectedGrid = 0;
-    /* access modifiers changed from: private */
-    public UUID lastSelectedGridUUID;
-    private boolean loggingIn = false;
-    private ImmutableList<MenuItem> menuItems = ImmutableList.of();
+    private AccountList accountList;
+    private boolean enableAutoClear;
+    private com.lumiyaviewer.lumiya.ui.grids.GridList.GridArrayAdapter gridDisplayAdapter;
+    private List gridDisplayList;
+    private GridList gridList;
+    private int lastSelectedGrid;
+    private UUID lastSelectedGridUUID;
+    private boolean loggingIn;
+    private ImmutableList menuItems;
 
-    private void CheckTOSAndLogin() {
-        View currentFocus = getCurrentFocus();
-        if (currentFocus != null) {
-            ((InputMethodManager) getSystemService("input_method")).hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+    static GridList _2D_get0(LoginActivity loginactivity)
+    {
+        return loginactivity.gridList;
+    }
+
+    static int _2D_get1(LoginActivity loginactivity)
+    {
+        return loginactivity.lastSelectedGrid;
+    }
+
+    static int _2D_set0(LoginActivity loginactivity, int i)
+    {
+        loginactivity.lastSelectedGrid = i;
+        return i;
+    }
+
+    static UUID _2D_set1(LoginActivity loginactivity, UUID uuid)
+    {
+        loginactivity.lastSelectedGridUUID = uuid;
+        return uuid;
+    }
+
+    public LoginActivity()
+    {
+        loggingIn = false;
+        enableAutoClear = false;
+        lastSelectedGrid = 0;
+        gridList = null;
+        accountList = null;
+        gridDisplayList = new ArrayList();
+        gridDisplayAdapter = null;
+        menuItems = ImmutableList.of();
+    }
+
+    private void CheckTOSAndLogin()
+    {
+        Object obj = getCurrentFocus();
+        if (obj != null)
+        {
+            ((InputMethodManager)getSystemService("input_method")).hideSoftInputFromWindow(((View) (obj)).getWindowToken(), 0);
         }
-        SharedPreferences preferences = getPreferences(0);
-        GridList.GridInfo selectedGrid = getSelectedGrid();
-        if (preferences.getBoolean(KEY_TOS_ACCEPTED, false) || (!selectedGrid.isLindenGrid())) {
+        obj = getPreferences(0);
+        com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo gridinfo = getSelectedGrid();
+        if (((SharedPreferences) (obj)).getBoolean("tos_accepted", false) || gridinfo.isLindenGrid() ^ true)
+        {
             DoLogin();
-        } else {
-            startActivityForResult(new Intent(this, TOSActivity.class), 5);
+            return;
+        } else
+        {
+            startActivityForResult(new Intent(this, com/lumiyaviewer/lumiya/ui/login/TOSActivity), 5);
+            return;
         }
     }
 
-    private void DoLogin() {
-        boolean z;
-        String str;
-        String str2;
-        SLURL slurl;
-        SharedPreferences preferences = getPreferences(0);
-        String editable = ((EditText) findViewById(R.id.editUserName)).getText().toString();
-        String editable2 = ((EditText) findViewById(R.id.editPassword)).getText().toString();
-        GridList.GridInfo selectedGrid = getSelectedGrid();
-        boolean isChecked = ((CheckBox) findViewById(R.id.savePassword)).isChecked();
-        String str3 = "";
-        if (editable2.equals(getString(R.string.saved_password))) {
-            str3 = preferences.getString(KEY_PASSWORD, "");
-            z = true;
-        } else {
-            z = false;
+    private void DoLogin()
+    {
+        Object obj3 = getPreferences(0);
+        String s1 = ((EditText)findViewById(0x7f1001c9)).getText().toString();
+        Object obj = ((EditText)findViewById(0x7f1001ca)).getText().toString();
+        com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo gridinfo = getSelectedGrid();
+        boolean flag3 = ((CheckBox)findViewById(0x7f1001cc)).isChecked();
+        String s = "";
+        Object obj1;
+        Object obj2;
+        boolean flag;
+        boolean flag1;
+        boolean flag2;
+        if (((String) (obj)).equals(getString(0x7f0902e2)))
+        {
+            s = ((SharedPreferences) (obj3)).getString("password", "");
+            flag = true;
+        } else
+        {
+            flag = false;
         }
-        if (!z) {
-            String passwordHash = SLAuth.getPasswordHash(editable2);
-            Debug.Log("Login: not using saved hash, password = " + editable2 + ", new hash: " + passwordHash);
-            str = passwordHash;
-        } else {
-            AccountList.AccountInfo findAccount = this.accountList.findAccount(editable, selectedGrid.getGridUUID());
-            if (findAccount != null && !findAccount.getPasswordHash().equals("")) {
-                str3 = findAccount.getPasswordHash();
+        if (!flag)
+        {
+            s = SLAuth.getPasswordHash(((String) (obj)));
+            Debug.Log((new StringBuilder()).append("Login: not using saved hash, password = ").append(((String) (obj))).append(", new hash: ").append(s).toString());
+        } else
+        {
+            obj1 = accountList.findAccount(s1, gridinfo.getGridUUID());
+            obj = s;
+            if (obj1 != null)
+            {
+                obj = s;
+                if (!((com.lumiyaviewer.lumiya.ui.accounts.AccountList.AccountInfo) (obj1)).getPasswordHash().equals(""))
+                {
+                    obj = ((com.lumiyaviewer.lumiya.ui.accounts.AccountList.AccountInfo) (obj1)).getPasswordHash();
+                }
             }
-            Debug.Log("Login: using saved hash, hash = " + str3);
-            str = str3;
+            Debug.Log((new StringBuilder()).append("Login: using saved hash, hash = ").append(((String) (obj))).toString());
+            s = ((String) (obj));
         }
-        this.enableAutoClear = false;
-        if (isChecked) {
-            ((EditText) findViewById(R.id.editPassword)).setTransformationMethod(SingleLineTransformationMethod.getInstance());
-            ((EditText) findViewById(R.id.editPassword)).setText(R.string.saved_password);
-        } else {
-            ((EditText) findViewById(R.id.editPassword)).setTransformationMethod(PasswordTransformationMethod.getInstance());
-            ((EditText) findViewById(R.id.editPassword)).setText("");
+        enableAutoClear = false;
+        if (flag3)
+        {
+            ((EditText)findViewById(0x7f1001ca)).setTransformationMethod(SingleLineTransformationMethod.getInstance());
+            ((EditText)findViewById(0x7f1001ca)).setText(0x7f0902e2);
+        } else
+        {
+            ((EditText)findViewById(0x7f1001ca)).setTransformationMethod(PasswordTransformationMethod.getInstance());
+            ((EditText)findViewById(0x7f1001ca)).setText("");
         }
-        this.enableAutoClear = true;
-        String string = preferences.getString(KEY_CLIENT_ID, "");
-        String string2 = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("start_location", "last");
-        boolean saveUserName = getSaveUserName();
-        boolean z2 = isChecked ? saveUserName : false;
-        SharedPreferences.Editor edit = preferences.edit();
-        edit.putString(KEY_LOGIN, saveUserName ? editable : "");
-        edit.putBoolean(KEY_SAVE_PASSWORD, isChecked);
-        if (!z || (!z2)) {
-            edit.putString(KEY_PASSWORD, z2 ? str : "");
+        enableAutoClear = true;
+        obj1 = ((SharedPreferences) (obj3)).getString("client_id", "");
+        obj2 = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).getString("start_location", "last");
+        flag2 = getSaveUserName();
+        if (flag3)
+        {
+            flag1 = flag2;
+        } else
+        {
+            flag1 = false;
         }
-        if (string.equals("")) {
-            str2 = UUID.randomUUID().toString();
-            edit.putString(KEY_CLIENT_ID, str2);
-        } else {
-            str2 = string;
+        obj3 = ((SharedPreferences) (obj3)).edit();
+        if (flag2)
+        {
+            obj = s1;
+        } else
+        {
+            obj = "";
         }
-        edit.putString(KEY_SELECTED_GRID, selectedGrid.getGridUUID().toString());
-        edit.apply();
-        if (saveUserName) {
-            this.accountList.findOrAddAccount(editable, z2 ? str : "", selectedGrid.getGridUUID());
+        ((android.content.SharedPreferences.Editor) (obj3)).putString("login", ((String) (obj)));
+        ((android.content.SharedPreferences.Editor) (obj3)).putBoolean("save_password", flag3);
+        if (!flag || flag1 ^ true)
+        {
+            if (flag1)
+            {
+                obj = s;
+            } else
+            {
+                obj = "";
+            }
+            ((android.content.SharedPreferences.Editor) (obj3)).putString("password", ((String) (obj)));
         }
-        try {
-            slurl = new SLURL(getIntent());
-        } catch (Exception e) {
-            slurl = null;
+        if (((String) (obj1)).equals(""))
+        {
+            obj = UUID.randomUUID().toString();
+            ((android.content.SharedPreferences.Editor) (obj3)).putString("client_id", ((String) (obj)));
+        } else
+        {
+            obj = obj1;
         }
-        String loginStartLocation = slurl != null ? slurl.getLoginStartLocation() : string2;
-        Debug.Log("Start location (LoginActivity): " + loginStartLocation);
-        this.loggingIn = true;
-        Intent intent = new Intent(this, GridConnectionService.class);
-        intent.setAction(GridConnectionService.LOGIN_ACTION);
-        intent.putExtra(KEY_LOGIN, editable);
-        intent.putExtra(KEY_PASSWORD, str);
-        intent.putExtra(KEY_CLIENT_ID, str2);
-        intent.putExtra("start_location", loginStartLocation);
-        intent.putExtra("login_url", selectedGrid.getLoginURL());
-        intent.putExtra("grid_name", selectedGrid.getGridName());
-        startService(intent);
+        ((android.content.SharedPreferences.Editor) (obj3)).putString("selected_grid", gridinfo.getGridUUID().toString());
+        ((android.content.SharedPreferences.Editor) (obj3)).apply();
+        if (flag2)
+        {
+            obj3 = accountList;
+            if (flag1)
+            {
+                obj1 = s;
+            } else
+            {
+                obj1 = "";
+            }
+            ((AccountList) (obj3)).findOrAddAccount(s1, ((String) (obj1)), gridinfo.getGridUUID());
+        }
+        try
+        {
+            obj1 = new SLURL(getIntent());
+        }
+        // Misplaced declaration of an exception variable
+        catch (Object obj1)
+        {
+            obj1 = null;
+        }
+        if (obj1 != null)
+        {
+            obj1 = ((SLURL) (obj1)).getLoginStartLocation();
+        } else
+        {
+            obj1 = obj2;
+        }
+        Debug.Log((new StringBuilder()).append("Start location (LoginActivity): ").append(((String) (obj1))).toString());
+        loggingIn = true;
+        obj2 = new Intent(this, com/lumiyaviewer/lumiya/GridConnectionService);
+        ((Intent) (obj2)).setAction("com.lumiyaviewer.lumiya.ACTION_LOGIN");
+        ((Intent) (obj2)).putExtra("login", s1);
+        ((Intent) (obj2)).putExtra("password", s);
+        ((Intent) (obj2)).putExtra("client_id", ((String) (obj)));
+        ((Intent) (obj2)).putExtra("start_location", ((String) (obj1)));
+        ((Intent) (obj2)).putExtra("login_url", gridinfo.getLoginURL());
+        ((Intent) (obj2)).putExtra("grid_name", gridinfo.getGridName());
+        startService(((Intent) (obj2)));
         showProgressView(true);
-        ((TextView) findViewById(R.id.connect_status_text)).setText(R.string.status_logging_in);
+        ((TextView)findViewById(0x7f1001d1)).setText(0x7f09031d);
     }
 
-    private void checkIfGridAvailable() {
+    private void checkIfGridAvailable()
+    {
         Debug.Log("LoginActivity: checking if grid is available");
-        SLGridConnection gridConnection = GridConnectionService.getGridConnection();
-        if (gridConnection != null) {
-            SLGridConnection.ConnectionState connectionState = gridConnection.getConnectionState();
-            UUID activeAgentUUID = gridConnection.getActiveAgentUUID();
-            Debug.Log("LoginActivity: connectionState = " + connectionState.toString());
-            if (connectionState == SLGridConnection.ConnectionState.Connected && activeAgentUUID != null) {
+        Object obj = GridConnectionService.getGridConnection();
+        if (obj != null)
+        {
+            com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState connectionstate = ((SLGridConnection) (obj)).getConnectionState();
+            obj = ((SLGridConnection) (obj)).getActiveAgentUUID();
+            Debug.Log((new StringBuilder()).append("LoginActivity: connectionState = ").append(connectionstate.toString()).toString());
+            if (connectionstate == com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState.Connected && obj != null)
+            {
                 Debug.Log("LoginActivity: grid available and connected");
-                startChatActivity(activeAgentUUID);
+                startChatActivity(((UUID) (obj)));
                 finish();
                 return;
             }
@@ -176,404 +283,522 @@ public class LoginActivity extends ThemedActivity implements View.OnClickListene
         updateConnectingStatus();
     }
 
-    private boolean getSaveUserName() {
-        return !PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("noSaveUserName", false);
+    private boolean getSaveUserName()
+    {
+        return PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getBoolean("noSaveUserName", false) ^ true;
     }
 
-    private GridList.GridInfo getSelectedGrid() {
-        Object selectedItem = ((Spinner) findViewById(R.id.spinnerGrid)).getSelectedItem();
-        return selectedItem instanceof GridList.GridInfo ? (GridList.GridInfo) selectedItem : this.gridList.getDefaultGrid();
-    }
-
-    private void loadSavedLogin() {
-        SharedPreferences preferences = getPreferences(0);
-        if (getSaveUserName()) {
-            String string = preferences.getString(KEY_PASSWORD, "");
-            ((EditText) findViewById(R.id.editUserName)).setText(preferences.getString(KEY_LOGIN, ""));
-            ((CheckBox) findViewById(R.id.savePassword)).setChecked(preferences.getBoolean(KEY_SAVE_PASSWORD, true));
-            if (!string.equals("")) {
-                ((EditText) findViewById(R.id.editPassword)).setTransformationMethod(SingleLineTransformationMethod.getInstance());
-                ((EditText) findViewById(R.id.editPassword)).setText(R.string.saved_password);
-            } else {
-                ((EditText) findViewById(R.id.editPassword)).setTransformationMethod(PasswordTransformationMethod.getInstance());
-                ((EditText) findViewById(R.id.editPassword)).setText("");
-            }
-        } else {
-            ((EditText) findViewById(R.id.editUserName)).setText("");
-            ((EditText) findViewById(R.id.editPassword)).setTransformationMethod(PasswordTransformationMethod.getInstance());
-            ((EditText) findViewById(R.id.editPassword)).setText("");
+    private com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo getSelectedGrid()
+    {
+        Object obj = ((Spinner)findViewById(0x7f1000b5)).getSelectedItem();
+        if (obj instanceof com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo)
+        {
+            return (com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo)obj;
+        } else
+        {
+            return gridList.getDefaultGrid();
         }
-        this.enableAutoClear = true;
     }
 
-    private boolean progressViewVisible() {
-        View findViewById = findViewById(R.id.login_progress_layout);
-        return findViewById != null && findViewById.getVisibility() == 0;
+    private void loadSavedLogin()
+    {
+        SharedPreferences sharedpreferences = getPreferences(0);
+        if (getSaveUserName())
+        {
+            String s = sharedpreferences.getString("password", "");
+            ((EditText)findViewById(0x7f1001c9)).setText(sharedpreferences.getString("login", ""));
+            ((CheckBox)findViewById(0x7f1001cc)).setChecked(sharedpreferences.getBoolean("save_password", true));
+            if (!s.equals(""))
+            {
+                ((EditText)findViewById(0x7f1001ca)).setTransformationMethod(SingleLineTransformationMethod.getInstance());
+                ((EditText)findViewById(0x7f1001ca)).setText(0x7f0902e2);
+            } else
+            {
+                ((EditText)findViewById(0x7f1001ca)).setTransformationMethod(PasswordTransformationMethod.getInstance());
+                ((EditText)findViewById(0x7f1001ca)).setText("");
+            }
+        } else
+        {
+            ((EditText)findViewById(0x7f1001c9)).setText("");
+            ((EditText)findViewById(0x7f1001ca)).setTransformationMethod(PasswordTransformationMethod.getInstance());
+            ((EditText)findViewById(0x7f1001ca)).setText("");
+        }
+        enableAutoClear = true;
     }
 
-    private void setSelectedGrid() {
-        try {
-            String string = getPreferences(0).getString(KEY_SELECTED_GRID, "");
-            if (!string.equals("")) {
-                int gridIndex = this.gridList.getGridIndex(UUID.fromString(string));
-                ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(gridIndex);
-                this.lastSelectedGrid = gridIndex;
-                Object selectedItem = ((Spinner) findViewById(R.id.spinnerGrid)).getSelectedItem();
-                if (selectedItem instanceof GridList.GridInfo) {
-                    this.lastSelectedGridUUID = ((GridList.GridInfo) selectedItem).getGridUUID();
+    private boolean progressViewVisible()
+    {
+        boolean flag1 = false;
+        View view = findViewById(0x7f1001d3);
+        boolean flag = flag1;
+        if (view != null)
+        {
+            flag = flag1;
+            if (view.getVisibility() == 0)
+            {
+                flag = true;
+            }
+        }
+        return flag;
+    }
+
+    private void setSelectedGrid()
+    {
+        try
+        {
+            Object obj = getPreferences(0).getString("selected_grid", "");
+            if (!((String) (obj)).equals(""))
+            {
+                int i = gridList.getGridIndex(UUID.fromString(((String) (obj))));
+                ((Spinner)findViewById(0x7f1000b5)).setSelection(i);
+                lastSelectedGrid = i;
+                obj = ((Spinner)findViewById(0x7f1000b5)).getSelectedItem();
+                if (obj instanceof com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo)
+                {
+                    lastSelectedGridUUID = ((com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo)obj).getGridUUID();
                 }
             }
-        } catch (Exception e) {
+            return;
+        }
+        catch (Exception exception)
+        {
+            return;
         }
     }
 
-    private void showProgressView(boolean z) {
-        int i = 8;
-        View findViewById = findViewById(R.id.login_progress_layout);
-        View findViewById2 = findViewById(R.id.login_root_view);
-        if (!(findViewById == null || findViewById2 == null)) {
-            findViewById(R.id.login_progress_layout).setVisibility(z ? 0 : 8);
-            View findViewById3 = findViewById(R.id.login_root_view);
-            if (!z) {
+    private void showProgressView(boolean flag)
+    {
+        byte byte0 = 8;
+        View view = findViewById(0x7f1001d3);
+        View view2 = findViewById(0x7f1001c6);
+        if (view != null && view2 != null)
+        {
+            View view1 = findViewById(0x7f1001d3);
+            int i;
+            if (flag)
+            {
+                i = 0;
+            } else
+            {
+                i = 8;
+            }
+            view1.setVisibility(i);
+            view1 = findViewById(0x7f1001c6);
+            if (flag)
+            {
+                i = byte0;
+            } else
+            {
                 i = 0;
             }
-            findViewById3.setVisibility(i);
+            view1.setVisibility(i);
         }
         updateMenuItems();
     }
 
-    private void startChatActivity(UUID uuid) {
-        Intent intent = new Intent(this, ChatNewActivity.class);
-        intent.addFlags(SLMoveEvents.AGENT_CONTROL_TURN_RIGHT);
+    private void startChatActivity(UUID uuid)
+    {
+        Intent intent = new Intent(this, com/lumiyaviewer/lumiya/ui/chat/ChatNewActivity);
+        intent.addFlags(0x4000000);
         intent.putExtra("activeAgentUUID", uuid.toString());
         startActivity(intent);
     }
 
-    private void updateConnectingStatus() {
-        SLGridConnection gridConnection;
-        boolean z = this.loggingIn;
-        if (!z && (gridConnection = GridConnectionService.getGridConnection()) != null && gridConnection.getConnectionState() == SLGridConnection.ConnectionState.Connecting) {
-            showProgressView(true);
-            if (gridConnection.getIsReconnecting()) {
-                ((TextView) findViewById(R.id.connect_status_text)).setText(getString(R.string.status_reconnecting, new Object[]{Integer.valueOf(gridConnection.getReconnectAttempt())}));
-                z = true;
-            } else {
-                ((TextView) findViewById(R.id.connect_status_text)).setText(R.string.status_logging_in);
-                z = true;
+    private void updateConnectingStatus()
+    {
+        boolean flag1 = loggingIn;
+        boolean flag = flag1;
+        if (!flag1)
+        {
+            SLGridConnection slgridconnection = GridConnectionService.getGridConnection();
+            flag = flag1;
+            if (slgridconnection != null)
+            {
+                flag = flag1;
+                if (slgridconnection.getConnectionState() == com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState.Connecting)
+                {
+                    showProgressView(true);
+                    if (slgridconnection.getIsReconnecting())
+                    {
+                        ((TextView)findViewById(0x7f1001d1)).setText(getString(0x7f09031e, new Object[] {
+                            Integer.valueOf(slgridconnection.getReconnectAttempt())
+                        }));
+                        flag = true;
+                    } else
+                    {
+                        ((TextView)findViewById(0x7f1001d1)).setText(0x7f09031d);
+                        flag = true;
+                    }
+                }
             }
         }
-        if (!z) {
+        if (!flag)
+        {
             showProgressView(false);
         }
     }
 
-    private void updateMenuItems() {
-        boolean z = !progressViewVisible();
-        for (MenuItem visible : this.menuItems) {
-            visible.setVisible(z);
-        }
+    private void updateMenuItems()
+    {
+        boolean flag = progressViewVisible();
+        for (Iterator iterator = menuItems.iterator(); iterator.hasNext(); ((MenuItem)iterator.next()).setVisible(flag ^ true)) { }
     }
 
-    public void afterTextChanged(Editable editable) {
+    public void afterTextChanged(Editable editable)
+    {
     }
 
-    public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-        if (this.enableAutoClear) {
-            EditText editText = (EditText) findViewById(R.id.editPassword);
-            if (editText.getText().toString().equals(getString(R.string.saved_password))) {
-                this.enableAutoClear = false;
-                editText.setText("");
-                editText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                this.enableAutoClear = true;
+    public void beforeTextChanged(CharSequence charsequence, int i, int j, int k)
+    {
+        if (enableAutoClear)
+        {
+            charsequence = (EditText)findViewById(0x7f1001ca);
+            if (charsequence.getText().toString().equals(getString(0x7f0902e2)))
+            {
+                enableAutoClear = false;
+                charsequence.setText("");
+                charsequence.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                enableAutoClear = true;
             }
         }
     }
 
-    public SharedPreferences getPreferences(int i) {
+    public SharedPreferences getPreferences(int i)
+    {
         return getSharedPreferences("LoginActivity", i);
     }
 
-    @EventHandler
-    public void handleLoginResult(SLLoginResultEvent sLLoginResultEvent) {
-        this.loggingIn = false;
-        Debug.Printf("LoginProgressActivity: result.success = %b", Boolean.valueOf(sLLoginResultEvent.success));
-        if (sLLoginResultEvent.success) {
-            startChatActivity(sLLoginResultEvent.activeAgentUUID);
+    public void handleLoginResult(SLLoginResultEvent slloginresultevent)
+    {
+        loggingIn = false;
+        Debug.Printf("LoginProgressActivity: result.success = %b", new Object[] {
+            Boolean.valueOf(slloginresultevent.success)
+        });
+        if (slloginresultevent.success)
+        {
+            startChatActivity(slloginresultevent.activeAgentUUID);
             finish();
             return;
         }
-        if (!isFinishing() && progressViewVisible()) {
-            String str = "Login to Second Life has failed.";
-            if (!Strings.isNullOrEmpty(sLLoginResultEvent.message)) {
-                str = sLLoginResultEvent.message;
+        if (!isFinishing() && progressViewVisible())
+        {
+            String s = "Login to Second Life has failed.";
+            if (!Strings.isNullOrEmpty(slloginresultevent.message))
+            {
+                s = slloginresultevent.message;
             }
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle((CharSequence) "Login failed");
-            builder.setMessage((CharSequence) str);
-            builder.setCancelable(true);
-            builder.create().show();
+            slloginresultevent = new android.support.v7.app.AlertDialog.Builder(this);
+            slloginresultevent.setTitle("Login failed");
+            slloginresultevent.setMessage(s);
+            slloginresultevent.setCancelable(true);
+            slloginresultevent.create().show();
         }
         showProgressView(false);
     }
 
-    @EventHandler
-    public void handleReconnectingEvent(SLReconnectingEvent sLReconnectingEvent) {
+    public void handleReconnectingEvent(SLReconnectingEvent slreconnectingevent)
+    {
         updateConnectingStatus();
     }
 
-    /* synthetic */ void adjustWhatsNewVisibility() {
-        if (findViewById(R.id.login_spacer).getHeight() < 2 && findViewById(R.id.whatsnewText).getVisibility() != 8) {
-            findViewById(R.id.whatsnewText).setVisibility(8);
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_login_LoginActivity_5985()
+    {
+        if (findViewById(0x7f1001ce).getHeight() < 2 && findViewById(0x7f1001c7).getVisibility() != 8)
+        {
+            findViewById(0x7f1001c7).setVisibility(8);
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onActivityResult(int i, int i2, Intent intent) {
-        AccountList.AccountInfo accountInfo;
-        Debug.Log("LoginActivity: onActivityResult: requestCode = " + i + ", resultCode = " + i2);
-        if (intent != null) {
-            Debug.Log("LoginActivity: onActivityResult: data = " + intent.getDataString() + ", " + intent.toString());
-        } else {
+    protected void onActivityResult(int i, int j, Intent intent)
+    {
+        Debug.Log((new StringBuilder()).append("LoginActivity: onActivityResult: requestCode = ").append(i).append(", resultCode = ").append(j).toString());
+        if (intent != null)
+        {
+            Debug.Log((new StringBuilder()).append("LoginActivity: onActivityResult: data = ").append(intent.getDataString()).append(", ").append(intent.toString()).toString());
+        } else
+        {
             Debug.Log("LoginActivity: onActivityResult: data = null");
         }
-        switch (i) {
-            case 3:
-                if (i2 == -1 && intent != null && (accountInfo = (AccountList.AccountInfo) intent.getParcelableExtra("selected_account")) != null) {
-                    String passwordHash = accountInfo.getPasswordHash();
-                    ((EditText) findViewById(R.id.editUserName)).setText(accountInfo.getLoginName());
-                    ((CheckBox) findViewById(R.id.savePassword)).setChecked(!passwordHash.equals(""));
-                    this.enableAutoClear = false;
-                    if (!passwordHash.equals("")) {
-                        ((EditText) findViewById(R.id.editPassword)).setTransformationMethod(SingleLineTransformationMethod.getInstance());
-                        ((EditText) findViewById(R.id.editPassword)).setText(R.string.saved_password);
-                    } else {
-                        ((EditText) findViewById(R.id.editPassword)).setTransformationMethod(PasswordTransformationMethod.getInstance());
-                        ((EditText) findViewById(R.id.editPassword)).setText("");
-                    }
-                    this.enableAutoClear = true;
-                    if (accountInfo.getGridUUID() != null) {
-                        int gridIndex = this.gridList.getGridIndex(accountInfo.getGridUUID());
-                        ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(gridIndex);
-                        this.lastSelectedGrid = gridIndex;
-                        Object selectedItem = ((Spinner) findViewById(R.id.spinnerGrid)).getSelectedItem();
-                        if (selectedItem instanceof GridList.GridInfo) {
-                            this.lastSelectedGridUUID = ((GridList.GridInfo) selectedItem).getGridUUID();
-                        }
-                    }
-                    SharedPreferences.Editor edit = getPreferences(0).edit();
-                    edit.putString(KEY_LOGIN, accountInfo.getLoginName());
-                    edit.putBoolean(KEY_SAVE_PASSWORD, !passwordHash.equals(""));
-                    edit.putString(KEY_PASSWORD, passwordHash);
-                    if (accountInfo.getGridUUID() != null) {
-                        edit.putString(KEY_SELECTED_GRID, accountInfo.getGridUUID().toString());
-                    }
-                    edit.apply();
-                    return;
-                }
-                return;
-            case 5:
-                if (i2 == -1) {
-                    SharedPreferences.Editor edit2 = getPreferences(0).edit();
-                    edit2.putBoolean(KEY_TOS_ACCEPTED, true);
-                    edit2.apply();
-                    DoLogin();
-                    return;
-                }
-                return;
-            default:
-                return;
+        i;
+        JVM INSTR tableswitch 3 5: default 104
+    //                   3 151
+    //                   4 104
+    //                   5 114;
+           goto _L1 _L2 _L1 _L3
+_L1:
+        return;
+_L3:
+        if (j == -1)
+        {
+            intent = getPreferences(0).edit();
+            intent.putBoolean("tos_accepted", true);
+            intent.apply();
+            DoLogin();
+            return;
         }
+        continue; /* Loop/switch isn't completed */
+_L2:
+        if (j == -1 && intent != null && (intent = (com.lumiyaviewer.lumiya.ui.accounts.AccountList.AccountInfo)intent.getParcelableExtra("selected_account")) != null)
+        {
+            String s = intent.getPasswordHash();
+            ((EditText)findViewById(0x7f1001c9)).setText(intent.getLoginName());
+            ((CheckBox)findViewById(0x7f1001cc)).setChecked(s.equals("") ^ true);
+            enableAutoClear = false;
+            android.content.SharedPreferences.Editor editor;
+            if (!s.equals(""))
+            {
+                ((EditText)findViewById(0x7f1001ca)).setTransformationMethod(SingleLineTransformationMethod.getInstance());
+                ((EditText)findViewById(0x7f1001ca)).setText(0x7f0902e2);
+            } else
+            {
+                ((EditText)findViewById(0x7f1001ca)).setTransformationMethod(PasswordTransformationMethod.getInstance());
+                ((EditText)findViewById(0x7f1001ca)).setText("");
+            }
+            enableAutoClear = true;
+            if (intent.getGridUUID() != null)
+            {
+                i = gridList.getGridIndex(intent.getGridUUID());
+                ((Spinner)findViewById(0x7f1000b5)).setSelection(i);
+                lastSelectedGrid = i;
+                Object obj = ((Spinner)findViewById(0x7f1000b5)).getSelectedItem();
+                if (obj instanceof com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo)
+                {
+                    lastSelectedGridUUID = ((com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo)obj).getGridUUID();
+                }
+            }
+            editor = getPreferences(0).edit();
+            editor.putString("login", intent.getLoginName());
+            editor.putBoolean("save_password", s.equals("") ^ true);
+            editor.putString("password", s);
+            if (intent.getGridUUID() != null)
+            {
+                editor.putString("selected_grid", intent.getGridUUID().toString());
+            }
+            editor.apply();
+            return;
+        }
+        if (true) goto _L1; else goto _L4
+_L4:
     }
 
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.whatsnewText:
-                startActivity(new Intent(this, WhatsNewActivity.class));
-                return;
-            case R.id.buttonLogin:
-                CheckTOSAndLogin();
-                return;
-            case R.id.loginCancelButton:
-                this.loggingIn = false;
-                SLGridConnection gridConnection = GridConnectionService.getGridConnection();
-                if (gridConnection != null) {
-                    gridConnection.CancelConnect();
-                }
-                showProgressView(false);
-                return;
-            default:
-                return;
+    public void onClick(View view)
+    {
+        switch (view.getId())
+        {
+        default:
+            return;
+
+        case 2131755469: 
+            CheckTOSAndLogin();
+            return;
+
+        case 2131755463: 
+            startActivity(new Intent(this, com/lumiyaviewer/lumiya/ui/login/WhatsNewActivity));
+            return;
+
+        case 2131755474: 
+            loggingIn = false;
+            break;
         }
+        view = GridConnectionService.getGridConnection();
+        if (view != null)
+        {
+            view.CancelConnect();
+        }
+        showProgressView(false);
     }
 
-    public void onCreate(Bundle bundle) {
+    public void onCreate(Bundle bundle)
+    {
         super.onCreate(bundle);
-        SLGridConnection gridConnection = GridConnectionService.getGridConnection();
-        if (gridConnection != null) {
-            SLGridConnection.ConnectionState connectionState = gridConnection.getConnectionState();
-            UUID activeAgentUUID = gridConnection.getActiveAgentUUID();
-            Debug.Log("LoginActivity: connectionState = " + connectionState.toString());
-            if (connectionState == SLGridConnection.ConnectionState.Connected && activeAgentUUID != null) {
-                startChatActivity(activeAgentUUID);
+        Object obj = GridConnectionService.getGridConnection();
+        if (obj != null)
+        {
+            bundle = ((SLGridConnection) (obj)).getConnectionState();
+            obj = ((SLGridConnection) (obj)).getActiveAgentUUID();
+            Debug.Log((new StringBuilder()).append("LoginActivity: connectionState = ").append(bundle.toString()).toString());
+            if (bundle == com.lumiyaviewer.lumiya.slproto.SLGridConnection.ConnectionState.Connected && obj != null)
+            {
+                startChatActivity(((UUID) (obj)));
                 finish();
                 return;
             }
         }
-        setContentView((int) R.layout.login);
+        setContentView(0x7f040058);
         Debug.Log("LoginActivity: created.");
-        this.gridList = new GridList(this);
-        this.accountList = new AccountList(this);
-        this.gridList.getGridList(this.gridDisplayList, true);
-        this.enableAutoClear = false;
-        findViewById(R.id.buttonLogin).setOnClickListener(this);
-        ((EditText) findViewById(R.id.editPassword)).addTextChangedListener(this);
+        gridList = new GridList(this);
+        accountList = new AccountList(this);
+        gridList.getGridList(gridDisplayList, true);
+        enableAutoClear = false;
+        findViewById(0x7f1001cd).setOnClickListener(this);
+        ((EditText)findViewById(0x7f1001ca)).addTextChangedListener(this);
         loadSavedLogin();
-        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder();
-        spannableStringBuilder.append(getString(R.string.whatsnew_caption, new Object[]{LumiyaApp.getAppVersion()}));
-        spannableStringBuilder.setSpan(new URLSpan(""), 0, spannableStringBuilder.length(), 33);
-        ((TextView) findViewById(R.id.whatsnewText)).setText(spannableStringBuilder, TextView.BufferType.SPANNABLE);
-        findViewById(R.id.whatsnewText).setClickable(true);
-        findViewById(R.id.whatsnewText).setOnClickListener(this);
-        this.gridDisplayAdapter = new GridList.GridArrayAdapter(this, this.gridDisplayList);
-        ((Spinner) findViewById(R.id.spinnerGrid)).setAdapter(this.gridDisplayAdapter);
+        bundle = new SpannableStringBuilder();
+        bundle.append(getString(0x7f09038a, new Object[] {
+            LumiyaApp.getAppVersion()
+        }));
+        bundle.setSpan(new URLSpan(""), 0, bundle.length(), 33);
+        ((TextView)findViewById(0x7f1001c7)).setText(bundle, android.widget.TextView.BufferType.SPANNABLE);
+        findViewById(0x7f1001c7).setClickable(true);
+        findViewById(0x7f1001c7).setOnClickListener(this);
+        gridDisplayAdapter = new com.lumiyaviewer.lumiya.ui.grids.GridList.GridArrayAdapter(this, gridDisplayList);
+        ((Spinner)findViewById(0x7f1000b5)).setAdapter(gridDisplayAdapter);
         setSelectedGrid();
-        ((Spinner) findViewById(R.id.spinnerGrid)).setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            /* JADX WARNING: type inference failed for: r5v0, types: [android.widget.AdapterView<?>, android.widget.AdapterView] */
-            /* JADX WARNING: Unknown variable types count: 1 */
-            /* Code decompiled incorrectly, please refer to instructions dump. */
-            public void onItemSelected(android.widget.AdapterView<?> r5, android.view.View r6, int r7, long r8) {
-                /*
-                    r4 = this;
-                    r3 = 0
-                    com.lumiyaviewer.lumiya.ui.login.LoginActivity r0 = com.lumiyaviewer.lumiya.ui.login.LoginActivity.this
-                    int r0 = r0.lastSelectedGrid
-                    if (r7 == r0) goto L_0x0032
-                    android.widget.Adapter r0 = r5.getAdapter()
-                    java.lang.Object r0 = r0.getItem(r7)
-                    boolean r1 = r0 instanceof com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo
-                    if (r1 == 0) goto L_0x0032
-                    com.lumiyaviewer.lumiya.ui.grids.GridList$GridInfo r0 = (com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo) r0
-                    java.lang.String r1 = r0.getLoginURL()
-                    if (r1 != 0) goto L_0x0033
-                    com.lumiyaviewer.lumiya.ui.grids.GridEditDialog r0 = new com.lumiyaviewer.lumiya.ui.grids.GridEditDialog
-                    com.lumiyaviewer.lumiya.ui.login.LoginActivity r1 = com.lumiyaviewer.lumiya.ui.login.LoginActivity.this
-                    com.lumiyaviewer.lumiya.ui.login.LoginActivity r2 = com.lumiyaviewer.lumiya.ui.login.LoginActivity.this
-                    com.lumiyaviewer.lumiya.ui.grids.GridList r2 = r2.gridList
-                    r0.<init>(r1, r2, r3)
-                    com.lumiyaviewer.lumiya.ui.login.LoginActivity r1 = com.lumiyaviewer.lumiya.ui.login.LoginActivity.this
-                    r0.setOnGridEditResultListener(r1)
-                    r0.show()
-                L_0x0032:
-                    return
-                L_0x0033:
-                    com.lumiyaviewer.lumiya.ui.login.LoginActivity r1 = com.lumiyaviewer.lumiya.ui.login.LoginActivity.this
-                    int unused = r1.lastSelectedGrid = r7
-                    com.lumiyaviewer.lumiya.ui.login.LoginActivity r1 = com.lumiyaviewer.lumiya.ui.login.LoginActivity.this
-                    java.util.UUID r0 = r0.getGridUUID()
-                    java.util.UUID unused = r1.lastSelectedGridUUID = r0
-                    goto L_0x0032
-                */
-                throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.login.LoginActivity.AnonymousClass1.onItemSelected(android.widget.AdapterView, android.view.View, int, long):void");
+        ((Spinner)findViewById(0x7f1000b5)).setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+
+            final LoginActivity this$0;
+
+            public void onItemSelected(AdapterView adapterview, View view, int i, long l)
+            {
+label0:
+                {
+                    if (i != LoginActivity._2D_get1(LoginActivity.this))
+                    {
+                        adapterview = ((AdapterView) (adapterview.getAdapter().getItem(i)));
+                        if (adapterview instanceof com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo)
+                        {
+                            adapterview = (com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo)adapterview;
+                            if (adapterview.getLoginURL() != null)
+                            {
+                                break label0;
+                            }
+                            adapterview = new GridEditDialog(LoginActivity.this, LoginActivity._2D_get0(LoginActivity.this), null);
+                            adapterview.setOnGridEditResultListener(LoginActivity.this);
+                            adapterview.show();
+                        }
+                    }
+                    return;
+                }
+                LoginActivity._2D_set0(LoginActivity.this, i);
+                LoginActivity._2D_set1(LoginActivity.this, adapterview.getGridUUID());
             }
 
-            public void onNothingSelected(AdapterView<?> adapterView) {
+            public void onNothingSelected(AdapterView adapterview)
+            {
+            }
+
+            
+            {
+                this$0 = LoginActivity.this;
+                super();
             }
         });
-        findViewById(R.id.whatsnewText).getViewTreeObserver().addOnGlobalLayoutListener(new $Lambda$U_ZFuxgsYW8weMauiDTqAtaKePI(this));
+        bundle = new _2D_.Lambda.U_ZFuxgsYW8weMauiDTqAtaKePI(this);
+        findViewById(0x7f1001c7).getViewTreeObserver().addOnGlobalLayoutListener(bundle);
         checkIfGridAvailable();
-        findViewById(R.id.loginCancelButton).setOnClickListener(this);
+        findViewById(0x7f1001d2).setOnClickListener(this);
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.login_menu, menu);
-        ImmutableList.Builder builder = ImmutableList.builder();
-        builder.add((Object) menu.findItem(R.id.item_manage_accounts));
-        builder.add((Object) menu.findItem(R.id.item_settings));
-        builder.add((Object) menu.findItem(R.id.item_manage_grids));
-        builder.add((Object) menu.findItem(R.id.item_show_password));
-        this.menuItems = builder.build();
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        getMenuInflater().inflate(0x7f12000f, menu);
+        com.google.common.collect.ImmutableList.Builder builder = ImmutableList.builder();
+        builder.add(menu.findItem(0x7f10032c));
+        builder.add(menu.findItem(0x7f10030b));
+        builder.add(menu.findItem(0x7f10032d));
+        builder.add(menu.findItem(0x7f10032e));
+        menuItems = builder.build();
         return true;
     }
 
-    public void onGridAdded(GridList.GridInfo gridInfo, boolean z) {
-        if (z) {
-            this.gridList.addNewGrid(gridInfo);
+    public void onGridAdded(com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo gridinfo, boolean flag)
+    {
+        if (flag)
+        {
+            gridList.addNewGrid(gridinfo);
         }
-        this.gridList.getGridList(this.gridDisplayList, true);
-        this.gridDisplayAdapter.notifyDataSetChanged();
-        int count = ((Spinner) findViewById(R.id.spinnerGrid)).getAdapter().getCount();
-        if (count > 1) {
-            ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(count - 2);
-            this.lastSelectedGrid = count - 2;
-            Object selectedItem = ((Spinner) findViewById(R.id.spinnerGrid)).getSelectedItem();
-            if (selectedItem instanceof GridList.GridInfo) {
-                this.lastSelectedGridUUID = ((GridList.GridInfo) selectedItem).getGridUUID();
+        gridList.getGridList(gridDisplayList, true);
+        gridDisplayAdapter.notifyDataSetChanged();
+        int i = ((Spinner)findViewById(0x7f1000b5)).getAdapter().getCount();
+        if (i > 1)
+        {
+            ((Spinner)findViewById(0x7f1000b5)).setSelection(i - 2);
+            lastSelectedGrid = i - 2;
+            gridinfo = ((com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo) (((Spinner)findViewById(0x7f1000b5)).getSelectedItem()));
+            if (gridinfo instanceof com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo)
+            {
+                lastSelectedGridUUID = ((com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo)gridinfo).getGridUUID();
             }
         }
     }
 
-    public void onGridDeleted(GridList.GridInfo gridInfo) {
+    public void onGridDeleted(com.lumiyaviewer.lumiya.ui.grids.GridList.GridInfo gridinfo)
+    {
     }
 
-    public void onGridEditCancelled() {
-        ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(this.lastSelectedGrid);
+    public void onGridEditCancelled()
+    {
+        ((Spinner)findViewById(0x7f1000b5)).setSelection(lastSelectedGrid);
     }
 
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.item_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-            case R.id.item_manage_accounts:
-                startActivityForResult(new Intent(this, ManageAccountsActivity.class), 3);
-                return true;
-            case R.id.item_manage_grids:
-                startActivity(new Intent(this, ManageGridsActivity.class));
-                return true;
-            case R.id.item_show_password:
-                EditText editText = (EditText) findViewById(R.id.editPassword);
-                editText.setTransformationMethod(SingleLineTransformationMethod.getInstance());
-                editText.setInputType(145);
-                return true;
-            default:
-                return super.onOptionsItemSelected(menuItem);
+    public boolean onOptionsItemSelected(MenuItem menuitem)
+    {
+        switch (menuitem.getItemId())
+        {
+        default:
+            return super.onOptionsItemSelected(menuitem);
+
+        case 2131755820: 
+            startActivityForResult(new Intent(this, com/lumiyaviewer/lumiya/ui/accounts/ManageAccountsActivity), 3);
+            return true;
+
+        case 2131755822: 
+            menuitem = (EditText)findViewById(0x7f1001ca);
+            menuitem.setTransformationMethod(SingleLineTransformationMethod.getInstance());
+            menuitem.setInputType(145);
+            return true;
+
+        case 2131755821: 
+            startActivity(new Intent(this, com/lumiyaviewer/lumiya/ui/grids/ManageGridsActivity));
+            return true;
+
+        case 2131755787: 
+            startActivity(new Intent(this, com/lumiyaviewer/lumiya/ui/settings/SettingsActivity));
+            return true;
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         Debug.Printf("LoginActivity: Resumed.", new Object[0]);
         checkIfGridAvailable();
-        this.gridList.loadGrids();
-        this.gridList.getGridList(this.gridDisplayList, true);
-        this.gridDisplayAdapter.notifyDataSetChanged();
-        if (this.lastSelectedGridUUID != null) {
-            ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(this.gridList.getGridIndex(this.lastSelectedGridUUID));
+        gridList.loadGrids();
+        gridList.getGridList(gridDisplayList, true);
+        gridDisplayAdapter.notifyDataSetChanged();
+        if (lastSelectedGridUUID != null)
+        {
+            int i = gridList.getGridIndex(lastSelectedGridUUID);
+            ((Spinner)findViewById(0x7f1000b5)).setSelection(i);
         }
-        this.accountList.loadAccounts();
-        if (getSaveUserName()) {
-            findViewById(R.id.savePassword).setEnabled(true);
+        accountList.loadAccounts();
+        if (getSaveUserName())
+        {
+            findViewById(0x7f1001cc).setEnabled(true);
+            return;
+        } else
+        {
+            ((EditText)findViewById(0x7f1001c9)).setText("");
+            ((EditText)findViewById(0x7f1001ca)).setTransformationMethod(PasswordTransformationMethod.getInstance());
+            ((EditText)findViewById(0x7f1001ca)).setText("");
+            findViewById(0x7f1001cc).setEnabled(false);
+            ((CheckBox)findViewById(0x7f1001cc)).setChecked(false);
             return;
         }
-        ((EditText) findViewById(R.id.editUserName)).setText("");
-        ((EditText) findViewById(R.id.editPassword)).setTransformationMethod(PasswordTransformationMethod.getInstance());
-        ((EditText) findViewById(R.id.editPassword)).setText("");
-        findViewById(R.id.savePassword).setEnabled(false);
-        ((CheckBox) findViewById(R.id.savePassword)).setChecked(false);
     }
 
-    /* access modifiers changed from: protected */
-    public void onStart() {
+    protected void onStart()
+    {
         super.onStart();
         checkIfGridAvailable();
     }
 
-    /* access modifiers changed from: protected */
-    public void onStop() {
+    protected void onStop()
+    {
         super.onStop();
     }
 
-    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+    public void onTextChanged(CharSequence charsequence, int i, int j, int k)
+    {
     }
 }

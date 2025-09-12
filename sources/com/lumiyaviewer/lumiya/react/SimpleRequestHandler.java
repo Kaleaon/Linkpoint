@@ -1,8 +1,22 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
-import javax.annotation.Nonnull;
 
-public abstract class SimpleRequestHandler<K> implements RequestHandler<K> {
-    public void onRequestCancelled(@Nonnull K k) {
+// Referenced classes of package com.lumiyaviewer.lumiya.react:
+//            RequestHandler
+
+public abstract class SimpleRequestHandler
+    implements RequestHandler
+{
+
+    public SimpleRequestHandler()
+    {
+    }
+
+    public void onRequestCancelled(Object obj)
+    {
     }
 }

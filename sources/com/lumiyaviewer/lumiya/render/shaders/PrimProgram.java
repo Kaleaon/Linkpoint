@@ -1,22 +1,41 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render.shaders;
 
 import android.opengl.GLES20;
 
-public class PrimProgram extends BasicPrimProgram {
+// Referenced classes of package com.lumiyaviewer.lumiya.render.shaders:
+//            BasicPrimProgram, Shader
+
+public class PrimProgram extends BasicPrimProgram
+{
+
     public int uTexMatrix;
 
-    public PrimProgram(Shader shader, Shader shader2) {
-        super(shader, shader2);
+    public PrimProgram(Shader shader, Shader shader1)
+    {
+        super(shader, shader1);
     }
 
-    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    public PrimProgram(boolean z) {
-        super(Shader.PrimVertexShader, z ? Shader.PrimOpaqueFragmentShader : Shader.PrimFragmentShader);
+    public PrimProgram(boolean flag)
+    {
+        Shader shader1 = Shader.PrimVertexShader;
+        Shader shader;
+        if (flag)
+        {
+            shader = Shader.PrimOpaqueFragmentShader;
+        } else
+        {
+            shader = Shader.PrimFragmentShader;
+        }
+        super(shader1, shader);
     }
 
-    /* access modifiers changed from: protected */
-    public void bindVariables() {
+    protected void bindVariables()
+    {
         super.bindVariables();
-        this.uTexMatrix = GLES20.glGetUniformLocation(this.handle, "uTexMatrix");
+        uTexMatrix = GLES20.glGetUniformLocation(handle, "uTexMatrix");
     }
 }

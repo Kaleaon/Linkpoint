@@ -1,12 +1,14 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -22,19 +24,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.google.common.base.Objects;
 import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
+import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
+import com.lumiyaviewer.lumiya.slproto.SLParcelInfo;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource;
 import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSourceObject;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager;
+import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterList;
 import com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo;
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatRecyclerAdapter;
 import com.lumiyaviewer.lumiya.ui.common.ChatterFragment;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
 import com.lumiyaviewer.lumiya.ui.common.UserFunctionsFragment;
@@ -42,1012 +45,963 @@ import com.lumiyaviewer.lumiya.ui.objects.ObjectDetailsFragment;
 import com.lumiyaviewer.lumiya.ui.render.CardboardActivity;
 import com.lumiyaviewer.lumiya.ui.voice.VoiceStatusView;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo;
-import java.util.UUID;
-import javax.annotation.Nullable;
 
-public class ChatFragment extends UserFunctionsFragment implements View.OnClickListener, View.OnKeyListener, ChatRecyclerAdapter.OnAdapterDataChanged, ChatRecyclerAdapter.OnUserPicClickedListener {
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat:
+//            ExportChatHistoryTask, ChatRecyclerAdapter, ChatLayoutManager, TypingIndicatorView
+
+public class ChatFragment extends UserFunctionsFragment
+    implements android.view.View.OnClickListener, android.view.View.OnKeyListener, ChatRecyclerAdapter.OnAdapterDataChanged, ChatRecyclerAdapter.OnUserPicClickedListener
+{
+
     private static final int PERMISSION_REQUEST_CODE = 500;
-    private static final long typingTimeout = 5000;
-    /* access modifiers changed from: private */
-    @Nullable
-    public ChatRecyclerAdapter adapter = null;
-    private final SubscriptionData<UUID, SLAgentCircuit> agentCircuit = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f247$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.2.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.2.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.2.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.2.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    @Nullable
-    private MenuItem clearChatHistoryMenuItem = null;
-    @Nullable
-    private MenuItem exportChatHistoryMenuItem = null;
-    private boolean hasMoreItems = false;
+    private static final long typingTimeout = 5000L;
+    private ChatRecyclerAdapter adapter;
+    private final SubscriptionData agentCircuit = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.yqEv_Il5ub7IaZ99Gwjf4YWSeKg._cls2(this));
+    private MenuItem clearChatHistoryMenuItem;
+    private MenuItem exportChatHistoryMenuItem;
+    private boolean hasMoreItems;
     private long lastTypingEventSent;
-    /* access modifiers changed from: private */
-    @Nullable
-    public ChatLayoutManager layoutManager = null;
-    /* access modifiers changed from: private */
-    public final Handler mHandler = new Handler();
-    @Nullable
-    private ChatterID markDisplayedChatterID = null;
-    private final RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
-        public void onScrollStateChanged(RecyclerView recyclerView, int i) {
-            if (i == 0 || i == 1) {
-                boolean unused = ChatFragment.this.scrollToBottomNeeded = false;
+    private ChatLayoutManager layoutManager;
+    private final Handler mHandler = new Handler();
+    private ChatterID markDisplayedChatterID;
+    private final android.support.v7.widget.RecyclerView.OnScrollListener scrollListener = new android.support.v7.widget.RecyclerView.OnScrollListener() {
+
+        final ChatFragment this$0;
+
+        public void onScrollStateChanged(RecyclerView recyclerview, int i)
+        {
+            if (i == 0 || i == 1)
+            {
+                ChatFragment._2D_set1(ChatFragment.this, false);
             }
         }
 
-        public void onScrolled(RecyclerView recyclerView, int i, int i2) {
-            ChatFragment.this.updateVisibleRange();
+        public void onScrolled(RecyclerView recyclerview, int i, int j)
+        {
+            ChatFragment._2D_wrap2(ChatFragment.this);
         }
+
+            
+            {
+                this$0 = ChatFragment.this;
+                super();
+            }
     };
-    /* access modifiers changed from: private */
-    public boolean scrollToBottomForceDown = false;
-    /* access modifiers changed from: private */
-    public boolean scrollToBottomNeeded = false;
-    /* access modifiers changed from: private */
-    public final Runnable scrollToBottomRunnable = new Runnable() {
-        public void run() {
-            boolean unused = ChatFragment.this.scrollToBottomRunnablePosted = false;
-            if (ChatFragment.this.getView() != null) {
-                RecyclerView recyclerView = (RecyclerView) ChatFragment.this.getView().findViewById(R.id.chatLogView);
-                if (recyclerView.hasPendingAdapterUpdates()) {
-                    boolean unused2 = ChatFragment.this.scrollToBottomRunnablePosted = true;
-                    ChatFragment.this.mHandler.post(ChatFragment.this.scrollToBottomRunnable);
-                } else if (ChatFragment.this.adapter != null && ChatFragment.this.layoutManager != null) {
-                    if (ChatFragment.this.scrollToBottomForceDown && ChatFragment.this.adapter.hasMoreItemsAtBottom()) {
-                        boolean unused3 = ChatFragment.this.scrollToBottomNeeded = false;
-                        ChatFragment.this.adapter.restartAtBottom();
+    private boolean scrollToBottomForceDown;
+    private boolean scrollToBottomNeeded;
+    private final Runnable scrollToBottomRunnable = new Runnable() {
+
+        final ChatFragment this$0;
+
+        public void run()
+        {
+label0:
+            {
+                ChatFragment._2D_set2(ChatFragment.this, false);
+                if (getView() != null)
+                {
+                    RecyclerView recyclerview = (RecyclerView)getView().findViewById(0x7f100118);
+                    if (recyclerview.hasPendingAdapterUpdates())
+                    {
+                        break label0;
                     }
-                    int itemCount = ChatFragment.this.adapter.getItemCount();
-                    if (itemCount > 0) {
-                        ChatFragment.this.layoutManager.setScrollMode(ChatFragment.this.scrollToBottomForceDown);
-                        recyclerView.smoothScrollToPosition(itemCount - 1);
-                        boolean unused4 = ChatFragment.this.scrollToBottomNeeded = true;
-                        boolean unused5 = ChatFragment.this.scrollToBottomForceDown = false;
+                    if (ChatFragment._2D_get0(ChatFragment.this) != null && ChatFragment._2D_get1(ChatFragment.this) != null)
+                    {
+                        if (ChatFragment._2D_get3(ChatFragment.this) && ChatFragment._2D_get0(ChatFragment.this).hasMoreItemsAtBottom())
+                        {
+                            ChatFragment._2D_set1(ChatFragment.this, false);
+                            ChatFragment._2D_get0(ChatFragment.this).restartAtBottom();
+                        }
+                        int i = ChatFragment._2D_get0(ChatFragment.this).getItemCount();
+                        if (i > 0)
+                        {
+                            ChatFragment._2D_get1(ChatFragment.this).setScrollMode(ChatFragment._2D_get3(ChatFragment.this));
+                            recyclerview.smoothScrollToPosition(i - 1);
+                            ChatFragment._2D_set1(ChatFragment.this, true);
+                            ChatFragment._2D_set0(ChatFragment.this, false);
+                        }
                     }
                 }
+                return;
             }
+            ChatFragment._2D_set2(ChatFragment.this, true);
+            ChatFragment._2D_get2(ChatFragment.this).post(ChatFragment._2D_get5(ChatFragment.this));
         }
+
+            
+            {
+                this$0 = ChatFragment.this;
+                super();
+            }
     };
-    /* access modifiers changed from: private */
-    public boolean scrollToBottomRunnablePosted = false;
+    private boolean scrollToBottomRunnablePosted;
     private final TextWatcher textWatcher = new TextWatcher() {
-        public void afterTextChanged(Editable editable) {
+
+        final ChatFragment this$0;
+
+        public void afterTextChanged(Editable editable)
+        {
         }
 
-        public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+        public void beforeTextChanged(CharSequence charsequence, int i, int j, int k)
+        {
         }
 
-        public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-            if (charSequence.length() != 0) {
-                ChatFragment.this.setTypingNotify(true);
-            } else {
-                ChatFragment.this.setTypingNotify(false);
+        public void onTextChanged(CharSequence charsequence, int i, int j, int k)
+        {
+            if (charsequence.length() != 0)
+            {
+                ChatFragment._2D_wrap0(ChatFragment.this, true);
+                return;
+            } else
+            {
+                ChatFragment._2D_wrap0(ChatFragment.this, false);
+                return;
             }
         }
+
+            
+            {
+                this$0 = ChatFragment.this;
+                super();
+            }
     };
-    @Nullable
-    private ChatterID typingNotifiedChatter = null;
-    /* access modifiers changed from: private */
-    public boolean updateRunnablePosted = false;
-    /* access modifiers changed from: private */
-    public final Runnable updateVisibleRangeRunnable = new Runnable() {
-        public void run() {
-            boolean unused = ChatFragment.this.updateRunnablePosted = false;
-            View view = ChatFragment.this.getView();
-            if (ChatFragment.this.adapter != null && ChatFragment.this.layoutManager != null && view != null) {
-                RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.chatLogView);
-                Debug.Printf("UpdateVisibleRange: pending %b, first %d, last %d", Boolean.valueOf(recyclerView.hasPendingAdapterUpdates()), Integer.valueOf(ChatFragment.this.layoutManager.findFirstVisibleItemPosition()), Integer.valueOf(ChatFragment.this.layoutManager.findLastVisibleItemPosition()));
-                if (!recyclerView.hasPendingAdapterUpdates()) {
-                    ChatFragment.this.updateHasMoreItems();
-                    int findFirstVisibleItemPosition = ChatFragment.this.layoutManager.findFirstVisibleItemPosition();
-                    int findLastVisibleItemPosition = ChatFragment.this.layoutManager.findLastVisibleItemPosition();
-                    if (ChatFragment.this.scrollToBottomNeeded) {
-                        findLastVisibleItemPosition = ChatFragment.this.adapter.getItemCount() - 1;
+    private ChatterID typingNotifiedChatter;
+    private boolean updateRunnablePosted;
+    private final Runnable updateVisibleRangeRunnable = new Runnable() {
+
+        final ChatFragment this$0;
+
+        public void run()
+        {
+label0:
+            {
+                ChatFragment._2D_set3(ChatFragment.this, false);
+                Object obj = getView();
+                if (ChatFragment._2D_get0(ChatFragment.this) != null && ChatFragment._2D_get1(ChatFragment.this) != null && obj != null)
+                {
+                    obj = (RecyclerView)((View) (obj)).findViewById(0x7f100118);
+                    Debug.Printf("UpdateVisibleRange: pending %b, first %d, last %d", new Object[] {
+                        Boolean.valueOf(((RecyclerView) (obj)).hasPendingAdapterUpdates()), Integer.valueOf(ChatFragment._2D_get1(ChatFragment.this).findFirstVisibleItemPosition()), Integer.valueOf(ChatFragment._2D_get1(ChatFragment.this).findLastVisibleItemPosition())
+                    });
+                    if (((RecyclerView) (obj)).hasPendingAdapterUpdates())
+                    {
+                        break label0;
                     }
-                    ChatFragment.this.adapter.setVisibleRange(findFirstVisibleItemPosition, findLastVisibleItemPosition);
-                    return;
+                    ChatFragment._2D_wrap1(ChatFragment.this);
+                    int j = ChatFragment._2D_get1(ChatFragment.this).findFirstVisibleItemPosition();
+                    int i = ChatFragment._2D_get1(ChatFragment.this).findLastVisibleItemPosition();
+                    if (ChatFragment._2D_get4(ChatFragment.this))
+                    {
+                        i = ChatFragment._2D_get0(ChatFragment.this).getItemCount() - 1;
+                    }
+                    ChatFragment._2D_get0(ChatFragment.this).setVisibleRange(j, i);
                 }
-                boolean unused2 = ChatFragment.this.updateRunnablePosted = true;
-                ChatFragment.this.mHandler.post(ChatFragment.this.updateVisibleRangeRunnable);
+                return;
             }
+            ChatFragment._2D_set3(ChatFragment.this, true);
+            ChatFragment._2D_get2(ChatFragment.this).post(ChatFragment._2D_get6(ChatFragment.this));
         }
+
+            
+            {
+                this$0 = ChatFragment.this;
+                super();
+            }
     };
-    private final SubscriptionData<SubscriptionSingleKey, ChatterID> voiceActiveChatter = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
+    private final SubscriptionData voiceActiveChatter = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.yqEv_Il5ub7IaZ99Gwjf4YWSeKg._cls3(this));
+    private final SubscriptionData voiceChatInfo = new SubscriptionData(UIThreadExecutor.getInstance(), new _2D_.Lambda.yqEv_Il5ub7IaZ99Gwjf4YWSeKg._cls4(this));
+    private boolean vrMode;
 
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f248$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.3.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.3.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.3.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.3.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    private final SubscriptionData<ChatterID, VoiceChatInfo> voiceChatInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
-
-        /* renamed from: -$f0 */
-        private final /* synthetic */ Object f249$f0;
-
-        private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.4.$m$0(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.4.$m$0(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.4.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.4.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
-    });
-    private boolean vrMode = false;
-
-    private void clearChatHistory() {
-        new AlertDialog.Builder(getContext()).setMessage(R.string.clear_chat_history_confirm).setCancelable(true).setPositiveButton("Yes", new DialogInterface.OnClickListener(this) {
-
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f246$f0;
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.1.$m$0(android.content.DialogInterface, int):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.1.$m$0(android.content.DialogInterface, int):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void onClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.1.onClick(android.content.DialogInterface, int):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg.1.onClick(android.content.DialogInterface, int):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.addArgDot(InsnGen.java:91)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:697)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        }).setNegativeButton("No", new $Lambda$yqEv_Il5ub7IaZ99Gwjf4YWSeKg()).create().show();
+    static ChatRecyclerAdapter _2D_get0(ChatFragment chatfragment)
+    {
+        return chatfragment.adapter;
     }
 
-    private void exportChatHistory() {
-        if (this.chatterID == null) {
+    static ChatLayoutManager _2D_get1(ChatFragment chatfragment)
+    {
+        return chatfragment.layoutManager;
+    }
+
+    static Handler _2D_get2(ChatFragment chatfragment)
+    {
+        return chatfragment.mHandler;
+    }
+
+    static boolean _2D_get3(ChatFragment chatfragment)
+    {
+        return chatfragment.scrollToBottomForceDown;
+    }
+
+    static boolean _2D_get4(ChatFragment chatfragment)
+    {
+        return chatfragment.scrollToBottomNeeded;
+    }
+
+    static Runnable _2D_get5(ChatFragment chatfragment)
+    {
+        return chatfragment.scrollToBottomRunnable;
+    }
+
+    static Runnable _2D_get6(ChatFragment chatfragment)
+    {
+        return chatfragment.updateVisibleRangeRunnable;
+    }
+
+    static boolean _2D_set0(ChatFragment chatfragment, boolean flag)
+    {
+        chatfragment.scrollToBottomForceDown = flag;
+        return flag;
+    }
+
+    static boolean _2D_set1(ChatFragment chatfragment, boolean flag)
+    {
+        chatfragment.scrollToBottomNeeded = flag;
+        return flag;
+    }
+
+    static boolean _2D_set2(ChatFragment chatfragment, boolean flag)
+    {
+        chatfragment.scrollToBottomRunnablePosted = flag;
+        return flag;
+    }
+
+    static boolean _2D_set3(ChatFragment chatfragment, boolean flag)
+    {
+        chatfragment.updateRunnablePosted = flag;
+        return flag;
+    }
+
+    static void _2D_wrap0(ChatFragment chatfragment, boolean flag)
+    {
+        chatfragment.setTypingNotify(flag);
+    }
+
+    static void _2D_wrap1(ChatFragment chatfragment)
+    {
+        chatfragment.updateHasMoreItems();
+    }
+
+    static void _2D_wrap2(ChatFragment chatfragment)
+    {
+        chatfragment.updateVisibleRange();
+    }
+
+    public ChatFragment()
+    {
+        vrMode = false;
+        layoutManager = null;
+        adapter = null;
+        scrollToBottomNeeded = false;
+        hasMoreItems = false;
+        typingNotifiedChatter = null;
+        markDisplayedChatterID = null;
+        exportChatHistoryMenuItem = null;
+        clearChatHistoryMenuItem = null;
+        updateRunnablePosted = false;
+        scrollToBottomRunnablePosted = false;
+        scrollToBottomForceDown = false;
+    }
+
+    private void clearChatHistory()
+    {
+        (new android.app.AlertDialog.Builder(getContext())).setMessage(0x7f0900bc).setCancelable(true).setPositiveButton("Yes", new _2D_.Lambda.yqEv_Il5ub7IaZ99Gwjf4YWSeKg._cls1(this)).setNegativeButton("No", new _2D_.Lambda.yqEv_Il5ub7IaZ99Gwjf4YWSeKg()).create().show();
+    }
+
+    private void exportChatHistory()
+    {
+label0:
+        {
+            if (chatterID != null)
+            {
+                if (ContextCompat.checkSelfPermission(getContext(), "android.permission.WRITE_EXTERNAL_STORAGE") == 0)
+                {
+                    break label0;
+                }
+                ActivityCompat.requestPermissions(getActivity(), new String[] {
+                    "android.permission.WRITE_EXTERNAL_STORAGE"
+                }, 500);
+            }
             return;
         }
-        if (ContextCompat.checkSelfPermission(getContext(), "android.permission.WRITE_EXTERNAL_STORAGE") != 0) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{"android.permission.WRITE_EXTERNAL_STORAGE"}, 500);
-            return;
-        }
-        new ExportChatHistoryTask(getActivity()).execute(new ChatterID[]{this.chatterID});
+        (new ExportChatHistoryTask(getActivity())).execute(new ChatterID[] {
+            chatterID
+        });
     }
 
-    public static Bundle makeSelection(ChatterID chatterID) {
-        Bundle makeSelection = ChatterFragment.makeSelection(chatterID);
-        makeSelection.putParcelable(ChatterFragment.CHATTER_ID_KEY, chatterID);
-        return makeSelection;
+    static void lambda$_2D_com_lumiyaviewer_lumiya_ui_chat_ChatFragment_22748(DialogInterface dialoginterface, int i)
+    {
+        dialoginterface.cancel();
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onAgentCircuit */
-    public void m410com_lumiyaviewer_lumiya_ui_chat_ChatFragmentmthref0(SLAgentCircuit sLAgentCircuit) {
-        int i = 0;
+    public static Bundle makeSelection(ChatterID chatterid)
+    {
+        Bundle bundle = ChatterFragment.makeSelection(chatterid);
+        bundle.putParcelable("chatterID", chatterid);
+        return bundle;
+    }
+
+    private void onAgentCircuit(SLAgentCircuit slagentcircuit)
+    {
+        boolean flag = false;
         View view = getView();
-        if (view != null) {
-            Object[] objArr = new Object[1];
-            objArr[0] = sLAgentCircuit != null ? "present" : "not present";
-            Debug.Printf("agentCircuit is now %s", objArr);
-            view.findViewById(R.id.sendMessageButton).setVisibility((sLAgentCircuit == null || !(this.vrMode ^ true)) ? 8 : 0);
-            View findViewById = view.findViewById(R.id.chat_speak_button);
-            if (sLAgentCircuit == null || !this.vrMode) {
+        if (view != null)
+        {
+            Object obj;
+            int i;
+            if (slagentcircuit != null)
+            {
+                obj = "present";
+            } else
+            {
+                obj = "not present";
+            }
+            Debug.Printf("agentCircuit is now %s", new Object[] {
+                obj
+            });
+            obj = view.findViewById(0x7f10011f);
+            if (slagentcircuit != null && vrMode ^ true)
+            {
+                i = 0;
+            } else
+            {
                 i = 8;
             }
-            findViewById.setVisibility(i);
+            ((View) (obj)).setVisibility(i);
+            obj = view.findViewById(0x7f10011c);
+            if (slagentcircuit != null && vrMode)
+            {
+                i = ((flag) ? 1 : 0);
+            } else
+            {
+                i = 8;
+            }
+            ((View) (obj)).setVisibility(i);
         }
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onVoiceActiveChatter */
-    public void m411com_lumiyaviewer_lumiya_ui_chat_ChatFragmentmthref1(ChatterID chatterID) {
-        if (chatterID == null || this.userManager == null || !this.vrMode) {
-            this.voiceChatInfo.unsubscribe();
-        } else {
-            this.voiceChatInfo.subscribe(this.userManager.getVoiceChatInfo(), chatterID);
+    private void onVoiceActiveChatter(ChatterID chatterid)
+    {
+        if (chatterid != null && userManager != null && vrMode)
+        {
+            voiceChatInfo.subscribe(userManager.getVoiceChatInfo(), chatterid);
+        } else
+        {
+            voiceChatInfo.unsubscribe();
         }
         updateVrModeControls();
     }
 
-    /* access modifiers changed from: private */
-    /* renamed from: onVoiceChatInfo */
-    public void m412com_lumiyaviewer_lumiya_ui_chat_ChatFragmentmthref2(VoiceChatInfo voiceChatInfo2) {
+    private void onVoiceChatInfo(VoiceChatInfo voicechatinfo)
+    {
         updateVrModeControls();
     }
 
-    private void scrollToBottom(boolean z) {
-        if (getView() != null && (!this.scrollToBottomRunnablePosted)) {
-            this.scrollToBottomNeeded = true;
-            this.scrollToBottomRunnablePosted = true;
-            this.scrollToBottomForceDown |= z;
-            this.mHandler.post(this.scrollToBottomRunnable);
+    private void scrollToBottom(boolean flag)
+    {
+        if (getView() != null && scrollToBottomRunnablePosted ^ true)
+        {
+            scrollToBottomNeeded = true;
+            scrollToBottomRunnablePosted = true;
+            scrollToBottomForceDown = scrollToBottomForceDown | flag;
+            mHandler.post(scrollToBottomRunnable);
         }
     }
 
-    private void sendMessage() {
-        SLAgentCircuit activeAgentCircuit;
+    private void sendMessage()
+    {
         setTypingNotify(false);
-        View view = getView();
-        if (this.chatterID != null && view != null) {
-            String charSequence = ((TextView) view.findViewById(R.id.sendMessageText)).getText().toString();
-            if (!charSequence.equals("")) {
-                if (!(this.userManager == null || (activeAgentCircuit = this.userManager.getActiveAgentCircuit()) == null)) {
-                    activeAgentCircuit.SendChatMessage(this.chatterID, charSequence);
-                    ((TextView) getView().findViewById(R.id.sendMessageText)).setText("");
-                }
-                scrollToBottom(false);
-            }
-        }
-    }
-
-    private boolean sendTypingNotify(@Nullable ChatterID chatterID, boolean z) {
-        UserManager userManager;
-        SLAgentCircuit activeAgentCircuit;
-        if (!(chatterID instanceof ChatterID.ChatterIDUser) || (userManager = chatterID.getUserManager()) == null || (activeAgentCircuit = userManager.getActiveAgentCircuit()) == null) {
-            return false;
-        }
-        activeAgentCircuit.sendTypingNotify(((ChatterID.ChatterIDUser) chatterID).getChatterUUID(), z);
-        return true;
-    }
-
-    /* access modifiers changed from: private */
-    public void setTypingNotify(boolean z) {
-        if (z) {
-            long currentTimeMillis = System.currentTimeMillis();
-            if (!Objects.equal(this.chatterID, this.typingNotifiedChatter)) {
-                if (this.typingNotifiedChatter != null) {
-                    sendTypingNotify(this.typingNotifiedChatter, false);
-                    this.typingNotifiedChatter = null;
-                }
-                if (sendTypingNotify(this.chatterID, true)) {
-                    this.typingNotifiedChatter = this.chatterID;
-                    this.lastTypingEventSent = currentTimeMillis;
-                }
-            } else if (this.typingNotifiedChatter != null && currentTimeMillis >= this.lastTypingEventSent + typingTimeout) {
-                this.lastTypingEventSent = currentTimeMillis;
-                sendTypingNotify(this.typingNotifiedChatter, true);
-            }
-        } else if (this.typingNotifiedChatter != null) {
-            sendTypingNotify(this.typingNotifiedChatter, false);
-            this.typingNotifiedChatter = null;
-        }
-    }
-
-    private void updateChatHistoryExists() {
-        boolean z = this.adapter != null ? this.adapter.getItemCount() != 0 : false;
-        Debug.Printf("ChatHistory: chat history exists %b", Boolean.valueOf(z));
-        if (this.clearChatHistoryMenuItem != null) {
-            this.clearChatHistoryMenuItem.setVisible(z);
-        }
-        if (this.exportChatHistoryMenuItem != null) {
-            this.exportChatHistoryMenuItem.setVisible(z);
-        }
-    }
-
-    /* access modifiers changed from: private */
-    public void updateHasMoreItems() {
-        boolean z = true;
-        View view = getView();
-        if (view != null) {
-            this.hasMoreItems = false;
-            if (!(this.layoutManager == null || this.adapter == null)) {
-                int itemCount = this.adapter.getItemCount();
-                int findLastVisibleItemPosition = this.layoutManager.findLastVisibleItemPosition();
-                if (this.scrollToBottomNeeded) {
-                    findLastVisibleItemPosition = this.adapter.getItemCount() - 1;
-                }
-                if (itemCount > 1 && findLastVisibleItemPosition != -1) {
-                    if (findLastVisibleItemPosition >= itemCount - 2) {
-                        z = this.adapter.hasMoreItemsAtBottom();
-                    }
-                    this.hasMoreItems = z;
-                }
-            }
-            view.findViewById(R.id.scroll_to_bottom_btn).setVisibility(this.hasMoreItems ? 0 : 8);
-        }
-    }
-
-    /* access modifiers changed from: private */
-    public void updateVisibleRange() {
-        if (this.adapter != null && this.layoutManager != null && getView() != null && (!this.updateRunnablePosted)) {
-            this.updateRunnablePosted = true;
-            this.mHandler.post(this.updateVisibleRangeRunnable);
-        }
-    }
-
-    private void updateVrModeControls() {
-        boolean z;
-        CurrentLocationInfo currentLocationInfoSnapshot;
-        boolean z2 = true;
-        int i = 0;
-        View view = getView();
-        if (view == null) {
+        Object obj = getView();
+        if (chatterID == null || obj == null)
+        {
             return;
         }
-        if (this.vrMode) {
-            view.findViewById(R.id.chat_vr_mode_controls).setVisibility(0);
-            if (isVoiceLoggedIn()) {
-                if (this.voiceActiveChatter.getData() != null) {
-                    VoiceChatInfo data = this.voiceChatInfo.getData();
-                    z = (data == null || data.state == VoiceChatInfo.VoiceChatState.None) ? false : true;
-                } else {
-                    z = false;
-                }
-                if (z) {
-                    z2 = false;
-                } else if (this.chatterID == null || this.userManager == null) {
-                    z2 = false;
-                } else if ((this.chatterID instanceof ChatterID.ChatterIDLocal) && ((currentLocationInfoSnapshot = this.userManager.getCurrentLocationInfoSnapshot()) == null || currentLocationInfoSnapshot.parcelVoiceChannel() == null)) {
-                    z2 = false;
-                }
-            } else {
-                z = false;
-                z2 = false;
-            }
-            view.findViewById(R.id.chat_speak_button).setVisibility(z ? 8 : 0);
-            View findViewById = view.findViewById(R.id.chat_voice_call_button);
-            if (!z2) {
-                i = 8;
-            }
-            findViewById.setVisibility(i);
+        obj = ((TextView)((View) (obj)).findViewById(0x7f10011e)).getText().toString();
+        if (((String) (obj)).equals(""))
+        {
             return;
         }
-        view.findViewById(R.id.chat_vr_mode_controls).setVisibility(8);
-    }
-
-    /* synthetic */ void handleClearChatHistory(DialogInterface dialogInterface, int i) {
-        if (this.chatterID != null) {
-            UserManager userManager = this.chatterID.getUserManager();
-            if (userManager != null) {
-                userManager.getChatterList().getActiveChattersManager().clearChatHistory(this.chatterID);
+        if (userManager != null)
+        {
+            SLAgentCircuit slagentcircuit = userManager.getActiveAgentCircuit();
+            if (slagentcircuit != null)
+            {
+                slagentcircuit.SendChatMessage(chatterID, ((String) (obj)));
+                ((TextView)getView().findViewById(0x7f10011e)).setText("");
             }
-            dialogInterface.dismiss();
         }
+        scrollToBottom(false);
     }
 
-    public void onAdapterDataAddedAtEnd() {
-        if (this.layoutManager != null && (!this.hasMoreItems || this.layoutManager.isSmoothScrolling() || this.scrollToBottomNeeded)) {
-            scrollToBottom(false);
-        }
-        updateChatHistoryExists();
-    }
-
-    public void onAdapterDataChanged() {
-        updateVisibleRange();
-        updateChatHistoryExists();
-    }
-
-    public void onAdapterDataReloaded() {
-        this.scrollToBottomNeeded = false;
-        updateVisibleRange();
-        updateChatHistoryExists();
-    }
-
-    public void onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-        super.onChatterNameUpdated(chatterNameRetriever);
-        View view = getView();
-        if (view != null) {
-            String resolvedName = this.chatterID instanceof ChatterID.ChatterIDLocal ? "local chat" : chatterNameRetriever.getResolvedName();
-            ((EditText) view.findViewById(R.id.sendMessageText)).setHint(resolvedName != null ? getString(R.string.chat_hint_message_format, resolvedName) : null);
-        }
-    }
-
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.scroll_to_bottom_btn:
-                scrollToBottom(true);
-                return;
-            case R.id.chat_speak_button:
-                FragmentActivity activity = getActivity();
-                if ((activity instanceof CardboardActivity) && this.chatterID != null) {
-                    ((CardboardActivity) activity).startDictation(this.chatterID);
-                    return;
+    private boolean sendTypingNotify(ChatterID chatterid, boolean flag)
+    {
+        if (chatterid instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser)
+        {
+            Object obj = chatterid.getUserManager();
+            if (obj != null)
+            {
+                obj = ((UserManager) (obj)).getActiveAgentCircuit();
+                if (obj != null)
+                {
+                    ((SLAgentCircuit) (obj)).sendTypingNotify(((com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDUser)chatterid).getChatterUUID(), flag);
+                    return true;
                 }
-                return;
-            case R.id.chat_voice_call_button:
-                if (this.chatterID != null) {
-                    handleStartVoice(this.chatterID);
-                    return;
-                }
-                return;
-            case R.id.sendMessageButton:
-                sendMessage();
-                return;
-            default:
-                return;
-        }
-    }
-
-    public void onCreate(@Nullable Bundle bundle) {
-        super.onCreate(bundle);
-        setHasOptionsMenu(true);
-        Bundle arguments = getArguments();
-        if (arguments != null && arguments.getBoolean(CardboardActivity.VR_MODE_TAG)) {
-            this.vrMode = true;
-        }
-    }
-
-    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
-        super.onCreateOptionsMenu(menu, menuInflater);
-        menuInflater.inflate(R.menu.chat_history_menu, menu);
-        this.exportChatHistoryMenuItem = menu.findItem(R.id.item_chat_history_export);
-        this.clearChatHistoryMenuItem = menu.findItem(R.id.item_chat_history_clear);
-        updateChatHistoryExists();
-    }
-
-    public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {
-        int i = 0;
-        super.onCreateView(layoutInflater, viewGroup, bundle);
-        View inflate = layoutInflater.inflate(R.layout.chat, viewGroup, false);
-        inflate.findViewById(R.id.scroll_to_bottom_btn).setOnClickListener(this);
-        this.layoutManager = new ChatLayoutManager(viewGroup.getContext(), 1, false);
-        this.layoutManager.setStackFromEnd(true);
-        RecyclerView recyclerView = (RecyclerView) inflate.findViewById(R.id.chatLogView);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.addOnScrollListener(this.scrollListener);
-        recyclerView.setLayoutManager(this.layoutManager);
-        inflate.findViewById(R.id.sendMessageButton).setOnClickListener(this);
-        inflate.findViewById(R.id.chat_speak_button).setOnClickListener(this);
-        inflate.findViewById(R.id.chat_voice_call_button).setOnClickListener(this);
-        EditText editText = (EditText) inflate.findViewById(R.id.sendMessageText);
-        editText.setOnKeyListener(this);
-        editText.addTextChangedListener(this.textWatcher);
-        editText.setVisibility(this.vrMode ? 8 : 0);
-        inflate.findViewById(R.id.sendMessageButton).setVisibility(this.vrMode ? 8 : 0);
-        View findViewById = inflate.findViewById(R.id.chat_vr_mode_controls);
-        if (!this.vrMode) {
-            i = 8;
-        }
-        findViewById.setVisibility(i);
-        return inflate;
-    }
-
-    /* access modifiers changed from: protected */
-    public void onCurrentLocationChanged(CurrentLocationInfo currentLocationInfo) {
-        super.m574com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragmentmthref1(currentLocationInfo);
-        updateVrModeControls();
-    }
-
-    public boolean onKey(View view, int i, KeyEvent keyEvent) {
-        if (keyEvent.getAction() == 0 && i == 66) {
-            sendMessage();
-            return true;
-        }
-        if (view instanceof TextView) {
-            if (((TextView) view).getText().length() != 0) {
-                setTypingNotify(true);
-            } else {
-                setTypingNotify(false);
             }
         }
         return false;
     }
 
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        switch (menuItem.getItemId()) {
-            case R.id.item_chat_history_export:
-                exportChatHistory();
-                return true;
-            case R.id.item_chat_history_clear:
-                clearChatHistory();
-                return true;
-            default:
-                return super.onOptionsItemSelected(menuItem);
+    private void setTypingNotify(boolean flag)
+    {
+        if (!flag) goto _L2; else goto _L1
+_L1:
+        long l = System.currentTimeMillis();
+        if (Objects.equal(chatterID, typingNotifiedChatter)) goto _L4; else goto _L3
+_L3:
+        if (typingNotifiedChatter != null)
+        {
+            sendTypingNotify(typingNotifiedChatter, false);
+            typingNotifiedChatter = null;
+        }
+        if (sendTypingNotify(chatterID, true))
+        {
+            typingNotifiedChatter = chatterID;
+            lastTypingEventSent = l;
+        }
+_L6:
+        return;
+_L4:
+        if (typingNotifiedChatter != null && l >= lastTypingEventSent + 5000L)
+        {
+            lastTypingEventSent = l;
+            sendTypingNotify(typingNotifiedChatter, true);
+            return;
+        }
+        continue; /* Loop/switch isn't completed */
+_L2:
+        if (typingNotifiedChatter != null)
+        {
+            sendTypingNotify(typingNotifiedChatter, false);
+            typingNotifiedChatter = null;
+            return;
+        }
+        if (true) goto _L6; else goto _L5
+_L5:
+    }
+
+    private void updateChatHistoryExists()
+    {
+        boolean flag;
+        if (adapter != null)
+        {
+            if (adapter.getItemCount() != 0)
+            {
+                flag = true;
+            } else
+            {
+                flag = false;
+            }
+        } else
+        {
+            flag = false;
+        }
+        Debug.Printf("ChatHistory: chat history exists %b", new Object[] {
+            Boolean.valueOf(flag)
+        });
+        if (clearChatHistoryMenuItem != null)
+        {
+            clearChatHistoryMenuItem.setVisible(flag);
+        }
+        if (exportChatHistoryMenuItem != null)
+        {
+            exportChatHistoryMenuItem.setVisible(flag);
         }
     }
 
-    public void onPause() {
-        if (this.markDisplayedChatterID != null) {
-            UserManager userManager = this.markDisplayedChatterID.getUserManager();
-            if (userManager != null) {
-                userManager.getChatterList().getActiveChattersManager().removeDisplayedChatter(this.markDisplayedChatterID);
+    private void updateHasMoreItems()
+    {
+        boolean flag = true;
+        View view = getView();
+        if (view != null)
+        {
+            hasMoreItems = false;
+            if (layoutManager != null && adapter != null)
+            {
+                int k = adapter.getItemCount();
+                int i = layoutManager.findLastVisibleItemPosition();
+                if (scrollToBottomNeeded)
+                {
+                    i = adapter.getItemCount() - 1;
+                }
+                if (k > 1 && i != -1)
+                {
+                    if (i >= k - 2)
+                    {
+                        flag = adapter.hasMoreItemsAtBottom();
+                    }
+                    hasMoreItems = flag;
+                }
             }
-            this.markDisplayedChatterID = null;
+            view = view.findViewById(0x7f10011a);
+            int j;
+            if (hasMoreItems)
+            {
+                j = 0;
+            } else
+            {
+                j = 8;
+            }
+            view.setVisibility(j);
+        }
+    }
+
+    private void updateVisibleRange()
+    {
+        if (adapter != null && layoutManager != null && getView() != null && updateRunnablePosted ^ true)
+        {
+            updateRunnablePosted = true;
+            mHandler.post(updateVisibleRangeRunnable);
+        }
+    }
+
+    private void updateVrModeControls()
+    {
+label0:
+        {
+            boolean flag1 = true;
+            boolean flag = false;
+            View view = getView();
+            if (view != null)
+            {
+                if (!vrMode)
+                {
+                    break label0;
+                }
+                view.findViewById(0x7f10011b).setVisibility(0);
+                int i;
+                byte byte1;
+                if (isVoiceLoggedIn())
+                {
+                    byte byte0;
+                    if (voiceActiveChatter.getData() != null)
+                    {
+                        Object obj = (VoiceChatInfo)voiceChatInfo.getData();
+                        if (obj != null && ((VoiceChatInfo) (obj)).state != com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo.VoiceChatState.None)
+                        {
+                            byte0 = 1;
+                        } else
+                        {
+                            byte0 = 0;
+                        }
+                    } else
+                    {
+                        byte0 = 0;
+                    }
+                    if (byte0 == 0)
+                    {
+                        if (chatterID != null && userManager != null)
+                        {
+                            byte1 = byte0;
+                            i = ((flag1) ? 1 : 0);
+                            if (chatterID instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDLocal)
+                            {
+                                obj = userManager.getCurrentLocationInfoSnapshot();
+                                if (obj != null && ((CurrentLocationInfo) (obj)).parcelVoiceChannel() != null)
+                                {
+                                    i = ((flag1) ? 1 : 0);
+                                    byte1 = byte0;
+                                } else
+                                {
+                                    i = 0;
+                                    byte1 = byte0;
+                                }
+                            }
+                        } else
+                        {
+                            i = 0;
+                            byte1 = byte0;
+                        }
+                    } else
+                    {
+                        i = 0;
+                        byte1 = byte0;
+                    }
+                } else
+                {
+                    byte1 = 0;
+                    i = 0;
+                }
+                obj = view.findViewById(0x7f10011c);
+                if (byte1 != 0)
+                {
+                    byte0 = 8;
+                } else
+                {
+                    byte0 = 0;
+                }
+                ((View) (obj)).setVisibility(byte0);
+                view = view.findViewById(0x7f10011d);
+                if (i != 0)
+                {
+                    i = ((flag) ? 1 : 0);
+                } else
+                {
+                    i = 8;
+                }
+                view.setVisibility(i);
+            }
+            return;
+        }
+        view.findViewById(0x7f10011b).setVisibility(8);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_chat_ChatFragment_2D_mthref_2D_0(SLAgentCircuit slagentcircuit)
+    {
+        onAgentCircuit(slagentcircuit);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_chat_ChatFragment_2D_mthref_2D_1(ChatterID chatterid)
+    {
+        onVoiceActiveChatter(chatterid);
+    }
+
+    void _2D_com_lumiyaviewer_lumiya_ui_chat_ChatFragment_2D_mthref_2D_2(VoiceChatInfo voicechatinfo)
+    {
+        onVoiceChatInfo(voicechatinfo);
+    }
+
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_chat_ChatFragment_22290(DialogInterface dialoginterface, int i)
+    {
+        if (chatterID != null)
+        {
+            UserManager usermanager = chatterID.getUserManager();
+            if (usermanager != null)
+            {
+                usermanager.getChatterList().getActiveChattersManager().clearChatHistory(chatterID);
+            }
+            dialoginterface.dismiss();
+        }
+    }
+
+    public void onAdapterDataAddedAtEnd()
+    {
+        if (layoutManager != null && (!hasMoreItems || layoutManager.isSmoothScrolling() || scrollToBottomNeeded))
+        {
+            scrollToBottom(false);
+        }
+        updateChatHistoryExists();
+    }
+
+    public void onAdapterDataChanged()
+    {
+        updateVisibleRange();
+        updateChatHistoryExists();
+    }
+
+    public void onAdapterDataReloaded()
+    {
+        scrollToBottomNeeded = false;
+        updateVisibleRange();
+        updateChatHistoryExists();
+    }
+
+    public void onChatterNameUpdated(ChatterNameRetriever chatternameretriever)
+    {
+        super.onChatterNameUpdated(chatternameretriever);
+        Object obj = getView();
+        if (obj != null)
+        {
+            if (chatterID instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDLocal)
+            {
+                chatternameretriever = "local chat";
+            } else
+            {
+                chatternameretriever = chatternameretriever.getResolvedName();
+            }
+            obj = (EditText)((View) (obj)).findViewById(0x7f10011e);
+            if (chatternameretriever != null)
+            {
+                chatternameretriever = getString(0x7f0900ac, new Object[] {
+                    chatternameretriever
+                });
+            } else
+            {
+                chatternameretriever = null;
+            }
+            ((EditText) (obj)).setHint(chatternameretriever);
+        }
+    }
+
+    public void onClick(View view)
+    {
+        view.getId();
+        JVM INSTR tableswitch 2131755290 2131755295: default 44
+    //                   2131755290 50
+    //                   2131755291 44
+    //                   2131755292 56
+    //                   2131755293 87
+    //                   2131755294 44
+    //                   2131755295 45;
+           goto _L1 _L2 _L1 _L3 _L4 _L1 _L5
+_L1:
+        return;
+_L5:
+        sendMessage();
+        return;
+_L2:
+        scrollToBottom(true);
+        return;
+_L3:
+        view = getActivity();
+        if ((view instanceof CardboardActivity) && chatterID != null)
+        {
+            ((CardboardActivity)view).startDictation(chatterID);
+            return;
+        }
+        continue; /* Loop/switch isn't completed */
+_L4:
+        if (chatterID != null)
+        {
+            handleStartVoice(chatterID);
+            return;
+        }
+        if (true) goto _L1; else goto _L6
+_L6:
+    }
+
+    public void onCreate(Bundle bundle)
+    {
+        super.onCreate(bundle);
+        setHasOptionsMenu(true);
+        bundle = getArguments();
+        if (bundle != null && bundle.getBoolean("vrMode"))
+        {
+            vrMode = true;
+        }
+    }
+
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuinflater)
+    {
+        super.onCreateOptionsMenu(menu, menuinflater);
+        menuinflater.inflate(0x7f120001, menu);
+        exportChatHistoryMenuItem = menu.findItem(0x7f1002f9);
+        clearChatHistoryMenuItem = menu.findItem(0x7f1002fa);
+        updateChatHistoryExists();
+    }
+
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        boolean flag = false;
+        super.onCreateView(layoutinflater, viewgroup, bundle);
+        layoutinflater = layoutinflater.inflate(0x7f040024, viewgroup, false);
+        layoutinflater.findViewById(0x7f10011a).setOnClickListener(this);
+        layoutManager = new ChatLayoutManager(viewgroup.getContext(), 1, false);
+        layoutManager.setStackFromEnd(true);
+        viewgroup = (RecyclerView)layoutinflater.findViewById(0x7f100118);
+        viewgroup.setHasFixedSize(true);
+        viewgroup.addOnScrollListener(scrollListener);
+        viewgroup.setLayoutManager(layoutManager);
+        layoutinflater.findViewById(0x7f10011f).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f10011c).setOnClickListener(this);
+        layoutinflater.findViewById(0x7f10011d).setOnClickListener(this);
+        viewgroup = (EditText)layoutinflater.findViewById(0x7f10011e);
+        viewgroup.setOnKeyListener(this);
+        viewgroup.addTextChangedListener(textWatcher);
+        int i;
+        if (vrMode)
+        {
+            i = 8;
+        } else
+        {
+            i = 0;
+        }
+        viewgroup.setVisibility(i);
+        viewgroup = layoutinflater.findViewById(0x7f10011f);
+        if (vrMode)
+        {
+            i = 8;
+        } else
+        {
+            i = 0;
+        }
+        viewgroup.setVisibility(i);
+        viewgroup = layoutinflater.findViewById(0x7f10011b);
+        if (vrMode)
+        {
+            i = ((flag) ? 1 : 0);
+        } else
+        {
+            i = 8;
+        }
+        viewgroup.setVisibility(i);
+        return layoutinflater;
+    }
+
+    protected void onCurrentLocationChanged(CurrentLocationInfo currentlocationinfo)
+    {
+        super.onCurrentLocationChanged(currentlocationinfo);
+        updateVrModeControls();
+    }
+
+    public boolean onKey(View view, int i, KeyEvent keyevent)
+    {
+label0:
+        {
+            if (keyevent.getAction() == 0 && i == 66)
+            {
+                sendMessage();
+                return true;
+            }
+            if (view instanceof TextView)
+            {
+                if (((TextView)view).getText().length() == 0)
+                {
+                    break label0;
+                }
+                setTypingNotify(true);
+            }
+            return false;
+        }
+        setTypingNotify(false);
+        return false;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem menuitem)
+    {
+        switch (menuitem.getItemId())
+        {
+        default:
+            return super.onOptionsItemSelected(menuitem);
+
+        case 2131755769: 
+            exportChatHistory();
+            return true;
+
+        case 2131755770: 
+            clearChatHistory();
+            break;
+        }
+        return true;
+    }
+
+    public void onPause()
+    {
+        if (markDisplayedChatterID != null)
+        {
+            UserManager usermanager = markDisplayedChatterID.getUserManager();
+            if (usermanager != null)
+            {
+                usermanager.getChatterList().getActiveChattersManager().removeDisplayedChatter(markDisplayedChatterID);
+            }
+            markDisplayedChatterID = null;
         }
         setTypingNotify(false);
         super.onPause();
     }
 
-    public void onPrepareOptionsMenu(Menu menu) {
+    public void onPrepareOptionsMenu(Menu menu)
+    {
         super.onPrepareOptionsMenu(menu);
         updateChatHistoryExists();
     }
 
-    public void onRequestPermissionsResult(int i, @NonNull String[] strArr, @NonNull int[] iArr) {
-        if (i == 500 && iArr.length > 0 && iArr[0] == 0) {
-            new ExportChatHistoryTask(getActivity()).execute(new ChatterID[]{this.chatterID});
+    public void onRequestPermissionsResult(int i, String as[], int ai[])
+    {
+        if (i == 500 && ai.length > 0 && ai[0] == 0)
+        {
+            (new ExportChatHistoryTask(getActivity())).execute(new ChatterID[] {
+                chatterID
+            });
         }
     }
 
-    public void onResume() {
-        UserManager userManager;
+    public void onResume()
+    {
         super.onResume();
-        this.markDisplayedChatterID = this.chatterID;
-        if (!(this.markDisplayedChatterID == null || (userManager = this.markDisplayedChatterID.getUserManager()) == null)) {
-            userManager.getChatterList().getActiveChattersManager().addDisplayedChatter(this.markDisplayedChatterID);
+        markDisplayedChatterID = chatterID;
+        if (markDisplayedChatterID != null)
+        {
+            UserManager usermanager = markDisplayedChatterID.getUserManager();
+            if (usermanager != null)
+            {
+                usermanager.getChatterList().getActiveChattersManager().addDisplayedChatter(markDisplayedChatterID);
+            }
         }
         updateVisibleRange();
         updateChatHistoryExists();
     }
 
-    /* access modifiers changed from: protected */
-    public void onShowUser(@Nullable ChatterID chatterID) {
-        UserManager userManager;
-        UserManager userManager2;
-        Debug.Printf("ChatFragment: displaying for user %s", chatterID);
-        if (!Objects.equal(this.markDisplayedChatterID, chatterID) && isFragmentVisible()) {
-            if (!(this.markDisplayedChatterID == null || (userManager2 = this.markDisplayedChatterID.getUserManager()) == null)) {
-                userManager2.getChatterList().getActiveChattersManager().removeDisplayedChatter(this.markDisplayedChatterID);
+    protected void onShowUser(ChatterID chatterid)
+    {
+        Debug.Printf("ChatFragment: displaying for user %s", new Object[] {
+            chatterid
+        });
+        if (!Objects.equal(markDisplayedChatterID, chatterid) && isFragmentVisible())
+        {
+            if (markDisplayedChatterID != null)
+            {
+                UserManager usermanager = markDisplayedChatterID.getUserManager();
+                if (usermanager != null)
+                {
+                    usermanager.getChatterList().getActiveChattersManager().removeDisplayedChatter(markDisplayedChatterID);
+                }
             }
-            this.markDisplayedChatterID = chatterID;
-            if (!(this.markDisplayedChatterID == null || (userManager = this.markDisplayedChatterID.getUserManager()) == null)) {
-                userManager.getChatterList().getActiveChattersManager().addDisplayedChatter(this.markDisplayedChatterID);
-            }
-        }
-        if (this.adapter != null) {
-            this.adapter.stopLoading();
-            this.adapter = null;
-        }
-        if (chatterID == null || this.userManager == null) {
-            this.agentCircuit.unsubscribe();
-            this.voiceActiveChatter.unsubscribe();
-            this.voiceChatInfo.unsubscribe();
-        } else {
-            this.agentCircuit.subscribe(UserManager.agentCircuits(), chatterID.agentUUID);
-            this.adapter = new ChatRecyclerAdapter(getActivity(), this.userManager, chatterID);
-            this.adapter.setOnUserPicClickedListener(this);
-            if (this.vrMode) {
-                this.voiceActiveChatter.subscribe(this.userManager.getVoiceActiveChatter(), SubscriptionSingleKey.Value);
-            } else {
-                this.voiceActiveChatter.unsubscribe();
+            markDisplayedChatterID = chatterid;
+            if (markDisplayedChatterID != null)
+            {
+                UserManager usermanager1 = markDisplayedChatterID.getUserManager();
+                if (usermanager1 != null)
+                {
+                    usermanager1.getChatterList().getActiveChattersManager().addDisplayedChatter(markDisplayedChatterID);
+                }
             }
         }
-        View view = getView();
-        if (view != null) {
-            Debug.Printf("ChatFragment: setting adapter to %s", this.adapter);
-            ((RecyclerView) view.findViewById(R.id.chatLogView)).setAdapter(this.adapter);
-            if (this.adapter != null) {
-                this.adapter.startLoading(this);
+        if (adapter != null)
+        {
+            adapter.stopLoading();
+            adapter = null;
+        }
+        if (chatterid != null && userManager != null)
+        {
+            agentCircuit.subscribe(UserManager.agentCircuits(), chatterid.agentUUID);
+            adapter = new ChatRecyclerAdapter(getActivity(), userManager, chatterid);
+            adapter.setOnUserPicClickedListener(this);
+            Object obj;
+            Object obj1;
+            if (vrMode)
+            {
+                voiceActiveChatter.subscribe(userManager.getVoiceActiveChatter(), SubscriptionSingleKey.Value);
+            } else
+            {
+                voiceActiveChatter.unsubscribe();
             }
-            TypingIndicatorView typingIndicatorView = (TypingIndicatorView) view.findViewById(R.id.typing_indicator);
-            if (typingIndicatorView != null) {
-                typingIndicatorView.setChatterID(chatterID);
+        } else
+        {
+            agentCircuit.unsubscribe();
+            voiceActiveChatter.unsubscribe();
+            voiceChatInfo.unsubscribe();
+        }
+        obj = getView();
+        if (obj != null)
+        {
+            obj1 = (RecyclerView)((View) (obj)).findViewById(0x7f100118);
+            Debug.Printf("ChatFragment: setting adapter to %s", new Object[] {
+                adapter
+            });
+            ((RecyclerView) (obj1)).setAdapter(adapter);
+            if (adapter != null)
+            {
+                adapter.startLoading(this);
             }
-            VoiceStatusView voiceStatusView = (VoiceStatusView) view.findViewById(R.id.voice_status_view);
-            if (voiceStatusView != null) {
-                voiceStatusView.setChatterID(chatterID);
+            obj1 = (TypingIndicatorView)((View) (obj)).findViewById(0x7f100120);
+            if (obj1 != null)
+            {
+                ((TypingIndicatorView) (obj1)).setChatterID(chatterid);
+            }
+            obj = (VoiceStatusView)((View) (obj)).findViewById(0x7f100119);
+            if (obj != null)
+            {
+                ((VoiceStatusView) (obj)).setChatterID(chatterid);
             }
             updateVisibleRange();
             updateChatHistoryExists();
@@ -1056,25 +1010,34 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.-$Lambda$yqEv
         setTypingNotify(false);
     }
 
-    public void onUserPicClicked(ChatMessageSource chatMessageSource) {
-        int objectLocalID;
-        if (this.userManager == null) {
-            return;
-        }
-        if (chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.User || chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.Group) {
-            handleUserViewProfile(chatMessageSource.getDefaultChatter(this.userManager.getUserID()));
-        } else if (chatMessageSource.getSourceType() == ChatMessageSource.ChatMessageSourceType.Object && (chatMessageSource instanceof ChatMessageSourceObject)) {
-            ChatMessageSourceObject chatMessageSourceObject = (ChatMessageSourceObject) chatMessageSource;
-            SLAgentCircuit data = this.agentCircuit.getData();
-            if (data != null && (objectLocalID = data.getGridConnection().parcelInfo.getObjectLocalID(chatMessageSourceObject.uuid)) != -1) {
-                DetailsActivity.showEmbeddedDetails(getActivity(), ObjectDetailsFragment.class, ObjectDetailsFragment.makeSelection(this.userManager.getUserID(), objectLocalID));
+    public void onUserPicClicked(ChatMessageSource chatmessagesource)
+    {
+        if (userManager != null)
+        {
+            if (chatmessagesource.getSourceType() == com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.User || chatmessagesource.getSourceType() == com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.Group)
+            {
+                handleUserViewProfile(chatmessagesource.getDefaultChatter(userManager.getUserID()));
+            } else
+            if (chatmessagesource.getSourceType() == com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource.ChatMessageSourceType.Object && (chatmessagesource instanceof ChatMessageSourceObject))
+            {
+                chatmessagesource = (ChatMessageSourceObject)chatmessagesource;
+                SLAgentCircuit slagentcircuit = (SLAgentCircuit)agentCircuit.getData();
+                if (slagentcircuit != null)
+                {
+                    int i = slagentcircuit.getGridConnection().parcelInfo.getObjectLocalID(((ChatMessageSourceObject) (chatmessagesource)).uuid);
+                    if (i != -1)
+                    {
+                        DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/objects/ObjectDetailsFragment, ObjectDetailsFragment.makeSelection(userManager.getUserID(), i));
+                        return;
+                    }
+                }
             }
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onVoiceLoginStatusChanged(Boolean bool) {
-        super.m573com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragmentmthref0(bool);
+    protected void onVoiceLoginStatusChanged(Boolean boolean1)
+    {
+        super.onVoiceLoginStatusChanged(boolean1);
         updateVrModeControls();
     }
 }

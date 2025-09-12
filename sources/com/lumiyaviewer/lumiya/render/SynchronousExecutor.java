@@ -1,30 +1,48 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.render;
 
 import com.lumiyaviewer.lumiya.Debug;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
-import javax.annotation.Nonnull;
 
-public class SynchronousExecutor implements Executor {
-    private final Queue<Runnable> queue = new ConcurrentLinkedQueue();
+public class SynchronousExecutor
+    implements Executor
+{
 
-    public void execute(@Nonnull Runnable runnable) {
-        this.queue.add(runnable);
+    private final Queue queue = new ConcurrentLinkedQueue();
+
+    public SynchronousExecutor()
+    {
     }
 
-    public void runQueuedTasks() {
-        while (true) {
-            Runnable poll = this.queue.poll();
-            if (poll != null) {
-                try {
-                    poll.run();
-                } catch (Exception e) {
-                    Debug.Warning(e);
+    public void execute(Runnable runnable)
+    {
+        queue.add(runnable);
+    }
+
+    public void runQueuedTasks()
+    {
+        do
+        {
+            Runnable runnable = (Runnable)queue.poll();
+            if (runnable != null)
+            {
+                try
+                {
+                    runnable.run();
                 }
-            } else {
+                catch (Exception exception)
+                {
+                    Debug.Warning(exception);
+                }
+            } else
+            {
                 return;
             }
-        }
+        } while (true);
     }
 }

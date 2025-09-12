@@ -1,18 +1,58 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.slproto.modules.search;
 
 import java.util.UUID;
-import javax.annotation.Nonnull;
 
-public abstract class SearchGridQuery {
+// Referenced classes of package com.lumiyaviewer.lumiya.slproto.modules.search:
+//            AutoValue_SearchGridQuery
 
-    public enum SearchType {
-        People,
-        Groups,
-        Places
+public abstract class SearchGridQuery
+{
+    public static final class SearchType extends Enum
+    {
+
+        private static final SearchType $VALUES[];
+        public static final SearchType Groups;
+        public static final SearchType People;
+        public static final SearchType Places;
+
+        public static SearchType valueOf(String s)
+        {
+            return (SearchType)Enum.valueOf(com/lumiyaviewer/lumiya/slproto/modules/search/SearchGridQuery$SearchType, s);
+        }
+
+        public static SearchType[] values()
+        {
+            return $VALUES;
+        }
+
+        static 
+        {
+            People = new SearchType("People", 0);
+            Groups = new SearchType("Groups", 1);
+            Places = new SearchType("Places", 2);
+            $VALUES = (new SearchType[] {
+                People, Groups, Places
+            });
+        }
+
+        private SearchType(String s, int i)
+        {
+            super(s, i);
+        }
     }
 
-    public static SearchGridQuery create(@Nonnull UUID uuid, @Nonnull String str, @Nonnull SearchType searchType) {
-        return new AutoValue_SearchGridQuery(uuid, str, searchType);
+
+    public SearchGridQuery()
+    {
+    }
+
+    public static SearchGridQuery create(UUID uuid, String s, SearchType searchtype)
+    {
+        return new AutoValue_SearchGridQuery(uuid, s, searchtype);
     }
 
     public abstract String searchText();

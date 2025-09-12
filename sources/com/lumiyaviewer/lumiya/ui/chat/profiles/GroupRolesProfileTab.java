@@ -1,6 +1,10 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.ui.chat.profiles;
 
-import android.graphics.Typeface;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
@@ -10,7 +14,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
+import com.google.common.collect.ImmutableMap;
 import com.lumiyaviewer.lumiya.react.SubscriptionData;
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
@@ -19,315 +23,296 @@ import com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply;
 import com.lumiyaviewer.lumiya.slproto.messages.GroupTitlesReply;
 import com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList;
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
+import com.lumiyaviewer.lumiya.slproto.users.SLMessageResponseCacher;
+import com.lumiyaviewer.lumiya.slproto.users.SerializableResponseCacher;
+import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
 import com.lumiyaviewer.lumiya.ui.common.ChatterReloadableFragment;
 import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
 import com.lumiyaviewer.lumiya.ui.common.LoadingLayout;
+import com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable;
 import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor;
 import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
-import javax.annotation.Nullable;
 
-public class GroupRolesProfileTab extends ChatterReloadableFragment implements LoadableMonitor.OnLoadableDataChangedListener {
-    private GroupRoleAdapter adapter = null;
-    private final SubscriptionData<UUID, GroupProfileReply> groupProfile = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    private final SubscriptionData<UUID, GroupRoleDataReply> groupRoles = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    private final SubscriptionData<UUID, GroupTitlesReply> groupTitles = new SubscriptionData<>(UIThreadExecutor.getInstance());
-    private final LoadableMonitor loadableMonitor = new LoadableMonitor(this.groupProfile, this.groupRoles, this.myGroupList).withOptionalLoadables(this.groupTitles).withDataChangedListener(this);
-    private final SubscriptionData<UUID, AvatarGroupList> myGroupList = new SubscriptionData<>(UIThreadExecutor.getInstance());
+// Referenced classes of package com.lumiyaviewer.lumiya.ui.chat.profiles:
+//            GroupRoleDetailsFragment
 
-    private class GroupRoleAdapter extends BaseAdapter {
-        @Nullable
+public class GroupRolesProfileTab extends ChatterReloadableFragment
+    implements com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor.OnLoadableDataChangedListener
+{
+    private class GroupRoleAdapter extends BaseAdapter
+    {
+
         private GroupRoleDataReply data;
-        @Nullable
         private GroupProfileReply groupProfile;
-        @Nullable
-        private Map<UUID, GroupTitlesReply.GroupData> titlesByRole;
+        final GroupRolesProfileTab this$0;
+        private Map titlesByRole;
 
-        private GroupRoleAdapter() {
-            this.groupProfile = null;
-            this.data = null;
-            this.titlesByRole = null;
-        }
-
-        /* synthetic */ GroupRoleAdapter(GroupRolesProfileTab groupRolesProfileTab, GroupRoleAdapter groupRoleAdapter) {
-            this();
-        }
-
-        public int getCount() {
-            if (this.data != null) {
-                return this.data.RoleData_Fields.size();
+        public int getCount()
+        {
+            if (data != null)
+            {
+                return data.RoleData_Fields.size();
+            } else
+            {
+                return 0;
             }
-            return 0;
         }
 
-        public GroupRoleDataReply.RoleData getItem(int i) {
-            if (this.data == null || i < 0 || i >= this.data.RoleData_Fields.size()) {
+        public com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply.RoleData getItem(int i)
+        {
+            if (data != null && i >= 0 && i < data.RoleData_Fields.size())
+            {
+                return (com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply.RoleData)data.RoleData_Fields.get(i);
+            } else
+            {
                 return null;
             }
-            return this.data.RoleData_Fields.get(i);
         }
 
-        public long getItemId(int i) {
-            return (long) i;
+        public volatile Object getItem(int i)
+        {
+            return getItem(i);
         }
 
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            boolean z;
-            boolean z2;
-            GroupTitlesReply.GroupData groupData;
-            int i2 = 1;
-            if (view == null) {
-                view = LayoutInflater.from(GroupRolesProfileTab.this.getContext()).inflate(R.layout.group_profile_role_list_item, viewGroup, false);
+        public long getItemId(int i)
+        {
+            return (long)i;
+        }
+
+        public View getView(int i, View view, ViewGroup viewgroup)
+        {
+            View view1;
+            boolean flag;
+            flag = true;
+            view1 = view;
+            if (view == null)
+            {
+                view1 = LayoutInflater.from(getContext()).inflate(0x7f040047, viewgroup, false);
             }
-            GroupRoleDataReply.RoleData item = getItem(i);
-            if (item != null) {
-                int i3 = (!item.RoleID.equals(UUIDPool.ZeroUUID) || this.groupProfile == null) ? item.Members : this.groupProfile.GroupData_Field.GroupMembershipCount;
-                ((TextView) view.findViewById(R.id.role_name)).setText(SLMessage.stringFromVariableOEM(item.Name));
-                ((TextView) view.findViewById(R.id.role_member_count)).setText(GroupRolesProfileTab.this.getResources().getQuantityString(R.plurals.members, i3, new Object[]{Integer.valueOf(i3)}));
-                if (this.titlesByRole == null || (groupData = this.titlesByRole.get(item.RoleID)) == null) {
-                    z = false;
-                    z2 = false;
-                } else {
-                    z = groupData.Selected;
-                    z2 = true;
-                }
-                view.findViewById(R.id.role_mine_check_mark).setVisibility(z2 ? 0 : 4);
-                TextView textView = (TextView) view.findViewById(R.id.role_name);
-                if (!z) {
-                    i2 = 0;
-                }
-                textView.setTypeface((Typeface) null, i2);
+            view = getItem(i);
+            if (view == null) goto _L2; else goto _L1
+_L1:
+            i = ((com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply.RoleData) (view)).Members;
+            if (((com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply.RoleData) (view)).RoleID.equals(UUIDPool.ZeroUUID) && groupProfile != null)
+            {
+                i = groupProfile.GroupData_Field.GroupMembershipCount;
             }
-            return view;
+            ((TextView)view1.findViewById(0x7f10017d)).setText(SLMessage.stringFromVariableOEM(((com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply.RoleData) (view)).Name));
+            ((TextView)view1.findViewById(0x7f10017e)).setText(getResources().getQuantityString(0x7f110001, i, new Object[] {
+                Integer.valueOf(i)
+            }));
+            if (titlesByRole == null) goto _L4; else goto _L3
+_L3:
+            view = (com.lumiyaviewer.lumiya.slproto.messages.GroupTitlesReply.GroupData)titlesByRole.get(((com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply.RoleData) (view)).RoleID);
+            if (view == null) goto _L4; else goto _L5
+_L5:
+            boolean flag1;
+            flag1 = ((com.lumiyaviewer.lumiya.slproto.messages.GroupTitlesReply.GroupData) (view)).Selected;
+            i = 1;
+_L7:
+            view = view1.findViewById(0x7f10017c);
+            if (i != 0)
+            {
+                i = 0;
+            } else
+            {
+                i = 4;
+            }
+            view.setVisibility(i);
+            view = (TextView)view1.findViewById(0x7f10017d);
+            if (flag1)
+            {
+                i = ((flag) ? 1 : 0);
+            } else
+            {
+                i = 0;
+            }
+            view.setTypeface(null, i);
+_L2:
+            return view1;
+_L4:
+            flag1 = false;
+            i = 0;
+            if (true) goto _L7; else goto _L6
+_L6:
         }
 
-        public boolean hasStableIds() {
+        public boolean hasStableIds()
+        {
             return false;
         }
 
-        public void setData(@Nullable GroupRoleDataReply groupRoleDataReply, @Nullable GroupTitlesReply groupTitlesReply, @Nullable GroupProfileReply groupProfileReply) {
-            this.data = groupRoleDataReply;
-            if (groupTitlesReply != null) {
-                this.titlesByRole = new HashMap();
-                for (GroupTitlesReply.GroupData groupData : groupTitlesReply.GroupData_Fields) {
-                    this.titlesByRole.put(groupData.RoleID, groupData);
+        public void setData(GroupRoleDataReply grouproledatareply, GroupTitlesReply grouptitlesreply, GroupProfileReply groupprofilereply)
+        {
+            data = grouproledatareply;
+            if (grouptitlesreply != null)
+            {
+                titlesByRole = new HashMap();
+                for (grouproledatareply = grouptitlesreply.GroupData_Fields.iterator(); grouproledatareply.hasNext(); titlesByRole.put(((com.lumiyaviewer.lumiya.slproto.messages.GroupTitlesReply.GroupData) (grouptitlesreply)).RoleID, grouptitlesreply))
+                {
+                    grouptitlesreply = (com.lumiyaviewer.lumiya.slproto.messages.GroupTitlesReply.GroupData)grouproledatareply.next();
                 }
-            } else {
-                this.titlesByRole = null;
+
+            } else
+            {
+                titlesByRole = null;
             }
-            this.groupProfile = groupProfileReply;
+            groupProfile = groupprofilereply;
             notifyDataSetInvalidated();
         }
+
+        private GroupRoleAdapter()
+        {
+            this$0 = GroupRolesProfileTab.this;
+            super();
+            groupProfile = null;
+            data = null;
+            titlesByRole = null;
+        }
+
+        GroupRoleAdapter(GroupRoleAdapter grouproleadapter)
+        {
+            this();
+        }
     }
 
-    @Nullable
-    private AvatarGroupList.AvatarGroupEntry getMyGroupEntry() {
-        try {
-            return this.myGroupList.get().Groups.get(this.groupProfile.get().GroupData_Field.GroupID);
-        } catch (SubscriptionData.DataNotReadyException e) {
+
+    private GroupRoleAdapter adapter;
+    private final SubscriptionData groupProfile = new SubscriptionData(UIThreadExecutor.getInstance());
+    private final SubscriptionData groupRoles = new SubscriptionData(UIThreadExecutor.getInstance());
+    private final SubscriptionData groupTitles = new SubscriptionData(UIThreadExecutor.getInstance());
+    private final LoadableMonitor loadableMonitor;
+    private final SubscriptionData myGroupList = new SubscriptionData(UIThreadExecutor.getInstance());
+
+    public GroupRolesProfileTab()
+    {
+        loadableMonitor = (new LoadableMonitor(new Loadable[] {
+            groupProfile, groupRoles, myGroupList
+        })).withOptionalLoadables(new Loadable[] {
+            groupTitles
+        }).withDataChangedListener(this);
+        adapter = null;
+    }
+
+    private com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry getMyGroupEntry()
+    {
+        com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry avatargroupentry;
+        try
+        {
+            avatargroupentry = (com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry)((AvatarGroupList)myGroupList.get()).Groups.get(((GroupProfileReply)groupProfile.get()).GroupData_Field.GroupID);
+        }
+        catch (com.lumiyaviewer.lumiya.react.SubscriptionData.DataNotReadyException datanotreadyexception)
+        {
             return null;
         }
+        return avatargroupentry;
     }
 
-    private long getMyGroupPowers() {
-        AvatarGroupList.AvatarGroupEntry myGroupEntry = getMyGroupEntry();
-        if (myGroupEntry != null) {
-            return myGroupEntry.GroupPowers;
-        }
-        return 0;
-    }
-
-    /* access modifiers changed from: private */
-    /* renamed from: onAddNewRoleButton */
-    public void m497com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTabmthref0(View view) {
-        if ((getMyGroupPowers() & 16) != 0) {
-            DetailsActivity.showEmbeddedDetails(getActivity(), GroupRoleDetailsFragment.class, GroupRoleDetailsFragment.makeSelection(this.chatterID, (UUID) null));
+    private long getMyGroupPowers()
+    {
+        com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry avatargroupentry = getMyGroupEntry();
+        if (avatargroupentry != null)
+        {
+            return avatargroupentry.GroupPowers;
+        } else
+        {
+            return 0L;
         }
     }
 
-    /* access modifiers changed from: package-private */
-    /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTab_2802  reason: not valid java name */
-    public /* synthetic */ void m498lambda$com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTab_2802(AdapterView adapterView, View view, int i, long j) {
-        GroupRoleDataReply.RoleData item;
-        if (this.adapter != null && (item = this.adapter.getItem(i)) != null) {
-            DetailsActivity.showEmbeddedDetails(getActivity(), GroupRoleDetailsFragment.class, GroupRoleDetailsFragment.makeSelection(this.chatterID, item.RoleID));
+    private void onAddNewRoleButton(View view)
+    {
+        if ((getMyGroupPowers() & 16L) != 0L)
+        {
+            DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/chat/profiles/GroupRoleDetailsFragment, GroupRoleDetailsFragment.makeSelection(chatterID, null));
         }
     }
 
-    @Nullable
-    public View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
-        View inflate = layoutInflater.inflate(R.layout.group_profile_tab_roles, viewGroup, false);
-        if (this.adapter == null) {
-            this.adapter = new GroupRoleAdapter(this, (GroupRoleAdapter) null);
-        }
-        ((ListView) inflate.findViewById(R.id.group_profile_roles_list)).setAdapter(this.adapter);
-        ((ListView) inflate.findViewById(R.id.group_profile_roles_list)).setOnItemClickListener(new AdapterView.OnItemClickListener(this) {
-
-            /* renamed from: -$f0 */
-            private final /* synthetic */ Object f336$f0;
-
-            private final /* synthetic */ void $m$0(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$Lambda$zWKNEqUupU__bUM7E0seQ8xMgmU.1.$m$0(android.widget.AdapterView, android.view.View, int, long):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.profiles.-$Lambda$zWKNEqUupU__bUM7E0seQ8xMgmU.1.$m$0(android.widget.AdapterView, android.view.View, int, long):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-
-            public final void onItemClick(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$Lambda$zWKNEqUupU__bUM7E0seQ8xMgmU.1.onItemClick(android.widget.AdapterView, android.view.View, int, long):void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.chat.profiles.-$Lambda$zWKNEqUupU__bUM7E0seQ8xMgmU.1.onItemClick(android.widget.AdapterView, android.view.View, int, long):void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
-        });
-        inflate.findViewById(R.id.add_new_role_button).setOnClickListener(new $Lambda$zWKNEqUupU__bUM7E0seQ8xMgmU(this));
-        ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout));
-        this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_group_selected), getString(R.string.group_profile_fail));
-        this.loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout));
-        return inflate;
+    void _2D_com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTab_2D_mthref_2D_0(View view)
+    {
+        onAddNewRoleButton(view);
     }
 
-    public void onLoadableDataChanged() {
-        try {
-            if (this.myGroupList.get().Groups.get(this.groupRoles.get().GroupData_Field.GroupID) != null && !this.groupTitles.isSubscribed()) {
-                this.groupTitles.subscribe(this.userManager.getGroupTitles().getPool(), this.groupRoles.get().GroupData_Field.GroupID);
+    void lambda$_2D_com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTab_2802(AdapterView adapterview, View view, int i, long l)
+    {
+        if (adapter != null)
+        {
+            adapterview = adapter.getItem(i);
+            if (adapterview != null)
+            {
+                DetailsActivity.showEmbeddedDetails(getActivity(), com/lumiyaviewer/lumiya/ui/chat/profiles/GroupRoleDetailsFragment, GroupRoleDetailsFragment.makeSelection(chatterID, ((com.lumiyaviewer.lumiya.slproto.messages.GroupRoleDataReply.RoleData) (adapterview)).RoleID));
             }
-        } catch (SubscriptionData.DataNotReadyException e) {
-        }
-        long myGroupPowers = getMyGroupPowers();
-        View view = getView();
-        if (view != null) {
-            view.findViewById(R.id.add_new_role_button).setVisibility((myGroupPowers & 16) != 0 ? 0 : 8);
-        }
-        if (this.adapter != null) {
-            this.adapter.setData(this.groupRoles.getData(), this.groupTitles.getData(), this.groupProfile.getData());
         }
     }
 
-    /* access modifiers changed from: protected */
-    public void onShowUser(@Nullable ChatterID chatterID) {
-        this.loadableMonitor.unsubscribeAll();
-        if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
-            UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID();
-            this.groupRoles.subscribe(this.userManager.getGroupRoles().getPool(), chatterUUID);
-            this.groupProfile.subscribe(this.userManager.getCachedGroupProfiles().getPool(), chatterUUID);
-            this.myGroupList.subscribe(this.userManager.getAvatarGroupLists().getPool(), chatterID.agentUUID);
-        } else if (this.adapter != null) {
-            this.adapter.setData((GroupRoleDataReply) null, (GroupTitlesReply) null, (GroupProfileReply) null);
+    public View onCreateView(LayoutInflater layoutinflater, ViewGroup viewgroup, Bundle bundle)
+    {
+        layoutinflater = layoutinflater.inflate(0x7f04004b, viewgroup, false);
+        if (adapter == null)
+        {
+            adapter = new GroupRoleAdapter(null);
+        }
+        ((ListView)layoutinflater.findViewById(0x7f10019f)).setAdapter(adapter);
+        ((ListView)layoutinflater.findViewById(0x7f10019f)).setOnItemClickListener(new _2D_.Lambda.zWKNEqUupU__bUM7E0seQ8xMgmU._cls1(this));
+        layoutinflater.findViewById(0x7f1001a0).setOnClickListener(new _2D_.Lambda.zWKNEqUupU__bUM7E0seQ8xMgmU(this));
+        ((LoadingLayout)layoutinflater.findViewById(0x7f1000bd)).setSwipeRefreshLayout((SwipeRefreshLayout)layoutinflater.findViewById(0x7f1000bb));
+        loadableMonitor.setLoadingLayout((LoadingLayout)layoutinflater.findViewById(0x7f1000bd), getString(0x7f0901e0), getString(0x7f090151));
+        loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout)layoutinflater.findViewById(0x7f1000bb));
+        return layoutinflater;
+    }
+
+    public void onLoadableDataChanged()
+    {
+        View view;
+        long l;
+        try
+        {
+            if ((com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList.AvatarGroupEntry)((AvatarGroupList)myGroupList.get()).Groups.get(((GroupRoleDataReply)groupRoles.get()).GroupData_Field.GroupID) != null && !groupTitles.isSubscribed())
+            {
+                groupTitles.subscribe(userManager.getGroupTitles().getPool(), ((GroupRoleDataReply)groupRoles.get()).GroupData_Field.GroupID);
+            }
+        }
+        catch (com.lumiyaviewer.lumiya.react.SubscriptionData.DataNotReadyException datanotreadyexception) { }
+        l = getMyGroupPowers();
+        view = getView();
+        if (view != null)
+        {
+            view = view.findViewById(0x7f1001a0);
+            int i;
+            if ((l & 16L) != 0L)
+            {
+                i = 0;
+            } else
+            {
+                i = 8;
+            }
+            view.setVisibility(i);
+        }
+        if (adapter != null)
+        {
+            adapter.setData((GroupRoleDataReply)groupRoles.getData(), (GroupTitlesReply)groupTitles.getData(), (GroupProfileReply)groupProfile.getData());
+        }
+    }
+
+    protected void onShowUser(ChatterID chatterid)
+    {
+        loadableMonitor.unsubscribeAll();
+        if (userManager != null && (chatterid instanceof com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDGroup))
+        {
+            UUID uuid = ((com.lumiyaviewer.lumiya.slproto.users.ChatterID.ChatterIDGroup)chatterid).getChatterUUID();
+            groupRoles.subscribe(userManager.getGroupRoles().getPool(), uuid);
+            groupProfile.subscribe(userManager.getCachedGroupProfiles().getPool(), uuid);
+            myGroupList.subscribe(userManager.getAvatarGroupLists().getPool(), chatterid.agentUUID);
+        } else
+        if (adapter != null)
+        {
+            adapter.setData(null, null, null);
+            return;
         }
     }
 }

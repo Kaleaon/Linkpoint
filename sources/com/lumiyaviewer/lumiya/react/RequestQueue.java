@@ -1,17 +1,23 @@
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: braces fieldsfirst space lnc 
+
 package com.lumiyaviewer.lumiya.react;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-public interface RequestQueue<K, T> extends RequestSource<K, T> {
-    @Nullable
-    K getNextRequest();
+// Referenced classes of package com.lumiyaviewer.lumiya.react:
+//            RequestSource, ResultHandler
 
-    @Nonnull
-    ResultHandler<K, T> getResultHandler();
+public interface RequestQueue
+    extends RequestSource
+{
 
-    void returnRequest(@Nonnull K k);
+    public abstract Object getNextRequest();
 
-    @Nullable
-    K waitForRequest() throws InterruptedException;
+    public abstract ResultHandler getResultHandler();
+
+    public abstract void returnRequest(Object obj);
+
+    public abstract Object waitForRequest()
+        throws InterruptedException;
 }
