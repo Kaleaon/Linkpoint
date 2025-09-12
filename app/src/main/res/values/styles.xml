@@ -28,4 +28,20 @@
         <item name="android:textColor">#FFFFFF</item>
         <item name="android:background">?attr/colorPrimary</item>
     </style>
+    
+    <!-- Card view styles -->
+    <style name="BorderlessCardButton" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+    
+    <style name="CardCaption">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+    
+    <!-- Tab Layout style -->
+    <style name="Widget.Design.TabLayout" parent="Widget.MaterialComponents.TabLayout">
+        <item name="tabMode">scrollable</item>
+        <item name="tabGravity">fill</item>
+    </style>
 </resources>
