@@ -89,6 +89,7 @@
             android:label="VR View" 
             android:name="com.lumiyaviewer.lumiya.ui.render.CardboardActivity" 
             android:screenOrientation="landscape" 
+            android:enableVrMode="@string/gvr_vr_mode_component" 
             android:exported="false">
             <intent-filter>
                 <action android:name="com.lumiyaviewer.lumiya.ui.render.CardboardActivity"/>
