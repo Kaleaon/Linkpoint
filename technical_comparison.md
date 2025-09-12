@@ -83,19 +83,30 @@ public struct Vector3 : IEquatable<Vector3>
 
 #### Linkpoint LLVector3:
 ```java
+import java.util.Objects;
+import java.nio.ByteBuffer;
+
 // Optimized for mobile performance
 public class LLVector3 {
     private float x, y, z;
     
-    // Memory-efficient operations
+    // Memory-efficient operations with null safety
     public void cross(LLVector3 other, LLVector3 result) {
+        Objects.requireNonNull(other, "other vector cannot be null");
+        Objects.requireNonNull(result, "result vector cannot be null");
+        
         result.x = this.y * other.z - this.z * other.y;
         result.y = this.z * other.x - this.x * other.z;
         result.z = this.x * other.y - this.y * other.x;
     }
     
-    // Packed data support for mobile network efficiency
+    // Packed data support for mobile network efficiency with buffer validation
     public void parseFromBytes(ByteBuffer buffer) {
+        Objects.requireNonNull(buffer, "buffer cannot be null");
+        if (buffer.remaining() < 12) { // 3 floats * 4 bytes each
+            throw new IllegalArgumentException("Buffer does not contain enough data for Vector3");
+        }
+        
         x = buffer.getFloat();
         y = buffer.getFloat();
         z = buffer.getFloat();
@@ -129,6 +140,11 @@ public class AssetManager
 
 #### Linkpoint ResourceManager:
 ```java
+import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.UUID;
+import android.util.LruCache;
+
 // Mobile-optimized asset management with memory pressure awareness
 public class ResourceManager {
     private final LruCache<UUID, CachedAsset> memoryCache;
@@ -136,6 +152,8 @@ public class ResourceManager {
     private final ExecutorService backgroundExecutor;
     
     public Future<TextureAsset> requestTexture(UUID textureId) {
+        Objects.requireNonNull(textureId, "textureId cannot be null");
+        
         // Check memory cache first
         CachedAsset cached = memoryCache.get(textureId);
         if (cached != null && cached.isValid()) {
@@ -154,7 +172,7 @@ public class ResourceManager {
                 
                 // Network fetch with mobile optimization
                 return fetchFromNetwork(textureId);
-            } catch (Exception e) {
+            } catch (NetworkException | OutOfMemoryError | TextureLoadException e) {
                 Logger.warn("Failed to load texture: " + textureId, e);
                 return getDefaultTexture();
             }
@@ -259,7 +277,7 @@ public class UDPBase
         try {
             await _udpSocket.SendAsync(buffer, bytes, remoteEndpoint);
             return true;
-        } catch (Exception e) {
+        } catch (SocketException | TimeoutException e) {
             Logger.Log($"UDP send failed: {e.Message}", Helpers.LogLevel.Error);
             return false;
         }

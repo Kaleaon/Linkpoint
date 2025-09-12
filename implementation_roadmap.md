@@ -35,7 +35,23 @@ This document provides a comprehensive, step-by-step roadmap based on the analys
 **Target Location:** `com.lumiyaviewer.lumiya.slproto.caps`
 
 ```java
-// New file: com.lumiyaviewer.lumiya.slproto.caps.HTTP2CapsClient
+import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.Arrays;
+import okhttp3.*;
+import android.util.Log;
+
+/**
+ * HTTP/2 enabled CAPS client with mobile optimizations and fallback support.
+ * 
+ * <p>This implementation provides HTTP/2 multiplexing for bulk operations while
+ * maintaining compatibility with legacy HTTP/1.1 systems. It includes mobile-specific
+ * optimizations such as network condition awareness and battery-conscious request handling.
+ * 
+ * <p>Thread-safe and designed for concurrent use across multiple simulator connections.
+ * 
+ * @since 1.0
+ */
 public class HTTP2CapsClient extends AbstractCapsHandler {
     private final OkHttpClient http2Client;
     private final ConcurrentHashMap<String, CompletableFuture<CapsResponse>> pendingRequests;
@@ -44,18 +60,41 @@ public class HTTP2CapsClient extends AbstractCapsHandler {
     // Integration with existing CAPS system
     private final ExistingCapsManager legacyManager;
     
+    /**
+     * Constructs a new HTTP/2 CAPS client with fallback support.
+     * 
+     * @param legacyManager The legacy CAPS manager to use for fallback operations.
+     *                      Must not be null.
+     * @throws NullPointerException if legacyManager is null
+     */
     public HTTP2CapsClient(ExistingCapsManager legacyManager) {
-        this.legacyManager = legacyManager;
+        this.legacyManager = Objects.requireNonNull(legacyManager, "legacyManager cannot be null");
         this.http2Client = new OkHttpClient.Builder()
             .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
             .connectionPool(new ConnectionPool(5, 5, TimeUnit.MINUTES))
             .build();
-        this.asyncExecutor = Executors.newCachedThreadPool();
+        this.asyncExecutor = Executors.newCachedThreadPool(r -> {
+            Thread thread = new Thread(r, "HTTP2CapsClient-Worker");
+            thread.setDaemon(true); // Prevent hanging JVM on shutdown
+            return thread;
+        });
         this.pendingRequests = new ConcurrentHashMap<>();
     }
     
+    /**
+     * Sends a CAPS request using HTTP/2 with automatic fallback to legacy systems.
+     * 
+     * <p>The method performs network condition analysis and automatically falls back
+     * to the legacy CAPS system on poor network conditions or HTTP/2 failures.
+     * 
+     * @param request The CAPS request to send. Must not be null.
+     * @return A CompletableFuture containing the CAPS response
+     * @throws NullPointerException if request is null
+     */
     @Override
     public CompletableFuture<CapsResponse> sendCapsRequest(CapsRequest request) {
+        Objects.requireNonNull(request, "request cannot be null");
+        
         // Fallback logic for mobile networks
         if (NetworkUtils.isMobileNetwork() && !NetworkUtils.hasStrongSignal()) {
             return legacyManager.sendCapsRequest(request); // Use existing HTTP/1.1
@@ -63,22 +102,34 @@ public class HTTP2CapsClient extends AbstractCapsHandler {
         
         // HTTP/2 multiplexing for bulk operations
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                Request http2Request = new Request.Builder()
-                    .url(request.getUrl())
-                    .method(request.getMethod(), createRequestBody(request))
-                    .addHeader("User-Agent", "Linkpoint-Mobile/1.0")
-                    .build();
-                    
-                Response response = http2Client.newCall(http2Request).execute();
+            Request http2Request = new Request.Builder()
+                .url(request.getUrl())
+                .method(request.getMethod(), createRequestBody(request))
+                .addHeader("User-Agent", "Linkpoint-Mobile/1.0")
+                .build();
+                
+            // Use try-with-resources for proper response cleanup
+            try (Response response = http2Client.newCall(http2Request).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("HTTP request failed with code: " + response.code());
+                }
                 return parseCapsResponse(response);
             } catch (IOException e) {
-                // Fallback to legacy CAPS on network errors
-                return legacyManager.sendCapsRequest(request).join();
+                // Fallback to legacy CAPS on network errors - use async chaining to avoid blocking
+                Log.w("HTTP2CapsClient", "HTTP/2 request failed, falling back to legacy", e);
+                return legacyManager.sendCapsRequest(request);
             }
         }, asyncExecutor);
     }
     
+    /**
+     * Applies mobile-specific optimizations to the HTTP/2 client.
+     * 
+     * <p>Enables GZIP compression for reduced bandwidth usage, request batching
+     * for improved efficiency, and request prioritization for better user experience.
+     * 
+     * <p>Should be called during initialization or when network conditions change.
+     */
     // Mobile-specific optimizations
     public void optimizeForMobile() {
         // Compress request bodies for mobile networks
@@ -88,6 +139,34 @@ public class HTTP2CapsClient extends AbstractCapsHandler {
         // Prioritize critical requests
         enableRequestPrioritization();
     }
+    
+    /**
+     * Properly shuts down the HTTP/2 client and releases all resources.
+     * 
+     * <p>This method should be called when the client is no longer needed
+     * to prevent resource leaks and ensure graceful shutdown.
+     */
+    public void shutdown() {
+        try {
+            if (asyncExecutor != null && !asyncExecutor.isShutdown()) {
+                asyncExecutor.shutdown();
+                if (!asyncExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    Log.w("HTTP2CapsClient", "Executor did not terminate gracefully, forcing shutdown");
+                    asyncExecutor.shutdownNow();
+                }
+            }
+            
+            if (http2Client != null) {
+                http2Client.dispatcher().executorService().shutdown();
+                http2Client.connectionPool().evictAll();
+            }
+            
+            pendingRequests.clear();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.w("HTTP2CapsClient", "Interrupted during shutdown", e);
+        }
+    }
 }
 ```
 
@@ -95,23 +174,53 @@ public class HTTP2CapsClient extends AbstractCapsHandler {
 **Target Location:** `com.lumiyaviewer.lumiya.slproto.events`
 
 ```java
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
+import okhttp3.*;
+import android.util.Log;
+
 // New file: com.lumiyaviewer.lumiya.slproto.events.WebSocketEventStream
+/**
+ * WebSocket event streaming client with UDP fallback support.
+ * 
+ * <p>Provides real-time event streaming over WebSocket connections with
+ * automatic fallback to UDP when WebSocket connections fail. Thread-safe
+ * and designed for mobile network conditions.
+ */
 public class WebSocketEventStream {
-    private final WebSocket webSocket;
+    private volatile WebSocket webSocket; // Use volatile for thread safety
     private final EventBus eventBus; // Use existing Linkpoint EventBus
     private final AtomicBoolean isConnected = new AtomicBoolean(false);
     
     // Integration with existing UDP circuit
     private final SLCircuit udpFallback;
     
+    /**
+     * Creates a new WebSocket event stream with UDP fallback.
+     * 
+     * @param udpFallback The UDP circuit to use for fallback. Must not be null.
+     * @param eventBus The event bus for message distribution. Must not be null.
+     * @throws NullPointerException if any parameter is null
+     */
     public WebSocketEventStream(SLCircuit udpFallback, EventBus eventBus) {
-        this.udpFallback = udpFallback;
-        this.eventBus = eventBus;
+        this.udpFallback = Objects.requireNonNull(udpFallback, "udpFallback cannot be null");
+        this.eventBus = Objects.requireNonNull(eventBus, "eventBus cannot be null");
     }
     
+    /**
+     * Connects to the specified WebSocket URL with automatic fallback handling.
+     * 
+     * @param wsUrl The WebSocket URL to connect to. Must not be null or empty.
+     * @throws IllegalArgumentException if wsUrl is null or empty
+     */
     public void connect(String wsUrl) {
+        if (wsUrl == null || wsUrl.trim().isEmpty()) {
+            throw new IllegalArgumentException("WebSocket URL cannot be null or empty");
+        }
+        
         OkHttpClient client = new OkHttpClient.Builder()
             .readTimeout(0, TimeUnit.MILLISECONDS) // Keep-alive connection
+            .retryOnConnectionFailure(true)
             .build();
             
         Request request = new Request.Builder()
@@ -148,9 +257,9 @@ public class WebSocketEventStream {
                     break;
                 // ... other message types
             }
-        } catch (Exception e) {
-            // Log error but don't crash - mobile resilience
-            Log.w("WebSocketEventStream", "Failed to parse message", e);
+        } catch (JsonParseException | IllegalArgumentException e) {
+            // Log specific parsing errors - more specific than generic Exception
+            Log.w("WebSocketEventStream", "Failed to parse WebSocket message", e);
         }
     }
     
@@ -451,9 +560,9 @@ public class EnhancedModernTextureManager extends ModernTextureManager {
                 return texture;
             })
             .exceptionally(error -> {
-                // Fallback to parent implementation on error
+                // Fallback to parent implementation on error - use async chaining
                 Log.w("EnhancedTextureManager", "Enhanced fetch failed, using fallback", error);
-                return super.fetchTexture(textureId, priority).join();
+                return super.fetchTexture(textureId, priority);
             });
     }
     
@@ -463,8 +572,8 @@ public class EnhancedModernTextureManager extends ModernTextureManager {
             return http2Fetcher.fetchAsync(textureId, priority)
                 .exceptionally(error -> {
                     Log.d("EnhancedTextureManager", "HTTP/2 fetch failed, trying legacy");
-                    // Fallback to existing fetch mechanism
-                    return super.fetchTextureData(textureId, priority).join();
+                    // Fallback to existing fetch mechanism - use async chaining
+                    return super.fetchTextureData(textureId, priority);
                 });
         } else {
             // Use existing fetch for limited connections
@@ -669,8 +778,8 @@ public class EnhancedModernTextureManager extends ModernTextureManager {
                   }
               } catch (IOException | CapsException e) {
                   Log.w("HTTP2CapsClient", "HTTP/2 request failed, falling back to legacy", e);
-                  // Automatic fallback
-                  return legacyManager.sendCapsRequest(request).join();
+                  // Automatic fallback - use async chaining to avoid blocking
+                  return legacyManager.sendCapsRequest(request);
               }
           }, getAsyncExecutor());
       }
@@ -942,7 +1051,7 @@ public class WebSocketEventStream {
                 
                 return connectionFuture.get(15, TimeUnit.SECONDS); // 15 second connect timeout
                 
-            } catch (Exception e) {
+            } catch (InterruptedException | ExecutionException e) {
                 throw new WebSocketException("Failed to establish WebSocket connection", e);
             }
         });
@@ -969,7 +1078,7 @@ public class WebSocketEventStream {
             // Post to existing EventBus
             eventBus.post(slEvent);
             
-        } catch (Exception e) {
+        } catch (JsonParseException | IllegalArgumentException e) {
             Log.w("WebSocketEventStream", "Failed to process incoming message", e);
             // Don't crash on message parse errors - mobile resilience
         }
@@ -1181,7 +1290,8 @@ public class OAuth2AuthenticationManager {
                     
                 Log.d("TokenStorage", "OAuth2 tokens stored securely for user: " + username);
                 
-            } catch (Exception e) {
+            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | 
+                     CertificateException | UnrecoverableEntryException e) {
                 Log.e("TokenStorage", "Failed to store OAuth2 tokens securely", e);
                 throw new SecurityException("Token storage failed", e);
             }
@@ -1211,7 +1321,8 @@ public class OAuth2AuthenticationManager {
                 
                 return Optional.of(tokens);
                 
-            } catch (Exception e) {
+            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | 
+                     CertificateException | UnrecoverableEntryException e) {
                 Log.w("TokenStorage", "Failed to retrieve cached tokens for user: " + username, e);
                 return Optional.empty();
             }
@@ -1361,16 +1472,16 @@ public class EnhancedModernTextureManager extends ModernTextureManager {
                 if (basisData.isPresent()) {
                     return transcodeBasisUniversalTexture(basisData.get(), textureId);
                 } else {
-                    // Fallback to existing texture loading
-                    return super.loadTextureAsync(textureId, priority).join();
+                    // Fallback to existing texture loading - use async chaining
+                    return super.loadTextureAsync(textureId, priority);
                 }
                 
-            } catch (Exception e) {
+            } catch (TextureLoadException | OutOfMemoryError e) {
                 Log.w(TAG, "Basis Universal texture loading failed for " + textureId + 
                           ", falling back to legacy", e);
                           
-                // Always fallback to existing system on error
-                return super.loadTextureAsync(textureId, priority).join();
+                // Always fallback to existing system on error - use async chaining
+                return super.loadTextureAsync(textureId, priority);
             }
         });
     }
@@ -2451,8 +2562,9 @@ public class AdvancedAssetPipeline {
                 Log.w("AdvancedAssetPipeline", "Asset processing failed for " + assetId, e);
                 // Fallback to existing texture manager
                 if (assetType == AssetType.TEXTURE) {
+                    // Use async chaining instead of blocking - return the future directly
                     return textureManager.loadTextureAsync(assetId, 
-                        convertPriority(priority)).join();
+                        convertPriority(priority));
                 } else {
                     throw new AssetProcessingException("Asset processing failed", e);
                 }
@@ -3120,7 +3232,7 @@ public class AdvancedCommunicationManager {
             // Update presence information
             presenceManager.updateLastActivity(message.getSenderId());
             
-        } catch (Exception e) {
+        } catch (MessageProcessingException | CommunicationException e) {
             Log.w("AdvancedCommunicationManager", "Failed to process incoming chat message", e);
         }
     }
@@ -3252,7 +3364,7 @@ public class AdvancedCommunicationManager {
                     } else {
                         failedMessages.add(queuedMessage);
                     }
-                } catch (Exception e) {
+                } catch (CommunicationException | NetworkException e) {
                     Log.w("OfflineMessageQueue", "Failed to send offline message", e);
                     failedMessages.add(queuedMessage);
                 }
@@ -3495,18 +3607,19 @@ public class PresenceManager {
         private void scheduleNextUpdate(long intervalMs) {
             scheduler.schedule(() -> {
                 try {
-                    // Broadcast presence update
-                    broadcastPresenceUpdate().join();
-                    
-                    // Calculate next update interval based on current conditions
-                    long nextInterval = calculateNextUpdateInterval();
-                    scheduleNextUpdate(nextInterval);
-                    
-                } catch (Exception e) {
-                    Log.w("BatteryAwarePresenceUpdates", "Presence update failed", e);
-                    // Continue with normal interval on error
-                    scheduleNextUpdate(NORMAL_UPDATE_INTERVAL);
-                }
+                    // Broadcast presence update - use async scheduling instead of blocking
+                    broadcastPresenceUpdate()
+                        .thenRun(() -> {
+                            // Calculate next update interval based on current conditions
+                            long nextInterval = calculateNextUpdateInterval();
+                            scheduleNextUpdate(nextInterval);
+                        })
+                        .exceptionally(throwable -> {
+                            Log.w("BatteryAwarePresenceUpdates", "Presence update failed", throwable);
+                            // Continue with normal interval on error
+                            scheduleNextUpdate(NORMAL_UPDATE_INTERVAL);
+                            return null;
+                        });
             }, intervalMs, TimeUnit.MILLISECONDS);
         }
         
