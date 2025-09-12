@@ -43,10 +43,78 @@
     <attr name="IconMaterialCheckCircle" format="reference" />
     <attr name="IconUserObject" format="reference" />
     <attr name="MenuIconCloseThemed" format="reference" />
-    <attr name="MenuIconObjects" format="reference" />
     <attr name="SmallIconDollar" format="reference" />
     <attr name="SmallIconHand" format="reference" />
     <attr name="IconExpandDown" format="reference" />
     <attr name="IconExpandRight" format="reference" />
     <attr name="objectPopupsCounterBackground" format="color|reference" />
+    
+    <!-- Missing attributes for layout files -->
+    <attr name="MenuIconSearchThemed" format="reference" />
+    <attr name="colorContentBackground" format="color|reference" />
+    <attr name="navDrawerBackgroundColor" format="color|reference" />
+    <attr name="IconMaterialMicLight" format="reference" />
+    <attr name="IconMaterialMicOffThemed" format="reference" />
+    <attr name="IconMaterialLoudspeakerThemed" format="reference" />
+    <attr name="IconMaterialBluetoothThemed" format="reference" />
+    
+    <!-- All missing menu icon attributes -->
+    <attr name="MenuIconAddToOutfit" format="reference" />
+    <attr name="MenuIconArrowRight" format="reference" />
+    <attr name="MenuIconArrowTopRight" format="reference" />
+    <attr name="MenuIconArrowUp" format="reference" />
+    <attr name="MenuIconBook" format="reference" />
+    <attr name="MenuIconCard" format="reference" />
+    <attr name="MenuIconChatBubble" format="reference" />
+    <attr name="MenuIconClipboardCopy" format="reference" />
+    <attr name="MenuIconClipboardCut" format="reference" />
+    <attr name="MenuIconClipboardPaste" format="reference" />
+    <attr name="MenuIconClose" format="reference" />
+    <attr name="MenuIconDollar" format="reference" />
+    <attr name="MenuIconEdit" format="reference" />
+    <attr name="MenuIconFlag" format="reference" />
+    <attr name="MenuIconFolderDelete" format="reference" />
+    <attr name="MenuIconFolderShare" format="reference" />
+    <attr name="MenuIconGears" format="reference" />
+    <attr name="MenuIconHanger" format="reference" />
+    <attr name="MenuIconHeadphones" format="reference" />
+    <attr name="MenuIconHome" format="reference" />
+    <attr name="MenuIconInventory" format="reference" />
+    <attr name="MenuIconItemShare" format="reference" />
+    <attr name="MenuIconLink" format="reference" />
+    <attr name="MenuIconLocalChat" format="reference" />
+    <attr name="MenuIconMinimap" format="reference" />
+    <attr name="MenuIconMinus" format="reference" />
+    <attr name="MenuIconMute" format="reference" />
+    <attr name="MenuIconNewFolder" format="reference" />
+    <attr name="MenuIconNewNotecard" format="reference" />
+    <attr name="MenuIconObjects" format="reference" />
+    <attr name="MenuIconPicture" format="reference" />
+    <attr name="MenuIconPinMap" format="reference" />
+    <attr name="MenuIconPlus" format="reference" />
+    <attr name="MenuIconRefresh" format="reference" />
+    <attr name="MenuIconRequestTeleport" format="reference" />
+    <attr name="MenuIconSearch" format="reference" />
+    <attr name="MenuIconSettings" format="reference" />
+    <attr name="MenuIconShare" format="reference" />
+    <attr name="MenuIconShowPassword" format="reference" />
+    <attr name="MenuIconSignOff" format="reference" />
+    <attr name="MenuIconSort" format="reference" />
+    <attr name="MenuIconTarget" format="reference" />
+    <attr name="MenuIconTopRightExpand" format="reference" />
+    <attr name="MenuIconTouch" format="reference" />
+    <attr name="MenuIconTrash" format="reference" />
+    <attr name="MenuIconUndo" format="reference" />
+    <attr name="MenuIconUnmute" format="reference" />
+    <attr name="MenuIconUsers" format="reference" />
+    <attr name="MenuIconVoice" format="reference" />
+    <attr name="MenuIconWearOutfit" format="reference" />
+    <attr name="MenuIconWorldView" format="reference" />
+    
+    <!-- XML preference attributes -->
+    <attr name="pageResource" format="reference" />
+    <attr name="pageNotificationDetails" format="boolean" />
+    <attr name="defaultRawResource" format="reference" />
+    <attr name="notificationType" format="string" />
+    
 </resources>
