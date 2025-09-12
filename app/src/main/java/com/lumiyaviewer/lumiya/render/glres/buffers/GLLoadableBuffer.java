@@ -45,21 +45,22 @@ public class GLLoadableBuffer implements GLCleanable {
                 default:
                     return;
             }
-        }
-        renderContext.KeepBuffer(this.rawBuffer);
-        GLES10.glEnableClientState(i);
-        switch (i) {
-            case 32884:
-                GLES10.glVertexPointer(i2, i3, i4, this.rawBuffer.positionFloat(i5));
-                return;
-            case 32885:
-                GLES10.glNormalPointer(i3, i4, this.rawBuffer.positionFloat(i5));
-                return;
-            case 32888:
-                GLES10.glTexCoordPointer(i2, i3, i4, this.rawBuffer.positionFloat(i5));
-                return;
-            default:
-                return;
+        } else {
+            renderContext.KeepBuffer(this.rawBuffer);
+            GLES10.glEnableClientState(i);
+            switch (i) {
+                case 32884:
+                    GLES10.glVertexPointer(i2, i3, i4, this.rawBuffer.positionFloat(i5));
+                    return;
+                case 32885:
+                    GLES10.glNormalPointer(i3, i4, this.rawBuffer.positionFloat(i5));
+                    return;
+                case 32888:
+                    GLES10.glTexCoordPointer(i2, i3, i4, this.rawBuffer.positionFloat(i5));
+                    return;
+                default:
+                    return;
+            }
         }
     }
 
@@ -121,30 +122,30 @@ public class GLLoadableBuffer implements GLCleanable {
 
     @TargetApi(18)
     public final void BindUniform(RenderContext renderContext, int i) {
-        Object obj = null;
+        boolean z = false;
         if (this.glBuffer == null) {
             this.glBuffer = new GLBuffer(renderContext.glResourceManager, this.rawBuffer);
             renderContext.glResourceManager.addCleanable(this);
-            obj = 1;
+            z = true;
         }
         GLES30.glBindBufferBase(35345, i, this.glBuffer.handle);
-        if (obj != null) {
+        if (z) {
             GLES20.glBufferData(35345, this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer(), 35044);
         }
     }
 
     @TargetApi(18)
     public final void BindUniformDynamic(RenderContext renderContext, int i, boolean z) {
-        int i2;
+        boolean z2;
         if ((this.glBuffer == null || z) && this.glBuffer == null) {
             this.glBuffer = new GLBuffer(renderContext.glResourceManager, this.rawBuffer);
             renderContext.glResourceManager.addCleanable(this);
-            i2 = 1;
+            z2 = true;
         } else {
-            i2 = 0;
+            z2 = false;
         }
         GLES30.glBindBufferBase(35345, i, this.glBuffer.handle);
-        if (i2 != 0) {
+        if (z2) {
             GLES20.glBufferData(35345, this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer(), 35048);
         } else if (z) {
             GLES20.glBufferSubData(35345, 0, this.rawBuffer.getCapacity(), this.rawBuffer.asByteBuffer());

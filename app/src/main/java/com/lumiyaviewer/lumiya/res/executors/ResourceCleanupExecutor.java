@@ -6,7 +6,8 @@ import java.util.concurrent.ThreadFactory;
 public class ResourceCleanupExecutor extends ScheduledThreadPoolExecutor {
 
     private static class InstanceHolder {
-        private static final ResourceCleanupExecutor Instance = new ResourceCleanupExecutor();
+        /* access modifiers changed from: private */
+        public static final ResourceCleanupExecutor Instance = new ResourceCleanupExecutor();
 
         private InstanceHolder() {
         }

@@ -12,8 +12,8 @@ public abstract class ResourceRequest<ResourceParams, ResourceType> {
     private final ResourceParams params;
     private boolean started = false;
 
-    public ResourceRequest(ResourceParams resourceParams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
-        this.params = resourceParams;
+    public ResourceRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
+        this.params = resourceparams;
         this.manager = resourceManager;
     }
 
@@ -24,19 +24,20 @@ public abstract class ResourceRequest<ResourceParams, ResourceType> {
     public void cancelRequest() {
     }
 
-    public void completeRequest(ResourceType resourceType) {
+    public void completeRequest(ResourceType resourcetype) {
         this.isCompleted = true;
-        this.manager.CompleteRequest(this.params, resourceType, this.consumers);
+        this.manager.CompleteRequest(this.params, resourcetype, this.consumers);
     }
 
     public abstract void execute();
 
-    protected final ResourceParams getParams() {
+    /* access modifiers changed from: protected */
+    public final ResourceParams getParams() {
         return this.params;
     }
 
-    public void intermediateResult(ResourceType resourceType) {
-        this.manager.IntermediateResult(this.params, resourceType, this.consumers);
+    public void intermediateResult(ResourceType resourcetype) {
+        this.manager.IntermediateResult(this.params, resourcetype, this.consumers);
     }
 
     public boolean isCancelled() {

@@ -14,8 +14,8 @@ public class DrawableFaceTexture implements ResourceConsumer, GLCleanable {
     private volatile GLLoadedTexture loadedTexture = null;
     private boolean textureRequested = false;
 
-    public DrawableFaceTexture(DrawableTextureParams drawableTextureParams) {
-        this.drawableTextureParams = drawableTextureParams;
+    public DrawableFaceTexture(DrawableTextureParams drawableTextureParams2) {
+        this.drawableTextureParams = drawableTextureParams2;
     }
 
     public void GLCleanup() {
@@ -32,14 +32,15 @@ public class DrawableFaceTexture implements ResourceConsumer, GLCleanable {
         if (gLLoadedTexture != null) {
             gLLoadedTexture.GLDraw();
             return true;
-        }
-        if (!this.textureRequested) {
+        } else if (this.textureRequested) {
+            return false;
+        } else {
             this.textureRequested = true;
             this.glTextureCache = renderContext.drawableStore.glTextureCache;
             renderContext.glResourceManager.addCleanable(this);
             this.glTextureCache.RequestResource(this.drawableTextureParams, this);
+            return false;
         }
-        return false;
     }
 
     public void OnResourceReady(Object obj, boolean z) {
@@ -53,7 +54,8 @@ public class DrawableFaceTexture implements ResourceConsumer, GLCleanable {
         }
     }
 
-    boolean hasAlphaLayer() {
+    /* access modifiers changed from: package-private */
+    public boolean hasAlphaLayer() {
         return this.hasAlphaLayer;
     }
 }

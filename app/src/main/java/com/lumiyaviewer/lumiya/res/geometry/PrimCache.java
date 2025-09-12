@@ -19,10 +19,10 @@ public class PrimCache extends ResourceMemoryCache<PrimDrawParams, DrawablePrim>
         private final GeometryCache geometryCache;
         private final GLTextureCache glTextureCache;
 
-        public PrimRequest(GLTextureCache gLTextureCache, GeometryCache geometryCache, PrimDrawParams primDrawParams, ResourceManager<PrimDrawParams, DrawablePrim> resourceManager) {
+        public PrimRequest(GLTextureCache gLTextureCache, GeometryCache geometryCache2, PrimDrawParams primDrawParams, ResourceManager<PrimDrawParams, DrawablePrim> resourceManager) {
             super(primDrawParams, resourceManager);
             this.glTextureCache = gLTextureCache;
-            this.geometryCache = geometryCache;
+            this.geometryCache = geometryCache2;
         }
 
         public void OnResourceReady(Object obj, boolean z) {
@@ -53,12 +53,13 @@ public class PrimCache extends ResourceMemoryCache<PrimDrawParams, DrawablePrim>
         }
     }
 
-    public PrimCache(GLTextureCache gLTextureCache, GeometryCache geometryCache) {
+    public PrimCache(GLTextureCache gLTextureCache, GeometryCache geometryCache2) {
         this.textureCache = gLTextureCache;
-        this.geometryCache = geometryCache;
+        this.geometryCache = geometryCache2;
     }
 
-    protected ResourceRequest<PrimDrawParams, DrawablePrim> CreateNewRequest(PrimDrawParams primDrawParams, ResourceManager<PrimDrawParams, DrawablePrim> resourceManager) {
+    /* access modifiers changed from: protected */
+    public ResourceRequest<PrimDrawParams, DrawablePrim> CreateNewRequest(PrimDrawParams primDrawParams, ResourceManager<PrimDrawParams, DrawablePrim> resourceManager) {
         return new PrimRequest(this.textureCache, this.geometryCache, primDrawParams, resourceManager);
     }
 }

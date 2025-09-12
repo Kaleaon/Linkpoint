@@ -27,14 +27,15 @@ public class TerrainGeometryCache extends ResourceMemoryCache<TerrainPatchHeight
         public void run() {
             try {
                 completeRequest(new TerrainPatchGeometry((TerrainPatchHeightMap) getParams()));
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 Debug.Warning(e);
                 completeRequest(null);
             }
         }
     }
 
-    protected ResourceRequest<TerrainPatchHeightMap, TerrainPatchGeometry> CreateNewRequest(TerrainPatchHeightMap terrainPatchHeightMap, ResourceManager<TerrainPatchHeightMap, TerrainPatchGeometry> resourceManager) {
+    /* access modifiers changed from: protected */
+    public ResourceRequest<TerrainPatchHeightMap, TerrainPatchGeometry> CreateNewRequest(TerrainPatchHeightMap terrainPatchHeightMap, ResourceManager<TerrainPatchHeightMap, TerrainPatchGeometry> resourceManager) {
         return new TerrainGeometryRequest(terrainPatchHeightMap, resourceManager);
     }
 }

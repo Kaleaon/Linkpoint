@@ -4,14 +4,13 @@ import android.annotation.TargetApi;
 import android.opengl.GLES30;
 import com.lumiyaviewer.lumiya.render.glres.GLGenericResource;
 import com.lumiyaviewer.lumiya.render.glres.GLResourceManager;
-import com.lumiyaviewer.lumiya.render.glres.GLResourceManager.GLGenericResourceReference;
 
 @TargetApi(18)
 public class GLVertexArrayObject implements GLGenericResource {
     public final int size;
     private final int[] vaoIndices;
 
-    private static class GLVertexArrayObjectReference extends GLGenericResourceReference {
+    private static class GLVertexArrayObjectReference extends GLResourceManager.GLGenericResourceReference {
         private final int[] vaoIndices;
 
         GLVertexArrayObjectReference(GLGenericResource gLGenericResource, GLResourceManager gLResourceManager, int[] iArr) {
@@ -29,7 +28,7 @@ public class GLVertexArrayObject implements GLGenericResource {
         this.size = i;
         this.vaoIndices = new int[i];
         GLES30.glGenVertexArrays(i, this.vaoIndices, 0);
-        GLVertexArrayObjectReference gLVertexArrayObjectReference = new GLVertexArrayObjectReference(this, gLResourceManager, this.vaoIndices);
+        new GLVertexArrayObjectReference(this, gLResourceManager, this.vaoIndices);
     }
 
     public void Bind(int i) {

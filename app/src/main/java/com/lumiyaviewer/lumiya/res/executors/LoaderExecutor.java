@@ -3,7 +3,8 @@ package com.lumiyaviewer.lumiya.res.executors;
 public class LoaderExecutor extends WeakExecutor {
 
     private static class InstanceHolder {
-        private static final LoaderExecutor Instance = new LoaderExecutor();
+        /* access modifiers changed from: private */
+        public static final LoaderExecutor Instance = new LoaderExecutor((LoaderExecutor) null);
 
         private InstanceHolder() {
         }
