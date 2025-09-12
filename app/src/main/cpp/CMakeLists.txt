@@ -111,10 +111,7 @@ if(vulkan-lib)
 endif()
 
 # Compiler definitions
-target_compile_definitions(${LIBRARY_NAME} PRIVATE
-    -DANDROID_PLATFORM_LEVEL=${ANDROID_PLATFORM_LEVEL}
-    -DUSE_OPENGL_ES3=1
-)
+# (Redundant target_compile_definitions removed; definitions are set globally)
 
 # Set target properties for better optimization (from main)
 set_target_properties(openjpeg PROPERTIES
