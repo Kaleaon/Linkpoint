@@ -111,4 +111,10 @@
     <attr name="MenuIconWearOutfit" format="reference" />
     <attr name="MenuIconWorldView" format="reference" />
     
+    <!-- XML preference attributes -->
+    <attr name="pageResource" format="reference" />
+    <attr name="pageNotificationDetails" format="boolean" />
+    <attr name="defaultRawResource" format="reference" />
+    <attr name="notificationType" format="string" />
+    
 </resources>
