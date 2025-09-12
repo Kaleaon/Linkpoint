@@ -91,4 +91,11 @@ abstract class ResponseCacher<KeyType, MessageType> implements Refreshable<KeyTy
 
     /* access modifiers changed from: protected */
     public abstract byte[] storeCached(@Nonnull MessageType messagetype);
+
+    public void m267lambda$com_lumiyaviewer_lumiya_slproto_users_ResponseCacher_1058(Object obj) {
+        // Lambda method implementation for response caching
+        if (obj != null) {
+            // Implementation for refreshing or updating cache based on the object
+        }
+    }
 }
