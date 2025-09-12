@@ -1,3 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  android.os.Bundle
+ */
 package com.lumiyaviewer.lumiya.voice.common.messages;
 
 import android.os.Bundle;
@@ -7,7 +13,8 @@ import com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class VoiceChannelStatus implements VoicePluginMessage {
+public class VoiceChannelStatus
+implements VoicePluginMessage {
     @Nonnull
     public final VoiceChannelInfo channelInfo;
     @Nonnull
@@ -21,12 +28,13 @@ public class VoiceChannelStatus implements VoicePluginMessage {
         this.errorMessage = bundle.getString("errorMessage");
     }
 
-    public VoiceChannelStatus(@Nonnull VoiceChannelInfo voiceChannelInfo, @Nonnull VoiceChatInfo voiceChatInfo, @Nullable String str) {
+    public VoiceChannelStatus(@Nonnull VoiceChannelInfo voiceChannelInfo, @Nonnull VoiceChatInfo voiceChatInfo, @Nullable String string2) {
         this.channelInfo = voiceChannelInfo;
         this.chatInfo = voiceChatInfo;
-        this.errorMessage = str;
+        this.errorMessage = string2;
     }
 
+    @Override
     public Bundle toBundle() {
         Bundle bundle = new Bundle();
         bundle.putBundle("channelInfo", this.channelInfo.toBundle());
@@ -35,3 +43,4 @@ public class VoiceChannelStatus implements VoicePluginMessage {
         return bundle;
     }
 }
+

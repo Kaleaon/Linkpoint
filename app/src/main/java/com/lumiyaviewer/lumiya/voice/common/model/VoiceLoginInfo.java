@@ -1,3 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  android.os.Bundle
+ */
 package com.lumiyaviewer.lumiya.voice.common.model;
 
 import android.os.Bundle;
@@ -20,44 +26,69 @@ public class VoiceLoginInfo {
         this.password = bundle.getString("password");
     }
 
-    public VoiceLoginInfo(String str, String str2, @Nonnull UUID uuid, String str3, String str4) {
-        this.voiceSipUriHostname = str;
-        this.voiceAccountServerName = str2;
-        this.agentUUID = uuid;
-        this.userName = str3;
-        this.password = str4;
+    public VoiceLoginInfo(String string2, String string3, @Nonnull UUID uUID, String string4, String string5) {
+        this.voiceSipUriHostname = string2;
+        this.voiceAccountServerName = string3;
+        this.agentUUID = uUID;
+        this.userName = string4;
+        this.password = string5;
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    /*
+     * Enabled aggressive block sorting
+     */
+    public boolean equals(Object object) {
+        boolean bl = true;
+        boolean bl2 = false;
+        if (this == object) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
+        boolean bl3 = bl2;
+        if (object == null) return bl3;
+        bl3 = bl2;
+        if (this.getClass() != object.getClass()) return bl3;
+        object = (VoiceLoginInfo)object;
+        if (this.voiceSipUriHostname != null) {
+            bl3 = bl2;
+            if (!this.voiceSipUriHostname.equals(((VoiceLoginInfo)object).voiceSipUriHostname)) return bl3;
+        } else if (((VoiceLoginInfo)object).voiceSipUriHostname != null) {
+            return bl2;
         }
-        VoiceLoginInfo voiceLoginInfo = (VoiceLoginInfo) obj;
-        if (this.voiceSipUriHostname != null ? !this.voiceSipUriHostname.equals(voiceLoginInfo.voiceSipUriHostname) : voiceLoginInfo.voiceSipUriHostname != null) {
-            return false;
+        if (this.voiceAccountServerName != null) {
+            bl3 = bl2;
+            if (!this.voiceAccountServerName.equals(((VoiceLoginInfo)object).voiceAccountServerName)) return bl3;
+        } else if (((VoiceLoginInfo)object).voiceAccountServerName != null) {
+            return bl2;
         }
-        if (this.voiceAccountServerName != null ? !this.voiceAccountServerName.equals(voiceLoginInfo.voiceAccountServerName) : voiceLoginInfo.voiceAccountServerName != null) {
-            return false;
+        bl3 = bl2;
+        if (!this.agentUUID.equals(((VoiceLoginInfo)object).agentUUID)) return bl3;
+        if (this.userName != null) {
+            bl3 = bl2;
+            if (!this.userName.equals(((VoiceLoginInfo)object).userName)) return bl3;
+        } else if (((VoiceLoginInfo)object).userName != null) {
+            return bl2;
         }
-        if (!this.agentUUID.equals(voiceLoginInfo.agentUUID)) {
-            return false;
+        if (this.password != null) {
+            return this.password.equals(((VoiceLoginInfo)object).password);
         }
-        if (this.userName != null ? this.userName.equals(voiceLoginInfo.userName) : voiceLoginInfo.userName == null) {
-            return this.password == null ? voiceLoginInfo.password == null : this.password.equals(voiceLoginInfo.password);
-        }
+        bl3 = bl;
+        if (((VoiceLoginInfo)object).password == null) return bl3;
         return false;
     }
 
+    /*
+     * Enabled aggressive block sorting
+     */
     public int hashCode() {
-        int i = 0;
-        int hashCode = ((this.userName == null ? 0 : this.userName.hashCode()) + (((((this.voiceAccountServerName == null ? 0 : this.voiceAccountServerName.hashCode()) + ((this.voiceSipUriHostname == null ? 0 : this.voiceSipUriHostname.hashCode()) * 31)) * 31) + this.agentUUID.hashCode()) * 31)) * 31;
+        int n = 0;
+        int n2 = this.voiceSipUriHostname != null ? this.voiceSipUriHostname.hashCode() : 0;
+        int n3 = this.voiceAccountServerName != null ? this.voiceAccountServerName.hashCode() : 0;
+        int n4 = this.agentUUID.hashCode();
+        int n5 = this.userName != null ? this.userName.hashCode() : 0;
         if (this.password != null) {
-            i = this.password.hashCode();
+            n = this.password.hashCode();
         }
-        return hashCode + i;
+        return (((n2 * 31 + n3) * 31 + n4) * 31 + n5) * 31 + n;
     }
 
     public Bundle toBundle() {
@@ -70,3 +101,4 @@ public class VoiceLoginInfo {
         return bundle;
     }
 }
+

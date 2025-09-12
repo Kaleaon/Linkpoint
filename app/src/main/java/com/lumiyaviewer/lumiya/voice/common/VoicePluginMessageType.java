@@ -1,3 +1,6 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package com.lumiyaviewer.lumiya.voice.common;
 
 public enum VoicePluginMessageType {
@@ -17,6 +20,7 @@ public enum VoicePluginMessageType {
     VoiceEnableMic,
     VoiceSetAudioProperties,
     VoiceAudioProperties;
-    
+
     public static final int VOICE_PLUGIN_MESSAGE = 200;
 }
+

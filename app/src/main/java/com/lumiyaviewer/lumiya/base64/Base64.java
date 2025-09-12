@@ -1,7 +1,8 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
 package com.lumiyaviewer.lumiya.base64;
 
-import com.google.common.base.Ascii;
-import com.google.common.primitives.UnsignedBytes;
 import java.util.Arrays;
 
 public class Base64 {
@@ -10,497 +11,787 @@ public class Base64 {
 
     static {
         Arrays.fill(IA, -1);
-        int length = CA.length;
-        for (int i = 0; i < length; i++) {
-            IA[CA[i]] = i;
+        int n = CA.length;
+        for (int i = 0; i < n; ++i) {
+            Base64.IA[Base64.CA[i]] = i;
         }
-        IA[61] = 0;
+        Base64.IA[61] = 0;
     }
 
-    public static final byte[] decode(String str) {
-        int length = str == null ? 0 : str.length();
-        if (length == 0) {
+    /*
+     * WARNING - void declaration
+     * Enabled aggressive block sorting
+     * Lifted jumps to return sites
+     */
+    public static final byte[] decode(String string2) {
+        int n;
+        int[] nArray;
+        int n2;
+        int n3;
+        void var7_3;
+        int n4 = string2 != null ? string2.length() : 0;
+        if (n4 == 0) {
+            byte[] byArray = new byte[]{};
+            return var7_3;
+        }
+        int n5 = 0;
+        for (n3 = 0; n3 < n4; ++n3) {
+            n2 = n5;
+            if (IA[string2.charAt(n3)] < 0) {
+                n2 = n5 + 1;
+            }
+            n5 = n2;
+        }
+        if ((n4 - n5) % 4 != 0) {
+            return var7_3;
+        }
+        n2 = 0;
+        n3 = n4;
+        while (n3 > 1 && (nArray = IA)[string2.charAt(n = n3 - 1)] <= 0) {
+            n3 = n;
+            if (string2.charAt(n) != '=') continue;
+            ++n2;
+            n3 = n;
+        }
+        int n6 = ((n4 - n5) * 6 >> 3) - n2;
+        byte[] byArray = new byte[n6];
+        n4 = 0;
+        n2 = 0;
+        while (true) {
+            byte[] byArray2 = byArray;
+            if (n2 >= n6) return var7_3;
+            n3 = 0;
+            n = 0;
+            n5 = n4;
+            for (n4 = n; n4 < 4; ++n4, ++n5) {
+                n = IA[string2.charAt(n5)];
+                if (n >= 0) {
+                    n3 |= n << 18 - n4 * 6;
+                    continue;
+                }
+                --n4;
+            }
+            n = n2 + 1;
+            byArray[n2] = (byte)(n3 >> 16);
+            n4 = n;
+            if (n < n6) {
+                n4 = n + 1;
+                byArray[n] = (byte)(n3 >> 8);
+                if (n4 < n6) {
+                    n2 = n4 + 1;
+                    byArray[n4] = (byte)n3;
+                    n4 = n2;
+                }
+            }
+            n2 = n4;
+            n4 = n5;
+        }
+    }
+
+    /*
+     * WARNING - void declaration
+     * Enabled aggressive block sorting
+     */
+    public static final byte[] decode(byte[] byArray) {
+        int n;
+        int[] nArray;
+        void var7_6;
+        int n2;
+        int n3;
+        int n4 = byArray.length;
+        int n5 = 0;
+        for (n3 = 0; n3 < n4; ++n3) {
+            n2 = n5;
+            if (IA[byArray[n3] & 0xFF] < 0) {
+                n2 = n5 + 1;
+            }
+            n5 = n2;
+        }
+        if ((n4 - n5) % 4 != 0) {
+            return var7_6;
+        }
+        n3 = 0;
+        n2 = n4;
+        while (n2 > 1 && (nArray = IA)[byArray[n = n2 - 1] & 0xFF] <= 0) {
+            n2 = n;
+            if (byArray[n] != 61) continue;
+            ++n3;
+            n2 = n;
+        }
+        int n6 = ((n4 - n5) * 6 >> 3) - n3;
+        byte[] byArray2 = new byte[n6];
+        n5 = 0;
+        n3 = 0;
+        while (true) {
+            byte[] byArray3 = byArray2;
+            if (n3 >= n6) {
+                return var7_6;
+            }
+            n4 = 0;
+            n = 0;
+            n2 = n5;
+            for (n5 = n; n5 < 4; ++n5, ++n2) {
+                n = IA[byArray[n2] & 0xFF];
+                if (n >= 0) {
+                    n4 |= n << 18 - n5 * 6;
+                    continue;
+                }
+                --n5;
+            }
+            n = n3 + 1;
+            byArray2[n3] = (byte)(n4 >> 16);
+            n5 = n;
+            if (n < n6) {
+                n5 = n + 1;
+                byArray2[n] = (byte)(n4 >> 8);
+                if (n5 < n6) {
+                    n3 = n5 + 1;
+                    byArray2[n5] = (byte)n4;
+                    n5 = n3;
+                }
+            }
+            n3 = n5;
+            n5 = n2;
+        }
+    }
+
+    /*
+     * WARNING - void declaration
+     * Enabled aggressive block sorting
+     * Lifted jumps to return sites
+     */
+    public static final byte[] decode(char[] cArray) {
+        int n;
+        int[] nArray;
+        int n2;
+        int n3;
+        void var7_3;
+        int n4 = cArray != null ? cArray.length : 0;
+        if (n4 == 0) {
+            byte[] byArray = new byte[]{};
+            return var7_3;
+        }
+        int n5 = 0;
+        for (n3 = 0; n3 < n4; ++n3) {
+            n2 = n5;
+            if (IA[cArray[n3]] < 0) {
+                n2 = n5 + 1;
+            }
+            n5 = n2;
+        }
+        if ((n4 - n5) % 4 != 0) {
+            return var7_3;
+        }
+        n2 = 0;
+        n3 = n4;
+        while (n3 > 1 && (nArray = IA)[cArray[n = n3 - 1]] <= 0) {
+            n3 = n;
+            if (cArray[n] != '=') continue;
+            ++n2;
+            n3 = n;
+        }
+        int n6 = ((n4 - n5) * 6 >> 3) - n2;
+        byte[] byArray = new byte[n6];
+        n4 = 0;
+        n2 = 0;
+        while (true) {
+            byte[] byArray2 = byArray;
+            if (n2 >= n6) return var7_3;
+            n3 = 0;
+            n = 0;
+            n5 = n4;
+            for (n4 = n; n4 < 4; ++n4, ++n5) {
+                n = IA[cArray[n5]];
+                if (n >= 0) {
+                    n3 |= n << 18 - n4 * 6;
+                    continue;
+                }
+                --n4;
+            }
+            n = n2 + 1;
+            byArray[n2] = (byte)(n3 >> 16);
+            n4 = n;
+            if (n < n6) {
+                n4 = n + 1;
+                byArray[n] = (byte)(n3 >> 8);
+                if (n4 < n6) {
+                    n2 = n4 + 1;
+                    byArray[n4] = (byte)n3;
+                    n4 = n2;
+                }
+            }
+            n2 = n4;
+            n4 = n5;
+        }
+    }
+
+    /*
+     * Unable to fully structure code
+     */
+    public static final byte[] decodeFast(String var0) {
+        block17: {
+            block18: {
+                block15: {
+                    block16: {
+                        block19: {
+                            var4_1 = var0.length();
+                            if (var4_1 == 0) {
+                                var0 = new byte[0];
+lbl4:
+                                // 2 sources
+
+                                return var0;
+                            }
+                            var1_2 = 0;
+                            var2_3 = var4_1 - 1;
+                            while (true) {
+                                var5_4 = var2_3;
+                                if (var1_2 >= var2_3) break;
+                                var5_4 = var2_3;
+                                if (Base64.IA[var0.charAt(var1_2) & 255] >= 0) break;
+                                ++var1_2;
+                            }
+                            while (var5_4 > 0 && Base64.IA[var0.charAt(var5_4) & 255] < 0) {
+                                --var5_4;
+                            }
+                            if (var0.charAt(var5_4) != '=') break block19;
+                            if (var0.charAt(var5_4 - 1) == '=') {
+                                var3_5 = 2;
+lbl21:
+                                // 3 sources
+
+                                while (true) {
+                                    var7_6 = var5_4 - var1_2 + 1;
+                                    if (var4_1 <= 76) break block15;
+                                    if (var0.charAt(76) != '\r') break block16;
+                                    var2_3 = var7_6 / 78;
+lbl26:
+                                    // 2 sources
+
+                                    while (true) {
+                                        var6_7 = var2_3 << 1;
+lbl28:
+                                        // 2 sources
+
+                                        while (true) {
+                                            var8_8 = ((var7_6 - var6_7) * 6 >> 3) - var3_5;
+                                            var13_9 = new byte[var8_8];
+                                            var4_1 = 0;
+                                            var9_10 = var8_8 / 3;
+                                            var7_6 = 0;
+                                            var2_3 = var1_2;
+                                            var1_2 = var7_6;
+                                            block6: while (var1_2 < var9_10 * 3) {
+                                                var14_14 = Base64.IA;
+                                                var10_11 = var2_3 + 1;
+                                                var7_6 = var14_14[var0.charAt(var2_3)];
+                                                var14_14 = Base64.IA;
+                                                var2_3 = var10_11 + 1;
+                                                var10_11 = var14_14[var0.charAt(var10_11)];
+                                                var14_14 = Base64.IA;
+                                                var11_12 = var2_3 + 1;
+                                                var12_13 = var14_14[var0.charAt(var2_3)];
+                                                var14_14 = Base64.IA;
+                                                var2_3 = var11_12 + 1;
+                                                var10_11 = var7_6 << 18 | var10_11 << 12 | var12_13 << 6 | var14_14[var0.charAt(var11_12)];
+                                                var11_12 = var1_2 + 1;
+                                                var13_9[var1_2] = (byte)(var10_11 >> 16);
+                                                var7_6 = var11_12 + 1;
+                                                var13_9[var11_12] = (byte)(var10_11 >> 8);
+                                                var13_9[var7_6] = (byte)var10_11;
+                                                var1_2 = var4_1++;
+                                                if (var6_7 > 0) {
+                                                    var1_2 = var4_1;
+                                                    if (var4_1 == 19) {
+                                                        var1_2 = var2_3 + 2;
+                                                        var4_1 = 0;
+lbl60:
+                                                        // 2 sources
+
+                                                        while (true) {
+                                                            var2_3 = var1_2;
+                                                            var1_2 = ++var7_6;
+                                                            continue block6;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                break block17;
+                                            }
+                                            break block18;
+                                            break;
+                                        }
+                                        break;
+                                    }
+                                    break;
+                                }
+                            }
+                            var3_5 = 1;
+                            ** GOTO lbl21
+                        }
+                        var3_5 = 0;
+                        ** while (true)
+                    }
+                    var2_3 = 0;
+                    ** while (true)
+                }
+                var6_7 = 0;
+                ** while (true)
+            }
+            var6_7 = var1_2;
+            var6_7 = var2_3;
+            if (var1_2 < var8_8) {
+                var4_1 = 0;
+                var6_7 = 0;
+                while (var2_3 <= var5_4 - var3_5) {
+                    var4_1 |= Base64.IA[var0.charAt(var2_3)] << 18 - var6_7 * 6;
+                    ++var6_7;
+                    ++var2_3;
+                }
+                var3_5 = 16;
+                while (true) {
+                    var6_7 = var1_2;
+                    var6_7 = var2_3;
+                    if (var1_2 >= var8_8) break;
+                    var13_9[var1_2] = (byte)(var4_1 >> var3_5);
+                    var3_5 -= 8;
+                    ++var1_2;
+                }
+            }
+            var0 = var13_9;
+            ** while (true)
+        }
+        var4_1 = var1_2;
+        var1_2 = var2_3;
+        ** while (true)
+    }
+
+    /*
+     * Enabled aggressive block sorting
+     */
+    public static final byte[] decodeFast(byte[] byArray) {
+        int n;
+        int n2;
+        int n3 = byArray.length;
+        if (n3 == 0) {
             return new byte[0];
         }
-        int i = 0;
-        for (int i2 = 0; i2 < length; i2++) {
-            if (IA[str.charAt(i2)] < 0) {
-                i++;
-            }
+        int n4 = 0;
+        int n5 = n3 - 1;
+        while (true) {
+            n2 = n5;
+            if (n4 >= n5) break;
+            n2 = n5;
+            if (IA[byArray[n4] & 0xFF] >= 0) break;
+            ++n4;
         }
-        if ((length - i) % 4 != 0) {
-            return null;
+        while (n2 > 0 && IA[byArray[n2] & 0xFF] < 0) {
+            --n2;
         }
-        int i3 = length;
-        int i4 = 0;
-        while (i3 > 1) {
-            i3--;
-            if (IA[str.charAt(i3)] > 0) {
-                break;
-            } else if (str.charAt(i3) == '=') {
-                i4++;
-            }
-        }
-        int i5 = (((length - i) * 6) >> 3) - i4;
-        byte[] bArr = new byte[i5];
-        int i6 = 0;
-        int i7 = 0;
-        while (i6 < i5) {
-            int i8 = 0;
-            int i9 = i7;
-            int i10 = 0;
-            while (i10 < 4) {
-                int i11 = i9 + 1;
-                int i12 = IA[str.charAt(i9)];
-                if (i12 < 0) {
-                    i10--;
-                } else {
-                    i8 |= i12 << (18 - (i10 * 6));
-                }
-                i10++;
-                i9 = i11;
-            }
-            int i13 = i6 + 1;
-            bArr[i6] = (byte) ((byte) (i8 >> 16));
-            if (i13 < i5) {
-                int i14 = i13 + 1;
-                bArr[i13] = (byte) ((byte) (i8 >> 8));
-                if (i14 >= i5) {
-                    i13 = i14;
-                } else {
-                    i13 = i14 + 1;
-                    bArr[i14] = (byte) ((byte) i8);
-                }
-            }
-            i6 = i13;
-            i7 = i9;
-        }
-        return bArr;
-    }
-
-    public static final byte[] decode(byte[] bArr) {
-        int i = 0;
-        for (byte b : bArr) {
-            if (IA[b & UnsignedBytes.MAX_VALUE] < 0) {
-                i++;
-            }
-        }
-        if ((r2 - i) % 4 != 0) {
-            return null;
-        }
-        int i2 = r2;
-        int i3 = 0;
-        while (i2 > 1) {
-            i2--;
-            if (IA[bArr[i2] & UnsignedBytes.MAX_VALUE] > 0) {
-                break;
-            } else if (bArr[i2] == 61) {
-                i3++;
-            }
-        }
-        int i4 = (((r2 - i) * 6) >> 3) - i3;
-        byte[] bArr2 = new byte[i4];
-        int i5 = 0;
-        int i6 = 0;
-        while (i5 < i4) {
-            int i7 = 0;
-            int i8 = i6;
-            int i9 = 0;
-            while (i9 < 4) {
-                int i10 = i8 + 1;
-                int i11 = IA[bArr[i8] & UnsignedBytes.MAX_VALUE];
-                if (i11 < 0) {
-                    i9--;
-                } else {
-                    i7 |= i11 << (18 - (i9 * 6));
-                }
-                i9++;
-                i8 = i10;
-            }
-            int i12 = i5 + 1;
-            bArr2[i5] = (byte) ((byte) (i7 >> 16));
-            if (i12 < i4) {
-                int i13 = i12 + 1;
-                bArr2[i12] = (byte) ((byte) (i7 >> 8));
-                if (i13 >= i4) {
-                    i12 = i13;
-                } else {
-                    i12 = i13 + 1;
-                    bArr2[i13] = (byte) ((byte) i7);
-                }
-            }
-            i5 = i12;
-            i6 = i8;
-        }
-        return bArr2;
-    }
-
-    public static final byte[] decode(char[] cArr) {
-        int length = cArr == null ? 0 : cArr.length;
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i = 0;
-        for (int i2 = 0; i2 < length; i2++) {
-            if (IA[cArr[i2]] < 0) {
-                i++;
-            }
-        }
-        if ((length - i) % 4 != 0) {
-            return null;
-        }
-        int i3 = length;
-        int i4 = 0;
-        while (i3 > 1) {
-            i3--;
-            if (IA[cArr[i3]] > 0) {
-                break;
-            } else if (cArr[i3] == '=') {
-                i4++;
-            }
-        }
-        int i5 = (((length - i) * 6) >> 3) - i4;
-        byte[] bArr = new byte[i5];
-        int i6 = 0;
-        int i7 = 0;
-        while (i6 < i5) {
-            int i8 = 0;
-            int i9 = i7;
-            int i10 = 0;
-            while (i10 < 4) {
-                int i11 = i9 + 1;
-                int i12 = IA[cArr[i9]];
-                if (i12 < 0) {
-                    i10--;
-                } else {
-                    i8 |= i12 << (18 - (i10 * 6));
-                }
-                i10++;
-                i9 = i11;
-            }
-            int i13 = i6 + 1;
-            bArr[i6] = (byte) ((byte) (i8 >> 16));
-            if (i13 < i5) {
-                int i14 = i13 + 1;
-                bArr[i13] = (byte) ((byte) (i8 >> 8));
-                if (i14 >= i5) {
-                    i13 = i14;
-                } else {
-                    i13 = i14 + 1;
-                    bArr[i14] = (byte) ((byte) i8);
-                }
-            }
-            i6 = i13;
-            i7 = i9;
-        }
-        return bArr;
-    }
-
-    public static final byte[] decodeFast(String str) {
-        int i;
-        int i2;
-        int i3 = 0;
-        int length = str.length();
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i4 = length - 1;
-        int i5 = 0;
-        while (i < i4 && IA[str.charAt(i) & 255] < 0) {
-            i5 = i + 1;
-        }
-        int i6 = i4;
-        while (i6 > 0 && IA[str.charAt(i6) & 255] < 0) {
-            i6--;
-        }
-        int i7 = str.charAt(i6) != '=' ? 0 : str.charAt(i6 + -1) != '=' ? 1 : 2;
-        int i8 = (i6 - i) + 1;
-        if (length <= 76) {
-            i2 = 0;
+        int n6 = byArray[n2] == 61 ? (byArray[n2 - 1] == 61 ? 2 : 1) : 0;
+        int n7 = n2 - n4 + 1;
+        if (n3 > 76) {
+            n5 = byArray[76] == 13 ? n7 / 78 : 0;
+            n = n5 << 1;
         } else {
-            i2 = (str.charAt(76) != 13 ? 0 : i8 / 78) << 1;
+            n = 0;
         }
-        int i9 = (((i8 - i2) * 6) >> 3) - i7;
-        byte[] bArr = new byte[i9];
-        int i10 = (i9 / 3) * 3;
-        int i11 = 0;
-        int i12 = 0;
-        while (i12 < i10) {
-            int i13 = i + 1;
-            int i14 = i13 + 1;
-            int i15 = (IA[str.charAt(i)] << 18) | (IA[str.charAt(i13)] << 12);
-            int i16 = i14 + 1;
-            int i17 = (IA[str.charAt(i14)] << 6) | i15;
-            i = i16 + 1;
-            int i18 = i17 | IA[str.charAt(i16)];
-            int i19 = i12 + 1;
-            bArr[i12] = (byte) ((byte) (i18 >> 16));
-            int i20 = i19 + 1;
-            bArr[i19] = (byte) ((byte) (i18 >> 8));
-            i12 = i20 + 1;
-            bArr[i20] = (byte) ((byte) i18);
-            if (i2 > 0 && (i11 = i11 + 1) == 19) {
-                i += 2;
-                i11 = 0;
+        int n8 = ((n7 - n) * 6 >> 3) - n6;
+        byte[] byArray2 = new byte[n8];
+        n3 = 0;
+        int n9 = n8 / 3;
+        n7 = 0;
+        n5 = n4;
+        n4 = n7;
+        while (n4 < n9 * 3) {
+            int[] nArray = IA;
+            int n10 = n5 + 1;
+            n7 = nArray[byArray[n5]];
+            nArray = IA;
+            n5 = n10 + 1;
+            int n11 = nArray[byArray[n10]];
+            nArray = IA;
+            n10 = n5 + 1;
+            int n12 = nArray[byArray[n5]];
+            nArray = IA;
+            n5 = n10 + 1;
+            n11 = n7 << 18 | n11 << 12 | n12 << 6 | nArray[byArray[n10]];
+            n10 = n4 + 1;
+            byArray2[n4] = (byte)(n11 >> 16);
+            n7 = n10 + 1;
+            byArray2[n10] = (byte)(n11 >> 8);
+            byArray2[n7] = (byte)n11;
+            n4 = n3++;
+            if (n > 0) {
+                n4 = n3;
+                if (n3 == 19) {
+                    n5 += 2;
+                    n4 = 0;
+                }
+            }
+            n3 = n4;
+            n4 = ++n7;
+        }
+        n = n4;
+        n = n5;
+        if (n4 >= n8) return byArray2;
+        n3 = 0;
+        n = 0;
+        while (n5 <= n2 - n6) {
+            n3 |= IA[byArray[n5]] << 18 - n * 6;
+            ++n;
+            ++n5;
+        }
+        n6 = 16;
+        while (true) {
+            n = n4;
+            n = n5;
+            if (n4 >= n8) return byArray2;
+            byArray2[n4] = (byte)(n3 >> n6);
+            n6 -= 8;
+            ++n4;
+        }
+    }
+
+    /*
+     * WARNING - void declaration
+     * Enabled aggressive block sorting
+     */
+    public static final byte[] decodeFast(char[] objectArray) {
+        int n;
+        int n2;
+        void var0_2;
+        int n3 = objectArray.length;
+        if (n3 == 0) {
+            byte[] byArray = new byte[]{};
+            return var0_2;
+        }
+        int n4 = 0;
+        int n5 = n3 - 1;
+        while (true) {
+            n2 = n5;
+            if (n4 >= n5) break;
+            n2 = n5;
+            if (IA[objectArray[n4]] >= 0) break;
+            ++n4;
+        }
+        while (n2 > 0 && IA[objectArray[n2]] < 0) {
+            --n2;
+        }
+        int n6 = objectArray[n2] == '=' ? (objectArray[n2 - 1] == '=' ? 2 : 1) : 0;
+        int n7 = n2 - n4 + 1;
+        if (n3 > 76) {
+            n5 = objectArray[76] == '\r' ? n7 / 78 : 0;
+            n = n5 << 1;
+        } else {
+            n = 0;
+        }
+        int n8 = ((n7 - n) * 6 >> 3) - n6;
+        byte[] byArray = new byte[n8];
+        n3 = 0;
+        int n9 = n8 / 3;
+        n7 = 0;
+        n5 = n4;
+        n4 = n7;
+        while (n4 < n9 * 3) {
+            int[] nArray = IA;
+            int n10 = n5 + 1;
+            n7 = nArray[objectArray[n5]];
+            nArray = IA;
+            n5 = n10 + 1;
+            int n11 = nArray[objectArray[n10]];
+            nArray = IA;
+            n10 = n5 + 1;
+            int n12 = nArray[objectArray[n5]];
+            nArray = IA;
+            n5 = n10 + 1;
+            n11 = n7 << 18 | n11 << 12 | n12 << 6 | nArray[objectArray[n10]];
+            n10 = n4 + 1;
+            byArray[n4] = (byte)(n11 >> 16);
+            n7 = n10 + 1;
+            byArray[n10] = (byte)(n11 >> 8);
+            byArray[n7] = (byte)n11;
+            n4 = n3++;
+            if (n > 0) {
+                n4 = n3;
+                if (n3 == 19) {
+                    n5 += 2;
+                    n4 = 0;
+                }
+            }
+            n3 = n4;
+            n4 = ++n7;
+        }
+        n = n4;
+        n = n5;
+        if (n4 < n8) {
+            n3 = 0;
+            n = 0;
+            while (n5 <= n2 - n6) {
+                n3 |= IA[objectArray[n5]] << 18 - n * 6;
+                ++n;
+                ++n5;
+            }
+            n6 = 16;
+            while (true) {
+                n = n4;
+                n = n5;
+                if (n4 >= n8) break;
+                byArray[n4] = (byte)(n3 >> n6);
+                n6 -= 8;
+                ++n4;
             }
         }
-        if (i12 < i9) {
-            int i21 = 0;
-            while (true) {
-                int i22 = i;
-                if (i22 > i6 - i7) {
+        byte[] byArray2 = byArray;
+        return var0_2;
+    }
+
+    /*
+     * Unable to fully structure code
+     */
+    public static final byte[] encodeToByte(byte[] var0, boolean var1_1) {
+        block14: {
+            block15: {
+                block17: {
+                    block16: {
+                        if (var0 == null) break block16;
+                        var5_2 = var0.length;
+lbl3:
+                        // 2 sources
+
+                        while (var5_2 == 0) {
+                            var12_3 = new byte[]{};
+lbl5:
+                            // 3 sources
+
+                            return var12_3;
+                        }
+                        break block17;
+                    }
+                    var5_2 = 0;
+                    ** GOTO lbl3
+                }
+                var8_4 = var5_2 / 3 * 3;
+                var4_5 = (var5_2 - 1) / 3 + 1 << 2;
+                if (var1_1) {
+                    var3_6 = (var4_5 - 1) / 76 << 1;
+lbl16:
+                    // 2 sources
+
+                    while (true) {
+                        var7_7 = var4_5 + var3_6;
+                        var13_8 = new byte[var7_7];
+                        var3_6 = 0;
+                        var4_5 = 0;
+                        var6_9 = 0;
+                        block3: while (var6_9 < var8_4) {
+                            var10_11 = var6_9 + 1;
+                            var6_9 = var0[var6_9];
+                            var9_10 = var10_11 + 1;
+                            var10_11 = (var6_9 & 255) << 16 | (var0[var10_11] & 255) << 8 | var0[var9_10] & 255;
+                            var6_9 = var4_5 + 1;
+                            var13_8[var4_5] = (byte)Base64.CA[var10_11 >>> 18 & 63];
+                            var4_5 = var6_9 + 1;
+                            var13_8[var6_9] = (byte)Base64.CA[var10_11 >>> 12 & 63];
+                            var11_12 = var4_5 + 1;
+                            var13_8[var4_5] = (byte)Base64.CA[var10_11 >>> 6 & 63];
+                            var6_9 = var11_12 + 1;
+                            var13_8[var11_12] = (byte)Base64.CA[var10_11 & 63];
+                            var4_5 = var3_6++;
+                            if (var1_1) {
+                                var4_5 = var3_6;
+                                if (var3_6 == 19) {
+                                    var4_5 = var3_6;
+                                    if (var6_9 < var7_7 - 2) {
+                                        var4_5 = var6_9 + 1;
+                                        var13_8[var6_9] = 13;
+                                        var13_8[var4_5] = 10;
+                                        var3_6 = 0;
+                                        ++var4_5;
+lbl46:
+                                        // 2 sources
+
+                                        while (true) {
+                                            var6_9 = var9_10 + 1;
+                                            continue block3;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            break block14;
+                        }
+                        break block15;
+                        break;
+                    }
+                }
+                var3_6 = 0;
+                ** while (true)
+            }
+            var4_5 = var5_2 - var8_4;
+            var12_3 = var13_8;
+            if (var4_5 <= 0) ** GOTO lbl5
+            var6_9 = var0[var8_4];
+            if (var4_5 == 2) {
+                var3_6 = (var0[var5_2 - 1] & 255) << 2;
+lbl60:
+                // 2 sources
+
+                while (true) {
+                    var3_6 = (var6_9 & 255) << 10 | var3_6;
+                    var13_8[var7_7 - 4] = (byte)Base64.CA[var3_6 >> 12];
+                    var13_8[var7_7 - 3] = (byte)Base64.CA[var3_6 >>> 6 & 63];
+                    if (var4_5 == 2) {
+                        var2_13 = (byte)Base64.CA[var3_6 & 63];
+lbl66:
+                        // 2 sources
+
+                        while (true) {
+                            var13_8[var7_7 - 2] = var2_13;
+                            var13_8[var7_7 - 1] = 61;
+                            var12_3 = var13_8;
+                            ** continue;
+                            break;
+                        }
+                    }
                     break;
                 }
-                i = i22 + 1;
-                i3++;
-                i21 = (IA[str.charAt(i22)] << (18 - (i3 * 6))) | i21;
+            } else {
+                var3_6 = 0;
+                ** continue;
             }
-            int i23 = 16;
-            for (int i24 = i12; i24 < i9; i24++) {
-                bArr[i24] = (byte) ((byte) (i21 >> i23));
-                i23 -= 8;
-            }
+            var2_13 = 61;
+            ** while (true)
         }
-        return bArr;
+        var3_6 = var4_5;
+        var4_5 = var6_9;
+        ** while (true)
     }
 
-    public static final byte[] decodeFast(byte[] bArr) {
-        int i;
-        int i2;
-        int i3 = 0;
-        int length = bArr.length;
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i4 = length - 1;
-        int i5 = 0;
-        while (i < i4 && IA[bArr[i] & UnsignedBytes.MAX_VALUE] < 0) {
-            i5 = i + 1;
-        }
-        int i6 = i4;
-        while (i6 > 0 && IA[bArr[i6] & UnsignedBytes.MAX_VALUE] < 0) {
-            i6--;
-        }
-        int i7 = bArr[i6] != 61 ? 0 : bArr[i6 + -1] != 61 ? 1 : 2;
-        int i8 = (i6 - i) + 1;
-        if (length <= 76) {
-            i2 = 0;
-        } else {
-            i2 = (bArr[76] != 13 ? 0 : i8 / 78) << 1;
-        }
-        int i9 = (((i8 - i2) * 6) >> 3) - i7;
-        byte[] bArr2 = new byte[i9];
-        int i10 = (i9 / 3) * 3;
-        int i11 = 0;
-        int i12 = 0;
-        while (i12 < i10) {
-            int i13 = i + 1;
-            int i14 = i13 + 1;
-            int i15 = (IA[bArr[i]] << 18) | (IA[bArr[i13]] << 12);
-            int i16 = i14 + 1;
-            int i17 = (IA[bArr[i14]] << 6) | i15;
-            i = i16 + 1;
-            int i18 = i17 | IA[bArr[i16]];
-            int i19 = i12 + 1;
-            bArr2[i12] = (byte) ((byte) (i18 >> 16));
-            int i20 = i19 + 1;
-            bArr2[i19] = (byte) ((byte) (i18 >> 8));
-            i12 = i20 + 1;
-            bArr2[i20] = (byte) ((byte) i18);
-            if (i2 > 0 && (i11 = i11 + 1) == 19) {
-                i += 2;
-                i11 = 0;
+    /*
+     * Unable to fully structure code
+     */
+    public static final char[] encodeToChar(byte[] var0, boolean var1_1) {
+        block14: {
+            block15: {
+                block17: {
+                    block16: {
+                        if (var0 == null) break block16;
+                        var5_2 = var0.length;
+lbl3:
+                        // 2 sources
+
+                        while (var5_2 == 0) {
+                            var12_3 = new char[]{};
+lbl5:
+                            // 3 sources
+
+                            return var12_3;
+                        }
+                        break block17;
+                    }
+                    var5_2 = 0;
+                    ** GOTO lbl3
+                }
+                var8_4 = var5_2 / 3 * 3;
+                var4_5 = (var5_2 - 1) / 3 + 1 << 2;
+                if (var1_1) {
+                    var3_6 = (var4_5 - 1) / 76 << 1;
+lbl16:
+                    // 2 sources
+
+                    while (true) {
+                        var7_7 = var4_5 + var3_6;
+                        var13_8 = new char[var7_7];
+                        var3_6 = 0;
+                        var4_5 = 0;
+                        var6_9 = 0;
+                        block3: while (var6_9 < var8_4) {
+                            var10_11 = var6_9 + 1;
+                            var6_9 = var0[var6_9];
+                            var9_10 = var10_11 + 1;
+                            var10_11 = (var6_9 & 255) << 16 | (var0[var10_11] & 255) << 8 | var0[var9_10] & 255;
+                            var11_12 = var4_5 + 1;
+                            var13_8[var4_5] = Base64.CA[var10_11 >>> 18 & 63];
+                            var6_9 = var11_12 + 1;
+                            var13_8[var11_12] = Base64.CA[var10_11 >>> 12 & 63];
+                            var4_5 = var6_9 + 1;
+                            var13_8[var6_9] = Base64.CA[var10_11 >>> 6 & 63];
+                            var6_9 = var4_5 + 1;
+                            var13_8[var4_5] = Base64.CA[var10_11 & 63];
+                            var4_5 = var3_6++;
+                            if (var1_1) {
+                                var4_5 = var3_6;
+                                if (var3_6 == 19) {
+                                    var4_5 = var3_6;
+                                    if (var6_9 < var7_7 - 2) {
+                                        var4_5 = var6_9 + 1;
+                                        var13_8[var6_9] = 13;
+                                        var13_8[var4_5] = 10;
+                                        var3_6 = 0;
+                                        ++var4_5;
+lbl46:
+                                        // 2 sources
+
+                                        while (true) {
+                                            var6_9 = var9_10 + 1;
+                                            continue block3;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            break block14;
+                        }
+                        break block15;
+                        break;
+                    }
+                }
+                var3_6 = 0;
+                ** while (true)
             }
-        }
-        if (i12 < i9) {
-            int i21 = 0;
-            while (true) {
-                int i22 = i;
-                if (i22 > i6 - i7) {
+            var4_5 = var5_2 - var8_4;
+            var12_3 = var13_8;
+            if (var4_5 <= 0) ** GOTO lbl5
+            var6_9 = var0[var8_4];
+            if (var4_5 == 2) {
+                var3_6 = (var0[var5_2 - 1] & 255) << 2;
+lbl60:
+                // 2 sources
+
+                while (true) {
+                    var3_6 = (var6_9 & 255) << 10 | var3_6;
+                    var13_8[var7_7 - 4] = Base64.CA[var3_6 >> 12];
+                    var13_8[var7_7 - 3] = Base64.CA[var3_6 >>> 6 & 63];
+                    if (var4_5 == 2) {
+                        var2_13 = Base64.CA[var3_6 & 63];
+lbl66:
+                        // 2 sources
+
+                        while (true) {
+                            var13_8[var7_7 - 2] = var2_13;
+                            var13_8[var7_7 - 1] = 61;
+                            var12_3 = var13_8;
+                            ** continue;
+                            break;
+                        }
+                    }
                     break;
                 }
-                i = i22 + 1;
-                i3++;
-                i21 = (IA[bArr[i22]] << (18 - (i3 * 6))) | i21;
+            } else {
+                var3_6 = 0;
+                ** continue;
             }
-            int i23 = 16;
-            for (int i24 = i12; i24 < i9; i24++) {
-                bArr2[i24] = (byte) ((byte) (i21 >> i23));
-                i23 -= 8;
-            }
+            var2_13 = 61;
+            ** while (true)
         }
-        return bArr2;
+        var3_6 = var4_5;
+        var4_5 = var6_9;
+        ** while (true)
     }
 
-    public static final byte[] decodeFast(char[] cArr) {
-        int i;
-        int i2;
-        int i3 = 0;
-        int length = cArr.length;
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i4 = length - 1;
-        int i5 = 0;
-        while (i < i4 && IA[cArr[i]] < 0) {
-            i5 = i + 1;
-        }
-        int i6 = i4;
-        while (i6 > 0 && IA[cArr[i6]] < 0) {
-            i6--;
-        }
-        int i7 = cArr[i6] != '=' ? 0 : cArr[i6 + -1] != '=' ? 1 : 2;
-        int i8 = (i6 - i) + 1;
-        if (length <= 76) {
-            i2 = 0;
-        } else {
-            i2 = (cArr[76] != 13 ? 0 : i8 / 78) << 1;
-        }
-        int i9 = (((i8 - i2) * 6) >> 3) - i7;
-        byte[] bArr = new byte[i9];
-        int i10 = (i9 / 3) * 3;
-        int i11 = 0;
-        int i12 = 0;
-        while (i12 < i10) {
-            int i13 = i + 1;
-            int i14 = i13 + 1;
-            int i15 = (IA[cArr[i]] << 18) | (IA[cArr[i13]] << 12);
-            int i16 = i14 + 1;
-            int i17 = (IA[cArr[i14]] << 6) | i15;
-            i = i16 + 1;
-            int i18 = i17 | IA[cArr[i16]];
-            int i19 = i12 + 1;
-            bArr[i12] = (byte) ((byte) (i18 >> 16));
-            int i20 = i19 + 1;
-            bArr[i19] = (byte) ((byte) (i18 >> 8));
-            i12 = i20 + 1;
-            bArr[i20] = (byte) ((byte) i18);
-            if (i2 > 0 && (i11 = i11 + 1) == 19) {
-                i += 2;
-                i11 = 0;
-            }
-        }
-        if (i12 < i9) {
-            int i21 = 0;
-            while (true) {
-                int i22 = i;
-                if (i22 > i6 - i7) {
-                    break;
-                }
-                i = i22 + 1;
-                i3++;
-                i21 = (IA[cArr[i22]] << (18 - (i3 * 6))) | i21;
-            }
-            int i23 = 16;
-            for (int i24 = i12; i24 < i9; i24++) {
-                bArr[i24] = (byte) ((byte) (i21 >> i23));
-                i23 -= 8;
-            }
-        }
-        return bArr;
-    }
-
-    public static final byte[] encodeToByte(byte[] bArr, boolean z) {
-        int i = 0;
-        int length = bArr == null ? 0 : bArr.length;
-        if (length == 0) {
-            return new byte[0];
-        }
-        int i2 = (length / 3) * 3;
-        int i3 = (((length - 1) / 3) + 1) << 2;
-        int i4 = i3 + (!z ? 0 : ((i3 - 1) / 76) << 1);
-        byte[] bArr2 = new byte[i4];
-        int i5 = 0;
-        int i6 = 0;
-        int i7 = 0;
-        while (i7 < i2) {
-            int i8 = i7 + 1;
-            int i9 = i8 + 1;
-            byte b = ((bArr[i8] & UnsignedBytes.MAX_VALUE) << 8) | ((bArr[i7] & UnsignedBytes.MAX_VALUE) << 16);
-            i7 = i9 + 1;
-            byte b2 = b | (bArr[i9] & UnsignedBytes.MAX_VALUE);
-            int i10 = i6 + 1;
-            bArr2[i6] = (byte) ((byte) CA[(b2 >>> Ascii.DC2) & 63]);
-            int i11 = i10 + 1;
-            bArr2[i10] = (byte) ((byte) CA[(b2 >>> Ascii.FF) & 63]);
-            int i12 = i11 + 1;
-            bArr2[i11] = (byte) ((byte) CA[(b2 >>> 6) & 63]);
-            i6 = i12 + 1;
-            bArr2[i12] = (byte) ((byte) CA[b2 & 63]);
-            if (z && (i5 = i5 + 1) == 19 && i6 < i4 - 2) {
-                int i13 = i6 + 1;
-                bArr2[i6] = Ascii.CR;
-                bArr2[i13] = 10;
-                i6 = i13 + 1;
-                i5 = 0;
-            }
-        }
-        int i14 = length - i2;
-        if (i14 > 0) {
-            int i15 = (bArr[i2] & UnsignedBytes.MAX_VALUE) << 10;
-            if (i14 == 2) {
-                i = (bArr[length - 1] & UnsignedBytes.MAX_VALUE) << 2;
-            }
-            int i16 = i15 | i;
-            bArr2[i4 - 4] = (byte) ((byte) CA[i16 >> 12]);
-            bArr2[i4 - 3] = (byte) ((byte) CA[(i16 >>> 6) & 63]);
-            bArr2[i4 - 2] = (byte) (i14 != 2 ? 61 : (byte) CA[i16 & 63]);
-            bArr2[i4 - 1] = 61;
-        }
-        return bArr2;
-    }
-
-    public static final char[] encodeToChar(byte[] bArr, boolean z) {
-        int i = 0;
-        int length = bArr == null ? 0 : bArr.length;
-        if (length == 0) {
-            return new char[0];
-        }
-        int i2 = (length / 3) * 3;
-        int i3 = (((length - 1) / 3) + 1) << 2;
-        int i4 = i3 + (!z ? 0 : ((i3 - 1) / 76) << 1);
-        char[] cArr = new char[i4];
-        int i5 = 0;
-        int i6 = 0;
-        int i7 = 0;
-        while (i7 < i2) {
-            int i8 = i7 + 1;
-            int i9 = i8 + 1;
-            byte b = ((bArr[i8] & UnsignedBytes.MAX_VALUE) << 8) | ((bArr[i7] & UnsignedBytes.MAX_VALUE) << 16);
-            i7 = i9 + 1;
-            byte b2 = b | (bArr[i9] & UnsignedBytes.MAX_VALUE);
-            int i10 = i6 + 1;
-            cArr[i6] = (char) CA[(b2 >>> Ascii.DC2) & 63];
-            int i11 = i10 + 1;
-            cArr[i10] = (char) CA[(b2 >>> Ascii.FF) & 63];
-            int i12 = i11 + 1;
-            cArr[i11] = (char) CA[(b2 >>> 6) & 63];
-            i6 = i12 + 1;
-            cArr[i12] = (char) CA[b2 & 63];
-            if (z && (i5 = i5 + 1) == 19 && i6 < i4 - 2) {
-                int i13 = i6 + 1;
-                cArr[i6] = 13;
-                cArr[i13] = 10;
-                i6 = i13 + 1;
-                i5 = 0;
-            }
-        }
-        int i14 = length - i2;
-        if (i14 > 0) {
-            int i15 = (bArr[i2] & UnsignedBytes.MAX_VALUE) << 10;
-            if (i14 == 2) {
-                i = (bArr[length - 1] & UnsignedBytes.MAX_VALUE) << 2;
-            }
-            int i16 = i15 | i;
-            cArr[i4 - 4] = (char) CA[i16 >> 12];
-            cArr[i4 - 3] = (char) CA[(i16 >>> 6) & 63];
-            cArr[i4 - 2] = (char) (i14 != 2 ? '=' : CA[i16 & 63]);
-            cArr[i4 - 1] = '=';
-        }
-        return cArr;
-    }
-
-    public static final String encodeToString(byte[] bArr, boolean z) {
-        return new String(encodeToChar(bArr, z));
+    public static final String encodeToString(byte[] byArray, boolean bl) {
+        return new String(Base64.encodeToChar(byArray, bl));
     }
 }
+

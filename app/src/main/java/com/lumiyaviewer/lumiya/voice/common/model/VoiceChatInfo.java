@@ -1,3 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  android.os.Bundle
+ */
 package com.lumiyaviewer.lumiya.voice.common.model;
 
 import android.os.Bundle;
@@ -8,8 +14,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class VoiceChatInfo {
-    private static final VoiceChatInfo emptyChatState = interner.intern(new VoiceChatInfo(VoiceChatState.None, VoiceChatState.None, 0, (UUID) null, false, false));
-    private static final Interner<VoiceChatInfo> interner = Interners.newWeakInterner();
+    private static final VoiceChatInfo emptyChatState;
+    private static final Interner<VoiceChatInfo> interner;
     @Nullable
     public final UUID activeSpeakerID;
     public final boolean isConference;
@@ -20,31 +26,32 @@ public class VoiceChatInfo {
     @Nonnull
     public final VoiceChatState state;
 
-    public enum VoiceChatState {
-        None,
-        Ringing,
-        Connecting,
-        Active
+    static {
+        interner = Interners.newWeakInterner();
+        emptyChatState = interner.intern(new VoiceChatInfo(VoiceChatState.None, VoiceChatState.None, 0, null, false, false));
     }
 
+    /*
+     * Enabled aggressive block sorting
+     */
     private VoiceChatInfo(Bundle bundle) {
-        UUID uuid = null;
         this.state = VoiceChatState.valueOf(bundle.getString("state"));
         this.previousState = VoiceChatState.valueOf(bundle.getString("previousState"));
         this.numActiveSpeakers = bundle.getInt("numActiveSpeakers");
-        String string = bundle.getString("activeSpeakerID");
-        this.activeSpeakerID = string != null ? UUID.fromString(string) : uuid;
+        Object object = bundle.getString("activeSpeakerID");
+        object = object != null ? UUID.fromString((String)object) : null;
+        this.activeSpeakerID = object;
         this.isConference = bundle.getBoolean("isConference");
         this.localMicActive = bundle.getBoolean("localMicActive");
     }
 
-    private VoiceChatInfo(@Nonnull VoiceChatState voiceChatState, @Nonnull VoiceChatState voiceChatState2, int i, @Nullable UUID uuid, boolean z, boolean z2) {
+    private VoiceChatInfo(@Nonnull VoiceChatState voiceChatState, @Nonnull VoiceChatState voiceChatState2, int n, @Nullable UUID uUID, boolean bl, boolean bl2) {
         this.state = voiceChatState;
         this.previousState = voiceChatState2;
-        this.numActiveSpeakers = i;
-        this.activeSpeakerID = uuid;
-        this.isConference = z;
-        this.localMicActive = z2;
+        this.numActiveSpeakers = n;
+        this.activeSpeakerID = uUID;
+        this.isConference = bl;
+        this.localMicActive = bl2;
     }
 
     @Nonnull
@@ -53,8 +60,8 @@ public class VoiceChatInfo {
     }
 
     @Nonnull
-    public static VoiceChatInfo create(@Nonnull VoiceChatState voiceChatState, @Nonnull VoiceChatState voiceChatState2, int i, @Nullable UUID uuid, boolean z, boolean z2) {
-        return interner.intern(new VoiceChatInfo(voiceChatState, voiceChatState2, i, uuid, z, z2));
+    public static VoiceChatInfo create(@Nonnull VoiceChatState voiceChatState, @Nonnull VoiceChatState voiceChatState2, int n, @Nullable UUID uUID, boolean bl, boolean bl2) {
+        return interner.intern(new VoiceChatInfo(voiceChatState, voiceChatState2, n, uUID, bl, bl2));
     }
 
     @Nonnull
@@ -62,45 +69,81 @@ public class VoiceChatInfo {
         return emptyChatState;
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    /*
+     * Enabled force condition propagation
+     * Lifted jumps to return sites
+     */
+    public boolean equals(Object object) {
+        boolean bl = true;
+        boolean bl2 = false;
+        if (this == object) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
+        boolean bl3 = bl2;
+        if (object == null) return bl3;
+        bl3 = bl2;
+        if (this.getClass() != object.getClass()) return bl3;
+        object = (VoiceChatInfo)object;
+        bl3 = bl2;
+        if (this.numActiveSpeakers != ((VoiceChatInfo)object).numActiveSpeakers) return bl3;
+        bl3 = bl2;
+        if (this.isConference != ((VoiceChatInfo)object).isConference) return bl3;
+        bl3 = bl2;
+        if (this.localMicActive != ((VoiceChatInfo)object).localMicActive) return bl3;
+        bl3 = bl2;
+        if (this.state != ((VoiceChatInfo)object).state) return bl3;
+        bl3 = bl2;
+        if (this.previousState != ((VoiceChatInfo)object).previousState) return bl3;
+        if (this.activeSpeakerID != null) {
+            return this.activeSpeakerID.equals(((VoiceChatInfo)object).activeSpeakerID);
         }
-        VoiceChatInfo voiceChatInfo = (VoiceChatInfo) obj;
-        if (this.numActiveSpeakers == voiceChatInfo.numActiveSpeakers && this.isConference == voiceChatInfo.isConference && this.localMicActive == voiceChatInfo.localMicActive && this.state == voiceChatInfo.state && this.previousState == voiceChatInfo.previousState) {
-            return this.activeSpeakerID == null ? voiceChatInfo.activeSpeakerID == null : this.activeSpeakerID.equals(voiceChatInfo.activeSpeakerID);
-        }
+        bl3 = bl;
+        if (((VoiceChatInfo)object).activeSpeakerID == null) return bl3;
         return false;
     }
 
+    /*
+     * Enabled aggressive block sorting
+     */
     public int hashCode() {
-        int i = 0;
-        int hashCode = ((!this.isConference ? 0 : 1) + (((this.activeSpeakerID == null ? 0 : this.activeSpeakerID.hashCode()) + (((((this.state.hashCode() * 31) + this.previousState.hashCode()) * 31) + this.numActiveSpeakers) * 31)) * 31)) * 31;
+        int n = 1;
+        int n2 = this.state.hashCode();
+        int n3 = this.previousState.hashCode();
+        int n4 = this.numActiveSpeakers;
+        int n5 = this.activeSpeakerID != null ? this.activeSpeakerID.hashCode() : 0;
+        int n6 = this.isConference ? 1 : 0;
         if (this.localMicActive) {
-            i = 1;
+            return ((((n2 * 31 + n3) * 31 + n4) * 31 + n5) * 31 + n6) * 31 + n;
         }
-        return hashCode + i;
+        n = 0;
+        return ((((n2 * 31 + n3) * 31 + n4) * 31 + n5) * 31 + n6) * 31 + n;
     }
 
+    /*
+     * Enabled aggressive block sorting
+     */
     public Bundle toBundle() {
-        String str = null;
         Bundle bundle = new Bundle();
         bundle.putString("state", this.state.toString());
         bundle.putString("previousState", this.previousState.toString());
         bundle.putInt("numActiveSpeakers", this.numActiveSpeakers);
-        if (this.activeSpeakerID != null) {
-            str = this.activeSpeakerID.toString();
-        }
-        bundle.putString("activeSpeakerID", str);
+        String string2 = this.activeSpeakerID != null ? this.activeSpeakerID.toString() : null;
+        bundle.putString("activeSpeakerID", string2);
         bundle.putBoolean("isConference", this.isConference);
         bundle.putBoolean("localMicActive", this.localMicActive);
         return bundle;
     }
 
     public String toString() {
-        return "VoiceChatInfo{state=" + this.state + ", previousState=" + this.previousState + ", numActiveSpeakers=" + this.numActiveSpeakers + ", activeSpeakerID=" + this.activeSpeakerID + ", isConference=" + this.isConference + ", localMicActive=" + this.localMicActive + '}';
+        return "VoiceChatInfo{state=" + (Object)((Object)this.state) + ", previousState=" + (Object)((Object)this.previousState) + ", numActiveSpeakers=" + this.numActiveSpeakers + ", activeSpeakerID=" + this.activeSpeakerID + ", isConference=" + this.isConference + ", localMicActive=" + this.localMicActive + '}';
+    }
+
+    public static enum VoiceChatState {
+        None,
+        Ringing,
+        Connecting,
+        Active;
+
     }
 }
+

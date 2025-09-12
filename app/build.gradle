@@ -65,6 +65,14 @@ dependencies {
     implementation 'com.google.guava:guava:32.1.2-android'
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'
     
+    // Google Play Services for Cloud Plugin
+    implementation 'com.google.android.gms:play-services-drive:17.0.0'
+    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+    implementation 'com.google.android.gms:play-services-base:18.2.0'
+    
+    // Support libraries for backward compatibility
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

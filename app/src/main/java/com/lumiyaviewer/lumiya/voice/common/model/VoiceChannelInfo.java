@@ -1,3 +1,11 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  android.net.Uri
+ *  android.net.Uri$Builder
+ *  android.os.Bundle
+ */
 package com.lumiyaviewer.lumiya.voice.common.model;
 
 import android.net.Uri;
@@ -29,71 +37,101 @@ public class VoiceChannelInfo {
         this.isConference = bundle.getBoolean("isConference");
     }
 
-    public VoiceChannelInfo(String str, boolean z, boolean z2) {
-        this.voiceChannelURI = str;
-        this.isSpatial = z;
-        this.isConference = z2;
+    public VoiceChannelInfo(String string2, boolean bl, boolean bl2) {
+        this.voiceChannelURI = string2;
+        this.isSpatial = bl;
+        this.isConference = bl2;
     }
 
-    public VoiceChannelInfo(@Nonnull UUID uuid, @Nonnull String str) {
-        this.voiceChannelURI = "sip:" + ("x" + Base64.encodeToString(Bytes.concat(Longs.toByteArray(uuid.getMostSignificantBits()), Longs.toByteArray(uuid.getLeastSignificantBits())), false).replace('+', '-').replace('/', '_')) + "@" + str;
+    public VoiceChannelInfo(@Nonnull UUID object, @Nonnull String string2) {
+        object = Bytes.concat(Longs.toByteArray(((UUID)object).getMostSignificantBits()), Longs.toByteArray(((UUID)object).getLeastSignificantBits()));
+        object = "x" + Base64.encodeToString((byte[])object, false).replace('+', '-').replace('/', '_');
+        this.voiceChannelURI = "sip:" + (String)object + "@" + string2;
         this.isSpatial = false;
         this.isConference = false;
     }
 
+    /*
+     * Enabled force condition propagation
+     * Lifted jumps to return sites
+     */
     @Nullable
-    public static UUID agentUUIDFromURI(String str) {
-        String nullToEmpty = Strings.nullToEmpty(str);
-        int indexOf = nullToEmpty.indexOf(58);
-        if (indexOf != -1) {
-            nullToEmpty = nullToEmpty.substring(indexOf + 1);
+    public static UUID agentUUIDFromURI(String object) {
+        Object object2 = Strings.nullToEmpty((String)object);
+        int n = ((String)object2).indexOf(58);
+        object = object2;
+        if (n != -1) {
+            object = ((String)object2).substring(n + 1);
         }
-        int indexOf2 = nullToEmpty.indexOf(64);
-        if (indexOf2 != -1) {
-            nullToEmpty = nullToEmpty.substring(0, indexOf2);
+        n = ((String)object).indexOf(64);
+        object2 = object;
+        if (n != -1) {
+            object2 = ((String)object).substring(0, n);
         }
-        if (nullToEmpty.startsWith("x")) {
-            nullToEmpty = nullToEmpty.substring(1);
+        object = object2;
+        if (((String)object2).startsWith("x")) {
+            object = ((String)object2).substring(1);
         }
-        byte[] decode = Base64.decode(nullToEmpty.replace("-", "+").replace("_", "/"));
-        if (decode != null && decode.length == 16) {
-            return new UUID(Longs.fromByteArray(Arrays.copyOfRange(decode, 0, 8)), Longs.fromByteArray(Arrays.copyOfRange(decode, 8, 16)));
-        }
-        return null;
+        if ((object = (Object)Base64.decode(((String)object).replace("-", "+").replace("_", "/"))) == null) return null;
+        if (((Object)object).length != 16) return null;
+        return new UUID(Longs.fromByteArray(Arrays.copyOfRange((byte[])object, 0, 8)), Longs.fromByteArray(Arrays.copyOfRange((byte[])object, 8, 16)));
     }
 
+    /*
+     * Enabled aggressive block sorting
+     */
     public void appendToUri(Uri.Builder builder) {
         builder.appendQueryParameter("voiceChannelURI", this.voiceChannelURI);
-        builder.appendQueryParameter("isSpatial", !this.isSpatial ? "false" : "true");
-        builder.appendQueryParameter("isConference", !this.isConference ? "false" : "true");
+        String string2 = this.isSpatial ? "true" : "false";
+        builder.appendQueryParameter("isSpatial", string2);
+        string2 = this.isConference ? "true" : "false";
+        builder.appendQueryParameter("isConference", string2);
     }
 
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    /*
+     * Enabled force condition propagation
+     * Lifted jumps to return sites
+     */
+    public boolean equals(Object object) {
+        boolean bl = true;
+        boolean bl2 = false;
+        if (this == object) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
+        boolean bl3 = bl2;
+        if (object == null) return bl3;
+        bl3 = bl2;
+        if (this.getClass() != object.getClass()) return bl3;
+        object = (VoiceChannelInfo)object;
+        bl3 = bl2;
+        if (this.isSpatial != ((VoiceChannelInfo)object).isSpatial) return bl3;
+        bl3 = bl2;
+        if (this.isConference != ((VoiceChannelInfo)object).isConference) return bl3;
+        if (this.voiceChannelURI != null) {
+            return this.voiceChannelURI.equals(((VoiceChannelInfo)object).voiceChannelURI);
         }
-        VoiceChannelInfo voiceChannelInfo = (VoiceChannelInfo) obj;
-        if (this.isSpatial == voiceChannelInfo.isSpatial && this.isConference == voiceChannelInfo.isConference) {
-            return this.voiceChannelURI == null ? voiceChannelInfo.voiceChannelURI == null : this.voiceChannelURI.equals(voiceChannelInfo.voiceChannelURI);
-        }
+        bl3 = bl;
+        if (((VoiceChannelInfo)object).voiceChannelURI == null) return bl3;
         return false;
     }
 
     @Nullable
     public UUID getAgentUUID() {
-        return agentUUIDFromURI(this.voiceChannelURI);
+        return VoiceChannelInfo.agentUUIDFromURI(this.voiceChannelURI);
     }
 
+    /*
+     * Enabled aggressive block sorting
+     */
     public int hashCode() {
-        int i = 0;
-        int hashCode = ((!this.isSpatial ? 0 : 1) + ((this.voiceChannelURI == null ? 0 : this.voiceChannelURI.hashCode()) * 31)) * 31;
+        int n = 1;
+        int n2 = this.voiceChannelURI != null ? this.voiceChannelURI.hashCode() : 0;
+        int n3 = this.isSpatial ? 1 : 0;
         if (this.isConference) {
-            i = 1;
+            return (n2 * 31 + n3) * 31 + n;
         }
-        return hashCode + i;
+        n = 0;
+        return (n2 * 31 + n3) * 31 + n;
     }
 
     public Bundle toBundle() {
@@ -104,3 +142,4 @@ public class VoiceChannelInfo {
         return bundle;
     }
 }
+

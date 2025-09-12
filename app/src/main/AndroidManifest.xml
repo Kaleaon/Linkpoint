@@ -6,10 +6,18 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission-sdk-23 android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission-sdk-23 android:name="android.permission.NFC"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    
+    <!-- Cloud Plugin Permissions -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    
+    <!-- Voice Plugin Permissions -->
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    
     <uses-feature android:name="android.hardware.screen.landscape" android:required="false"/>
     <uses-feature android:name="android.software.vr.mode" android:required="false"/>
     <uses-feature android:name="android.hardware.vr.high_performance" android:required="false"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
     <application android:theme="@style/Theme.Lumiya" android:label="@string/app_name" android:icon="@mipmap/ic_lumiya_launcher" android:name="com.lumiyaviewer.lumiya.LumiyaApp" android:allowBackup="true" android:installLocation="auto" android:supportsRtl="true" android:fullBackupContent="@xml/backup_rules">
         <activity android:label="@string/app_name" android:name="com.lumiyaviewer.lumiya.ui.login.LoginActivity" android:clearTaskOnLaunch="true" android:launchMode="singleTask" android:exported="true">
             <intent-filter>
@@ -57,6 +65,16 @@
         </activity>
         <service android:name="com.lumiyaviewer.lumiya.GridConnectionService"/>
         <service android:name="com.lumiyaviewer.lumiya.StreamingMediaService"/>
+        
+        <!-- Cloud Plugin Services -->
+        <service android:name="com.lumiyaviewer.lumiya.cloud.DriveSyncService" android:exported="false"/>
+        
+        <!-- Voice Plugin Services and Activities -->
+        <service android:name="com.lumiyaviewer.lumiya.voice.VoiceService" android:exported="false"/>
+        <activity android:name="com.lumiyaviewer.lumiya.voice.VoicePermissionRequestActivity" 
+                  android:theme="@style/Theme.AppCompat.Dialog"
+                  android:exported="false"/>
+        
         <provider android:name="android.support.v4.content.FileProvider" android:exported="false" android:authorities="com.lumiyaviewer.files" android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"/>
         </provider>

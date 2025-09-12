@@ -1,3 +1,9 @@
+/*
+ * Decompiled with CFR 0.152.
+ * 
+ * Could not load the following classes:
+ *  android.os.Bundle
+ */
 package com.lumiyaviewer.lumiya.voice.common.messages;
 
 import android.os.Bundle;
@@ -5,30 +11,39 @@ import com.lumiyaviewer.lumiya.voice.common.VoicePluginMessage;
 import com.lumiyaviewer.lumiya.voice.common.model.VoiceBluetoothState;
 import javax.annotation.Nonnull;
 
-public class VoiceAudioProperties implements VoicePluginMessage {
+public class VoiceAudioProperties
+implements VoicePluginMessage {
     @Nonnull
     public final VoiceBluetoothState bluetoothState;
     public final float speakerVolume;
     public final boolean speakerphoneOn;
 
-    public VoiceAudioProperties(float f, boolean z, @Nonnull VoiceBluetoothState voiceBluetoothState) {
+    public VoiceAudioProperties(float f, boolean bl, @Nonnull VoiceBluetoothState voiceBluetoothState) {
         this.speakerVolume = f;
-        this.speakerphoneOn = z;
+        this.speakerphoneOn = bl;
         this.bluetoothState = voiceBluetoothState;
     }
 
-    public VoiceAudioProperties(Bundle bundle) {
-        VoiceBluetoothState voiceBluetoothState;
-        this.speakerVolume = bundle.getFloat("speakerVolume");
-        this.speakerphoneOn = bundle.getBoolean("speakerphoneOn");
+    /*
+     * WARNING - void declaration
+     * Enabled aggressive block sorting
+     * Enabled unnecessary exception pruning
+     * Enabled aggressive exception aggregation
+     */
+    public VoiceAudioProperties(Bundle object) {
+        void var1_3;
+        this.speakerVolume = object.getFloat("speakerVolume");
+        this.speakerphoneOn = object.getBoolean("speakerphoneOn");
         try {
-            voiceBluetoothState = VoiceBluetoothState.valueOf(bundle.getString("bluetoothState"));
-        } catch (IllegalArgumentException e) {
-            voiceBluetoothState = VoiceBluetoothState.Error;
+            VoiceBluetoothState voiceBluetoothState = VoiceBluetoothState.valueOf(object.getString("bluetoothState"));
         }
-        this.bluetoothState = voiceBluetoothState;
+        catch (IllegalArgumentException illegalArgumentException) {
+            VoiceBluetoothState voiceBluetoothState = VoiceBluetoothState.Error;
+        }
+        this.bluetoothState = var1_3;
     }
 
+    @Override
     public Bundle toBundle() {
         Bundle bundle = new Bundle();
         bundle.putFloat("speakerVolume", this.speakerVolume);
@@ -37,3 +52,4 @@ public class VoiceAudioProperties implements VoicePluginMessage {
         return bundle;
     }
 }
+
