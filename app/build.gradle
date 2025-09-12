@@ -5,6 +5,12 @@ plugins {
 android {
     namespace 'com.lumiyaviewer.lumiya'
     compileSdk 34
+    
+    // Resource processing options
+    aaptOptions {
+        noCompress 'ktx2'  // Don't compress texture files
+        additionalParameters '--no-version-vectors'
+    }
 
     defaultConfig {
         applicationId "com.lumiyaviewer.lumiya"
@@ -18,17 +24,17 @@ android {
         // Enable multidex support for apps with more than 64K methods
         multiDexEnabled true
         
-        // NDK configuration for native code
-        ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
-        }
+        // NDK configuration for native code (temporarily disabled for testing resource conflicts)
+        // ndk {
+        //     abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        // }
         
-        externalNativeBuild {
-            cmake {
-                cppFlags "-std=c++17 -O3 -ffast-math"
-                arguments "-DANDROID_STL=c++_shared"
-            }
-        }
+        // externalNativeBuild {
+        //     cmake {
+        //         cppFlags "-std=c++17 -O3 -ffast-math"
+        //         arguments "-DANDROID_STL=c++_shared"
+        //     }
+        // }
     }
 
     buildTypes {
@@ -71,13 +77,13 @@ android {
         }
     }
 
-    // NDK build configuration
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-            version "3.31.5"
-        }
-    }
+    // NDK build configuration (temporarily disabled for testing resource conflicts)
+    // externalNativeBuild {
+    //     cmake {
+    //         path "src/main/cpp/CMakeLists.txt"
+    //         version "3.31.5"
+    //     }
+    // }
 }
 
 dependencies {
