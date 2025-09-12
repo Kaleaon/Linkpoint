@@ -1,6 +1,5 @@
 package com.lumiyaviewer.lumiya.react;
 
-import com.lumiyaviewer.lumiya.react.-$Lambda$CF5cnl0on0-506QrOcvyL8_AER8.AnonymousClass1;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
@@ -62,30 +61,34 @@ public class Subscription<K, T> implements RefreshableOne {
         return this.reference;
     }
 
-    /* renamed from: handleDataCallback */
-    /* synthetic */ void handleDataCallback(Object obj) {
+    /* access modifiers changed from: package-private */
+    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_Subscription_1719  reason: not valid java name */
+    public /* synthetic */ void m38lambda$com_lumiyaviewer_lumiya_react_Subscription_1719(Object obj) {
         this.onData.onData(obj);
     }
 
-    /* renamed from: handleErrorCallback */
-    /* synthetic */ void handleErrorCallback(Throwable th) {
+    /* access modifiers changed from: package-private */
+    /* renamed from: lambda$-com_lumiyaviewer_lumiya_react_Subscription_1938  reason: not valid java name */
+    public /* synthetic */ void m39lambda$com_lumiyaviewer_lumiya_react_Subscription_1938(Throwable th) {
         this.onError.onError(th);
     }
 
+    /* access modifiers changed from: package-private */
     void onData(T t) {
         if (this.executor != null) {
-            this.executor.execute(new -$Lambda$CF5cnl0on0-506QrOcvyL8_AER8(this, t));
+            this.executor.execute(() -> this.onData.onData(t));
         } else {
             this.onData.onData(t);
         }
     }
 
+    /* access modifiers changed from: package-private */
     void onError(Throwable th) {
         if (this.onError == null) {
             return;
         }
         if (this.executor != null) {
-            this.executor.execute(new AnonymousClass1(this, th));
+            this.executor.execute(() -> this.onError.onError(th));
         } else {
             this.onError.onError(th);
         }
