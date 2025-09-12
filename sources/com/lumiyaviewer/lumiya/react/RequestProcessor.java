@@ -73,16 +73,26 @@ public abstract class RequestProcessor
         resultHandler.onResultData(obj, processResult(obj, obj1));
     }
 
-    void lambda$_2D_com_lumiyaviewer_lumiya_react_RequestProcessor_940(Object obj)
+    /* access modifiers changed from: private */
+    /* renamed from: processRequestInternal */
+    public void m35lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_940(Object obj)
     {
-        processRequestInternal(obj);
+        Object obj1 = processRequest(obj);
+        if (obj1 != null)
+        {
+            resultHandler.onResultData(obj, obj1);
+        }
+        if (!isRequestComplete(obj, obj1) && requestHandler != null)
+        {
+            requestHandler.onRequest(obj);
+        }
     }
 
     public void onRequest(Object obj)
     {
         if (executor != null)
         {
-            executor.execute(new _2D_.Lambda.s15PKVbd3BFZx563Ff4DOHT5V_w(this, obj));
+            executor.execute(() -> m35lambda$com_lumiyaviewer_lumiya_react_RequestProcessor_940(obj));
             return;
         } else
         {
@@ -103,7 +113,7 @@ public abstract class RequestProcessor
     {
         if (executor != null)
         {
-            executor.execute(new _2D_.Lambda.s15PKVbd3BFZx563Ff4DOHT5V_w._cls2(this, obj, obj1));
+            executor.execute(() -> resultHandler.onResultData(obj, processResult(obj, obj1)));
             return;
         } else
         {
@@ -125,7 +135,7 @@ public abstract class RequestProcessor
     {
         if (executor != null)
         {
-            executor.execute(new _2D_.Lambda.s15PKVbd3BFZx563Ff4DOHT5V_w._cls1(this, obj));
+            executor.execute(() -> requestUpdateInternal(obj));
             return;
         } else
         {
