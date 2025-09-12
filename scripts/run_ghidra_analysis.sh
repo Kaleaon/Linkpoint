@@ -54,7 +54,21 @@ fi
 print_status "Running Ghidra headless analysis on Lumiya DEX..."
 
 cd "$ANALYSIS_DIR"
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+# Set JAVA_HOME if not already set
+if [ -z "$JAVA_HOME" ]; then
+    # Try to detect JAVA_HOME dynamically
+    JAVA_BIN=$(which java 2>/dev/null)
+    if [ -n "$JAVA_BIN" ]; then
+        JAVA_HOME=$(dirname $(dirname $(readlink -f "$JAVA_BIN")))
+        export JAVA_HOME
+        print_status "Detected JAVA_HOME as $JAVA_HOME"
+    else
+        print_warning "JAVA_HOME is not set and Java could not be detected automatically. Please set JAVA_HOME manually."
+        exit 1
+    fi
+else
+    print_status "Using existing JAVA_HOME: $JAVA_HOME"
+fi
 
 "$GHIDRA_PATH/support/analyzeHeadless" \
     "$ANALYSIS_DIR" \
