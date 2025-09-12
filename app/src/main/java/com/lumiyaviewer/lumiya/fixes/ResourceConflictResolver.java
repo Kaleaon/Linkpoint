@@ -46,9 +46,9 @@ public class ResourceConflictResolver {
      * Addresses the "Duplicate value for resource 'attr/fontStyle'" error.
      */
     private static void resolveAttributeConflicts(Context context) {
-        Resources res = context.getResources();
-        
         try {
+            Resources res = context.getResources();
+            
             // Check for app-specific fontStyle attribute
             int fontStyleAttr = res.getIdentifier("fontStyle", "attr", context.getPackageName());
             if (fontStyleAttr != 0) {
@@ -56,14 +56,16 @@ public class ResourceConflictResolver {
             }
             
             // Check for other conflicting attributes
-            int[] conflictingAttrs = {
-                res.getIdentifier("passwordToggleEnabled", "attr", context.getPackageName()),
-                res.getIdentifier("buttonGravity", "attr", context.getPackageName())
+            String[] conflictingAttrNames = {
+                "passwordToggleEnabled",
+                "buttonGravity",
+                "fontStyle"
             };
             
-            for (int attr : conflictingAttrs) {
+            for (String attrName : conflictingAttrNames) {
+                int attr = res.getIdentifier(attrName, "attr", context.getPackageName());
                 if (attr != 0) {
-                    Log.d(TAG, "Conflicting attribute resolved: " + attr);
+                    Log.d(TAG, "Conflicting attribute resolved: " + attrName + " = " + attr);
                 }
             }
             
@@ -76,10 +78,10 @@ public class ResourceConflictResolver {
      * Handle drawable conflicts, particularly eye icons from password fields.
      */
     private static void resolveDrawableConflicts(Context context) {
-        Resources res = context.getResources();
-        
         try {
-            // Check for visibility/eye icon drawables
+            Resources res = context.getResources();
+            
+            // Check for visibility/eye icon drawables that commonly conflict
             String[] drawableNames = {
                 "design_ic_visibility",
                 "design_ic_visibility_off", 
@@ -93,8 +95,8 @@ public class ResourceConflictResolver {
                 }
             }
             
-        } catch (Resources.NotFoundException e) {
-            Log.w(TAG, "Some drawable conflicts could not be resolved", e);
+        } catch (Exception e) {
+            Log.w(TAG, "Could not resolve drawable conflicts", e);
         }
     }
     

@@ -10,13 +10,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.preference.PreferenceManager;
+import androidx.core.app.NotificationCompat;
+import androidx.multidex.MultiDex;
+import androidx.multidex.MultiDexApplication;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-
-import androidx.core.app.NotificationCompat;
-
 import com.lumiyaviewer.lumiya.fixes.ResourceConflictResolver;
 
 /**
@@ -24,8 +24,9 @@ import com.lumiyaviewer.lumiya.fixes.ResourceConflictResolver;
  * 
  * Handles global application state, resource conflict resolution, and system-wide initialization.
  * Updated to use AndroidX libraries and modern Android development practices.
+ * Extends MultiDexApplication to support large applications with 64K+ methods.
  */
-public class LumiyaApp extends Application {
+public class LumiyaApp extends MultiDexApplication {
     private static final String TAG = "LumiyaApp";
     private static DisplayMetrics displayMetrics = new DisplayMetrics();
     private static Context mContext;
@@ -110,5 +111,11 @@ public class LumiyaApp extends Application {
         GlobalOptions.getInstance().initialize();
         
         Log.i(TAG, "Lumiya Application initialization complete");
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 }
