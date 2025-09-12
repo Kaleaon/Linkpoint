@@ -65,13 +65,13 @@ android {
         }
     }
 
-    // NDK build configuration
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-            version "3.22.1"  // Updated CMake version
-        }
-    }
+    // NDK build configuration - temporarily disabled to focus on resource fixes
+    // externalNativeBuild {
+    //     cmake {
+    //         path "src/main/cpp/CMakeLists.txt"
+    //         version "3.22.1"  // Updated CMake version
+    //     }
+    // }
 
     // AndroidX migration settings
     useLibrary 'org.apache.http.legacy'

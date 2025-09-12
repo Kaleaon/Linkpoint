@@ -19,11 +19,12 @@ endif()
 set(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION clang)
 set(CMAKE_ANDROID_STL_TYPE c++_shared)
 
-# Available source files only
+# Available source files only - simplified for core functionality
 set(NATIVE_SOURCES
     basis_universal/basisu_transcoder.cpp
-    jni/basis_transcoder_jni.cpp
-    jni/openjpeg_basis_integration.cpp
+    # Temporarily exclude JNI files that have KTX2 dependencies
+    # jni/basis_transcoder_jni.cpp
+    # jni/openjpeg_basis_integration.cpp
 )
 
 # Include directories
