@@ -213,4 +213,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$PT
         });
         builder.create().show();
     }
+
+    public void m549lambda$com_lumiyaviewer_lumiya_ui_common_TextFieldDialogBuilder_2200(DialogInterface dialogInterface, int i) {
+        // Lambda method implementation for dialog interface handling
+        if (dialogInterface != null) {
+            dialogInterface.dismiss();
+        }
+    }
 }

@@ -249,4 +249,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.res.executors.-$Lambd
     public <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
         return this.usePriorities ? new ComparableFutureTask(callable) : super.newTaskFor(callable);
     }
+
+    public static boolean m108lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531(String str, Runnable runnable) {
+        // Lambda method implementation for weak executor
+        if (str != null && runnable != null) {
+            runnable.run();
+            return true;
+        }
+        return false;
+    }
 }

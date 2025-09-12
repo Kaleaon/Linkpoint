@@ -98,20 +98,6 @@ public class MuteListData {
         return false;
     }
 
-    static /* synthetic */ boolean isEntryNameNotEqual(MuteListEntry muteListEntry, Map.Entry entry) {
-        if (entry != null) {
-            return !((String) entry.getKey()).equals(muteListEntry.name);
-        }
-        return false;
-    }
-
-    static /* synthetic */ boolean isMuteKeyNotEqual(MuteListKey muteListKey, Map.Entry entry) {
-        if (entry != null) {
-            return !((MuteListKey) entry.getKey()).equals(muteListKey);
-        }
-        return false;
-    }
-
     public static boolean m228lambda$com_lumiyaviewer_lumiya_slproto_modules_mutelist_MuteListData_4795(MuteListEntry muteListEntry, Map.Entry entry) {
         return isEntryNameNotEqual(muteListEntry, entry);
     }

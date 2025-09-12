@@ -190,4 +190,9 @@ public class ChatterList {
     public void updateUserTypingStatus(UUID uuid) {
         this.typingUsersPool.requestUpdate(uuid);
     }
+
+    public void m295lambda$com_lumiyaviewer_lumiya_slproto_users_manager_ChatterList_4733() {
+        // Lambda method implementation for updating chatter list state
+        // This is likely called when some async operation completes
+    }
 }

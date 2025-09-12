@@ -235,4 +235,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     public void updateMoneyTransactions() {
         this.moneyTransactionPool.requestUpdate(SubscriptionSingleKey.Value);
     }
+
+    public static void m286lambda$com_lumiyaviewer_lumiya_slproto_users_manager_BalanceManager_1705(LazyList lazyList) {
+        // Lambda method implementation for dispose handling in BalanceManager
+        if (lazyList != null) {
+            lazyList.close();
+        }
+    }
 }

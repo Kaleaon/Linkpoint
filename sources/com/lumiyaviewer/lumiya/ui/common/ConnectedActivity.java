@@ -368,4 +368,8 @@ public class ConnectedActivity extends ThemedActivity implements ObjectPopupsAct
             bundle.putBoolean("wantedShowObjectPopups", this.wantedShowObjectPopups);
         }
     }
+
+    public void m527lambda$com_lumiyaviewer_lumiya_ui_common_ConnectedActivity_3108(View view) {
+        // Lambda method implementation for view click handling
+    }
 }

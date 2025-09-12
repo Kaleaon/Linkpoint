@@ -651,4 +651,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
             sendMessage(VoicePluginMessageType.VoiceTerminateCall, new VoiceTerminateCall(voiceChannelInfo));
         }
     }
+
+    public void m905lambda$com_lumiyaviewer_lumiya_voiceintf_VoicePluginServiceConnection_17898() {
+        // Lambda method implementation for voice plugin service connection
+        // This method is likely called when the voice service connection is established
+    }
 }

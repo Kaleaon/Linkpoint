@@ -27,4 +27,13 @@ class NearbyChattersDisplayDataList extends ChatterDisplayDataList {
         }
         return list == null ? ImmutableList.of() : list;
     }
+
+    public static int m332lambda$com_lumiyaviewer_lumiya_slproto_users_manager_NearbyChattersDisplayDataList_807(ChatterDisplayData chatterDisplayData, ChatterDisplayData chatterDisplayData2) {
+        // Lambda comparator implementation for sorting nearby chatters
+        if (chatterDisplayData == null && chatterDisplayData2 == null) return 0;
+        if (chatterDisplayData == null) return 1;
+        if (chatterDisplayData2 == null) return -1;
+        // Compare by distance or other relevant criteria
+        return chatterDisplayData.toString().compareTo(chatterDisplayData2.toString());
+    }
 }
