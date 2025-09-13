@@ -15,7 +15,13 @@ if [ ! -f "$APK_PATH" ]; then
 fi
 
 echo "Testing APK: $(basename $APK_PATH)"
-echo "APK Size: $(stat -c%s $APK_PATH) bytes"
+# Portable file size detection (GNU/BSD)
+if stat --version >/dev/null 2>&1; then
+    APK_SIZE=$(stat -c%s "$APK_PATH")
+else
+    APK_SIZE=$(stat -f%z "$APK_PATH")
+fi
+echo "APK Size: ${APK_SIZE} bytes"
 echo ""
 
 # Test 1: Comprehensive Native Library Loading Simulation
