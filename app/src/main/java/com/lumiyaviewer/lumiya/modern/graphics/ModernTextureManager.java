@@ -284,15 +284,28 @@ public class ModernTextureManager {
     }
     
     private int getMaxTextureSize(int format) {
-        // Mobile GPU memory limits
+        // Mobile GPU memory limits (in bytes)
         switch (format) {
-            case FORMAT_ASTC_4x4_RGBA:
-                return 2048 * 2048; // 4MB compressed
-            case FORMAT_ETC2_RGBA:
-                return 1024 * 1024; // 1MB compressed
+            case FORMAT_ASTC_4x4_RGBA: {
+                // ASTC 4x4 block: 16 bytes per 4x4 block
+                int width = 2048, height = 2048;
+                int blocksX = (width + 3) / 4;
+                int blocksY = (height + 3) / 4;
+                return blocksX * blocksY * 16; // ~256KB compressed
+            }
+            case FORMAT_ETC2_RGBA: {
+                // ETC2 RGBA: 8 bits per pixel (1 byte per pixel), but ETC2 is block compressed (4x4 blocks, 8 bytes per block)
+                int width = 1024, height = 1024;
+                int blocksX = (width + 3) / 4;
+                int blocksY = (height + 3) / 4;
+                return blocksX * blocksY * 8; // ~256KB compressed
+            }
             case FORMAT_RGBA32:
-            default:
-                return 512 * 512 * 4; // 1MB uncompressed
+            default: {
+                // Uncompressed RGBA: 4 bytes per pixel
+                int width = 512, height = 512;
+                return width * height * 4; // 1MB uncompressed
+            }
         }
     }
     
