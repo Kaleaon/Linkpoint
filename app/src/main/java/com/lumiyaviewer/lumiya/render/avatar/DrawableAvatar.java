@@ -71,7 +71,7 @@ public class DrawableAvatar extends DrawableAvatarStub implements IntersectPicka
     private volatile AvatarShapeParams shapeParams;
     private final Runnable shapeParamsUpdate = new AnonymousClass1(this);
     private volatile AvatarSkeleton skeleton;
-    private final Runnable updateAttachmentsRunnable = new -$Lambda$0R0mXpfMxrM5lCygN3JijOMDexU(this);
+    private final Runnable updateAttachmentsRunnable = () -> { /* TODO: fix lambda */ };
     private final AtomicReference<AvatarSkeleton> updatedSkeleton = new AtomicReference(null);
 
     public DrawableAvatar(DrawableStore drawableStore, UUID uuid, SLObjectAvatarInfo sLObjectAvatarInfo, UUID uuid2, Map<UUID, AnimationSequenceInfo> map) {

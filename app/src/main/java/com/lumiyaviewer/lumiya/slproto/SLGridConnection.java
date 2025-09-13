@@ -25,7 +25,7 @@ import java.util.UUID;
 
 public class SLGridConnection extends SLConnection {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
-    private static final /* synthetic */ int[] f495-com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues = null;
+    private static final /* synthetic */ int[] syntheticField = null;
     private static final String DEFAULT_SYSTEM_ACCOUNT = "Second Life";
     private static boolean autoresponseEnabled = false;
     private static String autoresponseText = "";
@@ -63,8 +63,8 @@ public class SLGridConnection extends SLConnection {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
     private static /* synthetic */ int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues() {
-        if (f495-com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues != null) {
-            return f495-com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues;
+        if (syntheticField != null) {
+            return syntheticField;
         }
         int[] iArr = new int[ConnectionState.values().length];
         try {
@@ -79,7 +79,7 @@ public class SLGridConnection extends SLConnection {
             iArr[ConnectionState.Idle.ordinal()] = 3;
         } catch (NoSuchFieldError e3) {
         }
-        f495-com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues = iArr;
+        syntheticField = iArr;
         return iArr;
     }
 

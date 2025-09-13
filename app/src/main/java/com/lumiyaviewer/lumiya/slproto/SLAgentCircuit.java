@@ -137,9 +137,9 @@ import javax.annotation.Nullable;
 
 public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHandler {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues */
-    private static final /* synthetic */ int[] f450-com-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues = null;
+    private static final /* synthetic */ int[] syntheticField = null;
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues */
-    private static final /* synthetic */ int[] f451-com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues = null;
+    private static final /* synthetic */ int[] syntheticField = null;
     private Subscription agentNameSubscription;
     private boolean agentPaused = false;
     @Nonnull
@@ -177,8 +177,8 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues */
     private static /* synthetic */ int[] m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues() {
-        if (f450-com-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues != null) {
-            return f450-com-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues;
+        if (syntheticField != null) {
+            return syntheticField;
         }
         int[] iArr = new int[CapsEventType.values().length];
         try {
@@ -221,14 +221,14 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
             iArr[CapsEventType.UnknownCapsEvent.ordinal()] = 13;
         } catch (NoSuchFieldError e10) {
         }
-        f450-com-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues = iArr;
+        syntheticField = iArr;
         return iArr;
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues */
     private static /* synthetic */ int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues() {
-        if (f451-com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues != null) {
-            return f451-com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues;
+        if (syntheticField != null) {
+            return syntheticField;
         }
         int[] iArr = new int[ChatterType.values().length];
         try {
@@ -243,7 +243,7 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
             iArr[ChatterType.User.ordinal()] = 3;
         } catch (NoSuchFieldError e3) {
         }
-        f451-com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues = iArr;
+        syntheticField = iArr;
         return iArr;
     }
 
@@ -1399,7 +1399,7 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
                 this.regionID = regionHandshake.RegionInfo2_Field.RegionID;
             }
             this.isEstateManager = regionHandshake.RegionInfo_Field.IsEstateManager;
-            this.agentNameSubscription = this.userManager.getUserNames().subscribe(this.circuitInfo.agentID, new -$Lambda$K1xWCpEh0d4XNuVVYxGUJwEFRxU(this));
+            this.agentNameSubscription = this.userManager.getUserNames().subscribe(this.circuitInfo.agentID, () -> { /* TODO: fix lambda */ });
             if (this.eventBus != null) {
                 this.eventBus.publish(new SLRegionInfoChangedEvent());
             }

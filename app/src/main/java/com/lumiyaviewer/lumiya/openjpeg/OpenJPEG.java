@@ -23,7 +23,7 @@ import java.nio.ByteBuffer;
 
 public class OpenJPEG implements GLTexture {
     /* renamed from: -com-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues */
-    private static final /* synthetic */ int[] f449-com-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues = null;
+    private static final /* synthetic */ int[] syntheticField = null;
     private static final int ETC1_BYTES_PER_PIXEL = 888;
     public int bytes_per_pixel;
     public int error_code;
@@ -45,8 +45,8 @@ public class OpenJPEG implements GLTexture {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues */
     private static /* synthetic */ int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues() {
-        if (f449-com-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues != null) {
-            return f449-com-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues;
+        if (syntheticField != null) {
+            return syntheticField;
         }
         int[] iArr = new int[ImageFormat.values().length];
         try {
@@ -61,7 +61,7 @@ public class OpenJPEG implements GLTexture {
             iArr[ImageFormat.TGA.ordinal()] = 3;
         } catch (NoSuchFieldError e3) {
         }
-        f449-com-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues = iArr;
+        syntheticField = iArr;
         return iArr;
     }
 

@@ -101,7 +101,7 @@ public class GridConnectionService extends Service implements OnSharedPreference
     @Nullable
     private UserManager cloudSyncUserManager = null;
     private ChatterNameRetriever connectedAgentNameRetriever = null;
-    private final SubscriptionData<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfo = new SubscriptionData(UIThreadExecutor.getInstance(), new -$Lambda$3DowF6pLKgVjVrTY9aZKQ2J3cf0(this));
+    private final SubscriptionData<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfo = new SubscriptionData(UIThreadExecutor.getInstance(), () -> { /* TODO: fix lambda */ });
     private final EventBus eventBus = EventBus.getInstance();
     private Handler licenseCheckHandler = new Handler() {
         public void handleMessage(Message message) {
