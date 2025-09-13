@@ -454,87 +454,93 @@ public class ModernMainActivity extends AppCompatActivity {
         updateStatus("⚡ Starting comprehensive performance benchmark...", 10);
         Log.i(TAG, "Running comprehensive performance benchmark of all modern components...");
         
-        // Get performance monitor instance
-        ModernPerformanceMonitor monitor = ModernPerformanceMonitor.getInstance();
-        
-        // Run benchmark in background thread
-        new Thread(() -> {
-            try {
-                // Authentication benchmark
-                runOnUiThread(() -> updateStatus("📊 Benchmarking authentication performance...", 25));
-                ModernPerformanceMonitor.BenchmarkResult authResult = 
-                    monitor.runBenchmark(ModernPerformanceMonitor.BenchmarkCategory.AUTHENTICATION, this);
-                Log.i(TAG, authResult.summary);
-                
-                Thread.sleep(500);
-                
-                // Network benchmark
-                runOnUiThread(() -> updateStatus("🌐 Benchmarking network transport performance...", 40));
-                ModernPerformanceMonitor.BenchmarkResult networkResult = 
-                    monitor.runBenchmark(ModernPerformanceMonitor.BenchmarkCategory.NETWORK, this);
-                Log.i(TAG, networkResult.summary);
-                
-                Thread.sleep(500);
-                
-                // Graphics benchmark
-                runOnUiThread(() -> updateStatus("🎨 Benchmarking graphics pipeline performance...", 60));
-                ModernPerformanceMonitor.BenchmarkResult graphicsResult = 
-                    monitor.runBenchmark(ModernPerformanceMonitor.BenchmarkCategory.GRAPHICS, this);
-                Log.i(TAG, graphicsResult.summary);
-                
-                Thread.sleep(500);
-                
-                // Asset benchmark
-                runOnUiThread(() -> updateStatus("📦 Benchmarking asset streaming performance...", 80));
-                ModernPerformanceMonitor.BenchmarkResult assetResult = 
-                    monitor.runBenchmark(ModernPerformanceMonitor.BenchmarkCategory.ASSETS, this);
-                Log.i(TAG, assetResult.summary);
-                
-                Thread.sleep(500);
-                
-                // UI benchmark
-                runOnUiThread(() -> updateStatus("🖱️ Benchmarking UI performance...", 90));
-                ModernPerformanceMonitor.BenchmarkResult uiResult = 
-                    monitor.runBenchmark(ModernPerformanceMonitor.BenchmarkCategory.UI, this);
-                Log.i(TAG, uiResult.summary);
-                
-                // Generate comprehensive report
-                String performanceReport = monitor.exportPerformanceReport();
-                Log.i(TAG, "=== COMPREHENSIVE PERFORMANCE REPORT ===");
-                Log.i(TAG, performanceReport);
-                
-                // Calculate overall performance rating
-                long totalBenchmarkTime = authResult.totalDuration + networkResult.totalDuration + 
-                                        graphicsResult.totalDuration + assetResult.totalDuration + 
-                                        uiResult.totalDuration;
-                
-                String overallRating;
-                if (totalBenchmarkTime < 30000) { // Under 30 seconds
-                    overallRating = "EXCELLENT";
-                } else if (totalBenchmarkTime < 60000) { // Under 1 minute
-                    overallRating = "GOOD";
-                } else if (totalBenchmarkTime < 120000) { // Under 2 minutes
-                    overallRating = "FAIR";
-                } else {
-                    overallRating = "NEEDS_OPTIMIZATION";
+        try {
+            // Get performance monitor instance
+            ModernPerformanceMonitor monitor = ModernPerformanceMonitor.getInstance();
+            
+            // Run benchmark in background thread
+            new Thread(() -> {
+                try {
+                    // Authentication benchmark
+                    runOnUiThread(() -> updateStatus("📊 Benchmarking authentication performance...", 25));
+                    ModernPerformanceMonitor.BenchmarkResult authResult = 
+                        monitor.runBenchmark(ModernPerformanceMonitor.BenchmarkCategory.AUTHENTICATION, this);
+                    Log.i(TAG, authResult.summary);
+                    
+                    Thread.sleep(500);
+                    
+                    // Network benchmark
+                    runOnUiThread(() -> updateStatus("🌐 Benchmarking network transport performance...", 40));
+                    ModernPerformanceMonitor.BenchmarkResult networkResult = 
+                        monitor.runBenchmark(ModernPerformanceMonitor.BenchmarkCategory.NETWORK, this);
+                    Log.i(TAG, networkResult.summary);
+                    
+                    Thread.sleep(500);
+                    
+                    // Graphics benchmark
+                    runOnUiThread(() -> updateStatus("🎨 Benchmarking graphics pipeline performance...", 60));
+                    ModernPerformanceMonitor.BenchmarkResult graphicsResult = 
+                        monitor.runBenchmark(ModernPerformanceMonitor.BenchmarkCategory.GRAPHICS, this);
+                    Log.i(TAG, graphicsResult.summary);
+                    
+                    Thread.sleep(500);
+                    
+                    // Asset benchmark
+                    runOnUiThread(() -> updateStatus("📦 Benchmarking asset streaming performance...", 80));
+                    ModernPerformanceMonitor.BenchmarkResult assetResult = 
+                        monitor.runBenchmark(ModernPerformanceMonitor.BenchmarkCategory.ASSETS, this);
+                    Log.i(TAG, assetResult.summary);
+                    
+                    Thread.sleep(500);
+                    
+                    // UI benchmark
+                    runOnUiThread(() -> updateStatus("🖱️ Benchmarking UI performance...", 90));
+                    ModernPerformanceMonitor.BenchmarkResult uiResult = 
+                        monitor.runBenchmark(ModernPerformanceMonitor.BenchmarkCategory.UI, this);
+                    Log.i(TAG, uiResult.summary);
+                    
+                    // Generate comprehensive report
+                    String performanceReport = monitor.exportPerformanceReport();
+                    Log.i(TAG, "=== COMPREHENSIVE PERFORMANCE REPORT ===");
+                    Log.i(TAG, performanceReport);
+                    
+                    // Calculate overall performance rating
+                    long totalBenchmarkTime = authResult.totalDuration + networkResult.totalDuration + 
+                                            graphicsResult.totalDuration + assetResult.totalDuration + 
+                                            uiResult.totalDuration;
+                    
+                    String overallRating;
+                    if (totalBenchmarkTime < 30000) { // Under 30 seconds
+                        overallRating = "EXCELLENT";
+                    } else if (totalBenchmarkTime < 60000) { // Under 1 minute
+                        overallRating = "GOOD";
+                    } else if (totalBenchmarkTime < 120000) { // Under 2 minutes
+                        overallRating = "FAIR";
+                    } else {
+                        overallRating = "NEEDS_OPTIMIZATION";
+                    }
+                    
+                    runOnUiThread(() -> {
+                        updateStatus("✅ Performance benchmark completed - Overall rating: " + overallRating, 100);
+                    });
+                    
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    runOnUiThread(() -> {
+                        updateStatus("❌ Performance benchmark interrupted", 0);
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "Error during performance benchmark", e);
+                    runOnUiThread(() -> {
+                        updateStatus("❌ Performance benchmark failed: " + e.getMessage(), 0);
+                    });
                 }
-                
-                runOnUiThread(() -> {
-                    updateStatus("✅ Performance benchmark completed - Overall rating: " + overallRating, 100);
-                });
-                
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                runOnUiThread(() -> {
-                    updateStatus("❌ Performance benchmark interrupted", 0);
-                });
-            } catch (Exception e) {
-                Log.e(TAG, "Error during performance benchmark", e);
-                runOnUiThread(() -> {
-                    updateStatus("❌ Performance benchmark failed: " + e.getMessage(), 0);
-                });
-            }
-        }).start();
+            }).start();
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize performance monitor", e);
+            updateStatus("❌ Performance monitoring not available - check logs for details", 0);
+        }
     }
     
     private void openApplicationSettings() {
@@ -580,48 +586,53 @@ public class ModernMainActivity extends AppCompatActivity {
     }
     
     private void showSystemInfo() {
-        if (modernDemo != null) {
-            // Get performance monitor for additional system info
-            ModernPerformanceMonitor monitor = ModernPerformanceMonitor.getInstance();
-            String memoryReport = monitor.getMemoryUsageReport();
-            
-            String info = "📱 System Information\n\n";
-            info += "Graphics: " + modernDemo.getGraphicsInfo() + "\n";
-            info += "Connected: " + (modernDemo.isConnected() ? "Yes" : "No") + "\n";
-            info += "Components: All modern systems initialized\n";
-            info += "Build: Debug APK v3.4.3\n\n";
-            info += "Modern Features:\n";
-            info += "• OAuth2 Authentication ✅\n";
-            info += "• HTTP/2 CAPS Transport ✅\n";
-            info += "• WebSocket Events ✅\n";
-            info += "• OpenGL ES 3.0+ Pipeline ✅\n";
-            info += "• Intelligent Asset Streaming ✅\n";
-            info += "• Material Design 3 UI ✅\n";
-            info += "• Performance Monitoring ✅\n\n";
-            
-            info += "Memory Status:\n" + memoryReport.replace("=== Memory Usage Report ===\n", "");
-            
-            updateStatus("ℹ️ System info available - Check logs for complete details", 100);
-            Log.i(TAG, info);
-        } else {
-            String info = "📱 System Information\n\n";
-            info += "Status: Running in compatibility mode\n";
-            info += "Modern Components: Not available (likely missing native libraries)\n";
-            info += "Build: Debug APK v3.4.3\n\n";
-            info += "Available Features:\n";
-            info += "• Basic UI ✅\n";
-            info += "• Settings ✅\n";
-            info += "• Error Reporting ✅\n";
-            info += "• Logging ✅\n\n";
-            info += "Disabled Features:\n";
-            info += "• OAuth2 Authentication ❌\n";
-            info += "• HTTP/2 CAPS Transport ❌\n";
-            info += "• WebSocket Events ❌\n";
-            info += "• OpenGL ES 3.0+ Pipeline ❌\n";
-            info += "• Intelligent Asset Streaming ❌\n";
-            
-            updateStatus("ℹ️ Basic system info - Check logs for details", 100);
-            Log.i(TAG, info);
+        try {
+            if (modernDemo != null) {
+                // Get performance monitor for additional system info
+                ModernPerformanceMonitor monitor = ModernPerformanceMonitor.getInstance();
+                String memoryReport = monitor.getMemoryUsageReport();
+                
+                String info = "📱 System Information\n\n";
+                info += "Graphics: " + modernDemo.getGraphicsInfo() + "\n";
+                info += "Connected: " + (modernDemo.isConnected() ? "Yes" : "No") + "\n";
+                info += "Components: All modern systems initialized\n";
+                info += "Build: Debug APK v3.4.3\n\n";
+                info += "Modern Features:\n";
+                info += "• OAuth2 Authentication ✅\n";
+                info += "• HTTP/2 CAPS Transport ✅\n";
+                info += "• WebSocket Events ✅\n";
+                info += "• OpenGL ES 3.0+ Pipeline ✅\n";
+                info += "• Intelligent Asset Streaming ✅\n";
+                info += "• Material Design 3 UI ✅\n";
+                info += "• Performance Monitoring ✅\n\n";
+                
+                info += "Memory Status:\n" + memoryReport.replace("=== Memory Usage Report ===\n", "");
+                
+                updateStatus("ℹ️ System info available - Check logs for complete details", 100);
+                Log.i(TAG, info);
+            } else {
+                String info = "📱 System Information\n\n";
+                info += "Status: Running in compatibility mode\n";
+                info += "Modern Components: Not available (likely missing native libraries)\n";
+                info += "Build: Debug APK v3.4.3\n\n";
+                info += "Available Features:\n";
+                info += "• Basic UI ✅\n";
+                info += "• Settings ✅\n";
+                info += "• Error Reporting ✅\n";
+                info += "• Logging ✅\n\n";
+                info += "Disabled Features:\n";
+                info += "• OAuth2 Authentication ❌\n";
+                info += "• HTTP/2 CAPS Transport ❌\n";
+                info += "• WebSocket Events ❌\n";
+                info += "• OpenGL ES 3.0+ Pipeline ❌\n";
+                info += "• Intelligent Asset Streaming ❌\n";
+                
+                updateStatus("ℹ️ Basic system info - Check logs for details", 100);
+                Log.i(TAG, info);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error generating system info", e);
+            updateStatus("❌ System info unavailable - check logs", 0);
         }
     }
     
@@ -699,22 +710,31 @@ public class ModernMainActivity extends AppCompatActivity {
                 Thread.sleep(1000); // Simulate gathering logs
                 
                 // Generate comprehensive log report
-                ModernPerformanceMonitor monitor = ModernPerformanceMonitor.getInstance();
-                String performanceReport = monitor.exportPerformanceReport();
-                String memoryReport = monitor.getMemoryUsageReport();
-                
-                // In a real implementation, this would write to external storage
                 String logReport = "=== LINKPOINT MODERN DEMO LOG EXPORT ===\n";
                 logReport += "Export Time: " + new java.util.Date().toString() + "\n\n";
-                logReport += performanceReport + "\n\n";
-                logReport += memoryReport + "\n\n";
+                
+                try {
+                    ModernPerformanceMonitor monitor = ModernPerformanceMonitor.getInstance();
+                    String performanceReport = monitor.exportPerformanceReport();
+                    String memoryReport = monitor.getMemoryUsageReport();
+                    
+                    logReport += performanceReport + "\n\n";
+                    logReport += memoryReport + "\n\n";
+                } catch (Exception e) {
+                    Log.w(TAG, "Performance monitor not available for log export", e);
+                    logReport += "Performance monitoring data: Not available\n\n";
+                    logReport += "Memory monitoring data: Not available\n\n";
+                }
+                
+                logReport += "Modern Components Status: " + (modernDemo != null ? "Available" : "Not Available") + "\n";
+                logReport += "Native Libraries Status: " + (modernDemo != null ? "Loaded" : "Failed to load") + "\n\n";
                 logReport += "=== END OF LOG EXPORT ===\n";
                 
                 Log.i(TAG, "EXPORTED LOG REPORT:");
                 Log.i(TAG, logReport);
                 
                 runOnUiThread(() -> {
-                    updateStatus("✅ Logs exported successfully to Downloads folder", 100);
+                    updateStatus("✅ Logs exported successfully to logcat", 100);
                     Log.i(TAG, "Application logs and performance data exported successfully");
                 });
                 
@@ -722,6 +742,11 @@ public class ModernMainActivity extends AppCompatActivity {
                 Thread.currentThread().interrupt();
                 runOnUiThread(() -> {
                     updateStatus("❌ Log export interrupted", 0);
+                });
+            } catch (Exception e) {
+                Log.e(TAG, "Error during log export", e);
+                runOnUiThread(() -> {
+                    updateStatus("❌ Log export failed: " + e.getMessage(), 0);
                 });
             }
         }).start();
