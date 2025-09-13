@@ -45,6 +45,16 @@ set(BASIS_TRANSCODER_STUB_SOURCES
     jni/basis_transcoder_stub.cpp
 )
 
+# Vivox voice chat stub library sources
+set(VIVOX_STUB_SOURCES
+    jni/vivox_stubs.cpp
+)
+
+# Audio processing stub library sources  
+set(AUDIO_STUB_SOURCES
+    jni/audio_stubs.cpp
+)
+
 # Include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/basis_universal
@@ -109,6 +119,38 @@ add_library(
     ${BASIS_TRANSCODER_STUB_SOURCES}
 )
 
+# Create Vivox voice chat stub libraries to prevent UnsatisfiedLinkError crashes
+add_library(
+    vivoxsdk
+    SHARED
+    ${VIVOX_STUB_SOURCES}
+)
+
+add_library(
+    VxClient
+    SHARED
+    ${VIVOX_STUB_SOURCES}
+)
+
+# Create audio processing stub libraries
+add_library(
+    vxaudio-jni
+    SHARED
+    ${AUDIO_STUB_SOURCES}
+)
+
+add_library(
+    sndfile
+    SHARED
+    ${AUDIO_STUB_SOURCES}
+)
+
+add_library(
+    oRTP
+    SHARED
+    ${AUDIO_STUB_SOURCES}
+)
+
 # Link libraries for main openjpeg library
 target_link_libraries(
     openjpeg
@@ -131,6 +173,38 @@ target_link_libraries(
     ${android-lib}
 )
 
+# Link libraries for Vivox stub libraries (minimal dependencies)
+target_link_libraries(
+    vivoxsdk
+    ${log-lib}
+    ${android-lib}
+)
+
+target_link_libraries(
+    VxClient
+    ${log-lib}
+    ${android-lib}
+)
+
+# Link libraries for audio stub libraries
+target_link_libraries(
+    vxaudio-jni
+    ${log-lib}
+    ${android-lib}
+)
+
+target_link_libraries(
+    sndfile
+    ${log-lib}
+    ${android-lib}
+)
+
+target_link_libraries(
+    oRTP
+    ${log-lib}
+    ${android-lib}
+)
+
 # Link Vulkan if available (for main openjpeg library)
 if(vulkan-lib)
     target_link_libraries(openjpeg ${vulkan-lib})
@@ -146,5 +220,27 @@ set_target_properties(rawbuf PROPERTIES
 )
 
 set_target_properties(basis_transcoder PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+# Set target properties for Vivox stub libraries
+set_target_properties(vivoxsdk PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+set_target_properties(VxClient PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+# Set target properties for audio stub libraries  
+set_target_properties(vxaudio-jni PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+set_target_properties(sndfile PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+set_target_properties(oRTP PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION FALSE
 )

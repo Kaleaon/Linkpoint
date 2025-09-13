@@ -2,6 +2,7 @@
 #include <android/log.h>
 #include <cstring>  // for memcpy
 #include <stdlib.h>
+#include <cmath>    // for cosf, sinf
 
 #define TAG "RawbufStub"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
@@ -178,6 +179,132 @@ Java_com_lumiyaviewer_rawbuffers_DirectByteBuffer_zeroDecodeArray(JNIEnv *env, j
     
     LOGW("Zero decode fallback: copied %d bytes (not actual decompression)", copyLen);
     return copyLen;
+}
+
+// Additional texture manipulation functions based on reference link
+// https://gamedev.stackexchange.com/questions/50623/scaling-and-rotating-texture-onto-another-texture-by-raw-buffer-data
+
+JNIEXPORT void JNICALL
+Java_com_lumiyaviewer_rawbuffers_DirectByteBuffer_scaleTexture(JNIEnv *env, jclass clazz, jobject srcBuffer, jint srcWidth, jint srcHeight, jobject destBuffer, jint destWidth, jint destHeight, jint bytesPerPixel) {
+    LOGI("Texture scaling requested: %dx%d -> %dx%d, %d bytes per pixel", srcWidth, srcHeight, destWidth, destHeight, bytesPerPixel);
+    
+    jbyte* srcPtr = (jbyte*)env->GetDirectBufferAddress(srcBuffer);
+    jbyte* destPtr = (jbyte*)env->GetDirectBufferAddress(destBuffer);
+    
+    if (!srcPtr || !destPtr) {
+        LOGW("Could not get direct buffer addresses for texture scaling");
+        return;
+    }
+    
+    // Simple nearest-neighbor scaling algorithm
+    float scaleX = (float)srcWidth / destWidth;
+    float scaleY = (float)srcHeight / destHeight;
+    
+    for (int destY = 0; destY < destHeight; destY++) {
+        for (int destX = 0; destX < destWidth; destX++) {
+            // Find corresponding source pixel
+            int srcX = (int)(destX * scaleX);
+            int srcY = (int)(destY * scaleY);
+            
+            // Clamp to source bounds
+            if (srcX >= srcWidth) srcX = srcWidth - 1;
+            if (srcY >= srcHeight) srcY = srcHeight - 1;
+            
+            // Copy pixel data
+            int srcOffset = (srcY * srcWidth + srcX) * bytesPerPixel;
+            int destOffset = (destY * destWidth + destX) * bytesPerPixel;
+            
+            for (int b = 0; b < bytesPerPixel; b++) {
+                destPtr[destOffset + b] = srcPtr[srcOffset + b];
+            }
+        }
+    }
+    
+    LOGI("Texture scaling completed successfully");
+}
+
+JNIEXPORT void JNICALL
+Java_com_lumiyaviewer_rawbuffers_DirectByteBuffer_rotateTexture(JNIEnv *env, jclass clazz, jobject srcBuffer, jint width, jint height, jobject destBuffer, jfloat angle, jint bytesPerPixel) {
+    LOGI("Texture rotation requested: %dx%d by %.2f degrees, %d bytes per pixel", width, height, angle, bytesPerPixel);
+    
+    jbyte* srcPtr = (jbyte*)env->GetDirectBufferAddress(srcBuffer);
+    jbyte* destPtr = (jbyte*)env->GetDirectBufferAddress(destBuffer);
+    
+    if (!srcPtr || !destPtr) {
+        LOGW("Could not get direct buffer addresses for texture rotation");
+        return;
+    }
+    
+    // Convert angle to radians
+    float radians = angle * 3.14159f / 180.0f;
+    float cosAngle = cosf(radians);
+    float sinAngle = sinf(radians);
+    
+    int centerX = width / 2;
+    int centerY = height / 2;
+    
+    // Clear destination buffer first
+    memset(destPtr, 0, width * height * bytesPerPixel);
+    
+    // Rotate each pixel
+    for (int srcY = 0; srcY < height; srcY++) {
+        for (int srcX = 0; srcX < width; srcX++) {
+            // Translate to center origin
+            int relativeX = srcX - centerX;
+            int relativeY = srcY - centerY;
+            
+            // Apply rotation transformation
+            int destX = (int)(relativeX * cosAngle - relativeY * sinAngle) + centerX;
+            int destY = (int)(relativeX * sinAngle + relativeY * cosAngle) + centerY;
+            
+            // Check bounds
+            if (destX >= 0 && destX < width && destY >= 0 && destY < height) {
+                // Copy pixel data
+                int srcOffset = (srcY * width + srcX) * bytesPerPixel;
+                int destOffset = (destY * width + destX) * bytesPerPixel;
+                
+                for (int b = 0; b < bytesPerPixel; b++) {
+                    destPtr[destOffset + b] = srcPtr[srcOffset + b];
+                }
+            }
+        }
+    }
+    
+    LOGI("Texture rotation completed successfully");
+}
+
+JNIEXPORT void JNICALL
+Java_com_lumiyaviewer_rawbuffers_DirectByteBuffer_blendTextures(JNIEnv *env, jclass clazz, jobject srcBuffer, jobject destBuffer, jint width, jint height, jfloat alpha, jint bytesPerPixel) {
+    LOGI("Texture blending requested: %dx%d with alpha %.2f, %d bytes per pixel", width, height, alpha, bytesPerPixel);
+    
+    jbyte* srcPtr = (jbyte*)env->GetDirectBufferAddress(srcBuffer);
+    jbyte* destPtr = (jbyte*)env->GetDirectBufferAddress(destBuffer);
+    
+    if (!srcPtr || !destPtr) {
+        LOGW("Could not get direct buffer addresses for texture blending");
+        return;
+    }
+    
+    // Clamp alpha to valid range
+    if (alpha < 0.0f) alpha = 0.0f;
+    if (alpha > 1.0f) alpha = 1.0f;
+    
+    int totalPixels = width * height;
+    
+    // Blend each pixel using alpha blending: result = src * alpha + dest * (1 - alpha)
+    for (int pixel = 0; pixel < totalPixels; pixel++) {
+        int offset = pixel * bytesPerPixel;
+        
+        for (int b = 0; b < bytesPerPixel; b++) {
+            float srcValue = (float)((unsigned char)srcPtr[offset + b]);
+            float destValue = (float)((unsigned char)destPtr[offset + b]);
+            float blendedValue = srcValue * alpha + destValue * (1.0f - alpha);
+            
+            destPtr[offset + b] = (jbyte)((int)blendedValue);
+        }
+    }
+    
+    LOGI("Texture blending completed successfully");
 }
 
 } // extern "C"
