@@ -95,6 +95,12 @@ This project uses several key libraries:
 
 For detailed technical information about the project architecture and improvements:
 
+### Second Life Open Source Integration
+- **[Second Life Open Source Portal Integration Guide](docs/Second_Life_Open_Source_Portal_Integration_Guide.md)** - **PRIMARY GUIDE** - Comprehensive documentation for using Linkpoint with Second Life's open source ecosystem
+- **[OpenSimulator Compatibility](docs/OpenSimulator_Compatibility.md)** - Complete guide for connecting to and using OpenSimulator grids
+- **[LibreMetaverse Integration](docs/LibreMetaverse_Integration.md)** - Java implementation of LibreMetaverse patterns and protocols
+- **[Troubleshooting Second Life Integration](docs/Troubleshooting_Second_Life_Integration.md)** - Comprehensive troubleshooting guide for common SL integration issues
+
 ### Core Architecture Documentation
 - **[API Analysis and Improvements](docs/API_Analysis_and_Improvements.md)** - Comprehensive analysis of LibreMetaverse API implementation and graphics engine architecture
 - **[API Usage Catalog](docs/API_Usage_Catalog.md)** - Complete mapping of all APIs, libraries, and frameworks used in the project  
