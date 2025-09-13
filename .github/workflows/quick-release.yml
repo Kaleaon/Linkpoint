@@ -1,0 +1,61 @@
+name: Quick Release Build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  quick-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
+    - name: Cache Gradle dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Make gradlew executable
+      run: chmod +x gradlew
+      
+    - name: Build release APK
+      run: ./gradlew assembleRelease --no-daemon --stacktrace
+      
+    - name: Get build info
+      id: info
+      run: |
+        echo "commit_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+        
+    - name: Upload Release APK for Testing
+      uses: actions/upload-artifact@v4
+      with:
+        name: linkpoint-release-${{ steps.info.outputs.timestamp }}
+        path: app/build/outputs/apk/release/app-release.apk
+        retention-days: 7
+        
+    - name: Comment on Success
+      run: |
+        echo "## ✅ Release APK Ready for Testing" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📱 **Download**: linkpoint-release-${{ steps.info.outputs.timestamp }}" >> $GITHUB_STEP_SUMMARY
+        echo "🚀 **Build**: ${{ steps.info.outputs.commit_short }}" >> $GITHUB_STEP_SUMMARY
+        echo "⏱️  **Time**: ${{ steps.info.outputs.timestamp }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Ready to install and test on Android devices!" >> $GITHUB_STEP_SUMMARY
