@@ -13,28 +13,24 @@ android {
 
     defaultConfig {
         applicationId "com.lumiyaviewer.lumiya"
-        minSdk 21  // Updated minimum SDK for modern APIs
-        targetSdk 34
+        minSdk 21
+        targetSdk 30
         versionCode 67
         versionName "3.4.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         
-        // Enable multidex support for apps with more than 64K methods
-        multiDexEnabled true
-        
-        // NDK configuration for native code
+        // Simplified NDK configuration
         ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+            abiFilters 'arm64-v8a'
         }
         
-        externalNativeBuild {
-            cmake {
-                cppFlags "-std=c++20 -O3 -ffast-math"
-                arguments "-DANDROID_STL=c++_shared",
-                          "-DANDROID_NDK=/usr/local/lib/android/sdk/ndk/26.3.11579264"
-            }
-        }
+        // Disable native build for now to avoid CMake issues
+        // externalNativeBuild {
+        //     cmake {
+        //         cppFlags "-std=c++20 -O3 -ffast-math"
+        //     }
+        // }
     }
 
     buildTypes {
