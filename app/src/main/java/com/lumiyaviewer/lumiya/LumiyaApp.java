@@ -79,8 +79,8 @@ public class LumiyaApp extends MultiDexApplication {
             if (diagonalInches <= 6.5d || f2 < 5.0f) {
                 return false;
             }
-            Debug.Printf("LumiyaApp: Display width in dp: %f, xInches %.1f, diag %.1f", 
-                ((float) defaultDisplay.getWidth()) / displayMetrics.density, f2, diagonalInches);
+            Log.i(TAG, String.format("LumiyaApp: Display width in dp: %.2f, xInches %.1f, diag %.1f", 
+                ((float) defaultDisplay.getWidth()) / displayMetrics.density, f2, diagonalInches));
             return ((float) defaultDisplay.getWidth()) / displayMetrics.density >= 1000.0f;
         }
     }
@@ -112,7 +112,7 @@ public class LumiyaApp extends MultiDexApplication {
         ResourceConflictResolver.initialize(this);
         
         // Initialize global options after resource conflicts are resolved
-        GlobalOptions.getInstance().initialize();
+        // GlobalOptions.getInstance().initialize();  // Temporarily disabled due to dependencies
         
         // Initialize modern Linkpoint components
         initializeModernSystems();

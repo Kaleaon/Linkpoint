@@ -76,11 +76,18 @@ android {
             res.srcDirs = ['src/main/res']
             assets.srcDirs = ['src/main/assets']
             
-            // Only include modern components - exclude all legacy decompiled code
+            // Include only modern components that work
             java.includes = [
-                '**/modern/**',  // Only modern components
-                '**/Application.java',
-                '**/Application$*.java'
+                '**/modern/**',  // All modern components
+                '**/LumiyaApp.java',  // Main app class
+                '**/ui/main/ModernMainActivity.java',  // Modern main activity
+                '**/fixes/**',    // Resource conflict fixes
+            ]
+            java.excludes = [
+                // Exclude all broken decompiled files
+                '**/$Lambda$*.java',
+                '**/ui/common/*Fragment.java',
+                '**/ui/login/LoginActivity.java',  // Too many dependencies
             ]
         }
     }

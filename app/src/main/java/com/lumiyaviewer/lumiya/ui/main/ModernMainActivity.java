@@ -1,6 +1,7 @@
 package com.lumiyaviewer.lumiya.ui.main;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
@@ -72,12 +73,19 @@ public class ModernMainActivity extends Activity {
         Button assetButton = new Button(this);
         assetButton.setText("Test Asset Streaming");
         assetButton.setOnClickListener(v -> testAssetStreaming());
-        layout.addView(connectButton);
+        layout.addView(assetButton);
         
         // Render test button
         renderTestButton = new Button(this);
         renderTestButton.setText("Test Modern Graphics Pipeline");
         renderTestButton.setOnClickListener(v -> testModernRender());
+        layout.addView(renderTestButton);
+        
+        // Modern World View button
+        Button worldViewButton = new Button(this);
+        worldViewButton.setText("Open Modern World View");
+        worldViewButton.setOnClickListener(v -> openModernWorldView());
+        layout.addView(worldViewButton);
         
         setContentView(layout);
     }
@@ -135,6 +143,16 @@ public class ModernMainActivity extends Activity {
         } else {
             statusText.setText("Modern components not available");
         }
+    }
+    
+    private void openModernWorldView() {
+        Log.i(TAG, "Opening modern world view...");
+        statusText.setText("Opening modern Material Design world view...");
+        
+        Intent intent = new Intent(this, com.lumiyaviewer.lumiya.ui.modern.ModernWorldActivity.class);
+        startActivity(intent);
+        
+        statusText.setText("Modern world view opened successfully");
     }
     
     @Override
