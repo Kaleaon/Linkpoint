@@ -14,7 +14,7 @@ android {
     defaultConfig {
         applicationId "com.lumiyaviewer.lumiya"
         minSdk 21
-        targetSdk 30
+        targetSdk 33
         versionCode 67
         versionName "3.4.3"
 
@@ -24,13 +24,6 @@ android {
         ndk {
             abiFilters 'arm64-v8a'
         }
-        
-        // Disable native build for now to avoid CMake issues
-        // externalNativeBuild {
-        //     cmake {
-        //         cppFlags "-std=c++20 -O3 -ffast-math"
-        //     }
-        // }
     }
 
     buildTypes {
