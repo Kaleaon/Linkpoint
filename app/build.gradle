@@ -107,6 +107,20 @@ dependencies {
     // Google Play Services for Cloud Plugin
     implementation 'com.google.android.gms:play-services-drive:17.0.0'
     implementation 'com.google.android.gms:play-services-auth:20.7.0'  
+    // WebRTC for voice chat (replaces proprietary Vivox)
+    implementation 'org.webrtc:google-webrtc:1.0.32006'
+    
+    // Audio processing for voice enhancement
+    implementation 'com.github.pedroSG94:RootEncoder:2.2.7'
+    
+    // Network utilities for WebRTC signaling
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    
+    // JSON handling for WebRTC signaling
+    implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // Google Play Services for audio handling
     implementation 'com.google.android.gms:play-services-base:18.2.0'
     
     // Support libraries for backward compatibility  
