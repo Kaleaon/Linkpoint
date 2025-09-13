@@ -28,12 +28,31 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-lto")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-lto")
 
-# Available source files only - simplified for core functionality
-set(NATIVE_SOURCES
+# Available source files for main openjpeg library (Basis Universal integration)
+set(OPENJPEG_SOURCES
     basis_universal/basisu_transcoder.cpp
     # Enable JNI files for texture processing
     jni/basis_transcoder_jni.cpp
     jni/openjpeg_basis_integration.cpp
+)
+
+# Stub library sources for missing dependencies
+set(RAWBUF_STUB_SOURCES
+    jni/rawbuf_stub.cpp
+)
+
+set(BASIS_TRANSCODER_STUB_SOURCES
+    jni/basis_transcoder_stub.cpp
+)
+
+# Vivox voice chat stub library sources
+set(VIVOX_STUB_SOURCES
+    jni/vivox_stubs.cpp
+)
+
+# Audio processing stub library sources  
+set(AUDIO_STUB_SOURCES
+    jni/audio_stubs.cpp
 )
 
 # Include directories
@@ -80,14 +99,59 @@ if(ANDROID_PLATFORM_LEVEL GREATER_EQUAL 24)
     add_definitions(-DVULKAN_SUPPORT=1)
 endif()
 
-# Create the shared library (maintain compatibility with existing openjpeg usage)
+# Create the main openjpeg shared library (maintain compatibility with existing openjpeg usage)
 add_library(
     openjpeg
     SHARED
-    ${NATIVE_SOURCES}
+    ${OPENJPEG_SOURCES}
 )
 
-# Link libraries
+# Create stub libraries to prevent UnsatisfiedLinkError crashes
+add_library(
+    rawbuf
+    SHARED
+    ${RAWBUF_STUB_SOURCES}
+)
+
+add_library(
+    basis_transcoder
+    SHARED
+    ${BASIS_TRANSCODER_STUB_SOURCES}
+)
+
+# Create Vivox voice chat stub libraries to prevent UnsatisfiedLinkError crashes
+add_library(
+    vivoxsdk
+    SHARED
+    ${VIVOX_STUB_SOURCES}
+)
+
+add_library(
+    VxClient
+    SHARED
+    ${VIVOX_STUB_SOURCES}
+)
+
+# Create audio processing stub libraries
+add_library(
+    vxaudio-jni
+    SHARED
+    ${AUDIO_STUB_SOURCES}
+)
+
+add_library(
+    sndfile
+    SHARED
+    ${AUDIO_STUB_SOURCES}
+)
+
+add_library(
+    oRTP
+    SHARED
+    ${AUDIO_STUB_SOURCES}
+)
+
+# Link libraries for main openjpeg library
 target_link_libraries(
     openjpeg
     ${log-lib}
@@ -96,12 +160,87 @@ target_link_libraries(
     ${GLESv3-lib}
 )
 
-# Link Vulkan if available
+# Link libraries for stub libraries (minimal dependencies)
+target_link_libraries(
+    rawbuf
+    ${log-lib}
+    ${android-lib}
+)
+
+target_link_libraries(
+    basis_transcoder
+    ${log-lib}
+    ${android-lib}
+)
+
+# Link libraries for Vivox stub libraries (minimal dependencies)
+target_link_libraries(
+    vivoxsdk
+    ${log-lib}
+    ${android-lib}
+)
+
+target_link_libraries(
+    VxClient
+    ${log-lib}
+    ${android-lib}
+)
+
+# Link libraries for audio stub libraries
+target_link_libraries(
+    vxaudio-jni
+    ${log-lib}
+    ${android-lib}
+)
+
+target_link_libraries(
+    sndfile
+    ${log-lib}
+    ${android-lib}
+)
+
+target_link_libraries(
+    oRTP
+    ${log-lib}
+    ${android-lib}
+)
+
+# Link Vulkan if available (for main openjpeg library)
 if(vulkan-lib)
     target_link_libraries(openjpeg ${vulkan-lib})
 endif()
 
 # Set target properties for better optimization (disable IPO to avoid linker issues)
 set_target_properties(openjpeg PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+set_target_properties(rawbuf PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+set_target_properties(basis_transcoder PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+# Set target properties for Vivox stub libraries
+set_target_properties(vivoxsdk PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+set_target_properties(VxClient PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+# Set target properties for audio stub libraries  
+set_target_properties(vxaudio-jni PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+set_target_properties(sndfile PROPERTIES
+    INTERPROCEDURAL_OPTIMIZATION FALSE
+)
+
+set_target_properties(oRTP PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION FALSE
 )

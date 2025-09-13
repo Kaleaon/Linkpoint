@@ -104,17 +104,16 @@ android {
         }
     }
 
-    // Temporarily disable native build due to known NDK toolchain issues
-    // (Native components will be enabled once linker compatibility is resolved)
-    // externalNativeBuild {
-    //     cmake {
-    //         path "src/main/cpp/CMakeLists.txt"
-    //         version "3.22.1"
-    //     }
-    // }
+    // Enable native build with available NDK version
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
     
-    // Explicitly set NDK version to available one (disabled with native build)
-    // ndkVersion "26.3.11579264"
+    // Explicitly set NDK version to available one
+    ndkVersion "26.3.11579264"
 }
 
 dependencies {
