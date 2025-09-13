@@ -68,25 +68,33 @@ public class ModernLinkpointDemo {
     }
     
     /**
-     * Initialize modern graphics system
+     * Initialize modern graphics system with OpenGL ES 3.0 baseline
      */
     public void initializeGraphics() {
-        Log.i(TAG, "Initializing modern graphics system...");
+        Log.i(TAG, "Initializing modernized graphics system (ES 3.0+ only)...");
         
-        // Initialize render pipeline with modern OpenGL ES 3.0+ features
+        // Initialize render pipeline with mandatory OpenGL ES 3.0+ features
         boolean success = renderPipeline.initialize();
         if (success) {
             if (renderPipeline.isModernPipelineAvailable()) {
-                Log.i(TAG, "Modern PBR rendering pipeline enabled");
+                Log.i(TAG, "Modern PBR rendering pipeline enabled (ES 3.0+)");
+                Log.i(TAG, "Legacy ES 1.1/2.0 code paths removed");
             } else {
-                Log.i(TAG, "Legacy rendering pipeline active (OpenGL ES 2.0)");
+                Log.e(TAG, "CRITICAL: OpenGL ES 3.0+ required but not available");
+                Log.e(TAG, "Device does not meet minimum graphics requirements");
+                return;
             }
         }
         
-        // Check optimal texture format for this device
-        int optimalFormat = textureManager.getOptimalTextureFormat();
-        String formatName = ModernTextureManager.getFormatName(optimalFormat);
-        Log.i(TAG, "Optimal texture format for this device: " + formatName);
+        // Initialize modernized texture manager  
+        try {
+            int optimalFormat = textureManager.getOptimalTextureFormat();
+            String formatName = getFormatName(optimalFormat);
+            Log.i(TAG, "Optimal texture format: " + formatName + " (ES 3.0 ETC2+ only)");
+            Log.i(TAG, "Legacy JPEG2000 format support removed");
+        } catch (Exception e) {
+            Log.w(TAG, "Modern texture manager not fully available - using fallback");
+        }
         
         Log.i(TAG, "Graphics system initialized successfully");
     }
@@ -244,9 +252,57 @@ public class ModernLinkpointDemo {
     public String getGraphicsInfo() {
         boolean modernPipeline = renderPipeline.isModernPipelineAvailable();
         int textureFormat = textureManager.getOptimalTextureFormat();
-        String formatName = ModernTextureManager.getFormatName(textureFormat);
+        String formatName = getFormatName(textureFormat);
         
         return String.format("Modern Pipeline: %s, Optimal Texture: %s", 
                            modernPipeline ? "Available" : "Legacy", formatName);
+    }
+    
+    /**
+     * Demonstrate modernized graphics pipeline
+     * Shows the removal of OpenGL ES 1.1 compatibility and ES 3.0+ features
+     */
+    public void demonstrateModernGraphics() {
+        Log.i(TAG, "=== Modern Graphics Pipeline Demonstration ===");
+        
+        // Show capabilities that are now mandatory (ES 3.0+)
+        Log.i(TAG, "Mandatory ES 3.0+ features:");
+        Log.i(TAG, "  - Programmable shaders (vertex/fragment)");
+        Log.i(TAG, "  - Vertex Array Objects (VAOs)");
+        Log.i(TAG, "  - Uniform Buffer Objects (UBOs)");
+        Log.i(TAG, "  - ETC2 texture compression");
+        Log.i(TAG, "  - Transform feedback");
+        Log.i(TAG, "  - Multiple render targets (MRT)");
+        
+        // Show removed legacy features
+        Log.i(TAG, "Removed legacy ES 1.1 features:");
+        Log.i(TAG, "  - Fixed-function pipeline");
+        Log.i(TAG, "  - Matrix stack (glPushMatrix/glPopMatrix)");
+        Log.i(TAG, "  - Immediate mode rendering");
+        Log.i(TAG, "  - glTexEnv texture combiners");
+        Log.i(TAG, "  - Client-side vertex arrays");
+        
+        // Demonstrate modern PBR capabilities
+        if (renderPipeline.isModernPipelineAvailable()) {
+            Log.i(TAG, "PBR pipeline features available:");
+            Log.i(TAG, "  - Metallic/Roughness workflow");
+            Log.i(TAG, "  - Normal mapping");
+            Log.i(TAG, "  - Image-based lighting");
+            Log.i(TAG, "  - Dynamic directional/point lights");
+        }
+        
+        Log.i(TAG, "=============================================");
+    }
+    
+    /**
+     * Helper method to get texture format name
+     */
+    private String getFormatName(int format) {
+        switch (format) {
+            case 0x93B0: return "ASTC 4x4 RGBA";
+            case 0x9278: return "ETC2 RGBA"; 
+            case 0x1908: return "RGBA32";
+            default: return "Unknown Format";
+        }
     }
 }

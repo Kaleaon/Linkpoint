@@ -99,6 +99,34 @@ public class ModernTextureManager {
     }
     
     /**
+     * Get optimal texture format for this device
+     */
+    public int getOptimalTextureFormat() {
+        if (supportsASTC) {
+            return FORMAT_ASTC_4x4_RGBA;
+        } else if (supportsETC2) {
+            return FORMAT_ETC2_RGBA;
+        } else if (supportsBC7) {
+            return FORMAT_BC7_RGBA;
+        } else {
+            return FORMAT_RGBA32;
+        }
+    }
+    
+    /**
+     * Get format name for debugging
+     */
+    public static String getFormatName(int format) {
+        switch (format) {
+            case FORMAT_ASTC_4x4_RGBA: return "ASTC 4x4 RGBA";
+            case FORMAT_ETC2_RGBA: return "ETC2 RGBA";
+            case FORMAT_BC7_RGBA: return "BC7 RGBA";
+            case FORMAT_RGBA32: return "RGBA32";
+            default: return "Unknown";
+        }
+    }
+    
+    /**
      * Get the optimal texture format for this GPU
      */
     public int getOptimalTextureFormat() {
