@@ -81,33 +81,21 @@ android {
             res.srcDirs = ['src/main/res']
             assets.srcDirs = ['src/main/assets']
             
-            // Include only modern components that work
-            java.includes = [
-                '**/modern/**',  // All modern components
-                '**/LumiyaApp.java',  // Main app class
-                '**/ui/main/ModernMainActivity.java',  // Modern main activity
-                '**/ui/settings/ModernSettingsActivity.java',  // Modern settings activity
-                '**/ui/settings/EmulatorManager.java',  // Emulator management
-                '**/ui/settings/EmulatorSettingsActivity.java',  // Emulator settings UI
-                '**/ui/modern/**',  // Modern UI components
-                '**/fixes/**',    // Resource conflict fixes
-            ]
+            // Include essential components for login functionality
             java.excludes = [
-                // Exclude all broken decompiled files
-                '**/$Lambda$*.java',
-                '**/ui/common/*Fragment.java',
-                '**/ui/login/LoginActivity.java',  // Too many dependencies
+                // Exclude problematic decompiled files only
+                '**/$Lambda$*.java'
             ]
         }
     }
 
-    // Enable native build with available NDK version
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-            version "3.22.1"
-        }
-    }
+    // Disable native build temporarily to avoid CMake issues
+    // externalNativeBuild {
+    //     cmake {
+    //         path "src/main/cpp/CMakeLists.txt"
+    //         version "3.22.1"
+    //     }
+    // }
     
     // Explicitly set NDK version to available one
     ndkVersion "26.3.11579264"
