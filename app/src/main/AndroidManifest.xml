@@ -82,6 +82,12 @@
             android:name="com.lumiyaviewer.lumiya.ui.settings.SettingsActivity"
             android:exported="false"/>
             
+        <!-- Modern Settings Activity -->
+        <activity 
+            android:label="Demo Settings" 
+            android:name="com.lumiyaviewer.lumiya.ui.settings.ModernSettingsActivity"
+            android:exported="false"/>
+            
         <activity 
             android:theme="@style/Theme.AppCompat.Dialog" 
             android:label="Lumiya Viewer: Streaming media" 

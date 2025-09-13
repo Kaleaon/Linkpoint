@@ -81,6 +81,8 @@ android {
                 '**/modern/**',  // All modern components
                 '**/LumiyaApp.java',  // Main app class
                 '**/ui/main/ModernMainActivity.java',  // Modern main activity
+                '**/ui/settings/ModernSettingsActivity.java',  // Modern settings activity
+                '**/ui/modern/**',  // Modern UI components
                 '**/fixes/**',    // Resource conflict fixes
             ]
             java.excludes = [
