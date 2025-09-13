@@ -82,7 +82,7 @@ android {
         }
     }
 
-    // Disable native build temporarily to avoid CMake issues
+    // Disable native build temporarily to get basic APK working
     // externalNativeBuild {
     //     cmake {
     //         path "src/main/cpp/CMakeLists.txt"
