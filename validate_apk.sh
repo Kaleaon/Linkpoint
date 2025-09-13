@@ -68,8 +68,9 @@ echo ""
 echo "🔍 Test 3: APK Metadata Check"
 echo "------------------------------"
 
-APK_SIZE=$(stat -f%z "$APK_PATH" 2>/dev/null || stat -c%s "$APK_PATH" 2>/dev/null || echo "unknown")
-echo "APK Size: $APK_SIZE bytes ($(echo "scale=2; $APK_SIZE/1024/1024" | bc -l 2>/dev/null || echo "~17")MB)"
+APK_SIZE=$(wc -c < "$APK_PATH" 2>/dev/null)
+APK_SIZE_MB=$(awk "BEGIN {printf \"%.2f\", $APK_SIZE/1024/1024}")
+echo "APK Size: $APK_SIZE bytes (${APK_SIZE_MB}MB)"
 
 # Extract and check main activity from AndroidManifest
 echo "Checking main launcher activity..."
