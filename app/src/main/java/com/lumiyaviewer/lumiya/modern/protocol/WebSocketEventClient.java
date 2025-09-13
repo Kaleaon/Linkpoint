@@ -104,6 +104,32 @@ public class WebSocketEventClient extends WebSocketListener {
         }
     }
     
+    /**
+     * Send a message through the WebSocket connection
+     */
+    public java.util.concurrent.CompletableFuture<Boolean> sendMessage(String messageType, String payload) {
+        return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+            if (connected && webSocket != null) {
+                try {
+                    String message = String.format(
+                        "{\"type\":\"%s\",\"payload\":%s}", 
+                        messageType, 
+                        payload
+                    );
+                    boolean success = webSocket.send(message);
+                    Log.d(TAG, "Sent message: " + messageType + " (success: " + success + ")");
+                    return success;
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to send message: " + messageType, e);
+                    return false;
+                }
+            } else {
+                Log.w(TAG, "Cannot send message - WebSocket not connected");
+                return false;
+            }
+        });
+    }
+    
     // WebSocketListener implementation
     
     @Override
