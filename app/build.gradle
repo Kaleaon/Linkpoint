@@ -97,8 +97,8 @@ android {
     //     }
     // }
     
-    // Explicitly set NDK version to available one
-    ndkVersion "26.3.11579264"
+    // NDK version no longer needed without native build
+    // ndkVersion "26.3.11579264"
 }
 
 dependencies {
