@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import com.lumiyaviewer.lumiya.fixes.ResourceConflictResolver;
+import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo;
 
 /**
  * Main Application class for Lumiya Viewer.
@@ -31,6 +32,9 @@ public class LumiyaApp extends MultiDexApplication {
     private static DisplayMetrics displayMetrics = new DisplayMetrics();
     private static Context mContext;
     private static SharedPreferences prefs;
+    
+    // Modern components
+    private static ModernLinkpointDemo modernDemo;
 
     public static String getAppVersion() {
         try {
@@ -110,7 +114,31 @@ public class LumiyaApp extends MultiDexApplication {
         // Initialize global options after resource conflicts are resolved
         GlobalOptions.getInstance().initialize();
         
+        // Initialize modern Linkpoint components
+        initializeModernSystems();
+        
         Log.i(TAG, "Lumiya Application initialization complete");
+    }
+    
+    /**
+     * Initialize modern Second Life protocol and rendering systems
+     */
+    private void initializeModernSystems() {
+        try {
+            Log.i(TAG, "Initializing modern Linkpoint components...");
+            modernDemo = new ModernLinkpointDemo(this);
+            Log.i(TAG, "Modern Linkpoint systems initialized successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize modern systems", e);
+            // Continue without modern systems if initialization fails
+        }
+    }
+    
+    /**
+     * Get modern components demo instance
+     */
+    public static ModernLinkpointDemo getModernDemo() {
+        return modernDemo;
     }
 
     @Override
