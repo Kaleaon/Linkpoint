@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace 'com.lumiyaviewer.lumiya'
-    compileSdk 30
+    compileSdk 33
     
     // Simplified resource processing to avoid AAPT2 issues
     aaptOptions {
