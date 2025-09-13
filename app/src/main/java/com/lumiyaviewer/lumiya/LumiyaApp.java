@@ -104,20 +104,26 @@ public class LumiyaApp extends MultiDexApplication {
         
         Log.i(TAG, "Lumiya Application starting up");
         
-        // Set global context
-        mContext = this;
-        
-        // CRITICAL: Initialize resource conflict resolver before any other initialization
-        // This fixes build-breaking resource conflicts between AndroidX and support libraries
-        ResourceConflictResolver.initialize(this);
-        
-        // Initialize global options after resource conflicts are resolved
-        // GlobalOptions.getInstance().initialize();  // Temporarily disabled due to dependencies
-        
-        // Initialize modern Linkpoint components
-        initializeModernSystems();
-        
-        Log.i(TAG, "Lumiya Application initialization complete");
+        try {
+            // Set global context
+            mContext = this;
+            
+            // CRITICAL: Initialize resource conflict resolver before any other initialization
+            // This fixes build-breaking resource conflicts between AndroidX and support libraries
+            ResourceConflictResolver.initialize(this);
+            
+            // Initialize global options after resource conflicts are resolved
+            // GlobalOptions.getInstance().initialize();  // Temporarily disabled due to dependencies
+            
+            // Initialize modern Linkpoint components with exception handling
+            initializeModernSystems();
+            
+            Log.i(TAG, "Lumiya Application initialization complete");
+        } catch (Exception e) {
+            Log.e(TAG, "Critical error during application initialization", e);
+            // Don't crash the app - continue with basic functionality
+            Log.w(TAG, "Application will continue with limited functionality");
+        }
     }
     
     /**
@@ -129,8 +135,16 @@ public class LumiyaApp extends MultiDexApplication {
             modernDemo = new ModernLinkpointDemo(this);
             Log.i(TAG, "Modern Linkpoint systems initialized successfully");
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize modern systems", e);
+            Log.e(TAG, "Failed to initialize modern systems - continuing with graceful degradation", e);
             // Continue without modern systems if initialization fails
+            modernDemo = null;
+            
+            // Log specific error for debugging
+            if (e.getCause() instanceof UnsatisfiedLinkError) {
+                Log.w(TAG, "Native library loading failed - modern graphics features will be disabled");
+            } else {
+                Log.w(TAG, "Modern component initialization failed: " + e.getMessage());
+            }
         }
     }
     

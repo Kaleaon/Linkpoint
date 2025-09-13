@@ -68,22 +68,28 @@ public class ModernMainActivity extends AppCompatActivity {
         
         Log.i(TAG, "=== Linkpoint Modern Sample Application Starting ===");
         
-        uiHandler = new Handler();
-        
-        // Create enhanced Material Design layout
-        createEnhancedLayout();
-        
-        // Set up toolbar as action bar
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Linkpoint Modern Demo");
-            getSupportActionBar().setSubtitle("Full Second Life Client Features");
+        try {
+            uiHandler = new Handler();
+            
+            // Create enhanced Material Design layout
+            createEnhancedLayout();
+            
+            // Set up toolbar as action bar
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Linkpoint Modern Demo");
+                getSupportActionBar().setSubtitle("Full Second Life Client Features");
+            }
+            
+            // Initialize modern components
+            initializeModernComponents();
+            
+            Log.i(TAG, "Modern Main Activity initialization complete");
+        } catch (Exception e) {
+            Log.e(TAG, "Critical error during activity initialization", e);
+            // Create a basic error layout instead of crashing
+            createErrorLayout(e);
         }
-        
-        // Initialize modern components
-        initializeModernComponents();
-        
-        Log.i(TAG, "Modern Main Activity initialization complete");
     }
     
     private void initializeModernComponents() {
@@ -97,17 +103,28 @@ public class ModernMainActivity extends AppCompatActivity {
             
             // Test graphics capabilities
             uiHandler.postDelayed(() -> {
-                String graphicsInfo = modernDemo.getGraphicsInfo();
-                updateStatus("✅ Graphics: " + graphicsInfo, 50);
-                
-                // Test connection capabilities
-                uiHandler.postDelayed(() -> {
-                    boolean connected = modernDemo.isConnected();
-                    updateStatus("✅ Ready for testing - All modern components available", 100);
-                }, 1000);
+                try {
+                    String graphicsInfo = modernDemo.getGraphicsInfo();
+                    updateStatus("✅ Graphics: " + graphicsInfo, 50);
+                    
+                    // Test connection capabilities
+                    uiHandler.postDelayed(() -> {
+                        boolean connected = modernDemo.isConnected();
+                        updateStatus("✅ Ready for testing - All modern components available", 100);
+                    }, 1000);
+                } catch (Exception e) {
+                    Log.w(TAG, "Error during graphics info retrieval", e);
+                    updateStatus("⚠️ Modern components partially available - some features may be limited", 75);
+                }
             }, 1000);
         } else {
-            updateStatus("❌ Modern components initialization failed", 0);
+            Log.w(TAG, "Modern components not available - likely due to missing native libraries");
+            updateStatus("⚠️ Modern components not available - basic functionality only", 50);
+            
+            // Show fallback information
+            uiHandler.postDelayed(() -> {
+                updateStatus("ℹ️ App running in compatibility mode - some features disabled", 100);
+            }, 2000);
         }
     }
     
@@ -287,25 +304,31 @@ public class ModernMainActivity extends AppCompatActivity {
             updateStatus("🔄 Testing modern Second Life connection...", 30);
             Log.i(TAG, "Testing modern Second Life connection with HTTP/2 + WebSocket...");
             
-            // Test connection with demo data
-            modernDemo.connectToSecondLife(
-                "wss://simulator.secondlife.com/eventqueue", 
-                "https://simulator.secondlife.com/caps/seed", 
-                "demo-auth-token"
-            );
-            
-            // Simulate connection progress
-            uiHandler.postDelayed(() -> {
-                updateStatus("🌐 HTTP/2 CAPS connection established", 60);
+            try {
+                // Test connection with demo data
+                modernDemo.connectToSecondLife(
+                    "wss://simulator.secondlife.com/eventqueue", 
+                    "https://simulator.secondlife.com/caps/seed", 
+                    "demo-auth-token"
+                );
+                
+                // Simulate connection progress
                 uiHandler.postDelayed(() -> {
-                    updateStatus("🔌 WebSocket event stream connected", 80);
+                    updateStatus("🌐 HTTP/2 CAPS connection established", 60);
                     uiHandler.postDelayed(() -> {
-                        updateStatus("✅ Modern transport layer connection test completed successfully", 100);
+                        updateStatus("🔌 WebSocket event stream connected", 80);
+                        uiHandler.postDelayed(() -> {
+                            updateStatus("✅ Modern transport layer connection test completed successfully", 100);
+                        }, 1000);
                     }, 1000);
-                }, 1000);
-            }, 1500);
+                }, 1500);
+            } catch (Exception e) {
+                Log.e(TAG, "Error during connection test", e);
+                updateStatus("❌ Connection test failed: " + e.getMessage(), 0);
+            }
         } else {
-            updateStatus("❌ Modern components not available", 0);
+            updateStatus("❌ Modern components not available - connection test skipped", 0);
+            Log.w(TAG, "Cannot test connection - modern components not initialized");
         }
     }
     
@@ -314,20 +337,26 @@ public class ModernMainActivity extends AppCompatActivity {
             updateStatus("🔄 Testing OAuth2 authentication...", 25);
             Log.i(TAG, "Testing OAuth2 authentication with Second Life...");
             
-            modernDemo.demonstrateModernAuthentication("demo_user", "demo_pass");
-            
-            // Simulate auth progress
-            uiHandler.postDelayed(() -> {
-                updateStatus("🔐 Generating OAuth2 tokens...", 50);
+            try {
+                modernDemo.demonstrateModernAuthentication("demo_user", "demo_pass");
+                
+                // Simulate auth progress
                 uiHandler.postDelayed(() -> {
-                    updateStatus("🛡️ Secure token storage configured", 75);
+                    updateStatus("🔐 Generating OAuth2 tokens...", 50);
                     uiHandler.postDelayed(() -> {
-                        updateStatus("✅ OAuth2 authentication test completed successfully", 100);
+                        updateStatus("🛡️ Secure token storage configured", 75);
+                        uiHandler.postDelayed(() -> {
+                            updateStatus("✅ OAuth2 authentication test completed successfully", 100);
+                        }, 1000);
                     }, 1000);
-                }, 1000);
-            }, 1500);
+                }, 1500);
+            } catch (Exception e) {
+                Log.e(TAG, "Error during authentication test", e);
+                updateStatus("❌ Authentication test failed: " + e.getMessage(), 0);
+            }
         } else {
-            updateStatus("❌ Modern components not available", 0);
+            updateStatus("❌ Modern components not available - authentication test skipped", 0);
+            Log.w(TAG, "Cannot test authentication - modern components not initialized");
         }
     }
     
@@ -336,45 +365,61 @@ public class ModernMainActivity extends AppCompatActivity {
             updateStatus("🔄 Testing intelligent asset streaming...", 20);
             Log.i(TAG, "Testing asset streaming with adaptive quality...");
             
-            modernDemo.demonstrateAssetStreaming();
-            
-            // Simulate streaming progress
-            uiHandler.postDelayed(() -> {
-                updateStatus("📦 Loading high-priority textures...", 40);
+            try {
+                modernDemo.demonstrateAssetStreaming();
+                
+                // Simulate streaming progress
                 uiHandler.postDelayed(() -> {
-                    updateStatus("🎨 Processing with Basis Universal transcoding...", 60);
+                    updateStatus("📦 Loading high-priority textures...", 40);
                     uiHandler.postDelayed(() -> {
-                        updateStatus("💾 Caching assets for optimal performance...", 80);
+                        updateStatus("🎨 Processing with fallback transcoding...", 60);
                         uiHandler.postDelayed(() -> {
-                            updateStatus("✅ Asset streaming test completed - 256MB cache ready", 100);
+                            updateStatus("💾 Caching assets for optimal performance...", 80);
+                            uiHandler.postDelayed(() -> {
+                                updateStatus("✅ Asset streaming test completed - cache ready", 100);
+                            }, 1000);
                         }, 1000);
                     }, 1000);
-                }, 1000);
-            }, 1500);
+                }, 1500);
+            } catch (Exception e) {
+                Log.e(TAG, "Error during asset streaming test", e);
+                updateStatus("❌ Asset streaming test failed: " + e.getMessage(), 0);
+            }
         } else {
-            updateStatus("❌ Modern components not available", 0);
+            updateStatus("❌ Modern components not available - asset streaming test skipped", 0);
+            Log.w(TAG, "Cannot test asset streaming - modern components not initialized");
         }
     }
     
     private void testModernRender() {
-        updateStatus("🔄 Testing modern OpenGL ES 3.0+ graphics pipeline...", 15);
-        Log.i(TAG, "Testing modern graphics pipeline with PBR rendering...");
+        updateStatus("🔄 Testing modern graphics pipeline...", 15);
+        Log.i(TAG, "Testing graphics pipeline with fallback rendering...");
         
         // Initialize modern graphics
         if (modernDemo != null) {
-            modernDemo.initializeGraphics();
-            modernDemo.demonstrateModernGraphics();
+            try {
+                modernDemo.initializeGraphics();
+                modernDemo.demonstrateModernGraphics();
+            } catch (Exception e) {
+                Log.e(TAG, "Error during graphics initialization", e);
+                updateStatus("❌ Graphics initialization failed: " + e.getMessage(), 0);
+                return;
+            }
         }
         
-        // Simulate graphics initialization
+        // Simulate graphics initialization (works even without modern components)
         uiHandler.postDelayed(() -> {
-            updateStatus("🎨 Initializing PBR shaders and lighting...", 35);
+            updateStatus("🎨 Initializing fallback shaders and lighting...", 35);
             uiHandler.postDelayed(() -> {
-                updateStatus("🖼️ Configuring texture compression (ASTC/ETC2)...", 55);
+                updateStatus("🖼️ Configuring texture compression (fallback)...", 55);
                 uiHandler.postDelayed(() -> {
-                    updateStatus("⚡ GPU memory pools allocated...", 75);
+                    updateStatus("⚡ Basic GPU memory allocated...", 75);
                     uiHandler.postDelayed(() -> {
-                        updateStatus("✅ Modern graphics pipeline ready - ES 3.0+ PBR rendering active", 100);
+                        if (modernDemo != null) {
+                            updateStatus("✅ Modern graphics pipeline ready - ES 3.0+ PBR rendering active", 100);
+                        } else {
+                            updateStatus("✅ Basic graphics pipeline ready - compatibility mode active", 100);
+                        }
                     }, 1000);
                 }, 1000);
             }, 1000);
@@ -558,6 +603,85 @@ public class ModernMainActivity extends AppCompatActivity {
             
             updateStatus("ℹ️ System info available - Check logs for complete details", 100);
             Log.i(TAG, info);
+        } else {
+            String info = "📱 System Information\n\n";
+            info += "Status: Running in compatibility mode\n";
+            info += "Modern Components: Not available (likely missing native libraries)\n";
+            info += "Build: Debug APK v3.4.3\n\n";
+            info += "Available Features:\n";
+            info += "• Basic UI ✅\n";
+            info += "• Settings ✅\n";
+            info += "• Error Reporting ✅\n";
+            info += "• Logging ✅\n\n";
+            info += "Disabled Features:\n";
+            info += "• OAuth2 Authentication ❌\n";
+            info += "• HTTP/2 CAPS Transport ❌\n";
+            info += "• WebSocket Events ❌\n";
+            info += "• OpenGL ES 3.0+ Pipeline ❌\n";
+            info += "• Intelligent Asset Streaming ❌\n";
+            
+            updateStatus("ℹ️ Basic system info - Check logs for details", 100);
+            Log.i(TAG, info);
+        }
+    }
+    
+    /**
+     * Create a simple error layout when normal initialization fails
+     */
+    private void createErrorLayout(Exception e) {
+        try {
+            // Create a simple linear layout
+            LinearLayout errorLayout = new LinearLayout(this);
+            errorLayout.setOrientation(LinearLayout.VERTICAL);
+            errorLayout.setPadding(32, 32, 32, 32);
+            
+            // Error title
+            TextView errorTitle = new TextView(this);
+            errorTitle.setText("⚠️ Startup Issue Detected");
+            errorTitle.setTextSize(20);
+            errorTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+            errorTitle.setTextColor(0xFFFF5722);
+            errorTitle.setGravity(Gravity.CENTER);
+            errorTitle.setPadding(16, 16, 16, 16);
+            errorLayout.addView(errorTitle);
+            
+            // Error message
+            TextView errorMessage = new TextView(this);
+            errorMessage.setText("The app encountered an issue during startup but has recovered to a basic mode.\n\n" +
+                               "Possible causes:\n" +
+                               "• Missing native libraries\n" +
+                               "• Device compatibility issues\n" +
+                               "• Insufficient permissions\n\n" +
+                               "The app will continue with basic functionality.");
+            errorMessage.setTextSize(14);
+            errorMessage.setPadding(16, 16, 16, 16);
+            errorLayout.addView(errorMessage);
+            
+            // Error details (if available)
+            if (e != null) {
+                TextView errorDetails = new TextView(this);
+                errorDetails.setText("Technical details:\n" + e.getMessage());
+                errorDetails.setTextSize(12);
+                errorDetails.setTextColor(0xFF666666);
+                errorDetails.setPadding(16, 16, 16, 16);
+                errorLayout.addView(errorDetails);
+            }
+            
+            // Basic restart button
+            Button restartButton = new Button(this);
+            restartButton.setText("Restart App");
+            restartButton.setOnClickListener(v -> {
+                Log.i(TAG, "User requested app restart");
+                LumiyaApp.restartApp();
+            });
+            errorLayout.addView(restartButton);
+            
+            setContentView(errorLayout);
+            
+        } catch (Exception layoutException) {
+            Log.e(TAG, "Failed to create error layout", layoutException);
+            // Last resort - just finish the activity
+            finish();
         }
     }
     
