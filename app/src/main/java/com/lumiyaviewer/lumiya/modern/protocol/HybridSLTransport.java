@@ -107,7 +107,7 @@ public class HybridSLTransport {
             Log.d(TAG, "Sending WebSocket message: " + jsonMessage.substring(0, Math.min(100, jsonMessage.length())));
             
             // Send via WebSocket (OkHttp WebSocket send returns boolean)
-            boolean sent = eventClient.sendMessage(jsonMessage);
+            boolean sent = eventClient.sendRawMessage(jsonMessage);
             
             if (sent) {
                 // Simulate immediate acknowledgment for real-time messages
