@@ -155,30 +155,84 @@ Java_com_lumiyaviewer_rawbuffers_DirectByteBuffer_copyPart(JNIEnv *env, jobject 
 
 JNIEXPORT jint JNICALL
 Java_com_lumiyaviewer_rawbuffers_DirectByteBuffer_zeroDecodeArray(JNIEnv *env, jclass clazz, jbyteArray src, jint srcStart, jint srcLen, jbyteArray dest, jint destStart, jint destMaxLen) {
-    LOGI("Zero decode array using fallback implementation (basic copy)");
+    LOGI("Zero decode array using REAL implementation");
     
-    // This is a simplified implementation - just copy data without zero decoding
-    // Real zero decoding would decompress Second Life's zero-encoded data format
+    if (!src || !dest) {
+        LOGE("Zero decode: null arrays provided");
+        return -1;
+    }
     
+    if (srcLen <= 0 || destMaxLen <= 0) {
+        LOGE("Zero decode: invalid lengths - src: %d, dest: %d", srcLen, destMaxLen);
+        return -1;
+    }
+    
+    // Get array elements
     jbyte* srcPtr = env->GetByteArrayElements(src, nullptr);
     jbyte* destPtr = env->GetByteArrayElements(dest, nullptr);
     
     if (!srcPtr || !destPtr) {
-        LOGW("Could not get array elements for zero decode");
+        LOGE("Zero decode: failed to get array elements");
         if (srcPtr) env->ReleaseByteArrayElements(src, srcPtr, 0);
         if (destPtr) env->ReleaseByteArrayElements(dest, destPtr, JNI_ABORT);
         return -1;
     }
     
-    // Simple copy (not real zero decode)
-    int copyLen = (srcLen < destMaxLen) ? srcLen : destMaxLen;
-    memcpy(destPtr + destStart, srcPtr + srcStart, copyLen);
+    LOGI("Zero decode: processing %d bytes from offset %d", srcLen, srcStart);
     
+    int srcPos = srcStart;
+    int destPos = destStart;
+    int srcEnd = srcStart + srcLen;
+    int destEnd = destStart + destMaxLen;
+    
+    // Process the zero-encoded data
+    while (srcPos < srcEnd && destPos < destEnd) {
+        unsigned char currentByte = (unsigned char)srcPtr[srcPos++];
+        
+        if (currentByte == 0x00) {
+            // Zero-encoding detected
+            if (srcPos >= srcEnd) {
+                LOGW("Zero decode: incomplete zero-encoding at end of data");
+                break;
+            }
+            
+            unsigned char zeroCount = (unsigned char)srcPtr[srcPos++];
+            
+            // Sanity check for zero count
+            if (zeroCount == 0) {
+                LOGW("Zero decode: zero count is 0, treating as literal 0x00");
+                if (destPos < destEnd) {
+                    destPtr[destPos++] = 0x00;
+                }
+                srcPos--; // Step back to reprocess the count byte as regular data
+                continue;
+            }
+            
+            // Check if we have enough space in destination
+            if (destPos + zeroCount > destEnd) {
+                LOGW("Zero decode: not enough space for %d zeros, truncating", zeroCount);
+                zeroCount = destEnd - destPos;
+            }
+            
+            // Write the zeros
+            memset(destPtr + destPos, 0x00, zeroCount);
+            destPos += zeroCount;
+            
+        } else {
+            // Regular byte - copy as-is
+            destPtr[destPos++] = (jbyte)currentByte;
+        }
+    }
+    
+    int decodedLength = destPos - destStart;
+    
+    // Release arrays
     env->ReleaseByteArrayElements(src, srcPtr, 0);
     env->ReleaseByteArrayElements(dest, destPtr, 0);
     
-    LOGW("Zero decode fallback: copied %d bytes (not actual decompression)", copyLen);
-    return copyLen;
+    LOGI("Zero decode: REAL implementation completed - input %d bytes, output %d bytes", srcLen, decodedLength);
+    
+    return decodedLength;
 }
 
 // Additional texture manipulation functions based on reference link
