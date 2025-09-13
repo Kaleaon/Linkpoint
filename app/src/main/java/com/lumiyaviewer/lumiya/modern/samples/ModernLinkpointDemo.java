@@ -7,6 +7,8 @@ import com.lumiyaviewer.lumiya.modern.graphics.ModernRenderPipeline;
 import com.lumiyaviewer.lumiya.modern.graphics.ModernTextureManager;
 import com.lumiyaviewer.lumiya.modern.protocol.HybridSLTransport;
 import com.lumiyaviewer.lumiya.modern.protocol.WebSocketEventClient;
+import com.lumiyaviewer.lumiya.modern.auth.OAuth2AuthManager;
+import com.lumiyaviewer.lumiya.modern.assets.ModernAssetManager;
 
 /**
  * Demonstration of modern Linkpoint components
@@ -19,14 +21,18 @@ public class ModernLinkpointDemo {
     private final HybridSLTransport transport;
     private final ModernTextureManager textureManager;
     private final ModernRenderPipeline renderPipeline;
+    private final OAuth2AuthManager authManager;
+    private final ModernAssetManager assetManager;
     
     public ModernLinkpointDemo(Context context) {
         this.context = context;
         this.transport = new HybridSLTransport();
         this.textureManager = new ModernTextureManager(context);
         this.renderPipeline = new ModernRenderPipeline();
+        this.authManager = new OAuth2AuthManager(context);
+        this.assetManager = new ModernAssetManager(context);
         
-        Log.i(TAG, "Modern Linkpoint components initialized");
+        Log.i(TAG, "Modern Linkpoint components initialized with full feature set");
     }
     
     /**
@@ -166,7 +172,63 @@ public class ModernLinkpointDemo {
         textureManager.shutdown();
         renderPipeline.cleanup();
         
+        // Shutdown new components
+        if (assetManager != null) {
+            assetManager.shutdown();
+        }
+        
         Log.i(TAG, "Modern components shut down successfully");
+    }
+    
+    /**
+     * Demonstrate modern authentication with OAuth2
+     */
+    public void demonstrateModernAuthentication(String username, String password) {
+        Log.i(TAG, "Demonstrating modern OAuth2 authentication...");
+        
+        authManager.authenticateUser(username, password)
+            .thenAccept(result -> {
+                if (result.isSuccess()) {
+                    Log.i(TAG, "OAuth2 authentication successful!");
+                    transport.setAuthToken(result.getToken());
+                    demonstrateAssetStreaming();
+                } else {
+                    Log.w(TAG, "Authentication failed: " + result.getMessage());
+                }
+            });
+    }
+    
+    /**
+     * Demonstrate intelligent asset streaming
+     */
+    public void demonstrateAssetStreaming() {
+        Log.i(TAG, "Demonstrating intelligent asset streaming...");
+        
+        String[] textureIds = {"texture_001", "texture_002", "texture_003"};
+        
+        for (String textureId : textureIds) {
+            assetManager.loadAsset(textureId, ModernAssetManager.AssetType.TEXTURE)
+                .thenAccept(assetData -> {
+                    if (assetData != null) {
+                        Log.d(TAG, "Loaded texture asset: " + assetData.getId());
+                        textureManager.processModernTexture(assetData.getData());
+                    }
+                });
+        }
+    }
+    
+    /**
+     * Get authentication manager
+     */
+    public OAuth2AuthManager getAuthManager() {
+        return authManager;
+    }
+    
+    /**
+     * Get asset manager  
+     */
+    public ModernAssetManager getAssetManager() {
+        return assetManager;
     }
     
     /**

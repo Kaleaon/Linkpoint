@@ -46,6 +46,12 @@
             </intent-filter>
         </activity>
         
+        <!-- Modern Main Activity for showcasing new functionality -->
+        <activity 
+            android:label="Modern Linkpoint Demo" 
+            android:name="com.lumiyaviewer.lumiya.ui.main.ModernMainActivity"
+            android:exported="false"/>
+        
         <activity 
             android:label="Second Life Terms of Service" 
             android:name="com.lumiyaviewer.lumiya.ui.login.TOSActivity"
