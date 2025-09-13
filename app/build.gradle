@@ -75,6 +75,13 @@ android {
             java.srcDirs = ['src/main/java']
             res.srcDirs = ['src/main/res']
             assets.srcDirs = ['src/main/assets']
+            
+            // Only include modern components - exclude all legacy decompiled code
+            java.includes = [
+                '**/modern/**',  // Only modern components
+                '**/Application.java',
+                '**/Application$*.java'
+            ]
         }
     }
 

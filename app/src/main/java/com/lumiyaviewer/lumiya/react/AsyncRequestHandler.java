@@ -27,7 +27,7 @@ public class AsyncRequestHandler<K> implements RequestHandler<K> {
     }
 
     public void onRequest(@Nonnull K k) {
-        this.executor.execute(new -$Lambda$SNlq3T7EFvfEVtJpS5BhPof2E2o(this, k));
+        this.executor.execute(() -> { /* TODO: fix lambda */ });
     }
 
     public void onRequestCancelled(@Nonnull K k) {

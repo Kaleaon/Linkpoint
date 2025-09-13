@@ -45,7 +45,7 @@ public class SLThreadingCircuit extends SLCircuit implements Executor {
     }
 
     public void HandleMessage(SLMessage sLMessage) {
-        this.queue.offer(new -$Lambda$YxYPv04qlnFzJCNumOXxffqwZwU(this, sLMessage));
+        this.queue.offer(() -> super.HandleMessage(sLMessage));
     }
 
     public void ProcessCloseCircuit() {

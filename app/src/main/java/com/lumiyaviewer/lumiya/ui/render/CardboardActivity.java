@@ -173,55 +173,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.11.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.11.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
+        public final void brokenMethod(
+        // TODO: implement method
+    }
     });
     /* access modifiers changed from: private */
     public final AtomicReference<SLAvatarControl> avatarControl = new AtomicReference<>();
@@ -356,81 +310,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 
 */
 
-                public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.26.run():void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.26.run():void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
+                public final void brokenMethod(
+        // TODO: implement method
+    }
             });
         }
     };
@@ -583,86 +465,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     
 */
 
-                    public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.20.run():void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.20.run():void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                    	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                    	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
+                    public final void brokenMethod(
+        // TODO: implement method
+    }
                 });
             } else if (!CardboardActivity.this.controller.appButtonState && this.appButtonPressed) {
                 CardboardActivity.this.runOnUiThread(new Runnable(this) {
@@ -753,88 +558,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     
 */
 
-                    public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.21.run():void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.21.run():void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.connectElseIf(RegionGen.java:175)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:152)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                    	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                    	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
+                    public final void brokenMethod(
+        // TODO: implement method
+    }
                 });
             }
             this.appButtonPressed = CardboardActivity.this.controller.appButtonState;
@@ -973,98 +699,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                             
 */
 
-                            public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.29.run():void, dex: classes.dex
-                            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.29.run():void, class status: UNLOADED
-                            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                            	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                            	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                            	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                            	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                            
-*/
+                            public final void brokenMethod(
+        // TODO: implement method
+    }
                         });
                         return;
                     }
@@ -1166,95 +803,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                         
 */
 
-                        public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.27.run():void, dex: classes.dex
-                        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.27.run():void, class status: UNLOADED
-                        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                        	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                        	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                        	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                        
-*/
+                        public final void brokenMethod(
+        // TODO: implement method
+    }
                     });
                     this.activeMoveControl = null;
                 } else if (moveControl != null) {
@@ -1357,93 +908,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                         
 */
 
-                        public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.30.run():void, dex: classes.dex
-                        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.30.run():void, class status: UNLOADED
-                        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                        	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                        	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.connectElseIf(RegionGen.java:175)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:152)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                        	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                        
-*/
+                        public final void brokenMethod(
+        // TODO: implement method
+    }
                     });
                 }
             } else if (this.activeMoveControl != null) {
@@ -1538,88 +1005,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     
 */
 
-                    public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.28.run():void, dex: classes.dex
-                    jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.28.run():void, class status: UNLOADED
-                    	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                    	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                    	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                    	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                    	at jadx.core.codegen.RegionGen.connectElseIf(RegionGen.java:175)
-                    	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:152)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                    	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                    	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                    	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                    	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                    	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                    	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                    	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                    	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                    	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                    	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                    	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                    	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                    	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                    	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                    	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                    	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                    	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                    	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                    	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                    	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-                    	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-                    	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                    	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-                    	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-                    	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-                    	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-                    	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                    	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                    	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                    	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                    	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                    	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                    	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                    
-*/
+                    public final void brokenMethod(
+        // TODO: implement method
+    }
                 });
                 this.activeMoveControl = null;
             }
@@ -1695,55 +1083,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.15.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.15.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
+        public final void brokenMethod(
+        // TODO: implement method
+    }
     });
     @BindView(2131755636)
     TextView dialogQuestionText;
@@ -1892,55 +1234,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.12.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.12.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
+        public final void brokenMethod(
+        // TODO: implement method
+    }
     });
     /* access modifiers changed from: private */
     public volatile float neutralAgentHeading = Float.NaN;
@@ -2764,55 +2060,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.13.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.13.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
+        public final void brokenMethod(
+        // TODO: implement method
+    }
     });
     @BindView(2131755279)
     ProgressBar speakLevelIndicator;
@@ -2888,55 +2138,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.16.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.16.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
+        public final void brokenMethod(
+        // TODO: implement method
+    }
     });
     private final SubscriptionData<ChatterID, VoiceChatInfo> voiceChatInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
@@ -2993,55 +2197,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.17.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.17.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
+        public final void brokenMethod(
+        // TODO: implement method
+    }
     });
     private boolean voiceEnabled = false;
     private final SubscriptionData<SubscriptionSingleKey, Boolean> voiceLoggedIn = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
@@ -3099,55 +2257,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void onData(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.14.onData(java.lang.Object):void, dex: classes.dex
-        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.14.onData(java.lang.Object):void, class status: UNLOADED
-        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:98)
-        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:480)
-        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-        	at jadx.core.codegen.ClassGen.addInsnBody(ClassGen.java:437)
-        	at jadx.core.codegen.ClassGen.addField(ClassGen.java:378)
-        	at jadx.core.codegen.ClassGen.addFields(ClassGen.java:348)
-        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:226)
-        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-        
-*/
+        public final void brokenMethod(
+        // TODO: implement method
+    }
     });
     @BindView(2131755254)
     VoiceStatusView voiceStatusView;
@@ -3340,97 +2452,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                         
 */
 
-                        public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.22.run():void, dex: classes.dex
-                        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.22.run():void, class status: UNLOADED
-                        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                        	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                        	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                        	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                        	at jadx.core.codegen.ClassGen.addInnerClass(ClassGen.java:249)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:238)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                        
-*/
+                        public final void brokenMethod(
+        // TODO: implement method
+    }
                     });
                 }
             }
@@ -3623,83 +2647,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 
 */
 
-                public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.23.run():void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.23.run():void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.addInnerClass(ClassGen.java:249)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:238)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
+                public final void brokenMethod(
+        // TODO: implement method
+    }
             });
         }
 
@@ -3962,89 +2912,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                         
 */
 
-                        public final void onChatterNameUpdated(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.18.onChatterNameUpdated(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, dex: classes.dex
-                        jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.18.onChatterNameUpdated(com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever):void, class status: UNLOADED
-                        	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                        	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                        	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:640)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                        	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                        	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                        	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:429)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                        	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                        	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                        	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                        	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                        	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                        	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                        	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                        	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                        	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                        	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                        	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                        	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                        	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                        	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                        	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                        	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                        	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                        	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                        	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                        	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                        	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                        	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                        	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                        	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                        	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                        	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                        	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                        
-*/
+                        public final void brokenMethod(
+        // TODO: implement method
+    }
                     }, UIThreadExecutor.getInstance());
                 }
             } else {
@@ -4480,75 +3350,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 
 */
 
-                public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.25.run():void, dex: classes.dex
-                jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.25.run():void, class status: UNLOADED
-                	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-                	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-                	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-                	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-                	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-                	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-                	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-                	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-                	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-                	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeRegionIndent(RegionGen.java:98)
-                	at jadx.core.codegen.RegionGen.makeIf(RegionGen.java:142)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:62)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-                	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-                	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-                	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-                	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-                	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-                	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-                	at java.util.ArrayList.forEach(ArrayList.java:1259)
-                	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-                	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-                	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-                	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-                	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-                	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-                	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-                	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-                	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-                	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-                	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-                	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-                	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-                	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-                	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-                	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-                	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-                
-*/
+                public final void brokenMethod(
+        // TODO: implement method
+    }
             });
         }
     }
@@ -4979,72 +3783,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             
 */
 
-            public final void onViewInvalidated(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.19.onViewInvalidated():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.19.onViewInvalidated():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
+            public final void brokenMethod(
+        // TODO: implement method
+    }
         });
         int applyDimension = (int) TypedValue.applyDimension(2, 16.0f, getResources().getDisplayMetrics());
         this.voiceViewHeightAllowance = instance.getVoiceEnabled() ? (int) TypedValue.applyDimension(1, VOICE_VIEW_HEIGHT_ALLOWANCE_DP, getResources().getDisplayMetrics()) : 0;
@@ -5131,72 +3872,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             
 */
 
-            public final void run(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.24.run():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.24.run():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
+            public final void brokenMethod(
+        // TODO: implement method
+    }
         });
         ButterKnife.bind((Object) this, (View) this.onScreenControlsLayout);
         for (View view : new View[]{this.buttonTouch, this.buttonSpeak, this.buttonChat, this.buttonSpeechSend, this.buttonSit, this.buttonTouchObject, this.buttonObjectChat, this.buttonMoveForward, this.buttonMoveBackward, this.buttonTurnLeft, this.buttonTurnRight, this.buttonStandUp, this.yesButton, this.noButton}) {
@@ -5298,72 +3976,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             
 */
 
-            public final void onGlobalLayout(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.8.onGlobalLayout():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.8.onGlobalLayout():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
+            public final void brokenMethod(
+        // TODO: implement method
+    }
         });
         this.cardboardPrimaryControls.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener(this) {
 
@@ -5437,72 +4052,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             
 */
 
-            public final void onGlobalLayout(
-/*
-Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.9.onGlobalLayout():void, dex: classes.dex
-            jadx.core.utils.exceptions.JadxRuntimeException: Method args not loaded: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yhBpPTpVtOAhPHTLXL5B0hI4gXA.9.onGlobalLayout():void, class status: UNLOADED
-            	at jadx.core.dex.nodes.MethodNode.getArgRegs(MethodNode.java:278)
-            	at jadx.core.codegen.MethodGen.addDefinition(MethodGen.java:116)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:313)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.InsnGen.inlineAnonymousConstructor(InsnGen.java:676)
-            	at jadx.core.codegen.InsnGen.makeConstructor(InsnGen.java:607)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:364)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:231)
-            	at jadx.core.codegen.InsnGen.addWrappedArg(InsnGen.java:123)
-            	at jadx.core.codegen.InsnGen.addArg(InsnGen.java:107)
-            	at jadx.core.codegen.InsnGen.generateMethodArguments(InsnGen.java:787)
-            	at jadx.core.codegen.InsnGen.makeInvoke(InsnGen.java:728)
-            	at jadx.core.codegen.InsnGen.makeInsnBody(InsnGen.java:368)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:250)
-            	at jadx.core.codegen.InsnGen.makeInsn(InsnGen.java:221)
-            	at jadx.core.codegen.RegionGen.makeSimpleBlock(RegionGen.java:109)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:55)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.RegionGen.makeSimpleRegion(RegionGen.java:92)
-            	at jadx.core.codegen.RegionGen.makeRegion(RegionGen.java:58)
-            	at jadx.core.codegen.MethodGen.addRegionInsns(MethodGen.java:211)
-            	at jadx.core.codegen.MethodGen.addInstructions(MethodGen.java:204)
-            	at jadx.core.codegen.ClassGen.addMethodCode(ClassGen.java:318)
-            	at jadx.core.codegen.ClassGen.addMethod(ClassGen.java:271)
-            	at jadx.core.codegen.ClassGen.lambda$addInnerClsAndMethods$2(ClassGen.java:240)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-            	at java.util.ArrayList.forEach(ArrayList.java:1259)
-            	at java.util.stream.SortedOps$RefSortingSink.end(SortedOps.java:395)
-            	at java.util.stream.Sink$ChainedReference.end(Sink.java:258)
-            	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:483)
-            	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:472)
-            	at java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-            	at java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-            	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-            	at java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:485)
-            	at jadx.core.codegen.ClassGen.addInnerClsAndMethods(ClassGen.java:236)
-            	at jadx.core.codegen.ClassGen.addClassBody(ClassGen.java:227)
-            	at jadx.core.codegen.ClassGen.addClassCode(ClassGen.java:112)
-            	at jadx.core.codegen.ClassGen.makeClass(ClassGen.java:78)
-            	at jadx.core.codegen.CodeGen.wrapCodeGen(CodeGen.java:44)
-            	at jadx.core.codegen.CodeGen.generateJavaCode(CodeGen.java:33)
-            	at jadx.core.codegen.CodeGen.generate(CodeGen.java:21)
-            	at jadx.core.ProcessClass.generateCode(ProcessClass.java:61)
-            	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
-            
-*/
+            public final void brokenMethod(
+        // TODO: implement method
+    }
         });
         this.gvrView.setOnTouchListener(new View.OnTouchListener(this) {
 
