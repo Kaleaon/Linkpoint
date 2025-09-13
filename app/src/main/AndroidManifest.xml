@@ -35,7 +35,7 @@
         
         <activity 
             android:label="@string/app_name" 
-            android:name="com.lumiyaviewer.lumiya.ui.main.ModernMainActivity" 
+            android:name="com.lumiyaviewer.lumiya.ui.login.LoginActivity" 
             android:clearTaskOnLaunch="true" 
             android:launchMode="singleTask" 
             android:exported="true">
@@ -43,6 +43,15 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        
+        <!-- Modern demo activity - accessible via menu -->
+        <activity 
+            android:label="Linkpoint Demo" 
+            android:name="com.lumiyaviewer.lumiya.ui.main.ModernMainActivity" 
+            android:clearTaskOnLaunch="true" 
+            android:launchMode="singleTask" 
+            android:exported="false">
         </activity>
         
         <!-- Original login activity - temporarily disabled
