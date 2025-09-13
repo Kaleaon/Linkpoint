@@ -139,6 +139,8 @@ dependencies {
         resolutionStrategy {
             force 'androidx.appcompat:appcompat:1.6.1'
             force 'com.google.android.material:material:1.10.0'
+            force 'androidx.activity:activity:1.7.2'
+            force 'androidx.activity:activity-ktx:1.7.2'
         }
     }
 }
