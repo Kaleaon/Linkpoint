@@ -365,7 +365,7 @@ public class ModernAssetManager {
             
             // Generate asset data with quality-based size
             int baseSize = getBaseSizeForType(type);
-            int scaledSize = (int)(baseSize * quality.scaleFactor * quality.scaleFactor);
+            int scaledSize = (int)(baseSize * quality.scaleFactor);
             byte[] data = new byte[scaledSize];
             
             // Fill with simulated data
