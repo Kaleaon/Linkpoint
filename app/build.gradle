@@ -4,12 +4,11 @@ plugins {
 
 android {
     namespace 'com.lumiyaviewer.lumiya'
-    compileSdk 34
+    compileSdk 30
     
-    // Resource processing options
+    // Simplified resource processing to avoid AAPT2 issues
     aaptOptions {
-        noCompress 'ktx2'  // Don't compress texture files
-        additionalParameters '--no-version-vectors'
+        noCompress 'ktx2'
     }
 
     defaultConfig {
