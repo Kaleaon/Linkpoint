@@ -242,6 +242,3 @@ public class comprehensive_login_test {
         System.out.println("4. Verify with real SL credentials");
     }
 }
-</content>
-    </file>
-</invoke>
