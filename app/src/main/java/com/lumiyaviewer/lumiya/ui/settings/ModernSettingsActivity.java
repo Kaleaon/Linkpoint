@@ -1,5 +1,6 @@
 package com.lumiyaviewer.lumiya.ui.settings;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -64,6 +65,7 @@ public class ModernSettingsActivity extends AppCompatActivity {
         createNetworkSection();  
         createAssetSection();
         createDebugSection();
+        createEmulatorSection();
         
         scrollView.addView(mainLayout);
         setContentView(scrollView);
@@ -435,6 +437,90 @@ public class ModernSettingsActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+    
+    private void createEmulatorSection() {
+        LinearLayout emulatorSection = createSection("🔧 Emulator Management");
+        
+        // Emulator availability check
+        EmulatorManager emulatorManager = new EmulatorManager(this);
+        boolean isAvailable = emulatorManager.isAvailable();
+        
+        addTextSetting(emulatorSection,
+                      "Emulator Tools Status", 
+                      "Android emulator management availability",
+                      isAvailable ? "Available" : "Not Available");
+        
+        // Quick emulator status
+        addActionButton(emulatorSection,
+                       "Check Emulator Status",
+                       "Show running emulators and connected devices",
+                       () -> {
+                           if (isAvailable) {
+                               emulatorManager.getStatus(new EmulatorManager.EmulatorCallback() {
+                                   @Override
+                                   public void onSuccess(String message) {
+                                       runOnUiThread(() -> showToast("Status checked - see notification"));
+                                   }
+                                   
+                                   @Override
+                                   public void onError(String error) {
+                                       runOnUiThread(() -> showToast("Status check failed"));
+                                   }
+                                   
+                                   @Override
+                                   public void onStatusUpdate(String status) {
+                                       // Update UI if needed
+                                   }
+                               });
+                           } else {
+                               showToast("Emulator management not available");
+                           }
+                       });
+        
+        // Open full emulator settings
+        addActionButton(emulatorSection,
+                       "Open Emulator Settings",
+                       "Access full emulator management interface",
+                       () -> {
+                           if (isAvailable) {
+                               Intent intent = new Intent(this, EmulatorSettingsActivity.class);
+                               startActivity(intent);
+                           } else {
+                               showToast("Emulator management not available");
+                           }
+                       });
+        
+        // Quick AVD list
+        addActionButton(emulatorSection,
+                       "List Available AVDs",
+                       "Show currently configured Android Virtual Devices",
+                       () -> {
+                           if (isAvailable) {
+                               emulatorManager.listAVDs(new EmulatorManager.EmulatorCallback() {
+                                   @Override
+                                   public void onSuccess(String output) {
+                                       runOnUiThread(() -> {
+                                           String summary = EmulatorManager.formatAVDSummary(
+                                               EmulatorManager.parseAVDList(output));
+                                           showToast("AVDs: " + summary.split("\n").length + " found");
+                                       });
+                                   }
+                                   
+                                   @Override
+                                   public void onError(String error) {
+                                       runOnUiThread(() -> showToast("Failed to list AVDs"));
+                                   }
+                                   
+                                   @Override
+                                   public void onStatusUpdate(String status) {
+                                       // Update UI if needed
+                                   }
+                               });
+                           } else {
+                               showToast("Emulator management not available");
+                           }
+                       });
     }
     
     private void saveSettings() {

@@ -92,6 +92,8 @@ android {
                 '**/LumiyaApp.java',  // Main app class
                 '**/ui/main/ModernMainActivity.java',  // Modern main activity
                 '**/ui/settings/ModernSettingsActivity.java',  // Modern settings activity
+                '**/ui/settings/EmulatorManager.java',  // Emulator management
+                '**/ui/settings/EmulatorSettingsActivity.java',  // Emulator settings UI
                 '**/ui/modern/**',  // Modern UI components
                 '**/fixes/**',    // Resource conflict fixes
             ]
