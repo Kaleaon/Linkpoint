@@ -119,9 +119,35 @@ public class WebSocketEventClient extends WebSocketListener {
     }
     
     /**
-     * Send message through WebSocket connection
+     * Send a formatted message through the WebSocket connection (from main branch)
      */
-    public boolean sendMessage(String message) {
+    public java.util.concurrent.CompletableFuture<Boolean> sendMessage(String messageType, String payload) {
+        return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+            if (connected && webSocket != null) {
+                try {
+                    String message = String.format(
+                        "{\"type\":\"%s\",\"payload\":%s}", 
+                        messageType, 
+                        payload
+                    );
+                    boolean success = webSocket.send(message);
+                    Log.d(TAG, "Sent message: " + messageType + " (success: " + success + ")");
+                    return success;
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to send message: " + messageType, e);
+                    return false;
+                }
+            } else {
+                Log.w(TAG, "Cannot send message - WebSocket not connected");
+                return false;
+            }
+        });
+    }
+    
+    /**
+     * Send raw message through WebSocket connection (enhanced version)
+     */
+    public boolean sendRawMessage(String message) {
         if (webSocket == null || !connected) {
             Log.w(TAG, "Cannot send message: WebSocket not connected");
             return false;
@@ -136,7 +162,7 @@ public class WebSocketEventClient extends WebSocketListener {
     }
     
     /**
-     * Send binary message through WebSocket connection
+     * Send binary message through WebSocket connection (enhanced version)
      */
     public boolean sendBinaryMessage(byte[] data) {
         if (webSocket == null || !connected) {
