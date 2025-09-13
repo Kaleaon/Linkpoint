@@ -8,6 +8,8 @@ import okhttp3.RequestBody;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Modern HTTP/2 CAPS client for Second Life protocol
@@ -20,6 +22,7 @@ public class HTTP2CapsClient {
     
     private final OkHttpClient client;
     private String authToken;
+    private final Map<String, String> capabilities = new ConcurrentHashMap<>();
     
     public HTTP2CapsClient() {
         this.client = new OkHttpClient.Builder()
@@ -34,6 +37,27 @@ public class HTTP2CapsClient {
     
     public void setAuthToken(String token) {
         this.authToken = token;
+    }
+    
+    /**
+     * Configure capability URLs from seed capability response
+     */
+    public void configureCapabilities(Map<String, String> capabilitiesMap) {
+        capabilities.clear();
+        capabilities.putAll(capabilitiesMap);
+        Log.i(TAG, "Configured " + capabilities.size() + " capabilities");
+        
+        // Log available capabilities for debugging
+        for (Map.Entry<String, String> entry : capabilities.entrySet()) {
+            Log.d(TAG, "Capability: " + entry.getKey() + " -> " + entry.getValue());
+        }
+    }
+    
+    /**
+     * Get capability URL by name
+     */
+    public String getCapabilityUrl(String capabilityName) {
+        return capabilities.get(capabilityName);
     }
     
     /**
