@@ -28,12 +28,12 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-lto")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-lto")
 
-# Available source files for main openjpeg library (Basis Universal integration)
+# Available source files for main openjpeg library (Real OpenJPEG implementation)
 set(OPENJPEG_SOURCES
     basis_universal/basisu_transcoder.cpp
     # Enable JNI files for texture processing
     jni/basis_transcoder_jni.cpp
-    jni/openjpeg_basis_integration.cpp
+    jni/openjpeg_real_implementation.cpp
 )
 
 # Stub library sources for missing dependencies
