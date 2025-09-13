@@ -24,12 +24,16 @@ if(DEFINED OPT_FLAGS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OPT_FLAGS}")
 endif()
 
+# Disable LTO to avoid NDK toolchain issues
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-lto")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-lto")
+
 # Available source files only - simplified for core functionality
 set(NATIVE_SOURCES
     basis_universal/basisu_transcoder.cpp
-    # Temporarily exclude JNI files that have KTX2 dependencies
-    # jni/basis_transcoder_jni.cpp
-    # jni/openjpeg_basis_integration.cpp
+    # Enable JNI files for texture processing
+    jni/basis_transcoder_jni.cpp
+    jni/openjpeg_basis_integration.cpp
 )
 
 # Include directories
@@ -60,7 +64,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -ffunction-sections 
 if(ANDROID)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
     
-    # Enable dead code elimination
+    # Enable dead code elimination with compatible linker
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--gc-sections")
 endif()
 
@@ -97,7 +101,7 @@ if(vulkan-lib)
     target_link_libraries(openjpeg ${vulkan-lib})
 endif()
 
-# Set target properties for better optimization
+# Set target properties for better optimization (disable IPO to avoid linker issues)
 set_target_properties(openjpeg PROPERTIES
-    INTERPROCEDURAL_OPTIMIZATION TRUE
+    INTERPROCEDURAL_OPTIMIZATION FALSE
 )
