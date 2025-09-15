@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.search;
+import java.util.*;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -28,7 +29,6 @@ public class SearchGridFragment_ViewBinding implements Unbinder {
             public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                 return searchGridFragment.onSearchTextAction(i, keyEvent);
             }
-        });
         searchGridFragment.searchResultsList = (RecyclerView) Utils.findRequiredViewAsType(view, R.id.search_results_list, "field 'searchResultsList'", RecyclerView.class);
         searchGridFragment.radioGroupSearchType = (RadioGroup) Utils.findRequiredViewAsType(view, R.id.radiogroup_search_type, "field 'radioGroupSearchType'", RadioGroup.class);
         View findRequiredView2 = Utils.findRequiredView(view, R.id.start_search_button, "method 'onSearchButtonClicked'");
@@ -37,7 +37,6 @@ public class SearchGridFragment_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 searchGridFragment.onSearchButtonClicked();
             }
-        });
     }
 
     @CallSuper

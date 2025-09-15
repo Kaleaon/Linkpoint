@@ -18,7 +18,7 @@ public class GenericHTTPExecutor extends ThreadPoolExecutor {
     }
 
     private GenericHTTPExecutor() {
-        super(1, 3, 60, TimeUnit.SECONDS, new LinkedBlockingQueue(), new ThreadFactory() {
+        super(1, 3, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactory() {
             public Thread newThread(@Nonnull Runnable runnable) {
                 return new Thread(runnable, "HTTPAccess");
             }
@@ -26,9 +26,7 @@ public class GenericHTTPExecutor extends ThreadPoolExecutor {
         allowCoreThreadTimeOut(true);
     }
 
-    /* synthetic */ GenericHTTPExecutor(GenericHTTPExecutor genericHTTPExecutor) {
-        this();
-    }
+    // Removed synthetic constructor artifact from decompiler
 
     public static ExecutorService getInstance() {
         return InstanceHolder.instance;

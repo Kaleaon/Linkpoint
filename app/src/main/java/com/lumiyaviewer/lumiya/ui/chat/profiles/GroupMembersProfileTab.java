@@ -102,10 +102,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<GroupManager.GroupMembersQuery, LazyList<GroupMember>> groupMembers = new SubscriptionData<>(UIThreadExecutor.getInstance());
     private final SubscriptionData<UUID, GroupProfileReply> groupProfile = new SubscriptionData<>(UIThreadExecutor.getInstance());
     private final LoadableMonitor loadableMonitor = new LoadableMonitor(this.groupMemberList, this.myGroupList, this.groupProfile, this.groupMembers).withOptionalLoadables(this.agentCircuit).withDataChangedListener(this);
@@ -413,9 +409,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton((int) R.string.cancel, (DialogInterface.OnClickListener) new $Lambda$MA84Fd9rUtD4VNMgzavMq_NILXY()).create().show();
         }
     }
@@ -511,9 +504,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setNegativeButton((int) R.string.cancel, (DialogInterface.OnClickListener) new DialogInterface.OnClickListener() {
             private final /* synthetic */ void $m$0(
 /*
@@ -590,9 +580,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).create().show();
     }
 

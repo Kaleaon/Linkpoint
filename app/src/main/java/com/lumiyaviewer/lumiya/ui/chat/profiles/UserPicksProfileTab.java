@@ -206,9 +206,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
                 }).setNegativeButton("No", new $Lambda$0JruYUVxhc8cYQ6nJZD1LVnQE5A());
                 builder.create().show();
             }
@@ -305,10 +302,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         ((ListView) inflate.findViewById(R.id.picks_list_view)).setAdapter(this.picksAdapter);
         ((ListView) inflate.findViewById(R.id.picks_list_view)).setOnItemClickListener(new AdapterView.OnItemClickListener(this) {
 
@@ -378,10 +371,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout));
         this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_user_selected), getString(R.string.user_picks_fail));
         this.loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout));
@@ -401,7 +390,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: protected */
     public void onShowUser(@Nullable ChatterID chatterID) {
-        boolean z;
         UserManager userManager;
         int i = 0;
         this.loadableMonitor.unsubscribeAll();

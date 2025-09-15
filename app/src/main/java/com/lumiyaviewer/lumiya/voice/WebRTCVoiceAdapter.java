@@ -116,7 +116,6 @@ public class WebRTCVoiceAdapter {
                     adapterCallback.onVoiceError(error);
                 }
             }
-        });
         
         return webRTCManager.initialize()
             .thenApply(success -> {
@@ -126,7 +125,6 @@ public class WebRTCVoiceAdapter {
                 }
                 Log.i(TAG, "WebRTC voice adapter initialization " + (success ? "successful" : "failed"));
                 return success;
-            });
     }
     
     /**
@@ -342,7 +340,6 @@ public class WebRTCVoiceAdapter {
                 Log.e(TAG, "Failed to process SL voice credentials", e);
                 return false;
             }
-        });
     }
     
     /**

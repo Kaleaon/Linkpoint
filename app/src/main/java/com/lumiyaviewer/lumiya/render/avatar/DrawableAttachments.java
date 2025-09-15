@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.render.avatar;
+import java.util.*;
 
 import android.annotation.SuppressLint;
 import com.google.common.collect.ImmutableList;
@@ -73,7 +74,6 @@ class DrawableAttachments {
     boolean Draw(RenderContext renderContext, AvatarSkeleton avatarSkeleton, boolean z) {
         if (!this.rigged.isEmpty()) {
             if (renderContext.hasGL30) {
-                boolean z2;
                 renderContext.setupRiggedMeshProgram(true);
                 if (this.glAnimationDataBuffer == null) {
                     this.glAnimationDataBuffer = new GLLoadableBuffer(new DirectByteBuffer(renderContext.currentRiggedMeshProgram.uAnimationDataBlockSize));

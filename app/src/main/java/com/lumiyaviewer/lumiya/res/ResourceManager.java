@@ -49,7 +49,6 @@ public abstract class ResourceManager<ResourceParams, ResourceType> {
         public ResourceRequest<ResourceParams, ResourceType> load(@Nonnull ResourceParams resourceparams) throws Exception {
             return ResourceManager.this.CreateNewRequest(resourceparams, ResourceManager.this);
         }
-    });
 
     public void CancelRequest(ResourceConsumer resourceConsumer) {
         if (resourceConsumer != null) {

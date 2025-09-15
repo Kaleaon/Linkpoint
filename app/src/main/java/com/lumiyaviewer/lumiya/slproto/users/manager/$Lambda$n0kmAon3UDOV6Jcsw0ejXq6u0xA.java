@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.slproto.users.manager;
+import java.util.*;
 
 /* renamed from: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$n0kmAon3UDOV6Jcsw0ejXq6u0xA  reason: invalid class name */
 final /* synthetic */ class $Lambda$n0kmAon3UDOV6Jcsw0ejXq6u0xA implements Runnable {

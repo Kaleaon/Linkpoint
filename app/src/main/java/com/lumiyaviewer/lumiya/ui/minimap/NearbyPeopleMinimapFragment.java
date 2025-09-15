@@ -126,7 +126,6 @@ public class NearbyPeopleMinimapFragment extends Fragment {
         }
 
         public void setSelected(UUID uuid) {
-            int i;
             this.selectedUUID = uuid;
             if (uuid != null) {
                 int i2 = 0;

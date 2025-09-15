@@ -118,7 +118,6 @@ public class SLSearch extends SLModule {
                     return;
             }
         }
-    });
     private final ResultHandler<SearchGridQuery, LazyList<SearchGridResult>> searchResultHandler;
     private final UserManager userManager;
 

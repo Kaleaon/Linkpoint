@@ -116,7 +116,6 @@ public class SLUserProfiles extends SLModule {
                     SLUserProfiles.this.userManager.getAvatarPicks().requestUpdate(SLUserProfiles.this.userManager.getUserID());
                 }
             }
-        });
         SendMessage(pickDelete);
     }
 
@@ -282,7 +281,6 @@ public class SLUserProfiles extends SLModule {
                     SLUserProfiles.this.userManager.getAvatarProperties().requestUpdate(SLUserProfiles.this.userManager.getUserID());
                 }
             }
-        });
         SendMessage(avatarPropertiesUpdate);
     }
 
@@ -309,7 +307,6 @@ public class SLUserProfiles extends SLModule {
                     SLUserProfiles.this.userManager.getAvatarPicks().requestUpdate(SLUserProfiles.this.userManager.getUserID());
                 }
             }
-        });
         SendMessage(pickInfoUpdate);
     }
 

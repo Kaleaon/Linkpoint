@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.common;
+import java.util.*;
 
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
@@ -65,7 +66,6 @@ public class ButteryProgressBar extends View {
                 public void onAnimationUpdate(ValueAnimator valueAnimator) {
                     ButteryProgressBar.this.invalidate();
                 }
-            });
             this.mPaint.setColor(this.mBarColor);
             this.mShadow = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{(this.mBarColor & ViewCompat.MEASURED_SIZE_MASK) | 570425344, 0});
         } catch (Throwable th) {

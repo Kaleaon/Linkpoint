@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.dao;
+import java.util.*;
 
 public class MuteListCachedData {
     private int CRC;

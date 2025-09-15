@@ -254,9 +254,6 @@ public class BakeProcess implements SLTextureUploadRequest.TextureUploadComplete
     }
 
     public void OnTextureUploadComplete(SLTextureUploadRequest sLTextureUploadRequest) {
-        boolean z;
-        int i;
-        int i2;
         if (sLTextureUploadRequest instanceof BakedImageUploadRequest) {
             BakedImageUploadRequest bakedImageUploadRequest = (BakedImageUploadRequest) sLTextureUploadRequest;
             Debug.Log("Baking: texture " + bakedImageUploadRequest.bakedIndex + " uploaded, UUID = " + bakedImageUploadRequest.getTextureID());

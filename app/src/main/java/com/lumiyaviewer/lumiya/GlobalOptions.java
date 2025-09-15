@@ -339,7 +339,6 @@ public class GlobalOptions implements OnSharedPreferenceChangeListener {
     }
 
     public void updateFromPreferences(Context context, SharedPreferences sharedPreferences) {
-        int i;
         Debug.Printf("Updating options from preferences.", new Object[0]);
         updateNotificationSoundDefault(sharedPreferences, NotificationType.Private);
         updateNotificationSoundDefault(sharedPreferences, NotificationType.Group);

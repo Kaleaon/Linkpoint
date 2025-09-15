@@ -93,10 +93,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.distanceSubscription = userManager.getChatterList().getDistanceToUser().subscribe(chatterIDUser.getChatterUUID(), new Subscription.OnData(this) {
 
             /* renamed from: -$f0 */
@@ -169,10 +165,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: private */

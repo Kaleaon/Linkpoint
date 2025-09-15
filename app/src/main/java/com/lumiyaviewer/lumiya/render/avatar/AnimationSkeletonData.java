@@ -26,7 +26,6 @@ public class AnimationSkeletonData {
     }
 
     void animate(AvatarSkeleton avatarSkeleton, AvatarAnimationList avatarAnimationList) {
-        int i;
         Arrays.fill(this.animPriorityRotArray, 1.0f);
         Arrays.fill(this.animPriorityPosArray, 1.0f);
         for (i = 0; i < 133; i++) {

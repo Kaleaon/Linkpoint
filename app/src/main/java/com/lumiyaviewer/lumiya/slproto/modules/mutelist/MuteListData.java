@@ -37,7 +37,6 @@ public class MuteListData {
     }
 
     public MuteListData(byte[] bArr) {
-        int i;
         ImmutableMap.Builder builder = ImmutableMap.builder();
         ImmutableMap.Builder builder2 = ImmutableMap.builder();
         if (bArr != null) {

@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.render;
+import java.util.*;
 
 import android.annotation.SuppressLint;
 import android.support.annotation.CallSuper;
@@ -54,7 +55,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 cardboardActivity.onSpeakButton();
             }
-        });
         View findRequiredView2 = Utils.findRequiredView(view, R.id.button_chat, "field 'buttonChat' and method 'onChatButton'");
         cardboardActivity.buttonChat = (ImageButton) Utils.castView(findRequiredView2, R.id.button_chat, "field 'buttonChat'", ImageButton.class);
         this.view2131755257 = findRequiredView2;
@@ -62,7 +62,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 cardboardActivity.onChatButton();
             }
-        });
         View findRequiredView3 = Utils.findRequiredView(view, R.id.button_speech_send, "field 'buttonSpeechSend' and method 'onSpeechSendButton'");
         cardboardActivity.buttonSpeechSend = (ImageButton) Utils.castView(findRequiredView3, R.id.button_speech_send, "field 'buttonSpeechSend'", ImageButton.class);
         this.view2131755281 = findRequiredView3;
@@ -70,7 +69,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 cardboardActivity.onSpeechSendButton();
             }
-        });
         cardboardActivity.speechRecognitionResults = (TextView) Utils.findRequiredViewAsType(view, R.id.speech_recognition_results, "field 'speechRecognitionResults'", TextView.class);
         cardboardActivity.chatsOverlayLayout = (LinearLayout) Utils.findRequiredViewAsType(view, R.id.cardboard_ims, "field 'chatsOverlayLayout'", LinearLayout.class);
         View findRequiredView4 = Utils.findRequiredView(view, R.id.cardboard_aim_controls, "field 'cardboardAimControls' and method 'onAimControlsTouch'");
@@ -80,7 +78,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return cardboardActivity.onAimControlsTouch(view, motionEvent);
             }
-        });
         View findRequiredView5 = Utils.findRequiredView(view, R.id.cardboard_speak_controls, "field 'cardboardSpeakControls' and method 'onSpeakControlsTouch'");
         cardboardActivity.cardboardSpeakControls = (ViewGroup) Utils.castView(findRequiredView5, R.id.cardboard_speak_controls, "field 'cardboardSpeakControls'", ViewGroup.class);
         this.view2131755277 = findRequiredView5;
@@ -88,7 +85,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return cardboardActivity.m768com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref6(view, motionEvent);
             }
-        });
         View findRequiredView6 = Utils.findRequiredView(view, R.id.cardboard_object_controls, "field 'cardboardObjectControls' and method 'onObjectControlsTouch'");
         cardboardActivity.cardboardObjectControls = (ViewGroup) Utils.castView(findRequiredView6, R.id.cardboard_object_controls, "field 'cardboardObjectControls'", ViewGroup.class);
         this.view2131755266 = findRequiredView6;
@@ -96,7 +92,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return cardboardActivity.m769com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref7(view, motionEvent);
             }
-        });
         View findRequiredView7 = Utils.findRequiredView(view, R.id.object_touch_button, "field 'buttonTouchObject' and method 'onObjectTouch'");
         cardboardActivity.buttonTouchObject = (ImageButton) Utils.castView(findRequiredView7, R.id.object_touch_button, "field 'buttonTouchObject'", ImageButton.class);
         this.view2131755268 = findRequiredView7;
@@ -104,7 +99,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 cardboardActivity.onObjectTouch();
             }
-        });
         View findRequiredView8 = Utils.findRequiredView(view, R.id.cardboard_script_dialog, "field 'cardboardScriptDialog' and method 'onScriptDialogOutsideTouch'");
         cardboardActivity.cardboardScriptDialog = (ViewGroup) Utils.castView(findRequiredView8, R.id.cardboard_script_dialog, "field 'cardboardScriptDialog'", ViewGroup.class);
         this.view2131755282 = findRequiredView8;
@@ -112,7 +106,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return cardboardActivity.m770com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref8(view, motionEvent);
             }
-        });
         cardboardActivity.speakLevelIndicator = (ProgressBar) Utils.findRequiredViewAsType(view, R.id.speak_level_indicator, "field 'speakLevelIndicator'", ProgressBar.class);
         View findRequiredView9 = Utils.findRequiredView(view, R.id.cardboard_yes_button, "field 'yesButton' and method 'onYesButton'");
         cardboardActivity.yesButton = (ImageButton) Utils.castView(findRequiredView9, R.id.cardboard_yes_button, "field 'yesButton'", ImageButton.class);
@@ -121,7 +114,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 cardboardActivity.onYesButton();
             }
-        });
         View findRequiredView10 = Utils.findRequiredView(view, R.id.object_chat_button, "field 'buttonObjectChat' and method 'onObjectChat'");
         cardboardActivity.buttonObjectChat = (ImageButton) Utils.castView(findRequiredView10, R.id.object_chat_button, "field 'buttonObjectChat'", ImageButton.class);
         this.view2131755270 = findRequiredView10;
@@ -129,7 +121,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 cardboardActivity.onObjectChat();
             }
-        });
         cardboardActivity.yesNoText = (TextView) Utils.findRequiredViewAsType(view, R.id.cardboard_yesno_text, "field 'yesNoText'", TextView.class);
         cardboardActivity.cardboardDetailsPage = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.cardboard_details_page, "field 'cardboardDetailsPage'", ViewGroup.class);
         cardboardActivity.moveButtonsLayout = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.move_buttons_layout, "field 'moveButtonsLayout'", ViewGroup.class);
@@ -140,7 +131,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 cardboardActivity.onStandUpButton();
             }
-        });
         cardboardActivity.speakNowText = (TextView) Utils.findRequiredViewAsType(view, R.id.speak_now_text, "field 'speakNowText'", TextView.class);
         View findRequiredView12 = Utils.findRequiredView(view, R.id.button_move_forward, "field 'buttonMoveForward' and method 'onCamButtonTouch'");
         cardboardActivity.buttonMoveForward = (ImageButton) Utils.castView(findRequiredView12, R.id.button_move_forward, "field 'buttonMoveForward'", ImageButton.class);
@@ -149,7 +139,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent);
             }
-        });
         cardboardActivity.dialogQuestionText = (TextView) Utils.findRequiredViewAsType(view, R.id.dialogQuestionText, "field 'dialogQuestionText'", TextView.class);
         cardboardActivity.objectNameView = (TextView) Utils.findRequiredViewAsType(view, R.id.cardboard_object_name, "field 'objectNameView'", TextView.class);
         View findRequiredView13 = Utils.findRequiredView(view, R.id.button_move_backward, "field 'buttonMoveBackward' and method 'onCamButtonTouch'");
@@ -159,7 +148,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent);
             }
-        });
         cardboardActivity.voiceStatusView = (VoiceStatusView) Utils.findRequiredViewAsType(view, R.id.cardboard_voice_status_view, "field 'voiceStatusView'", VoiceStatusView.class);
         View findRequiredView14 = Utils.findRequiredView(view, R.id.cardboard_no_button, "field 'noButton' and method 'onNoButton'");
         cardboardActivity.noButton = (ImageButton) Utils.castView(findRequiredView14, R.id.cardboard_no_button, "field 'noButton'", ImageButton.class);
@@ -168,7 +156,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 cardboardActivity.onNoButton();
             }
-        });
         View findRequiredView15 = Utils.findRequiredView(view, R.id.button_touch, "field 'buttonTouch' and method 'onTouchButton'");
         cardboardActivity.buttonTouch = (ImageButton) Utils.castView(findRequiredView15, R.id.button_touch, "field 'buttonTouch'", ImageButton.class);
         this.view2131755255 = findRequiredView15;
@@ -176,7 +163,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 cardboardActivity.onTouchButton();
             }
-        });
         View findRequiredView16 = Utils.findRequiredView(view, R.id.button_turn_left, "field 'buttonTurnLeft' and method 'onCamButtonTouch'");
         cardboardActivity.buttonTurnLeft = (ImageButton) Utils.castView(findRequiredView16, R.id.button_turn_left, "field 'buttonTurnLeft'", ImageButton.class);
         this.view2131755261 = findRequiredView16;
@@ -184,7 +170,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent);
             }
-        });
         View findRequiredView17 = Utils.findRequiredView(view, R.id.button_turn_right, "field 'buttonTurnRight' and method 'onCamButtonTouch'");
         cardboardActivity.buttonTurnRight = (ImageButton) Utils.castView(findRequiredView17, R.id.button_turn_right, "field 'buttonTurnRight'", ImageButton.class);
         this.view2131755263 = findRequiredView17;
@@ -192,7 +177,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return cardboardActivity.onCamButtonTouch(view, motionEvent);
             }
-        });
         View findRequiredView18 = Utils.findRequiredView(view, R.id.object_sit_button, "field 'buttonSit' and method 'onObjectSit'");
         cardboardActivity.buttonSit = (ImageButton) Utils.castView(findRequiredView18, R.id.object_sit_button, "field 'buttonSit'", ImageButton.class);
         this.view2131755269 = findRequiredView18;
@@ -200,7 +184,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 cardboardActivity.onObjectSit();
             }
-        });
         cardboardActivity.cardboardPrimaryControls = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.cardboard_primary_controls, "field 'cardboardPrimaryControls'", ViewGroup.class);
         View findRequiredView19 = Utils.findRequiredView(view, R.id.cardboard_yesno_dialog, "method 'onYesNoOutsideTouch'");
         this.view2131755272 = findRequiredView19;
@@ -208,7 +191,6 @@ public class CardboardActivity_ViewBinding implements Unbinder {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return cardboardActivity.m771com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref9(view, motionEvent);
             }
-        });
     }
 
     @CallSuper

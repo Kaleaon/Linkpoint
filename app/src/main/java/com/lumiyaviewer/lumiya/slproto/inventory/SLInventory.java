@@ -291,10 +291,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             if (this.rootFolderFetchNeeded) {
                 this.rootFolderSubscription = new SubscriptionData<>(this.dbExecutor, new Subscription.OnData(this) {
 
@@ -378,10 +374,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else {
                 this.rootFolderSubscription = null;
             }
@@ -447,7 +439,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                 super.onMessageAcknowledged(sLMessage);
                 onInventoryCallbackListener.onInventoryCallback(sLInventoryEntry);
             }
-        });
         SendMessage(updateInventoryItem);
     }
 
@@ -581,16 +572,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     @Nullable
     private String UploadNotecardContents(SLInventoryEntry sLInventoryEntry, @Nullable UUID uuid, boolean z, byte[] bArr) {
         String capabilityOrThrow;
-        boolean z2;
         Response execute;
         int i = 0;
         String str = null;
@@ -847,10 +833,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void CopyInventoryItem(SLInventoryEntry sLInventoryEntry, SLInventoryEntry sLInventoryEntry2) {
@@ -957,10 +939,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             return;
         }
         function.apply(null);
@@ -979,7 +957,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                 public void onMessageAcknowledged(SLMessage sLMessage) {
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.parentUUID);
                 }
-            });
             SendMessage(removeInventoryFolder);
             return;
         }
@@ -994,7 +971,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             public void onMessageAcknowledged(SLMessage sLMessage) {
                 SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.parentUUID);
             }
-        });
         SendMessage(removeInventoryItem);
     }
 
@@ -1024,7 +1000,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             public void onMessageAcknowledged(SLMessage sLMessage) {
                 SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.uuid);
             }
-        });
         SendMessage(removeInventoryObjects);
     }
 
@@ -1067,7 +1042,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                     function.apply(randomUUID);
                 }
             }
-        });
         SendMessage(createInventoryFolder);
         return randomUUID;
     }
@@ -1308,7 +1282,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             public void onMessageAcknowledged(SLMessage sLMessage) {
                 SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.uuid);
             }
-        });
         SendMessage(linkInventoryItem);
     }
 
@@ -1331,7 +1304,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry2.uuid);
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.uuid);
                 }
-            });
             SendMessage(updateInventoryFolder);
             return;
         }
@@ -1350,7 +1322,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                 SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(uuid);
                 SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry2.uuid);
             }
-        });
         SendMessage(moveInventoryItem);
     }
 
@@ -1392,7 +1363,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.uuid);
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.parentUUID);
                 }
-            });
             SendMessage(updateInventoryFolder);
             return;
         }
@@ -1471,10 +1441,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void TrashInventoryItem(SLInventoryEntry sLInventoryEntry) {
@@ -1485,7 +1451,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     public void UpdateNotecard(@Nullable SLInventoryEntry sLInventoryEntry, UUID uuid, boolean z, String str, String str2, @Nullable byte[] bArr, @Nullable UUID uuid2, int i, @Nullable OnNotecardUpdatedListener onNotecardUpdatedListener) {
-        boolean z2;
         if (sLInventoryEntry != null) {
             z2 = !(Objects.equal(sLInventoryEntry.name, str) ? Objects.equal(sLInventoryEntry.description, str2) : false);
         } else {
@@ -1581,10 +1546,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else if (z2) {
                 sLInventoryEntry.name = str;
                 sLInventoryEntry.description = str2;
@@ -1683,10 +1644,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else {
                 StartUploadingNotecardContents(sLInventoryEntry, (UUID) null, z, bArr, onNotecardUpdatedListener);
             }
@@ -1706,7 +1663,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                     SLInventory.this.userManager.getObjectsManager().requestTaskInventoryUpdate(i2);
                     SLInventory.this.StartUploadingNotecardContents(sLInventoryEntry2, uuid3, z3, bArr2, onNotecardUpdatedListener2);
                 }
-            });
         }
     }
 
@@ -1789,10 +1745,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         } catch (DBObject.DatabaseBindingException e) {
             Debug.Warning(e);
         }
@@ -1934,7 +1886,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                 function.apply(uuid);
                 return null;
             }
-        });
     }
 
     /* access modifiers changed from: package-private */
@@ -2027,10 +1978,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
     }
 }

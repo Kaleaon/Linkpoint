@@ -54,7 +54,6 @@ public class AssetResponseCacher implements Refreshable<AssetKey> {
                 }
                 return assetData;
             }
-        });
     }
 
     public Subscribable<AssetKey, AssetData> getPool() {

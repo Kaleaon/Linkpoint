@@ -68,7 +68,6 @@ public class SingleObjectPopupFragment extends Fragment {
 
     @Nullable
     public View onCreateView(LayoutInflater layoutInflater, @Nullable ViewGroup viewGroup, @Nullable Bundle bundle) {
-        boolean z;
         SLChatEvent sLChatEvent;
         View inflate = layoutInflater.inflate(R.layout.object_popups_single_fragment_layout, viewGroup, false);
         UserManager userManager = getUserManager();

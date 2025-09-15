@@ -44,7 +44,6 @@ public class WeakPriorityRequestSet<T> {
     }
 
     public void addListener(RequestListener requestListener) {
-        boolean z;
         this.lock.lock();
         try {
             Iterator<WeakReference<RequestListener>> it = this.listeners.iterator();

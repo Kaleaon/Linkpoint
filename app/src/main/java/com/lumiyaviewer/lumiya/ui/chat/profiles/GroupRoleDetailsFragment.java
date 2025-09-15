@@ -101,9 +101,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
     };
     private final TextWatcher textChangedListener = new TextWatcher() {
         public void afterTextChanged(Editable editable) {
@@ -267,9 +264,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton("No", new DialogInterface.OnClickListener(runnable) {
 
                 /* renamed from: -$f0 */
@@ -345,10 +339,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.create().show();
             return;
         }
@@ -439,9 +429,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton("No", new $Lambda$oqvWEi5fLgnwnCXV95inckWtWE());
             builder.create().show();
         }
@@ -762,10 +749,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         return true;
     }
 
@@ -861,10 +844,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         return inflate;
     }
 

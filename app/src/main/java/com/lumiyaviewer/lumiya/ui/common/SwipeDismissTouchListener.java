@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.common;
+import java.util.*;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -80,13 +81,11 @@ public class SwipeDismissTouchListener implements OnInterceptTouchEventListener 
                 layoutParams.height = height;
                 SwipeDismissTouchListener.this.mView.setLayoutParams(layoutParams);
             }
-        });
         duration.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 layoutParams.height = ((Integer) valueAnimator.getAnimatedValue()).intValue();
                 SwipeDismissTouchListener.this.mView.setLayoutParams(layoutParams);
             }
-        });
         duration.start();
     }
 
@@ -95,8 +94,6 @@ public class SwipeDismissTouchListener implements OnInterceptTouchEventListener 
     }
 
     public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
-        boolean z;
-        boolean z2;
         float f;
         float f2;
         boolean z3 = true;
@@ -171,7 +168,6 @@ public class SwipeDismissTouchListener implements OnInterceptTouchEventListener 
                             public void onAnimationEnd(Animator animator) {
                                 SwipeDismissTouchListener.this.performDismiss();
                             }
-                        });
                     } else if (this.mSwiping) {
                         this.mView.animate().translationX(0.0f).translationY(0.0f).alpha(1.0f).setDuration(this.mAnimationTime).setListener((Animator.AnimatorListener) null);
                     }

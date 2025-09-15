@@ -44,7 +44,6 @@ public class SLCaps {
     }
 
     private void GetCapabilitesOnce(String str, String str2) throws LLSDException, IOException {
-        boolean z;
         try {
             z = new URL(str).getHost().equals("login.agni.lindenlab.com");
         } catch (Exception e) {

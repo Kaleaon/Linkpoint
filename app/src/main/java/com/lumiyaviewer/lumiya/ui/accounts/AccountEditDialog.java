@@ -83,7 +83,6 @@ class AccountEditDialog extends AppCompatDialog implements View.OnClickListener,
     }
 
     public void onClick(View view) {
-        boolean z;
         AccountList.AccountInfo accountInfo;
         boolean z2 = false;
         switch (view.getId()) {

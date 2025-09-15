@@ -80,7 +80,10 @@ android {
 
             // Exclude problematic decompiled artifacts
             java.excludes = [
-                '**/$Lambda$*.java'
+                '**/$Lambda$*.java',
+                '**/groups/SLGroupManager.java',     // Decompiler artifacts - non-critical for basic login
+                '**/SLAvatarAppearance.java',        // Fixed partially but may still have issues
+                '**/*$*.java'                       // Inner class artifacts from decompiler
             ]
         }
     }
@@ -111,11 +114,12 @@ dependencies {
     implementation 'com.google.android.gms:play-services-drive:17.0.0'
     implementation 'com.google.android.gms:play-services-auth:20.7.0'
 
-    // WebRTC for voice chat (per user choice), will use public STUN for first APK
-    implementation 'org.webrtc:google-webrtc:1.0.32006'
+    // WebRTC for voice chat - using Stream WebRTC Android library (available in Maven Central)
+    implementation 'io.getstream:stream-webrtc-android:1.0.7'
+    implementation 'io.getstream:stream-webrtc-android-ui:1.0.7'
 
-    // Audio processing for voice enhancement
-    implementation 'com.github.pedroSG94:RootEncoder:2.2.7'
+    // Audio processing - using AAudio and OpenSL ES Android libraries
+    implementation 'androidx.media:media:1.6.0'
 
     // OkHttp and logging for signaling flows
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'

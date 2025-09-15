@@ -50,8 +50,6 @@ public class AvatarSkeleton extends SLDefaultSkeleton {
     }
 
     AvatarSkeleton(@Nonnull AvatarShapeParams avatarShapeParams, @Nonnull MeshJointTranslations meshJointTranslations, boolean z) {
-        int i;
-        Object obj;
         this.hasExtendedBones = z;
         prepareSkeleton();
         for (Entry entry : this.bones.entrySet()) {

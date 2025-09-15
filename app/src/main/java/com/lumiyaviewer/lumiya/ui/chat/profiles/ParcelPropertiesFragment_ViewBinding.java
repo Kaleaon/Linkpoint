@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.chat.profiles;
+import java.util.*;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -32,7 +33,6 @@ public class ParcelPropertiesFragment_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 parcelPropertiesFragment.onParcelMediaStop();
             }
-        });
         parcelPropertiesFragment.parcelMediaCardView = (CardView) Utils.findRequiredViewAsType(view, R.id.parcel_media_card_view, "field 'parcelMediaCardView'", CardView.class);
         parcelPropertiesFragment.simRestartCardView = (CardView) Utils.findRequiredViewAsType(view, R.id.sim_restart_card_view, "field 'simRestartCardView'", CardView.class);
         parcelPropertiesFragment.parcelName = (TextView) Utils.findRequiredViewAsType(view, R.id.parcel_name, "field 'parcelName'", TextView.class);
@@ -46,7 +46,6 @@ public class ParcelPropertiesFragment_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 parcelPropertiesFragment.onParcelMediaPlay();
             }
-        });
         parcelPropertiesFragment.parcelImageView = (ImageAssetView) Utils.findRequiredViewAsType(view, R.id.parcel_image_view, "field 'parcelImageView'", ImageAssetView.class);
         parcelPropertiesFragment.parcelDescription = (TextView) Utils.findRequiredViewAsType(view, R.id.parcel_details_desc, "field 'parcelDescription'", TextView.class);
         View findRequiredView3 = Utils.findRequiredView(view, R.id.parcel_owner_profile_button, "method 'onOwnerProfileButton'");
@@ -55,21 +54,18 @@ public class ParcelPropertiesFragment_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 parcelPropertiesFragment.onOwnerProfileButton();
             }
-        });
         View findRequiredView4 = Utils.findRequiredView(view, R.id.sim_restart_button, "method 'onSimRestartButton'");
         this.view2131755617 = findRequiredView4;
         findRequiredView4.setOnClickListener(new DebouncingOnClickListener() {
             public void doClick(View view) {
                 parcelPropertiesFragment.onSimRestartButton();
             }
-        });
         View findRequiredView5 = Utils.findRequiredView(view, R.id.parcel_set_home_button, "method 'onSetHomeButton'");
         this.view2131755611 = findRequiredView5;
         findRequiredView5.setOnClickListener(new DebouncingOnClickListener() {
             public void doClick(View view) {
                 parcelPropertiesFragment.onSetHomeButton();
             }
-        });
     }
 
     @CallSuper

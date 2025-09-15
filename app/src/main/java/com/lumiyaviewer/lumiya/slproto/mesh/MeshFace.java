@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.slproto.mesh;
+import java.util.*;
 
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDException;

@@ -118,7 +118,6 @@ public class SLFinancialInfo extends SLModule {
 
     @SLMessageHandler
     public void HandleMoneyBalanceReply(MoneyBalanceReply moneyBalanceReply) {
-        int i;
         UUID uuid;
         UUID uuid2 = null;
         SLBalanceChangedEvent sLBalanceChangedEvent = new SLBalanceChangedEvent(this.balanceKnown, this.balance, moneyBalanceReply.MoneyData_Field.MoneyBalance);
@@ -152,7 +151,6 @@ public class SLFinancialInfo extends SLModule {
     }
 
     public int getBalance() {
-        int i;
         synchronized (this.balanceLock) {
             i = this.balance;
         }
@@ -160,7 +158,6 @@ public class SLFinancialInfo extends SLModule {
     }
 
     public boolean getBalanceKnown() {
-        boolean z;
         synchronized (this.balanceLock) {
             z = this.balanceKnown;
         }

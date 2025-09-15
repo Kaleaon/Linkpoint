@@ -283,10 +283,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
 
         public /* bridge */ /* synthetic */ int hashCode() {

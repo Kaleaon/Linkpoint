@@ -42,7 +42,6 @@ public class ObjectDerezDialog {
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.cancel();
             }
-        });
         builder.create().show();
     }
 }

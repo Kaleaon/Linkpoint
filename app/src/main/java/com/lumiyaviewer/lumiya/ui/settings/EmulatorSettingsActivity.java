@@ -265,7 +265,6 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
     private void updateStatus(String status) {
         runOnUiThread(() -> {
             statusText.setText("Status: " + status);
-        });
     }
     
     private EmulatorManager.EmulatorCallback createCallback(String operation) {
@@ -275,7 +274,6 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     updateStatus(operation + " completed");
                     showResultDialog("Success", message);
-                });
             }
             
             @Override
@@ -283,7 +281,6 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     updateStatus(operation + " failed");
                     showResultDialog("Error", error);
-                });
             }
             
             @Override
@@ -321,7 +318,6 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
                             addAVDItem(avd);
                         }
                     }
-                });
             }
             
             @Override
@@ -329,14 +325,12 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     updateStatus("Failed to load AVD list");
                     showResultDialog("Error", "Failed to load AVD list:\n" + error);
-                });
             }
             
             @Override
             public void onStatusUpdate(String status) {
                 updateStatus(status);
             }
-        });
     }
     
     private void addAVDItem(EmulatorManager.AVDInfo avd) {
@@ -457,7 +451,6 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
             
             updateStatus("Creating AVD: " + name);
             emulatorManager.createAVD(name, device, api, abi, createCallback("Create AVD"));
-        });
         
         builder.setNegativeButton("Cancel", null);
         builder.show();
@@ -470,7 +463,6 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
                             (name) -> {
                                 updateStatus("Starting AVD: " + name);
                                 emulatorManager.startAVD(name, createCallback("Start AVD"));
-                            });
     }
     
     private void showStopAVDDialog() {
@@ -478,7 +470,6 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
                             (name) -> {
                                 updateStatus("Stopping AVD: " + name);
                                 emulatorManager.stopAVD(name, createCallback("Stop AVD"));
-                            });
     }
     
     private void showDeleteAVDDialog() {
@@ -486,7 +477,6 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
                             (name) -> {
                                 updateStatus("Deleting AVD: " + name);
                                 emulatorManager.deleteAVD(name, createCallback("Delete AVD"));
-                            });
     }
     
     private void showSimpleInputDialog(String title, String message, SimpleInputCallback callback) {
@@ -505,7 +495,6 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Please enter a value", Toast.LENGTH_SHORT).show();
             }
-        });
         
         builder.setNegativeButton("Cancel", null);
         builder.show();
@@ -536,7 +525,6 @@ public class EmulatorSettingsActivity extends AppCompatActivity {
                                     EmulatorManager.EmulatorDefaults.DEFAULT_ABI,
                                     EmulatorManager.EmulatorDefaults.DEFAULT_TAG,
                                     createCallback("Install System Image"));
-                            });
     }
     
     private void showResultDialog(String title, String message) {

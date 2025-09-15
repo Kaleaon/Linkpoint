@@ -108,10 +108,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else {
                 list.add(i, t);
             }
@@ -245,10 +241,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else {
                 list.remove(i);
             }
@@ -357,10 +349,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else {
                 list.set(i, t);
             }

@@ -105,9 +105,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
             throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.objects.$Lambda$2R1p9WuPUwPagPVBm9YiYK9KyJ0.AnonymousClass3.<init>(java.lang.Object):void");
         }
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
     };
     private final Subscription.OnData<SLTaskInventory> onTaskInventoryReceived = new Subscription.OnData<SLTaskInventory>() {
         public void onData(SLTaskInventory sLTaskInventory) {
@@ -253,7 +250,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
     private void copyAllToInventory(boolean z) {
         SLAgentCircuit activeAgentCircuit;
         SLModules modules;
-        boolean z2;
         boolean z3 = false;
         final int objectLocalID = getObjectLocalID();
         final UserManager userManager = getUserManager();
@@ -377,9 +373,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
                             
 */
 
-                            public final void brokenMethod(
-        // TODO: implement method
-    }
                         }).setNegativeButton((int) R.string.cancel, (DialogInterface.OnClickListener) new $Lambda$2R1p9WuPUwPagPVBm9YiYK9KyJ0());
                         builder.create().show();
                         return;
@@ -524,10 +517,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
                             
 */
 
-                            public final void brokenMethod(
-        // TODO: implement method
-    }
-                        });
                         return null;
                     }
 
@@ -543,7 +532,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
                             }
                         }
                     }
-                });
             }
         }
     }
@@ -701,10 +689,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         return inflate;
     }
 

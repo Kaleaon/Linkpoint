@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.grids;
+import java.util.*;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -28,7 +29,6 @@ public class ManageGridsActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 manageGridsActivity.onAddNewGridButton();
             }
-        });
     }
 
     @CallSuper

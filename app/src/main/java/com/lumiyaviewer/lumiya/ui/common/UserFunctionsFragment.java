@@ -110,10 +110,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<SubscriptionSingleKey, Boolean> voiceLoggedIn = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -169,10 +165,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
     private static /* synthetic */ int[] m559getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
@@ -297,9 +289,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new $Lambda$EGu4GUNsisO_OSWWZeAugrk47Ks()).setCancelable(true).create().show();
             return;
         }
@@ -395,9 +384,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener() {
             private final /* synthetic */ void $m$0(
 /*
@@ -484,9 +470,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setCancelable(true).create().show();
     }
 
@@ -584,9 +567,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                 private final /* synthetic */ void $m$0(
 /*
@@ -658,10 +638,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.create().show();
         }
     }
@@ -741,10 +717,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         textFieldDialogBuilder.show();
     }
 
@@ -855,10 +827,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener(this, atomicInteger, chatterID, userManager, str) {
 
                 /* renamed from: -$f0 */
@@ -946,10 +914,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                 private final /* synthetic */ void $m$0(
 /*
@@ -1021,10 +985,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.create().show();
         }
     }
@@ -1110,10 +1070,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         textFieldDialogBuilder.show();
     }
 
@@ -1211,9 +1167,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setNegativeButton("No", new DialogInterface.OnClickListener() {
             private final /* synthetic */ void $m$0(
 /*
@@ -1278,10 +1231,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         builder.create().show();
     }
 
@@ -1359,10 +1308,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         textFieldDialogBuilder.show();
     }
 
@@ -1483,9 +1428,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                 private final /* synthetic */ void $m$0(
 /*
@@ -1569,9 +1511,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).create().show();
         }
     }
@@ -1826,10 +1765,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     }
 
     public void onPrepareOptionsMenu(Menu menu) {
-        boolean z;
-        boolean z2;
-        boolean z3;
-        boolean z4;
         AvatarGroupList avatarGroupList;
         AvatarGroupList.AvatarGroupEntry avatarGroupEntry;
         super.onPrepareOptionsMenu(menu);

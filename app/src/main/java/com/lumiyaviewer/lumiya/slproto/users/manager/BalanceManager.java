@@ -146,10 +146,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public Subscribable<SubscriptionSingleKey, Integer> getBalance() {

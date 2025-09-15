@@ -174,7 +174,6 @@ public class DrawableAvatar extends DrawableAvatarStub implements IntersectPicka
     }
 
     private void processUpdateAttachments() {
-        int i;
         DrawListEntry[] drawListEntryArr;
         DrawableObject drawableObject;
         int i2 = 0;
@@ -287,7 +286,6 @@ public class DrawableAvatar extends DrawableAvatarStub implements IntersectPicka
     }
 
     void AnimationRemove(UUID uuid) {
-        Object obj;
         synchronized (this.animationLock) {
             obj = this.animations.remove(uuid) != null ? 1 : null;
         }
@@ -428,7 +426,6 @@ public class DrawableAvatar extends DrawableAvatarStub implements IntersectPicka
         boolean z = false;
         AvatarShapeParams avatarShapeParams = this.shapeParams;
         if (avatarShapeParams != null) {
-            boolean z2;
             Debug.Printf("Avatar: shapeParamsUpdate: %d rigged meshes", Integer.valueOf(this.riggedMeshes.size()));
             MeshJointTranslations meshJointTranslations = new MeshJointTranslations();
             Iterator it = this.riggedMeshes.iterator();

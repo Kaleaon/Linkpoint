@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.utils;
+import java.util.*;
 
 public class InlineList<T extends InlineListEntry<T>> {
     private T first = null;

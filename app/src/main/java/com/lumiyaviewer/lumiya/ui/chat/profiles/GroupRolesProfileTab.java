@@ -74,8 +74,6 @@ public class GroupRolesProfileTab extends ChatterReloadableFragment implements L
         }
 
         public View getView(int i, View view, ViewGroup viewGroup) {
-            boolean z;
-            boolean z2;
             GroupTitlesReply.GroupData groupData;
             int i2 = 1;
             if (view == null) {
@@ -231,10 +229,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         inflate.findViewById(R.id.add_new_role_button).setOnClickListener(new $Lambda$zWKNEqUupU__bUM7E0seQ8xMgmU(this));
         ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout));
         this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_group_selected), getString(R.string.group_profile_fail));

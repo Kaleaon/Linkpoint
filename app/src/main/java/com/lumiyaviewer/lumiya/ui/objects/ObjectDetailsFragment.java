@@ -103,9 +103,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
     };
     private final LoadableMonitor loadableMonitor = new LoadableMonitor(this.objectProfile).withOptionalLoadables(this.balanceSubscription, this.myAvatarState).withDataChangedListener(this);
     @Nullable
@@ -216,9 +213,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new $Lambda$IbcMrpWxKnmu4WU7ZN8rETVfqs8());
             builder.show();
         }
@@ -360,9 +354,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener() {
                 private final /* synthetic */ void $m$0(
 /*
@@ -434,10 +425,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.show();
         }
     }
@@ -490,7 +477,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
     }
 
     private void showObjectProfile(SLObjectProfileData sLObjectProfileData) {
-        boolean z;
         SLAgentCircuit activeAgentCircuit;
         SLModules modules;
         this.objectProfileData = sLObjectProfileData;
@@ -617,9 +603,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
     }
 
     private void updateOptionsMenu() {
-        boolean z;
-        boolean z2;
-        boolean z3;
         boolean z4 = false;
         UserManager userManager = getUserManager();
         if (userManager == null || this.objectProfileData == null) {
@@ -758,7 +741,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
 
             public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
             }
-        });
         return inflate;
     }
 
@@ -892,10 +874,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                             
 */
 
-                            public final void brokenMethod(
-        // TODO: implement method
-    }
-                        });
                         builder.setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener() {
                             private final /* synthetic */ void $m$0(
 /*
@@ -975,10 +953,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                             
 */
 
-                            public final void brokenMethod(
-        // TODO: implement method
-    }
-                        });
                         builder.setCancelable(true);
                         builder.create().show();
                     }

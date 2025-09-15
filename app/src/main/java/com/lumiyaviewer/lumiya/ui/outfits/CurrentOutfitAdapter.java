@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.outfits;
+import java.util.*;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.slproto.chat.generic;
+import java.util.*;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;

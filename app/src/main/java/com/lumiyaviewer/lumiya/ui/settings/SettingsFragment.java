@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.settings;
+import java.util.*;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -162,10 +163,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
     }
 
@@ -239,10 +236,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         builder.create().show();
     }
 
@@ -340,10 +333,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         builder.setCancelable(true);
         builder.create().show();
     }
@@ -416,10 +405,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -488,10 +473,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         builder.create().show();
     }
 

@@ -173,10 +173,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     /* access modifiers changed from: private */
     public final AtomicReference<SLAvatarControl> avatarControl = new AtomicReference<>();
     @BindView(2131755257)
@@ -310,10 +306,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
     };
     @BindView(2131755258)
@@ -465,10 +457,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else if (!CardboardActivity.this.controller.appButtonState && this.appButtonPressed) {
                 CardboardActivity.this.runOnUiThread(new Runnable(this) {
 
@@ -558,10 +546,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             }
             this.appButtonPressed = CardboardActivity.this.controller.appButtonState;
             if (CardboardActivity.this.controller.isTouching) {
@@ -699,10 +683,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                             
 */
 
-                            public final void brokenMethod(
-        // TODO: implement method
-    }
-                        });
                         return;
                     }
                     CardboardActivity.this.runOnUiThread(new Runnable(this, this.activeMoveControl) {
@@ -803,10 +783,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
-                    });
                     this.activeMoveControl = null;
                 } else if (moveControl != null) {
                     CardboardActivity.this.runOnUiThread(new Runnable(f, this, moveControl) {
@@ -908,10 +884,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
-                    });
                 }
             } else if (this.activeMoveControl != null) {
                 CardboardActivity.this.runOnUiThread(new Runnable(this, this.activeMoveControl) {
@@ -1005,10 +977,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
                 this.activeMoveControl = null;
             }
         }
@@ -1083,10 +1051,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     @BindView(2131755636)
     TextView dialogQuestionText;
     private ChatterID dictationChatterID = null;
@@ -1234,10 +1198,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     /* access modifiers changed from: private */
     public volatile float neutralAgentHeading = Float.NaN;
     @BindView(2131755275)
@@ -1880,7 +1840,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
         
 */
-    });
     /* access modifiers changed from: private */
     public volatile boolean ownAvatarVisible = false;
     private ChatterNameRetriever pickedAvatarNameRetriever = null;
@@ -2060,10 +2019,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     @BindView(2131755279)
     ProgressBar speakLevelIndicator;
     @BindView(2131755278)
@@ -2138,10 +2093,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<ChatterID, VoiceChatInfo> voiceChatInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -2197,10 +2148,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private boolean voiceEnabled = false;
     private final SubscriptionData<SubscriptionSingleKey, Boolean> voiceLoggedIn = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
@@ -2257,10 +2204,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     @BindView(2131755254)
     VoiceStatusView voiceStatusView;
     /* access modifiers changed from: private */
@@ -2452,10 +2395,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
-                    });
                 }
             }
         }
@@ -2647,10 +2586,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
 
         public void onSurfaceCreated(EGLConfig eGLConfig) {
@@ -2912,9 +2847,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
                     }, UIThreadExecutor.getInstance());
                 }
             } else {
@@ -3350,10 +3282,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
     }
 
@@ -3483,8 +3411,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     public void updateExternalTexturePointer() {
-        int i;
-        int i2;
         if (this.hitPointUpdatePosted.getAndSet(false)) {
             synchronized (this.hitPointLock) {
                 i = this.postedHitPointX;
@@ -3783,10 +3709,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         int applyDimension = (int) TypedValue.applyDimension(2, 16.0f, getResources().getDisplayMetrics());
         this.voiceViewHeightAllowance = instance.getVoiceEnabled() ? (int) TypedValue.applyDimension(1, VOICE_VIEW_HEIGHT_ALLOWANCE_DP, getResources().getDisplayMetrics()) : 0;
         this.renderer = new WorldViewRenderer(this.stateHandler, true, this.userManager, applyDimension);
@@ -3872,10 +3794,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         ButterKnife.bind((Object) this, (View) this.onScreenControlsLayout);
         for (View view : new View[]{this.buttonTouch, this.buttonSpeak, this.buttonChat, this.buttonSpeechSend, this.buttonSit, this.buttonTouchObject, this.buttonObjectChat, this.buttonMoveForward, this.buttonMoveBackward, this.buttonTurnLeft, this.buttonTurnRight, this.buttonStandUp, this.yesButton, this.noButton}) {
             view.setAlpha(0.5f);
@@ -3976,10 +3894,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.cardboardPrimaryControls.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener(this) {
 
             /* renamed from: -$f0 */
@@ -4052,10 +3966,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.gvrView.setOnTouchListener(new View.OnTouchListener(this) {
 
             /* renamed from: -$f0 */
@@ -4194,7 +4104,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
             
 */
-        });
     }
 
     /* access modifiers changed from: protected */

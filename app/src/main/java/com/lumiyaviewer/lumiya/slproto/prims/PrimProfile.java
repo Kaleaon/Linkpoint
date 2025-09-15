@@ -158,7 +158,6 @@ public class PrimProfile {
 
     private static int getNumNGonPoints(PrimProfileParams primProfileParams, int i, float f, float f2, float f3, int i2) {
         float f4;
-        int i3;
         float f5 = primProfileParams.Begin;
         float f6 = primProfileParams.End;
         float f7 = 1.0f / ((float) i);

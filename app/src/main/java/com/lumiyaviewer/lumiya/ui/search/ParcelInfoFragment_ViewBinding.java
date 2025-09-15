@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.search;
+import java.util.*;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -32,14 +33,12 @@ public class ParcelInfoFragment_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 parcelInfoFragment.onParcelTeleportButton();
             }
-        });
         View findRequiredView2 = Utils.findRequiredView(view, R.id.parcel_owner_profile_button, "method 'onParcelOwnerProfileClick'");
         this.view2131755608 = findRequiredView2;
         findRequiredView2.setOnClickListener(new DebouncingOnClickListener() {
             public void doClick(View view) {
                 parcelInfoFragment.onParcelOwnerProfileClick();
             }
-        });
     }
 
     @CallSuper

@@ -12,7 +12,6 @@ public class WindlightDay {
     }
 
     public void InterpolatePreset(WindlightPreset windlightPreset, float f) {
-        int i;
         int i2 = 0;
         int length = hourTable.length - 1;
         while (true) {

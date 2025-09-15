@@ -71,9 +71,6 @@ public class ObjectSelectorFragment extends Fragment implements SeekBar.OnSeekBa
             throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.objects.$Lambda$rXtKRyOts6GGB3GxWNYA5oEvU2Y.AnonymousClass1.<init>(java.lang.Object):void");
         }
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
     };
     private SearchView searchView;
     private Subscription<SubscriptionSingleKey, ObjectsManager.ObjectDisplayList> subscription;
@@ -226,7 +223,6 @@ public class ObjectSelectorFragment extends Fragment implements SeekBar.OnSeekBa
             public boolean onQueryTextSubmit(String str) {
                 return true;
             }
-        });
         MenuItemCompat.setOnActionExpandListener(menu.findItem(R.id.action_search), new MenuItemCompat.OnActionExpandListener() {
             public boolean onMenuItemActionCollapse(MenuItem menuItem) {
                 View view = ObjectSelectorFragment.this.getView();
@@ -250,7 +246,6 @@ public class ObjectSelectorFragment extends Fragment implements SeekBar.OnSeekBa
                 ObjectSelectorFragment.this.updateFilter();
                 return true;
             }
-        });
     }
 
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup viewGroup, Bundle bundle) {

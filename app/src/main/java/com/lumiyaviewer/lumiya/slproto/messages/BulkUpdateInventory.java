@@ -56,7 +56,6 @@ public class BulkUpdateInventory extends SLMessage {
     }
 
     public int CalcPayloadSize() {
-        int i;
         int i2 = 37;
         Iterator<T> it = this.FolderData_Fields.iterator();
         while (true) {

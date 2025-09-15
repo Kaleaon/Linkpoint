@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.myava;
+import java.util.*;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -23,7 +24,6 @@ public class MuteListFragment_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 muteListFragment.onAddMuteListButtonClick();
             }
-        });
     }
 
     @CallSuper

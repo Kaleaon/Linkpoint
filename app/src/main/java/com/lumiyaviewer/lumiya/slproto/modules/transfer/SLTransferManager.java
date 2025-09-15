@@ -45,7 +45,6 @@ public class SLTransferManager extends SLModule {
                 SLTransferManager.this.CancelTransfer(sLTransfer);
             }
         }
-    });
     private final ResultHandler<AssetKey, AssetData> assetResultHandler;
     private final UserManager userManager = UserManager.getUserManager(this.agentCircuit.circuitInfo.agentID);
 

@@ -59,7 +59,6 @@ public class TeleportSLURLActivity extends AppCompatActivity implements View.OnC
 
     @SuppressLint({"DefaultLocale"})
     public void onCreate(Bundle bundle) {
-        boolean z;
         SLAgentCircuit agentCircuit;
         super.onCreate(bundle);
         setContentView((int) R.layout.teleport_slurl);

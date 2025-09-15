@@ -105,10 +105,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private boolean editMode = false;
     private boolean isEditingScript = false;
     private boolean isSaving = false;
@@ -300,10 +296,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
-                    });
                 } catch (SubscriptionData.DataNotReadyException e) {
                     Debug.Warning(e);
                 }
@@ -329,7 +321,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     private void updateButtonsForMode() {
-        int i;
         boolean z = true;
         int i2 = 8;
         TextKeyListener textKeyListener = null;
@@ -482,10 +473,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: package-private */
@@ -599,10 +586,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.create().show();
             return;
         }
@@ -684,10 +667,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         builder2.create().show();
     }
 

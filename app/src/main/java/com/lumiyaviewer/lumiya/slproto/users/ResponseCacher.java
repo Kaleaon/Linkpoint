@@ -57,7 +57,6 @@ abstract class ResponseCacher<KeyType, MessageType> implements Refreshable<KeyTy
                 }
                 return messagetype;
             }
-        });
     }
 
     /* access modifiers changed from: private */

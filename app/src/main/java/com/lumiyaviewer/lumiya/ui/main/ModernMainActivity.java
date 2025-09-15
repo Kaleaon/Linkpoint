@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.main;
+import java.util.*;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -522,18 +523,15 @@ public class ModernMainActivity extends AppCompatActivity {
                     
                     runOnUiThread(() -> {
                         updateStatus("✅ Performance benchmark completed - Overall rating: " + overallRating, 100);
-                    });
                     
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     runOnUiThread(() -> {
                         updateStatus("❌ Performance benchmark interrupted", 0);
-                    });
                 } catch (Exception e) {
                     Log.e(TAG, "Error during performance benchmark", e);
                     runOnUiThread(() -> {
                         updateStatus("❌ Performance benchmark failed: " + e.getMessage(), 0);
-                    });
                 }
             }).start();
             
@@ -684,7 +682,6 @@ public class ModernMainActivity extends AppCompatActivity {
             restartButton.setOnClickListener(v -> {
                 Log.i(TAG, "User requested app restart");
                 LumiyaApp.restartApp();
-            });
             errorLayout.addView(restartButton);
             
             setContentView(errorLayout);
@@ -736,18 +733,15 @@ public class ModernMainActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     updateStatus("✅ Logs exported successfully to logcat", 100);
                     Log.i(TAG, "Application logs and performance data exported successfully");
-                });
                 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 runOnUiThread(() -> {
                     updateStatus("❌ Log export interrupted", 0);
-                });
             } catch (Exception e) {
                 Log.e(TAG, "Error during log export", e);
                 runOnUiThread(() -> {
                     updateStatus("❌ Log export failed: " + e.getMessage(), 0);
-                });
             }
         }).start();
     }

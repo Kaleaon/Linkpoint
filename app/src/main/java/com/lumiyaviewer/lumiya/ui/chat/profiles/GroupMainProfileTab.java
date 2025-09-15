@@ -98,10 +98,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<UUID, AgentDataUpdate> agentDataUpdate = new SubscriptionData<>(UIThreadExecutor.getInstance());
     private ChatterNameRetriever founderNameRetriever = null;
     private final SubscriptionData<UUID, GroupProfileReply> groupProfile = new SubscriptionData<>(UIThreadExecutor.getInstance());
@@ -158,9 +154,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
     };
 
     /* access modifiers changed from: private */
@@ -284,9 +277,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setPositiveButton((int) R.string.set_role_dialog_ok, (DialogInterface.OnClickListener) new DialogInterface.OnClickListener(this, atomicInteger, uuid) {
 
                 /* renamed from: -$f0 */
@@ -366,10 +356,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.create().show();
         } catch (SubscriptionData.DataNotReadyException e) {
             Debug.Warning(e);
@@ -471,10 +457,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
                 builder.create().show();
             }
         } catch (SubscriptionData.DataNotReadyException e) {
@@ -653,10 +635,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
                 builder.setNegativeButton((int) R.string.cancel, (DialogInterface.OnClickListener) new $Lambda$qgA5NpRVpRFsQYZFFPT9VQYjWms());
                 builder.create().show();
             }
@@ -757,10 +735,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
                 builder.setNegativeButton((int) R.string.cancel, (DialogInterface.OnClickListener) new DialogInterface.OnClickListener() {
                     private final /* synthetic */ void $m$0(
 /*
@@ -837,10 +811,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
                 builder.create().show();
             }
         } catch (SubscriptionData.DataNotReadyException e) {
@@ -1001,10 +971,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         inflate.findViewById(R.id.button_copy_group_key).setOnClickListener(new View.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -1073,10 +1039,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         inflate.findViewById(R.id.active_group_checkbox).setOnClickListener(new View.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -1145,10 +1107,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         inflate.findViewById(R.id.show_in_profile_checkbox).setOnClickListener(new View.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -1217,10 +1175,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         inflate.findViewById(R.id.group_change_role_button).setOnClickListener(new View.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -1289,10 +1243,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         inflate.findViewById(R.id.group_profile_contribution_button).setOnClickListener(new View.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -1361,10 +1311,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         inflate.findViewById(R.id.group_join_button).setOnClickListener(new View.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -1433,10 +1379,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         inflate.findViewById(R.id.group_leave_button).setOnClickListener(new View.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -1505,10 +1447,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         inflate.findViewById(R.id.group_invite_button).setOnClickListener(new View.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -1577,10 +1515,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         ((LoadingLayout) inflate.findViewById(R.id.loading_layout)).setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout));
         this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_group_selected), getString(R.string.group_profile_fail));
         this.loadableMonitor.setSwipeRefreshLayout((SwipeRefreshLayout) inflate.findViewById(R.id.swipe_refresh_layout));

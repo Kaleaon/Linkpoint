@@ -101,9 +101,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         };
     }
 

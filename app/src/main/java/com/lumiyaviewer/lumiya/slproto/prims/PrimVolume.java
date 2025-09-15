@@ -149,7 +149,6 @@ public class PrimVolume {
     }
 
     private boolean sculpt(int i, int i2, int i3, GLTexture gLTexture, int i4) {
-        boolean z;
         byte b = this.volumeParams.SculptType;
         if (i == 0 || i2 == 0 || i3 < 3 || gLTexture == null) {
             i4 = -1;

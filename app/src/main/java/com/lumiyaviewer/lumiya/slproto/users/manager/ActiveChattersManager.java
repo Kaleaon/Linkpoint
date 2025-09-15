@@ -663,10 +663,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void addDisplayedChatter(@Nonnull ChatterID chatterID) {
@@ -753,10 +749,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: package-private */
@@ -784,7 +776,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     public Chatter getChatter(@Nonnull ChatterID chatterID, boolean z) {
         Query<Chatter> forCurrentThread;
         Chatter unique;
-        boolean z2;
         UUID uuid = null;
         SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit();
         UUID sessionID = activeAgentCircuit != null ? activeAgentCircuit.getSessionID() : null;
@@ -900,10 +891,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
         return unique;
     }
@@ -1043,10 +1030,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void notifyChatEventUpdated(SLChatEvent sLChatEvent) {
@@ -1121,10 +1104,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void notifyTeleportComplete(String str) {
@@ -1199,10 +1178,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void onMessageSourcesResolved(Set<Long> set, UserName userName) {
@@ -1314,9 +1289,5 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 }

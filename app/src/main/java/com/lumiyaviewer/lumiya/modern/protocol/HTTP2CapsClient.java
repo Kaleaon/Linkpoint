@@ -94,7 +94,6 @@ public class HTTP2CapsClient {
                     }
                 }
             }
-        });
         
         return future;
     }
@@ -135,7 +134,6 @@ public class HTTP2CapsClient {
                     }
                 }
             }
-        });
         
         return future;
     }

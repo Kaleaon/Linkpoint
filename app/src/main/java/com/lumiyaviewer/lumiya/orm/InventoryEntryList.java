@@ -46,7 +46,6 @@ public class InventoryEntryList extends AbstractList<SLInventoryEntry> {
                 }
                 return sLInventoryEntry == null ? new SLInventoryEntry() : sLInventoryEntry;
             }
-        });
         this.title = null;
         this.cursor = null;
         this.folder = null;
@@ -75,7 +74,6 @@ public class InventoryEntryList extends AbstractList<SLInventoryEntry> {
                 }
                 return sLInventoryEntry == null ? new SLInventoryEntry() : sLInventoryEntry;
             }
-        });
         this.title = str;
         this.folder = sLInventoryEntry;
         this.cursor = cursor2;

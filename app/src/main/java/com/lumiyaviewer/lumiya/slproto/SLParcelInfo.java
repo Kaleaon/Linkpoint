@@ -78,7 +78,6 @@ public class SLParcelInfo {
                     String knownName = getKnownName(sLObjectInfo, multipleChatterNameRetriever, set);
                     boolean nameMatches = sLObjectFilterInfo.nameMatches(knownName);
                     if (isEmpty != 0 || nameMatches) {
-                        boolean z3;
                         if (isEmpty != 0) {
                             z3 = (objectMatches ? nameMatches : 0) ^ 1;
                         } else {
@@ -259,7 +258,6 @@ public class SLParcelInfo {
     }
 
     public int getObjectLocalID(@Nullable UUID uuid) {
-        int i;
         synchronized (this) {
             if (uuid != null) {
                 SLObjectInfo sLObjectInfo = (SLObjectInfo) this.allObjectsNearby.get(uuid);

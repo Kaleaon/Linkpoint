@@ -22,7 +22,6 @@ public enum LLSDNodeType {
     private final String tagName;
 
     static {
-        int i;
         tagMap = new HashMap(values().length * 2);
         for (LLSDNodeType lLSDNodeType : values()) {
             tagMap.put(lLSDNodeType.tagName, lLSDNodeType);

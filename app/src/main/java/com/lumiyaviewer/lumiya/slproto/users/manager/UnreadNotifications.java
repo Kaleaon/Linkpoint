@@ -35,7 +35,6 @@ public abstract class UnreadNotifications {
     public UnreadNotificationInfo merge() {
         UnreadNotificationInfo.ObjectPopupNotification objectPopupNotification;
         ImmutableList.Builder builder;
-        int i;
         ImmutableMap<NotificationType, UnreadNotificationInfo> notificationGroups = notificationGroups();
         if (notificationGroups.isEmpty()) {
             return UnreadNotificationInfo.create(agentUUID(), 0, (List<UnreadNotificationInfo.UnreadMessageSource>) null, (NotificationType) null, 0, (NotificationType) null, (UnreadNotificationInfo.UnreadMessageSource) null, UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null));

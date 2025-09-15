@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.chat.profiles;
+import java.util.*;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -28,7 +29,6 @@ public class UserPickFragment_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 userPickFragment.onSetLocation(view);
             }
-        });
         View findRequiredView2 = Utils.findRequiredView(view, R.id.change_pic_button, "field 'changePicButton' and method 'onChangePic'");
         userPickFragment.changePicButton = (Button) Utils.castView(findRequiredView2, R.id.change_pic_button, "field 'changePicButton'", Button.class);
         this.view2131755698 = findRequiredView2;
@@ -36,7 +36,6 @@ public class UserPickFragment_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 userPickFragment.onChangePic(view);
             }
-        });
         userPickFragment.userPickImageView = (ImageAssetView) Utils.findRequiredViewAsType(view, R.id.user_pick_image_view, "field 'userPickImageView'", ImageAssetView.class);
         userPickFragment.pickDescription = (TextView) Utils.findRequiredViewAsType(view, R.id.pick_description, "field 'pickDescription'", TextView.class);
         View findRequiredView3 = Utils.findRequiredView(view, R.id.user_pick_desc_edit_button, "field 'userPickDescEditButton' and method 'onDescEdit'");
@@ -46,14 +45,12 @@ public class UserPickFragment_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 userPickFragment.onDescEdit(view);
             }
-        });
         View findRequiredView4 = Utils.findRequiredView(view, R.id.user_pick_teleport_button, "method 'onTeleportToPickClick'");
         this.view2131755697 = findRequiredView4;
         findRequiredView4.setOnClickListener(new DebouncingOnClickListener() {
             public void doClick(View view) {
                 userPickFragment.onTeleportToPickClick(view);
             }
-        });
     }
 
     @CallSuper

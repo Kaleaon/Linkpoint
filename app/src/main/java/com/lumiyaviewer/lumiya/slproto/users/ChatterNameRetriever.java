@@ -191,10 +191,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         } else if (this.chatterID instanceof ChatterID.ChatterIDGroup) {
             this.subscription = userManager.getCachedGroupProfiles().getPool().subscribe(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), this.executor, new Subscription.OnData(this) {
 
@@ -279,10 +275,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.-$Lambd
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         } else {
             this.subscription = null;
         }

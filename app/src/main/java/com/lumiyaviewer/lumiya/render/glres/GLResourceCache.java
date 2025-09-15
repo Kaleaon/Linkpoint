@@ -25,7 +25,6 @@ public abstract class GLResourceCache<ResourceParams, RawType, ResourceType exte
 
         public void GLCompleteLoad() {
             ResourceType resourcetype;
-            boolean z;
             synchronized (this) {
                 resourcetype = this.loadedResource;
                 z = this.loadedFinal;
@@ -50,7 +49,6 @@ public abstract class GLResourceCache<ResourceParams, RawType, ResourceType exte
 
         public int GLLoad(RenderContext renderContext, GLLoadQueue.GLLoadHandler gLLoadHandler) {
             Raw raw;
-            boolean z;
             synchronized (this) {
                 raw = this.rawResource;
                 z = this.finalResult;

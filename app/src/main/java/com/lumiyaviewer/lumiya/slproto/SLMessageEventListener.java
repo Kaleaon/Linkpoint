@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.slproto;
+import java.util.*;
 
 public interface SLMessageEventListener {
 

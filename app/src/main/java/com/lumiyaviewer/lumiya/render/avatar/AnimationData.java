@@ -34,7 +34,6 @@ public class AnimationData {
         private final AnimationRotKeyframe[] rotKeyframes;
 
         AnimationJointData(LittleEndianDataInputStream littleEndianDataInputStream, float f) throws IOException {
-            int i;
             this.Priority = littleEndianDataInputStream.readInt();
             int readInt = littleEndianDataInputStream.readInt();
             if (readInt < 0 || readInt > EventType.STREET_VIEW_COLLECTION) {

@@ -178,9 +178,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
                     }).setNegativeButton("No", new $Lambda$mB53054QosfH2NBejFMOD8VFF4s());
                     builder.create().show();
                     return true;

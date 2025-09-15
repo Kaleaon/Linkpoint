@@ -414,7 +414,6 @@ public abstract class MasterDetailsActivity extends DetailsActivity {
 
     /* access modifiers changed from: protected */
     public void updateTitleNoDetails() {
-        boolean z;
         Fragment findFragmentById = getSupportFragmentManager().findFragmentById(R.id.selector);
         if (findFragmentById == null || !(findFragmentById instanceof FragmentHasTitle) || !findFragmentById.isAdded()) {
             z = false;

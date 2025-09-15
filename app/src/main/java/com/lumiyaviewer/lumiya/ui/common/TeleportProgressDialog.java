@@ -111,9 +111,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             };
             if (z) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -205,9 +202,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
                 }).setNegativeButton("No", new $Lambda$8gWLFwrhoxKapEC8iWggaUhFR1c());
                 builder.create().show();
                 return;

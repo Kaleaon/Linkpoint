@@ -94,7 +94,6 @@ public class SecondLifeWebRTCBridge {
                 Log.e(TAG, "Failed to process SL voice credentials", e);
                 return false;
             }
-        });
     }
     
     /**
@@ -141,7 +140,6 @@ public class SecondLifeWebRTCBridge {
                 Log.e(TAG, "Voice server authentication error", e);
                 return false;
             }
-        });
     }
     
     /**
@@ -187,7 +185,6 @@ public class SecondLifeWebRTCBridge {
                 Log.e(TAG, "Failed to connect to voice channel", e);
                 return false;
             }
-        });
     }
     
     /**
@@ -213,7 +210,6 @@ public class SecondLifeWebRTCBridge {
                 Log.e(TAG, "Failed to disconnect from voice", e);
                 return false;
             }
-        });
     }
     
     /**
@@ -258,7 +254,6 @@ public class SecondLifeWebRTCBridge {
                 Log.e(TAG, "Voice CAPS processing error", e);
                 return false;
             }
-        });
     }
     
     /**

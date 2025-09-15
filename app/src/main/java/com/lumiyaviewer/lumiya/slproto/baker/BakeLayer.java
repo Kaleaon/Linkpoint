@@ -113,7 +113,6 @@ public class BakeLayer {
     }
 
     private int getNetColor(BakeProcess bakeProcess) {
-        boolean z;
         int[] iArr = this.paramIDs;
         int length = iArr.length;
         int i = 0;

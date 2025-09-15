@@ -221,7 +221,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.res.executors.-$Lambd
             	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
             
 */
-        });
         Debug.Printf("Executor for %s: maxThreads %d", str, Integer.valueOf(i));
         allowCoreThreadTimeOut(true);
     }

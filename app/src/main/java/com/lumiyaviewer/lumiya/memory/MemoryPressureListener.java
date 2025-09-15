@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.memory;
+import java.util.*;
 
 /**
  * Interface for listening to memory pressure events

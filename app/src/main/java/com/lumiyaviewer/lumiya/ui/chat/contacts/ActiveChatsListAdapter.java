@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.chat.contacts;
+import java.util.*;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -211,10 +212,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         Debug.Printf("currentLocationInfo subscribing", new Object[0]);
         this.currentLocationInfoSubscription = userManager2.getCurrentLocationInfo().subscribe(SubscriptionSingleDataPool.getSingleDataKey(), UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
@@ -288,10 +285,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.localChatUnreadCountSubscription = userManager2.getChatterList().getActiveChattersManager().getUnreadCounts().subscribe(this.localChatItem.getChatterID(userManager2), UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
             /* renamed from: -$f0 */
@@ -364,10 +357,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.localVoiceChatSubscription = userManager2.getVoiceChatInfo().subscribe(this.localChatItem.getChatterID(userManager2), UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
             /* renamed from: -$f0 */
@@ -440,10 +429,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public boolean areAllItemsEnabled() {

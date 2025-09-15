@@ -115,7 +115,6 @@ public class CameraParams {
         float f3;
         float f4;
         float f5;
-        boolean z;
         if (cameraParams != null) {
             synchronized (cameraParams.lock) {
                 cameraParams.processFling();
@@ -183,7 +182,6 @@ public class CameraParams {
         float f3;
         float f4;
         float f5;
-        boolean z;
         if (cameraParams != null) {
             synchronized (cameraParams.lock) {
                 cameraParams.processManualControl(headTransformCompat);
@@ -211,7 +209,6 @@ public class CameraParams {
     }
 
     public boolean isFlinging() {
-        boolean z;
         synchronized (this.lock) {
             z = this.isFlinging;
         }
@@ -219,7 +216,6 @@ public class CameraParams {
     }
 
     public boolean isValid() {
-        boolean z;
         synchronized (this.lock) {
             z = this.isValid;
         }

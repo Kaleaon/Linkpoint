@@ -172,10 +172,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.groupMemberDataSetHandler = new RateLimitRequestHandler<>(new RequestProcessor<UUID, UUID, UUID>(this.groupMemberDataSetPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
             @Nullable
@@ -192,7 +188,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                 GroupManager.this.groupMemberListDao.insertOrReplace(new GroupMemberList(uuid, uuid2));
                 return uuid2;
             }
-        });
         this.groupRoleMemberDataSetHandler = new RateLimitRequestHandler<>(new RequestProcessor<UUID, UUID, UUID>(this.groupRoleMemberDataSetPool, userManager2.getDatabaseExecutor()) {
             /* access modifiers changed from: protected */
             public boolean isRequestComplete(@Nonnull UUID uuid, UUID uuid2) {
@@ -218,7 +213,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                 GroupManager.this.groupRoleMemberListDao.insertOrReplace(new GroupRoleMemberList(uuid, uuid2, false));
                 return uuid2;
             }
-        });
         this.groupRoleMemberSubscriptionPool.attachRequestHandler(new AsyncRequestHandler(userManager2.getDatabaseExecutor(), new SimpleRequestHandler<GroupRoleMembersQuery>() {
             public void onRequest(@Nonnull GroupRoleMembersQuery groupRoleMembersQuery) {
                 GroupManager.this.groupRoleMemberSubscriptionPool.onResultData(groupRoleMembersQuery, GroupManager.this.groupRoleMemberDao.queryBuilder().where(GroupRoleMemberDao.Properties.GroupID.eq(groupRoleMembersQuery.groupID()), GroupRoleMemberDao.Properties.RoleID.eq(groupRoleMembersQuery.roleID()), GroupRoleMemberDao.Properties.RequestID.eq(groupRoleMembersQuery.requestID())).listLazyUncached());
@@ -294,9 +288,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }, userManager2.getDatabaseExecutor());
         this.groupMemberRolesSubscriptionPool.attachRequestHandler(new AsyncRequestHandler(userManager2.getDatabaseExecutor(), new SimpleRequestHandler<GroupMemberRolesQuery>() {
             public void onRequest(@Nonnull GroupMemberRolesQuery groupMemberRolesQuery) {
@@ -439,10 +430,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void requestRefreshMemberList(UUID uuid) {

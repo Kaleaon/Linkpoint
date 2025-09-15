@@ -27,7 +27,6 @@ public class AvatarTextures {
         int i = 0;
         boolean z2 = false;
         while (i < length) {
-            boolean z3;
             AvatarTextureFaceIndex avatarTextureFaceIndex = values[i];
             SLTextureEntryFace GetFace = sLTextureEntry.GetFace(avatarTextureFaceIndex.ordinal());
             if (GetFace != null) {

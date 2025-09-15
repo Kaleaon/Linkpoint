@@ -30,7 +30,6 @@ public enum SLInventoryType {
     private int typeCode;
 
     static {
-        int i;
         tagMap = new HashMap(values().length * 2);
         for (SLInventoryType sLInventoryType : values()) {
             tagMap.put(sLInventoryType.stringCode, sLInventoryType);

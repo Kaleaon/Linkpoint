@@ -18,7 +18,6 @@ public class ResourceCleanupExecutor extends ScheduledThreadPoolExecutor {
             public Thread newThread(Runnable runnable) {
                 return new Thread(runnable, "ResourceCleanup");
             }
-        });
     }
 
     public static ResourceCleanupExecutor getInstance() {

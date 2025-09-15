@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.chat.profiles;
+import java.util.*;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -30,7 +31,6 @@ public class UserFirstLifeProfileTab_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 userFirstLifeProfileTab.onAboutEditClicked(view);
             }
-        });
         userFirstLifeProfileTab.loadingLayout = (LoadingLayout) Utils.findRequiredViewAsType(view, R.id.loading_layout, "field 'loadingLayout'", LoadingLayout.class);
         View findRequiredView2 = Utils.findRequiredView(view, R.id.change_pic_button, "field 'changePicButton' and method 'onChangePicClicked'");
         userFirstLifeProfileTab.changePicButton = (Button) Utils.castView(findRequiredView2, R.id.change_pic_button, "field 'changePicButton'", Button.class);
@@ -39,7 +39,6 @@ public class UserFirstLifeProfileTab_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 userFirstLifeProfileTab.onChangePicClicked(view);
             }
-        });
         userFirstLifeProfileTab.userProfileAboutText = (TextView) Utils.findRequiredViewAsType(view, R.id.user_profile_about_text, "field 'userProfileAboutText'", TextView.class);
         userFirstLifeProfileTab.userPicView = (ImageAssetView) Utils.findRequiredViewAsType(view, R.id.user_pic_view, "field 'userPicView'", ImageAssetView.class);
     }

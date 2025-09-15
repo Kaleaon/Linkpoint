@@ -41,7 +41,6 @@ public class SLWearableData {
     }
 
     SLWearableData(byte[] bArr) throws WearableFormatException {
-        int i;
         try {
             String[] split = new String(bArr, "ISO-8859-1").trim().split("\n+");
             if (split.length < 2) {
