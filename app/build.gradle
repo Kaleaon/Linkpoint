@@ -78,12 +78,24 @@ android {
             res.srcDirs = ['src/main/res']
             assets.srcDirs = ['src/main/assets']
 
-            // Exclude problematic decompiled artifacts
+            // Exclude problematic decompiled artifacts - focus only on essential core files
             java.excludes = [
-                '**/$Lambda$*.java',
-                '**/groups/SLGroupManager.java',     // Decompiler artifacts - non-critical for basic login
-                '**/SLAvatarAppearance.java',        // Fixed partially but may still have issues
-                '**/*$*.java'                       // Inner class artifacts from decompiler
+                '**/$Lambda$*.java',                 // Lambda artifacts
+                '**/*$*.java',                       // Inner class artifacts from decompiler  
+                '**/vivox/**/*.java',                // Vivox voice chat - non-critical for basic functionality
+                '**/groups/**/*.java',               // Group management - non-critical
+                '**/modules/**/*.java',              // Most SL protocol modules - exclude all for now
+                '**/slproto/**/*.java',              // Exclude all SL protocol for now - too many artifacts
+                '**/render/**/*.java',               // Rendering - non-critical for basic login test
+                '**/res/**/*.java',                  // Resource management - non-critical for basic test
+                '**/ui/**/*.java',                   // Exclude all UI except our clean login
+                '**/voice/**/*.java',                // Voice chat - non-critical
+                '**/cloud/**/*.java'                 // Cloud features - non-critical
+            ]
+            
+            // Explicitly include our clean files
+            java.includes = [
+                '**/CleanLoginActivity.java'
             ]
         }
     }
