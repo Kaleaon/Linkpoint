@@ -135,3 +135,8 @@ Thumbs.db-e
 # Environment files
 *.env
 *.env.*
+
+# File Inventory System - Generated Files
+# (Exclude generated inventory files from commits)
+file_inventory/
+copilot_review_files/
