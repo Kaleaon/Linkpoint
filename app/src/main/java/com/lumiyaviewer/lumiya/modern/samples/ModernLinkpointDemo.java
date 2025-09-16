@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.modern.samples;
+import java.util.*;
 
 import android.content.Context;
 import android.util.Log;
@@ -54,7 +55,6 @@ public class ModernLinkpointDemo {
                 Log.d(TAG, "Received chat event: " + event.getData());
                 // TODO: Process chat message
             }
-        });
         
         transport.subscribeToEvents("objectUpdate", new WebSocketEventClient.EventListener() {
             @Override
@@ -62,7 +62,6 @@ public class ModernLinkpointDemo {
                 Log.d(TAG, "Received object update: " + event.getData());
                 // TODO: Update 3D world objects
             }
-        });
         
         Log.i(TAG, "Modern transport layer connected successfully");
     }
@@ -117,7 +116,6 @@ public class ModernLinkpointDemo {
             .exceptionally(throwable -> {
                 Log.e(TAG, "Error loading texture: " + textureId, throwable);
                 return null;
-            });
     }
     
     /**
@@ -142,7 +140,6 @@ public class ModernLinkpointDemo {
             .exceptionally(throwable -> {
                 Log.e(TAG, "Failed to send message", throwable);
                 return null;
-            });
     }
     
     /**
@@ -203,7 +200,6 @@ public class ModernLinkpointDemo {
                 } else {
                     Log.w(TAG, "Authentication failed: " + result.getMessage());
                 }
-            });
     }
     
     /**
@@ -221,7 +217,6 @@ public class ModernLinkpointDemo {
                         Log.d(TAG, "Loaded texture asset: " + assetData.getId());
                         textureManager.processModernTexture(assetData.getData());
                     }
-                });
         }
     }
     

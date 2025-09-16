@@ -93,10 +93,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private Unbinder unbinder;
 
     private void askForUnblock(MuteListEntry muteListEntry) {
@@ -178,9 +174,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setNegativeButton("No", new $Lambda$dntbaqhB2OOLQW5t89NMwUjCLX4());
         builder.create().show();
     }
@@ -267,7 +260,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
                     MuteListFragment.this.doUnblock(item);
                 }
             }
-        });
         this.muteList.setOnTouchListener(swipeDismissListViewTouchListener);
         this.muteList.setOnScrollListener(swipeDismissListViewTouchListener.makeScrollListener());
         this.muteList.setOnItemClickListener(new AdapterView.OnItemClickListener(this) {
@@ -338,10 +330,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         registerForContextMenu(this.muteList);
         return inflate;
     }

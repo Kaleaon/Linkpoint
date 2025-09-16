@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.common;
+import java.util.*;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -90,7 +91,6 @@ public abstract class UserListFragment extends Fragment {
                             ((DismissableAdapter) adapter).onDismiss(i);
                         }
                     }
-                });
                 listView.setOnTouchListener(swipeDismissListViewTouchListener);
                 listView.setOnScrollListener(swipeDismissListViewTouchListener.makeScrollListener());
             }

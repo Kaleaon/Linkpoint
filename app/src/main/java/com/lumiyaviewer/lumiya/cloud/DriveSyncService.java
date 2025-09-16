@@ -247,7 +247,6 @@ implements LogWriteTracker.OnLoggingDoneListener {
                 public void onMessageBatchSynced(MessageSyncBatch messageSyncBatch) {
                     CloudSyncMessenger.sendMessage(this.val$replyTo, MessageType.LogMessagesCompleted, new LogMessagesCompleted(this.val$message.agentUUID, this.val$message.lastMessageID), null);
                 }
-            });
             for (LogChatMessage logChatMessage : logMessageBatch.messages) {
                 if (logChatMessage == null || logChatMessage.chatterName == null || logChatMessage.messageText == null) continue;
                 this.synchronizer.logString(this.agentSyncConnections, logMessageBatch.agentUUID, logMessageBatch.agentName, this.logFileNameForChatter(logChatMessage.chatterName), new DriveLogEntry(logChatMessage.messageText, messageSyncBatch, logChatMessage.messageID));

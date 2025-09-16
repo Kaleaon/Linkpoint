@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.utils;
+import java.util.*;
 
 public interface InlineListEntry<T extends InlineListEntry<T>> {
     InlineList<T> getList();

@@ -22,7 +22,6 @@ public class FrustrumPlanes {
     }
 
     private void initPlane(int i, float[] fArr, int i2, float f) {
-        int i3;
         int i4 = 0;
         int i5 = i * 4;
         for (i3 = 0; i3 < 4; i3++) {

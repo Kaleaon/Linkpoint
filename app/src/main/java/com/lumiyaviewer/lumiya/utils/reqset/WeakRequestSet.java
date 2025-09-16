@@ -20,7 +20,6 @@ class WeakRequestSet<T> {
 
     /* access modifiers changed from: package-private */
     public boolean addRequest(@Nonnull T t, @Nonnull Object obj) {
-        boolean z;
         boolean z2 = true;
         synchronized (this.lock) {
             Set set = this.requests.get(t);

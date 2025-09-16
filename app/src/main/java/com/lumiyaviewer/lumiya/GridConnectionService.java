@@ -1436,7 +1436,6 @@ public class GridConnectionService extends Service implements OnSharedPreference
     }
 
     private void updateOnlineNotification() {
-        int i;
         if (gridConnection != null) {
             ConnectionState connectionState = gridConnection.getConnectionState();
             i = connectionState != ConnectionState.Idle ? GlobalOptions.getInstance().getKeepWifiOn() ? 1 : 0 : 0;

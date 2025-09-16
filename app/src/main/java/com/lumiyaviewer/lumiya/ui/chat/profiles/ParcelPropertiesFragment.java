@@ -97,10 +97,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<SubscriptionSingleKey, Boolean> isPlayingMedia = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -156,10 +152,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     @BindView(2131755614)
     Button mediaPlayButton;
     @BindView(2131755615)
@@ -427,9 +419,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new $Lambda$3KadVkUh82bQPaUr2S81wOMi_ug()).create().show();
         }
     }
@@ -540,9 +529,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new DialogInterface.OnClickListener() {
                 private final /* synthetic */ void $m$0(
 /*
@@ -632,9 +618,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setCancelable(true).create().show();
         }
     }

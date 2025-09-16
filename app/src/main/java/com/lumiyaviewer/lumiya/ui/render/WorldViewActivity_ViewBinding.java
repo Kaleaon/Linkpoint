@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.render;
+import java.util.*;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -45,7 +46,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onObjectPayButton();
             }
-        });
         worldViewActivity.buttonFlyUpward = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_fly_upward, "field 'buttonFlyUpward'", ImageButton.class);
         View findRequiredView2 = Utils.findRequiredView(view, R.id.button_hud, "field 'buttonHUD' and method 'onHUDButton'");
         worldViewActivity.buttonHUD = (Button) Utils.castView(findRequiredView2, R.id.button_hud, "field 'buttonHUD'", Button.class);
@@ -54,7 +54,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onHUDButton();
             }
-        });
         View findRequiredView3 = Utils.findRequiredView(view, R.id.button_stand_up, "field 'buttonStandUp' and method 'onObjectStandButton'");
         worldViewActivity.buttonStandUp = (ImageButton) Utils.castView(findRequiredView3, R.id.button_stand_up, "field 'buttonStandUp'", ImageButton.class);
         this.view2131755264 = findRequiredView3;
@@ -62,7 +61,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onObjectStandButton();
             }
-        });
         View findRequiredView4 = Utils.findRequiredView(view, R.id.object_more_button, "field 'objectMoreButton' and method 'onObjectMoreButton'");
         worldViewActivity.objectMoreButton = (ImageButton) Utils.castView(findRequiredView4, R.id.object_more_button, "field 'objectMoreButton'", ImageButton.class);
         this.view2131755754 = findRequiredView4;
@@ -70,7 +68,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onObjectMoreButton();
             }
-        });
         worldViewActivity.flyButtonsLayout = (LinearLayout) Utils.findRequiredViewAsType(view, R.id.fly_buttons_layout, "field 'flyButtonsLayout'", LinearLayout.class);
         worldViewActivity.objectPopupLeftSpacer = Utils.findRequiredView(view, R.id.object_popup_left_spacer, "field 'objectPopupLeftSpacer'");
         View findRequiredView5 = Utils.findRequiredView(view, R.id.object_touch_button, "field 'objectTouchButton' and method 'onObjectTouchButton'");
@@ -80,7 +77,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onObjectTouchButton();
             }
-        });
         worldViewActivity.buttonFlyDownward = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_fly_downward, "field 'buttonFlyDownward'", ImageButton.class);
         worldViewActivity.chatsOverlayLayout = (LinearLayout) Utils.findRequiredViewAsType(view, R.id.chats_overlay_layout, "field 'chatsOverlayLayout'", LinearLayout.class);
         worldViewActivity.moveButtonsLayout = Utils.findRequiredView(view, R.id.move_buttons_layout, "field 'moveButtonsLayout'");
@@ -94,7 +90,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onObjectChatButton();
             }
-        });
         worldViewActivity.detailsContainer = Utils.findRequiredView(view, R.id.details, "field 'detailsContainer'");
         worldViewActivity.worldViewTouchReceiver = Utils.findRequiredView(view, R.id.world_view_touch_receiver, "field 'worldViewTouchReceiver'");
         worldViewActivity.buttonTurnRight = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_turn_right, "field 'buttonTurnRight'", ImageButton.class);
@@ -105,7 +100,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onObjectSitButton();
             }
-        });
         worldViewActivity.buttonTurnLeft = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_turn_left, "field 'buttonTurnLeft'", ImageButton.class);
         worldViewActivity.buttonMoveForward = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_move_forward, "field 'buttonMoveForward'", ImageButton.class);
         worldViewActivity.objectControlsPanel = Utils.findRequiredView(view, R.id.object_controls_panel, "field 'objectControlsPanel'");
@@ -117,7 +111,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onCamOffButton();
             }
-        });
         worldViewActivity.voiceStatusView = (VoiceStatusView) Utils.findRequiredViewAsType(view, R.id.voice_status_view_3d, "field 'voiceStatusView'", VoiceStatusView.class);
         worldViewActivity.insetsBackground = (FrameLayout) Utils.findRequiredViewAsType(view, R.id.insets_background, "field 'insetsBackground'", FrameLayout.class);
         worldViewActivity.buttonMoveBackward = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_move_backward, "field 'buttonMoveBackward'", ImageButton.class);
@@ -128,7 +121,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onCamOnButton();
             }
-        });
         View findRequiredView10 = Utils.findRequiredView(view, R.id.object_stand_button, "field 'objectStandButton' and method 'onObjectStandButton'");
         worldViewActivity.objectStandButton = (ImageButton) Utils.castView(findRequiredView10, R.id.object_stand_button, "field 'objectStandButton'", ImageButton.class);
         this.view2131755538 = findRequiredView10;
@@ -136,7 +128,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onObjectStandButton();
             }
-        });
         worldViewActivity.dragPointer = Utils.findRequiredView(view, R.id.drag_pointer_view, "field 'dragPointer'");
         worldViewActivity.objectNameTextView = (TextView) Utils.findRequiredViewAsType(view, R.id.objectNameTextView, "field 'objectNameTextView'", TextView.class);
         View findRequiredView11 = Utils.findRequiredView(view, R.id.button_stop_flying, "field 'buttonStopFlying' and method 'onStopFlyingButton'");
@@ -146,7 +137,6 @@ public class WorldViewActivity_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 worldViewActivity.onStopFlyingButton();
             }
-        });
     }
 
     @CallSuper

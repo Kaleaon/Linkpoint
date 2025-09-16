@@ -268,7 +268,6 @@ public class SLTextureEntry {
     }
 
     private void WriteFaceBitfield(ByteBuffer byteBuffer, int i) {
-        int i2;
         int i3 = 0;
         int i4 = i;
         while (true) {

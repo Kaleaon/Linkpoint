@@ -133,10 +133,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<SubscriptionSingleKey, InventoryManager.InventoryClipboardEntry> clipboardEntry = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -192,10 +188,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<InventoryQuery, InventoryEntryList> entryList = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -251,10 +243,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     @Nonnull
     private ImmutableMap<Integer, MenuItem> folderActionMenuItems = ImmutableMap.of();
     private final SubscriptionData<UUID, Boolean> folderLoading = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
@@ -312,10 +300,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final InventoryFragmentHelper inventoryFragmentHelper = new InventoryFragmentHelper(this);
     private final AdapterView.OnItemClickListener itemClickListener = new AdapterView.OnItemClickListener(this) {
 
@@ -366,9 +350,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
     };
     private final LoadableMonitor loadableMonitor = new LoadableMonitor(this.entryList);
     private final View.OnClickListener saveAsClickListener = new View.OnClickListener(this) {
@@ -420,9 +401,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
     };
     private InventorySaveInfo saveInfo = null;
     private final SubscriptionData<SubscriptionSingleKey, Boolean> searchRunning = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
@@ -480,10 +458,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<SubscriptionSingleKey, ImmutableMap<UUID, String>> wornAttachments = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -539,10 +513,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<SubscriptionSingleKey, Table<SLWearableType, UUID, SLWearable>> wornWearables = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -598,10 +568,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-inventory-InventoryActivity$SelectActionSwitchesValues  reason: not valid java name */
     private static /* synthetic */ int[] m590getcomlumiyaviewerlumiyauiinventoryInventoryActivity$SelectActionSwitchesValues() {
@@ -980,9 +946,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).create().show();
             return;
         }
@@ -1088,9 +1051,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setNegativeButton("No", new DialogInterface.OnClickListener() {
             private final /* synthetic */ void $m$0(
 /*
@@ -1159,10 +1119,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         builder.create().show();
     }
 
@@ -1251,8 +1207,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     private void updateLoadingStatus() {
-        boolean z;
-        boolean z2;
         Context context = getContext();
         if (context != null) {
             boolean z3 = getArguments().getBoolean(IS_SEARCHING_KEY);
@@ -1477,10 +1431,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             }
         } else if (this.saveInfo.saveType == InventorySaveInfo.InventorySaveType.InventoryOffer) {
             SLAgentCircuit data2 = this.agentCircuit.getData();
@@ -1576,10 +1526,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: package-private */
@@ -1740,9 +1686,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                             
 */
 
-                            public final void brokenMethod(
-        // TODO: implement method
-    }
                         }).setNegativeButton("No", new $Lambda$MXulZZBv5zNDEqgJzTmU0EFG10());
                         builder.create().show();
                         return;
@@ -1838,9 +1781,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
                 }).create().show();
             }
         }
@@ -1990,10 +1930,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
-                    });
                     return true;
                 case R.id.inventory_folder_rename_item:
                     this.inventoryFragmentHelper.RenameInventoryEntry(folder);

@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.voice;
+import java.util.*;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -40,7 +41,6 @@ public class VoiceStatusView_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 voiceStatusView.onVoiceAnswerButton();
             }
-        });
         View findRequiredView2 = Utils.findRequiredView(view, R.id.voice_terminate_button, "field 'voiceTerminateButton' and method 'onVoiceTerminateButton'");
         voiceStatusView.voiceTerminateButton = (ImageButton) Utils.castView(findRequiredView2, R.id.voice_terminate_button, "field 'voiceTerminateButton'", ImageButton.class);
         this.view2131755736 = findRequiredView2;
@@ -48,7 +48,6 @@ public class VoiceStatusView_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 voiceStatusView.onVoiceTerminateButton();
             }
-        });
         voiceStatusView.voiceStatusSmallText = (TextView) Utils.findRequiredViewAsType(view, R.id.voice_status_small_text, "field 'voiceStatusSmallText'", TextView.class);
         View findRequiredView3 = Utils.findRequiredView(view, R.id.voice_bluetooth_button, "field 'voiceBluetoothButton' and method 'onVoiceBluetoothButton'");
         voiceStatusView.voiceBluetoothButton = (Button) Utils.castView(findRequiredView3, R.id.voice_bluetooth_button, "field 'voiceBluetoothButton'", Button.class);
@@ -57,7 +56,6 @@ public class VoiceStatusView_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 voiceStatusView.onVoiceBluetoothButton();
             }
-        });
         voiceStatusView.voiceSpeakIndicatorLeft = (ImageView) Utils.findRequiredViewAsType(view, R.id.voice_speak_indicator_left, "field 'voiceSpeakIndicatorLeft'", ImageView.class);
         View findRequiredView4 = Utils.findRequiredView(view, R.id.voice_mic_on_button, "field 'voiceMicOnButton' and method 'onVoiceMicOnButton'");
         voiceStatusView.voiceMicOnButton = (ImageButton) Utils.castView(findRequiredView4, R.id.voice_mic_on_button, "field 'voiceMicOnButton'", ImageButton.class);
@@ -66,7 +64,6 @@ public class VoiceStatusView_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 voiceStatusView.onVoiceMicOnButton();
             }
-        });
         voiceStatusView.voiceStatusControls = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.voice_status_controls, "field 'voiceStatusControls'", ViewGroup.class);
         View findRequiredView5 = Utils.findRequiredView(view, R.id.voice_loudspeaker_button, "field 'voiceLoudspeakerButton' and method 'onLoudspeakerButton'");
         voiceStatusView.voiceLoudspeakerButton = (Button) Utils.castView(findRequiredView5, R.id.voice_loudspeaker_button, "field 'voiceLoudspeakerButton'", Button.class);
@@ -75,7 +72,6 @@ public class VoiceStatusView_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 voiceStatusView.onLoudspeakerButton();
             }
-        });
         voiceStatusView.voiceStatusText = (TextView) Utils.findRequiredViewAsType(view, R.id.voice_status_text, "field 'voiceStatusText'", TextView.class);
         voiceStatusView.voiceSpeakIndicatorRight = (ImageView) Utils.findRequiredViewAsType(view, R.id.voice_speak_indicator_right, "field 'voiceSpeakIndicatorRight'", ImageView.class);
         View findRequiredView6 = Utils.findRequiredView(view, R.id.voice_mic_off_button, "field 'voiceMicOffButton' and method 'onVoiceMicOffButton'");
@@ -85,7 +81,6 @@ public class VoiceStatusView_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 voiceStatusView.onVoiceMicOffButton();
             }
-        });
         View findRequiredView7 = Utils.findRequiredView(view, R.id.voice_status_card_view, "field 'voiceStatusCardView' and method 'onVoiceStatusCardClick'");
         voiceStatusView.voiceStatusCardView = (CardView) Utils.castView(findRequiredView7, R.id.voice_status_card_view, "field 'voiceStatusCardView'", CardView.class);
         this.view2131755728 = findRequiredView7;
@@ -93,7 +88,6 @@ public class VoiceStatusView_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 voiceStatusView.onVoiceStatusCardClick();
             }
-        });
         voiceStatusView.voiceSpeakerVolumeControl = (SeekBar) Utils.findRequiredViewAsType(view, R.id.voice_speaker_volume_control, "field 'voiceSpeakerVolumeControl'", SeekBar.class);
     }
 

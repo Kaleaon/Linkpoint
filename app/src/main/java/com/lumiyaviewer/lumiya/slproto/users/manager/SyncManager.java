@@ -163,10 +163,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: private */
@@ -251,10 +247,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: private */
@@ -360,9 +352,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }, this.dbExecutor, true);
         }
         return this.chatterNameRetriever.getResolvedName();
@@ -652,10 +641,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
     }
 
@@ -768,10 +753,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void onMessagesWritten(long j) {
@@ -846,10 +827,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void startSyncing(CloudSyncServiceConnection cloudSyncServiceConnection) {
@@ -924,10 +901,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void stopSyncing() {
@@ -1000,10 +973,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: package-private */
@@ -1084,10 +1053,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
     }
 }

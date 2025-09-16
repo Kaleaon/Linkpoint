@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.chat.profiles;
+import java.util.*;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -40,7 +41,6 @@ public class UserMainProfileTab_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 userMainProfileTab.onChangePicClicked(view);
             }
-        });
         userMainProfileTab.userPicView = (ImageAssetView) Utils.findRequiredViewAsType(view, R.id.user_pic_view, "field 'userPicView'", ImageAssetView.class);
         userMainProfileTab.userProfileAboutText = (TextView) Utils.findRequiredViewAsType(view, R.id.user_profile_about_text, "field 'userProfileAboutText'", TextView.class);
         userMainProfileTab.textProfileAge = (TextView) Utils.findRequiredViewAsType(view, R.id.text_profile_age, "field 'textProfileAge'", TextView.class);
@@ -53,7 +53,6 @@ public class UserMainProfileTab_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 userMainProfileTab.onAboutEditClicked(view);
             }
-        });
         userMainProfileTab.userWebProfileLink = (TextView) Utils.findRequiredViewAsType(view, R.id.user_web_profile_link, "field 'userWebProfileLink'", TextView.class);
         userMainProfileTab.userPartnerCardView = Utils.findRequiredView(view, R.id.user_partner_card_view, "field 'userPartnerCardView'");
         userMainProfileTab.textProfileNotesText = (TextView) Utils.findRequiredViewAsType(view, R.id.text_profile_notes_text, "field 'textProfileNotesText'", TextView.class);
@@ -63,21 +62,18 @@ public class UserMainProfileTab_ViewBinding implements Unbinder {
             public void doClick(View view) {
                 userMainProfileTab.onViewProfileClicked(view);
             }
-        });
         View findRequiredView4 = Utils.findRequiredView(view, R.id.button_edit_notes, "method 'onEditNotesClicked'");
         this.view2131755724 = findRequiredView4;
         findRequiredView4.setOnClickListener(new DebouncingOnClickListener() {
             public void doClick(View view) {
                 userMainProfileTab.onEditNotesClicked(view);
             }
-        });
         View findRequiredView5 = Utils.findRequiredView(view, R.id.button_copy_agent_key, "method 'onCopyAgentKeyClicked'");
         this.view2131755720 = findRequiredView5;
         findRequiredView5.setOnClickListener(new DebouncingOnClickListener() {
             public void doClick(View view) {
                 userMainProfileTab.onCopyAgentKeyClicked(view);
             }
-        });
     }
 
     @CallSuper

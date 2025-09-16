@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.voice;
+import java.util.*;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -227,10 +228,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.voiceChatInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
             /* renamed from: -$f0 */
@@ -303,10 +300,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.speakerNameRetriever = null;
         this.activeChatterNameRetriever = null;
         this.activeChatterID = null;
@@ -400,9 +393,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         };
         LayoutInflater.from(context).inflate(R.layout.voice_status, this, true);
         initializeControls();
@@ -482,10 +472,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.voiceChatInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
             /* renamed from: -$f0 */
@@ -558,10 +544,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.speakerNameRetriever = null;
         this.activeChatterNameRetriever = null;
         this.activeChatterID = null;
@@ -655,9 +637,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         };
         LayoutInflater.from(context).inflate(R.layout.voice_status, this, true);
         initializeControls();
@@ -737,10 +716,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.voiceChatInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
             /* renamed from: -$f0 */
@@ -813,10 +788,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.speakerNameRetriever = null;
         this.activeChatterNameRetriever = null;
         this.activeChatterID = null;
@@ -910,9 +881,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         };
         LayoutInflater.from(context).inflate(R.layout.voice_status, this, true);
         initializeControls();
@@ -993,10 +961,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.voiceChatInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
             /* renamed from: -$f0 */
@@ -1069,10 +1033,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.speakerNameRetriever = null;
         this.activeChatterNameRetriever = null;
         this.activeChatterID = null;
@@ -1166,9 +1126,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         };
         LayoutInflater.from(context).inflate(R.layout.voice_status, this, true);
         initializeControls();
@@ -1218,7 +1175,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
 
     private void updateVoiceState() {
         ChatterID.ChatterIDUser chatterIDUser;
-        int i;
         String str;
         ChatterID.ChatterIDUser chatterIDUser2;
         int i2 = 4;

@@ -98,9 +98,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$4M
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }, WAIT_INTERVAL);
     }
 

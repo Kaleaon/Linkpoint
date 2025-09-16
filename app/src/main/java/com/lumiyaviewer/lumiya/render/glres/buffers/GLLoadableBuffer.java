@@ -136,7 +136,6 @@ public class GLLoadableBuffer implements GLCleanable {
 
     @TargetApi(18)
     public final void BindUniformDynamic(RenderContext renderContext, int i, boolean z) {
-        boolean z2;
         if ((this.glBuffer == null || z) && this.glBuffer == null) {
             this.glBuffer = new GLBuffer(renderContext.glResourceManager, this.rawBuffer);
             renderContext.glResourceManager.addCleanable(this);

@@ -57,7 +57,6 @@ public class CurrentOutfitFragment extends Fragment implements LoadableMonitor.O
                     ((DismissableAdapter) adapter).onDismiss(i);
                 }
             }
-        });
         listView.setOnTouchListener(swipeDismissListViewTouchListener);
         listView.setOnScrollListener(swipeDismissListViewTouchListener.makeScrollListener());
         return inflate;

@@ -33,7 +33,6 @@ public class SLTaskInventories extends SLModule implements SLXfer.SLXferCompleti
             public void onRequest(@Nonnull Integer num) {
                 SLTaskInventories.this.RequestTaskInventory(num.intValue());
             }
-        });
         this.userManager = UserManager.getUserManager(sLAgentCircuit.getAgentUUID());
         if (this.userManager != null) {
             this.resultHandler = this.userManager.getObjectsManager().getTaskInventoryRequestSource().attachRequestHandler(this.requestHandler);

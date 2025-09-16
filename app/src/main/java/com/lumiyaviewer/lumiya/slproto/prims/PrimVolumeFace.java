@@ -39,9 +39,6 @@ public class PrimVolumeFace {
     public VertexArray vertexArray;
 
     private boolean createCap(PrimVolume primVolume) {
-        int i;
-        boolean z;
-        boolean z2;
         if ((this.TypeMask & 64) == 0 && (this.TypeMask & 128) == 0 && primVolume.volumeParams.PathParams.Begin == 0.0f && primVolume.volumeParams.PathParams.End == 1.0f && primVolume.getProfileType() == 1 && primVolume.getPathType() == 16) {
             return createUnCutCubeCap(primVolume);
         }
@@ -237,11 +234,6 @@ public class PrimVolumeFace {
     }
 
     private boolean createSide(PrimVolume primVolume) {
-        int i;
-        int i2;
-        int i3;
-        int i4;
-        int i5;
         boolean z = (this.TypeMask & 256) != 0;
         byte b = primVolume.volumeParams.SculptType;
         byte b2 = (byte) (b & 7);
@@ -466,7 +458,6 @@ public class PrimVolumeFace {
     }
 
     private boolean createUnCutCubeCap(PrimVolume primVolume) {
-        int i;
         Vector3Array vector3Array = primVolume.Mesh;
         ArrayList<LLVector3> arrayList = primVolume.Profile.Profile;
         int i2 = primVolume.Profile.Total;

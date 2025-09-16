@@ -24,7 +24,6 @@ public class AgentPosition {
     }
 
     public boolean getInterpolatedPosition(@Nonnull LLVector3 lLVector3) {
-        boolean z;
         synchronized (this.lock) {
             if (this.isValid) {
                 if (this.velocity.x == 0.0f && this.velocity.y == 0.0f && this.velocity.z == 0.0f) {
@@ -53,7 +52,6 @@ public class AgentPosition {
     }
 
     public boolean getPosition(@Nonnull LLVector3 lLVector3) {
-        boolean z;
         synchronized (this.lock) {
             if (this.isValid) {
                 lLVector3.set(this.position);
@@ -66,7 +64,6 @@ public class AgentPosition {
     }
 
     public boolean isValid() {
-        boolean z;
         synchronized (this.lock) {
             z = this.isValid;
         }

@@ -161,7 +161,6 @@ public class UserManager {
             UserManager.this.daoSession.getUserNameDao().insertOrReplace(userName);
             return userName;
         }
-    });
     private final SubscriptionPool<UUID, UserName> userNamesPool = new SubscriptionPool<>();
     private final UserPicBitmapCache userPicBitmapCache;
     @Nonnull

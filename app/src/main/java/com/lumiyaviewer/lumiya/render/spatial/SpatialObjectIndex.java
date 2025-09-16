@@ -44,9 +44,7 @@ public class SpatialObjectIndex {
         public void run() {
             boolean z = false;
             while (SpatialObjectIndex.this.initialUpdateCompleted && (SpatialObjectIndex.this.indexDisabled ^ 1) != 0) {
-                int i;
                 TerrainData terrainData;
-                boolean z2;
                 synchronized (SpatialObjectIndex.this.terrainLock) {
                     Iterator it = SpatialObjectIndex.this.terrainDirty.entrySet().iterator();
                     if (it.hasNext()) {

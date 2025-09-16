@@ -101,7 +101,6 @@ public class UnreadNotificationManager implements ChatterNameRetriever.OnChatter
             public void onRequest(@Nonnull Boolean bool) {
                 UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateChatterDataRunnable);
             }
-        });
         updateTypesFromPreferences(LumiyaApp.getDefaultSharedPreferences());
         EventBus.getInstance().subscribe((Object) this);
     }
@@ -109,7 +108,6 @@ public class UnreadNotificationManager implements ChatterNameRetriever.OnChatter
     /* access modifiers changed from: private */
     @Nonnull
     public UnreadNotifications getUnreadNotification() {
-        int i;
         NotificationType notificationType;
         ArrayList arrayList;
         UnreadNotificationInfo.UnreadMessageSource unreadMessageSource;

@@ -56,7 +56,6 @@ public class SLWorldMap extends SLModule {
 
     @SLMessageHandler
     public void HandleMapBlockReply(MapBlockReply mapBlockReply) {
-        boolean z;
         boolean z2 = false;
         boolean z3 = false;
         Iterator<T> it = mapBlockReply.Data_Fields.iterator();

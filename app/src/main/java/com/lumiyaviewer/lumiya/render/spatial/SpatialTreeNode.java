@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.render.spatial;
+import java.util.*;
 
 import com.lumiyaviewer.lumiya.utils.InlineList;
 
@@ -129,8 +130,6 @@ public class SpatialTreeNode extends InlineList<DrawListEntry> {
     private void shrinkBoundingBox() {
         int i = 1;
         if (this.parent != null) {
-            int i2;
-            int i3;
             Object obj = new float[6];
             DrawListEntry drawListEntry = (DrawListEntry) getFirst();
             int i4 = 0;
@@ -216,7 +215,6 @@ public class SpatialTreeNode extends InlineList<DrawListEntry> {
         int i = 0;
         int i2 = -1;
         while (i < 3) {
-            int i3;
             float f2 = (this.position[(this.splitAxis + 6) + 3] - this.position[this.splitAxis + 6]) / MIN_SIZE;
             float f3 = this.position[this.splitAxis + 6] + ((f2 / MIN_SIZE) * ((float) i));
             if (fArr[this.splitAxis] < f3 || fArr[this.splitAxis + 3] > f3 + f2) {
@@ -238,7 +236,6 @@ public class SpatialTreeNode extends InlineList<DrawListEntry> {
         if (i2 == -1) {
             return this;
         }
-        Object obj;
         if (this.children == null) {
             this.children = new SpatialTreeNode[3];
             obj = 1;
@@ -280,7 +277,6 @@ public class SpatialTreeNode extends InlineList<DrawListEntry> {
         if (this.singleChild != null && getFirst() == null) {
             return this.singleChild.walkTree(frustrumPlanes, i, fArr);
         }
-        int i3;
         if (i != -1) {
             i = frustrumPlanes.testBoundingBox(this.position, fArr);
         }

@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.common;
+import java.util.*;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -158,9 +159,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setNegativeButton("No", new DialogInterface.OnClickListener(this) {
 
             /* renamed from: -$f0 */
@@ -237,10 +235,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         builder.create().show();
         return true;
     }
@@ -278,7 +272,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
 
             public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
             }
-        });
         return inflate;
     }
 
@@ -375,9 +368,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
                     }).setNegativeButton("No", new $Lambda$DtZUcoBgRyVus24uOe08hwsuHo());
                     builder.create().show();
                 }

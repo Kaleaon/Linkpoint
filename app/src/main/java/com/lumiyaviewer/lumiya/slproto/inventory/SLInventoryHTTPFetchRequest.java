@@ -613,7 +613,6 @@ class SLInventoryHTTPFetchRequest extends SLInventoryFetchRequest {
         private static final Map<String, FolderValueKey> tagMap = null;
 
         static {
-            int i;
             tagMap = new HashMap(values().length * 2);
             for (FolderValueKey folderValueKey : values()) {
                 tagMap.put(folderValueKey.toString(), folderValueKey);
@@ -894,7 +893,6 @@ class SLInventoryHTTPFetchRequest extends SLInventoryFetchRequest {
         private static final Map<String, ItemValueKey> tagMap = null;
 
         static {
-            int i;
             tagMap = new HashMap(values().length * 2);
             for (ItemValueKey itemValueKey : values()) {
                 tagMap.put(itemValueKey.toString(), itemValueKey);
@@ -921,7 +919,6 @@ class SLInventoryHTTPFetchRequest extends SLInventoryFetchRequest {
         private static final Map<String, PermissionsValueKey> tagMap = null;
 
         static {
-            int i;
             tagMap = new HashMap(values().length * 2);
             for (PermissionsValueKey permissionsValueKey : values()) {
                 tagMap.put(permissionsValueKey.toString(), permissionsValueKey);

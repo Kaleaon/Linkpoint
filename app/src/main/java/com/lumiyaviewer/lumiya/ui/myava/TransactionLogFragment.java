@@ -140,9 +140,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setNegativeButton("No", new $Lambda$N_xrT8AwWQ2OjPw50fSCa4Lhb58());
         builder.create().show();
     }

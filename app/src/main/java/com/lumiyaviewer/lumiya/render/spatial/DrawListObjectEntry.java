@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.render.spatial;
+import java.util.*;
 
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
 import com.lumiyaviewer.lumiya.slproto.types.Vector3Array;
@@ -20,7 +21,6 @@ public abstract class DrawListObjectEntry extends DrawListEntry {
     public void updateBoundingBox() {
         float[] fArr = this.objectInfo.worldMatrix;
         if (fArr != null) {
-            int i;
             float f;
             Vector3Array objectCoords = this.objectInfo.getObjectCoords();
             float[] data = objectCoords.getData();
@@ -36,7 +36,6 @@ public abstract class DrawListObjectEntry extends DrawListEntry {
                     f = fArr[(i2 * 4) + i] * ((-data[elementOffset + i]) / 2.0f);
                     float f2 = fArr[(i2 * 4) + i] * (data[elementOffset + i] / 2.0f);
                     float[] fArr3;
-                    int i3;
                     if (f < f2) {
                         fArr3 = this.boundingBox;
                         fArr3[i2] = f + fArr3[i2];

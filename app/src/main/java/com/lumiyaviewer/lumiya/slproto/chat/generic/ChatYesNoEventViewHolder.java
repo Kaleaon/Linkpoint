@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.slproto.chat.generic;
+import java.util.*;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;

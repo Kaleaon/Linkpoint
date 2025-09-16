@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.slproto.users.manager;
+import java.util.*;
 
 /* renamed from: com.lumiyaviewer.lumiya.slproto.users.manager.-$Lambda$vvo1Hidt87pwA0OrMywwrJjt1rU  reason: invalid class name */
 final /* synthetic */ class $Lambda$vvo1Hidt87pwA0OrMywwrJjt1rU implements OnListUpdated {

@@ -74,7 +74,6 @@ class MuteListAdapter extends BaseAdapter {
     }
 
     public View getView(int i, View view, ViewGroup viewGroup) {
-        int i2;
         MuteListEntry item = getItem(i);
         if (item != null) {
             if (view == null) {

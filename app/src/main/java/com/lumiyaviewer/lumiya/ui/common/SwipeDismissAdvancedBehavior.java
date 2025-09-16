@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.common;
+import java.util.*;
 
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -129,9 +130,6 @@ public class SwipeDismissAdvancedBehavior<V extends View> extends CoordinatorLay
         }
 
         public void onViewReleased(View view, float f, float f2) {
-            int i;
-            int i2;
-            boolean z;
             int width = view.getWidth();
             int height = view.getHeight();
             int left = view.getLeft();

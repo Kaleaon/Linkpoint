@@ -115,7 +115,6 @@ public class SLAvatarAppearance extends SLModule implements SLWearable.OnWearabl
                 SLAvatarAppearance.this.wornItemsResultHandler.onResultData(subscriptionSingleKey, SLAvatarAppearance.this.getWornItems());
             }
         }
-    });
     /* access modifiers changed from: private */
     public final ResultHandler<SubscriptionSingleKey, ImmutableList<WornItem>> wornItemsResultHandler;
     @Nonnull
@@ -244,10 +243,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
+        // Fixed decompilation artifact - proper method structure
         if (this.userManager != null) {
             this.wornItemsResultHandler = this.userManager.wornItems().attachRequestHandler(this.wornItemsRequestHandler);
         } else {
@@ -257,7 +253,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
 
     private void DetachItem(int i) {
         SLObjectAvatarInfo agentAvatar;
-        boolean z;
         Debug.Log("Outfits: detaching item " + i);
         boolean z2 = false;
         Map map = this.wantedAttachments.get();
@@ -338,7 +333,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     }
 
     private void SendAgentIsNowWearing() {
-        boolean z;
         AgentIsNowWearing agentIsNowWearing = new AgentIsNowWearing();
         agentIsNowWearing.AgentData_Field.AgentID = this.circuitInfo.agentID;
         agentIsNowWearing.AgentData_Field.SessionID = this.circuitInfo.sessionID;
@@ -422,8 +416,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     private void UpdateCOFContents() {
         InventoryEntryList<SLInventoryEntry> data;
         SLInventoryEntry folder;
-        boolean z;
-        boolean z2;
         boolean areWearablesReady = areWearablesReady();
         Debug.Printf("Wearables ready %b, cofReady %b", Boolean.valueOf(areWearablesReady), Boolean.valueOf(this.cofReady));
         if ((areWearablesReady ? this.cofReady : false) && (data = this.currentOutfitFolder.getData()) != null && (folder = data.getFolder()) != null && this.needUpdateCOF.getAndSet(false)) {
@@ -667,10 +659,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     private void UpdateWearableNames() {
@@ -692,10 +680,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     }
 
     private boolean WearItemList(InventoryDB inventoryDB, List<SLInventoryEntry> list, boolean z) {
-        boolean z2;
         SLWearableType byCode;
-        boolean z3;
-        boolean z4;
         boolean z5 = false;
         RLVController rLVController = this.agentCircuit.getModules().rlvController;
         HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables);
@@ -764,11 +749,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     }
 
     private boolean areWearablesReady() {
-        boolean z;
-        boolean z2;
-        boolean z3;
-        boolean z4;
-        boolean z5;
         SLWearableType[] values = SLWearableType.values();
         int length = values.length;
         int i = 0;
@@ -988,7 +968,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     }
 
     public void AttachInventoryItem(SLInventoryEntry sLInventoryEntry, int i, boolean z) {
-        boolean z2;
         InventoryDB inventoryDB = null;
         if (this.userManager != null) {
             inventoryDB = this.userManager.getInventoryManager().getDatabase();
@@ -1039,15 +1018,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     }
 
     public void ChangeOutfit(List<SLInventoryEntry> list, boolean z, SLInventoryEntry sLInventoryEntry) {
-        boolean z2;
-        boolean z3;
-        boolean z4;
         RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv;
-        boolean z5;
-        boolean z6;
         SLWearableType byCode;
-        boolean z7;
-        boolean z8;
         SLWearable remove;
         RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv2;
         InventoryDB database = this.userManager != null ? this.userManager.getInventoryManager().getDatabase() : null;
@@ -1239,7 +1211,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     }
 
     public void DetachInventoryItem(SLInventoryEntry sLInventoryEntry) {
-        boolean z;
         if (canDetachItem(sLInventoryEntry)) {
             UUID uuid = sLInventoryEntry.isLink() ? sLInventoryEntry.assetUUID : sLInventoryEntry.uuid;
             Debug.Log("Outfits: Detaching inventory item " + uuid);
@@ -1298,7 +1269,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     }
 
     public void ForceTakeItemOff(SLWearableType sLWearableType) {
-        boolean z;
         if (!this.wornWearables.row(sLWearableType).isEmpty()) {
             z = true;
             HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables);
@@ -1427,7 +1397,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.-$Lam
     }
 
     public void TakeItemOff(UUID uuid) {
-        boolean z;
         RLVController rLVController = this.agentCircuit.getModules().rlvController;
         HashBasedTable<SLWearableType, UUID, SLWearable> create = HashBasedTable.create(this.wornWearables);
         SLWearableType[] values = SLWearableType.values();

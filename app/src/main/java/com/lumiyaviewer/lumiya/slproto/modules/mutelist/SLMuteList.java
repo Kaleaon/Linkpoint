@@ -37,7 +37,6 @@ public class SLMuteList extends SLModule implements SLXfer.SLXferCompletionListe
                 SLMuteList.this.muteListResultHandler.onResultData(SubscriptionSingleKey.Value, SLMuteList.this.getMuteList());
             }
         }
-    });
     /* access modifiers changed from: private */
     public final ResultHandler<SubscriptionSingleKey, ImmutableList<MuteListEntry>> muteListResultHandler;
     private final UserManager userManager;

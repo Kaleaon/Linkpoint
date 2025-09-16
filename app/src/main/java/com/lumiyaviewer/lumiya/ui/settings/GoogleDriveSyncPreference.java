@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.settings;
+import java.util.*;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -140,9 +141,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new $Lambda$GONhG2H9w043w0Zbdp0nmAUgQ()).setCancelable(true).create().show();
         }
     }

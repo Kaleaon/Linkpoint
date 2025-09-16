@@ -113,9 +113,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
     };
     private ChatterNameRetriever ownerNameRetriever = null;
     private final SubscriptionData<SubscriptionSingleKey, ImmutableSet<UUID>> runningAnimations = new SubscriptionData<>(UIThreadExecutor.getInstance());
@@ -283,10 +280,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             dialog.findViewById(R.id.cancelButton).setOnClickListener(new $Lambda$OIe5MtmKyVPF26gruCQoZkxXroQ(dialog));
             dialog.show();
         }
@@ -690,10 +683,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                             
 */
 
-                            public final void brokenMethod(
-        // TODO: implement method
-    }
-                        });
                         return true;
                     case R.id.inventory_item_rename_item:
                         this.inventoryFragmentHelper.RenameInventoryEntry(sLInventoryEntry);

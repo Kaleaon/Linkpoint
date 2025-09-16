@@ -192,7 +192,6 @@ public class WebRTCManager {
             if (peerConnection != null) {
                 Log.d(TAG, "Mock ICE candidate added: " + candidate.sdp);
             }
-        });
     }
     
     /**
@@ -257,7 +256,6 @@ public class WebRTCManager {
             } catch (Exception e) {
                 Log.e(TAG, "Error during cleanup", e);
             }
-        });
         
         if (executor != null && !executor.isShutdown()) {
             executor.shutdown();

@@ -56,7 +56,6 @@ public class UploadImageAsyncTask extends AsyncTask<UploadImageParams, Void, Upl
     /* access modifiers changed from: protected */
     public UploadImageResult doInBackground(UploadImageParams... uploadImageParamsArr) {
         Bitmap bitmap;
-        boolean z;
         String str;
         boolean z2 = true;
         String str2 = null;

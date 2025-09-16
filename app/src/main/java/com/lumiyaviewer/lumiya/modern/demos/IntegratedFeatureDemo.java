@@ -124,7 +124,6 @@ public class IntegratedFeatureDemo {
                 Log.e(TAG, "Demo failed with error", e);
                 return false;
             }
-        });
     }
     
     /**
@@ -167,7 +166,6 @@ public class IntegratedFeatureDemo {
                 Log.e(TAG, "Avatar setup error", e);
                 return false;
             }
-        });
     }
     
     /**
@@ -197,7 +195,6 @@ public class IntegratedFeatureDemo {
                 Log.e(TAG, "Voice setup error", e);
                 return false;
             }
-        });
     }
     
     /**
@@ -226,7 +223,6 @@ public class IntegratedFeatureDemo {
                 Log.e(TAG, "Chat setup error", e);
                 return false;
             }
-        });
     }
     
     /**
@@ -273,7 +269,6 @@ public class IntegratedFeatureDemo {
             }).exceptionally(throwable -> {
                 Log.w(TAG, "Voice offer failed", throwable);
                 return null;
-            });
         }
     }
     

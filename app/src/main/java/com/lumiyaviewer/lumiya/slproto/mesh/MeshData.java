@@ -42,7 +42,6 @@ public class MeshData {
         float[] fArr;
         int[] iArr;
         float[] fArr2;
-        int i;
         GlobalOptions.MeshRendering meshRendering = GlobalOptions.getInstance().getMeshRendering();
         if (meshRendering == GlobalOptions.MeshRendering.disabled) {
             throw new IOException("Mesh rendering is disabled");

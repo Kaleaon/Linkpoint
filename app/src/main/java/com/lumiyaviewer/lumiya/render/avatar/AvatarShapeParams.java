@@ -18,7 +18,6 @@ public class AvatarShapeParams {
 
     @Nonnull
     public static AvatarShapeParams create(@Nullable AvatarShapeParams avatarShapeParams, AvatarAppearance avatarAppearance) {
-        int i;
         Debug.Log("DrawableAvatar: new appearance for avatar " + avatarAppearance.Sender_Field.ID + ", numParams = " + avatarAppearance.VisualParam_Fields.size() + ", appData = " + avatarAppearance.AppearanceData_Fields.size());
         for (i = 0; i < avatarAppearance.AppearanceData_Fields.size(); i++) {
             Debug.Printf("appData[%d]: appVer %d, cofVer %d, flags 0x%x", Integer.valueOf(i), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).AppearanceVersion), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).CofVersion), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).Flags));

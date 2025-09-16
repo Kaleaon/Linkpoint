@@ -159,7 +159,6 @@ public class GroupProfileFragment extends ChatterReloadableFragment implements L
                     ChatterID unused2 = GroupProfileFragment.this.lastSelectedChatterID = GroupProfileFragment.this.chatterID;
                 }
             }
-        });
         ((PagerSlidingTabStrip) inflate.findViewById(R.id.user_profile_tabs)).setViewPager(viewPager);
         this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_group_selected), getString(R.string.group_profile_fail));
         return inflate;

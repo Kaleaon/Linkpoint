@@ -218,9 +218,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }, this.inventoryDbExecutor);
         this.entryListPool.attachRequestHandler(new AsyncRequestHandler(this.inventoryDbExecutor, this.queryRequestHandler));
         this.entryListPool.setDisposeHandler(new DisposeHandler() {
@@ -291,9 +288,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }, this.inventoryDbExecutor);
     }
 

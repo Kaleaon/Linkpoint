@@ -74,10 +74,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
 
     static Fragment newInstance(UUID uuid) {
         MinimapFragment minimapFragment = new MinimapFragment();

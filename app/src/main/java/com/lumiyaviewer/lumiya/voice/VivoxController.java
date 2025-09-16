@@ -230,7 +230,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                         voiceService.listenForVolumeChanges(true);
                     }
                 }
-            });
             if (this.bluetoothScoState == 1) {
                 this.setBluetoothEnable(true);
                 return;
@@ -272,7 +271,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                     voiceService.updateAudioProperties();
                 }
             }
-        });
     }
 
     private void setBluetoothEnable(boolean bl) {
@@ -302,7 +300,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                     voiceService.updateAudioProperties();
                 }
             }
-        });
     }
 
     /*
@@ -346,7 +343,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                     voiceService.updateAudioProperties();
                 }
             }
-        });
     }
 
     private void updateSessionState(VoiceSession voiceSession) {
@@ -393,7 +389,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                 }
                 Debug.Printf("Voice: no session to accept", new Object[0]);
             }
-        });
     }
 
     public void ConnectChannel(VoiceChannelInfo voiceChannelInfo, @Nullable String string2, Messenger messenger) {
@@ -452,7 +447,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                     }
                 }
             }
-        });
     }
 
     public void EnableVoiceMic(VoiceEnableMic voiceEnableMic) {
@@ -483,7 +477,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                 }
                 this.this$0.setLocalMicEnabled(false);
             }
-        });
     }
 
     public void Login(VoiceLoginInfo voiceLoginInfo, Messenger messenger) {
@@ -548,7 +541,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                     return;
                 }
             }
-        });
     }
 
     public void Logout(Messenger messenger) {
@@ -576,7 +568,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                 Debug.Printf("Voice: logged out.", new Object[0]);
                 VoicePluginMessenger.sendMessage(this.val$replyTo, VoicePluginMessageType.VoiceLoginStatus, new VoiceLoginStatus(null, false, null), null);
             }
-        });
     }
 
     public void RejectCall(VoiceRejectCall voiceRejectCall) {
@@ -603,7 +594,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                 }
                 Debug.Printf("Voice: no session to terminate", new Object[0]);
             }
-        });
     }
 
     public void Set3DPosition(VoiceSet3DPosition voiceSet3DPosition) {
@@ -623,7 +613,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                     voiceSession.set3DPosition(this.val$message.speakerPosition, this.val$message.listenerPosition);
                 }
             }
-        });
     }
 
     public void SetAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
@@ -682,7 +671,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                     voiceService.updateAudioProperties();
                 }
             }
-        });
     }
 
     public void TerminateCall(VoiceTerminateCall voiceTerminateCall) {
@@ -707,7 +695,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                 }
                 this.this$0.setLocalMicEnabled(false);
             }
-        });
     }
 
     Messenger getIncomingMessenger() {
@@ -730,7 +717,6 @@ implements VivoxMessageController.OnVivoxMessageListener {
                     this.this$0.setBluetoothEnable(true);
                 }
             }
-        });
     }
 
     /*

@@ -73,8 +73,6 @@ public class InventoryFolderAdapter extends BaseAdapter implements View.OnClickL
 
     public View getView(int i, View view, ViewGroup viewGroup) {
         SLInventoryEntry sLInventoryEntry;
-        int i2;
-        int i3;
         boolean z = true;
         int i4 = 0;
         if (view == null) {

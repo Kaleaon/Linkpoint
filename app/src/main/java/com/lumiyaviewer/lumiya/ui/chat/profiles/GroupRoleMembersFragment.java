@@ -100,10 +100,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<UUID, GroupTitlesReply> groupTitles = new SubscriptionData<>(UIThreadExecutor.getInstance());
     private final LoadableMonitor loadableMonitor = new LoadableMonitor(this.groupRoleMemberList, this.myGroupList, this.groupProfile, this.roleMembers).withOptionalLoadables(this.agentCircuit, this.groupTitles).withDataChangedListener(this);
     private final SubscriptionData<UUID, AvatarGroupList> myGroupList = new SubscriptionData<>(UIThreadExecutor.getInstance());
@@ -355,9 +351,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setNegativeButton(R.string.cancel, new $Lambda$TbI0imFFmZKCR9nUgEGSvi_8Q0()).create().show();
     }
 
@@ -451,10 +444,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         this.adapter = new MemberListAdapter(getContext());
         ((RecyclerView) inflate.findViewById(R.id.group_profile_role_members_list)).setAdapter(this.adapter);
         this.loadableMonitor.setLoadingLayout((LoadingLayout) inflate.findViewById(R.id.loading_layout), getString(R.string.no_group_selected), getString(R.string.group_profile_fail));
@@ -464,8 +453,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     public void onLoadableDataChanged() {
         GroupTitlesReply data;
-        boolean z;
-        boolean z2;
         AvatarGroupList.AvatarGroupEntry myGroupEntry;
         boolean z3 = true;
         int i = 0;

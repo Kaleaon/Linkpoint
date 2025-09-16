@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.slproto.objects;
+import java.util.*;
 
 import com.lumiyaviewer.lumiya.render.spatial.DrawListObjectEntry;
 import com.lumiyaviewer.lumiya.render.spatial.DrawListPrimEntry;

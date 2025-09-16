@@ -338,8 +338,6 @@ public class OpenJPEG implements GLTexture {
                 GLES30.glTexStorage2D(3553, 1, 37492, this.width, this.height);
                 GLES30.glCompressedTexSubImage2D(3553, 0, 0, 0, this.width, this.height, 37492, this.rawBuffer.capacity(), this.rawBuffer);
             } else {
-                int i;
-                int i2;
                 int i3 = 5121;
                 switch (this.num_components) {
                     case 1:
@@ -380,7 +378,6 @@ public class OpenJPEG implements GLTexture {
             if (this.bytes_per_pixel == ETC1_BYTES_PER_PIXEL) {
                 GLES10.glCompressedTexImage2D(3553, 0, 36196, this.width, this.height, 0, this.rawBuffer.capacity(), this.rawBuffer);
             } else {
-                int i;
                 int i2 = 5121;
                 switch (this.num_components) {
                     case 1:
@@ -414,7 +411,6 @@ public class OpenJPEG implements GLTexture {
             GLES20.glCompressedTexImage2D(i, 0, 36196, this.width, this.height, 0, capacity, this.rawBuffer);
             return capacity;
         }
-        int i2;
         int i3 = 5121;
         switch (this.num_components) {
             case 1:
@@ -471,7 +467,6 @@ public class OpenJPEG implements GLTexture {
         }
         for (int i = 0; i < this.height; i++) {
             for (int i2 = 0; i2 < this.width; i2++) {
-                int i3;
                 if (this.num_components == 1) {
                     i3 = getByte(((this.width * i) + i2) * this.num_components) & 255;
                     i3 |= ((i3 << 16) | ViewCompat.MEASURED_STATE_MASK) | (i3 << 8);
@@ -499,7 +494,6 @@ public class OpenJPEG implements GLTexture {
         Bitmap createBitmap = Bitmap.createBitmap(this.width, this.height, Config.ARGB_8888);
         for (int i = 0; i < this.height; i++) {
             for (int i2 = 0; i2 < this.width; i2++) {
-                int i3;
                 if (this.num_extra_components == 1) {
                     i3 = getByte((((this.width * this.height) * this.num_components) + (this.width * i)) + i2) & 255;
                     i3 |= ((i3 << 16) | ViewCompat.MEASURED_STATE_MASK) | (i3 << 8);
@@ -552,9 +546,6 @@ public class OpenJPEG implements GLTexture {
         int i3 = 0;
         if (this.rawBuffer != null) {
             int i4 = (this.width * this.num_components) * i;
-            int i5;
-            int i6;
-            int i7;
             if (this.num_components == 3) {
                 while (i3 < i2) {
                     i5 = iArr[i3];

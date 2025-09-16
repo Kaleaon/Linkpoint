@@ -105,10 +105,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<InventoryQuery, InventoryEntryList> entryList = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -164,10 +160,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<UUID, Boolean> folderLoading = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -223,10 +215,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final AdapterView.OnItemClickListener itemClickListener = new $Lambda$oBJjjSxYBPvwKW_FzKQvdarEfUs(this);
     private ViewGroup listHeader;
     private final Object listHeaderData = new Object();
@@ -287,10 +275,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<SubscriptionSingleKey, ImmutableMap<UUID, String>> wornAttachments = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -346,10 +330,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<SubscriptionSingleKey, UUID> wornOutfitFolder = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -405,10 +385,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private final SubscriptionData<SubscriptionSingleKey, Table<SLWearableType, UUID, SLWearable>> wornWearables = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -464,10 +440,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
 
     private void changeOutfit(boolean z) {
         InventoryEntryList<SLInventoryEntry> data = this.entryList.getData();
@@ -662,7 +634,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
     }
 
     private void updateLoadingStatus() {
-        boolean z;
         Context context = getContext();
         if (context != null) {
             boolean z2 = true;

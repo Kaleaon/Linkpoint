@@ -65,7 +65,6 @@ public class SLCapEventQueue implements Runnable {
     }
 
     public void run() {
-        boolean z;
         Debug.Log("CapEventQueue: working thread starting with capURL = " + this.capURL);
         boolean z2 = false;
         while (true) {

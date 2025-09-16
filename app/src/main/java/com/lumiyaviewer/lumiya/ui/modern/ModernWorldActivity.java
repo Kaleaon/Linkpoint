@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.modern;
+import java.util.*;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -168,12 +169,10 @@ public class ModernWorldActivity extends AppCompatActivity {
         // Connect button click handler
         connectButton.setOnClickListener(v -> {
             connectToSecondLife();
-        });
         
         // Chat FAB click handler
         chatFab.setOnClickListener(v -> {
             openChat();
-        });
         
         // Toolbar navigation
         if (getSupportActionBar() != null) {

@@ -47,8 +47,6 @@ public class SLInventoryOpenHelper implements DBHandleCache.DBOpenHelper {
     }
 
     private boolean initTables(SQLiteDatabase sQLiteDatabase) throws SQLiteException {
-        boolean z;
-        boolean z2;
         sQLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS DBVersion (Version INTEGER);");
         Cursor query = sQLiteDatabase.query("DBVersion", new String[]{"Version"}, (String) null, (String[]) null, (String) null, (String) null, (String) null);
         if (!query.moveToFirst()) {

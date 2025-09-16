@@ -36,7 +36,6 @@ public class AvatarVisualState {
 
     private void startAnimation(UUID uuid, int i, long j, DrawableAvatar drawableAvatar) {
         AnimationSequenceInfo animationSequenceInfo;
-        int i2;
         AnimationSequenceInfo animationSequenceInfo2 = (AnimationSequenceInfo) this.animations.get(uuid);
         if (animationSequenceInfo2 == null) {
             Debug.Printf("Anim: Starting new animation %s seqID %d", uuid.toString(), Integer.valueOf(i));
@@ -91,9 +90,7 @@ public class AvatarVisualState {
         for (UUID uuid2 : hashSet2) {
             AnimationSequenceInfo animationSequenceInfo = (AnimationSequenceInfo) this.animations.get(uuid2);
             if (animationSequenceInfo != null) {
-                Object obj;
                 AnimationSequenceInfo animationSequenceInfo2;
-                int i;
                 if (animationSequenceInfo.sequenceID != 0) {
                     animationSequenceInfo = AnimationSequenceInfo.stopSequence(currentTimeMillis, animationSequenceInfo);
                     if (animationSequenceInfo != null) {

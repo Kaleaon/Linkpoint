@@ -112,7 +112,6 @@ public class SLCircuit extends SLMessageHandler {
     }
 
     private void ProcessResends() {
-        boolean z;
         boolean z2 = false;
         Iterator it = this.unackedQueue.iterator();
         while (true) {
@@ -313,7 +312,6 @@ public class SLCircuit extends SLMessageHandler {
 
     public boolean ProcessTransmit() throws IOException {
         SLMessage sLMessage = (SLMessage) this.outgoingQueue.peek();
-        int i;
         if (sLMessage != null) {
             sLMessage.Pack(this.txBuffer, this.tempBuffer);
             int AppendPendingAcks = sLMessage.AppendPendingAcks(this.txBuffer, this.pendingAcks);

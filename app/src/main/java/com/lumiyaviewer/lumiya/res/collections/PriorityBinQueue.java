@@ -104,7 +104,6 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
     }
 
     public boolean containsAll(Collection<?> collection) {
-        boolean z;
         this.lock.lock();
         try {
             Iterator<T> it = collection.iterator();
@@ -197,7 +196,6 @@ public class PriorityBinQueue<T> implements BlockingQueue<T> {
     }
 
     public boolean isEmpty() {
-        boolean z;
         this.lock.lock();
         try {
             Iterator<T> it = this.queues.values().iterator();

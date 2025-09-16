@@ -204,7 +204,6 @@ public class ModernChatManager {
             } catch (Exception e) {
                 Log.w(TAG, "Failed to send typing indicator", e);
             }
-        });
     }
     
     /**
@@ -232,7 +231,6 @@ public class ModernChatManager {
             } catch (Exception e) {
                 Log.e(TAG, "Error handling incoming message", e);
             }
-        });
     }
     
     /**

@@ -213,10 +213,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
-                    });
                 }
             } catch (InterruptedException e2) {
                 Debug.Warning(e2);
@@ -261,7 +257,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
     /* access modifiers changed from: package-private */
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_12525  reason: not valid java name */
     public /* synthetic */ void m254lambda$com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoice_12525(int i, LLSDNode lLSDNode) {
-        boolean z;
         VoiceChannelInfo voiceChannelInfo;
         this.currentParcelID = i;
         if (lLSDNode != null) {
@@ -413,10 +408,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             }
         } else if (this.voiceLoginInfo != null && (!this.voiceLoggedIn) && (serviceInstance = GridConnectionService.getServiceInstance()) != null) {
             serviceInstance.startVoice(this.voiceLoginInfo, UserManager.getUserManager(this.agentCircuit.getAgentUUID()));
@@ -459,7 +450,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
                         }
                     }
                 }
-            });
         }
     }
 
@@ -535,10 +525,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void onVoiceLoginStatus(VoicePluginServiceConnection voicePluginServiceConnection2, VoiceLoginStatus voiceLoginStatus) {
@@ -616,10 +602,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public boolean requestParcelVoiceInfo() {
@@ -698,10 +680,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         return true;
     }
 
@@ -792,10 +770,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
     }
 
@@ -886,10 +860,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public boolean userVoiceChatRequest(UUID uuid) {

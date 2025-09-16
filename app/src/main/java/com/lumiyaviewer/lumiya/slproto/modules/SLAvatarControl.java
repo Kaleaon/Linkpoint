@@ -73,7 +73,6 @@ public class SLAvatarControl extends SLModule {
                 SLAvatarControl.this.myAvatarStateResultHandler.onResultData(subscriptionSingleKey, SLAvatarControl.this.getMyAvatarState());
             }
         }
-    });
     private final CameraParams cameraParams = new CameraParams();
     private final Object cammingLock = new Object();
     /* access modifiers changed from: private */
@@ -230,12 +229,6 @@ public class SLAvatarControl extends SLModule {
     /* access modifiers changed from: private */
     @Nonnull
     public MyAvatarState getMyAvatarState() {
-        int i;
-        boolean z;
-        int i2;
-        boolean z2;
-        boolean z3;
-        int i3;
         SLAttachmentPoint sLAttachmentPoint;
         boolean z4 = false;
         boolean isFlying2 = getIsFlying();
@@ -321,7 +314,6 @@ public class SLAvatarControl extends SLModule {
     }
 
     private void rescheduleAgentUpdate() {
-        int i;
         boolean z = true;
         int i2 = 0;
         if (!this.enableAgentUpdates) {
@@ -554,7 +546,6 @@ public class SLAvatarControl extends SLModule {
     }
 
     public boolean getIsManualCamming() {
-        boolean z;
         synchronized (this.cammingLock) {
             z = this.isManualCamming;
         }

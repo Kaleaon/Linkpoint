@@ -78,7 +78,6 @@ public class SLGroupManager extends SLModule {
     public final String groupMemberDataURL;
     private final RequestHandler<UUID> groupMemberListHTTPRequestHandler = new AsyncCancellableRequestHandler(GenericHTTPExecutor.getInstance(), new SimpleRequestHandler<UUID>() {
         public void onRequest(@Nonnull UUID uuid) {
-            int i;
             Debug.Printf("GroupMemberList: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString());
             try {
                 UUID randomUUID = UUID.randomUUID();
@@ -135,7 +134,6 @@ public class SLGroupManager extends SLModule {
                 SLGroupManager.this.groupMemberListResultHandler.onResultError(uuid, e2);
             }
         }
-    });
     private final RequestHandler<UUID> groupMemberListRequestHandler = new AsyncLimitsRequestHandler(this.agentCircuit, new SimpleRequestHandler<UUID>() {
         public void onRequest(@Nonnull UUID uuid) {
             Debug.Printf("GroupMemberList: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString());
@@ -235,7 +233,6 @@ public class SLGroupManager extends SLModule {
 
             public void onMessageTimeout(SLMessage sLMessage) {
             }
-        });
         SendMessage(groupRoleChanges);
     }
 
@@ -301,7 +298,6 @@ public class SLGroupManager extends SLModule {
             public void onMessageAcknowledged(SLMessage sLMessage) {
                 SLGroupManager.this.userManager.getGroupRoles().requestUpdate(uuid);
             }
-        });
         SendMessage(groupRoleUpdate);
     }
 
@@ -466,7 +462,6 @@ public class SLGroupManager extends SLModule {
 
             public void onMessageTimeout(SLMessage sLMessage) {
             }
-        });
         SendMessage(groupRoleChanges);
     }
 
@@ -532,7 +527,6 @@ public class SLGroupManager extends SLModule {
 
             public void onMessageTimeout(SLMessage sLMessage) {
             }
-        });
         SendMessage(setGroupContribution);
     }
 
@@ -579,7 +573,6 @@ public class SLGroupManager extends SLModule {
                 Debug.Printf("GroupRole: ack set properties for role %s", uuid2);
                 SLGroupManager.this.userManager.getGroupRoles().requestUpdate(uuid);
             }
-        });
         SendMessage(groupRoleUpdate);
     }
 

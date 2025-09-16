@@ -141,7 +141,6 @@ public class WebSocketEventClient extends WebSocketListener {
                 Log.w(TAG, "Cannot send message - WebSocket not connected");
                 return false;
             }
-        });
     }
     
     /**

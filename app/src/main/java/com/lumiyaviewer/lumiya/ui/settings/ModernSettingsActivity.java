@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.settings;
+import java.util.*;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -372,7 +373,6 @@ public class ModernSettingsActivity extends AppCompatActivity {
                 Thread.sleep(2000); // Simulate export time
                 runOnUiThread(() -> {
                     showToast("✅ Debug logs exported successfully!");
-                });
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -388,7 +388,6 @@ public class ModernSettingsActivity extends AppCompatActivity {
                 Thread.sleep(3000); // Simulate clearing time
                 runOnUiThread(() -> {
                     showToast("✅ All caches cleared successfully!");
-                });
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -404,7 +403,6 @@ public class ModernSettingsActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     showToast("✅ Settings reset to default values!");
                     // In a real implementation, would reload the UI
-                });
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -472,11 +470,9 @@ public class ModernSettingsActivity extends AppCompatActivity {
                                    public void onStatusUpdate(String status) {
                                        // Update UI if needed
                                    }
-                               });
                            } else {
                                showToast("Emulator management not available");
                            }
-                       });
         
         // Open full emulator settings
         addActionButton(emulatorSection,
@@ -489,7 +485,6 @@ public class ModernSettingsActivity extends AppCompatActivity {
                            } else {
                                showToast("Emulator management not available");
                            }
-                       });
         
         // Quick AVD list
         addActionButton(emulatorSection,
@@ -504,7 +499,6 @@ public class ModernSettingsActivity extends AppCompatActivity {
                                            String summary = EmulatorManager.formatAVDSummary(
                                                EmulatorManager.parseAVDList(output));
                                            showToast("AVDs: " + summary.split("\n").length + " found");
-                                       });
                                    }
                                    
                                    @Override
@@ -516,11 +510,9 @@ public class ModernSettingsActivity extends AppCompatActivity {
                                    public void onStatusUpdate(String status) {
                                        // Update UI if needed
                                    }
-                               });
                            } else {
                                showToast("Emulator management not available");
                            }
-                       });
     }
     
     private void saveSettings() {

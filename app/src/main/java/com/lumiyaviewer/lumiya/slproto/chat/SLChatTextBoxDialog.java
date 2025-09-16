@@ -172,9 +172,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setOnTextCancelledListener(new $Lambda$Iyj6QpNZLoXueXenKuJvDVzcmI(this, userManager)).show();
     }
 }

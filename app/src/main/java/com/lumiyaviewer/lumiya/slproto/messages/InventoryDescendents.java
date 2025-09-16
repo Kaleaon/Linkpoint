@@ -58,7 +58,6 @@ public class InventoryDescendents extends SLMessage {
     }
 
     public int CalcPayloadSize() {
-        int i;
         int i2 = 61;
         Iterator<T> it = this.FolderData_Fields.iterator();
         while (true) {

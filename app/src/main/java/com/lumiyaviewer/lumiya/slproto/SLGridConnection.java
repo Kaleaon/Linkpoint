@@ -221,7 +221,6 @@ public class SLGridConnection extends SLConnection {
                 SLGridConnection.this.DoConnect(SLGridConnection.this.authParams, str);
                 SLGridConnection.this.loginThread = null;
             }
-        });
         setConnectionState(ConnectionState.Connecting);
         this.loginThread.start();
     }

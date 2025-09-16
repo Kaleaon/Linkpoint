@@ -80,7 +80,6 @@ public class LoginActivity extends ThemedActivity implements View.OnClickListene
     }
 
     private void DoLogin() {
-        boolean z;
         String str;
         String str2;
         SLURL slurl;
@@ -480,7 +479,6 @@ public class LoginActivity extends ThemedActivity implements View.OnClickListene
 
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
-        });
         findViewById(R.id.whatsnewText).getViewTreeObserver().addOnGlobalLayoutListener(new $Lambda$U_ZFuxgsYW8weMauiDTqAtaKePI(this));
         checkIfGridAvailable();
         findViewById(R.id.loginCancelButton).setOnClickListener(this);

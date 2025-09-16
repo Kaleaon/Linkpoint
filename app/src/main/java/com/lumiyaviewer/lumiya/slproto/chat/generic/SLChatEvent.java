@@ -727,7 +727,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.generic.
             	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
             
 */
-        });
         
         public static final ChatMessageViewType[] VALUES = null;
         private final boolean alwaysInflate;
@@ -1329,7 +1328,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.generic.
             	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
             
 */
-        });
         popupMenu.show();
         return true;
     }

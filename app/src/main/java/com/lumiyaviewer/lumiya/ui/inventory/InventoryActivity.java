@@ -222,7 +222,6 @@ public class InventoryActivity extends MasterDetailsActivity {
             public boolean onQueryTextSubmit(String str) {
                 return true;
             }
-        });
         MenuItemCompat.setOnActionExpandListener(this.searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
             public boolean onMenuItemActionCollapse(MenuItem menuItem) {
                 boolean unused = InventoryActivity.this.searchActive = false;
@@ -235,7 +234,6 @@ public class InventoryActivity extends MasterDetailsActivity {
                 InventoryActivity.this.updateSearchAction();
                 return true;
             }
-        });
         return true;
     }
 

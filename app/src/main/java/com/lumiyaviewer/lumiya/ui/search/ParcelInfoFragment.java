@@ -261,9 +261,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.search.-$Lambda$5J
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton("No", new $Lambda$5Jqy4HmgAu6T9fnroWhZqm3eJE());
             builder.create().show();
         }

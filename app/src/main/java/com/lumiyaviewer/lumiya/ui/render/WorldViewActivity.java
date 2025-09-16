@@ -162,10 +162,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private boolean arrowsToTurn = false;
     /* access modifiers changed from: private */
     @Nullable
@@ -321,10 +317,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
     };
     private boolean chatOver3D = false;
@@ -385,10 +377,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     @BindView(2131755284)
     View detailsContainer;
     /* access modifiers changed from: private */
@@ -556,10 +544,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     @BindView(2131755270)
     ImageButton objectChatButton;
     @BindView(2131755753)
@@ -697,10 +681,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     private UserManager userManager;
     private final SubscriptionData<SubscriptionSingleKey, ChatterID> voiceActiveChatter = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
@@ -757,10 +737,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     /* access modifiers changed from: private */
     public final SubscriptionData<ChatterID, VoiceChatInfo> voiceChatInfo = new SubscriptionData<>(UIThreadExecutor.getInstance(), new Subscription.OnData(this) {
 
@@ -817,10 +793,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     @BindView(2131755752)
     VoiceStatusView voiceStatusView;
     /* access modifiers changed from: private */
@@ -831,7 +803,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     FrameLayout worldViewHolder;
     private final View.OnTouchListener worldViewTouchListener = new View.OnTouchListener() {
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            boolean z;
             boolean r3 = WorldViewActivity.this.isInteracting;
             switch (motionEvent.getActionMasked()) {
                 case 0:
@@ -1105,7 +1076,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     private void selectHUDtoDisplay() {
-        int i;
         SLAttachmentPoint sLAttachmentPoint;
         ArrayList arrayList = new ArrayList();
         SLAgentCircuit data = this.agentCircuit.getData();
@@ -1218,10 +1188,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.create().show();
         }
     }
@@ -1905,9 +1871,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
                     }, UIThreadExecutor.getInstance());
                 }
             } else {
@@ -2121,10 +2084,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
         updateSplitScreenLayout();
         startFadingButtonsTimer();
@@ -2301,9 +2260,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
                 }).setNegativeButton((CharSequence) "No", (DialogInterface.OnClickListener) new $Lambda$YnTWxJEMPymM_sHfAdAKQ7gcDf8());
                 builder.show();
             } else if (this.pickedObject.isPayable() && (data = this.selectedObjectProfile.getData()) != null && this.userManager != null) {

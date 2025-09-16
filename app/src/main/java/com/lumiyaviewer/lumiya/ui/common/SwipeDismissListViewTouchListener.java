@@ -97,7 +97,6 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
     }
 
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        boolean z;
         boolean z2 = true;
         if (this.mViewWidth < 2) {
             this.mViewWidth = this.mListView.getWidth();
@@ -173,13 +172,11 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
                                 public void onAnimationEnd(Animator animator) {
                                     SwipeDismissListViewTouchListener.this.performDismiss(view2, i2);
                                 }
-                            });
                         } else {
                             ViewPropertyAnimator.animate(this.mDownView).translationX((float) (z2 ? this.mViewWidth : -this.mViewWidth)).alpha(0.0f).setDuration(this.mAnimationTime).setListener(new com.nineoldandroids.animation.AnimatorListenerAdapter() {
                                 public void onAnimationEnd(com.nineoldandroids.animation.Animator animator) {
                                     SwipeDismissListViewTouchListener.this.performDismiss(view2, i2);
                                 }
-                            });
                         }
                     } else if (Build.VERSION.SDK_INT >= 12) {
                         this.mDownView.animate().translationX(0.0f).alpha(1.0f).setDuration(this.mAnimationTime).setListener((Animator.AnimatorListener) null);

@@ -179,8 +179,6 @@ public class ChunkedList<E> extends AbstractList<E> implements RandomAccess {
     }
 
     public int removeElementsBefore(int i) {
-        int i2;
-        int i3;
         checkConsistency();
         if (i < 0 || i >= this.count) {
             return 0;
@@ -208,9 +206,7 @@ public class ChunkedList<E> extends AbstractList<E> implements RandomAccess {
     }
 
     public int replaceElement(@Nonnull E e, @Nonnull Comparator<E> comparator) {
-        int i;
         char c;
-        int i2;
         if (this.chunks.isEmpty()) {
             return -1;
         }

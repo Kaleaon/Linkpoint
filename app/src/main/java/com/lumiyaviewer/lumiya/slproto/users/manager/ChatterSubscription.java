@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.slproto.users.manager;
+import java.util.*;
 
 import com.lumiyaviewer.lumiya.react.Subscription;
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
@@ -61,9 +62,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
     };
     private final Subscription.OnData<VoiceChatInfo> onVoiceStatusChanged = new $Lambda$x6PlkRNg0xExeA_EUn8oEJWcOq8(this);
     @Nonnull

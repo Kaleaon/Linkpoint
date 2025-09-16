@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.objects;
+import java.util.*;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -126,10 +127,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             }
             i = i2 + 1;
         }
@@ -222,10 +219,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_2986  reason: not valid java name */
@@ -346,10 +339,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             create.show();
         }
     }

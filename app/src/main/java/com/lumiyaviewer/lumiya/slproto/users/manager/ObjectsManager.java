@@ -145,10 +145,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else {
                 ObjectsManager.this.objectProfilePool.onResultError(num, new SLGridConnection.NotConnectedException());
             }
@@ -268,10 +264,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else {
                 ObjectsManager.this.touchableObjectsPool.onResultError(uuid, new SLGridConnection.NotConnectedException());
             }

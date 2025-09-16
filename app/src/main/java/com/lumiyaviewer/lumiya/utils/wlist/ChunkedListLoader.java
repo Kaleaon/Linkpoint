@@ -54,10 +54,7 @@ public class ChunkedListLoader<E extends Identifiable<Long>> extends AbstractLis
     public boolean loadBelowWanted = false;
     private final Runnable loadMoreData = new Runnable() {
         public void run() {
-            boolean z;
             long r4;
-            boolean z2;
-            boolean z3;
             long r6;
             boolean z4 = true;
             Debug.Printf("ChatView: processing loadMoreData(), reloadRequested %b", Boolean.valueOf(ChunkedListLoader.this.reloadRequested.get()));
@@ -103,11 +100,8 @@ public class ChunkedListLoader<E extends Identifiable<Long>> extends AbstractLis
     private final Runnable processUpdate = new Runnable() {
         public void run() {
             LoadResult r3;
-            int i;
             LoadResult r32;
-            int i2;
             Identifiable identifiable;
-            boolean z;
             ChunkedListLoader.this.updatePosted.set(false);
             Debug.Printf("ChatView: processUpdate, reloadAccepted: %b", Boolean.valueOf(ChunkedListLoader.this.reloadAccepted.get()));
             if (ChunkedListLoader.this.reloadAccepted.getAndSet(false)) {

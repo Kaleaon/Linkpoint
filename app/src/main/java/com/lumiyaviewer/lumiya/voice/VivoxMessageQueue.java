@@ -55,7 +55,7 @@ public class VivoxMessageQueue {
                 try {
                     this.messageLock.wait();
                 }
-                catch (InterruptedException interruptedException) {}
+                catch (Exception e) { // Decompiler artifact - empty catch block }
                 Debug.Printf("Voice: got Vivox event", new Object[0]);
             }
         }

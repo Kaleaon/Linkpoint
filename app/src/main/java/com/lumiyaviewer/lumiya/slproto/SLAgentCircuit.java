@@ -1183,7 +1183,6 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
     }
 
     public void HandleKillObject(KillObject killObject) {
-        Object obj;
         SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo;
         Object obj2 = null;
         Iterator it = killObject.ObjectData_Fields.iterator();
@@ -1306,7 +1305,6 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
         Object obj2 = null;
         for (ObjectUpdateCompressed.ObjectData objectData : objectUpdateCompressed.ObjectData_Fields) {
             try {
-                Object obj3;
                 UUID uuid = (UUID) sLParcelInfo.uuidsNearby.get(Integer.valueOf(SLObjectInfo.getLocalID(objectData)));
                 SLObjectInfo sLObjectInfo = uuid != null ? (SLObjectInfo) sLParcelInfo.allObjectsNearby.get(uuid) : null;
                 if (sLObjectInfo != null) {
@@ -1407,7 +1405,6 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
     }
 
     public void HandleScriptDialog(ScriptDialog scriptDialog) {
-        boolean z;
         String[] strArr;
         int i = 0;
         if (scriptDialog.Buttons_Fields.size() > 0) {
@@ -1814,7 +1811,6 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
                 Debug.Log("Logout: LogoutRequest timed out!");
                 SLAgentCircuit.this.gridConn.processDisconnect(false, "Logout request has timed out.");
             }
-        });
         SendMessage(logoutRequest);
     }
 
@@ -1861,7 +1857,6 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
                     SLAgentCircuit.this.gridConn.notifyLoginError("Timed out while connecting to the simulator.");
                 }
             }
-        });
         SendMessage(useCircuitCode);
     }
 
@@ -1902,7 +1897,6 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
             public void onMessageTimeout(SLMessage sLMessage) {
                 SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
             }
-        });
         SendMessage(teleportLocationRequest);
     }
 
@@ -1921,7 +1915,6 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
                 public void onMessageTimeout(SLMessage sLMessage) {
                     SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
                 }
-            });
             SendMessage(teleportLandmarkRequest);
         }
     }
@@ -1948,7 +1941,6 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
             public void onMessageTimeout(SLMessage sLMessage) {
                 SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
             }
-        });
         SendMessage(teleportLocationRequest);
         return true;
     }
@@ -1967,7 +1959,6 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
             public void onMessageTimeout(SLMessage sLMessage) {
                 SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
             }
-        });
         SendMessage(teleportLureRequest);
     }
 
@@ -1989,7 +1980,6 @@ public class SLAgentCircuit extends SLThreadingCircuit implements ICapsEventHand
                 public void onMessageTimeout(SLMessage sLMessage) {
                     SLAgentCircuit.this.eventBus.publish(new SLTeleportResultEvent(false, "Teleport request has timed out."));
                 }
-            });
             SendMessage(teleportLocationRequest);
         }
     }

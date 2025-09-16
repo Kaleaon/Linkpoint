@@ -36,8 +36,6 @@ public class SLPolyMorphData {
     }
 
     public void applyMorphData(SLMeshData sLMeshData, float f, GLTexture gLTexture) {
-        int i;
-        int i2;
         ByteBuffer byteBuffer = null;
         int i3 = 0;
         if (this.isMasked && gLTexture != null) {

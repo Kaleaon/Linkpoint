@@ -139,7 +139,6 @@ public class WebRTCVoiceManager {
                 }
                 return false;
             }
-        });
     }
     
     /**
@@ -183,7 +182,6 @@ public class WebRTCVoiceManager {
                 }
                 return false;
             }
-        });
     }
     
     /**
@@ -206,7 +204,6 @@ public class WebRTCVoiceManager {
                         return true;
                     }
                     return false;
-                });
                 
                 if (voiceCallback != null) {
                     voiceCallback.onVoiceDisconnected(channelUri, "User left");
@@ -219,7 +216,6 @@ public class WebRTCVoiceManager {
                 Log.e(TAG, "Failed to leave voice channel", e);
                 return false;
             }
-        });
     }
     
     /**

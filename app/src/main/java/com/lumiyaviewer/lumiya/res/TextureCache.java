@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.res;
+import java.util.*;
 
 import android.util.Log;
 import android.util.LruCache;

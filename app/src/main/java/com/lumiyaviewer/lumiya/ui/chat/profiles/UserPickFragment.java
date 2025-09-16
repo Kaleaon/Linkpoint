@@ -104,10 +104,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         
 */
 
-        public final void brokenMethod(
-        // TODO: implement method
-    }
-    });
     @BindView(2131755696)
     Button setLocationButton;
     private Unbinder unbinder;
@@ -212,9 +208,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton("No", new $Lambda$pe_zD6dKvPMIxwvN5gLJ2hSMvgo());
             builder.create().show();
         }
@@ -343,10 +336,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             textFieldDialogBuilder.show();
         }
     }
@@ -567,9 +556,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                 private final /* synthetic */ void $m$0(
 /*
@@ -641,10 +627,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.create().show();
         }
     }
@@ -770,9 +752,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                 private final /* synthetic */ void $m$0(
 /*
@@ -844,10 +823,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.create().show();
         }
     }

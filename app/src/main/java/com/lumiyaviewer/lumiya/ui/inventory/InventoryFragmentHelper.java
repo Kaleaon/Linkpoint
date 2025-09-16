@@ -200,9 +200,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
         }).setNegativeButton("No", new DialogInterface.OnClickListener() {
             private final /* synthetic */ void $m$0(
 /*
@@ -267,10 +264,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         builder.create().show();
     }
 
@@ -374,9 +367,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton("No", new $Lambda$6k4r7SqDbbDd94MFx7S4Wwav0Lg());
             builder.create().show();
         }
@@ -462,10 +452,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         dialog.findViewById(R.id.cancelButton).setOnClickListener(new View.OnClickListener(dialog) {
 
             /* renamed from: -$f0 */
@@ -534,10 +520,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         dialog.show();
     }
 
@@ -652,10 +634,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             dialog.findViewById(R.id.cancelButton).setOnClickListener(new View.OnClickListener(dialog) {
 
                 /* renamed from: -$f0 */
@@ -731,10 +709,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             dialog.show();
         }
     }
@@ -835,9 +809,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
             }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                 private final /* synthetic */ void $m$0(
 /*
@@ -909,10 +880,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
             builder.create().show();
         }
     }
@@ -1026,10 +993,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         dialog.findViewById(R.id.cancelButton).setOnClickListener(new View.OnClickListener(dialog) {
 
             /* renamed from: -$f0 */
@@ -1098,10 +1061,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         dialog.show();
     }
 

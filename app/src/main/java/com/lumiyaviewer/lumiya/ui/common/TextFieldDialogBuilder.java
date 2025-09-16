@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.common;
+import java.util.*;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -150,10 +151,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$PT
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
         builder.create().show();
     }
 }

@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.render;
+import java.util.*;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -238,10 +239,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     public void setDrawDistance(int i) {
@@ -321,10 +318,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: package-private */
@@ -410,10 +403,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: package-private */
@@ -489,10 +478,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: package-private */
@@ -582,10 +567,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         }
     }
 
@@ -659,10 +640,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 
     /* access modifiers changed from: package-private */
@@ -741,9 +718,5 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
             
 */
 
-            public final void brokenMethod(
-        // TODO: implement method
-    }
-        });
     }
 }

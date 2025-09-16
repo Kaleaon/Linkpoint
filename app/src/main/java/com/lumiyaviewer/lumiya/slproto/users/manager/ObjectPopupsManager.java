@@ -154,10 +154,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else {
                 objectPopupListener2.onObjectPopupCountChanged(size);
             }
@@ -278,10 +274,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                         
 */
 
-                        public final void brokenMethod(
-        // TODO: implement method
-    }
-                    });
                 } else {
                     objectPopupListener2.onObjectPopupCountChanged(size);
                 }
@@ -365,10 +357,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                 
 */
 
-                public final void brokenMethod(
-        // TODO: implement method
-    }
-            });
         } else {
             objectPopupListener2.onNewObjectPopup(sLChatEvent);
         }
@@ -537,10 +525,6 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
                     
 */
 
-                    public final void brokenMethod(
-        // TODO: implement method
-    }
-                });
             } else {
                 objectPopupListener2.onObjectPopupCountChanged(0);
                 objectPopupListener2.onNewObjectPopup((SLChatEvent) null);
