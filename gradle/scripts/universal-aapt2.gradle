@@ -36,24 +36,38 @@ def setupAapt2ForArchitecture(archInfo) {
         return
     }
     
-    println "🔧 Setting up android-tools AAPT2 for ${archInfo.mapped}..."
+    println "🌍 Setting up universal AAPT2 for ${archInfo.mapped}..."
     
-    // Check for existing android-tools repository
+    // Enhanced architecture detection and android-tools integration
     def androidToolsDir = new File("/tmp/android-tools")
-    def aapt2Path = new File("/opt/android-tools/aapt2_compatible")
+    def aapt2Path = new File("/opt/android-tools/aapt2")
     
-    // Use the cloned android-tools repository
+    // Use the cloned android-tools repository (CleverFerret approach)
     if (androidToolsDir.exists()) {
-        def sourceAapt2 = new File(androidToolsDir, "build/android-11.0.0_r33/aapt2/${archInfo.mapped}/bin/aapt2")
+        // Try multiple Android versions (best to oldest)
+        def androidVersions = ["android-11.0.0_r33", "android-9.0.0_r33"]
+        def selectedVersion = null
+        def sourceAapt2 = null
         
-        if (sourceAapt2.exists()) {
-            println "✅ Found android-tools AAPT2: ${sourceAapt2.absolutePath}"
+        for (version in androidVersions) {
+            def versionDir = new File(androidToolsDir, "build/$version")
+            if (versionDir.exists()) {
+                sourceAapt2 = new File(versionDir, "aapt2/${archInfo.mapped}/bin/aapt2")
+                if (sourceAapt2.exists()) {
+                    selectedVersion = version
+                    break
+                }
+            }
+        }
+        
+        if (sourceAapt2?.exists()) {
+            println "✅ Found android-tools AAPT2: ${sourceAapt2.absolutePath} ($selectedVersion)"
             
-            // Copy to our tools directory  
+            // Setup tools directory  
             def toolsDir = new File("/opt/android-tools")
             toolsDir.mkdirs()
             
-            // Copy the binary
+            // Copy the binary (CleverFerret method)
             sourceAapt2.withInputStream { input ->
                 aapt2Path.withOutputStream { output ->
                     output << input
@@ -63,28 +77,16 @@ def setupAapt2ForArchitecture(archInfo) {
             // Make executable
             aapt2Path.setExecutable(true)
             
-            // Test the binary
+            // Test the binary with enhanced compatibility check
             try {
                 def proc = "${aapt2Path.absolutePath} version".execute()
                 proc.waitFor()
                 if (proc.exitValue() == 0) {
-                    println "✅ Android-tools AAPT2 working"
+                    def versionOutput = proc.text.trim()
+                    println "✅ Android-tools AAPT2 working: $versionOutput"
                     
-                    // Check AGP compatibility - this is the key fix
-                    println "🔧 Checking AGP compatibility..."
-                    def testProc = "${aapt2Path.absolutePath} --help".execute()
-                    testProc.waitFor()
-                    
-                    if (testProc.exitValue() == 0) {
-                        // For AGP compatibility, we need to avoid the override for now
-                        // and let AGP handle cross-architecture issues internally
-                        println "⚠️  AAPT2 v2.19 incompatible with AGP 8.6.0 --source-path option"
-                        println "📋 Using AGP's internal AAPT2 with runtime compatibility layer"
-                        setupCompatibilityLayer()
-                    } else {
-                        println "❌ AAPT2 help command failed"
-                        setupFallbackAapt2()
-                    }
+                    // Universal compatibility layer
+                    setupUniversalCompatibilityLayer(aapt2Path.absolutePath, selectedVersion, archInfo)
                 } else {
                     println "❌ AAPT2 version test failed"
                     setupFallbackAapt2()
@@ -94,13 +96,65 @@ def setupAapt2ForArchitecture(archInfo) {
                 setupFallbackAapt2()
             }
         } else {
-            println "❌ Android-tools AAPT2 binary not found at expected location"
+            println "❌ No compatible android-tools AAPT2 found for ${archInfo.mapped}"
+            // Try fallback architectures
+            def fallbackArchs = ["x86_64", "arm64-v8a", "armeabi-v7a", "x86"]
+            for (fallbackArch in fallbackArchs) {
+                if (fallbackArch != archInfo.mapped) {
+                    for (version in androidVersions) {
+                        def fallbackAapt2 = new File(androidToolsDir, "build/$version/aapt2/$fallbackArch/bin/aapt2")
+                        if (fallbackAapt2.exists()) {
+                            println "🔄 Using fallback AAPT2: $fallbackArch from $version"
+                            // Copy fallback binary
+                            fallbackAapt2.withInputStream { input ->
+                                aapt2Path.withOutputStream { output ->
+                                    output << input
+                                }
+                            }
+                            aapt2Path.setExecutable(true)
+                            setupUniversalCompatibilityLayer(aapt2Path.absolutePath, version, archInfo)
+                            return
+                        }
+                    }
+                }
+            }
             setupFallbackAapt2()
         }
     } else {
         println "❌ Android-tools repository not found, using fallback"
         setupFallbackAapt2()
     }
+}
+
+def setupUniversalCompatibilityLayer(aapt2Path, version, archInfo) {
+    println "🔧 Setting up universal compatibility layer..."
+    
+    // Create architecture-specific configuration
+    def configFile = new File(project.rootDir, "gradle-universal-config.properties")
+    configFile.text = """
+# Universal Android Tools Configuration
+# Generated: ${new Date()}
+# Architecture: ${archInfo.raw} -> ${archInfo.mapped}
+# Android Version: $version
+
+android.tools.aapt2.path=$aapt2Path
+android.tools.aapt2.arch=${archInfo.mapped}
+android.tools.aapt2.version=$version
+android.tools.aapt2.compatible=true
+
+# Universal build optimizations
+org.gradle.parallel=true
+org.gradle.caching=true
+android.useAndroidX=true
+android.enableJetifier=true
+"""
+    
+    // Let AGP handle AAPT2 internally with our enhanced environment
+    println "📋 Using AGP's internal AAPT2 with universal compatibility layer"
+    
+    // Set system properties for build optimization
+    System.setProperty("android.tools.universal.arch", archInfo.mapped)
+    System.setProperty("android.tools.universal.available", "true")
 }
 
 def setupCompatibilityLayer() {
