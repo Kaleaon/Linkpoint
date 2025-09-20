@@ -18,7 +18,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        // AGP 8.6.0 with universal ARM64 support
+        // AGP 7.4.2 - Compatible with android-tools AAPT2 v2.19
         classpath 'com.android.tools.build:gradle:7.4.2'
     }
 }
