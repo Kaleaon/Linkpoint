@@ -1,0 +1,163 @@
+// Universal AAPT2 Configuration Script
+// Automatically detects architecture and configures appropriate AAPT2 binary
+// This script runs during Gradle configuration phase
+
+def detectArchitecture() {
+    def arch = System.getProperty("os.arch")
+    def osName = System.getProperty("os.name").toLowerCase()
+    
+    println "🔍 Detecting architecture: $arch on $osName"
+    
+    // Map various architecture names to android-tools naming
+    def archMapping = [
+        'amd64': 'x86_64',
+        'x86_64': 'x86_64', 
+        'aarch64': 'arm64-v8a',
+        'arm64': 'arm64-v8a',
+        'armv7l': 'armeabi-v7a',
+        'armhf': 'armeabi-v7a',
+        'i386': 'x86',
+        'i686': 'x86'
+    ]
+    
+    def mappedArch = archMapping[arch] ?: 'unknown'
+    println "📋 Mapped architecture: $arch -> $mappedArch"
+    
+    return [
+        raw: arch,
+        mapped: mappedArch,
+        needsOverride: mappedArch in ['arm64-v8a', 'armeabi-v7a', 'x86']
+    ]
+}
+
+def setupAapt2ForArchitecture(archInfo) {
+    if (!archInfo.needsOverride) {
+        println "✅ Standard SDK AAPT2 sufficient for ${archInfo.raw}"
+        return
+    }
+    
+    println "🔧 Setting up native AAPT2 for ${archInfo.mapped}..."
+    
+    def androidToolsDir = new File(project.rootDir, '../android-tools')
+    def aapt2Path = new File("/opt/android-tools/aapt2")
+    
+    // Check if native AAPT2 already exists
+    if (aapt2Path.exists()) {
+        println "✅ Native AAPT2 found: ${aapt2Path.absolutePath}"
+        
+        // Test if it works
+        try {
+            def proc = "${aapt2Path.absolutePath} version".execute()
+            proc.waitFor()
+            if (proc.exitValue() == 0) {
+                println "✅ AAPT2 binary working"
+                project.ext.customAapt2Path = aapt2Path.absolutePath
+                return
+            }
+        } catch (Exception e) {
+            println "⚠️  AAPT2 test failed: ${e.message}"
+        }
+    }
+    
+    println "📥 Downloading native AAPT2 for ${archInfo.mapped}..."
+    
+    // Create android-tools directory
+    def toolsDir = new File("/opt/android-tools")
+    toolsDir.mkdirs()
+    
+    // Download and setup native AAPT2
+    try {
+        def androidToolsRepo = "https://github.com/JonForShort/android-tools"
+        def aapt2Url = "${androidToolsRepo}/raw/master/build/android-11.0.0_r33/aapt2/${archInfo.mapped}/bin/aapt2"
+        
+        println "🌐 Downloading from: $aapt2Url"
+        
+        def connection = new URL(aapt2Url).openConnection()
+        connection.setRequestProperty("User-Agent", "Gradle-Universal-Setup")
+        
+        def inputStream = connection.getInputStream()
+        def outputStream = new FileOutputStream(aapt2Path)
+        
+        inputStream.withStream { input ->
+            outputStream.withStream { output ->
+                output << input
+            }
+        }
+        
+        // Make executable
+        aapt2Path.setExecutable(true)
+        
+        // Test the binary
+        def proc = "${aapt2Path.absolutePath} version".execute()
+        proc.waitFor()
+        
+        if (proc.exitValue() == 0) {
+            println "✅ Native AAPT2 installed and working"
+            project.ext.customAapt2Path = aapt2Path.absolutePath
+        } else {
+            println "❌ Downloaded AAPT2 binary failed test"
+            setupFallbackAapt2()
+        }
+        
+    } catch (Exception e) {
+        println "⚠️  Download failed: ${e.message}"
+        setupFallbackAapt2()
+    }
+}
+
+def setupFallbackAapt2() {
+    println "🔄 Setting up fallback AAPT2..."
+    
+    def androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+    if (!androidHome) {
+        println "❌ No Android SDK found"
+        return
+    }
+    
+    def sdkAapt2 = new File("$androidHome/build-tools/35.0.0/aapt2")
+    if (!sdkAapt2.exists()) {
+        sdkAapt2 = new File("$androidHome/build-tools/34.0.0/aapt2")
+    }
+    
+    if (sdkAapt2.exists()) {
+        def fallbackPath = new File("/opt/android-tools/aapt2")
+        fallbackPath.parentFile.mkdirs()
+        
+        // Copy SDK AAPT2 as fallback
+        sdkAapt2.withInputStream { input ->
+            fallbackPath.withOutputStream { output ->
+                output << input
+            }
+        }
+        
+        fallbackPath.setExecutable(true)
+        println "📋 Fallback AAPT2 configured from Android SDK"
+        project.ext.customAapt2Path = fallbackPath.absolutePath
+    } else {
+        println "❌ No fallback AAPT2 available"
+    }
+}
+
+def configureGradleProperties() {
+    if (project.hasProperty('customAapt2Path')) {
+        def aapt2Path = project.ext.customAapt2Path
+        println "⚙️  Configuring Gradle to use: $aapt2Path"
+        
+        // Set the property for this build
+        project.ext.setProperty('android.aapt2FromMavenOverride', aapt2Path)
+        
+        // Also set as system property for this session
+        System.setProperty('android.aapt2FromMavenOverride', aapt2Path)
+        
+        println "✅ AAPT2 override configured"
+    }
+}
+
+// Main execution during configuration phase
+println "🌍 Universal AAPT2 Setup for Linkpoint"
+
+def archInfo = detectArchitecture()
+setupAapt2ForArchitecture(archInfo)
+configureGradleProperties()
+
+println "🎯 Universal AAPT2 configuration complete"
