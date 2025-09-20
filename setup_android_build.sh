@@ -19,9 +19,17 @@ echo -e "${BLUE}📦 Installing Java JDK 17...${NC}"
 apt-get update -q
 apt-get install -y openjdk-17-jdk wget unzip curl
 
-# Set JAVA_HOME
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> ~/.bashrc
+# Set JAVA_HOME (detect architecture)
+if [ -d "/usr/lib/jvm/java-17-openjdk-arm64" ]; then
+    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
+    echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64" >> ~/.bashrc
+elif [ -d "/usr/lib/jvm/java-17-openjdk-amd64" ]; then
+    export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    echo "export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> ~/.bashrc
+else
+    echo -e "${RED}❌ Could not find Java 17 installation${NC}"
+    exit 1
+fi
 
 # Verify Java installation
 echo -e "${GREEN}✅ Java Version:${NC}"
