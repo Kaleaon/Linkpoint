@@ -1,0 +1,22 @@
+version: 2.9.3
+apkFileName: Lumiya+Voice+Plugin_1.4_apkcombo.com.apk
+isFrameworkApk: false
+usesFramework:
+  ids:
+  - 1
+  tag: null
+sdkInfo:
+  minSdkVersion: 10
+  targetSdkVersion: 25
+packageInfo:
+  forcedPackageId: 127
+  renameManifestPackage: null
+versionInfo:
+  versionCode: 5
+  versionName: 1.4
+resourcesAreCompressed: false
+sharedLibrary: false
+sparseResources: false
+doNotCompress:
+- resources.arsc
+- png

@@ -1,0 +1,125 @@
+.class Lcom/google/common/collect/TreeRangeMap$SubRangeMap$1;
+.super Lcom/google/common/collect/TreeRangeMap$SubRangeMap$SubRangeMapAsMap;
+.source "TreeRangeMap.java"
+
+
+# annotations
+.annotation system Ldalvik/annotation/EnclosingMethod;
+    value = Lcom/google/common/collect/TreeRangeMap$SubRangeMap;->asDescendingMapOfRanges()Ljava/util/Map;
+.end annotation
+
+.annotation system Ldalvik/annotation/InnerClass;
+    accessFlags = 0x0
+    name = null
+.end annotation
+
+.annotation system Ldalvik/annotation/Signature;
+    value = {
+        "Lcom/google/common/collect/TreeRangeMap",
+        "<TK;TV;>.SubRangeMap.SubRangeMapAsMap;"
+    }
+.end annotation
+
+
+# instance fields
+.field final synthetic this$1:Lcom/google/common/collect/TreeRangeMap$SubRangeMap;
+
+
+# direct methods
+.method constructor <init>(Lcom/google/common/collect/TreeRangeMap$SubRangeMap;)V
+    .locals 0
+
+    .prologue
+    .line 434
+    .local p0, "this":Lcom/google/common/collect/TreeRangeMap$SubRangeMap$1;, "Lcom/google/common/collect/TreeRangeMap$SubRangeMap.1;"
+    iput-object p1, p0, Lcom/google/common/collect/TreeRangeMap$SubRangeMap$1;->this$1:Lcom/google/common/collect/TreeRangeMap$SubRangeMap;
+
+    invoke-direct {p0, p1}, Lcom/google/common/collect/TreeRangeMap$SubRangeMap$SubRangeMapAsMap;-><init>(Lcom/google/common/collect/TreeRangeMap$SubRangeMap;)V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method entryIterator()Ljava/util/Iterator;
+    .locals 4
+    .annotation system Ldalvik/annotation/Signature;
+        value = {
+            "()",
+            "Ljava/util/Iterator",
+            "<",
+            "Ljava/util/Map$Entry",
+            "<",
+            "Lcom/google/common/collect/Range",
+            "<TK;>;TV;>;>;"
+        }
+    .end annotation
+
+    .prologue
+    .line 438
+    .local p0, "this":Lcom/google/common/collect/TreeRangeMap$SubRangeMap$1;, "Lcom/google/common/collect/TreeRangeMap$SubRangeMap.1;"
+    iget-object v1, p0, Lcom/google/common/collect/TreeRangeMap$SubRangeMap$1;->this$1:Lcom/google/common/collect/TreeRangeMap$SubRangeMap;
+
+    invoke-static {v1}, Lcom/google/common/collect/TreeRangeMap$SubRangeMap;->access$200(Lcom/google/common/collect/TreeRangeMap$SubRangeMap;)Lcom/google/common/collect/Range;
+
+    move-result-object v1
+
+    invoke-virtual {v1}, Lcom/google/common/collect/Range;->isEmpty()Z
+
+    move-result v1
+
+    if-eqz v1, :cond_0
+
+    .line 439
+    invoke-static {}, Lcom/google/common/collect/Iterators;->emptyIterator()Lcom/google/common/collect/UnmodifiableIterator;
+
+    move-result-object v1
+
+    .line 447
+    :goto_0
+    return-object v1
+
+    .line 441
+    :cond_0
+    iget-object v1, p0, Lcom/google/common/collect/TreeRangeMap$SubRangeMap$1;->this$1:Lcom/google/common/collect/TreeRangeMap$SubRangeMap;
+
+    iget-object v1, v1, Lcom/google/common/collect/TreeRangeMap$SubRangeMap;->this$0:Lcom/google/common/collect/TreeRangeMap;
+
+    invoke-static {v1}, Lcom/google/common/collect/TreeRangeMap;->access$000(Lcom/google/common/collect/TreeRangeMap;)Ljava/util/NavigableMap;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/google/common/collect/TreeRangeMap$SubRangeMap$1;->this$1:Lcom/google/common/collect/TreeRangeMap$SubRangeMap;
+
+    invoke-static {v2}, Lcom/google/common/collect/TreeRangeMap$SubRangeMap;->access$200(Lcom/google/common/collect/TreeRangeMap$SubRangeMap;)Lcom/google/common/collect/Range;
+
+    move-result-object v2
+
+    iget-object v2, v2, Lcom/google/common/collect/Range;->upperBound:Lcom/google/common/collect/Cut;
+
+    const/4 v3, 0x0
+
+    invoke-interface {v1, v2, v3}, Ljava/util/NavigableMap;->headMap(Ljava/lang/Object;Z)Ljava/util/NavigableMap;
+
+    move-result-object v1
+
+    invoke-interface {v1}, Ljava/util/NavigableMap;->descendingMap()Ljava/util/NavigableMap;
+
+    move-result-object v1
+
+    invoke-interface {v1}, Ljava/util/NavigableMap;->values()Ljava/util/Collection;
+
+    move-result-object v1
+
+    invoke-interface {v1}, Ljava/util/Collection;->iterator()Ljava/util/Iterator;
+
+    move-result-object v0
+
+    .line 447
+    .local v0, "backingItr":Ljava/util/Iterator;, "Ljava/util/Iterator<Lcom/google/common/collect/TreeRangeMap$RangeMapEntry<TK;TV;>;>;"
+    new-instance v1, Lcom/google/common/collect/TreeRangeMap$SubRangeMap$1$1;
+
+    invoke-direct {v1, p0, v0}, Lcom/google/common/collect/TreeRangeMap$SubRangeMap$1$1;-><init>(Lcom/google/common/collect/TreeRangeMap$SubRangeMap$1;Ljava/util/Iterator;)V
+
+    goto :goto_0
+.end method

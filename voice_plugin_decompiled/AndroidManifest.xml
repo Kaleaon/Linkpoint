@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?><manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.lumiyaviewer.lumiya.voice" platformBuildVersionCode="25" platformBuildVersionName="7.1.1">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <application android:allowBackup="true" android:icon="@mipmap/ic_launcher_voice" android:label="@string/app_name" android:supportsRtl="true" android:theme="@style/AppTheme">
+        <service android:description="@string/app_name" android:enabled="true" android:exported="true" android:name="com.lumiyaviewer.lumiya.voice.VoiceService"/>
+        <activity android:name="com.lumiyaviewer.lumiya.voice.VoicePermissionRequestActivity" android:noHistory="true" android:theme="@style/Theme.AppCompat.Dialog"/>
+    </application>
+</manifest>
