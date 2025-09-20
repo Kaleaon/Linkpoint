@@ -1,0 +1,31 @@
+# Project-wide Gradle settings.
+# Heavily commented to help new contributors.
+
+# JVM memory: increase if running out of memory during build
+org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8
+
+# Parallel and on-demand configuration speeds up builds
+org.gradle.parallel=true
+org.gradle.configureondemand=true
+
+# AndroidX migration settings (keep enabled)
+android.useAndroidX=true
+android.enableJetifier=true
+
+# Smaller R classes, faster builds
+android.nonTransitiveRClass=true
+
+# Optimize resource processing
+android.enableResourceOptimizations=true
+
+# Suppress warning when building with the very latest SDK
+# We intentionally target/compile SDK 35.
+android.suppressUnsupportedCompileSdk=35
+
+# Build performance
+org.gradle.caching=true
+org.gradle.daemon=true
+
+# AAPT2 override for ARM64 architecture (from JonForShort/android-tools)
+# Fixed SDK and AAPT2 issues by using native ARM64 binary
+android.aapt2FromMavenOverride=/opt/android-tools/aapt2
