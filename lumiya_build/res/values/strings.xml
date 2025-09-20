@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lumiya</string>
+    <string name="status_message">Lumiya Second Life Client - Successfully Launched!</string>
+    <string name="launch_success">App core systems initialized and working</string>
+</resources>
