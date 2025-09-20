@@ -140,3 +140,7 @@ Thumbs.db-e
 # (Exclude generated inventory files from commits)
 file_inventory/
 copilot_review_files/
+-e 
+# Environment files
+*.env
+*.env.*
