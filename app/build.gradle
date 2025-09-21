@@ -6,8 +6,8 @@ android {
     namespace 'com.lumiyaviewer.lumiya'
 
     // SDK configuration (chosen by user): MinSDK 24, Target/Compile SDK 34 (using older build tools)
-    compileSdk 33
-    buildToolsVersion "33.0.2"
+    compileSdk 31
+    buildToolsVersion "31.0.0"
 
     // Resource processing tweaks (keep minimal). noCompress keeps ktx2 files uncompressed.
     aaptOptions {
