@@ -31,7 +31,8 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            shrinkResources true
+            // Disable resource shrinking to reduce AAPT2 dependency
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 
             // Use debug signing for test releases (NOT for Play Store)
@@ -39,6 +40,7 @@ android {
         }
         debug {
             minifyEnabled false
+            // Disable resource shrinking to reduce AAPT2 dependency
             shrinkResources false
         }
     }
