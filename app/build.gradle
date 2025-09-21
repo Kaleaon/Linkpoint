@@ -17,7 +17,7 @@ android {
     defaultConfig {
         applicationId "com.lumiyaviewer.lumiya"
         minSdk 24
-        targetSdk 34
+        targetSdk 31
         versionCode 67
         versionName "3.4.3"
 
