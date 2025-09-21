@@ -81,10 +81,54 @@ android {
             res.srcDirs = ['src/main/res']
             assets.srcDirs = ['src/main/assets']
 
-            // Start by excluding only the most problematic files, enable everything else
+            // Temporarily exclude everything except CleanLoginActivity for compilation testing
             java.excludes = [
                 '**/$Lambda$*.java',                 // Lambda artifacts from decompilation
-                '**/*$Lambda$*.java'                 // More lambda artifacts
+                '**/*$Lambda$*.java',                // More lambda artifacts
+                '**/Debug.java',                     // Debug classes might have issues
+                '**/cloud/**/*.java',                // Cloud features
+                '**/dao/**/*.java',                  // Database access objects
+                '**/eventbus/**/*.java',             // Event bus
+                '**/fixes/**/*.java',                // Fixes
+                '**/licensing/**/*.java',            // Licensing
+                '**/media/**/*.java',                // Media
+                '**/memory/**/*.java',               // Memory management
+                '**/modern/**/*.java',               // Modern components
+                '**/openjpeg/**/*.java',             // OpenJPEG
+                '**/orm/**/*.java',                  // Object-relational mapping
+                '**/react/**/*.java',                // React components
+                '**/render/**/*.java',               // Rendering
+                '**/res/**/*.java',                  // Resource management
+                '**/slproto/**/*.java',              // SL protocol - too complex for now
+                '**/sync/**/*.java',                 // Sync
+                '**/ui/accounts/**/*.java',          // UI accounts
+                '**/ui/avapicker/**/*.java',         // Avatar picker
+                '**/ui/chat/**/*.java',              // Chat UI
+                '**/ui/common/**/*.java',            // Common UI
+                '**/ui/grids/**/*.java',             // Grids UI
+                '**/ui/inventory/**/*.java',         // Inventory UI
+                '**/ui/main/**/*.java',              // Main UI
+                '**/ui/media/**/*.java',             // Media UI
+                '**/ui/minimap/**/*.java',           // Minimap
+                '**/ui/modern/**/*.java',            // Modern UI
+                '**/ui/myava/**/*.java',             // My avatar UI
+                '**/ui/notify/**/*.java',            // Notifications UI
+                '**/ui/objects/**/*.java',           // Objects UI
+                '**/ui/objpopup/**/*.java',          // Object popup UI
+                '**/ui/outfits/**/*.java',           // Outfits UI
+                '**/ui/render/**/*.java',            // Render UI
+                '**/ui/search/**/*.java',            // Search UI
+                '**/ui/settings/**/*.java',          // Settings UI
+                '**/ui/voice/**/*.java',             // Voice UI
+                '**/voice/**/*.java',                // Voice
+                '**/voiceintf/**/*.java'             // Voice interface
+            ]
+            
+            // Explicitly include only essential core files and CleanLoginActivity
+            java.includes = [
+                '**/utils/**/*.java',                // Utility classes
+                '**/base64/**/*.java',               // Base64 encoding
+                '**/ui/login/CleanLoginActivity.java' // Our clean login activity
             ]
         }
     }
