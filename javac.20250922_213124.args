@@ -1,0 +1,10 @@
+-cp
+./gradle/wrapper/gradle-wrapper.jar:./cfr-0.152.jar:
+-sourcepath
+app/src/main/java
+app/src/main/java/com/lumiyaviewer/lumiya/modern/connection/ModernSystemTests.java
+app/src/main/java/com/lumiyaviewer/lumiya/modern/connection/ConnectionDiagnostics.java
+app/src/main/java/com/lumiyaviewer/lumiya/modern/connection/ModernConnectionManager.java
+app/src/main/java/com/lumiyaviewer/lumiya/modern/connection/ConnectionIntegrationBridge.java
+app/src/main/java/com/lumiyaviewer/lumiya/modern/auth/ModernAuthManager.java
+app/src/main/java/com/lumiyaviewer/lumiya/modern/auth/OAuth2AuthManager.java
