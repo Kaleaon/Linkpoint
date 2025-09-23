@@ -1,0 +1,191 @@
+name: Lumiya Static Analysis
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      artifact_path:
+        description: 'Path to the Lumiya APK or ZIP (relative to repo root)'
+        required: false
+        default: ''
+      max_heap_mb:
+        description: 'Max heap (MB) for tools like JADX/CFR'
+        required: false
+        default: '4096'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install tools
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y unzip zip wget python3 python3-venv jq file apktool
+
+      - name: Detect analysis artifact (APK/ZIP)
+        id: detect
+        env:
+          INPUT_ARTIFACT: ${{ github.event.inputs.artifact_path }}
+        run: |
+          set -euxo pipefail
+          ART="$INPUT_ARTIFACT"
+          if [ -z "${ART}" ]; then
+            # Prefer these defaults if present
+            for CAND in Lumiya_3.4.2.zip Lumiya_3.4.2.apk; do
+              if [ -f "$CAND" ]; then ART="$CAND"; break; fi
+            done
+          fi
+          if [ -z "${ART}" ]; then
+            # Fallback: first APK/ZIP in repo root (non-recursive)
+            FIRST=$(ls -1 *.apk *.zip 2>/dev/null | head -n1 || true)
+            if [ -n "$FIRST" ]; then ART="$FIRST"; fi
+          fi
+          if [ -z "${ART}" ]; then
+            echo "::error::No APK/ZIP artifact provided or found (looked for Lumiya_3.4.2.* or *.apk/*.zip in repo root)." >&2
+            exit 1
+          fi
+          echo "artifact=$ART" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare workspace
+        run: |
+          set -euxo pipefail
+          mkdir -p out/jadx out/apktool out/dex2jar out/ghidra out/native out/meta
+          cp "${{ steps.detect.outputs.artifact }}" in.bin
+
+      - name: Detect APK vs ZIP and extract APK if needed
+        id: artifact
+        run: |
+          set -euxo pipefail
+          FILE=in.bin
+          APK=lumiya.apk
+          MIME=$(file -b --mime-type "$FILE" || true)
+          echo "MIME=$MIME"
+          if [[ "$MIME" == "application/zip" ]]; then
+            # If it already looks like an APK (classes.dex at root), just use it as APK
+            if unzip -l "$FILE" | grep -q "classes.dex"; then
+              cp "$FILE" "$APK"
+            else
+              # Try to extract first inner APK
+              INNER=$(unzip -l "$FILE" | awk '{print $4}' | grep -i '\.apk$' | head -n1 || true)
+              if [ -n "$INNER" ]; then
+                unzip -p "$FILE" "$INNER" > "$APK"
+              else
+                echo "::error::Could not find an APK inside ZIP and no classes.dex present." >&2
+                exit 1
+              fi
+            fi
+          else
+            cp "$FILE" "$APK"
+          fi
+          echo "apk=$APK" >> "$GITHUB_OUTPUT"
+
+      - name: Dump APK meta
+        run: |
+          set -euxo pipefail
+          file "${{ steps.artifact.outputs.apk }}" | tee out/meta/file_type.txt
+          unzip -l "${{ steps.artifact.outputs.apk }}" | tee out/meta/apk_zip_list.txt
+
+      - name: apktool decode (resources + smali)
+        run: |
+          set -euxo pipefail
+          apktool d -f -o out/apktool "${{ steps.artifact.outputs.apk }}"
+
+      - name: Download JADX
+        run: |
+          set -euxo pipefail
+          JADX_VER=1.5.0
+          wget -q https://github.com/skylot/jadx/releases/download/v${JADX_VER}/jadx-${JADX_VER}.zip -O /tmp/jadx.zip
+          unzip -q /tmp/jadx.zip -d /opt/jadx
+          echo "/opt/jadx/bin" >> $GITHUB_PATH
+
+      - name: Run JADX (Java decompile)
+        env:
+          MAX_HEAP_MB: ${{ github.event.inputs.max_heap_mb || '4096' }}
+        run: |
+          set -euxo pipefail
+          jadx -j2 -Xmx${MAX_HEAP_MB}m -d out/jadx "${{ steps.artifact.outputs.apk }}"
+
+      - name: Download dex2jar and CFR
+        run: |
+          set -euxo pipefail
+          D2J_VER=2.1
+          wget -q https://github.com/pxb1988/dex2jar/releases/download/v${D2J_VER}/dex2jar-${D2J_VER}.zip -O /tmp/d2j.zip
+          unzip -q /tmp/d2j.zip -d /opt/d2j
+          echo "/opt/d2j" >> $GITHUB_PATH
+          CFR_VER=0.152
+          wget -q https://www.benf.org/other/cfr/cfr-${CFR_VER}.jar -O /opt/cfr.jar
+
+      - name: Run dex2jar + CFR (alternate decompile path)
+        env:
+          MAX_HEAP_MB: ${{ github.event.inputs.max_heap_mb || '4096' }}
+        run: |
+          set -euxo pipefail
+          /opt/d2j/d2j-dex2jar.sh -f -o out/dex2jar/classes.jar "${{ steps.artifact.outputs.apk }}"
+          java -Xmx${MAX_HEAP_MB}m -jar /opt/cfr.jar out/dex2jar/classes.jar --outputdir out/dex2jar/src
+
+      - name: Extract native libs (.so) if present
+        run: |
+          set -euxo pipefail
+          unzip -Z1 "${{ steps.artifact.outputs.apk }}" | grep -E '^lib/.+\.so$' | while read -r so; do
+            unzip -p "${{ steps.artifact.outputs.apk }}" "$so" > "out/native/$(basename "$so")"
+          done || true
+          ls -la out/native || true
+
+      - name: Download Ghidra
+        run: |
+          set -euxo pipefail
+          GHIDRA_VER=11.0.3
+          wget -q https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${GHIDRA_VER}_build/ghidra_${GHIDRA_VER}_PUBLIC_20240515.zip -O /tmp/ghidra.zip || \
+          wget -q https://github.com/NationalSecurityAgency/ghidra/releases/latest/download/ghidra.zip -O /tmp/ghidra.zip
+          unzip -q /tmp/ghidra.zip -d /opt
+          GHIDRA_DIR=$(find /opt -maxdepth 1 -type d -name 'ghidra*' | head -n1)
+          echo "GHIDRA_DIR=$GHIDRA_DIR" >> $GITHUB_ENV
+
+      - name: Run Ghidra headless on native libs (if any)
+        if: ${{ hashFiles('out/native/*.so') != '' }}
+        run: |
+          set -euxo pipefail
+          GHIDRA_DIR="${{ env.GHIDRA_DIR }}"
+          PROJ_DIR="$PWD/out/ghidra/project"
+          mkdir -p "$PROJ_DIR" out/ghidra/reports
+          SCRIPT_DIR="$PWD/tools/ghidra"
+          if [ ! -f "$SCRIPT_DIR/dump_symbols.py" ]; then
+            echo "::error::Ghidra post-script not found at $SCRIPT_DIR/dump_symbols.py" >&2
+            exit 1
+          fi
+          for so in out/native/*.so; do
+            base=$(basename "$so")
+            out_json="out/ghidra/reports/${base}.functions.json"
+            "$GHIDRA_DIR/support/analyzeHeadless" "$PROJ_DIR" LumiyaProject \
+              -import "$so" \
+              -scriptPath "$SCRIPT_DIR" \
+              -postScript dump_symbols.py "$out_json" \
+              -deleteProject
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lumiya-analysis
+          path: |
+            out/jadx/**
+            out/apktool/**
+            out/dex2jar/**
+            out/ghidra/**
+            out/native/**
+            out/meta/**
+          retention-days: 14
