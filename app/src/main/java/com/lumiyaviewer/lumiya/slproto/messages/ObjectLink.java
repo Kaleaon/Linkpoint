@@ -2,6 +2,7 @@ package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.google.common.primitives.UnsignedBytes;
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
+import com.lumiyaviewer.lumiya.slproto.llsd.EnhancedLLSDUtils;
 import lindenlab.llsd.LLSD;
 import lindenlab.llsd.LLSDUtils;
 import java.nio.ByteBuffer;
@@ -236,11 +237,11 @@ public class ObjectLink extends SLMessage {
     
     /**
      * Export message as LLSD JSON for debugging/API usage
+     * Uses proper serialization handling
      */
     public String toJSONString() {
         try {
-            // Note: Would use LLSDJsonSerializer here when available
-            return messageLLSD.serialise(); // Falls back to XML for now
+            return EnhancedLLSDUtils.toJSONString(messageLLSD);
         } catch (Exception e) {
             return "{}";
         }
@@ -248,15 +249,11 @@ public class ObjectLink extends SLMessage {
     
     /**
      * Export message as LLSD Notation (compact format)
+     * Provides human-readable compact representation
      */
     public String toNotationString() {
         try {
-            // Note: Would use LLSDNotationSerializer here when available
-            // For now, return a simple representation
-            return String.format(
-                "{AgentID:u%s,SessionID:u%s,ObjectCount:i%d}",
-                getAgentID(), getSessionID(), getObjectLocalIDs().size()
-            );
+            return EnhancedLLSDUtils.toNotationString(messageLLSD);
         } catch (Exception e) {
             return "{}";
         }

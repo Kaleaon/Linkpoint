@@ -1,11 +1,13 @@
 package com.lumiyaviewer.lumiya.slproto.messages;
 
 import com.lumiyaviewer.lumiya.slproto.SLMessage;
+import com.lumiyaviewer.lumiya.slproto.llsd.EnhancedLLSDUtils;
 import lindenlab.llsd.LLSD;
 import lindenlab.llsd.LLSDUtils;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -115,33 +117,104 @@ public class AgentDataUpdate extends SLMessage {
         updateLLSDField("GroupName", groupName != null ? groupName : "");
     }
     
+    /**
+     * Update an LLSD field with proper error handling and validation
+     * @param key The field key to update
+     * @param value The new value to set
+     */
     @SuppressWarnings("unchecked")
     private void updateLLSDField(String key, Object value) {
-        if (agentDataLLSD.getContent() instanceof Map) {
-            Map<String, Object> map = (Map<String, Object>) agentDataLLSD.getContent();
-            map.put(key, value);
-            syncToLegacyFields();
+        if (key == null || key.trim().isEmpty()) {
+            throw new IllegalArgumentException("Field key cannot be null or empty");
+        }
+        
+        if (agentDataLLSD == null) {
+            initializeDefaultLLSD();
+        }
+        
+        try {
+            if (agentDataLLSD.getContent() instanceof Map) {
+                Map<String, Object> map = (Map<String, Object>) agentDataLLSD.getContent();
+                map.put(key, value);
+                syncToLegacyFields();
+            } else {
+                throw new IllegalStateException("LLSD content is not a Map");
+            }
+        } catch (ClassCastException e) {
+            throw new IllegalStateException("LLSD content cannot be cast to Map<String, Object>", e);
         }
     }
     
+    /**
+     * Synchronize LLSD data to legacy fields for wire protocol compatibility
+     */
     private void syncToLegacyFields() {
-        AgentData_Field.AgentID = getAgentID();
-        AgentData_Field.ActiveGroupID = getActiveGroupID();
-        AgentData_Field.FirstName = getFirstName().getBytes();
-        AgentData_Field.LastName = getLastName().getBytes();
-        AgentData_Field.GroupTitle = getGroupTitle().getBytes();
-        AgentData_Field.GroupPowers = getGroupPowers();
-        AgentData_Field.GroupName = getGroupName().getBytes();
+        if (AgentData_Field == null) {
+            AgentData_Field = new AgentData();
+        }
+        
+        try {
+            AgentData_Field.AgentID = getAgentID();
+            AgentData_Field.ActiveGroupID = getActiveGroupID();
+            AgentData_Field.FirstName = safeStringToBytes(getFirstName());
+            AgentData_Field.LastName = safeStringToBytes(getLastName());
+            AgentData_Field.GroupTitle = safeStringToBytes(getGroupTitle());
+            AgentData_Field.GroupPowers = getGroupPowers();
+            AgentData_Field.GroupName = safeStringToBytes(getGroupName());
+        } catch (Exception e) {
+            // Log error but don't fail - maintain robustness
+            System.err.println("Warning: Failed to sync to legacy fields: " + e.getMessage());
+        }
     }
     
+    /**
+     * Synchronize legacy fields to LLSD data
+     */
     private void syncFromLegacyFields() {
-        setAgentID(AgentData_Field.AgentID);
-        setActiveGroupID(AgentData_Field.ActiveGroupID);
-        setFirstName(AgentData_Field.FirstName != null ? new String(AgentData_Field.FirstName) : "");
-        setLastName(AgentData_Field.LastName != null ? new String(AgentData_Field.LastName) : "");
-        setGroupTitle(AgentData_Field.GroupTitle != null ? new String(AgentData_Field.GroupTitle) : "");
-        setGroupPowers(AgentData_Field.GroupPowers);
-        setGroupName(AgentData_Field.GroupName != null ? new String(AgentData_Field.GroupName) : "");
+        if (AgentData_Field == null) {
+            return;
+        }
+        
+        try {
+            setAgentID(AgentData_Field.AgentID);
+            setActiveGroupID(AgentData_Field.ActiveGroupID);
+            setFirstName(safeBytesToString(AgentData_Field.FirstName));
+            setLastName(safeBytesToString(AgentData_Field.LastName));
+            setGroupTitle(safeBytesToString(AgentData_Field.GroupTitle));
+            setGroupPowers(AgentData_Field.GroupPowers);
+            setGroupName(safeBytesToString(AgentData_Field.GroupName));
+        } catch (Exception e) {
+            // Log error but don't fail - maintain robustness
+            System.err.println("Warning: Failed to sync from legacy fields: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Safely convert string to bytes with UTF-8 encoding
+     */
+    private byte[] safeStringToBytes(String str) {
+        if (str == null) {
+            return new byte[0];
+        }
+        try {
+            return str.getBytes("UTF-8");
+        } catch (Exception e) {
+            return str.getBytes(); // Fallback to default encoding
+        }
+    }
+    
+    /**
+     * Safely convert bytes to string with UTF-8 encoding
+     */
+    private String safeBytesToString(byte[] bytes) {
+        if (bytes == null) {
+            return "";
+        }
+        try {
+            return new String(bytes, "UTF-8");
+        } catch (Exception e) {
+            return new String(bytes); // Fallback to default encoding
+        }
     }
 
     public int CalcPayloadSize() {
@@ -212,16 +285,26 @@ public class AgentDataUpdate extends SLMessage {
     }
     
     /**
-     * Create from LLSD XML string
+     * Create AgentDataUpdate from LLSD XML string
+     * Uses proper parsing with error handling
      */
     public static AgentDataUpdate fromXMLString(String xml) {
         AgentDataUpdate update = new AgentDataUpdate();
-        try {
-            // Note: Would use LLSDParser here when available
-            // For now, just return default instance
-            return update;
-        } catch (Exception e) {
-            return update;
+        
+        if (xml == null || xml.trim().isEmpty()) {
+            return update; // Return default instance
         }
+        
+        try {
+            Optional<LLSD> parsedLLSD = EnhancedLLSDUtils.parseFromXMLString(xml);
+            if (parsedLLSD.isPresent()) {
+                update.setAgentDataLLSD(parsedLLSD.get());
+            }
+        } catch (Exception e) {
+            // Log error but return default instance for robustness
+            System.err.println("Warning: Failed to parse AgentDataUpdate from XML: " + e.getMessage());
+        }
+        
+        return update;
     }
 }

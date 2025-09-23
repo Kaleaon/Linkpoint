@@ -2,14 +2,17 @@ package com.lumiyaviewer.lumiya.slproto.llsd;
 
 import lindenlab.llsd.LLSD;
 import lindenlab.llsd.LLSDUtils;
-// import lindenlab.llsd.LLSDParser;
-// import lindenlab.llsd.LLSDJsonParser;
-// import lindenlab.llsd.LLSDNotationParser;
-// import lindenlab.llsd.LLSDBinaryParser;
+import lindenlab.llsd.LLSDParser;
+import lindenlab.llsd.LLSDException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import java.io.StringWriter;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Enhanced LLSD utilities using Kaleaon's llsd-java library
@@ -23,6 +26,8 @@ import java.io.StringWriter;
  * - Enhanced type safety and error handling
  */
 public final class EnhancedLLSDUtils {
+    
+    private static final Logger LOGGER = Logger.getLogger(EnhancedLLSDUtils.class.getName());
     
     // Thread-safe cache for commonly used LLSD structures
     private static final Map<String, LLSD> CACHE = new ConcurrentHashMap<>();
@@ -230,79 +235,113 @@ public final class EnhancedLLSDUtils {
      */
     public static String toXMLString(LLSD llsd) {
         if (llsd == null) {
+            LOGGER.warning("Attempted to serialize null LLSD to XML");
             return "<llsd><undef /></llsd>";
         }
         
         try {
             return llsd.serialise();
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to serialize LLSD to XML", e);
             return "<llsd><undef /></llsd>";
         }
     }
     
+    /**
+     * Convert LLSD to JSON string format
+     * Uses LLSD's built-in JSON serialization when available
+     */
     public static String toJSONString(LLSD llsd) {
         if (llsd == null) {
+            LOGGER.warning("Attempted to serialize null LLSD to JSON");
             return "null";
         }
         
         try {
-            // Note: Would use LLSDJsonSerializer when available
-            // For now, fallback to XML
-            return llsd.serialise();
+            // For now, use XML serialization as fallback until JSON serializer is fully integrated
+            // This maintains compatibility while providing the expected interface
+            String xmlResult = llsd.serialise();
+            LOGGER.fine("JSON serialization falling back to XML format");
+            return xmlResult;
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to serialize LLSD to JSON", e);
             return "null";
         }
     }
     
+    /**
+     * Convert LLSD to Notation string format
+     * Provides compact representation suitable for debugging and configuration
+     */
     public static String toNotationString(LLSD llsd) {
         if (llsd == null) {
+            LOGGER.warning("Attempted to serialize null LLSD to Notation");
             return "!";
         }
         
         try {
-            // Note: Would use LLSDNotationSerializer when available
-            // For now, create simple notation representation
             Object content = llsd.getContent();
-            return createSimpleNotation(content);
+            return createNotationRepresentation(content);
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to serialize LLSD to Notation", e);
             return "!";
         }
     }
     
-    private static String createSimpleNotation(Object obj) {
+    /**
+     * Create notation representation of LLSD content
+     * Provides a compact, human-readable format
+     */
+    private static String createNotationRepresentation(Object obj) {
         if (obj == null) return "!";
-        if (obj instanceof String) return "s'" + obj + "'";
+        if (obj instanceof String) return "s'" + escapeNotationString((String) obj) + "'";
         if (obj instanceof Integer) return "i" + obj;
         if (obj instanceof Double) return "r" + obj;
         if (obj instanceof Boolean) return (Boolean) obj ? "1" : "0";
-        if (obj instanceof UUID) return "u" + obj.toString();
+        if (obj instanceof UUID) return "u" + obj.toString().replace("-", "");
+        if (obj instanceof Date) return "d" + ((Date) obj).toInstant().toString();
+        
         if (obj instanceof Map) {
             StringBuilder sb = new StringBuilder("{");
-            @SuppressWarnings("unchecked")
-            Map<String, Object> map = (Map<String, Object>) obj;
+            Map<?, ?> map = (Map<?, ?>) obj;
             boolean first = true;
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
                 if (!first) sb.append(",");
-                sb.append(entry.getKey()).append(":").append(createSimpleNotation(entry.getValue()));
+                String key = entry.getKey().toString();
+                sb.append(escapeNotationString(key)).append(":")
+                  .append(createNotationRepresentation(entry.getValue()));
                 first = false;
             }
             sb.append("}");
             return sb.toString();
         }
+        
         if (obj instanceof List) {
             StringBuilder sb = new StringBuilder("[");
-            @SuppressWarnings("unchecked")
-            List<Object> list = (List<Object>) obj;
+            List<?> list = (List<?>) obj;
             boolean first = true;
             for (Object item : list) {
                 if (!first) sb.append(",");
-                sb.append(createSimpleNotation(item));
+                sb.append(createNotationRepresentation(item));
                 first = false;
             }
             sb.append("]");
             return sb.toString();
         }
-        return obj.toString();
+        
+        return "s'" + escapeNotationString(obj.toString()) + "'";
+    }
+    
+    /**
+     * Escape special characters in notation strings
+     */
+    private static String escapeNotationString(String str) {
+        if (str == null) return "";
+        return str.replace("\\", "\\\\")
+                  .replace("'", "\\'")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r")
+                  .replace("\t", "\\t");
     }
     
     /**
@@ -329,11 +368,11 @@ public final class EnhancedLLSDUtils {
     }
     
     /**
-     * Merging and manipulation
+     * Merging and manipulation with proper type safety
      */
     public static LLSD merge(LLSD base, LLSD overlay) {
         if (base == null && overlay == null) {
-            return new LLSD(null);
+            return new LLSD(Collections.emptyMap());
         }
         if (base == null) {
             return overlay;
@@ -347,24 +386,98 @@ public final class EnhancedLLSDUtils {
             Object overlayContent = overlay.getContent();
             
             if (baseContent instanceof Map && overlayContent instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> baseMap = (Map<String, Object>) baseContent;
-                @SuppressWarnings("unchecked")
-                Map<String, Object> overlayMap = (Map<String, Object>) overlayContent;
+                Map<String, Object> baseMap = castToStringObjectMap(baseContent);
+                Map<String, Object> overlayMap = castToStringObjectMap(overlayContent);
                 
-                Map<String, Object> merged = LLSDUtils.mergeMaps(baseMap, overlayMap);
-                return new LLSD(merged);
+                if (baseMap != null && overlayMap != null) {
+                    Map<String, Object> merged = LLSDUtils.mergeMaps(baseMap, overlayMap);
+                    return new LLSD(merged);
+                }
             }
         } catch (Exception e) {
-            // Fall back to overlay
+            LOGGER.log(Level.WARNING, "Failed to merge LLSD objects, falling back to overlay", e);
         }
         
         return overlay;
     }
     
     /**
-     * Performance and cache management
+     * Safe cast to Map<String, Object> with proper type checking
      */
+    private static Map<String, Object> castToStringObjectMap(Object obj) {
+        if (!(obj instanceof Map)) {
+            return null;
+        }
+        
+        Map<?, ?> rawMap = (Map<?, ?>) obj;
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
+                Object key = entry.getKey();
+                if (key instanceof String) {
+                    result.put((String) key, entry.getValue());
+                } else {
+                    LOGGER.warning("Non-string key found in LLSD map: " + key);
+                    result.put(String.valueOf(key), entry.getValue());
+                }
+            }
+            return result;
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to safely cast map", e);
+            return null;
+        }
+    }
+    
+    /**
+     * Parsing methods with proper error handling
+     */
+    public static Optional<LLSD> parseFromXMLString(String xmlString) {
+        if (xmlString == null || xmlString.trim().isEmpty()) {
+            LOGGER.warning("Attempted to parse null or empty XML string");
+            return Optional.empty();
+        }
+        
+        parseOperations++;
+        
+        try (InputStream inputStream = new ByteArrayInputStream(
+                xmlString.getBytes(StandardCharsets.UTF_8))) {
+            
+            LLSDParser parser = new LLSDParser();
+            LLSD result = parser.parse(inputStream);
+            LOGGER.fine("Successfully parsed LLSD from XML string");
+            return Optional.of(result);
+            
+        } catch (LLSDException e) {
+            LOGGER.log(Level.WARNING, "LLSD parsing error: " + e.getMessage(), e);
+            return Optional.empty();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Unexpected error parsing LLSD from XML", e);
+            return Optional.empty();
+        }
+    }
+    
+    /**
+     * Create LLSD from XML string with caching support
+     */
+    public static Optional<LLSD> parseFromXMLStringCached(String xmlString, String cacheKey) {
+        if (cacheKey != null) {
+            LLSD cached = CACHE.get(cacheKey);
+            if (cached != null) {
+                cacheHits++;
+                LOGGER.fine("Cache hit for key: " + cacheKey);
+                return Optional.of(cached);
+            }
+        }
+        
+        Optional<LLSD> parsed = parseFromXMLString(xmlString);
+        if (parsed.isPresent() && cacheKey != null) {
+            CACHE.put(cacheKey, parsed.get());
+            LOGGER.fine("Cached LLSD with key: " + cacheKey);
+        }
+        
+        return parsed;
+    }
     public static void clearCache() {
         CACHE.clear();
     }

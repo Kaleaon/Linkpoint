@@ -2,6 +2,7 @@ package com.lumiyaviewer.lumiya.slproto.messages
 
 import com.google.common.primitives.UnsignedBytes
 import com.lumiyaviewer.lumiya.slproto.SLMessage
+import com.lumiyaviewer.lumiya.slproto.llsd.EnhancedLLSDUtils
 import lindenlab.llsd.LLSD
 import lindenlab.llsd.LLSDUtils
 import java.nio.ByteBuffer
@@ -179,31 +180,27 @@ class ObjectLinkKt : SLMessage() {
 
     // Advanced serialization using Kaleaon's LLSD library features
     fun toXMLString(): String = try {
-        messageLLSD.serialise()
+        EnhancedLLSDUtils.toXMLString(messageLLSD)
     } catch (e: Exception) {
         "<llsd><undef /></llsd>"
     }
 
     fun toJSONString(): String = try {
-        // Note: Would use LLSDJsonSerializer when fully available
-        messageLLSD.serialise() // Fallback to XML
+        EnhancedLLSDUtils.toJSONString(messageLLSD)
     } catch (e: Exception) {
         "{}"
     }
 
     fun toNotationString(): String = try {
-        // Create compact notation representation
-        val agentStr = "AgentID:u$agentID,SessionID:u$sessionID"
-        val objectStr = "Objects:[${objectLocalIDs.joinToString(",") { "i$it" }}]"
-        "{$agentStr,$objectStr}"
+        EnhancedLLSDUtils.toNotationString(messageLLSD)
     } catch (e: Exception) {
         "{}"
     }
 
-    // Validation using Kaleaon's utilities
+    // Validation using Kaleaon's utilities with proper error handling
     fun isValid(): Boolean = try {
-        val missing = LLSDUtils.validateRequiredFields(
-            messageLLSD.content,
+        val missing = EnhancedLLSDUtils.validateRequiredFields(
+            messageLLSD,
             "AgentData.AgentID", 
             "AgentData.SessionID"
         )
@@ -214,7 +211,7 @@ class ObjectLinkKt : SLMessage() {
 
     // Pretty printing for debugging
     fun prettyPrint(): String = try {
-        LLSDUtils.prettyPrint(messageLLSD.content)
+        EnhancedLLSDUtils.prettyPrint(messageLLSD)
     } catch (e: Exception) {
         toXMLString()
     }
