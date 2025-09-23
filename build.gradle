@@ -13,6 +13,7 @@ Universal Build System Features:
 apply from: 'gradle/scripts/universal-aapt2.gradle'
 
 buildscript {
+    ext.kotlin_version = '1.7.20'
     repositories {
         google()
         mavenCentral()
@@ -20,6 +21,7 @@ buildscript {
     dependencies {
         // AGP 7.0.4 - More compatible with AAPT2 v2.19  
         classpath 'com.android.tools.build:gradle:7.0.4'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
