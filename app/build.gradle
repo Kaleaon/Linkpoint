@@ -85,7 +85,7 @@ android {
             java.excludes = [
                 '**/$Lambda$*.java',                 // Lambda artifacts from decompilation
                 '**/*$Lambda$*.java',                // More lambda artifacts
-                '**/Debug.java',                     // Debug classes might have issues
+                // '**/Debug.java',                  // Debug classes - now needed by LLSD
                 '**/cloud/**/*.java',                // Cloud features
                 '**/dao/**/*.java',                  // Database access objects
                 '**/eventbus/**/*.java',             // Event bus
@@ -99,7 +99,16 @@ android {
                 '**/react/**/*.java',                // React components
                 '**/render/**/*.java',               // Rendering
                 '**/res/**/*.java',                  // Resource management
-                '**/slproto/**/*.java',              // SL protocol - too complex for now
+                '**/slproto/auth/**/*.java',         // Auth module - too complex for now
+                '**/slproto/caps/**/*.java',         // Capabilities module - too complex for now  
+                '**/slproto/chat/**/*.java',         // Chat module - too complex for now
+                '**/slproto/handler/**/*.java',      // Message handlers - too complex for now
+                '**/slproto/inventory/**/*.java',    // Inventory module - too complex for now
+                '**/slproto/modules/**/*.java',      // Protocol modules - too complex for now
+                '**/slproto/objects/**/*.java',      // Objects module - too complex for now
+                '**/slproto/terrain/**/*.java',     // Terrain module - too complex for now
+                '**/slproto/textures/**/*.java',    // Textures module - too complex for now
+                '**/slproto/users/**/*.java',       // Users module - too complex for now
                 '**/sync/**/*.java',                 // Sync
                 '**/ui/accounts/**/*.java',          // UI accounts
                 '**/ui/avapicker/**/*.java',         // Avatar picker
@@ -128,6 +137,12 @@ android {
             java.includes = [
                 '**/utils/**/*.java',                // Utility classes
                 '**/base64/**/*.java',               // Base64 encoding
+                '**/slproto/llsd/**/*.java',         // LLSD classes - needed for refactoring
+                '**/slproto/messages/**/*.java',     // Message classes - needed for refactoring
+                '**/slproto/SLMessage.java',         // Base message class
+                '**/slproto/https/LLSDContentTypeDetector.java', // LLSD content detection
+                '**/Debug.java',                     // Debug utility class - needed by LLSD
+                '**/test/**/*.java',                 // Test classes
                 '**/ui/login/CleanLoginActivity.java' // Our clean login activity
             ]
         }
