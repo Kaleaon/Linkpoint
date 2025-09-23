@@ -140,6 +140,13 @@ Thumbs.db-e
 # (Exclude generated inventory files from commits)
 file_inventory/
 copilot_review_files/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 -e 
 # Environment files
 *.env
