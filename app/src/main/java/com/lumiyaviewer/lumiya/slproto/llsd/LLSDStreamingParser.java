@@ -1,5 +1,4 @@
 package com.lumiyaviewer.lumiya.slproto.llsd;
-import java.util.*;
 
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.slproto.https.LLSDContentTypeDetector;

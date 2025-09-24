@@ -18,11 +18,11 @@ public enum LLSDNodeType {
     llsdMap("map"),
     llsdKey("key");
     
-    private static final Map<String, LLSDNodeType> tagMap = null;
+    private static final Map<String, LLSDNodeType> tagMap;
     private final String tagName;
 
     static {
-        tagMap = new HashMap(values().length * 2);
+        tagMap = new HashMap<>(values().length * 2);
         for (LLSDNodeType lLSDNodeType : values()) {
             tagMap.put(lLSDNodeType.tagName, lLSDNodeType);
         }

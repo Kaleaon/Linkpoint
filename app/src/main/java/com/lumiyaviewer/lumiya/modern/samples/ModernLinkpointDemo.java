@@ -10,10 +10,11 @@ import com.lumiyaviewer.lumiya.modern.protocol.HybridSLTransport;
 import com.lumiyaviewer.lumiya.modern.protocol.WebSocketEventClient;
 import com.lumiyaviewer.lumiya.modern.auth.OAuth2AuthManager;
 import com.lumiyaviewer.lumiya.modern.assets.ModernAssetManager;
+import com.lumiyaviewer.lumiya.modern.llsd.ModernLLSDCodec;
 
 /**
  * Demonstration of modern Linkpoint components
- * Shows integration of HTTP/2, WebSocket, and advanced graphics
+ * Shows integration of HTTP/2, WebSocket, LLSD codec, and advanced graphics
  */
 public class ModernLinkpointDemo {
     private static final String TAG = "ModernLinkpointDemo";
@@ -24,6 +25,7 @@ public class ModernLinkpointDemo {
     private final ModernRenderPipeline renderPipeline;
     private final OAuth2AuthManager authManager;
     private final ModernAssetManager assetManager;
+    private final ProtocolCompatibilityDemo protocolDemo;
     
     public ModernLinkpointDemo(Context context) {
         this.context = context;
@@ -32,8 +34,9 @@ public class ModernLinkpointDemo {
         this.renderPipeline = new ModernRenderPipeline();
         this.authManager = new OAuth2AuthManager(context);
         this.assetManager = new ModernAssetManager(context);
+        this.protocolDemo = new ProtocolCompatibilityDemo(context);
         
-        Log.i(TAG, "Modern Linkpoint components initialized with full feature set");
+        Log.i(TAG, "Modern Linkpoint components initialized with full feature set including LLSD codec");
     }
     
     /**
@@ -62,6 +65,7 @@ public class ModernLinkpointDemo {
                 Log.d(TAG, "Received object update: " + event.getData());
                 // TODO: Update 3D world objects
             }
+        });
         
         Log.i(TAG, "Modern transport layer connected successfully");
     }
@@ -116,6 +120,7 @@ public class ModernLinkpointDemo {
             .exceptionally(throwable -> {
                 Log.e(TAG, "Error loading texture: " + textureId, throwable);
                 return null;
+            });
     }
     
     /**
@@ -140,6 +145,7 @@ public class ModernLinkpointDemo {
             .exceptionally(throwable -> {
                 Log.e(TAG, "Failed to send message", throwable);
                 return null;
+            });
     }
     
     /**
@@ -217,6 +223,7 @@ public class ModernLinkpointDemo {
                         Log.d(TAG, "Loaded texture asset: " + assetData.getId());
                         textureManager.processModernTexture(assetData.getData());
                     }
+                });
         }
     }
     
@@ -232,6 +239,14 @@ public class ModernLinkpointDemo {
      */
     public ModernAssetManager getAssetManager() {
         return assetManager;
+    }
+    
+    /**
+     * Test modern LLSD codec and protocol compatibility
+     */
+    public void testModernLLSDCodec() {
+        Log.i(TAG, "Testing Modern LLSD Codec with LibreMetaverse compatibility...");
+        protocolDemo.runFullDemo();
     }
     
     /**

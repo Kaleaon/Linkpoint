@@ -25,6 +25,15 @@ public class Debug {
     }
 
     public static void Printf(String str, Object... objArr) {
+        try {
+            if (objArr == null || objArr.length == 0) {
+                Log.d(LOG_TAG, str);
+            } else {
+                Log.d(LOG_TAG, String.format(str, objArr));
+            }
+        } catch (Exception e) {
+            Log.d(LOG_TAG, str + " (format error: " + e.getMessage() + ")");
+        }
     }
 
     public static void Warning(Throwable th) {
