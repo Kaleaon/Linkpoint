@@ -79,11 +79,10 @@ android {
             res.srcDirs = ['src/main/res']
             assets.srcDirs = ['src/main/assets']
 
-            // Exclude problematic decompiled files and broken components
+            // Exclude only problematic decompiled files - enable modern components
             java.excludes = [
                 '**/$Lambda$*.java',                 // Lambda artifacts from decompilation
                 '**/*$Lambda$*.java',                // More lambda artifacts
-                '**/base64/Base64.java',             // Broken decompiled Base64 implementation - now fixed
                 '**/utils/reqset/**/*.java',         // Problematic decompiled request set classes
                 '**/utils/wlist/**/*.java',          // Problematic decompiled list classes with compilation errors
                 '**/utils/InlineList*.java',         // Decompiled inline list with type errors
