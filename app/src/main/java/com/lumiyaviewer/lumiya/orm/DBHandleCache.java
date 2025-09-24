@@ -73,41 +73,57 @@ public class DBHandleCache {
     public synchronized void Cleanup() {
         while (true) {
             Reference<? extends DBHandle> poll = this.refQueue.poll();
-            if (poll != null) {
-                DBOpenRef remove = this.refMap.remove(poll);
-                if (remove != null && remove.releaseReference() <= 0) {
-                    String fileName = remove.getFileName();
-                    Debug.Printf("DBHandle: Closing db '%s'", fileName);
-                    try {
-                        SQLiteDatabase db = remove.getDB();
-                        if (db.isOpen()) {
-                            db.close();
-                        }
-                    } catch (SQLiteException e) {
-                        Debug.Warning(e);
+            if (poll == null) {
+                break; // Exit when no more references to process
+            }
+            DBOpenRef remove = this.refMap.remove(poll);
+            if (remove != null && remove.releaseReference() <= 0) {
+                String fileName = remove.getFileName();
+                Debug.Printf("DBHandle: Closing db '%s'", fileName);
+                try {
+                    SQLiteDatabase db = remove.getDB();
+                    if (db != null && db.isOpen()) {
+                        db.close();
                     }
-                    this.fileMap.remove(fileName);
+                } catch (SQLiteException e) {
+                    Debug.Warning(e);
                 }
+                this.fileMap.remove(fileName);
             }
         }
-        return;
     }
 
     public synchronized DBHandle OpenDB(String str, DBOpenHelper dBOpenHelper) throws SQLiteException {
+        if (str == null || str.trim().isEmpty()) {
+            throw new IllegalArgumentException("Database filename cannot be null or empty");
+        }
+        if (dBOpenHelper == null) {
+            throw new IllegalArgumentException("DBOpenHelper cannot be null");
+        }
+        
         DBHandle dBHandle;
         DBOpenRef dBOpenRef = this.fileMap.get(str);
         if (dBOpenRef == null) {
             Debug.Printf("DBHandle: Opening db '%s'", str);
-            dBOpenRef = new DBOpenRef(str, dBOpenHelper.openOrCreateDatabase(str));
-            this.fileMap.put(str, dBOpenRef);
+            try {
+                SQLiteDatabase database = dBOpenHelper.openOrCreateDatabase(str);
+                if (database == null) {
+                    throw new SQLiteException("Failed to open or create database: " + str);
+                }
+                dBOpenRef = new DBOpenRef(str, database);
+                this.fileMap.put(str, dBOpenRef);
+            } catch (SQLiteException e) {
+                Debug.Warning("Failed to open database: " + str, e);
+                throw e;
+            }
         }
         dBHandle = new DBHandle(dBOpenRef.getDB());
         dBOpenRef.acquireReference();
-        this.refMap.put(new PhantomReference(dBHandle, this.refQueue), dBOpenRef);
+        this.refMap.put(new PhantomReference<>(dBHandle, this.refQueue), dBOpenRef);
         return dBHandle;
     }
 
     public synchronized boolean hasOpenHandles() {
-        return !(this.fileMap.isEmpty() ? this.refMap.isEmpty() : false);
+        return !this.fileMap.isEmpty() || !this.refMap.isEmpty();
     }
 }
