@@ -65,6 +65,7 @@ public class ModernLinkpointDemo {
                 Log.d(TAG, "Received object update: " + event.getData());
                 // TODO: Update 3D world objects
             }
+        });
         
         Log.i(TAG, "Modern transport layer connected successfully");
     }
@@ -119,6 +120,7 @@ public class ModernLinkpointDemo {
             .exceptionally(throwable -> {
                 Log.e(TAG, "Error loading texture: " + textureId, throwable);
                 return null;
+            });
     }
     
     /**
@@ -143,6 +145,7 @@ public class ModernLinkpointDemo {
             .exceptionally(throwable -> {
                 Log.e(TAG, "Failed to send message", throwable);
                 return null;
+            });
     }
     
     /**
@@ -220,6 +223,7 @@ public class ModernLinkpointDemo {
                         Log.d(TAG, "Loaded texture asset: " + assetData.getId());
                         textureManager.processModernTexture(assetData.getData());
                     }
+                });
         }
     }
     

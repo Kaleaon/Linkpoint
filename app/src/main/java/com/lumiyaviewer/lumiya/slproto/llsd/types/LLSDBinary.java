@@ -50,7 +50,7 @@ public class LLSDBinary extends LLSDNode {
 
     public void toXML(XmlSerializer xmlSerializer) throws IOException {
         xmlSerializer.startTag("", "binary");
-        xmlSerializer.text(Base64.encodeToString(this.value, false));
+        xmlSerializer.text(android.util.Base64.encodeToString(this.value, android.util.Base64.DEFAULT));
         xmlSerializer.endTag("", "binary");
     }
 }

@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.types;
 
-import android.support.v4.view.InputDeviceCompat;
+import androidx.core.view.InputDeviceCompat;
 
 public final class LLTersePacking {
     public static final float U16_to_float(int i, float f, float f2) {

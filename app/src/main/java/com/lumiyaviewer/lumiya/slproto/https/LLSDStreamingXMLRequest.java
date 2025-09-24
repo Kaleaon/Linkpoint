@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.https;
 
-import android.support.v4.os.EnvironmentCompat;
+import androidx.core.os.EnvironmentCompat;
 import com.google.common.net.HttpHeaders;
 import com.lumiyaviewer.lumiya.Debug;
 import com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode;
