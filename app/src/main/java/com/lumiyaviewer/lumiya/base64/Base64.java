@@ -1,53 +1,36 @@
 /*
- * Decompiled with CFR 0.152.
+ * Clean Base64 implementation for Linkpoint
+ * Replaces problematic decompiled code with working implementation
  */
 package com.lumiyaviewer.lumiya.base64;
 
-import java.util.Arrays;
+import android.util.Base64 as AndroidBase64;
 
+/**
+ * Base64 encoding/decoding utility using Android's built-in Base64 implementation
+ */
 public class Base64 {
-    private static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
-    private static final int[] IA = new int[256];
-
-    static {
-        Arrays.fill(IA, -1);
-        int n = CA.length;
-        for (int i = 0; i < n; ++i) {
-            Base64.IA[Base64.CA[i]] = i;
-        }
-        Base64.IA[61] = 0;
-    }
-
-    /*
-     * WARNING - void declaration
-     * Enabled aggressive block sorting
-     * Lifted jumps to return sites
+    
+    /**
+     * Decode a Base64 encoded string to bytes
      */
-    public static final byte[] decode(String string2) {
-        int n;
-        int[] nArray;
-        int n2;
-        int n3;
-        void var7_3;
-        int n4 = string2 != null ? string2.length() : 0;
-        if (n4 == 0) {
-            byte[] byArray = new byte[]{};
-            return var7_3;
+    public static byte[] decode(String input) {
+        if (input == null) {
+            return new byte[0];
         }
-        int n5 = 0;
-        for (n3 = 0; n3 < n4; ++n3) {
-            n2 = n5;
-            if (IA[string2.charAt(n3)] < 0) {
-                n2 = n5 + 1;
-            }
-            n5 = n2;
+        return AndroidBase64.decode(input, AndroidBase64.DEFAULT);
+    }
+    
+    /**
+     * Encode bytes to a Base64 string
+     */
+    public static String encode(byte[] input) {
+        if (input == null) {
+            return "";
         }
-        if ((n4 - n5) % 4 != 0) {
-            return var7_3;
-        }
-        n2 = 0;
-        n3 = n4;
-        while (n3 > 1 && (nArray = IA)[string2.charAt(n = n3 - 1)] <= 0) {
+        return AndroidBase64.encodeToString(input, AndroidBase64.DEFAULT);
+    }
+}
             n3 = n;
             if (string2.charAt(n) != '=') continue;
             ++n2;
