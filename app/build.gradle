@@ -86,6 +86,8 @@ android {
                 '**/$Lambda$*.java',                 // Lambda artifacts from decompilation
                 '**/*$Lambda$*.java',                // More lambda artifacts
                 '**/Debug.java',                     // Debug classes might have issues
+                '**/base64/**/*.java',               // Base64 encoding - decompiled issues
+                '**/utils/**/*.java',                // Utils classes - decompiled issues
                 '**/cloud/**/*.java',                // Cloud features
                 '**/dao/**/*.java',                  // Database access objects
                 '**/eventbus/**/*.java',             // Event bus
@@ -126,9 +128,8 @@ android {
             
             // Explicitly include only essential core files and CleanLoginActivity
             java.includes = [
-                '**/utils/**/*.java',                // Utility classes
-                '**/base64/**/*.java',               // Base64 encoding
-                '**/ui/login/CleanLoginActivity.java' // Our clean login activity
+                '**/ui/login/CleanLoginActivity.java', // Our clean login activity  
+                '**/slproto/llsd/integration/**/*.java' // LLSD integration bridge
             ]
         }
     }
@@ -171,6 +172,9 @@ dependencies {
 
     // JSON
     implementation 'com.google.code.gson:gson:2.10.1'
+
+    // LLSD Java library - the external library we're integrating
+    implementation 'lindenlab:llsd:1.0'
 
     // Google Play base
     implementation 'com.google.android.gms:play-services-base:18.2.0'
