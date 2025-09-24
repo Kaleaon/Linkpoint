@@ -22,23 +22,25 @@ public class SLInventoryOpenHelper implements DBHandleCache.DBOpenHelper {
     }
 
     private void enableWriteAheadLogging(SQLiteDatabase sQLiteDatabase) {
+        if (sQLiteDatabase == null) {
+            Debug.Printf("Cannot enable WAL on null database");
+            return;
+        }
+        
         try {
-            Method method = sQLiteDatabase.getClass().getMethod("enableWriteAheadLogging", new Class[0]);
+            Method method = sQLiteDatabase.getClass().getMethod("enableWriteAheadLogging");
             if (method != null) {
-                method.invoke(sQLiteDatabase, new Object[0]);
-                Debug.Printf("Write-ahead logging is supported.", new Object[0]);
+                method.invoke(sQLiteDatabase);
+                Debug.Printf("Write-ahead logging enabled successfully.");
             }
         } catch (NoSuchMethodException e) {
-            Debug.Printf("Write-ahead logging not supported.", new Object[0]);
-        } catch (IllegalArgumentException e2) {
-            Debug.Printf("Write-ahead logging not supported.", new Object[0]);
-            e2.printStackTrace();
-        } catch (IllegalAccessException e3) {
-            Debug.Printf("Write-ahead logging not supported.", new Object[0]);
-            e3.printStackTrace();
-        } catch (InvocationTargetException e4) {
-            Debug.Printf("Write-ahead logging not supported.", new Object[0]);
-            e4.printStackTrace();
+            Debug.Printf("Write-ahead logging not supported on this Android version.");
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            Debug.Printf("Write-ahead logging not accessible: %s", e.getMessage());
+        } catch (InvocationTargetException e) {
+            Debug.Printf("Failed to enable write-ahead logging: %s", e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
+        } catch (Exception e) {
+            Debug.Printf("Unexpected error enabling write-ahead logging: %s", e.getMessage());
         }
     }
 
@@ -48,36 +50,53 @@ public class SLInventoryOpenHelper implements DBHandleCache.DBOpenHelper {
 
     private boolean initTables(SQLiteDatabase sQLiteDatabase) throws SQLiteException {
         sQLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS DBVersion (Version INTEGER);");
-        Cursor query = sQLiteDatabase.query("DBVersion", new String[]{"Version"}, (String) null, (String[]) null, (String) null, (String) null, (String) null);
-        if (!query.moveToFirst()) {
-            z = true;
-            z2 = true;
-        } else if (query.getInt(0) != 21) {
-            z = false;
-            z2 = true;
-        } else {
-            z = false;
-            z2 = false;
+        Cursor query = null;
+        boolean isNewDb = false;
+        boolean needsUpgrade = false;
+        
+        try {
+            query = sQLiteDatabase.query("DBVersion", new String[]{"Version"}, null, null, null, null, null);
+            if (!query.moveToFirst()) {
+                isNewDb = true;
+                needsUpgrade = true;
+            } else if (query.getInt(0) != DB_VERSION) {
+                isNewDb = false;
+                needsUpgrade = true;
+            } else {
+                isNewDb = false;
+                needsUpgrade = false;
+            }
+        } finally {
+            if (query != null) {
+                query.close();
+            }
         }
-        query.close();
-        if (z2) {
+        
+        if (needsUpgrade) {
             Debug.Printf("Database needs upgrade.", new Object[0]);
             try {
-                for (String str : SLInventoryEntry.getCreateTableStatements()) {
-                    Debug.Printf("Inventory init: %s", str);
-                    sQLiteDatabase.execSQL(str);
+                // Use transaction for atomic database operations
+                sQLiteDatabase.beginTransaction();
+                try {
+                    for (String createStatement : SLInventoryEntry.getCreateTableStatements()) {
+                        Debug.Printf("Inventory init: %s", createStatement);
+                        sQLiteDatabase.execSQL(createStatement);
+                    }
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put("Version", DB_VERSION);
+                    if (isNewDb) {
+                        sQLiteDatabase.insert("DBVersion", null, contentValues);
+                    } else {
+                        sQLiteDatabase.update("DBVersion", contentValues, null, null);
+                    }
+                    sQLiteDatabase.setTransactionSuccessful();
+                } finally {
+                    sQLiteDatabase.endTransaction();
                 }
-                ContentValues contentValues = new ContentValues();
-                contentValues.put("Version", 21);
-                if (z) {
-                    sQLiteDatabase.insert("DBVersion", (String) null, contentValues);
-                } else {
-                    sQLiteDatabase.update("DBVersion", contentValues, (String) null, (String[]) null);
-                }
-                Debug.Printf("Upgraded database to version %d", 21);
+                Debug.Printf("Upgraded database to version %d", DB_VERSION);
                 return true;
             } catch (Exception e) {
-                SQLiteException sQLiteException = new SQLiteException(e.getMessage());
+                SQLiteException sQLiteException = new SQLiteException("Database initialization failed: " + e.getMessage());
                 sQLiteException.initCause(e);
                 throw sQLiteException;
             }
@@ -88,32 +107,44 @@ public class SLInventoryOpenHelper implements DBHandleCache.DBOpenHelper {
     }
 
     public synchronized DBHandle openDB(String str) {
-        try {
-            Debug.Printf("Opening inventory DB '%s'", str);
-        } catch (SQLiteException e) {
-            Debug.Warning(e);
+        if (str == null || str.trim().isEmpty()) {
+            Debug.Warning("Database filename cannot be null or empty");
             return null;
         }
-        return DBHandleCache.getInstance().OpenDB(str, this);
+        
+        try {
+            Debug.Printf("Opening inventory DB '%s'", str);
+            return DBHandleCache.getInstance().OpenDB(str, this);
+        } catch (SQLiteException e) {
+            Debug.Warning("Failed to open inventory database: " + str, e);
+            return null;
+        }
     }
 
     public SQLiteDatabase openOrCreateDatabase(String str) throws SQLiteException {
-        SQLiteDatabase openOrCreateDatabase = SQLiteDatabase.openOrCreateDatabase(str, (SQLiteDatabase.CursorFactory) null);
-        if (openOrCreateDatabase != null) {
-            Debug.Printf("DB file '%s' opened", str);
-            enableWriteAheadLogging(openOrCreateDatabase);
-            if (initTables(openOrCreateDatabase)) {
-                Debug.Printf("Reopening DB file '%s'", str);
-                openOrCreateDatabase.close();
-                openOrCreateDatabase = SQLiteDatabase.openOrCreateDatabase(str, (SQLiteDatabase.CursorFactory) null);
-                if (openOrCreateDatabase != null) {
-                    enableWriteAheadLogging(openOrCreateDatabase);
-                } else {
-                    throw new SQLiteException("DB was null");
-                }
-            }
-            return openOrCreateDatabase;
+        if (str == null || str.trim().isEmpty()) {
+            throw new SQLiteException("Database path cannot be null or empty");
         }
-        throw new SQLiteException("DB was null");
+        
+        SQLiteDatabase openOrCreateDatabase = SQLiteDatabase.openOrCreateDatabase(str, null);
+        if (openOrCreateDatabase == null) {
+            throw new SQLiteException("Failed to open database: " + str);
+        }
+        
+        Debug.Printf("DB file '%s' opened", str);
+        enableWriteAheadLogging(openOrCreateDatabase);
+        
+        if (initTables(openOrCreateDatabase)) {
+            Debug.Printf("Reopening DB file '%s' after initialization", str);
+            openOrCreateDatabase.close();
+            
+            openOrCreateDatabase = SQLiteDatabase.openOrCreateDatabase(str, null);
+            if (openOrCreateDatabase == null) {
+                throw new SQLiteException("Failed to reopen database after initialization: " + str);
+            }
+            enableWriteAheadLogging(openOrCreateDatabase);
+        }
+        
+        return openOrCreateDatabase;
     }
 }
