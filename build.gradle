@@ -27,6 +27,11 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Add Clojars repository for LLSD Java library
+        maven {
+            name = "Clojars"
+            url = "https://repo.clojars.org/"
+        }
     }
 }
 
