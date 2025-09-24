@@ -16,6 +16,9 @@ public final class DBHandle implements SQLiteDatabase.CursorFactory {
     }
 
     public DBHandle(SQLiteDatabase sQLiteDatabase) {
+        if (sQLiteDatabase == null) {
+            throw new IllegalArgumentException("SQLiteDatabase cannot be null");
+        }
         this.sqliteDB = sQLiteDatabase;
     }
 
@@ -24,6 +27,9 @@ public final class DBHandle implements SQLiteDatabase.CursorFactory {
     }
 
     public Cursor newCursor(SQLiteDatabase sQLiteDatabase, SQLiteCursorDriver sQLiteCursorDriver, String str, SQLiteQuery sQLiteQuery) {
+        if (sQLiteDatabase == null) {
+            throw new IllegalArgumentException("SQLiteDatabase cannot be null");
+        }
         return new DBHandleCursor(sQLiteDatabase, sQLiteCursorDriver, str, sQLiteQuery);
     }
 }

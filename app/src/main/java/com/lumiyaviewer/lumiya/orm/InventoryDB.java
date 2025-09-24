@@ -14,6 +14,9 @@ public class InventoryDB {
     private final SQLiteDatabase db;
 
     public InventoryDB(SQLiteDatabase sQLiteDatabase) {
+        if (sQLiteDatabase == null) {
+            throw new IllegalArgumentException("SQLiteDatabase cannot be null");
+        }
         this.db = sQLiteDatabase;
     }
 
@@ -26,6 +29,9 @@ public class InventoryDB {
     }
 
     public void deleteEntry(@Nonnull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
+        if (sLInventoryEntry == null) {
+            throw new IllegalArgumentException("SLInventoryEntry cannot be null");
+        }
         sLInventoryEntry.delete(this.db);
     }
 
@@ -40,6 +46,9 @@ public class InventoryDB {
 
     @Nonnull
     public SLInventoryEntry findEntryOrCreate(UUID uuid) {
+        if (uuid == null) {
+            throw new IllegalArgumentException("UUID cannot be null");
+        }
         SLInventoryEntry findEntry = findEntry(uuid);
         if (findEntry != null) {
             return findEntry;
@@ -52,22 +61,37 @@ public class InventoryDB {
     @Nullable
     public SLInventoryEntry findSpecialFolder(long j, int i) {
         SLInventoryEntry sLInventoryEntry = null;
-        Cursor query = SLInventoryEntry.query(this.db, "isFolder AND typeDefault = ? AND parent_id = ?", new String[]{Integer.toString(i), Long.toString(j)}, (String) null);
-        if (query.moveToNext()) {
-            sLInventoryEntry = new SLInventoryEntry(query);
+        Cursor query = null;
+        try {
+            query = SLInventoryEntry.query(this.db, "isFolder AND typeDefault = ? AND parent_id = ?", new String[]{Integer.toString(i), Long.toString(j)}, null);
+            if (query.moveToNext()) {
+                sLInventoryEntry = new SLInventoryEntry(query);
+            }
+        } finally {
+            if (query != null) {
+                query.close();
+            }
         }
-        query.close();
         return sLInventoryEntry;
     }
 
     @Nullable
     public SLInventoryEntry findSpecialFolder(UUID uuid, int i) {
-        SLInventoryEntry sLInventoryEntry = null;
-        Cursor query = SLInventoryEntry.query(this.db, "isFolder AND typeDefault = ? AND parentUUID_high = ? AND parentUUID_low = ?", new String[]{Integer.toString(i), Long.toString(uuid.getMostSignificantBits()), Long.toString(uuid.getLeastSignificantBits())}, (String) null);
-        if (query.moveToNext()) {
-            sLInventoryEntry = new SLInventoryEntry(query);
+        if (uuid == null) {
+            return null;
         }
-        query.close();
+        SLInventoryEntry sLInventoryEntry = null;
+        Cursor query = null;
+        try {
+            query = SLInventoryEntry.query(this.db, "isFolder AND typeDefault = ? AND parentUUID_high = ? AND parentUUID_low = ?", new String[]{Integer.toString(i), Long.toString(uuid.getMostSignificantBits()), Long.toString(uuid.getLeastSignificantBits())}, null);
+            if (query.moveToNext()) {
+                sLInventoryEntry = new SLInventoryEntry(query);
+            }
+        } finally {
+            if (query != null) {
+                query.close();
+            }
+        }
         return sLInventoryEntry;
     }
 
@@ -239,6 +263,9 @@ public class InventoryDB {
     }
 
     public void saveEntry(@Nonnull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
+        if (sLInventoryEntry == null) {
+            throw new IllegalArgumentException("SLInventoryEntry cannot be null");
+        }
         sLInventoryEntry.save(this.db);
     }
 
