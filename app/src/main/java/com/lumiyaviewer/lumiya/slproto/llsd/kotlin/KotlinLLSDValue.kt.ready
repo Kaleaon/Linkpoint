@@ -1,0 +1,336 @@
+/*
+ * Android-Compatible Kotlin LLSD Implementation
+ * Based on @Kaleaon's llsd-java Kotlin implementation
+ * Adapted for Android JVM 8 compatibility
+ *
+ * Original: https://github.com/Kaleaon/llsd-java
+ * Android adaptation for Linkpoint
+ */
+
+package com.lumiyaviewer.lumiya.slproto.llsd.kotlin
+
+import com.lumiyaviewer.lumiya.slproto.llsd.*
+import com.lumiyaviewer.lumiya.slproto.llsd.types.*
+import java.net.URI
+import java.util.*
+
+/**
+ * Android-compatible Kotlin LLSD implementation inspired by @Kaleaon's enhanced library.
+ * 
+ * This sealed class provides type-safe LLSD handling with Kotlin DSL support,
+ * adapted for Android's JVM 8 requirements while maintaining the enhanced features
+ * from @Kaleaon's modern implementation.
+ */
+sealed class KotlinLLSDValue {
+    
+    /** Represents an undefined or null LLSD value. */
+    object Undefined : KotlinLLSDValue()
+    
+    /**
+     * Represents an LLSD boolean value.
+     * @property value The underlying Boolean value.
+     */
+    data class Boolean(val value: kotlin.Boolean) : KotlinLLSDValue()
+    
+    /**
+     * Represents an LLSD integer value.
+     * @property value The underlying Int value.
+     */
+    data class Integer(val value: Int) : KotlinLLSDValue()
+    
+    /**
+     * Represents an LLSD real (floating-point) value.
+     * @property value The underlying Double value.
+     */
+    data class Real(val value: Double) : KotlinLLSDValue()
+    
+    /**
+     * Represents an LLSD string value.
+     * @property value The underlying String value.
+     */
+    data class String(val value: kotlin.String) : KotlinLLSDValue()
+    
+    /**
+     * Represents an LLSD UUID value.
+     * @property value The underlying UUID value.
+     */
+    data class UUID(val value: java.util.UUID) : KotlinLLSDValue()
+    
+    /**
+     * Represents an LLSD URI value.
+     * @property value The underlying URI value.
+     */
+    data class URI(val value: java.net.URI) : KotlinLLSDValue()
+    
+    /**
+     * Represents an LLSD date value.
+     * @property value The underlying Date value (using Java 8 compatible Date)
+     */
+    data class Date(val value: java.util.Date) : KotlinLLSDValue()
+    
+    /**
+     * Represents an LLSD binary value.
+     * @property value The underlying byte array.
+     */
+    data class Binary(val value: ByteArray) : KotlinLLSDValue() {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            other as Binary
+            return value.contentEquals(other.value)
+        }
+        
+        override fun hashCode(): Int = value.contentHashCode()
+    }
+    
+    /**
+     * Represents an LLSD array value.
+     * @property values The list of LLSD values in this array.
+     */
+    data class Array(val values: List<KotlinLLSDValue>) : KotlinLLSDValue() {
+        val size: Int get() = values.size
+        fun isEmpty(): kotlin.Boolean = values.isEmpty()
+        fun isNotEmpty(): kotlin.Boolean = values.isNotEmpty()
+        operator fun get(index: Int): KotlinLLSDValue = values[index]
+    }
+    
+    /**
+     * Represents an LLSD map value.
+     * @property values The map of string keys to LLSD values.
+     */
+    data class Map(val values: kotlin.collections.Map<kotlin.String, KotlinLLSDValue>) : KotlinLLSDValue() {
+        val size: Int get() = values.size
+        fun isEmpty(): kotlin.Boolean = values.isEmpty()
+        fun isNotEmpty(): kotlin.Boolean = values.isNotEmpty()
+        operator fun get(key: kotlin.String): KotlinLLSDValue = values[key] ?: Undefined
+        fun containsKey(key: kotlin.String): kotlin.Boolean = values.containsKey(key)
+        val keys: Set<kotlin.String> get() = values.keys
+    }
+    
+    /**
+     * Safe type conversion methods inspired by @Kaleaon's implementation
+     */
+    fun asString(default: kotlin.String = ""): kotlin.String = when (this) {
+        is String -> value
+        is Integer -> value.toString()
+        is Real -> value.toString()
+        is Boolean -> value.toString()
+        is UUID -> value.toString()
+        is URI -> value.toString()
+        is Date -> value.toString()
+        is Binary -> java.util.Base64.getEncoder().encodeToString(value)
+        else -> default
+    }
+    
+    fun asInt(default: Int = 0): Int = when (this) {
+        is Integer -> value
+        is Real -> value.toInt()
+        is String -> value.toIntOrNull() ?: default
+        is Boolean -> if (value) 1 else 0
+        else -> default
+    }
+    
+    fun asDouble(default: Double = 0.0): Double = when (this) {
+        is Real -> value
+        is Integer -> value.toDouble()
+        is String -> value.toDoubleOrNull() ?: default
+        else -> default
+    }
+    
+    fun asBoolean(default: kotlin.Boolean = false): kotlin.Boolean = when (this) {
+        is Boolean -> value
+        is Integer -> value != 0
+        is String -> value.toBoolean()
+        else -> default
+    }
+    
+    fun asUUID(): java.util.UUID? = when (this) {
+        is UUID -> value
+        is String -> try { java.util.UUID.fromString(value) } catch (e: Exception) { null }
+        else -> null
+    }
+    
+    fun asArray(): List<KotlinLLSDValue> = when (this) {
+        is Array -> values
+        else -> emptyList()
+    }
+    
+    fun asMap(): kotlin.collections.Map<kotlin.String, KotlinLLSDValue> = when (this) {
+        is Map -> values
+        else -> emptyMap()
+    }
+    
+    /**
+     * Convert to Linkpoint LLSD node for compatibility
+     */
+    fun toLinkpointLLSD(): LLSDNode {
+        return when (this) {
+            is Undefined -> LLSDUndefined()
+            is Boolean -> LLSDBoolean(value)
+            is Integer -> LLSDInt(value)
+            is Real -> LLSDDouble(value)
+            is String -> LLSDString(value)
+            is UUID -> LLSDUUID(value)
+            is URI -> LLSDURI(value)
+            is Date -> LLSDDate(value)
+            is Binary -> LLSDBinary(value)
+            is Array -> {
+                val linkpointArray = LLSDArray()
+                values.forEach { linkpointArray.add(it.toLinkpointLLSD()) }
+                linkpointArray
+            }
+            is Map -> {
+                val linkpointMap = LLSDMap()
+                values.forEach { (key, value) -> 
+                    linkpointMap.put(key, value.toLinkpointLLSD())
+                }
+                linkpointMap
+            }
+        }
+    }
+}
+
+/**
+ * DSL marker to prevent accidental nesting
+ */
+@DslMarker
+annotation class KotlinLLSDDslMarker
+
+/**
+ * DSL builder for LLSD arrays inspired by @Kaleaon's implementation
+ */
+@KotlinLLSDDslMarker
+class KotlinLLSDArrayBuilder {
+    private val values = mutableListOf<KotlinLLSDValue>()
+    
+    fun add(value: KotlinLLSDValue) {
+        values.add(value)
+    }
+    
+    fun add(value: kotlin.String) = add(KotlinLLSDValue.String(value))
+    fun add(value: Int) = add(KotlinLLSDValue.Integer(value))
+    fun add(value: Double) = add(KotlinLLSDValue.Real(value))
+    fun add(value: kotlin.Boolean) = add(KotlinLLSDValue.Boolean(value))
+    fun add(value: java.util.UUID) = add(KotlinLLSDValue.UUID(value))
+    fun add(value: java.net.URI) = add(KotlinLLSDValue.URI(value))
+    fun add(value: java.util.Date) = add(KotlinLLSDValue.Date(value))
+    fun add(value: ByteArray) = add(KotlinLLSDValue.Binary(value))
+    
+    // Shorthand operators
+    operator fun kotlin.String.unaryPlus() = add(this)
+    operator fun Int.unaryPlus() = add(this)
+    operator fun Double.unaryPlus() = add(this)
+    operator fun kotlin.Boolean.unaryPlus() = add(this)
+    
+    fun build(): KotlinLLSDValue.Array = KotlinLLSDValue.Array(values.toList())
+}
+
+/**
+ * DSL builder for LLSD maps inspired by @Kaleaon's implementation
+ */
+@KotlinLLSDDslMarker
+class KotlinLLSDMapBuilder {
+    private val values = mutableMapOf<kotlin.String, KotlinLLSDValue>()
+    
+    infix fun kotlin.String.to(value: KotlinLLSDValue) {
+        values[this] = value
+    }
+    
+    infix fun kotlin.String.to(value: kotlin.String) = this to KotlinLLSDValue.String(value)
+    infix fun kotlin.String.to(value: Int) = this to KotlinLLSDValue.Integer(value)
+    infix fun kotlin.String.to(value: Double) = this to KotlinLLSDValue.Real(value)
+    infix fun kotlin.String.to(value: kotlin.Boolean) = this to KotlinLLSDValue.Boolean(value)
+    infix fun kotlin.String.to(value: java.util.UUID) = this to KotlinLLSDValue.UUID(value)
+    infix fun kotlin.String.to(value: java.net.URI) = this to KotlinLLSDValue.URI(value)
+    infix fun kotlin.String.to(value: java.util.Date) = this to KotlinLLSDValue.Date(value)
+    infix fun kotlin.String.to(value: ByteArray) = this to KotlinLLSDValue.Binary(value)
+    
+    fun kotlin.String.array(init: KotlinLLSDArrayBuilder.() -> Unit) {
+        val builder = KotlinLLSDArrayBuilder()
+        builder.init()
+        values[this] = builder.build()
+    }
+    
+    fun kotlin.String.map(init: KotlinLLSDMapBuilder.() -> Unit) {
+        val builder = KotlinLLSDMapBuilder()
+        builder.init()
+        values[this] = KotlinLLSDValue.Map(builder.values.toMap())
+    }
+    
+    fun build(): KotlinLLSDValue.Map = KotlinLLSDValue.Map(values.toMap())
+}
+
+/**
+ * DSL functions inspired by @Kaleaon's enhanced library
+ */
+fun kotlinLlsdArray(init: KotlinLLSDArrayBuilder.() -> Unit): KotlinLLSDValue.Array {
+    val builder = KotlinLLSDArrayBuilder()
+    builder.init()
+    return builder.build()
+}
+
+fun kotlinLlsdMap(init: KotlinLLSDMapBuilder.() -> Unit): KotlinLLSDValue.Map {
+    val builder = KotlinLLSDMapBuilder()
+    builder.init()
+    return builder.build()
+}
+
+/**
+ * Convert any value to Kotlin LLSD value
+ */
+fun kotlinLlsdOf(value: Any?): KotlinLLSDValue = when (value) {
+    null -> KotlinLLSDValue.Undefined
+    is kotlin.Boolean -> KotlinLLSDValue.Boolean(value)
+    is Int -> KotlinLLSDValue.Integer(value)
+    is Long -> KotlinLLSDValue.Integer(value.toInt())
+    is Double -> KotlinLLSDValue.Real(value)
+    is Float -> KotlinLLSDValue.Real(value.toDouble())
+    is kotlin.String -> KotlinLLSDValue.String(value)
+    is java.util.UUID -> KotlinLLSDValue.UUID(value)
+    is java.net.URI -> KotlinLLSDValue.URI(value)
+    is java.util.Date -> KotlinLLSDValue.Date(value)
+    is ByteArray -> KotlinLLSDValue.Binary(value)
+    is List<*> -> KotlinLLSDValue.Array(value.map { kotlinLlsdOf(it) })
+    is kotlin.collections.Map<*, *> -> {
+        val map = mutableMapOf<kotlin.String, KotlinLLSDValue>()
+        value.forEach { (k, v) ->
+            if (k is kotlin.String) {
+                map[k] = kotlinLlsdOf(v)
+            }
+        }
+        KotlinLLSDValue.Map(map)
+    }
+    else -> KotlinLLSDValue.String(value.toString())
+}
+
+/**
+ * Extension to convert Linkpoint LLSD to Kotlin LLSD
+ */
+fun LLSDNode.toKotlinLLSD(): KotlinLLSDValue {
+    return when (this) {
+        is LLSDUndefined -> KotlinLLSDValue.Undefined
+        is LLSDBoolean -> KotlinLLSDValue.Boolean(this.booleanValue())
+        is LLSDInt -> KotlinLLSDValue.Integer(this.intValue())
+        is LLSDDouble -> KotlinLLSDValue.Real(this.doubleValue())
+        is LLSDString -> KotlinLLSDValue.String(this.stringValue())
+        is LLSDUUID -> KotlinLLSDValue.UUID(this.uuidValue())
+        is LLSDURI -> KotlinLLSDValue.URI(this.uriValue())
+        is LLSDDate -> KotlinLLSDValue.Date(this.dateValue())
+        is LLSDBinary -> KotlinLLSDValue.Binary(this.binaryValue())
+        is LLSDArray -> {
+            val values = mutableListOf<KotlinLLSDValue>()
+            for (i in 0 until this.size()) {
+                values.add(this.get(i).toKotlinLLSD())
+            }
+            KotlinLLSDValue.Array(values)
+        }
+        is LLSDMap -> {
+            val map = mutableMapOf<kotlin.String, KotlinLLSDValue>()
+            this.keys().forEach { key ->
+                map[key] = this.get(key).toKotlinLLSD()
+            }
+            KotlinLLSDValue.Map(map)
+        }
+        else -> KotlinLLSDValue.String(this.toString())
+    }
+}

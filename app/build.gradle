@@ -1,5 +1,7 @@
 plugins {
     id 'com.android.application'
+    // Kotlin support commented out due to compatibility issues with current build setup
+    // id 'org.jetbrains.kotlin.android' version '1.8.22'
 }
 
 android {
@@ -53,11 +55,17 @@ android {
         ignoreWarnings true
     }
 
-    // Java 17 is required by AGP 8.x
+    // Java 8 for Android compatibility (AGP 7.0.4 requires Java 8 targets)
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
+    
+    // Kotlin configuration for @Kaleaon's enhanced LLSD support (commented out - build compatibility)
+    // kotlinOptions {
+    //     jvmTarget = '1.8'
+    //     freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn']
+    // }
 
     // Packaging conflict resolution. Keep simple and explicit.
     packagingOptions {
@@ -86,6 +94,8 @@ android {
                 '**/$Lambda$*.java',                 // Lambda artifacts from decompilation
                 '**/*$Lambda$*.java',                // More lambda artifacts
                 '**/Debug.java',                     // Debug classes might have issues
+                '**/base64/**/*.java',               // Base64 encoding - decompiled issues
+                '**/utils/**/*.java',                // Utils classes - decompiled issues
                 '**/cloud/**/*.java',                // Cloud features
                 '**/dao/**/*.java',                  // Database access objects
                 '**/eventbus/**/*.java',             // Event bus
@@ -100,6 +110,21 @@ android {
                 '**/render/**/*.java',               // Rendering
                 '**/res/**/*.java',                  // Resource management
                 '**/slproto/**/*.java',              // SL protocol - too complex for now
+                '!**/slproto/llsd/integration/**/*.java', // EXCEPT our LLSD integration
+                '!**/slproto/llsd/LLSDException.java', // EXCEPT basic LLSD exceptions
+                '!**/slproto/llsd/LLSDXMLException.java',
+                '!**/slproto/llsd/LLSDValueTypeException.java',
+                '!**/slproto/llsd/LLSDInvalidKeyException.java',
+                '!**/slproto/llsd/types/LLSDString.java', // EXCEPT basic LLSD types
+                '!**/slproto/llsd/types/LLSDInt.java',
+                '!**/slproto/llsd/types/LLSDDouble.java',
+                '!**/slproto/llsd/types/LLSDBoolean.java',
+                '!**/slproto/llsd/types/LLSDUUID.java',
+                '!**/slproto/llsd/types/LLSDURI.java',
+                '!**/slproto/llsd/types/LLSDDate.java',
+                '!**/slproto/llsd/types/LLSDArray.java',
+                '!**/slproto/llsd/types/LLSDMap.java',
+                '!**/slproto/llsd/types/LLSDUndefined.java',
                 '**/sync/**/*.java',                 // Sync
                 '**/ui/accounts/**/*.java',          // UI accounts
                 '**/ui/avapicker/**/*.java',         // Avatar picker
@@ -126,9 +151,22 @@ android {
             
             // Explicitly include only essential core files and CleanLoginActivity
             java.includes = [
-                '**/utils/**/*.java',                // Utility classes
-                '**/base64/**/*.java',               // Base64 encoding
-                '**/ui/login/CleanLoginActivity.java' // Our clean login activity
+                '**/ui/login/CleanLoginActivity.java', // Our clean login activity  
+                '**/slproto/llsd/integration/**/*.java', // LLSD integration bridge and demo
+                '**/slproto/llsd/LLSDException.java', // Basic LLSD exceptions
+                '**/slproto/llsd/LLSDXMLException.java',
+                '**/slproto/llsd/LLSDValueTypeException.java',
+                '**/slproto/llsd/LLSDInvalidKeyException.java',
+                '**/slproto/llsd/types/LLSDString.java', // Basic LLSD types
+                '**/slproto/llsd/types/LLSDInt.java',
+                '**/slproto/llsd/types/LLSDDouble.java',
+                '**/slproto/llsd/types/LLSDBoolean.java',
+                '**/slproto/llsd/types/LLSDUUID.java',
+                '**/slproto/llsd/types/LLSDURI.java',
+                '**/slproto/llsd/types/LLSDDate.java',
+                '**/slproto/llsd/types/LLSDArray.java',
+                '**/slproto/llsd/types/LLSDMap.java',
+                '**/slproto/llsd/types/LLSDUndefined.java'
             ]
         }
     }
@@ -171,6 +209,14 @@ dependencies {
 
     // JSON
     implementation 'com.google.code.gson:gson:2.10.1'
+
+    // LLSD Java library - transitioning to @Kaleaon's enhanced version
+    // Current: Using compatible base version, planning migration to enhanced features
+    implementation 'lindenlab:llsd:1.0'
+    
+    // Kotlin support for @Kaleaon's enhanced LLSD features (commented out - build compatibility)
+    // implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+    // implementation 'org.jetbrains.kotlin:kotlin-reflect:1.8.22'
 
     // Google Play base
     implementation 'com.google.android.gms:play-services-base:18.2.0'
