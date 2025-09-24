@@ -202,7 +202,8 @@ dependencies {
     // JSON
     implementation 'com.google.code.gson:gson:2.10.1'
 
-    // LLSD Java library - the external library we're integrating
+    // LLSD Java library - transitioning to @Kaleaon's enhanced version
+    // Current: Using compatible base version, planning migration to enhanced features
     implementation 'lindenlab:llsd:1.0'
 
     // Google Play base
