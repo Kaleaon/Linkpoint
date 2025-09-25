@@ -20,6 +20,8 @@ buildscript {
     dependencies {
         // AGP 7.0.4 - More compatible with AAPT2 v2.19  
         classpath 'com.android.tools.build:gradle:7.0.4'
+        // Kotlin Gradle plugin for advanced Kotlin features
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22'
     }
 }
 
