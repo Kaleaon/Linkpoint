@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
-    // Kotlin support commented out due to compatibility issues with current build setup
-    // id 'org.jetbrains.kotlin.android' version '1.8.22'
+    // Kotlin support enabled for advanced LLSD features (@Kaleaon's implementation)
+    id 'org.jetbrains.kotlin.android'
 }
 
 android {
@@ -66,11 +66,11 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     
-    // Kotlin configuration for @Kaleaon's enhanced LLSD support (commented out - build compatibility)
-    // kotlinOptions {
-    //     jvmTarget = '1.8'
-    //     freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn']
-    // }
+    // Kotlin configuration for @Kaleaon's enhanced LLSD support (now enabled)
+    kotlinOptions {
+        jvmTarget = '1.8'
+        freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
+    }
 
     // Packaging conflict resolution. Keep simple and explicit.
     packagingOptions {
@@ -91,6 +91,7 @@ android {
         main {
             manifest.srcFile 'src/main/AndroidManifest.xml'
             java.srcDirs = ['src/main/java']
+            kotlin.srcDirs = ['src/main/java']  // Kotlin files in same directory structure
             res.srcDirs = ['src/main/res']
             assets.srcDirs = ['src/main/assets']
 
@@ -239,9 +240,9 @@ dependencies {
     // Current: Using compatible base version, planning migration to enhanced features
     implementation 'lindenlab:llsd:1.0'
     
-    // Kotlin support for @Kaleaon's enhanced LLSD features (commented out - build compatibility)
-    // implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
-    // implementation 'org.jetbrains.kotlin:kotlin-reflect:1.8.22'
+    // Kotlin support for @Kaleaon's enhanced LLSD features (now enabled)
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.8.22'
 
     // Google Play base
     implementation 'com.google.android.gms:play-services-base:18.2.0'
