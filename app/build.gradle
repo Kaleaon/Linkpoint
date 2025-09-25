@@ -87,7 +87,6 @@ android {
             java.excludes = [
                 '**/$Lambda$*.java',                 // Lambda artifacts from decompilation
                 '**/*$Lambda$*.java',                // More lambda artifacts
-                // '**/Debug.java',                  // Debug classes - now needed by LLSD
                 '**/cloud/**/*.java',                // Cloud features
                 '**/dao/**/*.java',                  // Database access objects
                 '**/eventbus/**/*.java',             // Event bus
