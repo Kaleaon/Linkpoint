@@ -51,11 +51,29 @@ class ObjectLinkKt : SLMessage() {
 
     // Kotlin properties for LLSD access with delegation-like behavior
     var agentID: UUID?
-        get() = LLSDUtils.getUUID(messageLLSD.content, "AgentData.AgentID", null)
+        get() {
+            val content = messageLLSD.content as? Map<*, *> ?: return null
+            val agentData = content["AgentData"] as? Map<*, *> ?: return null
+            val agentIdValue = agentData["AgentID"]
+            return when (agentIdValue) {
+                is UUID -> agentIdValue
+                is String -> try { UUID.fromString(agentIdValue) } catch (_: Exception) { null }
+                else -> null
+            }
+        }
         set(value) = updateNestedLLSDField("AgentData", "AgentID", value)
 
     var sessionID: UUID?
-        get() = LLSDUtils.getUUID(messageLLSD.content, "AgentData.SessionID", null)
+        get() {
+            val content = messageLLSD.content as? Map<*, *> ?: return null
+            val agentData = content["AgentData"] as? Map<*, *> ?: return null
+            val sessionIdValue = agentData["SessionID"]
+            return when (sessionIdValue) {
+                is UUID -> sessionIdValue
+                is String -> try { UUID.fromString(sessionIdValue) } catch (_: Exception) { null }
+                else -> null
+            }
+        }
         set(value) = updateNestedLLSDField("AgentData", "SessionID", value)
 
     val objectLocalIDs: List<Int>
