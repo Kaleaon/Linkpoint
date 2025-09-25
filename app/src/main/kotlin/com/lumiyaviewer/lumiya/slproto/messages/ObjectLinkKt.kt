@@ -139,7 +139,7 @@ class ObjectLinkKt : SLMessage() {
     override fun CalcPayloadSize(): Int = (objectLocalIDs.size * 4) + 37
 
     override fun Handle(handler: SLMessageHandler?) {
-        handler?.HandleObjectLink(this as ObjectLink)  // Cast for legacy compatibility
+        handler?.HandleObjectLink(this)  // Pass this directly, avoid unsafe cast
     }
 
     override fun PackPayload(buffer: ByteBuffer?) {
