@@ -19,6 +19,7 @@ import android.view.Display;
 import android.view.WindowManager;
 import com.lumiyaviewer.lumiya.fixes.ResourceConflictResolver;
 import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo;
+import com.lumiyaviewer.lumiya.debug.AutoLogUploader;
 
 /**
  * Main Application class for Lumiya Viewer.
@@ -70,6 +71,32 @@ public class LumiyaApp extends MultiDexApplication {
         }
         
         return status.toString();
+    }
+    
+    /**
+     * Upload debug logs immediately (for debug builds only)
+     */
+    public static void uploadDebugLogsNow(String reason) {
+        if (mContext != null) {
+            try {
+                AutoLogUploader.getInstance(mContext).uploadLogsNow(reason);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to trigger log upload", e);
+            }
+        }
+    }
+    
+    /**
+     * Report a crash for automatic upload (debug builds only)
+     */
+    public static void reportCrash(Throwable crash, String additionalInfo) {
+        if (mContext != null) {
+            try {
+                AutoLogUploader.getInstance(mContext).uploadCrashReport(crash, additionalInfo);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to upload crash report", e);
+            }
+        }
     }
 
     public static AssetManager getAssetManager() {
@@ -151,10 +178,20 @@ public class LumiyaApp extends MultiDexApplication {
             // Initialize modern Linkpoint components with comprehensive exception handling
             initializeModernSystems();
             
+            // Initialize automatic log upload for debug builds
+            initializeDebugLogUpload();
+            
             Log.i(TAG, "Lumiya Application initialization complete");
         } catch (Throwable e) {
             // Catch all throwables including OutOfMemoryError, LinkageError, etc.
             Log.e(TAG, "CRITICAL: Application initialization failed", e);
+            
+            // Upload crash report for debug builds
+            try {
+                AutoLogUploader.getInstance(this).uploadCrashReport(e, "Application initialization failure");
+            } catch (Exception uploadError) {
+                Log.e(TAG, "Failed to upload crash report", uploadError);
+            }
             
             // Log specific error types for debugging
             if (e instanceof OutOfMemoryError) {
@@ -269,6 +306,20 @@ public class LumiyaApp extends MultiDexApplication {
         } catch (Exception e) {
             Log.e(TAG, "Error during system checks", e);
             return false;
+        }
+    }
+    
+    /**
+     * Initialize debug log upload system for debug builds only
+     */
+    private void initializeDebugLogUpload() {
+        try {
+            AutoLogUploader logUploader = AutoLogUploader.getInstance(this);
+            logUploader.initializeAutoUpload();
+            Log.i(TAG, "Debug log upload system initialized");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize debug log upload", e);
+            // Don't crash the app if log upload fails
         }
     }
     

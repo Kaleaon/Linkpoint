@@ -5,14 +5,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.lumiyaviewer.lumiya.BuildConfig;
 import com.lumiyaviewer.lumiya.R;
 
 import java.security.MessageDigest;
@@ -104,6 +107,9 @@ public class CleanLoginActivity extends AppCompatActivity {
             // Show app status in the status text for debugging
             String appStatus = com.lumiyaviewer.lumiya.LumiyaApp.getStartupStatus();
             statusText.setText("Ready to login to Second Life\n\n" + appStatus);
+            
+            // Add debug log upload button for debug builds
+            addDebugLogUploadButton();
             
             Log.i("CleanLoginActivity", "All views initialized successfully");
             Log.i("CleanLoginActivity", appStatus);
@@ -208,5 +214,56 @@ public class CleanLoginActivity extends AppCompatActivity {
     
     private String generateClientID() {
         return java.util.UUID.randomUUID().toString();
+    }
+    
+    /**
+     * Add debug log upload button for debug builds
+     */
+    private void addDebugLogUploadButton() {
+        // Only add for debug builds
+        if (!BuildConfig.DEBUG) {
+            return;
+        }
+        
+        try {
+            // Find the parent layout
+            ViewGroup parentLayout = (ViewGroup) statusText.getParent();
+            
+            // Create debug log upload button
+            Button debugUploadButton = new Button(this);
+            debugUploadButton.setText("📤 Upload Debug Logs");
+            debugUploadButton.setTextSize(12);
+            
+            // Set layout parameters
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(0, 16, 0, 0);
+            debugUploadButton.setLayoutParams(params);
+            
+            // Set click listener
+            debugUploadButton.setOnClickListener(v -> {
+                debugUploadButton.setEnabled(false);
+                debugUploadButton.setText("📤 Uploading...");
+                
+                com.lumiyaviewer.lumiya.LumiyaApp.uploadDebugLogsNow("Manual upload from login screen");
+                
+                // Re-enable button after a delay
+                debugUploadButton.postDelayed(() -> {
+                    debugUploadButton.setEnabled(true);
+                    debugUploadButton.setText("📤 Upload Debug Logs");
+                    Toast.makeText(this, "Debug logs upload initiated - check logcat for results", Toast.LENGTH_LONG).show();
+                }, 2000);
+            });
+            
+            // Add to parent layout
+            parentLayout.addView(debugUploadButton);
+            
+            Log.i("CleanLoginActivity", "Debug log upload button added");
+            
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Failed to add debug upload button", e);
+        }
     }
 }
