@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.application'
-    // Kotlin support commented out due to compatibility issues with current build setup
-    // id 'org.jetbrains.kotlin.android' version '1.8.22'
+    id 'org.jetbrains.kotlin.android' version '1.8.22'
 }
 
 android {
@@ -52,25 +51,17 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    
+    kotlinOptions {
+        jvmTarget = '1.8'
+        freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn']
+    }
 
     lint {
         abortOnError false
         checkReleaseBuilds false
         ignoreWarnings true
     }
-
-
-    // Java 8 for Android compatibility (AGP 7.0.4 requires Java 8 targets)
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    
-    // Kotlin configuration for @Kaleaon's enhanced LLSD support (commented out - build compatibility)
-    // kotlinOptions {
-    //     jvmTarget = '1.8'
-    //     freeCompilerArgs += ['-Xopt-in=kotlin.RequiresOptIn']
-    // }
 
     // Packaging conflict resolution. Keep simple and explicit.
     packagingOptions {
@@ -239,9 +230,11 @@ dependencies {
     // Current: Using compatible base version, planning migration to enhanced features
     implementation 'lindenlab:llsd:1.0'
     
-    // Kotlin support for @Kaleaon's enhanced LLSD features (commented out - build compatibility)
-    // implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
-    // implementation 'org.jetbrains.kotlin:kotlin-reflect:1.8.22'
+    // Kotlin support for @Kaleaon's enhanced LLSD features
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.8.22'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
 
     // Google Play base
     implementation 'com.google.android.gms:play-services-base:18.2.0'
