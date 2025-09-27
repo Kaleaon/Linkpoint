@@ -3,15 +3,19 @@ package com.lumiyaviewer.lumiya.ui.login;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.lumiyaviewer.lumiya.BuildConfig;
 import com.lumiyaviewer.lumiya.R;
 
 import java.security.MessageDigest;
@@ -35,25 +39,84 @@ public class CleanLoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Use simple layout for now - we'll create the layout file next
-        setContentView(R.layout.activity_clean_login);
+        Log.i("CleanLoginActivity", "Starting CleanLoginActivity");
         
-        initializeViews();
-        setupLoginButton();
+        try {
+            // Use simple layout for now - we'll create the layout file next
+            setContentView(R.layout.activity_clean_login);
+            
+            initializeViews();
+            setupLoginButton();
+            
+            Log.i("CleanLoginActivity", "CleanLoginActivity initialized successfully");
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Error during activity initialization", e);
+            
+            // Create a basic error layout if the normal layout fails
+            createFallbackLayout(e);
+        }
+    }
+    
+    /**
+     * Create a basic fallback layout when normal initialization fails
+     */
+    private void createFallbackLayout(Exception originalError) {
+        try {
+            Log.w("CleanLoginActivity", "Creating fallback layout due to: " + originalError.getMessage());
+            
+            // Create a simple error display
+            setTitle("Lumiya - Second Life Viewer");
+            
+            // Since we can't rely on the XML layout, create a simple text view
+            TextView errorText = new TextView(this);
+            errorText.setText("Lumiya Second Life Viewer\n\n" +
+                            "The app is starting in safe mode.\n" +
+                            "Some features may be limited.\n\n" +
+                            "Error: " + originalError.getMessage());
+            errorText.setPadding(32, 32, 32, 32);
+            errorText.setTextSize(16);
+            setContentView(errorText);
+            
+            Log.i("CleanLoginActivity", "Fallback layout created successfully");
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Failed to create fallback layout", e);
+            // Last resort - just finish the activity
+            finish();
+        }
     }
     
     private void initializeViews() {
-        firstNameEdit = findViewById(R.id.edit_first_name);
-        lastNameEdit = findViewById(R.id.edit_last_name);
-        passwordEdit = findViewById(R.id.edit_password);
-        loginButton = findViewById(R.id.button_login);
-        loginProgress = findViewById(R.id.progress_login);
-        statusText = findViewById(R.id.text_status);
-        
-        // Initialize with default values for testing
-        firstNameEdit.setText("Test");
-        lastNameEdit.setText("User");
-        statusText.setText("Ready to login to Second Life");
+        try {
+            firstNameEdit = findViewById(R.id.edit_first_name);
+            lastNameEdit = findViewById(R.id.edit_last_name);
+            passwordEdit = findViewById(R.id.edit_password);
+            loginButton = findViewById(R.id.button_login);
+            loginProgress = findViewById(R.id.progress_login);
+            statusText = findViewById(R.id.text_status);
+            
+            // Check if all views were found
+            if (firstNameEdit == null || lastNameEdit == null || passwordEdit == null || 
+                loginButton == null || loginProgress == null || statusText == null) {
+                throw new RuntimeException("One or more required views not found in layout");
+            }
+            
+            // Initialize with default values for testing
+            firstNameEdit.setText("Test");
+            lastNameEdit.setText("User");
+            
+            // Show app status in the status text for debugging
+            String appStatus = com.lumiyaviewer.lumiya.LumiyaApp.getStartupStatus();
+            statusText.setText("Ready to login to Second Life\n\n" + appStatus);
+            
+            // Add debug log upload button for debug builds
+            addDebugLogUploadButton();
+            
+            Log.i("CleanLoginActivity", "All views initialized successfully");
+            Log.i("CleanLoginActivity", appStatus);
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Error initializing views", e);
+            throw e; // Re-throw to trigger fallback layout
+        }
     }
     
     private void setupLoginButton() {
@@ -151,5 +214,56 @@ public class CleanLoginActivity extends AppCompatActivity {
     
     private String generateClientID() {
         return java.util.UUID.randomUUID().toString();
+    }
+    
+    /**
+     * Add debug log upload button for debug builds
+     */
+    private void addDebugLogUploadButton() {
+        // Only add for debug builds
+        if (!BuildConfig.DEBUG) {
+            return;
+        }
+        
+        try {
+            // Find the parent layout
+            ViewGroup parentLayout = (ViewGroup) statusText.getParent();
+            
+            // Create debug log upload button
+            Button debugUploadButton = new Button(this);
+            debugUploadButton.setText("📤 Upload Debug Logs");
+            debugUploadButton.setTextSize(12);
+            
+            // Set layout parameters
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(0, 16, 0, 0);
+            debugUploadButton.setLayoutParams(params);
+            
+            // Set click listener
+            debugUploadButton.setOnClickListener(v -> {
+                debugUploadButton.setEnabled(false);
+                debugUploadButton.setText("📤 Uploading...");
+                
+                com.lumiyaviewer.lumiya.LumiyaApp.uploadDebugLogsNow("Manual upload from login screen");
+                
+                // Re-enable button after a delay
+                debugUploadButton.postDelayed(() -> {
+                    debugUploadButton.setEnabled(true);
+                    debugUploadButton.setText("📤 Upload Debug Logs");
+                    Toast.makeText(this, "Debug logs upload initiated - check logcat for results", Toast.LENGTH_LONG).show();
+                }, 2000);
+            });
+            
+            // Add to parent layout
+            parentLayout.addView(debugUploadButton);
+            
+            Log.i("CleanLoginActivity", "Debug log upload button added");
+            
+        } catch (Exception e) {
+            Log.e("CleanLoginActivity", "Failed to add debug upload button", e);
+        }
     }
 }

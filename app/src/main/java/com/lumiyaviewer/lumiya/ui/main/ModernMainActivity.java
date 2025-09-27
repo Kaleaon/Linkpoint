@@ -699,49 +699,31 @@ public class ModernMainActivity extends AppCompatActivity {
     }
     
     private void exportLogs() {
-        updateStatus("💾 Exporting application logs...", 50);
+        updateStatus("📤 Uploading logs to GitHub for copilot review...", 50);
         
         // Export in background thread
         new Thread(() -> {
             try {
                 Thread.sleep(1000); // Simulate gathering logs
                 
-                // Generate comprehensive log report
-                String logReport = "=== LINKPOINT MODERN DEMO LOG EXPORT ===\n";
-                logReport += "Export Time: " + new java.util.Date().toString() + "\n\n";
-                
-                try {
-                    ModernPerformanceMonitor monitor = ModernPerformanceMonitor.getInstance();
-                    String performanceReport = monitor.exportPerformanceReport();
-                    String memoryReport = monitor.getMemoryUsageReport();
-                    
-                    logReport += performanceReport + "\n\n";
-                    logReport += memoryReport + "\n\n";
-                } catch (Exception e) {
-                    Log.w(TAG, "Performance monitor not available for log export", e);
-                    logReport += "Performance monitoring data: Not available\n\n";
-                    logReport += "Memory monitoring data: Not available\n\n";
-                }
-                
-                logReport += "Modern Components Status: " + (modernDemo != null ? "Available" : "Not Available") + "\n";
-                logReport += "Native Libraries Status: " + (modernDemo != null ? "Loaded" : "Failed to load") + "\n\n";
-                logReport += "=== END OF LOG EXPORT ===\n";
-                
-                Log.i(TAG, "EXPORTED LOG REPORT:");
-                Log.i(TAG, logReport);
+                // Upload logs using the new AutoLogUploader
+                com.lumiyaviewer.lumiya.LumiyaApp.uploadDebugLogsNow("Manual upload from ModernMainActivity");
                 
                 runOnUiThread(() -> {
-                    updateStatus("✅ Logs exported successfully to logcat", 100);
-                    Log.i(TAG, "Application logs and performance data exported successfully");
+                    updateStatus("✅ Logs uploaded to GitHub successfully", 100);
+                    Log.i(TAG, "Application logs uploaded to GitHub for copilot review");
+                });
                 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 runOnUiThread(() -> {
-                    updateStatus("❌ Log export interrupted", 0);
+                    updateStatus("❌ Log upload interrupted", 0);
+                });
             } catch (Exception e) {
-                Log.e(TAG, "Error during log export", e);
+                Log.e(TAG, "Error during log upload", e);
                 runOnUiThread(() -> {
-                    updateStatus("❌ Log export failed: " + e.getMessage(), 0);
+                    updateStatus("❌ Log upload failed: " + e.getMessage(), 0);
+                });
             }
         }).start();
     }
