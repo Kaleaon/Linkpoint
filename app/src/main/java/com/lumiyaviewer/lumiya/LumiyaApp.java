@@ -44,6 +44,33 @@ public class LumiyaApp extends MultiDexApplication {
             return "";
         }
     }
+    
+    /**
+     * Get application startup status and any initialization errors
+     */
+    public static String getStartupStatus() {
+        if (mContext == null) {
+            return "Application context not initialized";
+        }
+        
+        StringBuilder status = new StringBuilder();
+        status.append("Lumiya Application Status:\n");
+        status.append("- Context: ").append(mContext != null ? "OK" : "NULL").append("\n");
+        status.append("- Modern Components: ").append(modernDemo != null ? "Active" : "Safe Mode").append("\n");
+        
+        if (modernDemo != null) {
+            try {
+                status.append("- Graphics: ").append(modernDemo.getGraphicsInfo()).append("\n");
+                status.append("- Connection: ").append(modernDemo.isConnected() ? "Connected" : "Disconnected").append("\n");
+            } catch (Exception e) {
+                status.append("- Component Status: Error checking - ").append(e.getMessage()).append("\n");
+            }
+        } else {
+            status.append("- Running in Safe Mode - basic functionality only\n");
+        }
+        
+        return status.toString();
+    }
 
     public static AssetManager getAssetManager() {
         return mContext != null ? mContext.getAssets() : null;
