@@ -22,6 +22,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.lumiyaviewer.lumiya.LumiyaApp;
 import com.lumiyaviewer.lumiya.modern.graphics.ModernRenderPipeline;
 import com.lumiyaviewer.lumiya.modern.data.LinkpointKotlinDataService;
+import com.lumiyaviewer.lumiya.modern.diagnostics.OperationalDiagnosticsActivity;
 import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo;
 import com.lumiyaviewer.lumiya.modern.samples.ModernGraphicsDemoActivity;
 import com.lumiyaviewer.lumiya.modern.utils.ModernPerformanceMonitor;
@@ -283,6 +284,11 @@ public class ModernMainActivity extends AppCompatActivity {
         createButtonWithDescription("📥 Fetch Extended Data", 
                                    "Pull additional profile, groups, and region data via Kotlin LLSD",
                                    v -> showExtendedAgentData());
+
+        // Operational diagnostics
+        createButtonWithDescription("🩺 Run Operational Diagnostics",
+                                   "Verify app readiness: networking, LLSD, services, GL, permissions",
+                                   v -> openDiagnostics());
     }
     
     private void createButtonWithDescription(String buttonText, String description, View.OnClickListener clickListener) {
@@ -324,6 +330,17 @@ public class ModernMainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, "Failed to fetch extended agent data", e);
             updateStatus("❌ Failed to fetch extended data: " + e.getMessage(), 0);
+        }
+    }
+
+    private void openDiagnostics() {
+        try {
+            Intent intent = new Intent(this, OperationalDiagnosticsActivity.class);
+            startActivity(intent);
+            updateStatus("✅ Diagnostics UI opened", 100);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to open diagnostics", e);
+            updateStatus("❌ Failed to open diagnostics: " + e.getMessage(), 0);
         }
     }
     

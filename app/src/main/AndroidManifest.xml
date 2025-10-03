@@ -112,6 +112,12 @@
             android:name="com.lumiyaviewer.lumiya.ui.settings.ModernSettingsActivity"
             android:exported="false"/>
 
+        <!-- Operational Diagnostics Activity -->
+        <activity
+            android:label="Operational Diagnostics"
+            android:name="com.lumiyaviewer.lumiya.modern.diagnostics.OperationalDiagnosticsActivity"
+            android:exported="false"/>
+
         <!-- Emulator Settings Activity -->
         <activity
             android:label="Emulator Management"
