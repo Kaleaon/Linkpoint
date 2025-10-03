@@ -21,6 +21,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.lumiyaviewer.lumiya.LumiyaApp;
 import com.lumiyaviewer.lumiya.modern.graphics.ModernRenderPipeline;
+import com.lumiyaviewer.lumiya.modern.data.LinkpointKotlinDataService;
 import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo;
 import com.lumiyaviewer.lumiya.modern.samples.ModernGraphicsDemoActivity;
 import com.lumiyaviewer.lumiya.modern.utils.ModernPerformanceMonitor;
@@ -62,6 +63,7 @@ public class ModernMainActivity extends AppCompatActivity {
     // Backend components
     private ModernLinkpointDemo modernDemo;
     private Handler uiHandler;
+    private LinkpointKotlinDataService dataService;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +86,9 @@ public class ModernMainActivity extends AppCompatActivity {
             
             // Initialize modern components
             initializeModernComponents();
+            
+            // Initialize Kotlin data service
+            dataService = new LinkpointKotlinDataService();
             
             Log.i(TAG, "Modern Main Activity initialization complete");
         } catch (Exception e) {
@@ -273,6 +278,11 @@ public class ModernMainActivity extends AppCompatActivity {
         createButtonWithDescription("⚙️ Application Settings", 
                                    "Configure demo application settings and preferences",
                                    v -> openApplicationSettings());
+
+        // Extended data section (Kotlin LLSD)
+        createButtonWithDescription("📥 Fetch Extended Data", 
+                                   "Pull additional profile, groups, and region data via Kotlin LLSD",
+                                   v -> showExtendedAgentData());
     }
     
     private void createButtonWithDescription(String buttonText, String description, View.OnClickListener clickListener) {
@@ -298,6 +308,23 @@ public class ModernMainActivity extends AppCompatActivity {
         button.setLayoutParams(buttonParams);
         
         mainLayout.addView(button);
+    }
+
+    private void showExtendedAgentData() {
+        try {
+            if (dataService == null) {
+                dataService = new LinkpointKotlinDataService();
+            }
+            updateStatus("🔄 Fetching extended agent data via Kotlin LLSD...", 25);
+            com.lumiyaviewer.lumiya.slproto.llsd.kotlin.KotlinLLSDValue.Map data =
+                dataService.fetchExtendedAgentProfile();
+            String compact = data.toLinkpointLLSD();
+            updateStatus("✅ Extended data ready (" + compact.length() + " chars)", 100);
+            Log.i(TAG, "Extended Agent Data (compact LLSD): " + compact);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to fetch extended agent data", e);
+            updateStatus("❌ Failed to fetch extended data: " + e.getMessage(), 0);
+        }
     }
     
     private void testModernConnection() {
