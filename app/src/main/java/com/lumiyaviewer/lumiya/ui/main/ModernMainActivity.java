@@ -23,6 +23,8 @@ import com.lumiyaviewer.lumiya.LumiyaApp;
 import com.lumiyaviewer.lumiya.modern.graphics.ModernRenderPipeline;
 import com.lumiyaviewer.lumiya.modern.data.LinkpointKotlinDataService;
 import com.lumiyaviewer.lumiya.modern.diagnostics.OperationalDiagnosticsActivity;
+import com.lumiyaviewer.lumiya.modern.utils.RuntimePermissionsHelper;
+import com.lumiyaviewer.lumiya.slproto.https.CapSeedFetcher;
 import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo;
 import com.lumiyaviewer.lumiya.modern.samples.ModernGraphicsDemoActivity;
 import com.lumiyaviewer.lumiya.modern.utils.ModernPerformanceMonitor;
@@ -289,6 +291,11 @@ public class ModernMainActivity extends AppCompatActivity {
         createButtonWithDescription("🩺 Run Operational Diagnostics",
                                    "Verify app readiness: networking, LLSD, services, GL, permissions",
                                    v -> openDiagnostics());
+
+        // CAPS seed fetcher
+        createButtonWithDescription("🔑 Fetch CAPS Seed",
+                                   "Fetch and parse the seed capability using OkHttp + LLSD",
+                                   v -> fetchCapsSeed());
     }
     
     private void createButtonWithDescription(String buttonText, String description, View.OnClickListener clickListener) {
@@ -342,6 +349,23 @@ public class ModernMainActivity extends AppCompatActivity {
             Log.e(TAG, "Failed to open diagnostics", e);
             updateStatus("❌ Failed to open diagnostics: " + e.getMessage(), 0);
         }
+    }
+
+    private void fetchCapsSeed() {
+        updateStatus("🔄 Fetching CAPS seed...", 30);
+        new Thread(() -> {
+            try {
+                CapSeedFetcher fetcher = new CapSeedFetcher(null);
+                // NOTE: Replace with actual seed URL after login; using placeholder
+                String seedUrl = "https://example.sim.com:12043/cap/seed";
+                com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode node = fetcher.fetchSeed(seedUrl);
+                String summary = node != null ? node.getClass().getSimpleName() : "null";
+                runOnUiThread(() -> updateStatus("✅ CAPS seed parsed: " + summary, 100));
+            } catch (Exception e) {
+                runOnUiThread(() -> updateStatus("❌ CAPS seed error: " + e.getMessage(), 0));
+                android.util.Log.e(TAG, "CAPS seed fetch failed", e);
+            }
+        }).start();
     }
     
     private void testModernConnection() {

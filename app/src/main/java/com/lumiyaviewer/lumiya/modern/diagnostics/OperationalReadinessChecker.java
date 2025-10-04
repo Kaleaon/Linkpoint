@@ -20,6 +20,7 @@ import com.lumiyaviewer.lumiya.LumiyaApp;
 import com.lumiyaviewer.lumiya.slproto.llsd.integration.LLSDIntegrationBridge;
 import com.lumiyaviewer.lumiya.slproto.llsd.kotlin.KotlinLLSDDemo;
 import com.lumiyaviewer.lumiya.slproto.llsd.kotlin.KotlinLLSDValue;
+import com.lumiyaviewer.lumiya.slproto.https.CapSeedFetcher;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -176,6 +177,16 @@ public class OperationalReadinessChecker {
                 add(report, "Modern components accessible", demo != null, demo != null ? demo.getClass().getSimpleName() : "null");
             } catch (Throwable t) {
                 add(report, "Modern components accessible", false, t.toString());
+            }
+
+            // CAPS seed (optional placeholder test)
+            try {
+                // Do not actually call network here to keep it quick; simulate by parsing a minimal seed map
+                String fakeSeed = "<?xml version='1.0'?><llsd><map><key>seed_capability</key><string>https://example/cap/seed</string></map></llsd>";
+                LLSDIntegrationBridge.parseFromXML(fakeSeed);
+                add(report, "CAPS seed parsing support", true, "bridge ok");
+            } catch (Throwable t) {
+                add(report, "CAPS seed parsing support", false, t.toString());
             }
         } catch (Throwable fatal) {
             Log.e("OperationalDiag", "Fatal diagnostics error", fatal);
