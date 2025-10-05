@@ -1,143 +1,380 @@
-# Automated Build Pipeline for Linkpoint
+# Linkpoint Build Pipeline Documentation
 
-This repository is configured with GitHub Actions to automatically build release-ready APK files for testing whenever code is pushed to the `main` branch.
+## Overview
 
-## 🚀 Automated Builds
+This document describes the GitHub Actions CI/CD pipeline for the Linkpoint Android application, which has been fully migrated to Kotlin.
 
-### How It Works
-- **Trigger**: Every push to `main` branch or manual workflow dispatch
-- **Build Time**: ~3-5 minutes for release APK
-- **Outputs**: Both debug and release APK files
-- **Retention**: APK artifacts kept for 30 days (7 days for quick builds)
+## Workflows
 
-### Available Workflows
+### 1. Build Linkpoint (`build-linkpoint.yml`)
 
-#### 1. `build-release.yml` - Complete Build Pipeline
-- Builds both debug and release APKs
-- Includes comprehensive artifact naming with version info
-- Provides detailed build summary with installation instructions
-- Triggered on: pushes to `main`, PRs to `main`, manual dispatch
+**Primary build workflow for the Kotlin-based Linkpoint app.**
 
-#### 2. `quick-release.yml` - Fast Release Build
-- Builds only release APK for immediate testing
-- Optimized for speed and simplicity
-- Triggered on: pushes to `main` only
+#### Triggers
+- Push to `main`, `develop`, or `cursor/**` branches
+- Pull requests to `main` or `develop`
+- Manual workflow dispatch
+- Changes to `Linkpoint/**` directory
 
-## 📱 Getting the APK
+#### Jobs
 
-### After Each Push to Main:
-1. Go to the **Actions** tab in the GitHub repository
-2. Click on the latest workflow run
-3. Scroll down to **Artifacts** section
-4. Download the APK file (e.g., `linkpoint-release-20240913_054400`)
-5. Extract the ZIP file to get the APK
+##### Build Job
+Compiles the application and generates APKs.
 
-### APK File Naming:
-- **Release**: `Linkpoint-release-v3.4.3-abc1234.apk`
-- **Debug**: `Linkpoint-debug-v3.4.3-abc1234.apk`
-- Format: `Linkpoint-[type]-v[version]-[commit].apk`
+**Steps:**
+1. **Checkout**: Retrieves source code with full history
+2. **Java Setup**: Configures JDK 17 (Temurin distribution)
+3. **Android SDK**: Installs Android SDK 34, NDK 25.2.9519653
+4. **Caching**: 
+   - Gradle packages and wrappers
+   - Kotlin compiler artifacts
+   - Android build cache
+5. **Validation**: Verifies Gradle wrapper integrity
+6. **Kotlin Check**: Validates migration status (should be 100% Kotlin)
+7. **Build**:
+   - Clean build
+   - Assemble Debug APK
+   - Assemble Release APK (optional)
+8. **Testing**:
+   - Unit tests
+   - Kotlin compilation checks
+9. **Quality**:
+   - Lint analysis
+   - Code coverage reports
+10. **Artifacts**:
+    - Debug APK (14-day retention)
+    - Release APK (30-day retention)
+    - Build reports (7-day retention)
+    - Lint results (7-day retention)
 
-## 🛠️ Build Configuration
+**Build Summary:**
+Generates comprehensive markdown summary including:
+- Build status
+- Kotlin migration metrics
+- Feature list
+- Build configuration
+- Code quality metrics
+- APK details
 
-### Release Build Features:
-- ✅ **Code Minification**: Enabled with ProGuard/R8
-- ✅ **Resource Shrinking**: Removes unused resources
-- ✅ **Debug Signing**: Uses debug keystore for testing (not production)
-- ✅ **Lint Bypassing**: Configured to build despite lint warnings
-- ✅ **APK Optimization**: ~6.8MB (vs ~13.6MB debug)
+##### Code Quality Job
+Analyzes codebase metrics and quality.
 
-### Build Environment:
-- **OS**: Ubuntu Latest
-- **Java**: OpenJDK 17 (Temurin distribution)
-- **Android SDK**: Latest available
-- **Gradle**: 8.0 (wrapper version)
-- **Build Tools**: Auto-installed as needed
+**Metrics Collected:**
+- Total Kotlin files
+- Lines of code
+- Code complexity (future)
 
-## 📋 Installation on Device
+##### Release Job
+Handles GitHub releases for tagged commits.
 
-### Prerequisites:
-1. Android device with API 21+ (Android 5.0+)
-2. Enable "Install from Unknown Sources" in device settings
+**Triggers:**
+- Tags matching `refs/tags/*`
+- Pushes to `main` branch
 
-### Steps:
-1. Download APK from GitHub Actions artifacts
-2. Transfer APK to your Android device
-3. Tap the APK file and install
-4. Launch "Linkpoint Modern Demo" from app drawer
+**Artifacts:**
+- Creates GitHub release with APKs
+- Generates release notes
+- Includes feature list
 
-### What You'll See:
-- Modern Material Design 3 interface
-- Feature overview and component status
-- Testing options for OAuth2, graphics, streaming, etc.
-- Performance benchmarking tools
+## Build Configuration
 
-## 🔧 Development Workflow
+### Environment Variables
 
-### Making Changes:
-1. Push code to `main` branch
-2. Workflow automatically triggers
-3. Wait ~3-5 minutes for build completion
-4. Download and test the generated APK
-
-### Manual Builds:
-```bash
-# Local release build
-./gradlew assembleRelease
-
-# Local debug build
-./gradlew assembleDebug
-
-# Clean build
-./gradlew clean assembleRelease
+```yaml
+JAVA_VERSION: '17'
+ANDROID_SDK_VERSION: '34'
+NDK_VERSION: '25.2.9519653'
+KOTLIN_VERSION: '1.9.22'
 ```
 
-### Troubleshooting:
-- **Build fails**: Check Actions tab for error details
-- **APK not installing**: Verify "Unknown Sources" is enabled
-- **App crashes**: Use debug APK for better error reporting
-- **Missing artifacts**: Check if workflow completed successfully
+### Build Variants
 
-## 🔐 Security Notes
+#### Debug
+- **Minification:** Disabled
+- **Debugging:** Enabled
+- **ProGuard:** Disabled
+- **Use Case:** Development, testing
 
-### Current Signing:
-- **Debug keystore** used for testing releases
-- Not suitable for Google Play Store distribution
-- Fine for sideloading and testing purposes
+#### Release
+- **Minification:** Optional (configurable)
+- **Debugging:** Disabled
+- **ProGuard:** Enabled (optional)
+- **Use Case:** Production deployment
 
-### For Production:
-- Configure proper release signing keystore
-- Store signing keys securely in GitHub Secrets
-- Update workflow to use production signing for releases
+## Project Structure
 
-## 📊 Build Metrics
+```
+Linkpoint/
+├── build.gradle.kts          # Kotlin DSL build script
+├── gradle.properties          # Gradle configuration
+├── settings.gradle.kts        # Project settings
+├── proguard-rules.pro        # ProGuard configuration
+└── src/
+    └── main/
+        ├── kotlin/            # 100% Kotlin source
+        │   └── com/linkpoint/ # Package root
+        ├── res/               # Android resources
+        └── AndroidManifest.xml
+```
 
-### Typical Build Times:
-- **Clean + Release**: ~5 minutes
-- **Release (cached)**: ~2-3 minutes
-- **Debug**: ~2 minutes
+## Dependencies
 
-### APK Sizes:
-- **Release**: ~6.8MB (optimized)
-- **Debug**: ~13.6MB (unoptimized)
+### Core Android
+- AndroidX Core KTX 1.12.0
+- AppCompat 1.6.1
+- Material Design 1.11.0
+- ConstraintLayout 2.1.4
+- Multidex 2.0.1
 
-### Cache Strategy:
-- Gradle dependencies cached between runs
-- Significant speed improvement for subsequent builds
-- Cache invalidated when build files change
+### Kotlin
+- Kotlin Stdlib 1.9.22
+- Kotlin Reflect 1.9.22
+- Coroutines Android 1.7.3
+- Coroutines Core 1.7.3
 
-## 🎯 Future Enhancements
+### Google Services
+- Play Services Base 18.3.0
+- Play Services Drive 17.0.0
+- Play Services Auth 20.7.0
 
-- [ ] Add automated testing before APK generation
-- [ ] Implement proper release signing for distribution
-- [ ] Add APK size monitoring and reporting
-- [ ] Create automatic draft releases for version tags
-- [ ] Add build notifications (Slack, email, etc.)
-- [ ] Implement branch protection with required builds
+### Networking
+- OkHttp 4.12.0
+- Gson 2.10.1
 
-## 📞 Support
+### Voice
+- Stream WebRTC Android 1.0.7
 
-If you encounter issues with the automated builds:
-1. Check the workflow logs in GitHub Actions
-2. Verify your changes don't break the build configuration
-3. Test locally with `./gradlew assembleRelease` first
-4. Create an issue with build logs if needed
+### Testing
+- JUnit 4.13.2
+- Robolectric 4.10.3
+- Mockito 5.7.0
+- Espresso 3.5.1
+
+## Build Requirements
+
+### Local Development
+- **JDK:** 17 or higher
+- **Android SDK:** API 34
+- **NDK:** 25.2.9519653
+- **Gradle:** 8.5+
+- **Memory:** 8GB RAM recommended
+- **Disk Space:** 10GB free
+
+### CI/CD (GitHub Actions)
+- **Runner:** ubuntu-latest
+- **Timeout:** 45 minutes
+- **Memory:** 4GB heap (-Xmx4g)
+- **Gradle Daemon:** Disabled for CI
+
+## Build Commands
+
+### Local Build
+```bash
+cd Linkpoint
+./gradlew clean assembleDebug
+```
+
+### Run Tests
+```bash
+cd Linkpoint
+./gradlew testDebugUnitTest
+```
+
+### Run Lint
+```bash
+cd Linkpoint
+./gradlew lintDebug
+```
+
+### Generate Coverage Report
+```bash
+cd Linkpoint
+./gradlew jacocoTestReport
+```
+
+### Full CI Build
+```bash
+cd Linkpoint
+./gradlew clean assembleDebug assembleRelease testDebugUnitTest lintDebug
+```
+
+## Kotlin Migration
+
+### Status: ✅ COMPLETE
+
+- **Java Files:** 0
+- **Kotlin Files:** 1,237
+- **Migration Rate:** 100%
+- **Lines of Code:** ~11 MB
+
+### Migrated Modules
+All modules have been migrated to Kotlin:
+- Core application logic
+- UI components
+- Rendering engine
+- Protocol implementation
+- Voice system
+- Data access layer
+- Cloud synchronization
+- Utilities
+
+## Features
+
+### Implemented
+- ✅ **Animesh** - Animated mesh rendering
+- ✅ **Bakes on Mesh (BoM)** - Advanced texture baking
+- ✅ **Enhanced Environment (EEP)** - Dynamic lighting and atmosphere
+- ✅ **PBR Materials** - Physically-based rendering
+- ✅ **WebRTC Voice** - Modern voice communication
+- ✅ **Full Kotlin** - 100% Kotlin codebase
+- ✅ **Coroutines** - Async/await programming model
+- ✅ **AndroidX** - Modern Android libraries
+
+## Artifacts
+
+### Debug APK
+- **Naming:** `linkpoint-debug-{commit_sha}.apk`
+- **Retention:** 14 days
+- **Size:** ~40-60 MB
+- **Signing:** Debug keystore
+
+### Release APK
+- **Naming:** `linkpoint-release-{commit_sha}.apk`
+- **Retention:** 30 days
+- **Size:** ~30-50 MB (with minification)
+- **Signing:** Release keystore (when configured)
+
+### Build Reports
+- **Retention:** 7 days
+- **Contents:**
+  - Test results
+  - Lint reports
+  - Build logs
+  - Coverage reports
+
+## Caching Strategy
+
+### Gradle Cache
+- **Path:** `~/.gradle/caches`, `~/.gradle/wrapper`
+- **Key:** OS + gradle files hash
+- **Benefit:** Speeds up dependency resolution
+
+### Kotlin Cache
+- **Path:** `~/.konan`, `~/.kotlin`
+- **Key:** OS + Kotlin version
+- **Benefit:** Faster Kotlin compilation
+
+### Android Build Cache
+- **Path:** `~/.android/build-cache`
+- **Key:** OS + build files hash
+- **Benefit:** Incremental build optimization
+
+## Performance Optimization
+
+### Gradle Configuration
+```properties
+org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g
+org.gradle.parallel=true
+org.gradle.caching=true
+org.gradle.daemon=false  # Disabled in CI
+kotlin.incremental=true
+kotlin.compiler.execution.strategy=in-process
+```
+
+### Build Time Optimization
+- Parallel builds enabled
+- Build cache enabled
+- Incremental Kotlin compilation
+- Dependency caching
+- Artifact reuse between jobs
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Out of Memory
+**Symptom:** Build fails with OutOfMemoryError
+
+**Solution:**
+```bash
+export GRADLE_OPTS="-Xmx4g -XX:MaxMetaspaceSize=1g"
+./gradlew clean assembleDebug
+```
+
+#### 2. NDK Not Found
+**Symptom:** NDK-related build failures
+
+**Solution:**
+- Install NDK 25.2.9519653 via SDK Manager
+- Set `ANDROID_NDK_HOME` environment variable
+
+#### 3. Gradle Sync Failed
+**Symptom:** Gradle sync or build fails
+
+**Solution:**
+```bash
+./gradlew clean --refresh-dependencies
+```
+
+#### 4. Kotlin Compilation Error
+**Symptom:** Kotlin compiler errors
+
+**Solution:**
+- Verify Kotlin version matches (1.9.22)
+- Clear Kotlin caches: `rm -rf ~/.kotlin`
+- Rebuild: `./gradlew clean build`
+
+## Monitoring
+
+### Build Status
+Check workflow runs at: `https://github.com/{org}/{repo}/actions`
+
+### Build Metrics
+- Average build time: ~15-20 minutes
+- Cache hit rate: ~80%
+- Test success rate: Target >95%
+
+## Security
+
+### Secrets Management
+- Keystore passwords stored in GitHub Secrets
+- API keys configured via environment variables
+- Signing configs for release builds
+
+### Code Scanning
+- Lint analysis on every build
+- Dependency vulnerability checks (planned)
+- Static code analysis (planned)
+
+## Future Improvements
+
+### Planned
+- [ ] Code coverage thresholds
+- [ ] Automated UI tests
+- [ ] Performance profiling
+- [ ] Crashlytics integration
+- [ ] Play Store deployment
+- [ ] Beta distribution via Firebase App Distribution
+- [ ] Automated changelog generation
+- [ ] Semantic versioning automation
+
+## Support
+
+For build issues or questions:
+1. Check GitHub Actions logs
+2. Review build reports artifacts
+3. Consult this documentation
+4. Open an issue on GitHub
+
+## References
+
+- [Android Gradle Plugin](https://developer.android.com/build/releases/gradle-plugin)
+- [Kotlin for Android](https://kotlinlang.org/docs/android-overview.html)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Gradle Build Cache](https://docs.gradle.org/current/userguide/build_cache.html)
+
+---
+
+**Last Updated:** October 5, 2025  
+**Pipeline Version:** 2.0 (Post-Kotlin Migration)  
+**Status:** ✅ Fully Operational

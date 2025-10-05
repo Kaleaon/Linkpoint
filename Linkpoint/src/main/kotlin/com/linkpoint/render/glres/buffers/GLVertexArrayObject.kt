@@ -1,0 +1,42 @@
+package com.linkpoint.render.glres.buffers
+
+import android.annotation.TargetApi
+import android.opengl.GLES30
+import com.linkpoint.render.glres.GLGenericResource
+import com.linkpoint.render.glres.GLResourceManager
+
+@TargetApi(18)
+class GLVertexArrayObject : GLGenericResource {
+    val Int size
+    private val Int[] vaoIndices
+
+    @JvmStatic
+private class GLVertexArrayObjectReference : GLResourceManager().GLGenericResourceReference {
+        private val Int[] vaoIndices
+
+        GLVertexArrayObjectReference(GLGenericResource gLGenericResource, GLResourceManager gLResourceManager, Int[] iArr) {
+            super(gLGenericResource, gLResourceManager)
+            this.vaoIndices = iArr
+        }
+
+        public Unit GLFree() {
+            GLES30.glDeleteVertexArrays(this.vaoIndices.length, this.vaoIndices, 0)
+        }
+    }
+
+    @TargetApi(18)
+    public GLVertexArrayObject(GLResourceManager gLResourceManager, Int i) {
+        this.size = i
+        this.vaoIndices = Int[i]
+        GLES30.glGenVertexArrays(i, this.vaoIndices, 0)
+        GLVertexArrayObjectReference(this, gLResourceManager, this.vaoIndices)
+    }
+
+    public Unit Bind(Int i) {
+        GLES30.glBindVertexArray(this.vaoIndices[i])
+    }
+
+    public Unit Unbind() {
+        GLES30.glBindVertexArray(0)
+    }
+}

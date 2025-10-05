@@ -1,0 +1,51 @@
+package com.linkpoint.slproto.messages
+
+import com.linkpoint.slproto.SLMessage
+import java.nio.ByteBuffer
+import java.util.UUID
+
+class ScriptReset : SLMessage() {
+    public AgentData AgentData_Field = AgentData()
+    public Script Script_Field = Script()
+
+    @JvmStatic
+    class AgentData {
+        public UUID AgentID
+        public UUID SessionID
+    }
+
+    @JvmStatic
+    class Script {
+        public UUID ItemID
+        public UUID ObjectID
+    }
+
+    public ScriptReset() {
+        this.zeroCoded = false
+    }
+
+    public Int CalcPayloadSize() {
+        return 68
+    }
+
+    public Unit Handle(SLMessageHandler sLMessageHandler) {
+        sLMessageHandler.HandleScriptReset(this)
+    }
+
+    public Unit PackPayload(ByteBuffer byteBuffer) {
+        byteBuffer.putShort(-1)
+        byteBuffer.put((Byte) 0)
+        byteBuffer.put((Byte) -10)
+        packUUID(byteBuffer, this.AgentData_Field.AgentID)
+        packUUID(byteBuffer, this.AgentData_Field.SessionID)
+        packUUID(byteBuffer, this.Script_Field.ObjectID)
+        packUUID(byteBuffer, this.Script_Field.ItemID)
+    }
+
+    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
+        this.Script_Field.ObjectID = unpackUUID(byteBuffer)
+        this.Script_Field.ItemID = unpackUUID(byteBuffer)
+    }
+}
