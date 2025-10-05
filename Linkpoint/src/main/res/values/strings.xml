@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Linkpoint</string>
+    <string name="app_subtitle">Modern Second Life Viewer</string>
+    
+    <!-- Login -->
+    <string name="login_first_name">First Name</string>
+    <string name="login_last_name">Last Name</string>
+    <string name="login_password">Password</string>
+    <string name="login_button">Login to Second Life</string>
+    <string name="login_status_ready">Ready to connect</string>
+    <string name="login_status_connecting">Connecting to Second Life…</string>
+    <string name="login_status_success">✓ Connected to Second Life</string>
+    <string name="login_status_failure">✗ Login failed</string>
+    
+    <!-- Voice -->
+    <string name="voice_title">Voice Chat</string>
+    <string name="voice_enable">Enable Voice</string>
+    <string name="voice_disable">Disable Voice</string>
+    <string name="voice_mute">Mute Microphone</string>
+    <string name="voice_unmute">Unmute Microphone</string>
+    <string name="voice_status_disabled">Voice: Disabled</string>
+    <string name="voice_status_connected">Voice: Connected</string>
+    <string name="voice_status_connecting">Voice: Connecting…</string>
+    
+    <!-- Permissions -->
+    <string name="permissions_granted">Permissions granted - Ready to connect</string>
+    <string name="permissions_denied">Some permissions denied - Voice may not work</string>
+    
+    <!-- World View -->
+    <string name="world_view_title">World View</string>
+    <string name="world_view_loading">Loading world…</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">Linkpoint Settings</string>
+    <string name="settings_graphics">Graphics Quality</string>
+    <string name="settings_voice">Voice Settings</string>
+    <string name="settings_network">Network</string>
+    
+    <!-- About -->
+    <string name="about_version">Version 1.0.0 (2025)</string>
+    <string name="about_description">Modern Second Life viewer for Android with WebRTC voice and PBR graphics</string>
+</resources>

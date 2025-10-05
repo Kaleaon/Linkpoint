@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Modern Linkpoint theme with Material Design 3 -->
+    <style name="Theme.Linkpoint" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/linkpoint_primary</item>
+        <item name="colorPrimaryVariant">@color/linkpoint_primary_variant</item>
+        <item name="colorOnPrimary">@color/linkpoint_on_primary</item>
+        
+        <!-- Secondary brand color -->
+        <item name="colorSecondary">@color/linkpoint_secondary</item>
+        <item name="colorSecondaryVariant">@color/linkpoint_secondary_variant</item>
+        <item name="colorOnSecondary">@color/linkpoint_on_secondary</item>
+        
+        <!-- Background colors -->
+        <item name="android:colorBackground">@color/linkpoint_background</item>
+        <item name="colorSurface">@color/linkpoint_surface</item>
+        <item name="colorOnBackground">@color/linkpoint_on_background</item>
+        <item name="colorOnSurface">@color/linkpoint_on_surface</item>
+        
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/linkpoint_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <!-- Action bar -->
+        <item name="actionBarStyle">@style/Widget.Linkpoint.ActionBar</item>
+    </style>
+    
+    <style name="Widget.Linkpoint.ActionBar" parent="Widget.MaterialComponents.ActionBar.Primary">
+        <item name="background">@color/linkpoint_surface</item>
+        <item name="titleTextColor">@color/linkpoint_on_surface</item>
+    </style>
+    
+    <!-- No action bar theme for immersive world view -->
+    <style name="Theme.Linkpoint.NoActionBar" parent="Theme.Linkpoint">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>
