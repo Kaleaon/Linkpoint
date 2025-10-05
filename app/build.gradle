@@ -7,9 +7,9 @@ plugins {
 android {
     namespace 'com.lumiyaviewer.lumiya'
 
-    // SDK configuration (chosen by user): MinSDK 24, Target/Compile SDK 34 (using older build tools)
-    compileSdk 31
-    buildToolsVersion "31.0.0"
+    // SDK configuration: MinSDK 24, Target/Compile SDK 34 for AGP 8.1.4
+    compileSdk 34
+    buildToolsVersion "34.0.0"
 
     // Resource processing tweaks (keep minimal). noCompress keeps ktx2 files uncompressed.
     aaptOptions {
@@ -19,7 +19,7 @@ android {
     defaultConfig {
         applicationId "com.lumiyaviewer.lumiya"
         minSdk 24
-        targetSdk 31
+        targetSdk 34
         versionCode 67
         versionName "3.4.3"
 
@@ -56,7 +56,6 @@ android {
     lint {
         abortOnError false
         checkReleaseBuilds false
-        ignoreWarnings true
     }
 
 
