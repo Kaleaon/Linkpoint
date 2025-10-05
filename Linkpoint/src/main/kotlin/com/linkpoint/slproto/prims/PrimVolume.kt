@@ -10,11 +10,11 @@ import com.linkpoint.slproto.types.Vector3Array
 import java.util.ArrayList
 
 class PrimVolume {
-    private const val Int FLEXI_PATH_REZ = 16
-    private const val Int SCULPT_REZ_1 = 6
-    private const val Int SCULPT_REZ_2 = 8
-    private const val Int SCULPT_REZ_3 = 16
-    private const val Int SCULPT_REZ_4 = 32
+    private const val FLEXI_PATH_REZ: Int = 16
+    private const val SCULPT_REZ_1: Int = 6
+    private const val SCULPT_REZ_2: Int = 8
+    private const val SCULPT_REZ_3: Int = 16
+    private const val SCULPT_REZ_4: Int = 32
     private Float Detail
     private Int FaceMask
     private Boolean GenerateSingleFace

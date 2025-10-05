@@ -41,8 +41,8 @@ import de.greenrobot.dao.query.LazyList
 import java.util.UUID
 import javax.annotation.Nullable
 
-class GroupMembersProfileTab : ChatterReloadableFragment() : LoadableMonitor.OnLoadableDataChangedListener {
-    private const val String ROLE_TO_ADD_KEY = "roleToAdd"
+class GroupMembersProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadableDataChangedListener {
+    private const val ROLE_TO_ADD_KEY: String = "roleToAdd"
     /* access modifiers changed from: private */
     public GroupMemberListRecyclerAdapter adapter = null
     /* access modifiers changed from: private */

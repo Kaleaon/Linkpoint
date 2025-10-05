@@ -16,11 +16,11 @@ import com.linkpoint.R
 
 @TargetApi(14)
 class ButteryProgressBar : View() {
-    private const val Int BASE_DURATION_MS = 500
-    private const val Int BASE_SEGMENT_COUNT = 5
-    private const val Int BASE_WIDTH_DP = 300
-    private const val Int DEFAULT_BAR_HEIGHT_DP = 4
-    private const val Int DEFAULT_DETENT_WIDTH_DP = 3
+    private const val BASE_DURATION_MS: Int = 500
+    private const val BASE_SEGMENT_COUNT: Int = 5
+    private const val BASE_WIDTH_DP: Int = 300
+    private const val DEFAULT_BAR_HEIGHT_DP: Int = 4
+    private const val DEFAULT_DETENT_WIDTH_DP: Int = 3
     private val ValueAnimator mAnimator
     private val Int mBarColor
     private val Float mDensity

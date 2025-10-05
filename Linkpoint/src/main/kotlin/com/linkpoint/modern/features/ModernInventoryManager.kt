@@ -14,7 +14,7 @@ import java.util.Map
  * Compatible with Second Life, Firestorm, and OpenSimulator inventory systems
  */
 class ModernInventoryManager {
-    private const val String TAG = "ModernInventoryManager"
+    private const val TAG: String = "ModernInventoryManager"
     
     private val HybridProtocolManager protocolManager
     private val Map<UUID, InventoryItem> inventoryCache = ConcurrentHashMap<>()

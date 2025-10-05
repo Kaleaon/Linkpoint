@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture
  * Handles SL-specific voice server communication and authentication
  */
 class SecondLifeWebRTCBridge {
-    private const val String TAG = "SLWebRTCBridge"
+    private const val TAG: String = "SLWebRTCBridge"
     
     private val Context context
     private val OkHttpClient httpClient
@@ -21,8 +21,8 @@ class SecondLifeWebRTCBridge {
     private val WebRTCVoiceAdapter voiceAdapter
     
     // Second Life voice server endpoints
-    private const val String SL_VOICE_PROVISION_URL = "https://cap.secondlife.com/cap/"
-    private const val String SL_VOICE_ACCOUNT_URL = "https://bhr.vivox.com/api2/viv_signin.php"
+    private const val SL_VOICE_PROVISION_URL: String = "https://cap.secondlife.com/cap/"
+    private const val SL_VOICE_ACCOUNT_URL: String = "https://bhr.vivox.com/api2/viv_signin.php"
     
     // Voice session state
     private String voiceAccountName

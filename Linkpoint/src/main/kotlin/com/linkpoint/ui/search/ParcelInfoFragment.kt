@@ -39,8 +39,8 @@ import com.linkpoint.ui.common.loadmon.LoadableMonitor
 import com.linkpoint.utils.UUIDPool
 import java.util.UUID
 
-class ParcelInfoFragment : FragmentWithTitle() : ReloadableFragment, LoadableMonitor.OnLoadableDataChangedListener, ChatterNameRetriever.OnChatterNameUpdated {
-    private const val String PARCEL_UUID_KEY = "parcelUUID"
+class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMonitor.OnLoadableDataChangedListener, ChatterNameRetriever.OnChatterNameUpdated {
+    private const val PARCEL_UUID_KEY: String = "parcelUUID"
     private val LoadableMonitor loadableMonitor = LoadableMonitor(this.parcelInfoReply).withDataChangedListener(this)
     private ChatterNameRetriever ownerGroupNameRetriever = null
     private ChatterNameRetriever ownerNameRetriever = null

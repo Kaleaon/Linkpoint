@@ -29,7 +29,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class SLMinimap : SLModule() {
-    const val Float CHAT_RANGE = 20.0f
+    const val CHAT_RANGE: Float = 20.0f
     private const val Int parcelBitmapSize = 256
     const val Int parcelDataSize = 64
     private const val Byte parcelOverlayFlagBorderSouth = Byte.MIN_VALUE

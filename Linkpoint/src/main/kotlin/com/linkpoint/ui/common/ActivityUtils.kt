@@ -9,8 +9,8 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class ActivityUtils {
-    const val String EXTRA_ACTIVE_AGENT_UUID = "activeAgentUUID"
-    const val String FRAGMENT_SELECTION_KEY = "fragmentSelection"
+    const val EXTRA_ACTIVE_AGENT_UUID: String = "activeAgentUUID"
+    const val FRAGMENT_SELECTION_KEY: String = "fragmentSelection"
 
     @JvmStatic
     UUID getActiveAgentID(Intent intent) {

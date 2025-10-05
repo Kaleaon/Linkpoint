@@ -14,7 +14,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class ObjectPopupsManager {
-    private const val Int MAX_POPUPS = 99
+    private const val MAX_POPUPS: Int = 99
     private SLChatEvent displayedPopupEvent = null
     private val AtomicInteger freshPopupsCount = AtomicInteger(0)
     private SLChatEvent lastEvent = null

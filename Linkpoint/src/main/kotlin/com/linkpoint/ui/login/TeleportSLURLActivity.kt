@@ -17,7 +17,7 @@ import com.linkpoint.slproto.users.manager.UserManager
 import com.linkpoint.ui.common.TeleportProgressDialog
 import java.util.UUID
 
-class TeleportSLURLActivity : AppCompatActivity() : View.OnClickListener {
+class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
     private SLURL slurl = null
 
     /* access modifiers changed from: package-private */

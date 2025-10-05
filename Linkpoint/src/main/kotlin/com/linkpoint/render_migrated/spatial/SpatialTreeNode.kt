@@ -4,7 +4,7 @@ import java.util.*
 import com.linkpoint.utils.InlineList
 
 class SpatialTreeNode : InlineList()<DrawListEntry> {
-    private const val Float MIN_SIZE = 2.0f
+    private const val MIN_SIZE: Float = 2.0f
     private SpatialTreeNode[] children = null
     Int depthBin = -1
     private val Int indexInParent

@@ -11,7 +11,7 @@ import com.linkpoint.R
 import com.linkpoint.ui.grids.GridList
 import java.util.UUID
 
-class GridEditDialog : AppCompatDialog() : View.OnClickListener {
+class GridEditDialog : AppCompatDialog(), View.OnClickListener {
     private GridList.GridInfo editGrid = null
     private GridList gridList = null
     private OnGridEditResultListener onGridEditResultListener = null

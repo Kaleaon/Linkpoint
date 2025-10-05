@@ -5,9 +5,9 @@ import android.support.v4.app.FragmentActivity
 import com.linkpoint.Debug
 import javax.annotation.Nullable
 
-class FragmentWithTitle : StateAwareFragment() : FragmentHasTitle {
-    private const val String FRAGMENT_SUBTITLE_TAG = "FragmentWithTitle:fragmentSubTitle"
-    private const val String FRAGMENT_TITLE_TAG = "FragmentWithTitle:fragmentTitle"
+class FragmentWithTitle : StateAwareFragment(), FragmentHasTitle {
+    private const val FRAGMENT_SUBTITLE_TAG: String = "FragmentWithTitle:fragmentSubTitle"
+    private const val FRAGMENT_TITLE_TAG: String = "FragmentWithTitle:fragmentTitle"
     private String fragmentSubTitle = null
     private String fragmentTitle = null
 

@@ -135,7 +135,7 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class SLAgentCircuit : SLThreadingCircuit() : ICapsEventHandler {
+class SLAgentCircuit : SLThreadingCircuit(), ICapsEventHandler {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues */
     private const val /* synthetic */ Int[] syntheticField = null
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues */

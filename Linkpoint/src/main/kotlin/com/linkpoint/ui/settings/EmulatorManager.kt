@@ -17,7 +17,7 @@ import java.util.List
  * for CLI-based Android emulator management functionality.
  */
 class EmulatorManager {
-    private const val String TAG = "EmulatorManager"
+    private const val TAG: String = "EmulatorManager"
     
     private val Context context
     private val File scriptPath
@@ -152,10 +152,10 @@ class EmulatorManager {
      */
     @JvmStatic
     class EmulatorDefaults {
-        const val String DEFAULT_DEVICE = "pixel_2"
-        const val String DEFAULT_API = "34"
-        const val String DEFAULT_ABI = "x86_64"
-        const val String DEFAULT_TAG = "google_apis"
+        const val DEFAULT_DEVICE: String = "pixel_2"
+        const val DEFAULT_API: String = "34"
+        const val DEFAULT_ABI: String = "x86_64"
+        const val DEFAULT_TAG: String = "google_apis"
         
         const val String[] SUPPORTED_APIS = {"30", "31", "32", "33", "34"}
         const val String[] SUPPORTED_ABIS = {"x86_64", "arm64-v8a", "x86"}

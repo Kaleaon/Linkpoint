@@ -35,8 +35,8 @@ import com.linkpoint.ui.objpopup.ObjectPopupsFragment
 import com.linkpoint.ui.objpopup.SingleObjectPopupFragment
 import java.util.UUID
 
-class ConnectedActivity : ThemedActivity() : ObjectPopupsActionProvider.ObjectPopupsClickListener, ObjectPopupsManager.ObjectPopupListener {
-    const val String OBJECT_POPUP_NOTIFICATION = "objectPopupNotification"
+class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPopupsClickListener, ObjectPopupsManager.ObjectPopupListener {
+    const val OBJECT_POPUP_NOTIFICATION: String = "objectPopupNotification"
     private NavDrawerActivityHelper navDrawerHelper
     private ObjectPopupsActionProvider objectPopupsActionProvider
     private Boolean objectPopupsDisplayed = false

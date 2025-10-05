@@ -43,13 +43,13 @@ import java.util.UUID
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class NotecardEditActivity : ThemedActivity() : SLNotecard.OnAttachmentClickListener, View.OnClickListener {
-    private const val String INVENTORY_ENTRY_KEY = "inventoryEntry"
-    private const val String IS_SCRIPT_KEY = "isScript"
-    private const val Int ITEM_FOR_ATTACHMENT_REQUEST = 1
-    private const val String PARENT_FOLDER_KEY = "parentFolderUUID"
-    private const val String TASK_LOCAL_ID_KEY = "taskLocalID"
-    private const val String TASK_UUID_KEY = "taskUUID"
+class NotecardEditActivity : ThemedActivity(), SLNotecard.OnAttachmentClickListener, View.OnClickListener {
+    private const val INVENTORY_ENTRY_KEY: String = "inventoryEntry"
+    private const val IS_SCRIPT_KEY: String = "isScript"
+    private const val ITEM_FOR_ATTACHMENT_REQUEST: Int = 1
+    private const val PARENT_FOLDER_KEY: String = "parentFolderUUID"
+    private const val TASK_LOCAL_ID_KEY: String = "taskLocalID"
+    private const val TASK_UUID_KEY: String = "taskUUID"
     private val SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 
         /* renamed from: -$f0 */

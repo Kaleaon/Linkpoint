@@ -34,7 +34,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class DriveTextFile {
-    private const val Int MAX_WRITTEN_STRINGS = 10000
+    private const val MAX_WRITTEN_STRINGS: Int = 10000
     private val AgentSyncConnections agentSyncConnections
     private val UUID agentUUID
     private val Queue<DriveLogEntry> appendStrings

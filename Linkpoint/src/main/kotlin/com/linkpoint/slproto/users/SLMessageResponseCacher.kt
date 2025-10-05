@@ -11,7 +11,7 @@ import java.nio.ByteOrder
 import java.util.concurrent.Executor
 import javax.annotation.Nonnull
 
-class SLMessageResponseCacher<Key, MessageType : SLMessage> : ResponseCacher<Key, MessageType> {
+class SLMessageResponseCacher<Key, MessageType : SLMessage>, ResponseCacher<Key, MessageType> {
     public SLMessageResponseCacher(DaoSession daoSession, Executor executor, String str) {
         super(daoSession, executor, str)
     }

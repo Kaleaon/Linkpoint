@@ -15,16 +15,16 @@ import java.util.concurrent.atomic.AtomicInteger
  * with improved reliability, retry logic, and fallback mechanisms.
  */
 class ModernConnectionManager {
-    private const val String TAG = "ModernConnectionManager"
+    private const val TAG: String = "ModernConnectionManager"
     
     // Updated login endpoints (fix for DNS issues)
-    private const val String MAIN_GRID_LOGIN = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
-    private const val String BETA_GRID_LOGIN = "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"
+    private const val MAIN_GRID_LOGIN: String = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
+    private const val BETA_GRID_LOGIN: String = "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"
     
     // Retry configuration
-    private const val Int MAX_RETRY_ATTEMPTS = 3
-    private const val Long INITIAL_RETRY_DELAY_MS = 1000
-    private const val Double RETRY_BACKOFF_MULTIPLIER = 2.0
+    private const val MAX_RETRY_ATTEMPTS: Int = 3
+    private const val INITIAL_RETRY_DELAY_MS: Long = 1000
+    private const val RETRY_BACKOFF_MULTIPLIER: Double = 2.0
     
     private val Context context
     private val ConnectionDiagnostics diagnostics

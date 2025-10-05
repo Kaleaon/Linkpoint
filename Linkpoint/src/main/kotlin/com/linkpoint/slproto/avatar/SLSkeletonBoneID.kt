@@ -165,10 +165,10 @@ enum class SLSkeletonBoneID {
     mHindLimb3Right(true, true, 131),
     mHindLimb4Right(true, true, 132)
     
-    const val Int NUM_ANIMATED = 133
-    const val Int NUM_BASE_BONES = 52
-    const val Int NUM_BASE_JOINTS = 26
-    const val Int NUM_JOINTS = 133
+    const val NUM_ANIMATED: Int = 133
+    const val NUM_BASE_BONES: Int = 52
+    const val NUM_BASE_JOINTS: Int = 26
+    const val NUM_JOINTS: Int = 133
     const val SLSkeletonBoneID[] VALUES = null
     @JvmStatic
     ImmutableMap<String, SLSkeletonBoneID> bones

@@ -15,7 +15,7 @@ import android.widget.TextView
 import com.linkpoint.R
 import com.linkpoint.ui.common.DetailsActivity
 
-class SettingsSelectionFragment : Fragment() : AdapterView.OnItemClickListener {
+class SettingsSelectionFragment : Fragment(), AdapterView.OnItemClickListener {
 
     private class SettingPagesAdapter : ArrayAdapter()<SettingsPage> {
         public SettingPagesAdapter(Context context) {

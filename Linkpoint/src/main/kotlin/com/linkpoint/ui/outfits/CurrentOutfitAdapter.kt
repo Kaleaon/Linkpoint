@@ -16,7 +16,7 @@ import com.linkpoint.slproto.modules.SLAvatarAppearance
 import com.linkpoint.ui.common.DismissableAdapter
 import com.linkpoint.ui.common.SwipeDismissListViewTouchListener
 
-class CurrentOutfitAdapter : BaseAdapter() : DismissableAdapter {
+class CurrentOutfitAdapter : BaseAdapter(), DismissableAdapter {
     private SLAvatarAppearance avatarAppearance
     private val LayoutInflater inflater
     private ImmutableList<SLAvatarAppearance.WornItem> wornItems = ImmutableList.of()

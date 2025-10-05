@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Replaces proprietary Vivox SDK with open-source WebRTC implementation
  */
 class WebRTCVoiceManager {
-    private const val String TAG = "WebRTCVoice"
+    private const val TAG: String = "WebRTCVoice"
     
     // WebRTC Components
     private PeerConnectionFactory peerConnectionFactory

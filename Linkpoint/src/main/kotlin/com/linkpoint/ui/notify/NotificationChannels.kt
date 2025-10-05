@@ -13,7 +13,7 @@ class NotificationChannels {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues  reason: not valid java name */
     private const val /* synthetic */ Int[] f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues = null
-    const val String MESSAGE_NOTIFICATION_GROUP = "messageNotifications"
+    const val MESSAGE_NOTIFICATION_GROUP: String = "messageNotifications"
     private val NotificationChannelManager channelManager
 
     enum class Channel {

@@ -13,7 +13,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 
-class TOSActivity : ThemedActivity() : View.OnClickListener {
+class TOSActivity : ThemedActivity(), View.OnClickListener {
     public Unit onClick(View view) {
         switch (view.getId()) {
             case R.id.tos_accept_button:

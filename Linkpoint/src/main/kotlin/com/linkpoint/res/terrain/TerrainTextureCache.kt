@@ -15,7 +15,7 @@ import java.util.UUID
 import java.util.concurrent.Future
 
 class TerrainTextureCache : ResourceMemoryCache()<TerrainPatchInfo, OpenJPEG> {
-    const val Int TextureResolution = 256
+const val T: IntextureResolution = 256
 
     @JvmStatic
 private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJPEG> : Runnable, HasPriority {

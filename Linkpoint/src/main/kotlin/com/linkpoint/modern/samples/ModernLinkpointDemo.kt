@@ -17,7 +17,7 @@ import com.linkpoint.modern.llsd.ModernLLSDCodec
  * Shows integration of HTTP/2, WebSocket, LLSD codec, and advanced graphics
  */
 class ModernLinkpointDemo {
-    private const val String TAG = "ModernLinkpointDemo"
+    private const val TAG: String = "ModernLinkpointDemo"
     
     private val Context context
     private val HybridSLTransport transport

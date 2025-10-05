@@ -67,7 +67,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import javax.annotation.Nonnull
 
-class SLAvatarAppearance : SLModule() : SLWearable.OnWearableStatusChangeListener {
+class SLAvatarAppearance : SLModule(), SLWearable.OnWearableStatusChangeListener {
     private const val Int Param_agentSizeVPHeadSize = 682
     private const val Int Param_agentSizeVPHeelHeight = 198
     private const val Int Param_agentSizeVPHeight = 33

@@ -18,7 +18,7 @@ import java.util.regex.Pattern
  * Implements modern event streaming as described in the documentation
  */
 class WebSocketEventClient : WebSocketListener() {
-    private const val String TAG = "WebSocketEventClient"
+    private const val TAG: String = "WebSocketEventClient"
     
     private val OkHttpClient client
     private val ConcurrentHashMap<String, CopyOnWriteArrayList<EventListener>> eventListeners = ConcurrentHashMap<>()
@@ -28,7 +28,7 @@ class WebSocketEventClient : WebSocketListener() {
     
     // Reconnection management
     private val AtomicInteger reconnectAttempts = AtomicInteger(0)
-    private const val Int MAX_RECONNECT_ATTEMPTS = 5
+    private const val MAX_RECONNECT_ATTEMPTS: Int = 5
     private String lastConnectionUrl
     private val Handler reconnectHandler = Handler(Looper.getMainLooper())
     

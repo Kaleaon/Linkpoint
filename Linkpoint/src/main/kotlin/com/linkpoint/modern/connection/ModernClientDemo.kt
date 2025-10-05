@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture
  * hybrid protocol support, and enhanced Second Life features.
  */
 class ModernClientDemo {
-    private const val String TAG = "ModernClientDemo"
+    private const val TAG: String = "ModernClientDemo"
     
     /**
      * Simple connection test without full login

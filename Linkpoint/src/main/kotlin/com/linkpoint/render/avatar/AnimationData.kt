@@ -15,7 +15,7 @@ import java.io.InputStream
 import java.util.UUID
 
 class AnimationData {
-    private const val Float LL_MAX_PELVIS_OFFSET = 5.0f
+    private const val LL_MAX_PELVIS_OFFSET: Float = 5.0f
     private val Float animLength
     private val Int animPriority
     private val UUID animationUUID

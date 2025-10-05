@@ -15,7 +15,7 @@ import java.util.concurrent.Executors
  * Note: This is a framework implementation that can be integrated with actual WebRTC libraries
  */
 class WebRTCManager {
-    private const val String TAG = "WebRTCManager"
+    private const val TAG: String = "WebRTCManager"
     
     private val Context context
     private val ExecutorService executor

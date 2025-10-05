@@ -6,17 +6,17 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 abstract class SLTextureEntryFace {
-    const val Int AttributeAll = -1
-    const val Int AttributeGlow = 512
-    const val Int AttributeMaterial = 128
-    const val Int AttributeMedia = 256
-    const val Int AttributeOffsetU = 16
-    const val Int AttributeOffsetV = 32
-    const val Int AttributeRGBA = 2
-    const val Int AttributeRepeatU = 4
-    const val Int AttributeRepeatV = 8
-    const val Int AttributeRotation = 64
-    const val Int AttributeTextureID = 1
+const val A: IntttributeAll = -1
+const val A: IntttributeGlow = 512
+const val A: IntttributeMaterial = 128
+const val A: IntttributeMedia = 256
+const val A: IntttributeOffsetU = 16
+const val A: IntttributeOffsetV = 32
+const val A: IntttributeRGBA = 2
+const val A: IntttributeRepeatU = 4
+const val A: IntttributeRepeatV = 8
+const val A: IntttributeRotation = 64
+const val A: IntttributeTextureID = 1
     private const val InternPool<SLTextureEntryFace> pool = InternPool<>()
 
     @JvmStatic

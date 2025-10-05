@@ -9,7 +9,7 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class GroupRoleMemberListDao : AbstractDao()<GroupRoleMemberList, UUID> {
-    const val String TABLENAME = "GroupRoleMemberLists"
+    const val TABLENAME: String = "GroupRoleMemberLists"
 
     @JvmStatic
     class Properties {

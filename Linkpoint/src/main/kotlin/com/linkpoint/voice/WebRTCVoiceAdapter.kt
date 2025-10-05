@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture
  * Provides drop-in replacement for Vivox functionality
  */
 class WebRTCVoiceAdapter {
-    private const val String TAG = "WebRTCVoiceAdapter"
+    private const val TAG: String = "WebRTCVoiceAdapter"
     
     @JvmStatic
 private WebRTCVoiceAdapter instance

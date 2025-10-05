@@ -13,7 +13,7 @@ import com.linkpoint.slproto.users.manager.UserManager
 import javax.annotation.Nullable
 
 abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnChatterNameUpdated {
-    const val String CHATTER_ID_KEY = "chatterID"
+    const val CHATTER_ID_KEY: String = "chatterID"
     /* access modifiers changed from: protected */
     public ChatterID chatterID
     protected ChatterNameRetriever nameRetriever

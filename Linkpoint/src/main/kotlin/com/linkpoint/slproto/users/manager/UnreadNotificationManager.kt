@@ -42,13 +42,13 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
-    private const val Long FRESH_MESSAGES_NOTIFICATION_INTERVAL = 3000
-    private const val Int MASK_ENABLED_ALL = 7
-    private const val Int MASK_ENABLED_GROUP = 2
-    private const val Int MASK_ENABLED_IM = 4
-    private const val Int MASK_ENABLED_LOCAL = 1
-    private const val Int MAX_CHATTERS_PER_NOTIFICATION = 3
-    private const val Int MAX_MESSAGES_PER_NOTIFICATION = 3
+    private const val FRESH_MESSAGES_NOTIFICATION_INTERVAL: Long = 3000
+    private const val MASK_ENABLED_ALL: Int = 7
+    private const val MASK_ENABLED_GROUP: Int = 2
+    private const val MASK_ENABLED_IM: Int = 4
+    private const val MASK_ENABLED_LOCAL: Int = 1
+    private const val MAX_CHATTERS_PER_NOTIFICATION: Int = 3
+    private const val MAX_MESSAGES_PER_NOTIFICATION: Int = 3
     const val Boolean unreadNotificationKey = Boolean.FALSE
     private val ChatMessageDao chatMessageDao
     private val ChatterDao chatterDao

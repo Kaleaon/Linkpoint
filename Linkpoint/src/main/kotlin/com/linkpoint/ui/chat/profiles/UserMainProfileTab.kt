@@ -42,7 +42,7 @@ import java.util.Date
 import java.util.UUID
 import javax.annotation.Nullable
 
-class UserMainProfileTab : ChatterReloadableFragment() : LoadableMonitor.OnLoadableDataChangedListener {
+class UserMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadableDataChangedListener {
     @BindView(2131755706)
     Button aboutEditButton
     private val SubscriptionData<UUID, AvatarNotesReply> avatarNotes = SubscriptionData<>(UIThreadExecutor.getInstance())

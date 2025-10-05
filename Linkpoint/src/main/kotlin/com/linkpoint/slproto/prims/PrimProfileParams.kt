@@ -5,8 +5,8 @@ import com.linkpoint.slproto.messages.ObjectUpdate
 import java.nio.ByteBuffer
 
 class PrimProfileParams {
-    const val Float CUT_QUANTA = 2.0E-5f
-    const val Float HOLLOW_QUANTA = 2.0E-5f
+    const val CUT_QUANTA: Float = 2.0E-5f
+    const val HOLLOW_QUANTA: Float = 2.0E-5f
     const val Byte LL_PCODE_HOLE_CIRCLE = 16
     const val Byte LL_PCODE_HOLE_MASK = -16
     const val Byte LL_PCODE_HOLE_SAME = 0

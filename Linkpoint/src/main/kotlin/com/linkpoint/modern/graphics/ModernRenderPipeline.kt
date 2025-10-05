@@ -10,7 +10,7 @@ import android.util.Log
  * Implements PBR-style rendering for capable mobile devices
  */
 class ModernRenderPipeline {
-    private const val String TAG = "ModernRenderPipeline"
+    private const val TAG: String = "ModernRenderPipeline"
     
     private Boolean isES3Available = false
     private Int pbrShaderProgram = -1

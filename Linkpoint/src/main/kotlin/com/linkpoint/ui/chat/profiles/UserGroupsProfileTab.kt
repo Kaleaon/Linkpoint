@@ -25,7 +25,7 @@ import com.linkpoint.ui.common.loadmon.LoadableMonitor
 import java.util.UUID
 import javax.annotation.Nullable
 
-class UserGroupsProfileTab : ChatterReloadableFragment() : LoadableMonitor.OnLoadableDataChangedListener {
+class UserGroupsProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadableDataChangedListener {
     private val SubscriptionData<UUID, AvatarGroupList> avatarGroups = SubscriptionData<>(UIThreadExecutor.getInstance())
     private GroupsAdapter groupsAdapter
     private val LoadableMonitor loadableMonitor = LoadableMonitor(this.avatarGroups).withDataChangedListener(this)

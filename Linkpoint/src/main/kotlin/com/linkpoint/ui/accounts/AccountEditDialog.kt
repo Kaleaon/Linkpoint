@@ -20,7 +20,7 @@ import com.linkpoint.ui.grids.GridList
 import java.util.List
 import java.util.UUID
 
-class AccountEditDialog : AppCompatDialog() : View.OnClickListener, TextWatcher {
+class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
     private AccountList.AccountInfo editAccount = null
     private GridList gridList = null
     private OnAccountEditResultListener onAccountEditResultListener = null

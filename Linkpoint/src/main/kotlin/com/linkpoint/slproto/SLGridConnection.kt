@@ -26,7 +26,7 @@ import java.util.UUID
 class SLGridConnection : SLConnection() {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
     private const val /* synthetic */ Int[] syntheticField = null
-    private const val String DEFAULT_SYSTEM_ACCOUNT = "Second Life"
+    private const val DEFAULT_SYSTEM_ACCOUNT: String = "Second Life"
     @JvmStatic
 private Boolean autoresponseEnabled = false
     @JvmStatic

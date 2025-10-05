@@ -28,16 +28,16 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 class InventoryActivity : MasterDetailsActivity() {
-    private const val String INITIAL_FOLDER_ID_TAG = "folderID"
-    private const val String NAME_FILTER_TAG = "nameFilter"
-    const val String SAVE_INFO_INTENT_TAG = "forSaveInfo"
-    private const val String SEARCH_ACTIVE_TAG = "searchActive"
-    const val String SELECT_ACTION_ASSET_TYPE = "selectActionAssetType"
-    const val String SELECT_ACTION_INTENT_TAG = "selectAction"
-    const val String SELECT_ACTION_PARAMS_TAG = "selectActionParams"
-    const val String SELECT_ITEM_INTENT_TAG = "forSelectItem"
-    const val String TRANSFER_TO_INTENT_TAG = "transferToID"
-    const val String TRANSFER_TO_NAME_TAG = "transferToName"
+    private const val INITIAL_FOLDER_ID_TAG: String = "folderID"
+    private const val NAME_FILTER_TAG: String = "nameFilter"
+    const val SAVE_INFO_INTENT_TAG: String = "forSaveInfo"
+    private const val SEARCH_ACTIVE_TAG: String = "searchActive"
+    const val SELECT_ACTION_ASSET_TYPE: String = "selectActionAssetType"
+    const val SELECT_ACTION_INTENT_TAG: String = "selectAction"
+    const val SELECT_ACTION_PARAMS_TAG: String = "selectActionParams"
+    const val SELECT_ITEM_INTENT_TAG: String = "forSelectItem"
+    const val TRANSFER_TO_INTENT_TAG: String = "transferToID"
+    const val TRANSFER_TO_NAME_TAG: String = "transferToName"
     private val FragmentActivityFactory InventoryDetailsFragmentFactory = FragmentActivityFactory() {
         public Intent createIntent(Context context, Bundle bundle) {
             Intent intent = Intent(context, InventoryActivity.class)

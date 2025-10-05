@@ -13,7 +13,7 @@ import com.linkpoint.ui.common.TextFieldEditFragment
 import java.util.UUID
 import javax.annotation.Nullable
 
-class UserNotesEditFragment : TextFieldEditFragment() : BackButtonHandler {
+class UserNotesEditFragment : TextFieldEditFragment(), BackButtonHandler {
     private Subscription<UUID, AvatarNotesReply> avatarNotesSubscription = null
 
     /* access modifiers changed from: private */

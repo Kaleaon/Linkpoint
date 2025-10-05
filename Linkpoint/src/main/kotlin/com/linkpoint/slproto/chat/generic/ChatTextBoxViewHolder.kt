@@ -12,7 +12,7 @@ import com.linkpoint.slproto.chat.SLChatTextBoxDialog
 import com.linkpoint.slproto.users.manager.UserManager
 import javax.annotation.Nullable
 
-class ChatTextBoxViewHolder : ChatEventViewHolder() : View.OnClickListener, View.OnKeyListener, View.OnFocusChangeListener {
+class ChatTextBoxViewHolder : ChatEventViewHolder(), View.OnClickListener, View.OnKeyListener, View.OnFocusChangeListener {
     private val Button dialogButtonIgnore
     val View dialogButtonsLayout
     val TextView dialogResultTextView

@@ -30,10 +30,10 @@ import java.io.IOException
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class ActiveChatsListAdapter : BaseAdapter() : Closeable, DismissableAdapter {
-    private const val Int VIEW_TYPE_COUNT = 2
-    private const val Int VIEW_TYPE_HEADER = 1
-    private const val Int VIEW_TYPE_ROW = 0
+class ActiveChatsListAdapter : BaseAdapter(), Closeable, DismissableAdapter {
+    private const val VIEW_TYPE_COUNT: Int = 2
+    private const val VIEW_TYPE_HEADER: Int = 1
+    private const val VIEW_TYPE_ROW: Int = 0
     private ImmutableList<? : ChatterDisplayInfo> activeChatters = ImmutableList.of()
     private val Subscription<ChatterListType, ImmutableList<ChatterDisplayData>> activeChattersSubscription
     /* access modifiers changed from: private */

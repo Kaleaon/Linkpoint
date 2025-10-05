@@ -20,19 +20,19 @@ import javax.crypto.spec.GCMParameterSpec
  * and biometric authentication for Second Life grid access.
  */
 class ModernAuthManager {
-    private const val String TAG = "ModernAuthManager"
+    private const val TAG: String = "ModernAuthManager"
     
     // Secure storage keys
-    private const val String PREFS_NAME = "sl_auth_secure"
-    private const val String KEY_ALIAS = "SLAuthKey"
-    private const val String KEY_ACCESS_TOKEN = "access_token"
-    private const val String KEY_REFRESH_TOKEN = "refresh_token"
-    private const val String KEY_USERNAME = "username"
-    private const val String KEY_TOKEN_EXPIRY = "token_expiry"
+    private const val PREFS_NAME: String = "sl_auth_secure"
+    private const val KEY_ALIAS: String = "SLAuthKey"
+    private const val KEY_ACCESS_TOKEN: String = "access_token"
+    private const val KEY_REFRESH_TOKEN: String = "refresh_token"
+    private const val KEY_USERNAME: String = "username"
+    private const val KEY_TOKEN_EXPIRY: String = "token_expiry"
     
     // OAuth2 endpoints (when Second Life supports OAuth2)
-    private const val String SL_OAUTH_AUTHORIZE = "https://id.secondlife.com/oauth2/authorize"
-    private const val String SL_OAUTH_TOKEN = "https://id.secondlife.com/oauth2/token"
+    private const val SL_OAUTH_AUTHORIZE: String = "https://id.secondlife.com/oauth2/authorize"
+    private const val SL_OAUTH_TOKEN: String = "https://id.secondlife.com/oauth2/token"
     
     private val Context context
     private val SharedPreferences securePrefs

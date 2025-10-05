@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.CopyOnWriteArrayList
 
 class MemoryManager {
-    private const val String TAG = "MemoryManager"
-    private const val Long MB = 1024 * 1024
+    private const val TAG: String = "MemoryManager"
+    private const val MB: Long = 1024 * 1024
     
     private val Context context
     private val ActivityManager activityManager

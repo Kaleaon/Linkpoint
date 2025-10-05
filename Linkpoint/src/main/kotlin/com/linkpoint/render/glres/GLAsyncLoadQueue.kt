@@ -18,7 +18,7 @@ import javax.microedition.khronos.egl.EGLContext
 import javax.microedition.khronos.egl.EGLDisplay
 import javax.microedition.khronos.egl.EGLSurface
 
-class GLAsyncLoadQueue : GLLoadQueue() : GLLoadQueue.GLLoadHandler {
+class GLAsyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
     /* access modifiers changed from: private */
     public volatile Boolean contextFailed = true
     /* access modifiers changed from: private */

@@ -13,7 +13,7 @@ import android.util.Log
  * Based on fixes from Broken Code Analysis document and modern Android development practices.
  */
 class ResourceConflictResolver {
-    private const val String TAG = "ResourceResolver"
+    private const val TAG: String = "ResourceResolver"
     
     /**
      * Initialize resource conflict resolution for the application context.

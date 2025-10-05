@@ -3,9 +3,9 @@ package com.linkpoint.dao
 import java.util.UUID
 
 class Friend {
-    const val Int GRANT_MAP_LOCATION = 2
-    const val Int GRANT_MODIFY_OBJECTS = 4
-    const val Int GRANT_ONLINE_STATUS = 1
+    const val GRANT_MAP_LOCATION: Int = 2
+    const val GRANT_MODIFY_OBJECTS: Int = 4
+    const val GRANT_ONLINE_STATUS: Int = 1
     private Boolean isOnline
     private Int rightsGiven
     private Int rightsHas

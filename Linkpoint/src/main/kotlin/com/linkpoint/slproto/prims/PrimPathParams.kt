@@ -8,16 +8,16 @@ import com.linkpoint.slproto.types.LLVector2
 import java.nio.ByteBuffer
 
 class PrimPathParams {
-    const val Float CUT_QUANTA = 2.0E-5f
+    const val CUT_QUANTA: Float = 2.0E-5f
     const val Byte LL_PCODE_PATH_CIRCLE = 32
     const val Byte LL_PCODE_PATH_CIRCLE2 = 48
     const val Byte LL_PCODE_PATH_FLEXIBLE = Byte.MIN_VALUE
     const val Byte LL_PCODE_PATH_LINE = 16
     const val Byte LL_PCODE_PATH_TEST = 64
-    const val Float REV_QUANTA = 0.015f
-    const val Float SCALE_QUANTA = 0.01f
-    const val Float SHEAR_QUANTA = 0.01f
-    const val Float TAPER_QUANTA = 0.01f
+    const val REV_QUANTA: Float = 0.015f
+    const val SCALE_QUANTA: Float = 0.01f
+    const val SHEAR_QUANTA: Float = 0.01f
+    const val TAPER_QUANTA: Float = 0.01f
     val Float Begin
     val Byte CurveType
     val Float End

@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture
  * Demonstrates all implemented features working together
  */
 class IntegratedFeatureDemo {
-    private const val String TAG = "IntegratedFeatureDemo"
+    private const val TAG: String = "IntegratedFeatureDemo"
     
     private val Context context
     

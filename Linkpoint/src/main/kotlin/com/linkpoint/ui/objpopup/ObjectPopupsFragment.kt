@@ -16,7 +16,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class ObjectPopupsFragment : Fragment() {
-    private const val String AGENT_UUID_KEY = "agentUUID"
+    private const val AGENT_UUID_KEY: String = "agentUUID"
     private val ItemTouchHelper.Callback itemTouchCallback = ItemTouchHelper.SimpleCallback(0, 12) {
         public Boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder viewHolder2) {
             return false

@@ -39,8 +39,8 @@ import javax.annotation.Nullable
 
 class DriveSyncService : Service()
 : LogWriteTracker.OnLoggingDoneListener {
-    private const val Long PERIODIC_SYNC_INTERVAL = 30000L
-    private const val Int REQUIRED_APP_VERSION = 58
+    private const val PERIODIC_SYNC_INTERVAL: Long = 30000L
+    private const val REQUIRED_APP_VERSION: Int = 58
     private val AgentSyncConnections agentSyncConnections
     private val GoogleApiClient.ConnectionCallbacks connectionCallbacks
     private val ErrorResolutionTracker errorResolutionTracker

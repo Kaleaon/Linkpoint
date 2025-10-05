@@ -34,7 +34,7 @@ import com.linkpoint.utils.UUIDPool
 import java.util.UUID
 import javax.annotation.Nullable
 
-class UserPicksProfileTab : ChatterReloadableFragment() : LoadableMonitor.OnLoadableDataChangedListener {
+class UserPicksProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadableDataChangedListener {
     private val SubscriptionData<UUID, AvatarPicksReply> avatarPicks = SubscriptionData<>(UIThreadExecutor.getInstance())
     private val LoadableMonitor loadableMonitor = LoadableMonitor(this.avatarPicks).withDataChangedListener(this)
     private PicksAdapter picksAdapter

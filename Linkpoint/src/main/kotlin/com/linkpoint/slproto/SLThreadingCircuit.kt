@@ -8,8 +8,8 @@ import java.util.concurrent.Executor
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
-class SLThreadingCircuit : SLCircuit() : Executor {
-    private const val Int DEFAULT_IDLE_INTERVAL = 1000
+class SLThreadingCircuit : SLCircuit(), Executor {
+    private const val DEFAULT_IDLE_INTERVAL: Int = 1000
     private val BlockingQueue<Runnable> queue = LinkedBlockingQueue()
     private volatile Boolean workEnabled = true
     private val Runnable workingRunnable = Runnable() {

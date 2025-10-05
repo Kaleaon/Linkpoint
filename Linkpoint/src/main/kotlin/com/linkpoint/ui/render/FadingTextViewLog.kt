@@ -19,7 +19,7 @@ import java.util.LinkedHashMap
 import java.util.Map
 
 class FadingTextViewLog {
-    private const val Long STALE_CHAT_TIMEOUT = 5000
+    private const val STALE_CHAT_TIMEOUT: Long = 5000
     private val Runnable RemoveStaleChatsTask = Runnable() {
         public Unit run() {
             Boolean unused = FadingTextViewLog.this.removeStaleChatsPosted = false

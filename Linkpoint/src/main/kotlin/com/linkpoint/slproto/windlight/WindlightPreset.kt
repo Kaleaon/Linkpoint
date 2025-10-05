@@ -8,7 +8,7 @@ import java.io.IOException
 import java.io.InputStream
 
 class WindlightPreset {
-    private const val Float WINDLIGHT_GAMMA = 2.2f
+    private const val WINDLIGHT_GAMMA: Float = 2.2f
     public Float[] ambient = Float[4]
     public Float[] ambientBelowWater = Float[4]
     public Float[] blue_density = Float[4]

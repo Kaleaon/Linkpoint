@@ -12,8 +12,8 @@ import com.linkpoint.ui.common.ActivityUtils
 import java.util.UUID
 
 class CardboardTransitionActivity : AppCompatActivity() {
-    private const val Int MAX_WAIT_ATTEMPTS = 15
-    private const val Long WAIT_INTERVAL = 250
+    private const val MAX_WAIT_ATTEMPTS: Int = 15
+    private const val WAIT_INTERVAL: Long = 250
     private Handler handler = Handler()
     private Int waitAttempts = 0
 

@@ -15,7 +15,7 @@ import javax.microedition.khronos.opengles.GL10
  * Eliminates all OpenGL ES 1.1 dependencies
  */
 class ModernWorldViewRenderer : GLSurfaceView.Renderer {
-    private const val String TAG = "ModernWorldViewRenderer"
+    private const val TAG: String = "ModernWorldViewRenderer"
     
     private ModernRenderContext renderContext
     private Boolean initialized = false

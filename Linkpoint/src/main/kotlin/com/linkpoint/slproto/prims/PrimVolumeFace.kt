@@ -9,17 +9,17 @@ import com.linkpoint.slproto.types.VertexArray
 import java.util.ArrayList
 
 class PrimVolumeFace {
-    const val Int BOTTOM_MASK = 1024
-    const val Int CAP_MASK = 2
-    const val Int END_MASK = 4
-    const val Int FLAT_MASK = 256
-    const val Int HOLLOW_MASK = 64
-    const val Int INNER_MASK = 16
-    const val Int OPEN_MASK = 128
-    const val Int OUTER_MASK = 32
-    const val Int SIDE_MASK = 8
-    const val Int SINGLE_MASK = 1
-    const val Int TOP_MASK = 512
+    const val BOTTOM_MASK: Int = 1024
+    const val CAP_MASK: Int = 2
+    const val END_MASK: Int = 4
+    const val FLAT_MASK: Int = 256
+    const val HOLLOW_MASK: Int = 64
+    const val INNER_MASK: Int = 16
+    const val OPEN_MASK: Int = 128
+    const val OUTER_MASK: Int = 32
+    const val SIDE_MASK: Int = 8
+    const val SINGLE_MASK: Int = 1
+    const val TOP_MASK: Int = 512
     public Int BeginS
     public Int BeginT
     public LLVector3 Center

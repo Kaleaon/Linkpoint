@@ -9,7 +9,7 @@ import com.linkpoint.modern.samples.ModernLinkpointDemo
  * Complete workflow demonstration of modern Linkpoint capabilities
  */
 class FullWorkflowDemo {
-    private const val String TAG = "FullWorkflowDemo"
+    private const val TAG: String = "FullWorkflowDemo"
     
     private val Context context
     private val ModernLinkpointDemo modernDemo

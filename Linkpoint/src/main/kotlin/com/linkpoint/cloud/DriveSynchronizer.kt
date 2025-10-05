@@ -23,7 +23,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class DriveSynchronizer {
-    private const val Long FLUSH_INTERVAL = 300000L
+    private const val FLUSH_INTERVAL: Long = 300000L
     private val Map<String, DriveChatLogFolder> chatLogFolders = HashMap<String, DriveChatLogFolder>()
     private val DriveConnectibleFolder chatLogsFolder
     private val Context context

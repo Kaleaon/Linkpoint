@@ -9,7 +9,7 @@ import java.util.List
 import java.util.RandomAccess
 import javax.annotation.Nonnull
 
-class ChunkedList<E> : AbstractList<E> : RandomAccess {
+class ChunkedList<E> : AbstractList<E>, RandomAccess {
     private val List<List<E>> chunks = ArrayList()
     private Int count = 0
     private List<E> lastChunk = null

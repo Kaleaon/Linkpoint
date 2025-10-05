@@ -5,7 +5,7 @@ import com.linkpoint.Debug
 import com.linkpoint.utils.InlineList
 
 class SpatialTree {
-    const val Int INVALID_BIN = -1
+    const val INVALID_BIN: Int = -1
     private val SpatialTreeNode[] bins
     private val Float[] depthBuf = Float[1]
     private Float drawDistance = 1.0f

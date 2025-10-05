@@ -9,8 +9,8 @@ import com.linkpoint.slproto.types.LLVector3
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 
 class PrimFlexibleInfo {
-    private const val Float FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE = 0.99f
-    private const val Long MIN_UPDATE_INTERVAL = 200
+    private const val FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE: Float = 0.99f
+    private const val MIN_UPDATE_INTERVAL: Long = 200
     private Int NumSections = 0
     private Long lastUpdateMillis
     private volatile Boolean needVertexBufferUpdate = false

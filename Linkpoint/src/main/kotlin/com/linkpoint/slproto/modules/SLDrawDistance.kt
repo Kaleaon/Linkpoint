@@ -4,9 +4,9 @@ import com.linkpoint.Debug
 import com.linkpoint.slproto.SLAgentCircuit
 
 class SLDrawDistance : SLModule() {
-    const val Float CHAT_RANGE = 20.0f
-    private const val Long DRAW_RANGE_TIMEOUT = 10000
-    const val Float MIN_DRAW_RANGE = 10.5f
+    const val CHAT_RANGE: Float = 20.0f
+    private const val DRAW_RANGE_TIMEOUT: Long = 10000
+    const val MIN_DRAW_RANGE: Float = 10.5f
     private Float activeDrawDistance = 0.0f
     private Long defaultDrawDistanceSince = 0
     private Boolean defaultTimerSet = false

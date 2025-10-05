@@ -10,8 +10,8 @@ import com.linkpoint.memory.MemoryPressureListener
  * Texture cache that integrates with MemoryManager for proper memory management
  */
 class TextureCache : MemoryPressureListener {
-    private const val String TAG = "TextureCache"
-    private const val Int DEFAULT_CACHE_SIZE_MB = 32
+    private const val TAG: String = "TextureCache"
+    private const val DEFAULT_CACHE_SIZE_MB: Int = 32
     
     private val MemoryManager memoryManager
     private val LruCache<String, CachedTexture> cache

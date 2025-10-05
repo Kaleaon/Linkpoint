@@ -24,12 +24,12 @@ import java.util.concurrent.TimeUnit
  * Uploads application logs and crash reports to GitHub for review by copilot
  */
 class AutoLogUploader {
-    private const val String TAG = "AutoLogUploader"
+    private const val TAG: String = "AutoLogUploader"
     
     // Configuration
-    private const val String PREF_LAST_UPLOAD = "last_log_upload"
-    private const val Long UPLOAD_INTERVAL_MS = TimeUnit.HOURS.toMillis(1); // Upload every hour
-    private const val Int MAX_LOG_SIZE = 50000; // 50KB limit for GitHub API
+    private const val PREF_LAST_UPLOAD: String = "last_log_upload"
+    private const val UPLOAD_INTERVAL_MS: Long = TimeUnit.HOURS.toMillis(1); // Upload every hour
+    private const val MAX_LOG_SIZE: Int = 50000; // 50KB limit for GitHub API
     
     private val Context context
     private val OkHttpClient httpClient

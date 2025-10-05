@@ -32,7 +32,7 @@ import com.linkpoint.ui.myava.TransactionLogAdapter
 import de.greenrobot.dao.query.LazyList
 import java.util.UUID
 
-class TransactionLogFragment : FragmentWithTitle() : LoadableMonitor.OnLoadableDataChangedListener, TransactionLogAdapter.OnTransactionClickListener {
+class TransactionLogFragment : FragmentWithTitle(), LoadableMonitor.OnLoadableDataChangedListener, TransactionLogAdapter.OnTransactionClickListener {
     /* access modifiers changed from: private */
     public TransactionLogAdapter adapter
     private val LoadableMonitor loadableMonitor = LoadableMonitor(this.moneyTransactions).withDataChangedListener(this)

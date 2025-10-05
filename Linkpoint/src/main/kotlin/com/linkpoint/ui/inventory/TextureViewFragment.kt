@@ -22,7 +22,7 @@ import javax.annotation.Nullable
 import uk.co.senab.photoview.PhotoViewAttacher
 
 class TextureViewFragment : StateAwareFragment() {
-    private const val String ASSET_UUID_KEY = "assetUUID"
+    private const val ASSET_UUID_KEY: String = "assetUUID"
     /* access modifiers changed from: private */
     public LoadAssetImageTask loadAssetImageTask = null
     /* access modifiers changed from: private */

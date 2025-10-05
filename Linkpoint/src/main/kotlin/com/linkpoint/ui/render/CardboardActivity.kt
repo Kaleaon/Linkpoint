@@ -99,16 +99,16 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 @TargetApi(16)
-class CardboardActivity : DetailsActivity() : ObjectPopupsManager.ObjectPopupListener {
+class CardboardActivity : DetailsActivity(), ObjectPopupsManager.ObjectPopupListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-render-MoveControlSwitchesValues  reason: not valid java name */
     private const val /* synthetic */ Int[] f580comlumiyaviewerlumiyauirenderMoveControlSwitchesValues = null
-    private const val Int DEFAULT_FONT_SIZE_SP = 16
-    private const val Int LISTVIEW_SCROLL_DURATION = 500
-    private const val Int LISTVIEW_SCROLL_OFFSET = 100
-    private const val Int RECYCLERVIEW_SCROLL_OFFSET = 100
-    private const val Float VOICE_VIEW_HEIGHT_ALLOWANCE_DP = 60.0f
-    const val String VR_MODE_TAG = "vrMode"
+    private const val DEFAULT_FONT_SIZE_SP: Int = 16
+    private const val LISTVIEW_SCROLL_DURATION: Int = 500
+    private const val LISTVIEW_SCROLL_OFFSET: Int = 100
+    private const val RECYCLERVIEW_SCROLL_OFFSET: Int = 100
+    private const val VOICE_VIEW_HEIGHT_ALLOWANCE_DP: Float = 60.0f
+    const val VR_MODE_TAG: String = "vrMode"
     private const val Float controlDrawSizeFactor = 1.5f
     private const val Float controlSizeFactorX = 1.0f
     private const val Float controlSizeFactorY = 0.75f
@@ -2228,9 +2228,9 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     private class WorldStereoRenderer : GvrView.StereoRenderer {
-        private const val Float TURN_DEGREES = 35.0f
-        private const val Float TURN_DEGREES_PER_MS = 0.02f
-        private const val Float YAW_AVERAGE_FACTOR = 1.0E-4f
+        private const val TURN_DEGREES: Float = 35.0f
+        private const val TURN_DEGREES_PER_MS: Float = 0.02f
+        private const val YAW_AVERAGE_FACTOR: Float = 1.0E-4f
         private Boolean agentHeadingAcquired = false
         private Boolean crosshairVisible = false
         private val Float[] extTextureMatrixUV = Float[16]

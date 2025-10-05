@@ -29,7 +29,7 @@ import com.linkpoint.debug.AutoLogUploader
  * Extends MultiDexApplication to support large applications with 64K+ methods.
  */
 class LinkpointApp : MultiDexApplication() {
-    private const val String TAG = "LinkpointApp"
+    private const val TAG: String = "LinkpointApp"
     @JvmStatic
 private DisplayMetrics displayMetrics = DisplayMetrics()
     @JvmStatic

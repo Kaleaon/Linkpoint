@@ -40,7 +40,7 @@ import com.linkpoint.utils.UUIDPool
 import java.util.UUID
 
 class ParcelPropertiesFragment : FragmentWithTitle() {
-    const val String PARCEL_DATA_KEY = "parcelData"
+    const val PARCEL_DATA_KEY: String = "parcelData"
     /* access modifiers changed from: private */
     val SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 

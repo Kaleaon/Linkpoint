@@ -66,13 +66,15 @@ import java.util.HashSet
 import java.util.Set
 import java.util.UUID
 
-class GridConnectionService : Service() : OnSharedPreferenceChangeListener {
+class GridConnectionService : Service(), OnSharedPreferenceChangeListener {
     /* renamed from: -com-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues */
-    private const val /* synthetic */ Int[] f442-com-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues = null
+    private /* synthetic */ val f442Values: IntArray? = null
     /* renamed from: -com-lumiyaviewer-lumiya-utils-LEDActionSwitchesValues */
-    private const val /* synthetic */ Int[] f443-com-lumiyaviewer-lumiya-utils-LEDActionSwitchesValues = null
-    const val String LOGIN_ACTION = "com.linkpoint.ACTION_LOGIN"
-    private const val Int REQUEST_CODE_UNREAD_NOTIFY = 2131755072
+    private /* synthetic */ val f443Values: IntArray? = null
+    
+    companion object {
+        const val LOGIN_ACTION: String = "com.linkpoint.ACTION_LOGIN"
+    private const val REQUEST_CODE_UNREAD_NOTIFY: Int = 2131755072
     @JvmStatic
 private SLGridConnection gridConnection = null
     @JvmStatic

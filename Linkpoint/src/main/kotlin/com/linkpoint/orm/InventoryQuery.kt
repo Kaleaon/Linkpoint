@@ -15,7 +15,7 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 abstract class InventoryQuery : Parcelable {
-    private const val Int ASSET_TYPE_ANY = -1
+    private const val ASSET_TYPE_ANY: Int = -1
     const val Parcelable.Creator<InventoryQuery> CREATOR = Parcelable.Creator<InventoryQuery>() {
         public InventoryQuery createFromParcel(Parcel parcel) {
             Bundle readBundle = parcel.readBundle(getClass().getClassLoader())
@@ -26,7 +26,7 @@ abstract class InventoryQuery : Parcelable {
             return InventoryQuery[i]
         }
     }
-    private const val Int FOLDER_TYPE_ANY = -1
+    private const val FOLDER_TYPE_ANY: Int = -1
 
     @JvmStatic
     InventoryQuery create(UUID uuid, String str, Boolean z, Boolean z2, Boolean z3, Int i) {

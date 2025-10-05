@@ -12,7 +12,7 @@ import java.util.NoSuchElementException
 import java.util.Timer
 
 class SLConnection : Runnable {
-    private const val Int DEFAULT_IDLE_INTERVAL = 1000
+    private const val DEFAULT_IDLE_INTERVAL: Int = 1000
     private Selector selector
     private volatile Timer timer
     private Thread workingThread

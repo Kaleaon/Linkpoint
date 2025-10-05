@@ -31,8 +31,8 @@ import com.linkpoint.utils.FileUtils
 import java.io.File
 import javax.annotation.Nullable
 
-class SettingsFragment : PreferenceFragmentCompat() : FragmentHasTitle {
-    private const val String PREF_RESOURCE_KEY = "prefResourceId"
+class SettingsFragment : PreferenceFragmentCompat(), FragmentHasTitle {
+    private const val PREF_RESOURCE_KEY: String = "prefResourceId"
     private RingtonePreference requestedRingtonePreference = null
 
     private class ClearCacheTask : AsyncTask()<Void, Void, Void> {

@@ -36,7 +36,7 @@ import com.linkpoint.ui.settings.ModernSettingsActivity
  * - Material Design 3 UI with comprehensive testing interface
  */
 class ModernMainActivity : AppCompatActivity() {
-    private const val String TAG = "ModernMainActivity"
+    private const val TAG: String = "ModernMainActivity"
     
     // UI Components with enhanced Material Design
     private Toolbar toolbar

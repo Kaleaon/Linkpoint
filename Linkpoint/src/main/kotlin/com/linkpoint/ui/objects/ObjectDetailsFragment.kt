@@ -50,8 +50,8 @@ import com.linkpoint.ui.objects.ObjectDerezDialog
 import java.util.UUID
 import javax.annotation.Nullable
 
-class ObjectDetailsFragment : FragmentWithTitle() : ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
-    private const val String LOCAL_ID_KEY = "localID"
+class ObjectDetailsFragment : FragmentWithTitle(), ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
+    private const val LOCAL_ID_KEY: String = "localID"
     private const val Int[] objectPayButtons = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
     private val SubscriptionData<SubscriptionSingleKey, Integer> balanceSubscription = SubscriptionData<>(UIThreadExecutor.getInstance())
     private val OnChatEventListener chatEventListener = OnChatEventListener(this) {

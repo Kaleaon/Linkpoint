@@ -67,15 +67,15 @@ import java.util.UUID
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class InventoryFragment : FragmentWithTitle() : ReloadableFragment {
+class InventoryFragment : FragmentWithTitle(), ReloadableFragment {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-inventory-InventoryActivity$SelectActionSwitchesValues  reason: not valid java name */
     private const val /* synthetic */ Int[] f446comlumiyaviewerlumiyauiinventoryInventoryActivity$SelectActionSwitchesValues = null
-    private const val String FOLDER_ID_KEY = "folderID"
-    private const val String IS_MASTER_FRAGMENT = "isMasterFragment"
-    private const val String IS_SEARCHING_KEY = "isSearching"
-    private const val String SEARCH_STRING_KEY = "searchString"
-    const val String SELECTED_INVENTORY_ENTRY = "selectedInventoryEntry"
+    private const val FOLDER_ID_KEY: String = "folderID"
+    private const val IS_MASTER_FRAGMENT: String = "isMasterFragment"
+    private const val IS_SEARCHING_KEY: String = "isSearching"
+    private const val SEARCH_STRING_KEY: String = "searchString"
+    const val SELECTED_INVENTORY_ENTRY: String = "selectedInventoryEntry"
     private const val Int[] folderActionIds = {R.id.inventory_go_up_item, R.id.inventory_create_item, R.id.inventory_folder_create_item, R.id.inventory_folder_create_landmark, R.id.inventory_folder_create_notecard, R.id.inventory_folder_upload_picture, R.id.inventory_folder_delete_item, R.id.inventory_folder_rename_item, R.id.inventory_folder_share_item, R.id.inventory_folder_cut_item, R.id.inventory_folder_copy_item, R.id.inventory_folder_paste_item, R.id.inventory_folder_paste_as_link_item}
     private InventoryFolderAdapter adapter = null
     private val SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {

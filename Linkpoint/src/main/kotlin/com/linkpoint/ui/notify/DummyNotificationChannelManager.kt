@@ -10,7 +10,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class DummyNotificationChannelManager : NotificationChannelManager {
-    const val String DEFAULT_NOTIFICATION_CHANNEL = "miscellaneous"
+    const val DEFAULT_NOTIFICATION_CHANNEL: String = "miscellaneous"
     private const val ImmutableSet<NotificationType> allChannels = ImmutableSet.of(NotificationType.LocalChat, NotificationType.Group, NotificationType.Private)
 
     public Boolean areNotificationsSystemControlled() {

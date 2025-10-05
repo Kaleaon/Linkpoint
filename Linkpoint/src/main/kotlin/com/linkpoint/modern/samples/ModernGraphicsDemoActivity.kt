@@ -14,7 +14,7 @@ import javax.microedition.khronos.opengles.GL10
  * Shows the modernized rendering pipeline in action with a simple renderer
  */
 class ModernGraphicsDemoActivity : Activity() {
-    private const val String TAG = "ModernGraphicsDemo"
+    private const val TAG: String = "ModernGraphicsDemo"
     
     private GLSurfaceView glSurfaceView
     private SimpleModernRenderer renderer
@@ -77,7 +77,7 @@ class ModernGraphicsDemoActivity : Activity() {
      */
     @JvmStatic
 private class SimpleModernRenderer : GLSurfaceView.Renderer {
-        private const val String TAG = "SimpleModernRenderer"
+        private const val TAG: String = "SimpleModernRenderer"
         
         override Unit onSurfaceCreated(GL10 gl, EGLConfig config) {
             Log.i(TAG, "Surface created - OpenGL ES 3.0+ context")

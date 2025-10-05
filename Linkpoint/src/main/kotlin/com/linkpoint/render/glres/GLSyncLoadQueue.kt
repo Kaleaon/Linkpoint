@@ -6,10 +6,10 @@ import com.linkpoint.render.TextureMemoryTracker
 import com.linkpoint.render.glres.GLLoadQueue
 import javax.annotation.Nonnull
 
-class GLSyncLoadQueue : GLLoadQueue() : GLLoadQueue.GLLoadHandler {
-    private const val Int MAX_LOADS_PER_FRAME = 16
-    private const val Int MAX_SIZE_PER_FRAME = 4194304
-    private const val Int WAIT_FRAMES_AFTER_LOAD = 3
+class GLSyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
+    private const val MAX_LOADS_PER_FRAME: Int = 16
+    private const val MAX_SIZE_PER_FRAME: Int = 4194304
+    private const val WAIT_FRAMES_AFTER_LOAD: Int = 3
     private Int framesWait = 0
 
     public Unit GLResourceLoaded(GLLoadQueue.GLLoadable gLLoadable) {

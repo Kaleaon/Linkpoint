@@ -11,7 +11,7 @@ import com.linkpoint.orm.DBObject
 import java.nio.ByteBuffer
 import java.util.UUID
 
-class InventoryEntryDBObject : DBObject() : Parcelable {
+class InventoryEntryDBObject : DBObject(), Parcelable {
     const val Parcelable.Creator<InventoryEntryDBObject> CREATOR = Parcelable.Creator<InventoryEntryDBObject>() {
         public InventoryEntryDBObject createFromParcel(Parcel parcel) {
             return InventoryEntryDBObject(parcel)

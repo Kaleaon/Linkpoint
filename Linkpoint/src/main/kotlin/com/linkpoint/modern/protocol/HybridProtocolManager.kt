@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
  * Supports UDP (legacy), HTTP/2 (CAPS), and WebSocket (real-time events) transports.
  */
 class HybridProtocolManager {
-    private const val String TAG = "HybridProtocol"
+    private const val TAG: String = "HybridProtocol"
     
     // Transport types
     enum class Transport {

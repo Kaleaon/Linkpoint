@@ -28,7 +28,7 @@ import com.linkpoint.ui.inventory.InventoryActivity
 import java.util.UUID
 import javax.annotation.Nullable
 
-class UserFirstLifeProfileTab : ChatterReloadableFragment() : LoadableMonitor.OnLoadableDataChangedListener {
+class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadableDataChangedListener {
     @BindView(2131755706)
     Button aboutEditButton
     private val SubscriptionData<UUID, AvatarPropertiesReply> avatarProperties = SubscriptionData<>(UIThreadExecutor.getInstance())
