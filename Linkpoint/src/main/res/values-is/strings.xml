@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">Fara heim</string>
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+    <string name="abc_action_bar_up_description">Fara upp</string>
+    <string name="abc_action_menu_overflow_description">Fleiri valkostir</string>
+    <string name="abc_action_mode_done">Lokið</string>
+    <string name="abc_activity_chooser_view_see_all">Sjá allt</string>
+    <string name="abc_activitychooserview_choose_application">Veldu forrit</string>
+    <string name="abc_capital_off">SLÖKKT</string>
+    <string name="abc_capital_on">KVEIKT</string>
+    <string name="abc_search_hint">Leita…</string>
+    <string name="abc_searchview_description_clear">Hreinsa fyrirspurn</string>
+    <string name="abc_searchview_description_query">Leitarfyrirspurn</string>
+    <string name="abc_searchview_description_search">Leita</string>
+    <string name="abc_searchview_description_submit">Senda fyrirspurn</string>
+    <string name="abc_searchview_description_voice">Raddleit</string>
+    <string name="abc_shareactionprovider_share_with">Deila með</string>
+    <string name="abc_shareactionprovider_share_with_application">Deila með %s</string>
+    <string name="abc_toolbar_collapse_description">Minnka</string>
+    <string name="back_button_content_description">til baka</string>
+    <string name="cancel_button">Hætta við</string>
+    <string name="dialog_button_got_it">ÉG SKIL</string>
+    <string name="dialog_button_open_help_center">OPNA HJÁLPARMIÐSTÖÐ</string>
+    <string name="dialog_message_incompatible_phone">Nota verður síma sem hægt er að nota með Daydream. Kíktu í hjálparmiðstöð Daydream til að fá frekari upplýsingar.</string>
+    <string name="dialog_message_no_cardboard">Náðu í Cardboard forritið til að stilla gleraugun.</string>
+    <string name="dialog_message_setup">Stilltu gleraugun þannig að upplifunin verði sem best.</string>
+    <string name="dialog_title">Stilla</string>
+    <string name="dialog_title_incompatible_phone">Ósamhæfur sími</string>
+    <string name="dialog_title_vr_core_not_enabled">Uppsetningar er krafist</string>
+    <string name="dialog_title_vr_core_not_installed">Uppsetningar er krafist</string>
+    <string name="dialog_title_warning">Viðvörun</string>
+    <string name="dialog_vr_core_not_enabled">Þetta forrit virkar hugsanlega ekki almennilega án sýndarveruleikaþjónustu Google, kveiktu á henni í stillingum símans áður en haldið er áfram.</string>
+    <string name="dialog_vr_core_not_installed">Þetta forrit virkar hugsanlega ekki almennilega án sýndarveruleikaþjónustu Google. Settu sýndarveruleikaþjónustu Google upp á Play Store áður en haldið er áfram.</string>
+    <string name="go_to_playstore_button">Opna Play Store</string>
+    <string name="go_to_vr_listeners_settings_button">Fara í stillingar</string>
+    <string name="no_browser_text">Enginn vafri til að opna vefsvæði</string>
+    <string name="place_your_phone_into_cardboard">Settu símann í Cardboard gleraugun</string>
+    <string name="place_your_viewer_into_viewer_format">Settu símann í %s gleraugun</string>
+    <string name="search_menu_title">Leita</string>
+    <string name="settings_button_content_description">stillingar</string>
+    <string name="setup_button">Uppsetning</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="switch_viewer_action">Skipta</string>
+    <string name="switch_viewer_prompt">Ertu að nota önnur gleraugu?</string>
+</resources>

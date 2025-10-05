@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Modern Material Design 3 colors -->
+    <color name="linkpoint_primary">#6200EE</color>
+    <color name="linkpoint_primary_variant">#3700B3</color>
+    <color name="linkpoint_secondary">#03DAC6</color>
+    <color name="linkpoint_secondary_variant">#018786</color>
+    
+    <!-- Background colors -->
+    <color name="linkpoint_background">#121212</color>
+    <color name="linkpoint_surface">#1E1E1E</color>
+    <color name="linkpoint_surface_variant">#2C2C2C</color>
+    
+    <!-- Text colors -->
+    <color name="linkpoint_on_primary">#FFFFFF</color>
+    <color name="linkpoint_on_secondary">#000000</color>
+    <color name="linkpoint_on_background">#FFFFFF</color>
+    <color name="linkpoint_on_surface">#FFFFFF</color>
+    
+    <!-- Status colors -->
+    <color name="linkpoint_success">#4CAF50</color>
+    <color name="linkpoint_warning">#FF9800</color>
+    <color name="linkpoint_error">#F44336</color>
+    
+    <!-- Voice indicator colors -->
+    <color name="voice_active">#00C853</color>
+    <color name="voice_muted">#F44336</color>
+    <color name="voice_inactive">#9E9E9E</color>
+</resources>

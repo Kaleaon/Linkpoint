@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:orientation="vertical" android:id="@+id/layout_root" android:padding="10dp" android:layout_width="match_parent" android:layout_height="match_parent">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/login_user_name"/>
+    <EditText android:id="@+id/loginNameText" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:inputType="textAutoCorrect"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/login_password"/>
+    <EditText android:id="@+id/loginPasswordText" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:inputType="textPassword"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/login_grid"/>
+    <Spinner android:id="@+id/spinnerGrid" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    <LinearLayout android:layout_gravity="right" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <Button android:id="@+id/okButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/add_new_account" style="@style/BorderlessCardButton"/>
+        <Button android:id="@+id/cancelButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/cancel" style="@style/BorderlessCardButton"/>
+    </LinearLayout>
+</LinearLayout>

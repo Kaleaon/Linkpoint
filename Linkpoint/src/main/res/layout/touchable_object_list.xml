@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+    <ListView android:id="@+id/touchableObjectListView" android:layout_width="match_parent" android:layout_height="match_parent"/>
+    <TextView android:gravity="center" android:id="@android:id/empty" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" android:text="@string/object_list_empty"/>
+</LinearLayout>
