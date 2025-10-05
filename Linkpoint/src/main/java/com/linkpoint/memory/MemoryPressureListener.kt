@@ -1,12 +1,11 @@
-package com.linkpoint.memory;
-import java.util.*;
+package com.linkpoint.memory
 
 /**
  * Interface for listening to memory pressure events
  */
-public interface MemoryPressureListener {
+interface MemoryPressureListener {
     /**
      * Called when memory pressure is detected (usage > 80%)
      */
-    void onMemoryPressure();
+    fun onMemoryPressure()
 }
