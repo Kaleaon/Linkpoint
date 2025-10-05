@@ -1,0 +1,54 @@
+package com.linkpoint.slproto.users
+
+class SLGroupInfo {
+    const val Long GP_ACCOUNTING_ACCOUNTABLE = 1099511627776L
+    const val Long GP_ALL_POWERS = -1
+    const val Long GP_GROUP_CHANGE_IDENTITY = 2048
+    const val Long GP_LAND_ADMIN = 4294967296L
+    const val Long GP_LAND_ALLOW_CREATE = 33554432
+    const val Long GP_LAND_ALLOW_EDIT_LAND = 8388608
+    const val Long GP_LAND_ALLOW_FLY = 16777216
+    const val Long GP_LAND_ALLOW_HOLD_EVENT = 2199023255552L
+    const val Long GP_LAND_ALLOW_LANDMARK = 67108864
+    const val Long GP_LAND_ALLOW_SET_HOME = 268435456
+    const val Long GP_LAND_CHANGE_IDENTITY = 262144
+    const val Long GP_LAND_CHANGE_MEDIA = 1048576
+    const val Long GP_LAND_DEED = 4096
+    const val Long GP_LAND_DIVIDE_JOIN = 32768
+    const val Long GP_LAND_EDIT = 2097152
+    const val Long GP_LAND_FIND_PLACES = 131072
+    const val Long GP_LAND_GARDENING = 34359738368L
+    const val Long GP_LAND_MANAGE_ALLOWED = 536870912
+    const val Long GP_LAND_MANAGE_BANNED = 1073741824
+    const val Long GP_LAND_MANAGE_PASSES = 2147483648L
+    const val Long GP_LAND_OPTIONS = 4194304
+    const val Long GP_LAND_RELEASE = 8192
+    const val Long GP_LAND_RETURN = 281500746514432L
+    const val Long GP_LAND_RETURN_GROUP_OWNED = 281474976710656L
+    const val Long GP_LAND_RETURN_GROUP_SET = 8589934592L
+    const val Long GP_LAND_RETURN_NON_GROUP = 17179869184L
+    const val Long GP_LAND_SET_LANDING_POINT = 524288
+    const val Long GP_LAND_SET_SALE_INFO = 16384
+    const val Long GP_MEMBER_EJECT = 4
+    const val Long GP_MEMBER_INVITE = 2
+    const val Long GP_MEMBER_OPTIONS = 8
+    const val Long GP_MEMBER_VISIBLE_IN_DIR = 140737488355328L
+    const val Long GP_NOTICES_RECEIVE = 8796093022208L
+    const val Long GP_NOTICES_SEND = 4398046511104L
+    const val Long GP_NO_POWERS = 0
+    const val Long GP_OBJECT_DEED = 68719476736L
+    const val Long GP_OBJECT_MANIPULATE = 274877906944L
+    const val Long GP_OBJECT_SET_SALE = 549755813888L
+    const val Long GP_PROPOSAL_START = 17592186044416L
+    const val Long GP_PROPOSAL_VOTE = 35184372088832L
+    const val Long GP_ROLE_ASSIGN_MEMBER = 256
+    const val Long GP_ROLE_ASSIGN_MEMBER_LIMITED = 128
+    const val Long GP_ROLE_CHANGE_ACTIONS = 1024
+    const val Long GP_ROLE_CREATE = 16
+    const val Long GP_ROLE_DELETE = 32
+    const val Long GP_ROLE_PROPERTIES = 64
+    const val Long GP_ROLE_REMOVE_MEMBER = 512
+    const val Long GP_SESSION_JOIN = 65536
+    const val Long GP_SESSION_MODERATOR = 137438953472L
+    const val Long GP_SESSION_VOICE = 134217728
+}
