@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.search;
+package com.linkpoint.ui.search;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -13,13 +13,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.dao.SearchGridResult;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.modules.search.SearchGridQuery;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
+import com.linkpoint.R;
+import com.linkpoint.dao.SearchGridResult;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.modules.search.SearchGridQuery;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.slproto.users.ChatterNameRetriever;
+import com.linkpoint.ui.chat.ChatterPicView;
 import de.greenrobot.dao.query.LazyList;
 import java.util.UUID;
 import javax.annotation.Nullable;

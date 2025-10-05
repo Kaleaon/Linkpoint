@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.settings;
+package com.linkpoint.ui.settings;
 import java.util.*;
 
 import android.content.Intent;
@@ -12,7 +12,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.lumiyaviewer.lumiya.LumiyaApp;
+import com.linkpoint.LumiyaApp;
 
 /**
  * Modern Settings Activity for Linkpoint Sample Application

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 import java.util.*;
 
 import android.support.annotation.CallSuper;
@@ -8,8 +8,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import butterknife.Unbinder;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
+import com.linkpoint.R;
+import com.linkpoint.ui.chat.ChatterPicView;
 
 public class MyAvatarFragment_ViewBinding implements Unbinder {
     private MyAvatarFragment target;

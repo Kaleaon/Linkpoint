@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.objects;
+package com.linkpoint.ui.objects;
 import java.util.*;
 
 import android.content.Context;
@@ -8,12 +8,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.objects.PayInfo;
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectProfileData;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
+import com.linkpoint.Debug;
+import com.linkpoint.R;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.objects.PayInfo;
+import com.linkpoint.slproto.objects.SLObjectProfileData;
+import com.linkpoint.slproto.users.manager.UserManager;
 
 public class ObjectPayDialog {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356  reason: not valid java name */

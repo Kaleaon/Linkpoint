@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.settings;
+package com.linkpoint.ui.settings;
 import java.util.*;
 
 import android.content.Context;
@@ -8,9 +8,9 @@ import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.CheckBoxPreference;
 import android.util.AttributeSet;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.licensing.LicenseChecker;
-import com.lumiyaviewer.lumiya.sync.CloudSyncServiceConnection;
+import com.linkpoint.R;
+import com.linkpoint.licensing.LicenseChecker;
+import com.linkpoint.sync.CloudSyncServiceConnection;
 
 public class GoogleDriveSyncPreference extends CheckBoxPreference {
     public GoogleDriveSyncPreference(Context context) {

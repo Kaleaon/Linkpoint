@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.login;
+package com.linkpoint.ui.login;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
@@ -8,13 +8,13 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.GridConnectionService;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
-import com.lumiyaviewer.lumiya.slproto.SLURL;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.common.TeleportProgressDialog;
+import com.linkpoint.GridConnectionService;
+import com.linkpoint.R;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.SLGridConnection;
+import com.linkpoint.slproto.SLURL;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.common.TeleportProgressDialog;
 import java.util.UUID;
 
 public class TeleportSLURLActivity extends AppCompatActivity implements View.OnClickListener {

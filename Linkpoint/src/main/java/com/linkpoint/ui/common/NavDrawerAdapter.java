@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,16 +11,16 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.chat.ChatNewActivity;
-import com.lumiyaviewer.lumiya.ui.inventory.InventoryActivity;
-import com.lumiyaviewer.lumiya.ui.login.LogoutDialog;
-import com.lumiyaviewer.lumiya.ui.minimap.MinimapActivity;
-import com.lumiyaviewer.lumiya.ui.myava.MyAvatarActivity;
-import com.lumiyaviewer.lumiya.ui.objects.ObjectListNewActivity;
-import com.lumiyaviewer.lumiya.ui.render.WorldViewActivity;
-import com.lumiyaviewer.lumiya.ui.search.SearchGridActivity;
-import com.lumiyaviewer.lumiya.ui.settings.SettingsActivity;
+import com.linkpoint.R;
+import com.linkpoint.ui.chat.ChatNewActivity;
+import com.linkpoint.ui.inventory.InventoryActivity;
+import com.linkpoint.ui.login.LogoutDialog;
+import com.linkpoint.ui.minimap.MinimapActivity;
+import com.linkpoint.ui.myava.MyAvatarActivity;
+import com.linkpoint.ui.objects.ObjectListNewActivity;
+import com.linkpoint.ui.render.WorldViewActivity;
+import com.linkpoint.ui.search.SearchGridActivity;
+import com.linkpoint.ui.settings.SettingsActivity;
 import java.util.UUID;
 
 class NavDrawerAdapter extends ArrayAdapter<NavDrawerItem> implements AdapterView.OnItemClickListener {

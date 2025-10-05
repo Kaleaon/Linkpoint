@@ -1,6 +1,6 @@
-package com.lumiyaviewer.lumiya.ui.chat.profiles;
+package com.linkpoint.ui.chat.profiles;
 
-import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
+import com.linkpoint.slproto.users.ChatterNameRetriever;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.chat.profiles.-$Lambda$wqoLfTfjESd1OUBLJEQMKRim4S0  reason: invalid class name */
 final /* synthetic */ class $Lambda$wqoLfTfjESd1OUBLJEQMKRim4S0 implements ChatterNameRetriever.OnChatterNameUpdated {

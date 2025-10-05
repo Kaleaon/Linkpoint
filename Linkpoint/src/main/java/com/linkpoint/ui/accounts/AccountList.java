@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.accounts;
+package com.linkpoint.ui.accounts;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.settings;
+package com.linkpoint.ui.settings;
 
 public class SettingsSubPageFragment extends SettingsFragment {
 }

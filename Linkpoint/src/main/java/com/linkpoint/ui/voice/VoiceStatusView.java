@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.voice;
+package com.linkpoint.ui.voice;
 import java.util.*;
 
 import android.annotation.TargetApi;
@@ -26,23 +26,23 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.google.common.base.Objects;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.GridConnectionService;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.react.Subscription;
-import com.lumiyaviewer.lumiya.react.SubscriptionData;
-import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.render.OnHoverListenerCompat;
-import com.lumiyaviewer.lumiya.voice.common.messages.VoiceAudioProperties;
-import com.lumiyaviewer.lumiya.voice.common.messages.VoiceSetAudioProperties;
-import com.lumiyaviewer.lumiya.voice.common.model.VoiceAudioDevice;
-import com.lumiyaviewer.lumiya.voice.common.model.VoiceBluetoothState;
-import com.lumiyaviewer.lumiya.voice.common.model.VoiceChatInfo;
-import com.lumiyaviewer.lumiya.voiceintf.VoicePluginServiceConnection;
+import com.linkpoint.Debug;
+import com.linkpoint.GridConnectionService;
+import com.linkpoint.R;
+import com.linkpoint.react.Subscription;
+import com.linkpoint.react.SubscriptionData;
+import com.linkpoint.react.SubscriptionSingleKey;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.slproto.users.ChatterNameRetriever;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.render.OnHoverListenerCompat;
+import com.linkpoint.voice.common.messages.VoiceAudioProperties;
+import com.linkpoint.voice.common.messages.VoiceSetAudioProperties;
+import com.linkpoint.voice.common.model.VoiceAudioDevice;
+import com.linkpoint.voice.common.model.VoiceBluetoothState;
+import com.linkpoint.voice.common.model.VoiceChatInfo;
+import com.linkpoint.voiceintf.VoicePluginServiceConnection;
 import javax.annotation.Nullable;
 
 public class VoiceStatusView extends FrameLayout {

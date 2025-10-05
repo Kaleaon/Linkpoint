@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.outfits;
+package com.linkpoint.ui.outfits;
 import java.util.*;
 
 import android.content.Context;
@@ -11,10 +11,10 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance;
-import com.lumiyaviewer.lumiya.ui.common.DismissableAdapter;
-import com.lumiyaviewer.lumiya.ui.common.SwipeDismissListViewTouchListener;
+import com.linkpoint.R;
+import com.linkpoint.slproto.modules.SLAvatarAppearance;
+import com.linkpoint.ui.common.DismissableAdapter;
+import com.linkpoint.ui.common.SwipeDismissListViewTouchListener;
 
 class CurrentOutfitAdapter extends BaseAdapter implements DismissableAdapter {
     @Nullable

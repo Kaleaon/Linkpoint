@@ -1,10 +1,10 @@
-package com.lumiyaviewer.lumiya.ui.grids;
+package com.linkpoint.ui.grids;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.ArrayAdapter;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.render;
+package com.linkpoint.ui.render;
 import java.util.*;
 
 import android.annotation.SuppressLint;
@@ -14,8 +14,8 @@ import android.widget.TextView;
 import butterknife.Unbinder;
 import butterknife.internal.DebouncingOnClickListener;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.voice.VoiceStatusView;
+import com.linkpoint.R;
+import com.linkpoint.ui.voice.VoiceStatusView;
 
 public class CardboardActivity_ViewBinding implements Unbinder {
     private CardboardActivity target;

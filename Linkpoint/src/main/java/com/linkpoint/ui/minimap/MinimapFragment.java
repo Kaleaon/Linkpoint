@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.minimap;
+package com.linkpoint.ui.minimap;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -6,15 +6,15 @@ import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.react.Subscription;
-import com.lumiyaviewer.lumiya.react.SubscriptionData;
-import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.modules.SLMinimap;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.minimap.MinimapView;
+import com.linkpoint.R;
+import com.linkpoint.react.Subscription;
+import com.linkpoint.react.SubscriptionData;
+import com.linkpoint.react.SubscriptionSingleKey;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.modules.SLMinimap;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.minimap.MinimapView;
 import java.util.UUID;
 
 public class MinimapFragment extends Fragment implements MinimapView.OnUserClickListener {

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.objpopup;
+package com.linkpoint.ui.objpopup;
 import java.util.*;
 
 import android.view.View;

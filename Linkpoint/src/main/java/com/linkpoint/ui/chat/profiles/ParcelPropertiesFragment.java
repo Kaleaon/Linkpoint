@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.chat.profiles;
+package com.linkpoint.ui.chat.profiles;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -20,23 +20,23 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 import com.google.common.base.Strings;
 import com.google.common.logging.nano.Vr;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.StreamingMediaService;
-import com.lumiyaviewer.lumiya.react.Subscription;
-import com.lumiyaviewer.lumiya.react.SubscriptionData;
-import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.ParcelData;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.ChatterNameDisplayer;
-import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
-import com.lumiyaviewer.lumiya.ui.common.FragmentWithTitle;
-import com.lumiyaviewer.lumiya.ui.common.ImageAssetView;
-import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import com.linkpoint.R;
+import com.linkpoint.StreamingMediaService;
+import com.linkpoint.react.Subscription;
+import com.linkpoint.react.SubscriptionData;
+import com.linkpoint.react.SubscriptionSingleKey;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.slproto.users.ParcelData;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.chat.ChatterPicView;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.common.ChatterNameDisplayer;
+import com.linkpoint.ui.common.DetailsActivity;
+import com.linkpoint.ui.common.FragmentWithTitle;
+import com.linkpoint.ui.common.ImageAssetView;
+import com.linkpoint.utils.UUIDPool;
 import java.util.UUID;
 
 public class ParcelPropertiesFragment extends FragmentWithTitle {

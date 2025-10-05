@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 import java.util.*;
 
 import android.app.AlertDialog;
@@ -16,9 +16,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import com.google.common.base.Objects;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
+import com.linkpoint.R;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.users.ChatterID;
 import javax.annotation.Nullable;
 
 public abstract class TextFieldEditFragment extends ChatterFragment implements BackButtonHandler {

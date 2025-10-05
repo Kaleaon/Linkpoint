@@ -1,13 +1,13 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 import java.util.*;
 
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import com.linkpoint.R;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.utils.UUIDPool;
 
 public class TeleportHomeDialog {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_common_TeleportHomeDialog_956  reason: not valid java name */

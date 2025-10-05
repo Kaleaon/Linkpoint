@@ -1,7 +1,7 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 import java.util.*;
 
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 enum MyAvatarDetailsPages {
     pageProfile(R.string.my_profile_fragment_title),

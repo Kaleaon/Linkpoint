@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.outfits;
+package com.linkpoint.ui.outfits;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -9,17 +9,17 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.react.SubscriptionData;
-import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.DismissableAdapter;
-import com.lumiyaviewer.lumiya.ui.common.SwipeDismissListViewTouchListener;
-import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor;
+import com.linkpoint.R;
+import com.linkpoint.react.SubscriptionData;
+import com.linkpoint.react.SubscriptionSingleKey;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.modules.SLAvatarAppearance;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.common.DismissableAdapter;
+import com.linkpoint.ui.common.SwipeDismissListViewTouchListener;
+import com.linkpoint.ui.common.loadmon.LoadableMonitor;
 import java.util.UUID;
 
 public class CurrentOutfitFragment extends Fragment implements LoadableMonitor.OnLoadableDataChangedListener, AdapterView.OnItemClickListener {

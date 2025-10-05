@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.minimap;
+package com.linkpoint.ui.minimap;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -11,15 +11,15 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.react.SubscriptionData;
-import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.users.ParcelData;
-import com.lumiyaviewer.lumiya.slproto.users.manager.CurrentLocationInfo;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.ConnectedActivity;
+import com.linkpoint.R;
+import com.linkpoint.react.SubscriptionData;
+import com.linkpoint.react.SubscriptionSingleKey;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.users.ParcelData;
+import com.linkpoint.slproto.users.manager.CurrentLocationInfo;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.common.ConnectedActivity;
 import java.util.UUID;
 import javax.annotation.Nullable;
 

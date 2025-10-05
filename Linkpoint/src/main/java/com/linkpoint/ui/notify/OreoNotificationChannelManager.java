@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.notify;
+package com.linkpoint.ui.notify;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -9,12 +9,12 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.LumiyaApp;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.media.NotificationSounds;
-import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels;
-import com.lumiyaviewer.lumiya.ui.settings.NotificationType;
+import com.linkpoint.Debug;
+import com.linkpoint.LumiyaApp;
+import com.linkpoint.R;
+import com.linkpoint.ui.media.NotificationSounds;
+import com.linkpoint.ui.notify.NotificationChannels;
+import com.linkpoint.ui.settings.NotificationType;
 import java.util.EnumMap;
 import java.util.Map;
 import javax.annotation.Nonnull;

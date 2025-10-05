@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.chat.contacts;
+package com.linkpoint.ui.chat.contacts;
 import java.util.*;
 
 import android.content.Context;
@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.chat.ChatterDisplayInfo;
 
 abstract class ChatterListAdapter extends BaseAdapter implements ListAdapter {
     protected final Context context;

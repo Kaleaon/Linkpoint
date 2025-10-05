@@ -1,10 +1,10 @@
-package com.lumiyaviewer.lumiya.ui.notify;
+package com.linkpoint.ui.notify;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import com.google.common.collect.ImmutableSet;
-import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels;
-import com.lumiyaviewer.lumiya.ui.settings.NotificationType;
+import com.linkpoint.ui.notify.NotificationChannels;
+import com.linkpoint.ui.settings.NotificationType;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 

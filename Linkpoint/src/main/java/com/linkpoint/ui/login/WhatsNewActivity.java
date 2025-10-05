@@ -1,10 +1,10 @@
-package com.lumiyaviewer.lumiya.ui.login;
+package com.linkpoint.ui.login;
 
 import android.os.Bundle;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.LumiyaApp;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.common.ThemedActivity;
+import com.linkpoint.LumiyaApp;
+import com.linkpoint.R;
+import com.linkpoint.ui.common.ThemedActivity;
 
 public class WhatsNewActivity extends ThemedActivity {
     public void onCreate(Bundle bundle) {

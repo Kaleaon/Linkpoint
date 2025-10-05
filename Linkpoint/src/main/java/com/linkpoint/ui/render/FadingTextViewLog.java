@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.render;
+package com.linkpoint.ui.render;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -11,9 +11,9 @@ import android.util.TypedValue;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.common.base.Strings;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
-import com.lumiyaviewer.lumiya.slproto.users.manager.ActiveChattersManager;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
+import com.linkpoint.slproto.chat.generic.SLChatEvent;
+import com.linkpoint.slproto.users.manager.ActiveChattersManager;
+import com.linkpoint.slproto.users.manager.UserManager;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;

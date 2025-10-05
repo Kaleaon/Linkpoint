@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.grids;
+package com.linkpoint.ui.grids;
 import java.util.*;
 
 import android.support.annotation.CallSuper;
@@ -8,7 +8,7 @@ import android.widget.ListView;
 import butterknife.Unbinder;
 import butterknife.internal.DebouncingOnClickListener;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 public class ManageGridsActivity_ViewBinding implements Unbinder {
     private ManageGridsActivity target;

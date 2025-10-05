@@ -1,6 +1,6 @@
-package com.lumiyaviewer.lumiya.ui.settings;
+package com.linkpoint.ui.settings;
 
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 public enum SettingsPage {
     PageConnection(R.xml.preferences_connection, R.string.prefs_category_connection),

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,8 +6,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.Debug;
+import com.linkpoint.R;
 
 public abstract class MasterDetailsActivity extends DetailsActivity {
     protected static final String FROM_SAME_ACTIVITY = "fromSameActivity";

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.chat.profiles;
+package com.linkpoint.ui.chat.profiles;
 import java.util.*;
 
 import android.support.annotation.CallSuper;
@@ -10,10 +10,10 @@ import android.widget.TextView;
 import butterknife.Unbinder;
 import butterknife.internal.DebouncingOnClickListener;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
-import com.lumiyaviewer.lumiya.ui.common.ImageAssetView;
-import com.lumiyaviewer.lumiya.ui.common.LoadingLayout;
+import com.linkpoint.R;
+import com.linkpoint.ui.chat.ChatterPicView;
+import com.linkpoint.ui.common.ImageAssetView;
+import com.linkpoint.ui.common.LoadingLayout;
 
 public class UserMainProfileTab_ViewBinding implements Unbinder {
     private UserMainProfileTab target;

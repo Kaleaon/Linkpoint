@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.objects;
+package com.linkpoint.ui.objects;
 import java.util.*;
 
 import android.content.Context;
@@ -12,10 +12,10 @@ import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.objects.SLAvatarObjectDisplayInfo;
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectDisplayInfo;
-import com.lumiyaviewer.lumiya.slproto.objects.SLPrimObjectDisplayInfo;
+import com.linkpoint.R;
+import com.linkpoint.slproto.objects.SLAvatarObjectDisplayInfo;
+import com.linkpoint.slproto.objects.SLObjectDisplayInfo;
+import com.linkpoint.slproto.objects.SLPrimObjectDisplayInfo;
 import javax.annotation.Nonnull;
 
 class ObjectListAdapter extends BaseExpandableListAdapter {

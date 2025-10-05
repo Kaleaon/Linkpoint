@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.chat.contacts;
+package com.linkpoint.ui.chat.contacts;
 import java.util.*;
 
 import android.content.Context;
@@ -7,11 +7,11 @@ import android.view.ViewGroup;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.lumiyaviewer.lumiya.react.Subscription;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterDisplayData;
-import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterListType;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
+import com.linkpoint.react.Subscription;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.users.manager.ChatterDisplayData;
+import com.linkpoint.slproto.users.manager.ChatterListType;
+import com.linkpoint.slproto.users.manager.UserManager;
 import java.io.Closeable;
 import java.io.IOException;
 

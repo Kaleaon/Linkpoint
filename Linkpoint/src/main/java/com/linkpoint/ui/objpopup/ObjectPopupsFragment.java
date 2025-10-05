@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.objpopup;
+package com.linkpoint.ui.objpopup;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -7,10 +7,10 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatLayoutManager;
+import com.linkpoint.R;
+import com.linkpoint.slproto.chat.generic.SLChatEvent;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.chat.ChatLayoutManager;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

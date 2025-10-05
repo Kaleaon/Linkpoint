@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import java.util.UUID;
 import javax.annotation.Nullable;

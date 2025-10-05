@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.grids;
+package com.linkpoint.ui.grids;
 import java.util.*;
 
 import android.content.DialogInterface;

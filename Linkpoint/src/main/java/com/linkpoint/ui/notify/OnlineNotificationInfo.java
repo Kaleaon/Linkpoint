@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.notify;
+package com.linkpoint.ui.notify;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -6,11 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import com.google.common.base.Objects;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
-import com.lumiyaviewer.lumiya.slproto.avatar.SLMoveEvents;
-import com.lumiyaviewer.lumiya.ui.login.LoginActivity;
-import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels;
+import com.linkpoint.R;
+import com.linkpoint.slproto.SLGridConnection;
+import com.linkpoint.slproto.avatar.SLMoveEvents;
+import com.linkpoint.ui.login.LoginActivity;
+import com.linkpoint.ui.notify.NotificationChannels;
 
 public class OnlineNotificationInfo {
 

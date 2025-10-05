@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.media;
+package com.linkpoint.ui.media;
 
 import android.content.Context;
 

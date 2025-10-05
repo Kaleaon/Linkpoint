@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.accounts;
+package com.linkpoint.ui.accounts;
 import java.util.*;
 
 import android.content.DialogInterface;

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 import java.util.*;
 
 import android.app.Activity;
@@ -11,7 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 public class NavDrawerActivityHelper implements AdapterView.OnItemClickListener {
     private final NavDrawerAdapter drawerAdapter;

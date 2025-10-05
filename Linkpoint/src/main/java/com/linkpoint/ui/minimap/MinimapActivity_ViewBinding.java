@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.minimap;
+package com.linkpoint.ui.minimap;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -8,7 +8,7 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import butterknife.Unbinder;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 public class MinimapActivity_ViewBinding implements Unbinder {
     private MinimapActivity target;

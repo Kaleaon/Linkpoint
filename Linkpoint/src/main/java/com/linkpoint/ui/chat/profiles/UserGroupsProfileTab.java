@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.chat.profiles;
+package com.linkpoint.ui.chat.profiles;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,17 +11,17 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.react.SubscriptionData;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.modules.groups.AvatarGroupList;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.common.ChatterReloadableFragment;
-import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
-import com.lumiyaviewer.lumiya.ui.common.LoadingLayout;
-import com.lumiyaviewer.lumiya.ui.common.loadmon.LoadableMonitor;
+import com.linkpoint.Debug;
+import com.linkpoint.R;
+import com.linkpoint.react.SubscriptionData;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.modules.groups.AvatarGroupList;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.common.ChatterReloadableFragment;
+import com.linkpoint.ui.common.DetailsActivity;
+import com.linkpoint.ui.common.LoadingLayout;
+import com.linkpoint.ui.common.loadmon.LoadableMonitor;
 import java.util.UUID;
 import javax.annotation.Nullable;
 

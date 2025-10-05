@@ -1,14 +1,14 @@
-package com.lumiyaviewer.lumiya.ui.chat.profiles;
+package com.linkpoint.ui.chat.profiles;
 
 import android.content.Context;
 import android.os.Bundle;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.SLMessage;
-import com.lumiyaviewer.lumiya.slproto.messages.AvatarPropertiesReply;
-import com.lumiyaviewer.lumiya.slproto.modules.SLUserProfiles;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.ui.common.ChatterFragment;
+import com.linkpoint.R;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.SLMessage;
+import com.linkpoint.slproto.messages.AvatarPropertiesReply;
+import com.linkpoint.slproto.modules.SLUserProfiles;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.ui.common.ChatterFragment;
 import java.util.UUID;
 
 public class UserAboutTextEditFragment extends ProfileTextFieldEditFragment {

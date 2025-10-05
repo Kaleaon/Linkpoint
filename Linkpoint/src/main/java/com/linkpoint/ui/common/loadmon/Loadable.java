@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common.loadmon;
+package com.linkpoint.ui.common.loadmon;
 import java.util.*;
 
 import javax.annotation.Nonnull;

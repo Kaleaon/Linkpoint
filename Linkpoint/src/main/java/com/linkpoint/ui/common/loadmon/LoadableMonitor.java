@@ -1,11 +1,11 @@
-package com.lumiyaviewer.lumiya.ui.common.loadmon;
+package com.linkpoint.ui.common.loadmon;
 
 import android.support.v4.widget.SwipeRefreshLayout;
 import com.google.common.base.Strings;
-import com.lumiyaviewer.lumiya.react.RefreshableOne;
-import com.lumiyaviewer.lumiya.react.UnsubscribableOne;
-import com.lumiyaviewer.lumiya.ui.common.LoadingLayout;
-import com.lumiyaviewer.lumiya.ui.common.loadmon.Loadable;
+import com.linkpoint.react.RefreshableOne;
+import com.linkpoint.react.UnsubscribableOne;
+import com.linkpoint.ui.common.LoadingLayout;
+import com.linkpoint.ui.common.loadmon.Loadable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

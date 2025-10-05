@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.settings;
+package com.linkpoint.ui.settings;
 import java.util.*;
 
 import android.content.Context;
@@ -12,8 +12,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
+import com.linkpoint.R;
+import com.linkpoint.ui.common.DetailsActivity;
 
 public class SettingsSelectionFragment extends Fragment implements AdapterView.OnItemClickListener {
 

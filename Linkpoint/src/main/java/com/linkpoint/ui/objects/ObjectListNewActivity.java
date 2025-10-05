@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.objects;
+package com.linkpoint.ui.objects;
 import java.util.*;
 
 import android.content.Context;
@@ -6,11 +6,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.chat.profiles.UserProfileFragment;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory;
-import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
+import com.linkpoint.R;
+import com.linkpoint.ui.chat.profiles.UserProfileFragment;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.common.FragmentActivityFactory;
+import com.linkpoint.ui.common.MasterDetailsActivity;
 
 public class ObjectListNewActivity extends MasterDetailsActivity {
 

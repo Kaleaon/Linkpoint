@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 import java.util.*;
 
 import android.animation.Animator;
@@ -10,7 +10,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import com.lumiyaviewer.lumiya.Debug;
+import com.linkpoint.Debug;
 
 @TargetApi(12)
 public class SwipeDismissTouchListener implements OnInterceptTouchEventListener {

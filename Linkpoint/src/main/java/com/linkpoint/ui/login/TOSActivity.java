@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.login;
+package com.linkpoint.ui.login;
 import java.util.*;
 
 import android.graphics.Color;
@@ -6,9 +6,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
 import com.google.common.io.CharStreams;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.common.ThemedActivity;
+import com.linkpoint.Debug;
+import com.linkpoint.R;
+import com.linkpoint.ui.common.ThemedActivity;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

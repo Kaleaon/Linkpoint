@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.settings;
+package com.linkpoint.ui.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,9 +8,9 @@ import android.net.Uri;
 import android.support.v4.view.ViewCompat;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.media.NotificationSounds;
-import com.lumiyaviewer.lumiya.utils.LEDAction;
+import com.linkpoint.R;
+import com.linkpoint.ui.media.NotificationSounds;
+import com.linkpoint.utils.LEDAction;
 
 public class NotificationSettings {
     private LEDAction blinkAction = LEDAction.None;

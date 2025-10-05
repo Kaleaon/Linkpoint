@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.chat.profiles;
+package com.linkpoint.ui.chat.profiles;
 
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -10,11 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.astuetz.PagerSlidingTabStrip;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.ui.common.ChatterReloadableFragment;
-import com.lumiyaviewer.lumiya.ui.common.ReloadableFragment;
-import com.lumiyaviewer.lumiya.ui.common.UserFunctionsFragment;
+import com.linkpoint.R;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.ui.common.ChatterReloadableFragment;
+import com.linkpoint.ui.common.ReloadableFragment;
+import com.linkpoint.ui.common.UserFunctionsFragment;
 import java.lang.ref.WeakReference;
 import java.util.EnumMap;
 import java.util.Map;

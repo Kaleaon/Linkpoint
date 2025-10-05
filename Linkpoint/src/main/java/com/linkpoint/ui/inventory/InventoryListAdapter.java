@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.inventory;
+package com.linkpoint.ui.inventory;
 import java.util.*;
 
 import android.content.Context;
@@ -10,9 +10,9 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
-import com.lumiyaviewer.lumiya.slproto.modules.SLAvatarAppearance;
+import com.linkpoint.R;
+import com.linkpoint.slproto.inventory.SLInventoryEntry;
+import com.linkpoint.slproto.modules.SLAvatarAppearance;
 
 public class InventoryListAdapter extends CursorAdapter {
     private SLAvatarAppearance avatarAppearance;

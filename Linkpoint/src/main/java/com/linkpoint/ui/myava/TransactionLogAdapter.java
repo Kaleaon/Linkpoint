@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -14,11 +14,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.dao.MoneyTransaction;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
-import com.lumiyaviewer.lumiya.ui.common.ChatterNameDisplayer;
+import com.linkpoint.R;
+import com.linkpoint.dao.MoneyTransaction;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.ui.chat.ChatterPicView;
+import com.linkpoint.ui.common.ChatterNameDisplayer;
 import de.greenrobot.dao.query.LazyList;
 import java.util.Calendar;
 import java.util.UUID;

@@ -1,8 +1,8 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.content.Intent;
 import android.support.v4.app.Fragment;
-import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import com.linkpoint.utils.UUIDPool;
 import java.util.UUID;
 import javax.annotation.Nullable;
 

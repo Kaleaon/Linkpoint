@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -7,14 +7,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.events.SLTeleportResultEvent;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatNewActivity;
-import com.lumiyaviewer.lumiya.ui.common.$Lambda$8gWLFwrhoxKapEC8iWggaUhFR1c;
+import com.linkpoint.Debug;
+import com.linkpoint.R;
+import com.linkpoint.eventbus.EventHandler;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.events.SLTeleportResultEvent;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.chat.ChatNewActivity;
+import com.linkpoint.ui.common.$Lambda$8gWLFwrhoxKapEC8iWggaUhFR1c;
 import java.util.UUID;
 
 public class TeleportProgressDialog extends ProgressDialog implements DialogInterface.OnCancelListener {

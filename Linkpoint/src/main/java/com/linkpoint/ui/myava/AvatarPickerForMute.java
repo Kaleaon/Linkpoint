@@ -1,16 +1,16 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteListEntry;
-import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteType;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.avapicker.AvatarPickerFragment;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
+import com.linkpoint.R;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.modules.mutelist.MuteListEntry;
+import com.linkpoint.slproto.modules.mutelist.MuteType;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.avapicker.AvatarPickerFragment;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.common.DetailsActivity;
 import java.util.UUID;
 import javax.annotation.Nullable;
 

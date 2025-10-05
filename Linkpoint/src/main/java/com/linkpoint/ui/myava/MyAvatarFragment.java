@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -13,18 +13,18 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.react.SubscriptionData;
-import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterNameRetriever;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
-import com.lumiyaviewer.lumiya.ui.common.FragmentWithTitle;
-import com.lumiyaviewer.lumiya.ui.outfits.OutfitsFragment;
+import com.linkpoint.R;
+import com.linkpoint.react.SubscriptionData;
+import com.linkpoint.react.SubscriptionSingleKey;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.slproto.users.ChatterNameRetriever;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.chat.ChatterPicView;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.common.DetailsActivity;
+import com.linkpoint.ui.common.FragmentWithTitle;
+import com.linkpoint.ui.outfits.OutfitsFragment;
 import java.util.UUID;
 
 public class MyAvatarFragment extends FragmentWithTitle implements AdapterView.OnItemClickListener, ChatterNameRetriever.OnChatterNameUpdated {

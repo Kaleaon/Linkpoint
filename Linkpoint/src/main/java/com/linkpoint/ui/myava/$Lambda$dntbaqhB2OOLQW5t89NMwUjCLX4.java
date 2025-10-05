@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 import java.util.*;
 
 import android.content.DialogInterface;

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -11,14 +11,14 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.View;
 import com.google.common.base.Objects;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG;
-import com.lumiyaviewer.lumiya.render.tex.DrawableTextureParams;
-import com.lumiyaviewer.lumiya.render.tex.TextureClass;
-import com.lumiyaviewer.lumiya.res.ResourceConsumer;
-import com.lumiyaviewer.lumiya.res.textures.TextureCache;
-import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import com.linkpoint.Debug;
+import com.linkpoint.R;
+import com.linkpoint.openjpeg.OpenJPEG;
+import com.linkpoint.render.tex.DrawableTextureParams;
+import com.linkpoint.render.tex.TextureClass;
+import com.linkpoint.res.ResourceConsumer;
+import com.linkpoint.res.textures.TextureCache;
+import com.linkpoint.utils.UUIDPool;
 import java.util.UUID;
 
 public class ImageAssetView extends View {

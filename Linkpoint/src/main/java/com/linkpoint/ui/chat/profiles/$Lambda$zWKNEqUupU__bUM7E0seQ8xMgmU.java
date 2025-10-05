@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.chat.profiles;
+package com.linkpoint.ui.chat.profiles;
 import java.util.*;
 
 import android.view.View;

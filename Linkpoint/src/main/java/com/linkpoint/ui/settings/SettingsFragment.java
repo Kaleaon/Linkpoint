@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.settings;
+package com.linkpoint.ui.settings;
 import java.util.*;
 
 import android.annotation.SuppressLint;
@@ -20,14 +20,14 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.ArrayAdapter;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.GlobalOptions;
-import com.lumiyaviewer.lumiya.LumiyaApp;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
-import com.lumiyaviewer.lumiya.ui.common.FragmentHasTitle;
-import com.lumiyaviewer.lumiya.ui.media.NotificationSounds;
-import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels;
-import com.lumiyaviewer.lumiya.utils.FileUtils;
+import com.linkpoint.GlobalOptions;
+import com.linkpoint.LumiyaApp;
+import com.linkpoint.R;
+import com.linkpoint.ui.common.DetailsActivity;
+import com.linkpoint.ui.common.FragmentHasTitle;
+import com.linkpoint.ui.media.NotificationSounds;
+import com.linkpoint.ui.notify.NotificationChannels;
+import com.linkpoint.utils.FileUtils;
 import java.io.File;
 import javax.annotation.Nullable;
 

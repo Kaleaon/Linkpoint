@@ -1,6 +1,6 @@
-package com.lumiyaviewer.lumiya.ui.render;
+package com.linkpoint.ui.render;
 
-import com.lumiyaviewer.lumiya.render.WorldViewRenderer;
+import com.linkpoint.render.WorldViewRenderer;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.render.-$Lambda$WbegR8yVWPTDY8X58dwHEd9HRSQ  reason: invalid class name */
 final /* synthetic */ class $Lambda$WbegR8yVWPTDY8X58dwHEd9HRSQ implements Runnable {

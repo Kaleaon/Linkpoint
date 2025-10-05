@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.settings;
+package com.linkpoint.ui.settings;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -8,8 +8,8 @@ import android.net.Uri;
 import android.support.v7.preference.Preference;
 import android.util.AttributeSet;
 import com.google.common.base.Objects;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.media.NotificationSounds;
+import com.linkpoint.R;
+import com.linkpoint.ui.media.NotificationSounds;
 
 public class RingtonePreference extends Preference {
     private int defaultRawResource = 0;

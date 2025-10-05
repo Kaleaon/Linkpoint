@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.render;
+package com.linkpoint.ui.render;
 
 import android.widget.TextView;
 

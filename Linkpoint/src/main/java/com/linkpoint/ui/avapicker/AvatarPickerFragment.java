@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.avapicker;
+package com.linkpoint.ui.avapicker;
 import java.util.*;
 
 import android.content.Context;
@@ -14,15 +14,15 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import com.astuetz.PagerSlidingTabStrip;
 import com.google.common.base.Predicate;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterDisplayData;
-import com.lumiyaviewer.lumiya.slproto.users.manager.ChatterListType;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo;
-import com.lumiyaviewer.lumiya.ui.chat.contacts.ChatterListSubscriptionAdapter;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.FragmentWithTitle;
+import com.linkpoint.R;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.slproto.users.manager.ChatterDisplayData;
+import com.linkpoint.slproto.users.manager.ChatterListType;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.chat.ChatterDisplayInfo;
+import com.linkpoint.ui.chat.contacts.ChatterListSubscriptionAdapter;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.common.FragmentWithTitle;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 

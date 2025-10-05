@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.objects;
+package com.linkpoint.ui.objects;
 import java.util.*;
 
 import android.content.Context;
@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
+import com.linkpoint.R;
+import com.linkpoint.slproto.objects.SLObjectInfo;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 

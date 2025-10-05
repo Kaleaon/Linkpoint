@@ -1,10 +1,10 @@
-package com.lumiyaviewer.lumiya.ui.chat.profiles;
+package com.linkpoint.ui.chat.profiles;
 
-import com.lumiyaviewer.lumiya.react.Subscription;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.messages.AvatarPropertiesReply;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.ui.common.TextFieldEditFragment;
+import com.linkpoint.react.Subscription;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.messages.AvatarPropertiesReply;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.ui.common.TextFieldEditFragment;
 import java.util.UUID;
 import javax.annotation.Nullable;
 

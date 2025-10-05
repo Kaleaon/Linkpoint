@@ -1,12 +1,12 @@
-package com.lumiyaviewer.lumiya.ui.objects;
+package com.linkpoint.ui.objects;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.types.EDeRezDestination;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
+import com.linkpoint.R;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.types.EDeRezDestination;
+import com.linkpoint.slproto.users.manager.UserManager;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 

@@ -1,16 +1,16 @@
-package com.lumiyaviewer.lumiya.ui.objpopup;
+package com.linkpoint.ui.objpopup;
 import java.util.*;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.ChatEventViewHolder;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
-import com.lumiyaviewer.lumiya.slproto.users.manager.SubscribableList;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatEventTimestampUpdater;
-import com.lumiyaviewer.lumiya.ui.common.RecyclerSubscribableListAdapter;
+import com.linkpoint.slproto.chat.generic.ChatEventViewHolder;
+import com.linkpoint.slproto.chat.generic.SLChatEvent;
+import com.linkpoint.slproto.users.manager.SubscribableList;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.chat.ChatEventTimestampUpdater;
+import com.linkpoint.ui.common.RecyclerSubscribableListAdapter;
 
 public class ObjectPopupsAdapter extends RecyclerSubscribableListAdapter<SLChatEvent> {
     private final Context context;

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 import java.util.*;
 
 import android.animation.ValueAnimator;
@@ -12,7 +12,7 @@ import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Interpolator;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 @TargetApi(14)
 public class ButteryProgressBar extends View {

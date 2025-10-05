@@ -1,8 +1,8 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.content.Intent;
 import android.os.Bundle;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
+import com.linkpoint.slproto.users.ChatterID;
 import java.util.UUID;
 
 public abstract class ChatterReloadableFragment extends ChatterFragment implements ReloadableFragment {

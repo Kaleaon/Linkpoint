@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.search;
+package com.linkpoint.ui.search;
 import java.util.*;
 
 import android.support.annotation.CallSuper;
@@ -8,9 +8,9 @@ import android.widget.TextView;
 import butterknife.Unbinder;
 import butterknife.internal.DebouncingOnClickListener;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
-import com.lumiyaviewer.lumiya.ui.common.ImageAssetView;
+import com.linkpoint.R;
+import com.linkpoint.ui.chat.ChatterPicView;
+import com.linkpoint.ui.common.ImageAssetView;
 
 public class ParcelInfoFragment_ViewBinding implements Unbinder {
     private ParcelInfoFragment target;

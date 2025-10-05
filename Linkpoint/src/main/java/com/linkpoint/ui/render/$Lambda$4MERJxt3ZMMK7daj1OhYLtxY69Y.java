@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.render;
+package com.linkpoint.ui.render;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.render.-$Lambda$4MERJxt3ZMMK7daj1OhYLtxY69Y  reason: invalid class name */
 final /* synthetic */ class $Lambda$4MERJxt3ZMMK7daj1OhYLtxY69Y implements Runnable {

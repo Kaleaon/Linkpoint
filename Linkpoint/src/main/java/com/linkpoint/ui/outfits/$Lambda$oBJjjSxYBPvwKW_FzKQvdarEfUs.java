@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.outfits;
+package com.linkpoint.ui.outfits;
 import java.util.*;
 
 import android.view.View;

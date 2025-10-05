@@ -1,7 +1,7 @@
-package com.lumiyaviewer.lumiya.ui.chat.profiles;
+package com.linkpoint.ui.chat.profiles;
 
-import com.lumiyaviewer.lumiya.react.Subscription;
-import com.lumiyaviewer.lumiya.slproto.messages.AvatarPropertiesReply;
+import com.linkpoint.react.Subscription;
+import com.linkpoint.slproto.messages.AvatarPropertiesReply;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.chat.profiles.-$Lambda$6hJe-KPqqQcY7xiCxogddm78oYc  reason: invalid class name */
 final /* synthetic */ class $Lambda$6hJeKPqqQcY7xiCxogddm78oYc implements Subscription.OnData {

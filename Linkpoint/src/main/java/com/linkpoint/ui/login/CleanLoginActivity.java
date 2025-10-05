@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.login;
+package com.linkpoint.ui.login;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -15,8 +15,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.lumiyaviewer.lumiya.BuildConfig;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.BuildConfig;
+import com.linkpoint.R;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

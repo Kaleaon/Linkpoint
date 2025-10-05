@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.minimap;
+package com.linkpoint.ui.minimap;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,8 +15,8 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.WindowManager;
 import com.google.common.base.Objects;
-import com.lumiyaviewer.lumiya.slproto.modules.SLMinimap;
-import com.lumiyaviewer.lumiya.slproto.types.ImmutableVector;
+import com.linkpoint.slproto.modules.SLMinimap;
+import com.linkpoint.slproto.types.ImmutableVector;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;

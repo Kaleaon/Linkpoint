@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.grids;
+package com.linkpoint.ui.grids;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,10 +17,10 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.common.ThemedActivity;
-import com.lumiyaviewer.lumiya.ui.grids.GridEditDialog;
-import com.lumiyaviewer.lumiya.ui.grids.GridList;
+import com.linkpoint.R;
+import com.linkpoint.ui.common.ThemedActivity;
+import com.linkpoint.ui.grids.GridEditDialog;
+import com.linkpoint.ui.grids.GridList;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.accounts;
+package com.linkpoint.ui.accounts;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -15,12 +15,12 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.accounts.AccountEditDialog;
-import com.lumiyaviewer.lumiya.ui.accounts.AccountList;
-import com.lumiyaviewer.lumiya.ui.common.ThemedActivity;
-import com.lumiyaviewer.lumiya.ui.grids.GridList;
-import com.lumiyaviewer.lumiya.ui.grids.ManageGridsActivity;
+import com.linkpoint.R;
+import com.linkpoint.ui.accounts.AccountEditDialog;
+import com.linkpoint.ui.accounts.AccountList;
+import com.linkpoint.ui.common.ThemedActivity;
+import com.linkpoint.ui.grids.GridList;
+import com.linkpoint.ui.grids.ManageGridsActivity;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.render;
+package com.linkpoint.ui.render;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -8,7 +8,7 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 public class InsetColoringLayout extends FrameLayout {
     private int backgroundColor = 0;

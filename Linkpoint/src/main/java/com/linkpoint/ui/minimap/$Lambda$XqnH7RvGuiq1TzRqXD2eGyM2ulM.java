@@ -1,7 +1,7 @@
-package com.lumiyaviewer.lumiya.ui.minimap;
+package com.linkpoint.ui.minimap;
 
-import com.lumiyaviewer.lumiya.react.Subscription;
-import com.lumiyaviewer.lumiya.slproto.modules.SLMinimap;
+import com.linkpoint.react.Subscription;
+import com.linkpoint.slproto.modules.SLMinimap;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$XqnH7RvGuiq1TzRqXD2eGyM2ulM  reason: invalid class name */
 final /* synthetic */ class $Lambda$XqnH7RvGuiq1TzRqXD2eGyM2ulM implements Subscription.OnData {

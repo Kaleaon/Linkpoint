@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.objpopup;
+package com.linkpoint.ui.objpopup;
 import java.util.*;
 
 import android.content.Context;
@@ -7,7 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 import javax.annotation.Nullable;
 
 public class ObjectPopupsActionProvider extends ActionProvider implements View.OnClickListener {

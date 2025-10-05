@@ -1,10 +1,10 @@
-package com.lumiyaviewer.lumiya.ui.chat.contacts;
+package com.linkpoint.ui.chat.contacts;
 import java.util.*;
 
 import android.content.Context;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.chat.ChatterDisplayInfo;
 import javax.annotation.Nullable;
 
 class ChatterListSimpleAdapter extends ChatterListAdapter {

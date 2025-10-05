@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.inventory;
+package com.linkpoint.ui.inventory;
 
 public class InventorySortOrderChangedEvent {
     public final int sortOrder;

@@ -1,10 +1,10 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 import com.google.common.base.Optional;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.users.manager.SubscribableList;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.users.manager.SubscribableList;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.accounts;
+package com.linkpoint.ui.accounts;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -13,10 +13,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.auth.SLAuth;
-import com.lumiyaviewer.lumiya.ui.accounts.AccountList;
-import com.lumiyaviewer.lumiya.ui.grids.GridList;
+import com.linkpoint.R;
+import com.linkpoint.slproto.auth.SLAuth;
+import com.linkpoint.ui.accounts.AccountList;
+import com.linkpoint.ui.grids.GridList;
 import java.util.List;
 import java.util.UUID;
 

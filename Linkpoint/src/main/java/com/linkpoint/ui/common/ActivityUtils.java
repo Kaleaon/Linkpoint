@@ -1,9 +1,9 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.content.Intent;
 import android.os.Bundle;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.utils.UUIDPool;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

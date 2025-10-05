@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.main;
+package com.linkpoint.ui.main;
 import java.util.*;
 
 import android.app.Activity;
@@ -19,12 +19,12 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.lumiyaviewer.lumiya.LumiyaApp;
-import com.lumiyaviewer.lumiya.modern.graphics.ModernRenderPipeline;
-import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo;
-import com.lumiyaviewer.lumiya.modern.samples.ModernGraphicsDemoActivity;
-import com.lumiyaviewer.lumiya.modern.utils.ModernPerformanceMonitor;
-import com.lumiyaviewer.lumiya.ui.settings.ModernSettingsActivity;
+import com.linkpoint.LumiyaApp;
+import com.linkpoint.modern.graphics.ModernRenderPipeline;
+import com.linkpoint.modern.samples.ModernLinkpointDemo;
+import com.linkpoint.modern.samples.ModernGraphicsDemoActivity;
+import com.linkpoint.modern.utils.ModernPerformanceMonitor;
+import com.linkpoint.ui.settings.ModernSettingsActivity;
 
 /**
  * Enhanced Main Activity showcasing comprehensive Linkpoint modern components

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -10,7 +10,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 import javax.annotation.Nullable;
 
 public class LoadingLayout extends FrameLayout {

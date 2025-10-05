@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.objects;
+package com.linkpoint.ui.objects;
 import java.util.*;
 
 import android.content.Context;
@@ -10,9 +10,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLTaskInventory;
+import com.linkpoint.R;
+import com.linkpoint.slproto.inventory.SLInventoryEntry;
+import com.linkpoint.slproto.inventory.SLTaskInventory;
 
 public class TaskInventoryListAdapter extends BaseAdapter {
     private final Context context;

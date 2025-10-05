@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,10 +8,10 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteListEntry;
-import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteType;
-import com.lumiyaviewer.lumiya.ui.common.SwipeDismissListViewTouchListener;
+import com.linkpoint.R;
+import com.linkpoint.slproto.modules.mutelist.MuteListEntry;
+import com.linkpoint.slproto.modules.mutelist.MuteType;
+import com.linkpoint.ui.common.SwipeDismissListViewTouchListener;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

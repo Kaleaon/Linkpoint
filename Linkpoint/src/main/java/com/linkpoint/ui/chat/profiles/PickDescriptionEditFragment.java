@@ -1,17 +1,17 @@
-package com.lumiyaviewer.lumiya.ui.chat.profiles;
+package com.linkpoint.ui.chat.profiles;
 
 import android.content.Context;
 import android.os.Bundle;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.react.SubscriptionData;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.SLMessage;
-import com.lumiyaviewer.lumiya.slproto.messages.PickInfoReply;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.slproto.users.manager.AvatarPickKey;
-import com.lumiyaviewer.lumiya.ui.common.ChatterFragment;
-import com.lumiyaviewer.lumiya.ui.common.TextFieldEditFragment;
+import com.linkpoint.R;
+import com.linkpoint.react.SubscriptionData;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.SLMessage;
+import com.linkpoint.slproto.messages.PickInfoReply;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.slproto.users.manager.AvatarPickKey;
+import com.linkpoint.ui.common.ChatterFragment;
+import com.linkpoint.ui.common.TextFieldEditFragment;
 import javax.annotation.Nullable;
 
 public class PickDescriptionEditFragment extends TextFieldEditFragment {

@@ -1,9 +1,9 @@
-package com.lumiyaviewer.lumiya.ui.voice;
+package com.linkpoint.ui.voice;
 import java.util.*;
 
 import android.view.MotionEvent;
 import android.view.View;
-import com.lumiyaviewer.lumiya.ui.render.OnHoverListenerCompat;
+import com.linkpoint.ui.render.OnHoverListenerCompat;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu9qjGWbEJmZF4NfrRGigLGXl8  reason: invalid class name */
 final /* synthetic */ class $Lambda$LRu9qjGWbEJmZF4NfrRGigLGXl8 implements View.OnHoverListener {

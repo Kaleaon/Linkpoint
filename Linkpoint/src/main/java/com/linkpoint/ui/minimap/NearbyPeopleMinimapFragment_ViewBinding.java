@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.minimap;
+package com.linkpoint.ui.minimap;
 import java.util.*;
 
 import android.support.annotation.CallSuper;
@@ -7,7 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import butterknife.Unbinder;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 public class NearbyPeopleMinimapFragment_ViewBinding implements Unbinder {
     private NearbyPeopleMinimapFragment target;

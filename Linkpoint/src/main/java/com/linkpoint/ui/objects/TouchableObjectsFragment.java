@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.objects;
+package com.linkpoint.ui.objects;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,14 +8,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.react.SubscriptionData;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import com.linkpoint.R;
+import com.linkpoint.react.SubscriptionData;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.objects.SLObjectInfo;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.utils.UUIDPool;
 import java.util.UUID;
 
 public class TouchableObjectsFragment extends Fragment implements AdapterView.OnItemClickListener {

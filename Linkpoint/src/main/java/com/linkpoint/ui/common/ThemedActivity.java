@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 import java.util.*;
 
 import android.app.Activity;
@@ -7,12 +7,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.GlobalOptions;
-import com.lumiyaviewer.lumiya.eventbus.EventBus;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
-import com.lumiyaviewer.lumiya.ui.ThemeMapper;
-import com.lumiyaviewer.lumiya.ui.settings.ThemeChangedEvent;
+import com.linkpoint.Debug;
+import com.linkpoint.GlobalOptions;
+import com.linkpoint.eventbus.EventBus;
+import com.linkpoint.eventbus.EventHandler;
+import com.linkpoint.ui.ThemeMapper;
+import com.linkpoint.ui.settings.ThemeChangedEvent;
 
 public class ThemedActivity extends AppCompatActivity {
     private int selectedThemeId = -1;

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.avapicker;
+package com.linkpoint.ui.avapicker;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.avapicker.-$Lambda$GxFBFkg7vdmipTAXKE3eB-6HqSs  reason: invalid class name */
 final /* synthetic */ class $Lambda$GxFBFkg7vdmipTAXKE3eB6HqSs implements Runnable {

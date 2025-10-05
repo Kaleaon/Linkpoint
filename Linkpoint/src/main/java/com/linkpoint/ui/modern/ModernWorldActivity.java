@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.modern;
+package com.linkpoint.ui.modern;
 import java.util.*;
 
 import android.os.Bundle;
@@ -16,8 +16,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.lumiyaviewer.lumiya.LumiyaApp;
-import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo;
+import com.linkpoint.LumiyaApp;
+import com.linkpoint.modern.samples.ModernLinkpointDemo;
 
 /**
  * Modern World View Activity using Material Design 3

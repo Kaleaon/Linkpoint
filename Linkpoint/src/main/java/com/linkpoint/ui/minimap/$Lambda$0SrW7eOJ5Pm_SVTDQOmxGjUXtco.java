@@ -1,8 +1,8 @@
-package com.lumiyaviewer.lumiya.ui.minimap;
+package com.linkpoint.ui.minimap;
 import java.util.*;
 
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.react.Subscription;
+import com.linkpoint.react.Subscription;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$0SrW7eOJ5Pm_SVTDQOmxGjUXtco  reason: invalid class name */
 final /* synthetic */ class $Lambda$0SrW7eOJ5Pm_SVTDQOmxGjUXtco implements Subscription.OnData {

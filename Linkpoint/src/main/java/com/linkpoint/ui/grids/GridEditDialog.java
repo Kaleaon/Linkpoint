@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.grids;
+package com.linkpoint.ui.grids;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.grids.GridList;
+import com.linkpoint.R;
+import com.linkpoint.ui.grids.GridList;
 import java.util.UUID;
 
 public class GridEditDialog extends AppCompatDialog implements View.OnClickListener {

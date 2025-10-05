@@ -1,14 +1,14 @@
-package com.lumiyaviewer.lumiya.ui.render;
+package com.linkpoint.ui.render;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.render.TextureMemoryTracker;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
+import com.linkpoint.Debug;
+import com.linkpoint.R;
+import com.linkpoint.render.TextureMemoryTracker;
+import com.linkpoint.ui.common.ActivityUtils;
 import java.util.UUID;
 
 public class CardboardTransitionActivity extends AppCompatActivity {

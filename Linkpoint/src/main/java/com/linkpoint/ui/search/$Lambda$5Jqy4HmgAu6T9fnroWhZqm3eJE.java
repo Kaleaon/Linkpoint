@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.search;
+package com.linkpoint.ui.search;
 import java.util.*;
 
 import android.content.DialogInterface;

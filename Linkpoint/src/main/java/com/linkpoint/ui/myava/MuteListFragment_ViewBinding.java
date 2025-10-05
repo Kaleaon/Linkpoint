@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 import java.util.*;
 
 import android.support.annotation.CallSuper;
@@ -8,7 +8,7 @@ import android.widget.ListView;
 import butterknife.Unbinder;
 import butterknife.internal.DebouncingOnClickListener;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 public class MuteListFragment_ViewBinding implements Unbinder {
     private MuteListFragment target;

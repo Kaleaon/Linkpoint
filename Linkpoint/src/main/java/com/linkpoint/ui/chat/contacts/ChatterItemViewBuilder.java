@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.chat.contacts;
+package com.linkpoint.ui.chat.contacts;
 import java.util.*;
 
 import android.graphics.Typeface;
@@ -6,10 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.ui.chat.ChatterPicView;
-import com.lumiyaviewer.lumiya.ui.chat.TypingIndicatorView;
+import com.linkpoint.R;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.ui.chat.ChatterPicView;
+import com.linkpoint.ui.chat.TypingIndicatorView;
 import javax.annotation.Nullable;
 
 public class ChatterItemViewBuilder {

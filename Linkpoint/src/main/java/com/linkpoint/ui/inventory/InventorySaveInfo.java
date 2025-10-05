@@ -1,8 +1,8 @@
-package com.lumiyaviewer.lumiya.ui.inventory;
+package com.linkpoint.ui.inventory;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType;
+import com.linkpoint.slproto.inventory.SLAssetType;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

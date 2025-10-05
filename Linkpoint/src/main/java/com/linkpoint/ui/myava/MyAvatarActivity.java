@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 import java.util.*;
 
 import android.content.Context;
@@ -6,10 +6,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory;
-import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
-import com.lumiyaviewer.lumiya.ui.outfits.OutfitsFragment;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.common.FragmentActivityFactory;
+import com.linkpoint.ui.common.MasterDetailsActivity;
+import com.linkpoint.ui.outfits.OutfitsFragment;
 
 public class MyAvatarActivity extends MasterDetailsActivity {
     private final FragmentActivityFactory detailsFragmentFactory = new FragmentActivityFactory() {

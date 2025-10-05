@@ -1,8 +1,8 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import com.lumiyaviewer.lumiya.Debug;
+import com.linkpoint.Debug;
 import javax.annotation.Nullable;
 
 public class FragmentWithTitle extends StateAwareFragment implements FragmentHasTitle {

@@ -1,16 +1,16 @@
-package com.lumiyaviewer.lumiya.ui.chat.contacts;
+package com.linkpoint.ui.chat.contacts;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.ui.chat.ChatFragment;
-import com.lumiyaviewer.lumiya.ui.chat.ChatNewActivity;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.ChatterFragment;
-import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory;
-import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.ui.chat.ChatFragment;
+import com.linkpoint.ui.chat.ChatNewActivity;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.common.ChatterFragment;
+import com.linkpoint.ui.common.FragmentActivityFactory;
+import com.linkpoint.ui.common.MasterDetailsActivity;
 
 public class ChatFragmentActivityFactory implements FragmentActivityFactory {
 

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.inventory;
+package com.linkpoint.ui.inventory;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -12,18 +12,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.eventbus.EventBus;
-import com.lumiyaviewer.lumiya.react.SubscriptionData;
-import com.lumiyaviewer.lumiya.react.SubscriptionSingleKey;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory;
-import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
-import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import com.linkpoint.R;
+import com.linkpoint.eventbus.EventBus;
+import com.linkpoint.react.SubscriptionData;
+import com.linkpoint.react.SubscriptionSingleKey;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.inventory.SLAssetType;
+import com.linkpoint.slproto.inventory.SLInventoryEntry;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.ui.common.FragmentActivityFactory;
+import com.linkpoint.ui.common.MasterDetailsActivity;
+import com.linkpoint.utils.UUIDPool;
 import java.util.UUID;
 import javax.annotation.Nullable;
 

@@ -1,8 +1,8 @@
-package com.lumiyaviewer.lumiya.ui.chat.contacts;
+package com.linkpoint.ui.chat.contacts;
 import java.util.*;
 
 import com.google.common.collect.ImmutableList;
-import com.lumiyaviewer.lumiya.react.Subscription;
+import com.linkpoint.react.Subscription;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.chat.contacts.-$Lambda$6auIiCEAvthJH-C9LU_XlJZMtEQ  reason: invalid class name */
 final /* synthetic */ class $Lambda$6auIiCEAvthJHC9LU_XlJZMtEQ implements Subscription.OnData {

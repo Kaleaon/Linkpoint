@@ -1,8 +1,8 @@
-package com.lumiyaviewer.lumiya.ui.objects;
+package com.linkpoint.ui.objects;
 import java.util.*;
 
-import com.lumiyaviewer.lumiya.react.Subscription;
-import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectsManager;
+import com.linkpoint.react.Subscription;
+import com.linkpoint.slproto.users.manager.ObjectsManager;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$rXtKRyOts6GGB3GxWNYA5oEvU2Y  reason: invalid class name */
 final /* synthetic */ class $Lambda$rXtKRyOts6GGB3GxWNYA5oEvU2Y implements Subscription.OnData {

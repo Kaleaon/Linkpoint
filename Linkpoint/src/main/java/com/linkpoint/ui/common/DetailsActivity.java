@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.app.Activity;
 import android.content.Context;
@@ -11,8 +11,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.Debug;
+import com.linkpoint.R;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 
 import android.support.annotation.CallSuper;
 import android.support.annotation.UiThread;
@@ -6,8 +6,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import butterknife.Unbinder;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.common.LoadingLayout;
+import com.linkpoint.R;
+import com.linkpoint.ui.common.LoadingLayout;
 
 public class TransactionLogFragment_ViewBinding implements Unbinder {
     private TransactionLogFragment target;

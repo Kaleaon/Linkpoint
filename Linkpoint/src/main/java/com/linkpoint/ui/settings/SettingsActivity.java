@@ -1,13 +1,13 @@
-package com.lumiyaviewer.lumiya.ui.settings;
+package com.linkpoint.ui.settings;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory;
-import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity;
+import com.linkpoint.R;
+import com.linkpoint.ui.common.FragmentActivityFactory;
+import com.linkpoint.ui.common.MasterDetailsActivity;
 
 public class SettingsActivity extends MasterDetailsActivity {
     private final FragmentActivityFactory detailsFragmentFactory = new FragmentActivityFactory() {

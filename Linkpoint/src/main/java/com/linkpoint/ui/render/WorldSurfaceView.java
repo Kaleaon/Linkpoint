@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.render;
+package com.linkpoint.ui.render;
 import java.util.*;
 
 import android.annotation.SuppressLint;
@@ -9,13 +9,13 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.TypedValue;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.GlobalOptions;
-import com.lumiyaviewer.lumiya.render.WorldViewRenderer;
-import com.lumiyaviewer.lumiya.render.picking.ObjectIntersectInfo;
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo;
-import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
+import com.linkpoint.Debug;
+import com.linkpoint.GlobalOptions;
+import com.linkpoint.render.WorldViewRenderer;
+import com.linkpoint.render.picking.ObjectIntersectInfo;
+import com.linkpoint.slproto.objects.SLObjectAvatarInfo;
+import com.linkpoint.slproto.objects.SLObjectInfo;
+import com.linkpoint.slproto.users.manager.UserManager;
 
 @SuppressLint({"ViewConstructor"})
 public class WorldSurfaceView extends GLSurfaceView {

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.common;
+package com.linkpoint.ui.common;
 
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -17,22 +17,22 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.GridConnectionService;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.eventbus.EventBus;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
-import com.lumiyaviewer.lumiya.react.UIThreadExecutor;
-import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
-import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent;
-import com.lumiyaviewer.lumiya.slproto.events.SLConnectionStateChangedEvent;
-import com.lumiyaviewer.lumiya.slproto.events.SLDisconnectEvent;
-import com.lumiyaviewer.lumiya.slproto.users.manager.ObjectPopupsManager;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.login.LoginActivity;
-import com.lumiyaviewer.lumiya.ui.objpopup.ObjectPopupsActionProvider;
-import com.lumiyaviewer.lumiya.ui.objpopup.ObjectPopupsFragment;
-import com.lumiyaviewer.lumiya.ui.objpopup.SingleObjectPopupFragment;
+import com.linkpoint.Debug;
+import com.linkpoint.GridConnectionService;
+import com.linkpoint.R;
+import com.linkpoint.eventbus.EventBus;
+import com.linkpoint.eventbus.EventHandler;
+import com.linkpoint.react.UIThreadExecutor;
+import com.linkpoint.slproto.SLGridConnection;
+import com.linkpoint.slproto.chat.generic.SLChatEvent;
+import com.linkpoint.slproto.events.SLConnectionStateChangedEvent;
+import com.linkpoint.slproto.events.SLDisconnectEvent;
+import com.linkpoint.slproto.users.manager.ObjectPopupsManager;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.login.LoginActivity;
+import com.linkpoint.ui.objpopup.ObjectPopupsActionProvider;
+import com.linkpoint.ui.objpopup.ObjectPopupsFragment;
+import com.linkpoint.ui.objpopup.SingleObjectPopupFragment;
 import java.util.UUID;
 
 public class ConnectedActivity extends ThemedActivity implements ObjectPopupsActionProvider.ObjectPopupsClickListener, ObjectPopupsManager.ObjectPopupListener {

@@ -1,12 +1,12 @@
-package com.lumiyaviewer.lumiya.ui.avapicker;
+package com.linkpoint.ui.avapicker;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry;
-import com.lumiyaviewer.lumiya.slproto.users.ChatterID;
-import com.lumiyaviewer.lumiya.ui.common.DetailsActivity;
-import com.lumiyaviewer.lumiya.ui.inventory.InventoryFragmentHelper;
+import com.linkpoint.R;
+import com.linkpoint.slproto.inventory.SLInventoryEntry;
+import com.linkpoint.slproto.users.ChatterID;
+import com.linkpoint.ui.common.DetailsActivity;
+import com.linkpoint.ui.inventory.InventoryFragmentHelper;
 import java.util.UUID;
 import javax.annotation.Nullable;
 

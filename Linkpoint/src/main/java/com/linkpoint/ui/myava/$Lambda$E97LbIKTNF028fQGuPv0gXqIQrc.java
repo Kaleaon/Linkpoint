@@ -1,6 +1,6 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 
-import com.lumiyaviewer.lumiya.react.Subscription;
+import com.linkpoint.react.Subscription;
 
 /* renamed from: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$E97LbIKTNF028fQGuPv0gXqIQrc  reason: invalid class name */
 final /* synthetic */ class $Lambda$E97LbIKTNF028fQGuPv0gXqIQrc implements Subscription.OnData {

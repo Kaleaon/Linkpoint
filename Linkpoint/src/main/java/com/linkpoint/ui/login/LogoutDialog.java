@@ -1,20 +1,20 @@
-package com.lumiyaviewer.lumiya.ui.login;
+package com.linkpoint.ui.login;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import com.lumiyaviewer.lumiya.Debug;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.eventbus.EventBus;
-import com.lumiyaviewer.lumiya.eventbus.EventHandler;
-import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit;
-import com.lumiyaviewer.lumiya.slproto.SLGridConnection;
-import com.lumiyaviewer.lumiya.slproto.events.SLDisconnectEvent;
-import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager;
-import com.lumiyaviewer.lumiya.ui.common.ActivityUtils;
-import com.lumiyaviewer.lumiya.utils.UUIDPool;
+import com.linkpoint.Debug;
+import com.linkpoint.R;
+import com.linkpoint.eventbus.EventBus;
+import com.linkpoint.eventbus.EventHandler;
+import com.linkpoint.slproto.SLAgentCircuit;
+import com.linkpoint.slproto.SLGridConnection;
+import com.linkpoint.slproto.events.SLDisconnectEvent;
+import com.linkpoint.slproto.users.manager.UserManager;
+import com.linkpoint.ui.common.ActivityUtils;
+import com.linkpoint.utils.UUIDPool;
 import java.util.UUID;
 
 public class LogoutDialog extends ProgressDialog {

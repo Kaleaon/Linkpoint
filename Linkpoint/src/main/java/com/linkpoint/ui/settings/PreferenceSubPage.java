@@ -1,12 +1,12 @@
-package com.lumiyaviewer.lumiya.ui.settings;
+package com.linkpoint.ui.settings;
 
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.v7.preference.Preference;
 import android.util.AttributeSet;
-import com.lumiyaviewer.lumiya.R;
-import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels;
+import com.linkpoint.R;
+import com.linkpoint.ui.notify.NotificationChannels;
 
 public class PreferenceSubPage extends Preference {
     private NotificationType notificationType = null;

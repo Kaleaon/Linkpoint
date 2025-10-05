@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.search;
+package com.linkpoint.ui.search;
 import java.util.*;
 
 import android.support.annotation.CallSuper;
@@ -12,7 +12,7 @@ import android.widget.TextView;
 import butterknife.Unbinder;
 import butterknife.internal.DebouncingOnClickListener;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 public class SearchGridFragment_ViewBinding implements Unbinder {
     private SearchGridFragment target;

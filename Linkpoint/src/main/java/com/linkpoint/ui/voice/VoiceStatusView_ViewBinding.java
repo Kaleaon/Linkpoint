@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.ui.voice;
+package com.linkpoint.ui.voice;
 import java.util.*;
 
 import android.support.annotation.CallSuper;
@@ -14,7 +14,7 @@ import android.widget.TextView;
 import butterknife.Unbinder;
 import butterknife.internal.DebouncingOnClickListener;
 import butterknife.internal.Utils;
-import com.lumiyaviewer.lumiya.R;
+import com.linkpoint.R;
 
 public class VoiceStatusView_ViewBinding implements Unbinder {
     private VoiceStatusView target;

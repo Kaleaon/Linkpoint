@@ -1,6 +1,6 @@
-package com.lumiyaviewer.lumiya.ui.myava;
+package com.linkpoint.ui.myava;
 
-import com.lumiyaviewer.lumiya.ui.chat.profiles.UserProfileFragment;
+import com.linkpoint.ui.chat.profiles.UserProfileFragment;
 
 public class MyProfileFragment extends UserProfileFragment {
 }
