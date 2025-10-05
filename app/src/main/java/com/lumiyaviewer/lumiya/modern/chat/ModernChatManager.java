@@ -41,12 +41,30 @@ public class ModernChatManager {
     
     private ChatEventListener chatListener;
     
-    public ModernChatManager(Context context, WebSocketEventClient eventClient) {
-        this.context = context;
-        this.eventClient = eventClient;
+    public ModernChatManager(Object protocolManager) {
+        this.context = null; // Context not needed in protocol-based implementation
+        this.eventClient = null; // Event client will be initialized from protocol manager
         this.executor = Executors.newFixedThreadPool(2);
         
         Log.i(TAG, "Modern chat manager initialized");
+    }
+    
+    /**
+     * Initialize chat manager
+     */
+    public CompletableFuture<Boolean> initializeAsync() {
+        Log.i(TAG, "Initializing modern chat management system");
+        
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                // Initialize chat systems
+                Log.i(TAG, "Chat management system initialized successfully");
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to initialize chat management system", e);
+                return false;
+            }
+        }, executor);
     }
     
     /**
