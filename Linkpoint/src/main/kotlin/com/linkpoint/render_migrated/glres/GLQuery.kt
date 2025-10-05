@@ -9,7 +9,7 @@ import javax.annotation.Nonnull
 
 @TargetApi(18)
 class GLQuery : GLResource() {
-    private const val Int MIN_OCCLUSION_QUERY_FRAMES = 0
+    private const val MIN_OCCLUSION_QUERY_FRAMES: Int = 0
     /* access modifiers changed from: private */
     @JvmStatic
     ThreadLocal<Int[]> idQuery = ThreadLocal<Int[]>() {

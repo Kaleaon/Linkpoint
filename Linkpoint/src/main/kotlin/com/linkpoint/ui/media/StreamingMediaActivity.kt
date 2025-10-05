@@ -11,7 +11,7 @@ import com.linkpoint.StreamingMediaService
 import com.linkpoint.slproto.users.ParcelData
 import com.linkpoint.ui.chat.profiles.ParcelPropertiesFragment
 
-class StreamingMediaActivity : AppCompatActivity() : View.OnClickListener {
+class StreamingMediaActivity : AppCompatActivity(), View.OnClickListener {
     public Unit onClick(View view) {
         switch (view.getId()) {
             case R.id.parcel_media_stop_button:

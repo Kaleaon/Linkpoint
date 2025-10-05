@@ -3,11 +3,11 @@ package com.linkpoint.slproto.types
 import androidx.core.view.InputDeviceCompat
 
 val class LLTersePacking {
-    const val Float U16_to_float(Int i, Float f, Float f2) {
+const val U16_: Floatto_float(Int i, Float f, Float f2) {
         return int_dequantize(1.5259022E-5f, i, f, f2)
     }
 
-    const val Float U8_to_float(Int i, Float f, Float f2) {
+const val U8_: Floatto_float(Int i, Float f, Float f2) {
         return int_dequantize(0.003921569f, i, f, f2)
     }
 

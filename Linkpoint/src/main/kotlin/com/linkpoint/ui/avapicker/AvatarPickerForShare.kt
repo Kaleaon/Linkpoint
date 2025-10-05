@@ -11,7 +11,7 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 class AvatarPickerForShare : AvatarPickerFragment() {
-    private const val String INVENTORY_ENTRY_KEY = "inventoryEntry"
+    private const val INVENTORY_ENTRY_KEY: String = "inventoryEntry"
     private val InventoryFragmentHelper inventoryFragmentHelper = InventoryFragmentHelper(this)
 
     @JvmStatic

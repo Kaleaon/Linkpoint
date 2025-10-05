@@ -13,7 +13,7 @@ import com.linkpoint.utils.IdentityMatrix
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 
 class TerrainPatchGeometry {
-    const val Int DrawPatchSize = 16
+const val D: IntrawPatchSize = 16
     private const val Int index_size_bytes = 3072
     private const val Int vertex_size_bytes = 9248
     @JvmStatic

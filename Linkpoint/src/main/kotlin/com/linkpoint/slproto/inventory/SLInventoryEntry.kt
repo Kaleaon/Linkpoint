@@ -18,7 +18,7 @@ import com.linkpoint.utils.SimpleStringParser
 import java.util.UUID
 import javax.annotation.Nullable
 
-class SLInventoryEntry : InventoryEntryDBObject() : Parcelable {
+class SLInventoryEntry : InventoryEntryDBObject(), Parcelable {
     const val Parcelable.Creator<SLInventoryEntry> CREATOR = Parcelable.Creator<SLInventoryEntry>() {
         public SLInventoryEntry createFromParcel(Parcel parcel) {
             return SLInventoryEntry(parcel, (SLInventoryEntry) null)
@@ -28,60 +28,60 @@ class SLInventoryEntry : InventoryEntryDBObject() : Parcelable {
             return SLInventoryEntry[i]
         }
     }
-    private const val String DELIM_ANY = " \t\n"
-    private const val String DELIM_EOL = "\n"
-    const val Int FT_ANIMATION = 20
-    const val Int FT_BASIC_ROOT = 52
-    const val Int FT_BODYPART = 13
-    const val Int FT_CALLINGCARD = 2
-    const val Int FT_CLOTHING = 5
-    const val Int FT_CURRENT_OUTFIT = 46
-    const val Int FT_ENSEMBLE_END = 45
-    const val Int FT_ENSEMBLE_START = 26
-    const val Int FT_FAVORITE = 23
-    const val Int FT_GESTURE = 21
-    const val Int FT_INBOX = 50
-    const val Int FT_LANDMARK = 3
-    const val Int FT_LOST_AND_FOUND = 16
-    const val Int FT_LSL_TEXT = 10
-    const val Int FT_MESH = 49
-    const val Int FT_MY_OUTFITS = 48
-    const val Int FT_NOTECARD = 7
-    const val Int FT_OBJECT = 6
-    const val Int FT_OUTBOX = 51
-    const val Int FT_OUTFIT = 47
-    const val Int FT_ROOT_INVENTORY = 8
-    const val Int FT_SNAPSHOT_CATEGORY = 15
-    const val Int FT_SOUND = 1
-    const val Int FT_TEXTURE = 0
-    const val Int FT_TRASH = 14
-    const val Int II_FLAGS_WEARABLES_MASK = 255
-    const val Int IT_ANIMATION = 19
-    const val Int IT_ATTACHMENT = 17
-    const val Int IT_BODYPART = 13
-    const val Int IT_CALLINGCARD = 2
-    const val Int IT_CATEGORY = 8
-    const val Int IT_CLOTHING = 5
-    const val Int IT_COUNT = 21
-    const val Int IT_GESTURE = 20
-    const val Int IT_LANDMARK = 3
-    const val Int IT_LOST_AND_FOUND = 16
-    const val Int IT_LSL = 10
-    const val Int IT_LSL_BYTECODE = 11
-    const val Int IT_NOTECARD = 7
-    const val Int IT_OBJECT = 6
-    const val Int IT_ROOT_CATEGORY = 9
-    const val Int IT_SCRIPT = 4
-    const val Int IT_SNAPSHOT = 15
-    const val Int IT_SOUND = 1
-    const val Int IT_TEXTURE = 0
-    const val Int IT_TEXTURE_TGA = 12
-    const val Int IT_TRASH = 14
-    const val Int IT_WEARABLE = 18
-    const val Int PERM_COPY = 32768
-    const val Int PERM_FULL = Integer.MAX_VALUE
-    const val Int PERM_MODIFY = 16384
-    const val Int PERM_TRANSFER = 8192
+    private const val DELIM_ANY: String = " \t\n"
+    private const val DELIM_EOL: String = "\n"
+    const val FT_ANIMATION: Int = 20
+    const val FT_BASIC_ROOT: Int = 52
+    const val FT_BODYPART: Int = 13
+    const val FT_CALLINGCARD: Int = 2
+    const val FT_CLOTHING: Int = 5
+    const val FT_CURRENT_OUTFIT: Int = 46
+    const val FT_ENSEMBLE_END: Int = 45
+    const val FT_ENSEMBLE_START: Int = 26
+    const val FT_FAVORITE: Int = 23
+    const val FT_GESTURE: Int = 21
+    const val FT_INBOX: Int = 50
+    const val FT_LANDMARK: Int = 3
+    const val FT_LOST_AND_FOUND: Int = 16
+    const val FT_LSL_TEXT: Int = 10
+    const val FT_MESH: Int = 49
+    const val FT_MY_OUTFITS: Int = 48
+    const val FT_NOTECARD: Int = 7
+    const val FT_OBJECT: Int = 6
+    const val FT_OUTBOX: Int = 51
+    const val FT_OUTFIT: Int = 47
+    const val FT_ROOT_INVENTORY: Int = 8
+    const val FT_SNAPSHOT_CATEGORY: Int = 15
+    const val FT_SOUND: Int = 1
+    const val FT_TEXTURE: Int = 0
+    const val FT_TRASH: Int = 14
+    const val II_FLAGS_WEARABLES_MASK: Int = 255
+    const val IT_ANIMATION: Int = 19
+    const val IT_ATTACHMENT: Int = 17
+    const val IT_BODYPART: Int = 13
+    const val IT_CALLINGCARD: Int = 2
+    const val IT_CATEGORY: Int = 8
+    const val IT_CLOTHING: Int = 5
+    const val IT_COUNT: Int = 21
+    const val IT_GESTURE: Int = 20
+    const val IT_LANDMARK: Int = 3
+    const val IT_LOST_AND_FOUND: Int = 16
+    const val IT_LSL: Int = 10
+    const val IT_LSL_BYTECODE: Int = 11
+    const val IT_NOTECARD: Int = 7
+    const val IT_OBJECT: Int = 6
+    const val IT_ROOT_CATEGORY: Int = 9
+    const val IT_SCRIPT: Int = 4
+    const val IT_SNAPSHOT: Int = 15
+    const val IT_SOUND: Int = 1
+    const val IT_TEXTURE: Int = 0
+    const val IT_TEXTURE_TGA: Int = 12
+    const val IT_TRASH: Int = 14
+    const val IT_WEARABLE: Int = 18
+    const val PERM_COPY: Int = 32768
+    const val PERM_FULL: Int = Integer.MAX_VALUE
+    const val PERM_MODIFY: Int = 16384
+    const val PERM_TRANSFER: Int = 8192
 
     public SLInventoryEntry() {
     }

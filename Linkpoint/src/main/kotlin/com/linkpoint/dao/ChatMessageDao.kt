@@ -11,7 +11,7 @@ import java.util.Date
 import java.util.UUID
 
 class ChatMessageDao : AbstractDao()<ChatMessage, Long> {
-    const val String TABLENAME = "CHAT_MESSAGE"
+    const val TABLENAME: String = "CHAT_MESSAGE"
 
     @JvmStatic
     class Properties {

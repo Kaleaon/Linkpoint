@@ -13,7 +13,7 @@ import java.util.concurrent.Executors
  * Based on C++ Integration Guide specifications
  */
 class ModernTextureManager {
-    private const val String TAG = "ModernTextureManager"
+    private const val TAG: String = "ModernTextureManager"
     
     private val Context context
     private val ExecutorService transcodingExecutor
@@ -21,9 +21,9 @@ class ModernTextureManager {
     private Boolean nativeLibraryLoaded = false
     
     // Texture format constants
-    const val Int FORMAT_ASTC_4x4_RGBA = 0x93B0
-    const val Int FORMAT_ETC2_RGBA = 0x9278
-    const val Int FORMAT_RGBA32 = 0x1908
+const val FORMAT_ASTC_4: Intx4_RGBA = 0x93B0
+    const val FORMAT_ETC2_RGBA: Int = 0x9278
+    const val FORMAT_RGBA32: Int = 0x1908
     
     public ModernTextureManager(Context context) {
         this.context = context

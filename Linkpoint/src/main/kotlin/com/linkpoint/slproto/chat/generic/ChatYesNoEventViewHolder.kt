@@ -17,7 +17,7 @@ import com.linkpoint.slproto.chat.generic.SLChatYesNoEvent
 import com.linkpoint.slproto.users.manager.UserManager
 import javax.annotation.Nullable
 
-class ChatYesNoEventViewHolder : ChatEventViewHolder() : View.OnClickListener {
+class ChatYesNoEventViewHolder : ChatEventViewHolder(), View.OnClickListener {
     final CardView cardView
     private Int cardViewDefaultBackground
     private Int cardViewDefaultText

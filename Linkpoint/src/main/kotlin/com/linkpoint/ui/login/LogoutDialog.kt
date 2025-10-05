@@ -18,7 +18,7 @@ import com.linkpoint.utils.UUIDPool
 import java.util.UUID
 
 class LogoutDialog : ProgressDialog() {
-    private const val Long DISCONNECT_TIMEOUT = 5000
+    private const val DISCONNECT_TIMEOUT: Long = 5000
     private UUID agentUUID
     private val EventBus eventBus
     private val Handler handler

@@ -21,11 +21,11 @@ import java.util.ArrayList
  * Implements advanced asset management features for mobile virtual world clients
  */
 class ModernAssetManager {
-    private const val String TAG = "ModernAssetManager"
+    private const val TAG: String = "ModernAssetManager"
     
     // Cache size limits (256MB total as per specifications)
-    private const val Long MAX_CACHE_SIZE = 256 * 1024 * 1024; // 256MB
-    private const val Int MAX_CACHE_ENTRIES = 1000
+    private const val MAX_CACHE_SIZE: Long = 256 * 1024 * 1024; // 256MB
+    private const val MAX_CACHE_ENTRIES: Int = 1000
     
     private val Context context
     private val ExecutorService loadingExecutor
@@ -217,7 +217,7 @@ private class CachedAsset {
         final AssetData assetData
         private Long lastAccess
         private val Long cacheTime
-        private const val Long EXPIRE_TIME = 30 * 60 * 1000; // 30 minutes
+        private const val EXPIRE_TIME: Long = 30 * 60 * 1000; // 30 minutes
         
         CachedAsset(AssetData assetData) {
             this.assetData = assetData

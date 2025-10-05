@@ -13,7 +13,7 @@ import java.util.HashMap
  * Based on Second Life Integration Guide modernization plans
  */
 class HybridSLTransport {
-    private const val String TAG = "HybridSLTransport"
+    private const val TAG: String = "HybridSLTransport"
     
     private val HTTP2CapsClient capsClient;        // Modern CAPS using HTTP/2
     private val WebSocketEventClient eventClient;  // Real-time events

@@ -19,7 +19,7 @@ import com.linkpoint.slproto.objects.SLPrimObjectDisplayInfo
 import javax.annotation.Nonnull
 
 class ObjectListAdapter : BaseExpandableListAdapter() {
-    private const val Int HIERARCHY_PADDING_DP = 10
+    private const val HIERARCHY_PADDING_DP: Int = 10
     private val Context context
     private ImmutableList<SLObjectDisplayInfo> objects = ImmutableList.of()
 

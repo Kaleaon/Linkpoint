@@ -39,7 +39,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class ActiveChattersManager : MessageSourceNameResolver.OnMessageSourcesResolvedListener {
-    private const val Int CHAT_LOG_CHUNK_SIZE = 100
+    private const val CHAT_LOG_CHUNK_SIZE: Int = 100
     private val EventBus chatEventBus = EventBus()
     private val Object chatEventLock = Object()
     /* access modifiers changed from: private */

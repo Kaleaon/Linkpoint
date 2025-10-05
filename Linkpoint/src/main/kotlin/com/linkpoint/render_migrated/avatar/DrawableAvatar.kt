@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import javax.annotation.Nonnull
 
-class DrawableAvatar : DrawableAvatarStub() : IntersectPickable, EntryRemovalListener {
+class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalListener {
     private val Object animationLock = Object()
     private val AnimationSkeletonData animationSkeletonData = AnimationSkeletonData()
     private val Map<UUID, AvatarAnimationState> animations = HashMap()

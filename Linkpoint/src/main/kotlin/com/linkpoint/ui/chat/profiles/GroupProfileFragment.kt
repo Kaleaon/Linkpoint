@@ -28,7 +28,7 @@ import java.util.Map
 import java.util.UUID
 import javax.annotation.Nullable
 
-class GroupProfileFragment : ChatterReloadableFragment() : LoadableMonitor.OnLoadableDataChangedListener {
+class GroupProfileFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoadableDataChangedListener {
     /* access modifiers changed from: private */
     val Map<ProfileTab, WeakReference<Fragment>> activeFragments = EnumMap(ProfileTab.class)
     /* access modifiers changed from: private */

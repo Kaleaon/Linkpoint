@@ -33,9 +33,9 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class InventoryFragmentHelper {
-    const val Int SORT_ORDER_ALPHA = 1
-    private const val String SORT_ORDER_KEY = "inventorySortOrder"
-    const val Int SORT_ORDER_NEWEST_FIRST = 0
+    const val SORT_ORDER_ALPHA: Int = 1
+    private const val SORT_ORDER_KEY: String = "inventorySortOrder"
+    const val SORT_ORDER_NEWEST_FIRST: Int = 0
     private val Fragment fragment
 
     public InventoryFragmentHelper(Fragment fragment2) {

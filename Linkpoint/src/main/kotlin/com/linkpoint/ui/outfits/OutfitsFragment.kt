@@ -47,8 +47,8 @@ import java.util.UUID
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class OutfitsFragment : FragmentWithTitle() : ReloadableFragment, View.OnClickListener, InventoryFolderAdapter.OnItemCheckboxClickListener {
-    private const val String FOLDER_ID_KEY = "folderID"
+class OutfitsFragment : FragmentWithTitle(), ReloadableFragment, View.OnClickListener, InventoryFolderAdapter.OnItemCheckboxClickListener {
+    private const val FOLDER_ID_KEY: String = "folderID"
     private InventoryFolderAdapter adapter = null
     private val SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 

@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.Nonnull
 
 class SLDisplayNameFetcher : SLModule() {
-    private const val Int MAX_BATCH_SIZE = 4
+    private const val MAX_BATCH_SIZE: Int = 4
     private val String capsURL
     private val Runnable httpThreadRunnable = Runnable() {
         public Unit run() {

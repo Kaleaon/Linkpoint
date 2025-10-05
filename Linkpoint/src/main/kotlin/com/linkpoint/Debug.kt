@@ -4,7 +4,7 @@ import android.util.Log
 import java.nio.ByteBuffer
 
 class Debug {
-    private const val String LOG_TAG = "Linkpoint"
+    private const val LOG_TAG: String = "Linkpoint"
 
     @JvmStatic
     Unit AlwaysPrintf(String str, Object... objArr) {

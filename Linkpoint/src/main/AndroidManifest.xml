@@ -27,7 +27,7 @@
     <application
         android:name=".LinkpointApp"
         android:label="@string/app_name"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_lumiya_launcher"
         android:theme="@style/Theme.Linkpoint"
         android:allowBackup="true"
         android:supportsRtl="true"

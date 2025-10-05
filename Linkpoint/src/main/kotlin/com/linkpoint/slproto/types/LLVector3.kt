@@ -8,7 +8,7 @@ import com.linkpoint.slproto.llsd.types.LLSDMap
 import java.nio.ByteBuffer
 
 class LLVector3 {
-    const val Float FP_MAG_THRESHOLD = 1.0E-7f
+    const val FP_MAG_THRESHOLD: Float = 1.0E-7f
     const val LLVector3 Zero = LLVector3(0.0f, 0.0f, 0.0f)
     const val LLVector3 z_axis = LLVector3(0.0f, 0.0f, 1.0f)
     public Float x = 0.0f

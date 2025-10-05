@@ -24,7 +24,7 @@ import com.linkpoint.modern.samples.ModernLinkpointDemo
  * This demonstrates modernized UI patterns while maintaining Linkpoint functionality
  */
 class ModernWorldActivity : AppCompatActivity() {
-    private const val String TAG = "ModernWorldActivity"
+    private const val TAG: String = "ModernWorldActivity"
     
     // UI Components using modern patterns (no ButterKnife)
     private CoordinatorLayout coordinatorLayout

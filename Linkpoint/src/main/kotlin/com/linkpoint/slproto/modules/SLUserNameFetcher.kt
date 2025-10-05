@@ -22,9 +22,9 @@ import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-class SLUserNameFetcher : SLModule() : RequestListener {
-    private const val Int MAX_BATCH_SIZE = 4
-    private const val Long REPLY_TIMEOUT = 10000
+class SLUserNameFetcher : SLModule(), RequestListener {
+    private const val MAX_BATCH_SIZE: Int = 4
+    private const val REPLY_TIMEOUT: Long = 10000
     private val SLCaps caps
     /* access modifiers changed from: private */
     val Condition hasNamesToFetch = this.lock.newCondition()

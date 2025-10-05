@@ -23,7 +23,7 @@ import com.linkpoint.ui.search.SearchGridActivity
 import com.linkpoint.ui.settings.SettingsActivity
 import java.util.UUID
 
-class NavDrawerAdapter : ArrayAdapter()<NavDrawerItem> : AdapterView.OnItemClickListener {
+class NavDrawerAdapter : ArrayAdapter()<NavDrawerItem>, AdapterView.OnItemClickListener {
     @JvmStatic
 private NavDrawerItem[] items = {NavDrawerActivityItem(R.id.item_chat, R.attr.MenuIconLocalChatThemed, R.string.nav_chat, ChatNewActivity.class), NavDrawerActivityItem(R.id.item_3d_view, R.attr.MenuIconWorldViewThemed, R.string.nav_3d_view, WorldViewActivity.class), NavDrawerActivityItem(R.id.item_objects, R.attr.MenuIconObjectsThemed, R.string.nav_objects, ObjectListNewActivity.class), NavDrawerActivityItem(R.id.item_inventory, R.attr.MenuIconInventoryThemed, R.string.nav_inventory, InventoryActivity.class), NavDrawerActivityItem(R.id.item_minimap, R.attr.MenuIconMinimapThemed, R.string.nav_minimap, MinimapActivity.class), NavDrawerItem(R.id.item_teleport_home, R.attr.MenuIconHomeThemed, R.string.nav_teleport_home) {
         public Unit onClick(Context context) {

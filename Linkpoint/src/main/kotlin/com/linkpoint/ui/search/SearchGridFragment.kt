@@ -31,7 +31,7 @@ import com.linkpoint.ui.search.SearchGridAdapter
 import de.greenrobot.dao.query.LazyList
 import java.util.UUID
 
-class SearchGridFragment : FragmentWithTitle() : LoadableMonitor.OnLoadableDataChangedListener, SearchGridAdapter.OnSearchResultClickListener {
+class SearchGridFragment : FragmentWithTitle(), LoadableMonitor.OnLoadableDataChangedListener, SearchGridAdapter.OnSearchResultClickListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-search-SearchGridQuery$SearchTypeSwitchesValues  reason: not valid java name */
     private const val /* synthetic */ Int[] f584comlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues = null

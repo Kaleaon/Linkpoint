@@ -27,7 +27,7 @@ import java.util.UUID
 import java.util.zip.CRC32
 import javax.annotation.Nonnull
 
-class SLMuteList : SLModule() : SLXfer.SLXferCompletionListener {
+class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
     private Integer cachedCRC = null
     private val MuteListCachedDataDao muteListCachedDataDao
     private volatile MuteListData muteListData = MuteListData()

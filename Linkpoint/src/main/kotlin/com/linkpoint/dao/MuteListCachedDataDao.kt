@@ -9,7 +9,7 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class MuteListCachedDataDao : AbstractDao()<MuteListCachedData, Long> {
-    const val String TABLENAME = "MUTE_LIST_CACHED_DATA"
+    const val TABLENAME: String = "MUTE_LIST_CACHED_DATA"
 
     @JvmStatic
     class Properties {

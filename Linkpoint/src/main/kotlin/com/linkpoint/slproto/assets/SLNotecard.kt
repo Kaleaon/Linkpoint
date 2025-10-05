@@ -19,8 +19,8 @@ import java.util.ArrayList
 import java.util.List
 
 class SLNotecard {
-    private const val String DELIM_ANY = " \t\n"
-    private const val String DELIM_EOL = "\n"
+    private const val DELIM_ANY: String = " \t\n"
+    private const val DELIM_EOL: String = "\n"
     private List<NotecardAttachment> attachments
     private Boolean isScript
     private String notecardText

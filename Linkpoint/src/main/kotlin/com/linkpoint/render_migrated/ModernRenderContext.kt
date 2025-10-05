@@ -12,11 +12,11 @@ import com.linkpoint.modern.graphics.ModernRenderPipeline
  * Implements the modernization plan from Graphics_Engine_Modernization_Plan.md
  */
 class ModernRenderContext {
-    private const val String TAG = "ModernRenderContext"
+    private const val TAG: String = "ModernRenderContext"
     
     // OpenGL ES version requirements
-    private const val Int MIN_GL_VERSION = 30; // ES 3.0 minimum
-    const val Float NEAR_PLANE = 0.5f
+    private const val MIN_GL_VERSION: Int = 30; // ES 3.0 minimum
+    const val NEAR_PLANE: Float = 0.5f
     
     // Modern capabilities
     private Boolean hasComputeShaders = false;  // ES 3.1+

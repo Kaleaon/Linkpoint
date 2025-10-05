@@ -6,7 +6,7 @@ import com.linkpoint.slproto.types.LLVector3
 import java.util.ArrayList
 
 class PrimPath {
-    private const val Int MIN_DETAIL_FACES = 6
+    private const val MIN_DETAIL_FACES: Int = 6
     @JvmStatic
 private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
     Boolean Dirty = true

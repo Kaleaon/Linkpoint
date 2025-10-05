@@ -44,8 +44,8 @@ import java.util.Set
 import java.util.UUID
 import javax.annotation.Nullable
 
-class GroupMemberRolesFragment : ChatterReloadableFragment() : LoadableMonitor.OnLoadableDataChangedListener, BackButtonHandler {
-    private const val String MEMBER_ID_KEY = "memberID"
+class GroupMemberRolesFragment : ChatterReloadableFragment(), LoadableMonitor.OnLoadableDataChangedListener, BackButtonHandler {
+    private const val MEMBER_ID_KEY: String = "memberID"
     /* access modifiers changed from: private */
     public UUID MemberID = null
     /* access modifiers changed from: private */

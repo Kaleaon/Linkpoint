@@ -45,13 +45,13 @@ import java.util.ArrayList
 import java.util.List
 import java.util.UUID
 
-class LoginActivity : ThemedActivity() : View.OnClickListener, TextWatcher, GridEditDialog.OnGridEditResultListener {
-    private const val String KEY_CLIENT_ID = "client_id"
-    private const val String KEY_LOGIN = "login"
-    private const val String KEY_PASSWORD = "password"
-    private const val String KEY_SAVE_PASSWORD = "save_password"
-    private const val String KEY_SELECTED_GRID = "selected_grid"
-    private const val String KEY_TOS_ACCEPTED = "tos_accepted"
+class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridEditDialog.OnGridEditResultListener {
+    private const val KEY_CLIENT_ID: String = "client_id"
+    private const val KEY_LOGIN: String = "login"
+    private const val KEY_PASSWORD: String = "password"
+    private const val KEY_SAVE_PASSWORD: String = "save_password"
+    private const val KEY_SELECTED_GRID: String = "selected_grid"
+    private const val KEY_TOS_ACCEPTED: String = "tos_accepted"
     private AccountList accountList = null
     private Boolean enableAutoClear = false
     private GridList.GridArrayAdapter gridDisplayAdapter = null

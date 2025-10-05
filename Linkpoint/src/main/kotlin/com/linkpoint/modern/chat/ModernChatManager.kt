@@ -19,7 +19,7 @@ import java.util.concurrent.Executors
  * Extends existing chat system with modern features
  */
 class ModernChatManager {
-    private const val String TAG = "ModernChatManager"
+    private const val TAG: String = "ModernChatManager"
     
     private val Context context
     private val ExecutorService executor

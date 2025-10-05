@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Provides comprehensive performance tracking, memory usage monitoring, and benchmark reporting
  */
 class ModernPerformanceMonitor {
-    private const val String TAG = "ModernPerformanceMonitor"
+    private const val TAG: String = "ModernPerformanceMonitor"
     
     // Singleton instance
     @JvmStatic

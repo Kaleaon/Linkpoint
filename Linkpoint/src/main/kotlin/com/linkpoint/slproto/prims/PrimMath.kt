@@ -3,8 +3,8 @@ package com.linkpoint.slproto.prims
 import com.linkpoint.slproto.types.LLVector3
 
 class PrimMath {
-    const val Float F_DEG_TO_RAD = 0.017453292f
-    const val Float F_PI = 3.1415927f
+    const val F_DEG_TO_RAD: Float = 0.017453292f
+    const val F_PI: Float = 3.1415927f
 
     @JvmStatic
     Float lerp(Float f, Float f2, Float f3) {

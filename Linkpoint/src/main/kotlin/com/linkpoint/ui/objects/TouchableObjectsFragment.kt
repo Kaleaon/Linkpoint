@@ -18,8 +18,8 @@ import com.linkpoint.ui.common.ActivityUtils
 import com.linkpoint.utils.UUIDPool
 import java.util.UUID
 
-class TouchableObjectsFragment : Fragment() : AdapterView.OnItemClickListener {
-    private const val String OBJECT_UUID_KEY = "objectUUID"
+class TouchableObjectsFragment : Fragment(), AdapterView.OnItemClickListener {
+    private const val OBJECT_UUID_KEY: String = "objectUUID"
     private TouchableObjectListAdapter listAdapter
     private val SubscriptionData<UUID, ImmutableList<SLObjectInfo>> touchableObjects = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$LilZ3G1QEr_14fK4lPNJzUyzlBg(this))
 

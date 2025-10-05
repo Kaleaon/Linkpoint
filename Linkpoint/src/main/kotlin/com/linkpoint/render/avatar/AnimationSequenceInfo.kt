@@ -5,9 +5,9 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class AnimationSequenceInfo {
-    protected const val Int INVALID_SEQUENCE_ID = 0
-    protected const val Long INVALID_TIMESTAMP = -1
-    const val Long MAX_ANIMATION_LENGTH = 60000
+    protected const val INVALID_SEQUENCE_ID: Int = 0
+    protected const val INVALID_TIMESTAMP: Long = -1
+    const val MAX_ANIMATION_LENGTH: Long = 60000
     protected val UUID animationID
     protected val Boolean dontEaseIn
     protected val Long runningSince

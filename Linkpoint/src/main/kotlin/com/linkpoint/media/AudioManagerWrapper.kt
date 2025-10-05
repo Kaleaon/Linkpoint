@@ -10,14 +10,14 @@ import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
 class AudioManagerWrapper : InvocationHandler {
-    const val Int AUDIOFOCUS_GAIN = 1
-    const val Int AUDIOFOCUS_GAIN_TRANSIENT = 2
-    const val Int AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK = 3
-    const val Int AUDIOFOCUS_LOSS = -1
-    const val Int AUDIOFOCUS_LOSS_TRANSIENT = -2
-    const val Int AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK = -3
-    const val Int AUDIOFOCUS_REQUEST_FAILED = 0
-    const val Int AUDIOFOCUS_REQUEST_GRANTED = 1
+    const val AUDIOFOCUS_GAIN: Int = 1
+    const val AUDIOFOCUS_GAIN_TRANSIENT: Int = 2
+    const val AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK: Int = 3
+    const val AUDIOFOCUS_LOSS: Int = -1
+    const val AUDIOFOCUS_LOSS_TRANSIENT: Int = -2
+    const val AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK: Int = -3
+    const val AUDIOFOCUS_REQUEST_FAILED: Int = 0
+    const val AUDIOFOCUS_REQUEST_GRANTED: Int = 1
     @JvmStatic
 private Method mAbandonAudioFocus
     @JvmStatic

@@ -15,7 +15,7 @@ import com.linkpoint.slproto.users.manager.UserManager
 import java.io.Closeable
 import java.io.IOException
 
-class ChatterListSubscriptionAdapter : ChatterListSimpleAdapter() : Subscription.OnData<ImmutableList<ChatterDisplayData>>, Closeable {
+class ChatterListSubscriptionAdapter : ChatterListSimpleAdapter(), Subscription.OnData<ImmutableList<ChatterDisplayData>>, Closeable {
     private val Predicate<ChatterDisplayData> predicate
     private val Subscription<ChatterListType, ImmutableList<ChatterDisplayData>> subscription
 

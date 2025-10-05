@@ -42,7 +42,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 import javax.annotation.Nullable
 
-class GroupMainProfileTab : ChatterReloadableFragment() : LoadableMonitor.OnLoadableDataChangedListener {
+class GroupMainProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadableDataChangedListener {
     private val SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 
         /* renamed from: -$f0 */

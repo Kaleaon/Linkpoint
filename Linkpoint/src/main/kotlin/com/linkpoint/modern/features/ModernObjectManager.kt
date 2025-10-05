@@ -15,7 +15,7 @@ import java.util.Map
  * Supports mesh objects, sculpties, and modern PBR materials
  */
 class ModernObjectManager {
-    private const val String TAG = "ModernObjectManager"
+    private const val TAG: String = "ModernObjectManager"
     
     private val HybridProtocolManager protocolManager
     private val Map<UUID, WorldObject> objectCache = ConcurrentHashMap<>()

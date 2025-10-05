@@ -36,7 +36,7 @@ class CloudSyncServiceConnection : ServiceConnection {
 
     /* renamed from: -com-lumiyaviewer-lumiya-cloud-common-LogSyncStatus$StatusSwitchesValues  reason: not valid java name */
     private const val /* synthetic */ Int[] f229comlumiyaviewerlumiyacloudcommonLogSyncStatus$StatusSwitchesValues = null
-    private const val Int REQUIRED_PLUGIN_VERSION = 1
+    private const val REQUIRED_PLUGIN_VERSION: Int = 1
     private val Context context
     private val Handler fromPluginHandler = Handler() {
 

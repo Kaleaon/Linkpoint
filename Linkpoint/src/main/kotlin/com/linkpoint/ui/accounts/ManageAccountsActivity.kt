@@ -24,7 +24,7 @@ import com.linkpoint.ui.grids.ManageGridsActivity
 import java.util.ArrayList
 import java.util.List
 
-class ManageAccountsActivity : ThemedActivity() : AccountEditDialog.OnAccountEditResultListener, AdapterView.OnItemClickListener, View.OnClickListener {
+class ManageAccountsActivity : ThemedActivity(), AccountEditDialog.OnAccountEditResultListener, AdapterView.OnItemClickListener, View.OnClickListener {
     private AccountList accountList = null
     private AccountListAdapter adapter
     private List<AccountList.AccountInfo> displayList = ArrayList()

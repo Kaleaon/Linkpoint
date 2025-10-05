@@ -27,10 +27,10 @@ import java.lang.ref.WeakReference
 import java.util.UUID
 
 class StreamingMediaService : Service() {
-    const val String LOCATION_DESC_KEY = "location_desc"
-    const val String LOCATION_NAME_KEY = "location_name"
-    const val String MEDIA_URL_KEY = "media_url"
-    private const val Int MSG_ON_AUDIO_FOCUS_CHANGE = 100
+    const val LOCATION_DESC_KEY: String = "location_desc"
+    const val LOCATION_NAME_KEY: String = "location_name"
+    const val MEDIA_URL_KEY: String = "media_url"
+    private const val MSG_ON_AUDIO_FOCUS_CHANGE: Int = 100
     const val SubscriptionSingleDataPool<Boolean> isPlayingMedia = SubscriptionSingleDataPool()
     private AudioManagerWrapper audioManagerWrapper = null
     private UUID lastActiveAgentUUID = null

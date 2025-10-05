@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
  * Based on LibreMetaverse patterns with mobile optimization
  */
 class HTTP2CapsClient {
-    private const val String TAG = "HTTP2CapsClient"
+    private const val TAG: String = "HTTP2CapsClient"
     private const val MediaType JSON = MediaType.get("application/json; charset=utf-8")
     private const val MediaType LLSD_XML = MediaType.get("application/llsd+xml; charset=utf-8")
     

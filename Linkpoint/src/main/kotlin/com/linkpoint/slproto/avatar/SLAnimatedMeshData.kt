@@ -6,10 +6,10 @@ import com.linkpoint.render.glres.buffers.GLLoadableBuffer
 import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 
 class SLAnimatedMeshData : SLMeshData() {
-    private const val Int BUF_INDEX = 1
-    private const val Int BUF_TEXCOORD = 2
-    private const val Int BUF_VERTEX = 0
-    private const val Int BUF_WEIGHTS = 3
+    private const val BUF_INDEX: Int = 1
+    private const val BUF_TEXCOORD: Int = 2
+    private const val BUF_VERTEX: Int = 0
+    private const val BUF_WEIGHTS: Int = 3
     private Boolean VBOLoaded = false
     private val Boolean animated
     private val DirectByteBuffer animatedVertexData

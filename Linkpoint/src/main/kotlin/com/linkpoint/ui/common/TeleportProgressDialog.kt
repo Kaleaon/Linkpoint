@@ -17,7 +17,7 @@ import com.linkpoint.ui.chat.ChatNewActivity
 import com.linkpoint.ui.common.$Lambda$8gWLFwrhoxKapEC8iWggaUhFR1c
 import java.util.UUID
 
-class TeleportProgressDialog : ProgressDialog() : DialogInterface.OnCancelListener {
+class TeleportProgressDialog : ProgressDialog(), DialogInterface.OnCancelListener {
     private val Handler mHandler = Handler()
     private val UserManager userManager
 

@@ -22,7 +22,7 @@ import com.linkpoint.ui.common.SwipeDismissListViewTouchListener
 import com.linkpoint.ui.common.loadmon.LoadableMonitor
 import java.util.UUID
 
-class CurrentOutfitFragment : Fragment() : LoadableMonitor.OnLoadableDataChangedListener, AdapterView.OnItemClickListener {
+class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedListener, AdapterView.OnItemClickListener {
     private val SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance())
     private CurrentOutfitAdapter listAdapter
     private val LoadableMonitor loadableMonitor = LoadableMonitor(this.wornItems).withOptionalLoadables(this.agentCircuit).withDataChangedListener(this)

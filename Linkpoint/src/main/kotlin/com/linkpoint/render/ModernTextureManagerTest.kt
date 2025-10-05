@@ -9,7 +9,7 @@ import java.io.IOException
  * Test class for ModernTextureManager functionality
  */
 class ModernTextureManagerTest {
-    private const val String TAG = "ModernTextureManagerTest"
+    private const val TAG: String = "ModernTextureManagerTest"
     
     @JvmStatic
     Unit runBasicTests(Context context) {

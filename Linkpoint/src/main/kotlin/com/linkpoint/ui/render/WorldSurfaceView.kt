@@ -19,7 +19,7 @@ import com.linkpoint.slproto.users.manager.UserManager
 
 @SuppressLint({"ViewConstructor"})
 class WorldSurfaceView : GLSurfaceView() {
-    private const val Int DEFAULT_FONT_SIZE_SP = 16
+    private const val DEFAULT_FONT_SIZE_SP: Int = 16
     /* access modifiers changed from: private */
     val WorldViewActivity activity
     @SuppressLint({"HandlerLeak"})

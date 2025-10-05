@@ -16,7 +16,7 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 class ErrorResolutionTracker {
-    const val String DELETE_RESOLVABLE_ERROR_TAG = "deleteResolvableError"
+    const val DELETE_RESOLVABLE_ERROR_TAG: String = "deleteResolvableError"
     @JvmStatic
 private ErrorResolutionTracker instance = null
     private val Context context

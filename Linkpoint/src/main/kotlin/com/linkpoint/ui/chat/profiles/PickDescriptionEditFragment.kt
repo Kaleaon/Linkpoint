@@ -15,7 +15,7 @@ import com.linkpoint.ui.common.TextFieldEditFragment
 import javax.annotation.Nullable
 
 class PickDescriptionEditFragment : TextFieldEditFragment() {
-    private const val String AVATAR_PICK_KEY = "avatarPickKey"
+    private const val AVATAR_PICK_KEY: String = "avatarPickKey"
     private val SubscriptionData<AvatarPickKey, PickInfoReply> pickInfo = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$Y7Ne2VWglUcvjFUgJydWWKVgIXM(this))
 
     private AvatarPickKey getPickKey() {

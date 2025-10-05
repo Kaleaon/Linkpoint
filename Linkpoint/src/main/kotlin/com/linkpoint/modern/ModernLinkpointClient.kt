@@ -19,7 +19,7 @@ import java.util.concurrent.Executors
  * and advanced Second Life features.
  */
 class ModernLinkpointClient {
-    private const val String TAG = "ModernLinkpoint"
+    private const val TAG: String = "ModernLinkpoint"
     
     private val Context context
     

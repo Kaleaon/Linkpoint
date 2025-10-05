@@ -14,7 +14,7 @@ import java.util.ArrayList
  * inventory system, and improved user experience.
  */
 class ModernSecondLifeFeatures {
-    private const val String TAG = "ModernSLFeatures"
+    private const val TAG: String = "ModernSLFeatures"
     
     private val HybridProtocolManager protocolManager
     private val ModernAvatarManager avatarManager

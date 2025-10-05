@@ -12,7 +12,7 @@ import java.io.Serializable
 import java.util.concurrent.Executor
 import javax.annotation.Nonnull
 
-class SerializableResponseCacher<Key, MessageType : Serializable> : ResponseCacher<Key, MessageType> {
+class SerializableResponseCacher<Key, MessageType : Serializable>, ResponseCacher<Key, MessageType> {
     public SerializableResponseCacher(DaoSession daoSession, Executor executor, String str) {
         super(daoSession, executor, str)
     }

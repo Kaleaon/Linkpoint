@@ -9,7 +9,7 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class UserNameDao : AbstractDao()<UserName, UUID> {
-    const val String TABLENAME = "UserNames"
+    const val TABLENAME: String = "UserNames"
 
     @JvmStatic
     class Properties {

@@ -29,14 +29,14 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
 class SLCircuit : SLMessageHandler() {
-    private const val Int DEFAULT_IDLE_INTERVAL = 1000
-    private const val Int FAST_IDLE_INTERVAL = 100
-    private const val Int MESSAGE_MAX_RETRIES = 3
-    private const val Int MESSAGE_TIMEOUT_MILLIS = 5000
-    private const val Long NEED_PING_TIMEOUT = 10000
-    private const val Long PING_INTERVAL = 5000
-    private const val Int TRACK_HANDLED_PACKETS = 1024
-    private const val Int UNANSWERED_PINGS = 3
+    private const val DEFAULT_IDLE_INTERVAL: Int = 1000
+    private const val FAST_IDLE_INTERVAL: Int = 100
+    private const val MESSAGE_MAX_RETRIES: Int = 3
+    private const val MESSAGE_TIMEOUT_MILLIS: Int = 5000
+    private const val NEED_PING_TIMEOUT: Long = 10000
+    private const val PING_INTERVAL: Long = 5000
+    private const val TRACK_HANDLED_PACKETS: Int = 1024
+    private const val UNANSWERED_PINGS: Int = 3
     SLAuthReply authReply
     public SLCircuitInfo circuitInfo
     private DatagramChannel datagramChannel

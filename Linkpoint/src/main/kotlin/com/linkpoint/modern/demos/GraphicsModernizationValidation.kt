@@ -10,7 +10,7 @@ import com.linkpoint.modern.samples.ModernLinkpointDemo
  * Shows before/after comparison and validates all modern features
  */
 class GraphicsModernizationValidation {
-    private const val String TAG = "GraphicsModernization"
+    private const val TAG: String = "GraphicsModernization"
     
     @JvmStatic
     Unit validateModernization(Context context) {

@@ -1,7 +1,7 @@
 package com.linkpoint.slproto.types
 
 class LLVector4 {
-    const val Float FP_MAG_THRESHOLD = 1.0E-7f
+    const val FP_MAG_THRESHOLD: Float = 1.0E-7f
     public Float w
     public Float x
     public Float y

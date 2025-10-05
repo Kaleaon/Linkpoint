@@ -25,7 +25,7 @@ import java.util.UUID
 import javax.annotation.Nonnull
 
 class SLTransferManager : SLModule() {
-    private const val Float DEFAULT_PRIORITY = 10000.0f
+    private const val DEFAULT_PRIORITY: Float = 10000.0f
     /* access modifiers changed from: private */
     val BiMap<AssetKey, UUID> activeTransferIds = Maps.synchronizedBiMap(HashBiMap.create())
     /* access modifiers changed from: private */

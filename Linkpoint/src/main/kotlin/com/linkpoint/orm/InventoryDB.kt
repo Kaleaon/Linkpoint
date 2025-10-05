@@ -10,7 +10,7 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class InventoryDB {
-    const val Int MAX_UPDATES_PER_TRANSACTION = 16
+    const val MAX_UPDATES_PER_TRANSACTION: Int = 16
     private val SQLiteDatabase db
 
     public InventoryDB(SQLiteDatabase sQLiteDatabase) {

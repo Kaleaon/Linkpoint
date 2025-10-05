@@ -1,10 +1,10 @@
 package com.linkpoint.render.spatial
 
 class FrustrumPlanes {
-    const val Int INSIDE = 1
-    const val Int INTERSECT = 0
-    private const val Int NUM_PLANES = 6
-    const val Int OUTSIDE = -1
+    const val INSIDE: Int = 1
+    const val INTERSECT: Int = 0
+    private const val NUM_PLANES: Int = 6
+    const val OUTSIDE: Int = -1
     private val Float[] params = Float[24]
     private val Int[] pnIndex = Int[36]
 

@@ -8,9 +8,9 @@ import com.linkpoint.slproto.messages.RegionHandshake
 import com.linkpoint.utils.BitBuffer
 
 class TerrainData {
-    const val Int PatchesPerEdge = 16
-    const val Int PatchesSize = 16
-    const val Int TerrainPerEdge = 256
+const val P: IntatchesPerEdge = 16
+const val P: IntatchesSize = 16
+const val T: InterrainPerEdge = 256
     private val Float[] heightMap = Float[65536]
     private val Boolean[] patchDirtyMap = Boolean[256]
     private volatile TerrainTextures terrainTextures = TerrainTextures()

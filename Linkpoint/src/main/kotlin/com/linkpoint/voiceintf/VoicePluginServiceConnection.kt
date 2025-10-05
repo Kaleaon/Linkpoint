@@ -73,13 +73,13 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.annotation.Nullable
 
 class VoicePluginServiceConnection : ServiceConnection {
-    const val String ACTION_VOICE_ACCEPT = "accept"
-    const val String ACTION_VOICE_REJECT = "reject"
-    private const val Int INCOMING_CALL_NOTIFICATION_ID = 1001
-    private const val String INTENT_EXTRA_CHATTER_ID = "chatterID"
-    private const val String INTENT_EXTRA_OPEN_CHATTER = "openChatterIntent"
-    private const val String INTENT_EXTRA_RINGING_MESSSAGE = "ringingMessage"
-    private const val Int REQUIRED_PLUGIN_VERSION = 3
+    const val ACTION_VOICE_ACCEPT: String = "accept"
+    const val ACTION_VOICE_REJECT: String = "reject"
+    private const val INCOMING_CALL_NOTIFICATION_ID: Int = 1001
+    private const val INTENT_EXTRA_CHATTER_ID: String = "chatterID"
+    private const val INTENT_EXTRA_OPEN_CHATTER: String = "openChatterIntent"
+    private const val INTENT_EXTRA_RINGING_MESSSAGE: String = "ringingMessage"
+    private const val REQUIRED_PLUGIN_VERSION: Int = 3
     private const val AtomicBoolean installOfferDisplayed = AtomicBoolean(false)
     private val Context context
     private val Handler fromPluginHandler = Handler() {

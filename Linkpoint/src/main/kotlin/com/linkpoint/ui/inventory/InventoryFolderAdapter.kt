@@ -25,7 +25,7 @@ import java.util.UUID
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class InventoryFolderAdapter : BaseAdapter() : View.OnClickListener {
+class InventoryFolderAdapter : BaseAdapter(), View.OnClickListener {
     private SLAvatarAppearance avatarAppearance = null
     private InventoryEntryList data = InventoryEntryList()
     private InventoryDB database

@@ -24,7 +24,7 @@ import java.nio.ByteBuffer
 class OpenJPEG : GLTexture {
     /* renamed from: -com-lumiyaviewer-lumiya-openjpeg-OpenJPEG$ImageFormatSwitchesValues */
     private const val /* synthetic */ Int[] syntheticField = null
-    private const val Int ETC1_BYTES_PER_PIXEL = 888
+    private const val ETC1_BYTES_PER_PIXEL: Int = 888
     public Int bytes_per_pixel
     public Int error_code
     public Int height

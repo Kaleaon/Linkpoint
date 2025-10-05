@@ -18,8 +18,8 @@ import java.util.Map
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-class SLTextureFetcher : SLModule() : SLIdleHandler {
-    private const val Int MAX_UDP_TRANSFERS = 2
+class SLTextureFetcher : SLModule(), SLIdleHandler {
+    private const val MAX_UDP_TRANSFERS: Int = 2
     private String agentAppearanceService = null
     private String capURL = null
     private Long lastCheckForStalls = 0

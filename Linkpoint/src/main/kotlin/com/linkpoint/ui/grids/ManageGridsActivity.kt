@@ -24,7 +24,7 @@ import com.linkpoint.ui.grids.GridList
 import java.util.ArrayList
 import java.util.List
 
-class ManageGridsActivity : ThemedActivity() : GridEditDialog.OnGridEditResultListener, AdapterView.OnItemClickListener {
+class ManageGridsActivity : ThemedActivity(), GridEditDialog.OnGridEditResultListener, AdapterView.OnItemClickListener {
     private GridListAdapter adapter
     private List<GridList.GridInfo> displayList = ArrayList()
     private GridList gridList = null

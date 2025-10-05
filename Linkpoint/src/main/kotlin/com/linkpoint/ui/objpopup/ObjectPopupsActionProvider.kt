@@ -10,7 +10,7 @@ import android.widget.TextView
 import com.linkpoint.R
 import javax.annotation.Nullable
 
-class ObjectPopupsActionProvider : ActionProvider() : View.OnClickListener {
+class ObjectPopupsActionProvider : ActionProvider(), View.OnClickListener {
     private Int objectPopupCount = 0
     private ObjectPopupsClickListener objectPopupsClickListener = null
     private TextView popupCountTextView = null

@@ -20,10 +20,10 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class DetailsActivity : ConnectedActivity() {
-    const val String DEFAULT_DETAILS_FRAGMENT_TAG = "defaultDetails"
-    private const val String DEFAULT_SUBTITLE_TAG = "DetailsActivity:defaultSubTitle"
-    private const val String DEFAULT_TITLE_TAG = "DetailsActivity:defaultTitle"
-    private const val String DETAILS_STACK_TAG = "DetailsActivity:DetailsStack"
+    const val DEFAULT_DETAILS_FRAGMENT_TAG: String = "defaultDetails"
+    private const val DEFAULT_SUBTITLE_TAG: String = "DetailsActivity:defaultSubTitle"
+    private const val DEFAULT_TITLE_TAG: String = "DetailsActivity:defaultTitle"
+    private const val DETAILS_STACK_TAG: String = "DetailsActivity:DetailsStack"
     private String defaultSubTitle = null
     private String defaultTitle = null
     private val ArrayList<DetailsStackEntry> detailsStack = ArrayList<>()

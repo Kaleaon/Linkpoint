@@ -9,7 +9,7 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class SearchGridResultDao : AbstractDao()<SearchGridResult, Long> {
-    const val String TABLENAME = "SearchGridResults"
+    const val TABLENAME: String = "SearchGridResults"
 
     @JvmStatic
     class Properties {

@@ -23,9 +23,9 @@ import com.linkpoint.slproto.types.LLVector3
 import java.util.UUID
 
 class DrawablePrim {
-    const val Int RENDER_PASS_ALL = 3
-    const val Int RENDER_PASS_OPAQUE = 1
-    const val Int RENDER_PASS_TRANSPARENT = 2
+    const val RENDER_PASS_ALL: Int = 3
+    const val RENDER_PASS_OPAQUE: Int = 1
+    const val RENDER_PASS_TRANSPARENT: Int = 2
     private val Int[] FaceColorsIDs
     private val Int FaceCount
     private val DrawableFaceTexture[] FaceTextures

@@ -14,8 +14,8 @@ import java.util.HashMap
 import java.util.Map
 
 class TextureUDPTransfer {
-    private const val Int MAX_RETRIES = 2
-    private const val Long PACKET_TIMEOUT = 15000
+    private const val MAX_RETRIES: Int = 2
+    private const val PACKET_TIMEOUT: Long = 15000
     private Boolean completed = false
     public SLTextureFetchRequest fetchReq
     private Int gotSize = 0

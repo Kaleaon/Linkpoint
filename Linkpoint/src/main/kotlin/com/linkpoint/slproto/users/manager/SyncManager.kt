@@ -32,7 +32,7 @@ class SyncManager {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
     private const val /* synthetic */ Int[] f226comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
-    private const val Int MAX_MESSAGES_PER_BATCH = 100
+    private const val MAX_MESSAGES_PER_BATCH: Int = 100
     private val ChatMessageDao chatMessageDao
     private val ChatterDao chatterDao
     private ChatterNameRetriever chatterNameRetriever = null

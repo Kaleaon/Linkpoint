@@ -47,9 +47,9 @@ import java.util.HashSet
 import java.util.UUID
 import javax.annotation.Nullable
 
-class ObjectSelectorFragment : Fragment() : SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener, ExpandableListView.OnGroupClickListener, ExpandableListView.OnChildClickListener {
-    private const val Int MAX_FILTER_DISTANCE = 256
-    private const val Int PROGRESS_BAR_SIZE_DIP = 4
+class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener, ExpandableListView.OnGroupClickListener, ExpandableListView.OnChildClickListener {
+    private const val MAX_FILTER_DISTANCE: Int = 256
+    private const val PROGRESS_BAR_SIZE_DIP: Int = 4
     private SLObjectFilterInfo filterInfo = SLObjectFilterInfo.create()
     private val Subscription.OnData<ObjectsManager.ObjectDisplayList> onObjectListData = $Lambda$rXtKRyOts6GGB3GxWNYA5oEvU2Y(this)
     private val Subscription.OnError onObjectListError = Subscription.OnError(this) {

@@ -10,7 +10,7 @@ import de.greenrobot.dao.AbstractDaoMaster
 import de.greenrobot.dao.identityscope.IdentityScopeType
 
 class DaoMaster : AbstractDaoMaster() {
-    const val Int SCHEMA_VERSION = 71
+    const val SCHEMA_VERSION: Int = 71
 
     @JvmStatic
     abstract class OpenHelper : SQLiteOpenHelper() {

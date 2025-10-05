@@ -19,7 +19,7 @@ import com.linkpoint.LinkpointApp
  * Provides comprehensive configuration options for all modern components
  */
 class ModernSettingsActivity : AppCompatActivity() {
-    private const val String TAG = "ModernSettingsActivity"
+    private const val TAG: String = "ModernSettingsActivity"
     
     // UI Components
     private Toolbar toolbar

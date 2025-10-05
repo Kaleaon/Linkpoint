@@ -18,9 +18,9 @@ import com.linkpoint.voice.VoiceService
 import javax.annotation.Nonnull
 
 class VoicePermissionRequestActivity : AppCompatActivity() {
-    private const val Int PERMISSION_AUDIO_REQUEST_CODE = 100
-    const val String VOICE_INIT_MESSAGE = "voiceInitMessage"
-    const val String VOICE_INIT_REPLY_TO = "voiceInitReplyTo"
+    private const val PERMISSION_AUDIO_REQUEST_CODE: Int = 100
+    const val VOICE_INIT_MESSAGE: String = "voiceInitMessage"
+    const val VOICE_INIT_REPLY_TO: String = "voiceInitReplyTo"
     private Boolean serviceBound = false
     private val ServiceConnection serviceConnection = ServiceConnection(this){
         final VoicePermissionRequestActivity this$0

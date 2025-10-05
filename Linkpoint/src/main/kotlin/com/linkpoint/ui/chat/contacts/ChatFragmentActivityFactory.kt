@@ -12,33 +12,31 @@ import com.linkpoint.ui.common.ChatterFragment
 import com.linkpoint.ui.common.FragmentActivityFactory
 import com.linkpoint.ui.common.MasterDetailsActivity
 
-class ChatFragmentActivityFactory : FragmentActivityFactory {
+class ChatFragmentActivityFactory private constructor() : FragmentActivityFactory {
 
-    @JvmStatic
-private class InstanceHolder {
-        /* access modifiers changed from: private */
-        const val ChatFragmentActivityFactory Instance = ChatFragmentActivityFactory()
+    companion object {
+        @JvmStatic
+        private val Instance = ChatFragmentActivityFactory()
 
-        private InstanceHolder() {
+        @JvmStatic
+        fun getInstance(): ChatFragmentActivityFactory {
+            return Instance
         }
     }
 
-    @JvmStatic
-    ChatFragmentActivityFactory getInstance() {
-        return InstanceHolder.Instance
-    }
-
-    public Intent createIntent(Context context, Bundle bundle) {
-        ChatterID chatterID
-        Intent intent = Intent(context, ChatNewActivity.class)
+    override fun createIntent(context: Context, bundle: Bundle?): Intent {
+        val intent = Intent(context, ChatNewActivity::class.java)
         intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, bundle)
-        if (!(bundle == null || !bundle.containsKey(ChatterFragment.CHATTER_ID_KEY) || (chatterID = (ChatterID) bundle.getParcelable(ChatterFragment.CHATTER_ID_KEY)) == null)) {
-            ActivityUtils.setActiveAgentID(intent, chatterID.agentUUID)
+        if (bundle != null && bundle.containsKey(ChatterFragment.CHATTER_ID_KEY)) {
+            val chatterID = bundle.getParcelable<ChatterID>(ChatterFragment.CHATTER_ID_KEY)
+            if (chatterID != null) {
+                ActivityUtils.setActiveAgentID(intent, chatterID.agentUUID)
+            }
         }
         return intent
     }
 
-    public Class<? : Fragment> getFragmentClass() {
-        return ChatFragment.class
+    override fun getFragmentClass(): Class<out Fragment> {
+        return ChatFragment::class.java
     }
 }

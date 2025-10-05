@@ -45,12 +45,12 @@ import javax.annotation.concurrent.ThreadSafe
 
 @ThreadSafe
 class SLUserProfiles : SLModule() {
-    const val Int AVATAR_AGEVERIFIED = 32
-    const val Int AVATAR_ALLOW_PUBLISH = 1
-    const val Int AVATAR_IDENTIFIED = 4
-    const val Int AVATAR_MATURE_PUBLISH = 2
-    const val Int AVATAR_ONLINE = 16
-    const val Int AVATAR_TRANSACTED = 8
+    const val AVATAR_AGEVERIFIED: Int = 32
+    const val AVATAR_ALLOW_PUBLISH: Int = 1
+    const val AVATAR_IDENTIFIED: Int = 4
+    const val AVATAR_MATURE_PUBLISH: Int = 2
+    const val AVATAR_ONLINE: Int = 16
+    const val AVATAR_TRANSACTED: Int = 8
     private val RequestHandler<UUID> agentDataUpdateRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
         public Unit onRequest(UUID uuid) {
             SLUserProfiles.this.requestAgentDataUpdate()

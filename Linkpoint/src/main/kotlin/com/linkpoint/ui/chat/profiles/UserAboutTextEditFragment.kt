@@ -12,7 +12,7 @@ import com.linkpoint.ui.common.ChatterFragment
 import java.util.UUID
 
 class UserAboutTextEditFragment : ProfileTextFieldEditFragment() {
-    private const val String IS_FIRST_LIFE_KEY = "isFirstLife"
+    private const val IS_FIRST_LIFE_KEY: String = "isFirstLife"
     private AvatarPropertiesReply avatarProperties
 
     private Boolean isFirstLife() {

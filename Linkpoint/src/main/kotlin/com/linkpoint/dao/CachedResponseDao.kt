@@ -8,7 +8,7 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class CachedResponseDao : AbstractDao()<CachedResponse, String> {
-    const val String TABLENAME = "CachedResponses"
+    const val TABLENAME: String = "CachedResponses"
 
     @JvmStatic
     class Properties {

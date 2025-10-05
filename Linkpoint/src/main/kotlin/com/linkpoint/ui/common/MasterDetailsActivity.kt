@@ -10,10 +10,10 @@ import com.linkpoint.Debug
 import com.linkpoint.R
 
 abstract class MasterDetailsActivity : DetailsActivity() {
-    protected const val String FROM_SAME_ACTIVITY = "fromSameActivity"
-    private const val String IMPLICIT_DETAILS_TAG = "MasterDetailsActivityIsImplicitDetails"
-    const val String INTENT_SELECTION_KEY = "selection"
-    const val String WEAK_SELECTION_KEY = "weakSelection"
+    protected const val FROM_SAME_ACTIVITY: String = "fromSameActivity"
+    private const val IMPLICIT_DETAILS_TAG: String = "MasterDetailsActivityIsImplicitDetails"
+    const val INTENT_SELECTION_KEY: String = "selection"
+    const val WEAK_SELECTION_KEY: String = "weakSelection"
     private Boolean isSplitScreen = false
 
     /* access modifiers changed from: protected */

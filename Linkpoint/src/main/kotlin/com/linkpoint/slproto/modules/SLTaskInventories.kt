@@ -20,9 +20,9 @@ import com.linkpoint.utils.SimpleStringParser
 import java.util.UUID
 import javax.annotation.Nonnull
 
-class SLTaskInventories : SLModule() : SLXfer.SLXferCompletionListener {
-    private const val String DELIM_ANY = " \t\n"
-    private const val String DELIM_EOL = "\n"
+class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
+    private const val DELIM_ANY: String = " \t\n"
+    private const val DELIM_EOL: String = "\n"
     private val RequestHandler<Integer> requestHandler
     private val ResultHandler<Integer, SLTaskInventory> resultHandler
     private val UserManager userManager

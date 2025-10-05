@@ -9,7 +9,7 @@ import com.linkpoint.slproto.modules.rlv.RLVController
 import java.util.UUID
 
 class RLVCmdGetAttach : RLVCommand {
-    private const val Int NUM_ATTACHMENT_POINTS_LSL = 41
+    private const val NUM_ATTACHMENT_POINTS_LSL: Int = 41
 
     public Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
         try {

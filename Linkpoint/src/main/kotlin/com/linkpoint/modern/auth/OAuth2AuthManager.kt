@@ -18,16 +18,16 @@ import java.util.concurrent.Executors
  * Implements secure authentication following modern standards
  */
 class OAuth2AuthManager {
-    private const val String TAG = "OAuth2AuthManager"
+    private const val TAG: String = "OAuth2AuthManager"
     
     // Second Life login endpoints
-    private const val String SL_LOGIN_URL = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
-    private const val String ADITI_LOGIN_URL = "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"
+    private const val SL_LOGIN_URL: String = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
+    private const val ADITI_LOGIN_URL: String = "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"
     
     // Client information
-    private const val String CLIENT_VERSION = "Linkpoint 3.4.3"
-    private const val String PLATFORM = "Android"
-    private const val String MAC = "00:00:00:00:00:00"; // Mock MAC address
+    private const val CLIENT_VERSION: String = "Linkpoint 3.4.3"
+    private const val PLATFORM: String = "Android"
+    private const val MAC: String = "00:00:00:00:00:00"; // Mock MAC address
     
     private val Context context
     private val ExecutorService executor

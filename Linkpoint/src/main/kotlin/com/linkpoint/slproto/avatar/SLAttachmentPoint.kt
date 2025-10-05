@@ -6,8 +6,8 @@ import java.util.HashMap
 import java.util.Map
 
 class SLAttachmentPoint {
-    const val Int NON_HUD_ATTACHMENT_POINTS = 47
-    const val Int NUM_ATTACHMENT_POINTS = 56
+    const val NON_HUD_ATTACHMENT_POINTS: Int = 47
+    const val NUM_ATTACHMENT_POINTS: Int = 56
     const val SLAttachmentPoint[] attachmentPoints = SLAttachmentPoint[56]
     const val Int[] nonHUDpoints = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55}
     const val Map<String, SLAttachmentPoint> pointsByName = HashMap()

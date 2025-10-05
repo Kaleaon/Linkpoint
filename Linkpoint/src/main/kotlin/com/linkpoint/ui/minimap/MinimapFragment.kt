@@ -17,7 +17,7 @@ import com.linkpoint.ui.common.ActivityUtils
 import com.linkpoint.ui.minimap.MinimapView
 import java.util.UUID
 
-class MinimapFragment : Fragment() : MinimapView.OnUserClickListener {
+class MinimapFragment : Fragment(), MinimapView.OnUserClickListener {
     private val SubscriptionData<SubscriptionSingleKey, SLMinimap.MinimapBitmap> minimapBitmap = SubscriptionData<>(UIThreadExecutor.getInstance(), $Lambda$XqnH7RvGuiq1TzRqXD2eGyM2ulM(this))
     private val SubscriptionData<SubscriptionSingleKey, SLMinimap.UserLocations> userLocations = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 

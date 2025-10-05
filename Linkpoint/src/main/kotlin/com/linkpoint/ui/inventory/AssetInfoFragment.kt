@@ -51,8 +51,8 @@ import java.util.UUID
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class AssetInfoFragment : FragmentWithTitle() : ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
-    private const val String ITEM_UUID_KEY = "itemUUID"
+class AssetInfoFragment : FragmentWithTitle(), ReloadableFragment, View.OnClickListener, LoadableMonitor.OnLoadableDataChangedListener {
+    private const val ITEM_UUID_KEY: String = "itemUUID"
     private val SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance())
     private ChatterNameRetriever creatorNameRetriever = null
     private val SubscriptionData<UUID, SLInventoryEntry> entrySubscription = SubscriptionData<>(UIThreadExecutor.getInstance())

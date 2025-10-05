@@ -37,8 +37,8 @@ import java.util.Iterator
 import java.util.UUID
 import javax.annotation.Nullable
 
-class GroupRoleMembersFragment : ChatterFragment() : LoadableMonitor.OnLoadableDataChangedListener {
-    private const val String ROLE_ID_KEY = "role_id"
+class GroupRoleMembersFragment : ChatterFragment(), LoadableMonitor.OnLoadableDataChangedListener {
+    private const val ROLE_ID_KEY: String = "role_id"
     private UUID RoleID
     private MemberListAdapter adapter = null
     private val SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance())

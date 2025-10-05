@@ -9,7 +9,7 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class ChatterDao : AbstractDao()<Chatter, Long> {
-    const val String TABLENAME = "CHATTER"
+    const val TABLENAME: String = "CHATTER"
 
     @JvmStatic
     class Properties {

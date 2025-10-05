@@ -23,7 +23,7 @@ import java.util.zip.InflaterInputStream
 import javax.annotation.Nullable
 
 class MeshData {
-    const val Int MAX_RIGGED_MESH_JOINTS = 163
+    const val MAX_RIGGED_MESH_JOINTS: Int = 163
     private val Float[] bindShapeMatrix
     private val MeshFace[] faces
     private GLLoadableBuffer glJointIndexBuffer

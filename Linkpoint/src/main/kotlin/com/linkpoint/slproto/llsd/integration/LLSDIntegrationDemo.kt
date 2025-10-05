@@ -10,7 +10,7 @@ import com.linkpoint.slproto.llsd.types.*
  * Demo class showing the LLSD integration working with the external library
  */
 class LLSDIntegrationDemo {
-    private const val String TAG = "LLSDIntegrationDemo"
+    private const val TAG: String = "LLSDIntegrationDemo"
     
     /**
      * Demonstrate LLSD integration with simple examples

@@ -14,7 +14,7 @@ private Float[] CosineTable16 = Float[256]
 private Float[] DequantizeTable16 = Float[256]
     @JvmStatic
 private Float[] DequantizeTable32 = Float[256]
-    const val Int END_OF_PATCHES = 97
+    const val END_OF_PATCHES: Int = 97
     @JvmStatic
 private Float OO_SQRT2 = 0.70710677f
     @JvmStatic

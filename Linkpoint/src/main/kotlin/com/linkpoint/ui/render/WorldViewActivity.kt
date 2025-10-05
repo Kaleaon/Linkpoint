@@ -100,12 +100,12 @@ import java.util.UUID
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class WorldViewActivity : DetailsActivity() : View.OnTouchListener, ThemeMapper, ScriptDialogHandler, UnreadNotificationManager.NotifyCapture {
-    private const val Long BUTTONS_FADE_TIMEOUT_MILLIS = 7500
-    private const val String FROM_NOTIFICATION_TAG = "fromNotification"
-    private const val Long OBJECT_DESELECT_TIMEOUT_MILLIS = 6000
-    private const val Int PERMISSION_AUDIO_REQUEST_CODE = 100
-    private const val Float TURNING_SPEED = 50.0f
+class WorldViewActivity : DetailsActivity(), View.OnTouchListener, ThemeMapper, ScriptDialogHandler, UnreadNotificationManager.NotifyCapture {
+    private val BUTTONS_FADE_TIMEOUT_MILLIS: Long = 7500
+    private val FROM_NOTIFICATION_TAG: String = "fromNotification"
+    private val OBJECT_DESELECT_TIMEOUT_MILLIS: Long = 6000
+    private val PERMISSION_AUDIO_REQUEST_CODE: Int = 100
+    private val TURNING_SPEED: Float = 50.0f
     /* access modifiers changed from: private */
     val SubscriptionData<UUID, SLAgentCircuit> agentCircuit = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 

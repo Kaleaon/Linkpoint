@@ -8,7 +8,7 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class UserPicDao : AbstractDao()<UserPic, Long> {
-    const val String TABLENAME = "USER_PIC"
+    const val TABLENAME: String = "USER_PIC"
 
     @JvmStatic
     class Properties {

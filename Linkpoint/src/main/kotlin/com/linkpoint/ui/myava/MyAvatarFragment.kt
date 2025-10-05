@@ -27,7 +27,7 @@ import com.linkpoint.ui.common.FragmentWithTitle
 import com.linkpoint.ui.outfits.OutfitsFragment
 import java.util.UUID
 
-class MyAvatarFragment : FragmentWithTitle() : AdapterView.OnItemClickListener, ChatterNameRetriever.OnChatterNameUpdated {
+class MyAvatarFragment : FragmentWithTitle(), AdapterView.OnItemClickListener, ChatterNameRetriever.OnChatterNameUpdated {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-myava-MyAvatarDetailsPagesSwitchesValues  reason: not valid java name */
     private const val /* synthetic */ Int[] f462comlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues = null

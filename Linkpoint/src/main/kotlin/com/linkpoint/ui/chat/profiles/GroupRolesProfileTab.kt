@@ -29,7 +29,7 @@ import java.util.Map
 import java.util.UUID
 import javax.annotation.Nullable
 
-class GroupRolesProfileTab : ChatterReloadableFragment() : LoadableMonitor.OnLoadableDataChangedListener {
+class GroupRolesProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoadableDataChangedListener {
     private GroupRoleAdapter adapter = null
     private val SubscriptionData<UUID, GroupProfileReply> groupProfile = SubscriptionData<>(UIThreadExecutor.getInstance())
     private val SubscriptionData<UUID, GroupRoleDataReply> groupRoles = SubscriptionData<>(UIThreadExecutor.getInstance())

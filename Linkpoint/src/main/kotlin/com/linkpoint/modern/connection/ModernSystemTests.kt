@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
  * This provides a way to test the functionality without full build system.
  */
 class ModernSystemTests {
-    private const val String TAG = "ModernSystemTests"
+    private const val TAG: String = "ModernSystemTests"
     
     /**
      * Test connection diagnostics functionality

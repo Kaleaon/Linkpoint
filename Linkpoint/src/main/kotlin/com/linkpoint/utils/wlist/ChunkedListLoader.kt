@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class ChunkedListLoader<E : Identifiable<Long>> : AbstractList<E> : ChunkedList.ChunkFactory<E>, RandomAccess {
+class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.ChunkFactory<E>, RandomAccess {
     /* access modifiers changed from: private */
     val Queue<E> addedElements = ConcurrentLinkedQueue()
     /* access modifiers changed from: private */

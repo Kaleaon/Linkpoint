@@ -27,7 +27,7 @@ class TextureCompressedCache : ResourceManager()<DrawableTextureParams, File> {
 
         /* renamed from: -com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
         private const val /* synthetic */ Int[] f53comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null
-        private const val Int MAX_RETRIES = 2
+        private const val MAX_RETRIES: Int = 2
         final /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$render$tex$TextureClass
         private val File compressedFile
         private volatile SLTextureFetchRequest fetchRequest

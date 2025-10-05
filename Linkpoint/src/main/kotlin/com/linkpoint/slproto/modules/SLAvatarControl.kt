@@ -45,12 +45,12 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 class SLAvatarControl : SLModule() {
-    private const val Int IDLE_AGENT_UPDATE_INTERVAL = 2000
-    const val Float MANUAL_FLY_SPEED = 1.0f
-    const val Float MANUAL_MOVE_SPEED = 1.0f
-    const val Float MANUAL_STRAFE_SPEED = 1.0f
-    const val Float MANUAL_TURN_SPEED = 45.0f
-    private const val Int MIN_AGENT_UPDATE_INTERVAL = 200
+    private const val IDLE_AGENT_UPDATE_INTERVAL: Int = 2000
+    const val MANUAL_FLY_SPEED: Float = 1.0f
+    const val MANUAL_MOVE_SPEED: Float = 1.0f
+    const val MANUAL_STRAFE_SPEED: Float = 1.0f
+    const val MANUAL_TURN_SPEED: Float = 45.0f
+    private const val MIN_AGENT_UPDATE_INTERVAL: Int = 200
     private const val UUID animUUID_Falldown = UUID.fromString("666307d9-a860-572d-6fd4-c3ab8865c094")
     private const val UUID animUUID_Land = UUID.fromString("7a17b059-12b2-41b1-570a-186368b6aa6f")
     private const val UUID animUUID_PreJump = UUID.fromString("7a4e87fe-de39-6fcb-6223-024b00893244")

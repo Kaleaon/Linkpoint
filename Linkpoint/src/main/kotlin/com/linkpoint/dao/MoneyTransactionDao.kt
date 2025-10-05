@@ -10,7 +10,7 @@ import java.util.Date
 import java.util.UUID
 
 class MoneyTransactionDao : AbstractDao()<MoneyTransaction, Long> {
-    const val String TABLENAME = "MONEY_TRANSACTION"
+    const val TABLENAME: String = "MONEY_TRANSACTION"
 
     @JvmStatic
     class Properties {
