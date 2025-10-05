@@ -1,0 +1,338 @@
+name: Deploy Linkpoint
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (e.g., v1.0.0)'
+        required: true
+        type: string
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+          - beta
+
+env:
+  JAVA_VERSION: '17'
+  ANDROID_SDK_VERSION: '34'
+  NDK_VERSION: '25.2.9519653'
+
+jobs:
+  build-release:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: recursive
+    
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
+        cache: 'gradle'
+    
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: ${{ env.ANDROID_SDK_VERSION }}
+        build-tools: 34.0.0
+        cmake: 3.22.1
+        ndk: ${{ env.NDK_VERSION }}
+    
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+          ~/.android/build-cache
+          Linkpoint/.gradle
+        key: ${{ runner.os }}-gradle-release-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-release-
+          ${{ runner.os }}-gradle-
+    
+    - name: Decode keystore
+      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > Linkpoint/release.keystore
+    
+    - name: Create keystore.properties
+      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      run: |
+        cat > Linkpoint/keystore.properties << EOF
+        storeFile=release.keystore
+        storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+        keyAlias=${{ secrets.KEY_ALIAS }}
+        keyPassword=${{ secrets.KEY_PASSWORD }}
+        EOF
+    
+    - name: Grant execute permission for gradlew
+      run: |
+        cd Linkpoint
+        chmod +x gradlew
+    
+    - name: Extract version info
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION="${GITHUB_REF#refs/tags/}"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "version_name=${VERSION#v}" >> $GITHUB_OUTPUT
+        echo "version_code=$(date +%s)" >> $GITHUB_OUTPUT
+    
+    - name: Update version in build.gradle.kts
+      run: |
+        cd Linkpoint
+        sed -i "s/versionName = \".*\"/versionName = \"${{ steps.version.outputs.version_name }}\"/" build.gradle.kts
+        sed -i "s/versionCode = [0-9]*/versionCode = ${{ steps.version.outputs.version_code }}/" build.gradle.kts
+    
+    - name: Clean build
+      run: |
+        cd Linkpoint
+        ./gradlew clean --stacktrace
+    
+    - name: Build Release APK (Signed)
+      if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      run: |
+        cd Linkpoint
+        ./gradlew assembleRelease --stacktrace --info --no-daemon
+      env:
+        GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+    
+    - name: Build Release APK (Unsigned)
+      if: ${{ secrets.KEYSTORE_BASE64 == '' }}
+      run: |
+        cd Linkpoint
+        ./gradlew assembleRelease --stacktrace --info --no-daemon
+      env:
+        GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g"
+    
+    - name: Run tests
+      run: |
+        cd Linkpoint
+        ./gradlew testReleaseUnitTest --stacktrace
+      continue-on-error: true
+    
+    - name: Run lint
+      run: |
+        cd Linkpoint
+        ./gradlew lintRelease --stacktrace
+      continue-on-error: true
+    
+    - name: Generate APK checksums
+      run: |
+        cd Linkpoint/build/outputs/apk/release
+        for apk in *.apk; do
+          sha256sum "$apk" > "$apk.sha256"
+          md5sum "$apk" > "$apk.md5"
+        done
+    
+    - name: Rename APK
+      run: |
+        cd Linkpoint/build/outputs/apk/release
+        for apk in *.apk; do
+          if [[ $apk != linkpoint-* ]]; then
+            mv "$apk" "linkpoint-${{ steps.version.outputs.version_name }}.apk"
+          fi
+        done
+    
+    - name: Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: linkpoint-release-${{ steps.version.outputs.version }}
+        path: |
+          Linkpoint/build/outputs/apk/release/*.apk
+          Linkpoint/build/outputs/apk/release/*.sha256
+          Linkpoint/build/outputs/apk/release/*.md5
+        retention-days: 90
+        compression-level: 9
+    
+    - name: Upload mapping files
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: mapping-files-${{ steps.version.outputs.version }}
+        path: |
+          Linkpoint/build/outputs/mapping/release/
+        retention-days: 90
+      continue-on-error: true
+    
+    - name: Generate build summary
+      run: |
+        echo "# 📱 Linkpoint Release Build" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 📦 Release Information" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version Name:** ${{ steps.version.outputs.version_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version Code:** ${{ steps.version.outputs.version_code }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Build Date:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f Linkpoint/build/outputs/apk/release/*.apk ]; then
+          echo "## 📦 APK Details" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lh Linkpoint/build/outputs/apk/release/*.apk >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "## 🔐 Checksums" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat Linkpoint/build/outputs/apk/release/*.sha256 >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+
+  deploy-github:
+    name: Deploy to GitHub Releases
+    needs: build-release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Extract version info
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION="${GITHUB_REF#refs/tags/}"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+    
+    - name: Download Release APK
+      uses: actions/download-artifact@v4
+      with:
+        name: linkpoint-release-${{ steps.version.outputs.version }}
+        path: artifacts/
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        if [ -f CHANGELOG.md ]; then
+          # Extract changelog for this version
+          awk '/## \[${{ steps.version.outputs.version }}\]/,/## \[/{if(/## \[/ && !/## \[${{ steps.version.outputs.version }}\]/)exit;print}' CHANGELOG.md > release_notes.md
+        else
+          # Generate changelog from commits
+          git log --pretty=format:"- %s (%h)" $(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")..HEAD > release_notes.md
+        fi
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: artifacts/*
+        tag_name: ${{ steps.version.outputs.version }}
+        name: Linkpoint ${{ steps.version.outputs.version }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: ${{ contains(steps.version.outputs.version, 'beta') || contains(steps.version.outputs.version, 'alpha') }}
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-firebase:
+    name: Deploy to Firebase App Distribution
+    needs: build-release
+    runs-on: ubuntu-latest
+    if: ${{ secrets.FIREBASE_APP_ID != '' && (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')) }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Extract version info
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+          ENVIRONMENT="${{ github.event.inputs.environment }}"
+        else
+          VERSION="${GITHUB_REF#refs/tags/}"
+          ENVIRONMENT="production"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+    
+    - name: Download Release APK
+      uses: actions/download-artifact@v4
+      with:
+        name: linkpoint-release-${{ steps.version.outputs.version }}
+        path: artifacts/
+    
+    - name: Upload to Firebase App Distribution
+      uses: wzieba/Firebase-Distribution-Github-Action@v1
+      with:
+        appId: ${{ secrets.FIREBASE_APP_ID }}
+        serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        groups: ${{ steps.version.outputs.environment == 'production' && 'production-testers' || 'beta-testers' }}
+        file: artifacts/*.apk
+        releaseNotes: |
+          Version: ${{ steps.version.outputs.version }}
+          Environment: ${{ steps.version.outputs.environment }}
+          
+          See full release notes at: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}
+
+  notify:
+    name: Notify Deployment
+    needs: [deploy-github, deploy-firebase]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Extract version info
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION="${GITHUB_REF#refs/tags/}"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+    
+    - name: Deployment Summary
+      run: |
+        echo "# 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Deployment Status" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ needs.deploy-github.result }}" == "success" ]; then
+          echo "✅ GitHub Releases: Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "   - [View Release](https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ GitHub Releases: Failed" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ "${{ needs.deploy-firebase.result }}" == "success" ]; then
+          echo "✅ Firebase App Distribution: Deployed" >> $GITHUB_STEP_SUMMARY
+        elif [ "${{ needs.deploy-firebase.result }}" == "skipped" ]; then
+          echo "⏭️ Firebase App Distribution: Skipped" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Firebase App Distribution: Failed" >> $GITHUB_STEP_SUMMARY
+        fi

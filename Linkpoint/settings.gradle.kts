@@ -16,7 +16,3 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Linkpoint"
-include(":app")
-
-// Map root to app module
-project(":app").projectDir = file(".")
