@@ -118,3 +118,7 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+-e 
+# Environment files
+*.env
+*.env.*
