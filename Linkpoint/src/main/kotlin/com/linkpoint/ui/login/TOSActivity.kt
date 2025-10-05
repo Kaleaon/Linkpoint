@@ -14,7 +14,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 
 class TOSActivity : ThemedActivity(), View.OnClickListener {
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         switch (view.getId()) {
             case R.id.tos_accept_button:
                 setResult(-1)
@@ -29,7 +29,7 @@ class TOSActivity : ThemedActivity(), View.OnClickListener {
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.tos)
         findViewById(R.id.tos_accept_button).setOnClickListener(this)

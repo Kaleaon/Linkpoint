@@ -97,7 +97,7 @@ class OAuth2AuthManager {
     /**
      * Set grid preference (main or test grid)
      */
-    public Unit setUseTestGrid(Boolean useTestGrid) {
+    fun setUseTestGrid(Boolean useTestGrid) {
         this.useTestGrid = useTestGrid
         Log.i(TAG, "Grid set to: " + (useTestGrid ? "Aditi (test)" : "Second Life (main)"))
     }
@@ -117,7 +117,7 @@ class OAuth2AuthManager {
         return accessToken
     }
     
-    public Unit logout() {
+    fun logout() {
         this.accessToken = null
         this.refreshToken = null
         this.tokenExpiryTime = 0

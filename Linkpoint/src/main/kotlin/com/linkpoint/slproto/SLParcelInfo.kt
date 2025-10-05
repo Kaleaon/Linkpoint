@@ -479,13 +479,13 @@ class SLParcelInfo {
         this.simSunHourDirty = false
     }
 
-    public Unit setAgentAvatar(SLObjectAvatarInfo sLObjectAvatarInfo) {
+    fun setAgentAvatar(SLObjectAvatarInfo sLObjectAvatarInfo) {
         synchronized (this.agentAvatarLock) {
             this.agentAvatar = sLObjectAvatarInfo
         }
     }
 
-    public Unit setDrawDistance(Float f) {
+    fun setDrawDistance(Float f) {
         synchronized (this) {
             if (this.drawDistance != f) {
                 this.drawDistance = f

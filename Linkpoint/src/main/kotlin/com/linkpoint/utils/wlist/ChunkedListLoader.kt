@@ -47,7 +47,7 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
     /* access modifiers changed from: private */
     public Boolean loadBelowWanted = false
     private val Runnable loadMoreData = Runnable() {
-        public Unit run() {
+        fun run() {
             Long r4
             Long r6
             Boolean z4 = true
@@ -92,7 +92,7 @@ class ChunkedListLoader<E : Identifiable<Long>>, AbstractList<E> : ChunkedList.C
     /* access modifiers changed from: private */
     val Object lock = Object()
     private val Runnable processUpdate = Runnable() {
-        public Unit run() {
+        fun run() {
             LoadResult r3
             LoadResult r32
             Identifiable identifiable
@@ -248,7 +248,7 @@ protected class LoadResult<E> {
     }
 
     /* access modifiers changed from: private */
-    public Unit postUpdate() {
+    fun postUpdate() {
         if (this.updatePosted.compareAndSet(false, true)) {
             Debug.Printf("ChatView: requesting processUpdate ()", Object[0])
             this.listenerExecutor.execute(this.processUpdate)
@@ -257,7 +257,7 @@ protected class LoadResult<E> {
         Debug.Printf("ChatView: processUpdate () already requested", Object[0])
     }
 
-    public Unit addElement(E e) {
+    fun addElement(E e) {
         Debug.Printf("ChatView: addElement: adding element with id %d", e.getId())
         this.addedElements.add(e)
         postUpdate()
@@ -280,7 +280,7 @@ protected class LoadResult<E> {
         return LoadResult<>(ArrayList(0), false, j)
     }
 
-    public Unit reload() {
+    fun reload() {
         this.reloadRequested.set(true)
         if (this.loadRequested.compareAndSet(false, true)) {
             this.executor.execute(this.loadMoreData)
@@ -290,7 +290,7 @@ protected class LoadResult<E> {
     /* JADX WARNING: Removed duplicated region for block: B:135:? A[RETURN, SYNTHETIC] */
     /* JADX WARNING: Removed duplicated region for block: B:46:0x00d9  */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit setVisibleRange(Int r9, Int r10) {
+    fun setVisibleRange(Int r9, Int r10) {
         /*
             r8 = this
             r1 = 1
@@ -573,7 +573,7 @@ protected class LoadResult<E> {
         return this.items.size()
     }
 
-    public Unit updateElement(E e) {
+    fun updateElement(E e) {
         Debug.Printf("ChatView: addElement: updated element with id %d", e.getId())
         synchronized (this.lock) {
             this.updatedElements.put((Long) e.getId(), e)

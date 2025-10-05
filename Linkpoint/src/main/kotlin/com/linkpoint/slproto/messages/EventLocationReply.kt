@@ -29,11 +29,11 @@ class EventLocationReply : SLMessage() {
         return 49
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleEventLocationReply(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 52)
@@ -43,7 +43,7 @@ class EventLocationReply : SLMessage() {
         packLLVector3(byteBuffer, this.EventData_Field.RegionPos)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         this.EventData_Field.Success = unpackBoolean(byteBuffer)
         this.EventData_Field.RegionID = unpackUUID(byteBuffer)

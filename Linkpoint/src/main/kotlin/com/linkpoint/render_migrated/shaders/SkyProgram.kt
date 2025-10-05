@@ -19,7 +19,7 @@ class SkyProgram : ShaderProgram() {
         super(Shader.SkyVertexShader, shader)
     }
 
-    public Unit ApplyWindlight(RenderContext renderContext) {
+    fun ApplyWindlight(RenderContext renderContext) {
         WindlightPreset windlightPreset = renderContext.windlightPreset
         GLES20.glUniform3f(this.skyColor, ((windlightPreset.blue_horizon[0] + windlightPreset.sunlight_color[0]) + windlightPreset.ambient[0]) * windlightPreset.blue_density[0], ((windlightPreset.blue_horizon[1] + windlightPreset.sunlight_color[1]) + windlightPreset.ambient[1]) * windlightPreset.blue_density[1], ((windlightPreset.blue_horizon[2] + windlightPreset.sunlight_color[2]) + windlightPreset.ambient[2]) * windlightPreset.blue_density[2])
         GLES20.glUniform1f(this.hazeHorizon, windlightPreset.haze_horizon[0])

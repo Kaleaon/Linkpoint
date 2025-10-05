@@ -29,11 +29,11 @@ class RemoveAttachment : SLMessage() {
         return 53
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleRemoveAttachment(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 76)
@@ -43,7 +43,7 @@ class RemoveAttachment : SLMessage() {
         packUUID(byteBuffer, this.AttachmentBlock_Field.ItemID)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AttachmentBlock_Field.AttachmentPoint = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

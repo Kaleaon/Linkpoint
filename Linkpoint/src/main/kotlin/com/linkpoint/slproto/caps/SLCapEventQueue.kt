@@ -65,7 +65,7 @@ class SLCapEventQueue : Runnable {
         this.workingThread.start()
     }
 
-    public Unit run() {
+    fun run() {
         Debug.Log("CapEventQueue: working thread starting with capURL = " + this.capURL)
         Boolean z2 = false
         while (true) {

@@ -123,10 +123,10 @@ class SLInventoryUDPFetchRequest : SLInventoryFetchRequest() {
         return true
     }
 
-    public Unit cancel() {
+    fun cancel() {
     }
 
-    public Unit start() {
+    fun start() {
         Debug.Log("Inventory: UDP fetching folder " + this.folderUUID.toString())
         FetchInventoryDescendents fetchInventoryDescendents = FetchInventoryDescendents()
         fetchInventoryDescendents.AgentData_Field.AgentID = this.inventory.getCircuitInfo().agentID

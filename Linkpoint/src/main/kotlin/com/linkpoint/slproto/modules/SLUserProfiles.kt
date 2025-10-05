@@ -52,32 +52,32 @@ class SLUserProfiles : SLModule() {
     const val AVATAR_ONLINE: Int = 16
     const val AVATAR_TRANSACTED: Int = 8
     private val RequestHandler<UUID> agentDataUpdateRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             SLUserProfiles.this.requestAgentDataUpdate()
         }
     }, false, 3, 15000)
     private ResultHandler<UUID, AgentDataUpdate> agentDataUpdateResultHandler
     private ResultHandler<UUID, AvatarGroupList> avatarGroupListsResultHandler
     private val RequestHandler<UUID> avatarNotesRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarnotesrequest", String[]{uuid.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<UUID, AvatarNotesReply> avatarNotesResultHandler
     private val RequestHandler<AvatarPickKey> avatarPickInfosRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<AvatarPickKey>() {
-        public Unit onRequest(AvatarPickKey avatarPickKey) {
+        fun onRequest(AvatarPickKey avatarPickKey) {
             SLUserProfiles.this.agentCircuit.SendGenericMessage("pickinforequest", String[]{avatarPickKey.avatarID.toString(), avatarPickKey.pickID.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<AvatarPickKey, PickInfoReply> avatarPickInfosResultHandler
     private val RequestHandler<UUID> avatarPicksRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarpicksrequest", String[]{uuid.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<UUID, AvatarPicksReply> avatarPicksResultHandler
     private val RequestHandler<UUID> avatarPropertiesRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             Debug.Printf("AvatarGroupList: Requesting avatar properties for %s", uuid.toString())
             AvatarPropertiesRequest avatarPropertiesRequest = AvatarPropertiesRequest()
             avatarPropertiesRequest.AgentData_Field.AgentID = SLUserProfiles.this.circuitInfo.agentID
@@ -102,14 +102,14 @@ class SLUserProfiles : SLModule() {
         this.setHomeLocationCap = sLCaps.getCapability(SLCaps.SLCapability.HomeLocation)
     }
 
-    public Unit DeletePick(UUID uuid) {
+    fun DeletePick(UUID uuid) {
         PickDelete pickDelete = PickDelete()
         pickDelete.AgentData_Field.AgentID = this.circuitInfo.agentID
         pickDelete.AgentData_Field.SessionID = this.circuitInfo.sessionID
         pickDelete.Data_Field.PickID = uuid
         pickDelete.isReliable = true
         pickDelete.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 super.onMessageAcknowledged(sLMessage)
                 if (SLUserProfiles.this.userManager != null) {
                     SLUserProfiles.this.userManager.getAvatarPicks().requestUpdate(SLUserProfiles.this.userManager.getUserID())
@@ -119,14 +119,14 @@ class SLUserProfiles : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleAgentDataUpdate(AgentDataUpdate agentDataUpdate) {
+    fun HandleAgentDataUpdate(AgentDataUpdate agentDataUpdate) {
         if (this.agentDataUpdateResultHandler != null) {
             this.agentDataUpdateResultHandler.onResultData(agentDataUpdate.AgentData_Field.AgentID, agentDataUpdate)
         }
     }
 
     @SLEventQueueMessageHandler(eventName = SLCapEventQueue.CapsEventType.AgentGroupDataUpdate)
-    public Unit HandleAgentGroupDataUpdate(LLSDNode lLSDNode) {
+    fun HandleAgentGroupDataUpdate(LLSDNode lLSDNode) {
         try {
             AgentGroupDataInfo agentGroupDataInfo = (AgentGroupDataInfo) lLSDNode.toObject(AgentGroupDataInfo.class)
             if (this.avatarGroupListsResultHandler != null) {
@@ -143,7 +143,7 @@ class SLUserProfiles : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleAgentGroupDataUpdate(AgentGroupDataUpdate agentGroupDataUpdate) {
+    fun HandleAgentGroupDataUpdate(AgentGroupDataUpdate agentGroupDataUpdate) {
         if (this.avatarGroupListsResultHandler != null) {
             AvatarGroupList avatarGroupList = AvatarGroupList(agentGroupDataUpdate)
             this.avatarGroupListsResultHandler.onResultData(avatarGroupList.avatarID, avatarGroupList)
@@ -151,7 +151,7 @@ class SLUserProfiles : SLModule() {
     }
 
     @SLEventQueueMessageHandler(eventName = SLCapEventQueue.CapsEventType.AvatarGroupsReply)
-    public Unit HandleAvatarGroupsReply(LLSDNode lLSDNode) {
+    fun HandleAvatarGroupsReply(LLSDNode lLSDNode) {
         try {
             AgentGroupDataInfo agentGroupDataInfo = (AgentGroupDataInfo) lLSDNode.toObject(AgentGroupDataInfo.class)
             if (this.avatarGroupListsResultHandler != null) {
@@ -166,7 +166,7 @@ class SLUserProfiles : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleAvatarGroupsReply(AvatarGroupsReply avatarGroupsReply) {
+    fun HandleAvatarGroupsReply(AvatarGroupsReply avatarGroupsReply) {
         if (!Objects.equal(avatarGroupsReply.AgentData_Field.AvatarID, this.circuitInfo.agentID) && this.avatarGroupListsResultHandler != null) {
             AvatarGroupList avatarGroupList = AvatarGroupList(avatarGroupsReply)
             this.avatarGroupListsResultHandler.onResultData(avatarGroupList.avatarID, avatarGroupList)
@@ -174,27 +174,27 @@ class SLUserProfiles : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleAvatarNotesReply(AvatarNotesReply avatarNotesReply) {
+    fun HandleAvatarNotesReply(AvatarNotesReply avatarNotesReply) {
         if (this.avatarNotesResultHandler != null) {
             this.avatarNotesResultHandler.onResultData(avatarNotesReply.Data_Field.TargetID, avatarNotesReply)
         }
     }
 
     @SLMessageHandler
-    public Unit HandleAvatarPicksReply(AvatarPicksReply avatarPicksReply) {
+    fun HandleAvatarPicksReply(AvatarPicksReply avatarPicksReply) {
         if (this.avatarPicksResultHandler != null) {
             this.avatarPicksResultHandler.onResultData(avatarPicksReply.AgentData_Field.TargetID, avatarPicksReply)
         }
     }
 
     @SLMessageHandler
-    public Unit HandleAvatarPropertiesReply(AvatarPropertiesReply avatarPropertiesReply) {
+    fun HandleAvatarPropertiesReply(AvatarPropertiesReply avatarPropertiesReply) {
         if (this.avatarPropertiesResultHandler != null) {
             this.avatarPropertiesResultHandler.onResultData(avatarPropertiesReply.AgentData_Field.AvatarID, avatarPropertiesReply)
         }
     }
 
-    public Unit HandleCircuitReady() {
+    fun HandleCircuitReady() {
         if (this.userManager != null) {
             this.avatarPropertiesResultHandler = this.userManager.getAvatarProperties().getRequestSource().attachRequestHandler(this.avatarPropertiesRequestHandler)
             this.avatarNotesResultHandler = this.userManager.getAvatarNotes().getRequestSource().attachRequestHandler(this.avatarNotesRequestHandler)
@@ -205,7 +205,7 @@ class SLUserProfiles : SLModule() {
         }
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         if (this.userManager != null) {
             this.userManager.getAvatarProperties().getRequestSource().detachRequestHandler(this.avatarPropertiesRequestHandler)
             this.userManager.getAvatarNotes().getRequestSource().detachRequestHandler(this.avatarNotesRequestHandler)
@@ -215,13 +215,13 @@ class SLUserProfiles : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandlePickInfoReply(PickInfoReply pickInfoReply) {
+    fun HandlePickInfoReply(PickInfoReply pickInfoReply) {
         if (this.avatarPickInfosResultHandler != null) {
             this.avatarPickInfosResultHandler.onResultData(AvatarPickKey(pickInfoReply.Data_Field.CreatorID, pickInfoReply.Data_Field.PickID), pickInfoReply)
         }
     }
 
-    public Unit SaveUserNotes(UUID uuid, String str) {
+    fun SaveUserNotes(UUID uuid, String str) {
         AvatarNotesUpdate avatarNotesUpdate = AvatarNotesUpdate()
         avatarNotesUpdate.AgentData_Field.AgentID = this.circuitInfo.agentID
         avatarNotesUpdate.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -261,7 +261,7 @@ class SLUserProfiles : SLModule() {
         }
     }
 
-    public Unit UpdateAvatarProperties(UUID uuid, UUID uuid2, String str, String str2, Boolean z, Boolean z2, String str3) {
+    fun UpdateAvatarProperties(UUID uuid, UUID uuid2, String str, String str2, Boolean z, Boolean z2, String str3) {
         AvatarPropertiesUpdate avatarPropertiesUpdate = AvatarPropertiesUpdate()
         avatarPropertiesUpdate.AgentData_Field.AgentID = this.circuitInfo.agentID
         avatarPropertiesUpdate.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -274,7 +274,7 @@ class SLUserProfiles : SLModule() {
         avatarPropertiesUpdate.PropertiesData_Field.ProfileURL = SLMessage.stringToVariableOEM(str3)
         avatarPropertiesUpdate.isReliable = true
         avatarPropertiesUpdate.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 super.onMessageAcknowledged(sLMessage)
                 if (SLUserProfiles.this.userManager != null) {
                     SLUserProfiles.this.userManager.getAvatarProperties().requestUpdate(SLUserProfiles.this.userManager.getUserID())
@@ -283,7 +283,7 @@ class SLUserProfiles : SLModule() {
         SendMessage(avatarPropertiesUpdate)
     }
 
-    public Unit UpdatePickInfo(final UUID uuid, UUID uuid2, UUID uuid3, String str, String str2, UUID uuid4, LLVector3d lLVector3d, Int i, Boolean z) {
+    fun UpdatePickInfo(final UUID uuid, UUID uuid2, UUID uuid3, String str, String str2, UUID uuid4, LLVector3d lLVector3d, Int i, Boolean z) {
         PickInfoUpdate pickInfoUpdate = PickInfoUpdate()
         pickInfoUpdate.AgentData_Field.AgentID = this.circuitInfo.agentID
         pickInfoUpdate.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -299,7 +299,7 @@ class SLUserProfiles : SLModule() {
         pickInfoUpdate.Data_Field.Enabled = z
         pickInfoUpdate.isReliable = true
         pickInfoUpdate.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 super.onMessageAcknowledged(sLMessage)
                 if (SLUserProfiles.this.userManager != null) {
                     SLUserProfiles.this.userManager.getAvatarPickInfos().requestUpdate(AvatarPickKey(SLUserProfiles.this.userManager.getUserID(), uuid))
@@ -309,7 +309,7 @@ class SLUserProfiles : SLModule() {
         SendMessage(pickInfoUpdate)
     }
 
-    public Unit requestAgentDataUpdate() {
+    fun requestAgentDataUpdate() {
         AgentDataUpdateRequest agentDataUpdateRequest = AgentDataUpdateRequest()
         agentDataUpdateRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentDataUpdateRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID

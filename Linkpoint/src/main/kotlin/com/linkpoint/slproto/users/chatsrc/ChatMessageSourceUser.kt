@@ -42,18 +42,18 @@ class ChatMessageSourceUser : ChatMessageSource() {
         return this.uuid
     }
 
-    public Unit serializeTo(ChatMessage chatMessage) {
+    fun serializeTo(ChatMessage chatMessage) {
         super.serializeTo(chatMessage)
         chatMessage.setSenderUUID(this.uuid)
         chatMessage.setSenderName(this.displayName)
         chatMessage.setSenderLegacyName(this.legacyName)
     }
 
-    public Unit setDisplayName(String str) {
+    fun setDisplayName(String str) {
         this.displayName = str
     }
 
-    public Unit setLegacyName(String str) {
+    fun setLegacyName(String str) {
         this.legacyName = str
     }
 }

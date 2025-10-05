@@ -52,21 +52,21 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.buttonSpeak = (ImageButton) Utils.castView(findRequiredView, R.id.button_speak, "field 'buttonSpeak'", ImageButton.class)
         this.view2131755256 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 cardboardActivity.onSpeakButton()
             }
         View findRequiredView2 = Utils.findRequiredView(view, R.id.button_chat, "field 'buttonChat' and method 'onChatButton'")
         cardboardActivity.buttonChat = (ImageButton) Utils.castView(findRequiredView2, R.id.button_chat, "field 'buttonChat'", ImageButton.class)
         this.view2131755257 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 cardboardActivity.onChatButton()
             }
         View findRequiredView3 = Utils.findRequiredView(view, R.id.button_speech_send, "field 'buttonSpeechSend' and method 'onSpeechSendButton'")
         cardboardActivity.buttonSpeechSend = (ImageButton) Utils.castView(findRequiredView3, R.id.button_speech_send, "field 'buttonSpeechSend'", ImageButton.class)
         this.view2131755281 = findRequiredView3
         findRequiredView3.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 cardboardActivity.onSpeechSendButton()
             }
         cardboardActivity.speechRecognitionResults = (TextView) Utils.findRequiredViewAsType(view, R.id.speech_recognition_results, "field 'speechRecognitionResults'", TextView.class)
@@ -96,7 +96,7 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.buttonTouchObject = (ImageButton) Utils.castView(findRequiredView7, R.id.object_touch_button, "field 'buttonTouchObject'", ImageButton.class)
         this.view2131755268 = findRequiredView7
         findRequiredView7.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 cardboardActivity.onObjectTouch()
             }
         View findRequiredView8 = Utils.findRequiredView(view, R.id.cardboard_script_dialog, "field 'cardboardScriptDialog' and method 'onScriptDialogOutsideTouch'")
@@ -111,14 +111,14 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.yesButton = (ImageButton) Utils.castView(findRequiredView9, R.id.cardboard_yes_button, "field 'yesButton'", ImageButton.class)
         this.view2131755274 = findRequiredView9
         findRequiredView9.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 cardboardActivity.onYesButton()
             }
         View findRequiredView10 = Utils.findRequiredView(view, R.id.object_chat_button, "field 'buttonObjectChat' and method 'onObjectChat'")
         cardboardActivity.buttonObjectChat = (ImageButton) Utils.castView(findRequiredView10, R.id.object_chat_button, "field 'buttonObjectChat'", ImageButton.class)
         this.view2131755270 = findRequiredView10
         findRequiredView10.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 cardboardActivity.onObjectChat()
             }
         cardboardActivity.yesNoText = (TextView) Utils.findRequiredViewAsType(view, R.id.cardboard_yesno_text, "field 'yesNoText'", TextView.class)
@@ -128,7 +128,7 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.buttonStandUp = (ImageButton) Utils.castView(findRequiredView11, R.id.button_stand_up, "field 'buttonStandUp'", ImageButton.class)
         this.view2131755264 = findRequiredView11
         findRequiredView11.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 cardboardActivity.onStandUpButton()
             }
         cardboardActivity.speakNowText = (TextView) Utils.findRequiredViewAsType(view, R.id.speak_now_text, "field 'speakNowText'", TextView.class)
@@ -153,14 +153,14 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.noButton = (ImageButton) Utils.castView(findRequiredView14, R.id.cardboard_no_button, "field 'noButton'", ImageButton.class)
         this.view2131755275 = findRequiredView14
         findRequiredView14.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 cardboardActivity.onNoButton()
             }
         View findRequiredView15 = Utils.findRequiredView(view, R.id.button_touch, "field 'buttonTouch' and method 'onTouchButton'")
         cardboardActivity.buttonTouch = (ImageButton) Utils.castView(findRequiredView15, R.id.button_touch, "field 'buttonTouch'", ImageButton.class)
         this.view2131755255 = findRequiredView15
         findRequiredView15.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 cardboardActivity.onTouchButton()
             }
         View findRequiredView16 = Utils.findRequiredView(view, R.id.button_turn_left, "field 'buttonTurnLeft' and method 'onCamButtonTouch'")
@@ -181,7 +181,7 @@ class CardboardActivity_ViewBinding : Unbinder {
         cardboardActivity.buttonSit = (ImageButton) Utils.castView(findRequiredView18, R.id.object_sit_button, "field 'buttonSit'", ImageButton.class)
         this.view2131755269 = findRequiredView18
         findRequiredView18.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 cardboardActivity.onObjectSit()
             }
         cardboardActivity.cardboardPrimaryControls = (ViewGroup) Utils.findRequiredViewAsType(view, R.id.cardboard_primary_controls, "field 'cardboardPrimaryControls'", ViewGroup.class)
@@ -194,7 +194,7 @@ class CardboardActivity_ViewBinding : Unbinder {
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         CardboardActivity cardboardActivity = this.target
         if (cardboardActivity == null) {
             throw IllegalStateException("Bindings already cleared.")

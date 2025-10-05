@@ -28,7 +28,7 @@ private class GLQueryReference : GLResourceManager().GLResourceReference {
             super(gLResource, i, gLResourceManager)
         }
 
-        public Unit GLFree() {
+        fun GLFree() {
             Int[] iArr = (Int[]) GLQuery.idQuery.get()
             iArr[0] = this.handle
             Debug.Printf("GLBuffer: deleted buffer %d", Integer.valueOf(iArr[0]))
@@ -54,7 +54,7 @@ private class GLQueryReference : GLResourceManager().GLResourceReference {
         return iArr[0]
     }
 
-    public Unit BeginOcclusionQuery(RenderContext renderContext) {
+    fun BeginOcclusionQuery(RenderContext renderContext) {
         GLES30.glBeginQuery(35887, this.handle)
         this.isQueryRunning = true
         this.queryResult = OcclusionQueryResult.NotReady
@@ -62,7 +62,7 @@ private class GLQueryReference : GLResourceManager().GLResourceReference {
         renderContext.enqueueOcclusionQuery(this)
     }
 
-    public Unit EndOcclusionQuery() {
+    fun EndOcclusionQuery() {
         GLES30.glEndQuery(35887)
     }
 

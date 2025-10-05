@@ -68,12 +68,12 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
     }
 
     /* access modifiers changed from: private */
-    public Unit performDismiss() {
+    fun performDismiss() {
         final ViewGroup.LayoutParams layoutParams = this.mView.getLayoutParams()
         final Int height = this.mView.getHeight()
         ValueAnimator duration = ValueAnimator.ofInt(Int[]{height, 1}).setDuration(this.mAnimationTime)
         duration.addListener(AnimatorListenerAdapter() {
-            public Unit onAnimationEnd(Animator animator) {
+            fun onAnimationEnd(Animator animator) {
                 SwipeDismissTouchListener.this.mCallbacks.onDismiss(SwipeDismissTouchListener.this.mView, SwipeDismissTouchListener.this.mToken)
                 SwipeDismissTouchListener.this.mView.setAlpha(1.0f)
                 SwipeDismissTouchListener.this.mView.setTranslationX(0.0f)
@@ -82,7 +82,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                 SwipeDismissTouchListener.this.mView.setLayoutParams(layoutParams)
             }
         duration.addUpdateListener(ValueAnimator.AnimatorUpdateListener() {
-            public Unit onAnimationUpdate(ValueAnimator valueAnimator) {
+            fun onAnimationUpdate(ValueAnimator valueAnimator) {
                 layoutParams.height = ((Integer) valueAnimator.getAnimatedValue()).intValue()
                 SwipeDismissTouchListener.this.mView.setLayoutParams(layoutParams)
             }
@@ -165,7 +165,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                     }
                     if (z3) {
                         this.mView.animate().translationX(f2).translationY(f).alpha(0.0f).setDuration(this.mAnimationTime).setListener(AnimatorListenerAdapter() {
-                            public Unit onAnimationEnd(Animator animator) {
+                            fun onAnimationEnd(Animator animator) {
                                 SwipeDismissTouchListener.this.performDismiss()
                             }
                     } else if (this.mSwiping) {

@@ -23,22 +23,22 @@ class MemoryManager {
         this.activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)
     }
     
-    public Unit addMemoryPressureListener(MemoryPressureListener listener) {
+    fun addMemoryPressureListener(MemoryPressureListener listener) {
         listeners.add(listener)
     }
     
-    public Unit removeMemoryPressureListener(MemoryPressureListener listener) {
+    fun removeMemoryPressureListener(MemoryPressureListener listener) {
         listeners.remove(listener)
     }
     
-    public Unit trackAllocation(String key, Object resource, Long size) {
+    fun trackAllocation(String key, Object resource, Long size) {
         resourceCache.put(key, WeakReference<>(resource))
         totalAllocated.addAndGet(size)
         
         checkMemoryPressure()
     }
     
-    public Unit trackDeallocation(String key, Long size) {
+    fun trackDeallocation(String key, Long size) {
         resourceCache.remove(key)
         totalAllocated.addAndGet(-size)
     }
@@ -59,7 +59,7 @@ class MemoryManager {
         }
     }
     
-    public Unit performMemoryCleanup() {
+    fun performMemoryCleanup() {
         Log.i(TAG, "Performing memory cleanup")
         
         // Clean up weak references

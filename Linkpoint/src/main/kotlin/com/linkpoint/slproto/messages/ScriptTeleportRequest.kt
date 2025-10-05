@@ -23,11 +23,11 @@ class ScriptTeleportRequest : SLMessage() {
         return this.Data_Field.ObjectName.length + 1 + 1 + this.Data_Field.SimName.length + 12 + 12 + 4
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleScriptTeleportRequest(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -61)
@@ -37,7 +37,7 @@ class ScriptTeleportRequest : SLMessage() {
         packLLVector3(byteBuffer, this.Data_Field.LookAt)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.Data_Field.ObjectName = unpackVariable(byteBuffer, 1)
         this.Data_Field.SimName = unpackVariable(byteBuffer, 1)
         this.Data_Field.SimPosition = unpackLLVector3(byteBuffer)

@@ -216,7 +216,7 @@ private /* synthetic */ Int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConne
 
     private Unit startConnecting(final Boolean z, final String str) {
         this.loginThread = Thread(Runnable() {
-            public Unit run() {
+            fun run() {
                 if (z) {
                     try {
                         Thread.sleep(3000)

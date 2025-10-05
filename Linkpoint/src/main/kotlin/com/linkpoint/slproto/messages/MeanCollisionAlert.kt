@@ -26,11 +26,11 @@ class MeanCollisionAlert : SLMessage() {
         return (this.MeanCollision_Fields.size() * 41) + 5
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleMeanCollisionAlert(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -120)
@@ -44,7 +44,7 @@ class MeanCollisionAlert : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
             MeanCollision meanCollision = MeanCollision()

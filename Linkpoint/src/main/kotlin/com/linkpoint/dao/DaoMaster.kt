@@ -18,7 +18,7 @@ class DaoMaster : AbstractDaoMaster() {
             super(context, str, cursorFactory, 71)
         }
 
-        public Unit onCreate(SQLiteDatabase sQLiteDatabase) {
+        fun onCreate(SQLiteDatabase sQLiteDatabase) {
             Log.i("greenDAO", "Creating tables for schema version 71")
             DaoMaster.createAllTables(sQLiteDatabase, false)
         }
@@ -30,7 +30,7 @@ class DaoMaster : AbstractDaoMaster() {
             super(context, str, cursorFactory)
         }
 
-        public Unit onUpgrade(SQLiteDatabase sQLiteDatabase, Int i, Int i2) {
+        fun onUpgrade(SQLiteDatabase sQLiteDatabase, Int i, Int i2) {
             Log.i("greenDAO", "Upgrading schema from version " + i + " to " + i2 + " by dropping all tables")
             DaoMaster.dropAllTables(sQLiteDatabase, true)
             onCreate(sQLiteDatabase)

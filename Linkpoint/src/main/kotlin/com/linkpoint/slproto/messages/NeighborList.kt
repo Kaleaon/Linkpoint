@@ -35,11 +35,11 @@ class NeighborList : SLMessage() {
         return i
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleNeighborList(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.put((Byte) 3)
         for (Int i = 0; i < 4; i++) {
             packIPAddress(byteBuffer, this.NeighborBlock_Fields[i].IP)
@@ -52,7 +52,7 @@ class NeighborList : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         for (Int i = 0; i < 4; i++) {
             this.NeighborBlock_Fields[i].IP = unpackIPAddress(byteBuffer)
             this.NeighborBlock_Fields[i].Port = unpackShort(byteBuffer) & 65535

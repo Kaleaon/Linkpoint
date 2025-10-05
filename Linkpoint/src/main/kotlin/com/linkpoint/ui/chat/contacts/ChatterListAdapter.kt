@@ -34,7 +34,7 @@ abstract class ChatterListAdapter : BaseAdapter() : ListAdapter {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setUserDistanceInline(Boolean z) {
+    fun setUserDistanceInline(Boolean z) {
         this.userDistanceInline = z
     }
 }

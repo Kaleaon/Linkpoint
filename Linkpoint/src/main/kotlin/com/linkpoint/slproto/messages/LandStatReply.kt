@@ -48,11 +48,11 @@ class LandStatReply : SLMessage() {
         }
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleLandStatReply(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -90)
@@ -72,7 +72,7 @@ class LandStatReply : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.RequestData_Field.ReportType = unpackInt(byteBuffer)
         this.RequestData_Field.RequestFlags = unpackInt(byteBuffer)
         this.RequestData_Field.TotalObjectCount = unpackInt(byteBuffer)

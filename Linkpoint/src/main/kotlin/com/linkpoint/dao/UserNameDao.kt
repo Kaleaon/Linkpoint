@@ -76,7 +76,7 @@ class UserNameDao : AbstractDao()<UserName, UUID> {
         return UserName(fromString, string, str, z)
     }
 
-    public Unit readEntity(Cursor cursor, UserName userName, Int i) {
+    fun readEntity(Cursor cursor, UserName userName, Int i) {
         String str = null
         userName.setUuid(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)))
         userName.setUserName(cursor.isNull(i + 1) ? null : cursor.getString(i + 1))

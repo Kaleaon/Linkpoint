@@ -97,7 +97,7 @@ abstract class InventoryQuery : Parcelable {
         return InventoryEntryList(str, sLInventoryEntry, SLInventoryEntry.query(inventoryDB.getDatabase(), join, strArr, "isFolder DESC, (isFolder AND (typeDefault >= 0)) DESC, (assetType == 25) DESC" + ", " + str2))
     }
 
-    public Unit writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(Parcel parcel, Int i) {
         Bundle bundle = Bundle()
         UUID folderId = folderId()
         if (folderId != null) {

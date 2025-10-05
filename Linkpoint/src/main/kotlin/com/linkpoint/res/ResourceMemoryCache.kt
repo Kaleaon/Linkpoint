@@ -38,7 +38,7 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> : ResourceManag
     
     protected abstract Long estimateSize(ResourceType resource)
 
-    public Unit CompleteRequest(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
+    fun CompleteRequest(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
         if (resourcetype != null) {
             String key = "final_" + String.valueOf(resourceparams.hashCode())
             memoryManager.trackAllocation(key, resourcetype, estimateSize(resourcetype))
@@ -49,7 +49,7 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> : ResourceManag
         super.CompleteRequest(resourceparams, resourcetype, set)
     }
 
-    public Unit IntermediateResult(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
+    fun IntermediateResult(ResourceParams resourceparams, ResourceType resourcetype, Set<ResourceConsumer> set) {
         if (resourcetype != null) {
             String key = "intermediate_" + String.valueOf(resourceparams.hashCode())
             memoryManager.trackAllocation(key, resourcetype, estimateSize(resourcetype))
@@ -60,7 +60,7 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> : ResourceManag
         super.IntermediateResult(resourceparams, resourcetype, set)
     }
 
-    public Unit RequestResource(ResourceParams resourceparams, ResourceConsumer resourceConsumer) {
+    fun RequestResource(ResourceParams resourceparams, ResourceConsumer resourceConsumer) {
         ResourceType ifPresent = this.finalResults.getIfPresent(resourceparams)
         if (ifPresent != null) {
             resourceConsumer.OnResourceReady(ifPresent, false)

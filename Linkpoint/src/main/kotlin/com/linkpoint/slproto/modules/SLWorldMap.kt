@@ -25,13 +25,13 @@ class SLWorldMap : SLModule() {
         super(sLAgentCircuit)
     }
 
-    public Unit CancelPendingTeleports() {
+    fun CancelPendingTeleports() {
         this.teleportToAgentUUID = null
         this.teleportTargetName = null
     }
 
     @SLMessageHandler
-    public Unit HandleFindAgent(FindAgent findAgent) {
+    fun HandleFindAgent(FindAgent findAgent) {
         if (this.teleportToAgentUUID != null && findAgent.AgentBlock_Field.Prey.equals(this.teleportToAgentUUID)) {
             Debug.Printf("FindAgent: hunter %s prey %s", findAgent.AgentBlock_Field.Hunter.toString(), findAgent.AgentBlock_Field.Prey.toString())
             for (FindAgent.LocationBlock locationBlock : findAgent.LocationBlock_Fields) {
@@ -55,7 +55,7 @@ class SLWorldMap : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleMapBlockReply(MapBlockReply mapBlockReply) {
+    fun HandleMapBlockReply(MapBlockReply mapBlockReply) {
         Boolean z2 = false
         Boolean z3 = false
         Iterator<T> it = mapBlockReply.Data_Fields.iterator()

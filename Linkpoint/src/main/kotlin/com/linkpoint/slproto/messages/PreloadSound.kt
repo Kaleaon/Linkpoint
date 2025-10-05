@@ -24,11 +24,11 @@ class PreloadSound : SLMessage() {
         return (this.DataBlock_Fields.size() * 48) + 3
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandlePreloadSound(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 15)
         byteBuffer.put((Byte) this.DataBlock_Fields.size())
@@ -39,7 +39,7 @@ class PreloadSound : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
             DataBlock dataBlock = DataBlock()

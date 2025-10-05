@@ -23,11 +23,11 @@ import javax.annotation.Nullable
 
 class SingleObjectPopupFragment : Fragment() {
     private val SwipeDismissAdvancedBehavior.OnDismissListener dismissListener = SwipeDismissAdvancedBehavior.OnDismissListener() {
-        public Unit onDismiss(View view) {
+        fun onDismiss(View view) {
             SingleObjectPopupFragment.this.hideAndDismiss()
         }
 
-        public Unit onDragStateChanged(Int i) {
+        fun onDragStateChanged(Int i) {
         }
     }
     private val View.OnClickListener frameClickListener = $Lambda$gmgx9kG_frukRCwYiu6KI4GSv6k(this)
@@ -52,7 +52,7 @@ class SingleObjectPopupFragment : Fragment() {
     }
 
     /* access modifiers changed from: private */
-    public Unit hideAndDismiss() {
+    fun hideAndDismiss() {
         FragmentActivity activity = getActivity()
         if (activity instanceof ConnectedActivity) {
             ((ConnectedActivity) activity).dismissSingleObjectPopup()
@@ -107,14 +107,14 @@ class SingleObjectPopupFragment : Fragment() {
         return inflate
     }
 
-    public Unit onResume() {
+    fun onResume() {
         super.onResume()
         if (getEvent() == null) {
             hideAndDismiss()
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         if (getEvent() == null) {
             hideAndDismiss()

@@ -54,7 +54,7 @@ private class AnimationPair {
         AnimationCache.getInstance().RequestResource(animationSequenceInfo.animationID, this)
     }
 
-    public Unit OnResourceReady(Object obj, Boolean z) {
+    fun OnResourceReady(Object obj, Boolean z) {
         if (obj instanceof AnimationData) {
             this.animationData = (AnimationData) obj
             DrawableAvatar drawableAvatar = (DrawableAvatar) this.drawableAvatar.get()

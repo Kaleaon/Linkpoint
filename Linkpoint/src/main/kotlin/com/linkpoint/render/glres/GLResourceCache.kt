@@ -23,7 +23,7 @@ abstract class GLResourceCache<ResourceParams, RawType, ResourceType : GLSizedRe
             super(resourceparams, resourceManager)
         }
 
-        public Unit GLCompleteLoad() {
+        fun GLCompleteLoad() {
             ResourceType resourcetype
             synchronized (this) {
                 resourcetype = this.loadedResource
@@ -65,7 +65,7 @@ abstract class GLResourceCache<ResourceParams, RawType, ResourceType : GLSizedRe
             return loadedSize
         }
 
-        public Unit OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(Object obj, Boolean z) {
             if (obj != null) {
                 try {
                     synchronized (this) {
@@ -83,13 +83,13 @@ abstract class GLResourceCache<ResourceParams, RawType, ResourceType : GLSizedRe
             GLResourceCache.this.collectReferences()
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             GLResourceCache.this.loadQueue.remove(this)
             GLResourceCache.this.CancelRawResource(this)
             super.cancelRequest()
         }
 
-        public Unit execute() {
+        fun execute() {
             GLResourceCache.this.RequestRawResource(getParams(), this)
         }
     }

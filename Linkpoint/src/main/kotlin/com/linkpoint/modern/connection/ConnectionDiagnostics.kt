@@ -195,7 +195,7 @@ class ConnectionDiagnostics {
         
         private StringBuilder issues = StringBuilder()
         
-        public Unit addIssue(String issue) {
+        fun addIssue(String issue) {
             if (issues.length() > 0) {
                 issues.append("; ")
             }

@@ -22,7 +22,7 @@ class InventoryListAdapter : CursorAdapter() {
         this.avatarAppearance = sLAvatarAppearance
     }
 
-    public Unit bindView(View view, Context context, Cursor cursor) {
+    fun bindView(View view, Context context, Cursor cursor) {
         SLInventoryEntry sLInventoryEntry = SLInventoryEntry(cursor)
         ((TextView) view.findViewById(R.id.itemNameTextView)).setText(sLInventoryEntry.name)
         Int drawableResource = sLInventoryEntry.getDrawableResource()

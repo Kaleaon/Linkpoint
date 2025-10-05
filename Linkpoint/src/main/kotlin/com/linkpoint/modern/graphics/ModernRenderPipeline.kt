@@ -95,7 +95,7 @@ class ModernRenderPipeline {
         return true
     }
     
-    public Unit renderFrame(RenderParams params) {
+    fun renderFrame(RenderParams params) {
         if (isES3Available && pbrShaderProgram != -1) {
             renderModernFrame(params)
         } else if (legacyShaderProgram != -1) {
@@ -325,7 +325,7 @@ class ModernRenderPipeline {
         return isES3Available
     }
     
-    public Unit cleanup() {
+    fun cleanup() {
         if (pbrShaderProgram != -1) {
             GLES30.glDeleteProgram(pbrShaderProgram)
         }

@@ -275,7 +275,7 @@ class ModernAvatarManager {
     /**
      * Set avatar event listener
      */
-    public Unit setAvatarEventListener(AvatarEventListener listener) {
+    fun setAvatarEventListener(AvatarEventListener listener) {
         this.avatarListener = listener
     }
     
@@ -295,7 +295,7 @@ class ModernAvatarManager {
     /**
      * Cleanup resources
      */
-    public Unit cleanup() {
+    fun cleanup() {
         if (executor != null && !executor.isShutdown()) {
             executor.shutdown()
         }
@@ -328,19 +328,19 @@ class ModernAvatarManager {
             this.createdTime = System.currentTimeMillis()
         }
         
-        public Unit setAppearance(AvatarAppearance appearance) {
+        fun setAppearance(AvatarAppearance appearance) {
             this.appearance = appearance
         }
         
-        public Unit setCurrentAnimation(String animationId) {
+        fun setCurrentAnimation(String animationId) {
             this.currentAnimation = animationId
         }
         
-        public Unit updateTexture(AvatarTextureInfo textureInfo) {
+        fun updateTexture(AvatarTextureInfo textureInfo) {
             textures.put(textureInfo.getType(), textureInfo)
         }
         
-        public Unit cleanup() {
+        fun cleanup() {
             textures.clear()
         }
         

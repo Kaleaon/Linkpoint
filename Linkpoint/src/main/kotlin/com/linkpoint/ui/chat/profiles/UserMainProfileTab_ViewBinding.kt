@@ -38,7 +38,7 @@ class UserMainProfileTab_ViewBinding : Unbinder {
         userMainProfileTab.changePicButton = (Button) Utils.castView(findRequiredView, R.id.change_pic_button, "field 'changePicButton'", Button.class)
         this.view2131755698 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userMainProfileTab.onChangePicClicked(view)
             }
         userMainProfileTab.userPicView = (ImageAssetView) Utils.findRequiredViewAsType(view, R.id.user_pic_view, "field 'userPicView'", ImageAssetView.class)
@@ -50,7 +50,7 @@ class UserMainProfileTab_ViewBinding : Unbinder {
         userMainProfileTab.aboutEditButton = (Button) Utils.castView(findRequiredView2, R.id.about_edit_button, "field 'aboutEditButton'", Button.class)
         this.view2131755706 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userMainProfileTab.onAboutEditClicked(view)
             }
         userMainProfileTab.userWebProfileLink = (TextView) Utils.findRequiredViewAsType(view, R.id.user_web_profile_link, "field 'userWebProfileLink'", TextView.class)
@@ -59,25 +59,25 @@ class UserMainProfileTab_ViewBinding : Unbinder {
         View findRequiredView3 = Utils.findRequiredView(view, R.id.user_profile_view_partner_button, "method 'onViewProfileClicked'")
         this.view2131755715 = findRequiredView3
         findRequiredView3.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userMainProfileTab.onViewProfileClicked(view)
             }
         View findRequiredView4 = Utils.findRequiredView(view, R.id.button_edit_notes, "method 'onEditNotesClicked'")
         this.view2131755724 = findRequiredView4
         findRequiredView4.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userMainProfileTab.onEditNotesClicked(view)
             }
         View findRequiredView5 = Utils.findRequiredView(view, R.id.button_copy_agent_key, "method 'onCopyAgentKeyClicked'")
         this.view2131755720 = findRequiredView5
         findRequiredView5.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userMainProfileTab.onCopyAgentKeyClicked(view)
             }
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         UserMainProfileTab userMainProfileTab = this.target
         if (userMainProfileTab == null) {
             throw IllegalStateException("Bindings already cleared.")

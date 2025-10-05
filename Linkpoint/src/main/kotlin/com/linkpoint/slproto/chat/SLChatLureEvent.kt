@@ -51,7 +51,7 @@ val class SLChatLureEvent : SLChatYesNoEvent() {
         return context.getString(R.string.teleport_lure_accepted)
     }
 
-    public Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager) {
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
@@ -60,7 +60,7 @@ val class SLChatLureEvent : SLChatYesNoEvent() {
         }
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setSessionID(this.lureID)
     }

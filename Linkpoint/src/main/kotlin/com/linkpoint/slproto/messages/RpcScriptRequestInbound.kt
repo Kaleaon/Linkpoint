@@ -31,11 +31,11 @@ class RpcScriptRequestInbound : SLMessage() {
         return this.DataBlock_Field.StringValue.length + 54 + 12
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleRpcScriptRequestInbound(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -97)
@@ -48,7 +48,7 @@ class RpcScriptRequestInbound : SLMessage() {
         packVariable(byteBuffer, this.DataBlock_Field.StringValue, 2)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.TargetBlock_Field.GridX = unpackInt(byteBuffer)
         this.TargetBlock_Field.GridY = unpackInt(byteBuffer)
         this.DataBlock_Field.TaskID = unpackUUID(byteBuffer)

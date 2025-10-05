@@ -1571,7 +1571,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     }
 
     /* access modifiers changed from: protected */
-    public Unit handleStartVoice(ChatterID chatterID) {
+    fun handleStartVoice(ChatterID chatterID) {
         CurrentLocationInfo currentLocationInfoSnapshot
         VoiceChannelInfo parcelVoiceChannel
         SLAgentCircuit sLAgentCircuit = null
@@ -1591,7 +1591,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     }
 
     /* access modifiers changed from: protected */
-    public Unit handleUserViewProfile(ChatterID chatterID) {
+    fun handleUserViewProfile(ChatterID chatterID) {
         if (chatterID != null && chatterID.isValidUUID()) {
             switch (m559getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues()[chatterID.getChatterType().ordinal()]) {
                 case 1:
@@ -1651,12 +1651,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         performTeleportTo(sLAgentCircuit, chatterIDUser)
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.user_list_context_menu, menu)
     }
@@ -1664,7 +1664,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     /* access modifiers changed from: protected */
     @CallSuper
     /* renamed from: onCurrentLocationChanged */
-    public Unit m574com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragmentmthref1(CurrentLocationInfo currentLocationInfo2) {
+    fun m574com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragmentmthref1(CurrentLocationInfo currentLocationInfo2) {
         FragmentActivity activity = getActivity()
         if (activity != null) {
             activity.supportInvalidateOptionsMenu()
@@ -1672,7 +1672,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     }
 
     @EventHandler
-    public Unit onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
+    fun onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
         FragmentActivity activity = getActivity()
         if (activity != null) {
             activity.supportInvalidateOptionsMenu()
@@ -1765,7 +1765,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         return super.onOptionsItemSelected(menuItem)
     }
 
-    public Unit onPrepareOptionsMenu(Menu menu) {
+    fun onPrepareOptionsMenu(Menu menu) {
         AvatarGroupList avatarGroupList
         AvatarGroupList.AvatarGroupEntry avatarGroupEntry
         super.onPrepareOptionsMenu(menu)
@@ -1920,7 +1920,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         UserManager userManager = null
         super.onStart()
         if (this.chatterID != null) {
@@ -1936,7 +1936,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         EventBus.getInstance().subscribe((Object) this)
     }
 
-    public Unit onStop() {
+    fun onStop() {
         this.voiceLoggedIn.unsubscribe()
         this.currentLocationInfo.unsubscribe()
         EventBus.getInstance().unsubscribe(this)
@@ -1946,7 +1946,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
     /* access modifiers changed from: protected */
     @CallSuper
     /* renamed from: onVoiceLoginStatusChanged */
-    public Unit m573com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragmentmthref0(Boolean bool) {
+    fun m573com_lumiyaviewer_lumiya_ui_common_UserFunctionsFragmentmthref0(Boolean bool) {
         FragmentActivity activity = getActivity()
         if (activity != null) {
             activity.supportInvalidateOptionsMenu()

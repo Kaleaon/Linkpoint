@@ -58,7 +58,7 @@ class VoiceConnector {
         return VoiceAccountConnection(this.messageController, this, voiceLoginInfo)
     }
 
-    public Unit dispose() {
+    fun dispose() {
         if (!this.disposed) {
             this.disposed = true
             vx_req_connector_initiate_shutdown_t vx_req_connector_initiate_shutdown_t2 = vx_req_connector_initiate_shutdown_t()
@@ -76,14 +76,14 @@ class VoiceConnector {
         return this.voiceAccountServerName
     }
 
-    public Unit setLocalMicVolume(Int n) {
+    fun setLocalMicVolume(Int n) {
         vx_req_connector_set_local_mic_volume_t vx_req_connector_set_local_mic_volume_t2 = vx_req_connector_set_local_mic_volume_t()
         vx_req_connector_set_local_mic_volume_t2.setConnector_handle(this.handle)
         vx_req_connector_set_local_mic_volume_t2.setVolume(n)
         this.messageController.sendRequest(vx_req_connector_set_local_mic_volume_t2.getBase())
     }
 
-    public Unit setLocalSpeakerVolume(Int n) {
+    fun setLocalSpeakerVolume(Int n) {
         vx_req_connector_set_local_speaker_volume_t vx_req_connector_set_local_speaker_volume_t2 = vx_req_connector_set_local_speaker_volume_t()
         vx_req_connector_set_local_speaker_volume_t2.setConnector_handle(this.handle)
         vx_req_connector_set_local_speaker_volume_t2.setVolume(n)
@@ -93,7 +93,7 @@ class VoiceConnector {
     /*
      * Enabled aggressive block sorting
      */
-    public Unit setMuteLocalMic(Boolean bl) {
+    fun setMuteLocalMic(Boolean bl) {
         vx_req_connector_mute_local_mic_t vx_req_connector_mute_local_mic_t2 = vx_req_connector_mute_local_mic_t()
         vx_req_connector_mute_local_mic_t2.setConnector_handle(this.handle)
         Int n = bl ? 1 : 0
@@ -104,7 +104,7 @@ class VoiceConnector {
     /*
      * Enabled aggressive block sorting
      */
-    public Unit setMuteLocalSpeaker(Boolean bl) {
+    fun setMuteLocalSpeaker(Boolean bl) {
         vx_req_connector_mute_local_speaker_t vx_req_connector_mute_local_speaker_t2 = vx_req_connector_mute_local_speaker_t()
         vx_req_connector_mute_local_speaker_t2.setConnector_handle(this.handle)
         Int n = bl ? 1 : 0

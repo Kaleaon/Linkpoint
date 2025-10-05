@@ -53,31 +53,31 @@ class SearchGridResult {
         return this.searchUUID
     }
 
-    public Unit setId(Long l) {
+    fun setId(Long l) {
         this.id = l
     }
 
-    public Unit setItemName(String str) {
+    fun setItemName(String str) {
         this.itemName = str
     }
 
-    public Unit setItemType(Int i) {
+    fun setItemType(Int i) {
         this.itemType = i
     }
 
-    public Unit setItemUUID(UUID uuid) {
+    fun setItemUUID(UUID uuid) {
         this.itemUUID = uuid
     }
 
-    public Unit setLevensteinDistance(Int i) {
+    fun setLevensteinDistance(Int i) {
         this.levensteinDistance = i
     }
 
-    public Unit setMemberCount(Integer num) {
+    fun setMemberCount(Integer num) {
         this.memberCount = num
     }
 
-    public Unit setSearchUUID(UUID uuid) {
+    fun setSearchUUID(UUID uuid) {
         this.searchUUID = uuid
     }
 }

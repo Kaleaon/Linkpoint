@@ -20,7 +20,7 @@ class InventoryDB {
         this.db = sQLiteDatabase
     }
 
-    public Unit beginTransaction() {
+    fun beginTransaction() {
         if (Build.VERSION.SDK_INT >= 11) {
             this.db.beginTransactionNonExclusive()
         } else {
@@ -28,14 +28,14 @@ class InventoryDB {
         }
     }
 
-    public Unit deleteEntry(SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
+    fun deleteEntry(SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
         if (sLInventoryEntry == null) {
             throw IllegalArgumentException("SLInventoryEntry cannot be null")
         }
         sLInventoryEntry.delete(this.db)
     }
 
-    public Unit endTransaction() {
+    fun endTransaction() {
         this.db.endTransaction()
     }
 
@@ -126,7 +126,7 @@ class InventoryDB {
         return
      */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit retainChildren(Long r16, java.util.Set<java.util.UUID> r18) {
+    fun retainChildren(Long r16, java.util.Set<java.util.UUID> r18) {
         /*
             r15 = this
             android.database.sqlite.SQLiteDatabase r2 = r15.db     // Catch:{ SQLiteException -> 0x0086 }
@@ -255,18 +255,18 @@ class InventoryDB {
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.orm.InventoryDB.retainChildren(Long, java.util.Set):Unit")
     }
 
-    public Unit saveEntry(SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
+    fun saveEntry(SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
         if (sLInventoryEntry == null) {
             throw IllegalArgumentException("SLInventoryEntry cannot be null")
         }
         sLInventoryEntry.save(this.db)
     }
 
-    public Unit setTransactionSuccessful() {
+    fun setTransactionSuccessful() {
         this.db.setTransactionSuccessful()
     }
 
-    public Unit yieldIfContendedSafely() {
+    fun yieldIfContendedSafely() {
         this.db.yieldIfContendedSafely()
     }
 }

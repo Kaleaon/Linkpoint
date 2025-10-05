@@ -22,7 +22,7 @@ class DrawableAvatarPart : ResourceConsumer {
     private volatile SLAnimatedMeshData meshData
     private volatile Boolean meshDataUpdated
     private val Runnable meshUpdate = Runnable() {
-        public Unit run() {
+        fun run() {
             GLTexture -get3
             Float[] -get2
             Debug.Printf("Avatar: meshUpdate entered for part %s", DrawableAvatarPart.this.faceIndex.toString())
@@ -82,7 +82,7 @@ class DrawableAvatarPart : ResourceConsumer {
         }
     }
 
-    public Unit OnResourceReady(Object obj, Boolean z) {
+    fun OnResourceReady(Object obj, Boolean z) {
         String str = "Avatar: (requesting meshUpdate) face %s texture %s"
         Object[] objArr = Object[2]
         objArr[0] = this.faceIndex.toString()

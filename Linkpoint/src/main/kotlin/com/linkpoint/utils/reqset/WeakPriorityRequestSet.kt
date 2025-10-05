@@ -43,7 +43,7 @@ class WeakPriorityRequestSet<T> {
         }
     }
 
-    public Unit addListener(RequestListener requestListener) {
+    fun addListener(RequestListener requestListener) {
         this.lock.lock()
         try {
             Iterator<WeakReference<RequestListener>> it = this.listeners.iterator()
@@ -66,7 +66,7 @@ class WeakPriorityRequestSet<T> {
         }
     }
 
-    public Unit addRequest(Int i, T t, Object obj) {
+    fun addRequest(Int i, T t, Object obj) {
         this.lock.lock()
         try {
             WeakRequestSet weakRequestSet = this.priorityBins.get(Integer.valueOf(i))
@@ -86,7 +86,7 @@ class WeakPriorityRequestSet<T> {
         }
     }
 
-    public Unit completeRequest(T t) {
+    fun completeRequest(T t) {
         this.lock.lock()
         try {
             for (WeakRequestSet completeRequest : this.priorityBins.values()) {
@@ -132,7 +132,7 @@ class WeakPriorityRequestSet<T> {
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.utils.reqset.WeakPriorityRequestSet.getRequest():java.lang.Object")
     }
 
-    public Unit removeListener(RequestListener requestListener) {
+    fun removeListener(RequestListener requestListener) {
         this.lock.lock()
         try {
             Iterator<WeakReference<RequestListener>> it = this.listeners.iterator()
@@ -147,7 +147,7 @@ class WeakPriorityRequestSet<T> {
         }
     }
 
-    public Unit waitRequest() throws InterruptedException {
+    fun waitRequest() throws InterruptedException {
         this.lock.lock()
         try {
             if (getRequest() == null) {

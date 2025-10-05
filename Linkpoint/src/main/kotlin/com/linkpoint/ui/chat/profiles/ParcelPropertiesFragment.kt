@@ -196,7 +196,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
 
         /* access modifiers changed from: protected */
-        public Unit onPostExecute(Boolean bool) {
+        fun onPostExecute(Boolean bool) {
             this.progressDialog.dismiss()
             if (bool == null || (!bool.booleanValue())) {
                 AlertDialog.Builder(ParcelPropertiesFragment.this.getContext()).setMessage((Int) R.string.set_home_failed).setCancelable(true).create().show()
@@ -206,7 +206,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
 
         /* access modifiers changed from: protected */
-        public Unit onPreExecute() {
+        fun onPreExecute() {
             this.progressDialog = ProgressDialog.show(ParcelPropertiesFragment.this.getContext(), (CharSequence) null, ParcelPropertiesFragment.this.getString(R.string.setting_home_location), true)
         }
     }
@@ -221,13 +221,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    public Unit m503com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref1(SLAgentCircuit sLAgentCircuit) {
+    fun m503com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref1(SLAgentCircuit sLAgentCircuit) {
         updateSimOptions()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onIsPlayingMedia */
-    public Unit m502com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref0(Boolean bool) {
+    fun m502com_lumiyaviewer_lumiya_ui_chat_profiles_ParcelPropertiesFragmentmthref0(Boolean bool) {
         updatePlayingStatus()
     }
 
@@ -282,7 +282,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return inflate
     }
 
-    public Unit onDestroyView() {
+    fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.ownerNameDisplayer.unbindViews()
@@ -292,7 +292,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     @OnClick({2131755608})
-    public Unit onOwnerProfileButton() {
+    fun onOwnerProfileButton() {
         if (this.parcelData == null) {
             return
         }
@@ -304,7 +304,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     @OnClick({2131755614})
-    public Unit onParcelMediaPlay() {
+    fun onParcelMediaPlay() {
         if (this.parcelData != null && (!Strings.isNullOrEmpty(this.parcelData.getMediaURL())) && this.userManager != null) {
             Intent intent = Intent(getContext(), StreamingMediaService.class)
             intent.setAction("com.linkpoint.ACTION_PLAY_MEDIA")
@@ -317,14 +317,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     @OnClick({2131755615})
-    public Unit onParcelMediaStop() {
+    fun onParcelMediaStop() {
         Intent intent = Intent(getContext(), StreamingMediaService.class)
         intent.setAction("com.linkpoint.ACTION_STOP_MEDIA")
         getContext().startService(intent)
     }
 
     @OnClick({2131755611})
-    public Unit onSetHomeButton() {
+    fun onSetHomeButton() {
         if (this.agentCircuit.getData() != null) {
             AlertDialog.Builder(getContext()).setMessage((Int) R.string.set_home_confirm_title).setCancelable(true).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
@@ -424,7 +424,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     @OnClick({2131755617})
-    public Unit onSimRestartButton() {
+    fun onSimRestartButton() {
         SLAgentCircuit data = this.agentCircuit.getData()
         if (data != null) {
             AlertDialog.Builder(getContext()).setMessage((Int) R.string.restart_region_confirm_title).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, data) {
@@ -622,7 +622,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         this.userManager = UserManager.getUserManager(UUIDPool.getUUID(getArguments().getString("activeAgentUUID")))
         this.parcelData = (ParcelData) getArguments().getSerializable(PARCEL_DATA_KEY)
@@ -643,7 +643,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    public Unit onStop() {
+    fun onStop() {
         this.userManager = null
         this.parcelData = null
         this.ownerNameDisplayer.setChatterID((ChatterID) null)

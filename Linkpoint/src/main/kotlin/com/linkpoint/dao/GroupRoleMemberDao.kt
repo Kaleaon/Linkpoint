@@ -59,7 +59,7 @@ class GroupRoleMemberDao : AbstractDao()<GroupRoleMember, Void> {
         return GroupRoleMember(UUID.fromString(cursor.getString(i + 0)), UUID.fromString(cursor.getString(i + 1)), UUID.fromString(cursor.getString(i + 2)), UUID.fromString(cursor.getString(i + 3)))
     }
 
-    public Unit readEntity(Cursor cursor, GroupRoleMember groupRoleMember, Int i) {
+    fun readEntity(Cursor cursor, GroupRoleMember groupRoleMember, Int i) {
         groupRoleMember.setGroupID(UUID.fromString(cursor.getString(i + 0)))
         groupRoleMember.setRequestID(UUID.fromString(cursor.getString(i + 1)))
         groupRoleMember.setRoleID(UUID.fromString(cursor.getString(i + 2)))

@@ -30,11 +30,11 @@ class PayPriceReply : SLMessage() {
         return (this.ButtonData_Fields.size() * 4) + 25
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandlePayPriceReply(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -94)
@@ -46,7 +46,7 @@ class PayPriceReply : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.ObjectData_Field.ObjectID = unpackUUID(byteBuffer)
         this.ObjectData_Field.DefaultPayPrice = unpackInt(byteBuffer)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

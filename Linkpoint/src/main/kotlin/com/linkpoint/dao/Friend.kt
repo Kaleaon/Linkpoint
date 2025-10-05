@@ -38,19 +38,19 @@ class Friend {
         return this.uuid
     }
 
-    public Unit setIsOnline(Boolean z) {
+    fun setIsOnline(Boolean z) {
         this.isOnline = z
     }
 
-    public Unit setRightsGiven(Int i) {
+    fun setRightsGiven(Int i) {
         this.rightsGiven = i
     }
 
-    public Unit setRightsHas(Int i) {
+    fun setRightsHas(Int i) {
         this.rightsHas = i
     }
 
-    public Unit setUuid(UUID uuid) {
+    fun setUuid(UUID uuid) {
         this.uuid = uuid
     }
 }

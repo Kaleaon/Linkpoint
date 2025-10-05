@@ -41,7 +41,7 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    public Unit bindViews(TextView textView, ChatterPicView chatterPicView) {
+    fun bindViews(TextView textView, ChatterPicView chatterPicView) {
         this.nameTextView = textView
         this.picView = chatterPicView
         updateViews()
@@ -59,14 +59,14 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
         return str != null ? str : context.getString(R.string.name_loading_title)
     }
 
-    public Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
         if (chatterNameRetriever == this.nameRetriever) {
             this.alreadyUpdated = true
             updateViews()
         }
     }
 
-    public Unit setChatterID(ChatterID chatterID2) {
+    fun setChatterID(ChatterID chatterID2) {
         if (!Objects.equal(chatterID2, this.chatterID)) {
             if (this.nameRetriever != null) {
                 this.nameRetriever.dispose()
@@ -93,7 +93,7 @@ class ChatterNameDisplayer : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    public Unit unbindViews() {
+    fun unbindViews() {
         this.nameTextView = null
         this.picView = null
     }

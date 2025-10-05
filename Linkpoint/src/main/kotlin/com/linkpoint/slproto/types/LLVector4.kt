@@ -57,14 +57,14 @@ class LLVector4 {
         return LLVector4(lLVector4.x - lLVector42.x, lLVector4.y - lLVector42.y, lLVector4.z - lLVector42.z, lLVector4.w - lLVector42.w)
     }
 
-    public Unit add(LLVector4 lLVector4) {
+    fun add(LLVector4 lLVector4) {
         this.x += lLVector4.x
         this.y += lLVector4.y
         this.z += lLVector4.z
         this.w += lLVector4.w
     }
 
-    public Unit clear() {
+    fun clear() {
         this.x = 0.0f
         this.y = 0.0f
         this.z = 0.0f
@@ -75,7 +75,7 @@ class LLVector4 {
         return (this.x * lLVector4.x) + (this.y * lLVector4.y) + (this.z * lLVector4.z)
     }
 
-    public Unit mul(Float f) {
+    fun mul(Float f) {
         this.x *= f
         this.y *= f
         this.z *= f
@@ -97,28 +97,28 @@ class LLVector4 {
         return sqrt
     }
 
-    public Unit set(Float f, Float f2, Float f3) {
+    fun set(Float f, Float f2, Float f3) {
         this.x = f
         this.y = f2
         this.z = f3
         this.w = 0.0f
     }
 
-    public Unit set(LLVector4 lLVector4) {
+    fun set(LLVector4 lLVector4) {
         this.x = lLVector4.x
         this.y = lLVector4.y
         this.z = lLVector4.z
         this.w = lLVector4.w
     }
 
-    public Unit setMax(LLVector4 lLVector4) {
+    fun setMax(LLVector4 lLVector4) {
         this.x = Math.max(this.x, lLVector4.x)
         this.y = Math.max(this.y, lLVector4.y)
         this.z = Math.max(this.z, lLVector4.z)
         this.w = Math.max(this.w, lLVector4.w)
     }
 
-    public Unit setMin(LLVector4 lLVector4) {
+    fun setMin(LLVector4 lLVector4) {
         this.x = Math.min(this.x, lLVector4.x)
         this.y = Math.min(this.y, lLVector4.y)
         this.z = Math.min(this.z, lLVector4.z)

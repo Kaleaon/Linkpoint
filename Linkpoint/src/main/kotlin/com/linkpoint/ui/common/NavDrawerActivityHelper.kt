@@ -58,13 +58,13 @@ private class DrawerToggle : ActionBarDrawerToggle() {
         return true
     }
 
-    public Unit onConfigurationChanged(Configuration configuration) {
+    fun onConfigurationChanged(Configuration configuration) {
         if (this.drawerToggle != null) {
             this.drawerToggle.onConfigurationChanged(configuration)
         }
     }
 
-    public Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
         if (this.drawerLayout != null) {
             this.drawerLayout.closeDrawers()
         }
@@ -77,7 +77,7 @@ private class DrawerToggle : ActionBarDrawerToggle() {
         return this.drawerToggle != null && this.drawerToggle.onOptionsItemSelected(menuItem)
     }
 
-    public Unit syncState() {
+    fun syncState() {
         if (this.drawerToggle != null) {
             this.drawerToggle.syncState()
         }

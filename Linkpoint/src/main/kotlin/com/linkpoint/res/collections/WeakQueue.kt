@@ -59,7 +59,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Unit clear() {
+    fun clear() {
         this.lock.lock()
         try {
             this.queue.clear()
@@ -240,7 +240,7 @@ class WeakQueue<T> : BlockingQueue<T> {
         return null
     }
 
-    public Unit put(T t) throws InterruptedException {
+    fun put(T t) throws InterruptedException {
         add(t)
     }
 

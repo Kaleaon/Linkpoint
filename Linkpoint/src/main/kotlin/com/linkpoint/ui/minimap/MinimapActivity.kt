@@ -36,7 +36,7 @@ class MinimapActivity : ConnectedActivity() {
 
     /* access modifiers changed from: private */
     /* renamed from: onCurrentLocationInfo */
-    public Unit m639com_lumiyaviewer_lumiya_ui_minimap_MinimapActivitymthref0(CurrentLocationInfo currentLocationInfo2) {
+    fun m639com_lumiyaviewer_lumiya_ui_minimap_MinimapActivitymthref0(CurrentLocationInfo currentLocationInfo2) {
         String str = null
         if (currentLocationInfo2 != null) {
             ParcelData parcelData = currentLocationInfo2.parcelData()
@@ -60,7 +60,7 @@ class MinimapActivity : ConnectedActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.split_two_panels)
         ButterKnife.bind((Activity) this)
@@ -107,7 +107,7 @@ class MinimapActivity : ConnectedActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null) {
@@ -118,7 +118,7 @@ class MinimapActivity : ConnectedActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStop() {
+    fun onStop() {
         this.currentLocationInfo.unsubscribe()
         super.onStop()
     }

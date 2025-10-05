@@ -28,15 +28,15 @@ class MuteListCachedData {
         return this.id
     }
 
-    public Unit setCRC(Int i) {
+    fun setCRC(Int i) {
         this.CRC = i
     }
 
-    public Unit setData(Byte[] bArr) {
+    fun setData(Byte[] bArr) {
         this.data = bArr
     }
 
-    public Unit setId(Long l) {
+    fun setId(Long l) {
         this.id = l
     }
 }

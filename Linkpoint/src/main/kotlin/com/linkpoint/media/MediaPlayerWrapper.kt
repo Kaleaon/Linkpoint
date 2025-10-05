@@ -24,12 +24,12 @@ class MediaPlayerWrapper : Runnable, OnErrorListener, OnInfoListener, OnPrepared
         return false
     }
 
-    public Unit onPrepared(MediaPlayer mediaPlayer) {
+    fun onPrepared(MediaPlayer mediaPlayer) {
         Debug.Log("MediaPlayerWrapper: prepared, starting playback")
         mediaPlayer.start()
     }
 
-    public Unit play(String str) {
+    fun play(String str) {
         synchronized (this) {
             if (this.mustExit) {
                 return
@@ -51,7 +51,7 @@ class MediaPlayerWrapper : Runnable, OnErrorListener, OnInfoListener, OnPrepared
         }
     }
 
-    public Unit release() {
+    fun release() {
         synchronized (this) {
             this.mustPlay = false
             this.mustExit = true
@@ -61,7 +61,7 @@ class MediaPlayerWrapper : Runnable, OnErrorListener, OnInfoListener, OnPrepared
         }
     }
 
-    public Unit run() {
+    fun run() {
         Debug.Log("MediaPlayerWrapper: working thread started")
         while (!this.mustExit) {
             if (this.mustPlay) {
@@ -113,7 +113,7 @@ class MediaPlayerWrapper : Runnable, OnErrorListener, OnInfoListener, OnPrepared
         }
     }
 
-    public Unit stop() {
+    fun stop() {
         synchronized (this) {
             if (this.mustExit) {
                 return

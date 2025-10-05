@@ -31,11 +31,11 @@ class ChatPass : SLMessage() {
         return this.ChatData_Field.Name.length + 49 + 1 + 1 + 4 + 1 + 2 + this.ChatData_Field.Message.length + 4
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleChatPass(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -17)
@@ -51,7 +51,7 @@ class ChatPass : SLMessage() {
         packVariable(byteBuffer, this.ChatData_Field.Message, 2)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.ChatData_Field.Channel = unpackInt(byteBuffer)
         this.ChatData_Field.Position = unpackLLVector3(byteBuffer)
         this.ChatData_Field.ID = unpackUUID(byteBuffer)

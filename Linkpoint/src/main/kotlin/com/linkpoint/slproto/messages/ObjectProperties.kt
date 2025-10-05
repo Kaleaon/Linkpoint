@@ -58,11 +58,11 @@ class ObjectProperties : SLMessage() {
         }
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleObjectProperties(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 9)
         byteBuffer.put((Byte) this.ObjectData_Fields.size())
@@ -97,7 +97,7 @@ class ObjectProperties : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
             ObjectData objectData = ObjectData()

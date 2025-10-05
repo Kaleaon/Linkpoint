@@ -300,7 +300,7 @@ class SecondLifeWebRTCBridge {
     /**
      * Cleanup voice bridge resources
      */
-    public Unit cleanup() {
+    fun cleanup() {
         Log.i(TAG, "Cleaning up Second Life WebRTC bridge...")
         
         // Disconnect from voice if connected

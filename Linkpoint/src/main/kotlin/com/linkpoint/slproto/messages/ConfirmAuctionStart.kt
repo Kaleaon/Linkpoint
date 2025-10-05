@@ -21,11 +21,11 @@ class ConfirmAuctionStart : SLMessage() {
         return 24
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleConfirmAuctionStart(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -26)
@@ -33,7 +33,7 @@ class ConfirmAuctionStart : SLMessage() {
         packInt(byteBuffer, this.AuctionData_Field.AuctionID)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AuctionData_Field.ParcelID = unpackUUID(byteBuffer)
         this.AuctionData_Field.AuctionID = unpackInt(byteBuffer)
     }

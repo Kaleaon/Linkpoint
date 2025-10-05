@@ -27,7 +27,7 @@ private class MeshGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawable
             this.meshCache = meshCache2
         }
 
-        public Unit OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(Object obj, Boolean z) {
             if (obj instanceof MeshData) {
                 this.meshData = (MeshData) obj
                 PrimComputeExecutor.getInstance().execute(this)
@@ -36,16 +36,16 @@ private class MeshGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawable
             completeRequest(null)
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             PrimComputeExecutor.getInstance().remove(this)
             super.cancelRequest()
         }
 
-        public Unit execute() {
+        fun execute() {
             this.meshCache.RequestResource(((PrimVolumeParams) getParams()).SculptID, this)
         }
 
-        public Unit run() {
+        fun run() {
             try {
                 completeRequest(DrawableGeometry(this.meshData))
             } catch (Exception e) {
@@ -63,7 +63,7 @@ private class SculptGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawab
             super(primVolumeParams, resourceManager)
         }
 
-        public Unit OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(Object obj, Boolean z) {
             if (obj instanceof OpenJPEG) {
                 this.sculptData = (OpenJPEG) obj
                 PrimComputeExecutor.getInstance().execute(this)
@@ -72,17 +72,17 @@ private class SculptGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawab
             completeRequest(null)
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             PrimComputeExecutor.getInstance().remove(this)
             TextureCache.getInstance().CancelRequest(this)
             super.cancelRequest()
         }
 
-        public Unit execute() {
+        fun execute() {
             TextureCache.getInstance().RequestResource(this.sculptTextureParams, this)
         }
 
-        public Unit run() {
+        fun run() {
             try {
                 completeRequest(DrawableGeometry((PrimVolumeParams) getParams(), this.sculptData))
             } catch (Exception e) {
@@ -97,16 +97,16 @@ private class SimpleGeometryRequest : ResourceRequest()<PrimVolumeParams, Drawab
             super(primVolumeParams, resourceManager)
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             PrimComputeExecutor.getInstance().remove(this)
             super.cancelRequest()
         }
 
-        public Unit execute() {
+        fun execute() {
             PrimComputeExecutor.getInstance().execute(this)
         }
 
-        public Unit run() {
+        fun run() {
             try {
                 completeRequest(DrawableGeometry((PrimVolumeParams) getParams(), (OpenJPEG) null))
             } catch (Exception e) {

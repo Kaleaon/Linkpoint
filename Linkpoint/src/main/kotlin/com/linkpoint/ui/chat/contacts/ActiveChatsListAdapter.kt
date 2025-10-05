@@ -64,7 +64,7 @@ class ActiveChatsListAdapter : BaseAdapter(), Closeable, DismissableAdapter {
             this(chatterID2)
         }
 
-        public Unit buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
+        fun buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
             Boolean z = false
             StringBuilder sb = StringBuilder(context.getString(R.string.local_chat_item_title))
             if (ActiveChatsListAdapter.this.currentLocationInfo != null) {
@@ -96,11 +96,11 @@ class ActiveChatsListAdapter : BaseAdapter(), Closeable, DismissableAdapter {
             return ActiveChatsListAdapter.this.context.getString(R.string.local_chat_item_title)
         }
 
-        public Unit setUnreadInfo(UnreadMessageInfo unreadMessageInfo2) {
+        fun setUnreadInfo(UnreadMessageInfo unreadMessageInfo2) {
             this.unreadMessageInfo = unreadMessageInfo2
         }
 
-        public Unit setVoiceChatInfo(VoiceChatInfo voiceChatInfo2) {
+        fun setVoiceChatInfo(VoiceChatInfo voiceChatInfo2) {
             this.voiceChatInfo = voiceChatInfo2
         }
     }
@@ -123,7 +123,7 @@ private class OnlineFriendsHeaderRow {
             return view2
         }
 
-        public Unit setAnyoneOnline(Boolean z) {
+        fun setAnyoneOnline(Boolean z) {
             this.isAnyoneOnline = z
         }
     }
@@ -434,7 +434,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
         return i > 0 && i <= this.activeChatters.size()
     }
 
-    public Unit close() throws IOException {
+    fun close() throws IOException {
         this.activeChattersSubscription.unsubscribe()
         this.onlineFriendsSubscription.unsubscribe()
         this.currentLocationInfoSubscription.unsubscribe()
@@ -541,7 +541,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.contacts.-$La
         notifyDataSetChanged()
     }
 
-    public Unit onDismiss(Int i) {
+    fun onDismiss(Int i) {
         ChatterID chatterID
         Object item = getItem(i)
         if ((item instanceof ChatterDisplayInfo) && (chatterID = ((ChatterDisplayInfo) item).getChatterID(this.userManager)) != null) {

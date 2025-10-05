@@ -86,7 +86,7 @@ private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadabl
         }
     }
 
-    public Unit onLoadableStatusChange(Loadable loadable, Loadable.Status status2) {
+    fun onLoadableStatusChange(Loadable loadable, Loadable.Status status2) {
         Boolean z = false
         Boolean z2 = false
         Boolean z3 = false
@@ -115,7 +115,7 @@ private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadabl
         }
     }
 
-    public Unit onRefresh() {
+    fun onRefresh() {
         for (Loadable loadable : this.loadables) {
             if (loadable instanceof RefreshableOne) {
                 ((RefreshableOne) loadable).requestRefresh()
@@ -128,13 +128,13 @@ private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadabl
         }
     }
 
-    public Unit setButteryProgressBar(Boolean z) {
+    fun setButteryProgressBar(Boolean z) {
         if (this.loadingLayout != null) {
             this.loadingLayout.setButteryProgressBar(z)
         }
     }
 
-    public Unit setEmptyMessage(Boolean z, String str) {
+    fun setEmptyMessage(Boolean z, String str) {
         if (!z) {
             str = null
         }
@@ -142,26 +142,26 @@ private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadabl
         updateLoadingIndicator()
     }
 
-    public Unit setExtraLoading(Boolean z) {
+    fun setExtraLoading(Boolean z) {
         this.isExtraLoading = z
         onLoadableStatusChange((Loadable) null, (Loadable.Status) null)
     }
 
-    public Unit setLoadingLayout(LoadingLayout loadingLayout2, String str, String str2) {
+    fun setLoadingLayout(LoadingLayout loadingLayout2, String str, String str2) {
         this.loadingLayout = loadingLayout2
         this.loadingIdleMessage = str
         this.loadingErrorMessage = str2
         updateLoadingIndicator()
     }
 
-    public Unit setSwipeRefreshLayout(SwipeRefreshLayout swipeRefreshLayout2) {
+    fun setSwipeRefreshLayout(SwipeRefreshLayout swipeRefreshLayout2) {
         this.swipeRefreshLayout = swipeRefreshLayout2
         if (swipeRefreshLayout2 != null) {
             swipeRefreshLayout2.setOnRefreshListener(this)
         }
     }
 
-    public Unit unsubscribeAll() {
+    fun unsubscribeAll() {
         for (Loadable loadable : this.loadables) {
             if (loadable instanceof UnsubscribableOne) {
                 ((UnsubscribableOne) loadable).unsubscribe()

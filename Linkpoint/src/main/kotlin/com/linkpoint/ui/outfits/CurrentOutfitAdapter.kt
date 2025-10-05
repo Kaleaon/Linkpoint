@@ -85,7 +85,7 @@ class CurrentOutfitAdapter : BaseAdapter(), DismissableAdapter {
         return this.wornItems.isEmpty()
     }
 
-    public Unit onDismiss(Int i) {
+    fun onDismiss(Int i) {
         SLAvatarAppearance.WornItem item = getItem(i)
         if (item != null && this.avatarAppearance != null) {
             if (item.getWornOn() != null) {
@@ -96,11 +96,11 @@ class CurrentOutfitAdapter : BaseAdapter(), DismissableAdapter {
         }
     }
 
-    public Unit setAvatarAppearance(SLAvatarAppearance sLAvatarAppearance) {
+    fun setAvatarAppearance(SLAvatarAppearance sLAvatarAppearance) {
         this.avatarAppearance = sLAvatarAppearance
     }
 
-    public Unit setData(ImmutableList<SLAvatarAppearance.WornItem> immutableList) {
+    fun setData(ImmutableList<SLAvatarAppearance.WornItem> immutableList) {
         if (immutableList == null) {
             immutableList = ImmutableList.of()
         }

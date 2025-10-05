@@ -44,7 +44,7 @@ class CardboardControlsPlaceholder : ViewGroup() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onLayout(Boolean z, Int i, Int i2, Int i3, Int i4) {
+    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4) {
         Int childCount = getChildCount()
         for (Int i5 = 0; i5 < childCount; i5++) {
             getChildAt(i5).layout(0, 0, this.fixedWidth, this.fixedHeight)
@@ -52,7 +52,7 @@ class CardboardControlsPlaceholder : ViewGroup() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onMeasure(Int i, Int i2) {
+    fun onMeasure(Int i, Int i2) {
         Int childCount = getChildCount()
         for (Int i3 = 0; i3 < childCount; i3++) {
             View childAt = getChildAt(i3)
@@ -63,13 +63,13 @@ class CardboardControlsPlaceholder : ViewGroup() {
         setMeasuredDimension(0, 0)
     }
 
-    public Unit setFixedSize(Int i, Int i2) {
+    fun setFixedSize(Int i, Int i2) {
         this.fixedWidth = i
         this.fixedHeight = i2
         requestLayout()
     }
 
-    public Unit setOnViewInvalidateListener(OnViewInvalidateListener onViewInvalidateListener2) {
+    fun setOnViewInvalidateListener(OnViewInvalidateListener onViewInvalidateListener2) {
         this.onViewInvalidateListener = onViewInvalidateListener2
     }
 }

@@ -62,7 +62,7 @@ private AutoLogUploader instance
     /**
      * Initialize automatic log uploading (only for debug builds)
      */
-    public Unit initializeAutoUpload() {
+    fun initializeAutoUpload() {
         // Only enable for debug builds
         if (!BuildConfig.DEBUG) {
             Log.d(TAG, "Auto log upload disabled for release builds")
@@ -86,7 +86,7 @@ private AutoLogUploader instance
     /**
      * Upload logs immediately with a specific reason
      */
-    public Unit uploadLogsNow(String reason) {
+    fun uploadLogsNow(String reason) {
         if (!BuildConfig.DEBUG) {
             Log.d(TAG, "Log upload disabled for release builds")
             return
@@ -99,7 +99,7 @@ private AutoLogUploader instance
     /**
      * Upload crash report immediately
      */
-    public Unit uploadCrashReport(Throwable crash, String additionalInfo) {
+    fun uploadCrashReport(Throwable crash, String additionalInfo) {
         if (!BuildConfig.DEBUG) {
             return
         }

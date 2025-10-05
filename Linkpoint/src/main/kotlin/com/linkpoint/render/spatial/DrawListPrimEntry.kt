@@ -15,7 +15,7 @@ class DrawListPrimEntry : DrawListObjectEntry() {
         super(sLObjectInfo)
     }
 
-    public Unit addToDrawList(DrawList drawList) {
+    fun addToDrawList(DrawList drawList) {
         WeakReference weakReference = this.drawableObject
         Object obj = weakReference != null ? (DrawableObject) weakReference.get() : null
         if (obj == null) {

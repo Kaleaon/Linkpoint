@@ -31,11 +31,11 @@ class SetStartLocationRequest : SLMessage() {
         return this.StartLocationData_Field.SimName.length + 1 + 4 + 12 + 12 + 36
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleSetStartLocationRequest(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 68)
@@ -47,7 +47,7 @@ class SetStartLocationRequest : SLMessage() {
         packLLVector3(byteBuffer, this.StartLocationData_Field.LocationLookAt)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.StartLocationData_Field.SimName = unpackVariable(byteBuffer, 1)

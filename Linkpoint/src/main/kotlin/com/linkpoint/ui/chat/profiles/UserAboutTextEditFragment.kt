@@ -41,13 +41,13 @@ class UserAboutTextEditFragment : ProfileTextFieldEditFragment() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onAvatarProperties(AvatarPropertiesReply avatarPropertiesReply) {
+    fun onAvatarProperties(AvatarPropertiesReply avatarPropertiesReply) {
         this.avatarProperties = avatarPropertiesReply
         setOriginalText(isFirstLife() ? SLMessage.stringFromVariableOEM(this.avatarProperties.PropertiesData_Field.FLAboutText) : SLMessage.stringFromVariableUTF(avatarPropertiesReply.PropertiesData_Field.AboutText))
     }
 
     /* access modifiers changed from: protected */
-    public Unit saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
+    fun saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
         Boolean z = true
         if (this.avatarProperties != null) {
             String stringFromVariableUTF = SLMessage.stringFromVariableUTF(this.avatarProperties.PropertiesData_Field.AboutText)

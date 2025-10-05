@@ -78,7 +78,7 @@ private class GroupsAdapter : BaseAdapter() {
         }
 
         /* access modifiers changed from: package-private */
-        public Unit setData(AvatarGroupList avatarGroupList2) {
+        fun setData(AvatarGroupList avatarGroupList2) {
             ImmutableList.Builder builder = ImmutableList.Builder()
             builder.addAll((Iterable) avatarGroupList2.Groups.values())
             this.avatarGroupList = builder.build()
@@ -106,7 +106,7 @@ private class GroupsAdapter : BaseAdapter() {
         return inflate
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         try {
             this.loadableMonitor.setEmptyMessage(this.avatarGroups.get().Groups.isEmpty(), getString(R.string.no_groups))
             if (this.groupsAdapter != null) {
@@ -118,7 +118,7 @@ private class GroupsAdapter : BaseAdapter() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         UserManager userManager
         this.loadableMonitor.unsubscribeAll()
         if ((chatterID instanceof ChatterID.ChatterIDUser) && (userManager = chatterID.getUserManager()) != null) {

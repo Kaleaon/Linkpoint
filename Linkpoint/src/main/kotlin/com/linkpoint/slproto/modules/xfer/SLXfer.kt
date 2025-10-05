@@ -37,7 +37,7 @@ private class XferListenerInvocation {
             this.listener = sLXferCompletionListener
         }
 
-        public Unit invokeListener(String str, Byte[] bArr) {
+        fun invokeListener(String str, Byte[] bArr) {
             this.listener.onXferComplete(this.tag, str, bArr)
         }
     }
@@ -53,7 +53,7 @@ private class XferListenerInvocation {
         this.expectedPacketNum = 0
     }
 
-    public Unit HandleDataPacket(SLXferManager sLXferManager, SendXferPacket sendXferPacket) {
+    fun HandleDataPacket(SLXferManager sLXferManager, SendXferPacket sendXferPacket) {
         Int length
         Int i = 4
         Debug.Printf("XferPacket: packetNum %d (0x%x), dataLen %d", Integer.valueOf(sendXferPacket.XferID_Field.Packet), Integer.valueOf(sendXferPacket.XferID_Field.Packet), Integer.valueOf(sendXferPacket.DataPacket_Field.Data.length))
@@ -91,7 +91,7 @@ private class XferListenerInvocation {
         }
     }
 
-    public Unit StartTransfer(SLXferManager sLXferManager) {
+    fun StartTransfer(SLXferManager sLXferManager) {
         RequestXfer requestXfer = RequestXfer()
         requestXfer.XferID_Field.ID = this.id
         requestXfer.XferID_Field.Filename = SLMessage.stringToVariableOEM(this.fileName)
@@ -104,7 +104,7 @@ private class XferListenerInvocation {
         sLXferManager.SendMessage(requestXfer)
     }
 
-    public Unit addListener(SLXferCompletionListener sLXferCompletionListener, Object obj) {
+    fun addListener(SLXferCompletionListener sLXferCompletionListener, Object obj) {
         this.listeners.add(XferListenerInvocation(obj, sLXferCompletionListener))
     }
 
@@ -116,7 +116,7 @@ private class XferListenerInvocation {
         return this.fileName
     }
 
-    public Unit invokeListeners() {
+    fun invokeListeners() {
         for (XferListenerInvocation invokeListener : this.listeners) {
             invokeListener.invokeListener(this.fileName, this.receivedData)
         }

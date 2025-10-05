@@ -370,7 +370,7 @@ private abstract class ChatterIDWithUUID : ChatterID() {
             return ChatterID.super.toString() + ":" + (this.uuid != null ? this.uuid.toString() : "null")
         }
 
-        public Unit writeToParcel(Parcel parcel, Int i) {
+        fun writeToParcel(Parcel parcel, Int i) {
             ChatterID.super.writeToParcel(parcel, i)
             if (this.uuid != null) {
                 parcel.writeLong(this.uuid.getMostSignificantBits())
@@ -539,7 +539,7 @@ private /* synthetic */ Int[] m259getcomlumiyaviewerlumiyaslprotousersChatterID$
         return bundle
     }
 
-    public Unit toDatabaseObject(Chatter chatter) {
+    fun toDatabaseObject(Chatter chatter) {
         chatter.setType(getChatterType().ordinal())
         chatter.setUuid(getOptionalChatterUUID())
     }
@@ -548,7 +548,7 @@ private /* synthetic */ Int[] m259getcomlumiyaviewerlumiyaslprotousersChatterID$
         return "Chatter:" + getChatterType().toString()
     }
 
-    public Unit writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(Parcel parcel, Int i) {
         parcel.writeLong(this.agentUUID.getMostSignificantBits())
         parcel.writeLong(this.agentUUID.getLeastSignificantBits())
     }

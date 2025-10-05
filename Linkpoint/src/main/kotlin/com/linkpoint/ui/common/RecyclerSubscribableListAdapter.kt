@@ -35,12 +35,12 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
             throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.common.RecyclerSubscribableListAdapter.LocalItemList.<init>(com.lumiyaviewer.lumiya.ui.common.RecyclerSubscribableListAdapter, com.lumiyaviewer.lumiya.slproto.users.manager.SubscribableList, com.google.common.base.Optional):Unit")
         }
 
-        public Unit add(Int i, T t) {
+        fun add(Int i, T t) {
             this.backingList.add(i, t)
             RecyclerSubscribableListAdapter.this.notifyItemInserted(i)
         }
 
-        public Unit clear() {
+        fun clear() {
             this.backingList.clear()
             RecyclerSubscribableListAdapter.this.notifyDataSetChanged()
         }
@@ -94,7 +94,7 @@ abstract class RecyclerSubscribableListAdapter<T> : RecyclerView.Adapter {
     /* access modifiers changed from: protected */
     public abstract Int getObjectViewType(T t)
 
-    public Unit onBindViewHolder(RecyclerView.ViewHolder viewHolder, Int i) {
+    fun onBindViewHolder(RecyclerView.ViewHolder viewHolder, Int i) {
         bindObjectViewHolder(viewHolder, this.localItemList.get(i))
     }
 

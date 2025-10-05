@@ -35,11 +35,11 @@ private String sanitizeDialogText(String str) {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onDialogIgnored(UserManager userManager) {
+    fun onDialogIgnored(UserManager userManager) {
         this.ignored = true
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setChatChannel(Integer.valueOf(this.chatChannel))
         chatMessage.setDialogIgnored(Boolean.valueOf(this.ignored))

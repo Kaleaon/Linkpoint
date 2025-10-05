@@ -39,11 +39,11 @@ class RequestParcelTransfer : SLMessage() {
         return 114
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleRequestParcelTransfer(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -36)
@@ -63,7 +63,7 @@ class RequestParcelTransfer : SLMessage() {
         packInt(byteBuffer, this.RegionData_Field.GridY)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.Data_Field.TransactionID = unpackUUID(byteBuffer)
         this.Data_Field.TransactionTime = unpackInt(byteBuffer)
         this.Data_Field.SourceID = unpackUUID(byteBuffer)

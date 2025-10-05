@@ -81,7 +81,7 @@ class SearchGridResultDao : AbstractDao()<SearchGridResult, Long> {
         return SearchGridResult(valueOf, fromString, i2, fromString2, string, i3, num)
     }
 
-    public Unit readEntity(Cursor cursor, SearchGridResult searchGridResult, Int i) {
+    fun readEntity(Cursor cursor, SearchGridResult searchGridResult, Int i) {
         Integer num = null
         searchGridResult.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         searchGridResult.setSearchUUID(UUID.fromString(cursor.getString(i + 1)))

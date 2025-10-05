@@ -41,11 +41,11 @@ class ParcelInfoReply : SLMessage() {
         return this.Data_Field.Name.length + 33 + 1 + this.Data_Field.Desc.length + 4 + 4 + 1 + 4 + 4 + 4 + 1 + this.Data_Field.SimName.length + 16 + 4 + 4 + 4 + 20
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleParcelInfoReply(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 55)
@@ -67,7 +67,7 @@ class ParcelInfoReply : SLMessage() {
         packInt(byteBuffer, this.Data_Field.AuctionID)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.Data_Field.ParcelID = unpackUUID(byteBuffer)
         this.Data_Field.OwnerID = unpackUUID(byteBuffer)

@@ -4,7 +4,7 @@ import java.util.*
 class InlineList<T : InlineListEntry<T>> {
     private T first = null
 
-    public Unit addEntry(T t) {
+    fun addEntry(T t) {
         InlineList list = t.getList()
         if (list != this) {
             if (list != null) {
@@ -24,7 +24,7 @@ class InlineList<T : InlineListEntry<T>> {
         return this.first
     }
 
-    public Unit removeEntry(T t) {
+    fun removeEntry(T t) {
         if (t.getList() == this) {
             InlineListEntry next = t.getNext()
             InlineListEntry prev = t.getPrev()
@@ -42,6 +42,6 @@ class InlineList<T : InlineListEntry<T>> {
         }
     }
 
-    public Unit requestEntryRemoval(T t) {
+    fun requestEntryRemoval(T t) {
     }
 }

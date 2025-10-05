@@ -23,7 +23,7 @@ class ThemedActivity : AppCompatActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         this.selectedThemeId = GlobalOptions.getInstance().getThemeResourceId()
         Debug.Printf("Theme: activity theme 0x%x", Integer.valueOf(this.selectedThemeId))
         Int i = this.selectedThemeId
@@ -32,7 +32,7 @@ class ThemedActivity : AppCompatActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onResume() {
+    fun onResume() {
         super.onResume()
         Int themeResourceId = GlobalOptions.getInstance().getThemeResourceId()
         Debug.Printf("Theme: resume, activity theme 0x%x", Integer.valueOf(themeResourceId))
@@ -42,19 +42,19 @@ class ThemedActivity : AppCompatActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         EventBus.getInstance().subscribe((Activity) this)
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStop() {
+    fun onStop() {
         EventBus.getInstance().unsubscribeActivity(this)
         super.onStop()
     }
 
     @EventHandler
-    public Unit onThemeChangedEvent(ThemeChangedEvent themeChangedEvent) {
+    fun onThemeChangedEvent(ThemeChangedEvent themeChangedEvent) {
         Debug.Printf("Theme: old theme id 0x%x, theme id 0x%x", Integer.valueOf(this.selectedThemeId), Integer.valueOf(themeChangedEvent.themeResourceId))
         if (Build.VERSION.SDK_INT >= 11) {
             recreate()

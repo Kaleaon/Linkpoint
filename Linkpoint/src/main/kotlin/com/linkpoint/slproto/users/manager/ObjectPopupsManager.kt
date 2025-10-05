@@ -156,7 +156,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    public Unit addObjectPopup(SLChatEvent sLChatEvent) {
+    fun addObjectPopup(SLChatEvent sLChatEvent) {
         Executor executor
         Boolean z = false
         ObjectPopupListener objectPopupListener2 = null
@@ -358,7 +358,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.userManager.getUnreadNotificationManager().updateUnreadNotifications()
     }
 
-    public Unit addPopupWatcher(Object obj) {
+    fun addPopupWatcher(Object obj) {
         synchronized (this.listenerLock) {
             this.popupWatchers.add(obj)
             this.freshPopupsCount.set(0)
@@ -369,7 +369,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* JADX WARNING: Removed duplicated region for block: B:12:0x001f  */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit cancelObjectPopup(com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent r6) {
+    fun cancelObjectPopup(com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent r6) {
         /*
             r5 = this
             r1 = 0
@@ -428,7 +428,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    public Unit clearObjectPopups() {
+    fun clearObjectPopups() {
         ObjectPopupListener objectPopupListener2
         Executor executor
         synchronized (this.listenerLock) {
@@ -528,7 +528,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.userManager.getUnreadNotificationManager().updateUnreadNotifications()
     }
 
-    public Unit dismissDisplayedObjectPopup(SLChatEvent sLChatEvent) {
+    fun dismissDisplayedObjectPopup(SLChatEvent sLChatEvent) {
         synchronized (this.listenerLock) {
             if (sLChatEvent == this.displayedPopupEvent) {
                 this.displayedPopupEvent = null
@@ -590,7 +590,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return z
     }
 
-    public Unit removeObjectPopupListener(ObjectPopupListener objectPopupListener2) {
+    fun removeObjectPopupListener(ObjectPopupListener objectPopupListener2) {
         synchronized (this.listenerLock) {
             if (this.objectPopupListener != null && this.objectPopupListener.get() == objectPopupListener2) {
                 this.objectPopupListener = null
@@ -599,13 +599,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
 
-    public Unit removePopupWatcher(Object obj) {
+    fun removePopupWatcher(Object obj) {
         synchronized (this.listenerLock) {
             this.popupWatchers.remove(obj)
         }
     }
 
-    public Unit setObjectPopupListener(ObjectPopupListener objectPopupListener2, Executor executor) {
+    fun setObjectPopupListener(ObjectPopupListener objectPopupListener2, Executor executor) {
         synchronized (this.listenerLock) {
             this.objectPopupListener = WeakReference<>(objectPopupListener2)
             this.objectPopupListenerExecutor = executor

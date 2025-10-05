@@ -106,11 +106,11 @@ class ChildAgentUpdate : SLMessage() {
         }
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleChildAgentUpdate(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.put(Ascii.EM)
         packLong(byteBuffer, this.AgentData_Field.RegionHandle)
         packInt(byteBuffer, this.AgentData_Field.ViewerCircuitCode)
@@ -172,7 +172,7 @@ class ChildAgentUpdate : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.RegionHandle = unpackLong(byteBuffer)
         this.AgentData_Field.ViewerCircuitCode = unpackInt(byteBuffer)
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)

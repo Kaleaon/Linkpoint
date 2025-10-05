@@ -43,7 +43,7 @@ class WorldViewActivity_ViewBinding : Unbinder {
         worldViewActivity.objectPayButton = (ImageButton) Utils.castView(findRequiredView, R.id.object_pay_button, "field 'objectPayButton'", ImageButton.class)
         this.view2131755554 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onObjectPayButton()
             }
         worldViewActivity.buttonFlyUpward = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_fly_upward, "field 'buttonFlyUpward'", ImageButton.class)
@@ -51,21 +51,21 @@ class WorldViewActivity_ViewBinding : Unbinder {
         worldViewActivity.buttonHUD = (Button) Utils.castView(findRequiredView2, R.id.button_hud, "field 'buttonHUD'", Button.class)
         this.view2131755763 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onHUDButton()
             }
         View findRequiredView3 = Utils.findRequiredView(view, R.id.button_stand_up, "field 'buttonStandUp' and method 'onObjectStandButton'")
         worldViewActivity.buttonStandUp = (ImageButton) Utils.castView(findRequiredView3, R.id.button_stand_up, "field 'buttonStandUp'", ImageButton.class)
         this.view2131755264 = findRequiredView3
         findRequiredView3.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onObjectStandButton()
             }
         View findRequiredView4 = Utils.findRequiredView(view, R.id.object_more_button, "field 'objectMoreButton' and method 'onObjectMoreButton'")
         worldViewActivity.objectMoreButton = (ImageButton) Utils.castView(findRequiredView4, R.id.object_more_button, "field 'objectMoreButton'", ImageButton.class)
         this.view2131755754 = findRequiredView4
         findRequiredView4.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onObjectMoreButton()
             }
         worldViewActivity.flyButtonsLayout = (LinearLayout) Utils.findRequiredViewAsType(view, R.id.fly_buttons_layout, "field 'flyButtonsLayout'", LinearLayout.class)
@@ -74,7 +74,7 @@ class WorldViewActivity_ViewBinding : Unbinder {
         worldViewActivity.objectTouchButton = (ImageButton) Utils.castView(findRequiredView5, R.id.object_touch_button, "field 'objectTouchButton'", ImageButton.class)
         this.view2131755268 = findRequiredView5
         findRequiredView5.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onObjectTouchButton()
             }
         worldViewActivity.buttonFlyDownward = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_fly_downward, "field 'buttonFlyDownward'", ImageButton.class)
@@ -87,7 +87,7 @@ class WorldViewActivity_ViewBinding : Unbinder {
         worldViewActivity.objectChatButton = (ImageButton) Utils.castView(findRequiredView6, R.id.object_chat_button, "field 'objectChatButton'", ImageButton.class)
         this.view2131755270 = findRequiredView6
         findRequiredView6.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onObjectChatButton()
             }
         worldViewActivity.detailsContainer = Utils.findRequiredView(view, R.id.details, "field 'detailsContainer'")
@@ -97,7 +97,7 @@ class WorldViewActivity_ViewBinding : Unbinder {
         worldViewActivity.objectSitButton = (ImageButton) Utils.castView(findRequiredView7, R.id.object_sit_button, "field 'objectSitButton'", ImageButton.class)
         this.view2131755269 = findRequiredView7
         findRequiredView7.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onObjectSitButton()
             }
         worldViewActivity.buttonTurnLeft = (ImageButton) Utils.findRequiredViewAsType(view, R.id.button_turn_left, "field 'buttonTurnLeft'", ImageButton.class)
@@ -108,7 +108,7 @@ class WorldViewActivity_ViewBinding : Unbinder {
         worldViewActivity.buttonCamOff = (ImageButton) Utils.castView(findRequiredView8, R.id.button_cam_off, "field 'buttonCamOff'", ImageButton.class)
         this.view2131755762 = findRequiredView8
         findRequiredView8.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onCamOffButton()
             }
         worldViewActivity.voiceStatusView = (VoiceStatusView) Utils.findRequiredViewAsType(view, R.id.voice_status_view_3d, "field 'voiceStatusView'", VoiceStatusView.class)
@@ -118,14 +118,14 @@ class WorldViewActivity_ViewBinding : Unbinder {
         worldViewActivity.buttonCamOn = (ImageButton) Utils.castView(findRequiredView9, R.id.button_cam_on, "field 'buttonCamOn'", ImageButton.class)
         this.view2131755761 = findRequiredView9
         findRequiredView9.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onCamOnButton()
             }
         View findRequiredView10 = Utils.findRequiredView(view, R.id.object_stand_button, "field 'objectStandButton' and method 'onObjectStandButton'")
         worldViewActivity.objectStandButton = (ImageButton) Utils.castView(findRequiredView10, R.id.object_stand_button, "field 'objectStandButton'", ImageButton.class)
         this.view2131755538 = findRequiredView10
         findRequiredView10.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onObjectStandButton()
             }
         worldViewActivity.dragPointer = Utils.findRequiredView(view, R.id.drag_pointer_view, "field 'dragPointer'")
@@ -134,13 +134,13 @@ class WorldViewActivity_ViewBinding : Unbinder {
         worldViewActivity.buttonStopFlying = (ImageButton) Utils.castView(findRequiredView11, R.id.button_stop_flying, "field 'buttonStopFlying'", ImageButton.class)
         this.view2131755758 = findRequiredView11
         findRequiredView11.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 worldViewActivity.onStopFlyingButton()
             }
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         WorldViewActivity worldViewActivity = this.target
         if (worldViewActivity == null) {
             throw IllegalStateException("Bindings already cleared.")

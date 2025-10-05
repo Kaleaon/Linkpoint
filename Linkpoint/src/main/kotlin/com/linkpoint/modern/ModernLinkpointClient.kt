@@ -310,7 +310,7 @@ class ModernLinkpointClient {
     /**
      * Shutdown the entire client
      */
-    public Unit shutdown() {
+    fun shutdown() {
         Log.i(TAG, "Shutting down Modern Linkpoint client")
         
         logoutAsync(); // Async logout

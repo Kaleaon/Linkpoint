@@ -89,7 +89,7 @@ private /* synthetic */ Int[] m355getcomlumiyaviewerlumiyaslprotousersChatterID$
 
     /* access modifiers changed from: private */
     /* renamed from: onChatterNameRetrieved */
-    public Unit m361com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref5(ChatterNameRetriever chatterNameRetriever2) {
+    fun m361com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref5(ChatterNameRetriever chatterNameRetriever2) {
         this.dbExecutor.execute(Runnable(this) {
 
             /* renamed from: -$f0 */
@@ -162,7 +162,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onFlushChatterNameRetrieved */
-    public Unit m362com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref6(ChatterNameRetriever chatterNameRetriever2) {
+    fun m362com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref6(ChatterNameRetriever chatterNameRetriever2) {
         String resolvedName = chatterNameRetriever2.getResolvedName()
         this.flushChatters.remove(chatterNameRetriever2.chatterID)
         chatterNameRetriever2.dispose()
@@ -173,7 +173,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onMyNameRetrieved */
-    public Unit m357com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref1(ChatterNameRetriever chatterNameRetriever2) {
+    fun m357com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref1(ChatterNameRetriever chatterNameRetriever2) {
         this.dbExecutor.execute(Runnable(this) {
 
             /* renamed from: -$f0 */
@@ -246,7 +246,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: processMessagesFlushed */
-    public Unit m366lambda$com_lumiyaviewer_lumiya_slproto_users_manager_SyncManager_9859(ImmutableList<Long> immutableList) {
+    fun m366lambda$com_lumiyaviewer_lumiya_slproto_users_manager_SyncManager_9859(ImmutableList<Long> immutableList) {
         for (Long load : immutableList) {
             ChatMessage chatMessage = (ChatMessage) this.chatMessageDao.load(load)
             if (chatMessage != null && !chatMessage.getSyncedToGoogleDrive()) {
@@ -355,7 +355,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     /* JADX WARNING: Removed duplicated region for block: B:29:0x014f  */
     /* renamed from: syncMoreMessages */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit m360com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref4() {
+    fun m360com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref4() {
         /*
             r18 = this
             r0 = r18
@@ -555,7 +555,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    public Unit flushChatter(ChatterID chatterID) {
+    fun flushChatter(ChatterID chatterID) {
         if (this.syncingEnabled.get()) {
             this.dbExecutor.execute(Runnable(this, chatterID) {
 
@@ -675,7 +675,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         m360com_lumiyaviewer_lumiya_slproto_users_manager_SyncManagermthref4()
     }
 
-    public Unit onMessagesFlushed(ImmutableList<Long> immutableList) {
+    fun onMessagesFlushed(ImmutableList<Long> immutableList) {
         this.dbExecutor.execute(Runnable(this, immutableList) {
 
             /* renamed from: -$f0 */
@@ -749,7 +749,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
 
-    public Unit onMessagesWritten(Long j) {
+    fun onMessagesWritten(Long j) {
         this.dbExecutor.execute(Runnable(j, this) {
 
             /* renamed from: -$f0 */
@@ -823,7 +823,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
 
-    public Unit startSyncing(CloudSyncServiceConnection cloudSyncServiceConnection) {
+    fun startSyncing(CloudSyncServiceConnection cloudSyncServiceConnection) {
         this.syncServiceConnection.set(cloudSyncServiceConnection)
         this.syncingEnabled.set(true)
         this.needsStopSyncing.set(false)
@@ -897,7 +897,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     }
 
-    public Unit stopSyncing() {
+    fun stopSyncing() {
         Debug.Printf("SyncManager: requested to stop syncing", Object[0])
         this.dbExecutor.execute(Runnable(this) {
 
@@ -970,7 +970,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: package-private */
-    public Unit syncNewMessages() {
+    fun syncNewMessages() {
         if (this.syncingEnabled.get()) {
             this.dbExecutor.execute(Runnable(this) {
 

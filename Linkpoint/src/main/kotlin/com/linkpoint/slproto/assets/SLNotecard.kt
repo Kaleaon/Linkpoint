@@ -39,7 +39,7 @@ private class AttachmentClickableSpan : ClickableSpan() : InventoryEntrySpan {
             return this.entry
         }
 
-        public Unit onClick(View view) {
+        fun onClick(View view) {
             if (this.clickListener != null) {
                 this.clickListener.onAttachmentClick(this.entry)
             }
@@ -56,7 +56,7 @@ private class AttachmentSpan : ReplacementSpan() : InventoryEntrySpan {
             this.linkText = sLInventoryEntry.getReadableTextForLink()
         }
 
-        public Unit draw(Canvas canvas, CharSequence charSequence, Int i, Int i2, Float f, Int i3, Int i4, Int i5, Paint paint) {
+        fun draw(Canvas canvas, CharSequence charSequence, Int i, Int i2, Float f, Int i3, Int i4, Int i5, Paint paint) {
             if (i != i2) {
                 Paint paint2 = Paint(paint)
                 paint2.setUnderlineText(true)

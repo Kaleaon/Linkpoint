@@ -38,11 +38,11 @@ class CoarseLocationUpdate : SLMessage() {
         return (this.Location_Fields.size() * 3) + 3 + 4 + 1 + (this.AgentData_Fields.size() * 16)
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleCoarseLocationUpdate(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 6)
         byteBuffer.put((Byte) this.Location_Fields.size())
@@ -59,7 +59,7 @@ class CoarseLocationUpdate : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
             Location location = Location()

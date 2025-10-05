@@ -64,7 +64,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentHasTitle {
         }
 
         /* access modifiers changed from: protected */
-        public Unit onPostExecute(Void voidR) {
+        fun onPostExecute(Void voidR) {
             if (this.progressDialog != null) {
                 this.progressDialog.dismiss()
             }
@@ -74,7 +74,7 @@ class SettingsFragment : PreferenceFragmentCompat(), FragmentHasTitle {
         }
 
         /* access modifiers changed from: protected */
-        public Unit onPreExecute() {
+        fun onPreExecute() {
             this.cacheDirs = GlobalOptions.getInstance().getAvailableCacheDirs()
             this.progressDialog = ProgressDialog.show(SettingsFragment.this.getContext(), (CharSequence) null, SettingsFragment.this.getString(R.string.clearing_cache), true, true, DialogInterface.OnCancelListener(this) {
 
@@ -167,7 +167,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
     }
 
     /* access modifiers changed from: private */
-    public Unit askForRestart() {
+    fun askForRestart() {
         AlertDialog.Builder builder = AlertDialog.Builder(getContext())
         builder.setMessage(R.string.restart_after_changing_cache_location)
         builder.setCancelable(true)
@@ -550,7 +550,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
     }
 
     @SuppressLint({"CommitPrefEdits"})
-    public Unit onActivityResult(Int i, Int i2, Intent intent) {
+    fun onActivityResult(Int i, Int i2, Intent intent) {
         if (i == 2 && i2 == -1 && intent != null && this.requestedRingtonePreference != null) {
             Uri uri = (Uri) intent.getParcelableExtra("android.intent.extra.ringtone.PICKED_URI")
             String uri2 = uri != null ? uri.toString() : ""
@@ -565,7 +565,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         }
     }
 
-    public Unit onCreatePreferences(Bundle bundle, String str) {
+    fun onCreatePreferences(Bundle bundle, String str) {
         addPreferencesFromResource(getArguments().getInt(PREF_RESOURCE_KEY))
         FragmentActivity activity = getActivity()
         if (activity instanceof DetailsActivity) {
@@ -577,7 +577,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         }
     }
 
-    public Unit onDetach() {
+    fun onDetach() {
         super.onDetach()
         FragmentActivity activity = getActivity()
         if (activity instanceof DetailsActivity) {
@@ -609,7 +609,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.settings.-$Lambda$
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         FragmentActivity activity = getActivity()
         if (activity instanceof DetailsActivity) {

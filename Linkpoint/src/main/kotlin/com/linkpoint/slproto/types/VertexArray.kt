@@ -11,7 +11,7 @@ class VertexArray {
         this.texCoords = Vector2Array(i)
     }
 
-    public Unit LerpPlanarVertex(Int i, VertexArray vertexArray, Int i2, VertexArray vertexArray2, Int i3, VertexArray vertexArray3, Int i4, Float f, Float f2, LLVector3 lLVector3, LLVector3 lLVector32, LLVector2 lLVector2, LLVector2 lLVector22) {
+    fun LerpPlanarVertex(Int i, VertexArray vertexArray, Int i2, VertexArray vertexArray2, Int i3, VertexArray vertexArray3, Int i4, Float f, Float f2, LLVector3 lLVector3, LLVector3 lLVector32, LLVector2 lLVector2, LLVector2 lLVector22) {
         vertexArray2.vertices.getSub(i3, vertexArray.vertices, i2, lLVector3)
         lLVector3.mul(f)
         vertexArray3.vertices.getSub(i4, vertexArray.vertices, i2, lLVector32)

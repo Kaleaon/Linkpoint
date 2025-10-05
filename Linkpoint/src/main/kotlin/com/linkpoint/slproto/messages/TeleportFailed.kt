@@ -41,11 +41,11 @@ class TeleportFailed : SLMessage() {
         }
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleTeleportFailed(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 74)
@@ -58,7 +58,7 @@ class TeleportFailed : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.Reason = unpackVariable(byteBuffer, 1)
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE

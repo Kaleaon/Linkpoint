@@ -52,7 +52,7 @@ class ChatterListSimpleAdapter : ChatterListAdapter() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit setData(ImmutableList<? : ChatterDisplayInfo> immutableList) {
+    fun setData(ImmutableList<? : ChatterDisplayInfo> immutableList) {
         this.data = immutableList
         notifyDataSetChanged()
     }

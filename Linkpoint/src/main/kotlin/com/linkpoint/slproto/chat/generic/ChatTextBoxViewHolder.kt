@@ -39,7 +39,7 @@ class ChatTextBoxViewHolder : ChatEventViewHolder(), View.OnClickListener, View.
         }
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         switch (view.getId()) {
             case R.id.buttonDialogIgnore:
                 if (this.textBoxEvent != null) {
@@ -66,7 +66,7 @@ class ChatTextBoxViewHolder : ChatEventViewHolder(), View.OnClickListener, View.
         }
     }
 
-    public Unit onFocusChange(View view, Boolean z) {
+    fun onFocusChange(View view, Boolean z) {
         if (view == this.textBox && this.textBox != null && !z) {
             this.textBox.setVisibility(4)
             this.textBoxSend.setText(R.string.textbox_reply_caption)
@@ -85,7 +85,7 @@ class ChatTextBoxViewHolder : ChatEventViewHolder(), View.OnClickListener, View.
         return true
     }
 
-    public Unit setTextBoxEvent(SLChatTextBoxDialog sLChatTextBoxDialog) {
+    fun setTextBoxEvent(SLChatTextBoxDialog sLChatTextBoxDialog) {
         if (this.textBoxEvent != sLChatTextBoxDialog) {
             this.textBoxEvent = sLChatTextBoxDialog
             if (this.textBox != null) {

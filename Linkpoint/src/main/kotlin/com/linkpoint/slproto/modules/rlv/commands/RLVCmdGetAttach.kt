@@ -11,7 +11,7 @@ import java.util.UUID
 class RLVCmdGetAttach : RLVCommand {
     private const val NUM_ATTACHMENT_POINTS_LSL: Int = 41
 
-    public Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
         try {
             Int parseInt = Integer.parseInt(str)
             SLAvatarAppearance sLAvatarAppearance = rLVController.getModules().avatarAppearance

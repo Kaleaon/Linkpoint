@@ -36,11 +36,11 @@ class ObjectPropertiesFamily : SLMessage() {
         return this.ObjectData_Field.Name.length + 102 + 1 + this.ObjectData_Field.Description.length + 2
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleObjectPropertiesFamily(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) 10)
         packInt(byteBuffer, this.ObjectData_Field.RequestFlags)
@@ -61,7 +61,7 @@ class ObjectPropertiesFamily : SLMessage() {
         packVariable(byteBuffer, this.ObjectData_Field.Description, 1)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.ObjectData_Field.RequestFlags = unpackInt(byteBuffer)
         this.ObjectData_Field.ObjectID = unpackUUID(byteBuffer)
         this.ObjectData_Field.OwnerID = unpackUUID(byteBuffer)

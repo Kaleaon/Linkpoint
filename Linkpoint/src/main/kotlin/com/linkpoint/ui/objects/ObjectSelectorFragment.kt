@@ -115,7 +115,7 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
     }
 
     /* access modifiers changed from: private */
-    public Unit updateFilter() {
+    fun updateFilter() {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
         SLObjectFilterInfo filter = getFilter()
@@ -190,7 +190,7 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         }
     }
 
-    public Unit onCheckedChanged(CompoundButton compoundButton, Boolean z) {
+    fun onCheckedChanged(CompoundButton compoundButton, Boolean z) {
         updateFilter()
     }
 
@@ -204,12 +204,12 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         return true
     }
 
-    public Unit onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.menu_object_selector, menu)
         this.searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search))
@@ -277,7 +277,7 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         return true
     }
 
-    public Unit onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
+    fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
         View view = getView()
         if (view != null) {
             ((TextView) view.findViewById(R.id.objectListRangeDisplay)).setText(getString(R.string.object_range_format, Integer.valueOf(i)))
@@ -287,7 +287,7 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         SLModules modules
         Int i = 256
         super.onStart()
@@ -312,10 +312,10 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         }
     }
 
-    public Unit onStartTrackingTouch(SeekBar seekBar) {
+    fun onStartTrackingTouch(SeekBar seekBar) {
     }
 
-    public Unit onStop() {
+    fun onStop() {
         SLAgentCircuit activeAgentCircuit
         SLModules modules
         if (this.subscription != null) {
@@ -329,6 +329,6 @@ class ObjectSelectorFragment : Fragment(), SeekBar.OnSeekBarChangeListener, Comp
         super.onStop()
     }
 
-    public Unit onStopTrackingTouch(SeekBar seekBar) {
+    fun onStopTrackingTouch(SeekBar seekBar) {
     }
 }

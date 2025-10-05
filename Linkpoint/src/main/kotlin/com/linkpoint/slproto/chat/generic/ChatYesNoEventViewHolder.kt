@@ -70,7 +70,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder(), View.OnClickListener {
         }
     }
 
-    public Unit makeCardViewDisabled() {
+    fun makeCardViewDisabled() {
         if (!this.cardViewFaded) {
             this.cardView.setCardBackgroundColor(this.cardViewDisabledBackground)
             this.questionMsg.setTextColor(this.cardViewDisabledText)
@@ -78,7 +78,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder(), View.OnClickListener {
         }
     }
 
-    public Unit makeCardViewEnabled() {
+    fun makeCardViewEnabled() {
         if (this.cardViewFaded) {
             this.cardViewFaded = false
             if (this.fadeAnimatorSet != null && Build.VERSION.SDK_INT >= 11) {
@@ -90,7 +90,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder(), View.OnClickListener {
         this.textView.setTextColor(this.cardViewDefaultText)
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         switch (view.getId()) {
             case R.id.buttonYesNoAccept:
                 if (this.yesNoEvent != null && this.yesNoEvent.getEventState() == SLChatYesNoEvent.EventState.EventNew) {
@@ -111,7 +111,7 @@ class ChatYesNoEventViewHolder : ChatEventViewHolder(), View.OnClickListener {
         }
     }
 
-    public Unit setEvent(SLChatYesNoEvent sLChatYesNoEvent) {
+    fun setEvent(SLChatYesNoEvent sLChatYesNoEvent) {
         this.yesNoEvent = sLChatYesNoEvent
     }
 }

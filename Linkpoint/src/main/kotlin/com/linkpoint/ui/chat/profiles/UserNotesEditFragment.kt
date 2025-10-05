@@ -18,7 +18,7 @@ class UserNotesEditFragment : TextFieldEditFragment(), BackButtonHandler {
 
     /* access modifiers changed from: private */
     /* renamed from: onAvatarNotes */
-    public Unit m510com_lumiyaviewer_lumiya_ui_chat_profiles_UserNotesEditFragmentmthref0(AvatarNotesReply avatarNotesReply) {
+    fun m510com_lumiyaviewer_lumiya_ui_chat_profiles_UserNotesEditFragmentmthref0(AvatarNotesReply avatarNotesReply) {
         setOriginalText(SLMessage.stringFromVariableUTF(avatarNotesReply.Data_Field.Notes).trim())
     }
 
@@ -33,7 +33,7 @@ class UserNotesEditFragment : TextFieldEditFragment(), BackButtonHandler {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         if (this.avatarNotesSubscription != null) {
             this.avatarNotesSubscription.unsubscribe()
             this.avatarNotesSubscription = null
@@ -44,7 +44,7 @@ class UserNotesEditFragment : TextFieldEditFragment(), BackButtonHandler {
     }
 
     /* access modifiers changed from: protected */
-    public Unit saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
+    fun saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
         sLAgentCircuit.getModules().userProfiles.SaveUserNotes(chatterID.getOptionalChatterUUID(), str)
     }
 }

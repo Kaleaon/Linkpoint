@@ -30,7 +30,7 @@ class SLMeshData {
         this.indexBuffer = DirectByteBuffer(sLPolyMesh.indexBuffer)
     }
 
-    public Unit initFromReference() {
+    fun initFromReference() {
         this.vertexBuffer.copyFrom(0, this.referenceData.vertexBuffer, 0, this.referenceData.vertexBuffer.asByteBuffer().capacity())
         this.texCoordsBuffer.copyFrom(0, this.referenceData.texCoordsBuffer, 0, this.referenceData.texCoordsBuffer.asByteBuffer().capacity())
         this.indexBuffer.copyFrom(0, this.referenceData.indexBuffer, 0, this.referenceData.indexBuffer.asByteBuffer().capacity())

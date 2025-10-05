@@ -23,11 +23,11 @@ class InventoryAssetResponse : SLMessage() {
         return 37
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleInventoryAssetResponse(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put(Ascii.ESC)
@@ -36,7 +36,7 @@ class InventoryAssetResponse : SLMessage() {
         packBoolean(byteBuffer, this.QueryData_Field.IsReadable)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.QueryData_Field.QueryID = unpackUUID(byteBuffer)
         this.QueryData_Field.AssetID = unpackUUID(byteBuffer)
         this.QueryData_Field.IsReadable = unpackBoolean(byteBuffer)

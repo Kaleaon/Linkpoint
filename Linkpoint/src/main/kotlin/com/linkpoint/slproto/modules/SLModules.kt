@@ -125,19 +125,19 @@ class SLModules {
         list20.add(sLVoice)
     }
 
-    public Unit HandleCircuitReady() {
+    fun HandleCircuitReady() {
         for (SLModule HandleCircuitReady : this.modules) {
             HandleCircuitReady.HandleCircuitReady()
         }
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         for (SLModule HandleCloseCircuit : this.modules) {
             HandleCloseCircuit.HandleCloseCircuit()
         }
     }
 
-    public Unit HandleGlobalOptionsChange() {
+    fun HandleGlobalOptionsChange() {
         for (SLModule HandleGlobalOptionsChange : this.modules) {
             HandleGlobalOptionsChange.HandleGlobalOptionsChange()
         }

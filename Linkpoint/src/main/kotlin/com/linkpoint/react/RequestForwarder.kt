@@ -35,7 +35,7 @@ abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> : RequestHandler<Kup> {
             RequestForwarder.this.processResultInternal(this.key, obj)
         }
 
-        public Unit onData(Tdown tdown) {
+        fun onData(Tdown tdown) {
             if (RequestForwarder.this.executor != null) {
                 RequestForwarder.this.executor.execute(-$Lambda$swF2K5wPKI2_xA-bWP-XwHVnywU(this, tdown))
             } else {
@@ -43,11 +43,11 @@ abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> : RequestHandler<Kup> {
             }
         }
 
-        public Unit onError(Throwable th) {
+        fun onError(Throwable th) {
             RequestForwarder.this.resultHandler.onResultError(this.key, th)
         }
 
-        public Unit unsubscribe() {
+        fun unsubscribe() {
             this.subscription.unsubscribe()
         }
     }
@@ -78,7 +78,7 @@ abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> : RequestHandler<Kup> {
         processRequestInternal(obj)
     }
 
-    public Unit onRequest(Kup kup) {
+    fun onRequest(Kup kup) {
         if (this.executor != null) {
             this.executor.execute(AnonymousClass1(this, kup))
         } else {
@@ -86,7 +86,7 @@ abstract class RequestForwarder<Kup, Tup, Kdown, Tdown> : RequestHandler<Kup> {
         }
     }
 
-    public Unit onRequestCancelled(Kup kup) {
+    fun onRequestCancelled(Kup kup) {
         DownstreamSubscription downstreamSubscription
         synchronized (this.lock) {
             downstreamSubscription = (DownstreamSubscription) this.subscriptions.remove(kup)

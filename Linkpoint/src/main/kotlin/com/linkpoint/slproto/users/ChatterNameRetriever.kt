@@ -45,7 +45,7 @@ class ChatterNameRetriever {
 
     /* access modifiers changed from: private */
     /* renamed from: onCurrentLocation */
-    public Unit m262com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref0(CurrentLocationInfo currentLocationInfo) {
+    fun m262com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref0(CurrentLocationInfo currentLocationInfo) {
         String str = null
         ParcelData parcelData = currentLocationInfo.parcelData()
         if (parcelData != null) {
@@ -62,7 +62,7 @@ class ChatterNameRetriever {
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupProfile */
-    public Unit m264com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref2(GroupProfileReply groupProfileReply) {
+    fun m264com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref2(GroupProfileReply groupProfileReply) {
         this.resolvedName = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name)
         this.resolvedSecondaryName = SLMessage.stringFromVariableOEM(groupProfileReply.GroupData_Field.Name)
         OnChatterNameUpdated onChatterNameUpdated = (OnChatterNameUpdated) this.listener.get()
@@ -73,7 +73,7 @@ class ChatterNameRetriever {
 
     /* access modifiers changed from: private */
     /* renamed from: onUserName */
-    public Unit m263com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref1(UserName userName) {
+    fun m263com_lumiyaviewer_lumiya_slproto_users_ChatterNameRetrievermthref1(UserName userName) {
         Debug.Printf("Resolved name for %s", userName.getUuid())
         if (GlobalOptions.getInstance().isLegacyUserNames()) {
             this.resolvedName = userName.getUserName()
@@ -88,7 +88,7 @@ class ChatterNameRetriever {
         }
     }
 
-    public Unit dispose() {
+    fun dispose() {
         if (this.subscription != null) {
             this.subscription.unsubscribe()
         }
@@ -102,7 +102,7 @@ class ChatterNameRetriever {
         return this.resolvedSecondaryName
     }
 
-    public Unit subscribe() {
+    fun subscribe() {
         UserManager userManager = this.chatterID.getUserManager()
         if (userManager == null) {
             this.subscription = null

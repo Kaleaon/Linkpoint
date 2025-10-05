@@ -110,12 +110,12 @@ class MeshFace {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit PrepareInfluenceBuffer(MeshWeightsBuffer meshWeightsBuffer, Int i) {
+    fun PrepareInfluenceBuffer(MeshWeightsBuffer meshWeightsBuffer, Int i) {
         OpenJPEG.meshPrepareSeparateInfluenceBuffer(this.weightBuffer.asByteBuffer(), this.numVertices, meshWeightsBuffer.jointIndexBuffer.asByteBuffer(), meshWeightsBuffer.weightsBuffer.asByteBuffer(), i)
     }
 
     /* access modifiers changed from: package-private */
-    public Unit PrepareInfluenceBuffer(DirectByteBuffer directByteBuffer, Int i) {
+    fun PrepareInfluenceBuffer(DirectByteBuffer directByteBuffer, Int i) {
         if (this.weightBuffer != null) {
             OpenJPEG.meshPrepareInfluenceBuffer(this.weightBuffer.asByteBuffer(), this.numVertices, directByteBuffer.asByteBuffer(), i)
         }

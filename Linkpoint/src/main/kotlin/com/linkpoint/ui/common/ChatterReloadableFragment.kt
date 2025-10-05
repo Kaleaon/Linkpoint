@@ -6,7 +6,7 @@ import com.linkpoint.slproto.users.ChatterID
 import java.util.UUID
 
 abstract class ChatterReloadableFragment : ChatterFragment() : ReloadableFragment {
-    public Unit setFragmentArgs(Intent intent, Bundle bundle) {
+    fun setFragmentArgs(Intent intent, Bundle bundle) {
         UUID activeAgentID
         ChatterID chatterID = null
         if (bundle != null) {

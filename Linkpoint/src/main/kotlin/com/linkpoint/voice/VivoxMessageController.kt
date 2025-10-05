@@ -39,7 +39,7 @@ class VivoxMessageController {
              * Enabled force condition propagation
              * Lifted jumps to return sites
              */
-            public Unit handleMessage(Message object) {
+            fun handleMessage(Message object) {
                 block4: {
                     block3: {
                         if (!(((Message)object).obj instanceof vx_message_base_t)) break block3
@@ -97,7 +97,7 @@ class VivoxMessageController {
         return Integer.toString(this.requestId.getAndIncrement())
     }
 
-    public Unit sendRequest(vx_req_base_t vx_req_base_t2) {
+    fun sendRequest(vx_req_base_t vx_req_base_t2) {
         String string2 = this.getRequestID()
         Debug.Printf("Voice: sending request with cookie '%s'", string2)
         VxClientProxy.set_request_cookie(vx_req_base_t2, string2)
@@ -128,16 +128,16 @@ class VivoxMessageController {
         }
     }
 
-    public Unit stop() {
+    fun stop() {
         this.listenForMessages.set(false)
         this.receiverThread.interrupt()
     }
 
     @JvmStatic
     interface OnVivoxMessageListener {
-        public Unit onVivoxEvent(vx_evt_base_t var1)
+        fun onVivoxEvent(vx_evt_base_t var1)
 
-        public Unit onVivoxMessage(vx_message_base_t var1)
+        fun onVivoxMessage(vx_message_base_t var1)
     }
 
     @JvmStatic
@@ -153,7 +153,7 @@ private class PendingRequest {
          * Enabled unnecessary exception pruning
          * Enabled aggressive exception aggregation
          */
-        public Unit signalRequestCompleted(vx_resp_base_t vx_resp_base_t2) {
+        fun signalRequestCompleted(vx_resp_base_t vx_resp_base_t2) {
             Object object = this.monitor
             synchronized (object) {
                 this.result = vx_resp_base_t2

@@ -56,12 +56,12 @@ private class AccountListAdapter : ArrayAdapter()<AccountList.AccountInfo> {
         }
 
         /* access modifiers changed from: package-private */
-        public Unit updateGridList() {
+        fun updateGridList() {
             this.gridList.loadGrids()
         }
 
         /* access modifiers changed from: package-private */
-        public Unit updateList() {
+        fun updateList() {
             super.notifyDataSetChanged()
         }
     }
@@ -163,10 +163,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         deleteAccount(accountInfo)
     }
 
-    public Unit onAccountEditCancelled() {
+    fun onAccountEditCancelled() {
     }
 
-    public Unit onAccountEdited(AccountList.AccountInfo accountInfo, Boolean z) {
+    fun onAccountEdited(AccountList.AccountInfo accountInfo, Boolean z) {
         if (z) {
             this.accountList.addNewAccount(accountInfo)
         }
@@ -179,7 +179,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         }
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         switch (view.getId()) {
             case R.id.add_new_account_button:
                 AccountEditDialog accountEditDialog = AccountEditDialog(this, (AccountList.AccountInfo) null)
@@ -209,7 +209,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         return super.onContextItemSelected(menuItem)
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.manage_accounts)
         this.accountList = AccountList(this)
@@ -222,7 +222,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         registerForContextMenu(listView)
     }
 
-    public Unit onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+    fun onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
         super.onCreateContextMenu(contextMenu, view, contextMenuInfo)
         getMenuInflater().inflate(R.menu.account_list_context_menu, contextMenu)
     }
@@ -232,7 +232,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         return true
     }
 
-    public Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
         Object itemAtPosition = adapterView.getItemAtPosition(i)
         if (itemAtPosition instanceof AccountList.AccountInfo) {
             Intent intent = Intent()
@@ -252,7 +252,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.accounts.-$Lambda$
         }
     }
 
-    public Unit onResume() {
+    fun onResume() {
         super.onResume()
         this.adapter.updateGridList()
     }

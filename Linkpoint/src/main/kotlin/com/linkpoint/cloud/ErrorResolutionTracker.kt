@@ -102,7 +102,7 @@ private ErrorResolutionTracker instance = null
     }
 
     static interface RestartableOperation {
-        public Unit tryRestartingOperation()
+        fun tryRestartingOperation()
     }
 }
 

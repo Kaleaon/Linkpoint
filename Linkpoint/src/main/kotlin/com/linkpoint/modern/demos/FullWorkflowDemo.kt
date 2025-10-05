@@ -21,7 +21,7 @@ class FullWorkflowDemo {
         Log.i(TAG, "Full workflow demo initialized")
     }
     
-    public Unit demonstrateCompleteWorkflow() {
+    fun demonstrateCompleteWorkflow() {
         Log.i(TAG, "=== STARTING COMPLETE LINKPOINT WORKFLOW DEMONSTRATION ===")
         
         demonstrateAuthentication()

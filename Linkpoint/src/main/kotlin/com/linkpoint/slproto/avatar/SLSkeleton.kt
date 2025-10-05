@@ -13,14 +13,14 @@ class SLSkeleton {
     public SLSkeletonBone rootBone
     private val SLSkeletonBone[] updateBones = SLSkeletonBone[SLSkeletonBoneID.VALUES.length]
 
-    public Unit UpdateGlobalPositions(AnimationSkeletonData animationSkeletonData) {
+    fun UpdateGlobalPositions(AnimationSkeletonData animationSkeletonData) {
         for (SLSkeletonBone updateGlobalPos : this.updateBones) {
             updateGlobalPos.updateGlobalPos(animationSkeletonData, this.jointMatrix, this.jointWorldMatrix)
         }
     }
 
     /* access modifiers changed from: protected */
-    public Unit applyJointTranslations(MeshJointTranslations meshJointTranslations) {
+    fun applyJointTranslations(MeshJointTranslations meshJointTranslations) {
         for (Map.Entry entry : this.bones.entrySet()) {
             Float[] fArr = meshJointTranslations.jointTranslations.get(entry.getKey())
             if (fArr != null) {
@@ -56,7 +56,7 @@ class SLSkeleton {
     }
 
     /* access modifiers changed from: protected */
-    public Unit prepareSkeleton() {
+    fun prepareSkeleton() {
         this.rootBone.prepareSkeleton(this.updateBones, 0)
     }
 }

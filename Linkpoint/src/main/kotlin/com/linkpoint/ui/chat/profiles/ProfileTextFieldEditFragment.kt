@@ -16,7 +16,7 @@ abstract class ProfileTextFieldEditFragment : TextFieldEditFragment() {
     public abstract Unit m507com_lumiyaviewer_lumiya_ui_chat_profiles_ProfileTextFieldEditFragmentmthref0(AvatarPropertiesReply avatarPropertiesReply)
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         if (this.avatarProperties != null) {
             this.avatarProperties.unsubscribe()
             this.avatarProperties = null

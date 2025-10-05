@@ -18,7 +18,7 @@ class BalanceManager {
     /* access modifiers changed from: private */
     val SubscriptionPool<SubscriptionSingleKey, Integer> balancePool = SubscriptionPool<>()
     private val SimpleRequestHandler<SubscriptionSingleKey> balanceRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        public Unit onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
             SLFinancialInfo sLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get()
             if (sLFinancialInfo == null) {
                 BalanceManager.this.balancePool.onResultError(SubscriptionSingleKey.Value, SLGridConnection.NotConnectedException())
@@ -42,7 +42,7 @@ class BalanceManager {
     val SubscriptionPool<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactionPool = SubscriptionPool<>()
     /* access modifiers changed from: private */
     val Runnable requestBalanceRunnable = Runnable() {
-        public Unit run() {
+        fun run() {
             SLFinancialInfo sLFinancialInfo = (SLFinancialInfo) BalanceManager.this.financialInfo.get()
             if (sLFinancialInfo != null) {
                 sLFinancialInfo.AskForMoneyBalance()
@@ -59,7 +59,7 @@ class BalanceManager {
         this.moneyTransactionDao = userManager2.getDaoSession().getMoneyTransactionDao()
         this.balancePool.attachRequestHandler(this.balanceRequestHandler)
         this.moneyTransactionPool.attachRequestHandler(AsyncRequestHandler(userManager2.getDatabaseExecutor(), SimpleRequestHandler<SubscriptionSingleKey>() {
-            public Unit onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+            fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
                 BalanceManager.this.moneyTransactionPool.onResultData(subscriptionSingleKey, BalanceManager.this.moneyTransactionDao.queryBuilder().orderAsc(MoneyTransactionDao.Properties.Timestamp).listLazy())
             }
         }))
@@ -73,11 +73,11 @@ class BalanceManager {
         }
     }
 
-    public Unit clearFinancialInfo(SLFinancialInfo sLFinancialInfo) {
+    fun clearFinancialInfo(SLFinancialInfo sLFinancialInfo) {
         this.financialInfo.compareAndSet(sLFinancialInfo, (Object) null)
     }
 
-    public Unit clearMoneyTransactions() {
+    fun clearMoneyTransactions() {
         this.userManager.getDatabaseExecutor().execute(Runnable(this) {
 
             /* renamed from: -$f0 */
@@ -163,15 +163,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.moneyTransactionPool
     }
 
-    public Unit setFinancialInfo(SLFinancialInfo sLFinancialInfo) {
+    fun setFinancialInfo(SLFinancialInfo sLFinancialInfo) {
         this.financialInfo.set(sLFinancialInfo)
     }
 
-    public Unit updateBalance(Int i) {
+    fun updateBalance(Int i) {
         this.balancePool.onResultData(SubscriptionSingleKey.Value, Integer.valueOf(i))
     }
 
-    public Unit updateMoneyTransactions() {
+    fun updateMoneyTransactions() {
         this.moneyTransactionPool.requestUpdate(SubscriptionSingleKey.Value)
     }
 }

@@ -24,7 +24,7 @@ class WorldSurfaceView : GLSurfaceView() {
     val WorldViewActivity activity
     @SuppressLint({"HandlerLeak"})
     private val Handler mHandler = Handler() {
-        public Unit handleMessage(Message message) {
+        fun handleMessage(Message message) {
             switch (message.what) {
                 case 1:
                     if (message.obj != null && (message.obj instanceof ObjectIntersectInfo)) {
@@ -138,7 +138,7 @@ class WorldSurfaceView : GLSurfaceView() {
         this.renderer.requestScreenshot(this.mHandler)
     }
 
-    public Unit onPause() {
+    fun onPause() {
         Debug.Log("GLView: onPause () entered.")
         this.renderer.disableDrawing()
         Debug.Log("GLView: calling super.onPause ().")
@@ -146,7 +146,7 @@ class WorldSurfaceView : GLSurfaceView() {
         Debug.Log("GLView: onPause () exiting")
     }
 
-    public Unit onResume() {
+    fun onResume() {
         super.onResume()
         if (this.wantGL20 == getWantGL20() || this.activity == null) {
             WorldViewRenderer worldViewRenderer = this.renderer
@@ -158,16 +158,16 @@ class WorldSurfaceView : GLSurfaceView() {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit pickObjectHover(Float f, Float f2) {
+    fun pickObjectHover(Float f, Float f2) {
         this.renderer.pickObject(f, f2, this.mHandler)
     }
 
-    public Unit setAvatarCountLimit(Int i) {
+    fun setAvatarCountLimit(Int i) {
         this.renderer.setAvatarCountLimit(i)
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setDisplayedHUDid(Int i) {
+    fun setDisplayedHUDid(Int i) {
         queueEvent(Runnable(i, this) {
 
             /* renamed from: -$f0 */
@@ -241,12 +241,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
 
     }
 
-    public Unit setDrawDistance(Int i) {
+    fun setDrawDistance(Int i) {
         this.renderer.setDrawDistance(i)
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setDrawPickedObject(SLObjectInfo sLObjectInfo) {
+    fun setDrawPickedObject(SLObjectInfo sLObjectInfo) {
         queueEvent(Runnable(this, sLObjectInfo) {
 
             /* renamed from: -$f0 */
@@ -321,14 +321,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setForcedTime(Boolean z, Float f) {
+    fun setForcedTime(Boolean z, Float f) {
         if (this.renderer != null) {
             this.renderer.setForcedTime(z, f)
         }
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setHUDOffset(Float f, Float f2) {
+    fun setHUDOffset(Float f, Float f2) {
         queueEvent(Runnable(f, f2, this) {
 
             /* renamed from: -$f0 */
@@ -406,7 +406,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setHUDScaleFactor(Float f) {
+    fun setHUDScaleFactor(Float f) {
         queueEvent(Runnable(f, this) {
 
             /* renamed from: -$f0 */
@@ -481,12 +481,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setIsInteracting(Boolean z) {
+    fun setIsInteracting(Boolean z) {
         this.renderer.setIsInteracting(z)
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setOwnAvatarHidden(Boolean z) {
+    fun setOwnAvatarHidden(Boolean z) {
         if (this.ownAvatarHidden != z) {
             this.ownAvatarHidden = z
             queueEvent(Runnable(z, this) {
@@ -571,7 +571,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
     }
 
     /* access modifiers changed from: package-private */
-    public Unit takeScreenshot() {
+    fun takeScreenshot() {
         queueEvent(Runnable(this) {
 
             /* renamed from: -$f0 */
@@ -643,7 +643,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Wb
     }
 
     /* access modifiers changed from: package-private */
-    public Unit touchHUD(Float f, Float f2) {
+    fun touchHUD(Float f, Float f2) {
         queueEvent(Runnable(f, f2, this) {
 
             /* renamed from: -$f0 */

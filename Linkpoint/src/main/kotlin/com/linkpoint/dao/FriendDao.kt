@@ -67,7 +67,7 @@ class FriendDao : AbstractDao()<Friend, UUID> {
         return Friend(fromString, i2, i3, z)
     }
 
-    public Unit readEntity(Cursor cursor, Friend friend, Int i) {
+    fun readEntity(Cursor cursor, Friend friend, Int i) {
         friend.setUuid(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)))
         friend.setRightsGiven(cursor.getInt(i + 1))
         friend.setRightsHas(cursor.getInt(i + 2))

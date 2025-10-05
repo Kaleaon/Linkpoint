@@ -73,7 +73,7 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
             this.texture = wearableTexture
         }
 
-        public Unit OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(Object obj, Boolean z) {
             if (obj instanceof OpenJPEG) {
                 this.textureData = (OpenJPEG) obj
             }
@@ -97,7 +97,7 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         }
 
         /* access modifiers changed from: package-private */
-        public Unit requestData() {
+        fun requestData() {
             TextureCache.getInstance().RequestResource(DrawableTextureParams.create(this.texture.textureID, TextureClass.Asset), this)
         }
     }
@@ -140,7 +140,7 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
 
     /* access modifiers changed from: private */
     /* renamed from: bakeAppearance */
-    public Unit m140com_lumiyaviewer_lumiya_slproto_baker_BakeProcessmthref0() {
+    fun m140com_lumiyaviewer_lumiya_slproto_baker_BakeProcessmthref0() {
         Debug.Printf("Baking: Requesting texture data.", Object[0])
         for (List<WearableTextureData> it : this.wearables.values()) {
             for (WearableTextureData requestData : it) {
@@ -248,13 +248,13 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
     }
 
     /* access modifiers changed from: private */
-    public Unit notifyTextureReady() {
+    fun notifyTextureReady() {
         synchronized (this.textureReadyLock) {
             this.textureReadyLock.notifyAll()
         }
     }
 
-    public Unit OnTextureUploadComplete(SLTextureUploadRequest sLTextureUploadRequest) {
+    fun OnTextureUploadComplete(SLTextureUploadRequest sLTextureUploadRequest) {
         if (sLTextureUploadRequest instanceof BakedImageUploadRequest) {
             BakedImageUploadRequest bakedImageUploadRequest = (BakedImageUploadRequest) sLTextureUploadRequest
             Debug.Log("Baking: texture " + bakedImageUploadRequest.bakedIndex + " uploaded, UUID = " + bakedImageUploadRequest.getTextureID())
@@ -306,7 +306,7 @@ private class BakedImageUploadRequest : SLTextureUploadRequest() {
         }
     }
 
-    public Unit cancel() {
+    fun cancel() {
         this.bakingThread.interrupt()
     }
 

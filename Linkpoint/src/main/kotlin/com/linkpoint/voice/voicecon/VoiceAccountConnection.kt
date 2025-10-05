@@ -57,7 +57,7 @@ class VoiceAccountConnection {
         this.handle = object
     }
 
-    public Unit createVoiceSession(VoiceChannelInfo object, String string2) throws VoiceException {
+    fun createVoiceSession(VoiceChannelInfo object, String string2) throws VoiceException {
         vx_req_session_create_t vx_req_session_create_t2 = vx_req_session_create_t()
         vx_req_session_create_t2.setAccount_handle(this.handle)
         if (string2 != null) {
@@ -82,7 +82,7 @@ class VoiceAccountConnection {
         }
     }
 
-    public Unit dispose() {
+    fun dispose() {
         if (!this.disposed) {
             this.disposed = true
             vx_req_account_logout_t vx_req_account_logout_t2 = vx_req_account_logout_t()

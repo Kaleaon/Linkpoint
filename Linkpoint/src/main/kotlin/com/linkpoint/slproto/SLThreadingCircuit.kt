@@ -13,7 +13,7 @@ class SLThreadingCircuit : SLCircuit(), Executor {
     private val BlockingQueue<Runnable> queue = LinkedBlockingQueue()
     private volatile Boolean workEnabled = true
     private val Runnable workingRunnable = Runnable() {
-        public Unit run() {
+        fun run() {
             Debug.Printf("SLThreadingCircuit: working thread started.", Object[0])
             while (SLThreadingCircuit.this.workEnabled) {
                 try {
@@ -44,23 +44,23 @@ class SLThreadingCircuit : SLCircuit(), Executor {
         this.workingThread.interrupt()
     }
 
-    public Unit HandleMessage(SLMessage sLMessage) {
+    fun HandleMessage(SLMessage sLMessage) {
         this.queue.offer(() -> super.HandleMessage(sLMessage))
     }
 
-    public Unit ProcessCloseCircuit() {
+    fun ProcessCloseCircuit() {
         stopThread()
     }
 
-    public Unit ProcessNetworkError() {
+    fun ProcessNetworkError() {
         stopThread()
     }
 
-    public Unit ProcessTimeout() {
+    fun ProcessTimeout() {
         stopThread()
     }
 
-    public Unit execute(Runnable runnable) {
+    fun execute(Runnable runnable) {
         this.queue.offer(runnable)
     }
 }

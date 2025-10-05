@@ -17,7 +17,7 @@ class DrawListAvatarEntry : DrawListObjectEntry() {
         this.objectAvatarInfo = sLObjectAvatarInfo
     }
 
-    public Unit addToDrawList(DrawList drawList) {
+    fun addToDrawList(DrawList drawList) {
         Object obj = null
         WeakReference weakReference
         if (drawList.avatars.size() < drawList.avatarCountLimit || this.objectAvatarInfo.isMyAvatar()) {

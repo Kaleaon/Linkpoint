@@ -14,7 +14,7 @@ class SkyCloudsProgram : SkyProgram() {
         super(Shader.SkyFragmentShader)
     }
 
-    public Unit ApplyWindlight(RenderContext renderContext) {
+    fun ApplyWindlight(RenderContext renderContext) {
         super.ApplyWindlight(renderContext)
         WindlightPreset windlightPreset = renderContext.windlightPreset
         GLES20.glUniform3f(this.cloudColor, windlightPreset.cloud_color[0], windlightPreset.cloud_color[1], windlightPreset.cloud_color[2])

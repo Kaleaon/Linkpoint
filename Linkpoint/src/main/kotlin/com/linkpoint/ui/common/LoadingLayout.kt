@@ -100,18 +100,18 @@ class LoadingLayout : FrameLayout() {
         }
     }
 
-    public Unit setButteryProgressBar(Boolean z) {
+    fun setButteryProgressBar(Boolean z) {
         this.butteryBarVisible = z
         if (this.butteryProgressBar != null) {
             this.butteryProgressBar.setVisibility(z ? 0 : 8)
         }
     }
 
-    public Unit setSwipeRefreshLayout(SwipeRefreshLayout swipeRefreshLayout2) {
+    fun setSwipeRefreshLayout(SwipeRefreshLayout swipeRefreshLayout2) {
         this.swipeRefreshLayout = swipeRefreshLayout2
     }
 
-    public Unit showContent(String str) {
+    fun showContent(String str) {
         setMode(false, str != null, true)
         this.textView.setText(str)
         if (this.swipeRefreshLayout != null) {
@@ -119,11 +119,11 @@ class LoadingLayout : FrameLayout() {
         }
     }
 
-    public Unit showLoading() {
+    fun showLoading() {
         setMode(true, false, false)
     }
 
-    public Unit showMessage(String str) {
+    fun showMessage(String str) {
         setMode(false, true, false)
         this.textView.setText(str)
     }

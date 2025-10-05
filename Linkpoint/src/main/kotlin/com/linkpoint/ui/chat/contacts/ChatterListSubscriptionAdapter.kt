@@ -35,7 +35,7 @@ class ChatterListSubscriptionAdapter : ChatterListSimpleAdapter(), Subscription.
         return super.areAllItemsEnabled()
     }
 
-    public Unit close() throws IOException {
+    fun close() throws IOException {
         this.subscription.unsubscribe()
     }
 
@@ -67,7 +67,7 @@ class ChatterListSubscriptionAdapter : ChatterListSimpleAdapter(), Subscription.
         return super.isEnabled(i)
     }
 
-    public Unit onData(ImmutableList<ChatterDisplayData> immutableList) {
+    fun onData(ImmutableList<ChatterDisplayData> immutableList) {
         if (this.predicate == null) {
             setData(immutableList)
         } else {

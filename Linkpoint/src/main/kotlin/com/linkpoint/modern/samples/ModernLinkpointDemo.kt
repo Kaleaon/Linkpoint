@@ -118,7 +118,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize modern Second Life connection
      */
-    public Unit connectToSecondLife(String eventQueueUrl, String seedCapability, String authToken) {
+    fun connectToSecondLife(String eventQueueUrl, String seedCapability, String authToken) {
         Log.i(TAG, "Connecting to Second Life with modern protocols...")
         
         if (transport == null) {
@@ -157,7 +157,7 @@ class ModernLinkpointDemo {
     /**
      * Initialize modern graphics system with OpenGL ES 3.0 baseline
      */
-    public Unit initializeGraphics() {
+    fun initializeGraphics() {
         Log.i(TAG, "Initializing modernized graphics system (ES 3.0+ only)...")
         
         if (renderPipeline == null) {
@@ -202,7 +202,7 @@ class ModernLinkpointDemo {
     /**
      * Load texture with modern transcoding
      */
-    public Unit loadTexture(String textureId) {
+    fun loadTexture(String textureId) {
         Log.d(TAG, "Loading texture with modern pipeline: " + textureId)
         
         if (textureManager == null) {
@@ -232,7 +232,7 @@ class ModernLinkpointDemo {
     /**
      * Send modern message
      */
-    public Unit sendMessage(String messageType, String content) {
+    fun sendMessage(String messageType, String content) {
         Log.d(TAG, "Sending modern message: " + messageType)
         
         if (transport == null) {
@@ -265,7 +265,7 @@ class ModernLinkpointDemo {
     /**
      * Render frame with modern pipeline
      */
-    public Unit renderFrame(Float[] viewMatrix, Float[] projectionMatrix) {
+    fun renderFrame(Float[] viewMatrix, Float[] projectionMatrix) {
         if (renderPipeline == null) {
             Log.w(TAG, "Render pipeline not available - frame rendering skipped")
             return
@@ -299,7 +299,7 @@ class ModernLinkpointDemo {
     /**
      * Shutdown modern components
      */
-    public Unit shutdown() {
+    fun shutdown() {
         Log.i(TAG, "Shutting down modern Linkpoint components")
         
         try {
@@ -327,7 +327,7 @@ class ModernLinkpointDemo {
     /**
      * Demonstrate modern authentication with OAuth2
      */
-    public Unit demonstrateModernAuthentication(String username, String password) {
+    fun demonstrateModernAuthentication(String username, String password) {
         Log.i(TAG, "Demonstrating modern OAuth2 authentication...")
         
         authManager.authenticateUser(username, password)
@@ -344,7 +344,7 @@ class ModernLinkpointDemo {
     /**
      * Demonstrate intelligent asset streaming
      */
-    public Unit demonstrateAssetStreaming() {
+    fun demonstrateAssetStreaming() {
         Log.i(TAG, "Demonstrating intelligent asset streaming...")
         
         String[] textureIds = {"texture_001", "texture_002", "texture_003"}
@@ -377,7 +377,7 @@ class ModernLinkpointDemo {
     /**
      * Test modern LLSD codec and protocol compatibility
      */
-    public Unit testModernLLSDCodec() {
+    fun testModernLLSDCodec() {
         Log.i(TAG, "Testing Modern LLSD Codec with LibreMetaverse compatibility...")
         protocolDemo.runFullDemo()
     }
@@ -422,7 +422,7 @@ class ModernLinkpointDemo {
      * Demonstrate modernized graphics pipeline
      * Shows the removal of OpenGL ES 1.1 compatibility and ES 3.0+ features
      */
-    public Unit demonstrateModernGraphics() {
+    fun demonstrateModernGraphics() {
         Log.i(TAG, "=== Modern Graphics Pipeline Demonstration ===")
         
         // Show capabilities that are now mandatory (ES 3.0+)

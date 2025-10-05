@@ -14,7 +14,7 @@ class SubscribableList<T> : AbstractList<T> {
     private val Object lock = Object()
     private val Map<List<T>, Optional<Executor>> targets = WeakHashMap()
 
-    public Unit add(Int i, T t) {
+    fun add(Int i, T t) {
         ImmutableList<Map.Entry<List<T>, Optional<Executor>>> copyOf
         synchronized (this.lock) {
             this.backingList.add(i, t)
@@ -123,7 +123,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return copyOf
     }
 
-    public Unit clear() {
+    fun clear() {
         ImmutableList<Map.Entry<List<T>, Optional<Executor>>> copyOf
         synchronized (this.lock) {
             this.backingList.clear()
@@ -248,7 +248,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return remove
     }
 
-    public Unit removeSubscription(List<T> list) {
+    fun removeSubscription(List<T> list) {
         synchronized (this.lock) {
             this.targets.remove(list)
         }

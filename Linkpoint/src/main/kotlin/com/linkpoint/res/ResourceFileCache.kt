@@ -13,16 +13,16 @@ abstract class ResourceFileCache<ResourceParams, ResourceType> : ResourceMemoryC
             this.file = file2
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             LoaderExecutor.getInstance().remove(this)
             super.cancelRequest()
         }
 
-        public Unit execute() {
+        fun execute() {
             LoaderExecutor.getInstance().execute(this)
         }
 
-        public Unit run() {
+        fun run() {
             try {
                 completeRequest(ResourceFileCache.this.createResourceFromFile(getParams(), this.file))
             } catch (Exception e) {

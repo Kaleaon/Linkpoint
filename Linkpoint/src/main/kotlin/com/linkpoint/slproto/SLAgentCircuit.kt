@@ -903,7 +903,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit AcceptFriendship(UUID uuid, UUID uuid2) {
+    fun AcceptFriendship(UUID uuid, UUID uuid2) {
         UUID uuid3 = null
         this.userManager.getChatterList().getFriendManager().addFriend(uuid)
         SLMessage acceptFriendship = AcceptFriendship()
@@ -923,7 +923,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(acceptFriendship)
     }
 
-    public Unit AcceptInventoryOffer(Int i, Boolean z, UUID uuid, UUID uuid2, UUID uuid3) {
+    fun AcceptInventoryOffer(Int i, Boolean z, UUID uuid, UUID uuid2, UUID uuid3) {
         SLMessage improvedInstantMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -956,7 +956,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(improvedInstantMessage)
     }
 
-    public Unit AddFriend(UUID uuid, String str) {
+    fun AddFriend(UUID uuid, String str) {
         SLMessage improvedInstantMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -976,7 +976,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(improvedInstantMessage)
     }
 
-    public Unit BuyObject(Int i, Byte b, Int i2) {
+    fun BuyObject(Int i, Byte b, Int i2) {
         UUID activeGroupID = getActiveGroupID()
         SLMessage objectBuy = ObjectBuy()
         objectBuy.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -996,7 +996,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(objectBuy)
     }
 
-    public Unit CloseCircuit() {
+    fun CloseCircuit() {
         Debug.Printf("AgentCircuit: closing circuit.", Object[0])
         if (this.modules != null) {
             this.modules.HandleCloseCircuit()
@@ -1011,7 +1011,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         super.CloseCircuit()
     }
 
-    public Unit DerezObject(Int i, EDeRezDestination eDeRezDestination) {
+    fun DerezObject(Int i, EDeRezDestination eDeRezDestination) {
         UUID activeGroupID = getActiveGroupID()
         SLMessage deRezObject = DeRezObject()
         deRezObject.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -1033,7 +1033,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(deRezObject)
     }
 
-    public Unit DoRequestPayPrice(UUID uuid) {
+    fun DoRequestPayPrice(UUID uuid) {
         SLObjectInfo sLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.allObjectsNearby.get(uuid)
         if (sLObjectInfo == null) {
             return
@@ -1048,14 +1048,14 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(requestPayPrice)
     }
 
-    public Unit GenerateChatMoneyEvent(UUID uuid, Int i, Int i2) {
+    fun GenerateChatMoneyEvent(UUID uuid, Int i, Int i2) {
         HandleChatEvent(uuid != null ? ChatterID.getUserChatterID(this.agentUUID, uuid) : this.localChatterID, SLChatBalanceChangedEvent(uuid != null ? ChatMessageSourceUser(uuid) : ChatMessageSourceUnknown.getInstance(), this.agentUUID, true, i, i2), true)
         if (this.modules != null) {
             this.modules.financialInfo.RecordChatEvent(uuid, i, i2)
         }
     }
 
-    public Unit HandleAgentMovementComplete(AgentMovementComplete agentMovementComplete) {
+    fun HandleAgentMovementComplete(AgentMovementComplete agentMovementComplete) {
         this.regionHandle = agentMovementComplete.Data_Field.RegionHandle
         this.modules.avatarControl.setAgentPosition(agentMovementComplete.Data_Field.Position, null)
         Debug.Printf("Got agentPosition: %s", this.modules.avatarControl.getAgentPosition().getImmutablePosition())
@@ -1065,18 +1065,18 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         this.modules.avatarControl.setEnableAgentUpdates(true)
     }
 
-    public Unit HandleAlertMessage(AlertMessage alertMessage) {
+    fun HandleAlertMessage(AlertMessage alertMessage) {
         HandleChatEvent(this.localChatterID, SLChatSystemMessageEvent(ChatMessageSourceUnknown.getInstance(), this.agentUUID, SLMessage.stringFromVariableOEM(alertMessage.AlertData_Field.Message)), true)
     }
 
-    public Unit HandleAvatarAnimation(AvatarAnimation avatarAnimation) {
+    fun HandleAvatarAnimation(AvatarAnimation avatarAnimation) {
         SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
         if (sLParcelInfo != null && this.modules != null) {
             sLParcelInfo.ApplyAvatarAnimation(avatarAnimation, this.modules.avatarControl)
         }
     }
 
-    public Unit HandleAvatarAppearance(AvatarAppearance avatarAppearance) {
+    fun HandleAvatarAppearance(AvatarAppearance avatarAppearance) {
         Debug.Log("Got AvatarAppearance, ID = " + avatarAppearance.Sender_Field.ID.toString() + " isTrial = " + avatarAppearance.Sender_Field.IsTrial + ", our ID = " + this.circuitInfo.agentID.toString())
         if (avatarAppearance.Sender_Field.ID.equals(this.circuitInfo.agentID) && this.modules != null) {
             this.modules.avatarAppearance.HandleAvatarAppearance(avatarAppearance)
@@ -1087,18 +1087,18 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit HandleAvatarInterestsReply(AvatarInterestsReply avatarInterestsReply) {
+    fun HandleAvatarInterestsReply(AvatarInterestsReply avatarInterestsReply) {
         Debug.Log("got AvatarInterestsReply: wantToText = " + SLMessage.stringFromVariableOEM(avatarInterestsReply.PropertiesData_Field.WantToText))
         Debug.Log("got AvatarInterestsReply: skillText = " + SLMessage.stringFromVariableOEM(avatarInterestsReply.PropertiesData_Field.SkillsText))
     }
 
-    public Unit HandleChatEvent(ChatterID chatterID, SLChatEvent sLChatEvent, Boolean z) {
+    fun HandleChatEvent(ChatterID chatterID, SLChatEvent sLChatEvent, Boolean z) {
         if (!isEventMuted(chatterID, sLChatEvent)) {
             this.userManager.getChatterList().getActiveChattersManager().HandleChatEvent(chatterID, sLChatEvent, z)
         }
     }
 
-    public Unit HandleChatFromSimulator(ChatFromSimulator chatFromSimulator) {
+    fun HandleChatFromSimulator(ChatFromSimulator chatFromSimulator) {
         SLModules modules = getModules()
         if (modules == null || !modules.rlvController.onIncomingChat(chatFromSimulator)) {
             UUID uuid = chatFromSimulator.ChatData_Field.SourceID
@@ -1125,7 +1125,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit HandleImprovedInstantMessage(ImprovedInstantMessage improvedInstantMessage) {
+    fun HandleImprovedInstantMessage(ImprovedInstantMessage improvedInstantMessage) {
         ChatMessageSource chatMessageSourceObject
         Int i = improvedInstantMessage.MessageBlock_Field.Dialog
         if (i == 19 || i == 31) {
@@ -1143,7 +1143,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         HandleIM(improvedInstantMessage, chatMessageSourceObject)
     }
 
-    public Unit HandleImprovedTerseObjectUpdate(ImprovedTerseObjectUpdate improvedTerseObjectUpdate) {
+    fun HandleImprovedTerseObjectUpdate(ImprovedTerseObjectUpdate improvedTerseObjectUpdate) {
         SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
         RequestMultipleObjects requestMultipleObjects = null
         for (ImprovedTerseObjectUpdate.ObjectData objectData : improvedTerseObjectUpdate.ObjectData_Fields) {
@@ -1183,7 +1183,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit HandleKillObject(KillObject killObject) {
+    fun HandleKillObject(KillObject killObject) {
         SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
         Object obj2 = null
         Iterator it = killObject.ObjectData_Fields.iterator()
@@ -1199,7 +1199,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit HandleLayerData(LayerData layerData) {
+    fun HandleLayerData(LayerData layerData) {
         if (layerData.LayerID_Field.Type == 76) {
             SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
             if (sLParcelInfo != null) {
@@ -1208,11 +1208,11 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit HandleLoadURL(LoadURL loadURL) {
+    fun HandleLoadURL(LoadURL loadURL) {
         HandleChatEvent(this.localChatterID, SLChatTextEvent(ChatMessageSourceObject(loadURL.Data_Field.ObjectID, SLMessage.stringFromVariableOEM(loadURL.Data_Field.ObjectName)), this.agentUUID, loadURL), true)
     }
 
-    public Unit HandleObjectProperties(ObjectProperties objectProperties) {
+    fun HandleObjectProperties(ObjectProperties objectProperties) {
         Debug.Log("ObjectProperties: " + objectProperties.ObjectData_Fields.size() + " ObjectSelect replies. Reqd " + this.objectNamesRequested.size() + " obj, remains " + this.gridConn.parcelInfo.objectNamesQueue.size() + " objects.")
         for (ObjectProperties.ObjectData objectData : objectProperties.ObjectData_Fields) {
             SLObjectInfo sLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.objectNamesQueue.remove(objectData.ObjectID)
@@ -1241,7 +1241,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         this.objectPropertiesRateLimiter.fire()
     }
 
-    public Unit HandleObjectUpdate(ObjectUpdate objectUpdate) {
+    fun HandleObjectUpdate(ObjectUpdate objectUpdate) {
         SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
         Object obj = null
         Object obj2 = null
@@ -1286,7 +1286,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit HandleObjectUpdateCached(ObjectUpdateCached objectUpdateCached) {
+    fun HandleObjectUpdateCached(ObjectUpdateCached objectUpdateCached) {
         SLMessage requestMultipleObjects = RequestMultipleObjects()
         requestMultipleObjects.AgentData_Field.AgentID = this.circuitInfo.agentID
         requestMultipleObjects.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1300,7 +1300,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(requestMultipleObjects)
     }
 
-    public Unit HandleObjectUpdateCompressed(ObjectUpdateCompressed objectUpdateCompressed) {
+    fun HandleObjectUpdateCompressed(ObjectUpdateCompressed objectUpdateCompressed) {
         SLParcelInfo sLParcelInfo = this.gridConn.parcelInfo
         Object obj = null
         Object obj2 = null
@@ -1345,7 +1345,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit HandleOfflineNotification(OfflineNotification offlineNotification) {
+    fun HandleOfflineNotification(OfflineNotification offlineNotification) {
         List arrayList = ArrayList(offlineNotification.AgentBlock_Fields.size())
         for (OfflineNotification.AgentBlock agentBlock : offlineNotification.AgentBlock_Fields) {
             arrayList.add(agentBlock.AgentID)
@@ -1353,7 +1353,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         this.userManager.getChatterList().getFriendManager().setUsersOnline(arrayList, false)
     }
 
-    public Unit HandleOnlineNotification(OnlineNotification onlineNotification) {
+    fun HandleOnlineNotification(OnlineNotification onlineNotification) {
         List arrayList = ArrayList(onlineNotification.AgentBlock_Fields.size())
         for (OnlineNotification.AgentBlock agentBlock : onlineNotification.AgentBlock_Fields) {
             arrayList.add(agentBlock.AgentID)
@@ -1361,7 +1361,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         this.userManager.getChatterList().getFriendManager().setUsersOnline(arrayList, true)
     }
 
-    public Unit HandlePayPriceReply(PayPriceReply payPriceReply) {
+    fun HandlePayPriceReply(PayPriceReply payPriceReply) {
         SLObjectInfo sLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.allObjectsNearby.get(payPriceReply.ObjectData_Field.ObjectID)
         if (sLObjectInfo != null) {
             Int i = payPriceReply.ObjectData_Field.DefaultPayPrice
@@ -1383,7 +1383,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit HandleRegionHandshake(RegionHandshake regionHandshake) {
+    fun HandleRegionHandshake(RegionHandshake regionHandshake) {
         if (!this.authReply.isTemporary) {
             SLMessage regionHandshakeReply = RegionHandshakeReply()
             regionHandshakeReply.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -1405,7 +1405,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit HandleScriptDialog(ScriptDialog scriptDialog) {
+    fun HandleScriptDialog(ScriptDialog scriptDialog) {
         String[] strArr
         Int i = 0
         if (scriptDialog.Buttons_Fields.size() > 0) {
@@ -1434,37 +1434,37 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit HandleSimulatorViewerTimeMessage(SimulatorViewerTimeMessage simulatorViewerTimeMessage) {
+    fun HandleSimulatorViewerTimeMessage(SimulatorViewerTimeMessage simulatorViewerTimeMessage) {
         if (!this.authReply.isTemporary && this.gridConn != null && this.gridConn.parcelInfo != null) {
             Float f = (simulatorViewerTimeMessage.TimeInfo_Field.SunPhase / 6.2831855f) + 0.25f
             this.gridConn.parcelInfo.setSunHour((Float) (((Double) f) - Math.floor((Double) f)))
         }
     }
 
-    public Unit HandleTeleportFailed(TeleportFailed teleportFailed) {
+    fun HandleTeleportFailed(TeleportFailed teleportFailed) {
         Debug.Log("TeleportFailed: reason = " + SLMessage.stringFromVariableOEM(teleportFailed.Info_Field.Reason))
         this.teleportRequestSent = false
         this.eventBus.publish(SLTeleportResultEvent(false, SLMessage.stringFromVariableOEM(teleportFailed.Info_Field.Reason)))
     }
 
-    public Unit HandleTeleportLocal(TeleportLocal teleportLocal) {
+    fun HandleTeleportLocal(TeleportLocal teleportLocal) {
         this.teleportRequestSent = false
         this.eventBus.publish(SLTeleportResultEvent(true, null))
     }
 
-    public Unit HandleTeleportProgress(TeleportProgress teleportProgress) {
+    fun HandleTeleportProgress(TeleportProgress teleportProgress) {
         Debug.Log("Teleport progress: flags = " + teleportProgress.Info_Field.TeleportFlags + ", progress = " + SLMessage.stringFromVariableOEM(teleportProgress.Info_Field.Message))
     }
 
-    public Unit HandleTeleportStart(TeleportStart teleportStart) {
+    fun HandleTeleportStart(TeleportStart teleportStart) {
         Debug.Log("TeleportStart: flags = " + teleportStart.Info_Field.TeleportFlags)
     }
 
-    public Unit OfferInventoryItem(UUID uuid, SLInventoryEntry sLInventoryEntry) {
+    fun OfferInventoryItem(UUID uuid, SLInventoryEntry sLInventoryEntry) {
         this.userManager.getInventoryManager().getExecutor().execute(com.lumiyaviewer.lumiya.slproto.-$Lambda$K1xWCpEh0d4XNuVVYxGUJwEFRxU.AnonymousClass1(this, sLInventoryEntry, uuid))
     }
 
-    public Unit OfferTeleport(UUID uuid, String str) {
+    fun OfferTeleport(UUID uuid, String str) {
         SLMessage startLure = StartLure()
         startLure.AgentData_Field.AgentID = this.circuitInfo.agentID
         startLure.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1476,7 +1476,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(startLure)
     }
 
-    public Unit OnCapsEvent(CapsEvent capsEvent) {
+    fun OnCapsEvent(CapsEvent capsEvent) {
         try {
             this.capsEventQueue.add(capsEvent)
             this.selector.wakeup()
@@ -1484,7 +1484,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit ProcessIdle() {
+    fun ProcessIdle() {
         if (this.doingObjectSelection && System.currentTimeMillis() > this.lastObjectSelection + 15000) {
             this.doingObjectSelection = false
             ProcessObjectSelectionTimeout()
@@ -1505,7 +1505,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit ProcessNetworkError() {
+    fun ProcessNetworkError() {
         super.ProcessNetworkError()
         Debug.Printf("Network: Network error.", Object[0])
         if (this.modules != null) {
@@ -1516,7 +1516,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit ProcessTimeout() {
+    fun ProcessTimeout() {
         super.ProcessTimeout()
         if (this.modules != null) {
             this.modules.avatarControl.setEnableAgentUpdates(false)
@@ -1526,7 +1526,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit ProcessWakeup() {
+    fun ProcessWakeup() {
         super.ProcessWakeup()
         while (true) {
             try {
@@ -1541,7 +1541,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         ProcessIdle()
     }
 
-    public Unit RemoveFriend(UUID uuid) {
+    fun RemoveFriend(UUID uuid) {
         SLMessage terminateFriendship = TerminateFriendship()
         terminateFriendship.AgentData_Field.AgentID = this.circuitInfo.agentID
         terminateFriendship.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1558,7 +1558,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         TryWakeUp()
     }
 
-    public Unit RequestTeleport(UUID uuid, String str) {
+    fun RequestTeleport(UUID uuid, String str) {
         SendInstantMessage(uuid, str, 26)
     }
 
@@ -1576,8 +1576,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
     /* DevToolsApp WARNING: Removed duplicated region for block: B:13:0x002d  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:18:0x0047  */
     /* DevToolsApp WARNING: Removed duplicated region for block: B:21:0x014c  */
-    public Unit RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r8) {
-    public Unit RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry inventoryEntry) {
+    fun RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry r8) {
+    fun RezObject(com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry inventoryEntry) {
         UUID groupID = com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID
         UUID parcelOwnerID = null
         
@@ -1700,7 +1700,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
     }
     }
 
-    public Unit SendChatMessage(ChatterID chatterID, String str) {
+    fun SendChatMessage(ChatterID chatterID, String str) {
         switch (m39-getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues()[chatterID.getChatterType().ordinal()]) {
             case 1:
                 SendGroupInstantMessage(chatterID.getOptionalChatterUUID(), str)
@@ -1716,7 +1716,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit SendGenericMessage(String str, String[] strArr) {
+    fun SendGenericMessage(String str, String[] strArr) {
         SLMessage genericMessage = GenericMessage()
         genericMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         genericMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1732,7 +1732,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(genericMessage)
     }
 
-    public Unit SendGroupInstantMessage(UUID uuid, String str) {
+    fun SendGroupInstantMessage(UUID uuid, String str) {
         SLMessage improvedInstantMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1763,7 +1763,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         return SendInstantMessage(uuid, str, 0)
     }
 
-    public Unit SendLocalChatMessage(String str) {
+    fun SendLocalChatMessage(String str) {
         Int i = 0
         if (str.startsWith("/")) {
             Int i2 = 1
@@ -1801,19 +1801,19 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         logoutRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
         logoutRequest.isReliable = true
         logoutRequest.setEventListener(SLMessageEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 Debug.Log("Logout: Logout request acknowledged.")
                 SLAgentCircuit.this.gridConn.processDisconnect(true, "Logged out.")
             }
 
-            public Unit onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(SLMessage sLMessage) {
                 Debug.Log("Logout: LogoutRequest timed out!")
                 SLAgentCircuit.this.gridConn.processDisconnect(false, "Logout request has timed out.")
             }
         SendMessage(logoutRequest)
     }
 
-    public Unit SendScriptDialogReply(UUID uuid, Int i, Int i2, String str) {
+    fun SendScriptDialogReply(UUID uuid, Int i, Int i2, String str) {
         SLMessage scriptDialogReply = ScriptDialogReply()
         scriptDialogReply.AgentData_Field.AgentID = this.circuitInfo.agentID
         scriptDialogReply.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1833,7 +1833,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         useCircuitCode.CircuitCode_Field.ID = this.circuitInfo.agentID
         useCircuitCode.isReliable = true
         useCircuitCode.setEventListener(SLMessageEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 Debug.Log("SLAgentCircuit: UseCircuitCode acknowledged.")
                 if (!SLAgentCircuit.this.authReply.isTemporary) {
                     if (SLAgentCircuit.this.authReply.fromTeleport) {
@@ -1849,7 +1849,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                 }
             }
 
-            public Unit onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(SLMessage sLMessage) {
                 if (SLAgentCircuit.this.authReply.fromTeleport) {
                     SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Timed out while connecting to the simulator."))
                 } else {
@@ -1859,7 +1859,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(useCircuitCode)
     }
 
-    public Unit StartGroupSessionForVoice(UUID uuid) {
+    fun StartGroupSessionForVoice(UUID uuid) {
         Object obj = null
         synchronized (this.startedGroupSessions) {
             if (!this.startedGroupSessions.contains(uuid)) {
@@ -1872,7 +1872,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    public Unit TeleportToGlobalPosition(LLVector3 lLVector3) {
+    fun TeleportToGlobalPosition(LLVector3 lLVector3) {
         Int floor = (Int) Math.floor((Double) lLVector3.x)
         Int floor2 = (Int) Math.floor((Double) lLVector3.y)
         floor -= floor % 256
@@ -1890,16 +1890,16 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         teleportLocationRequest.Info_Field.LookAt = lLVector33
         teleportLocationRequest.isReliable = true
         teleportLocationRequest.setEventListener(SLMessageEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
             }
 
-            public Unit onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(SLMessage sLMessage) {
                 SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Teleport request has timed out."))
             }
         SendMessage(teleportLocationRequest)
     }
 
-    public Unit TeleportToLandmarkAsset(UUID uuid) {
+    fun TeleportToLandmarkAsset(UUID uuid) {
         if (getModules().rlvController.canTeleportToLandmark()) {
             this.teleportRequestSent = true
             SLMessage teleportLandmarkRequest = TeleportLandmarkRequest()
@@ -1908,10 +1908,10 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             teleportLandmarkRequest.Info_Field.LandmarkID = uuid
             teleportLandmarkRequest.isReliable = true
             teleportLandmarkRequest.setEventListener(SLMessageEventListener() {
-                public Unit onMessageAcknowledged(SLMessage sLMessage) {
+                fun onMessageAcknowledged(SLMessage sLMessage) {
                 }
 
-                public Unit onMessageTimeout(SLMessage sLMessage) {
+                fun onMessageTimeout(SLMessage sLMessage) {
                     SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Teleport request has timed out."))
                 }
             SendMessage(teleportLandmarkRequest)
@@ -1934,17 +1934,17 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         lLVector32.x += 10.0f
         teleportLocationRequest.isReliable = true
         teleportLocationRequest.setEventListener(SLMessageEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
             }
 
-            public Unit onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(SLMessage sLMessage) {
                 SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Teleport request has timed out."))
             }
         SendMessage(teleportLocationRequest)
         return true
     }
 
-    public Unit TeleportToLure(UUID uuid) {
+    fun TeleportToLure(UUID uuid) {
         this.teleportRequestSent = true
         SLMessage teleportLureRequest = TeleportLureRequest()
         teleportLureRequest.Info_Field.AgentID = this.circuitInfo.agentID
@@ -1952,16 +1952,16 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         teleportLureRequest.Info_Field.LureID = uuid
         teleportLureRequest.isReliable = true
         teleportLureRequest.setEventListener(SLMessageEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
             }
 
-            public Unit onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(SLMessage sLMessage) {
                 SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Teleport request has timed out."))
             }
         SendMessage(teleportLureRequest)
     }
 
-    public Unit TeleportToRegion(Long j, Int i, Int i2, Int i3) {
+    fun TeleportToRegion(Long j, Int i, Int i2, Int i3) {
         if (getModules().rlvController.canTeleportToLocation()) {
             Debug.Log("TeleportToRegion: regionHandle = " + Long.toHexString(j) + ", pos = (" + i + ", " + i2 + ", " + i3 + ")")
             this.teleportRequestSent = true
@@ -1973,17 +1973,17 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             teleportLocationRequest.Info_Field.LookAt = LLVector3(0.0f, 1.0f, 0.0f)
             teleportLocationRequest.isReliable = true
             teleportLocationRequest.setEventListener(SLMessageEventListener() {
-                public Unit onMessageAcknowledged(SLMessage sLMessage) {
+                fun onMessageAcknowledged(SLMessage sLMessage) {
                 }
 
-                public Unit onMessageTimeout(SLMessage sLMessage) {
+                fun onMessageTimeout(SLMessage sLMessage) {
                     SLAgentCircuit.this.eventBus.publish(SLTeleportResultEvent(false, "Teleport request has timed out."))
                 }
             SendMessage(teleportLocationRequest)
         }
     }
 
-    public Unit TouchObject(Int i) {
+    fun TouchObject(Int i) {
         SLMessage objectGrab = ObjectGrab()
         objectGrab.AgentData_Field.AgentID = this.circuitInfo.agentID
         objectGrab.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1999,7 +1999,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(objectGrab)
     }
 
-    public Unit TouchObjectFace(SLObjectInfo sLObjectInfo, Int i, Float f, Float f2, Float f3, Float f4, Float f5, Float f6, Float f7) {
+    fun TouchObjectFace(SLObjectInfo sLObjectInfo, Int i, Float f, Float f2, Float f3, Float f4, Float f5, Float f6, Float f7) {
         Debug.Printf("Touch: Object %d, face %d, pos (%f, %f, %f), uv (%f, %f)", Integer.valueOf(sLObjectInfo.localID), Integer.valueOf(i), Float.valueOf(f), Float.valueOf(f2), Float.valueOf(f3), Float.valueOf(f4), Float.valueOf(f5))
         SLMessage objectGrab = ObjectGrab()
         objectGrab.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -2024,14 +2024,14 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(objectGrab)
     }
 
-    public Unit TryWakeUp() {
+    fun TryWakeUp() {
         try {
             this.selector.wakeup()
         } catch (Exception e) {
         }
     }
 
-    public Unit UnpauseAgent() {
+    fun UnpauseAgent() {
         this.lastVisibleActivities = System.currentTimeMillis()
         if (this.agentPaused) {
             DoAgentResume()
@@ -2156,7 +2156,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         getModules().avatarAppearance.UpdateMyAttachments()
     }
 
-    public Unit sendTypingNotify(UUID uuid, Boolean z) {
+    fun sendTypingNotify(UUID uuid, Boolean z) {
         SendInstantMessage(uuid, "", z ? 41 : 42)
     }
 }

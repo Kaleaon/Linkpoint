@@ -46,7 +46,7 @@ val class SLChatLureRequestedEvent : SLChatEvent() {
         return false
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setMessageText(this.message)
     }

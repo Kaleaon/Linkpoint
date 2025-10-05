@@ -36,7 +36,7 @@ class SLTextureUploadRequest : Runnable {
         return this.textureID
     }
 
-    public Unit run() {
+    fun run() {
         Response execute
         try {
             String asString = LLSDXMLRequest().PerformRequest(this.capURL, LLSDUndefined()).byKey("uploader").asString()
@@ -65,11 +65,11 @@ class SLTextureUploadRequest : Runnable {
         }
     }
 
-    public Unit setCapURL(String str) {
+    fun setCapURL(String str) {
         this.capURL = str
     }
 
-    public Unit setOnUploadComplete(TextureUploadCompleteListener textureUploadCompleteListener) {
+    fun setOnUploadComplete(TextureUploadCompleteListener textureUploadCompleteListener) {
         this.onUploadComplete = textureUploadCompleteListener
     }
 }

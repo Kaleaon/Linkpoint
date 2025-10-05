@@ -69,7 +69,7 @@ private /* synthetic */ Int[] m157getcomlumiyaviewerlumiyaslprotochatgenericSLCh
         super(chatMessageSource, uuid, str)
     }
 
-    public Unit bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
+    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
         if (chatEventViewHolder instanceof ChatYesNoEventViewHolder) {
             ChatYesNoEventViewHolder chatYesNoEventViewHolder = (ChatYesNoEventViewHolder) chatEventViewHolder
@@ -140,17 +140,17 @@ private /* synthetic */ Int[] m157getcomlumiyaviewerlumiyaslprotochatgenericSLCh
     public abstract String getYesMessage(Context context)
 
     /* access modifiers changed from: protected */
-    public Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager) {
         this.eventState = EventState.EventCancelled
         notifyEventUpdated(userManager)
     }
 
-    public Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager) {
         this.eventState = EventState.EventAccepted
         notifyEventUpdated(userManager)
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setEventState(Integer.valueOf(this.eventState.ordinal()))
     }

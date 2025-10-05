@@ -83,7 +83,7 @@ private /* synthetic */ Int[] m268getcomlumiyaviewerlumiyaslprotouserschatsrcCha
 
     public abstract UUID getSourceUUID()
 
-    public Unit serializeTo(ChatMessage chatMessage) {
+    fun serializeTo(ChatMessage chatMessage) {
         chatMessage.setSenderType(Integer.valueOf(getSourceType().ordinal()))
     }
 }

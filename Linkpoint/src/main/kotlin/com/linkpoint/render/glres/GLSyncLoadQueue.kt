@@ -12,11 +12,11 @@ class GLSyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
     private const val WAIT_FRAMES_AFTER_LOAD: Int = 3
     private Int framesWait = 0
 
-    public Unit GLResourceLoaded(GLLoadQueue.GLLoadable gLLoadable) {
+    fun GLResourceLoaded(GLLoadQueue.GLLoadable gLLoadable) {
         gLLoadable.GLCompleteLoad()
     }
 
-    public Unit RunLoadQueue(RenderContext renderContext) {
+    fun RunLoadQueue(RenderContext renderContext) {
         GLLoadQueue.GLLoadable gLLoadable
         if (this.framesWait != 0) {
             this.framesWait--

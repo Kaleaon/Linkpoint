@@ -32,13 +32,13 @@ class AsyncCancellableRequestHandler<K> : RequestHandler<K> {
         }
     }
 
-    public Unit onRequest(K k) {
+    fun onRequest(K k) {
         synchronized (this.lock) {
             this.activeRequests.put(k, this.executor.submit(-$Lambda$W2IjgG3sQFB-K_ukBg8_XysJz_I(this, k)))
         }
     }
 
-    public Unit onRequestCancelled(K k) {
+    fun onRequestCancelled(K k) {
         synchronized (this.lock) {
             Future future = (Future) this.activeRequests.remove(k)
             if (future != null) {

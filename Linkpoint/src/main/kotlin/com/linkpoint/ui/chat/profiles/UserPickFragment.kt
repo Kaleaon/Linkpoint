@@ -235,7 +235,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onPickInfo */
-    public Unit m515com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragmentmthref0(PickInfoReply pickInfoReply) {
+    fun m515com_lumiyaviewer_lumiya_ui_chat_profiles_UserPickFragmentmthref0(PickInfoReply pickInfoReply) {
         if (pickInfoReply != null) {
             LLVector3d lLVector3d = pickInfoReply.Data_Field.PosGlobal
             Debug.Printf("GlobalPos: got pick global pos %f, %f, %f", Double.valueOf(lLVector3d.x), Double.valueOf(lLVector3d.y), Double.valueOf(lLVector3d.z))
@@ -396,7 +396,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: protected */
     @OnClick({2131755698})
-    public Unit onChangePic(View view) {
+    fun onChangePic(View view) {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         AvatarPickKey pickKey = getPickKey()
         PickInfoReply data = this.pickInfo.getData()
@@ -407,12 +407,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.pick_menu, menu)
         this.menuItemRename = menu.findItem(R.id.item_pick_rename)
@@ -431,7 +431,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: protected */
     @OnClick({2131755700})
-    public Unit onDescEdit(View view) {
+    fun onDescEdit(View view) {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         AvatarPickKey pickKey = getPickKey()
         if (userManager != null && pickKey != null) {
@@ -439,7 +439,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    public Unit onDestroyView() {
+    fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -461,7 +461,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: protected */
     @OnClick({2131755696})
-    public Unit onSetLocation(View view) {
+    fun onSetLocation(View view) {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         AvatarPickKey pickKey = getPickKey()
         PickInfoReply data = this.pickInfo.getData()
@@ -632,7 +632,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         Int i = 0
         super.onStart()
         setTitle(getString(R.string.name_loading_title), (String) null)
@@ -653,14 +653,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         this.pickInfo.unsubscribe()
     }
 
-    public Unit onStop() {
+    fun onStop() {
         this.pickInfo.unsubscribe()
         super.onStop()
     }
 
     /* access modifiers changed from: protected */
     @OnClick({2131755697})
-    public Unit onTeleportToPickClick(View view) {
+    fun onTeleportToPickClick(View view) {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         PickInfoReply data = this.pickInfo.getData()
         if (data != null && userManager != null) {

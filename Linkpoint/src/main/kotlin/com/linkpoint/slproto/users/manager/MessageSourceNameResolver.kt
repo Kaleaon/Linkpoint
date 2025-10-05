@@ -19,7 +19,7 @@ class MessageSourceNameResolver {
     val Object lock = Object()
     /* access modifiers changed from: private */
     val Subscription.OnData<UserName> onUserName = Subscription.OnData<UserName>() {
-        public Unit onData(UserName userName) {
+        fun onData(UserName userName) {
             NameRequestEntry nameRequestEntry
             HashSet hashSet = null
             synchronized (MessageSourceNameResolver.this.lock) {
@@ -60,7 +60,7 @@ class MessageSourceNameResolver {
             this.messageDatabaseIDs.add(l)
         }
 
-        public Unit addMessageID(Long l) {
+        fun addMessageID(Long l) {
             this.messageDatabaseIDs.add(l)
         }
 
@@ -68,11 +68,11 @@ class MessageSourceNameResolver {
             return this.messageDatabaseIDs
         }
 
-        public Unit subscribe() {
+        fun subscribe() {
             this.subscription = MessageSourceNameResolver.this.userManager.getUserNames().subscribe(this.userUUID, MessageSourceNameResolver.this.dbExecutor, MessageSourceNameResolver.this.onUserName)
         }
 
-        public Unit unsubscribe() {
+        fun unsubscribe() {
             this.subscription.unsubscribe()
             this.subscription = null
         }
@@ -88,7 +88,7 @@ class MessageSourceNameResolver {
         this.dbExecutor = userManager2.getDatabaseExecutor()
     }
 
-    public Unit requestResolve(UUID uuid, Long l) {
+    fun requestResolve(UUID uuid, Long l) {
         NameRequestEntry nameRequestEntry
         Boolean z = false
         synchronized (this.lock) {

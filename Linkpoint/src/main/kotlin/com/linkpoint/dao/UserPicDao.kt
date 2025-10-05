@@ -71,7 +71,7 @@ class UserPicDao : AbstractDao()<UserPic, Long> {
         return UserPic(valueOf, string, bArr)
     }
 
-    public Unit readEntity(Cursor cursor, UserPic userPic, Int i) {
+    fun readEntity(Cursor cursor, UserPic userPic, Int i) {
         Byte[] bArr = null
         userPic.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         userPic.setUuid(cursor.isNull(i + 1) ? null : cursor.getString(i + 1))

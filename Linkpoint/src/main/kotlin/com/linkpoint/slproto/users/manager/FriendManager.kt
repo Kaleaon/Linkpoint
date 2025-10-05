@@ -21,12 +21,12 @@ class FriendManager {
     /* access modifiers changed from: private */
     val FriendDao friendDao
     private val OnListUpdated onFriendListUpdated = OnListUpdated() {
-        public Unit onListUpdated() {
+        fun onListUpdated() {
             FriendManager.this.chatterList.notifyListUpdated(ChatterListType.Friends)
         }
     }
     private val OnListUpdated onFriendsOnlineListUpdated = OnListUpdated() {
-        public Unit onListUpdated() {
+        fun onListUpdated() {
             FriendManager.this.chatterList.notifyListUpdated(ChatterListType.FriendsOnline)
         }
     }
@@ -49,7 +49,7 @@ class FriendManager {
         }
     }
 
-    public Unit addFriend(UUID uuid) {
+    fun addFriend(UUID uuid) {
         if (((Friend) this.friendDao.load(uuid)) == null) {
             this.friendDao.insert(Friend(uuid, 1, 1, false))
         }
@@ -76,13 +76,13 @@ class FriendManager {
         return this.onlineStatus
     }
 
-    public Unit removeFriend(UUID uuid) {
+    fun removeFriend(UUID uuid) {
         this.friendDao.deleteByKey(uuid)
         this.chatterList.updateList(ChatterListType.Friends)
         this.chatterList.updateList(ChatterListType.FriendsOnline)
     }
 
-    public Unit setUsersOnline(List<UUID> list, Boolean z) {
+    fun setUsersOnline(List<UUID> list, Boolean z) {
         for (UUID uuid : list) {
             Friend friend = (Friend) this.friendDao.load(uuid)
             if (friend != null) {
@@ -94,7 +94,7 @@ class FriendManager {
         this.chatterList.updateList(ChatterListType.FriendsOnline)
     }
 
-    public Unit updateFriendList(ImmutableList<SLAuthReply.Friend> immutableList) {
+    fun updateFriendList(ImmutableList<SLAuthReply.Friend> immutableList) {
         HashSet hashSet = HashSet()
         for (SLAuthReply.Friend friend : immutableList) {
             UUID uuid = friend.uuid

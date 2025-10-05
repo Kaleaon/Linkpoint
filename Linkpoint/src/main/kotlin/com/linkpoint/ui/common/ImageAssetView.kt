@@ -47,7 +47,7 @@ class ImageAssetView : View() {
             this()
         }
 
-        public Unit OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(Object obj, Boolean z) {
             if (obj instanceof OpenJPEG) {
                 this.texture = (OpenJPEG) obj
             }
@@ -81,7 +81,7 @@ class ImageAssetView : View() {
         }
 
         /* access modifiers changed from: protected */
-        public Unit onPostExecute(Bitmap bitmap) {
+        fun onPostExecute(Bitmap bitmap) {
             Bitmap unused = ImageAssetView.this.imageBitmap = bitmap
             if (ImageAssetView.this.verticalFit) {
                 ImageAssetView.this.requestLayout()
@@ -104,7 +104,7 @@ class ImageAssetView : View() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onAttachedToWindow() {
+    fun onAttachedToWindow() {
         super.onAttachedToWindow()
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics()
         TypedValue typedValue = TypedValue()
@@ -118,7 +118,7 @@ class ImageAssetView : View() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onDraw(Canvas canvas) {
+    fun onDraw(Canvas canvas) {
         Int width = getWidth()
         Int height = getHeight()
         this.bitmapPaint.setStyle(Paint.Style.STROKE)
@@ -167,7 +167,7 @@ class ImageAssetView : View() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onMeasure(Int i, Int i2) {
+    fun onMeasure(Int i, Int i2) {
         if (View.MeasureSpec.getMode(i) == 0 && View.MeasureSpec.getMode(i2) == 0) {
             super.onMeasure(i, i2)
             return
@@ -183,12 +183,12 @@ class ImageAssetView : View() {
         setMeasuredDimension(size, min)
     }
 
-    public Unit setAlignTop(Boolean z) {
+    fun setAlignTop(Boolean z) {
         this.alignTop = z
         invalidate()
     }
 
-    public Unit setAssetID(UUID uuid) {
+    fun setAssetID(UUID uuid) {
         Object[] objArr = Object[1]
         objArr[0] = uuid != null ? uuid.toString() : null
         Debug.Printf("asset ID: %s", objArr)
@@ -214,7 +214,7 @@ class ImageAssetView : View() {
         }
     }
 
-    public Unit setVerticalFit(Boolean z) {
+    fun setVerticalFit(Boolean z) {
         this.verticalFit = z
         requestLayout()
     }

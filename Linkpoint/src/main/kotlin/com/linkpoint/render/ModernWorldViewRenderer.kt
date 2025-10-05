@@ -204,7 +204,7 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Update camera position
      */
-    public Unit setCameraPosition(Float x, Float y, Float z) {
+    fun setCameraPosition(Float x, Float y, Float z) {
         cameraPosition[0] = x
         cameraPosition[1] = y
         cameraPosition[2] = z
@@ -213,7 +213,7 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Update look at point  
      */
-    public Unit setLookAt(Float x, Float y, Float z) {
+    fun setLookAt(Float x, Float y, Float z) {
         lookAtPoint[0] = x
         lookAtPoint[1] = y
         lookAtPoint[2] = z
@@ -222,7 +222,7 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Update lighting direction
      */
-    public Unit setDirectionalLight(Float x, Float y, Float z, Float intensity) {
+    fun setDirectionalLight(Float x, Float y, Float z, Float intensity) {
         directionalLight[0] = x
         directionalLight[1] = y
         directionalLight[2] = z
@@ -263,7 +263,7 @@ class ModernWorldViewRenderer : GLSurfaceView.Renderer {
     /**
      * Cleanup resources
      */
-    public Unit cleanup() {
+    fun cleanup() {
         Log.i(TAG, "Cleaning up modern world view renderer")
         
         if (renderContext != null) {

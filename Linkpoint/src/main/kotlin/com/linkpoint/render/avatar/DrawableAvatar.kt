@@ -306,7 +306,7 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         updateRunningAnimations()
     }
 
-    public Unit Draw(RenderContext renderContext) {
+    fun Draw(RenderContext renderContext) {
         Float[] worldMatrix = getWorldMatrix(renderContext)
         if (worldMatrix != null) {
             try {
@@ -319,7 +319,7 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         }
     }
 
-    public Unit DrawNameTag(RenderContext renderContext) {
+    fun DrawNameTag(RenderContext renderContext) {
         DrawableHoverText drawableHoverText = this.drawableNameTag
         if (drawableHoverText != null) {
             LLVector3 lLVector3 = this.headPosition
@@ -393,7 +393,7 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         return objectIntersectInfo
     }
 
-    public Unit RunAnimations() {
+    fun RunAnimations() {
         AvatarSkeleton avatarSkeleton = (AvatarSkeleton) this.updatedSkeleton.getAndSet(null)
         if (avatarSkeleton != null) {
             this.skeleton = avatarSkeleton
@@ -445,26 +445,26 @@ class DrawableAvatar : DrawableAvatarStub(), IntersectPickable, EntryRemovalList
         }
     }
 
-    public Unit onEntryRemovalRequested(DrawListEntry drawListEntry) {
+    fun onEntryRemovalRequested(DrawListEntry drawListEntry) {
         synchronized (this.deadAttachmentsLock) {
             this.deadAttachmentsList.add(drawListEntry)
         }
         updateAttachments()
     }
 
-    public Unit onRiggedMeshReady(DrawableObject drawableObject) {
+    fun onRiggedMeshReady(DrawableObject drawableObject) {
         if (this.riggedMeshes.add(drawableObject)) {
             updateRiggedMeshes()
         }
     }
 
-    public Unit setDisplayedHUDid(Int i) {
+    fun setDisplayedHUDid(Int i) {
         if (this.displayedHUDid.getAndSet(i) != i) {
             updateAttachments()
         }
     }
 
-    public Unit updateAttachments() {
+    fun updateAttachments() {
         PrimComputeExecutor.getInstance().execute(this.updateAttachmentsRunnable)
     }
 

@@ -18,7 +18,7 @@ class DrawableFaceTexture : ResourceConsumer, GLCleanable {
         this.drawableTextureParams = drawableTextureParams2
     }
 
-    public Unit GLCleanup() {
+    fun GLCleanup() {
         if (this.glTextureCache != null) {
             this.glTextureCache.CancelRequest(this)
         }
@@ -43,7 +43,7 @@ class DrawableFaceTexture : ResourceConsumer, GLCleanable {
         }
     }
 
-    public Unit OnResourceReady(Object obj, Boolean z) {
+    fun OnResourceReady(Object obj, Boolean z) {
         if (obj instanceof GLLoadedTexture) {
             GLLoadedTexture gLLoadedTexture = (GLLoadedTexture) obj
             this.loadedTexture = gLLoadedTexture

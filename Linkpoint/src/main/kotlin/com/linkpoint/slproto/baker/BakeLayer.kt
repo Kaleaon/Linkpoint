@@ -147,7 +147,7 @@ private /* synthetic */ Int[] m138getcomlumiyaviewerlumiyaslprotoavatarSLAvatarP
     /* JADX WARNING: Removed duplicated region for block: B:52:0x0243  */
     /* JADX WARNING: Removed duplicated region for block: B:73:? A[RETURN, SYNTHETIC] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit Bake(com.lumiyaviewer.lumiya.openjpeg.OpenJPEG r21, com.lumiyaviewer.lumiya.slproto.baker.BakeProcess r22) {
+    fun Bake(com.lumiyaviewer.lumiya.openjpeg.OpenJPEG r21, com.lumiyaviewer.lumiya.slproto.baker.BakeProcess r22) {
         /*
             r20 = this
             r15 = 0
@@ -492,7 +492,7 @@ private /* synthetic */ Int[] m138getcomlumiyaviewerlumiyaslprotoavatarSLAvatarP
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.baker.BakeLayer.Bake(com.lumiyaviewer.lumiya.openjpeg.OpenJPEG, com.lumiyaviewer.lumiya.slproto.baker.BakeProcess):Unit")
     }
 
-    public Unit BakeAlpha(OpenJPEG openJPEG, BakeProcess bakeProcess) {
+    fun BakeAlpha(OpenJPEG openJPEG, BakeProcess bakeProcess) {
         if (!this.isRenderPassBump) {
             if (this.tgaTexture != null) {
                 try {

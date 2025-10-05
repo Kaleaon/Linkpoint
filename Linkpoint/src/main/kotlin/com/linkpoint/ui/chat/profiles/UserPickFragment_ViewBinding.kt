@@ -26,14 +26,14 @@ class UserPickFragment_ViewBinding : Unbinder {
         userPickFragment.setLocationButton = (Button) Utils.castView(findRequiredView, R.id.user_pick_set_location_button, "field 'setLocationButton'", Button.class)
         this.view2131755696 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userPickFragment.onSetLocation(view)
             }
         View findRequiredView2 = Utils.findRequiredView(view, R.id.change_pic_button, "field 'changePicButton' and method 'onChangePic'")
         userPickFragment.changePicButton = (Button) Utils.castView(findRequiredView2, R.id.change_pic_button, "field 'changePicButton'", Button.class)
         this.view2131755698 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userPickFragment.onChangePic(view)
             }
         userPickFragment.userPickImageView = (ImageAssetView) Utils.findRequiredViewAsType(view, R.id.user_pick_image_view, "field 'userPickImageView'", ImageAssetView.class)
@@ -42,19 +42,19 @@ class UserPickFragment_ViewBinding : Unbinder {
         userPickFragment.userPickDescEditButton = (Button) Utils.castView(findRequiredView3, R.id.user_pick_desc_edit_button, "field 'userPickDescEditButton'", Button.class)
         this.view2131755700 = findRequiredView3
         findRequiredView3.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userPickFragment.onDescEdit(view)
             }
         View findRequiredView4 = Utils.findRequiredView(view, R.id.user_pick_teleport_button, "method 'onTeleportToPickClick'")
         this.view2131755697 = findRequiredView4
         findRequiredView4.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userPickFragment.onTeleportToPickClick(view)
             }
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         UserPickFragment userPickFragment = this.target
         if (userPickFragment == null) {
             throw IllegalStateException("Bindings already cleared.")

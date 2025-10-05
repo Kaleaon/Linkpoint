@@ -77,7 +77,7 @@ class SLGroupManager : SLModule() {
     /* access modifiers changed from: private */
     val String groupMemberDataURL
     private val RequestHandler<UUID> groupMemberListHTTPRequestHandler = AsyncCancellableRequestHandler(GenericHTTPExecutor.getInstance(), SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             Debug.Printf("GroupMemberList: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString())
             try {
                 UUID randomUUID = UUID.randomUUID()
@@ -135,7 +135,7 @@ class SLGroupManager : SLModule() {
             }
         }
     private val RequestHandler<UUID> groupMemberListRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             Debug.Printf("GroupMemberList: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString())
             GroupMembersRequest groupMembersRequest = GroupMembersRequest()
             groupMembersRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID
@@ -149,7 +149,7 @@ class SLGroupManager : SLModule() {
     /* access modifiers changed from: private */
     public ResultHandler<UUID, UUID> groupMemberListResultHandler
     private val RequestHandler<UUID> groupProfileRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             Debug.Printf("GroupManager: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString())
             SLGroupManager.this.RequestGroupProfileData(uuid)
         }
@@ -157,7 +157,7 @@ class SLGroupManager : SLModule() {
     private ResultHandler<UUID, GroupProfileReply> groupProfileResultHandler
     private val GroupRoleMemberDao groupRoleMemberDao
     private val RequestHandler<UUID> groupRoleMemberListRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             Debug.Printf("GroupRoleMemberList: [%s] network requesting for %s", Thread.currentThread().getName(), uuid.toString())
             GroupRoleMembersRequest groupRoleMembersRequest = GroupRoleMembersRequest()
             groupRoleMembersRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID
@@ -170,7 +170,7 @@ class SLGroupManager : SLModule() {
     }, false, 3, 15000)
     private ResultHandler<UUID, UUID> groupRoleMemberListResultHandler
     private val RequestHandler<UUID> groupRolesRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             Debug.Printf("GroupRoles: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString())
             GroupRoleDataRequest groupRoleDataRequest = GroupRoleDataRequest()
             groupRoleDataRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID
@@ -183,7 +183,7 @@ class SLGroupManager : SLModule() {
     }, false, 3, 15000)
     private ResultHandler<UUID, GroupRoleDataReply> groupRolesResultHandler
     private val RequestHandler<UUID> groupTitlesRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             Debug.Printf("GroupTitles: [%s] network requesting for group %s", Thread.currentThread().getName(), uuid.toString())
             SLGroupManager.this.requestGroupTitles(uuid)
         }
@@ -206,7 +206,7 @@ class SLGroupManager : SLModule() {
     }
 
     /* access modifiers changed from: private */
-    public Unit RequestGroupProfileData(UUID uuid) {
+    fun RequestGroupProfileData(UUID uuid) {
         GroupProfileRequest groupProfileRequest = GroupProfileRequest()
         groupProfileRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         groupProfileRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -227,17 +227,17 @@ class SLGroupManager : SLModule() {
         groupRoleChanges.RoleChange_Fields.add(roleChange)
         groupRoleChanges.isReliable = true
         groupRoleChanges.setEventListener(SLMessageEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 SLGroupManager.this.userManager.getChatterList().getGroupManager().requestGroupRoleMembersRefresh(uuid)
             }
 
-            public Unit onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(SLMessage sLMessage) {
             }
         SendMessage(groupRoleChanges)
     }
 
     /* access modifiers changed from: private */
-    public Unit requestGroupTitles(UUID uuid) {
+    fun requestGroupTitles(UUID uuid) {
         GroupTitlesRequest groupTitlesRequest = GroupTitlesRequest()
         groupTitlesRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         groupTitlesRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -247,7 +247,7 @@ class SLGroupManager : SLModule() {
         SendMessage(groupTitlesRequest)
     }
 
-    public Unit AcceptGroupInvite(UUID uuid, UUID uuid2, Boolean z) {
+    fun AcceptGroupInvite(UUID uuid, UUID uuid2, Boolean z) {
         ImprovedInstantMessage improvedInstantMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -267,7 +267,7 @@ class SLGroupManager : SLModule() {
         SendMessage(improvedInstantMessage)
     }
 
-    public Unit ActivateGroup(UUID uuid) {
+    fun ActivateGroup(UUID uuid) {
         ActivateGroup activateGroup = ActivateGroup()
         activateGroup.AgentData_Field.AgentID = this.circuitInfo.agentID
         activateGroup.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -276,11 +276,11 @@ class SLGroupManager : SLModule() {
         SendMessage(activateGroup)
     }
 
-    public Unit AddMemberToRole(UUID uuid, UUID uuid2, UUID uuid3) {
+    fun AddMemberToRole(UUID uuid, UUID uuid2, UUID uuid3) {
         RequestRoleMemberChange(uuid, uuid2, uuid3, 0)
     }
 
-    public Unit DeleteRole(final UUID uuid, UUID uuid2) {
+    fun DeleteRole(final UUID uuid, UUID uuid2) {
         GroupRoleUpdate groupRoleUpdate = GroupRoleUpdate()
         groupRoleUpdate.AgentData_Field.AgentID = this.circuitInfo.agentID
         groupRoleUpdate.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -295,13 +295,13 @@ class SLGroupManager : SLModule() {
         groupRoleUpdate.RoleData_Fields.add(roleData)
         groupRoleUpdate.isReliable = true
         groupRoleUpdate.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 SLGroupManager.this.userManager.getGroupRoles().requestUpdate(uuid)
             }
         SendMessage(groupRoleUpdate)
     }
 
-    public Unit HandleCircuitReady() {
+    fun HandleCircuitReady() {
         if (this.userManager != null) {
             this.groupProfileResultHandler = this.userManager.getCachedGroupProfiles().getRequestSource().attachRequestHandler(this.groupProfileRequestHandler)
             this.groupTitlesResultHandler = this.userManager.getGroupTitles().getRequestSource().attachRequestHandler(this.groupTitlesRequestHandler)
@@ -311,7 +311,7 @@ class SLGroupManager : SLModule() {
         }
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         if (this.userManager != null) {
             this.userManager.getCachedGroupProfiles().getRequestSource().detachRequestHandler(this.groupProfileRequestHandler)
             this.userManager.getGroupTitles().getRequestSource().detachRequestHandler(this.groupTitlesRequestHandler)
@@ -321,12 +321,12 @@ class SLGroupManager : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleEjectGroupMemberReply(EjectGroupMemberReply ejectGroupMemberReply) {
+    fun HandleEjectGroupMemberReply(EjectGroupMemberReply ejectGroupMemberReply) {
         this.userManager.getChatterList().getGroupManager().requestRefreshMemberList(ejectGroupMemberReply.GroupData_Field.GroupID)
     }
 
     @SLMessageHandler
-    public Unit HandleGroupMembersReply(GroupMembersReply groupMembersReply) {
+    fun HandleGroupMembersReply(GroupMembersReply groupMembersReply) {
         Debug.Printf("GroupMember: got reply, %d members, memberCount %d", Integer.valueOf(groupMembersReply.MemberData_Fields.size()), Integer.valueOf(groupMembersReply.GroupData_Field.MemberCount))
         for (GroupMembersReply.MemberData memberData : groupMembersReply.MemberData_Fields) {
             this.groupMemberDao.insert(GroupMember(groupMembersReply.GroupData_Field.GroupID, groupMembersReply.GroupData_Field.RequestID, memberData.AgentID, memberData.Contribution, SLMessage.stringFromVariableOEM(memberData.OnlineStatus), memberData.AgentPowers, SLMessage.stringFromVariableOEM(memberData.Title), memberData.IsOwner))
@@ -340,21 +340,21 @@ class SLGroupManager : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleGroupProfileReply(GroupProfileReply groupProfileReply) {
+    fun HandleGroupProfileReply(GroupProfileReply groupProfileReply) {
         if (this.groupProfileResultHandler != null) {
             this.groupProfileResultHandler.onResultData(groupProfileReply.GroupData_Field.GroupID, groupProfileReply)
         }
     }
 
     @SLMessageHandler
-    public Unit HandleGroupRoleDataReply(GroupRoleDataReply groupRoleDataReply) {
+    fun HandleGroupRoleDataReply(GroupRoleDataReply groupRoleDataReply) {
         if (this.groupRolesResultHandler != null) {
             this.groupRolesResultHandler.onResultData(groupRoleDataReply.GroupData_Field.GroupID, groupRoleDataReply)
         }
     }
 
     @SLMessageHandler
-    public Unit HandleGroupRoleMembersReply(GroupRoleMembersReply groupRoleMembersReply) {
+    fun HandleGroupRoleMembersReply(GroupRoleMembersReply groupRoleMembersReply) {
         Debug.Printf("GroupRoleMember: got reply, %d members, total pairs %d", Integer.valueOf(groupRoleMembersReply.MemberData_Fields.size()), Integer.valueOf(groupRoleMembersReply.AgentData_Field.TotalPairs))
         for (GroupRoleMembersReply.MemberData memberData : groupRoleMembersReply.MemberData_Fields) {
             this.groupRoleMemberDao.insert(GroupRoleMember(groupRoleMembersReply.AgentData_Field.GroupID, groupRoleMembersReply.AgentData_Field.RequestID, memberData.RoleID, memberData.MemberID))
@@ -367,14 +367,14 @@ class SLGroupManager : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleGroupTitlesReply(GroupTitlesReply groupTitlesReply) {
+    fun HandleGroupTitlesReply(GroupTitlesReply groupTitlesReply) {
         if (this.groupTitlesResultHandler != null) {
             this.groupTitlesResultHandler.onResultData(groupTitlesReply.AgentData_Field.GroupID, groupTitlesReply)
         }
     }
 
     @SLMessageHandler
-    public Unit HandleJoinGroupReply(JoinGroupReply joinGroupReply) {
+    fun HandleJoinGroupReply(JoinGroupReply joinGroupReply) {
         AgentDataUpdateRequest agentDataUpdateRequest = AgentDataUpdateRequest()
         agentDataUpdateRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentDataUpdateRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -384,7 +384,7 @@ class SLGroupManager : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleLeaveGroupReply(LeaveGroupReply leaveGroupReply) {
+    fun HandleLeaveGroupReply(LeaveGroupReply leaveGroupReply) {
         AgentDataUpdateRequest agentDataUpdateRequest = AgentDataUpdateRequest()
         agentDataUpdateRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         agentDataUpdateRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -393,11 +393,11 @@ class SLGroupManager : SLModule() {
         this.eventBus.publish(SLJoinLeaveGroupEvent(leaveGroupReply.GroupData_Field.GroupID, false, leaveGroupReply.GroupData_Field.Success))
     }
 
-    public Unit RemoveMemberFromRole(UUID uuid, UUID uuid2, UUID uuid3) {
+    fun RemoveMemberFromRole(UUID uuid, UUID uuid2, UUID uuid3) {
         RequestRoleMemberChange(uuid, uuid2, uuid3, 1)
     }
 
-    public Unit RequestEjectFromGroup(UUID uuid, UUID uuid2) {
+    fun RequestEjectFromGroup(UUID uuid, UUID uuid2) {
         EjectGroupMemberRequest ejectGroupMemberRequest = EjectGroupMemberRequest()
         ejectGroupMemberRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         ejectGroupMemberRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -409,7 +409,7 @@ class SLGroupManager : SLModule() {
         SendMessage(ejectGroupMemberRequest)
     }
 
-    public Unit RequestJoinGroup(UUID uuid) {
+    fun RequestJoinGroup(UUID uuid) {
         JoinGroupRequest joinGroupRequest = JoinGroupRequest()
         joinGroupRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         joinGroupRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -418,7 +418,7 @@ class SLGroupManager : SLModule() {
         SendMessage(joinGroupRequest)
     }
 
-    public Unit RequestLeaveGroup(UUID uuid) {
+    fun RequestLeaveGroup(UUID uuid) {
         LeaveGroupRequest leaveGroupRequest = LeaveGroupRequest()
         leaveGroupRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         leaveGroupRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -427,7 +427,7 @@ class SLGroupManager : SLModule() {
         SendMessage(leaveGroupRequest)
     }
 
-    public Unit RequestMemberRoleChanges(final UUID uuid, final UUID uuid2, Collection<UUID> collection, Collection<UUID> collection2) {
+    fun RequestMemberRoleChanges(final UUID uuid, final UUID uuid2, Collection<UUID> collection, Collection<UUID> collection2) {
         final Boolean equals = this.circuitInfo.agentID.equals(uuid2)
         GroupRoleChanges groupRoleChanges = GroupRoleChanges()
         groupRoleChanges.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -451,7 +451,7 @@ class SLGroupManager : SLModule() {
         }
         groupRoleChanges.isReliable = true
         groupRoleChanges.setEventListener(SLMessageEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 SLGroupManager.this.userManager.getChatterList().getGroupManager().requestGroupRoleMembersRefresh(uuid)
                 if (equals) {
                     SLGroupManager.this.userManager.getCachedGroupProfiles().requestUpdate(uuid)
@@ -460,12 +460,12 @@ class SLGroupManager : SLModule() {
                 }
             }
 
-            public Unit onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(SLMessage sLMessage) {
             }
         SendMessage(groupRoleChanges)
     }
 
-    public Unit SendGroupInvite(UUID uuid, UUID uuid2, UUID uuid3) {
+    fun SendGroupInvite(UUID uuid, UUID uuid2, UUID uuid3) {
         InviteGroupRequest inviteGroupRequest = InviteGroupRequest()
         inviteGroupRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
         inviteGroupRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -479,7 +479,7 @@ class SLGroupManager : SLModule() {
         this.agentCircuit.HandleChatEvent(ChatterID.getGroupChatterID(this.agentCircuit.getAgentUUID(), uuid2), SLChatGroupInvitationSentEvent((ChatMessageSource) ChatMessageSourceUser(uuid), this.agentCircuit.getAgentUUID()), true)
     }
 
-    public Unit SendGroupNotice(UUID uuid, String str, String str2, SLInventoryEntry sLInventoryEntry) {
+    fun SendGroupNotice(UUID uuid, String str, String str2, SLInventoryEntry sLInventoryEntry) {
         ImprovedInstantMessage improvedInstantMessage = ImprovedInstantMessage()
         improvedInstantMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         improvedInstantMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -509,7 +509,7 @@ class SLGroupManager : SLModule() {
         SendMessage(improvedInstantMessage)
     }
 
-    public Unit SetGroupContribution(UUID uuid, Int i) {
+    fun SetGroupContribution(UUID uuid, Int i) {
         SetGroupContribution setGroupContribution = SetGroupContribution()
         setGroupContribution.AgentData_Field.AgentID = this.circuitInfo.agentID
         setGroupContribution.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -517,7 +517,7 @@ class SLGroupManager : SLModule() {
         setGroupContribution.Data_Field.Contribution = i
         setGroupContribution.isReliable = true
         setGroupContribution.setEventListener(SLMessageEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 AgentDataUpdateRequest agentDataUpdateRequest = AgentDataUpdateRequest()
                 agentDataUpdateRequest.AgentData_Field.AgentID = SLGroupManager.this.circuitInfo.agentID
                 agentDataUpdateRequest.AgentData_Field.SessionID = SLGroupManager.this.circuitInfo.sessionID
@@ -525,12 +525,12 @@ class SLGroupManager : SLModule() {
                 SLGroupManager.this.SendMessage(agentDataUpdateRequest)
             }
 
-            public Unit onMessageTimeout(SLMessage sLMessage) {
+            fun onMessageTimeout(SLMessage sLMessage) {
             }
         SendMessage(setGroupContribution)
     }
 
-    public Unit SetGroupOptions(UUID uuid, Boolean z, Boolean z2) {
+    fun SetGroupOptions(UUID uuid, Boolean z, Boolean z2) {
         SetGroupAcceptNotices setGroupAcceptNotices = SetGroupAcceptNotices()
         setGroupAcceptNotices.AgentData_Field.AgentID = this.circuitInfo.agentID
         setGroupAcceptNotices.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -542,7 +542,7 @@ class SLGroupManager : SLModule() {
         this.agentCircuit.getModules().userProfiles.requestAgentDataUpdate()
     }
 
-    public Unit SetGroupRole(UUID uuid, UUID uuid2) {
+    fun SetGroupRole(UUID uuid, UUID uuid2) {
         GroupTitleUpdate groupTitleUpdate = GroupTitleUpdate()
         groupTitleUpdate.AgentData_Field.AgentID = this.circuitInfo.agentID
         groupTitleUpdate.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -553,7 +553,7 @@ class SLGroupManager : SLModule() {
         requestGroupTitles(uuid)
     }
 
-    public Unit SetRoleProperties(final UUID uuid, final UUID uuid2, String str, String str2, String str3, Long j) {
+    fun SetRoleProperties(final UUID uuid, final UUID uuid2, String str, String str2, String str3, Long j) {
         Debug.Printf("GroupRole: setting role properties for role %s", uuid2)
         GroupRoleUpdate groupRoleUpdate = GroupRoleUpdate()
         groupRoleUpdate.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -569,7 +569,7 @@ class SLGroupManager : SLModule() {
         groupRoleUpdate.RoleData_Fields.add(roleData)
         groupRoleUpdate.isReliable = true
         groupRoleUpdate.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 Debug.Printf("GroupRole: ack set properties for role %s", uuid2)
                 SLGroupManager.this.userManager.getGroupRoles().requestUpdate(uuid)
             }

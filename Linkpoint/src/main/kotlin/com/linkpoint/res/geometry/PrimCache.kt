@@ -26,7 +26,7 @@ private class PrimRequest : ResourceRequest()<PrimDrawParams, DrawablePrim> : Ru
             this.geometryCache = geometryCache2
         }
 
-        public Unit OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(Object obj, Boolean z) {
             if (obj instanceof DrawableGeometry) {
                 this.geometry = (DrawableGeometry) obj
                 PrimComputeExecutor.getInstance().execute(this)
@@ -35,17 +35,17 @@ private class PrimRequest : ResourceRequest()<PrimDrawParams, DrawablePrim> : Ru
             completeRequest(null)
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             PrimComputeExecutor.getInstance().remove(this)
             this.geometryCache.CancelRequest(this)
             super.cancelRequest()
         }
 
-        public Unit execute() {
+        fun execute() {
             this.geometryCache.RequestResource(((PrimDrawParams) getParams()).getVolumeParams(), this)
         }
 
-        public Unit run() {
+        fun run() {
             try {
                 completeRequest(DrawablePrim((PrimDrawParams) getParams(), this.geometry))
             } catch (Exception e) {

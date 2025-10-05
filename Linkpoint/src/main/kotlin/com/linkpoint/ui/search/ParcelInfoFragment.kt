@@ -88,7 +88,7 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
         }
     }
 
-    public Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
         if ((chatterNameRetriever == this.ownerNameRetriever || chatterNameRetriever == this.ownerGroupNameRetriever) && this.unbinder != null && this.ownerGroupNameRetriever != null && this.ownerNameRetriever != null) {
             ChatterNameRetriever chatterNameRetriever2 = this.ownerGroupNameRetriever.getResolvedName() != null ? this.ownerGroupNameRetriever : this.ownerNameRetriever
             String resolvedName = chatterNameRetriever2.getResolvedName()
@@ -109,7 +109,7 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
         return inflate
     }
 
-    public Unit onDestroyView() {
+    fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -117,7 +117,7 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
         super.onDestroyView()
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         ParcelInfoReply data = this.parcelInfoReply.getData()
         Debug.Printf("ParcelInfo: loadable data %s", data)
         UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
@@ -154,7 +154,7 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
     }
 
     @OnClick({2131755608})
-    public Unit onParcelOwnerProfileClick() {
+    fun onParcelOwnerProfileClick() {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
         ParcelInfoReply data = this.parcelInfoReply.getData()
         if (activeAgentID != null && data != null) {
@@ -169,7 +169,7 @@ class ParcelInfoFragment : FragmentWithTitle(), ReloadableFragment, LoadableMoni
     }
 
     @OnClick({2131755600})
-    public Unit onParcelTeleportButton() {
+    fun onParcelTeleportButton() {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         ParcelInfoReply data = this.parcelInfoReply.getData()
         if (data != null && userManager != null) {
@@ -267,12 +267,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.search.-$Lambda$5J
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         showParcelInfo(UUIDPool.getUUID(getArguments().getString(PARCEL_UUID_KEY)))
     }
 
-    public Unit onStop() {
+    fun onStop() {
         this.loadableMonitor.unsubscribeAll()
         if (this.ownerNameRetriever != null) {
             this.ownerNameRetriever.dispose()
@@ -289,7 +289,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.search.-$Lambda$5J
         super.onStop()
     }
 
-    public Unit setFragmentArgs(Intent intent, Bundle bundle) {
+    fun setFragmentArgs(Intent intent, Bundle bundle) {
         getArguments().putAll(bundle)
         if (isFragmentStarted()) {
             showParcelInfo(UUIDPool.getUUID(bundle.getString(PARCEL_UUID_KEY)))

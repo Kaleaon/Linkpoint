@@ -55,35 +55,35 @@ class GroupMember {
         return this.userID
     }
 
-    public Unit setAgentPowers(Long j) {
+    fun setAgentPowers(Long j) {
         this.agentPowers = j
     }
 
-    public Unit setContribution(Int i) {
+    fun setContribution(Int i) {
         this.contribution = i
     }
 
-    public Unit setGroupID(UUID uuid) {
+    fun setGroupID(UUID uuid) {
         this.groupID = uuid
     }
 
-    public Unit setIsOwner(Boolean z) {
+    fun setIsOwner(Boolean z) {
         this.isOwner = z
     }
 
-    public Unit setOnlineStatus(String str) {
+    fun setOnlineStatus(String str) {
         this.onlineStatus = str
     }
 
-    public Unit setRequestID(UUID uuid) {
+    fun setRequestID(UUID uuid) {
         this.requestID = uuid
     }
 
-    public Unit setTitle(String str) {
+    fun setTitle(String str) {
         this.title = str
     }
 
-    public Unit setUserID(UUID uuid) {
+    fun setUserID(UUID uuid) {
         this.userID = uuid
     }
 }

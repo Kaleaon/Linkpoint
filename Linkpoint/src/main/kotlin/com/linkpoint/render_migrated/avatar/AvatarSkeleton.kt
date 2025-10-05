@@ -190,7 +190,7 @@ private class AttachmentPoint {
         }
     }
 
-    public Unit UpdateGlobalPositions(AnimationSkeletonData animationSkeletonData) {
+    fun UpdateGlobalPositions(AnimationSkeletonData animationSkeletonData) {
         super.UpdateGlobalPositions(animationSkeletonData)
         updateAttachmentMatrix()
     }
@@ -233,7 +233,7 @@ private class AttachmentPoint {
         return this.forceAnimate.getAndSet(false)
     }
 
-    public Unit setForceAnimate() {
+    fun setForceAnimate() {
         this.forceAnimate.set(true)
     }
 }

@@ -58,7 +58,7 @@ private WebRTCVoiceAdapter instance
     /**
      * Set callback for voice events
      */
-    public Unit setCallback(VoiceAdapterCallback callback) {
+    fun setCallback(VoiceAdapterCallback callback) {
         this.adapterCallback = callback
     }
     
@@ -127,7 +127,7 @@ private WebRTCVoiceAdapter instance
      * Shutdown voice system
      * Replaces Vivox vx_uninitialize()
      */
-    public Unit shutdown() {
+    fun shutdown() {
         Log.i(TAG, "Shutting down WebRTC voice adapter...")
         
         if (webRTCManager != null) {
@@ -220,7 +220,7 @@ private WebRTCVoiceAdapter instance
      * Set local speaker volume
      * Replaces Vivox vx_req_connector_set_local_speaker_volume
      */
-    public Unit setSpeakerVolume(Float volume) {
+    fun setSpeakerVolume(Float volume) {
         this.speakerVolume = Math.max(0.0f, Math.min(1.0f, volume))
         
         if (webRTCManager != null) {
@@ -234,7 +234,7 @@ private WebRTCVoiceAdapter instance
      * Set local microphone volume
      * Replaces Vivox vx_req_connector_set_local_mic_volume
      */
-    public Unit setMicrophoneVolume(Float volume) {
+    fun setMicrophoneVolume(Float volume) {
         this.microphoneVolume = Math.max(0.0f, Math.min(1.0f, volume))
         
         if (webRTCManager != null) {
@@ -248,7 +248,7 @@ private WebRTCVoiceAdapter instance
      * Mute/unmute local microphone
      * Replaces Vivox vx_req_connector_mute_local_mic
      */
-    public Unit setMicrophoneMuted(Boolean muted) {
+    fun setMicrophoneMuted(Boolean muted) {
         this.isMicrophoneMuted = muted
         
         if (webRTCManager != null) {

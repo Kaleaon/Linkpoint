@@ -83,7 +83,7 @@ class LLSDMap : LLSDNode() {
         return this.items.containsKey(str)
     }
 
-    public Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    fun toBinary(DataOutputStream dataOutputStream) throws IOException {
         dataOutputStream.writeByte(Vr.VREvent.VrCore.ErrorCode.CONTROLLER_GATT_CHARACTERISTIC_NOT_FOUND)
         ImmutableSet<Map.Entry<String, LLSDNode>> entrySet = this.items.entrySet()
         dataOutputStream.writeInt(entrySet.size())
@@ -165,7 +165,7 @@ class LLSDMap : LLSDNode() {
         }
     }
 
-    public Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    fun toXML(XmlSerializer xmlSerializer) throws IOException {
         xmlSerializer.startTag("", "map")
         for (Map.Entry entry : this.items.entrySet()) {
             xmlSerializer.startTag("", "key")

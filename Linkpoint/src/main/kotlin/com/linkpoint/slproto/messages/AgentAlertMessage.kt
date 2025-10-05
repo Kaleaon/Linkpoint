@@ -27,11 +27,11 @@ class AgentAlertMessage : SLMessage() {
         return this.AlertData_Field.Message.length + 2 + 20
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleAgentAlertMessage(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -121)
@@ -40,7 +40,7 @@ class AgentAlertMessage : SLMessage() {
         packVariable(byteBuffer, this.AlertData_Field.Message, 1)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AlertData_Field.Modal = unpackBoolean(byteBuffer)
         this.AlertData_Field.Message = unpackVariable(byteBuffer, 1)

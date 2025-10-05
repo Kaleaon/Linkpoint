@@ -33,7 +33,7 @@ private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJP
                 TextureCache.getInstance().RequestResource(DrawableTextureParams.create(uuid, TextureClass.Terrain), this)
             }
 
-            public Unit OnResourceReady(Object obj, Boolean z) {
+            fun OnResourceReady(Object obj, Boolean z) {
                 if (obj instanceof OpenJPEG) {
                     TerrainTextureRequest.this.onLayerReady(this.layer, (OpenJPEG) obj)
                 } else if (obj == null) {
@@ -46,7 +46,7 @@ private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJP
             super(terrainPatchInfo, resourceManager)
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             synchronized (this) {
                 for (Int i = 0; i < 4; i++) {
                     this.rawRequests[i] = null
@@ -59,7 +59,7 @@ private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJP
             super.cancelRequest()
         }
 
-        public Unit execute() {
+        fun execute() {
             this.layerNeededMask = ((TerrainPatchInfo) getParams()).getLayerMask()
             this.layerReadyMask = 0
             if (this.layerNeededMask != 0) {
@@ -114,7 +114,7 @@ private class TerrainTextureRequest : ResourceRequest()<TerrainPatchInfo, OpenJP
             }
         }
 
-        public Unit run() {
+        fun run() {
             try {
                 TerrainPatchInfo terrainPatchInfo = (TerrainPatchInfo) getParams()
                 OpenJPEG bakeTerrain = OpenJPEG.bakeTerrain(256, 256, this.rawTextures, terrainPatchInfo.getTextureHeightMap(), terrainPatchInfo.getHeightMap().getMapWidth(), terrainPatchInfo.getHeightMap().getMapHeight())

@@ -643,7 +643,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         Int id = view.getId()
         for (Int i = 0; i < objectPayButtons.length; i++) {
             if (objectPayButtons[i] == id) {
@@ -687,12 +687,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    public Unit onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.object_details_menu, menu)
         this.menuItemObjectTake = menu.findItem(R.id.item_object_take)
@@ -722,7 +722,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
         final Button button = (Button) inflate.findViewById(R.id.object_pay_button)
         ((EditText) inflate.findViewById(R.id.object_pay_amount)).addTextChangedListener(TextWatcher() {
-            public Unit afterTextChanged(Editable editable) {
+            fun afterTextChanged(Editable editable) {
                 try {
                     Integer.parseInt(editable.toString())
                     button.setEnabled(true)
@@ -731,20 +731,20 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                 }
             }
 
-            public Unit beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+            fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
             }
 
-            public Unit onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+            fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
             }
         return inflate
     }
 
-    public Unit onDestroyView() {
+    fun onDestroyView() {
         this.ownerNameDisplayer.unbindViews()
         super.onDestroyView()
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         Throwable error = this.objectProfile.getError()
         SLObjectProfileData data = this.objectProfile.getData()
         if (error instanceof ObjectsManager.ObjectDoesNotExistException) {
@@ -957,7 +957,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         return super.onOptionsItemSelected(menuItem)
     }
 
-    public Unit onPause() {
+    fun onPause() {
         UserManager userManager = getUserManager()
         if (userManager != null) {
             userManager.getChatterList().getActiveChattersManager().removeObjectMessageListener(this.chatEventListener)
@@ -965,7 +965,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         super.onPause()
     }
 
-    public Unit onResume() {
+    fun onResume() {
         super.onResume()
         UserManager userManager = getUserManager()
         if (userManager != null) {
@@ -973,19 +973,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         setTitle(getString(R.string.object_details_caption), (String) null)
         showObject(getArguments().getInt(LOCAL_ID_KEY))
     }
 
-    public Unit onStop() {
+    fun onStop() {
         this.loadableMonitor.unsubscribeAll()
         this.ownerNameDisplayer.setChatterID((ChatterID) null)
         super.onStop()
     }
 
-    public Unit setFragmentArgs(Intent intent, Bundle bundle) {
+    fun setFragmentArgs(Intent intent, Bundle bundle) {
         if (bundle != null) {
             getArguments().putAll(bundle)
             Int i = bundle.getInt(LOCAL_ID_KEY)

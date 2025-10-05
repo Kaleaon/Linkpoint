@@ -93,11 +93,11 @@ class WindlightPreset {
         }
     }
 
-    public Unit reset() {
+    fun reset() {
         loadFromAssetFile("windlight/A%2D12PM.xml")
     }
 
-    public Unit setByInterpolation(WindlightPreset windlightPreset, WindlightPreset windlightPreset2, Float f) {
+    fun setByInterpolation(WindlightPreset windlightPreset, WindlightPreset windlightPreset2, Float f) {
         this.star_brightness = (windlightPreset.star_brightness * (1.0f - f)) + (windlightPreset2.star_brightness * f)
         lerpFloatArray(this.ambient, windlightPreset.ambient, windlightPreset2.ambient, f)
         lerpFloatArray(this.ambientBelowWater, windlightPreset.ambientBelowWater, windlightPreset2.ambientBelowWater, f)

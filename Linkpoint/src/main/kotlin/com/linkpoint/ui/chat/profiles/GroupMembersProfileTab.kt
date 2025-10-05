@@ -127,7 +127,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             return 0
         }
 
-        public Unit onBindViewHolder(GroupMemberViewHolder groupMemberViewHolder, Int i) {
+        fun onBindViewHolder(GroupMemberViewHolder groupMemberViewHolder, Int i) {
             Boolean z = false
             if (this.data != null && (!this.data.isClosed()) && i >= 0 && i < this.data.size()) {
                 GroupMember groupMember = this.data.get(i)
@@ -142,17 +142,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             return GroupMemberViewHolder(this.layoutInflater.inflate(R.layout.group_member_list_item, viewGroup, false), GroupMembersProfileTab.this.userManager.getUserID(), this.cardSelectedColor)
         }
 
-        public Unit onViewRecycled(GroupMemberViewHolder groupMemberViewHolder) {
+        fun onViewRecycled(GroupMemberViewHolder groupMemberViewHolder) {
             groupMemberViewHolder.recycle()
         }
 
-        public Unit setData(LazyList<GroupMember> lazyList) {
+        fun setData(LazyList<GroupMember> lazyList) {
             this.data = lazyList
             this.selectedPosition = -1
             notifyDataSetChanged()
         }
 
-        public Unit setSelectedPosition(Int i) {
+        fun setSelectedPosition(Int i) {
             if (i != this.selectedPosition) {
                 Int i2 = this.selectedPosition
                 this.selectedPosition = i
@@ -206,7 +206,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
 
         /* access modifiers changed from: package-private */
-        public Unit bindToData(GroupMember groupMember, Boolean z) {
+        fun bindToData(GroupMember groupMember, Boolean z) {
             Int i = 0
             String str = null
             ChatterID.ChatterIDUser userChatterID = groupMember != null ? ChatterID.getUserChatterID(this.agentUUID, groupMember.getUserID()) : null
@@ -247,14 +247,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             button.setVisibility(i)
         }
 
-        public Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
+        fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
             if (chatterNameRetriever2 != null) {
                 this.userNameTextView.setText(chatterNameRetriever2.getResolvedName())
                 this.userPicView.setChatterID(chatterNameRetriever2.chatterID, chatterNameRetriever2.getResolvedName())
             }
         }
 
-        public Unit onClick(View view) {
+        fun onClick(View view) {
             switch (view.getId()) {
                 case R.id.group_member_card_view:
                     if (GroupMembersProfileTab.this.getArguments().containsKey(GroupMembersProfileTab.ROLE_TO_ADD_KEY)) {
@@ -296,7 +296,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
 
         /* access modifiers changed from: package-private */
-        public Unit recycle() {
+        fun recycle() {
             if (this.chatterNameRetriever != null) {
                 this.chatterNameRetriever.dispose()
                 this.chatterNameRetriever = null
@@ -307,7 +307,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: private */
-    public Unit addGroupRoleMember(ChatterID.ChatterIDUser chatterIDUser) {
+    fun addGroupRoleMember(ChatterID.ChatterIDUser chatterIDUser) {
         UUID uuid = UUIDPool.getUUID(getArguments().getString(ROLE_TO_ADD_KEY))
         if (uuid != null) {
             AlertDialog.Builder(getContext()).setTitle((Int) R.string.add_role_member_confirm).setPositiveButton((Int) R.string.yes_add_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, uuid, chatterIDUser) {
@@ -414,7 +414,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: private */
-    public Unit ejectGroupMember(ChatterID.ChatterIDUser chatterIDUser) {
+    fun ejectGroupMember(ChatterID.ChatterIDUser chatterIDUser) {
         AlertDialog.Builder(getContext()).setTitle((Int) R.string.eject_member_confirm).setPositiveButton((Int) R.string.yes_eject_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, chatterIDUser) {
 
             /* renamed from: -$f0 */
@@ -603,7 +603,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupMemberList */
-    public Unit m473com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMembersProfileTabmthref0(UUID uuid) {
+    fun m473com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMembersProfileTabmthref0(UUID uuid) {
         Debug.Printf("GroupMemberList: got dataset ID = %s", uuid)
         if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDGroup)) {
             this.groupMembers.subscribe(this.userManager.getChatterList().getGroupManager().getGroupMembersList(), GroupManager.GroupMembersQuery.create(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), uuid))
@@ -646,7 +646,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return inflate
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         if (this.adapter != null) {
             this.adapter.setData(this.groupMembers.getData())
             this.adapter.notifyDataSetChanged()
@@ -656,7 +656,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         this.loadableMonitor.unsubscribeAll()
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
             UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()

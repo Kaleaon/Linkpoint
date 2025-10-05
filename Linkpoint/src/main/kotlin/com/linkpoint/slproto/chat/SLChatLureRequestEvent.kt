@@ -57,7 +57,7 @@ val class SLChatLureRequestEvent : SLChatYesNoEvent() {
         return true
     }
 
-    public Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager) {
         super.onYesAction(context, userManager)
         UUID sourceUUID = this.source.getSourceUUID()
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -70,7 +70,7 @@ val class SLChatLureRequestEvent : SLChatYesNoEvent() {
         }
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

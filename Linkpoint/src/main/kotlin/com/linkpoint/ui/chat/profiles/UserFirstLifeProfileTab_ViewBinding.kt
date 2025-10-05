@@ -28,7 +28,7 @@ class UserFirstLifeProfileTab_ViewBinding : Unbinder {
         userFirstLifeProfileTab.aboutEditButton = (Button) Utils.castView(findRequiredView, R.id.about_edit_button, "field 'aboutEditButton'", Button.class)
         this.view2131755706 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userFirstLifeProfileTab.onAboutEditClicked(view)
             }
         userFirstLifeProfileTab.loadingLayout = (LoadingLayout) Utils.findRequiredViewAsType(view, R.id.loading_layout, "field 'loadingLayout'", LoadingLayout.class)
@@ -36,7 +36,7 @@ class UserFirstLifeProfileTab_ViewBinding : Unbinder {
         userFirstLifeProfileTab.changePicButton = (Button) Utils.castView(findRequiredView2, R.id.change_pic_button, "field 'changePicButton'", Button.class)
         this.view2131755698 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 userFirstLifeProfileTab.onChangePicClicked(view)
             }
         userFirstLifeProfileTab.userProfileAboutText = (TextView) Utils.findRequiredViewAsType(view, R.id.user_profile_about_text, "field 'userProfileAboutText'", TextView.class)
@@ -44,7 +44,7 @@ class UserFirstLifeProfileTab_ViewBinding : Unbinder {
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         UserFirstLifeProfileTab userFirstLifeProfileTab = this.target
         if (userFirstLifeProfileTab == null) {
             throw IllegalStateException("Bindings already cleared.")

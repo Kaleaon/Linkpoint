@@ -55,7 +55,7 @@ private class GridListAdapter : ArrayAdapter()<GridList.GridInfo> {
         }
 
         /* access modifiers changed from: package-private */
-        public Unit updateList() {
+        fun updateList() {
             super.notifyDataSetChanged()
         }
     }
@@ -74,7 +74,7 @@ private class GridListAdapter : ArrayAdapter()<GridList.GridInfo> {
     }
 
     @OnClick({2131755484})
-    public Unit onAddNewGridButton() {
+    fun onAddNewGridButton() {
         GridEditDialog gridEditDialog = GridEditDialog(this, this.gridList, (GridList.GridInfo) null)
         gridEditDialog.setOnGridEditResultListener(this)
         gridEditDialog.show()
@@ -187,7 +187,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
         return super.onContextItemSelected(menuItem)
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.manage_grids)
         ButterKnife.bind((Activity) this)
@@ -199,7 +199,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
         registerForContextMenu(this.gridListView)
     }
 
-    public Unit onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+    fun onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
         super.onCreateContextMenu(contextMenu, view, contextMenuInfo)
         Object item = this.adapter.getItem(((AdapterView.AdapterContextMenuInfo) contextMenuInfo).position)
         if (item != null && !((GridList.GridInfo) item).isPredefinedGrid()) {
@@ -207,7 +207,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
         }
     }
 
-    public Unit onGridAdded(GridList.GridInfo gridInfo, Boolean z) {
+    fun onGridAdded(GridList.GridInfo gridInfo, Boolean z) {
         if (z) {
             this.gridList.addNewGrid(gridInfo)
         } else {
@@ -221,14 +221,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.grids.-$Lambda$mB5
         }
     }
 
-    public Unit onGridDeleted(GridList.GridInfo gridInfo) {
+    fun onGridDeleted(GridList.GridInfo gridInfo) {
         deleteGrid(gridInfo)
     }
 
-    public Unit onGridEditCancelled() {
+    fun onGridEditCancelled() {
     }
 
-    public Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
         GridList.GridInfo gridInfo
         if (this.adapter != null && (gridInfo = (GridList.GridInfo) this.adapter.getItem(i)) != null && !gridInfo.isPredefinedGrid()) {
             GridEditDialog gridEditDialog = GridEditDialog(this, this.gridList, gridInfo)

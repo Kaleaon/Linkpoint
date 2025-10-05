@@ -87,7 +87,7 @@ class ObjectListAdapter : BaseExpandableListAdapter() {
         if (viewGroup instanceof ExpandableListView) {
             final ExpandableListView expandableListView = (ExpandableListView) viewGroup
             AnonymousClass1 r1 = View.OnClickListener() {
-                public Unit onClick(View view) {
+                fun onClick(View view) {
                     if (view.getVisibility() == 0) {
                         switch (view.getId()) {
                             case R.id.groupIndicatorCollapsed:
@@ -157,7 +157,7 @@ class ObjectListAdapter : BaseExpandableListAdapter() {
         return true
     }
 
-    public Unit setData(ImmutableList<SLObjectDisplayInfo> immutableList) {
+    fun setData(ImmutableList<SLObjectDisplayInfo> immutableList) {
         this.objects = immutableList
         notifyDataSetChanged()
     }

@@ -81,7 +81,7 @@ class GLAsyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
             return eglCreateContext
         }
 
-        public Unit run() {
+        fun run() {
             RenderContext andSet = this.renderContext.getAndSet((Object) null)
             EGLContext createContext = createContext()
             Int i = 0
@@ -161,11 +161,11 @@ class GLAsyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
         }
     }
 
-    public Unit GLResourceLoaded(GLLoadQueue.GLLoadable gLLoadable) {
+    fun GLResourceLoaded(GLLoadQueue.GLLoadable gLLoadable) {
         this.loadedQueue.offer(gLLoadable)
     }
 
-    public Unit RunLoadQueue(RenderContext renderContext) {
+    fun RunLoadQueue(RenderContext renderContext) {
         while (true) {
             GLLoadQueue.GLLoadable poll = this.loadedQueue.poll()
             if (poll != null) {
@@ -176,7 +176,7 @@ class GLAsyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
         }
     }
 
-    public Unit StopLoadQueue() {
+    fun StopLoadQueue() {
         Debug.Printf("TexLoad: StopLoadQueue called.", Object[0])
         this.mustExit.set(true)
         this.thread.interrupt()
@@ -188,7 +188,7 @@ class GLAsyncLoadQueue : GLLoadQueue(), GLLoadQueue.GLLoadHandler {
         Debug.Printf("TexLoad: StopLoadQueue exiting.", Object[0])
     }
 
-    public Unit remove(GLLoadQueue.GLLoadable gLLoadable) {
+    fun remove(GLLoadQueue.GLLoadable gLLoadable) {
         this.loadedQueue.remove(gLLoadable)
         super.remove(gLLoadable)
     }

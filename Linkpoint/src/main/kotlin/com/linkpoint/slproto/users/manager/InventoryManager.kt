@@ -47,7 +47,7 @@ class InventoryManager {
     private val RequestHandler<InventoryQuery> queryRequestHandler = RequestHandler<InventoryQuery>() {
         private val Map<InventoryQuery, FolderSubscription> folderQueries = ConcurrentHashMap()
 
-        public Unit onRequest(InventoryQuery inventoryQuery) {
+        fun onRequest(InventoryQuery inventoryQuery) {
             FolderSubscription put
             if (inventoryQuery.containsString() != null) {
                 InventoryManager.this.entryListPool.onResultData(inventoryQuery, inventoryQuery.query((SLInventoryEntry) null, InventoryManager.this.inventoryDB))
@@ -63,7 +63,7 @@ class InventoryManager {
             }
         }
 
-        public Unit onRequestCancelled(InventoryQuery inventoryQuery) {
+        fun onRequestCancelled(InventoryQuery inventoryQuery) {
             FolderSubscription folderSubscription = this.folderQueries.get(inventoryQuery)
             if (folderSubscription != null) {
                 folderSubscription.unsubscribe()
@@ -89,20 +89,20 @@ class InventoryManager {
             this(inventoryQuery, uuid)
         }
 
-        public Unit onData(SLInventoryEntry sLInventoryEntry) {
+        fun onData(SLInventoryEntry sLInventoryEntry) {
             if (sLInventoryEntry != null) {
                 Debug.Printf("Inventory: folder subscription got name: %s with folderId = '%s'", sLInventoryEntry.name, sLInventoryEntry.uuid)
             }
             InventoryManager.this.entryListPool.onResultData(this.query, this.query.query(sLInventoryEntry, InventoryManager.this.inventoryDB))
         }
 
-        public Unit onError(Throwable th) {
+        fun onError(Throwable th) {
             Debug.Printf("Inventory: subscription error: %s", th)
             Debug.Warning(th)
             InventoryManager.this.entryListPool.onResultError(this.query, th)
         }
 
-        public Unit unsubscribe() {
+        fun unsubscribe() {
             this.subscription.unsubscribe()
         }
     }
@@ -311,11 +311,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
 
     /* access modifiers changed from: private */
-    public Unit updateSearchResults() {
+    fun updateSearchResults() {
         this.entryListPool.requestUpdateSome($Lambda$JIBenvPHaOomPgMJhTFPuiVXBzY())
     }
 
-    public Unit copyToClipboard(InventoryClipboardEntry inventoryClipboardEntry) {
+    fun copyToClipboard(InventoryClipboardEntry inventoryClipboardEntry) {
         this.clipboardPool.setData(SubscriptionSingleKey.Value, inventoryClipboardEntry)
     }
 
@@ -367,15 +367,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.searchRunningPool
     }
 
-    public Unit requestFolderUpdate(UUID uuid) {
+    fun requestFolderUpdate(UUID uuid) {
         this.folderEntryPool.requestUpdate(uuid)
     }
 
-    public Unit setCurrentSessionID(UUID uuid) {
+    fun setCurrentSessionID(UUID uuid) {
         this.currentSessionID.set(uuid)
     }
 
-    public Unit setRootFolder(UUID uuid) {
+    fun setRootFolder(UUID uuid) {
         this.rootFolderID.set(uuid)
     }
 }

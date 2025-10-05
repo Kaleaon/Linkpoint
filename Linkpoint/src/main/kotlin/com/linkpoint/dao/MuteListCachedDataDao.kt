@@ -58,7 +58,7 @@ class MuteListCachedDataDao : AbstractDao()<MuteListCachedData, Long> {
         return MuteListCachedData(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)), cursor.getInt(i + 1), cursor.getBlob(i + 2))
     }
 
-    public Unit readEntity(Cursor cursor, MuteListCachedData muteListCachedData, Int i) {
+    fun readEntity(Cursor cursor, MuteListCachedData muteListCachedData, Int i) {
         muteListCachedData.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         muteListCachedData.setCRC(cursor.getInt(i + 1))
         muteListCachedData.setData(cursor.getBlob(i + 2))

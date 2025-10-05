@@ -47,7 +47,7 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
         findViewById(R.id.gridNameText).requestFocus()
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         Boolean z = false
         switch (view.getId()) {
             case R.id.okButton:
@@ -99,7 +99,7 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setTitle((Int) R.string.new_grid_dialog_title)
         setContentView((Int) R.layout.grid_edit_dialog)
@@ -109,7 +109,7 @@ class GridEditDialog : AppCompatDialog(), View.OnClickListener {
         prepare()
     }
 
-    public Unit setOnGridEditResultListener(OnGridEditResultListener onGridEditResultListener2) {
+    fun setOnGridEditResultListener(OnGridEditResultListener onGridEditResultListener2) {
         this.onGridEditResultListener = onGridEditResultListener2
     }
 }

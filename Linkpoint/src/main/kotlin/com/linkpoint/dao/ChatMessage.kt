@@ -193,123 +193,123 @@ class ChatMessage : Identifiable<Long> {
         return this.viewType
     }
 
-    public Unit setAccepted(Boolean bool) {
+    fun setAccepted(Boolean bool) {
         this.accepted = bool
     }
 
-    public Unit setAssetType(Integer num) {
+    fun setAssetType(Integer num) {
         this.assetType = num
     }
 
-    public Unit setChatChannel(Integer num) {
+    fun setChatChannel(Integer num) {
         this.chatChannel = num
     }
 
-    public Unit setChatterID(Long j) {
+    fun setChatterID(Long j) {
         this.chatterID = j
     }
 
-    public Unit setDialogButtons(Byte[] bArr) {
+    fun setDialogButtons(Byte[] bArr) {
         this.dialogButtons = bArr
     }
 
-    public Unit setDialogIgnored(Boolean bool) {
+    fun setDialogIgnored(Boolean bool) {
         this.dialogIgnored = bool
     }
 
-    public Unit setDialogSelectedOption(String str) {
+    fun setDialogSelectedOption(String str) {
         this.dialogSelectedOption = str
     }
 
-    public Unit setEventState(Integer num) {
+    fun setEventState(Integer num) {
         this.eventState = num
     }
 
-    public Unit setId(Long l) {
+    fun setId(Long l) {
         this.id = l
     }
 
-    public Unit setIsOffline(Boolean bool) {
+    fun setIsOffline(Boolean bool) {
         this.isOffline = bool
     }
 
-    public Unit setItemID(UUID uuid) {
+    fun setItemID(UUID uuid) {
         this.itemID = uuid
     }
 
-    public Unit setItemName(String str) {
+    fun setItemName(String str) {
         this.itemName = str
     }
 
-    public Unit setMessageText(String str) {
+    fun setMessageText(String str) {
         this.messageText = str
     }
 
-    public Unit setMessageType(Int i) {
+    fun setMessageType(Int i) {
         this.messageType = i
     }
 
-    public Unit setNewBalance(Integer num) {
+    fun setNewBalance(Integer num) {
         this.newBalance = num
     }
 
-    public Unit setObjectName(String str) {
+    fun setObjectName(String str) {
         this.objectName = str
     }
 
-    public Unit setOrigIMType(Integer num) {
+    fun setOrigIMType(Integer num) {
         this.origIMType = num
     }
 
-    public Unit setOrigTimestamp(Date date) {
+    fun setOrigTimestamp(Date date) {
         this.origTimestamp = date
     }
 
-    public Unit setQuestionMask(Integer num) {
+    fun setQuestionMask(Integer num) {
         this.questionMask = num
     }
 
-    public Unit setSenderLegacyName(String str) {
+    fun setSenderLegacyName(String str) {
         this.senderLegacyName = str
     }
 
-    public Unit setSenderName(String str) {
+    fun setSenderName(String str) {
         this.senderName = str
     }
 
-    public Unit setSenderType(Integer num) {
+    fun setSenderType(Integer num) {
         this.senderType = num
     }
 
-    public Unit setSenderUUID(UUID uuid) {
+    fun setSenderUUID(UUID uuid) {
         this.senderUUID = uuid
     }
 
-    public Unit setSessionID(UUID uuid) {
+    fun setSessionID(UUID uuid) {
         this.sessionID = uuid
     }
 
-    public Unit setSyncedToGoogleDrive(Boolean z) {
+    fun setSyncedToGoogleDrive(Boolean z) {
         this.syncedToGoogleDrive = z
     }
 
-    public Unit setTextBoxButtonIndex(Integer num) {
+    fun setTextBoxButtonIndex(Integer num) {
         this.textBoxButtonIndex = num
     }
 
-    public Unit setTimestamp(Date date) {
+    fun setTimestamp(Date date) {
         this.timestamp = date
     }
 
-    public Unit setTransactionAmount(Integer num) {
+    fun setTransactionAmount(Integer num) {
         this.transactionAmount = num
     }
 
-    public Unit setUserID(UUID uuid) {
+    fun setUserID(UUID uuid) {
         this.userID = uuid
     }
 
-    public Unit setViewType(Int i) {
+    fun setViewType(Int i) {
         this.viewType = i
     }
 }

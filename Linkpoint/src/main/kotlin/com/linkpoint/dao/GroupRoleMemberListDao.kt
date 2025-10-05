@@ -64,7 +64,7 @@ class GroupRoleMemberListDao : AbstractDao()<GroupRoleMemberList, UUID> {
         return GroupRoleMemberList(fromString, fromString2, z)
     }
 
-    public Unit readEntity(Cursor cursor, GroupRoleMemberList groupRoleMemberList, Int i) {
+    fun readEntity(Cursor cursor, GroupRoleMemberList groupRoleMemberList, Int i) {
         groupRoleMemberList.setGroupID(cursor.isNull(i + 0) ? null : UUID.fromString(cursor.getString(i + 0)))
         groupRoleMemberList.setRequestID(UUID.fromString(cursor.getString(i + 1)))
         groupRoleMemberList.setMustRevalidate(cursor.getShort(i + 2) != (Short) 0)

@@ -71,11 +71,11 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
             this.fetcher = sLTextureFetcher
         }
 
-        public Unit OnTextureFetchComplete(SLTextureFetchRequest sLTextureFetchRequest) {
+        fun OnTextureFetchComplete(SLTextureFetchRequest sLTextureFetchRequest) {
             completeRequest(sLTextureFetchRequest.outputFile)
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             SLTextureFetchRequest sLTextureFetchRequest
             SLTextureFetcher sLTextureFetcher
             Future<?> future
@@ -95,12 +95,12 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
             super.cancelRequest()
         }
 
-        public Unit completeRequest(File file) {
+        fun completeRequest(File file) {
             TextureCompressedCache.this.downloadExecutor.completeRequest(this)
             super.completeRequest(file)
         }
 
-        public Unit execute() {
+        fun execute() {
             this.fetchTask = HTTPFetchExecutor.getInstance().submit(this)
         }
 
@@ -118,7 +118,7 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
         /* JADX WARNING: Removed duplicated region for block: B:66:0x01d2 A[LOOP:0: B:11:0x00bc->B:66:0x01d2, LOOP_END] */
         /* JADX WARNING: Removed duplicated region for block: B:75:0x00fc A[SYNTHETIC] */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        public Unit run() {
+        fun run() {
             /*
                 r10 = this
                 r9 = 2
@@ -332,7 +332,7 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
             throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.textures.TextureCompressedCache.TextureFetchRequest.run():Unit")
         }
 
-        public Unit start() {
+        fun start() {
             SLTextureFetchRequest sLTextureFetchRequest
             SLTextureFetcher sLTextureFetcher = this.fetcher
             if (sLTextureFetcher == null) {
@@ -354,7 +354,7 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
         return TextureFetchRequest(drawableTextureParams, resourceManager, TextureCache.getInstance().getTextureCompressedFile(drawableTextureParams), this.fetcher)
     }
 
-    public Unit RequestResource(DrawableTextureParams drawableTextureParams, ResourceConsumer resourceConsumer) {
+    fun RequestResource(DrawableTextureParams drawableTextureParams, ResourceConsumer resourceConsumer) {
         File textureCompressedFileOld = TextureCache.getInstance().getTextureCompressedFileOld(drawableTextureParams)
         File textureCompressedFile = TextureCache.getInstance().getTextureCompressedFile(drawableTextureParams)
         synchronized (this.lock) {
@@ -369,11 +369,11 @@ private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassS
         }
     }
 
-    public Unit setFetcher(SLTextureFetcher sLTextureFetcher) {
+    fun setFetcher(SLTextureFetcher sLTextureFetcher) {
         this.fetcher = sLTextureFetcher
     }
 
-    public Unit setMaxTextureDownloads(Int i) {
+    fun setMaxTextureDownloads(Int i) {
         if (i > 0) {
             this.downloadExecutor.setMaxConcurrentTasks(i)
             HTTPFetchExecutor.getInstance().setCorePoolSize(i)

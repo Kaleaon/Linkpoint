@@ -29,11 +29,11 @@ class TeleportFinish : SLMessage() {
         return this.Info_Field.SeedCapability.length + 36 + 1 + 4 + 4
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleTeleportFinish(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 69)
@@ -47,7 +47,7 @@ class TeleportFinish : SLMessage() {
         packInt(byteBuffer, this.Info_Field.TeleportFlags)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.LocationID = unpackInt(byteBuffer)
         this.Info_Field.SimIP = unpackIPAddress(byteBuffer)

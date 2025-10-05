@@ -60,7 +60,7 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
         return str
     }
 
-    public Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
         Object[] objArr = Object[1]
         objArr[0] = this.chatterID != null ? this.chatterID.toString() : "null"
         Debug.Printf("updateTitle: ChatterNameRetriever: retrieved for %s", objArr)
@@ -77,18 +77,18 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
     /* access modifiers changed from: protected */
     public abstract Unit onShowUser(ChatterID chatterID2)
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         setNewUser((ChatterID) getArguments().getParcelable(CHATTER_ID_KEY))
     }
 
-    public Unit onStop() {
+    fun onStop() {
         setNewUser((ChatterID) null)
         super.onStop()
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setNewUser(ChatterID chatterID2) {
+    fun setNewUser(ChatterID chatterID2) {
         UserManager userManager2 = null
         this.chatterID = chatterID2
         if (chatterID2 != null) {
@@ -106,7 +106,7 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
     }
 
     /* access modifiers changed from: protected */
-    public Unit setShowChatterTitle(Boolean z) {
+    fun setShowChatterTitle(Boolean z) {
         this.showChatterTitle = z
     }
 }

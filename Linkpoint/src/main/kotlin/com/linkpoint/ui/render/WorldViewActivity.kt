@@ -193,7 +193,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     public ValueAnimator buttonsFadeAnimator = null
     /* access modifiers changed from: private */
     val Runnable buttonsFadeTask = Runnable() {
-        public Unit run() {
+        fun run() {
             Boolean unused = WorldViewActivity.this.buttonsFadeTimerStarted = false
             if (!WorldViewActivity.this.detailsVisible() && (!WorldViewActivity.this.isDragging) && WorldViewActivity.this.agentCircuit.hasData()) {
                 VoiceChatInfo voiceChatInfo = (VoiceChatInfo) WorldViewActivity.this.voiceChatInfo.getData()
@@ -213,7 +213,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     /* access modifiers changed from: private */
     public Boolean buttonsFadeTimerStarted = false
     private val Runnable buttonsRestoreTask = Runnable() {
-        public Unit run() {
+        fun run() {
             if (Build.VERSION.SDK_INT >= 11) {
                 if (WorldViewActivity.this.buttonsFadeAnimator != null) {
                     WorldViewActivity.this.buttonsFadeAnimator.cancel()
@@ -231,7 +231,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
 
         @Subscribe
-        public Unit onChatMessage(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
+        fun onChatMessage(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
             WorldViewActivity.this.mHandler.post(Runnable(this, chatMessageEvent) {
 
                 /* renamed from: -$f0 */
@@ -404,7 +404,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             return true
         }
 
-        public Unit onLongPress(MotionEvent motionEvent) {
+        fun onLongPress(MotionEvent motionEvent) {
             Float rawX = motionEvent.getRawX()
             Float rawY = motionEvent.getRawY()
             if (WorldViewActivity.this.isDragging) {
@@ -550,7 +550,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     public Boolean objectDeselectTimerStarted = false
     /* access modifiers changed from: private */
     val Runnable objectDeselectTimerTask = Runnable() {
-        public Unit run() {
+        fun run() {
             Boolean unused = WorldViewActivity.this.objectDeselectTimerStarted = false
             if (!WorldViewActivity.this.detailsVisible() && (!WorldViewActivity.this.isDragging)) {
                 Long r0 = (WorldViewActivity.this.lastObjectActivityTime + WorldViewActivity.OBJECT_DESELECT_TIMEOUT_MILLIS) - SystemClock.uptimeMillis()
@@ -620,7 +620,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             return true
         }
 
-        public Unit onScaleEnd(ScaleGestureDetector scaleGestureDetector) {
+        fun onScaleEnd(ScaleGestureDetector scaleGestureDetector) {
             Boolean unused = WorldViewActivity.this.isInScaling = false
         }
     }
@@ -925,7 +925,7 @@ private class SelectableAttachment {
     }
 
     /* access modifiers changed from: private */
-    public Unit dragSelectorSetRawPosition(Int i, Int i2) {
+    fun dragSelectorSetRawPosition(Int i, Int i2) {
         Int[] iArr = Int[2]
         this.dragPointerLayout.getLocationOnScreen(iArr)
         Int width = i - (this.dragPointer.getWidth() / 2)
@@ -988,7 +988,7 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    public Unit m836com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref0(SLAgentCircuit sLAgentCircuit) {
+    fun m836com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref0(SLAgentCircuit sLAgentCircuit) {
         if (sLAgentCircuit != null) {
             this.avatarControl = sLAgentCircuit.getModules().avatarControl
             this.drawDistance = sLAgentCircuit.getModules().drawDistance
@@ -1011,7 +1011,7 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onCurrentLocation */
-    public Unit m839com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref3(CurrentLocationInfo currentLocationInfo2) {
+    fun m839com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref3(CurrentLocationInfo currentLocationInfo2) {
         ParcelData parcelData = currentLocationInfo2 != null ? currentLocationInfo2.parcelData() : null
         String name = parcelData != null ? parcelData.getName() : null
         if (name == null) {
@@ -1022,13 +1022,13 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onMyAvatarState */
-    public Unit m837com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref1(MyAvatarState myAvatarState2) {
+    fun m837com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref1(MyAvatarState myAvatarState2) {
         updateObjectPanel()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onPickedAvatarNameUpdated */
-    public Unit m842com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref6(ChatterNameRetriever chatterNameRetriever) {
+    fun m842com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref6(ChatterNameRetriever chatterNameRetriever) {
         if (chatterNameRetriever == this.pickedAvatarNameRetriever) {
             updateObjectPanel()
         }
@@ -1036,7 +1036,7 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onSelectedObjectProfile */
-    public Unit m838com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref2(SLObjectProfileData sLObjectProfileData) {
+    fun m838com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref2(SLObjectProfileData sLObjectProfileData) {
         Debug.Printf("got selected object profile: %s", sLObjectProfileData)
         updateObjectPanel()
         if (sLObjectProfileData != null) {
@@ -1049,7 +1049,7 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceActiveChatter */
-    public Unit m840com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref4(ChatterID chatterID) {
+    fun m840com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref4(ChatterID chatterID) {
         if (this.voiceStatusView != null) {
             this.voiceStatusView.setChatterID(chatterID)
         }
@@ -1062,11 +1062,11 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceChatInfo */
-    public Unit m841com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref5(VoiceChatInfo voiceChatInfo2) {
+    fun m841com_lumiyaviewer_lumiya_ui_render_WorldViewActivitymthref5(VoiceChatInfo voiceChatInfo2) {
     }
 
     /* access modifiers changed from: private */
-    public Unit selectByDragPointer(Int i, Int i2) {
+    fun selectByDragPointer(Int i, Int i2) {
         Int[] iArr = Int[2]
         this.dragPointerLayout.getLocationOnScreen(iArr)
         Int[] iArr2 = Int[2]
@@ -1212,7 +1212,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: private */
-    public Unit startFadingButtons() {
+    fun startFadingButtons() {
         if (Build.VERSION.SDK_INT >= 11 && this.buttonsFadeAnimator != null) {
             this.buttonsFadeAnimator.start()
         }
@@ -1760,19 +1760,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     @EventHandler
-    public Unit handleBakingProgressEvent(SLBakingProgressEvent sLBakingProgressEvent) {
+    fun handleBakingProgressEvent(SLBakingProgressEvent sLBakingProgressEvent) {
         if (sLBakingProgressEvent.first) {
             Toast.makeText(this, "Updating avatar appearance...", 0).show()
         }
     }
 
-    public Unit handleChatEvent(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
+    fun handleChatEvent(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
         if (this.chatOver3D && !detailsVisible() && this.userManager != null && this.chatsOverlayLayout != null && this.fadingTextViewLog != null) {
             this.fadingTextViewLog.handleChatEvent(chatMessageEvent)
         }
     }
 
-    public Unit handlePickedObject(ObjectIntersectInfo objectIntersectInfo) {
+    fun handlePickedObject(ObjectIntersectInfo objectIntersectInfo) {
         this.pickedIntersectInfo = objectIntersectInfo
         this.pickedObject = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
         if (this.pickedObject != null) {
@@ -1922,7 +1922,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         return i == 2131427372 ? R.style.Theme_Linkpoint_Light_NoActionBar : i == 2131427375 ? R.style.Theme_Linkpoint_Pink_NoActionBar : R.style.Theme_Linkpoint_NoActionBar
     }
 
-    public Unit moveTouchEvent(Int i, MotionEvent motionEvent) {
+    fun moveTouchEvent(Int i, MotionEvent motionEvent) {
         Float f = 1.0f
         Float f2 = -1.0f
         if (this.avatarControl == null) {
@@ -1961,7 +1961,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     @OnClick({2131755762})
-    public Unit onCamOffButton() {
+    fun onCamOffButton() {
         if (this.camButtonEnabled) {
             this.manualCamMode = false
             if (this.avatarControl != null) {
@@ -1972,7 +1972,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     @OnClick({2131755761})
-    public Unit onCamOnButton() {
+    fun onCamOnButton() {
         if (this.camButtonEnabled) {
             this.manualCamMode = true
             if (this.avatarControl != null) {
@@ -1982,13 +1982,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    public Unit onConfigurationChanged(Configuration configuration) {
+    fun onConfigurationChanged(Configuration configuration) {
         super.onConfigurationChanged(configuration)
         this.isSplitScreen = LinkpointApp.isSplitScreenNeeded(this)
         updateSplitScreenLayout()
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         this.userManager = ActivityUtils.getUserManager(getIntent())
         if (this.userManager == null) {
@@ -2118,12 +2118,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     @EventHandler
-    public Unit onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
+    fun onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
         updateSimTimeOverride()
     }
 
     @OnClick({2131755763})
-    public Unit onHUDButton() {
+    fun onHUDButton() {
         if (this.displayedHUDid != 0) {
             this.displayedHUDid = 0
             this.mGLView.setDisplayedHUDid(this.displayedHUDid)
@@ -2134,7 +2134,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: protected */
-    public Unit onNewIntent(Intent intent) {
+    fun onNewIntent(Intent intent) {
         super.onNewIntent(intent)
         Debug.Printf("NotifyCapture: got newIntent: %s", intent)
         this.mHandler.post(this.buttonsRestoreTask)
@@ -2151,21 +2151,21 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     @OnClick({2131755270})
-    public Unit onObjectChatButton() {
+    fun onObjectChatButton() {
         if (this.pickedObject != null) {
             chatWithObject(this.pickedObject)
         }
     }
 
     @OnClick({2131755754})
-    public Unit onObjectMoreButton() {
+    fun onObjectMoreButton() {
         if (this.pickedObject != null) {
             showObjectInfo(this.pickedObject)
         }
     }
 
     @OnClick({2131755554})
-    public Unit onObjectPayButton() {
+    fun onObjectPayButton() {
         SLObjectProfileData data
         if (this.pickedObject != null) {
             String name = this.pickedObject.getName()
@@ -2267,21 +2267,21 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     @OnClick({2131755269})
-    public Unit onObjectSitButton() {
+    fun onObjectSitButton() {
         if (this.pickedObject != null && this.avatarControl != null) {
             this.avatarControl.SitOnObject(this.pickedObject.getId())
         }
     }
 
     @OnClick({2131755264, 2131755538})
-    public Unit onObjectStandButton() {
+    fun onObjectStandButton() {
         if (this.avatarControl != null) {
             this.avatarControl.Stand()
         }
     }
 
     @OnClick({2131755268})
-    public Unit onObjectTouchButton() {
+    fun onObjectTouchButton() {
         if (this.pickedObject != null) {
             touchObject(this.pickedObject, this.pickedIntersectInfo)
         }
@@ -2316,7 +2316,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    public Unit onPause() {
+    fun onPause() {
         Debug.Printf("WorldViewActivity: onPause", Object[0])
         if (this.userManager != null) {
             this.userManager.getUnreadNotificationManager().clearNotifyCapture(this)
@@ -2352,14 +2352,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         return super.onPrepareOptionsMenu(menu)
     }
 
-    public Unit onRequestPermissionsResult(Int i, String[] strArr, Int[] iArr) {
+    fun onRequestPermissionsResult(Int i, String[] strArr, Int[] iArr) {
         Debug.Printf("Cardboard: onRequestPermissionResult, code %d", Integer.valueOf(i))
         if (i == 100) {
             startCardboardActivity()
         }
     }
 
-    public Unit onResume() {
+    fun onResume() {
         super.onResume()
         Debug.Printf("WorldViewActivity: onResume", Object[0])
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext())
@@ -2391,7 +2391,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         if (this.userManager != null) {
             this.agentCircuit.subscribe(UserManager.agentCircuits(), this.userManager.getUserID())
@@ -2401,7 +2401,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStop() {
+    fun onStop() {
         this.agentCircuit.unsubscribe()
         this.voiceActiveChatter.unsubscribe()
         this.voiceChatInfo.unsubscribe()
@@ -2410,7 +2410,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     @OnClick({2131755758})
-    public Unit onStopFlyingButton() {
+    fun onStopFlyingButton() {
         if (this.avatarControl != null) {
             this.avatarControl.stopFlying()
             updateObjectPanel()
@@ -2491,7 +2491,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         return false
     }
 
-    public Unit onUserInteraction() {
+    fun onUserInteraction() {
         super.onUserInteraction()
         Debug.Printf("ButtonsFade: some user interaction", Object[0])
         this.mHandler.post(this.buttonsRestoreTask)
@@ -2499,7 +2499,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         beginCountingObjectDeselect()
     }
 
-    public Unit processScreenshot(Bitmap bitmap) {
+    fun processScreenshot(Bitmap bitmap) {
         try {
             File file = File(getCacheDir(), "screenshots")
             file.mkdirs()
@@ -2524,7 +2524,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         }
     }
 
-    public Unit rendererAdvancedRenderingChanged() {
+    fun rendererAdvancedRenderingChanged() {
         Intent intent = getIntent()
         finish()
         startActivity(intent)
@@ -2532,7 +2532,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
 
     /* access modifiers changed from: package-private */
     @SuppressLint({"CommitPrefEdits"})
-    public Unit rendererShaderCompileError() {
+    fun rendererShaderCompileError() {
         Toast.makeText(this, "Advanced rendering is not available on your hardware. Falling back to basic rendering.", 1).show()
         SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit()
         edit.putBoolean("advanced_rendering", false)
@@ -2542,17 +2542,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     }
 
     /* access modifiers changed from: package-private */
-    public Unit rendererSurfaceCreated() {
+    fun rendererSurfaceCreated() {
         if (this.drawDistance != null) {
             this.drawDistance.Enable3DView(this.prefDrawDistance)
         }
     }
 
-    public Unit setLastTouchUUID(UUID uuid) {
+    fun setLastTouchUUID(UUID uuid) {
         this.lastTouchUUID = uuid
     }
 
-    public Unit setTouchedObject(SLObjectInfo sLObjectInfo) {
+    fun setTouchedObject(SLObjectInfo sLObjectInfo) {
         if (sLObjectInfo != null) {
             this.lastTouchUUID = sLObjectInfo.getId()
             if (this.lastTouchUUID != null) {

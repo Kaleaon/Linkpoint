@@ -29,15 +29,15 @@ class GroupRoleMemberList {
         return this.requestID
     }
 
-    public Unit setGroupID(UUID uuid) {
+    fun setGroupID(UUID uuid) {
         this.groupID = uuid
     }
 
-    public Unit setMustRevalidate(Boolean z) {
+    fun setMustRevalidate(Boolean z) {
         this.mustRevalidate = z
     }
 
-    public Unit setRequestID(UUID uuid) {
+    fun setRequestID(UUID uuid) {
         this.requestID = uuid
     }
 }

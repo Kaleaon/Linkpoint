@@ -212,7 +212,7 @@ class ModernChatManager {
     /**
      * Send typing indicator
      */
-    public Unit sendTypingIndicator(String sessionId, Boolean isTyping) {
+    fun sendTypingIndicator(String sessionId, Boolean isTyping) {
         executor.execute(() -> {
             try {
                 if (eventClient != null) {
@@ -227,7 +227,7 @@ class ModernChatManager {
     /**
      * Handle incoming chat message from protocol layer
      */
-    public Unit handleIncomingMessage(String messageType, String payload) {
+    fun handleIncomingMessage(String messageType, String payload) {
         executor.execute(() -> {
             try {
                 switch (messageType) {
@@ -268,7 +268,7 @@ class ModernChatManager {
     /**
      * Set chat event listener
      */
-    public Unit setChatEventListener(ChatEventListener listener) {
+    fun setChatEventListener(ChatEventListener listener) {
         this.chatListener = listener
     }
     
@@ -452,7 +452,7 @@ class ModernChatManager {
     /**
      * Cleanup resources
      */
-    public Unit cleanup() {
+    fun cleanup() {
         if (executor != null && !executor.isShutdown()) {
             executor.shutdown()
         }
@@ -523,7 +523,7 @@ class ModernChatManager {
             this.createdTime = System.currentTimeMillis()
         }
         
-        public Unit addMessage(ChatMessage message) {
+        fun addMessage(ChatMessage message) {
             messages.add(message)
             // Limit message history per session
             if (messages.size() > 500) {
@@ -535,7 +535,7 @@ class ModernChatManager {
         public String getSessionId() { return sessionId; }
         public Type getType() { return type; }
         public String getGroupName() { return groupName; }
-        public Unit setGroupName(String groupName) { this.groupName = groupName; }
+        fun setGroupName(String groupName) { this.groupName = groupName; }
         public List<ChatMessage> getMessages() { return ArrayList<>(messages); }
         public Long getCreatedTime() { return createdTime; }
     }

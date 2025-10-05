@@ -69,7 +69,7 @@ class CachedResponseDao : AbstractDao()<CachedResponse, String> {
         return CachedResponse(string, bArr, z)
     }
 
-    public Unit readEntity(Cursor cursor, CachedResponse cachedResponse, Int i) {
+    fun readEntity(Cursor cursor, CachedResponse cachedResponse, Int i) {
         Byte[] bArr = null
         cachedResponse.setKey(cursor.isNull(i + 0) ? null : cursor.getString(i + 0))
         if (!cursor.isNull(i + 1)) {

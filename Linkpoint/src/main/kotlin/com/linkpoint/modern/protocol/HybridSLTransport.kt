@@ -30,7 +30,7 @@ class HybridSLTransport {
     /**
      * Set authentication token for all transport layers
      */
-    public Unit setAuthToken(String token) {
+    fun setAuthToken(String token) {
         capsClient.setAuthToken(token)
         eventClient.setAuthToken(token)
         Log.d(TAG, "Auth token configured for all transports")
@@ -39,7 +39,7 @@ class HybridSLTransport {
     /**
      * Initialize connections based on authentication data
      */
-    public Unit initialize(String eventQueueUrl, String seedCapability) {
+    fun initialize(String eventQueueUrl, String seedCapability) {
         try {
             // Configure HTTP/2 CAPS client
             if (seedCapability != null) {
@@ -294,7 +294,7 @@ class HybridSLTransport {
     /**
      * Subscribe to real-time events
      */
-    public Unit subscribeToEvents(String eventType, WebSocketEventClient.EventListener listener) {
+    fun subscribeToEvents(String eventType, WebSocketEventClient.EventListener listener) {
         eventClient.subscribe(eventType, listener)
         Log.d(TAG, "Subscribed to event type: " + eventType)
     }
@@ -319,7 +319,7 @@ class HybridSLTransport {
     /**
      * Shutdown all transport layers
      */
-    public Unit shutdown() {
+    fun shutdown() {
         Log.i(TAG, "Shutting down hybrid transport")
         capsClient.shutdown()
         eventClient.shutdown()

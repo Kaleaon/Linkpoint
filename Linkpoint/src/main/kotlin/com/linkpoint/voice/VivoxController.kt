@@ -336,7 +336,7 @@ private VivoxController instance
         }
     }
 
-    public Unit AcceptCall(VoiceAcceptCall voiceAcceptCall) {
+    fun AcceptCall(VoiceAcceptCall voiceAcceptCall) {
         this.controllerHandler.post(Runnable(this, voiceAcceptCall){
             final VivoxController this$0
             final VoiceAcceptCall val$message
@@ -373,7 +373,7 @@ private VivoxController instance
             }
     }
 
-    public Unit ConnectChannel(VoiceChannelInfo voiceChannelInfo, String string2, Messenger messenger) {
+    fun ConnectChannel(VoiceChannelInfo voiceChannelInfo, String string2, Messenger messenger) {
         this.controllerHandler.post(Runnable(this, voiceChannelInfo, string2, messenger){
             final VivoxController this$0
             final String val$channelCredentials
@@ -430,7 +430,7 @@ private VivoxController instance
             }
     }
 
-    public Unit EnableVoiceMic(VoiceEnableMic voiceEnableMic) {
+    fun EnableVoiceMic(VoiceEnableMic voiceEnableMic) {
         this.controllerHandler.post(Runnable(this, voiceEnableMic){
             final VivoxController this$0
             final VoiceEnableMic val$message
@@ -459,7 +459,7 @@ private VivoxController instance
             }
     }
 
-    public Unit Login(VoiceLoginInfo voiceLoginInfo, Messenger messenger) {
+    fun Login(VoiceLoginInfo voiceLoginInfo, Messenger messenger) {
         this.controllerHandler.post(Runnable(this, voiceLoginInfo, messenger){
             final VivoxController this$0
             final Messenger val$replyTo
@@ -522,7 +522,7 @@ private VivoxController instance
             }
     }
 
-    public Unit Logout(Messenger messenger) {
+    fun Logout(Messenger messenger) {
         this.controllerHandler.post(Runnable(this, messenger){
             final VivoxController this$0
             final Messenger val$replyTo
@@ -548,7 +548,7 @@ private VivoxController instance
             }
     }
 
-    public Unit RejectCall(VoiceRejectCall voiceRejectCall) {
+    fun RejectCall(VoiceRejectCall voiceRejectCall) {
         this.controllerHandler.post(Runnable(this, voiceRejectCall){
             final VivoxController this$0
             final VoiceRejectCall val$message
@@ -573,7 +573,7 @@ private VivoxController instance
             }
     }
 
-    public Unit Set3DPosition(VoiceSet3DPosition voiceSet3DPosition) {
+    fun Set3DPosition(VoiceSet3DPosition voiceSet3DPosition) {
         this.controllerHandler.post(Runnable(this, voiceSet3DPosition){
             final VivoxController this$0
             final VoiceSet3DPosition val$message
@@ -591,7 +591,7 @@ private VivoxController instance
             }
     }
 
-    public Unit SetAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
+    fun SetAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
         this.controllerHandler.post(Runnable(this, voiceSetAudioProperties){
             final VivoxController this$0
             final VoiceSetAudioProperties val$message
@@ -648,7 +648,7 @@ private VivoxController instance
             }
     }
 
-    public Unit TerminateCall(VoiceTerminateCall voiceTerminateCall) {
+    fun TerminateCall(VoiceTerminateCall voiceTerminateCall) {
         this.controllerHandler.post(Runnable(this, voiceTerminateCall){
             final VivoxController this$0
             final VoiceTerminateCall val$message

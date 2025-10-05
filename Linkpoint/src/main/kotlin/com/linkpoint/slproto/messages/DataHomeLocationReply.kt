@@ -24,11 +24,11 @@ class DataHomeLocationReply : SLMessage() {
         return 52
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleDataHomeLocationReply(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 68)
@@ -38,7 +38,7 @@ class DataHomeLocationReply : SLMessage() {
         packLLVector3(byteBuffer, this.Info_Field.LookAt)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.Info_Field.AgentID = unpackUUID(byteBuffer)
         this.Info_Field.RegionHandle = unpackLong(byteBuffer)
         this.Info_Field.Position = unpackLLVector3(byteBuffer)

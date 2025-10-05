@@ -109,7 +109,7 @@ class SLURL : Parcelable {
         return "uri:" + TextUtils.htmlEncode(this.locationName) + "&amp;" + Integer.toString(this.locationX) + "&amp;" + Integer.toString(this.locationY) + "&amp;" + Integer.toString(this.locationZ)
     }
 
-    public Unit writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(Parcel parcel, Int i) {
         parcel.writeString(this.locationName)
         parcel.writeInt(this.locationX)
         parcel.writeInt(this.locationY)

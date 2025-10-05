@@ -223,7 +223,7 @@ class ModernConnectionManager {
         return activeConnections.get()
     }
 
-    public Unit shutdown() {
+    fun shutdown() {
         Log.i(TAG, "Shutting down connection manager")
         executor.shutdown()
         try {

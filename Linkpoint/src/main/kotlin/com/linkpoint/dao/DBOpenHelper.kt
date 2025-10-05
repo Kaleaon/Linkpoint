@@ -37,13 +37,13 @@ class DBOpenHelper : DevOpenHelper() {
         }
     }
 
-    public Unit onDowngrade(SQLiteDatabase sQLiteDatabase, Int oldVersion, Int newVersion) {
+    fun onDowngrade(SQLiteDatabase sQLiteDatabase, Int oldVersion, Int newVersion) {
         Debug.Printf("Database downgrade requested from %d to %d", oldVersion, newVersion)
         // Call onUpgrade which will recreate the database if needed
         super.onUpgrade(sQLiteDatabase, oldVersion, newVersion)
     }
 
-    public Unit onUpgrade(SQLiteDatabase sQLiteDatabase, Int oldVersion, Int newVersion) {
+    fun onUpgrade(SQLiteDatabase sQLiteDatabase, Int oldVersion, Int newVersion) {
         Debug.Printf("Database upgrade requested from %d to %d", oldVersion, newVersion)
         
         Boolean upgradeSuccessful = false

@@ -106,7 +106,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
 
     }
     private val Subscription.OnData<SLTaskInventory> onTaskInventoryReceived = Subscription.OnData<SLTaskInventory>() {
-        public Unit onData(SLTaskInventory sLTaskInventory) {
+        fun onData(SLTaskInventory sLTaskInventory) {
             SLTaskInventory unused = TaskInventoryFragment.this.taskInventory = sLTaskInventory
             View view = TaskInventoryFragment.this.getView()
             if (view != null) {
@@ -604,12 +604,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         }
     }
 
-    public Unit onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.task_inventory_menu, menu)
     }
@@ -700,7 +700,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         setTitle(getString(R.string.object_contents_title), (String) null)
         UserManager userManager = getUserManager()
@@ -711,7 +711,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
         }
     }
 
-    public Unit onStop() {
+    fun onStop() {
         if (this.taskInventorySubscription != null) {
             this.taskInventorySubscription.unsubscribe()
             this.taskInventorySubscription = null

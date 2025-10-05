@@ -49,7 +49,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
 
     /* access modifiers changed from: protected */
     @OnClick({2131755706})
-    public Unit onAboutEditClicked(View view) {
+    fun onAboutEditClicked(View view) {
         if (this.chatterID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserAboutTextEditFragment.class, UserAboutTextEditFragment.makeSelection(this.chatterID, true))
         }
@@ -57,7 +57,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
 
     /* access modifiers changed from: protected */
     @OnClick({2131755698})
-    public Unit onChangePicClicked(View view) {
+    fun onChangePicClicked(View view) {
         AvatarPropertiesReply data = this.avatarProperties.getData()
         if (this.chatterID != null && data != null) {
             Bundle bundle = Bundle()
@@ -75,7 +75,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
         return inflate
     }
 
-    public Unit onDestroyView() {
+    fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -83,7 +83,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
         super.onDestroyView()
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         Boolean z = true
         if (getView() != null) {
             try {
@@ -102,7 +102,7 @@ class UserFirstLifeProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnL
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         Int i = 0
         this.loadableMonitor.unsubscribeAll()
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDUser)) {

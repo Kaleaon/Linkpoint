@@ -8,7 +8,7 @@ import java.util.HashSet
 import java.util.UUID
 
 class RLVCmdClear : RLVCommand {
-    public Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
         HashSet hashSet = HashSet()
         for (RLVRestrictionType rLVRestrictionType : RLVRestrictionType.values()) {
             if (str == "") {

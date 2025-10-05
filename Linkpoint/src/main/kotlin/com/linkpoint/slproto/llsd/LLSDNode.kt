@@ -409,7 +409,7 @@ private /* synthetic */ Int[] m195getcomlumiyaviewerlumiyaslprotohttpsLLSDConten
         return stringWriter.toString()
     }
 
-    public Unit serializeToXML(OutputStream outputStream, String str) throws IOException {
+    fun serializeToXML(OutputStream outputStream, String str) throws IOException {
         XmlSerializer newSerializer = Xml.newSerializer()
         newSerializer.setOutput(outputStream, str)
         newSerializer.startTag("", "llsd")

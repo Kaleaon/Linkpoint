@@ -25,7 +25,7 @@ class ObjectPopupsAdapter : RecyclerSubscribableListAdapter()<SLChatEvent> {
     }
 
     /* access modifiers changed from: protected */
-    public Unit bindObjectViewHolder(RecyclerView.ViewHolder viewHolder, SLChatEvent sLChatEvent) {
+    fun bindObjectViewHolder(RecyclerView.ViewHolder viewHolder, SLChatEvent sLChatEvent) {
         if (viewHolder instanceof ChatEventViewHolder) {
             sLChatEvent.bindViewHolder((ChatEventViewHolder) viewHolder, this.userManager, (ChatEventTimestampUpdater) null)
         }

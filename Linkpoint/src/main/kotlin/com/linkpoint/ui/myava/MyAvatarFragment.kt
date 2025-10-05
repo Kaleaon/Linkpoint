@@ -150,7 +150,7 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
 
     /* access modifiers changed from: private */
     /* renamed from: onMyBalance */
-    public Unit m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0(Integer num) {
+    fun m654com_lumiyaviewer_lumiya_ui_myava_MyAvatarFragmentmthref0(Integer num) {
         if (this.unbinder != null) {
             ListAdapter adapter = this.myAvatarOptionsList.getAdapter()
             if (adapter instanceof MyAvatarPagesAdapter) {
@@ -159,7 +159,7 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
         }
     }
 
-    public Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
         String resolvedName = chatterNameRetriever.getResolvedName()
         if (this.unbinder != null) {
             this.myAvatarName.setText(resolvedName != null ? resolvedName : getString(R.string.name_loading_title))
@@ -177,7 +177,7 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
         return inflate
     }
 
-    public Unit onDestroyView() {
+    fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -185,7 +185,7 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
         super.onDestroyView()
     }
 
-    public Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
         UUID agentUUID = getAgentUUID()
         Object itemAtPosition = adapterView.getItemAtPosition(i)
         if ((itemAtPosition instanceof MyAvatarDetailsPages) && agentUUID != null) {
@@ -208,7 +208,7 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         UUID agentUUID = getAgentUUID()
         UserManager userManager = UserManager.getUserManager(agentUUID)
@@ -220,7 +220,7 @@ private /* synthetic */ Int[] m653getcomlumiyaviewerlumiyauimyavaMyAvatarDetails
         }
     }
 
-    public Unit onStop() {
+    fun onStop() {
         if (this.myAvatarNameRetriever != null) {
             this.myAvatarNameRetriever.dispose()
             this.myAvatarNameRetriever = null

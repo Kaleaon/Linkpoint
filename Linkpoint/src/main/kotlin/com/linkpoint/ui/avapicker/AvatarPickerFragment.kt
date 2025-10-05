@@ -38,7 +38,7 @@ abstract class AvatarPickerFragment : FragmentWithTitle() : AdapterView.OnItemCl
             this.context = context2
         }
 
-        public Unit destroyItem(ViewGroup viewGroup, Int i, Object obj) {
+        fun destroyItem(ViewGroup viewGroup, Int i, Object obj) {
             if (obj instanceof View) {
                 if (obj instanceof ListView) {
                     ((ListView) obj).setAdapter((ListAdapter) null)
@@ -139,7 +139,7 @@ private /* synthetic */ Int[] m388getcomlumiyaviewerlumiyauiavapickerAvatarPicke
     }
 
     /* access modifiers changed from: protected */
-    public Unit createExtraView(LayoutInflater layoutInflater, FrameLayout frameLayout) {
+    fun createExtraView(LayoutInflater layoutInflater, FrameLayout frameLayout) {
     }
 
     public abstract String getTitle()
@@ -156,7 +156,7 @@ private /* synthetic */ Int[] m388getcomlumiyaviewerlumiyauiavapickerAvatarPicke
         return inflate
     }
 
-    public Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
         ChatterID chatterID
         Object itemAtPosition = adapterView.getItemAtPosition(i)
         if ((itemAtPosition instanceof ChatterDisplayInfo) && (chatterID = ((ChatterDisplayInfo) itemAtPosition).getChatterID(ActivityUtils.getUserManager(getArguments()))) != null) {

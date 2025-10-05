@@ -56,7 +56,7 @@ abstract class ChatterDisplayDataList {
         Debug.Printf("FriendList: refreshList: %d subscriptions", Integer.valueOf(this.chatterSubscriptions.size()))
     }
 
-    public Unit dispose() {
+    fun dispose() {
         for (ChatterSubscription unsubscribe : this.chatterSubscriptions.values()) {
             unsubscribe.unsubscribe()
         }
@@ -77,7 +77,7 @@ abstract class ChatterDisplayDataList {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit requestRefresh(Executor executor) {
+    fun requestRefresh(Executor executor) {
         Debug.Printf("FriendList: requestRefresh: needsRefresh = %s", Boolean.toString(this.needsRefresh.get()))
         if (this.needsRefresh.getAndSet(true)) {
             return

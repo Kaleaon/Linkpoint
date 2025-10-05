@@ -30,7 +30,7 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
     public SLTaskInventories(SLAgentCircuit sLAgentCircuit) {
         super(sLAgentCircuit)
         this.requestHandler = AsyncRequestHandler(sLAgentCircuit, SimpleRequestHandler<Integer>() {
-            public Unit onRequest(Integer num) {
+            fun onRequest(Integer num) {
                 SLTaskInventories.this.RequestTaskInventory(num.intValue())
             }
         this.userManager = UserManager.getUserManager(sLAgentCircuit.getAgentUUID())
@@ -42,7 +42,7 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
     }
 
     /* access modifiers changed from: private */
-    public Unit RequestTaskInventory(Int i) {
+    fun RequestTaskInventory(Int i) {
         Debug.Printf("taskID = %d", Integer.valueOf(i))
         RequestTaskInventory requestTaskInventory = RequestTaskInventory()
         requestTaskInventory.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -79,7 +79,7 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
         }
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         if (this.userManager != null) {
             this.userManager.getObjectsManager().getTaskInventoryRequestSource().detachRequestHandler(this.requestHandler)
         }
@@ -87,7 +87,7 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
     }
 
     @SLMessageHandler
-    public Unit HandleReplyTaskInventory(ReplyTaskInventory replyTaskInventory) {
+    fun HandleReplyTaskInventory(ReplyTaskInventory replyTaskInventory) {
         String stringFromVariableOEM = SLMessage.stringFromVariableOEM(replyTaskInventory.InventoryData_Field.Filename)
         Debug.Printf("taskID = %s, serial = %d, filename = '%s'", replyTaskInventory.InventoryData_Field.TaskID.toString(), Integer.valueOf(replyTaskInventory.InventoryData_Field.Serial), stringFromVariableOEM)
         if (!stringFromVariableOEM.equals("")) {
@@ -97,7 +97,7 @@ class SLTaskInventories : SLModule(), SLXfer.SLXferCompletionListener {
         }
     }
 
-    public Unit onXferComplete(Object obj, String str, Byte[] bArr) {
+    fun onXferComplete(Object obj, String str, Byte[] bArr) {
         if (obj instanceof UUID) {
             UUID uuid = (UUID) obj
             Debug.Printf("onXferComplete with file = '%s', data length = %d", str, Integer.valueOf(bArr.length))

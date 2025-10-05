@@ -71,25 +71,25 @@ class AccountList {
             return this.PasswordHash
         }
 
-        public Unit saveToPreferences(SharedPreferences.Editor editor, String str) {
+        fun saveToPreferences(SharedPreferences.Editor editor, String str) {
             editor.putString(str + "_login_name", this.LoginName)
             editor.putString(str + "_pwd_hash", this.PasswordHash)
             editor.putString(str + "_grid", this.GridUUID.toString())
         }
 
-        public Unit setGridUUID(UUID uuid) {
+        fun setGridUUID(UUID uuid) {
             this.GridUUID = uuid
         }
 
-        public Unit setLoginName(String str) {
+        fun setLoginName(String str) {
             this.LoginName = str
         }
 
-        public Unit setPasswordHash(String str) {
+        fun setPasswordHash(String str) {
             this.PasswordHash = str
         }
 
-        public Unit writeToParcel(Parcel parcel, Int i) {
+        fun writeToParcel(Parcel parcel, Int i) {
             parcel.writeString(this.LoginName)
             parcel.writeString(this.PasswordHash)
             if (this.GridUUID != null) {
@@ -105,11 +105,11 @@ class AccountList {
         loadAccounts()
     }
 
-    public Unit addNewAccount(AccountInfo accountInfo) {
+    fun addNewAccount(AccountInfo accountInfo) {
         this.accounts.add(accountInfo)
     }
 
-    public Unit deleteAccount(AccountInfo accountInfo) {
+    fun deleteAccount(AccountInfo accountInfo) {
         this.accounts.remove(accountInfo)
     }
 
@@ -146,7 +146,7 @@ class AccountList {
         return list
     }
 
-    public Unit loadAccounts() {
+    fun loadAccounts() {
         this.accounts.clear()
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext())
         Int i = defaultSharedPreferences.getInt("accounts_count", 0)
@@ -155,7 +155,7 @@ class AccountList {
         }
     }
 
-    public Unit savePreferences() {
+    fun savePreferences() {
         SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext()).edit()
         edit.putInt("accounts_count", this.accounts.size())
         Int i = 0

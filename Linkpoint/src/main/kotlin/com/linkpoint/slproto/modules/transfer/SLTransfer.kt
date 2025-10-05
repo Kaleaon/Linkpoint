@@ -110,7 +110,7 @@ class SLTransfer {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit HandleTransferInfo(SLTransferManager sLTransferManager, TransferInfo transferInfo) {
+    fun HandleTransferInfo(SLTransferManager sLTransferManager, TransferInfo transferInfo) {
         this.statusKnown = true
         this.status = transferInfo.TransferInfoData_Field.Status
         this.size = transferInfo.TransferInfoData_Field.Size
@@ -121,7 +121,7 @@ class SLTransfer {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit HandleTransferPacket(SLTransferManager sLTransferManager, TransferPacket transferPacket) {
+    fun HandleTransferPacket(SLTransferManager sLTransferManager, TransferPacket transferPacket) {
         this.queuedPackets.put(Integer.valueOf(transferPacket.TransferData_Field.Packet), transferPacket)
         RunQueuedPackets(sLTransferManager)
     }

@@ -67,7 +67,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     val SubscriptionPool<Boolean, UnreadNotifications> unreadNotificationInfoPool = SubscriptionPool<>()
     /* access modifiers changed from: private */
     val Runnable updateChatterDataRunnable = Runnable() {
-        public Unit run() {
+        fun run() {
             UnreadNotificationManager.this.updateUnreadChatterData()
             UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateNotificationDataRunnable)
         }
@@ -76,7 +76,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     val Executor updateExecutor
     /* access modifiers changed from: private */
     val Runnable updateNotificationDataRunnable = Runnable() {
-        public Unit run() {
+        fun run() {
             UnreadNotificationManager.this.unreadNotificationInfoPool.onResultData(UnreadNotificationManager.unreadNotificationKey, UnreadNotificationManager.this.getUnreadNotification())
         }
     }
@@ -93,7 +93,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         this.updateExecutor = userManager2.getDatabaseRunOnceExecutor()
         this.emptyNotification = UnreadNotificationInfo.create(userManager2.getUserID(), 0, (List<UnreadNotificationInfo.UnreadMessageSource>) null, (NotificationType) null, 0, (NotificationType) null, (UnreadNotificationInfo.UnreadMessageSource) null, UnreadNotificationInfo.ObjectPopupNotification.create(0, 0, (UnreadNotificationInfo.ObjectPopupMessage) null))
         this.unreadNotificationInfoPool.attachRequestHandler(SimpleRequestHandler<Boolean>() {
-            public Unit onRequest(Boolean bool) {
+            fun onRequest(Boolean bool) {
                 UnreadNotificationManager.this.updateExecutor.execute(UnreadNotificationManager.this.updateChatterDataRunnable)
             }
         updateTypesFromPreferences(LinkpointApp.getDefaultSharedPreferences())
@@ -265,7 +265,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     }
 
     /* access modifiers changed from: private */
-    public Unit updateUnreadChatterData() {
+    fun updateUnreadChatterData() {
         Int i = this.maskEnabled.get()
         if (i == 0) {
             this.totalUnreadCount.set(0)
@@ -334,7 +334,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    public Unit addFreshMessage(Chatter chatter) {
+    fun addFreshMessage(Chatter chatter) {
         ChatterID.ChatterType chatterType
         Boolean z = true
         Long id = chatter.getId()
@@ -370,7 +370,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         return null
     }
 
-    public Unit clearFreshMessages(Chatter chatter) {
+    fun clearFreshMessages(Chatter chatter) {
         Long id = chatter.getId()
         if (id != null) {
             synchronized (this.freshMessageCountsLock) {
@@ -379,7 +379,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         }
     }
 
-    public Unit clearNotifyCapture(NotifyCapture notifyCapture2) {
+    fun clearNotifyCapture(NotifyCapture notifyCapture2) {
         synchronized (this.notifyCaptureLock) {
             if (this.notifyCapture != null && this.notifyCapture.get() == notifyCapture2) {
                 this.notifyCapture = null
@@ -392,18 +392,18 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
         return this.unreadNotificationInfoPool
     }
 
-    public Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
         this.updateExecutor.execute(this.updateNotificationDataRunnable)
     }
 
     @EventHandler
-    public Unit onGlobalPreferencesChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
+    fun onGlobalPreferencesChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
         if (globalOptionsChangedEvent.preferences != null) {
             updateTypesFromPreferences(globalOptionsChangedEvent.preferences)
         }
     }
 
-    public Unit setNotifyCapture(NotifyCapture notifyCapture2) {
+    fun setNotifyCapture(NotifyCapture notifyCapture2) {
         synchronized (this.notifyCaptureLock) {
             this.notifyCapture = WeakReference<>(notifyCapture2)
             updateUnreadNotifications()
@@ -411,7 +411,7 @@ class UnreadNotificationManager : ChatterNameRetriever.OnChatterNameUpdated {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit updateUnreadNotifications() {
+    fun updateUnreadNotifications() {
         this.unreadNotificationInfoPool.requestUpdate(unreadNotificationKey)
     }
 }

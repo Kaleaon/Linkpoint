@@ -98,7 +98,7 @@ private String repairCapabilityURL(Boolean z, String str) {
         }
     }
 
-    public Unit GetCapabilites(String str, String str2) {
+    fun GetCapabilites(String str, String str2) {
         Int i = 0
         while (i < 1) {
             try {

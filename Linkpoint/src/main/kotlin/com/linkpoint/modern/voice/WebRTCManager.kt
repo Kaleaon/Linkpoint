@@ -187,7 +187,7 @@ class WebRTCManager {
     /**
      * Add ICE candidate (mock implementation)
      */
-    public Unit addIceCandidate(MockIceCandidate candidate) {
+    fun addIceCandidate(MockIceCandidate candidate) {
         executor.execute(() -> {
             if (peerConnection != null) {
                 Log.d(TAG, "Mock ICE candidate added: " + candidate.sdp)
@@ -197,7 +197,7 @@ class WebRTCManager {
     /**
      * Set voice connection listener
      */
-    public Unit setConnectionListener(VoiceConnectionListener listener) {
+    fun setConnectionListener(VoiceConnectionListener listener) {
         this.connectionListener = listener
     }
     
@@ -219,7 +219,7 @@ class WebRTCManager {
     /**
      * Cleanup resources
      */
-    public Unit cleanup() {
+    fun cleanup() {
         executor.execute(() -> {
             try {
                 if (peerConnection != null) {

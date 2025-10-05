@@ -38,11 +38,11 @@ class StartLure : SLMessage() {
         return this.Info_Field.Message.length + 2 + 36 + 1 + (this.TargetData_Fields.size() * 16)
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleStartLure(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 70)
@@ -56,7 +56,7 @@ class StartLure : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.Info_Field.LureType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE

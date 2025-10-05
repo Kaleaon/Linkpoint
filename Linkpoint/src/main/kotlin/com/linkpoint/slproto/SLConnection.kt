@@ -29,7 +29,7 @@ class SLConnection : Runnable {
         this.timer = null
     }
 
-    public Unit AddCircuit(SLCircuit sLCircuit) {
+    fun AddCircuit(SLCircuit sLCircuit) {
         synchronized (this) {
             if (this.workingThread == null) {
                 this.workingThread = Thread(this, "SLConnection")
@@ -53,7 +53,7 @@ class SLConnection : Runnable {
         return timer
     }
 
-    public Unit run() {
+    fun run() {
         Debug.Log("working thread started")
         while (!this.selector.keys().isEmpty()) {
             SLCircuit sLCircuit

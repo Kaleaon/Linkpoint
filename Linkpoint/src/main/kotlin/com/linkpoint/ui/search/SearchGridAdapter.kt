@@ -55,7 +55,7 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
 
         /* access modifiers changed from: package-private */
         @SuppressLint({"DefaultLocale", "SetTextI18n"})
-        public Unit bindToData(SearchGridResult searchGridResult2) {
+        fun bindToData(SearchGridResult searchGridResult2) {
             this.searchGridResult = searchGridResult2
             this.resultItemName.setText(searchGridResult2.getItemName())
             if (searchGridResult2.getItemType() == SearchGridQuery.SearchType.Groups.ordinal()) {
@@ -83,21 +83,21 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
             }
         }
 
-        public Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
+        fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
             String resolvedName
             if (chatterNameRetriever2 == this.chatterNameRetriever && (resolvedName = chatterNameRetriever2.getResolvedName()) != null) {
                 this.resultItemName.setText(resolvedName)
             }
         }
 
-        public Unit onClick(View view) {
+        fun onClick(View view) {
             if (SearchGridAdapter.this.onSearchResultClickListener != null && this.searchGridResult != null) {
                 SearchGridAdapter.this.onSearchResultClickListener.onSearchResultClicked(this.searchGridResult)
             }
         }
 
         /* access modifiers changed from: package-private */
-        public Unit onRecycled() {
+        fun onRecycled() {
             this.userPicView.setChatterID((ChatterID) null, (String) null)
             if (this.chatterNameRetriever != null) {
                 this.chatterNameRetriever.dispose()
@@ -119,7 +119,7 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
         }
 
         @CallSuper
-        public Unit unbind() {
+        fun unbind() {
             SearchViewHolder searchViewHolder = this.target
             if (searchViewHolder == null) {
                 throw IllegalStateException("Bindings already cleared.")
@@ -153,7 +153,7 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
         return this.data.get(i).getId().longValue()
     }
 
-    public Unit onBindViewHolder(SearchViewHolder searchViewHolder, Int i) {
+    fun onBindViewHolder(SearchViewHolder searchViewHolder, Int i) {
         if (this.data != null && i >= 0 && i < this.data.size()) {
             searchViewHolder.bindToData(this.data.get(i))
         }
@@ -163,11 +163,11 @@ class SearchGridAdapter : RecyclerView().Adapter<SearchViewHolder> {
         return SearchViewHolder(this.inflater.inflate(R.layout.search_result_item, viewGroup, false))
     }
 
-    public Unit onViewRecycled(SearchViewHolder searchViewHolder) {
+    fun onViewRecycled(SearchViewHolder searchViewHolder) {
         searchViewHolder.onRecycled()
     }
 
-    public Unit setData(LazyList<SearchGridResult> lazyList) {
+    fun setData(LazyList<SearchGridResult> lazyList) {
         this.data = lazyList
         notifyDataSetChanged()
     }

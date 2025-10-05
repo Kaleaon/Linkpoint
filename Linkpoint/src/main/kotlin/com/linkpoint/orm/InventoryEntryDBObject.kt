@@ -120,7 +120,7 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
         return dBHandle.getDB().queryWithFactory(dBHandle, false, tableName, fieldNames, str, strArr, (String) null, (String) null, str2, (String) null)
     }
 
-    public Unit bindInsertOrUpdate(SQLiteStatement sQLiteStatement) {
+    fun bindInsertOrUpdate(SQLiteStatement sQLiteStatement) {
         Int i = 1
         sQLiteStatement.bindLong(1, this.parent_id)
         if (this.uuid != null) {
@@ -320,7 +320,7 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
         return tableName
     }
 
-    public Unit loadFromCursor(Cursor cursor) {
+    fun loadFromCursor(Cursor cursor) {
         Boolean z = true
         this._id = cursor.getLong(0)
         this.parent_id = cursor.getLong(1)
@@ -357,7 +357,7 @@ class InventoryEntryDBObject : DBObject(), Parcelable {
         this.salePrice = wrap.getInt()
     }
 
-    public Unit writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(Parcel parcel, Int i) {
         Int i2 = 1
         parcel.writeLong(this._id)
         parcel.writeLong(this.parent_id)

@@ -112,12 +112,12 @@ private /* synthetic */ Int[] m851getcomlumiyaviewerlumiyaslprotomodulessearchSe
         return inflate
     }
 
-    public Unit onDestroyView() {
+    fun onDestroyView() {
         this.unbinder.unbind()
         super.onDestroyView()
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         if (this.adapter != null) {
             LazyList data = this.searchResults.getData()
             this.adapter.setData(data)
@@ -126,11 +126,11 @@ private /* synthetic */ Int[] m851getcomlumiyaviewerlumiyaslprotomodulessearchSe
     }
 
     @OnClick({2131755640})
-    public Unit onSearchButtonClicked() {
+    fun onSearchButtonClicked() {
         beginSearch()
     }
 
-    public Unit onSearchResultClicked(SearchGridResult searchGridResult) {
+    fun onSearchResultClicked(SearchGridResult searchGridResult) {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
         if (searchGridResult != null && activeAgentID != null) {
             switch (m851getcomlumiyaviewerlumiyaslprotomodulessearchSearchGridQuery$SearchTypeSwitchesValues()[SearchGridQuery.SearchType.values()[searchGridResult.getItemType()].ordinal()]) {

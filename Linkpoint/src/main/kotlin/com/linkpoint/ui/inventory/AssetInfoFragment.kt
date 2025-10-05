@@ -497,7 +497,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         dialog.dismiss()
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         SLInventoryEntry data = this.entrySubscription.getData()
         if (data != null) {
             switch (view.getId()) {
@@ -544,12 +544,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         menuInflater.inflate(R.menu.inventory_item_menu, menu)
         this.menuItemDelete = menu.findItem(R.id.inventory_item_delete_item)
         this.menuItemRename = menu.findItem(R.id.inventory_item_rename_item)
@@ -580,7 +580,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         return inflate
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         try {
             showEntryInfo(this.entrySubscription.get())
@@ -707,22 +707,22 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         return super.onOptionsItemSelected(menuItem)
     }
 
-    public Unit onPrepareOptionsMenu(Menu menu) {
+    fun onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu)
         updateMenuItems()
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         showEntry(UUIDPool.getUUID(getArguments().getString(ITEM_UUID_KEY)))
     }
 
-    public Unit onStop() {
+    fun onStop() {
         showEntry((UUID) null)
         super.onStop()
     }
 
-    public Unit setFragmentArgs(Intent intent, Bundle bundle) {
+    fun setFragmentArgs(Intent intent, Bundle bundle) {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(intent)
         if (activeAgentID != null) {
             getArguments().putString("activeAgentUUID", activeAgentID.toString())

@@ -41,7 +41,7 @@ class SpatialObjectIndex {
     private val Map<Integer, TerrainData> terrainDirty = HashMap()
     private val Object terrainLock = Object()
     private val Runnable terrainUpdate = Runnable() {
-        public Unit run() {
+        fun run() {
             Boolean z = false
             while (SpatialObjectIndex.this.initialUpdateCompleted && (SpatialObjectIndex.this.indexDisabled ^ 1) != 0) {
                 TerrainData terrainData
@@ -110,7 +110,7 @@ class SpatialObjectIndex {
             this()
         }
 
-        public Unit run() {
+        fun run() {
             if (SpatialObjectIndex.this.initialUpdateCompleted && (SpatialObjectIndex.this.indexDisabled ^ 1) != 0) {
                 if (!SpatialObjectIndex.this.frustrumChanged.getAndSet(false) ? SpatialObjectIndex.this.spatialTree.isTreeWalkNeeded() : true) {
                     FrustrumPlanes -get4 = SpatialObjectIndex.this.frustrumPlanes
@@ -134,7 +134,7 @@ class SpatialObjectIndex {
             this()
         }
 
-        public Unit run() {
+        fun run() {
             if (SpatialObjectIndex.this.initialUpdateCompleted && (SpatialObjectIndex.this.indexDisabled ^ 1) != 0) {
                 DrawListObjectEntry[] drawListObjectEntryArr
                 synchronized (SpatialObjectIndex.this.objectUpdateRemoveLock) {
@@ -193,7 +193,7 @@ class SpatialObjectIndex {
         }
     }
 
-    public Unit completeInitialUpdate() {
+    fun completeInitialUpdate() {
         this.initialUpdateCompleted = true
         if (!this.indexDisabled) {
             PrimComputeExecutor.getInstance().execute(this.objectsUpdateTask)
@@ -220,11 +220,11 @@ class SpatialObjectIndex {
         }
     }
 
-    public Unit setAvatarCountLimit(Int i) {
+    fun setAvatarCountLimit(Int i) {
         this.avatarCountLimit = i
     }
 
-    public Unit setViewport(FrustrumInfo frustrumInfo, FrustrumPlanes frustrumPlanes) {
+    fun setViewport(FrustrumInfo frustrumInfo, FrustrumPlanes frustrumPlanes) {
         Object obj = 1
         synchronized (this.lock) {
             if (this.frustrumInfo == null) {
@@ -252,7 +252,7 @@ class SpatialObjectIndex {
         return true
     }
 
-    public Unit updateObject(DrawListObjectEntry drawListObjectEntry) {
+    fun updateObject(DrawListObjectEntry drawListObjectEntry) {
         Boolean add
         synchronized (this.objectUpdateRemoveLock) {
             add = !drawListObjectEntry.getObjectInfo().isDead ? this.objectsToUpdate.add(drawListObjectEntry) : this.objectsToRemove.add(drawListObjectEntry)

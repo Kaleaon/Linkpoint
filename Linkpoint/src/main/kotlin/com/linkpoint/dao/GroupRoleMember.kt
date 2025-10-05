@@ -31,19 +31,19 @@ class GroupRoleMember {
         return this.userID
     }
 
-    public Unit setGroupID(UUID uuid) {
+    fun setGroupID(UUID uuid) {
         this.groupID = uuid
     }
 
-    public Unit setRequestID(UUID uuid) {
+    fun setRequestID(UUID uuid) {
         this.requestID = uuid
     }
 
-    public Unit setRoleID(UUID uuid) {
+    fun setRoleID(UUID uuid) {
         this.roleID = uuid
     }
 
-    public Unit setUserID(UUID uuid) {
+    fun setUserID(UUID uuid) {
         this.userID = uuid
     }
 }

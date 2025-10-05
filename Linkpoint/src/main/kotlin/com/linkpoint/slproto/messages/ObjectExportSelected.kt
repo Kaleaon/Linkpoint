@@ -31,11 +31,11 @@ class ObjectExportSelected : SLMessage() {
         return (this.ObjectData_Fields.size() * 16) + 39
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleObjectExportSelected(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 123)
@@ -48,7 +48,7 @@ class ObjectExportSelected : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.RequestID = unpackUUID(byteBuffer)
         this.AgentData_Field.VolumeDetail = unpackShort(byteBuffer)

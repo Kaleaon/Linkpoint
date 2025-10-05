@@ -169,7 +169,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             return false
         }
 
-        public Unit setData(GroupRoleDataReply groupRoleDataReply, Set<UUID> set) {
+        fun setData(GroupRoleDataReply groupRoleDataReply, Set<UUID> set) {
             this.data = groupRoleDataReply
             this.selectedRoles.clear()
             if (set != null) {
@@ -179,7 +179,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             notifyDataSetInvalidated()
         }
 
-        public Unit toggleChecked(UUID uuid) {
+        fun toggleChecked(UUID uuid) {
             GroupTitlesReply groupTitlesReply
             if (!uuid.equals(UUIDPool.ZeroUUID) && GroupMemberRolesFragment.this.userManager != null && GroupMemberRolesFragment.this.MemberID != null) {
                 Long r4 = GroupMemberRolesFragment.this.getMyGroupPowers()
@@ -284,7 +284,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupRoleMemberList */
-    public Unit m459com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMemberRolesFragmentmthref0(UUID uuid) {
+    fun m459com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMemberRolesFragmentmthref0(UUID uuid) {
         if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDGroup) && this.MemberID != null) {
             this.activeRoles.subscribe(this.userManager.getChatterList().getGroupManager().getGroupMemberRoleList(), GroupManager.GroupMemberRolesQuery.create(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), this.MemberID, uuid))
         }
@@ -292,7 +292,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onMemberNameUpdated */
-    public Unit m460com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMemberRolesFragmentmthref1(ChatterNameRetriever chatterNameRetriever) {
+    fun m460com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMemberRolesFragmentmthref1(ChatterNameRetriever chatterNameRetriever) {
         String resolvedName = chatterNameRetriever.getResolvedName()
         if (!Strings.isNullOrEmpty(resolvedName)) {
             setTitle(getString(R.string.member_roles_title_format, resolvedName), (String) null)
@@ -302,7 +302,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: private */
-    public Unit updateUnsavedChanges() {
+    fun updateUnsavedChanges() {
         Boolean anyChanges = anyChanges()
         if (anyChanges != this.hasChanged) {
             this.hasChanged = anyChanges
@@ -428,13 +428,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return true
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
         setShowChatterTitle(false)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.group_member_roles_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
@@ -521,7 +521,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return inflate
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         if (this.adapter != null) {
             this.adapter.setData(this.groupRoles.getData(), this.activeRoles.getData())
         }
@@ -559,7 +559,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         this.loadableMonitor.unsubscribeAll()
         if (this.memberNameRetriever != null) {
             this.memberNameRetriever.dispose()

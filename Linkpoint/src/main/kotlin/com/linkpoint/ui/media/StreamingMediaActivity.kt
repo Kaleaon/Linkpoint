@@ -12,7 +12,7 @@ import com.linkpoint.slproto.users.ParcelData
 import com.linkpoint.ui.chat.profiles.ParcelPropertiesFragment
 
 class StreamingMediaActivity : AppCompatActivity(), View.OnClickListener {
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         switch (view.getId()) {
             case R.id.parcel_media_stop_button:
                 Intent intent = Intent(getIntent())
@@ -26,7 +26,7 @@ class StreamingMediaActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         ParcelData parcelData
         super.onCreate(bundle)
         setContentView((Int) R.layout.streaming_media)

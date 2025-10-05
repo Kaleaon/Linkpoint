@@ -85,14 +85,14 @@ class EmulatorManager {
     /**
      * List all available AVDs
      */
-    public Unit listAVDs(EmulatorCallback callback) {
+    fun listAVDs(EmulatorCallback callback) {
         EmulatorTask("list-avds", callback).execute()
     }
     
     /**
      * Create a AVD
      */
-    public Unit createAVD(String name, String device, String apiLevel, String abi, EmulatorCallback callback) {
+    fun createAVD(String name, String device, String apiLevel, String abi, EmulatorCallback callback) {
         String[] args = {"create", name, "--device", device, "--api", apiLevel, "--abi", abi}
         EmulatorTask(args, callback).execute()
     }
@@ -100,35 +100,35 @@ class EmulatorManager {
     /**
      * Start an AVD
      */
-    public Unit startAVD(String name, EmulatorCallback callback) {
+    fun startAVD(String name, EmulatorCallback callback) {
         EmulatorTask("start", name, callback).execute()
     }
     
     /**
      * Stop an AVD
      */
-    public Unit stopAVD(String name, EmulatorCallback callback) {
+    fun stopAVD(String name, EmulatorCallback callback) {
         EmulatorTask("stop", name, callback).execute()
     }
     
     /**
      * Delete an AVD
      */
-    public Unit deleteAVD(String name, EmulatorCallback callback) {
+    fun deleteAVD(String name, EmulatorCallback callback) {
         EmulatorTask("delete", name, callback).execute()
     }
     
     /**
      * Get emulator status
      */
-    public Unit getStatus(EmulatorCallback callback) {
+    fun getStatus(EmulatorCallback callback) {
         EmulatorTask("status", callback).execute()
     }
     
     /**
      * Install system image
      */
-    public Unit installSystemImage(String apiLevel, String abi, String tag, EmulatorCallback callback) {
+    fun installSystemImage(String apiLevel, String abi, String tag, EmulatorCallback callback) {
         String[] args = {"install-image", apiLevel, abi, tag}
         EmulatorTask(args, callback).execute()
     }
@@ -136,14 +136,14 @@ class EmulatorManager {
     /**
      * List available device profiles
      */
-    public Unit listDevices(EmulatorCallback callback) {
+    fun listDevices(EmulatorCallback callback) {
         EmulatorTask("list-devices", callback).execute()
     }
     
     /**
      * List available system images
      */
-    public Unit listSystemImages(EmulatorCallback callback) {
+    fun listSystemImages(EmulatorCallback callback) {
         EmulatorTask("list-images", callback).execute()
     }
     

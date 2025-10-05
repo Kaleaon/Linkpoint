@@ -80,7 +80,7 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         }
     }
 
-    public Unit clear() {
+    fun clear() {
         this.lock.lock()
         try {
             this.queues.clear()
@@ -286,7 +286,7 @@ class PriorityBinQueue<T> : BlockingQueue<T> {
         return null
     }
 
-    public Unit put(T t) throws InterruptedException {
+    fun put(T t) throws InterruptedException {
         add(t)
     }
 

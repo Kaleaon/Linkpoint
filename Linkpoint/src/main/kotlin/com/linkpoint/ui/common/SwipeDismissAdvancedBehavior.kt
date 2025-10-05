@@ -105,18 +105,18 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
             return 0
         }
 
-        public Unit onViewCaptured(View view, Int i) {
+        fun onViewCaptured(View view, Int i) {
             this.mOriginalCapturedViewLeft = view.getLeft()
             this.mOriginalCapturedViewTop = view.getTop()
         }
 
-        public Unit onViewDragStateChanged(Int i) {
+        fun onViewDragStateChanged(Int i) {
             if (SwipeDismissAdvancedBehavior.this.mListener != null) {
                 SwipeDismissAdvancedBehavior.this.mListener.onDragStateChanged(i)
             }
         }
 
-        public Unit onViewPositionChanged(View view, Int i, Int i2, Int i3, Int i4) {
+        fun onViewPositionChanged(View view, Int i, Int i2, Int i3, Int i4) {
             Int i5 = 0
             Int abs = (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 3) != 0 ? Math.abs(i - this.mOriginalCapturedViewLeft) : 0
             if ((SwipeDismissAdvancedBehavior.this.mSwipeDirection & 12) != 0) {
@@ -129,7 +129,7 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
             }
         }
 
-        public Unit onViewReleased(View view, Float f, Float f2) {
+        fun onViewReleased(View view, Float f, Float f2) {
             Int width = view.getWidth()
             Int height = view.getHeight()
             Int left = view.getLeft()
@@ -191,7 +191,7 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
             this.mDismiss = z
         }
 
-        public Unit run() {
+        fun run() {
             if (SwipeDismissAdvancedBehavior.this.mViewDragHelper != null && SwipeDismissAdvancedBehavior.this.mViewDragHelper.continueSettling(true)) {
                 ViewCompat.postOnAnimation(this.mView, this)
             } else if (this.mDismiss && SwipeDismissAdvancedBehavior.this.mListener != null) {
@@ -265,28 +265,28 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
         return true
     }
 
-    public Unit setDragDismissDistance(Float f) {
+    fun setDragDismissDistance(Float f) {
         this.mDragDismissThreshold = clamp(0.0f, f, 1.0f)
     }
 
-    public Unit setEndAlphaSwipeDistance(Float f) {
+    fun setEndAlphaSwipeDistance(Float f) {
         this.mAlphaEndSwipeDistance = clamp(0.0f, f, 1.0f)
     }
 
-    public Unit setListener(OnDismissListener onDismissListener) {
+    fun setListener(OnDismissListener onDismissListener) {
         this.mListener = onDismissListener
     }
 
-    public Unit setSensitivity(Float f) {
+    fun setSensitivity(Float f) {
         this.mSensitivity = f
         this.mSensitivitySet = true
     }
 
-    public Unit setStartAlphaSwipeDistance(Float f) {
+    fun setStartAlphaSwipeDistance(Float f) {
         this.mAlphaStartSwipeDistance = clamp(0.0f, f, 1.0f)
     }
 
-    public Unit setSwipeDirection(Int i) {
+    fun setSwipeDirection(Int i) {
         this.mSwipeDirection = i
     }
 }

@@ -21,13 +21,13 @@ class MuteListFragment_ViewBinding : Unbinder {
         View findRequiredView = Utils.findRequiredView(view, R.id.add_mute_list_button, "method 'onAddMuteListButtonClick'")
         this.view2131755492 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 muteListFragment.onAddMuteListButtonClick()
             }
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         MuteListFragment muteListFragment = this.target
         if (muteListFragment == null) {
             throw IllegalStateException("Bindings already cleared.")

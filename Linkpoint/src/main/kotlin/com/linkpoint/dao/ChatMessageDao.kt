@@ -231,7 +231,7 @@ class ChatMessageDao : AbstractDao()<ChatMessage, Long> {
         return ChatMessage(valueOf, j, date, i2, date2, bool, fromString, valueOf2, string, string2, string3, i3, valueOf3, valueOf4, fromString2, fromString3, string4, valueOf5, valueOf6, valueOf7, valueOf8, bool2, bool3, cursor.isNull(i + 23) ? null : UUID.fromString(cursor.getString(i + 23)), cursor.isNull(i + 24) ? null : cursor.getString(i + 24), cursor.isNull(i + 25) ? null : Integer.valueOf(cursor.getInt(i + 25)), cursor.isNull(i + 26) ? null : cursor.getBlob(i + 26), cursor.isNull(i + 27) ? null : cursor.getString(i + 27), cursor.isNull(i + 28) ? null : Integer.valueOf(cursor.getInt(i + 28)), cursor.getShort(i + 29) != (Short) 0)
     }
 
-    public Unit readEntity(Cursor cursor, ChatMessage chatMessage, Int i) {
+    fun readEntity(Cursor cursor, ChatMessage chatMessage, Int i) {
         Boolean bool
         Boolean z = true
         Integer num = null

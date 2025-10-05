@@ -107,7 +107,7 @@ private /* synthetic */ Int[] m646getcomlumiyaviewerlumiyaslprotomodulesmutelist
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setData(List<MuteListEntry> list) {
+    fun setData(List<MuteListEntry> list) {
         this.muteList = list != null ? ImmutableList.copyOf(list) : ImmutableList.of()
         notifyDataSetChanged()
     }

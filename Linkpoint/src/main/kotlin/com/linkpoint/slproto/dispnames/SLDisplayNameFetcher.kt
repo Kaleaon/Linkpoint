@@ -29,7 +29,7 @@ class SLDisplayNameFetcher : SLModule() {
     private const val MAX_BATCH_SIZE: Int = 4
     private val String capsURL
     private val Runnable httpThreadRunnable = Runnable() {
-        public Unit run() {
+        fun run() {
             UUID nextRequest
             RequestQueue<UUID, UserName> userNameRequestQueue = SLDisplayNameFetcher.this.userManager.getUserNameRequestQueue()
             HashSet<UUID> hashSet = HashSet<>()
@@ -55,7 +55,7 @@ class SLDisplayNameFetcher : SLModule() {
         }
     }
     private val RequestHandler<UUID> requestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             UUIDNameRequest uUIDNameRequest = UUIDNameRequest()
             UUIDNameRequest.UUIDNameBlock uUIDNameBlock = UUIDNameRequest.UUIDNameBlock()
             uUIDNameBlock.ID = uuid
@@ -103,7 +103,7 @@ class SLDisplayNameFetcher : SLModule() {
     }
 
     /* access modifiers changed from: private */
-    public Unit requestNamesHttp(Set<UUID> set, RequestQueue<UUID, UserName> requestQueue2) {
+    fun requestNamesHttp(Set<UUID> set, RequestQueue<UUID, UserName> requestQueue2) {
         StringBuilder append = StringBuilder(this.capsURL).append('/')
         Boolean z = true
         for (UUID uuid : set) {
@@ -148,7 +148,7 @@ class SLDisplayNameFetcher : SLModule() {
         }
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         this.threadMustExit.set(true)
         if (this.xmlReq != null) {
             this.xmlReq.InterruptRequest()
@@ -162,7 +162,7 @@ class SLDisplayNameFetcher : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleUUIDNameReply(UUIDNameReply uUIDNameReply) {
+    fun HandleUUIDNameReply(UUIDNameReply uUIDNameReply) {
         for (UUIDNameReply.UUIDNameBlock uUIDNameBlock : uUIDNameReply.UUIDNameBlock_Fields) {
             UUID uuid = uUIDNameBlock.ID
             String str = SLMessage.stringFromVariableOEM(uUIDNameBlock.FirstName) + " " + SLMessage.stringFromVariableOEM(uUIDNameBlock.LastName)

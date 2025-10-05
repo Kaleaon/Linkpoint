@@ -17,7 +17,7 @@ class GLTextTextureCache : GLResourceCache()<DrawableTextParams, DrawableTextBit
     }
 
     /* access modifiers changed from: protected */
-    public Unit CancelRawResource(ResourceConsumer resourceConsumer) {
+    fun CancelRawResource(ResourceConsumer resourceConsumer) {
         this.drawableTextCache.CancelRequest(resourceConsumer)
     }
 
@@ -32,7 +32,7 @@ class GLTextTextureCache : GLResourceCache()<DrawableTextParams, DrawableTextBit
     }
 
     /* access modifiers changed from: protected */
-    public Unit RequestRawResource(DrawableTextParams drawableTextParams, ResourceConsumer resourceConsumer) {
+    fun RequestRawResource(DrawableTextParams drawableTextParams, ResourceConsumer resourceConsumer) {
         this.drawableTextCache.RequestResource(drawableTextParams, resourceConsumer)
     }
 }

@@ -20,7 +20,7 @@ class NearbyPeopleMinimapFragment_ViewBinding : Unbinder {
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         NearbyPeopleMinimapFragment nearbyPeopleMinimapFragment = this.target
         if (nearbyPeopleMinimapFragment == null) {
             throw IllegalStateException("Bindings already cleared.")
