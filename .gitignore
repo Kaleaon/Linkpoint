@@ -101,6 +101,14 @@ Thumbs.db
 *.env
 *.env.*
 
+# Signing files - NEVER commit these!
+*.keystore
+*.jks
+keystore.properties
+signing.properties
+release.keystore
+debug.keystore
+
 # File Inventory System - Generated Files
 file_inventory/
 copilot_review_files/
