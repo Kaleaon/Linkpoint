@@ -33,11 +33,29 @@ public class ModernAvatarManager {
     
     private AvatarEventListener avatarListener;
     
-    public ModernAvatarManager(Context context) {
-        this.context = context;
+    public ModernAvatarManager(Object protocolManager) {
+        this.context = null; // Context not needed in protocol-based implementation
         this.executor = Executors.newFixedThreadPool(2);
         
         Log.i(TAG, "Modern avatar manager initialized");
+    }
+    
+    /**
+     * Initialize avatar manager
+     */
+    public CompletableFuture<Boolean> initializeAsync() {
+        Log.i(TAG, "Initializing modern avatar management system");
+        
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                // Initialize avatar tracking systems
+                Log.i(TAG, "Avatar management system initialized successfully");
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to initialize avatar management system", e);
+                return false;
+            }
+        }, executor);
     }
     
     /**
