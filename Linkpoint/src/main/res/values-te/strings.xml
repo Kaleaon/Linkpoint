@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">హోమ్‌కు నావిగేట్ చేయండి</string>
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+    <string name="abc_action_bar_up_description">పైకి నావిగేట్ చేయండి</string>
+    <string name="abc_action_menu_overflow_description">మరిన్ని ఎంపికలు</string>
+    <string name="abc_action_mode_done">పూర్తయింది</string>
+    <string name="abc_activity_chooser_view_see_all">అన్నీ చూడండి</string>
+    <string name="abc_activitychooserview_choose_application">అనువర్తనాన్ని ఎంచుకోండి</string>
+    <string name="abc_capital_off">ఆఫ్ చేయి</string>
+    <string name="abc_capital_on">ఆన్ చేయి</string>
+    <string name="abc_search_hint">శోధించు...</string>
+    <string name="abc_searchview_description_clear">ప్రశ్నను క్లియర్ చేయి</string>
+    <string name="abc_searchview_description_query">ప్రశ్న శోధించండి</string>
+    <string name="abc_searchview_description_search">శోధించు</string>
+    <string name="abc_searchview_description_submit">ప్రశ్నని సమర్పించు</string>
+    <string name="abc_searchview_description_voice">వాయిస్ శోధన</string>
+    <string name="abc_shareactionprovider_share_with">వీరితో భాగస్వామ్యం చేయి</string>
+    <string name="abc_shareactionprovider_share_with_application">%sతో భాగస్వామ్యం చేయి</string>
+    <string name="abc_toolbar_collapse_description">కుదించండి</string>
+    <string name="back_button_content_description">వెనుకకు</string>
+    <string name="cancel_button">రద్దు చేయి</string>
+    <string name="dialog_button_got_it">అర్థమైంది</string>
+    <string name="dialog_button_open_help_center">సహాయ కేంద్రాన్ని తెరువు</string>
+    <string name="dialog_message_incompatible_phone">డేడ్రీమ్ అనుకూల ఫోన్ అవసరం. మరింత సమాచారం కోసం డేడ్రీమ్ సహాయ కేంద్రాన్ని సందర్శించండి.</string>
+    <string name="dialog_message_no_cardboard">మీ వ్యూయర్‌ను కాన్ఫిగర్ చేయడానికి కార్డ్‌బోర్డ్ అనువర్తనాన్ని పొందండి.</string>
+    <string name="dialog_message_setup">ఉత్తమ అనుభవం కోసం మీ వ్యూయర్‌ను సెటప్ చేయండి.</string>
+    <string name="dialog_title">కాన్ఫిగర్ చేయండి</string>
+    <string name="dialog_title_incompatible_phone">అననుకూల ఫోన్</string>
+    <string name="dialog_title_vr_core_not_enabled">సెటప్ ఆవశ్యకం</string>
+    <string name="dialog_title_vr_core_not_installed">ఇన్‌స్టాల్ చేయడం ఆవశ్యకం</string>
+    <string name="dialog_title_warning">హెచ్చరిక</string>
+    <string name="dialog_vr_core_not_enabled">ఈ అనువర్తనం Google VR సేవలను ప్రారంభించకుంటే సరిగ్గా పని చేయకపోవచ్చు, దయచేసి కొనసాగించే ముందు ఫోన్ సెట్టింగ్‌ల్లో దీన్ని ప్రారంభించండి.</string>
+    <string name="dialog_vr_core_not_installed">ఈ అనువర్తనం Google VR సేవలు లేకుండా సరిగ్గా పని చేయకపోవచ్చు. దయచేసి కొనసాగించే ముందు Play స్టోర్ నుండి Google VR సేవలను ఇన్‌స్టాల్ చేసుకోండి.</string>
+    <string name="go_to_playstore_button">Play స్టోర్‌కి వెళ్లు</string>
+    <string name="go_to_vr_listeners_settings_button">సెట్టింగ్‌లకు వెళ్లు</string>
+    <string name="no_browser_text">వెబ్‌సైట్‌ను తెరవడానికి బ్రౌజర్ ఏదీ లేదు</string>
+    <string name="place_your_phone_into_cardboard">మీ ఫోన్‌ను మీ కార్డ్‌బోర్డ్ వ్యూయర్‌లో ఉంచండి</string>
+    <string name="place_your_viewer_into_viewer_format">మీ ఫోన్‌ను మీ %s వ్యూయర్‌లో ఉంచండి</string>
+    <string name="search_menu_title">శోధించు</string>
+    <string name="settings_button_content_description">సెట్టింగ్‌లు</string>
+    <string name="setup_button">సెటప్ చేయి</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="switch_viewer_action">మార్చండి</string>
+    <string name="switch_viewer_prompt">వేరే వ్యూయర్‌ ఉపయోగిస్తున్నారా?</string>
+</resources>

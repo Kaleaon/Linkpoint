@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt" android:id="@+id/chatMessageCardView" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="10dp" app:cardBackgroundColor="?attr/CardViewDefaultBackground" app:cardElevation="4dp">
+    <LinearLayout android:layout_gravity="center_vertical" android:orientation="vertical" android:id="@+id/lureMessageLayout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:textSize="16sp" android:textColor="?attr/CardViewDefaultText" android:autoLink="none|web|email" android:id="@+id/chatMessageTextView" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_weight="1"/>
+            <Button android:layout_gravity="top|right|center_vertical|center_horizontal|center" android:id="@+id/buttonDialogIgnore" android:paddingLeft="10dp" android:paddingRight="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="8dp" android:text="✕" android:layout_weight="0" style="@style/BorderlessButton"/>
+        </LinearLayout>
+        <TextView android:textSize="16sp" android:textColor="?attr/CardViewDefaultText" android:gravity="right" android:id="@+id/dialogResultTextView" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Accept teleport?" android:layout_weight="1"/>
+        <LinearLayout android:layout_gravity="right" android:orientation="horizontal" android:id="@+id/dialogButtonsLayout" android:padding="10dp" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <EditText android:textColor="?attr/CardViewDefaultText" android:id="@+id/llTextBoxEdit" android:visibility="invisible" android:layout_width="match_parent" android:layout_height="match_parent" android:singleLine="true" android:layout_weight="1" android:imeOptions="actionSend"/>
+            <Button android:layout_gravity="right" android:id="@+id/buttonTextBoxSend" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/textbox_reply_caption" android:layout_weight="0" style="@style/BorderlessButton"/>
+        </LinearLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>

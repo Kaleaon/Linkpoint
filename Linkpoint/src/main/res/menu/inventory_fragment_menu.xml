@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:aapt="http://schemas.android.com/aapt">
+    <item android:icon="?attr/MenuIconArrowUp" android:id="@+id/inventory_go_up_item" android:title="@string/inventory_go_up" app:showAsAction="always"/>
+    <item android:icon="?attr/MenuIconPlus" android:id="@+id/inventory_create_item" android:title="@string/inventory_create" app:showAsAction="ifRoom">
+        <menu>
+            <item android:icon="?attr/MenuIconNewFolder" android:id="@+id/inventory_folder_create_item" android:title="@string/inventory_new_folder" app:showAsAction="ifRoom"/>
+            <item android:icon="?attr/MenuIconPinMap" android:id="@+id/inventory_folder_create_landmark" android:title="@string/inventory_new_landmark" app:showAsAction="ifRoom"/>
+            <item android:icon="?attr/MenuIconNewNotecard" android:id="@+id/inventory_folder_create_notecard" android:title="@string/menu_item_inventory_new_notecard" app:showAsAction="ifRoom"/>
+            <item android:icon="?attr/MenuIconPicture" android:id="@+id/inventory_folder_upload_picture" android:title="@string/menu_item_inventory_upload_picture" app:showAsAction="ifRoom"/>
+        </menu>
+    </item>
+    <item android:icon="?attr/MenuIconFolderDelete" android:id="@+id/inventory_folder_delete_item" android:title="@string/inventory_delete_folder" app:showAsAction="ifRoom"/>
+    <item android:icon="?attr/MenuIconEdit" android:id="@+id/inventory_folder_rename_item" android:title="@string/inventory_rename_folder" app:showAsAction="ifRoom"/>
+    <item android:icon="?attr/MenuIconFolderShare" android:id="@+id/inventory_folder_share_item" android:title="@string/inventory_share_folder" app:showAsAction="ifRoom"/>
+    <item android:icon="?attr/MenuIconClipboardCut" android:id="@+id/inventory_folder_cut_item" android:title="@string/inventory_cut" app:showAsAction="ifRoom"/>
+    <item android:icon="?attr/MenuIconClipboardCopy" android:id="@+id/inventory_folder_copy_item" android:title="@string/inventory_copy" app:showAsAction="ifRoom"/>
+    <item android:icon="?attr/MenuIconClipboardPaste" android:id="@+id/inventory_folder_paste_item" android:title="@string/inventory_paste" app:showAsAction="ifRoom"/>
+    <item android:icon="?attr/MenuIconLink" android:id="@+id/inventory_folder_paste_as_link_item" android:title="@string/inventory_paste_as_link" app:showAsAction="ifRoom"/>
+</menu>

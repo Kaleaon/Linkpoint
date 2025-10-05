@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="abc_action_bar_home_description">Navigeerimine avaekraanile</string>
+    <string name="abc_action_bar_home_description_format">%1$s, %2$s</string>
+    <string name="abc_action_bar_home_subtitle_description_format">%1$s, %2$s, %3$s</string>
+    <string name="abc_action_bar_up_description">Navigeerimine üles</string>
+    <string name="abc_action_menu_overflow_description">Rohkem valikuid</string>
+    <string name="abc_action_mode_done">Valmis</string>
+    <string name="abc_activity_chooser_view_see_all">Kuva kõik</string>
+    <string name="abc_activitychooserview_choose_application">Valige rakendus</string>
+    <string name="abc_capital_off">VÄLJAS</string>
+    <string name="abc_capital_on">SEES</string>
+    <string name="abc_search_hint">Otsige …</string>
+    <string name="abc_searchview_description_clear">Päringu tühistamine</string>
+    <string name="abc_searchview_description_query">Otsingupäring</string>
+    <string name="abc_searchview_description_search">Otsing</string>
+    <string name="abc_searchview_description_submit">Päringu esitamine</string>
+    <string name="abc_searchview_description_voice">Häälotsing</string>
+    <string name="abc_shareactionprovider_share_with">Jagamine:</string>
+    <string name="abc_shareactionprovider_share_with_application">Jagamine kasutajaga %s</string>
+    <string name="abc_toolbar_collapse_description">Ahendamine</string>
+    <string name="back_button_content_description">tagasi</string>
+    <string name="cancel_button">Tühista</string>
+    <string name="dialog_button_got_it">SELGE</string>
+    <string name="dialog_button_open_help_center">AVAGE ABIKESKUS</string>
+    <string name="dialog_message_incompatible_phone">Vaja on Daydream-valmidusega telefoni. Lisateavet leiate Daydreami abikeskusest.</string>
+    <string name="dialog_message_no_cardboard">Hankige oma vaaturi seadistamiseks rakendus Cardboard.</string>
+    <string name="dialog_message_setup">Parima kasutuskogemuse saamiseks seadistage oma vaatur.</string>
+    <string name="dialog_title">Seadistamine</string>
+    <string name="dialog_title_incompatible_phone">Ühildumatu telefon</string>
+    <string name="dialog_title_vr_core_not_enabled">Seadistamine on vajalik</string>
+    <string name="dialog_title_vr_core_not_installed">Installimine on vajalik</string>
+    <string name="dialog_title_warning">Hoiatus</string>
+    <string name="dialog_vr_core_not_enabled">See rakendus ei pruugi ilma Google\'i VR-teenuseid lubamata korralikult töötada. Enne jätkamist lubage VR-teenused telefoni menüüs Seaded.</string>
+    <string name="dialog_vr_core_not_installed">See rakendus ei pruugi ilma Google\'i VR-teenusteta korralikult töötada. Enne jätkamist installige Play poest Google\'i VR-teenused.</string>
+    <string name="go_to_playstore_button">Ava Play pood</string>
+    <string name="go_to_vr_listeners_settings_button">Ava menüü Seaded</string>
+    <string name="no_browser_text">Veebisaidi avamiseks pole brauserit</string>
+    <string name="place_your_phone_into_cardboard">Asetage telefon oma Cardboardi vaaturisse</string>
+    <string name="place_your_viewer_into_viewer_format">Asetage telefon oma vaaturisse %s</string>
+    <string name="search_menu_title">Otsing</string>
+    <string name="settings_button_content_description">seaded</string>
+    <string name="setup_button">Seadistamine</string>
+    <string name="status_bar_notification_info_overflow">999+</string>
+    <string name="switch_viewer_action">Vahetamine</string>
+    <string name="switch_viewer_prompt">Kas kasutate teist vaaturit?</string>
+</resources>
