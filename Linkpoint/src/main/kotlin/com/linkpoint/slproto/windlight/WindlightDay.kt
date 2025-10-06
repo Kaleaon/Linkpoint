@@ -11,7 +11,7 @@ class WindlightDay {
         }
     }
 
-    public Unit InterpolatePreset(WindlightPreset windlightPreset, Float f) {
+    fun InterpolatePreset(WindlightPreset windlightPreset, Float f) {
         Int i2 = 0
         Int length = hourTable.length - 1
         while (true) {

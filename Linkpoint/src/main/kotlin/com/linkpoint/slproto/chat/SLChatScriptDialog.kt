@@ -56,12 +56,12 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
             setOnCancelListener(this)
         }
 
-        public Unit onCancel(DialogInterface dialogInterface) {
+        fun onCancel(DialogInterface dialogInterface) {
             SLChatScriptDialog.this.onDialogIgnored(this.userManager)
             dismiss()
         }
 
-        public Unit onClick(View view) {
+        fun onClick(View view) {
             Int i = 0
             while (true) {
                 if (i >= SLChatScriptDialog.dialogButtonIds.length) {
@@ -95,7 +95,7 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
         this.buttons = strArr
     }
 
-    public Unit bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
+    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
         if (chatEventViewHolder instanceof ChatScriptDialogViewHolder) {
             ChatScriptDialogViewHolder chatScriptDialogViewHolder = (ChatScriptDialogViewHolder) chatEventViewHolder
@@ -142,7 +142,7 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
         return true
     }
 
-    public Unit onDialogButton(UserManager userManager, Int i) {
+    fun onDialogButton(UserManager userManager, Int i) {
         if (i >= 0 && i < this.buttons.length) {
             this.selectedOption = this.buttons[i]
             UUID sourceUUID = this.source.getSourceUUID()
@@ -154,12 +154,12 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
         }
     }
 
-    public Unit onDialogIgnored(UserManager userManager) {
+    fun onDialogIgnored(UserManager userManager) {
         super.onDialogIgnored(userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         try {
             ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
@@ -171,7 +171,7 @@ val class SLChatScriptDialog : SLChatDialogEvent() {
         chatMessage.setDialogSelectedOption(this.selectedOption)
     }
 
-    public Unit showDialog(Context context, UserManager userManager) {
+    fun showDialog(Context context, UserManager userManager) {
         ScriptDialogDialog(context, userManager, this.source.getSourceName(userManager), this.text).show()
     }
 }

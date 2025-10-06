@@ -25,22 +25,22 @@ abstract class DrawListEntry : InlineListEntry<DrawListEntry> {
         return this.prev
     }
 
-    public Unit requestEntryRemoval() {
+    fun requestEntryRemoval() {
         InlineList inlineList = this.list
         if (inlineList != null) {
             inlineList.requestEntryRemoval(this)
         }
     }
 
-    public Unit setList(InlineList<DrawListEntry> inlineList) {
+    fun setList(InlineList<DrawListEntry> inlineList) {
         this.list = inlineList
     }
 
-    public Unit setNext(DrawListEntry drawListEntry) {
+    fun setNext(DrawListEntry drawListEntry) {
         this.next = drawListEntry
     }
 
-    public Unit setPrev(DrawListEntry drawListEntry) {
+    fun setPrev(DrawListEntry drawListEntry) {
         this.prev = drawListEntry
     }
 }

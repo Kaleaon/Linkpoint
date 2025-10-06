@@ -4,1906 +4,1906 @@ import java.util.*
 import com.linkpoint.slproto.SLMessage
 
 class SLMessageHandler {
-    public Unit DefaultMessageHandler(SLMessage sLMessage) {
+    fun DefaultMessageHandler(SLMessage sLMessage) {
     }
 
-    public Unit HandleAbortXfer(AbortXfer abortXfer) {
+    fun HandleAbortXfer(AbortXfer abortXfer) {
         DefaultMessageHandler(abortXfer)
     }
 
-    public Unit HandleAcceptCallingCard(AcceptCallingCard acceptCallingCard) {
+    fun HandleAcceptCallingCard(AcceptCallingCard acceptCallingCard) {
         DefaultMessageHandler(acceptCallingCard)
     }
 
-    public Unit HandleAcceptFriendship(AcceptFriendship acceptFriendship) {
+    fun HandleAcceptFriendship(AcceptFriendship acceptFriendship) {
         DefaultMessageHandler(acceptFriendship)
     }
 
-    public Unit HandleActivateGestures(ActivateGestures activateGestures) {
+    fun HandleActivateGestures(ActivateGestures activateGestures) {
         DefaultMessageHandler(activateGestures)
     }
 
-    public Unit HandleActivateGroup(ActivateGroup activateGroup) {
+    fun HandleActivateGroup(ActivateGroup activateGroup) {
         DefaultMessageHandler(activateGroup)
     }
 
-    public Unit HandleAddCircuitCode(AddCircuitCode addCircuitCode) {
+    fun HandleAddCircuitCode(AddCircuitCode addCircuitCode) {
         DefaultMessageHandler(addCircuitCode)
     }
 
-    public Unit HandleAgentAlertMessage(AgentAlertMessage agentAlertMessage) {
+    fun HandleAgentAlertMessage(AgentAlertMessage agentAlertMessage) {
         DefaultMessageHandler(agentAlertMessage)
     }
 
-    public Unit HandleAgentAnimation(AgentAnimation agentAnimation) {
+    fun HandleAgentAnimation(AgentAnimation agentAnimation) {
         DefaultMessageHandler(agentAnimation)
     }
 
-    public Unit HandleAgentCachedTexture(AgentCachedTexture agentCachedTexture) {
+    fun HandleAgentCachedTexture(AgentCachedTexture agentCachedTexture) {
         DefaultMessageHandler(agentCachedTexture)
     }
 
-    public Unit HandleAgentCachedTextureResponse(AgentCachedTextureResponse agentCachedTextureResponse) {
+    fun HandleAgentCachedTextureResponse(AgentCachedTextureResponse agentCachedTextureResponse) {
         DefaultMessageHandler(agentCachedTextureResponse)
     }
 
-    public Unit HandleAgentDataUpdate(AgentDataUpdate agentDataUpdate) {
+    fun HandleAgentDataUpdate(AgentDataUpdate agentDataUpdate) {
         DefaultMessageHandler(agentDataUpdate)
     }
 
-    public Unit HandleAgentDataUpdateRequest(AgentDataUpdateRequest agentDataUpdateRequest) {
+    fun HandleAgentDataUpdateRequest(AgentDataUpdateRequest agentDataUpdateRequest) {
         DefaultMessageHandler(agentDataUpdateRequest)
     }
 
-    public Unit HandleAgentDropGroup(AgentDropGroup agentDropGroup) {
+    fun HandleAgentDropGroup(AgentDropGroup agentDropGroup) {
         DefaultMessageHandler(agentDropGroup)
     }
 
-    public Unit HandleAgentFOV(AgentFOV agentFOV) {
+    fun HandleAgentFOV(AgentFOV agentFOV) {
         DefaultMessageHandler(agentFOV)
     }
 
-    public Unit HandleAgentGroupDataUpdate(AgentGroupDataUpdate agentGroupDataUpdate) {
+    fun HandleAgentGroupDataUpdate(AgentGroupDataUpdate agentGroupDataUpdate) {
         DefaultMessageHandler(agentGroupDataUpdate)
     }
 
-    public Unit HandleAgentHeightWidth(AgentHeightWidth agentHeightWidth) {
+    fun HandleAgentHeightWidth(AgentHeightWidth agentHeightWidth) {
         DefaultMessageHandler(agentHeightWidth)
     }
 
-    public Unit HandleAgentIsNowWearing(AgentIsNowWearing agentIsNowWearing) {
+    fun HandleAgentIsNowWearing(AgentIsNowWearing agentIsNowWearing) {
         DefaultMessageHandler(agentIsNowWearing)
     }
 
-    public Unit HandleAgentMovementComplete(AgentMovementComplete agentMovementComplete) {
+    fun HandleAgentMovementComplete(AgentMovementComplete agentMovementComplete) {
         DefaultMessageHandler(agentMovementComplete)
     }
 
-    public Unit HandleAgentPause(AgentPause agentPause) {
+    fun HandleAgentPause(AgentPause agentPause) {
         DefaultMessageHandler(agentPause)
     }
 
-    public Unit HandleAgentQuitCopy(AgentQuitCopy agentQuitCopy) {
+    fun HandleAgentQuitCopy(AgentQuitCopy agentQuitCopy) {
         DefaultMessageHandler(agentQuitCopy)
     }
 
-    public Unit HandleAgentRequestSit(AgentRequestSit agentRequestSit) {
+    fun HandleAgentRequestSit(AgentRequestSit agentRequestSit) {
         DefaultMessageHandler(agentRequestSit)
     }
 
-    public Unit HandleAgentResume(AgentResume agentResume) {
+    fun HandleAgentResume(AgentResume agentResume) {
         DefaultMessageHandler(agentResume)
     }
 
-    public Unit HandleAgentSetAppearance(AgentSetAppearance agentSetAppearance) {
+    fun HandleAgentSetAppearance(AgentSetAppearance agentSetAppearance) {
         DefaultMessageHandler(agentSetAppearance)
     }
 
-    public Unit HandleAgentSit(AgentSit agentSit) {
+    fun HandleAgentSit(AgentSit agentSit) {
         DefaultMessageHandler(agentSit)
     }
 
-    public Unit HandleAgentThrottle(AgentThrottle agentThrottle) {
+    fun HandleAgentThrottle(AgentThrottle agentThrottle) {
         DefaultMessageHandler(agentThrottle)
     }
 
-    public Unit HandleAgentUpdate(AgentUpdate agentUpdate) {
+    fun HandleAgentUpdate(AgentUpdate agentUpdate) {
         DefaultMessageHandler(agentUpdate)
     }
 
-    public Unit HandleAgentWearablesRequest(AgentWearablesRequest agentWearablesRequest) {
+    fun HandleAgentWearablesRequest(AgentWearablesRequest agentWearablesRequest) {
         DefaultMessageHandler(agentWearablesRequest)
     }
 
-    public Unit HandleAgentWearablesUpdate(AgentWearablesUpdate agentWearablesUpdate) {
+    fun HandleAgentWearablesUpdate(AgentWearablesUpdate agentWearablesUpdate) {
         DefaultMessageHandler(agentWearablesUpdate)
     }
 
-    public Unit HandleAlertMessage(AlertMessage alertMessage) {
+    fun HandleAlertMessage(AlertMessage alertMessage) {
         DefaultMessageHandler(alertMessage)
     }
 
-    public Unit HandleAssetUploadComplete(AssetUploadComplete assetUploadComplete) {
+    fun HandleAssetUploadComplete(AssetUploadComplete assetUploadComplete) {
         DefaultMessageHandler(assetUploadComplete)
     }
 
-    public Unit HandleAssetUploadRequest(AssetUploadRequest assetUploadRequest) {
+    fun HandleAssetUploadRequest(AssetUploadRequest assetUploadRequest) {
         DefaultMessageHandler(assetUploadRequest)
     }
 
-    public Unit HandleAtomicPassObject(AtomicPassObject atomicPassObject) {
+    fun HandleAtomicPassObject(AtomicPassObject atomicPassObject) {
         DefaultMessageHandler(atomicPassObject)
     }
 
-    public Unit HandleAttachedSound(AttachedSound attachedSound) {
+    fun HandleAttachedSound(AttachedSound attachedSound) {
         DefaultMessageHandler(attachedSound)
     }
 
-    public Unit HandleAttachedSoundGainChange(AttachedSoundGainChange attachedSoundGainChange) {
+    fun HandleAttachedSoundGainChange(AttachedSoundGainChange attachedSoundGainChange) {
         DefaultMessageHandler(attachedSoundGainChange)
     }
 
-    public Unit HandleAvatarAnimation(AvatarAnimation avatarAnimation) {
+    fun HandleAvatarAnimation(AvatarAnimation avatarAnimation) {
         DefaultMessageHandler(avatarAnimation)
     }
 
-    public Unit HandleAvatarAppearance(AvatarAppearance avatarAppearance) {
+    fun HandleAvatarAppearance(AvatarAppearance avatarAppearance) {
         DefaultMessageHandler(avatarAppearance)
     }
 
-    public Unit HandleAvatarClassifiedReply(AvatarClassifiedReply avatarClassifiedReply) {
+    fun HandleAvatarClassifiedReply(AvatarClassifiedReply avatarClassifiedReply) {
         DefaultMessageHandler(avatarClassifiedReply)
     }
 
-    public Unit HandleAvatarGroupsReply(AvatarGroupsReply avatarGroupsReply) {
+    fun HandleAvatarGroupsReply(AvatarGroupsReply avatarGroupsReply) {
         DefaultMessageHandler(avatarGroupsReply)
     }
 
-    public Unit HandleAvatarInterestsReply(AvatarInterestsReply avatarInterestsReply) {
+    fun HandleAvatarInterestsReply(AvatarInterestsReply avatarInterestsReply) {
         DefaultMessageHandler(avatarInterestsReply)
     }
 
-    public Unit HandleAvatarInterestsUpdate(AvatarInterestsUpdate avatarInterestsUpdate) {
+    fun HandleAvatarInterestsUpdate(AvatarInterestsUpdate avatarInterestsUpdate) {
         DefaultMessageHandler(avatarInterestsUpdate)
     }
 
-    public Unit HandleAvatarNotesReply(AvatarNotesReply avatarNotesReply) {
+    fun HandleAvatarNotesReply(AvatarNotesReply avatarNotesReply) {
         DefaultMessageHandler(avatarNotesReply)
     }
 
-    public Unit HandleAvatarNotesUpdate(AvatarNotesUpdate avatarNotesUpdate) {
+    fun HandleAvatarNotesUpdate(AvatarNotesUpdate avatarNotesUpdate) {
         DefaultMessageHandler(avatarNotesUpdate)
     }
 
-    public Unit HandleAvatarPickerReply(AvatarPickerReply avatarPickerReply) {
+    fun HandleAvatarPickerReply(AvatarPickerReply avatarPickerReply) {
         DefaultMessageHandler(avatarPickerReply)
     }
 
-    public Unit HandleAvatarPickerRequest(AvatarPickerRequest avatarPickerRequest) {
+    fun HandleAvatarPickerRequest(AvatarPickerRequest avatarPickerRequest) {
         DefaultMessageHandler(avatarPickerRequest)
     }
 
-    public Unit HandleAvatarPickerRequestBackend(AvatarPickerRequestBackend avatarPickerRequestBackend) {
+    fun HandleAvatarPickerRequestBackend(AvatarPickerRequestBackend avatarPickerRequestBackend) {
         DefaultMessageHandler(avatarPickerRequestBackend)
     }
 
-    public Unit HandleAvatarPicksReply(AvatarPicksReply avatarPicksReply) {
+    fun HandleAvatarPicksReply(AvatarPicksReply avatarPicksReply) {
         DefaultMessageHandler(avatarPicksReply)
     }
 
-    public Unit HandleAvatarPropertiesReply(AvatarPropertiesReply avatarPropertiesReply) {
+    fun HandleAvatarPropertiesReply(AvatarPropertiesReply avatarPropertiesReply) {
         DefaultMessageHandler(avatarPropertiesReply)
     }
 
-    public Unit HandleAvatarPropertiesRequest(AvatarPropertiesRequest avatarPropertiesRequest) {
+    fun HandleAvatarPropertiesRequest(AvatarPropertiesRequest avatarPropertiesRequest) {
         DefaultMessageHandler(avatarPropertiesRequest)
     }
 
-    public Unit HandleAvatarPropertiesRequestBackend(AvatarPropertiesRequestBackend avatarPropertiesRequestBackend) {
+    fun HandleAvatarPropertiesRequestBackend(AvatarPropertiesRequestBackend avatarPropertiesRequestBackend) {
         DefaultMessageHandler(avatarPropertiesRequestBackend)
     }
 
-    public Unit HandleAvatarPropertiesUpdate(AvatarPropertiesUpdate avatarPropertiesUpdate) {
+    fun HandleAvatarPropertiesUpdate(AvatarPropertiesUpdate avatarPropertiesUpdate) {
         DefaultMessageHandler(avatarPropertiesUpdate)
     }
 
-    public Unit HandleAvatarSitResponse(AvatarSitResponse avatarSitResponse) {
+    fun HandleAvatarSitResponse(AvatarSitResponse avatarSitResponse) {
         DefaultMessageHandler(avatarSitResponse)
     }
 
-    public Unit HandleAvatarTextureUpdate(AvatarTextureUpdate avatarTextureUpdate) {
+    fun HandleAvatarTextureUpdate(AvatarTextureUpdate avatarTextureUpdate) {
         DefaultMessageHandler(avatarTextureUpdate)
     }
 
-    public Unit HandleBulkUpdateInventory(BulkUpdateInventory bulkUpdateInventory) {
+    fun HandleBulkUpdateInventory(BulkUpdateInventory bulkUpdateInventory) {
         DefaultMessageHandler(bulkUpdateInventory)
     }
 
-    public Unit HandleBuyObjectInventory(BuyObjectInventory buyObjectInventory) {
+    fun HandleBuyObjectInventory(BuyObjectInventory buyObjectInventory) {
         DefaultMessageHandler(buyObjectInventory)
     }
 
-    public Unit HandleCameraConstraint(CameraConstraint cameraConstraint) {
+    fun HandleCameraConstraint(CameraConstraint cameraConstraint) {
         DefaultMessageHandler(cameraConstraint)
     }
 
-    public Unit HandleCancelAuction(CancelAuction cancelAuction) {
+    fun HandleCancelAuction(CancelAuction cancelAuction) {
         DefaultMessageHandler(cancelAuction)
     }
 
-    public Unit HandleChangeInventoryItemFlags(ChangeInventoryItemFlags changeInventoryItemFlags) {
+    fun HandleChangeInventoryItemFlags(ChangeInventoryItemFlags changeInventoryItemFlags) {
         DefaultMessageHandler(changeInventoryItemFlags)
     }
 
-    public Unit HandleChangeUserRights(ChangeUserRights changeUserRights) {
+    fun HandleChangeUserRights(ChangeUserRights changeUserRights) {
         DefaultMessageHandler(changeUserRights)
     }
 
-    public Unit HandleChatFromSimulator(ChatFromSimulator chatFromSimulator) {
+    fun HandleChatFromSimulator(ChatFromSimulator chatFromSimulator) {
         DefaultMessageHandler(chatFromSimulator)
     }
 
-    public Unit HandleChatFromViewer(ChatFromViewer chatFromViewer) {
+    fun HandleChatFromViewer(ChatFromViewer chatFromViewer) {
         DefaultMessageHandler(chatFromViewer)
     }
 
-    public Unit HandleChatPass(ChatPass chatPass) {
+    fun HandleChatPass(ChatPass chatPass) {
         DefaultMessageHandler(chatPass)
     }
 
-    public Unit HandleCheckParcelAuctions(CheckParcelAuctions checkParcelAuctions) {
+    fun HandleCheckParcelAuctions(CheckParcelAuctions checkParcelAuctions) {
         DefaultMessageHandler(checkParcelAuctions)
     }
 
-    public Unit HandleCheckParcelSales(CheckParcelSales checkParcelSales) {
+    fun HandleCheckParcelSales(CheckParcelSales checkParcelSales) {
         DefaultMessageHandler(checkParcelSales)
     }
 
-    public Unit HandleChildAgentAlive(ChildAgentAlive childAgentAlive) {
+    fun HandleChildAgentAlive(ChildAgentAlive childAgentAlive) {
         DefaultMessageHandler(childAgentAlive)
     }
 
-    public Unit HandleChildAgentDying(ChildAgentDying childAgentDying) {
+    fun HandleChildAgentDying(ChildAgentDying childAgentDying) {
         DefaultMessageHandler(childAgentDying)
     }
 
-    public Unit HandleChildAgentPositionUpdate(ChildAgentPositionUpdate childAgentPositionUpdate) {
+    fun HandleChildAgentPositionUpdate(ChildAgentPositionUpdate childAgentPositionUpdate) {
         DefaultMessageHandler(childAgentPositionUpdate)
     }
 
-    public Unit HandleChildAgentUnknown(ChildAgentUnknown childAgentUnknown) {
+    fun HandleChildAgentUnknown(ChildAgentUnknown childAgentUnknown) {
         DefaultMessageHandler(childAgentUnknown)
     }
 
-    public Unit HandleChildAgentUpdate(ChildAgentUpdate childAgentUpdate) {
+    fun HandleChildAgentUpdate(ChildAgentUpdate childAgentUpdate) {
         DefaultMessageHandler(childAgentUpdate)
     }
 
-    public Unit HandleClassifiedDelete(ClassifiedDelete classifiedDelete) {
+    fun HandleClassifiedDelete(ClassifiedDelete classifiedDelete) {
         DefaultMessageHandler(classifiedDelete)
     }
 
-    public Unit HandleClassifiedGodDelete(ClassifiedGodDelete classifiedGodDelete) {
+    fun HandleClassifiedGodDelete(ClassifiedGodDelete classifiedGodDelete) {
         DefaultMessageHandler(classifiedGodDelete)
     }
 
-    public Unit HandleClassifiedInfoReply(ClassifiedInfoReply classifiedInfoReply) {
+    fun HandleClassifiedInfoReply(ClassifiedInfoReply classifiedInfoReply) {
         DefaultMessageHandler(classifiedInfoReply)
     }
 
-    public Unit HandleClassifiedInfoRequest(ClassifiedInfoRequest classifiedInfoRequest) {
+    fun HandleClassifiedInfoRequest(ClassifiedInfoRequest classifiedInfoRequest) {
         DefaultMessageHandler(classifiedInfoRequest)
     }
 
-    public Unit HandleClassifiedInfoUpdate(ClassifiedInfoUpdate classifiedInfoUpdate) {
+    fun HandleClassifiedInfoUpdate(ClassifiedInfoUpdate classifiedInfoUpdate) {
         DefaultMessageHandler(classifiedInfoUpdate)
     }
 
-    public Unit HandleClearFollowCamProperties(ClearFollowCamProperties clearFollowCamProperties) {
+    fun HandleClearFollowCamProperties(ClearFollowCamProperties clearFollowCamProperties) {
         DefaultMessageHandler(clearFollowCamProperties)
     }
 
-    public Unit HandleCloseCircuit(CloseCircuit closeCircuit) {
+    fun HandleCloseCircuit(CloseCircuit closeCircuit) {
         DefaultMessageHandler(closeCircuit)
     }
 
-    public Unit HandleCoarseLocationUpdate(CoarseLocationUpdate coarseLocationUpdate) {
+    fun HandleCoarseLocationUpdate(CoarseLocationUpdate coarseLocationUpdate) {
         DefaultMessageHandler(coarseLocationUpdate)
     }
 
-    public Unit HandleCompleteAgentMovement(CompleteAgentMovement completeAgentMovement) {
+    fun HandleCompleteAgentMovement(CompleteAgentMovement completeAgentMovement) {
         DefaultMessageHandler(completeAgentMovement)
     }
 
-    public Unit HandleCompleteAuction(CompleteAuction completeAuction) {
+    fun HandleCompleteAuction(CompleteAuction completeAuction) {
         DefaultMessageHandler(completeAuction)
     }
 
-    public Unit HandleCompletePingCheck(CompletePingCheck completePingCheck) {
+    fun HandleCompletePingCheck(CompletePingCheck completePingCheck) {
         DefaultMessageHandler(completePingCheck)
     }
 
-    public Unit HandleConfirmAuctionStart(ConfirmAuctionStart confirmAuctionStart) {
+    fun HandleConfirmAuctionStart(ConfirmAuctionStart confirmAuctionStart) {
         DefaultMessageHandler(confirmAuctionStart)
     }
 
-    public Unit HandleConfirmEnableSimulator(ConfirmEnableSimulator confirmEnableSimulator) {
+    fun HandleConfirmEnableSimulator(ConfirmEnableSimulator confirmEnableSimulator) {
         DefaultMessageHandler(confirmEnableSimulator)
     }
 
-    public Unit HandleConfirmXferPacket(ConfirmXferPacket confirmXferPacket) {
+    fun HandleConfirmXferPacket(ConfirmXferPacket confirmXferPacket) {
         DefaultMessageHandler(confirmXferPacket)
     }
 
-    public Unit HandleCopyInventoryFromNotecard(CopyInventoryFromNotecard copyInventoryFromNotecard) {
+    fun HandleCopyInventoryFromNotecard(CopyInventoryFromNotecard copyInventoryFromNotecard) {
         DefaultMessageHandler(copyInventoryFromNotecard)
     }
 
-    public Unit HandleCopyInventoryItem(CopyInventoryItem copyInventoryItem) {
+    fun HandleCopyInventoryItem(CopyInventoryItem copyInventoryItem) {
         DefaultMessageHandler(copyInventoryItem)
     }
 
-    public Unit HandleCreateGroupReply(CreateGroupReply createGroupReply) {
+    fun HandleCreateGroupReply(CreateGroupReply createGroupReply) {
         DefaultMessageHandler(createGroupReply)
     }
 
-    public Unit HandleCreateGroupRequest(CreateGroupRequest createGroupRequest) {
+    fun HandleCreateGroupRequest(CreateGroupRequest createGroupRequest) {
         DefaultMessageHandler(createGroupRequest)
     }
 
-    public Unit HandleCreateInventoryFolder(CreateInventoryFolder createInventoryFolder) {
+    fun HandleCreateInventoryFolder(CreateInventoryFolder createInventoryFolder) {
         DefaultMessageHandler(createInventoryFolder)
     }
 
-    public Unit HandleCreateInventoryItem(CreateInventoryItem createInventoryItem) {
+    fun HandleCreateInventoryItem(CreateInventoryItem createInventoryItem) {
         DefaultMessageHandler(createInventoryItem)
     }
 
-    public Unit HandleCreateLandmarkForEvent(CreateLandmarkForEvent createLandmarkForEvent) {
+    fun HandleCreateLandmarkForEvent(CreateLandmarkForEvent createLandmarkForEvent) {
         DefaultMessageHandler(createLandmarkForEvent)
     }
 
-    public Unit HandleCreateNewOutfitAttachments(CreateNewOutfitAttachments createNewOutfitAttachments) {
+    fun HandleCreateNewOutfitAttachments(CreateNewOutfitAttachments createNewOutfitAttachments) {
         DefaultMessageHandler(createNewOutfitAttachments)
     }
 
-    public Unit HandleCreateTrustedCircuit(CreateTrustedCircuit createTrustedCircuit) {
+    fun HandleCreateTrustedCircuit(CreateTrustedCircuit createTrustedCircuit) {
         DefaultMessageHandler(createTrustedCircuit)
     }
 
-    public Unit HandleCrossedRegion(CrossedRegion crossedRegion) {
+    fun HandleCrossedRegion(CrossedRegion crossedRegion) {
         DefaultMessageHandler(crossedRegion)
     }
 
-    public Unit HandleDataHomeLocationReply(DataHomeLocationReply dataHomeLocationReply) {
+    fun HandleDataHomeLocationReply(DataHomeLocationReply dataHomeLocationReply) {
         DefaultMessageHandler(dataHomeLocationReply)
     }
 
-    public Unit HandleDataHomeLocationRequest(DataHomeLocationRequest dataHomeLocationRequest) {
+    fun HandleDataHomeLocationRequest(DataHomeLocationRequest dataHomeLocationRequest) {
         DefaultMessageHandler(dataHomeLocationRequest)
     }
 
-    public Unit HandleDataServerLogout(DataServerLogout dataServerLogout) {
+    fun HandleDataServerLogout(DataServerLogout dataServerLogout) {
         DefaultMessageHandler(dataServerLogout)
     }
 
-    public Unit HandleDeRezAck(DeRezAck deRezAck) {
+    fun HandleDeRezAck(DeRezAck deRezAck) {
         DefaultMessageHandler(deRezAck)
     }
 
-    public Unit HandleDeRezObject(DeRezObject deRezObject) {
+    fun HandleDeRezObject(DeRezObject deRezObject) {
         DefaultMessageHandler(deRezObject)
     }
 
-    public Unit HandleDeactivateGestures(DeactivateGestures deactivateGestures) {
+    fun HandleDeactivateGestures(DeactivateGestures deactivateGestures) {
         DefaultMessageHandler(deactivateGestures)
     }
 
-    public Unit HandleDeclineCallingCard(DeclineCallingCard declineCallingCard) {
+    fun HandleDeclineCallingCard(DeclineCallingCard declineCallingCard) {
         DefaultMessageHandler(declineCallingCard)
     }
 
-    public Unit HandleDeclineFriendship(DeclineFriendship declineFriendship) {
+    fun HandleDeclineFriendship(DeclineFriendship declineFriendship) {
         DefaultMessageHandler(declineFriendship)
     }
 
-    public Unit HandleDenyTrustedCircuit(DenyTrustedCircuit denyTrustedCircuit) {
+    fun HandleDenyTrustedCircuit(DenyTrustedCircuit denyTrustedCircuit) {
         DefaultMessageHandler(denyTrustedCircuit)
     }
 
-    public Unit HandleDerezContainer(DerezContainer derezContainer) {
+    fun HandleDerezContainer(DerezContainer derezContainer) {
         DefaultMessageHandler(derezContainer)
     }
 
-    public Unit HandleDetachAttachmentIntoInv(DetachAttachmentIntoInv detachAttachmentIntoInv) {
+    fun HandleDetachAttachmentIntoInv(DetachAttachmentIntoInv detachAttachmentIntoInv) {
         DefaultMessageHandler(detachAttachmentIntoInv)
     }
 
-    public Unit HandleDirClassifiedQuery(DirClassifiedQuery dirClassifiedQuery) {
+    fun HandleDirClassifiedQuery(DirClassifiedQuery dirClassifiedQuery) {
         DefaultMessageHandler(dirClassifiedQuery)
     }
 
-    public Unit HandleDirClassifiedQueryBackend(DirClassifiedQueryBackend dirClassifiedQueryBackend) {
+    fun HandleDirClassifiedQueryBackend(DirClassifiedQueryBackend dirClassifiedQueryBackend) {
         DefaultMessageHandler(dirClassifiedQueryBackend)
     }
 
-    public Unit HandleDirClassifiedReply(DirClassifiedReply dirClassifiedReply) {
+    fun HandleDirClassifiedReply(DirClassifiedReply dirClassifiedReply) {
         DefaultMessageHandler(dirClassifiedReply)
     }
 
-    public Unit HandleDirEventsReply(DirEventsReply dirEventsReply) {
+    fun HandleDirEventsReply(DirEventsReply dirEventsReply) {
         DefaultMessageHandler(dirEventsReply)
     }
 
-    public Unit HandleDirFindQuery(DirFindQuery dirFindQuery) {
+    fun HandleDirFindQuery(DirFindQuery dirFindQuery) {
         DefaultMessageHandler(dirFindQuery)
     }
 
-    public Unit HandleDirFindQueryBackend(DirFindQueryBackend dirFindQueryBackend) {
+    fun HandleDirFindQueryBackend(DirFindQueryBackend dirFindQueryBackend) {
         DefaultMessageHandler(dirFindQueryBackend)
     }
 
-    public Unit HandleDirGroupsReply(DirGroupsReply dirGroupsReply) {
+    fun HandleDirGroupsReply(DirGroupsReply dirGroupsReply) {
         DefaultMessageHandler(dirGroupsReply)
     }
 
-    public Unit HandleDirLandQuery(DirLandQuery dirLandQuery) {
+    fun HandleDirLandQuery(DirLandQuery dirLandQuery) {
         DefaultMessageHandler(dirLandQuery)
     }
 
-    public Unit HandleDirLandQueryBackend(DirLandQueryBackend dirLandQueryBackend) {
+    fun HandleDirLandQueryBackend(DirLandQueryBackend dirLandQueryBackend) {
         DefaultMessageHandler(dirLandQueryBackend)
     }
 
-    public Unit HandleDirLandReply(DirLandReply dirLandReply) {
+    fun HandleDirLandReply(DirLandReply dirLandReply) {
         DefaultMessageHandler(dirLandReply)
     }
 
-    public Unit HandleDirPeopleReply(DirPeopleReply dirPeopleReply) {
+    fun HandleDirPeopleReply(DirPeopleReply dirPeopleReply) {
         DefaultMessageHandler(dirPeopleReply)
     }
 
-    public Unit HandleDirPlacesQuery(DirPlacesQuery dirPlacesQuery) {
+    fun HandleDirPlacesQuery(DirPlacesQuery dirPlacesQuery) {
         DefaultMessageHandler(dirPlacesQuery)
     }
 
-    public Unit HandleDirPlacesQueryBackend(DirPlacesQueryBackend dirPlacesQueryBackend) {
+    fun HandleDirPlacesQueryBackend(DirPlacesQueryBackend dirPlacesQueryBackend) {
         DefaultMessageHandler(dirPlacesQueryBackend)
     }
 
-    public Unit HandleDirPlacesReply(DirPlacesReply dirPlacesReply) {
+    fun HandleDirPlacesReply(DirPlacesReply dirPlacesReply) {
         DefaultMessageHandler(dirPlacesReply)
     }
 
-    public Unit HandleDirPopularQuery(DirPopularQuery dirPopularQuery) {
+    fun HandleDirPopularQuery(DirPopularQuery dirPopularQuery) {
         DefaultMessageHandler(dirPopularQuery)
     }
 
-    public Unit HandleDirPopularQueryBackend(DirPopularQueryBackend dirPopularQueryBackend) {
+    fun HandleDirPopularQueryBackend(DirPopularQueryBackend dirPopularQueryBackend) {
         DefaultMessageHandler(dirPopularQueryBackend)
     }
 
-    public Unit HandleDirPopularReply(DirPopularReply dirPopularReply) {
+    fun HandleDirPopularReply(DirPopularReply dirPopularReply) {
         DefaultMessageHandler(dirPopularReply)
     }
 
-    public Unit HandleDisableSimulator(DisableSimulator disableSimulator) {
+    fun HandleDisableSimulator(DisableSimulator disableSimulator) {
         DefaultMessageHandler(disableSimulator)
     }
 
-    public Unit HandleEconomyData(EconomyData economyData) {
+    fun HandleEconomyData(EconomyData economyData) {
         DefaultMessageHandler(economyData)
     }
 
-    public Unit HandleEconomyDataRequest(EconomyDataRequest economyDataRequest) {
+    fun HandleEconomyDataRequest(EconomyDataRequest economyDataRequest) {
         DefaultMessageHandler(economyDataRequest)
     }
 
-    public Unit HandleEdgeDataPacket(EdgeDataPacket edgeDataPacket) {
+    fun HandleEdgeDataPacket(EdgeDataPacket edgeDataPacket) {
         DefaultMessageHandler(edgeDataPacket)
     }
 
-    public Unit HandleEjectGroupMemberReply(EjectGroupMemberReply ejectGroupMemberReply) {
+    fun HandleEjectGroupMemberReply(EjectGroupMemberReply ejectGroupMemberReply) {
         DefaultMessageHandler(ejectGroupMemberReply)
     }
 
-    public Unit HandleEjectGroupMemberRequest(EjectGroupMemberRequest ejectGroupMemberRequest) {
+    fun HandleEjectGroupMemberRequest(EjectGroupMemberRequest ejectGroupMemberRequest) {
         DefaultMessageHandler(ejectGroupMemberRequest)
     }
 
-    public Unit HandleEjectUser(EjectUser ejectUser) {
+    fun HandleEjectUser(EjectUser ejectUser) {
         DefaultMessageHandler(ejectUser)
     }
 
-    public Unit HandleEmailMessageReply(EmailMessageReply emailMessageReply) {
+    fun HandleEmailMessageReply(EmailMessageReply emailMessageReply) {
         DefaultMessageHandler(emailMessageReply)
     }
 
-    public Unit HandleEmailMessageRequest(EmailMessageRequest emailMessageRequest) {
+    fun HandleEmailMessageRequest(EmailMessageRequest emailMessageRequest) {
         DefaultMessageHandler(emailMessageRequest)
     }
 
-    public Unit HandleEnableSimulator(EnableSimulator enableSimulator) {
+    fun HandleEnableSimulator(EnableSimulator enableSimulator) {
         DefaultMessageHandler(enableSimulator)
     }
 
-    public Unit HandleError(Error error) {
+    fun HandleError(Error error) {
         DefaultMessageHandler(error)
     }
 
-    public Unit HandleEstateCovenantReply(EstateCovenantReply estateCovenantReply) {
+    fun HandleEstateCovenantReply(EstateCovenantReply estateCovenantReply) {
         DefaultMessageHandler(estateCovenantReply)
     }
 
-    public Unit HandleEstateCovenantRequest(EstateCovenantRequest estateCovenantRequest) {
+    fun HandleEstateCovenantRequest(EstateCovenantRequest estateCovenantRequest) {
         DefaultMessageHandler(estateCovenantRequest)
     }
 
-    public Unit HandleEstateOwnerMessage(EstateOwnerMessage estateOwnerMessage) {
+    fun HandleEstateOwnerMessage(EstateOwnerMessage estateOwnerMessage) {
         DefaultMessageHandler(estateOwnerMessage)
     }
 
-    public Unit HandleEventGodDelete(EventGodDelete eventGodDelete) {
+    fun HandleEventGodDelete(EventGodDelete eventGodDelete) {
         DefaultMessageHandler(eventGodDelete)
     }
 
-    public Unit HandleEventInfoReply(EventInfoReply eventInfoReply) {
+    fun HandleEventInfoReply(EventInfoReply eventInfoReply) {
         DefaultMessageHandler(eventInfoReply)
     }
 
-    public Unit HandleEventInfoRequest(EventInfoRequest eventInfoRequest) {
+    fun HandleEventInfoRequest(EventInfoRequest eventInfoRequest) {
         DefaultMessageHandler(eventInfoRequest)
     }
 
-    public Unit HandleEventLocationReply(EventLocationReply eventLocationReply) {
+    fun HandleEventLocationReply(EventLocationReply eventLocationReply) {
         DefaultMessageHandler(eventLocationReply)
     }
 
-    public Unit HandleEventLocationRequest(EventLocationRequest eventLocationRequest) {
+    fun HandleEventLocationRequest(EventLocationRequest eventLocationRequest) {
         DefaultMessageHandler(eventLocationRequest)
     }
 
-    public Unit HandleEventNotificationAddRequest(EventNotificationAddRequest eventNotificationAddRequest) {
+    fun HandleEventNotificationAddRequest(EventNotificationAddRequest eventNotificationAddRequest) {
         DefaultMessageHandler(eventNotificationAddRequest)
     }
 
-    public Unit HandleEventNotificationRemoveRequest(EventNotificationRemoveRequest eventNotificationRemoveRequest) {
+    fun HandleEventNotificationRemoveRequest(EventNotificationRemoveRequest eventNotificationRemoveRequest) {
         DefaultMessageHandler(eventNotificationRemoveRequest)
     }
 
-    public Unit HandleFeatureDisabled(FeatureDisabled featureDisabled) {
+    fun HandleFeatureDisabled(FeatureDisabled featureDisabled) {
         DefaultMessageHandler(featureDisabled)
     }
 
-    public Unit HandleFetchInventory(FetchInventory fetchInventory) {
+    fun HandleFetchInventory(FetchInventory fetchInventory) {
         DefaultMessageHandler(fetchInventory)
     }
 
-    public Unit HandleFetchInventoryDescendents(FetchInventoryDescendents fetchInventoryDescendents) {
+    fun HandleFetchInventoryDescendents(FetchInventoryDescendents fetchInventoryDescendents) {
         DefaultMessageHandler(fetchInventoryDescendents)
     }
 
-    public Unit HandleFetchInventoryReply(FetchInventoryReply fetchInventoryReply) {
+    fun HandleFetchInventoryReply(FetchInventoryReply fetchInventoryReply) {
         DefaultMessageHandler(fetchInventoryReply)
     }
 
-    public Unit HandleFindAgent(FindAgent findAgent) {
+    fun HandleFindAgent(FindAgent findAgent) {
         DefaultMessageHandler(findAgent)
     }
 
-    public Unit HandleForceObjectSelect(ForceObjectSelect forceObjectSelect) {
+    fun HandleForceObjectSelect(ForceObjectSelect forceObjectSelect) {
         DefaultMessageHandler(forceObjectSelect)
     }
 
-    public Unit HandleForceScriptControlRelease(ForceScriptControlRelease forceScriptControlRelease) {
+    fun HandleForceScriptControlRelease(ForceScriptControlRelease forceScriptControlRelease) {
         DefaultMessageHandler(forceScriptControlRelease)
     }
 
-    public Unit HandleFormFriendship(FormFriendship formFriendship) {
+    fun HandleFormFriendship(FormFriendship formFriendship) {
         DefaultMessageHandler(formFriendship)
     }
 
-    public Unit HandleFreezeUser(FreezeUser freezeUser) {
+    fun HandleFreezeUser(FreezeUser freezeUser) {
         DefaultMessageHandler(freezeUser)
     }
 
-    public Unit HandleGenericMessage(GenericMessage genericMessage) {
+    fun HandleGenericMessage(GenericMessage genericMessage) {
         DefaultMessageHandler(genericMessage)
     }
 
-    public Unit HandleGetScriptRunning(GetScriptRunning getScriptRunning) {
+    fun HandleGetScriptRunning(GetScriptRunning getScriptRunning) {
         DefaultMessageHandler(getScriptRunning)
     }
 
-    public Unit HandleGodKickUser(GodKickUser godKickUser) {
+    fun HandleGodKickUser(GodKickUser godKickUser) {
         DefaultMessageHandler(godKickUser)
     }
 
-    public Unit HandleGodUpdateRegionInfo(GodUpdateRegionInfo godUpdateRegionInfo) {
+    fun HandleGodUpdateRegionInfo(GodUpdateRegionInfo godUpdateRegionInfo) {
         DefaultMessageHandler(godUpdateRegionInfo)
     }
 
-    public Unit HandleGodlikeMessage(GodlikeMessage godlikeMessage) {
+    fun HandleGodlikeMessage(GodlikeMessage godlikeMessage) {
         DefaultMessageHandler(godlikeMessage)
     }
 
-    public Unit HandleGrantGodlikePowers(GrantGodlikePowers grantGodlikePowers) {
+    fun HandleGrantGodlikePowers(GrantGodlikePowers grantGodlikePowers) {
         DefaultMessageHandler(grantGodlikePowers)
     }
 
-    public Unit HandleGrantUserRights(GrantUserRights grantUserRights) {
+    fun HandleGrantUserRights(GrantUserRights grantUserRights) {
         DefaultMessageHandler(grantUserRights)
     }
 
-    public Unit HandleGroupAccountDetailsReply(GroupAccountDetailsReply groupAccountDetailsReply) {
+    fun HandleGroupAccountDetailsReply(GroupAccountDetailsReply groupAccountDetailsReply) {
         DefaultMessageHandler(groupAccountDetailsReply)
     }
 
-    public Unit HandleGroupAccountDetailsRequest(GroupAccountDetailsRequest groupAccountDetailsRequest) {
+    fun HandleGroupAccountDetailsRequest(GroupAccountDetailsRequest groupAccountDetailsRequest) {
         DefaultMessageHandler(groupAccountDetailsRequest)
     }
 
-    public Unit HandleGroupAccountSummaryReply(GroupAccountSummaryReply groupAccountSummaryReply) {
+    fun HandleGroupAccountSummaryReply(GroupAccountSummaryReply groupAccountSummaryReply) {
         DefaultMessageHandler(groupAccountSummaryReply)
     }
 
-    public Unit HandleGroupAccountSummaryRequest(GroupAccountSummaryRequest groupAccountSummaryRequest) {
+    fun HandleGroupAccountSummaryRequest(GroupAccountSummaryRequest groupAccountSummaryRequest) {
         DefaultMessageHandler(groupAccountSummaryRequest)
     }
 
-    public Unit HandleGroupAccountTransactionsReply(GroupAccountTransactionsReply groupAccountTransactionsReply) {
+    fun HandleGroupAccountTransactionsReply(GroupAccountTransactionsReply groupAccountTransactionsReply) {
         DefaultMessageHandler(groupAccountTransactionsReply)
     }
 
-    public Unit HandleGroupAccountTransactionsRequest(GroupAccountTransactionsRequest groupAccountTransactionsRequest) {
+    fun HandleGroupAccountTransactionsRequest(GroupAccountTransactionsRequest groupAccountTransactionsRequest) {
         DefaultMessageHandler(groupAccountTransactionsRequest)
     }
 
-    public Unit HandleGroupActiveProposalItemReply(GroupActiveProposalItemReply groupActiveProposalItemReply) {
+    fun HandleGroupActiveProposalItemReply(GroupActiveProposalItemReply groupActiveProposalItemReply) {
         DefaultMessageHandler(groupActiveProposalItemReply)
     }
 
-    public Unit HandleGroupActiveProposalsRequest(GroupActiveProposalsRequest groupActiveProposalsRequest) {
+    fun HandleGroupActiveProposalsRequest(GroupActiveProposalsRequest groupActiveProposalsRequest) {
         DefaultMessageHandler(groupActiveProposalsRequest)
     }
 
-    public Unit HandleGroupDataUpdate(GroupDataUpdate groupDataUpdate) {
+    fun HandleGroupDataUpdate(GroupDataUpdate groupDataUpdate) {
         DefaultMessageHandler(groupDataUpdate)
     }
 
-    public Unit HandleGroupMembersReply(GroupMembersReply groupMembersReply) {
+    fun HandleGroupMembersReply(GroupMembersReply groupMembersReply) {
         DefaultMessageHandler(groupMembersReply)
     }
 
-    public Unit HandleGroupMembersRequest(GroupMembersRequest groupMembersRequest) {
+    fun HandleGroupMembersRequest(GroupMembersRequest groupMembersRequest) {
         DefaultMessageHandler(groupMembersRequest)
     }
 
-    public Unit HandleGroupNoticeAdd(GroupNoticeAdd groupNoticeAdd) {
+    fun HandleGroupNoticeAdd(GroupNoticeAdd groupNoticeAdd) {
         DefaultMessageHandler(groupNoticeAdd)
     }
 
-    public Unit HandleGroupNoticeRequest(GroupNoticeRequest groupNoticeRequest) {
+    fun HandleGroupNoticeRequest(GroupNoticeRequest groupNoticeRequest) {
         DefaultMessageHandler(groupNoticeRequest)
     }
 
-    public Unit HandleGroupNoticesListReply(GroupNoticesListReply groupNoticesListReply) {
+    fun HandleGroupNoticesListReply(GroupNoticesListReply groupNoticesListReply) {
         DefaultMessageHandler(groupNoticesListReply)
     }
 
-    public Unit HandleGroupNoticesListRequest(GroupNoticesListRequest groupNoticesListRequest) {
+    fun HandleGroupNoticesListRequest(GroupNoticesListRequest groupNoticesListRequest) {
         DefaultMessageHandler(groupNoticesListRequest)
     }
 
-    public Unit HandleGroupProfileReply(GroupProfileReply groupProfileReply) {
+    fun HandleGroupProfileReply(GroupProfileReply groupProfileReply) {
         DefaultMessageHandler(groupProfileReply)
     }
 
-    public Unit HandleGroupProfileRequest(GroupProfileRequest groupProfileRequest) {
+    fun HandleGroupProfileRequest(GroupProfileRequest groupProfileRequest) {
         DefaultMessageHandler(groupProfileRequest)
     }
 
-    public Unit HandleGroupProposalBallot(GroupProposalBallot groupProposalBallot) {
+    fun HandleGroupProposalBallot(GroupProposalBallot groupProposalBallot) {
         DefaultMessageHandler(groupProposalBallot)
     }
 
-    public Unit HandleGroupRoleChanges(GroupRoleChanges groupRoleChanges) {
+    fun HandleGroupRoleChanges(GroupRoleChanges groupRoleChanges) {
         DefaultMessageHandler(groupRoleChanges)
     }
 
-    public Unit HandleGroupRoleDataReply(GroupRoleDataReply groupRoleDataReply) {
+    fun HandleGroupRoleDataReply(GroupRoleDataReply groupRoleDataReply) {
         DefaultMessageHandler(groupRoleDataReply)
     }
 
-    public Unit HandleGroupRoleDataRequest(GroupRoleDataRequest groupRoleDataRequest) {
+    fun HandleGroupRoleDataRequest(GroupRoleDataRequest groupRoleDataRequest) {
         DefaultMessageHandler(groupRoleDataRequest)
     }
 
-    public Unit HandleGroupRoleMembersReply(GroupRoleMembersReply groupRoleMembersReply) {
+    fun HandleGroupRoleMembersReply(GroupRoleMembersReply groupRoleMembersReply) {
         DefaultMessageHandler(groupRoleMembersReply)
     }
 
-    public Unit HandleGroupRoleMembersRequest(GroupRoleMembersRequest groupRoleMembersRequest) {
+    fun HandleGroupRoleMembersRequest(GroupRoleMembersRequest groupRoleMembersRequest) {
         DefaultMessageHandler(groupRoleMembersRequest)
     }
 
-    public Unit HandleGroupRoleUpdate(GroupRoleUpdate groupRoleUpdate) {
+    fun HandleGroupRoleUpdate(GroupRoleUpdate groupRoleUpdate) {
         DefaultMessageHandler(groupRoleUpdate)
     }
 
-    public Unit HandleGroupTitleUpdate(GroupTitleUpdate groupTitleUpdate) {
+    fun HandleGroupTitleUpdate(GroupTitleUpdate groupTitleUpdate) {
         DefaultMessageHandler(groupTitleUpdate)
     }
 
-    public Unit HandleGroupTitlesReply(GroupTitlesReply groupTitlesReply) {
+    fun HandleGroupTitlesReply(GroupTitlesReply groupTitlesReply) {
         DefaultMessageHandler(groupTitlesReply)
     }
 
-    public Unit HandleGroupTitlesRequest(GroupTitlesRequest groupTitlesRequest) {
+    fun HandleGroupTitlesRequest(GroupTitlesRequest groupTitlesRequest) {
         DefaultMessageHandler(groupTitlesRequest)
     }
 
-    public Unit HandleGroupVoteHistoryItemReply(GroupVoteHistoryItemReply groupVoteHistoryItemReply) {
+    fun HandleGroupVoteHistoryItemReply(GroupVoteHistoryItemReply groupVoteHistoryItemReply) {
         DefaultMessageHandler(groupVoteHistoryItemReply)
     }
 
-    public Unit HandleGroupVoteHistoryRequest(GroupVoteHistoryRequest groupVoteHistoryRequest) {
+    fun HandleGroupVoteHistoryRequest(GroupVoteHistoryRequest groupVoteHistoryRequest) {
         DefaultMessageHandler(groupVoteHistoryRequest)
     }
 
-    public Unit HandleHealthMessage(HealthMessage healthMessage) {
+    fun HandleHealthMessage(HealthMessage healthMessage) {
         DefaultMessageHandler(healthMessage)
     }
 
-    public Unit HandleImageData(ImageData imageData) {
+    fun HandleImageData(ImageData imageData) {
         DefaultMessageHandler(imageData)
     }
 
-    public Unit HandleImageNotInDatabase(ImageNotInDatabase imageNotInDatabase) {
+    fun HandleImageNotInDatabase(ImageNotInDatabase imageNotInDatabase) {
         DefaultMessageHandler(imageNotInDatabase)
     }
 
-    public Unit HandleImagePacket(ImagePacket imagePacket) {
+    fun HandleImagePacket(ImagePacket imagePacket) {
         DefaultMessageHandler(imagePacket)
     }
 
-    public Unit HandleImprovedInstantMessage(ImprovedInstantMessage improvedInstantMessage) {
+    fun HandleImprovedInstantMessage(ImprovedInstantMessage improvedInstantMessage) {
         DefaultMessageHandler(improvedInstantMessage)
     }
 
-    public Unit HandleImprovedTerseObjectUpdate(ImprovedTerseObjectUpdate improvedTerseObjectUpdate) {
+    fun HandleImprovedTerseObjectUpdate(ImprovedTerseObjectUpdate improvedTerseObjectUpdate) {
         DefaultMessageHandler(improvedTerseObjectUpdate)
     }
 
-    public Unit HandleInitiateDownload(InitiateDownload initiateDownload) {
+    fun HandleInitiateDownload(InitiateDownload initiateDownload) {
         DefaultMessageHandler(initiateDownload)
     }
 
-    public Unit HandleInternalScriptMail(InternalScriptMail internalScriptMail) {
+    fun HandleInternalScriptMail(InternalScriptMail internalScriptMail) {
         DefaultMessageHandler(internalScriptMail)
     }
 
-    public Unit HandleInventoryAssetResponse(InventoryAssetResponse inventoryAssetResponse) {
+    fun HandleInventoryAssetResponse(InventoryAssetResponse inventoryAssetResponse) {
         DefaultMessageHandler(inventoryAssetResponse)
     }
 
-    public Unit HandleInventoryDescendents(InventoryDescendents inventoryDescendents) {
+    fun HandleInventoryDescendents(InventoryDescendents inventoryDescendents) {
         DefaultMessageHandler(inventoryDescendents)
     }
 
-    public Unit HandleInviteGroupRequest(InviteGroupRequest inviteGroupRequest) {
+    fun HandleInviteGroupRequest(InviteGroupRequest inviteGroupRequest) {
         DefaultMessageHandler(inviteGroupRequest)
     }
 
-    public Unit HandleInviteGroupResponse(InviteGroupResponse inviteGroupResponse) {
+    fun HandleInviteGroupResponse(InviteGroupResponse inviteGroupResponse) {
         DefaultMessageHandler(inviteGroupResponse)
     }
 
-    public Unit HandleJoinGroupReply(JoinGroupReply joinGroupReply) {
+    fun HandleJoinGroupReply(JoinGroupReply joinGroupReply) {
         DefaultMessageHandler(joinGroupReply)
     }
 
-    public Unit HandleJoinGroupRequest(JoinGroupRequest joinGroupRequest) {
+    fun HandleJoinGroupRequest(JoinGroupRequest joinGroupRequest) {
         DefaultMessageHandler(joinGroupRequest)
     }
 
-    public Unit HandleKickUser(KickUser kickUser) {
+    fun HandleKickUser(KickUser kickUser) {
         DefaultMessageHandler(kickUser)
     }
 
-    public Unit HandleKickUserAck(KickUserAck kickUserAck) {
+    fun HandleKickUserAck(KickUserAck kickUserAck) {
         DefaultMessageHandler(kickUserAck)
     }
 
-    public Unit HandleKillChildAgents(KillChildAgents killChildAgents) {
+    fun HandleKillChildAgents(KillChildAgents killChildAgents) {
         DefaultMessageHandler(killChildAgents)
     }
 
-    public Unit HandleKillObject(KillObject killObject) {
+    fun HandleKillObject(KillObject killObject) {
         DefaultMessageHandler(killObject)
     }
 
-    public Unit HandleLandStatReply(LandStatReply landStatReply) {
+    fun HandleLandStatReply(LandStatReply landStatReply) {
         DefaultMessageHandler(landStatReply)
     }
 
-    public Unit HandleLandStatRequest(LandStatRequest landStatRequest) {
+    fun HandleLandStatRequest(LandStatRequest landStatRequest) {
         DefaultMessageHandler(landStatRequest)
     }
 
-    public Unit HandleLayerData(LayerData layerData) {
+    fun HandleLayerData(LayerData layerData) {
         DefaultMessageHandler(layerData)
     }
 
-    public Unit HandleLeaveGroupReply(LeaveGroupReply leaveGroupReply) {
+    fun HandleLeaveGroupReply(LeaveGroupReply leaveGroupReply) {
         DefaultMessageHandler(leaveGroupReply)
     }
 
-    public Unit HandleLeaveGroupRequest(LeaveGroupRequest leaveGroupRequest) {
+    fun HandleLeaveGroupRequest(LeaveGroupRequest leaveGroupRequest) {
         DefaultMessageHandler(leaveGroupRequest)
     }
 
-    public Unit HandleLinkInventoryItem(LinkInventoryItem linkInventoryItem) {
+    fun HandleLinkInventoryItem(LinkInventoryItem linkInventoryItem) {
         DefaultMessageHandler(linkInventoryItem)
     }
 
-    public Unit HandleLiveHelpGroupReply(LiveHelpGroupReply liveHelpGroupReply) {
+    fun HandleLiveHelpGroupReply(LiveHelpGroupReply liveHelpGroupReply) {
         DefaultMessageHandler(liveHelpGroupReply)
     }
 
-    public Unit HandleLiveHelpGroupRequest(LiveHelpGroupRequest liveHelpGroupRequest) {
+    fun HandleLiveHelpGroupRequest(LiveHelpGroupRequest liveHelpGroupRequest) {
         DefaultMessageHandler(liveHelpGroupRequest)
     }
 
-    public Unit HandleLoadURL(LoadURL loadURL) {
+    fun HandleLoadURL(LoadURL loadURL) {
         DefaultMessageHandler(loadURL)
     }
 
-    public Unit HandleLogDwellTime(LogDwellTime logDwellTime) {
+    fun HandleLogDwellTime(LogDwellTime logDwellTime) {
         DefaultMessageHandler(logDwellTime)
     }
 
-    public Unit HandleLogFailedMoneyTransaction(LogFailedMoneyTransaction logFailedMoneyTransaction) {
+    fun HandleLogFailedMoneyTransaction(LogFailedMoneyTransaction logFailedMoneyTransaction) {
         DefaultMessageHandler(logFailedMoneyTransaction)
     }
 
-    public Unit HandleLogParcelChanges(LogParcelChanges logParcelChanges) {
+    fun HandleLogParcelChanges(LogParcelChanges logParcelChanges) {
         DefaultMessageHandler(logParcelChanges)
     }
 
-    public Unit HandleLogTextMessage(LogTextMessage logTextMessage) {
+    fun HandleLogTextMessage(LogTextMessage logTextMessage) {
         DefaultMessageHandler(logTextMessage)
     }
 
-    public Unit HandleLogoutReply(LogoutReply logoutReply) {
+    fun HandleLogoutReply(LogoutReply logoutReply) {
         DefaultMessageHandler(logoutReply)
     }
 
-    public Unit HandleLogoutRequest(LogoutRequest logoutRequest) {
+    fun HandleLogoutRequest(LogoutRequest logoutRequest) {
         DefaultMessageHandler(logoutRequest)
     }
 
-    public Unit HandleMapBlockReply(MapBlockReply mapBlockReply) {
+    fun HandleMapBlockReply(MapBlockReply mapBlockReply) {
         DefaultMessageHandler(mapBlockReply)
     }
 
-    public Unit HandleMapBlockRequest(MapBlockRequest mapBlockRequest) {
+    fun HandleMapBlockRequest(MapBlockRequest mapBlockRequest) {
         DefaultMessageHandler(mapBlockRequest)
     }
 
-    public Unit HandleMapItemReply(MapItemReply mapItemReply) {
+    fun HandleMapItemReply(MapItemReply mapItemReply) {
         DefaultMessageHandler(mapItemReply)
     }
 
-    public Unit HandleMapItemRequest(MapItemRequest mapItemRequest) {
+    fun HandleMapItemRequest(MapItemRequest mapItemRequest) {
         DefaultMessageHandler(mapItemRequest)
     }
 
-    public Unit HandleMapLayerReply(MapLayerReply mapLayerReply) {
+    fun HandleMapLayerReply(MapLayerReply mapLayerReply) {
         DefaultMessageHandler(mapLayerReply)
     }
 
-    public Unit HandleMapLayerRequest(MapLayerRequest mapLayerRequest) {
+    fun HandleMapLayerRequest(MapLayerRequest mapLayerRequest) {
         DefaultMessageHandler(mapLayerRequest)
     }
 
-    public Unit HandleMapNameRequest(MapNameRequest mapNameRequest) {
+    fun HandleMapNameRequest(MapNameRequest mapNameRequest) {
         DefaultMessageHandler(mapNameRequest)
     }
 
-    public Unit HandleMeanCollisionAlert(MeanCollisionAlert meanCollisionAlert) {
+    fun HandleMeanCollisionAlert(MeanCollisionAlert meanCollisionAlert) {
         DefaultMessageHandler(meanCollisionAlert)
     }
 
-    public Unit HandleMergeParcel(MergeParcel mergeParcel) {
+    fun HandleMergeParcel(MergeParcel mergeParcel) {
         DefaultMessageHandler(mergeParcel)
     }
 
-    public Unit HandleModifyLand(ModifyLand modifyLand) {
+    fun HandleModifyLand(ModifyLand modifyLand) {
         DefaultMessageHandler(modifyLand)
     }
 
-    public Unit HandleMoneyBalanceReply(MoneyBalanceReply moneyBalanceReply) {
+    fun HandleMoneyBalanceReply(MoneyBalanceReply moneyBalanceReply) {
         DefaultMessageHandler(moneyBalanceReply)
     }
 
-    public Unit HandleMoneyBalanceRequest(MoneyBalanceRequest moneyBalanceRequest) {
+    fun HandleMoneyBalanceRequest(MoneyBalanceRequest moneyBalanceRequest) {
         DefaultMessageHandler(moneyBalanceRequest)
     }
 
-    public Unit HandleMoneyTransferBackend(MoneyTransferBackend moneyTransferBackend) {
+    fun HandleMoneyTransferBackend(MoneyTransferBackend moneyTransferBackend) {
         DefaultMessageHandler(moneyTransferBackend)
     }
 
-    public Unit HandleMoneyTransferRequest(MoneyTransferRequest moneyTransferRequest) {
+    fun HandleMoneyTransferRequest(MoneyTransferRequest moneyTransferRequest) {
         DefaultMessageHandler(moneyTransferRequest)
     }
 
-    public Unit HandleMoveInventoryFolder(MoveInventoryFolder moveInventoryFolder) {
+    fun HandleMoveInventoryFolder(MoveInventoryFolder moveInventoryFolder) {
         DefaultMessageHandler(moveInventoryFolder)
     }
 
-    public Unit HandleMoveInventoryItem(MoveInventoryItem moveInventoryItem) {
+    fun HandleMoveInventoryItem(MoveInventoryItem moveInventoryItem) {
         DefaultMessageHandler(moveInventoryItem)
     }
 
-    public Unit HandleMoveTaskInventory(MoveTaskInventory moveTaskInventory) {
+    fun HandleMoveTaskInventory(MoveTaskInventory moveTaskInventory) {
         DefaultMessageHandler(moveTaskInventory)
     }
 
-    public Unit HandleMultipleObjectUpdate(MultipleObjectUpdate multipleObjectUpdate) {
+    fun HandleMultipleObjectUpdate(MultipleObjectUpdate multipleObjectUpdate) {
         DefaultMessageHandler(multipleObjectUpdate)
     }
 
-    public Unit HandleMuteListRequest(MuteListRequest muteListRequest) {
+    fun HandleMuteListRequest(MuteListRequest muteListRequest) {
         DefaultMessageHandler(muteListRequest)
     }
 
-    public Unit HandleMuteListUpdate(MuteListUpdate muteListUpdate) {
+    fun HandleMuteListUpdate(MuteListUpdate muteListUpdate) {
         DefaultMessageHandler(muteListUpdate)
     }
 
-    public Unit HandleNameValuePair(NameValuePair nameValuePair) {
+    fun HandleNameValuePair(NameValuePair nameValuePair) {
         DefaultMessageHandler(nameValuePair)
     }
 
-    public Unit HandleNearestLandingRegionReply(NearestLandingRegionReply nearestLandingRegionReply) {
+    fun HandleNearestLandingRegionReply(NearestLandingRegionReply nearestLandingRegionReply) {
         DefaultMessageHandler(nearestLandingRegionReply)
     }
 
-    public Unit HandleNearestLandingRegionRequest(NearestLandingRegionRequest nearestLandingRegionRequest) {
+    fun HandleNearestLandingRegionRequest(NearestLandingRegionRequest nearestLandingRegionRequest) {
         DefaultMessageHandler(nearestLandingRegionRequest)
     }
 
-    public Unit HandleNearestLandingRegionUpdated(NearestLandingRegionUpdated nearestLandingRegionUpdated) {
+    fun HandleNearestLandingRegionUpdated(NearestLandingRegionUpdated nearestLandingRegionUpdated) {
         DefaultMessageHandler(nearestLandingRegionUpdated)
     }
 
-    public Unit HandleNeighborList(NeighborList neighborList) {
+    fun HandleNeighborList(NeighborList neighborList) {
         DefaultMessageHandler(neighborList)
     }
 
-    public Unit HandleNetTest(NetTest netTest) {
+    fun HandleNetTest(NetTest netTest) {
         DefaultMessageHandler(netTest)
     }
 
-    public Unit HandleObjectAdd(ObjectAdd objectAdd) {
+    fun HandleObjectAdd(ObjectAdd objectAdd) {
         DefaultMessageHandler(objectAdd)
     }
 
-    public Unit HandleObjectAttach(ObjectAttach objectAttach) {
+    fun HandleObjectAttach(ObjectAttach objectAttach) {
         DefaultMessageHandler(objectAttach)
     }
 
-    public Unit HandleObjectBuy(ObjectBuy objectBuy) {
+    fun HandleObjectBuy(ObjectBuy objectBuy) {
         DefaultMessageHandler(objectBuy)
     }
 
-    public Unit HandleObjectCategory(ObjectCategory objectCategory) {
+    fun HandleObjectCategory(ObjectCategory objectCategory) {
         DefaultMessageHandler(objectCategory)
     }
 
-    public Unit HandleObjectClickAction(ObjectClickAction objectClickAction) {
+    fun HandleObjectClickAction(ObjectClickAction objectClickAction) {
         DefaultMessageHandler(objectClickAction)
     }
 
-    public Unit HandleObjectDeGrab(ObjectDeGrab objectDeGrab) {
+    fun HandleObjectDeGrab(ObjectDeGrab objectDeGrab) {
         DefaultMessageHandler(objectDeGrab)
     }
 
-    public Unit HandleObjectDelete(ObjectDelete objectDelete) {
+    fun HandleObjectDelete(ObjectDelete objectDelete) {
         DefaultMessageHandler(objectDelete)
     }
 
-    public Unit HandleObjectDelink(ObjectDelink objectDelink) {
+    fun HandleObjectDelink(ObjectDelink objectDelink) {
         DefaultMessageHandler(objectDelink)
     }
 
-    public Unit HandleObjectDescription(ObjectDescription objectDescription) {
+    fun HandleObjectDescription(ObjectDescription objectDescription) {
         DefaultMessageHandler(objectDescription)
     }
 
-    public Unit HandleObjectDeselect(ObjectDeselect objectDeselect) {
+    fun HandleObjectDeselect(ObjectDeselect objectDeselect) {
         DefaultMessageHandler(objectDeselect)
     }
 
-    public Unit HandleObjectDetach(ObjectDetach objectDetach) {
+    fun HandleObjectDetach(ObjectDetach objectDetach) {
         DefaultMessageHandler(objectDetach)
     }
 
-    public Unit HandleObjectDrop(ObjectDrop objectDrop) {
+    fun HandleObjectDrop(ObjectDrop objectDrop) {
         DefaultMessageHandler(objectDrop)
     }
 
-    public Unit HandleObjectDuplicate(ObjectDuplicate objectDuplicate) {
+    fun HandleObjectDuplicate(ObjectDuplicate objectDuplicate) {
         DefaultMessageHandler(objectDuplicate)
     }
 
-    public Unit HandleObjectDuplicateOnRay(ObjectDuplicateOnRay objectDuplicateOnRay) {
+    fun HandleObjectDuplicateOnRay(ObjectDuplicateOnRay objectDuplicateOnRay) {
         DefaultMessageHandler(objectDuplicateOnRay)
     }
 
-    public Unit HandleObjectExportSelected(ObjectExportSelected objectExportSelected) {
+    fun HandleObjectExportSelected(ObjectExportSelected objectExportSelected) {
         DefaultMessageHandler(objectExportSelected)
     }
 
-    public Unit HandleObjectExtraParams(ObjectExtraParams objectExtraParams) {
+    fun HandleObjectExtraParams(ObjectExtraParams objectExtraParams) {
         DefaultMessageHandler(objectExtraParams)
     }
 
-    public Unit HandleObjectFlagUpdate(ObjectFlagUpdate objectFlagUpdate) {
+    fun HandleObjectFlagUpdate(ObjectFlagUpdate objectFlagUpdate) {
         DefaultMessageHandler(objectFlagUpdate)
     }
 
-    public Unit HandleObjectGrab(ObjectGrab objectGrab) {
+    fun HandleObjectGrab(ObjectGrab objectGrab) {
         DefaultMessageHandler(objectGrab)
     }
 
-    public Unit HandleObjectGrabUpdate(ObjectGrabUpdate objectGrabUpdate) {
+    fun HandleObjectGrabUpdate(ObjectGrabUpdate objectGrabUpdate) {
         DefaultMessageHandler(objectGrabUpdate)
     }
 
-    public Unit HandleObjectGroup(ObjectGroup objectGroup) {
+    fun HandleObjectGroup(ObjectGroup objectGroup) {
         DefaultMessageHandler(objectGroup)
     }
 
-    public Unit HandleObjectImage(ObjectImage objectImage) {
+    fun HandleObjectImage(ObjectImage objectImage) {
         DefaultMessageHandler(objectImage)
     }
 
-    public Unit HandleObjectIncludeInSearch(ObjectIncludeInSearch objectIncludeInSearch) {
+    fun HandleObjectIncludeInSearch(ObjectIncludeInSearch objectIncludeInSearch) {
         DefaultMessageHandler(objectIncludeInSearch)
     }
 
-    public Unit HandleObjectLink(ObjectLink objectLink) {
+    fun HandleObjectLink(ObjectLink objectLink) {
         DefaultMessageHandler(objectLink)
     }
 
-    public Unit HandleObjectMaterial(ObjectMaterial objectMaterial) {
+    fun HandleObjectMaterial(ObjectMaterial objectMaterial) {
         DefaultMessageHandler(objectMaterial)
     }
 
-    public Unit HandleObjectName(ObjectName objectName) {
+    fun HandleObjectName(ObjectName objectName) {
         DefaultMessageHandler(objectName)
     }
 
-    public Unit HandleObjectOwner(ObjectOwner objectOwner) {
+    fun HandleObjectOwner(ObjectOwner objectOwner) {
         DefaultMessageHandler(objectOwner)
     }
 
-    public Unit HandleObjectPermissions(ObjectPermissions objectPermissions) {
+    fun HandleObjectPermissions(ObjectPermissions objectPermissions) {
         DefaultMessageHandler(objectPermissions)
     }
 
-    public Unit HandleObjectPosition(ObjectPosition objectPosition) {
+    fun HandleObjectPosition(ObjectPosition objectPosition) {
         DefaultMessageHandler(objectPosition)
     }
 
-    public Unit HandleObjectProperties(ObjectProperties objectProperties) {
+    fun HandleObjectProperties(ObjectProperties objectProperties) {
         DefaultMessageHandler(objectProperties)
     }
 
-    public Unit HandleObjectPropertiesFamily(ObjectPropertiesFamily objectPropertiesFamily) {
+    fun HandleObjectPropertiesFamily(ObjectPropertiesFamily objectPropertiesFamily) {
         DefaultMessageHandler(objectPropertiesFamily)
     }
 
-    public Unit HandleObjectRotation(ObjectRotation objectRotation) {
+    fun HandleObjectRotation(ObjectRotation objectRotation) {
         DefaultMessageHandler(objectRotation)
     }
 
-    public Unit HandleObjectSaleInfo(ObjectSaleInfo objectSaleInfo) {
+    fun HandleObjectSaleInfo(ObjectSaleInfo objectSaleInfo) {
         DefaultMessageHandler(objectSaleInfo)
     }
 
-    public Unit HandleObjectScale(ObjectScale objectScale) {
+    fun HandleObjectScale(ObjectScale objectScale) {
         DefaultMessageHandler(objectScale)
     }
 
-    public Unit HandleObjectSelect(ObjectSelect objectSelect) {
+    fun HandleObjectSelect(ObjectSelect objectSelect) {
         DefaultMessageHandler(objectSelect)
     }
 
-    public Unit HandleObjectShape(ObjectShape objectShape) {
+    fun HandleObjectShape(ObjectShape objectShape) {
         DefaultMessageHandler(objectShape)
     }
 
-    public Unit HandleObjectSpinStart(ObjectSpinStart objectSpinStart) {
+    fun HandleObjectSpinStart(ObjectSpinStart objectSpinStart) {
         DefaultMessageHandler(objectSpinStart)
     }
 
-    public Unit HandleObjectSpinStop(ObjectSpinStop objectSpinStop) {
+    fun HandleObjectSpinStop(ObjectSpinStop objectSpinStop) {
         DefaultMessageHandler(objectSpinStop)
     }
 
-    public Unit HandleObjectSpinUpdate(ObjectSpinUpdate objectSpinUpdate) {
+    fun HandleObjectSpinUpdate(ObjectSpinUpdate objectSpinUpdate) {
         DefaultMessageHandler(objectSpinUpdate)
     }
 
-    public Unit HandleObjectUpdate(ObjectUpdate objectUpdate) {
+    fun HandleObjectUpdate(ObjectUpdate objectUpdate) {
         DefaultMessageHandler(objectUpdate)
     }
 
-    public Unit HandleObjectUpdateCached(ObjectUpdateCached objectUpdateCached) {
+    fun HandleObjectUpdateCached(ObjectUpdateCached objectUpdateCached) {
         DefaultMessageHandler(objectUpdateCached)
     }
 
-    public Unit HandleObjectUpdateCompressed(ObjectUpdateCompressed objectUpdateCompressed) {
+    fun HandleObjectUpdateCompressed(ObjectUpdateCompressed objectUpdateCompressed) {
         DefaultMessageHandler(objectUpdateCompressed)
     }
 
-    public Unit HandleOfferCallingCard(OfferCallingCard offerCallingCard) {
+    fun HandleOfferCallingCard(OfferCallingCard offerCallingCard) {
         DefaultMessageHandler(offerCallingCard)
     }
 
-    public Unit HandleOfflineNotification(OfflineNotification offlineNotification) {
+    fun HandleOfflineNotification(OfflineNotification offlineNotification) {
         DefaultMessageHandler(offlineNotification)
     }
 
-    public Unit HandleOnlineNotification(OnlineNotification onlineNotification) {
+    fun HandleOnlineNotification(OnlineNotification onlineNotification) {
         DefaultMessageHandler(onlineNotification)
     }
 
-    public Unit HandleOpenCircuit(OpenCircuit openCircuit) {
+    fun HandleOpenCircuit(OpenCircuit openCircuit) {
         DefaultMessageHandler(openCircuit)
     }
 
-    public Unit HandlePacketAck(PacketAck packetAck) {
+    fun HandlePacketAck(PacketAck packetAck) {
         DefaultMessageHandler(packetAck)
     }
 
-    public Unit HandleParcelAccessListReply(ParcelAccessListReply parcelAccessListReply) {
+    fun HandleParcelAccessListReply(ParcelAccessListReply parcelAccessListReply) {
         DefaultMessageHandler(parcelAccessListReply)
     }
 
-    public Unit HandleParcelAccessListRequest(ParcelAccessListRequest parcelAccessListRequest) {
+    fun HandleParcelAccessListRequest(ParcelAccessListRequest parcelAccessListRequest) {
         DefaultMessageHandler(parcelAccessListRequest)
     }
 
-    public Unit HandleParcelAccessListUpdate(ParcelAccessListUpdate parcelAccessListUpdate) {
+    fun HandleParcelAccessListUpdate(ParcelAccessListUpdate parcelAccessListUpdate) {
         DefaultMessageHandler(parcelAccessListUpdate)
     }
 
-    public Unit HandleParcelAuctions(ParcelAuctions parcelAuctions) {
+    fun HandleParcelAuctions(ParcelAuctions parcelAuctions) {
         DefaultMessageHandler(parcelAuctions)
     }
 
-    public Unit HandleParcelBuy(ParcelBuy parcelBuy) {
+    fun HandleParcelBuy(ParcelBuy parcelBuy) {
         DefaultMessageHandler(parcelBuy)
     }
 
-    public Unit HandleParcelBuyPass(ParcelBuyPass parcelBuyPass) {
+    fun HandleParcelBuyPass(ParcelBuyPass parcelBuyPass) {
         DefaultMessageHandler(parcelBuyPass)
     }
 
-    public Unit HandleParcelClaim(ParcelClaim parcelClaim) {
+    fun HandleParcelClaim(ParcelClaim parcelClaim) {
         DefaultMessageHandler(parcelClaim)
     }
 
-    public Unit HandleParcelDeedToGroup(ParcelDeedToGroup parcelDeedToGroup) {
+    fun HandleParcelDeedToGroup(ParcelDeedToGroup parcelDeedToGroup) {
         DefaultMessageHandler(parcelDeedToGroup)
     }
 
-    public Unit HandleParcelDisableObjects(ParcelDisableObjects parcelDisableObjects) {
+    fun HandleParcelDisableObjects(ParcelDisableObjects parcelDisableObjects) {
         DefaultMessageHandler(parcelDisableObjects)
     }
 
-    public Unit HandleParcelDivide(ParcelDivide parcelDivide) {
+    fun HandleParcelDivide(ParcelDivide parcelDivide) {
         DefaultMessageHandler(parcelDivide)
     }
 
-    public Unit HandleParcelDwellReply(ParcelDwellReply parcelDwellReply) {
+    fun HandleParcelDwellReply(ParcelDwellReply parcelDwellReply) {
         DefaultMessageHandler(parcelDwellReply)
     }
 
-    public Unit HandleParcelDwellRequest(ParcelDwellRequest parcelDwellRequest) {
+    fun HandleParcelDwellRequest(ParcelDwellRequest parcelDwellRequest) {
         DefaultMessageHandler(parcelDwellRequest)
     }
 
-    public Unit HandleParcelGodForceOwner(ParcelGodForceOwner parcelGodForceOwner) {
+    fun HandleParcelGodForceOwner(ParcelGodForceOwner parcelGodForceOwner) {
         DefaultMessageHandler(parcelGodForceOwner)
     }
 
-    public Unit HandleParcelGodMarkAsContent(ParcelGodMarkAsContent parcelGodMarkAsContent) {
+    fun HandleParcelGodMarkAsContent(ParcelGodMarkAsContent parcelGodMarkAsContent) {
         DefaultMessageHandler(parcelGodMarkAsContent)
     }
 
-    public Unit HandleParcelInfoReply(ParcelInfoReply parcelInfoReply) {
+    fun HandleParcelInfoReply(ParcelInfoReply parcelInfoReply) {
         DefaultMessageHandler(parcelInfoReply)
     }
 
-    public Unit HandleParcelInfoRequest(ParcelInfoRequest parcelInfoRequest) {
+    fun HandleParcelInfoRequest(ParcelInfoRequest parcelInfoRequest) {
         DefaultMessageHandler(parcelInfoRequest)
     }
 
-    public Unit HandleParcelJoin(ParcelJoin parcelJoin) {
+    fun HandleParcelJoin(ParcelJoin parcelJoin) {
         DefaultMessageHandler(parcelJoin)
     }
 
-    public Unit HandleParcelMediaCommandMessage(ParcelMediaCommandMessage parcelMediaCommandMessage) {
+    fun HandleParcelMediaCommandMessage(ParcelMediaCommandMessage parcelMediaCommandMessage) {
         DefaultMessageHandler(parcelMediaCommandMessage)
     }
 
-    public Unit HandleParcelMediaUpdate(ParcelMediaUpdate parcelMediaUpdate) {
+    fun HandleParcelMediaUpdate(ParcelMediaUpdate parcelMediaUpdate) {
         DefaultMessageHandler(parcelMediaUpdate)
     }
 
-    public Unit HandleParcelObjectOwnersReply(ParcelObjectOwnersReply parcelObjectOwnersReply) {
+    fun HandleParcelObjectOwnersReply(ParcelObjectOwnersReply parcelObjectOwnersReply) {
         DefaultMessageHandler(parcelObjectOwnersReply)
     }
 
-    public Unit HandleParcelObjectOwnersRequest(ParcelObjectOwnersRequest parcelObjectOwnersRequest) {
+    fun HandleParcelObjectOwnersRequest(ParcelObjectOwnersRequest parcelObjectOwnersRequest) {
         DefaultMessageHandler(parcelObjectOwnersRequest)
     }
 
-    public Unit HandleParcelOverlay(ParcelOverlay parcelOverlay) {
+    fun HandleParcelOverlay(ParcelOverlay parcelOverlay) {
         DefaultMessageHandler(parcelOverlay)
     }
 
-    public Unit HandleParcelProperties(ParcelProperties parcelProperties) {
+    fun HandleParcelProperties(ParcelProperties parcelProperties) {
         DefaultMessageHandler(parcelProperties)
     }
 
-    public Unit HandleParcelPropertiesRequest(ParcelPropertiesRequest parcelPropertiesRequest) {
+    fun HandleParcelPropertiesRequest(ParcelPropertiesRequest parcelPropertiesRequest) {
         DefaultMessageHandler(parcelPropertiesRequest)
     }
 
-    public Unit HandleParcelPropertiesRequestByID(ParcelPropertiesRequestByID parcelPropertiesRequestByID) {
+    fun HandleParcelPropertiesRequestByID(ParcelPropertiesRequestByID parcelPropertiesRequestByID) {
         DefaultMessageHandler(parcelPropertiesRequestByID)
     }
 
-    public Unit HandleParcelPropertiesUpdate(ParcelPropertiesUpdate parcelPropertiesUpdate) {
+    fun HandleParcelPropertiesUpdate(ParcelPropertiesUpdate parcelPropertiesUpdate) {
         DefaultMessageHandler(parcelPropertiesUpdate)
     }
 
-    public Unit HandleParcelReclaim(ParcelReclaim parcelReclaim) {
+    fun HandleParcelReclaim(ParcelReclaim parcelReclaim) {
         DefaultMessageHandler(parcelReclaim)
     }
 
-    public Unit HandleParcelRelease(ParcelRelease parcelRelease) {
+    fun HandleParcelRelease(ParcelRelease parcelRelease) {
         DefaultMessageHandler(parcelRelease)
     }
 
-    public Unit HandleParcelRename(ParcelRename parcelRename) {
+    fun HandleParcelRename(ParcelRename parcelRename) {
         DefaultMessageHandler(parcelRename)
     }
 
-    public Unit HandleParcelReturnObjects(ParcelReturnObjects parcelReturnObjects) {
+    fun HandleParcelReturnObjects(ParcelReturnObjects parcelReturnObjects) {
         DefaultMessageHandler(parcelReturnObjects)
     }
 
-    public Unit HandleParcelSales(ParcelSales parcelSales) {
+    fun HandleParcelSales(ParcelSales parcelSales) {
         DefaultMessageHandler(parcelSales)
     }
 
-    public Unit HandleParcelSelectObjects(ParcelSelectObjects parcelSelectObjects) {
+    fun HandleParcelSelectObjects(ParcelSelectObjects parcelSelectObjects) {
         DefaultMessageHandler(parcelSelectObjects)
     }
 
-    public Unit HandleParcelSetOtherCleanTime(ParcelSetOtherCleanTime parcelSetOtherCleanTime) {
+    fun HandleParcelSetOtherCleanTime(ParcelSetOtherCleanTime parcelSetOtherCleanTime) {
         DefaultMessageHandler(parcelSetOtherCleanTime)
     }
 
-    public Unit HandlePayPriceReply(PayPriceReply payPriceReply) {
+    fun HandlePayPriceReply(PayPriceReply payPriceReply) {
         DefaultMessageHandler(payPriceReply)
     }
 
-    public Unit HandlePickDelete(PickDelete pickDelete) {
+    fun HandlePickDelete(PickDelete pickDelete) {
         DefaultMessageHandler(pickDelete)
     }
 
-    public Unit HandlePickGodDelete(PickGodDelete pickGodDelete) {
+    fun HandlePickGodDelete(PickGodDelete pickGodDelete) {
         DefaultMessageHandler(pickGodDelete)
     }
 
-    public Unit HandlePickInfoReply(PickInfoReply pickInfoReply) {
+    fun HandlePickInfoReply(PickInfoReply pickInfoReply) {
         DefaultMessageHandler(pickInfoReply)
     }
 
-    public Unit HandlePickInfoUpdate(PickInfoUpdate pickInfoUpdate) {
+    fun HandlePickInfoUpdate(PickInfoUpdate pickInfoUpdate) {
         DefaultMessageHandler(pickInfoUpdate)
     }
 
-    public Unit HandlePlacesQuery(PlacesQuery placesQuery) {
+    fun HandlePlacesQuery(PlacesQuery placesQuery) {
         DefaultMessageHandler(placesQuery)
     }
 
-    public Unit HandlePlacesReply(PlacesReply placesReply) {
+    fun HandlePlacesReply(PlacesReply placesReply) {
         DefaultMessageHandler(placesReply)
     }
 
-    public Unit HandlePreloadSound(PreloadSound preloadSound) {
+    fun HandlePreloadSound(PreloadSound preloadSound) {
         DefaultMessageHandler(preloadSound)
     }
 
-    public Unit HandlePurgeInventoryDescendents(PurgeInventoryDescendents purgeInventoryDescendents) {
+    fun HandlePurgeInventoryDescendents(PurgeInventoryDescendents purgeInventoryDescendents) {
         DefaultMessageHandler(purgeInventoryDescendents)
     }
 
-    public Unit HandleRebakeAvatarTextures(RebakeAvatarTextures rebakeAvatarTextures) {
+    fun HandleRebakeAvatarTextures(RebakeAvatarTextures rebakeAvatarTextures) {
         DefaultMessageHandler(rebakeAvatarTextures)
     }
 
-    public Unit HandleRedo(Redo redo) {
+    fun HandleRedo(Redo redo) {
         DefaultMessageHandler(redo)
     }
 
-    public Unit HandleRegionHandleRequest(RegionHandleRequest regionHandleRequest) {
+    fun HandleRegionHandleRequest(RegionHandleRequest regionHandleRequest) {
         DefaultMessageHandler(regionHandleRequest)
     }
 
-    public Unit HandleRegionHandshake(RegionHandshake regionHandshake) {
+    fun HandleRegionHandshake(RegionHandshake regionHandshake) {
         DefaultMessageHandler(regionHandshake)
     }
 
-    public Unit HandleRegionHandshakeReply(RegionHandshakeReply regionHandshakeReply) {
+    fun HandleRegionHandshakeReply(RegionHandshakeReply regionHandshakeReply) {
         DefaultMessageHandler(regionHandshakeReply)
     }
 
-    public Unit HandleRegionIDAndHandleReply(RegionIDAndHandleReply regionIDAndHandleReply) {
+    fun HandleRegionIDAndHandleReply(RegionIDAndHandleReply regionIDAndHandleReply) {
         DefaultMessageHandler(regionIDAndHandleReply)
     }
 
-    public Unit HandleRegionInfo(RegionInfo regionInfo) {
+    fun HandleRegionInfo(RegionInfo regionInfo) {
         DefaultMessageHandler(regionInfo)
     }
 
-    public Unit HandleRegionPresenceRequestByHandle(RegionPresenceRequestByHandle regionPresenceRequestByHandle) {
+    fun HandleRegionPresenceRequestByHandle(RegionPresenceRequestByHandle regionPresenceRequestByHandle) {
         DefaultMessageHandler(regionPresenceRequestByHandle)
     }
 
-    public Unit HandleRegionPresenceRequestByRegionID(RegionPresenceRequestByRegionID regionPresenceRequestByRegionID) {
+    fun HandleRegionPresenceRequestByRegionID(RegionPresenceRequestByRegionID regionPresenceRequestByRegionID) {
         DefaultMessageHandler(regionPresenceRequestByRegionID)
     }
 
-    public Unit HandleRegionPresenceResponse(RegionPresenceResponse regionPresenceResponse) {
+    fun HandleRegionPresenceResponse(RegionPresenceResponse regionPresenceResponse) {
         DefaultMessageHandler(regionPresenceResponse)
     }
 
-    public Unit HandleRemoveAttachment(RemoveAttachment removeAttachment) {
+    fun HandleRemoveAttachment(RemoveAttachment removeAttachment) {
         DefaultMessageHandler(removeAttachment)
     }
 
-    public Unit HandleRemoveInventoryFolder(RemoveInventoryFolder removeInventoryFolder) {
+    fun HandleRemoveInventoryFolder(RemoveInventoryFolder removeInventoryFolder) {
         DefaultMessageHandler(removeInventoryFolder)
     }
 
-    public Unit HandleRemoveInventoryItem(RemoveInventoryItem removeInventoryItem) {
+    fun HandleRemoveInventoryItem(RemoveInventoryItem removeInventoryItem) {
         DefaultMessageHandler(removeInventoryItem)
     }
 
-    public Unit HandleRemoveInventoryObjects(RemoveInventoryObjects removeInventoryObjects) {
+    fun HandleRemoveInventoryObjects(RemoveInventoryObjects removeInventoryObjects) {
         DefaultMessageHandler(removeInventoryObjects)
     }
 
-    public Unit HandleRemoveMuteListEntry(RemoveMuteListEntry removeMuteListEntry) {
+    fun HandleRemoveMuteListEntry(RemoveMuteListEntry removeMuteListEntry) {
         DefaultMessageHandler(removeMuteListEntry)
     }
 
-    public Unit HandleRemoveNameValuePair(RemoveNameValuePair removeNameValuePair) {
+    fun HandleRemoveNameValuePair(RemoveNameValuePair removeNameValuePair) {
         DefaultMessageHandler(removeNameValuePair)
     }
 
-    public Unit HandleRemoveParcel(RemoveParcel removeParcel) {
+    fun HandleRemoveParcel(RemoveParcel removeParcel) {
         DefaultMessageHandler(removeParcel)
     }
 
-    public Unit HandleRemoveTaskInventory(RemoveTaskInventory removeTaskInventory) {
+    fun HandleRemoveTaskInventory(RemoveTaskInventory removeTaskInventory) {
         DefaultMessageHandler(removeTaskInventory)
     }
 
-    public Unit HandleReplyTaskInventory(ReplyTaskInventory replyTaskInventory) {
+    fun HandleReplyTaskInventory(ReplyTaskInventory replyTaskInventory) {
         DefaultMessageHandler(replyTaskInventory)
     }
 
-    public Unit HandleReportAutosaveCrash(ReportAutosaveCrash reportAutosaveCrash) {
+    fun HandleReportAutosaveCrash(ReportAutosaveCrash reportAutosaveCrash) {
         DefaultMessageHandler(reportAutosaveCrash)
     }
 
-    public Unit HandleRequestGodlikePowers(RequestGodlikePowers requestGodlikePowers) {
+    fun HandleRequestGodlikePowers(RequestGodlikePowers requestGodlikePowers) {
         DefaultMessageHandler(requestGodlikePowers)
     }
 
-    public Unit HandleRequestImage(RequestImage requestImage) {
+    fun HandleRequestImage(RequestImage requestImage) {
         DefaultMessageHandler(requestImage)
     }
 
-    public Unit HandleRequestInventoryAsset(RequestInventoryAsset requestInventoryAsset) {
+    fun HandleRequestInventoryAsset(RequestInventoryAsset requestInventoryAsset) {
         DefaultMessageHandler(requestInventoryAsset)
     }
 
-    public Unit HandleRequestMultipleObjects(RequestMultipleObjects requestMultipleObjects) {
+    fun HandleRequestMultipleObjects(RequestMultipleObjects requestMultipleObjects) {
         DefaultMessageHandler(requestMultipleObjects)
     }
 
-    public Unit HandleRequestObjectPropertiesFamily(RequestObjectPropertiesFamily requestObjectPropertiesFamily) {
+    fun HandleRequestObjectPropertiesFamily(RequestObjectPropertiesFamily requestObjectPropertiesFamily) {
         DefaultMessageHandler(requestObjectPropertiesFamily)
     }
 
-    public Unit HandleRequestParcelTransfer(RequestParcelTransfer requestParcelTransfer) {
+    fun HandleRequestParcelTransfer(RequestParcelTransfer requestParcelTransfer) {
         DefaultMessageHandler(requestParcelTransfer)
     }
 
-    public Unit HandleRequestPayPrice(RequestPayPrice requestPayPrice) {
+    fun HandleRequestPayPrice(RequestPayPrice requestPayPrice) {
         DefaultMessageHandler(requestPayPrice)
     }
 
-    public Unit HandleRequestRegionInfo(RequestRegionInfo requestRegionInfo) {
+    fun HandleRequestRegionInfo(RequestRegionInfo requestRegionInfo) {
         DefaultMessageHandler(requestRegionInfo)
     }
 
-    public Unit HandleRequestTaskInventory(RequestTaskInventory requestTaskInventory) {
+    fun HandleRequestTaskInventory(RequestTaskInventory requestTaskInventory) {
         DefaultMessageHandler(requestTaskInventory)
     }
 
-    public Unit HandleRequestTrustedCircuit(RequestTrustedCircuit requestTrustedCircuit) {
+    fun HandleRequestTrustedCircuit(RequestTrustedCircuit requestTrustedCircuit) {
         DefaultMessageHandler(requestTrustedCircuit)
     }
 
-    public Unit HandleRequestXfer(RequestXfer requestXfer) {
+    fun HandleRequestXfer(RequestXfer requestXfer) {
         DefaultMessageHandler(requestXfer)
     }
 
-    public Unit HandleRetrieveInstantMessages(RetrieveInstantMessages retrieveInstantMessages) {
+    fun HandleRetrieveInstantMessages(RetrieveInstantMessages retrieveInstantMessages) {
         DefaultMessageHandler(retrieveInstantMessages)
     }
 
-    public Unit HandleRevokePermissions(RevokePermissions revokePermissions) {
+    fun HandleRevokePermissions(RevokePermissions revokePermissions) {
         DefaultMessageHandler(revokePermissions)
     }
 
-    public Unit HandleRezMultipleAttachmentsFromInv(RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv) {
+    fun HandleRezMultipleAttachmentsFromInv(RezMultipleAttachmentsFromInv rezMultipleAttachmentsFromInv) {
         DefaultMessageHandler(rezMultipleAttachmentsFromInv)
     }
 
-    public Unit HandleRezObject(RezObject rezObject) {
+    fun HandleRezObject(RezObject rezObject) {
         DefaultMessageHandler(rezObject)
     }
 
-    public Unit HandleRezObjectFromNotecard(RezObjectFromNotecard rezObjectFromNotecard) {
+    fun HandleRezObjectFromNotecard(RezObjectFromNotecard rezObjectFromNotecard) {
         DefaultMessageHandler(rezObjectFromNotecard)
     }
 
-    public Unit HandleRezRestoreToWorld(RezRestoreToWorld rezRestoreToWorld) {
+    fun HandleRezRestoreToWorld(RezRestoreToWorld rezRestoreToWorld) {
         DefaultMessageHandler(rezRestoreToWorld)
     }
 
-    public Unit HandleRezScript(RezScript rezScript) {
+    fun HandleRezScript(RezScript rezScript) {
         DefaultMessageHandler(rezScript)
     }
 
-    public Unit HandleRezSingleAttachmentFromInv(RezSingleAttachmentFromInv rezSingleAttachmentFromInv) {
+    fun HandleRezSingleAttachmentFromInv(RezSingleAttachmentFromInv rezSingleAttachmentFromInv) {
         DefaultMessageHandler(rezSingleAttachmentFromInv)
     }
 
-    public Unit HandleRoutedMoneyBalanceReply(RoutedMoneyBalanceReply routedMoneyBalanceReply) {
+    fun HandleRoutedMoneyBalanceReply(RoutedMoneyBalanceReply routedMoneyBalanceReply) {
         DefaultMessageHandler(routedMoneyBalanceReply)
     }
 
-    public Unit HandleRpcChannelReply(RpcChannelReply rpcChannelReply) {
+    fun HandleRpcChannelReply(RpcChannelReply rpcChannelReply) {
         DefaultMessageHandler(rpcChannelReply)
     }
 
-    public Unit HandleRpcChannelRequest(RpcChannelRequest rpcChannelRequest) {
+    fun HandleRpcChannelRequest(RpcChannelRequest rpcChannelRequest) {
         DefaultMessageHandler(rpcChannelRequest)
     }
 
-    public Unit HandleRpcScriptReplyInbound(RpcScriptReplyInbound rpcScriptReplyInbound) {
+    fun HandleRpcScriptReplyInbound(RpcScriptReplyInbound rpcScriptReplyInbound) {
         DefaultMessageHandler(rpcScriptReplyInbound)
     }
 
-    public Unit HandleRpcScriptRequestInbound(RpcScriptRequestInbound rpcScriptRequestInbound) {
+    fun HandleRpcScriptRequestInbound(RpcScriptRequestInbound rpcScriptRequestInbound) {
         DefaultMessageHandler(rpcScriptRequestInbound)
     }
 
-    public Unit HandleRpcScriptRequestInboundForward(RpcScriptRequestInboundForward rpcScriptRequestInboundForward) {
+    fun HandleRpcScriptRequestInboundForward(RpcScriptRequestInboundForward rpcScriptRequestInboundForward) {
         DefaultMessageHandler(rpcScriptRequestInboundForward)
     }
 
-    public Unit HandleSaveAssetIntoInventory(SaveAssetIntoInventory saveAssetIntoInventory) {
+    fun HandleSaveAssetIntoInventory(SaveAssetIntoInventory saveAssetIntoInventory) {
         DefaultMessageHandler(saveAssetIntoInventory)
     }
 
-    public Unit HandleScriptAnswerYes(ScriptAnswerYes scriptAnswerYes) {
+    fun HandleScriptAnswerYes(ScriptAnswerYes scriptAnswerYes) {
         DefaultMessageHandler(scriptAnswerYes)
     }
 
-    public Unit HandleScriptControlChange(ScriptControlChange scriptControlChange) {
+    fun HandleScriptControlChange(ScriptControlChange scriptControlChange) {
         DefaultMessageHandler(scriptControlChange)
     }
 
-    public Unit HandleScriptDataReply(ScriptDataReply scriptDataReply) {
+    fun HandleScriptDataReply(ScriptDataReply scriptDataReply) {
         DefaultMessageHandler(scriptDataReply)
     }
 
-    public Unit HandleScriptDataRequest(ScriptDataRequest scriptDataRequest) {
+    fun HandleScriptDataRequest(ScriptDataRequest scriptDataRequest) {
         DefaultMessageHandler(scriptDataRequest)
     }
 
-    public Unit HandleScriptDialog(ScriptDialog scriptDialog) {
+    fun HandleScriptDialog(ScriptDialog scriptDialog) {
         DefaultMessageHandler(scriptDialog)
     }
 
-    public Unit HandleScriptDialogReply(ScriptDialogReply scriptDialogReply) {
+    fun HandleScriptDialogReply(ScriptDialogReply scriptDialogReply) {
         DefaultMessageHandler(scriptDialogReply)
     }
 
-    public Unit HandleScriptMailRegistration(ScriptMailRegistration scriptMailRegistration) {
+    fun HandleScriptMailRegistration(ScriptMailRegistration scriptMailRegistration) {
         DefaultMessageHandler(scriptMailRegistration)
     }
 
-    public Unit HandleScriptQuestion(ScriptQuestion scriptQuestion) {
+    fun HandleScriptQuestion(ScriptQuestion scriptQuestion) {
         DefaultMessageHandler(scriptQuestion)
     }
 
-    public Unit HandleScriptReset(ScriptReset scriptReset) {
+    fun HandleScriptReset(ScriptReset scriptReset) {
         DefaultMessageHandler(scriptReset)
     }
 
-    public Unit HandleScriptRunningReply(ScriptRunningReply scriptRunningReply) {
+    fun HandleScriptRunningReply(ScriptRunningReply scriptRunningReply) {
         DefaultMessageHandler(scriptRunningReply)
     }
 
-    public Unit HandleScriptSensorReply(ScriptSensorReply scriptSensorReply) {
+    fun HandleScriptSensorReply(ScriptSensorReply scriptSensorReply) {
         DefaultMessageHandler(scriptSensorReply)
     }
 
-    public Unit HandleScriptSensorRequest(ScriptSensorRequest scriptSensorRequest) {
+    fun HandleScriptSensorRequest(ScriptSensorRequest scriptSensorRequest) {
         DefaultMessageHandler(scriptSensorRequest)
     }
 
-    public Unit HandleScriptTeleportRequest(ScriptTeleportRequest scriptTeleportRequest) {
+    fun HandleScriptTeleportRequest(ScriptTeleportRequest scriptTeleportRequest) {
         DefaultMessageHandler(scriptTeleportRequest)
     }
 
-    public Unit HandleSendPostcard(SendPostcard sendPostcard) {
+    fun HandleSendPostcard(SendPostcard sendPostcard) {
         DefaultMessageHandler(sendPostcard)
     }
 
-    public Unit HandleSendXferPacket(SendXferPacket sendXferPacket) {
+    fun HandleSendXferPacket(SendXferPacket sendXferPacket) {
         DefaultMessageHandler(sendXferPacket)
     }
 
-    public Unit HandleSetAlwaysRun(SetAlwaysRun setAlwaysRun) {
+    fun HandleSetAlwaysRun(SetAlwaysRun setAlwaysRun) {
         DefaultMessageHandler(setAlwaysRun)
     }
 
-    public Unit HandleSetCPURatio(SetCPURatio setCPURatio) {
+    fun HandleSetCPURatio(SetCPURatio setCPURatio) {
         DefaultMessageHandler(setCPURatio)
     }
 
-    public Unit HandleSetFollowCamProperties(SetFollowCamProperties setFollowCamProperties) {
+    fun HandleSetFollowCamProperties(SetFollowCamProperties setFollowCamProperties) {
         DefaultMessageHandler(setFollowCamProperties)
     }
 
-    public Unit HandleSetGroupAcceptNotices(SetGroupAcceptNotices setGroupAcceptNotices) {
+    fun HandleSetGroupAcceptNotices(SetGroupAcceptNotices setGroupAcceptNotices) {
         DefaultMessageHandler(setGroupAcceptNotices)
     }
 
-    public Unit HandleSetGroupContribution(SetGroupContribution setGroupContribution) {
+    fun HandleSetGroupContribution(SetGroupContribution setGroupContribution) {
         DefaultMessageHandler(setGroupContribution)
     }
 
-    public Unit HandleSetScriptRunning(SetScriptRunning setScriptRunning) {
+    fun HandleSetScriptRunning(SetScriptRunning setScriptRunning) {
         DefaultMessageHandler(setScriptRunning)
     }
 
-    public Unit HandleSetSimPresenceInDatabase(SetSimPresenceInDatabase setSimPresenceInDatabase) {
+    fun HandleSetSimPresenceInDatabase(SetSimPresenceInDatabase setSimPresenceInDatabase) {
         DefaultMessageHandler(setSimPresenceInDatabase)
     }
 
-    public Unit HandleSetSimStatusInDatabase(SetSimStatusInDatabase setSimStatusInDatabase) {
+    fun HandleSetSimStatusInDatabase(SetSimStatusInDatabase setSimStatusInDatabase) {
         DefaultMessageHandler(setSimStatusInDatabase)
     }
 
-    public Unit HandleSetStartLocation(SetStartLocation setStartLocation) {
+    fun HandleSetStartLocation(SetStartLocation setStartLocation) {
         DefaultMessageHandler(setStartLocation)
     }
 
-    public Unit HandleSetStartLocationRequest(SetStartLocationRequest setStartLocationRequest) {
+    fun HandleSetStartLocationRequest(SetStartLocationRequest setStartLocationRequest) {
         DefaultMessageHandler(setStartLocationRequest)
     }
 
-    public Unit HandleSimCrashed(SimCrashed simCrashed) {
+    fun HandleSimCrashed(SimCrashed simCrashed) {
         DefaultMessageHandler(simCrashed)
     }
 
-    public Unit HandleSimStats(SimStats simStats) {
+    fun HandleSimStats(SimStats simStats) {
         DefaultMessageHandler(simStats)
     }
 
-    public Unit HandleSimStatus(SimStatus simStatus) {
+    fun HandleSimStatus(SimStatus simStatus) {
         DefaultMessageHandler(simStatus)
     }
 
-    public Unit HandleSimWideDeletes(SimWideDeletes simWideDeletes) {
+    fun HandleSimWideDeletes(SimWideDeletes simWideDeletes) {
         DefaultMessageHandler(simWideDeletes)
     }
 
-    public Unit HandleSimulatorLoad(SimulatorLoad simulatorLoad) {
+    fun HandleSimulatorLoad(SimulatorLoad simulatorLoad) {
         DefaultMessageHandler(simulatorLoad)
     }
 
-    public Unit HandleSimulatorMapUpdate(SimulatorMapUpdate simulatorMapUpdate) {
+    fun HandleSimulatorMapUpdate(SimulatorMapUpdate simulatorMapUpdate) {
         DefaultMessageHandler(simulatorMapUpdate)
     }
 
-    public Unit HandleSimulatorPresentAtLocation(SimulatorPresentAtLocation simulatorPresentAtLocation) {
+    fun HandleSimulatorPresentAtLocation(SimulatorPresentAtLocation simulatorPresentAtLocation) {
         DefaultMessageHandler(simulatorPresentAtLocation)
     }
 
-    public Unit HandleSimulatorReady(SimulatorReady simulatorReady) {
+    fun HandleSimulatorReady(SimulatorReady simulatorReady) {
         DefaultMessageHandler(simulatorReady)
     }
 
-    public Unit HandleSimulatorSetMap(SimulatorSetMap simulatorSetMap) {
+    fun HandleSimulatorSetMap(SimulatorSetMap simulatorSetMap) {
         DefaultMessageHandler(simulatorSetMap)
     }
 
-    public Unit HandleSimulatorShutdownRequest(SimulatorShutdownRequest simulatorShutdownRequest) {
+    fun HandleSimulatorShutdownRequest(SimulatorShutdownRequest simulatorShutdownRequest) {
         DefaultMessageHandler(simulatorShutdownRequest)
     }
 
-    public Unit HandleSimulatorViewerTimeMessage(SimulatorViewerTimeMessage simulatorViewerTimeMessage) {
+    fun HandleSimulatorViewerTimeMessage(SimulatorViewerTimeMessage simulatorViewerTimeMessage) {
         DefaultMessageHandler(simulatorViewerTimeMessage)
     }
 
-    public Unit HandleSoundTrigger(SoundTrigger soundTrigger) {
+    fun HandleSoundTrigger(SoundTrigger soundTrigger) {
         DefaultMessageHandler(soundTrigger)
     }
 
-    public Unit HandleStartAuction(StartAuction startAuction) {
+    fun HandleStartAuction(StartAuction startAuction) {
         DefaultMessageHandler(startAuction)
     }
 
-    public Unit HandleStartGroupProposal(StartGroupProposal startGroupProposal) {
+    fun HandleStartGroupProposal(StartGroupProposal startGroupProposal) {
         DefaultMessageHandler(startGroupProposal)
     }
 
-    public Unit HandleStartLure(StartLure startLure) {
+    fun HandleStartLure(StartLure startLure) {
         DefaultMessageHandler(startLure)
     }
 
-    public Unit HandleStartPingCheck(StartPingCheck startPingCheck) {
+    fun HandleStartPingCheck(StartPingCheck startPingCheck) {
         DefaultMessageHandler(startPingCheck)
     }
 
-    public Unit HandleStateSave(StateSave stateSave) {
+    fun HandleStateSave(StateSave stateSave) {
         DefaultMessageHandler(stateSave)
     }
 
-    public Unit HandleSubscribeLoad(SubscribeLoad subscribeLoad) {
+    fun HandleSubscribeLoad(SubscribeLoad subscribeLoad) {
         DefaultMessageHandler(subscribeLoad)
     }
 
-    public Unit HandleSystemKickUser(SystemKickUser systemKickUser) {
+    fun HandleSystemKickUser(SystemKickUser systemKickUser) {
         DefaultMessageHandler(systemKickUser)
     }
 
-    public Unit HandleSystemMessage(SystemMessage systemMessage) {
+    fun HandleSystemMessage(SystemMessage systemMessage) {
         DefaultMessageHandler(systemMessage)
     }
 
-    public Unit HandleTallyVotes(TallyVotes tallyVotes) {
+    fun HandleTallyVotes(TallyVotes tallyVotes) {
         DefaultMessageHandler(tallyVotes)
     }
 
-    public Unit HandleTelehubInfo(TelehubInfo telehubInfo) {
+    fun HandleTelehubInfo(TelehubInfo telehubInfo) {
         DefaultMessageHandler(telehubInfo)
     }
 
-    public Unit HandleTeleportCancel(TeleportCancel teleportCancel) {
+    fun HandleTeleportCancel(TeleportCancel teleportCancel) {
         DefaultMessageHandler(teleportCancel)
     }
 
-    public Unit HandleTeleportFailed(TeleportFailed teleportFailed) {
+    fun HandleTeleportFailed(TeleportFailed teleportFailed) {
         DefaultMessageHandler(teleportFailed)
     }
 
-    public Unit HandleTeleportFinish(TeleportFinish teleportFinish) {
+    fun HandleTeleportFinish(TeleportFinish teleportFinish) {
         DefaultMessageHandler(teleportFinish)
     }
 
-    public Unit HandleTeleportLandingStatusChanged(TeleportLandingStatusChanged teleportLandingStatusChanged) {
+    fun HandleTeleportLandingStatusChanged(TeleportLandingStatusChanged teleportLandingStatusChanged) {
         DefaultMessageHandler(teleportLandingStatusChanged)
     }
 
-    public Unit HandleTeleportLandmarkRequest(TeleportLandmarkRequest teleportLandmarkRequest) {
+    fun HandleTeleportLandmarkRequest(TeleportLandmarkRequest teleportLandmarkRequest) {
         DefaultMessageHandler(teleportLandmarkRequest)
     }
 
-    public Unit HandleTeleportLocal(TeleportLocal teleportLocal) {
+    fun HandleTeleportLocal(TeleportLocal teleportLocal) {
         DefaultMessageHandler(teleportLocal)
     }
 
-    public Unit HandleTeleportLocationRequest(TeleportLocationRequest teleportLocationRequest) {
+    fun HandleTeleportLocationRequest(TeleportLocationRequest teleportLocationRequest) {
         DefaultMessageHandler(teleportLocationRequest)
     }
 
-    public Unit HandleTeleportLureRequest(TeleportLureRequest teleportLureRequest) {
+    fun HandleTeleportLureRequest(TeleportLureRequest teleportLureRequest) {
         DefaultMessageHandler(teleportLureRequest)
     }
 
-    public Unit HandleTeleportProgress(TeleportProgress teleportProgress) {
+    fun HandleTeleportProgress(TeleportProgress teleportProgress) {
         DefaultMessageHandler(teleportProgress)
     }
 
-    public Unit HandleTeleportRequest(TeleportRequest teleportRequest) {
+    fun HandleTeleportRequest(TeleportRequest teleportRequest) {
         DefaultMessageHandler(teleportRequest)
     }
 
-    public Unit HandleTeleportStart(TeleportStart teleportStart) {
+    fun HandleTeleportStart(TeleportStart teleportStart) {
         DefaultMessageHandler(teleportStart)
     }
 
-    public Unit HandleTerminateFriendship(TerminateFriendship terminateFriendship) {
+    fun HandleTerminateFriendship(TerminateFriendship terminateFriendship) {
         DefaultMessageHandler(terminateFriendship)
     }
 
-    public Unit HandleTestMessage(TestMessage testMessage) {
+    fun HandleTestMessage(TestMessage testMessage) {
         DefaultMessageHandler(testMessage)
     }
 
-    public Unit HandleTrackAgent(TrackAgent trackAgent) {
+    fun HandleTrackAgent(TrackAgent trackAgent) {
         DefaultMessageHandler(trackAgent)
     }
 
-    public Unit HandleTransferAbort(TransferAbort transferAbort) {
+    fun HandleTransferAbort(TransferAbort transferAbort) {
         DefaultMessageHandler(transferAbort)
     }
 
-    public Unit HandleTransferInfo(TransferInfo transferInfo) {
+    fun HandleTransferInfo(TransferInfo transferInfo) {
         DefaultMessageHandler(transferInfo)
     }
 
-    public Unit HandleTransferInventory(TransferInventory transferInventory) {
+    fun HandleTransferInventory(TransferInventory transferInventory) {
         DefaultMessageHandler(transferInventory)
     }
 
-    public Unit HandleTransferInventoryAck(TransferInventoryAck transferInventoryAck) {
+    fun HandleTransferInventoryAck(TransferInventoryAck transferInventoryAck) {
         DefaultMessageHandler(transferInventoryAck)
     }
 
-    public Unit HandleTransferPacket(TransferPacket transferPacket) {
+    fun HandleTransferPacket(TransferPacket transferPacket) {
         DefaultMessageHandler(transferPacket)
     }
 
-    public Unit HandleTransferRequest(TransferRequest transferRequest) {
+    fun HandleTransferRequest(TransferRequest transferRequest) {
         DefaultMessageHandler(transferRequest)
     }
 
-    public Unit HandleUUIDGroupNameReply(UUIDGroupNameReply uUIDGroupNameReply) {
+    fun HandleUUIDGroupNameReply(UUIDGroupNameReply uUIDGroupNameReply) {
         DefaultMessageHandler(uUIDGroupNameReply)
     }
 
-    public Unit HandleUUIDGroupNameRequest(UUIDGroupNameRequest uUIDGroupNameRequest) {
+    fun HandleUUIDGroupNameRequest(UUIDGroupNameRequest uUIDGroupNameRequest) {
         DefaultMessageHandler(uUIDGroupNameRequest)
     }
 
-    public Unit HandleUUIDNameReply(UUIDNameReply uUIDNameReply) {
+    fun HandleUUIDNameReply(UUIDNameReply uUIDNameReply) {
         DefaultMessageHandler(uUIDNameReply)
     }
 
-    public Unit HandleUUIDNameRequest(UUIDNameRequest uUIDNameRequest) {
+    fun HandleUUIDNameRequest(UUIDNameRequest uUIDNameRequest) {
         DefaultMessageHandler(uUIDNameRequest)
     }
 
-    public Unit HandleUndo(Undo undo) {
+    fun HandleUndo(Undo undo) {
         DefaultMessageHandler(undo)
     }
 
-    public Unit HandleUndoLand(UndoLand undoLand) {
+    fun HandleUndoLand(UndoLand undoLand) {
         DefaultMessageHandler(undoLand)
     }
 
-    public Unit HandleUnsubscribeLoad(UnsubscribeLoad unsubscribeLoad) {
+    fun HandleUnsubscribeLoad(UnsubscribeLoad unsubscribeLoad) {
         DefaultMessageHandler(unsubscribeLoad)
     }
 
-    public Unit HandleUpdateAttachment(UpdateAttachment updateAttachment) {
+    fun HandleUpdateAttachment(UpdateAttachment updateAttachment) {
         DefaultMessageHandler(updateAttachment)
     }
 
-    public Unit HandleUpdateCreateInventoryItem(UpdateCreateInventoryItem updateCreateInventoryItem) {
+    fun HandleUpdateCreateInventoryItem(UpdateCreateInventoryItem updateCreateInventoryItem) {
         DefaultMessageHandler(updateCreateInventoryItem)
     }
 
-    public Unit HandleUpdateGroupInfo(UpdateGroupInfo updateGroupInfo) {
+    fun HandleUpdateGroupInfo(UpdateGroupInfo updateGroupInfo) {
         DefaultMessageHandler(updateGroupInfo)
     }
 
-    public Unit HandleUpdateInventoryFolder(UpdateInventoryFolder updateInventoryFolder) {
+    fun HandleUpdateInventoryFolder(UpdateInventoryFolder updateInventoryFolder) {
         DefaultMessageHandler(updateInventoryFolder)
     }
 
-    public Unit HandleUpdateInventoryItem(UpdateInventoryItem updateInventoryItem) {
+    fun HandleUpdateInventoryItem(UpdateInventoryItem updateInventoryItem) {
         DefaultMessageHandler(updateInventoryItem)
     }
 
-    public Unit HandleUpdateMuteListEntry(UpdateMuteListEntry updateMuteListEntry) {
+    fun HandleUpdateMuteListEntry(UpdateMuteListEntry updateMuteListEntry) {
         DefaultMessageHandler(updateMuteListEntry)
     }
 
-    public Unit HandleUpdateParcel(UpdateParcel updateParcel) {
+    fun HandleUpdateParcel(UpdateParcel updateParcel) {
         DefaultMessageHandler(updateParcel)
     }
 
-    public Unit HandleUpdateSimulator(UpdateSimulator updateSimulator) {
+    fun HandleUpdateSimulator(UpdateSimulator updateSimulator) {
         DefaultMessageHandler(updateSimulator)
     }
 
-    public Unit HandleUpdateTaskInventory(UpdateTaskInventory updateTaskInventory) {
+    fun HandleUpdateTaskInventory(UpdateTaskInventory updateTaskInventory) {
         DefaultMessageHandler(updateTaskInventory)
     }
 
-    public Unit HandleUpdateUserInfo(UpdateUserInfo updateUserInfo) {
+    fun HandleUpdateUserInfo(UpdateUserInfo updateUserInfo) {
         DefaultMessageHandler(updateUserInfo)
     }
 
-    public Unit HandleUseCachedMuteList(UseCachedMuteList useCachedMuteList) {
+    fun HandleUseCachedMuteList(UseCachedMuteList useCachedMuteList) {
         DefaultMessageHandler(useCachedMuteList)
     }
 
-    public Unit HandleUseCircuitCode(UseCircuitCode useCircuitCode) {
+    fun HandleUseCircuitCode(UseCircuitCode useCircuitCode) {
         DefaultMessageHandler(useCircuitCode)
     }
 
-    public Unit HandleUserInfoReply(UserInfoReply userInfoReply) {
+    fun HandleUserInfoReply(UserInfoReply userInfoReply) {
         DefaultMessageHandler(userInfoReply)
     }
 
-    public Unit HandleUserInfoRequest(UserInfoRequest userInfoRequest) {
+    fun HandleUserInfoRequest(UserInfoRequest userInfoRequest) {
         DefaultMessageHandler(userInfoRequest)
     }
 
-    public Unit HandleUserReport(UserReport userReport) {
+    fun HandleUserReport(UserReport userReport) {
         DefaultMessageHandler(userReport)
     }
 
-    public Unit HandleUserReportInternal(UserReportInternal userReportInternal) {
+    fun HandleUserReportInternal(UserReportInternal userReportInternal) {
         DefaultMessageHandler(userReportInternal)
     }
 
-    public Unit HandleVelocityInterpolateOff(VelocityInterpolateOff velocityInterpolateOff) {
+    fun HandleVelocityInterpolateOff(VelocityInterpolateOff velocityInterpolateOff) {
         DefaultMessageHandler(velocityInterpolateOff)
     }
 
-    public Unit HandleVelocityInterpolateOn(VelocityInterpolateOn velocityInterpolateOn) {
+    fun HandleVelocityInterpolateOn(VelocityInterpolateOn velocityInterpolateOn) {
         DefaultMessageHandler(velocityInterpolateOn)
     }
 
-    public Unit HandleViewerEffect(ViewerEffect viewerEffect) {
+    fun HandleViewerEffect(ViewerEffect viewerEffect) {
         DefaultMessageHandler(viewerEffect)
     }
 
-    public Unit HandleViewerFrozenMessage(ViewerFrozenMessage viewerFrozenMessage) {
+    fun HandleViewerFrozenMessage(ViewerFrozenMessage viewerFrozenMessage) {
         DefaultMessageHandler(viewerFrozenMessage)
     }
 
-    public Unit HandleViewerStartAuction(ViewerStartAuction viewerStartAuction) {
+    fun HandleViewerStartAuction(ViewerStartAuction viewerStartAuction) {
         DefaultMessageHandler(viewerStartAuction)
     }
 
-    public Unit HandleViewerStats(ViewerStats viewerStats) {
+    fun HandleViewerStats(ViewerStats viewerStats) {
         DefaultMessageHandler(viewerStats)
     }
 }

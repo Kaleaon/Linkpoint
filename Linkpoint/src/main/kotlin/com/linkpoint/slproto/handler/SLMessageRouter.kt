@@ -26,7 +26,7 @@ private class HandlerInfo {
             this.subscriber = WeakReference<>(obj)
         }
 
-        public Unit invoke(Object obj) {
+        fun invoke(Object obj) {
             try {
                 Object obj2 = this.subscriber.get()
                 if (obj2 != null) {
@@ -57,7 +57,7 @@ private class HandlerList : LinkedList()<HandlerInfo> {
             this()
         }
 
-        public Unit deleteAll(Object obj) {
+        fun deleteAll(Object obj) {
             LinkedList linkedList = LinkedList()
             Iterator it = iterator()
             while (it.hasNext()) {
@@ -70,7 +70,7 @@ private class HandlerList : LinkedList()<HandlerInfo> {
             removeAll(linkedList)
         }
 
-        public Unit invokeAll(Object obj) {
+        fun invokeAll(Object obj) {
             Iterator it = iterator()
             while (it.hasNext()) {
                 ((HandlerInfo) it.next()).invoke(obj)

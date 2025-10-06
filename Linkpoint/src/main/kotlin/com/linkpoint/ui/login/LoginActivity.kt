@@ -273,10 +273,10 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         }
     }
 
-    public Unit afterTextChanged(Editable editable) {
+    fun afterTextChanged(Editable editable) {
     }
 
-    public Unit beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+    fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
         if (this.enableAutoClear) {
             EditText editText = (EditText) findViewById(R.id.editPassword)
             if (editText.getText().toString().equals(getString(R.string.saved_password))) {
@@ -293,7 +293,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
     }
 
     @EventHandler
-    public Unit handleLoginResult(SLLoginResultEvent sLLoginResultEvent) {
+    fun handleLoginResult(SLLoginResultEvent sLLoginResultEvent) {
         this.loggingIn = false
         Debug.Printf("LoginProgressActivity: result.success = %b", Boolean.valueOf(sLLoginResultEvent.success))
         if (sLLoginResultEvent.success) {
@@ -316,7 +316,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
     }
 
     @EventHandler
-    public Unit handleReconnectingEvent(SLReconnectingEvent sLReconnectingEvent) {
+    fun handleReconnectingEvent(SLReconnectingEvent sLReconnectingEvent) {
         updateConnectingStatus()
     }
 
@@ -329,7 +329,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
     }
 
     /* access modifiers changed from: protected */
-    public Unit onActivityResult(Int i, Int i2, Intent intent) {
+    fun onActivityResult(Int i, Int i2, Intent intent) {
         AccountList.AccountInfo accountInfo
         Debug.Log("LoginActivity: onActivityResult: requestCode = " + i + ", resultCode = " + i2)
         if (intent != null) {
@@ -386,7 +386,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         }
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         switch (view.getId()) {
             case R.id.whatsnewText:
                 startActivity(Intent(this, WhatsNewActivity.class))
@@ -407,7 +407,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         SLGridConnection gridConnection = GridConnectionService.getGridConnection()
         if (gridConnection != null) {
@@ -442,7 +442,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
             /* JADX WARNING: type inference failed for: r5v0, types: [android.widget.AdapterView<?>, android.widget.AdapterView] */
             /* JADX WARNING: Unknown variable types count: 1 */
             /* Code decompiled incorrectly, please refer to instructions dump. */
-            public Unit onItemSelected(android.widget.AdapterView<?> r5, android.view.View r6, Int r7, Long r8) {
+            fun onItemSelected(android.widget.AdapterView<?> r5, android.view.View r6, Int r7, Long r8) {
                 /*
                     r4 = this
                     r3 = 0
@@ -477,7 +477,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
                 throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.ui.login.LoginActivity.AnonymousClass1.onItemSelected(android.widget.AdapterView, android.view.View, Int, Long):Unit")
             }
 
-            public Unit onNothingSelected(AdapterView<?> adapterView) {
+            fun onNothingSelected(AdapterView<?> adapterView) {
             }
         findViewById(R.id.whatsnewText).getViewTreeObserver().addOnGlobalLayoutListener($Lambda$U_ZFuxgsYW8weMauiDTqAtaKePI(this))
         checkIfGridAvailable()
@@ -495,7 +495,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         return true
     }
 
-    public Unit onGridAdded(GridList.GridInfo gridInfo, Boolean z) {
+    fun onGridAdded(GridList.GridInfo gridInfo, Boolean z) {
         if (z) {
             this.gridList.addNewGrid(gridInfo)
         }
@@ -512,10 +512,10 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         }
     }
 
-    public Unit onGridDeleted(GridList.GridInfo gridInfo) {
+    fun onGridDeleted(GridList.GridInfo gridInfo) {
     }
 
-    public Unit onGridEditCancelled() {
+    fun onGridEditCancelled() {
         ((Spinner) findViewById(R.id.spinnerGrid)).setSelection(this.lastSelectedGrid)
     }
 
@@ -541,7 +541,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
     }
 
     /* access modifiers changed from: protected */
-    public Unit onResume() {
+    fun onResume() {
         super.onResume()
         Debug.Printf("LoginActivity: Resumed.", Object[0])
         checkIfGridAvailable()
@@ -564,16 +564,16 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         checkIfGridAvailable()
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStop() {
+    fun onStop() {
         super.onStop()
     }
 
-    public Unit onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+    fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
     }
 }

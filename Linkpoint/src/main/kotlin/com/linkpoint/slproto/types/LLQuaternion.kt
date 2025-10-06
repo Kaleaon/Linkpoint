@@ -239,7 +239,7 @@ private /* synthetic */ Int[] m258getcomlumiyaviewerlumiyaslprototypesLLQuaterni
         return LLQuaternion(f2, f3, f4, f)
     }
 
-    public Unit addMul(LLQuaternion lLQuaternion, Float f) {
+    fun addMul(LLQuaternion lLQuaternion, Float f) {
         this.x += lLQuaternion.x * f
         this.y += lLQuaternion.y * f
         this.z += lLQuaternion.z * f
@@ -274,7 +274,7 @@ private /* synthetic */ Int[] m258getcomlumiyaviewerlumiyaslprototypesLLQuaterni
         return acos
     }
 
-    public Unit getInverseMatrix(Float[] fArr, Int i) {
+    fun getInverseMatrix(Float[] fArr, Int i) {
         Float f = this.x * this.x
         Float f2 = this.y * this.y
         Float f3 = this.z * this.z
@@ -355,7 +355,7 @@ private /* synthetic */ Int[] m258getcomlumiyaviewerlumiyaslprototypesLLQuaterni
         return sqrt
     }
 
-    public Unit set(LLQuaternion lLQuaternion) {
+    fun set(LLQuaternion lLQuaternion) {
         this.x = lLQuaternion.x
         this.y = lLQuaternion.y
         this.z = lLQuaternion.z
@@ -364,14 +364,14 @@ private /* synthetic */ Int[] m258getcomlumiyaviewerlumiyaslprototypesLLQuaterni
         this.inverseMatrix = null
     }
 
-    public Unit setIdentity() {
+    fun setIdentity() {
         this.x = 0.0f
         this.y = 0.0f
         this.z = 0.0f
         this.w = 1.0f
     }
 
-    public Unit setLerp(LLQuaternion lLQuaternion, Float f, LLQuaternion lLQuaternion2, Float f2) {
+    fun setLerp(LLQuaternion lLQuaternion, Float f, LLQuaternion lLQuaternion2, Float f2) {
         this.x = (lLQuaternion.x * f) + (lLQuaternion2.x * f2)
         this.y = (lLQuaternion.y * f) + (lLQuaternion2.y * f2)
         this.z = (lLQuaternion.z * f) + (lLQuaternion2.z * f2)
@@ -380,7 +380,7 @@ private /* synthetic */ Int[] m258getcomlumiyaviewerlumiyaslprototypesLLQuaterni
         this.inverseMatrix = null
     }
 
-    public Unit setMul(LLQuaternion lLQuaternion, LLQuaternion lLQuaternion2) {
+    fun setMul(LLQuaternion lLQuaternion, LLQuaternion lLQuaternion2) {
         this.x = (((lLQuaternion2.w * lLQuaternion.x) + (lLQuaternion2.x * lLQuaternion.w)) + (lLQuaternion2.y * lLQuaternion.z)) - (lLQuaternion2.z * lLQuaternion.y)
         this.y = (((lLQuaternion2.w * lLQuaternion.y) + (lLQuaternion2.y * lLQuaternion.w)) + (lLQuaternion2.z * lLQuaternion.x)) - (lLQuaternion2.x * lLQuaternion.z)
         this.z = (((lLQuaternion2.w * lLQuaternion.z) + (lLQuaternion2.z * lLQuaternion.w)) + (lLQuaternion2.x * lLQuaternion.y)) - (lLQuaternion2.y * lLQuaternion.x)
@@ -389,7 +389,7 @@ private /* synthetic */ Int[] m258getcomlumiyaviewerlumiyaslprototypesLLQuaterni
         this.inverseMatrix = null
     }
 
-    public Unit setQuat(Float f, Float f2, Float f3, Float f4) {
+    fun setQuat(Float f, Float f2, Float f3, Float f4) {
         LLVector3 lLVector3 = LLVector3(f2, f3, f4)
         lLVector3.normVec()
         Float f5 = 0.5f * f
@@ -403,7 +403,7 @@ private /* synthetic */ Int[] m258getcomlumiyaviewerlumiyaslprototypesLLQuaterni
         this.inverseMatrix = null
     }
 
-    public Unit setQuat(Float f, LLVector3 lLVector3) {
+    fun setQuat(Float f, LLVector3 lLVector3) {
         LLVector3 lLVector32 = LLVector3(lLVector3)
         lLVector32.normVec()
         Float f2 = 0.5f * f
@@ -417,14 +417,14 @@ private /* synthetic */ Int[] m258getcomlumiyaviewerlumiyaslprototypesLLQuaterni
         this.inverseMatrix = null
     }
 
-    public Unit setRaw(Float f, Float f2, Float f3, Float f4) {
+    fun setRaw(Float f, Float f2, Float f3, Float f4) {
         this.x = f
         this.y = f2
         this.z = f3
         this.w = f4
     }
 
-    public Unit setZero() {
+    fun setZero() {
         this.x = 0.0f
         this.y = 0.0f
         this.z = 0.0f

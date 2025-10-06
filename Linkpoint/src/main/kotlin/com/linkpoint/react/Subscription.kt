@@ -85,13 +85,13 @@ class Subscription<K, T> : RefreshableOne {
         }
     }
 
-    public Unit requestRefresh() {
+    fun requestRefresh() {
         if (this.subscriptionPool instanceof Refreshable) {
             ((Refreshable) this.subscriptionPool).requestUpdate(this.key)
         }
     }
 
-    public Unit unsubscribe() {
+    fun unsubscribe() {
         this.subscriptionPool.unsubscribe(this)
     }
 }

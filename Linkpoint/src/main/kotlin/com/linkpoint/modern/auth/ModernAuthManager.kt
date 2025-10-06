@@ -203,7 +203,7 @@ class ModernAuthManager {
     /**
      * Clear all cached authentication data
      */
-    public Unit clearAuthCache() {
+    fun clearAuthCache() {
         SharedPreferences.Editor editor = securePrefs.edit()
         editor.clear()
         editor.apply()

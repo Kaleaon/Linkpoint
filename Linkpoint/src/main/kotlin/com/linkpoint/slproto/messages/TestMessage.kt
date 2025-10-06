@@ -31,11 +31,11 @@ class TestMessage : SLMessage() {
         return 56
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleTestMessage(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) 1)
@@ -47,7 +47,7 @@ class TestMessage : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.TestBlock1_Field.Test1 = unpackInt(byteBuffer)
         for (Int i = 0; i < 4; i++) {
             this.NeighborBlock_Fields[i].Test0 = unpackInt(byteBuffer)

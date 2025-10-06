@@ -22,7 +22,7 @@ class ObjectPopupsFragment : Fragment() {
             return false
         }
 
-        public Unit onSwiped(RecyclerView.ViewHolder viewHolder, Int i) {
+        fun onSwiped(RecyclerView.ViewHolder viewHolder, Int i) {
             RecyclerView recyclerView
             RecyclerView.Adapter adapter
             UserManager r1 = ObjectPopupsFragment.this.getUserManager()
@@ -63,7 +63,7 @@ class ObjectPopupsFragment : Fragment() {
         return inflate
     }
 
-    public Unit onStart() {
+    fun onStart() {
         RecyclerView recyclerView
         super.onStart()
         UserManager userManager = getUserManager()
@@ -73,7 +73,7 @@ class ObjectPopupsFragment : Fragment() {
         }
     }
 
-    public Unit onStop() {
+    fun onStop() {
         RecyclerView recyclerView
         View view = getView()
         if (!(view == null || (recyclerView = (RecyclerView) view.findViewById(R.id.objectPopupsList)) == null)) {

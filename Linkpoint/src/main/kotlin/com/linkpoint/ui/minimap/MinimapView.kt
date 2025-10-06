@@ -140,7 +140,7 @@ class MinimapView : View() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onDraw(Canvas canvas) {
+    fun onDraw(Canvas canvas) {
         if (this.minimapBitmap != null) {
             Int width = getWidth()
             Int height = getHeight()
@@ -192,7 +192,7 @@ class MinimapView : View() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onMeasure(Int i, Int i2) {
+    fun onMeasure(Int i, Int i2) {
         Display defaultDisplay = ((WindowManager) getContext().getSystemService("window")).getDefaultDisplay()
         if (Build.VERSION.SDK_INT >= 13) {
             defaultDisplay.getSize(this.displaySize)
@@ -254,7 +254,7 @@ class MinimapView : View() {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setMinimapBitmap(SLMinimap.MinimapBitmap minimapBitmap2) {
+    fun setMinimapBitmap(SLMinimap.MinimapBitmap minimapBitmap2) {
         if (minimapBitmap2 == null) {
             if (this.minimapBitmap != null) {
                 this.minimapBitmap.recycle()
@@ -269,12 +269,12 @@ class MinimapView : View() {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setOnUserClickListener(OnUserClickListener onUserClickListener2) {
+    fun setOnUserClickListener(OnUserClickListener onUserClickListener2) {
         this.onUserClickListener = onUserClickListener2
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setSelectedUser(UUID uuid) {
+    fun setSelectedUser(UUID uuid) {
         if (!Objects.equal(uuid, this.selectedUser)) {
             this.selectedUser = uuid
             invalidate()
@@ -282,7 +282,7 @@ class MinimapView : View() {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setUserLocations(SLMinimap.UserLocations userLocations2) {
+    fun setUserLocations(SLMinimap.UserLocations userLocations2) {
         this.userLocations = userLocations2
         invalidate()
     }

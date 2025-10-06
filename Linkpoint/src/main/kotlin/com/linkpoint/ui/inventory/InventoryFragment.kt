@@ -766,19 +766,19 @@ private /* synthetic */ Int[] m590getcomlumiyaviewerlumiyauiinventoryInventoryAc
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    public Unit m597com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref2(SLAgentCircuit sLAgentCircuit) {
+    fun m597com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref2(SLAgentCircuit sLAgentCircuit) {
         updateFolderActionItems()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onClipboardEntry */
-    public Unit m596com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref1(InventoryManager.InventoryClipboardEntry inventoryClipboardEntry) {
+    fun m596com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref1(InventoryManager.InventoryClipboardEntry inventoryClipboardEntry) {
         updateFolderActionItems()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onInventoryEntryList */
-    public Unit m595com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref0(InventoryEntryList inventoryEntryList) {
+    fun m595com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref0(InventoryEntryList inventoryEntryList) {
         Boolean z = true
         Debug.Printf("InventoryFragment (%s): onInventoryEntryList: %d entries", this, Integer.valueOf(inventoryEntryList.size()))
         if (isForSelectItem()) {
@@ -803,13 +803,13 @@ private /* synthetic */ Int[] m590getcomlumiyaviewerlumiyauiinventoryInventoryAc
 
     /* access modifiers changed from: private */
     /* renamed from: onLoadingStatusChanged */
-    public Unit m599com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref4(Boolean bool) {
+    fun m599com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref4(Boolean bool) {
         updateLoadingStatus()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onWornAttachmentsChanged */
-    public Unit m600com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref5(ImmutableMap<UUID, String> immutableMap) {
+    fun m600com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref5(ImmutableMap<UUID, String> immutableMap) {
         if (this.adapter != null) {
             this.adapter.setWornAttachments(immutableMap)
         }
@@ -817,7 +817,7 @@ private /* synthetic */ Int[] m590getcomlumiyaviewerlumiyauiinventoryInventoryAc
 
     /* access modifiers changed from: private */
     /* renamed from: onWornWearablesChanged */
-    public Unit m601com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref6(Table<SLWearableType, UUID, SLWearable> table) {
+    fun m601com_lumiyaviewer_lumiya_ui_inventory_InventoryFragmentmthref6(Table<SLWearableType, UUID, SLWearable> table) {
         if (this.adapter != null) {
             this.adapter.setWornWearables(table)
         }
@@ -1539,7 +1539,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    public Unit onActivityCreated(Bundle bundle) {
+    fun onActivityCreated(Bundle bundle) {
         Intent intent
         super.onActivityCreated(bundle)
         FragmentActivity activity = getActivity()
@@ -1558,7 +1558,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         ((TextView) view.findViewById(R.id.save_as_message)).setText(getString(R.string.inventory_save_format, this.saveInfo.saveItemName))
     }
 
-    public Unit onActivityResult(Int i, Int i2, Intent intent) {
+    fun onActivityResult(Int i, Int i2, Intent intent) {
         Uri data
         SLAgentCircuit sLAgentCircuit = null
         super.onActivityResult(i, i2, intent)
@@ -1785,12 +1785,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         if (folderActionsVisible()) {
             menuInflater.inflate(R.menu.inventory_fragment_menu, menu)
@@ -1815,7 +1815,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     @EventHandler
-    public Unit onInventorySortOrderChanged(InventorySortOrderChangedEvent inventorySortOrderChangedEvent) {
+    fun onInventorySortOrderChanged(InventorySortOrderChangedEvent inventorySortOrderChangedEvent) {
         if (isFragmentStarted()) {
             showInventoryList(getInventoryQuery())
         }
@@ -1965,24 +1965,24 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         return false
     }
 
-    public Unit onPrepareOptionsMenu(Menu menu) {
+    fun onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu)
         updateFolderActionItems()
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         EventBus.getInstance().subscribe((Object) this)
         showInventoryList(getInventoryQuery())
     }
 
-    public Unit onStop() {
+    fun onStop() {
         showInventoryList((InventoryQuery) null)
         EventBus.getInstance().unsubscribe(this)
         super.onStop()
     }
 
-    public Unit setFragmentArgs(Intent intent, Bundle bundle) {
+    fun setFragmentArgs(Intent intent, Bundle bundle) {
         Debug.Printf("InventoryFragment: setFragmentArgs '%s'", bundle)
         if (bundle != null) {
             getArguments().putAll(bundle)
@@ -1993,7 +1993,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setSearchString(String str) {
+    fun setSearchString(String str) {
         Bundle arguments = getArguments()
         arguments.putBoolean(IS_SEARCHING_KEY, str != null)
         arguments.putString(SEARCH_STRING_KEY, str)

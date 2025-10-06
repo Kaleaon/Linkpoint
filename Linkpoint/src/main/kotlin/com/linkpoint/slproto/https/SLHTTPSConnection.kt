@@ -41,10 +41,10 @@ class SLHTTPSConnection {
     @JvmStatic
 private TrustManager[] trustAllCerts = {trustEverythingManager}
     private const val X509TrustManager trustEverythingManager = X509TrustManager() {
-        public Unit checkClientTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
+        fun checkClientTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
         }
 
-        public Unit checkServerTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
+        fun checkServerTrusted(X509Certificate[] x509CertificateArr, String str) throws CertificateException {
         }
 
         public X509Certificate[] getAcceptedIssuers() {

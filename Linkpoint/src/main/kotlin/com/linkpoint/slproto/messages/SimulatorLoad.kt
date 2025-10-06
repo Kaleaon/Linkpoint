@@ -33,11 +33,11 @@ class SimulatorLoad : SLMessage() {
         return (this.AgentList_Fields.size() * 6) + 14
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleSimulatorLoad(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put(Ascii.FF)
@@ -52,7 +52,7 @@ class SimulatorLoad : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.SimulatorLoadData_Field.TimeDilation = unpackFloat(byteBuffer)
         this.SimulatorLoadData_Field.AgentCount = unpackInt(byteBuffer)
         this.SimulatorLoadData_Field.CanAcceptAgents = unpackBoolean(byteBuffer)

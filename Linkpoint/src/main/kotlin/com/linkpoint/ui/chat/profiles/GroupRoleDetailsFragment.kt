@@ -102,14 +102,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     }
     private val TextWatcher textChangedListener = TextWatcher() {
-        public Unit afterTextChanged(Editable editable) {
+        fun afterTextChanged(Editable editable) {
             GroupRoleDetailsFragment.this.updateUnsavedChanges()
         }
 
-        public Unit beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+        fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
         }
 
-        public Unit onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+        fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
         }
     }
     private MenuItem undoMenuItem
@@ -598,7 +598,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: private */
-    public Unit updateUnsavedChanges() {
+    fun updateUnsavedChanges() {
         Boolean anyChanges = anyChanges()
         if (anyChanges != this.hasChanged) {
             this.hasChanged = anyChanges
@@ -751,12 +751,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return true
     }
 
-    public Unit onCreate(@android.support.annotation.Nullable Bundle bundle) {
+    fun onCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.group_role_edit_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
@@ -845,7 +845,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return inflate
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         setLoadedValues()
     }
 
@@ -863,7 +863,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         this.loadableMonitor.unsubscribeAll()
         if (getArguments().containsKey(ROLE_ID_KEY)) {
             this.RoleID = UUIDPool.getUUID(getArguments().getString(ROLE_ID_KEY))

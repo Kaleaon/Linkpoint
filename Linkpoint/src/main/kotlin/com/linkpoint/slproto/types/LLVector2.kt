@@ -30,7 +30,7 @@ class LLVector2 {
         return LLVector2(lLVector2.x + lLVector22.x, lLVector2.y + lLVector22.y)
     }
 
-    public Unit add(LLVector2 lLVector2) {
+    fun add(LLVector2 lLVector2) {
         this.x += lLVector2.x
         this.y += lLVector2.y
     }
@@ -58,7 +58,7 @@ class LLVector2 {
         return (Float) Math.sqrt((Double) ((this.x * this.x) + (this.y * this.y)))
     }
 
-    public Unit mul(Float f) {
+    fun mul(Float f) {
         this.x *= f
         this.y *= f
     }
@@ -76,17 +76,17 @@ class LLVector2 {
         return sqrt
     }
 
-    public Unit set(Float f, Float f2) {
+    fun set(Float f, Float f2) {
         this.x = f
         this.y = f2
     }
 
-    public Unit setMax(LLVector2 lLVector2) {
+    fun setMax(LLVector2 lLVector2) {
         this.x = Math.max(this.x, lLVector2.x)
         this.y = Math.max(this.y, lLVector2.y)
     }
 
-    public Unit setMin(LLVector2 lLVector2) {
+    fun setMin(LLVector2 lLVector2) {
         this.x = Math.min(this.x, lLVector2.x)
         this.y = Math.min(this.y, lLVector2.y)
     }

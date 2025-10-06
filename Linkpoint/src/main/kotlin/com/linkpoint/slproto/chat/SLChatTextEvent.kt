@@ -62,7 +62,7 @@ class SLChatTextEvent : SLChatEvent() {
         return this.text != null && this.text.startsWith("/me ")
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setMessageText(this.text)
     }

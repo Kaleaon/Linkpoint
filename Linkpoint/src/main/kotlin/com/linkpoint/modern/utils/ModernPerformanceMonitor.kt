@@ -104,7 +104,7 @@ private ModernPerformanceMonitor instance
     /**
      * Start timing an operation
      */
-    public Unit startOperation(String operationName) {
+    fun startOperation(String operationName) {
         Long startTime = SystemClock.elapsedRealtime()
         operationStartTimes.put(operationName, startTime)
         
@@ -118,7 +118,7 @@ private ModernPerformanceMonitor instance
     /**
      * End timing an operation and record the duration
      */
-    public Unit endOperation(String operationName) {
+    fun endOperation(String operationName) {
         Long endTime = SystemClock.elapsedRealtime()
         Long startTime = operationStartTimes.remove(operationName)
         
@@ -139,7 +139,7 @@ private ModernPerformanceMonitor instance
     /**
      * Record a single-point performance measurement
      */
-    public Unit recordMetric(String metricName, Long value) {
+    fun recordMetric(String metricName, Long value) {
         operationDurations.computeIfAbsent(metricName, k -> ArrayList<>()).add(value)
         operationCounts.put(metricName, operationCounts.getOrDefault(metricName, 0) + 1)
         
@@ -447,7 +447,7 @@ private ModernPerformanceMonitor instance
     /**
      * Clear all performance data
      */
-    public Unit clearAllData() {
+    fun clearAllData() {
         operationStartTimes.clear()
         operationDurations.clear()
         operationCounts.clear()

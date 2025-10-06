@@ -168,7 +168,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    public Unit m622com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref1(SLAgentCircuit sLAgentCircuit) {
+    fun m622com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref1(SLAgentCircuit sLAgentCircuit) {
         if (sLAgentCircuit != null && !sLAgentCircuit.getModules().rlvController.canViewNotecard()) {
             finish()
         }
@@ -177,7 +177,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
 
     /* access modifiers changed from: private */
     /* renamed from: onNotecardLoaded */
-    public Unit m621com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref0(AssetData assetData) {
+    fun m621com_lumiyaviewer_lumiya_ui_inventory_NotecardEditActivitymthref0(AssetData assetData) {
         if (assetData.getStatus() == 1) {
             try {
                 this.notecard = SLNotecard(assetData.getData(), this.isEditingScript)
@@ -486,7 +486,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: protected */
-    public Unit onActivityResult(Int i, Int i2, Intent intent) {
+    fun onActivityResult(Int i, Int i2, Intent intent) {
         SLInventoryEntry sLInventoryEntry
         switch (i) {
             case 1:
@@ -504,7 +504,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    public Unit onAttachmentClick(SLInventoryEntry sLInventoryEntry) {
+    fun onAttachmentClick(SLInventoryEntry sLInventoryEntry) {
         if (sLInventoryEntry.invType == SLInventoryType.IT_LANDMARK.getTypeCode()) {
             CharSequence[] charSequenceArr = {getString(R.string.attachment_action_teleport), getString(R.string.attachment_action_copy)}
             AlertDialog.Builder builder = AlertDialog.Builder(this)
@@ -671,7 +671,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         builder2.create().show()
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         switch (view.getId()) {
             case R.id.notecardErrorDiscard:
                 this.lastErrorMessage = null
@@ -691,7 +691,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         Intent intent = getIntent()
         if (intent != null) {

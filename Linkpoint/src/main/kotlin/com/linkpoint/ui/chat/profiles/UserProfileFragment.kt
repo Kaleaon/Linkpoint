@@ -29,7 +29,7 @@ class UserProfileFragment : UserFunctionsFragment() {
             super(fragmentManager)
         }
 
-        public Unit destroyItem(ViewGroup viewGroup, Int i, Object obj) {
+        fun destroyItem(ViewGroup viewGroup, Int i, Object obj) {
             ProfileTab profileTab = ProfileTab.values()[i]
             if (profileTab != null) {
                 UserProfileFragment.this.activeFragments.remove(profileTab)
@@ -86,7 +86,7 @@ class UserProfileFragment : UserFunctionsFragment() {
         return UserFunctionsFragment.makeSelection(chatterID)
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
     }
 
@@ -100,7 +100,7 @@ class UserProfileFragment : UserFunctionsFragment() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         for (WeakReference weakReference : this.activeFragments.values()) {
             Fragment fragment = (Fragment) weakReference.get()
             if (fragment instanceof ReloadableFragment) {

@@ -17,7 +17,7 @@ class LLSDXMLRequest {
     private const val MediaType MEDIA_TYPE_LLSD_XML = MediaType.parse("application/llsd+xml")
     private val AtomicReference<Call> callRef = AtomicReference<>((Object) null)
 
-    public Unit InterruptRequest() {
+    fun InterruptRequest() {
         Call call = this.callRef.get()
         if (call != null) {
             try {

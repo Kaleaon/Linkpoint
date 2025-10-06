@@ -24,11 +24,11 @@ class GodKickUser : SLMessage() {
         return this.UserInfo_Field.Reason.length + 54 + 4
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleGodKickUser(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -91)
@@ -39,7 +39,7 @@ class GodKickUser : SLMessage() {
         packVariable(byteBuffer, this.UserInfo_Field.Reason, 2)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.UserInfo_Field.GodID = unpackUUID(byteBuffer)
         this.UserInfo_Field.GodSessionID = unpackUUID(byteBuffer)
         this.UserInfo_Field.AgentID = unpackUUID(byteBuffer)

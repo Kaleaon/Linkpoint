@@ -166,7 +166,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onDistance */
-    public Unit m301com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref2(Float f) {
+    fun m301com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref2(Float f) {
         if (f != null) {
             Float floatValue = f.floatValue()
             if (Float.compare(floatValue, this.displayData.distanceToUser) != 0) {
@@ -177,7 +177,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onOnlineStatus */
-    public Unit m300com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref1(Boolean bool) {
+    fun m300com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref1(Boolean bool) {
         if (bool != null && this.displayData.isOnline != bool.booleanValue()) {
             setChatterDisplayData(this.displayData.withOnlineStatus(bool.booleanValue()))
         }
@@ -185,14 +185,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
 
     /* access modifiers changed from: private */
     /* renamed from: onUserName */
-    public Unit m299com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref0(UserName userName) {
+    fun m299com_lumiyaviewer_lumiya_slproto_users_manager_ChatterUserSubscriptionmthref0(UserName userName) {
         String userName2 = GlobalOptions.getInstance().isLegacyUserNames() ? userName.getUserName() : userName.getDisplayName()
         if (!Objects.equal(userName2, this.displayData.displayName)) {
             setChatterDisplayData(this.displayData.withDisplayName(userName2))
         }
     }
 
-    public Unit unsubscribe() {
+    fun unsubscribe() {
         this.nameSubscription.unsubscribe()
         this.onlineStatusSubscription.unsubscribe()
         this.distanceSubscription.unsubscribe()

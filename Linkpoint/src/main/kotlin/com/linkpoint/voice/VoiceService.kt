@@ -64,7 +64,7 @@ private VoiceService serviceInstance = null
                 this.this$0 = voiceService
             }
 
-            public Unit onReceive(Context context, Intent intent) {
+            fun onReceive(Context context, Intent intent) {
                 this.this$0.handleBluetoothStateIntent(intent)
             }
         }
@@ -313,14 +313,14 @@ private VoiceService serviceInstance = null
         return this.mMessenger.getBinder()
     }
 
-    public Unit onCreate() {
+    fun onCreate() {
         super.onCreate()
         serviceInstance = this
         this.audioManager = (AudioManager)this.getSystemService("audio")
         this.audioStreamVolumeObserver = AudioStreamVolumeObserver((Context)this)
     }
 
-    public Unit onDestroy() {
+    fun onDestroy() {
         if (this.vivoxController != null) {
             this.vivoxController.setIncomingMessenger(null)
         }
@@ -354,7 +354,7 @@ private VoiceService serviceInstance = null
     /*
      * Enabled aggressive block sorting
      */
-    public Unit setVolume(Float f) {
+    fun setVolume(Float f) {
         if (this.audioManager != null) {
             Int n = this.audioManager.isBluetoothScoOn() ? 6 : 0
             Int n2 = Math.round((Float)this.audioManager.getStreamMaxVolume(n) * f)
@@ -411,7 +411,7 @@ private VoiceService serviceInstance = null
         /*
          * Exception decompiling
          */
-        public Unit handleMessage(Message var1_1) {
+        fun handleMessage(Message var1_1) {
             /*
              * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
              * 

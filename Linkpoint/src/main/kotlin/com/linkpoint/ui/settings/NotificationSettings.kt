@@ -47,7 +47,7 @@ class NotificationSettings {
         return ""
     }
 
-    public Unit Load(SharedPreferences sharedPreferences) {
+    fun Load(SharedPreferences sharedPreferences) {
         this.notificationEnabled = sharedPreferences.getBoolean(this.type.getEnableKey(), true)
         this.soundEnabled = sharedPreferences.getBoolean(this.type.getPlaySoundKey(), true)
         NotificationSounds notificationSounds = NotificationSounds.defaultSounds.get(this.type)

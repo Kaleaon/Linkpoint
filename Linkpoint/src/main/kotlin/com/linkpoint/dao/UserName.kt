@@ -61,19 +61,19 @@ class UserName {
         }
     }
 
-    public Unit setDisplayName(String str) {
+    fun setDisplayName(String str) {
         this.displayName = str
     }
 
-    public Unit setIsBadUUID(Boolean z) {
+    fun setIsBadUUID(Boolean z) {
         this.isBadUUID = z
     }
 
-    public Unit setUserName(String str) {
+    fun setUserName(String str) {
         this.userName = str
     }
 
-    public Unit setUuid(UUID uuid) {
+    fun setUuid(UUID uuid) {
         this.uuid = uuid
     }
 }

@@ -30,19 +30,19 @@ class ParcelInfoFragment_ViewBinding : Unbinder {
         View findRequiredView = Utils.findRequiredView(view, R.id.parcel_teleport_button, "method 'onParcelTeleportButton'")
         this.view2131755600 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 parcelInfoFragment.onParcelTeleportButton()
             }
         View findRequiredView2 = Utils.findRequiredView(view, R.id.parcel_owner_profile_button, "method 'onParcelOwnerProfileClick'")
         this.view2131755608 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 parcelInfoFragment.onParcelOwnerProfileClick()
             }
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         ParcelInfoFragment parcelInfoFragment = this.target
         if (parcelInfoFragment == null) {
             throw IllegalStateException("Bindings already cleared.")

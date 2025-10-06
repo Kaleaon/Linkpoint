@@ -17,11 +17,11 @@ private class TextGenRequest : ResourceRequest()<DrawableTextParams, DrawableTex
             this.fontSize = i
         }
 
-        public Unit execute() {
+        fun execute() {
             PrimComputeExecutor.getInstance().execute(this)
         }
 
-        public Unit run() {
+        fun run() {
             completeRequest(DrawableTextBitmap((DrawableTextParams) getParams(), this.fontSize))
         }
     }

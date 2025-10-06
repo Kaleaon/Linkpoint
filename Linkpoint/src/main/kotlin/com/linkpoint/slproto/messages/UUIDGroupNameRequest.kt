@@ -22,11 +22,11 @@ class UUIDGroupNameRequest : SLMessage() {
         return (this.UUIDNameBlock_Fields.size() * 16) + 5
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleUUIDGroupNameRequest(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -19)
@@ -36,7 +36,7 @@ class UUIDGroupNameRequest : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         Byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
         for (Int i = 0; i < b; i++) {
             UUIDNameBlock uUIDNameBlock = UUIDNameBlock()

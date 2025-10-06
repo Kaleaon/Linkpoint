@@ -28,11 +28,11 @@ class CreateGroupReply : SLMessage() {
         return this.ReplyData_Field.Message.length + 18 + 20
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleCreateGroupReply(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 84)
@@ -42,7 +42,7 @@ class CreateGroupReply : SLMessage() {
         packVariable(byteBuffer, this.ReplyData_Field.Message, 1)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.ReplyData_Field.GroupID = unpackUUID(byteBuffer)
         this.ReplyData_Field.Success = unpackBoolean(byteBuffer)

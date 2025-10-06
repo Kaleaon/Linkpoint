@@ -12,7 +12,7 @@ class StarsProgram : ShaderProgram() {
         super(Shader.StarsVertexShader, Shader.StarsFragmentShader)
     }
 
-    public Unit ApplyWindlight(RenderContext renderContext) {
+    fun ApplyWindlight(RenderContext renderContext) {
         GLES20.glUniform4f(this.uStarColor, 1.0f, 1.0f, 1.0f, renderContext.windlightPreset.star_brightness)
     }
 

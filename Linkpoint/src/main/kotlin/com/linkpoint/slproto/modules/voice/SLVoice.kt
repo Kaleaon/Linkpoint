@@ -91,7 +91,7 @@ class SLVoice : SLModule() {
 
     /* access modifiers changed from: private */
     /* renamed from: onParcelVoiceInfoResult */
-    public Unit m253com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref3(LLSDNode lLSDNode) {
+    fun m253com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref3(LLSDNode lLSDNode) {
         if (lLSDNode != null) {
             try {
                 Debug.Printf("SLVoice: parcel voice info '%s'", lLSDNode.serializeToXML())
@@ -103,7 +103,7 @@ class SLVoice : SLModule() {
 
     /* access modifiers changed from: private */
     /* renamed from: onProvisionVoiceAccountResult */
-    public Unit m252com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref2(LLSDNode lLSDNode) {
+    fun m252com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref2(LLSDNode lLSDNode) {
         if (lLSDNode != null) {
             try {
                 Debug.Printf("SLVoice: result '%s'", lLSDNode.serializeToXML())
@@ -220,11 +220,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceLoginStatusChanged */
-    public Unit m250com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref0(Boolean bool) {
+    fun m250com_lumiyaviewer_lumiya_slproto_modules_voice_SLVoicemthref0(Boolean bool) {
         this.voiceLoggedIn = bool != null ? bool.booleanValue() : false
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         this.shutdown = true
         this.voiceLoggedInSubscription.unsubscribe()
         super.HandleCloseCircuit()
@@ -411,7 +411,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         }
     }
 
-    public Unit nearbyVoiceChatRequest(VoiceChannelInfo voiceChannelInfo) {
+    fun nearbyVoiceChatRequest(VoiceChannelInfo voiceChannelInfo) {
         VoicePluginServiceConnection voicePluginServiceConnection2 = this.voicePluginServiceConnection
         if (this.voiceEnabled && this.voiceLoggedIn && voicePluginServiceConnection2 != null) {
             voicePluginServiceConnection2.addChannel(ChatterID.getLocalChatterID(this.userManager.getUserID()), voiceChannelInfo)
@@ -420,14 +420,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
     }
 
     @EventHandler
-    public Unit onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
+    fun onGlobalOptionsChanged(GlobalOptions.GlobalOptionsChangedEvent globalOptionsChangedEvent) {
         updateVoiceEnabledStatus()
     }
 
-    public Unit onGroupSessionReady(final UUID uuid) {
+    fun onGroupSessionReady(final UUID uuid) {
         if (this.requestedGroupChats.remove(uuid) && this.chatSessionRequestURL != null) {
             LLSDXMLAsyncRequest(this.chatSessionRequestURL, LLSDMap(LLSDMap.LLSDMapEntry("method", LLSDString(NotificationCompat.CATEGORY_CALL)), LLSDMap.LLSDMapEntry("session-id", LLSDUUID(uuid))), LLSDXMLAsyncRequest.LLSDXMLResultListener() {
-                public Unit onLLSDXMLResult(LLSDNode lLSDNode) {
+                fun onLLSDXMLResult(LLSDNode lLSDNode) {
                     ChatterID groupChatterID = ChatterID.getGroupChatterID(SLVoice.this.userManager.getUserID(), uuid)
                     if (lLSDNode == null) {
                         try {
@@ -450,7 +450,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         }
     }
 
-    public Unit onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus) {
+    fun onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus) {
         this.agentCircuit.execute(Runnable(this, voiceChannelStatus) {
 
             /* renamed from: -$f0 */
@@ -524,7 +524,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
 
     }
 
-    public Unit onVoiceLoginStatus(VoicePluginServiceConnection voicePluginServiceConnection2, VoiceLoginStatus voiceLoginStatus) {
+    fun onVoiceLoginStatus(VoicePluginServiceConnection voicePluginServiceConnection2, VoiceLoginStatus voiceLoginStatus) {
         this.agentCircuit.execute(Runnable(this, voiceLoginStatus, voicePluginServiceConnection2) {
 
             /* renamed from: -$f0 */
@@ -680,7 +680,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         return true
     }
 
-    public Unit setCurrentParcel(Int i) {
+    fun setCurrentParcel(Int i) {
         Boolean z = false
         synchronized (this.parcelVoiceChannelLock) {
             if (!(this.parcelVoiceCapURL == null || this.capURL == null || this.requestedParcelID == i)) {
@@ -770,7 +770,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         }
     }
 
-    public Unit updateSpatialVoicePosition() {
+    fun updateSpatialVoicePosition() {
         VoicePluginServiceConnection voicePluginServiceConnection2 = this.voicePluginServiceConnection
         VoiceChannelInfo voiceChannelInfo = this.connectedVoiceChannel
         if (voicePluginServiceConnection2 != null && voiceChannelInfo != null && voiceChannelInfo.isSpatial) {
@@ -788,7 +788,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.modules.voice
         }
     }
 
-    public Unit updateVoiceEnabledStatus() {
+    fun updateVoiceEnabledStatus() {
         UIThreadExecutor.getInstance().execute(Runnable(this) {
 
             /* renamed from: -$f0 */

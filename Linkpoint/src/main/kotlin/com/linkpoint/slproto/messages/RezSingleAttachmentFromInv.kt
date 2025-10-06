@@ -36,11 +36,11 @@ class RezSingleAttachmentFromInv : SLMessage() {
         return this.ObjectData_Field.Name.length + 50 + 1 + this.ObjectData_Field.Description.length + 36
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleRezSingleAttachmentFromInv(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -117)
@@ -57,7 +57,7 @@ class RezSingleAttachmentFromInv : SLMessage() {
         packVariable(byteBuffer, this.ObjectData_Field.Description, 1)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.ObjectData_Field.ItemID = unpackUUID(byteBuffer)

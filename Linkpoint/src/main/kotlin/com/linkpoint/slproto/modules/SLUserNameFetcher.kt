@@ -36,7 +36,7 @@ class SLUserNameFetcher : SLModule(), RequestListener {
     private val Runnable threadRunnable = Runnable() {
         /* JADX WARNING: No exception handlers in catch block: Catch:{  } */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        public Unit run() {
+        fun run() {
             /*
                 r2 = this
             L_0x0000:
@@ -189,7 +189,7 @@ class SLUserNameFetcher : SLModule(), RequestListener {
         return arrayList
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         this.threadMustExit = true
         if (this.xmlReq != null) {
             this.xmlReq.InterruptRequest()
@@ -218,7 +218,7 @@ class SLUserNameFetcher : SLModule(), RequestListener {
         }
     }
 
-    public Unit onNewRequest() {
+    fun onNewRequest() {
         if (this.workingThread != null) {
             this.lock.lock()
             try {

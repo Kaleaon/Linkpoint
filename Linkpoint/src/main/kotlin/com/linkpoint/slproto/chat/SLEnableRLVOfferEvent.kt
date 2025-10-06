@@ -57,12 +57,12 @@ val class SLEnableRLVOfferEvent : SLChatYesNoEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager) {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    public Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager) {
         super.onYesAction(context, userManager)
         SharedPreferences.Editor edit = LinkpointApp.getDefaultSharedPreferences().edit()
         edit.putBoolean("rlv_enabled", true)
@@ -70,7 +70,7 @@ val class SLEnableRLVOfferEvent : SLChatYesNoEvent() {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

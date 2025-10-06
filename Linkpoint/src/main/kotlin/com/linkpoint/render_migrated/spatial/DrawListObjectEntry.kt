@@ -16,7 +16,7 @@ abstract class DrawListObjectEntry : DrawListEntry() {
         return this.objectInfo
     }
 
-    public Unit updateBoundingBox() {
+    fun updateBoundingBox() {
         Float[] fArr = this.objectInfo.worldMatrix
         if (fArr != null) {
             Float f

@@ -103,7 +103,7 @@ const val T: InterrainPerEdge = 256
         }
     }
 
-    public Unit ProcessLayerData(Byte[] bArr) {
+    fun ProcessLayerData(Byte[] bArr) {
         TerrainPatch DecompressPatch
         BitBuffer bitBuffer = BitBuffer(bArr)
         Int bits = bitBuffer.getBits(16)
@@ -187,7 +187,7 @@ const val T: InterrainPerEdge = 256
         return this.waterHeightValid && f < this.waterHeight
     }
 
-    public Unit reset() {
+    fun reset() {
         synchronized (this.vertexLock) {
             this.waterHeightValid = false
             this.validCount = 0
@@ -203,7 +203,7 @@ const val T: InterrainPerEdge = 256
         }
     }
 
-    public Unit updateEntireTerrain() {
+    fun updateEntireTerrain() {
         markVerticesDirty(0, 0, 256, 256)
     }
 }

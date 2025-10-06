@@ -259,7 +259,7 @@ class IntegratedFeatureDemo {
     /**
      * Demonstrate voice communication
      */
-    public Unit demonstrateVoice() {
+    fun demonstrateVoice() {
         if (voiceEnabled) {
             Log.i(TAG, "Demonstrating voice features...")
             
@@ -275,7 +275,7 @@ class IntegratedFeatureDemo {
     /**
      * Demonstrate chat functionality
      */
-    public Unit demonstrateChat() {
+    fun demonstrateChat() {
         if (chatActive) {
             Log.i(TAG, "Demonstrating chat features...")
             
@@ -306,7 +306,7 @@ class IntegratedFeatureDemo {
     /**
      * Cleanup all resources
      */
-    public Unit cleanup() {
+    fun cleanup() {
         try {
             if (voiceManager != null) {
                 voiceManager.cleanup()

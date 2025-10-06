@@ -102,7 +102,7 @@ class GroupRolesProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoad
             return false
         }
 
-        public Unit setData(GroupRoleDataReply groupRoleDataReply, GroupTitlesReply groupTitlesReply, GroupProfileReply groupProfileReply) {
+        fun setData(GroupRoleDataReply groupRoleDataReply, GroupTitlesReply groupTitlesReply, GroupProfileReply groupProfileReply) {
             this.data = groupRoleDataReply
             if (groupTitlesReply != null) {
                 this.titlesByRole = HashMap()
@@ -135,7 +135,7 @@ class GroupRolesProfileTab : ChatterReloadableFragment(), LoadableMonitor.OnLoad
 
     /* access modifiers changed from: private */
     /* renamed from: onAddNewRoleButton */
-    public Unit m497com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTabmthref0(View view) {
+    fun m497com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRolesProfileTabmthref0(View view) {
         if ((getMyGroupPowers() & 16) != 0) {
             DetailsActivity.showEmbeddedDetails(getActivity(), GroupRoleDetailsFragment.class, GroupRoleDetailsFragment.makeSelection(this.chatterID, (UUID) null))
         }
@@ -231,7 +231,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return inflate
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         try {
             if (this.myGroupList.get().Groups.get(this.groupRoles.get().GroupData_Field.GroupID) != null && !this.groupTitles.isSubscribed()) {
                 this.groupTitles.subscribe(this.userManager.getGroupTitles().getPool(), this.groupRoles.get().GroupData_Field.GroupID)
@@ -249,7 +249,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         this.loadableMonitor.unsubscribeAll()
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {
             UUID chatterUUID = ((ChatterID.ChatterIDGroup) chatterID).getChatterUUID()

@@ -22,11 +22,11 @@ class ScriptRunningReply : SLMessage() {
         return 37
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleScriptRunningReply(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -12)
@@ -35,7 +35,7 @@ class ScriptRunningReply : SLMessage() {
         packBoolean(byteBuffer, this.Script_Field.Running)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.Script_Field.ObjectID = unpackUUID(byteBuffer)
         this.Script_Field.ItemID = unpackUUID(byteBuffer)
         this.Script_Field.Running = unpackBoolean(byteBuffer)

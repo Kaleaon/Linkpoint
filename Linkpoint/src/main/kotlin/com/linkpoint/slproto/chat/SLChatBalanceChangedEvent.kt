@@ -79,7 +79,7 @@ class SLChatBalanceChangedEvent : SLChatEvent() {
         return false
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTransactionAmount(this.transactionAmountValid ? Integer.valueOf(this.transactionAmount) : null)
         chatMessage.setNewBalance(Integer.valueOf(this.newBalance))

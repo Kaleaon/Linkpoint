@@ -239,12 +239,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
         return true
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.user_notes_edit_menu, menu)
         this.undoMenuItem = menu.findItem(R.id.item_undo)
@@ -256,7 +256,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
         final TextView textView = (TextView) inflate.findViewById(R.id.field_edit_text)
         textView.setHint(getFieldHint(layoutInflater.getContext()))
         textView.addTextChangedListener(TextWatcher() {
-            public Unit afterTextChanged(Editable editable) {
+            fun afterTextChanged(Editable editable) {
                 Boolean z = !Objects.equal(textView.getText().toString(), TextFieldEditFragment.this.originalText)
                 if (z != TextFieldEditFragment.this.hasChanged) {
                     Boolean unused = TextFieldEditFragment.this.hasChanged = z
@@ -266,10 +266,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
                 }
             }
 
-            public Unit beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+            fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
             }
 
-            public Unit onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+            fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
             }
         return inflate
     }
@@ -380,7 +380,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$Dt
     public abstract Unit saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str)
 
     /* access modifiers changed from: protected */
-    public Unit setOriginalText(String str) {
+    fun setOriginalText(String str) {
         this.originalText = str
         View view = getView()
         if (view != null) {

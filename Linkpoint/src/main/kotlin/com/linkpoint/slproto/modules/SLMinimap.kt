@@ -53,7 +53,7 @@ class SLMinimap : SLModule() {
     private val Int[] parcelIDs = Int[4096]
     private val Map<Integer, ParcelData> parcels = ConcurrentHashMap()
     private val RequestHandler<SubscriptionSingleKey> userLocationRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        public Unit onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
             if (SLMinimap.this.userLocationsResultHandler != null) {
                 SLMinimap.this.userLocationsResultHandler.onResultData(subscriptionSingleKey, UserLocations(SLMinimap.this.myAvatarPosition, SLMinimap.this.getMyAvatarHeading(), SLMinimap.this.userPositions))
             }
@@ -88,7 +88,7 @@ class SLMinimap : SLModule() {
             return Bitmap.createBitmap(this.colors, this.bitmapWidth, this.bitmapHeight, Bitmap.Config.ARGB_8888)
         }
 
-        public Unit updateBitmap(Bitmap bitmap) {
+        fun updateBitmap(Bitmap bitmap) {
             bitmap.setPixels(this.colors, 0, this.bitmapWidth, 0, 0, this.bitmapWidth, this.bitmapHeight)
         }
     }
@@ -152,7 +152,7 @@ class SLMinimap : SLModule() {
 
     /* access modifiers changed from: private */
     /* renamed from: updateAvatarParcelData */
-    public Unit m212com_lumiyaviewer_lumiya_slproto_modules_SLMinimapmthref0() {
+    fun m212com_lumiyaviewer_lumiya_slproto_modules_SLMinimapmthref0() {
         ParcelData parcelData = null
         if (this.myAvatarParcelDataIndex >= 0) {
             parcelData = this.parcels.get(Integer.valueOf(this.parcelIDs[this.myAvatarParcelDataIndex]))
@@ -168,7 +168,7 @@ class SLMinimap : SLModule() {
         this.userManager.setCurrentLocationInfo(CurrentLocationInfo.create(parcelData, this.nearbyUsersCount, this.chatRangeUsersCount, sLVoice.getCurrentParcelVoiceChannel()))
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         if (this.userManager != null) {
             this.userManager.getUserLocationsPool().detachRequestHandler(this.userLocationRequestHandler)
         }
@@ -183,7 +183,7 @@ class SLMinimap : SLModule() {
     /* JADX WARNING: Removed duplicated region for block: B:79:0x01c0  */
     @com.lumiyaviewer.lumiya.slproto.handler.SLMessageHandler
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit HandleCoarseLocationUpdate(com.lumiyaviewer.lumiya.slproto.messages.CoarseLocationUpdate r14) {
+    fun HandleCoarseLocationUpdate(com.lumiyaviewer.lumiya.slproto.messages.CoarseLocationUpdate r14) {
         /*
             r13 = this
             r3 = 0
@@ -442,7 +442,7 @@ class SLMinimap : SLModule() {
     }
 
     @SLMessageHandler
-    public Unit HandleParcelOverlay(ParcelOverlay parcelOverlay) {
+    fun HandleParcelOverlay(ParcelOverlay parcelOverlay) {
         Debug.Log("ParcelOverlay: SequenceID = " + parcelOverlay.ParcelData_Field.SequenceID)
         Byte[] bArr = parcelOverlay.ParcelData_Field.Data
         Int length = bArr.length / 64
@@ -532,7 +532,7 @@ class SLMinimap : SLModule() {
     /* JADX WARNING: Removed duplicated region for block: B:40:? A[RETURN, SYNTHETIC] */
     @com.lumiyaviewer.lumiya.slproto.handler.SLEventQueueMessageHandler(eventName = com.lumiyaviewer.lumiya.slproto.caps.SLCapEventQueue.CapsEventType.ParcelProperties)
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit HandleParcelProperties(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode r10) {
+    fun HandleParcelProperties(com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode r10) {
         /*
             r9 = this
             r2 = 0
@@ -626,7 +626,7 @@ class SLMinimap : SLModule() {
         return arrayList
     }
 
-    public Unit requestUpdateAvatarParcelData() {
+    fun requestUpdateAvatarParcelData() {
         this.agentCircuit.execute($Lambda$eaDiotW55nmaHN5_b1ikeJpLLsk(this))
     }
 }

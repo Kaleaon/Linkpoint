@@ -50,7 +50,7 @@ val class SLChatFriendshipOfferedEvent : SLChatYesNoEvent() {
         return context.getString(R.string.friendship_request_accepted)
     }
 
-    public Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager) {
         super.onYesAction(context, userManager)
         UUID sourceUUID = this.source.getSourceUUID()
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -59,7 +59,7 @@ val class SLChatFriendshipOfferedEvent : SLChatYesNoEvent() {
         }
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setSessionID(this.sessionID)
     }

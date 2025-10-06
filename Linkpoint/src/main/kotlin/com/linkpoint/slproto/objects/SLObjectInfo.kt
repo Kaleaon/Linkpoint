@@ -326,7 +326,7 @@ private Int attachmentIDFromState(Int i) {
         }
     }
 
-    public Unit ApplyObjectProperties(ObjectProperties.ObjectData objectData) {
+    fun ApplyObjectProperties(ObjectProperties.ObjectData objectData) {
         this.name = SLMessage.stringFromVariableOEM(objectData.Name)
         this.description = SLMessage.stringFromVariableUTF(objectData.Description)
         this.touchName = SLMessage.stringFromVariableUTF(objectData.TouchName)
@@ -338,7 +338,7 @@ private Int attachmentIDFromState(Int i) {
         this.nameRequested = false
     }
 
-    public Unit ApplyObjectUpdate(ObjectUpdate.ObjectData objectData) {
+    fun ApplyObjectUpdate(ObjectUpdate.ObjectData objectData) {
         PrimVolumeParams primVolumeParams = null
         this.localID = objectData.ID
         this.uuid = UUIDPool.getUUID(objectData.FullID)
@@ -377,7 +377,7 @@ private Int attachmentIDFromState(Int i) {
     /* JADX WARNING: Removed duplicated region for block: B:68:0x0188  */
     /* JADX WARNING: Removed duplicated region for block: B:71:0x019b  */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit ApplyObjectUpdate(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed.ObjectData r13) throws com.lumiyaviewer.lumiya.slproto.objects.UnsupportedObjectTypeException {
+    fun ApplyObjectUpdate(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed.ObjectData r13) throws com.lumiyaviewer.lumiya.slproto.objects.UnsupportedObjectTypeException {
         /*
             r12 = this
             r10 = 0
@@ -590,7 +590,7 @@ private Int attachmentIDFromState(Int i) {
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo.ApplyObjectUpdate(com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdateCompressed$ObjectData):Unit")
     }
 
-    public Unit ApplyTerseObjectUpdate(ImprovedTerseObjectUpdate.ObjectData objectData) {
+    fun ApplyTerseObjectUpdate(ImprovedTerseObjectUpdate.ObjectData objectData) {
         ByteBuffer wrap = ByteBuffer.wrap(objectData.Data)
         wrap.order(ByteOrder.LITTLE_ENDIAN)
         wrap.getInt()
@@ -633,7 +633,7 @@ private Int attachmentIDFromState(Int i) {
         }
     }
 
-    public Unit clearDrawListEntry() {
+    fun clearDrawListEntry() {
         synchronized (this) {
             this.drawListEntry = null
         }
@@ -707,7 +707,7 @@ private Int attachmentIDFromState(Int i) {
         return this.objectCoords
     }
 
-    public Unit getObjectExtents(MatrixStack matrixStack, Boolean z, LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun getObjectExtents(MatrixStack matrixStack, Boolean z, LLVector3 lLVector3, LLVector3 lLVector32) {
         Float[] fArr = Float[8]
         Int elementOffset = this.objectCoords.getElementOffset(0)
         Int elementOffset2 = this.objectCoords.getElementOffset(1)
@@ -831,7 +831,7 @@ private Int attachmentIDFromState(Int i) {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onTexturesUpdate(SLTextureEntry sLTextureEntry) {
+    fun onTexturesUpdate(SLTextureEntry sLTextureEntry) {
     }
 
     public synchronized Unit removeChild(SLObjectInfo sLObjectInfo) {
@@ -842,7 +842,7 @@ private Int attachmentIDFromState(Int i) {
         this.treeNode.removeChild(sLObjectInfo.treeNode)
     }
 
-    public Unit removeFromSpatialIndex() {
+    fun removeFromSpatialIndex() {
         DrawListObjectEntry existingDrawListEntry = getExistingDrawListEntry()
         if (existingDrawListEntry != null) {
             existingDrawListEntry.requestEntryRemoval()
@@ -868,15 +868,15 @@ private Int attachmentIDFromState(Int i) {
         return
     }
 
-    public Unit setPayInfo(PayInfo payInfo2) {
+    fun setPayInfo(PayInfo payInfo2) {
         this.payInfo = payInfo2
     }
 
-    public Unit updateSpatialIndex(Boolean z) {
+    fun updateSpatialIndex(Boolean z) {
         updateSpatialIndex(SpatialIndex.getInstance().getObjectIndex(), z)
     }
 
-    public Unit updateWorldMatrix(Boolean z) {
+    fun updateWorldMatrix(Boolean z) {
         SLObjectInfo parentObject = getParentObject()
         Float[] matrix = parentObject == null ? IdentityMatrix.getMatrix() : parentObject.isAvatar() ? IdentityMatrix.getMatrix() : parentObject.worldMatrix
         if (matrix != null) {

@@ -64,7 +64,7 @@ private class ExponentialInterpolator : Interpolator {
             this.mAnimator.setRepeatCount(-1)
             this.mAnimator.setInterpolator(ExponentialInterpolator((ExponentialInterpolator) null))
             this.mAnimator.addUpdateListener(ValueAnimator.AnimatorUpdateListener() {
-                public Unit onAnimationUpdate(ValueAnimator valueAnimator) {
+                fun onAnimationUpdate(ValueAnimator valueAnimator) {
                     ButteryProgressBar.this.invalidate()
                 }
             this.mPaint.setColor(this.mBarColor)
@@ -88,7 +88,7 @@ private class ExponentialInterpolator : Interpolator {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onDraw(Canvas canvas) {
+    fun onDraw(Canvas canvas) {
         if (this.mAnimator.isStarted()) {
             this.mShadow.draw(canvas)
             Float floatValue = ((Float) this.mAnimator.getAnimatedValue()).floatValue()
@@ -104,7 +104,7 @@ private class ExponentialInterpolator : Interpolator {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onLayout(Boolean z, Int i, Int i2, Int i3, Int i4) {
+    fun onLayout(Boolean z, Int i, Int i2, Int i3, Int i4) {
         if (z) {
             Int width = getWidth()
             this.mShadow.setBounds(0, this.mSolidBarHeight, width, getHeight() - this.mSolidBarHeight)
@@ -115,7 +115,7 @@ private class ExponentialInterpolator : Interpolator {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onVisibilityChanged(View view, Int i) {
+    fun onVisibilityChanged(View view, Int i) {
         super.onVisibilityChanged(view, i)
         if (i == 0) {
             start()

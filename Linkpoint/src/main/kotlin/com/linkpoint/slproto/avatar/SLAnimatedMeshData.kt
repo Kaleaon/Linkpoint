@@ -306,7 +306,7 @@ class SLAnimatedMeshData : SLMeshData() {
         return this.animatedVertexData
     }
 
-    public Unit setVerticesDirty() {
+    fun setVerticesDirty() {
         this.verticesDirty = true
     }
 }

@@ -163,7 +163,7 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
             return iArr
         }
 
-        public Unit handleMessage(Message message) {
+        fun handleMessage(Message message) {
             if (message.what == 200 && (message.obj instanceof Bundle)) {
                 Bundle bundle = (Bundle) message.obj
                 if (bundle.containsKey("message") && bundle.containsKey("messageType")) {
@@ -251,7 +251,7 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
     }
 
     /* access modifiers changed from: private */
-    public Unit onVoiceAudioProperties(VoiceAudioProperties voiceAudioProperties) {
+    fun onVoiceAudioProperties(VoiceAudioProperties voiceAudioProperties) {
         VoiceBluetoothState voiceBluetoothState = null
         Object[] objArr = Object[1]
         if (voiceAudioProperties != null) {
@@ -266,7 +266,7 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
     }
 
     /* access modifiers changed from: private */
-    public Unit onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus) {
+    fun onVoiceChannelStatus(VoiceChannelStatus voiceChannelStatus) {
         SLModules modules
         if (voiceChannelStatus.chatInfo.state == VoiceChatInfo.VoiceChatState.None) {
             cancelNotifications(voiceChannelStatus.channelInfo.voiceChannelURI)
@@ -291,7 +291,7 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
     }
 
     /* access modifiers changed from: private */
-    public Unit onVoiceInitializeReply(VoiceInitializeReply voiceInitializeReply) {
+    fun onVoiceInitializeReply(VoiceInitializeReply voiceInitializeReply) {
         if (!voiceInitializeReply.appVersionOk) {
             UserManager userManager2 = this.userManager.get()
             if (userManager2 != null) {
@@ -317,7 +317,7 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
     }
 
     /* access modifiers changed from: private */
-    public Unit onVoiceLoginStatus(VoiceLoginStatus voiceLoginStatus) {
+    fun onVoiceLoginStatus(VoiceLoginStatus voiceLoginStatus) {
         SLModules modules
         UserManager userManager2 = this.userManager.get()
         if (userManager2 != null) {
@@ -330,7 +330,7 @@ private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePlugin
     }
 
     /* access modifiers changed from: private */
-    public Unit onVoiceRinging(VoiceRinging voiceRinging) {
+    fun onVoiceRinging(VoiceRinging voiceRinging) {
         UserManager userManager2 = this.userManager.get()
         if (userManager2 != null && voiceRinging != null && voiceRinging.agentUUID != null) {
             ChatterID.ChatterIDUser userChatterID = ChatterID.getUserChatterID(userManager2.getUserID(), voiceRinging.agentUUID)
@@ -457,7 +457,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         ((NotificationManager) this.context.getSystemService("notification")).notify(str2, 1001, build)
     }
 
-    public Unit acceptCall(Intent intent) {
+    fun acceptCall(Intent intent) {
         if (intent.hasExtra(INTENT_EXTRA_RINGING_MESSSAGE)) {
             VoiceRinging voiceRinging = VoiceRinging(intent.getBundleExtra(INTENT_EXTRA_RINGING_MESSSAGE))
             Debug.Printf("Voice: accepting session '%s', url '%s'", voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo.voiceChannelURI)
@@ -478,7 +478,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         }
     }
 
-    public Unit acceptVoiceCall(ChatterID chatterID) {
+    fun acceptVoiceCall(ChatterID chatterID) {
         VoiceChannelInfo voiceChannelInfo = (VoiceChannelInfo) this.voiceChannels.get(chatterID)
         if (voiceChannelInfo != null) {
             Debug.Printf("Voice: cancelling notification", Object[0])
@@ -488,22 +488,22 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         }
     }
 
-    public Unit acceptVoiceCall(VoiceRinging voiceRinging) {
+    fun acceptVoiceCall(VoiceRinging voiceRinging) {
         Debug.Printf("Voice: cancelling notification", Object[0])
         cancelNotifications((String) null)
         Debug.Printf("Voice: accepting voice call (session handle %s)", voiceRinging.sessionHandle)
         sendMessage(VoicePluginMessageType.VoiceAcceptCall, VoiceAcceptCall(voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo))
     }
 
-    public Unit addChannel(ChatterID chatterID, VoiceChannelInfo voiceChannelInfo) {
+    fun addChannel(ChatterID chatterID, VoiceChannelInfo voiceChannelInfo) {
         this.voiceChannels.forcePut(chatterID, voiceChannelInfo)
     }
 
-    public Unit disconnect() {
+    fun disconnect() {
         this.mainThreadHandler.post($Lambda$KEiwggiQxhrsJugAMeHgzXJrgrA(this))
     }
 
-    public Unit enableVoiceMic(Boolean z) {
+    fun enableVoiceMic(Boolean z) {
         sendMessage(VoicePluginMessageType.VoiceEnableMic, VoiceEnableMic(z))
     }
 
@@ -530,7 +530,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         this.context.unbindService(this)
     }
 
-    public Unit onServiceConnected(ComponentName componentName, IBinder iBinder) {
+    fun onServiceConnected(ComponentName componentName, IBinder iBinder) {
         Debug.Printf("LinkpointVoice: service connected", Object[0])
         this.toPluginMessenger = Messenger(iBinder)
         try {
@@ -540,7 +540,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         }
     }
 
-    public Unit onServiceDisconnected(ComponentName componentName) {
+    fun onServiceDisconnected(ComponentName componentName) {
         Debug.Printf("LinkpointCloud: service disconnected", Object[0])
         UserManager userManager2 = this.userManager.get()
         if (userManager2 != null) {
@@ -548,7 +548,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         }
     }
 
-    public Unit rejectCall(Intent intent) {
+    fun rejectCall(Intent intent) {
         if (intent.hasExtra(INTENT_EXTRA_RINGING_MESSSAGE)) {
             VoiceRinging voiceRinging = VoiceRinging(intent.getBundleExtra(INTENT_EXTRA_RINGING_MESSSAGE))
             Debug.Printf("Voice: requesting to reject session '%s', url '%s'", voiceRinging.sessionHandle, voiceRinging.voiceChannelInfo.voiceChannelURI)
@@ -566,18 +566,18 @@ Method generation error in method: com.lumiyaviewer.lumiya.voiceintf.-$Lambda$KE
         return false
     }
 
-    public Unit setVoiceAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
+    fun setVoiceAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
         sendMessage(VoicePluginMessageType.VoiceSetAudioProperties, voiceSetAudioProperties)
     }
 
-    public Unit setVoiceLoginInfo(VoiceLoginInfo voiceLoginInfo2, UserManager userManager2) {
+    fun setVoiceLoginInfo(VoiceLoginInfo voiceLoginInfo2, UserManager userManager2) {
         this.userManager.set(userManager2)
         if (!Objects.equal(this.voiceLoginInfo.getAndSet(voiceLoginInfo2), voiceLoginInfo2) && this.voiceInitialized.get() && voiceLoginInfo2 != null) {
             sendMessage(VoicePluginMessageType.VoiceLogin, VoiceLogin(voiceLoginInfo2))
         }
     }
 
-    public Unit terminateVoiceCall(ChatterID chatterID) {
+    fun terminateVoiceCall(ChatterID chatterID) {
         VoiceChannelInfo voiceChannelInfo = (VoiceChannelInfo) this.voiceChannels.get(chatterID)
         if (voiceChannelInfo != null) {
             sendMessage(VoicePluginMessageType.VoiceTerminateCall, VoiceTerminateCall(voiceChannelInfo))

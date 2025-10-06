@@ -26,7 +26,7 @@ class AvatarPickerForMute : AvatarPickerFragment() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onAvatarSelected(ChatterID chatterID, String str) {
+    fun onAvatarSelected(ChatterID chatterID, String str) {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
             SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()

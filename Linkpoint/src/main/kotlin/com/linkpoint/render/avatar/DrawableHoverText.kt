@@ -50,7 +50,7 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
         }
     }
 
-    public Unit GLCleanup() {
+    fun GLCleanup() {
         if (this.textTextureCache != null) {
             this.textTextureCache.CancelRequest(this)
         }
@@ -95,7 +95,7 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
         }
     }
 
-    public Unit OnResourceReady(Object obj, Boolean z) {
+    fun OnResourceReady(Object obj, Boolean z) {
         if (obj instanceof GLLoadedTextTexture) {
             this.hoverTextTexture = (GLLoadedTextTexture) obj
         } else if (obj == null) {

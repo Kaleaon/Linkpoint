@@ -308,7 +308,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         this.onCallButtonListener = null
         this.updatingAudioVolume = false
         this.volumeChangeListener = SeekBar.OnSeekBarChangeListener() {
-            public Unit onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
+            fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
                     Float max = ((Float) i) / ((Float) seekBar.getMax())
@@ -319,10 +319,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 }
             }
 
-            public Unit onStartTrackingTouch(SeekBar seekBar) {
+            fun onStartTrackingTouch(SeekBar seekBar) {
             }
 
-            public Unit onStopTrackingTouch(SeekBar seekBar) {
+            fun onStopTrackingTouch(SeekBar seekBar) {
             }
         }
         this.onActiveSpeakerNameUpdated = ChatterNameRetriever.OnChatterNameUpdated(this) {
@@ -552,7 +552,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         this.onCallButtonListener = null
         this.updatingAudioVolume = false
         this.volumeChangeListener = SeekBar.OnSeekBarChangeListener() {
-            public Unit onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
+            fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
                     Float max = ((Float) i) / ((Float) seekBar.getMax())
@@ -563,10 +563,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 }
             }
 
-            public Unit onStartTrackingTouch(SeekBar seekBar) {
+            fun onStartTrackingTouch(SeekBar seekBar) {
             }
 
-            public Unit onStopTrackingTouch(SeekBar seekBar) {
+            fun onStopTrackingTouch(SeekBar seekBar) {
             }
         }
         this.onActiveSpeakerNameUpdated = ChatterNameRetriever.OnChatterNameUpdated(this) {
@@ -796,7 +796,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         this.onCallButtonListener = null
         this.updatingAudioVolume = false
         this.volumeChangeListener = SeekBar.OnSeekBarChangeListener() {
-            public Unit onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
+            fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
                     Float max = ((Float) i) / ((Float) seekBar.getMax())
@@ -807,10 +807,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 }
             }
 
-            public Unit onStartTrackingTouch(SeekBar seekBar) {
+            fun onStartTrackingTouch(SeekBar seekBar) {
             }
 
-            public Unit onStopTrackingTouch(SeekBar seekBar) {
+            fun onStopTrackingTouch(SeekBar seekBar) {
             }
         }
         this.onActiveSpeakerNameUpdated = ChatterNameRetriever.OnChatterNameUpdated(this) {
@@ -1041,7 +1041,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         this.onCallButtonListener = null
         this.updatingAudioVolume = false
         this.volumeChangeListener = SeekBar.OnSeekBarChangeListener() {
-            public Unit onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
+            fun onProgressChanged(SeekBar seekBar, Int i, Boolean z) {
                 VoicePluginServiceConnection voicePluginServiceConnection
                 if (z && (!VoiceStatusView.this.updatingAudioVolume)) {
                     Float max = ((Float) i) / ((Float) seekBar.getMax())
@@ -1052,10 +1052,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
                 }
             }
 
-            public Unit onStartTrackingTouch(SeekBar seekBar) {
+            fun onStartTrackingTouch(SeekBar seekBar) {
             }
 
-            public Unit onStopTrackingTouch(SeekBar seekBar) {
+            fun onStopTrackingTouch(SeekBar seekBar) {
             }
         }
         this.onActiveSpeakerNameUpdated = ChatterNameRetriever.OnChatterNameUpdated(this) {
@@ -1154,7 +1154,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceAudioProperties */
-    public Unit m867com_lumiyaviewer_lumiya_ui_voice_VoiceStatusViewmthref0(VoiceAudioProperties voiceAudioProperties2) {
+    fun m867com_lumiyaviewer_lumiya_ui_voice_VoiceStatusViewmthref0(VoiceAudioProperties voiceAudioProperties2) {
         VoiceBluetoothState voiceBluetoothState = null
         Object[] objArr = Object[1]
         if (voiceAudioProperties2 != null) {
@@ -1167,7 +1167,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceChatInfo */
-    public Unit m868com_lumiyaviewer_lumiya_ui_voice_VoiceStatusViewmthref1(VoiceChatInfo voiceChatInfo2) {
+    fun m868com_lumiyaviewer_lumiya_ui_voice_VoiceStatusViewmthref1(VoiceChatInfo voiceChatInfo2) {
         updateVoiceState()
     }
 
@@ -1326,7 +1326,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         }
     }
 
-    public Unit disableMic() {
+    fun disableMic() {
         VoiceChatInfo data
         GridConnectionService serviceInstance
         if (this.chatterID != null && (data = this.voiceChatInfo.getData()) != null && data.state == VoiceChatInfo.VoiceChatState.Active && (serviceInstance = GridConnectionService.getServiceInstance()) != null) {
@@ -1334,7 +1334,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         }
     }
 
-    public Unit enableHover(OnHoverListenerCompat onHoverListenerCompat) {
+    fun enableHover(OnHoverListenerCompat onHoverListenerCompat) {
         if (Build.VERSION.SDK_INT >= 21) {
             this.hoverEnabled = true
             $Lambda$LRu9qjGWbEJmZF4NfrRGigLGXl8 r2 = $Lambda$LRu9qjGWbEJmZF4NfrRGigLGXl8(onHoverListenerCompat)
@@ -1354,7 +1354,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         }
     }
 
-    public Unit hideBackground() {
+    fun hideBackground() {
         this.voiceStatusCardView.setCardBackgroundColor(0)
         this.voiceStatusCardView.setCardElevation(0.0f)
     }
@@ -1367,7 +1367,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     }
 
     @OnClick({2131755739})
-    public Unit onLoudspeakerButton() {
+    fun onLoudspeakerButton() {
         VoicePluginServiceConnection voicePluginServiceConnection
         VoiceAudioProperties data = this.voiceAudioProperties.getData()
         GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
@@ -1377,7 +1377,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     }
 
     @OnClick({2131755731})
-    public Unit onVoiceAnswerButton() {
+    fun onVoiceAnswerButton() {
         GridConnectionService serviceInstance
         VoiceChatInfo data = this.voiceChatInfo.getData()
         if (this.onCallButtonListener != null && (this.chatterID == null || data == null || data.state == VoiceChatInfo.VoiceChatState.None)) {
@@ -1389,7 +1389,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     }
 
     @OnClick({2131755740})
-    public Unit onVoiceBluetoothButton() {
+    fun onVoiceBluetoothButton() {
         VoicePluginServiceConnection voicePluginServiceConnection
         VoiceAudioProperties data = this.voiceAudioProperties.getData()
         GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
@@ -1399,7 +1399,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     }
 
     @OnClick({2131755730})
-    public Unit onVoiceMicOffButton() {
+    fun onVoiceMicOffButton() {
         GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
         if (serviceInstance != null) {
             serviceInstance.enableVoiceMic(true)
@@ -1407,7 +1407,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     }
 
     @OnClick({2131755729})
-    public Unit onVoiceMicOnButton() {
+    fun onVoiceMicOnButton() {
         GridConnectionService serviceInstance = GridConnectionService.getServiceInstance()
         if (serviceInstance != null) {
             serviceInstance.enableVoiceMic(false)
@@ -1415,7 +1415,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     }
 
     @OnClick({2131755728})
-    public Unit onVoiceStatusCardClick() {
+    fun onVoiceStatusCardClick() {
         if (this.voiceStatusControls == null) {
             return
         }
@@ -1428,19 +1428,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
     }
 
     @OnClick({2131755736})
-    public Unit onVoiceTerminateButton() {
+    fun onVoiceTerminateButton() {
         GridConnectionService serviceInstance
         if (this.chatterID != null && (serviceInstance = GridConnectionService.getServiceInstance()) != null) {
             serviceInstance.terminateVoiceCall(this.chatterID)
         }
     }
 
-    public Unit setCanConnect(Boolean z) {
+    fun setCanConnect(Boolean z) {
         this.canConnect = z
         updateVoiceState()
     }
 
-    public Unit setChatterID(ChatterID chatterID2) {
+    fun setChatterID(ChatterID chatterID2) {
         this.chatterID = chatterID2
         if (chatterID2 != null) {
             UserManager userManager = chatterID2.getUserManager()
@@ -1475,7 +1475,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         updateVoiceState()
     }
 
-    public Unit setLightTheme() {
+    fun setLightTheme() {
         this.voiceStatusText.setTextColor(-1)
         this.voiceStatusSmallText.setTextColor(-1)
         this.voiceAnswerButton.setImageResource(R.drawable.icon_material_voice_call)
@@ -1484,16 +1484,16 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.voice.-$Lambda$LRu
         this.voiceTerminateButton.setImageResource(R.drawable.menu_close_light)
     }
 
-    public Unit setOnCallButtonListener(View.OnClickListener onClickListener) {
+    fun setOnCallButtonListener(View.OnClickListener onClickListener) {
         this.onCallButtonListener = onClickListener
     }
 
-    public Unit setShowActiveChatterName(Boolean z) {
+    fun setShowActiveChatterName(Boolean z) {
         this.showActiveChatterName = z
         updateVoiceState()
     }
 
-    public Unit setShowWhenInactive(Boolean z) {
+    fun setShowWhenInactive(Boolean z) {
         this.showWhenInactive = z
         updateVoiceState()
     }

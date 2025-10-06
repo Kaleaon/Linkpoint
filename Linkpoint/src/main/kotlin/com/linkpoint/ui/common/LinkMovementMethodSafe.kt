@@ -62,7 +62,7 @@ class LinkMovementMethodSafe : LinkMovementMethod() {
         }
     }
 
-    public Unit setOnLinkOpenErrorListener(OnLinkOpenErrorListener onLinkOpenErrorListener2) {
+    fun setOnLinkOpenErrorListener(OnLinkOpenErrorListener onLinkOpenErrorListener2) {
         this.onLinkOpenErrorListener = onLinkOpenErrorListener2
     }
 }

@@ -146,7 +146,7 @@ class ModernRenderContext {
     /**
      * Set up projection matrix for perspective rendering
      */
-    public Unit setupProjection(Int width, Int height, Float fov, Float near, Float far) {
+    fun setupProjection(Int width, Int height, Float fov, Float near, Float far) {
         this.aspectRatio = (Float) width / (Float) height
         this.FOVAngle = fov
         
@@ -165,7 +165,7 @@ class ModernRenderContext {
     /**
      * Set up view matrix for camera positioning
      */
-    public Unit setupCamera(Float[] eyePos, Float[] lookAt, Float[] up) {
+    fun setupCamera(Float[] eyePos, Float[] lookAt, Float[] up) {
         Matrix.setLookAtM(viewMatrix, 0, 
             eyePos[0], eyePos[1], eyePos[2],
             lookAt[0], lookAt[1], lookAt[2], 
@@ -175,7 +175,7 @@ class ModernRenderContext {
     /**
      * Begin frame rendering
      */
-    public Unit beginFrame() {
+    fun beginFrame() {
         frameCount++
         
         // Clear frame buffer
@@ -188,7 +188,7 @@ class ModernRenderContext {
     /**
      * End frame rendering
      */
-    public Unit endFrame() {
+    fun endFrame() {
         // Force completion of OpenGL commands
         GLES30.glFlush()
         
@@ -199,36 +199,36 @@ class ModernRenderContext {
     /**
      * Modern matrix operations (replaces legacy GLES10 matrix stack)
      */
-    public Unit pushMatrix() {
+    fun pushMatrix() {
         // Store current model matrix state
         // In modern OpenGL, we manage matrix stack manually
         Log.d(TAG, "Matrix push - managed in application code")
     }
     
-    public Unit popMatrix() {
+    fun popMatrix() {
         // Restore previous model matrix state  
         Log.d(TAG, "Matrix pop - managed in application code")
     }
     
-    public Unit setModelMatrix(Float[] matrix) {
+    fun setModelMatrix(Float[] matrix) {
         System.arraycopy(matrix, 0, modelMatrix, 0, 16)
     }
     
-    public Unit multiplyMatrix(Float[] matrix) {
+    fun multiplyMatrix(Float[] matrix) {
         Float[] temp = Float[16]
         Matrix.multiplyMM(temp, 0, modelMatrix, 0, matrix, 0)
         System.arraycopy(temp, 0, modelMatrix, 0, 16)
     }
     
-    public Unit translate(Float x, Float y, Float z) {
+    fun translate(Float x, Float y, Float z) {
         Matrix.translateM(modelMatrix, 0, x, y, z)
     }
     
-    public Unit rotate(Float angle, Float x, Float y, Float z) {
+    fun rotate(Float angle, Float x, Float y, Float z) {
         Matrix.rotateM(modelMatrix, 0, angle, x, y, z)
     }
     
-    public Unit scale(Float x, Float y, Float z) {
+    fun scale(Float x, Float y, Float z) {
         Matrix.scaleM(modelMatrix, 0, x, y, z)
         this.scaleX = x
         this.scaleY = y 
@@ -261,7 +261,7 @@ class ModernRenderContext {
     /**
      * Render using modern pipeline
      */
-    public Unit renderWithModernPipeline(ModernRenderPipeline.RenderParams params) {
+    fun renderWithModernPipeline(ModernRenderPipeline.RenderParams params) {
         // Set matrices in render params
         System.arraycopy(modelMatrix, 0, params.modelMatrix, 0, 16)
         System.arraycopy(viewMatrix, 0, params.viewMatrix, 0, 16)
@@ -274,7 +274,7 @@ class ModernRenderContext {
     /**
      * Check OpenGL error and log if found
      */
-    public Unit checkGLError(String operation) {
+    fun checkGLError(String operation) {
         Int error = GLES30.glGetError()
         if (error != GLES30.GL_NO_ERROR) {
             Log.e(TAG, "OpenGL error in " + operation + ": " + error)
@@ -306,7 +306,7 @@ class ModernRenderContext {
     /**
      * Cleanup resources
      */
-    public Unit cleanup() {
+    fun cleanup() {
         Log.i(TAG, "Cleaning up Modern Render Context")
         renderPipeline.cleanup()
     }

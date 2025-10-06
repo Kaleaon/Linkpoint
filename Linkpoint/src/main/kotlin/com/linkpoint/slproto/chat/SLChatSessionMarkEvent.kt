@@ -54,7 +54,7 @@ class SLChatSessionMarkEvent : SLChatEvent() {
         return true
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setMessageText(this.description)
         chatMessage.setChatChannel(Integer.valueOf(this.sessionMarkType.ordinal()))

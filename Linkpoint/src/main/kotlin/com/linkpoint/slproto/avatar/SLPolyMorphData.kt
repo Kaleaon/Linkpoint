@@ -35,7 +35,7 @@ class SLPolyMorphData {
         Debug.Log("SLPolyMorphData: Loaded morph '" + sLVisualParamID + "', vertices = " + this.numVertices)
     }
 
-    public Unit applyMorphData(SLMeshData sLMeshData, Float f, GLTexture gLTexture) {
+    fun applyMorphData(SLMeshData sLMeshData, Float f, GLTexture gLTexture) {
         ByteBuffer byteBuffer = null
         Int i3 = 0
         if (this.isMasked && gLTexture != null) {
@@ -52,7 +52,7 @@ class SLPolyMorphData {
         OpenJPEG.applyMeshMorph(f, sLMeshData.vertexBuffer.asByteBuffer(), sLMeshData.texCoordsBuffer.asByteBuffer(), this.numVertices, this.indexBuffer.asByteBuffer(), this.vertexBuffer.asByteBuffer(), this.texCoordsBuffer.asByteBuffer(), i2, i, i3, byteBuffer)
     }
 
-    public Unit applyMorphDataSlow(SLMeshData sLMeshData, Float f, GLTexture gLTexture) {
+    fun applyMorphDataSlow(SLMeshData sLMeshData, Float f, GLTexture gLTexture) {
         FloatBuffer asFloatBuffer = this.vertexBuffer.asFloatBuffer()
         FloatBuffer asFloatBuffer2 = this.texCoordsBuffer.asFloatBuffer()
         IntBuffer asIntBuffer = this.indexBuffer.asIntBuffer()

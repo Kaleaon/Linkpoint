@@ -33,7 +33,7 @@ private class InstanceHolder {
     }
 
     /* access modifiers changed from: protected */
-    public Unit beforeExecute(Thread thread, Runnable runnable) {
+    fun beforeExecute(Thread thread, Runnable runnable) {
         super.beforeExecute(thread, runnable)
         this.pauseLock.lock()
         while (this.isPaused) {
@@ -48,7 +48,7 @@ private class InstanceHolder {
         }
     }
 
-    public Unit pause() {
+    fun pause() {
         this.pauseLock.lock()
         try {
             this.isPaused = true
@@ -57,7 +57,7 @@ private class InstanceHolder {
         }
     }
 
-    public Unit resume() {
+    fun resume() {
         this.pauseLock.lock()
         try {
             this.isPaused = false

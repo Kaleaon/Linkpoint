@@ -122,7 +122,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
     }
 
     @EventHandler
-    public Unit handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
+    fun handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
         Debug.Printf("LogoutDialog: disconnect event", Object[0])
         dismiss()
     }
@@ -145,7 +145,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
     }
 
     /* access modifiers changed from: protected */
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setProgressStyle(0)
         setMessage(getContext().getString(R.string.logging_out))
@@ -165,7 +165,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
         return onSaveInstanceState
     }
 
-    public Unit onStart() {
+    fun onStart() {
         SLAgentCircuit activeAgentCircuit
         SLGridConnection gridConnection
         Boolean z = false
@@ -185,13 +185,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.login.-$Lambda$Ido
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStop() {
+    fun onStop() {
         this.handler.removeCallbacks(this.onDisconnectTimeout)
         this.eventBus.unsubscribe(this)
         super.onStop()
     }
 
-    public Unit setAgentUUID(UUID uuid) {
+    fun setAgentUUID(UUID uuid) {
         this.agentUUID = uuid
     }
 }

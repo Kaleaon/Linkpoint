@@ -73,7 +73,7 @@ class CachedAssetDao : AbstractDao()<CachedAsset, String> {
         return CachedAsset(string, i2, bArr, z)
     }
 
-    public Unit readEntity(Cursor cursor, CachedAsset cachedAsset, Int i) {
+    fun readEntity(Cursor cursor, CachedAsset cachedAsset, Int i) {
         Byte[] bArr = null
         cachedAsset.setKey(cursor.isNull(i + 0) ? null : cursor.getString(i + 0))
         cachedAsset.setStatus(cursor.getInt(i + 1))

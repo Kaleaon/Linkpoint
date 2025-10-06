@@ -146,7 +146,7 @@ private /* synthetic */ Int[] m232getcomlumiyaviewerlumiyaslprotomodulesrlvRLVCo
         return String.format("RestrainedLove viewer v%d.%d.%d", Object[]{1, 10, 1})
     }
 
-    public Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
         try {
             Int parseInt = Integer.parseInt(str)
             switch (m232getcomlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues()[rLVCommands.ordinal()]) {

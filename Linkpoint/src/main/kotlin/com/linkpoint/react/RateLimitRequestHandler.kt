@@ -83,7 +83,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
         return this
     }
 
-    public Unit detachRequestHandler(RequestHandler<K> requestHandler) {
+    fun detachRequestHandler(RequestHandler<K> requestHandler) {
         synchronized (this.lock) {
             if (this.requestHandler == requestHandler) {
                 this.requestHandler = null
@@ -109,7 +109,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
         return this
     }
 
-    public Unit onRequest(K k) {
+    fun onRequest(K k) {
         Debug.Printf("UserPic: RateLimitHandler: for %s", k.toString())
         synchronized (this.lock) {
             this.pendingRequests.add(k)
@@ -117,7 +117,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
         runPendingRequests()
     }
 
-    public Unit onRequestCancelled(K k) {
+    fun onRequestCancelled(K k) {
         Debug.Printf("UserPic: RateLimitHandler: cancelled for %s", k.toString())
         synchronized (this.lock) {
             this.pendingRequests.remove(k)
@@ -128,7 +128,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
         runPendingRequests()
     }
 
-    public Unit onResultData(K k, T t) {
+    fun onResultData(K k, T t) {
         synchronized (this.lock) {
             this.pendingRequests.remove(k)
             this.requestsInFlight.remove(k)
@@ -137,7 +137,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
         runPendingRequests()
     }
 
-    public Unit onResultError(K k, Throwable th) {
+    fun onResultError(K k, Throwable th) {
         synchronized (this.lock) {
             this.pendingRequests.remove(k)
             this.requestsInFlight.remove(k)
@@ -146,7 +146,7 @@ class RateLimitRequestHandler<K, T> : RequestHandler<K>, RequestQueue<K, T>, Req
         runPendingRequests()
     }
 
-    public Unit returnRequest(K k) {
+    fun returnRequest(K k) {
         synchronized (this.lock) {
             if (this.requestsInFlight.remove(k) != null) {
                 this.pendingRequests.add(k)

@@ -21,11 +21,11 @@ class OpenCircuit : SLMessage() {
         return 10
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleOpenCircuit(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) -1)
         byteBuffer.put((Byte) -4)
@@ -33,7 +33,7 @@ class OpenCircuit : SLMessage() {
         packShort(byteBuffer, (Short) this.CircuitInfo_Field.Port)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.CircuitInfo_Field.IP = unpackIPAddress(byteBuffer)
         this.CircuitInfo_Field.Port = unpackShort(byteBuffer) & 65535
     }

@@ -72,7 +72,7 @@ class TextureUDPTransfer {
         }
     }
 
-    public Unit HandleImageData(ImageData imageData) {
+    fun HandleImageData(ImageData imageData) {
         this.lastReceivedPacket = System.currentTimeMillis()
         this.headerReceived = true
         this.size = imageData.ImageID_Field.Size
@@ -81,7 +81,7 @@ class TextureUDPTransfer {
         HandleDataPacket(0, imageData.ImageDataData_Field.Data)
     }
 
-    public Unit HandleImagePacket(ImagePacket imagePacket) {
+    fun HandleImagePacket(ImagePacket imagePacket) {
         HandleDataPacket(imagePacket.ImageID_Field.Packet, imagePacket.ImageData_Field.Data)
     }
 
@@ -94,7 +94,7 @@ class TextureUDPTransfer {
         return true
     }
 
-    public Unit StartTransfer(SLAgentCircuit sLAgentCircuit, SLCircuitInfo sLCircuitInfo) {
+    fun StartTransfer(SLAgentCircuit sLAgentCircuit, SLCircuitInfo sLCircuitInfo) {
         Int i = 0
         Debug.Log("TextureUDP: starting transfer, image ID = " + this.fetchReq.textureID)
         this.lastReceivedPacket = System.currentTimeMillis()

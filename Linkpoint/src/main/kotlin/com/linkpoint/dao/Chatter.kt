@@ -59,35 +59,35 @@ class Chatter {
         return this.uuid
     }
 
-    public Unit setActive(Boolean z) {
+    fun setActive(Boolean z) {
         this.active = z
     }
 
-    public Unit setId(Long l) {
+    fun setId(Long l) {
         this.id = l
     }
 
-    public Unit setLastMessageID(Long l) {
+    fun setLastMessageID(Long l) {
         this.lastMessageID = l
     }
 
-    public Unit setLastSessionID(UUID uuid) {
+    fun setLastSessionID(UUID uuid) {
         this.lastSessionID = uuid
     }
 
-    public Unit setMuted(Boolean z) {
+    fun setMuted(Boolean z) {
         this.muted = z
     }
 
-    public Unit setType(Int i) {
+    fun setType(Int i) {
         this.type = i
     }
 
-    public Unit setUnreadCount(Int i) {
+    fun setUnreadCount(Int i) {
         this.unreadCount = i
     }
 
-    public Unit setUuid(UUID uuid) {
+    fun setUuid(UUID uuid) {
         this.uuid = uuid
     }
 }

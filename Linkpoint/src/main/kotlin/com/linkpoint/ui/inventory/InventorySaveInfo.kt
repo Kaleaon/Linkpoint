@@ -63,7 +63,7 @@ class InventorySaveInfo : Parcelable {
         return 0
     }
 
-    public Unit writeToParcel(Parcel parcel, Int i) {
+    fun writeToParcel(Parcel parcel, Int i) {
         parcel.writeInt(this.saveType.ordinal())
         if (this.saveItemUUID != null) {
             parcel.writeByte((Byte) 1)

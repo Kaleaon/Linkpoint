@@ -35,7 +35,7 @@ class PickDescriptionEditFragment : TextFieldEditFragment() {
 
     /* access modifiers changed from: private */
     /* renamed from: onPickInfoReply */
-    public Unit m506com_lumiyaviewer_lumiya_ui_chat_profiles_PickDescriptionEditFragmentmthref0(PickInfoReply pickInfoReply) {
+    fun m506com_lumiyaviewer_lumiya_ui_chat_profiles_PickDescriptionEditFragmentmthref0(PickInfoReply pickInfoReply) {
         if (pickInfoReply != null) {
             setOriginalText(SLMessage.stringFromVariableUTF(pickInfoReply.Data_Field.Desc))
         }
@@ -47,7 +47,7 @@ class PickDescriptionEditFragment : TextFieldEditFragment() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         AvatarPickKey pickKey = getPickKey()
         if (this.userManager == null || !(chatterID instanceof ChatterID.ChatterIDUser) || pickKey == null) {
             this.pickInfo.unsubscribe()
@@ -57,7 +57,7 @@ class PickDescriptionEditFragment : TextFieldEditFragment() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
+    fun saveEditedText(SLAgentCircuit sLAgentCircuit, ChatterID chatterID, String str) {
         AvatarPickKey pickKey = getPickKey()
         PickInfoReply data = this.pickInfo.getData()
         if (sLAgentCircuit != null && pickKey != null && data != null) {

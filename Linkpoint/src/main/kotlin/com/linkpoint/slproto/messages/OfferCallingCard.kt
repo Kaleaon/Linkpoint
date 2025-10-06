@@ -28,11 +28,11 @@ class OfferCallingCard : SLMessage() {
         return 68
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleOfferCallingCard(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 45)
@@ -42,7 +42,7 @@ class OfferCallingCard : SLMessage() {
         packUUID(byteBuffer, this.AgentBlock_Field.TransactionID)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.AgentBlock_Field.DestID = unpackUUID(byteBuffer)

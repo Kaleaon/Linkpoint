@@ -35,14 +35,14 @@ class HTTP2CapsClient {
             .build()
     }
     
-    public Unit setAuthToken(String token) {
+    fun setAuthToken(String token) {
         this.authToken = token
     }
     
     /**
      * Configure capability URLs from seed capability response
      */
-    public Unit configureCapabilities(Map<String, String> capabilitiesMap) {
+    fun configureCapabilities(Map<String, String> capabilitiesMap) {
         capabilities.clear()
         capabilities.putAll(capabilitiesMap)
         Log.i(TAG, "Configured " + capabilities.size() + " capabilities")
@@ -203,7 +203,7 @@ private class ProgressRequestBody : RequestBody() {
         Unit onProgress(Long bytesWritten, Long contentLength)
     }
     
-    public Unit shutdown() {
+    fun shutdown() {
         client.dispatcher().executorService().shutdown()
         client.connectionPool().evictAll()
     }

@@ -215,7 +215,7 @@ class WebRTCVoiceManager {
     /**
      * Mute/unmute microphone
      */
-    public Unit setMicrophoneMuted(Boolean muted) {
+    fun setMicrophoneMuted(Boolean muted) {
         this.isMuted = muted
         if (localAudioTrack != null) {
             localAudioTrack.setEnabled(!muted)
@@ -226,7 +226,7 @@ class WebRTCVoiceManager {
     /**
      * Set speaker volume
      */
-    public Unit setSpeakerVolume(Float volume) {
+    fun setSpeakerVolume(Float volume) {
         this.speakerVolume = Math.max(0.0f, Math.min(1.0f, volume))
         
         // Adjust audio manager volume
@@ -243,7 +243,7 @@ class WebRTCVoiceManager {
     /**
      * Set microphone volume
      */
-    public Unit setMicrophoneVolume(Float volume) {
+    fun setMicrophoneVolume(Float volume) {
         this.microphoneVolume = Math.max(0.0f, Math.min(1.0f, volume))
         // WebRTC handles microphone gain internally
         Log.i(TAG, "Microphone volume set to: " + this.microphoneVolume)
@@ -308,7 +308,7 @@ class WebRTCVoiceManager {
     /**
      * Cleanup and release resources
      */
-    public Unit cleanup() {
+    fun cleanup() {
         Log.i(TAG, "Cleaning up WebRTC voice system...")
         
         // Close all peer connections
@@ -363,7 +363,7 @@ private class VoiceSession {
             this.createTime = System.currentTimeMillis()
         }
         
-        public Unit cleanup() {
+        fun cleanup() {
             // Cleanup session-specific resources
         }
     }

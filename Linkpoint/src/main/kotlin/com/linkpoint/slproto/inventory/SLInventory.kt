@@ -92,13 +92,13 @@ class SLInventory : SLModule() {
     val Map<UUID, SLInventoryFetchRequest> fetchRequests = ConcurrentHashMap()
     private val ResultHandler<UUID, SLInventoryEntry> folderEntryResultHandler
     private val RequestHandler<UUID> folderLoadingRequestHandler = SimpleRequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             SLInventory.this.updateFolderLoadingStatus(uuid)
         }
     }
     private val ResultHandler<UUID, Boolean> folderLoadingResultHandler
     private val RequestHandler<UUID> folderRequestHandler = RequestHandler<UUID>() {
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             try {
                 Debug.Printf("Inventory: folderRequestHandler: folderId = '%s'", uuid)
                 SLInventoryFetchRequest sLInventoryHTTPFetchRequest = SLInventory.this.fetchCap != null ? SLInventoryHTTPFetchRequest(SLInventory.this, uuid, SLInventory.this.fetchCap) : SLInventoryUDPFetchRequest(SLInventory.this, uuid)
@@ -110,7 +110,7 @@ class SLInventory : SLModule() {
             }
         }
 
-        public Unit onRequestCancelled(UUID uuid) {
+        fun onRequestCancelled(UUID uuid) {
             SLInventoryFetchRequest sLInventoryFetchRequest = (SLInventoryFetchRequest) SLInventory.this.fetchRequests.remove(uuid)
             SLInventory.this.updateFolderLoadingStatus(uuid)
             if (sLInventoryFetchRequest != null) {
@@ -121,11 +121,11 @@ class SLInventory : SLModule() {
     private AtomicInteger nextCallbackID = AtomicInteger(1)
     private val SubscriptionData<UUID, SLInventoryEntry> nextFolderSubscription
     private SLMessageEventListener reloadEvent = SLMessageEventListener() {
-        public Unit onMessageAcknowledged(SLMessage sLMessage) {
+        fun onMessageAcknowledged(SLMessage sLMessage) {
             SLInventory.this.eventBus.publish(SLInventoryUpdatedEvent((Set<Long>) null, (Set<Long>) null, true))
         }
 
-        public Unit onMessageTimeout(SLMessage sLMessage) {
+        fun onMessageTimeout(SLMessage sLMessage) {
         }
     }
     public SLInventoryEntry rootFolder = null
@@ -134,18 +134,18 @@ class SLInventory : SLModule() {
     private val ResultHandler<SubscriptionSingleKey, Boolean> seachRunningResultHandler
     private val ResultHandler<SubscriptionSingleKey, Boolean> searchProcessResultHandler
     private val RequestHandler<SubscriptionSingleKey> searchRequestHandler = RequestHandler<SubscriptionSingleKey>() {
-        public Unit onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
             SLInventory.this.fetchEntireInventoryRequested.set(true)
             SLInventory.this.fetchNextFolder()
         }
 
-        public Unit onRequestCancelled(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequestCancelled(SubscriptionSingleKey subscriptionSingleKey) {
             SLInventory.this.fetchEntireInventoryRequested.set(false)
             SLInventory.this.updateSearchRunningStatus()
         }
     }
     private val RequestHandler<SubscriptionSingleKey> searchRunningRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        public Unit onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
             SLInventory.this.updateSearchRunningStatus()
         }
     }
@@ -436,7 +436,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         updateInventoryItem.isReliable = true
         Debug.Printf("Update inventory callback %d", Integer.valueOf(inventoryData.CallbackID))
         updateInventoryItem.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 super.onMessageAcknowledged(sLMessage)
                 onInventoryCallbackListener.onInventoryCallback(sLInventoryEntry)
             }
@@ -477,7 +477,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     /* access modifiers changed from: private */
-    public Unit MoveTaskInventory(UUID uuid, Int i, UUID uuid2) {
+    fun MoveTaskInventory(UUID uuid, Int i, UUID uuid2) {
         MoveTaskInventory moveTaskInventory = MoveTaskInventory()
         moveTaskInventory.AgentData_Field.AgentID = this.circuitInfo.agentID
         moveTaskInventory.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -489,7 +489,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     /* access modifiers changed from: private */
-    public Unit StartUploadingNotecardContents(SLInventoryEntry sLInventoryEntry, UUID uuid, Boolean z, Byte[] bArr, OnNotecardUpdatedListener onNotecardUpdatedListener) {
+    fun StartUploadingNotecardContents(SLInventoryEntry sLInventoryEntry, UUID uuid, Boolean z, Byte[] bArr, OnNotecardUpdatedListener onNotecardUpdatedListener) {
         GenericHTTPExecutor.getInstance().execute(Runnable(z, this, sLInventoryEntry, bArr, uuid, onNotecardUpdatedListener) {
 
             /* renamed from: -$f0 */
@@ -662,7 +662,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     /* access modifiers changed from: private */
-    public Unit fetchNextFolder() {
+    fun fetchNextFolder() {
         if (this.fetchEntireInventoryRequested.get()) {
             UUID uuid = this.circuitInfo.sessionID
             try {
@@ -698,13 +698,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
 
     /* access modifiers changed from: private */
     /* renamed from: onNextFolderError */
-    public Unit m175com_lumiyaviewer_lumiya_slproto_inventory_SLInventorymthref1(Throwable th) {
+    fun m175com_lumiyaviewer_lumiya_slproto_inventory_SLInventorymthref1(Throwable th) {
         fetchNextFolder()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onNextFolderFetched */
-    public Unit m174com_lumiyaviewer_lumiya_slproto_inventory_SLInventorymthref0(SLInventoryEntry sLInventoryEntry) {
+    fun m174com_lumiyaviewer_lumiya_slproto_inventory_SLInventorymthref0(SLInventoryEntry sLInventoryEntry) {
         if (Objects.equal(sLInventoryEntry.sessionID, this.circuitInfo.sessionID)) {
             fetchNextFolder()
         }
@@ -712,7 +712,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
 
     /* access modifiers changed from: private */
     /* renamed from: onRootFolderFetched */
-    public Unit m176com_lumiyaviewer_lumiya_slproto_inventory_SLInventorymthref2(SLInventoryEntry sLInventoryEntry) {
+    fun m176com_lumiyaviewer_lumiya_slproto_inventory_SLInventorymthref2(SLInventoryEntry sLInventoryEntry) {
         this.rootFolderFetchNeeded = false
         if (this.rootFolderSubscription != null) {
             this.rootFolderSubscription.unsubscribe()
@@ -721,14 +721,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     /* access modifiers changed from: private */
-    public Unit updateFolderLoadingStatus(UUID uuid) {
+    fun updateFolderLoadingStatus(UUID uuid) {
         if (this.folderLoadingResultHandler != null) {
             this.folderLoadingResultHandler.onResultData(uuid, Boolean.valueOf(this.fetchRequests.containsKey(uuid)))
         }
     }
 
     /* access modifiers changed from: private */
-    public Unit updateSearchRunningStatus() {
+    fun updateSearchRunningStatus() {
         if (this.searchRunningRequestHandler != null) {
             this.seachRunningResultHandler.onResultData(SubscriptionSingleKey.Value, Boolean.valueOf(this.fetchEntireInventoryRequested.get() ? this.nextFolderSubscription.isSubscribed() : false))
         }
@@ -752,7 +752,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         return arrayList
     }
 
-    public Unit CopyInventoryFromNotecard(UUID uuid, UUID uuid2, UUID uuid3, Runnable runnable) {
+    fun CopyInventoryFromNotecard(UUID uuid, UUID uuid2, UUID uuid3, Runnable runnable) {
         GenericHTTPExecutor.getInstance().execute(Runnable(this, uuid, uuid2, uuid3, runnable) {
 
             /* renamed from: -$f0 */
@@ -835,7 +835,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
 
     }
 
-    public Unit CopyInventoryItem(SLInventoryEntry sLInventoryEntry, SLInventoryEntry sLInventoryEntry2) {
+    fun CopyInventoryItem(SLInventoryEntry sLInventoryEntry, SLInventoryEntry sLInventoryEntry2) {
         CopyInventoryItem copyInventoryItem = CopyInventoryItem()
         copyInventoryItem.AgentData_Field.AgentID = this.circuitInfo.agentID
         copyInventoryItem.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -850,7 +850,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         SendMessage(copyInventoryItem)
     }
 
-    public Unit CopyObjectContents(String str, Int i, Set<UUID> set, Function<UUID, Void> function) {
+    fun CopyObjectContents(String str, Int i, Set<UUID> set, Function<UUID, Void> function) {
         if (this.rootFolder != null) {
             this.dbExecutor.execute(Runnable(i, this, str, ImmutableSet.copyOf(set), function) {
 
@@ -944,7 +944,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         function.apply(null)
     }
 
-    public Unit DeleteInventoryItem(final SLInventoryEntry sLInventoryEntry) {
+    fun DeleteInventoryItem(final SLInventoryEntry sLInventoryEntry) {
         if (sLInventoryEntry.isFolder) {
             RemoveInventoryFolder removeInventoryFolder = RemoveInventoryFolder()
             removeInventoryFolder.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -954,7 +954,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             removeInventoryFolder.FolderData_Fields.add(folderData)
             removeInventoryFolder.isReliable = true
             removeInventoryFolder.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-                public Unit onMessageAcknowledged(SLMessage sLMessage) {
+                fun onMessageAcknowledged(SLMessage sLMessage) {
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.parentUUID)
                 }
             SendMessage(removeInventoryFolder)
@@ -968,13 +968,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         removeInventoryItem.InventoryData_Fields.add(inventoryData)
         removeInventoryItem.isReliable = true
         removeInventoryItem.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.parentUUID)
             }
         SendMessage(removeInventoryItem)
     }
 
-    public Unit DeleteInventoryItemRaw(UUID uuid) {
+    fun DeleteInventoryItemRaw(UUID uuid) {
         RemoveInventoryItem removeInventoryItem = RemoveInventoryItem()
         removeInventoryItem.AgentData_Field.AgentID = this.circuitInfo.agentID
         removeInventoryItem.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -986,7 +986,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         SendMessage(removeInventoryItem)
     }
 
-    public Unit DeleteMultiInventoryItemRaw(final SLInventoryEntry sLInventoryEntry, List<UUID> list) {
+    fun DeleteMultiInventoryItemRaw(final SLInventoryEntry sLInventoryEntry, List<UUID> list) {
         RemoveInventoryObjects removeInventoryObjects = RemoveInventoryObjects()
         removeInventoryObjects.AgentData_Field.AgentID = this.circuitInfo.agentID
         removeInventoryObjects.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -997,7 +997,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         }
         removeInventoryObjects.isReliable = true
         removeInventoryObjects.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.uuid)
             }
         SendMessage(removeInventoryObjects)
@@ -1033,7 +1033,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         createInventoryFolder.FolderData_Field.Name = SLMessage.stringToVariableOEM(str)
         createInventoryFolder.isReliable = true
         createInventoryFolder.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 Debug.Printf("Inventory: folder created with uuid = %s, parent %s", randomUUID, sLInventoryEntry.uuid)
                 if (SLInventory.this.userManager != null) {
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.uuid)
@@ -1046,7 +1046,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         return randomUUID
     }
 
-    public Unit DoCreateNewLandmark(SLInventoryEntry sLInventoryEntry, String str, String str2) {
+    fun DoCreateNewLandmark(SLInventoryEntry sLInventoryEntry, String str, String str2) {
         CreateInventoryItem createInventoryItem = CreateInventoryItem()
         createInventoryItem.AgentData_Field.AgentID = this.circuitInfo.agentID
         createInventoryItem.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1063,7 +1063,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     @SLEventQueueMessageHandler(eventName = SLCapEventQueue.CapsEventType.BulkUpdateInventory)
-    public Unit HandleBulkUpdateInventory(LLSDNode lLSDNode) {
+    fun HandleBulkUpdateInventory(LLSDNode lLSDNode) {
         Debug.Printf("BulkUpdateInventory: EventQueue event", Object[0])
         SLInventoryNewContentsEvent sLInventoryNewContentsEvent = SLInventoryNewContentsEvent()
         HashSet<UUID> hashSet = HashSet<>()
@@ -1171,7 +1171,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         }
     }
 
-    public Unit HandleCircuitReady() {
+    fun HandleCircuitReady() {
         super.HandleCircuitReady()
         if (this.rootFolderFetchNeeded && this.rootFolderSubscription != null && this.rootFolder != null && this.userManager != null) {
             Debug.Printf("Inventory: Fetching root folder: %s", this.rootFolder.uuid)
@@ -1179,7 +1179,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         }
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         if (this.rootFolderSubscription != null) {
             this.rootFolderSubscription.unsubscribe()
         }
@@ -1209,7 +1209,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     @SLMessageHandler
-    public Unit HandleUpdateCreateInventoryItem(UpdateCreateInventoryItem updateCreateInventoryItem) {
+    fun HandleUpdateCreateInventoryItem(UpdateCreateInventoryItem updateCreateInventoryItem) {
         SLInventoryNewContentsEvent sLInventoryNewContentsEvent = SLInventoryNewContentsEvent()
         HashSet<UUID> hashSet = HashSet<>()
         for (UpdateCreateInventoryItem.InventoryData inventoryData : updateCreateInventoryItem.InventoryData_Fields) {
@@ -1266,7 +1266,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         }
     }
 
-    public Unit LinkInventoryItem(final SLInventoryEntry sLInventoryEntry, UUID uuid, Int i, Int i2, String str, String str2) {
+    fun LinkInventoryItem(final SLInventoryEntry sLInventoryEntry, UUID uuid, Int i, Int i2, String str, String str2) {
         LinkInventoryItem linkInventoryItem = LinkInventoryItem()
         linkInventoryItem.AgentData_Field.AgentID = this.circuitInfo.agentID
         linkInventoryItem.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1279,13 +1279,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         linkInventoryItem.InventoryBlock_Field.Description = SLMessage.stringToVariableOEM(str2)
         linkInventoryItem.isReliable = true
         linkInventoryItem.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.uuid)
             }
         SendMessage(linkInventoryItem)
     }
 
-    public Unit MoveInventoryItem(final SLInventoryEntry sLInventoryEntry, final SLInventoryEntry sLInventoryEntry2) {
+    fun MoveInventoryItem(final SLInventoryEntry sLInventoryEntry, final SLInventoryEntry sLInventoryEntry2) {
         final UUID uuid = sLInventoryEntry.parentUUID
         if (sLInventoryEntry.isFolder) {
             UpdateInventoryFolder updateInventoryFolder = UpdateInventoryFolder()
@@ -1299,7 +1299,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             updateInventoryFolder.FolderData_Fields.add(folderData)
             updateInventoryFolder.isReliable = true
             updateInventoryFolder.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-                public Unit onMessageAcknowledged(SLMessage sLMessage) {
+                fun onMessageAcknowledged(SLMessage sLMessage) {
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(uuid)
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry2.uuid)
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.uuid)
@@ -1318,14 +1318,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         moveInventoryItem.InventoryData_Fields.add(inventoryData)
         moveInventoryItem.isReliable = true
         moveInventoryItem.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-            public Unit onMessageAcknowledged(SLMessage sLMessage) {
+            fun onMessageAcknowledged(SLMessage sLMessage) {
                 SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(uuid)
                 SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry2.uuid)
             }
         SendMessage(moveInventoryItem)
     }
 
-    public Unit MoveInventoryItemRaw(UUID uuid, String str, UUID uuid2) {
+    fun MoveInventoryItemRaw(UUID uuid, String str, UUID uuid2) {
         MoveInventoryItem moveInventoryItem = MoveInventoryItem()
         moveInventoryItem.AgentData_Field.AgentID = this.circuitInfo.agentID
         moveInventoryItem.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1340,7 +1340,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
         SendMessage(moveInventoryItem)
     }
 
-    public Unit RenameInventoryItem(final SLInventoryEntry sLInventoryEntry, String str) {
+    fun RenameInventoryItem(final SLInventoryEntry sLInventoryEntry, String str) {
         sLInventoryEntry.name = str
         try {
             this.db.saveEntry(sLInventoryEntry)
@@ -1359,7 +1359,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             updateInventoryFolder.FolderData_Fields.add(folderData)
             updateInventoryFolder.isReliable = true
             updateInventoryFolder.setEventListener(SLMessageEventListener.SLMessageBaseEventListener() {
-                public Unit onMessageAcknowledged(SLMessage sLMessage) {
+                fun onMessageAcknowledged(SLMessage sLMessage) {
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.uuid)
                     SLInventory.this.userManager.getInventoryManager().requestFolderUpdate(sLInventoryEntry.parentUUID)
                 }
@@ -1443,14 +1443,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
 
     }
 
-    public Unit TrashInventoryItem(SLInventoryEntry sLInventoryEntry) {
+    fun TrashInventoryItem(SLInventoryEntry sLInventoryEntry) {
         SLInventoryEntry findSpecialFolder = this.db.findSpecialFolder(this.rootFolder.getId(), 14)
         if (findSpecialFolder != null) {
             MoveInventoryItem(sLInventoryEntry, findSpecialFolder)
         }
     }
 
-    public Unit UpdateNotecard(SLInventoryEntry sLInventoryEntry, UUID uuid, Boolean z, String str, String str2, Byte[] bArr, UUID uuid2, Int i, OnNotecardUpdatedListener onNotecardUpdatedListener) {
+    fun UpdateNotecard(SLInventoryEntry sLInventoryEntry, UUID uuid, Boolean z, String str, String str2, Byte[] bArr, UUID uuid2, Int i, OnNotecardUpdatedListener onNotecardUpdatedListener) {
         if (sLInventoryEntry != null) {
             z2 = !(Objects.equal(sLInventoryEntry.name, str) ? Objects.equal(sLInventoryEntry.description, str2) : false)
         } else {
@@ -1659,14 +1659,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
             final Byte[] bArr2 = bArr
             final OnNotecardUpdatedListener onNotecardUpdatedListener2 = onNotecardUpdatedListener
             DoUpdateTaskInventoryItem(sLInventoryEntry, i, SLMessageEventListener.SLMessageBaseEventListener() {
-                public Unit onMessageAcknowledged(SLMessage sLMessage) {
+                fun onMessageAcknowledged(SLMessage sLMessage) {
                     SLInventory.this.userManager.getObjectsManager().requestTaskInventoryUpdate(i2)
                     SLInventory.this.StartUploadingNotecardContents(sLInventoryEntry2, uuid3, z3, bArr2, onNotecardUpdatedListener2)
                 }
         }
     }
 
-    public Unit UpdateStoreInventoryItem(SLInventoryEntry sLInventoryEntry) {
+    fun UpdateStoreInventoryItem(SLInventoryEntry sLInventoryEntry) {
         try {
             this.db.saveEntry(sLInventoryEntry)
             DoUpdateInventoryItem(sLInventoryEntry, OnInventoryCallbackListener(this, sLInventoryEntry) {
@@ -1887,7 +1887,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.inventory.-$L
     }
 
     /* access modifiers changed from: package-private */
-    public Unit onFetchComplete(SLInventoryFetchRequest sLInventoryFetchRequest, UUID uuid, Long j, Boolean z, Boolean z2) {
+    fun onFetchComplete(SLInventoryFetchRequest sLInventoryFetchRequest, UUID uuid, Long j, Boolean z, Boolean z2) {
         if (this.dbExecutor != null) {
             this.dbExecutor.execute(Runnable(z, z2, j, this, uuid) {
 

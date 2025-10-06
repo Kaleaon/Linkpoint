@@ -43,7 +43,7 @@ class TransactionLogFragment : FragmentWithTitle(), LoadableMonitor.OnLoadableDa
     private val SubscriptionData<SubscriptionSingleKey, LazyList<MoneyTransaction>> moneyTransactions = SubscriptionData<>(UIThreadExecutor.getInstance())
     /* access modifiers changed from: private */
     val Runnable scrollToBottomRunnable = Runnable() {
-        public Unit run() {
+        fun run() {
             Int itemCount
             Boolean unused = TransactionLogFragment.this.scrollToBottomRunnablePosted = false
             if (TransactionLogFragment.this.unbinder != null) {
@@ -172,12 +172,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         performClearTransactionLog()
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setHasOptionsMenu(true)
     }
 
-    public Unit onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+    fun onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         super.onCreateOptionsMenu(menu, menuInflater)
         menuInflater.inflate(R.menu.transaction_log_menu, menu)
     }
@@ -192,7 +192,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         return inflate
     }
 
-    public Unit onDestroyView() {
+    fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -200,7 +200,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         super.onDestroyView()
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         LazyList data = this.moneyTransactions.getData()
         if (data != null) {
             this.loadableMonitor.setEmptyMessage(data.isEmpty(), getString(R.string.no_transactions_per_session))
@@ -221,7 +221,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -229,12 +229,12 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$N_x
         }
     }
 
-    public Unit onStop() {
+    fun onStop() {
         this.loadableMonitor.unsubscribeAll()
         super.onStop()
     }
 
-    public Unit onTransactionClicked(MoneyTransaction moneyTransaction) {
+    fun onTransactionClicked(MoneyTransaction moneyTransaction) {
         UUID activeAgentID = ActivityUtils.getActiveAgentID(getArguments())
         if (activeAgentID != null) {
             DetailsActivity.showEmbeddedDetails(getActivity(), UserProfileFragment.class, UserProfileFragment.makeSelection(ChatterID.getUserChatterID(activeAgentID, moneyTransaction.getAgentUUID())))

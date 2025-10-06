@@ -226,7 +226,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
     }
 
     @EventHandler
-    public Unit handleTeleportResult(SLTeleportResultEvent sLTeleportResultEvent) {
+    fun handleTeleportResult(SLTeleportResultEvent sLTeleportResultEvent) {
         Boolean isShowing = isShowing()
         Debug.Log("TeleportResult: success = " + sLTeleportResultEvent.success)
         try {
@@ -250,7 +250,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
         }
     }
 
-    public Unit onCancel(DialogInterface dialogInterface) {
+    fun onCancel(DialogInterface dialogInterface) {
         if (this.userManager != null) {
             try {
                 SLAgentCircuit activeAgentCircuit = this.userManager.getActiveAgentCircuit()
@@ -263,14 +263,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$8g
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         if (this.userManager != null) {
             this.userManager.getEventBus().subscribe(this, (Activity) null, this.mHandler)
         }
     }
 
-    public Unit onStop() {
+    fun onStop() {
         if (this.userManager != null) {
             this.userManager.getEventBus().unsubscribe(this)
         }

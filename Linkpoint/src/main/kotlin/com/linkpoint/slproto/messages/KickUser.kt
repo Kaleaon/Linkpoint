@@ -30,11 +30,11 @@ class KickUser : SLMessage() {
         return this.UserInfo_Field.Reason.length + 34 + 10
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleKickUser(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -93)
@@ -45,7 +45,7 @@ class KickUser : SLMessage() {
         packVariable(byteBuffer, this.UserInfo_Field.Reason, 2)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.TargetBlock_Field.TargetIP = unpackIPAddress(byteBuffer)
         this.TargetBlock_Field.TargetPort = unpackShort(byteBuffer) & 65535
         this.UserInfo_Field.AgentID = unpackUUID(byteBuffer)

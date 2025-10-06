@@ -319,7 +319,7 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return true
     }
 
-    public Unit SaveJPEG2K(File file) throws IOException {
+    fun SaveJPEG2K(File file) throws IOException {
         if (this.rawBuffer != null) {
             if (writeJPEG2K(file.getAbsolutePath(), this.rawBuffer, this.width, this.height, this.num_components, this.num_extra_components) != 0) {
                 throw IOException("Failed to save JPEG2k to " + file.getAbsolutePath())
@@ -327,13 +327,13 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         }
     }
 
-    public Unit SaveRaw(File file) {
+    fun SaveRaw(File file) {
         if (this.rawBuffer != null) {
             writeRaw(this.rawBuffer, file.getAbsolutePath())
         }
     }
 
-    public Unit SaveToFile(File file) {
+    fun SaveToFile(File file) {
         try {
             FileOutputStream fileOutputStream = FileOutputStream(file, false)
             fileOutputStream.getChannel().write(this.rawBuffer)
@@ -445,19 +445,19 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return (this.width * this.height) * this.bytes_per_pixel
     }
 
-    public Unit blendAlpha(OpenJPEG openJPEG, Boolean z) {
+    fun blendAlpha(OpenJPEG openJPEG, Boolean z) {
         if (this.rawBuffer != null && openJPEG.rawBuffer != null && this.num_components >= 4 && openJPEG.num_components >= 4) {
             drawBuf(this.rawBuffer, this.width, this.height, this.num_components, openJPEG.rawBuffer, openJPEG.width, openJPEG.height, openJPEG.num_components, 0, false, true, z, false)
         }
     }
 
-    public Unit draw(OpenJPEG openJPEG, Int i, Boolean z) {
+    fun draw(OpenJPEG openJPEG, Int i, Boolean z) {
         if (this.rawBuffer != null && openJPEG.rawBuffer != null) {
             drawBuf(this.rawBuffer, this.width, this.height, this.num_components, openJPEG.rawBuffer, openJPEG.width, openJPEG.height, openJPEG.num_components, i, z, false, false, false)
         }
     }
 
-    public Unit drawBump(OpenJPEG openJPEG, Int i, Boolean z, Boolean z2) {
+    fun drawBump(OpenJPEG openJPEG, Int i, Boolean z, Boolean z2) {
         if (this.rawBuffer != null && openJPEG.rawBuffer != null && this.num_extra_components >= 1 && openJPEG.num_components >= 4) {
             drawBuf(this.rawBuffer, this.width, this.height, this.num_components, openJPEG.rawBuffer, openJPEG.width, openJPEG.height, openJPEG.num_components, 0, false, false, z2, true)
         }
@@ -554,7 +554,7 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         return this.bytes_per_pixel != ETC1_BYTES_PER_PIXEL && (this.num_components >= 4 || this.num_components == 1)
     }
 
-    public Unit putPixelRow(Int i, Int[] iArr, Int i2) {
+    fun putPixelRow(Int i, Int[] iArr, Int i2) {
         Int i3 = 0
         if (this.rawBuffer != null) {
             Int i4 = (this.width * this.num_components) * i
@@ -586,7 +586,7 @@ private /* synthetic */ Int[] m37-getcom-lumiyaviewer-lumiya-openjpeg-OpenJPEG$I
         }
     }
 
-    public Unit setComponent(Int i, Byte b) {
+    fun setComponent(Int i, Byte b) {
         if (this.rawBuffer != null) {
             setComponentBuf(this.rawBuffer, this.width, this.height, this.num_components, this.num_extra_components, i, b)
         }

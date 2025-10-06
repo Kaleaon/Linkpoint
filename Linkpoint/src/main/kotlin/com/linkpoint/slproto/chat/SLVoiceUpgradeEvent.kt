@@ -64,12 +64,12 @@ val class SLVoiceUpgradeEvent : SLChatYesNoEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager) {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    public Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager) {
         super.onYesAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
         Intent intent = Intent("android.intent.action.VIEW")
@@ -77,7 +77,7 @@ val class SLVoiceUpgradeEvent : SLChatYesNoEvent() {
         context.startActivity(intent)
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemName(this.upgradeURL)
         chatMessage.setAssetType(Integer.valueOf(this.isInstall ? 1 : 0))

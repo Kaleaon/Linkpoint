@@ -7,7 +7,7 @@ import com.linkpoint.R
 import com.linkpoint.ui.common.ThemedActivity
 
 class WhatsNewActivity : ThemedActivity() {
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.whats_new)
         ((TextView) findViewById(R.id.whatsnewCaption)).setText(String.format(getString(R.string.whatsnew_caption), Object[]{LinkpointApp.getAppVersion()}))

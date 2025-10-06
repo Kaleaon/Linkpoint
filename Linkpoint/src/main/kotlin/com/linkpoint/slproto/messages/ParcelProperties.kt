@@ -77,11 +77,11 @@ class ParcelProperties : SLMessage() {
         return this.ParcelData_Field.Bitmap.length + 84 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 4 + 1 + this.ParcelData_Field.Name.length + 1 + this.ParcelData_Field.Desc.length + 1 + this.ParcelData_Field.MusicURL.length + 1 + this.ParcelData_Field.MediaURL.length + 16 + 1 + 16 + 4 + 4 + 1 + 16 + 16 + 12 + 12 + 1 + 1 + 1 + 1 + 1 + 1 + 1
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleParcelProperties(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.put(Ascii.ETB)
         packInt(byteBuffer, this.ParcelData_Field.RequestResult)
         packInt(byteBuffer, this.ParcelData_Field.SequenceID)
@@ -135,7 +135,7 @@ class ParcelProperties : SLMessage() {
         packBoolean(byteBuffer, this.AgeVerificationBlock_Field.RegionDenyAgeUnverified)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.ParcelData_Field.RequestResult = unpackInt(byteBuffer)
         this.ParcelData_Field.SequenceID = unpackInt(byteBuffer)
         this.ParcelData_Field.SnapSelection = unpackBoolean(byteBuffer)

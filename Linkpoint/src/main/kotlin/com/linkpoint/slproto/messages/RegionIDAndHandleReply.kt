@@ -21,11 +21,11 @@ class RegionIDAndHandleReply : SLMessage() {
         return 28
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleRegionIDAndHandleReply(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 54)
@@ -33,7 +33,7 @@ class RegionIDAndHandleReply : SLMessage() {
         packLong(byteBuffer, this.ReplyBlock_Field.RegionHandle)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.ReplyBlock_Field.RegionID = unpackUUID(byteBuffer)
         this.ReplyBlock_Field.RegionHandle = unpackLong(byteBuffer)
     }

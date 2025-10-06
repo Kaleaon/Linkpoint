@@ -253,11 +253,11 @@ private File getInventoryDatabasePath(String str) {
         return userManager
     }
 
-    public Unit addChatMessage(ChatMessage chatMessage) {
+    fun addChatMessage(ChatMessage chatMessage) {
         this.chatMessageDao.insert(chatMessage)
     }
 
-    public Unit clearActiveAgentCircuit(SLAgentCircuit sLAgentCircuit) {
+    fun clearActiveAgentCircuit(SLAgentCircuit sLAgentCircuit) {
         if (this.activeAgentCircuit.compareAndSet(sLAgentCircuit, (Object) null)) {
             Debug.Printf("Active agent circuit cleared.", Object[0])
             this.objectPopupsManager.clearObjectPopups()
@@ -522,7 +522,7 @@ private File getInventoryDatabasePath(String str) {
         return this.parcelInfoData
     }
 
-    public Unit setActiveAgentCircuit(SLAgentCircuit sLAgentCircuit) {
+    fun setActiveAgentCircuit(SLAgentCircuit sLAgentCircuit) {
         this.activeAgentCircuit.set(sLAgentCircuit)
         if (sLAgentCircuit == null) {
             this.objectPopupsManager.clearObjectPopups()
@@ -531,7 +531,7 @@ private File getInventoryDatabasePath(String str) {
         activeAgentCircuitsPool.setData(this.userID, sLAgentCircuit)
     }
 
-    public Unit setChatterMuted(ChatterID chatterID, Boolean z) {
+    fun setChatterMuted(ChatterID chatterID, Boolean z) {
         if (chatterID.getChatterType() != ChatterID.ChatterType.Local) {
             synchronized (this.chatterUpdateLock) {
                 Query<Chatter> forCurrentThread = this.findChatterQuery.forCurrentThread()
@@ -554,15 +554,15 @@ private File getInventoryDatabasePath(String str) {
         }
     }
 
-    public Unit setCurrentLocationInfo(CurrentLocationInfo currentLocationInfo) {
+    fun setCurrentLocationInfo(CurrentLocationInfo currentLocationInfo) {
         this.currentLocationInfoPool.setData(this.currentLocationInfoPool.getKey(), currentLocationInfo)
     }
 
-    public Unit setUserBadUUID(UUID uuid) {
+    fun setUserBadUUID(UUID uuid) {
         updateUserNames(uuid, (String) null, (String) null, true)
     }
 
-    public Unit setUserPic(UUID uuid, Byte[] bArr) {
+    fun setUserPic(UUID uuid, Byte[] bArr) {
         if (uuid != null) {
             Query<UserPic> forCurrentThread = this.findUserPicQuery.forCurrentThread()
             forCurrentThread.setParameter(0, uuid.toString())
@@ -578,27 +578,27 @@ private File getInventoryDatabasePath(String str) {
         }
     }
 
-    public Unit setVoiceActiveChatter(ChatterID chatterID) {
+    fun setVoiceActiveChatter(ChatterID chatterID) {
         this.voiceActiveChatterPool.setData(SubscriptionSingleKey.Value, chatterID)
     }
 
-    public Unit setVoiceAudioProperties(VoiceAudioProperties voiceAudioProperties) {
+    fun setVoiceAudioProperties(VoiceAudioProperties voiceAudioProperties) {
         this.voiceAudioPropertiesPool.setData(SubscriptionSingleKey.Value, voiceAudioProperties)
     }
 
-    public Unit setVoiceChatInfo(ChatterID chatterID, VoiceChatInfo voiceChatInfo) {
+    fun setVoiceChatInfo(ChatterID chatterID, VoiceChatInfo voiceChatInfo) {
         this.voiceChatInfoPool.setData(chatterID, voiceChatInfo)
     }
 
-    public Unit setVoiceLoggedIn(Boolean z) {
+    fun setVoiceLoggedIn(Boolean z) {
         this.voiceLoggedInPool.setData(SubscriptionSingleKey.Value, Boolean.valueOf(z))
     }
 
-    public Unit updateUserNames(UUID uuid, String str, String str2) {
+    fun updateUserNames(UUID uuid, String str, String str2) {
         updateUserNames(uuid, str, str2, false)
     }
 
-    public Unit updateUserNames(UUID uuid, String str, String str2, Boolean z) {
+    fun updateUserNames(UUID uuid, String str, String str2, Boolean z) {
         Query<User> forCurrentThread = this.findUserQuery.forCurrentThread()
         forCurrentThread.setParameter(0, uuid.toString())
         synchronized (this.userUpdateLock) {

@@ -14,7 +14,7 @@ class GLExternalTexture {
     private val Int handle
     private val Int height
     private val SurfaceTexture.OnFrameAvailableListener onFrameAvailableListener = SurfaceTexture.OnFrameAvailableListener() {
-        public Unit onFrameAvailable(SurfaceTexture surfaceTexture) {
+        fun onFrameAvailable(SurfaceTexture surfaceTexture) {
         }
     }
     private val Surface surface
@@ -39,7 +39,7 @@ class GLExternalTexture {
     }
 
     @TargetApi(15)
-    public Unit bind() {
+    fun bind() {
         GLES11.glBindTexture(36197, this.handle)
     }
 
@@ -55,19 +55,19 @@ class GLExternalTexture {
         return this.width
     }
 
-    public Unit postCanvas(Canvas canvas) {
+    fun postCanvas(Canvas canvas) {
         this.surface.unlockCanvasAndPost(canvas)
     }
 
     @TargetApi(15)
-    public Unit release() {
+    fun release() {
         this.surface.release()
         this.surfaceTexture.release()
         GLES11.glDeleteTextures(1, Int[]{this.handle}, 0)
     }
 
     @TargetApi(11)
-    public Unit update(Float[] fArr) {
+    fun update(Float[] fArr) {
         this.surfaceTexture.updateTexImage()
         this.surfaceTexture.getTransformMatrix(fArr)
     }

@@ -40,7 +40,7 @@ class SettingsSelectionFragment : Fragment(), AdapterView.OnItemClickListener {
         return inflate
     }
 
-    public Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
         SettingsPage[] values = SettingsPage.values()
         if (i >= 0 && i < values.length) {
             DetailsActivity.showEmbeddedDetails(getActivity(), SettingsFragment.class, SettingsFragment.makeSelection(values[i].getPageResourceId()))

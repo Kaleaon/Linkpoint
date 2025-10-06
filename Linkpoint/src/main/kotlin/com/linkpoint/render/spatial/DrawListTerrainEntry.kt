@@ -18,7 +18,7 @@ class DrawListTerrainEntry : DrawListEntry() {
         updatePatchInfo(terrainPatchInfo)
     }
 
-    public Unit addToDrawList(DrawList drawList) {
+    fun addToDrawList(DrawList drawList) {
         Object obj = null
         WeakReference weakReference = this.drawablePatch
         if (weakReference != null) {
@@ -31,7 +31,7 @@ class DrawListTerrainEntry : DrawListEntry() {
         drawList.terrain.add(obj)
     }
 
-    public Unit updatePatchInfo(TerrainPatchInfo terrainPatchInfo) {
+    fun updatePatchInfo(TerrainPatchInfo terrainPatchInfo) {
         this.patchInfo = terrainPatchInfo
         Float minHeight = terrainPatchInfo.getMinHeight()
         Float maxHeight = terrainPatchInfo.getMaxHeight()

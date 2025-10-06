@@ -112,12 +112,12 @@ class ModernAssetManager {
     /**
      * Set quality level and enable/disable adaptive quality
      */
-    public Unit setQualityLevel(QualityLevel quality) {
+    fun setQualityLevel(QualityLevel quality) {
         this.currentQuality = quality
         Log.i(TAG, "Quality level set to: " + quality)
     }
     
-    public Unit setAdaptiveQuality(Boolean adaptive) {
+    fun setAdaptiveQuality(Boolean adaptive) {
         this.adaptiveQuality = adaptive
         if (adaptive) {
             networkMonitor.startMonitoring()
@@ -143,7 +143,7 @@ class ModernAssetManager {
     /**
      * Clear cache and free memory
      */
-    public Unit clearCache() {
+    fun clearCache() {
         assetCache.clear()
         totalCacheSize.set(0)
         Log.i(TAG, "Asset cache cleared")
@@ -481,7 +481,7 @@ private class AssetPriorityQueue {
     /**
      * Clean up resources
      */
-    public Unit shutdown() {
+    fun shutdown() {
         if (loadingExecutor != null && !loadingExecutor.isShutdown()) {
             loadingExecutor.shutdown()
         }

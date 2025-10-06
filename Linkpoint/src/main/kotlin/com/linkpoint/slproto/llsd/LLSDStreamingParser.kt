@@ -45,17 +45,17 @@ class LLSDStreamingParser {
             return LLSDDefaultContentHandler()
         }
 
-        public Unit onArrayEnd(String str) throws LLSDXMLException {
+        fun onArrayEnd(String str) throws LLSDXMLException {
         }
 
         public LLSDContentHandler onMapBegin(String str) throws LLSDXMLException {
             return LLSDDefaultContentHandler()
         }
 
-        public Unit onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        fun onMapEnd(String str) throws LLSDXMLException, InterruptedException {
         }
 
-        public Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+        fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
         }
     }
 

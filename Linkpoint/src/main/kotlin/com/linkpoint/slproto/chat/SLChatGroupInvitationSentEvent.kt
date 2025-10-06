@@ -43,7 +43,7 @@ val class SLChatGroupInvitationSentEvent : SLChatEvent() {
         return false
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

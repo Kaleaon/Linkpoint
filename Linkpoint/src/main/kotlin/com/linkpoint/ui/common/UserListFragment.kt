@@ -41,7 +41,7 @@ abstract class UserListFragment : Fragment() {
     public abstract ListAdapter createListAdapter(Context context, LoaderManager loaderManager, UserManager userManager2)
 
     /* access modifiers changed from: protected */
-    public Unit handleUserDefaultAction(ChatterID chatterID) {
+    fun handleUserDefaultAction(ChatterID chatterID) {
         if (this.userManager != null) {
             Bundle makeSelection = ChatFragment.makeSelection(chatterID)
             Bundle arguments = getArguments()
@@ -67,7 +67,7 @@ abstract class UserListFragment : Fragment() {
         }
     }
 
-    public Unit onActivityCreated(Bundle bundle) {
+    fun onActivityCreated(Bundle bundle) {
         super.onActivityCreated(bundle)
         View view = getView()
         if (view != null) {
@@ -84,7 +84,7 @@ abstract class UserListFragment : Fragment() {
                         return false
                     }
 
-                    public Unit onDismiss(ListView listView, Int i) {
+                    fun onDismiss(ListView listView, Int i) {
                         ListAdapter adapter = listView.getAdapter()
                         if (adapter instanceof DismissableAdapter) {
                             ((DismissableAdapter) adapter).onDismiss(i)
@@ -96,7 +96,7 @@ abstract class UserListFragment : Fragment() {
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         this.userManager = ActivityUtils.getUserManager(getArguments())
     }
@@ -105,7 +105,7 @@ abstract class UserListFragment : Fragment() {
         return layoutInflater.inflate(R.layout.contacts_group, viewGroup, false)
     }
 
-    public Unit onStart() {
+    fun onStart() {
         ListView listView
         ListAdapter listAdapter = null
         super.onStart()
@@ -120,7 +120,7 @@ abstract class UserListFragment : Fragment() {
         }
     }
 
-    public Unit onStop() {
+    fun onStop() {
         ListView listView
         View view = getView()
         Debug.Printf("UserListFragment: onStop, rootView = %s", view)
@@ -139,7 +139,7 @@ abstract class UserListFragment : Fragment() {
     }
 
     @EventHandler
-    public Unit onUserInfoChanged(EventUserInfoChanged eventUserInfoChanged) {
+    fun onUserInfoChanged(EventUserInfoChanged eventUserInfoChanged) {
         if (this.userManager != null && this.userManager.getUserID().equals(eventUserInfoChanged.agentUUID) && eventUserInfoChanged.isProfileChanged()) {
             updateListViews()
         }

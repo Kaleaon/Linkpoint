@@ -65,7 +65,7 @@ class TextFieldDialogBuilder {
         return this
     }
 
-    public Unit show() {
+    fun show() {
         AlertDialog.Builder builder = AlertDialog.Builder(this.context)
         builder.setTitle(this.title)
         EditText editText = EditText(this.context)

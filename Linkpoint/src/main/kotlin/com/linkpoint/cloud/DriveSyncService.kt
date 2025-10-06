@@ -323,7 +323,7 @@ class DriveSyncService : Service()
         return this.mMessenger.getBinder()
     }
 
-    public Unit onDestroy() {
+    fun onDestroy() {
         Debug.Printf("Service destroyed", Object[0])
         super.onDestroy()
     }
@@ -378,7 +378,7 @@ private enum GoogleApiState {
         /*
          * Exception decompiling
          */
-        public Unit handleMessage(Message var1_1) {
+        fun handleMessage(Message var1_1) {
             /*
              * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
              * 

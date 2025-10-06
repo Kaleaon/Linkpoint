@@ -83,7 +83,7 @@ class Vector2Array : VectorArray() {
         this.data[i2 + 1] = f2
     }
 
-    public Unit swap(Int i, Int i2) {
+    fun swap(Int i, Int i2) {
         Int i3 = (this.numComponents * i) + this.offset
         Int i4 = (this.numComponents * i2) + this.offset
         for (Int i5 = 0; i5 < 2; i5++) {

@@ -50,11 +50,11 @@ class ScriptDialog : SLMessage() {
         }
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleScriptDialog(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 0)
         byteBuffer.put((Byte) -66)
@@ -75,7 +75,7 @@ class ScriptDialog : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.Data_Field.ObjectID = unpackUUID(byteBuffer)
         this.Data_Field.FirstName = unpackVariable(byteBuffer, 1)
         this.Data_Field.LastName = unpackVariable(byteBuffer, 1)

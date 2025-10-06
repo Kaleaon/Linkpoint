@@ -128,7 +128,7 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: private */
-    public Unit updateSearchAction() {
+    fun updateSearchAction() {
         String str
         if (!this.activityStarted || !this.searchActive) {
             this.searchProcess.unsubscribe()
@@ -150,7 +150,7 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit clearSearchMode() {
+    fun clearSearchMode() {
         this.searchActive = false
         if (this.searchMenuItem != null) {
             MenuItemCompat.collapseActionView(this.searchMenuItem)
@@ -183,7 +183,7 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         if (bundle != null) {
             this.searchActive = bundle.getBoolean(SEARCH_ACTIVE_TAG)
@@ -253,7 +253,7 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle)
         if (bundle != null) {
             bundle.putBoolean(SEARCH_ACTIVE_TAG, this.searchActive)
@@ -262,14 +262,14 @@ class InventoryActivity : MasterDetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         this.activityStarted = true
         updateSearchAction()
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStop() {
+    fun onStop() {
         this.activityStarted = false
         updateSearchAction()
         super.onStop()

@@ -216,11 +216,11 @@ private class AnimationPosKeyframe : AnimationKeyframe()<LLVector3> {
             return this.position
         }
 
-        public Unit setInterpolated(LLVector3 lLVector3, Float f, AnimationKeyframe<LLVector3> animationKeyframe, Float f2) {
+        fun setInterpolated(LLVector3 lLVector3, Float f, AnimationKeyframe<LLVector3> animationKeyframe, Float f2) {
             lLVector3.setLerp(this.position, f, (LLVector3) animationKeyframe.getTransform(), f2)
         }
 
-        public Unit setTransform(LLVector3 lLVector3) {
+        fun setTransform(LLVector3 lLVector3) {
             lLVector3.set(this.position)
         }
 
@@ -242,11 +242,11 @@ private class AnimationRotKeyframe : AnimationKeyframe()<LLQuaternion> {
             return this.quaternion
         }
 
-        public Unit setInterpolated(LLQuaternion lLQuaternion, Float f, AnimationKeyframe<LLQuaternion> animationKeyframe, Float f2) {
+        fun setInterpolated(LLQuaternion lLQuaternion, Float f, AnimationKeyframe<LLQuaternion> animationKeyframe, Float f2) {
             lLQuaternion.setLerp(this.quaternion, f, (LLQuaternion) animationKeyframe.getTransform(), f2)
         }
 
-        public Unit setTransform(LLQuaternion lLQuaternion) {
+        fun setTransform(LLQuaternion lLQuaternion) {
             lLQuaternion.set(this.quaternion)
         }
 
@@ -369,7 +369,7 @@ private Float cubicStep(Float f) {
         return builder.build()
     }
 
-    public Unit dumpAnimationData() {
+    fun dumpAnimationData() {
         Debug.Printf("Animation -- dump -- priority %d length %f joint sets %d (inPoint %f outPoint %f loop %b easeIn %f easeOut %f)", Integer.valueOf(this.animPriority), Float.valueOf(this.animLength), Integer.valueOf(this.jointSets.size()), Float.valueOf(this.inPoint), Float.valueOf(this.outPoint), Boolean.valueOf(this.loop), Float.valueOf(this.easeInTime), Float.valueOf(this.easeOutTime))
         for (Int i = 0; i < this.jointSets.size(); i++) {
             Int keyAt = this.jointSets.keyAt(i)

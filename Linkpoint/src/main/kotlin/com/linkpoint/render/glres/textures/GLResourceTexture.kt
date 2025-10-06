@@ -26,7 +26,7 @@ private class GLResourceTexturesReference : GLResourceManager().GLResourceRefere
             TextureMemoryTracker.allocTextureMemory(i2)
         }
 
-        public Unit GLFree() {
+        fun GLFree() {
             TextureMemoryTracker.releaseTextureMemory(this.loadedSize)
             Int[] iArr = (Int[]) GLResourceTexture.idBuffer.get()
             iArr[0] = this.handle

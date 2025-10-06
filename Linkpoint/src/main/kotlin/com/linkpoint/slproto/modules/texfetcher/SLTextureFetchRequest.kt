@@ -98,7 +98,7 @@ private /* synthetic */ Int[] m239getcomlumiyaviewerlumiyarendertexTextureClassS
         return getPriorityForClass(this.textureClass, this.visibleRangeCategory)
     }
 
-    public Unit setOnFetchComplete(TextureFetchCompleteListener textureFetchCompleteListener) {
+    fun setOnFetchComplete(TextureFetchCompleteListener textureFetchCompleteListener) {
         this.onFetchComplete = textureFetchCompleteListener
     }
 }

@@ -110,7 +110,7 @@ class CameraParams {
         return f2 - 180.0f
     }
 
-    public Unit copyFrom(CameraParams cameraParams) {
+    fun copyFrom(CameraParams cameraParams) {
         Float f
         Float f2
         Float f3
@@ -143,7 +143,7 @@ class CameraParams {
         }
     }
 
-    public Unit fling(Float f, Float f2) {
+    fun fling(Float f, Float f2) {
         synchronized (this.lock) {
             this.headingFlingSpeed = f
             this.tiltFlingSpeed = f2
@@ -176,7 +176,7 @@ class CameraParams {
         return f
     }
 
-    public Unit getVRCamera(CameraParams cameraParams, HeadTransformCompat headTransformCompat) {
+    fun getVRCamera(CameraParams cameraParams, HeadTransformCompat headTransformCompat) {
         Float f
         Float f2
         Float f3
@@ -222,7 +222,7 @@ class CameraParams {
         return z
     }
 
-    public Unit rotate(Float f, Float f2) {
+    fun rotate(Float f, Float f2) {
         synchronized (this.lock) {
             this.heading = wrapAngle(this.heading + f)
             this.tilt = Math.max(Math.min(this.tilt + f2, MAX_PITCH), MIN_PITCH)
@@ -230,7 +230,7 @@ class CameraParams {
         }
     }
 
-    public Unit set(LLVector3 lLVector3, Float f, Float f2) {
+    fun set(LLVector3 lLVector3, Float f, Float f2) {
         synchronized (this.lock) {
             if (lLVector3 != null) {
                 this.position.set(lLVector3)
@@ -241,13 +241,13 @@ class CameraParams {
         }
     }
 
-    public Unit setHeading(Float f) {
+    fun setHeading(Float f) {
         synchronized (this.lock) {
             this.heading = f
         }
     }
 
-    public Unit setPosition(LLVector3 lLVector3) {
+    fun setPosition(LLVector3 lLVector3) {
         synchronized (this.lock) {
             if (lLVector3 != null) {
                 this.position.set(lLVector3)
@@ -257,7 +257,7 @@ class CameraParams {
         }
     }
 
-    public Unit setPosition(LLVector3 lLVector3, Float f) {
+    fun setPosition(LLVector3 lLVector3, Float f) {
         synchronized (this.lock) {
             if (lLVector3 != null) {
                 this.position.set(lLVector3)
@@ -270,7 +270,7 @@ class CameraParams {
         }
     }
 
-    public Unit startManualControl(Float f, Float f2, Float f3, Float f4) {
+    fun startManualControl(Float f, Float f2, Float f3, Float f4) {
         synchronized (this.lock) {
             if (!this.isManualControl) {
                 LLVector3 lLVector3 = LLVector3(this.position)
@@ -292,13 +292,13 @@ class CameraParams {
         }
     }
 
-    public Unit stopManualControl() {
+    fun stopManualControl() {
         synchronized (this.lock) {
             this.isManualControl = false
         }
     }
 
-    public Unit zoom(Float f, Float f2, Float f3, Float f4, Float f5) {
+    fun zoom(Float f, Float f2, Float f3, Float f4, Float f5) {
         synchronized (this.lock) {
             Float f6 = f - 1.0f
             LLVector3 lLVector3 = LLVector3(this.position)

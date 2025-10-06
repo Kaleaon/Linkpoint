@@ -50,7 +50,7 @@ class ObjectsManager {
             }
         }
 
-        public Unit onRequest(Integer num) {
+        fun onRequest(Integer num) {
             SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.execute(Runnable(this, activeAgentCircuit, num) {
@@ -169,7 +169,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
         }
 
-        public Unit onRequest(UUID uuid) {
+        fun onRequest(UUID uuid) {
             SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.execute(Runnable(this, activeAgentCircuit, uuid) {
@@ -271,7 +271,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
     }
     /* access modifiers changed from: private */
     val Runnable updateObjectListRunnable = Runnable() {
-        public Unit run() {
+        fun run() {
             SLObjectFilterInfo r2
             synchronized (ObjectsManager.this.filterLock) {
                 r2 = ObjectsManager.this.filterInfo
@@ -285,7 +285,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
     private val SimpleRequestHandler<SubscriptionSingleKey> updateRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
-        public Unit onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
             SLAgentCircuit activeAgentCircuit = ObjectsManager.this.userManager.getActiveAgentCircuit()
             if (activeAgentCircuit != null) {
                 activeAgentCircuit.execute(ObjectsManager.this.updateObjectListRunnable)
@@ -294,7 +294,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
             }
         }
 
-        public Unit onRequestCancelled(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequestCancelled(SubscriptionSingleKey subscriptionSingleKey) {
             ObjectsManager.this.nameRetriever.clearChatters()
         }
     }
@@ -348,7 +348,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         this.touchableObjectsPool.attachRequestHandler(this.touchableObjectsRequestHandler)
     }
 
-    public Unit clearParcelInfo(SLParcelInfo sLParcelInfo) {
+    fun clearParcelInfo(SLParcelInfo sLParcelInfo) {
         this.parcelInfo.compareAndSet(sLParcelInfo, (Object) null)
     }
 
@@ -378,19 +378,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.myAvatarStatePool
     }
 
-    public Unit requestObjectListUpdate() {
+    fun requestObjectListUpdate() {
         this.objectDisplayListPool.requestUpdate(SubscriptionSingleKey.Value)
     }
 
-    public Unit requestObjectProfileUpdate(Int i) {
+    fun requestObjectProfileUpdate(Int i) {
         this.objectProfilePool.requestUpdate(Integer.valueOf(i))
     }
 
-    public Unit requestTaskInventoryUpdate(Int i) {
+    fun requestTaskInventoryUpdate(Int i) {
         this.taskInventoryPool.requestUpdate(Integer.valueOf(i))
     }
 
-    public Unit requestTouchableChildrenUpdate(UUID uuid) {
+    fun requestTouchableChildrenUpdate(UUID uuid) {
         this.touchableObjectsPool.requestUpdate(uuid)
     }
 
@@ -398,7 +398,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         return this.runningAnimationsPool
     }
 
-    public Unit setFilter(SLObjectFilterInfo sLObjectFilterInfo) {
+    fun setFilter(SLObjectFilterInfo sLObjectFilterInfo) {
         Boolean z = false
         synchronized (this.filterLock) {
             if (!this.filterInfo.equals(sLObjectFilterInfo)) {
@@ -411,7 +411,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.users.manager
         }
     }
 
-    public Unit setParcelInfo(SLParcelInfo sLParcelInfo) {
+    fun setParcelInfo(SLParcelInfo sLParcelInfo) {
         this.parcelInfo.set(sLParcelInfo)
         requestObjectListUpdate()
     }

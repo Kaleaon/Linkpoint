@@ -61,20 +61,20 @@ class SLPolyMesh : SLMeshData() {
         Debug.Log("SLPolyMesh: Loaded, numVerts = " + this.numVertices + ", faces = " + this.numFaces + ", morphs = " + this.morphs.length)
     }
 
-    public Unit applyMorphData(SLMeshData sLMeshData, Float[] fArr, GLTexture gLTexture) {
+    fun applyMorphData(SLMeshData sLMeshData, Float[] fArr, GLTexture gLTexture) {
         for (Int i = 0; i < fArr.length; i++) {
             this.morphs[i].applyMorphData(sLMeshData, fArr[i], gLTexture)
         }
     }
 
-    public Unit applySkeleton(SLAnimatedMeshData sLAnimatedMeshData, Float[] fArr) {
+    fun applySkeleton(SLAnimatedMeshData sLAnimatedMeshData, Float[] fArr) {
         DirectByteBuffer animatedVertexData
         if (this.hasWeights && this.jointMap != null && (animatedVertexData = sLAnimatedMeshData.getAnimatedVertexData()) != null) {
             OpenJPEG.applyMorphingTransform(this.numVertices, sLAnimatedMeshData.vertexBuffer.asByteBuffer(), animatedVertexData.asByteBuffer(), this.weightsBuffer.asByteBuffer(), this.jointMap, fArr)
         }
     }
 
-    public Unit applySkeletonSlow(SLAnimatedMeshData sLAnimatedMeshData, Float[] fArr) {
+    fun applySkeletonSlow(SLAnimatedMeshData sLAnimatedMeshData, Float[] fArr) {
         DirectByteBuffer animatedVertexData
         Double d
         if (this.hasWeights && this.jointMap != null && (animatedVertexData = sLAnimatedMeshData.getAnimatedVertexData()) != null) {

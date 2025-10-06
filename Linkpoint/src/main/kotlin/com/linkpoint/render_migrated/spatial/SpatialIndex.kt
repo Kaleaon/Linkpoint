@@ -61,14 +61,14 @@ private class InstanceHolder {
         return this.objectIndex
     }
 
-    public Unit setAvatarCountLimit(Int i) {
+    fun setAvatarCountLimit(Int i) {
         SpatialObjectIndex spatialObjectIndex = this.objectIndex
         if (spatialObjectIndex != null) {
             spatialObjectIndex.setAvatarCountLimit(i)
         }
     }
 
-    public Unit updateTerrainPatch(Int i, Int i2, TerrainData terrainData) {
+    fun updateTerrainPatch(Int i, Int i2, TerrainData terrainData) {
         SpatialObjectIndex spatialObjectIndex = this.objectIndex
         if (spatialObjectIndex != null) {
             spatialObjectIndex.updateTerrainPatch(i, i2, terrainData)

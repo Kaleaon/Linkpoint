@@ -32,11 +32,11 @@ class TransferInventory : SLMessage() {
         return (this.InventoryBlock_Fields.size() * 17) + 53
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleTransferInventory(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 39)
@@ -50,7 +50,7 @@ class TransferInventory : SLMessage() {
         }
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.InfoBlock_Field.SourceID = unpackUUID(byteBuffer)
         this.InfoBlock_Field.DestID = unpackUUID(byteBuffer)
         this.InfoBlock_Field.TransactionID = unpackUUID(byteBuffer)

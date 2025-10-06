@@ -96,7 +96,7 @@ private /* synthetic */ Int[] m296getcomlumiyaviewerlumiyaslprotousersmanagerCha
             }
 
             /* access modifiers changed from: protected */
-            public Unit cancelRequest(ChatterListType chatterListType) {
+            fun cancelRequest(ChatterListType chatterListType) {
                 ChatterDisplayDataList chatterDisplayDataList = (ChatterDisplayDataList) ChatterList.this.chatterLists.remove(chatterListType)
                 if (chatterDisplayDataList != null) {
                     chatterDisplayDataList.dispose()
@@ -163,26 +163,26 @@ private /* synthetic */ Int[] m296getcomlumiyaviewerlumiyaslprotousersmanagerCha
     }
 
     /* access modifiers changed from: package-private */
-    public Unit notifyListUpdated(ChatterListType chatterListType) {
+    fun notifyListUpdated(ChatterListType chatterListType) {
         this.chatterListPool.requestUpdate(chatterListType)
     }
 
-    public Unit updateDistanceToAllUsers() {
+    fun updateDistanceToAllUsers() {
         this.nearbyDistancePool.requestUpdateAll()
     }
 
-    public Unit updateDistanceToUser(UUID uuid) {
+    fun updateDistanceToUser(UUID uuid) {
         this.nearbyDistancePool.requestUpdate(uuid)
     }
 
-    public Unit updateList(ChatterListType chatterListType) {
+    fun updateList(ChatterListType chatterListType) {
         ChatterDisplayDataList chatterDisplayDataList = this.chatterLists.get(chatterListType)
         if (chatterDisplayDataList != null) {
             chatterDisplayDataList.requestRefresh(this.userManager.getDatabaseExecutor())
         }
     }
 
-    public Unit updateUserTypingStatus(UUID uuid) {
+    fun updateUserTypingStatus(UUID uuid) {
         this.typingUsersPool.requestUpdate(uuid)
     }
 }

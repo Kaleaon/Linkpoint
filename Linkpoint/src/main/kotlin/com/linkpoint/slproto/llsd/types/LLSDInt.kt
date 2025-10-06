@@ -28,12 +28,12 @@ class LLSDInt : LLSDNode() {
         return this.value
     }
 
-    public Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    fun toBinary(DataOutputStream dataOutputStream) throws IOException {
         dataOutputStream.writeByte(105)
         dataOutputStream.writeInt(this.value)
     }
 
-    public Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    fun toXML(XmlSerializer xmlSerializer) throws IOException {
         xmlSerializer.startTag("", "integer")
         xmlSerializer.text(Integer.toString(this.value))
         xmlSerializer.endTag("", "integer")

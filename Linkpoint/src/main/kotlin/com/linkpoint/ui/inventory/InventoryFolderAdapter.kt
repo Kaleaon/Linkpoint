@@ -158,7 +158,7 @@ class InventoryFolderAdapter : BaseAdapter(), View.OnClickListener {
         return true
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         if (this.onItemCheckboxClickListener != null) {
             Object tag = view.getTag(R.id.tag_outfit_object)
             if (tag instanceof SLInventoryEntry) {
@@ -167,12 +167,12 @@ class InventoryFolderAdapter : BaseAdapter(), View.OnClickListener {
         }
     }
 
-    public Unit setAvatarAppearance(SLAvatarAppearance sLAvatarAppearance) {
+    fun setAvatarAppearance(SLAvatarAppearance sLAvatarAppearance) {
         this.avatarAppearance = sLAvatarAppearance
         notifyDataSetChanged()
     }
 
-    public Unit setData(InventoryEntryList inventoryEntryList) {
+    fun setData(InventoryEntryList inventoryEntryList) {
         if (inventoryEntryList == null) {
             inventoryEntryList = InventoryEntryList()
         }
@@ -180,26 +180,26 @@ class InventoryFolderAdapter : BaseAdapter(), View.OnClickListener {
         notifyDataSetChanged()
     }
 
-    public Unit setDatabase(InventoryDB inventoryDB) {
+    fun setDatabase(InventoryDB inventoryDB) {
         this.database = inventoryDB
         notifyDataSetChanged()
     }
 
-    public Unit setOnItemCheckboxClickListener(OnItemCheckboxClickListener onItemCheckboxClickListener2) {
+    fun setOnItemCheckboxClickListener(OnItemCheckboxClickListener onItemCheckboxClickListener2) {
         this.onItemCheckboxClickListener = onItemCheckboxClickListener2
     }
 
-    public Unit setWornAttachments(ImmutableMap<UUID, String> immutableMap) {
+    fun setWornAttachments(ImmutableMap<UUID, String> immutableMap) {
         this.wornAttachments = immutableMap
         notifyDataSetChanged()
     }
 
-    public Unit setWornOutfitFolder(UUID uuid) {
+    fun setWornOutfitFolder(UUID uuid) {
         this.wornOutfitFolder = uuid
         notifyDataSetChanged()
     }
 
-    public Unit setWornWearables(Table<SLWearableType, UUID, SLWearable> table) {
+    fun setWornWearables(Table<SLWearableType, UUID, SLWearable> table) {
         this.wornWearables = table
         notifyDataSetChanged()
     }

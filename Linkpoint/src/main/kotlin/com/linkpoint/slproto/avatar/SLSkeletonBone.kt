@@ -49,12 +49,12 @@ class SLSkeletonBone {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit deform(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun deform(LLVector3 lLVector3, LLVector3 lLVector32) {
         this.offset.add(lLVector3)
         this.scale.mul(lLVector32)
     }
 
-    public Unit deformHierarchy(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun deformHierarchy(LLVector3 lLVector3, LLVector3 lLVector32) {
         this.offset.add(lLVector3)
         this.scale.mul(lLVector32)
         if (this.collisionVolumes != null) {
@@ -133,7 +133,7 @@ class SLSkeletonBone {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setPositionOverride(LLVector3 lLVector3) {
+    fun setPositionOverride(LLVector3 lLVector3) {
         this.basePosition.set(lLVector3)
     }
 

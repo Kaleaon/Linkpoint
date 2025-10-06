@@ -23,18 +23,18 @@ class EdgeDataPacket : SLMessage() {
         return this.EdgeData_Field.LayerData.length + 4 + 1
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleEdgeDataPacket(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.put(Ascii.CAN)
         packByte(byteBuffer, (Byte) this.EdgeData_Field.LayerType)
         packByte(byteBuffer, (Byte) this.EdgeData_Field.Direction)
         packVariable(byteBuffer, this.EdgeData_Field.LayerData, 2)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.EdgeData_Field.LayerType = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.EdgeData_Field.Direction = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.EdgeData_Field.LayerData = unpackVariable(byteBuffer, 2)

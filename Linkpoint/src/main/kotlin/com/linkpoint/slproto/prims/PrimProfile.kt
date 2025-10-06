@@ -226,7 +226,7 @@ private Int getNumNGonPoints(PrimProfileParams primProfileParams, Int i, Float f
     }
 
     /* access modifiers changed from: protected */
-    public Unit genNormals(PrimProfileParams primProfileParams) {
+    fun genNormals(PrimProfileParams primProfileParams) {
         LLVector3 lLVector3
         Int size = this.Profile.size()
         Int i = this.TotalOut != 0 ? this.TotalOut : this.Total / 2

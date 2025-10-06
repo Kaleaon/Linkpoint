@@ -28,7 +28,7 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
         /* access modifiers changed from: private */
         public volatile File compressedFile = null
         private val Runnable decompressRunnable = Runnable() {
-            public Unit run() {
+            fun run() {
                 try {
                     Bitmap asBitmap = OpenJPEG(UserPicBitmapRequest.this.compressedFile, 128, 128, false).getAsBitmap()
                     ByteArrayOutputStream byteArrayOutputStream = ByteArrayOutputStream()
@@ -44,7 +44,7 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
         }
         private volatile Future<?> decompressorFuture
         private val Runnable loadRunnable = Runnable() {
-            public Unit run() {
+            fun run() {
                 Byte[] userPic = UserPicBitmapCache.this.userManager.getUserPic((UUID) UserPicBitmapRequest.this.getParams())
                 Object[] objArr = Object[2]
                 objArr[0] = UserPicBitmapRequest.this.getParams()
@@ -63,7 +63,7 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
             super(uuid, resourceManager)
         }
 
-        public Unit OnResourceReady(Object obj, Boolean z) {
+        fun OnResourceReady(Object obj, Boolean z) {
             Object[] objArr = Object[2]
             objArr[0] = getParams()
             objArr[1] = obj != null ? obj.toString() : "null"
@@ -76,7 +76,7 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
             }
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             Debug.Printf("DecompressRequest: cancelled (%s)", ((UUID) getParams()).toString())
             Future<?> future = this.decompressorFuture
             if (future != null) {
@@ -90,7 +90,7 @@ class UserPicBitmapCache : ResourceMemoryCache()<UUID, Bitmap> {
             super.cancelRequest()
         }
 
-        public Unit execute() {
+        fun execute() {
             Debug.Printf("UserPic: Requesting load for %s", getParams())
             this.loaderFuture = LoaderExecutor.getInstance().submit(this.loadRunnable)
         }

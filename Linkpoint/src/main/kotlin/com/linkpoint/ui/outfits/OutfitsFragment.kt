@@ -493,7 +493,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    public Unit m696com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref1(SLAgentCircuit sLAgentCircuit) {
+    fun m696com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref1(SLAgentCircuit sLAgentCircuit) {
         SLAvatarAppearance sLAvatarAppearance = null
         if (this.adapter != null) {
             InventoryFolderAdapter inventoryFolderAdapter = this.adapter
@@ -506,7 +506,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onInventoryEntryList */
-    public Unit m695com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref0(InventoryEntryList inventoryEntryList) {
+    fun m695com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref0(InventoryEntryList inventoryEntryList) {
         Debug.Printf("InventoryFragment (%s): onInventoryEntryList: %d entries", this, Integer.valueOf(inventoryEntryList.size()))
         setTitle(inventoryEntryList.getTitle(), (String) null)
         if (this.adapter != null) {
@@ -517,13 +517,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onLoadingStatusChanged */
-    public Unit m697com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref2(Boolean bool) {
+    fun m697com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref2(Boolean bool) {
         updateLoadingStatus()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onRootFolderEntryList */
-    public Unit m700com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref5(InventoryEntryList inventoryEntryList) {
+    fun m700com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref5(InventoryEntryList inventoryEntryList) {
         if (inventoryEntryList != null) {
             Iterator it = inventoryEntryList.iterator()
             while (it.hasNext()) {
@@ -543,7 +543,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onWornAttachmentsChanged */
-    public Unit m698com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref3(ImmutableMap<UUID, String> immutableMap) {
+    fun m698com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref3(ImmutableMap<UUID, String> immutableMap) {
         if (this.adapter != null) {
             this.adapter.setWornAttachments(immutableMap)
         }
@@ -551,7 +551,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onWornOutfitFolder */
-    public Unit m701com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref6(UUID uuid) {
+    fun m701com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref6(UUID uuid) {
         if (this.adapter != null) {
             this.adapter.setWornOutfitFolder(uuid)
         }
@@ -559,7 +559,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
 
     /* access modifiers changed from: private */
     /* renamed from: onWornWearablesChanged */
-    public Unit m699com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref4(Table<SLWearableType, UUID, SLWearable> table) {
+    fun m699com_lumiyaviewer_lumiya_ui_outfits_OutfitsFragmentmthref4(Table<SLWearableType, UUID, SLWearable> table) {
         if (this.adapter != null) {
             this.adapter.setWornWearables(table)
         }
@@ -683,7 +683,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         }
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         switch (view.getId()) {
             case R.id.outfit_folder_wear_button:
                 changeOutfit(true)
@@ -712,13 +712,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
     }
 
     @EventHandler
-    public Unit onInventorySortOrderChanged(InventorySortOrderChangedEvent inventorySortOrderChangedEvent) {
+    fun onInventorySortOrderChanged(InventorySortOrderChangedEvent inventorySortOrderChangedEvent) {
         if (isFragmentStarted()) {
             showInventoryList(getFolderUUID())
         }
     }
 
-    public Unit onItemCheckboxClicked(SLInventoryEntry sLInventoryEntry) {
+    fun onItemCheckboxClicked(SLInventoryEntry sLInventoryEntry) {
         SLInventoryEntry resolveLink
         UserManager userManager = getUserManager()
         SLAgentCircuit data = this.agentCircuit.getData()
@@ -742,19 +742,19 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.outfits.-$Lambda$o
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         EventBus.getInstance().subscribe((Object) this)
         showInventoryList(getFolderUUID())
     }
 
-    public Unit onStop() {
+    fun onStop() {
         showInventoryList((UUID) null)
         EventBus.getInstance().unsubscribe(this)
         super.onStop()
     }
 
-    public Unit setFragmentArgs(Intent intent, Bundle bundle) {
+    fun setFragmentArgs(Intent intent, Bundle bundle) {
         Debug.Printf("InventoryFragment: setFragmentArgs '%s'", bundle)
         if (bundle != null) {
             getArguments().putAll(bundle)

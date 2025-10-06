@@ -53,7 +53,7 @@ private class WeakRunnable : Runnable {
                 this(runnable)
             }
 
-            public Unit run() {
+            fun run() {
                 Runnable runnable = (Runnable) this.runnableRef.get()
                 if (runnable != null) {
                     runnable.run()

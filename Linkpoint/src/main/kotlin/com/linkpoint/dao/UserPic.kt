@@ -27,15 +27,15 @@ class UserPic {
         return this.uuid
     }
 
-    public Unit setBitmap(Byte[] bArr) {
+    fun setBitmap(Byte[] bArr) {
         this.bitmap = bArr
     }
 
-    public Unit setId(Long l) {
+    fun setId(Long l) {
         this.id = l
     }
 
-    public Unit setUuid(String str) {
+    fun setUuid(String str) {
         this.uuid = str
     }
 }

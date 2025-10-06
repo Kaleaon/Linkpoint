@@ -115,7 +115,7 @@ protected UUID extractItemID(ImprovedInstantMessage improvedInstantMessage) {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager) {
         super.onNoAction(context, userManager)
         UUID sourceUUID = this.source.getSourceUUID()
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -127,7 +127,7 @@ protected UUID extractItemID(ImprovedInstantMessage improvedInstantMessage) {
         }
     }
 
-    public Unit onOfferAccepted(Context context, UserManager userManager, UUID uuid) {
+    fun onOfferAccepted(Context context, UserManager userManager, UUID uuid) {
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
@@ -138,13 +138,13 @@ protected UUID extractItemID(ImprovedInstantMessage improvedInstantMessage) {
         }
     }
 
-    public Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager) {
         if (this.dbMessage != null) {
             context.startActivity(InventoryActivity.makeSaveItemIntent(context, this.agentUUID, InventorySaveInfo(InventorySaveInfo.InventorySaveType.InventoryOffer, this.itemID, getItemName(), (UUID) null, this.assetType, this.dbMessage.getId().longValue())))
         }
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         Integer num = null
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setOrigIMType(Integer.valueOf(this.origIMType))

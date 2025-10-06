@@ -38,7 +38,7 @@ abstract class RequestOperator<K, T> : RequestHandler<K> {
         }
     }
 
-    public Unit onRequest(K k) {
+    fun onRequest(K k) {
         if (this.executor != null) {
             this.executor.execute(() -> m32lambda$com_lumiyaviewer_lumiya_react_RequestOperator_996(k))
             return
@@ -51,7 +51,7 @@ abstract class RequestOperator<K, T> : RequestHandler<K> {
         }
     }
 
-    public Unit onRequestCancelled(K k) {
+    fun onRequestCancelled(K k) {
         if (this.executor != null) {
             this.executor.execute(() -> m31lambda$com_lumiyaviewer_lumiya_react_RequestOperator_1579(k))
         } else {

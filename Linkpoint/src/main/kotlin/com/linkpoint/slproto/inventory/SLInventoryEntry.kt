@@ -537,11 +537,11 @@ private Unit parseSaleInfo(SimpleStringParser simpleStringParser, SLInventoryEnt
         return this.assetType == SLAssetType.AT_LINK.getTypeCode() && this.invType == SLInventoryType.IT_WEARABLE.getTypeCode()
     }
 
-    public Unit updateOrInsert(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
+    fun updateOrInsert(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
         super.updateOrInsert(sQLiteDatabase, "uuid_low = ? AND uuid_high = ?", String[]{Long.toString(this.uuid.getLeastSignificantBits()), Long.toString(this.uuid.getMostSignificantBits())})
     }
 
-    public Unit updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) throws DBObject.DatabaseBindingException {
+    fun updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) throws DBObject.DatabaseBindingException {
         sQLiteStatement.bindLong(19, this.uuid.getMostSignificantBits())
         sQLiteStatement.bindLong(20, this.uuid.getLeastSignificantBits())
         super.updateOrInsert(sQLiteStatement, sQLiteStatement2)

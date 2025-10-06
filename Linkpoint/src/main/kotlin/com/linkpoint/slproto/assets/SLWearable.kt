@@ -32,7 +32,7 @@ class SLWearable : Subscription.OnData<AssetData>, Subscription.OnError {
         this.assetSubscription = userManager.getAssetResponseCacher().getPool().subscribe(AssetKey.createAssetKey((UUID) null, (UUID) null, uuid2, sLWearableType.getAssetType().getTypeCode()), executor, this, this)
     }
 
-    public Unit dispose() {
+    fun dispose() {
         Debug.Printf("Wearable: unsubscribing for wearable %s", this.assetID)
         this.assetSubscription.unsubscribe()
     }
@@ -57,7 +57,7 @@ class SLWearable : Subscription.OnData<AssetData>, Subscription.OnError {
         return this.wearableData
     }
 
-    public Unit onData(AssetData assetData) {
+    fun onData(AssetData assetData) {
         if (assetData != null) {
             if (assetData.getStatus() != 1 || assetData.getData() == null) {
                 Debug.Printf("Wearable: asset transfer failed for asset %s", this.assetID)
@@ -78,7 +78,7 @@ class SLWearable : Subscription.OnData<AssetData>, Subscription.OnError {
         }
     }
 
-    public Unit onError(Throwable th) {
+    fun onError(Throwable th) {
         Debug.Printf("Wearable: got error for asset %s", this.assetID)
         this.isFailed = true
         if (this.statusChangeListener != null) {
@@ -86,7 +86,7 @@ class SLWearable : Subscription.OnData<AssetData>, Subscription.OnError {
         }
     }
 
-    public Unit setInventoryName(String str) {
+    fun setInventoryName(String str) {
         this.inventoryName = str
     }
 }

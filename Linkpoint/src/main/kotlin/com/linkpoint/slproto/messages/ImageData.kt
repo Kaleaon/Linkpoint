@@ -30,11 +30,11 @@ class ImageData : SLMessage() {
         return this.ImageDataData_Field.Data.length + 2 + 24
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleImageData(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.put((Byte) 9)
         packUUID(byteBuffer, this.ImageID_Field.ID)
         packByte(byteBuffer, (Byte) this.ImageID_Field.Codec)
@@ -43,7 +43,7 @@ class ImageData : SLMessage() {
         packVariable(byteBuffer, this.ImageDataData_Field.Data, 2)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.ImageID_Field.ID = unpackUUID(byteBuffer)
         this.ImageID_Field.Codec = unpackByte(byteBuffer) & UnsignedBytes.MAX_VALUE
         this.ImageID_Field.Size = unpackInt(byteBuffer)

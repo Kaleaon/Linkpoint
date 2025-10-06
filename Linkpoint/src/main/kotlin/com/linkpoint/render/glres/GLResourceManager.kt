@@ -38,7 +38,7 @@ class GLResourceManager {
         }
     }
 
-    public Unit Cleanup() {
+    fun Cleanup() {
         synchronized (this.glCleanableLock) {
             this.glCleanables.size()
         }
@@ -54,7 +54,7 @@ class GLResourceManager {
         }
     }
 
-    public Unit Flush() {
+    fun Flush() {
         synchronized (this.glCleanableLock) {
             for (GLCleanable gLCleanable : this.glCleanables) {
                 if (gLCleanable != null) {
@@ -69,7 +69,7 @@ class GLResourceManager {
         TextureMemoryTracker.releaseAllGLMemory()
     }
 
-    public Unit addCleanable(GLCleanable gLCleanable) {
+    fun addCleanable(GLCleanable gLCleanable) {
         synchronized (this.glCleanableLock) {
             this.glCleanables.add(gLCleanable)
         }

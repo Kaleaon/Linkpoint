@@ -51,7 +51,7 @@ class WeakRequestSet<T> {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit completeRequest(T t) {
+    fun completeRequest(T t) {
         Set<WeakReference> remove
         synchronized (this.lock) {
             remove = this.requests.remove(t)

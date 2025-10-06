@@ -24,11 +24,11 @@ class TransferPacket : SLMessage() {
         return this.TransferData_Field.Data.length + 30 + 1
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleTransferPacket(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.put((Byte) 17)
         packUUID(byteBuffer, this.TransferData_Field.TransferID)
         packInt(byteBuffer, this.TransferData_Field.ChannelType)
@@ -37,7 +37,7 @@ class TransferPacket : SLMessage() {
         packVariable(byteBuffer, this.TransferData_Field.Data, 2)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.TransferData_Field.TransferID = unpackUUID(byteBuffer)
         this.TransferData_Field.ChannelType = unpackInt(byteBuffer)
         this.TransferData_Field.Packet = unpackInt(byteBuffer)

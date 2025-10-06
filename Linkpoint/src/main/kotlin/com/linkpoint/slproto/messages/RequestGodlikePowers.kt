@@ -28,11 +28,11 @@ class RequestGodlikePowers : SLMessage() {
         return 53
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleRequestGodlikePowers(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 1)
@@ -42,7 +42,7 @@ class RequestGodlikePowers : SLMessage() {
         packUUID(byteBuffer, this.RequestBlock_Field.Token)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.RequestBlock_Field.Godlike = unpackBoolean(byteBuffer)

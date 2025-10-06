@@ -121,7 +121,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             return 0
         }
 
-        public Unit onBindViewHolder(MemberViewHolder memberViewHolder, Int i) {
+        fun onBindViewHolder(MemberViewHolder memberViewHolder, Int i) {
             if (this.data != null && i >= 0 && i < this.data.size()) {
                 memberViewHolder.bindToData(this.data.get(i), this.canDeleteMembers, this.canDeleteMyself)
             }
@@ -131,11 +131,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             return MemberViewHolder(this.layoutInflater.inflate(R.layout.group_role_member_list_item, viewGroup, false), GroupRoleMembersFragment.this.userManager.getUserID())
         }
 
-        public Unit onViewRecycled(MemberViewHolder memberViewHolder) {
+        fun onViewRecycled(MemberViewHolder memberViewHolder) {
             memberViewHolder.recycle()
         }
 
-        public Unit setData(LazyList<GroupRoleMember> lazyList, Boolean z, Boolean z2) {
+        fun setData(LazyList<GroupRoleMember> lazyList, Boolean z, Boolean z2) {
             this.data = lazyList
             this.canDeleteMembers = z
             this.canDeleteMyself = z2
@@ -162,7 +162,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
 
         /* access modifiers changed from: package-private */
-        public Unit bindToData(GroupRoleMember groupRoleMember, Boolean z, Boolean z2) {
+        fun bindToData(GroupRoleMember groupRoleMember, Boolean z, Boolean z2) {
             Int i = 0
             ChatterID.ChatterIDUser userChatterID = groupRoleMember != null ? ChatterID.getUserChatterID(this.agentUUID, groupRoleMember.getUserID()) : null
             if (!Objects.equal(userChatterID, this.boundChatterID)) {
@@ -192,14 +192,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             imageButton.setVisibility(i)
         }
 
-        public Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
+        fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever2) {
             if (chatterNameRetriever2 != null) {
                 this.userNameTextView.setText(chatterNameRetriever2.getResolvedName())
                 this.userPicView.setChatterID(chatterNameRetriever2.chatterID, chatterNameRetriever2.getResolvedName())
             }
         }
 
-        public Unit onClick(View view) {
+        fun onClick(View view) {
             switch (view.getId()) {
                 case R.id.role_member_remove_button:
                     if (this.boundChatterID != null && this.canDelete) {
@@ -213,7 +213,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         }
 
         /* access modifiers changed from: package-private */
-        public Unit recycle() {
+        fun recycle() {
             if (this.chatterNameRetriever != null) {
                 this.chatterNameRetriever.dispose()
                 this.chatterNameRetriever = null
@@ -253,14 +253,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onGroupRoleMemberList */
-    public Unit m494com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleMembersFragmentmthref0(UUID uuid) {
+    fun m494com_lumiyaviewer_lumiya_ui_chat_profiles_GroupRoleMembersFragmentmthref0(UUID uuid) {
         if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDGroup) && this.RoleID != null) {
             this.roleMembers.subscribe(this.userManager.getChatterList().getGroupManager().getGroupRoleMemberList(), GroupManager.GroupRoleMembersQuery.create(((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID(), this.RoleID, uuid))
         }
     }
 
     /* access modifiers changed from: private */
-    public Unit removeMemberFromRole(ChatterID.ChatterIDUser chatterIDUser) {
+    fun removeMemberFromRole(ChatterID.ChatterIDUser chatterIDUser) {
         AlertDialog.Builder(getContext()).setTitle(R.string.remove_member_from_role_confirm).setPositiveButton(R.string.yes_remove, DialogInterface.OnClickListener(this, chatterIDUser) {
 
             /* renamed from: -$f0 */
@@ -450,7 +450,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return inflate
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         GroupTitlesReply data
         AvatarGroupList.AvatarGroupEntry myGroupEntry
         Boolean z3 = true
@@ -505,7 +505,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         this.loadableMonitor.unsubscribeAll()
         this.RoleID = UUIDPool.getUUID(getArguments().getString(ROLE_ID_KEY))
         if (this.userManager != null && (chatterID instanceof ChatterID.ChatterIDGroup)) {

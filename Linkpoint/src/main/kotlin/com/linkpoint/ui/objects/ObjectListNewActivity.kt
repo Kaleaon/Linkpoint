@@ -57,7 +57,7 @@ private class InstanceHolder {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setDefaultTitle(getString(R.string.objects_activity_caption), (String) null)
     }

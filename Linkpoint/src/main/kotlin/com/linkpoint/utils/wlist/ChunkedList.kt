@@ -90,19 +90,19 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         }
     }
 
-    public Unit addChunkAtEnd(List<E> list) {
+    fun addChunkAtEnd(List<E> list) {
         this.chunks.add(list)
         this.count += list.size()
         resetLastPosition()
     }
 
-    public Unit addChunkAtStart(List<E> list) {
+    fun addChunkAtStart(List<E> list) {
         this.chunks.add(0, list)
         this.count += list.size()
         resetLastPosition()
     }
 
-    public Unit addElement(E e, Int i, ChunkFactory<E> chunkFactory) {
+    fun addElement(E e, Int i, ChunkFactory<E> chunkFactory) {
         List<E> list = null
         if (this.chunks.size() > 0) {
             list = this.chunks.get(this.chunks.size() - 1)
@@ -122,7 +122,7 @@ class ChunkedList<E> : AbstractList<E>, RandomAccess {
         checkConsistency()
     }
 
-    public Unit clear() {
+    fun clear() {
         this.chunks.clear()
         this.count = 0
         resetLastPosition()

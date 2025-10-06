@@ -163,7 +163,7 @@ class DriveSynchronizer {
     }
 
     static interface OnSyncCompletedListener {
-        public Unit onSyncCompleted()
+        fun onSyncCompleted()
     }
 }
 

@@ -94,7 +94,7 @@ private Boolean soundOnNotify = true
     @JvmStatic
 private Set<Activity> visibleActivities = Collections.synchronizedSet(HashSet())
     private val BroadcastReceiver cloudPluginInstalledReceiver = BroadcastReceiver() {
-        public Unit onReceive(Context context, Intent intent) {
+        fun onReceive(Context context, Intent intent) {
             if (Strings.nullToEmpty(intent.getData().getSchemeSpecificPart()).equals("com.linkpoint.cloud") && GridConnectionService.gridConnection != null && GridConnectionService.gridConnection.getConnectionState() == ConnectionState.Connected) {
                 UUID activeAgentUUID = GridConnectionService.gridConnection.getActiveAgentUUID()
                 if (activeAgentUUID != null) {
@@ -114,7 +114,7 @@ private Set<Activity> visibleActivities = Collections.synchronizedSet(HashSet())
     private val SubscriptionData<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfo = SubscriptionData(UIThreadExecutor.getInstance(), () -> { // Lambda implementation })
     private val EventBus eventBus = EventBus.getInstance()
     private Handler licenseCheckHandler = Handler() {
-        public Unit handleMessage(Message message) {
+        fun handleMessage(Message message) {
             switch (message.what) {
                 case R.id.msg_licensing_allow /*2131755033*/:
                     Debug.Printf("License: License check ok.", Object[0])
@@ -144,7 +144,7 @@ private Set<Activity> visibleActivities = Collections.synchronizedSet(HashSet())
     private val Set<Integer> shownNotificationIds = Collections.newSetFromMap(Collections.synchronizedMap(HashMap()))
     private Subscription<Boolean, UnreadNotifications> unreadNotifySubscription
     private val BroadcastReceiver voicePluginInstalledReceiver = BroadcastReceiver() {
-        public Unit onReceive(Context context, Intent intent) {
+        fun onReceive(Context context, Intent intent) {
             if (Strings.nullToEmpty(intent.getData().getSchemeSpecificPart()).equals("com.linkpoint.voice") && GridConnectionService.gridConnection != null && GridConnectionService.gridConnection.getConnectionState() == ConnectionState.Connected) {
                 UUID activeAgentUUID = GridConnectionService.gridConnection.getActiveAgentUUID()
                 if (activeAgentUUID != null) {
@@ -1501,19 +1501,19 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         onUnreadNotification(unreadNotifications)
     }
 
-    public Unit acceptVoiceCall(ChatterID chatterID) {
+    fun acceptVoiceCall(ChatterID chatterID) {
         if (this.voicePluginServiceConnection != null) {
             this.voicePluginServiceConnection.acceptVoiceCall(chatterID)
         }
     }
 
-    public Unit acceptVoiceCall(VoiceRinging voiceRinging) {
+    fun acceptVoiceCall(VoiceRinging voiceRinging) {
         if (this.voicePluginServiceConnection != null) {
             this.voicePluginServiceConnection.acceptVoiceCall(voiceRinging)
         }
     }
 
-    public Unit enableVoiceMic(Boolean z) {
+    fun enableVoiceMic(Boolean z) {
         if (this.voicePluginServiceConnection != null) {
             this.voicePluginServiceConnection.enableVoiceMic(z)
         }
@@ -1525,7 +1525,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
     }
 
     @EventHandler
-    public Unit handleConnectEvent(SLLoginResultEvent sLLoginResultEvent) {
+    fun handleConnectEvent(SLLoginResultEvent sLLoginResultEvent) {
         UserManager userManager = UserManager.getUserManager(sLLoginResultEvent.activeAgentUUID)
         if (userManager != null) {
             this.unreadNotifySubscription = userManager.getUnreadNotificationManager().getUnreadNotifications().subscribe(UnreadNotificationManager.unreadNotificationKey, UIThreadExecutor.getSerialInstance(), com.lumiyaviewer.lumiya.-$Lambda$3DowF6pLKgVjVrTY9aZKQ2J3cf0.AnonymousClass1(this))
@@ -1543,12 +1543,12 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
     }
 
     @EventHandler
-    public Unit handleConnectionStateChangedEvent(SLConnectionStateChangedEvent sLConnectionStateChangedEvent) {
+    fun handleConnectionStateChangedEvent(SLConnectionStateChangedEvent sLConnectionStateChangedEvent) {
         updateOnlineNotification()
     }
 
     @EventHandler
-    public Unit handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
+    fun handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
         updateOnlineNotification()
         Debug.Log("GridConnectionService: stopping self because of disconnect.")
         stopCloudSync()
@@ -1567,7 +1567,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         return this.mBinder
     }
 
-    public Unit onCreate() {
+    fun onCreate() {
         super.onCreate()
         serviceInstance = WeakReference(this)
         this.prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext())
@@ -1576,7 +1576,7 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         updateOnlineNotification()
     }
 
-    public Unit onDestroy() {
+    fun onDestroy() {
         if (this.prefs != null) {
             this.prefs.unregisterOnSharedPreferenceChangeListener(this)
             this.prefs = null
@@ -1592,11 +1592,11 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
     }
 
     @EventHandler
-    public Unit onGlobalPreferencesChanged(GlobalOptionsChangedEvent globalOptionsChangedEvent) {
+    fun onGlobalPreferencesChanged(GlobalOptionsChangedEvent globalOptionsChangedEvent) {
         readPreferences(globalOptionsChangedEvent.preferences)
     }
 
-    public Unit onSharedPreferenceChanged(SharedPreferences sharedPreferences, String str) {
+    fun onSharedPreferenceChanged(SharedPreferences sharedPreferences, String str) {
         readPreferences(sharedPreferences)
         updateOnlineNotification()
     }
@@ -1624,18 +1624,18 @@ private NotificationSettings notifySettingsByType(NotificationType notificationT
         return super.onUnbind(intent)
     }
 
-    public Unit startVoice(VoiceLoginInfo voiceLoginInfo, UserManager userManager) {
+    fun startVoice(VoiceLoginInfo voiceLoginInfo, UserManager userManager) {
         connectToVoicePlugin(voiceLoginInfo, userManager)
     }
 
-    public Unit stopVoice() {
+    fun stopVoice() {
         if (this.voicePluginServiceConnection != null) {
             this.voicePluginServiceConnection.disconnect()
             this.voicePluginServiceConnection = null
         }
     }
 
-    public Unit terminateVoiceCall(ChatterID chatterID) {
+    fun terminateVoiceCall(ChatterID chatterID) {
         if (this.voicePluginServiceConnection != null) {
             this.voicePluginServiceConnection.terminateVoiceCall(chatterID)
         }

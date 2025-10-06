@@ -27,11 +27,11 @@ class DeclineFriendship : SLMessage() {
         return 52
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleDeclineFriendship(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 42)
@@ -40,7 +40,7 @@ class DeclineFriendship : SLMessage() {
         packUUID(byteBuffer, this.TransactionBlock_Field.TransactionID)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.AgentData_Field.SessionID = unpackUUID(byteBuffer)
         this.TransactionBlock_Field.TransactionID = unpackUUID(byteBuffer)

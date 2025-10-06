@@ -24,11 +24,11 @@ class AsyncRequestHandler<K> : RequestHandler<K> {
         this.baseHandler.onRequestCancelled(obj)
     }
 
-    public Unit onRequest(K k) {
+    fun onRequest(K k) {
         this.executor.execute(() -> { // Lambda implementation })
     }
 
-    public Unit onRequestCancelled(K k) {
+    fun onRequestCancelled(K k) {
         this.executor.execute(AnonymousClass1(this, k))
     }
 }

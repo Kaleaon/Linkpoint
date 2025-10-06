@@ -36,7 +36,7 @@ class AvatarPickerForShare : AvatarPickerFragment() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onAvatarSelected(ChatterID chatterID, String str) {
+    fun onAvatarSelected(ChatterID chatterID, String str) {
         Bundle arguments = getArguments()
         if (arguments != null && arguments.containsKey(INVENTORY_ENTRY_KEY)) {
             this.inventoryFragmentHelper.ConfirmShareInventoryEntry((SLInventoryEntry) arguments.getParcelable(INVENTORY_ENTRY_KEY), chatterID, str, $Lambda$GxFBFkg7vdmipTAXKE3eB6HqSs(this))

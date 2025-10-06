@@ -22,7 +22,7 @@ class BasicPrimProgram : ShaderProgram() {
         super(shader, shader2)
     }
 
-    public Unit SetupLighting(RenderContext renderContext, WindlightPreset windlightPreset) {
+    fun SetupLighting(RenderContext renderContext, WindlightPreset windlightPreset) {
         if (windlightPreset != null) {
             GLES20.glUniform3f(this.LightDiffuseDir, windlightPreset.lightnorm[0], windlightPreset.lightnorm[2], -windlightPreset.lightnorm[1])
             if (Math.abs(windlightPreset.lightnorm[1]) > 0.1f) {
@@ -53,7 +53,7 @@ class BasicPrimProgram : ShaderProgram() {
         this.LightAmbientColor = GLES20.glGetUniformLocation(this.handle, "LightAmbientColor")
     }
 
-    public Unit setTextureEnabled(Boolean z) {
+    fun setTextureEnabled(Boolean z) {
         GLES20.glUniform1i(this.useTexture, z ? 1 : 0)
     }
 }

@@ -320,7 +320,7 @@ private class ProtocolRouter {
     /**
      * Shutdown the protocol manager
      */
-    public Unit shutdown() {
+    fun shutdown() {
         Log.i(TAG, "Shutting down hybrid protocol manager")
         
         isConnected = false

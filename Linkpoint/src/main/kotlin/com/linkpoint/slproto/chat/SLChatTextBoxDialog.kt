@@ -31,7 +31,7 @@ val class SLChatTextBoxDialog : SLChatDialogEvent() {
         this.textBoxButtonIndex = i
     }
 
-    public Unit bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
+    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
         super.bindViewHolder(chatEventViewHolder, userManager, chatEventTimestampUpdater)
         if (chatEventViewHolder instanceof ChatTextBoxViewHolder) {
             ChatTextBoxViewHolder chatTextBoxViewHolder = (ChatTextBoxViewHolder) chatEventViewHolder
@@ -65,13 +65,13 @@ val class SLChatTextBoxDialog : SLChatDialogEvent() {
     }
 
     /* renamed from: onDialogIgnored */
-    public Unit m147lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4314(UserManager userManager) {
+    fun m147lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4314(UserManager userManager) {
         super.onDialogIgnored(userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
     /* renamed from: onEnteredText */
-    public Unit m146lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4223(UserManager userManager, String str) {
+    fun m146lambda$com_lumiyaviewer_lumiya_slproto_chat_SLChatTextBoxDialog_4223(UserManager userManager, String str) {
         this.enteredValue = str
         UUID sourceUUID = this.source.getSourceUUID()
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -81,13 +81,13 @@ val class SLChatTextBoxDialog : SLChatDialogEvent() {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setTextBoxButtonIndex(Integer.valueOf(this.textBoxButtonIndex))
         chatMessage.setDialogSelectedOption(this.enteredValue)
     }
 
-    public Unit showDialog(Context context, UserManager userManager) {
+    fun showDialog(Context context, UserManager userManager) {
         TextFieldDialogBuilder(context).setTitle(this.text).setOnTextEnteredListener(TextFieldDialogBuilder.OnTextEnteredListener(this, userManager) {
 
             /* renamed from: -$f0 */

@@ -79,7 +79,7 @@ private /* synthetic */ Int[] m384getcomlumiyaviewerlumiyacloudcommonMessageType
             return iArr
         }
 
-        public Unit handleMessage(Message message) {
+        fun handleMessage(Message message) {
             if (message.what == 100 && (message.obj instanceof Bundle)) {
                 Bundle bundle = (Bundle) message.obj
                 if (bundle.containsKey("message") && bundle.containsKey("messageType")) {
@@ -149,7 +149,7 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
     }
 
     /* access modifiers changed from: private */
-    public Unit onLogMessagesCompleted(LogMessagesCompleted logMessagesCompleted) {
+    fun onLogMessagesCompleted(LogMessagesCompleted logMessagesCompleted) {
         Debug.Printf("LinkpointCloud: written messages until %d for agent %s", Long.valueOf(logMessagesCompleted.lastWrittenMessageID), logMessagesCompleted.agentUUID)
         if (this.userManager.getUserID().equals(logMessagesCompleted.agentUUID)) {
             this.userManager.getSyncManager().onMessagesWritten(logMessagesCompleted.lastWrittenMessageID)
@@ -157,7 +157,7 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
     }
 
     /* access modifiers changed from: private */
-    public Unit onLogMessagesFlushed(LogMessagesFlushed logMessagesFlushed) {
+    fun onLogMessagesFlushed(LogMessagesFlushed logMessagesFlushed) {
         Debug.Printf("LinkpointCloud: flushed some messages for agent %s", logMessagesFlushed.agentUUID)
         if (this.userManager.getUserID().equals(logMessagesFlushed.agentUUID)) {
             this.userManager.getSyncManager().onMessagesFlushed(logMessagesFlushed.messageIDs)
@@ -165,7 +165,7 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
     }
 
     /* access modifiers changed from: private */
-    public Unit onLogSyncStatus(LogSyncStatus logSyncStatus) {
+    fun onLogSyncStatus(LogSyncStatus logSyncStatus) {
         String string
         Debug.Printf("LinkpointCloud: got logSyncStatus %s, plugin version %d", logSyncStatus.status, Integer.valueOf(logSyncStatus.pluginVersionCode))
         if (this.toPluginMessenger != null) {
@@ -202,7 +202,7 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
         }
     }
 
-    public Unit disconnect() {
+    fun disconnect() {
         this.mainThreadHandler.post($Lambda$WmOOQW2pFqpMpXOyAP45N3kh7mE(this))
     }
 
@@ -213,7 +213,7 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
         this.context.unbindService(this)
     }
 
-    public Unit onServiceConnected(ComponentName componentName, IBinder iBinder) {
+    fun onServiceConnected(ComponentName componentName, IBinder iBinder) {
         Debug.Printf("LinkpointCloud: service connected", Object[0])
         this.toPluginMessenger = Messenger(iBinder)
         try {
@@ -223,7 +223,7 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
         }
     }
 
-    public Unit onServiceDisconnected(ComponentName componentName) {
+    fun onServiceDisconnected(ComponentName componentName) {
         Debug.Printf("LinkpointCloud: service disconnected", Object[0])
     }
 
@@ -234,13 +234,13 @@ private /* synthetic */ Int[] m379getcomlumiyaviewerlumiyacloudcommonLogSyncStat
         return false
     }
 
-    public Unit showSyncingError(String str, String str2, Intent intent) {
+    fun showSyncingError(String str, String str2, Intent intent) {
         NotificationCompat.Builder builder = NotificationCompat.Builder(this.context)
         builder.setSmallIcon(R.drawable.ic_cloud_sync_notify).setContentTitle(str).setContentText(str2).setDefaults(0).setOngoing(false).setAutoCancel(true).setContentIntent(PendingIntent.getActivity(this.context, 0, intent, SLMoveEvents.AGENT_CONTROL_AWAY)).setOnlyAlertOnce(true)
         ((NotificationManager) this.context.getSystemService("notification")).notify(R.id.google_drive_problem_notify, builder.build())
     }
 
-    public Unit stopSyncing() {
+    fun stopSyncing() {
         if (!this.syncingStarted.getAndSet(false)) {
             disconnect()
         } else if (this.toPluginMessenger != null) {

@@ -27,7 +27,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
         /* JADX WARNING: Removed duplicated region for block: B:39:0x0170  */
         /* JADX WARNING: Removed duplicated region for block: B:40:0x0172  */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        public Unit run() {
+        fun run() {
             /*
                 r15 = this
                 r14 = 3
@@ -238,7 +238,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
         }
 
         /* access modifiers changed from: package-private */
-        public Unit addEntry(SLInventoryEntry sLInventoryEntry) throws InterruptedException {
+        fun addEntry(SLInventoryEntry sLInventoryEntry) throws InterruptedException {
             this.commitEntryQueue.put(sLInventoryEntry)
         }
 
@@ -248,7 +248,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
         /* JADX WARNING: Removed duplicated region for block: B:27:0x007f  */
         /* JADX WARNING: Removed duplicated region for block: B:65:? A[RETURN, SYNTHETIC] */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        public Unit run() {
+        fun run() {
             /*
                 r11 = this
                 r3 = 1
@@ -421,7 +421,7 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
         }
 
         /* access modifiers changed from: package-private */
-        public Unit stopAndWait(Boolean z) throws InterruptedException {
+        fun stopAndWait(Boolean z) throws InterruptedException {
             if (!z) {
                 this.aborted = true
             }
@@ -456,14 +456,14 @@ class SLInventoryHTTPFetchRequest : SLInventoryFetchRequest() {
             } : super.onArrayBegin(str)
         }
 
-        public Unit onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        fun onMapEnd(String str) throws LLSDXMLException, InterruptedException {
             if (this.gotUUID != null && this.gotUUID.equals(SLInventoryHTTPFetchRequest.this.folderUUID) && this.gotVersion != SLInventoryHTTPFetchRequest.this.folderEntry.version) {
                 SLInventoryHTTPFetchRequest.this.folderEntry.version = this.gotVersion
                 this.commitThread.addEntry(SLInventoryHTTPFetchRequest.this.folderEntry)
             }
         }
 
-        public Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+        fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
             Debug.Printf("InvFetch: FolderDataContentHandler: key '%s' value '%s'", str, lLSDNode)
             if (str.equals("version")) {
                 this.gotVersion = lLSDNode.asInt()
@@ -533,7 +533,7 @@ private /* synthetic */ Int[] m189getcomlumiyaviewerlumiyaslprotoinventorySLInve
             this.entry.isFolder = true
         }
 
-        public Unit onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        fun onMapEnd(String str) throws LLSDXMLException, InterruptedException {
             if (this.entry.parentUUID == null) {
                 this.entry.parentUUID = SLInventoryHTTPFetchRequest.this.folderEntry.parentUUID
                 this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId()
@@ -544,7 +544,7 @@ private /* synthetic */ Int[] m189getcomlumiyaviewerlumiyaslprotoinventorySLInve
             this.commitThread.addEntry(this.entry)
         }
 
-        public Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+        fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
             FolderValueKey byTag = FolderValueKey.byTag(str)
             if (byTag != null) {
                 switch (m189getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$FolderValueKeySwitchesValues()[byTag.ordinal()]) {
@@ -691,7 +691,7 @@ private /* synthetic */ Int[] m192getcomlumiyaviewerlumiyaslprotoinventorySLInve
                 return iArr
             }
 
-            public Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+            fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
                 PermissionsValueKey byTag = PermissionsValueKey.byTag(str)
                 if (byTag != null) {
                     switch (m192getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$PermissionsValueKeySwitchesValues()[byTag.ordinal()]) {
@@ -734,7 +734,7 @@ private /* synthetic */ Int[] m192getcomlumiyaviewerlumiyaslprotoinventorySLInve
             }
         }
         private val LLSDStreamingParser.LLSDContentHandler saleInfoHandler = LLSDStreamingParser.LLSDDefaultContentHandler() {
-            public Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+            fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
                 if (str.equals("sale_type")) {
                     if (lLSDNode.isString()) {
                         ItemEntryContentHandler.this.entry.saleType = SLSaleType.getByString(lLSDNode.asString()).getTypeCode()
@@ -810,7 +810,7 @@ private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInve
             return str.equals("permissions") ? this.permissionsHandler : str.equals("sale_info") ? this.saleInfoHandler : super.onMapBegin(str)
         }
 
-        public Unit onMapEnd(String str) throws LLSDXMLException, InterruptedException {
+        fun onMapEnd(String str) throws LLSDXMLException, InterruptedException {
             if (this.entry.parentUUID == null) {
                 this.entry.parentUUID = SLInventoryHTTPFetchRequest.this.folderEntry.parentUUID
                 this.entry.parent_id = SLInventoryHTTPFetchRequest.this.folderEntry.getId()
@@ -821,7 +821,7 @@ private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInve
             this.commitThread.addEntry(this.entry)
         }
 
-        public Unit onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
+        fun onPrimitiveValue(String str, LLSDNode lLSDNode) throws LLSDXMLException, LLSDValueTypeException {
             ItemValueKey byTag = ItemValueKey.byTag(str)
             if (byTag != null) {
                 switch (m191getcomlumiyaviewerlumiyaslprotoinventorySLInventoryHTTPFetchRequest$ItemValueKeySwitchesValues()[byTag.ordinal()]) {
@@ -966,7 +966,7 @@ private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInve
         this.capURL = str
     }
 
-    public Unit cancel() {
+    fun cancel() {
         this.isCancelled.set(true)
         LLSDStreamingXMLRequest lLSDStreamingXMLRequest = this.streamingXmlReqRef.get()
         if (lLSDStreamingXMLRequest != null) {
@@ -978,7 +978,7 @@ private /* synthetic */ Int[] m191getcomlumiyaviewerlumiyaslprotoinventorySLInve
         }
     }
 
-    public Unit start() {
+    fun start() {
         if (!this.isCancelled.get() && this.futureRef.get() == null) {
             this.futureRef.set(GenericHTTPExecutor.getInstance().submit(this.httpRequest))
         }

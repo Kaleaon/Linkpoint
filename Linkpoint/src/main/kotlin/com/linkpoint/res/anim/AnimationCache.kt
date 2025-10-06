@@ -33,12 +33,12 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
             this.assetName = str
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             LoaderExecutor.getInstance().remove(this)
             super.cancelRequest()
         }
 
-        public Unit execute() {
+        fun execute() {
             LoaderExecutor.getInstance().execute(this)
         }
 
@@ -74,7 +74,7 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
         /* JADX WARNING: Removed duplicated region for block: B:30:0x0070 A[SYNTHETIC, Splitter:B:30:0x0070] */
         /* JADX WARNING: Removed duplicated region for block: B:35:0x0079 A[ExcHandler: all (th java.lang.Throwable), Splitter:B:5:0x0023] */
         /* Code decompiled incorrectly, please refer to instructions dump. */
-        public Unit run() {
+        fun run() {
             /*
                 r6 = this
                 r2 = 0
@@ -175,7 +175,7 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
             super(uuid, resourceManager)
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             Subscription<AssetKey, AssetData> subscription = this.assetSubscription
             if (subscription != null) {
                 subscription.unsubscribe()
@@ -183,7 +183,7 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
             super.cancelRequest()
         }
 
-        public Unit completeRequest(AnimationData animationData) {
+        fun completeRequest(AnimationData animationData) {
             Subscription<AssetKey, AssetData> subscription = this.assetSubscription
             if (subscription != null) {
                 subscription.unsubscribe()
@@ -191,7 +191,7 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
             super.completeRequest(animationData)
         }
 
-        public Unit execute() {
+        fun execute() {
             AssetResponseCacher assetResponseCacher = (AssetResponseCacher) AnimationCache.this.assetResponseCacher.get()
             if (assetResponseCacher != null) {
                 this.assetSubscription = assetResponseCacher.getPool().subscribe(AssetKey.createAssetKey((UUID) null, (UUID) null, (UUID) getParams(), 20), LoaderExecutor.getInstance(), this, this)
@@ -200,7 +200,7 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
             }
         }
 
-        public Unit onData(AssetData assetData) {
+        fun onData(AssetData assetData) {
             AnimationData animationData
             if (assetData == null || assetData.getData() == null || assetData.getStatus() != 1) {
                 completeRequest((AnimationData) null)
@@ -225,7 +225,7 @@ private class AssetLoadRequest : ResourceRequest()<UUID, AnimationData> : Runnab
             completeRequest(animationData)
         }
 
-        public Unit onError(Throwable th) {
+        fun onError(Throwable th) {
             completeRequest((AnimationData) null)
         }
     }
@@ -271,7 +271,7 @@ private class InstanceHolder {
         return this.assetAnimations.contains(uuid2) ? AssetLoadRequest(uuid, resourceManager, uuid2) : DownloadRequest(uuid, resourceManager)
     }
 
-    public Unit setAssetResponseCacher(AssetResponseCacher assetResponseCacher2) {
+    fun setAssetResponseCacher(AssetResponseCacher assetResponseCacher2) {
         this.assetResponseCacher.set(assetResponseCacher2)
     }
 }

@@ -53,13 +53,13 @@ class MeshRiggingData {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit PrepareInfluenceBuffers(RenderContext renderContext, Float[] fArr) {
+    fun PrepareInfluenceBuffers(RenderContext renderContext, Float[] fArr) {
         GLES20.glUseProgram(renderContext.riggedMeshProgram.getHandle())
         GLES20.glUniformMatrix4fv(renderContext.riggedMeshProgram.uBindShapeMatrix, 1, false, fArr, 0)
         GLES20.glUniform4fv(renderContext.riggedMeshProgram.uJointVectors, this.mappedJointVectors.length / 4, this.mappedJointVectors, 0)
     }
 
-    public Unit SetupBuffers30(RenderContext renderContext) {
+    fun SetupBuffers30(RenderContext renderContext) {
         if (this.glRiggingDataBuffer == null) {
             this.glRiggingDataBuffer = GLLoadableBuffer(PrepareRiggingUniformBuffer(renderContext))
         }
@@ -67,12 +67,12 @@ class MeshRiggingData {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit UpdateRigged(MeshFace meshFace, Float[] fArr, DirectByteBuffer directByteBuffer, Int i) {
+    fun UpdateRigged(MeshFace meshFace, Float[] fArr, DirectByteBuffer directByteBuffer, Int i) {
         meshFace.UpdateRigged(directByteBuffer, i, fArr, this.mappedJointMatrices)
     }
 
     /* access modifiers changed from: package-private */
-    public Unit UpdateRiggedMatrices(AvatarSkeleton avatarSkeleton) {
+    fun UpdateRiggedMatrices(AvatarSkeleton avatarSkeleton) {
         if (this.mappedJointMatrices == null) {
             this.mappedJointMatrices = Float[(this.joints.length * 16)]
         }

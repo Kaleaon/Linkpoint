@@ -42,7 +42,7 @@ val class SLChatFriendshipResultEvent : SLChatEvent() {
         return true
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setAccepted(Boolean.valueOf(this.accepted))
     }

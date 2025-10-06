@@ -979,7 +979,7 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
         }
     }
 
-    public Unit bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
+    fun bindViewHolder(ChatEventViewHolder chatEventViewHolder, UserManager userManager, ChatEventTimestampUpdater chatEventTimestampUpdater) {
         ChatterPicView chatterPicView = chatEventViewHolder.chatSourceIcon
         Boolean equal = this.source.getSourceType() == ChatMessageSource.ChatMessageSourceType.User ? Objects.equal(this.source.getSourceUUID(), this.agentUUID) : false
         if (chatEventViewHolder.chatSourceIconRight != null && equal) {
@@ -1170,7 +1170,7 @@ private /* synthetic */ Int[] m149getcomlumiyaviewerlumiyaslprotouserschatsrcCha
     }
 
     /* access modifiers changed from: protected */
-    public Unit notifyEventUpdated(UserManager userManager) {
+    fun notifyEventUpdated(UserManager userManager) {
         if (this.dbMessage != null) {
             userManager.getChatterList().getActiveChattersManager().notifyChatEventUpdated(this)
         }
@@ -1333,7 +1333,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.slproto.chat.generic.
     }
 
     /* access modifiers changed from: protected */
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         chatMessage.setTimestamp(this.timestamp)
         chatMessage.setIsOffline(Boolean.valueOf(this.isOffline))
         chatMessage.setOrigTimestamp(this.originalTimestamp)

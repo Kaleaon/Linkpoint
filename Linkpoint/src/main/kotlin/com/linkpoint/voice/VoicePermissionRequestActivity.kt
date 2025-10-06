@@ -28,12 +28,12 @@ class VoicePermissionRequestActivity : AppCompatActivity() {
             this.this$0 = voicePermissionRequestActivity
         }
 
-        public Unit onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        fun onServiceConnected(ComponentName componentName, IBinder iBinder) {
             VoicePermissionRequestActivity.access$002(this.this$0, Messenger(iBinder))
             ActivityCompat.requestPermissions(this.this$0, String[]{"android.permission.RECORD_AUDIO"}, 100)
         }
 
-        public Unit onServiceDisconnected(ComponentName componentName) {
+        fun onServiceDisconnected(ComponentName componentName) {
             VoicePermissionRequestActivity.access$002(this.this$0, null)
         }
     }

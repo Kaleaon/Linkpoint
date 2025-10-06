@@ -158,7 +158,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onActiveGroupCheckboxClicked */
-    public Unit m440com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref3(View view) {
+    fun m440com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref3(View view) {
         try {
             if (((CheckBox) view).isChecked()) {
                 this.agentCircuit.get().getModules().groupManager.ActivateGroup(this.groupProfile.get().GroupData_Field.GroupID)
@@ -172,7 +172,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    public Unit m437com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref0(SLAgentCircuit sLAgentCircuit) {
+    fun m437com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref0(SLAgentCircuit sLAgentCircuit) {
         View view = getView()
         if (view != null) {
             for (Int findViewById : Int[]{R.id.show_in_profile_checkbox, R.id.active_group_checkbox, R.id.group_profile_contribution_button, R.id.group_join_button, R.id.group_leave_button, R.id.group_invite_button, R.id.group_change_role_button}) {
@@ -183,7 +183,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onChangeRoleClicked */
-    public Unit m442com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref5(View view) {
+    fun m442com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref5(View view) {
         Int i = 0
         try {
             this.agentCircuit.assertHasData()
@@ -364,7 +364,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onContributeLandClicked */
-    public Unit m443com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref6(View view) {
+    fun m443com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref6(View view) {
         try {
             this.agentCircuit.assertHasData()
             AvatarGroupList.AvatarGroupEntry avatarGroupEntry = this.myGroupList.get().Groups.get(this.groupProfile.get().GroupData_Field.GroupID)
@@ -466,7 +466,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onCopyGroupKeyClicked */
-    public Unit m439com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref2(View view) {
+    fun m439com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref2(View view) {
         if (this.chatterID instanceof ChatterID.ChatterIDGroup) {
             String uuid = ((ChatterID.ChatterIDGroup) this.chatterID).getChatterUUID().toString()
             if (Build.VERSION.SDK_INT < 11) {
@@ -484,7 +484,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
      */
     /* renamed from: onInviteClicked */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit m446com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref9(android.view.View r9) {
+    fun m446com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref9(android.view.View r9) {
         /*
             r8 = this
             com.lumiyaviewer.lumiya.slproto.users.ChatterID r0 = r8.chatterID     // Catch:{ DataNotReadyException -> 0x0067 }
@@ -540,7 +540,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onJoinClicked */
-    public Unit m444com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref7(View view) {
+    fun m444com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref7(View view) {
         try {
             this.agentCircuit.assertHasData()
             UUID uuid = this.groupProfile.get().GroupData_Field.GroupID
@@ -645,7 +645,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onLeaveClicked */
-    public Unit m445com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref8(View view) {
+    fun m445com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref8(View view) {
         try {
             this.agentCircuit.assertHasData()
             UUID uuid = this.groupProfile.get().GroupData_Field.GroupID
@@ -820,7 +820,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onShowInProfileCheckboxClicked */
-    public Unit m441com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref4(View view) {
+    fun m441com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref4(View view) {
         try {
             AvatarGroupList.AvatarGroupEntry avatarGroupEntry = this.myGroupList.get().Groups.get(this.groupProfile.get().GroupData_Field.GroupID)
             if (avatarGroupEntry != null) {
@@ -833,7 +833,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
 
     /* access modifiers changed from: private */
     /* renamed from: onViewProfileClicked */
-    public Unit m438com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref1(View view) {
+    fun m438com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref1(View view) {
         UUID uuid
         GroupProfileReply data = this.groupProfile.getData()
         if (data != null && this.chatterID != null && (uuid = data.GroupData_Field.FounderID) != null && (!uuid.equals(UUIDPool.ZeroUUID)) && this.chatterID != null) {
@@ -1520,7 +1520,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return inflate
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         Int i = 0
         View view = getView()
         try {
@@ -1598,7 +1598,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         View view = getView()
         this.loadableMonitor.unsubscribeAll()
         this.agentCircuit.unsubscribe()

@@ -52,7 +52,7 @@ class VoiceEnablePreference : CheckBoxPreference() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onClick() {
+    fun onClick() {
         VoicePluginServiceConnection.setInstallOfferDisplayed(true)
         super.onClick()
         if (isChecked() && !VoicePluginServiceConnection.checkPluginInstalled(getContext())) {

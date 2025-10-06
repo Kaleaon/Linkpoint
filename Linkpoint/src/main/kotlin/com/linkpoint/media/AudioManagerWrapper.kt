@@ -58,7 +58,7 @@ private Method mRequestAudioFocus
         }
     }
 
-    public Unit abandonAudioFocus() {
+    fun abandonAudioFocus() {
         Debug.Log("AudioManagerWrapper: abandoning audio focus")
         if (this.hasAudioFocusAPI) {
             try {
@@ -91,7 +91,7 @@ private Method mRequestAudioFocus
         }
     }
 
-    public Unit setHandler(Handler handler, Int i) {
+    fun setHandler(Handler handler, Int i) {
         this.mHandler = handler
         this.msgCode = i
     }

@@ -234,7 +234,7 @@ class MeshData {
         return meshWeightsBuffer
     }
 
-    public Unit ApplyJointTranslations(MeshJointTranslations meshJointTranslations) {
+    fun ApplyJointTranslations(MeshJointTranslations meshJointTranslations) {
         meshJointTranslations.pelvisOffset += this.pelvisOffset
         if (this.jointTranslations != null) {
             EnumMap<SLSkeletonBoneID, Float[]> enumMap = meshJointTranslations.jointTranslations
@@ -244,7 +244,7 @@ class MeshData {
         }
     }
 
-    public Unit PrepareInfluenceBuffers(RenderContext renderContext) {
+    fun PrepareInfluenceBuffers(RenderContext renderContext) {
         if (this.riggingData != null) {
             if (this.glJointIndexBuffer == null || this.glWeightsBuffer == null) {
                 if (this.weightsBuffer == null) {
@@ -261,7 +261,7 @@ class MeshData {
         }
     }
 
-    public Unit PrepareInfluencesForFace(RenderContext renderContext, Int i) {
+    fun PrepareInfluencesForFace(RenderContext renderContext, Int i) {
         if (this.glJointIndexBuffer != null) {
             this.glJointIndexBuffer.Bind20(renderContext, renderContext.riggedMeshProgram.vJoint, 4, 5121, 4, i * 4)
         }
@@ -270,12 +270,12 @@ class MeshData {
         }
     }
 
-    public Unit SetupBuffers30(RenderContext renderContext) {
+    fun SetupBuffers30(RenderContext renderContext) {
         renderContext.bindRiggingMeshData(this.riggingData)
         GLES20.glUniformMatrix4fv(renderContext.currentRiggedMeshProgram.uBindShapeMatrix, 1, false, this.bindShapeMatrix, 0)
     }
 
-    public Unit SetupFace30(RenderContext renderContext, Int i) {
+    fun SetupFace30(RenderContext renderContext, Int i) {
         if (this.glJointIndexBuffer == null || this.glWeightsBuffer == null) {
             if (this.weightsBuffer == null) {
                 this.weightsBuffer = makeInfluenceBuffers()
@@ -291,13 +291,13 @@ class MeshData {
         this.glWeightsBuffer.Bind20(renderContext, renderContext.currentRiggedMeshProgram.vWeight, 4, 5126, 16, i * 4 * 4)
     }
 
-    public Unit UpdateRigged(Int i, DirectByteBuffer directByteBuffer, Int i2) {
+    fun UpdateRigged(Int i, DirectByteBuffer directByteBuffer, Int i2) {
         if (this.riggingData != null) {
             this.riggingData.UpdateRigged(this.faces[i], this.bindShapeMatrix, directByteBuffer, i2)
         }
     }
 
-    public Unit UpdateRiggedMatrices(AvatarSkeleton avatarSkeleton) {
+    fun UpdateRiggedMatrices(AvatarSkeleton avatarSkeleton) {
         if (this.riggingData != null) {
             this.riggingData.UpdateRiggedMatrices(avatarSkeleton)
         }

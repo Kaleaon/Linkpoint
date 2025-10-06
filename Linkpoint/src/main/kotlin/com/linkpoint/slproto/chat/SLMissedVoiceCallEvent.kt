@@ -46,7 +46,7 @@ val class SLMissedVoiceCallEvent : SLChatYesNoEvent() {
         return ""
     }
 
-    public Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager) {
         SLModules modules
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
@@ -55,7 +55,7 @@ val class SLMissedVoiceCallEvent : SLChatYesNoEvent() {
         }
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
     }
 }

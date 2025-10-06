@@ -106,7 +106,7 @@ class PrimVolumeParams {
         return "{Volume: SculptType 0x" + Integer.toHexString(this.SculptType) + ", SculptID " + (this.SculptID != null ? this.SculptID.toString() : "null") + ", Path = (" + this.PathParams.toString() + "), Profile = (" + this.ProfileParams.toString() + ")}"
     }
 
-    public Unit unpackExtraParams(ByteBuffer byteBuffer) {
+    fun unpackExtraParams(ByteBuffer byteBuffer) {
         try {
             Byte b = byteBuffer.get()
             for (Int i = 0; i < b; i++) {

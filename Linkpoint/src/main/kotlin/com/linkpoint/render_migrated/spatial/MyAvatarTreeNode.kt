@@ -10,23 +10,23 @@ class MyAvatarTreeNode : InlineList()<DrawListEntry> {
         this.spatialTree = spatialTree
     }
 
-    public Unit addDrawables(DrawList drawList) {
+    fun addDrawables(DrawList drawList) {
         for (DrawListEntry drawListEntry = (DrawListEntry) getFirst(); drawListEntry != null; drawListEntry = drawListEntry.getNext()) {
             drawListEntry.addToDrawList(drawList)
         }
     }
 
-    public Unit addEntry(DrawListEntry drawListEntry) {
+    fun addEntry(DrawListEntry drawListEntry) {
         super.addEntry(drawListEntry)
         this.spatialTree.setDrawListChanged()
     }
 
-    public Unit removeEntry(DrawListEntry drawListEntry) {
+    fun removeEntry(DrawListEntry drawListEntry) {
         super.removeEntry(drawListEntry)
         this.spatialTree.setDrawListChanged()
     }
 
-    public Unit requestEntryRemoval(DrawListEntry drawListEntry) {
+    fun requestEntryRemoval(DrawListEntry drawListEntry) {
         this.spatialTree.spatialObjectIndex.requestEntryRemoval(drawListEntry)
     }
 }

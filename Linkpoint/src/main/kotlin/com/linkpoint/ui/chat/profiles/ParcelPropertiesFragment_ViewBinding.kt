@@ -30,7 +30,7 @@ class ParcelPropertiesFragment_ViewBinding : Unbinder {
         parcelPropertiesFragment.mediaStopButton = (Button) Utils.castView(findRequiredView, R.id.parcel_media_stop_button, "field 'mediaStopButton'", Button.class)
         this.view2131755615 = findRequiredView
         findRequiredView.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 parcelPropertiesFragment.onParcelMediaStop()
             }
         parcelPropertiesFragment.parcelMediaCardView = (CardView) Utils.findRequiredViewAsType(view, R.id.parcel_media_card_view, "field 'parcelMediaCardView'", CardView.class)
@@ -43,7 +43,7 @@ class ParcelPropertiesFragment_ViewBinding : Unbinder {
         parcelPropertiesFragment.mediaPlayButton = (Button) Utils.castView(findRequiredView2, R.id.parcel_media_play_button, "field 'mediaPlayButton'", Button.class)
         this.view2131755614 = findRequiredView2
         findRequiredView2.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 parcelPropertiesFragment.onParcelMediaPlay()
             }
         parcelPropertiesFragment.parcelImageView = (ImageAssetView) Utils.findRequiredViewAsType(view, R.id.parcel_image_view, "field 'parcelImageView'", ImageAssetView.class)
@@ -51,25 +51,25 @@ class ParcelPropertiesFragment_ViewBinding : Unbinder {
         View findRequiredView3 = Utils.findRequiredView(view, R.id.parcel_owner_profile_button, "method 'onOwnerProfileButton'")
         this.view2131755608 = findRequiredView3
         findRequiredView3.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 parcelPropertiesFragment.onOwnerProfileButton()
             }
         View findRequiredView4 = Utils.findRequiredView(view, R.id.sim_restart_button, "method 'onSimRestartButton'")
         this.view2131755617 = findRequiredView4
         findRequiredView4.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 parcelPropertiesFragment.onSimRestartButton()
             }
         View findRequiredView5 = Utils.findRequiredView(view, R.id.parcel_set_home_button, "method 'onSetHomeButton'")
         this.view2131755611 = findRequiredView5
         findRequiredView5.setOnClickListener(DebouncingOnClickListener() {
-            public Unit doClick(View view) {
+            fun doClick(View view) {
                 parcelPropertiesFragment.onSetHomeButton()
             }
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         ParcelPropertiesFragment parcelPropertiesFragment = this.target
         if (parcelPropertiesFragment == null) {
             throw IllegalStateException("Bindings already cleared.")

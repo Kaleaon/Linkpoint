@@ -32,11 +32,11 @@ class EjectGroupMemberReply : SLMessage() {
         return 37
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleEjectGroupMemberReply(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 90)
@@ -45,7 +45,7 @@ class EjectGroupMemberReply : SLMessage() {
         packBoolean(byteBuffer, this.EjectData_Field.Success)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
         this.GroupData_Field.GroupID = unpackUUID(byteBuffer)
         this.EjectData_Field.Success = unpackBoolean(byteBuffer)

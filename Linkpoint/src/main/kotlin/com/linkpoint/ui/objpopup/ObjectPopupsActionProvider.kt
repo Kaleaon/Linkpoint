@@ -27,7 +27,7 @@ class ObjectPopupsActionProvider : ActionProvider(), View.OnClickListener {
         return this.objectPopupCount != 0
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         if (this.objectPopupsClickListener != null) {
             this.objectPopupsClickListener.onObjectPopupsClicked()
         }
@@ -47,7 +47,7 @@ class ObjectPopupsActionProvider : ActionProvider(), View.OnClickListener {
         return true
     }
 
-    public Unit setObjectPopupCount(Int i) {
+    fun setObjectPopupCount(Int i) {
         if (this.objectPopupCount != i) {
             this.objectPopupCount = i
             if (this.popupCountTextView != null) {
@@ -57,7 +57,7 @@ class ObjectPopupsActionProvider : ActionProvider(), View.OnClickListener {
         }
     }
 
-    public Unit setObjectPopupsClickListener(ObjectPopupsClickListener objectPopupsClickListener2) {
+    fun setObjectPopupsClickListener(ObjectPopupsClickListener objectPopupsClickListener2) {
         this.objectPopupsClickListener = objectPopupsClickListener2
     }
 }

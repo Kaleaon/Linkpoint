@@ -27,7 +27,7 @@ abstract class RequestFinalProcessor<K, T> : RequestHandler<K> {
         }
     }
 
-    public Unit onRequest(K k) {
+    fun onRequest(K k) {
         if (this.executor != null) {
             this.executor.execute(-$Lambda$psFcS6-5kKyuCZBH4SbOZwtpXG8(this, k))
             return
@@ -39,7 +39,7 @@ abstract class RequestFinalProcessor<K, T> : RequestHandler<K> {
         }
     }
 
-    public Unit onRequestCancelled(K k) {
+    fun onRequestCancelled(K k) {
         if (this.executor != null) {
             this.executor.execute(AnonymousClass1(this, k))
         } else {

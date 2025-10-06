@@ -32,7 +32,7 @@ class User : ChatterDisplayInfo {
         this.rightsHas = i2
     }
 
-    public Unit buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
+    fun buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
         chatterItemViewBuilder.setLabel(this.displayName)
         chatterItemViewBuilder.setThumbnailChatterID(getChatterID(userManager), this.displayName)
     }
@@ -77,35 +77,35 @@ class User : ChatterDisplayInfo {
         return (this.userName == null || this.displayName == null) ? this.badUUID ^ 1 : false
     }
 
-    public Unit setBadUUID(Boolean z) {
+    fun setBadUUID(Boolean z) {
         this.badUUID = z
     }
 
-    public Unit setDisplayName(String str) {
+    fun setDisplayName(String str) {
         this.displayName = str
     }
 
-    public Unit setId(Long l) {
+    fun setId(Long l) {
         this.id = l
     }
 
-    public Unit setIsFriend(Boolean z) {
+    fun setIsFriend(Boolean z) {
         this.isFriend = z
     }
 
-    public Unit setRightsGiven(Int i) {
+    fun setRightsGiven(Int i) {
         this.rightsGiven = i
     }
 
-    public Unit setRightsHas(Int i) {
+    fun setRightsHas(Int i) {
         this.rightsHas = i
     }
 
-    public Unit setUserName(String str) {
+    fun setUserName(String str) {
         this.userName = str
     }
 
-    public Unit setUuid(UUID uuid) {
+    fun setUuid(UUID uuid) {
         this.uuid = uuid
     }
 }

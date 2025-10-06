@@ -31,7 +31,7 @@ class ObjectDerezDialog {
         Int i2 = derezAction.derezQuestionId
         AlertDialog.Builder builder = AlertDialog.Builder(context)
         builder.setMessage(context.getString(i2)).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener() {
-            public Unit onClick(DialogInterface dialogInterface, Int i) {
+            fun onClick(DialogInterface dialogInterface, Int i) {
                 SLAgentCircuit activeAgentCircuit
                 dialogInterface.dismiss()
                 UserManager userManager = UserManager.getUserManager(uuid)
@@ -40,7 +40,7 @@ class ObjectDerezDialog {
                 }
             }
         }).setNegativeButton("No", DialogInterface.OnClickListener() {
-            public Unit onClick(DialogInterface dialogInterface, Int i) {
+            fun onClick(DialogInterface dialogInterface, Int i) {
                 dialogInterface.cancel()
             }
         builder.create().show()

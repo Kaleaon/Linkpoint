@@ -407,7 +407,7 @@ private class TextureInfo {
     /**
      * Shutdown texture manager
      */
-    public Unit shutdown() {
+    fun shutdown() {
         transcodingExecutor.shutdown()
         Log.i(TAG, "Texture manager shut down")
     }
@@ -415,7 +415,7 @@ private class TextureInfo {
     /**
      * Process modern texture data from asset manager
      */
-    public Unit processModernTexture(Byte[] textureData) {
+    fun processModernTexture(Byte[] textureData) {
         Log.d(TAG, "Processing modern texture data: " + textureData.length + " bytes")
         
         // In real implementation, this would:

@@ -34,7 +34,7 @@ class ProtocolCompatibilityDemo {
     /**
      * Demonstrate LLSD primitive creation with LibreMetaverse compatibility
      */
-    public Unit demonstrateLLSDPrimitives() {
+    fun demonstrateLLSDPrimitives() {
         Log.i(TAG, "=== LLSD Primitives Compatibility Demo ===")
         
         // Vector3 compatibility 
@@ -64,7 +64,7 @@ class ProtocolCompatibilityDemo {
     /**
      * Demonstrate protocol transport compatibility
      */
-    public Unit demonstrateProtocolTransports() {
+    fun demonstrateProtocolTransports() {
         Log.i(TAG, "=== Protocol Transport Compatibility Demo ===")
         
         // HTTP/2 CAPS compatibility
@@ -80,7 +80,7 @@ class ProtocolCompatibilityDemo {
     /**
      * Demonstrate authentication compatibility
      */
-    public Unit demonstrateAuthCompatibility() {
+    fun demonstrateAuthCompatibility() {
         Log.i(TAG, "=== Authentication Compatibility Demo ===")
         
         // OAuth2 modern authentication
@@ -93,7 +93,7 @@ class ProtocolCompatibilityDemo {
     /**
      * Run full compatibility demonstration
      */
-    public Unit runFullDemo() {
+    fun runFullDemo() {
         Log.i(TAG, "Starting Linkpoint Protocol Compatibility Demonstration")
         Log.i(TAG, "Demonstrating wire-level compatibility with SL/Firestorm/LibreMetaverse")
         

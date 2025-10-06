@@ -72,7 +72,7 @@ class VoiceChannelInfo {
     /*
      * Enabled aggressive block sorting
      */
-    public Unit appendToUri(Uri.Builder builder) {
+    fun appendToUri(Uri.Builder builder) {
         builder.appendQueryParameter("voiceChannelURI", this.voiceChannelURI)
         String string2 = this.isSpatial ? "true" : "false"
         builder.appendQueryParameter("isSpatial", string2)

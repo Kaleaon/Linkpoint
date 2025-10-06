@@ -42,7 +42,7 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
         }
     }
 
-    public Unit BeginFetch(SLTextureFetchRequest sLTextureFetchRequest) {
+    fun BeginFetch(SLTextureFetchRequest sLTextureFetchRequest) {
         SLTextureFetchRequest sLTextureFetchRequest2 = null
         synchronized (this) {
             File file = sLTextureFetchRequest.destFile
@@ -65,13 +65,13 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
         RunUDPQueue()
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         StopFetching()
         super.HandleCloseCircuit()
     }
 
     @SLMessageHandler
-    public Unit HandleImageData(ImageData imageData) {
+    fun HandleImageData(ImageData imageData) {
         SLTextureFetchRequest sLTextureFetchRequest
         synchronized (this) {
             TextureUDPTransfer textureUDPTransfer = this.udpTransfers.get(imageData.ImageID_Field.ID)
@@ -91,7 +91,7 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
     }
 
     @SLMessageHandler
-    public Unit HandleImageNotInDatabase(ImageNotInDatabase imageNotInDatabase) {
+    fun HandleImageNotInDatabase(ImageNotInDatabase imageNotInDatabase) {
         SLTextureFetchRequest sLTextureFetchRequest
         synchronized (this) {
             Debug.Log("TextureUDP: Image not in database: " + imageNotInDatabase.ImageID_Field.ID)
@@ -105,7 +105,7 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
     }
 
     @SLMessageHandler
-    public Unit HandleImagePacket(ImagePacket imagePacket) {
+    fun HandleImagePacket(ImagePacket imagePacket) {
         SLTextureFetchRequest sLTextureFetchRequest
         synchronized (this) {
             TextureUDPTransfer textureUDPTransfer = this.udpTransfers.get(imagePacket.ImageID_Field.ID)
@@ -126,7 +126,7 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
         }
     }
 
-    public Unit ProcessIdle() {
+    fun ProcessIdle() {
         HashSet hashSet
         HashSet<UUID> hashSet2 = null
         Long currentTimeMillis = System.currentTimeMillis()
@@ -163,11 +163,11 @@ class SLTextureFetcher : SLModule(), SLIdleHandler {
         }
     }
 
-    public Unit StopFetching() {
+    fun StopFetching() {
         this.udpQueue.clear()
     }
 
-    public Unit UpdatePriority(SLTextureFetchRequest sLTextureFetchRequest) {
+    fun UpdatePriority(SLTextureFetchRequest sLTextureFetchRequest) {
         this.udpQueue.updatePriority(sLTextureFetchRequest)
     }
 

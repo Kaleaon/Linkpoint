@@ -87,12 +87,12 @@ val class SLChatPermissionRequestEvent : SLChatYesNoEvent() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onNoAction(Context context, UserManager userManager) {
+    fun onNoAction(Context context, UserManager userManager) {
         super.onNoAction(context, userManager)
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    public Unit onYesAction(Context context, UserManager userManager) {
+    fun onYesAction(Context context, UserManager userManager) {
         super.onYesAction(context, userManager)
         SLAgentCircuit activeAgentCircuit = userManager.getActiveAgentCircuit()
         if (activeAgentCircuit != null) {
@@ -101,7 +101,7 @@ val class SLChatPermissionRequestEvent : SLChatYesNoEvent() {
         userManager.getObjectPopupsManager().cancelObjectPopup(this)
     }
 
-    public Unit serializeToDatabaseObject(ChatMessage chatMessage) {
+    fun serializeToDatabaseObject(ChatMessage chatMessage) {
         super.serializeToDatabaseObject(chatMessage)
         chatMessage.setItemID(this.ItemID)
         chatMessage.setItemName(this.ObjectOwner)

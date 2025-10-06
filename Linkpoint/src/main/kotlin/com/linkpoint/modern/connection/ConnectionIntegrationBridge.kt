@@ -154,7 +154,7 @@ class ConnectionIntegrationBridge {
     /**
      * Shutdown the connection manager
      */
-    public Unit shutdown() {
+    fun shutdown() {
         Log.i(TAG, "Shutting down connection integration bridge")
         modernManager.shutdown()
     }

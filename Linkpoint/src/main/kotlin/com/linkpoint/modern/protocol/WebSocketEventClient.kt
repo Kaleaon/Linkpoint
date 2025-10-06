@@ -39,14 +39,14 @@ class WebSocketEventClient : WebSocketListener() {
             .build()
     }
     
-    public Unit setAuthToken(String token) {
+    fun setAuthToken(String token) {
         this.authToken = token
     }
     
     /**
      * Connect to Second Life event queue via WebSocket
      */
-    public Unit connect(String eventQueueUrl) {
+    fun connect(String eventQueueUrl) {
         this.lastConnectionUrl = eventQueueUrl
         this.reconnectAttempts.set(0); // Reset reconnect attempts on manual connect
         
@@ -70,7 +70,7 @@ class WebSocketEventClient : WebSocketListener() {
     /**
      * Disconnect from event queue
      */
-    public Unit disconnect() {
+    fun disconnect() {
         if (webSocket != null) {
             webSocket.close(1000, "Normal closure")
             webSocket = null
@@ -81,7 +81,7 @@ class WebSocketEventClient : WebSocketListener() {
     /**
      * Subscribe to a specific event type
      */
-    public Unit subscribe(String eventType, EventListener listener) {
+    fun subscribe(String eventType, EventListener listener) {
         eventListeners.computeIfAbsent(eventType, k -> CopyOnWriteArrayList<>()).add(listener)
         
         // Send subscription message if connected
@@ -98,7 +98,7 @@ class WebSocketEventClient : WebSocketListener() {
     /**
      * Unsubscribe from an event type
      */
-    public Unit unsubscribe(String eventType, EventListener listener) {
+    fun unsubscribe(String eventType, EventListener listener) {
         CopyOnWriteArrayList<EventListener> listeners = eventListeners.get(eventType)
         if (listeners != null) {
             listeners.remove(listener)
@@ -428,7 +428,7 @@ class WebSocketEventClient : WebSocketListener() {
         }
     }
     
-    public Unit shutdown() {
+    fun shutdown() {
         disconnect()
         client.dispatcher().executorService().shutdown()
         client.connectionPool().evictAll()

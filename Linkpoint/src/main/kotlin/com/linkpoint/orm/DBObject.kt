@@ -65,7 +65,7 @@ abstract class DBObject : Parcelable {
 
     public abstract Unit bindInsertOrUpdate(SQLiteStatement sQLiteStatement)
 
-    public Unit delete(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
+    fun delete(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
         if (sQLiteDatabase == null) {
             throw DatabaseBindingException(getClass(), "database not opened.")
         }
@@ -97,7 +97,7 @@ abstract class DBObject : Parcelable {
 
     public abstract Unit loadFromCursor(Cursor cursor)
 
-    public Unit reload(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
+    fun reload(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
         if (sQLiteDatabase == null) {
             throw DatabaseBindingException(getClass(), "database not opened.")
         } else if (this._id != 0) {
@@ -115,11 +115,11 @@ abstract class DBObject : Parcelable {
         }
     }
 
-    public Unit resetId() {
+    fun resetId() {
         this._id = 0
     }
 
-    public Unit save(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
+    fun save(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
         if (sQLiteDatabase == null) {
             throw DatabaseBindingException(getClass(), "database not opened.")
         }
@@ -153,7 +153,7 @@ abstract class DBObject : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Unit updateOrInsert(SQLiteDatabase sQLiteDatabase, String str, String[] strArr) throws DatabaseBindingException {
+    fun updateOrInsert(SQLiteDatabase sQLiteDatabase, String str, String[] strArr) throws DatabaseBindingException {
         if (sQLiteDatabase == null) {
             throw DatabaseBindingException(getClass(), "database not opened.")
         }
@@ -183,7 +183,7 @@ abstract class DBObject : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Unit updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) throws DatabaseBindingException {
+    fun updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) throws DatabaseBindingException {
         if (sQLiteStatement == null || sQLiteStatement2 == null) {
             throw DatabaseBindingException(getClass(), "SQLiteStatements cannot be null")
         }

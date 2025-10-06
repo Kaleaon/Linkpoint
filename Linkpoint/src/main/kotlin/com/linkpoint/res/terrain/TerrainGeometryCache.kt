@@ -17,16 +17,16 @@ private class TerrainGeometryRequest : ResourceRequest()<TerrainPatchHeightMap, 
             super(terrainPatchHeightMap, resourceManager)
         }
 
-        public Unit cancelRequest() {
+        fun cancelRequest() {
             PrimComputeExecutor.getInstance().remove(this)
             super.cancelRequest()
         }
 
-        public Unit execute() {
+        fun execute() {
             PrimComputeExecutor.getInstance().execute(this)
         }
 
-        public Unit run() {
+        fun run() {
             try {
                 completeRequest(TerrainPatchGeometry((TerrainPatchHeightMap) getParams()))
             } catch (Exception e) {

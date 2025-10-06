@@ -77,7 +77,7 @@ class InventoryEntryList : AbstractList()<SLInventoryEntry> {
         this.size = cursor2 != null ? cursor2.getCount() : 0
     }
 
-    public Unit close() {
+    fun close() {
         synchronized (this.lock) {
             if (this.cursor != null && !this.cursor.isClosed()) {
                 this.cursor.close()

@@ -23,11 +23,11 @@ class ScriptMailRegistration : SLMessage() {
         return this.DataBlock_Field.TargetIP.length + 1 + 2 + 16 + 4 + 4
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleScriptMailRegistration(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) -94)
@@ -37,7 +37,7 @@ class ScriptMailRegistration : SLMessage() {
         packInt(byteBuffer, this.DataBlock_Field.Flags)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.DataBlock_Field.TargetIP = unpackVariable(byteBuffer, 1)
         this.DataBlock_Field.TargetPort = unpackShort(byteBuffer) & 65535
         this.DataBlock_Field.TaskID = unpackUUID(byteBuffer)

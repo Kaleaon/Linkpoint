@@ -87,7 +87,7 @@ class OpportunisticExecutor : Executor {
             this()
         }
 
-        public Unit execute(Runnable runnable) {
+        fun execute(Runnable runnable) {
             try {
                 OpportunisticExecutor.this.lock.lock()
                 OpportunisticExecutor.this.runOnceRunnables.add(runnable)
@@ -103,7 +103,7 @@ class OpportunisticExecutor : Executor {
         this.thread.start()
     }
 
-    public Unit execute(Runnable runnable) {
+    fun execute(Runnable runnable) {
         try {
             this.lock.lock()
             if (Thread.currentThread().getId() == this.thread.getId() && this.queue.isEmpty()) {

@@ -15,7 +15,7 @@ class DrawEntryList : InlineList()<DrawListEntry> {
         this.listener = entryRemovalListener
     }
 
-    public Unit requestEntryRemoval(DrawListEntry drawListEntry) {
+    fun requestEntryRemoval(DrawListEntry drawListEntry) {
         if (this.listener != null) {
             this.listener.onEntryRemovalRequested(drawListEntry)
         }

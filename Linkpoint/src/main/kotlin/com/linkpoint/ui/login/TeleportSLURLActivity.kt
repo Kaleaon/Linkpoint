@@ -27,7 +27,7 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
         finish()
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         SLGridConnection gridConnection
         SLAgentCircuit activeAgentCircuit
         UserManager userManager = null
@@ -58,7 +58,7 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     @SuppressLint({"DefaultLocale"})
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         SLAgentCircuit agentCircuit
         super.onCreate(bundle)
         setContentView((Int) R.layout.teleport_slurl)

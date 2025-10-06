@@ -125,7 +125,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    public Unit dismissSingleObjectPopup() {
+    fun dismissSingleObjectPopup() {
         hideSingleObjectPopup()
         UserManager userManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null) {
@@ -144,12 +144,12 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     @EventHandler
-    public Unit handleConnectionStateChangedEvent(SLConnectionStateChangedEvent sLConnectionStateChangedEvent) {
+    fun handleConnectionStateChangedEvent(SLConnectionStateChangedEvent sLConnectionStateChangedEvent) {
         updateConnectionStatus()
     }
 
     @EventHandler
-    public Unit handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
+    fun handleDisconnectEvent(SLDisconnectEvent sLDisconnectEvent) {
         if (handleConnectionEvents()) {
             Debug.Printf("ConnectedActivity: disconnect event, normalDisconnect %b", Boolean.valueOf(sLDisconnectEvent.normalDisconnect))
             if (sLDisconnectEvent.normalDisconnect) {
@@ -176,7 +176,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    public Unit onBackPressed() {
+    fun onBackPressed() {
         if (!this.navDrawerHelper.onBackPressed()) {
             if ((!handleConnectionEvents() || !removeObjectPopupsFragment()) && !handleBackPressed()) {
                 super.onBackPressed()
@@ -184,13 +184,13 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    public Unit onConfigurationChanged(Configuration configuration) {
+    fun onConfigurationChanged(Configuration configuration) {
         super.onConfigurationChanged(configuration)
         this.navDrawerHelper.onConfigurationChanged(configuration)
     }
 
     /* access modifiers changed from: protected */
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         if (!handleConnectionEvents()) {
             return
@@ -226,7 +226,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    public Unit onNewIntent(Intent intent) {
+    fun onNewIntent(Intent intent) {
         super.onNewIntent(intent)
         if (!handleConnectionEvents()) {
             return
@@ -242,7 +242,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         removeObjectPopupsFragment()
     }
 
-    public Unit onNewObjectPopup(SLChatEvent sLChatEvent) {
+    fun onNewObjectPopup(SLChatEvent sLChatEvent) {
         UUID activeAgentID
         if (findViewById(R.id.object_popups_container) != null && (activeAgentID = ActivityUtils.getActiveAgentID(getIntent())) != null) {
             FragmentManager supportFragmentManager = getSupportFragmentManager()
@@ -273,7 +273,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    public Unit onObjectPopupCountChanged(Int i) {
+    fun onObjectPopupCountChanged(Int i) {
         if (this.objectPopupsActionProvider != null) {
             this.objectPopupsActionProvider.setObjectPopupCount(i)
         }
@@ -290,7 +290,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
         }
     }
 
-    public Unit onObjectPopupsClicked() {
+    fun onObjectPopupsClicked() {
         if (findViewById(R.id.object_popups_container) != null) {
             FragmentManager supportFragmentManager = getSupportFragmentManager()
             if (this.objectPopupsDisplayed) {
@@ -317,7 +317,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    public Unit onPause() {
+    fun onPause() {
         UserManager userManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null && handleConnectionEvents()) {
             userManager.getObjectPopupsManager().removeObjectPopupListener(this)
@@ -327,7 +327,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    public Unit onPostCreate(Bundle bundle) {
+    fun onPostCreate(Bundle bundle) {
         super.onPostCreate(bundle)
         if (handleConnectionEvents()) {
             View findViewById = findViewById(R.id.offline_notify_status_layout)
@@ -340,7 +340,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    public Unit onResume() {
+    fun onResume() {
         super.onResume()
         UserManager userManager = ActivityUtils.getUserManager(getIntent())
         if (userManager != null && handleConnectionEvents()) {
@@ -361,7 +361,7 @@ class ConnectedActivity : ThemedActivity(), ObjectPopupsActionProvider.ObjectPop
     }
 
     /* access modifiers changed from: protected */
-    public Unit onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle)
         if (handleConnectionEvents()) {
             bundle.putBoolean("objectPopupsDisplayed", this.objectPopupsDisplayed)

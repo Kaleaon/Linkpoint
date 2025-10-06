@@ -66,7 +66,7 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
     }
 
     /* access modifiers changed from: private */
-    public Unit performDismiss(View view, Int i) {
+    fun performDismiss(View view, Int i) {
         this.mCallbacks.onDismiss(this.mListView, i)
     }
 
@@ -83,10 +83,10 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
 
     public AbsListView.OnScrollListener makeScrollListener() {
         return AbsListView.OnScrollListener() {
-            public Unit onScroll(AbsListView absListView, Int i, Int i2, Int i3) {
+            fun onScroll(AbsListView absListView, Int i, Int i2, Int i3) {
             }
 
-            public Unit onScrollStateChanged(AbsListView absListView, Int i) {
+            fun onScrollStateChanged(AbsListView absListView, Int i) {
                 Boolean z = true
                 SwipeDismissListViewTouchListener swipeDismissListViewTouchListener = SwipeDismissListViewTouchListener.this
                 if (i == 1) {
@@ -170,12 +170,12 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
                         this.mDismissAnimationRefCount++
                         if (Build.VERSION.SDK_INT >= 12) {
                             this.mDownView.animate().translationX((Float) (z2 ? this.mViewWidth : -this.mViewWidth)).alpha(0.0f).setDuration(this.mAnimationTime).setListener(AnimatorListenerAdapter() {
-                                public Unit onAnimationEnd(Animator animator) {
+                                fun onAnimationEnd(Animator animator) {
                                     SwipeDismissListViewTouchListener.this.performDismiss(view2, i2)
                                 }
                         } else {
                             ViewPropertyAnimator.animate(this.mDownView).translationX((Float) (z2 ? this.mViewWidth : -this.mViewWidth)).alpha(0.0f).setDuration(this.mAnimationTime).setListener(com.nineoldandroids.animation.AnimatorListenerAdapter() {
-                                public Unit onAnimationEnd(com.nineoldandroids.animation.Animator animator) {
+                                fun onAnimationEnd(com.nineoldandroids.animation.Animator animator) {
                                     SwipeDismissListViewTouchListener.this.performDismiss(view2, i2)
                                 }
                         }
@@ -243,7 +243,7 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
         return false
     }
 
-    public Unit setEnabled(Boolean z) {
+    fun setEnabled(Boolean z) {
         this.mPaused = !z
     }
 }

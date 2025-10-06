@@ -52,7 +52,7 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
                 return false
             }
 
-            public Unit onDismiss(ListView listView, Int i) {
+            fun onDismiss(ListView listView, Int i) {
                 ListAdapter adapter = listView.getAdapter()
                 if (adapter instanceof DismissableAdapter) {
                     ((DismissableAdapter) adapter).onDismiss(i)
@@ -63,7 +63,7 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
         return inflate
     }
 
-    public Unit onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
+    fun onItemClick(AdapterView<?> adapterView, View view, Int i, Long j) {
         SLAvatarAppearance.WornItem item
         SLAgentCircuit data = this.agentCircuit.getData()
         if (this.listAdapter != null && data != null && (item = this.listAdapter.getItem(i)) != null && item.getIsTouchable() && item.getWornOn() == null) {
@@ -71,7 +71,7 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
         }
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         if (this.listAdapter != null) {
             SLAgentCircuit data = this.agentCircuit.getData()
             this.listAdapter.setAvatarAppearance(data != null ? data.getModules().avatarAppearance : null)
@@ -79,7 +79,7 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
         }
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -90,7 +90,7 @@ class CurrentOutfitFragment : Fragment(), LoadableMonitor.OnLoadableDataChangedL
         this.loadableMonitor.unsubscribeAll()
     }
 
-    public Unit onStop() {
+    fun onStop() {
         this.loadableMonitor.unsubscribeAll()
         super.onStop()
     }

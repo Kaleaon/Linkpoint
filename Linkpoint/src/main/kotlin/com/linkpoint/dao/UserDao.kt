@@ -95,7 +95,7 @@ class UserDao : AbstractDao()<User, Long> {
         return User(valueOf, fromString, string, str, z2, z, cursor.getInt(i + 6), cursor.getInt(i + 7))
     }
 
-    public Unit readEntity(Cursor cursor, User user, Int i) {
+    fun readEntity(Cursor cursor, User user, Int i) {
         Boolean z = true
         String str = null
         user.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))

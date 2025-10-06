@@ -65,19 +65,19 @@ class LLVector3 {
         return LLVector3(lLVector3.x - lLVector32.x, lLVector3.y - lLVector32.y, lLVector3.z - lLVector32.z)
     }
 
-    public Unit add(LLVector3 lLVector3) {
+    fun add(LLVector3 lLVector3) {
         this.x += lLVector3.x
         this.y += lLVector3.y
         this.z += lLVector3.z
     }
 
-    public Unit addMul(ImmutableVector immutableVector, Float f) {
+    fun addMul(ImmutableVector immutableVector, Float f) {
         this.x += immutableVector.x * f
         this.y += immutableVector.y * f
         this.z += immutableVector.z * f
     }
 
-    public Unit addMul(LLVector3 lLVector3, Float f) {
+    fun addMul(LLVector3 lLVector3, Float f) {
         this.x += lLVector3.x * f
         this.y += lLVector3.y * f
         this.z += lLVector3.z * f
@@ -130,13 +130,13 @@ class LLVector3 {
         return (this.x * this.x) + (this.y * this.y) + (this.z * this.z)
     }
 
-    public Unit mul(Float f) {
+    fun mul(Float f) {
         this.x *= f
         this.y *= f
         this.z *= f
     }
 
-    public Unit mul(LLQuaternion lLQuaternion) {
+    fun mul(LLQuaternion lLQuaternion) {
         Float f = (((-lLQuaternion.x) * this.x) - (lLQuaternion.y * this.y)) - (lLQuaternion.z * this.z)
         Float f2 = ((lLQuaternion.w * this.x) + (lLQuaternion.y * this.z)) - (lLQuaternion.z * this.y)
         Float f3 = ((lLQuaternion.w * this.y) + (lLQuaternion.z * this.x)) - (lLQuaternion.x * this.z)
@@ -146,19 +146,19 @@ class LLVector3 {
         this.z = ((((-f) * lLQuaternion.z) + (f4 * lLQuaternion.w)) - (f2 * lLQuaternion.y)) + (lLQuaternion.x * f3)
     }
 
-    public Unit mul(LLVector3 lLVector3) {
+    fun mul(LLVector3 lLVector3) {
         this.x *= lLVector3.x
         this.y *= lLVector3.y
         this.z *= lLVector3.z
     }
 
-    public Unit mulWeighted(ImmutableVector immutableVector, Float f) {
+    fun mulWeighted(ImmutableVector immutableVector, Float f) {
         this.x *= (immutableVector.x * f) + 1.0f
         this.y *= (immutableVector.y * f) + 1.0f
         this.z *= (immutableVector.z * f) + 1.0f
     }
 
-    public Unit mulWeighted(LLVector3 lLVector3, Float f) {
+    fun mulWeighted(LLVector3 lLVector3, Float f) {
         this.x *= (lLVector3.x * f) + 1.0f
         this.y *= (lLVector3.y * f) + 1.0f
         this.z *= (lLVector3.z * f) + 1.0f
@@ -179,13 +179,13 @@ class LLVector3 {
         return sqrt
     }
 
-    public Unit set(Float f, Float f2, Float f3) {
+    fun set(Float f, Float f2, Float f3) {
         this.x = f
         this.y = f2
         this.z = f3
     }
 
-    public Unit set(LLVector3 lLVector3) {
+    fun set(LLVector3 lLVector3) {
         if (lLVector3 != null) {
             this.x = lLVector3.x
             this.y = lLVector3.y
@@ -193,13 +193,13 @@ class LLVector3 {
         }
     }
 
-    public Unit setAdd(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun setAdd(LLVector3 lLVector3, LLVector3 lLVector32) {
         this.x = lLVector3.x + lLVector32.x
         this.y = lLVector3.y + lLVector32.y
         this.z = lLVector3.z + lLVector32.z
     }
 
-    public Unit setCross(LLVector3 lLVector3) {
+    fun setCross(LLVector3 lLVector3) {
         Float f = (this.y * lLVector3.z) - (lLVector3.y * this.z)
         Float f2 = (this.z * lLVector3.x) - (lLVector3.z * this.x)
         this.x = f
@@ -207,37 +207,37 @@ class LLVector3 {
         this.z = (this.x * lLVector3.y) - (lLVector3.x * this.y)
     }
 
-    public Unit setLerp(LLVector3 lLVector3, Float f, LLVector3 lLVector32, Float f2) {
+    fun setLerp(LLVector3 lLVector3, Float f, LLVector3 lLVector32, Float f2) {
         this.x = (lLVector3.x * f) + (lLVector32.x * f2)
         this.y = (lLVector3.y * f) + (lLVector32.y * f2)
         this.z = (lLVector3.z * f) + (lLVector32.z * f2)
     }
 
-    public Unit setLerp(LLVector3 lLVector3, LLVector3 lLVector32, Float f) {
+    fun setLerp(LLVector3 lLVector3, LLVector3 lLVector32, Float f) {
         this.x = lLVector3.x + ((lLVector32.x - lLVector3.x) * f)
         this.y = lLVector3.y + ((lLVector32.y - lLVector3.y) * f)
         this.z = lLVector3.z + ((lLVector32.z - lLVector3.z) * f)
     }
 
-    public Unit setMul(LLVector3 lLVector3, Float f) {
+    fun setMul(LLVector3 lLVector3, Float f) {
         this.x = lLVector3.x * f
         this.y = lLVector3.y * f
         this.z = lLVector3.z * f
     }
 
-    public Unit setMul(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun setMul(LLVector3 lLVector3, LLVector3 lLVector32) {
         this.x = lLVector3.x * lLVector32.x
         this.y = lLVector3.y * lLVector32.y
         this.z = lLVector3.z * lLVector32.z
     }
 
-    public Unit setSub(LLVector3 lLVector3, LLVector3 lLVector32) {
+    fun setSub(LLVector3 lLVector3, LLVector3 lLVector32) {
         this.x = lLVector3.x - lLVector32.x
         this.y = lLVector3.y - lLVector32.y
         this.z = lLVector3.z - lLVector32.z
     }
 
-    public Unit sub(LLVector3 lLVector3) {
+    fun sub(LLVector3 lLVector3) {
         this.x -= lLVector3.x
         this.y -= lLVector3.y
         this.z -= lLVector3.z

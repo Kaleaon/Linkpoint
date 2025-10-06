@@ -87,7 +87,7 @@ private class PicksAdapter : BaseAdapter() {
         }
 
         /* access modifiers changed from: package-private */
-        public Unit setData(AvatarPicksReply avatarPicksReply) {
+        fun setData(AvatarPicksReply avatarPicksReply) {
             this.picksReply = avatarPicksReply
             notifyDataSetChanged()
         }
@@ -95,7 +95,7 @@ private class PicksAdapter : BaseAdapter() {
 
     /* access modifiers changed from: private */
     /* renamed from: onAddNewPick */
-    public Unit m520com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTabmthref0(View view) {
+    fun m520com_lumiyaviewer_lumiya_ui_chat_profiles_UserPicksProfileTabmthref0(View view) {
         ParcelData parcelData = null
         if (this.userManager != null && (this.chatterID instanceof ChatterID.ChatterIDUser)) {
             CurrentLocationInfo currentLocationInfoSnapshot = this.userManager.getCurrentLocationInfoSnapshot()
@@ -377,7 +377,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
         return inflate
     }
 
-    public Unit onLoadableDataChanged() {
+    fun onLoadableDataChanged() {
         try {
             if (this.picksAdapter != null) {
                 this.picksAdapter.setData(this.avatarPicks.getData())
@@ -389,7 +389,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     }
 
     /* access modifiers changed from: protected */
-    public Unit onShowUser(ChatterID chatterID) {
+    fun onShowUser(ChatterID chatterID) {
         UserManager userManager
         Int i = 0
         this.loadableMonitor.unsubscribeAll()

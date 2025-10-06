@@ -13,19 +13,19 @@ class SLTempCircuit : SLCircuit() {
         super(sLGridConnection, sLCircuitInfo, sLAuthReply, null)
     }
 
-    public Unit DefaultMessageHandler(SLMessage sLMessage) {
+    fun DefaultMessageHandler(SLMessage sLMessage) {
         this.pendingMessages.add(sLMessage)
     }
 
-    public Unit ProcessNetworkError() {
+    fun ProcessNetworkError() {
         this.gridConn.removeTempCircuit(this)
     }
 
-    public Unit ProcessTimeout() {
+    fun ProcessTimeout() {
         this.gridConn.removeTempCircuit(this)
     }
 
-    public Unit SendUseCode() {
+    fun SendUseCode() {
         SLMessage useCircuitCode = UseCircuitCode()
         useCircuitCode.CircuitCode_Field.Code = this.circuitInfo.circuitCode
         useCircuitCode.CircuitCode_Field.SessionID = this.circuitInfo.sessionID

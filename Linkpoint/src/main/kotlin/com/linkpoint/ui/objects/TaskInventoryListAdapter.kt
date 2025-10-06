@@ -67,7 +67,7 @@ class TaskInventoryListAdapter : BaseAdapter() {
         return false
     }
 
-    public Unit setData(SLTaskInventory sLTaskInventory) {
+    fun setData(SLTaskInventory sLTaskInventory) {
         this.taskInventory = sLTaskInventory
         notifyDataSetChanged()
     }

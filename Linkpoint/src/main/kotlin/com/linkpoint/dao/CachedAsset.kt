@@ -33,19 +33,19 @@ class CachedAsset {
         return this.status
     }
 
-    public Unit setData(Byte[] bArr) {
+    fun setData(Byte[] bArr) {
         this.data = bArr
     }
 
-    public Unit setKey(String str) {
+    fun setKey(String str) {
         this.key = str
     }
 
-    public Unit setMustRevalidate(Boolean z) {
+    fun setMustRevalidate(Boolean z) {
         this.mustRevalidate = z
     }
 
-    public Unit setStatus(Int i) {
+    fun setStatus(Int i) {
         this.status = i
     }
 }

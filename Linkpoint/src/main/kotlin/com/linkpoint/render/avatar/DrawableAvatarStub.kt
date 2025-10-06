@@ -38,7 +38,7 @@ class DrawableAvatarStub : OnChatterNameUpdated {
         }
     }
 
-    public Unit DrawNameTag(RenderContext renderContext) {
+    fun DrawNameTag(RenderContext renderContext) {
         DrawableHoverText drawableHoverText = this.drawableNameTag
         Float[] worldMatrix = getWorldMatrix(renderContext)
         if (drawableHoverText != null && worldMatrix != null) {
@@ -60,7 +60,7 @@ class DrawableAvatarStub : OnChatterNameUpdated {
         return fArr
     }
 
-    public Unit onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
+    fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
         setNameTag(chatterNameRetriever.getResolvedName())
     }
 }

@@ -72,7 +72,7 @@ class MoneyTransactionDao : AbstractDao()<MoneyTransaction, Long> {
         return MoneyTransaction(valueOf, date, uuid, cursor.getInt(i + 3), cursor.getInt(i + 4))
     }
 
-    public Unit readEntity(Cursor cursor, MoneyTransaction moneyTransaction, Int i) {
+    fun readEntity(Cursor cursor, MoneyTransaction moneyTransaction, Int i) {
         UUID uuid = null
         moneyTransaction.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))
         moneyTransaction.setTimestamp(Date(cursor.getLong(i + 1)))

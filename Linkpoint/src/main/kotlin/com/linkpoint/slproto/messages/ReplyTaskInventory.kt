@@ -22,11 +22,11 @@ class ReplyTaskInventory : SLMessage() {
         return this.InventoryData_Field.Filename.length + 19 + 4
     }
 
-    public Unit Handle(SLMessageHandler sLMessageHandler) {
+    fun Handle(SLMessageHandler sLMessageHandler) {
         sLMessageHandler.HandleReplyTaskInventory(this)
     }
 
-    public Unit PackPayload(ByteBuffer byteBuffer) {
+    fun PackPayload(ByteBuffer byteBuffer) {
         byteBuffer.putShort(-1)
         byteBuffer.put((Byte) 1)
         byteBuffer.put((Byte) 34)
@@ -35,7 +35,7 @@ class ReplyTaskInventory : SLMessage() {
         packVariable(byteBuffer, this.InventoryData_Field.Filename, 1)
     }
 
-    public Unit UnpackPayload(ByteBuffer byteBuffer) {
+    fun UnpackPayload(ByteBuffer byteBuffer) {
         this.InventoryData_Field.TaskID = unpackUUID(byteBuffer)
         this.InventoryData_Field.Serial = unpackShort(byteBuffer)
         this.InventoryData_Field.Filename = unpackVariable(byteBuffer, 1)

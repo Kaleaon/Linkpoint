@@ -42,23 +42,23 @@ class MoneyTransaction {
         return this.transactionAmount
     }
 
-    public Unit setAgentUUID(UUID uuid) {
+    fun setAgentUUID(UUID uuid) {
         this.agentUUID = uuid
     }
 
-    public Unit setId(Long l) {
+    fun setId(Long l) {
         this.id = l
     }
 
-    public Unit setNewBalance(Int i) {
+    fun setNewBalance(Int i) {
         this.newBalance = i
     }
 
-    public Unit setTimestamp(Date date) {
+    fun setTimestamp(Date date) {
         this.timestamp = date
     }
 
-    public Unit setTransactionAmount(Int i) {
+    fun setTransactionAmount(Int i) {
         this.transactionAmount = i
     }
 }

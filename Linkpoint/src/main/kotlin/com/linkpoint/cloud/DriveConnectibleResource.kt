@@ -354,7 +354,7 @@ abstract class DriveConnectibleResource {
     }
 
     static interface OnResourceReadyListener {
-        public Unit onResourceReady(DriveResource var1, String var2)
+        fun onResourceReady(DriveResource var1, String var2)
     }
 
     @JvmStatic

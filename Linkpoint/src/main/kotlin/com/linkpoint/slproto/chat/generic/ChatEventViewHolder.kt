@@ -45,7 +45,7 @@ class ChatEventViewHolder : RecyclerView().ViewHolder {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit requestAdapterUpdate() {
+    fun requestAdapterUpdate() {
         RecyclerView.Adapter adapter2 = (RecyclerView.Adapter) this.adapter.get()
         if (adapter2 != null) {
             adapter2.notifyItemChanged(getAdapterPosition())
@@ -53,12 +53,12 @@ class ChatEventViewHolder : RecyclerView().ViewHolder {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setupTimestampUpdate(Context context, Long j) {
+    fun setupTimestampUpdate(Context context, Long j) {
         this.updateTimestamp = j
         updateTimestamp(context)
     }
 
-    public Unit updateTimestamp(Context context) {
+    fun updateTimestamp(Context context) {
         if (this.timestampView == null) {
             return
         }

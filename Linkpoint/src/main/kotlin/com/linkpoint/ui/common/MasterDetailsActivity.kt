@@ -50,7 +50,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
     /* JADX WARNING: Removed duplicated region for block: B:88:0x01f2  */
     /* JADX WARNING: Removed duplicated region for block: B:97:0x0222 A[ADDED_TO_REGION] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit onCreate(@android.support.annotation.Nullable android.os.Bundle r15) {
+    fun onCreate(@android.support.annotation.Nullable android.os.Bundle r15) {
         /*
             r14 = this
             r13 = 2131755654(0x7f100286, Float:1.9142193E38)
@@ -362,7 +362,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onNewIntent(Intent intent) {
+    fun onNewIntent(Intent intent) {
         Bundle bundle = null
         super.onNewIntent(intent)
         Debug.Printf("MasterDetailsActivity: onNewIntent, intent = %s", intent)
@@ -386,12 +386,12 @@ abstract class MasterDetailsActivity : DetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(Bundle bundle) {
         super.onSaveInstanceState(bundle)
     }
 
     /* access modifiers changed from: protected */
-    public Unit replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment) {
+    fun replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment) {
         Fragment findFragmentById
         FragmentTransaction beginTransaction = fragmentManager.beginTransaction()
         beginTransaction.setCustomAnimations(R.anim.slide_from_right, 17432577, 0, 17432577)
@@ -413,7 +413,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit updateTitleNoDetails() {
+    fun updateTitleNoDetails() {
         Fragment findFragmentById = getSupportFragmentManager().findFragmentById(R.id.selector)
         if (findFragmentById == null || !(findFragmentById instanceof FragmentHasTitle) || !findFragmentById.isAdded()) {
             z = false

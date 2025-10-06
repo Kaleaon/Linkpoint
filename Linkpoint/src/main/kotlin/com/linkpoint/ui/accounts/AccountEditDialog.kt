@@ -69,10 +69,10 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         ((TextView) findViewById(R.id.loginNameText)).requestFocus()
     }
 
-    public Unit afterTextChanged(Editable editable) {
+    fun afterTextChanged(Editable editable) {
     }
 
-    public Unit beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+    fun beforeTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
         TextView textView = (TextView) findViewById(R.id.loginPasswordText)
         if (textView.getTag() != null) {
             textView.setTag((Object) null)
@@ -82,7 +82,7 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         }
     }
 
-    public Unit onClick(View view) {
+    fun onClick(View view) {
         AccountList.AccountInfo accountInfo
         Boolean z2 = false
         switch (view.getId()) {
@@ -137,7 +137,7 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setTitle((Int) R.string.new_account_dialog_title)
         setContentView((Int) R.layout.account_edit_dialog)
@@ -148,11 +148,11 @@ class AccountEditDialog : AppCompatDialog(), View.OnClickListener, TextWatcher {
         prepare()
     }
 
-    public Unit onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
+    fun onTextChanged(CharSequence charSequence, Int i, Int i2, Int i3) {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit setOnAccountEditResultListener(OnAccountEditResultListener onAccountEditResultListener2) {
+    fun setOnAccountEditResultListener(OnAccountEditResultListener onAccountEditResultListener2) {
         this.onAccountEditResultListener = onAccountEditResultListener2
     }
 }

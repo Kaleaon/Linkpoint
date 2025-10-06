@@ -12,7 +12,7 @@ class RLVCmdDetach : RLVCmdGenericRestriction() {
     }
 
     /* access modifiers changed from: protected */
-    public Unit HandleForce(RLVController rLVController, UUID uuid, String str) {
+    fun HandleForce(RLVController rLVController, UUID uuid, String str) {
         UUID attachmentUUID
         SLAvatarAppearance sLAvatarAppearance = rLVController.getModules().avatarAppearance
         for (Int i = 0; i < 56; i++) {

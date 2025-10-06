@@ -88,7 +88,7 @@ class DaoSession : AbstractDaoSession() {
         registerDao(Chatter.class, this.chatterDao)
     }
 
-    public Unit clear() {
+    fun clear() {
         this.cachedResponseDaoConfig.getIdentityScope().clear()
         this.cachedAssetDaoConfig.getIdentityScope().clear()
         this.moneyTransactionDaoConfig.getIdentityScope().clear()

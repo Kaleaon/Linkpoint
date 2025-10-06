@@ -413,7 +413,7 @@ val class DrawableGeometry : GLCleanable {
         }
     }
 
-    public Unit GLCleanup() {
+    fun GLCleanup() {
         this.vertexArrayObject = null
     }
 

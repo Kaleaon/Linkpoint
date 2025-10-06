@@ -72,7 +72,7 @@ class StartingExecutor {
         throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.executors.StartingExecutor.runQueue():Unit")
     }
 
-    public Unit cancelRequest(Startable startable) {
+    fun cancelRequest(Startable startable) {
         synchronized (this.lock) {
             this.waitingRequests.remove(startable)
             this.activeRequests.remove(startable)
@@ -80,29 +80,29 @@ class StartingExecutor {
         runQueue()
     }
 
-    public Unit completeRequest(Startable startable) {
+    fun completeRequest(Startable startable) {
         synchronized (this.lock) {
             this.activeRequests.remove(startable)
         }
         runQueue()
     }
 
-    public Unit pause() {
+    fun pause() {
         this.paused = true
     }
 
-    public Unit queueRequest(Startable startable) {
+    fun queueRequest(Startable startable) {
         synchronized (this.lock) {
             this.waitingRequests.add(startable)
         }
         runQueue()
     }
 
-    public Unit setMaxConcurrentTasks(Int i) {
+    fun setMaxConcurrentTasks(Int i) {
         this.maxConcurrentRequests = i
     }
 
-    public Unit unpause() {
+    fun unpause() {
         this.paused = false
         runQueue()
     }

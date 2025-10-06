@@ -83,7 +83,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
 
     /* access modifiers changed from: private */
     /* renamed from: onMinimapBitmap */
-    public Unit m640com_lumiyaviewer_lumiya_ui_minimap_MinimapFragmentmthref0(SLMinimap.MinimapBitmap minimapBitmap2) {
+    fun m640com_lumiyaviewer_lumiya_ui_minimap_MinimapFragmentmthref0(SLMinimap.MinimapBitmap minimapBitmap2) {
         View view = getView()
         if (view != null) {
             ((MinimapView) view.findViewById(R.id.minimapView)).setMinimapBitmap(minimapBitmap2)
@@ -92,14 +92,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
 
     /* access modifiers changed from: private */
     /* renamed from: onUserLocations */
-    public Unit m641com_lumiyaviewer_lumiya_ui_minimap_MinimapFragmentmthref1(SLMinimap.UserLocations userLocations2) {
+    fun m641com_lumiyaviewer_lumiya_ui_minimap_MinimapFragmentmthref1(SLMinimap.UserLocations userLocations2) {
         View view = getView()
         if (view != null) {
             ((MinimapView) view.findViewById(R.id.minimapView)).setUserLocations(userLocations2)
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
     }
 
@@ -110,7 +110,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
         return inflate
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         if (userManager != null) {
@@ -122,13 +122,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.minimap.-$Lambda$X
         this.userLocations.unsubscribe()
     }
 
-    public Unit onStop() {
+    fun onStop() {
         this.minimapBitmap.unsubscribe()
         this.userLocations.unsubscribe()
         super.onStop()
     }
 
-    public Unit onUserClick(UUID uuid) {
+    fun onUserClick(UUID uuid) {
         FragmentManager fragmentManager = getFragmentManager()
         if (fragmentManager != null) {
             Fragment findFragmentById = fragmentManager.findFragmentById(R.id.details)

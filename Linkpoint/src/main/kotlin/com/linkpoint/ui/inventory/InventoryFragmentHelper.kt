@@ -271,7 +271,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         }
     }
 
-    public Unit ConfirmShareInventoryEntry(SLInventoryEntry sLInventoryEntry, ChatterID chatterID, String str, Runnable runnable) {
+    fun ConfirmShareInventoryEntry(SLInventoryEntry sLInventoryEntry, ChatterID chatterID, String str, Runnable runnable) {
         SLAgentCircuit activeAgentCircuit = getActiveAgentCircuit()
         if (sLInventoryEntry != null && chatterID != null && activeAgentCircuit != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
@@ -371,7 +371,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    public Unit CreateNewFolder(SLInventoryEntry sLInventoryEntry) {
+    fun CreateNewFolder(SLInventoryEntry sLInventoryEntry) {
         Dialog dialog = Dialog(getContext())
         dialog.setContentView(R.layout.inv_rename_dialog)
         dialog.setTitle(R.string.new_folder_dialog_title)
@@ -522,7 +522,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    public Unit CreateNewLandmark(SLInventoryEntry sLInventoryEntry) {
+    fun CreateNewLandmark(SLInventoryEntry sLInventoryEntry) {
         ParcelData parcelData
         String str = null
         UserManager userManager = getUserManager()
@@ -712,7 +712,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    public Unit DeleteInventoryEntry(SLInventoryEntry sLInventoryEntry, Runnable runnable) {
+    fun DeleteInventoryEntry(SLInventoryEntry sLInventoryEntry, Runnable runnable) {
         SLInventory inventory = getInventory()
         if (inventory != null && sLInventoryEntry != null) {
             Boolean isLink = inventory.canMoveToTrash(sLInventoryEntry) ? sLInventoryEntry.isLink() : true
@@ -883,7 +883,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    public Unit PerformInventoryAction(SLInventoryEntry sLInventoryEntry, Int i) {
+    fun PerformInventoryAction(SLInventoryEntry sLInventoryEntry, Int i) {
         Debug.Log("PerformInventoryAction: entry = " + sLInventoryEntry)
         switch (i) {
             case R.string.asset_action_edit:
@@ -912,7 +912,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    public Unit RenameInventoryEntry(SLInventoryEntry sLInventoryEntry) {
+    fun RenameInventoryEntry(SLInventoryEntry sLInventoryEntry) {
         Dialog dialog = Dialog(getContext())
         dialog.setContentView(R.layout.inv_rename_dialog)
         dialog.setTitle(R.string.rename_inv_item_title)
@@ -1063,7 +1063,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
     }
 
     /* access modifiers changed from: package-private */
-    public Unit ShareInventoryEntry(SLInventoryEntry sLInventoryEntry) {
+    fun ShareInventoryEntry(SLInventoryEntry sLInventoryEntry) {
         UserManager userManager = getUserManager()
         FragmentActivity activity = this.fragment.getActivity()
         if (activity != null && userManager != null) {

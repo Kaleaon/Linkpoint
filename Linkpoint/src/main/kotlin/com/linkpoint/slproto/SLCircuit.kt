@@ -143,7 +143,7 @@ class SLCircuit : SLMessageHandler() {
         TryProcessIdle()
     }
 
-    public Unit CloseCircuit() {
+    fun CloseCircuit() {
         this.selectionKey.cancel()
         try {
             this.datagramChannel.close()
@@ -154,27 +154,27 @@ class SLCircuit : SLMessageHandler() {
         ProcessCloseCircuit()
     }
 
-    public Unit DefaultEventQueueHandler(CapsEventType capsEventType, LLSDNode lLSDNode) {
+    fun DefaultEventQueueHandler(CapsEventType capsEventType, LLSDNode lLSDNode) {
         if (!this.messageRouter.handleEventQueueMessage(capsEventType, lLSDNode)) {
             Debug.Log("Unhandled event queue msg: type = " + capsEventType)
         }
     }
 
-    public Unit DefaultMessageHandler(SLMessage sLMessage) {
+    fun DefaultMessageHandler(SLMessage sLMessage) {
         Boolean handleMessage = this.messageRouter.handleMessage(sLMessage)
     }
 
-    public Unit HandleMessage(SLMessage sLMessage) {
+    fun HandleMessage(SLMessage sLMessage) {
         sLMessage.handleMessage(this)
     }
 
-    public Unit HandlePacketAck(PacketAck packetAck) {
+    fun HandlePacketAck(PacketAck packetAck) {
         for (Packets packets : packetAck.Packets_Fields) {
             ProcessReceivedAck(packets.ID)
         }
     }
 
-    public Unit HandleStartPingCheck(StartPingCheck startPingCheck) {
+    fun HandleStartPingCheck(StartPingCheck startPingCheck) {
         SLMessage completePingCheck = CompletePingCheck()
         completePingCheck.PingID_Field.PingID = startPingCheck.PingID_Field.PingID
         SendMessage(completePingCheck)
@@ -187,13 +187,13 @@ class SLCircuit : SLMessageHandler() {
         }
     }
 
-    public Unit ProcessCloseCircuit() {
+    fun ProcessCloseCircuit() {
     }
 
-    public Unit ProcessIdle() {
+    fun ProcessIdle() {
     }
 
-    public Unit ProcessNetworkError() {
+    fun ProcessNetworkError() {
     }
 
     public Boolean ProcessReceive() throws java.io.IOException {
@@ -287,7 +287,7 @@ class SLCircuit : SLMessageHandler() {
         return true
     }
 
-    public Unit ProcessReceivedAck(Int i) {
+    fun ProcessReceivedAck(Int i) {
         SLMessage sLMessage
         Iterator it = this.unackedQueue.iterator()
         while (it.hasNext()) {
@@ -307,7 +307,7 @@ class SLCircuit : SLMessageHandler() {
         }
     }
 
-    public Unit ProcessTimeout() {
+    fun ProcessTimeout() {
     }
 
     public Boolean ProcessTransmit() throws IOException {
@@ -357,7 +357,7 @@ class SLCircuit : SLMessageHandler() {
         return false
     }
 
-    public Unit ProcessWakeup() {
+    fun ProcessWakeup() {
         ProcessResends()
         TryProcessIdle()
     }
@@ -369,7 +369,7 @@ class SLCircuit : SLMessageHandler() {
         }
     }
 
-    public Unit SendMessage(SLMessage sLMessage) {
+    fun SendMessage(SLMessage sLMessage) {
         sLMessage.seqNum = this.lastSeqNum.incrementAndGet()
         sLMessage.sentTimeMillis = System.currentTimeMillis()
         sLMessage.retries = 0
@@ -378,7 +378,7 @@ class SLCircuit : SLMessageHandler() {
         this.selector.wakeup()
     }
 
-    public Unit TryProcessIdle() {
+    fun TryProcessIdle() {
         Long elapsedRealtime = SystemClock.elapsedRealtime()
         if (elapsedRealtime >= this.lastReceivedPacketMillis + NEED_PING_TIMEOUT && elapsedRealtime >= this.lastPingSent + PING_INTERVAL) {
             if (this.pingSentCount < 3) {
@@ -409,7 +409,7 @@ class SLCircuit : SLMessageHandler() {
         }
     }
 
-    public Unit UpdateSelectorOps() {
+    fun UpdateSelectorOps() {
         if (this.selectionKey.isValid()) {
             try {
                 if (this.outgoingQueue.isEmpty() && this.pendingAcks.isEmpty()) {

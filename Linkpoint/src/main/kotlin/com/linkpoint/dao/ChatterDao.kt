@@ -97,7 +97,7 @@ class ChatterDao : AbstractDao()<Chatter, Long> {
         return Chatter(valueOf, i2, fromString, z2, z, i3, valueOf2, uuid)
     }
 
-    public Unit readEntity(Cursor cursor, Chatter chatter, Int i) {
+    fun readEntity(Cursor cursor, Chatter chatter, Int i) {
         Boolean z = true
         UUID uuid = null
         chatter.setId(cursor.isNull(i + 0) ? null : Long.valueOf(cursor.getLong(i + 0)))

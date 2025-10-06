@@ -23,7 +23,7 @@ class MyAvatarFragment_ViewBinding : Unbinder {
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         MyAvatarFragment myAvatarFragment = this.target
         if (myAvatarFragment == null) {
             throw IllegalStateException("Bindings already cleared.")

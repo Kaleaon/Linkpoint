@@ -78,7 +78,7 @@ class GroupMemberDao : AbstractDao()<GroupMember, Void> {
         return GroupMember(fromString, fromString2, fromString3, i2, string, j, string2, z)
     }
 
-    public Unit readEntity(Cursor cursor, GroupMember groupMember, Int i) {
+    fun readEntity(Cursor cursor, GroupMember groupMember, Int i) {
         Boolean z = false
         groupMember.setGroupID(UUID.fromString(cursor.getString(i + 0)))
         groupMember.setRequestID(UUID.fromString(cursor.getString(i + 1)))

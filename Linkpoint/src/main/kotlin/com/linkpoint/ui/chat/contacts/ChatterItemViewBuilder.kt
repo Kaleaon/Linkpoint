@@ -110,7 +110,7 @@ class ChatterItemViewBuilder {
         return inflate
     }
 
-    public Unit reset() {
+    fun reset() {
         this.label = null
         this.onlineVisible = false
         this.distanceSet = false
@@ -123,11 +123,11 @@ class ChatterItemViewBuilder {
         this.voiceActive = false
     }
 
-    public Unit setActiveGroup(Boolean z) {
+    fun setActiveGroup(Boolean z) {
         this.isActiveGroup = z
     }
 
-    public Unit setDistance(Float f) {
+    fun setDistance(Float f) {
         if (Float.isNaN(f)) {
             this.distanceSet = false
             return
@@ -136,33 +136,33 @@ class ChatterItemViewBuilder {
         this.distance = f
     }
 
-    public Unit setLabel(String str) {
+    fun setLabel(String str) {
         this.label = str
     }
 
-    public Unit setLastMessage(String str) {
+    fun setLastMessage(String str) {
         this.lastMessage = str
     }
 
-    public Unit setOnlineStatusIcon(Boolean z, Boolean z2) {
+    fun setOnlineStatusIcon(Boolean z, Boolean z2) {
         this.onlineVisible = z
         this.isOnline = z2
     }
 
-    public Unit setThumbnailChatterID(ChatterID chatterID, String str) {
+    fun setThumbnailChatterID(ChatterID chatterID, String str) {
         this.thumbnailChatterID = chatterID
         this.thumbnailLabel = str
     }
 
-    public Unit setThumbnailDefaultIcon(Int i) {
+    fun setThumbnailDefaultIcon(Int i) {
         this.thumbnailDefaultIcon = i
     }
 
-    public Unit setUnreadCount(Int i) {
+    fun setUnreadCount(Int i) {
         this.unreadCount = i
     }
 
-    public Unit setVoiceActive(Boolean z) {
+    fun setVoiceActive(Boolean z) {
         this.voiceActive = z
     }
 }

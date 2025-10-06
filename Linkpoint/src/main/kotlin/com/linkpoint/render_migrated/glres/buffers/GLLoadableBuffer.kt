@@ -162,7 +162,7 @@ class GLLoadableBuffer : GLCleanable {
         GLES20.glDrawElements(i, i2, i3, i4)
     }
 
-    public Unit GLCleanup() {
+    fun GLCleanup() {
         this.glBuffer = null
     }
 

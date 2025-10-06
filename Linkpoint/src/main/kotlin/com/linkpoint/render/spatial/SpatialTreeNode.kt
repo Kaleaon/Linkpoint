@@ -180,13 +180,13 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         }
     }
 
-    public Unit addDrawables(DrawList drawList) {
+    fun addDrawables(DrawList drawList) {
         for (DrawListEntry drawListEntry = (DrawListEntry) getFirst(); drawListEntry != null; drawListEntry = drawListEntry.getNext()) {
             drawListEntry.addToDrawList(drawList)
         }
     }
 
-    public Unit addEntry(DrawListEntry drawListEntry) {
+    fun addEntry(DrawListEntry drawListEntry) {
         Object obj = 1
         Boolean z = getFirst() == null && this.children == null
         if (this.singleChild == null) {
@@ -253,7 +253,7 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         return this.children[i2].findNode(fArr)
     }
 
-    public Unit removeEntry(DrawListEntry drawListEntry) {
+    fun removeEntry(DrawListEntry drawListEntry) {
         super.removeEntry(drawListEntry)
         if (this.depthBin != -1) {
             this.spatialTree.setDrawListChanged()
@@ -268,7 +268,7 @@ class SpatialTreeNode : InlineList()<DrawListEntry> {
         shrinkBoundingBox()
     }
 
-    public Unit requestEntryRemoval(DrawListEntry drawListEntry) {
+    fun requestEntryRemoval(DrawListEntry drawListEntry) {
         this.spatialTree.spatialObjectIndex.requestEntryRemoval(drawListEntry)
     }
 

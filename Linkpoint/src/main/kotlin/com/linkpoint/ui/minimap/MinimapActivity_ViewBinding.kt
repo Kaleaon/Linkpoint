@@ -28,7 +28,7 @@ class MinimapActivity_ViewBinding : Unbinder {
     }
 
     @CallSuper
-    public Unit unbind() {
+    fun unbind() {
         MinimapActivity minimapActivity = this.target
         if (minimapActivity == null) {
             throw IllegalStateException("Bindings already cleared.")

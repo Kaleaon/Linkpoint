@@ -8,7 +8,7 @@ import com.linkpoint.slproto.modules.rlv.RLVRestrictionType
 import java.util.UUID
 
 class RLVCmdRedirChat : RLVCommand {
-    public Unit Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
+    fun Handle(RLVController rLVController, UUID uuid, RLVCommands rLVCommands, String str, String str2) {
         if (str2 == null) {
             str2 = ""
         }

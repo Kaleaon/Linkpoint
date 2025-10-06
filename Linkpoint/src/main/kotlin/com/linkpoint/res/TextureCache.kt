@@ -41,7 +41,7 @@ class TextureCache : MemoryPressureListener {
         memoryManager.addMemoryPressureListener(this)
     }
     
-    public Unit put(String key, CachedTexture texture) {
+    fun put(String key, CachedTexture texture) {
         if (texture != null) {
             memoryManager.trackAllocation("texture_" + key, texture, texture.getEstimatedSize())
             cache.put(key, texture)
@@ -52,7 +52,7 @@ class TextureCache : MemoryPressureListener {
         return cache.get(key)
     }
     
-    public Unit remove(String key) {
+    fun remove(String key) {
         CachedTexture texture = cache.remove(key)
         if (texture != null) {
             memoryManager.trackDeallocation("texture_" + key, texture.getEstimatedSize())
@@ -64,7 +64,7 @@ class TextureCache : MemoryPressureListener {
         return cache.size()
     }
     
-    public Unit clear() {
+    fun clear() {
         cache.evictAll()
     }
     

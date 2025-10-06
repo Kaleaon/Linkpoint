@@ -219,7 +219,7 @@ private Long getTotalMemory() {
         }
     }
 
-    public Unit enableVoice() {
+    fun enableVoice() {
         Editor edit = LinkpointApp.getDefaultSharedPreferences().edit()
         edit.putBoolean("enableVoice", true)
         edit.apply()
@@ -323,7 +323,7 @@ private Long getTotalMemory() {
         return this.voiceEnabled
     }
 
-    public Unit initialize() {
+    fun initialize() {
         SharedPreferences defaultSharedPreferences = LinkpointApp.getDefaultSharedPreferences()
         updateFromPreferences(LinkpointApp.getContext(), defaultSharedPreferences)
         defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
@@ -337,12 +337,12 @@ private Long getTotalMemory() {
         return this.legacyUserNames
     }
 
-    public Unit onSharedPreferenceChanged(SharedPreferences sharedPreferences, String str) {
+    fun onSharedPreferenceChanged(SharedPreferences sharedPreferences, String str) {
         updateFromPreferences(LinkpointApp.getContext(), sharedPreferences)
         EventBus.getInstance().publish(GlobalOptionsChangedEvent(sharedPreferences))
     }
 
-    public Unit updateFromPreferences(Context context, SharedPreferences sharedPreferences) {
+    fun updateFromPreferences(Context context, SharedPreferences sharedPreferences) {
         Debug.Printf("Updating options from preferences.", Object[0])
         updateNotificationSoundDefault(sharedPreferences, NotificationType.Private)
         updateNotificationSoundDefault(sharedPreferences, NotificationType.Group)

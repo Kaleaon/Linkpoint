@@ -70,7 +70,7 @@ class RLVController : SLModule() {
         this.agentCircuit.HandleChatEvent(this.agentCircuit.getLocalChatterID(), SLEnableRLVOfferEvent(chatFromSimulator, this.agentCircuit.getAgentUUID()), true)
     }
 
-    public Unit HandleGlobalOptionsChange() {
+    fun HandleGlobalOptionsChange() {
         Boolean rLVEnabled = GlobalOptions.getInstance().getRLVEnabled()
         if (rLVEnabled && (!this.RLVEnabled) && this.RLVEnablingOffered && this.RLVEnablingCommand != null) {
             this.RLVEnablingOffered = false
@@ -229,7 +229,7 @@ class RLVController : SLModule() {
         return true
     }
 
-    public Unit sayOnChannel(Int i, String str) {
+    fun sayOnChannel(Int i, String str) {
         Debug.Printf("RLV reply (%d): '%s'", Integer.valueOf(i), str)
         ChatFromViewer chatFromViewer = ChatFromViewer()
         chatFromViewer.AgentData_Field.AgentID = this.circuitInfo.agentID
@@ -241,7 +241,7 @@ class RLVController : SLModule() {
         SendMessage(chatFromViewer)
     }
 
-    public Unit teleportToGlobalPos(UUID uuid, LLVector3 lLVector3) {
+    fun teleportToGlobalPos(UUID uuid, LLVector3 lLVector3) {
         if (this.RLVEnabled && this.restrictions.isAllowed(RLVRestrictionType.tploc, "", (UUID) null, uuid)) {
             this.agentCircuit.TeleportToGlobalPosition(lLVector3)
         }

@@ -32,7 +32,7 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
     private val MuteListCachedDataDao muteListCachedDataDao
     private volatile MuteListData muteListData = MuteListData()
     private val RequestHandler<SubscriptionSingleKey> muteListRequestHandler = AsyncRequestHandler(this.agentCircuit, SimpleRequestHandler<SubscriptionSingleKey>() {
-        public Unit onRequest(SubscriptionSingleKey subscriptionSingleKey) {
+        fun onRequest(SubscriptionSingleKey subscriptionSingleKey) {
             if (SLMuteList.this.muteListResultHandler != null) {
                 SLMuteList.this.muteListResultHandler.onResultData(SubscriptionSingleKey.Value, SLMuteList.this.getMuteList())
             }
@@ -63,7 +63,7 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
         Debug.Printf("MuteList: Requested mute list (CRC %08x)", Integer.valueOf(muteListRequest.MuteData_Field.MuteCRC))
     }
 
-    public Unit Block(MuteListEntry muteListEntry) {
+    fun Block(MuteListEntry muteListEntry) {
         this.muteListData = this.muteListData.Block(muteListEntry)
         Debug.Printf("MuteList: adding entry %s '%s'", muteListEntry.uuid.toString(), muteListEntry.name)
         UpdateMuteListEntry updateMuteListEntry = UpdateMuteListEntry()
@@ -78,7 +78,7 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
         this.userManager.muteListPool().requestUpdate(SubscriptionSingleKey.Value)
     }
 
-    public Unit HandleCircuitReady() {
+    fun HandleCircuitReady() {
         super.HandleCircuitReady()
         if (this.muteListCachedDataDao != null) {
             LazyList listLazy = this.muteListCachedDataDao.queryBuilder().listLazy()
@@ -94,7 +94,7 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
         }
     }
 
-    public Unit HandleCloseCircuit() {
+    fun HandleCloseCircuit() {
         if (this.userManager != null) {
             this.userManager.muteListPool().detachRequestHandler(this.muteListRequestHandler)
         }
@@ -102,7 +102,7 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
     }
 
     @SLMessageHandler
-    public Unit HandleMuteListUpdate(MuteListUpdate muteListUpdate) {
+    fun HandleMuteListUpdate(MuteListUpdate muteListUpdate) {
         String stringFromVariableOEM = SLMessage.stringFromVariableOEM(muteListUpdate.MuteData_Field.Filename)
         Debug.Printf("MuteList: fileName = '%s'", stringFromVariableOEM)
         if (!stringFromVariableOEM.equals("")) {
@@ -111,11 +111,11 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
     }
 
     @SLMessageHandler
-    public Unit HandleUseCachedMuteList(UseCachedMuteList useCachedMuteList) {
+    fun HandleUseCachedMuteList(UseCachedMuteList useCachedMuteList) {
         Debug.Printf("MuteList: Using cached mute list.", Object[0])
     }
 
-    public Unit Unblock(MuteListEntry muteListEntry) {
+    fun Unblock(MuteListEntry muteListEntry) {
         this.muteListData = this.muteListData.Unblock(muteListEntry)
         Debug.Printf("MuteList: removing entry %s '%s'", muteListEntry.uuid.toString(), muteListEntry.name)
         RemoveMuteListEntry removeMuteListEntry = RemoveMuteListEntry()
@@ -143,7 +143,7 @@ class SLMuteList : SLModule(), SLXfer.SLXferCompletionListener {
         return this.muteListData.isMutedByName(str)
     }
 
-    public Unit onXferComplete(Object obj, String str, Byte[] bArr) {
+    fun onXferComplete(Object obj, String str, Byte[] bArr) {
         if (bArr != null) {
             this.muteListData = MuteListData(bArr)
             if (this.muteListCachedDataDao != null) {

@@ -51,7 +51,7 @@ class VoiceSession {
         Debug.Printf("Voice: created session: %s (uri %s)", this.handle, this.voiceChannelInfo.voiceChannelURI)
     }
 
-    public Unit dispose() {
+    fun dispose() {
         if (!this.disposed) {
             this.disposed = true
             vx_req_session_terminate_t vx_req_session_terminate_t2 = vx_req_session_terminate_t()
@@ -115,7 +115,7 @@ class VoiceSession {
         return this.isIncoming
     }
 
-    public Unit mediaConnect() {
+    fun mediaConnect() {
         vx_req_session_media_connect_t vx_req_session_media_connect_t2 = vx_req_session_media_connect_t()
         vx_req_session_media_connect_t2.setSession_handle(this.handle)
         vx_req_session_media_connect_t2.setSessiongroup_handle(this.sessionGroupHandle)
@@ -123,7 +123,7 @@ class VoiceSession {
         this.messageController.sendRequest(vx_req_session_media_connect_t2.getBase())
     }
 
-    public Unit mediaDisconnect(vx_termination_status vx_termination_status2) {
+    fun mediaDisconnect(vx_termination_status vx_termination_status2) {
         vx_req_session_media_disconnect_t vx_req_session_media_disconnect_t2 = vx_req_session_media_disconnect_t()
         vx_req_session_media_disconnect_t2.setSession_handle(this.handle)
         vx_req_session_media_disconnect_t2.setSessiongroup_handle(this.sessionGroupHandle)
@@ -131,7 +131,7 @@ class VoiceSession {
         this.messageController.sendRequest(vx_req_session_media_disconnect_t2.getBase())
     }
 
-    public Unit set3DPosition(Voice3DPosition voice3DPosition, Voice3DPosition voice3DPosition2) {
+    fun set3DPosition(Voice3DPosition voice3DPosition, Voice3DPosition voice3DPosition2) {
         Debug.Printf("Voice: set3D: speaker %s", voice3DPosition.toString())
         Debug.Printf("Voice: set3D: listener %s", voice3DPosition2.toString())
         vx_req_session_set_3d_position_t vx_req_session_set_3d_position_t2 = vx_req_session_set_3d_position_t()

@@ -56,7 +56,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
             this()
         }
 
-        public Unit addRestriction(UUID uuid, String str) {
+        fun addRestriction(UUID uuid, String str) {
             HashSet hashSet = this.restMap.get(str)
             if (hashSet == null) {
                 hashSet = HashSet()
@@ -185,7 +185,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
             return this.restMap.isEmpty()
         }
 
-        public Unit removeAllForObject(UUID uuid) {
+        fun removeAllForObject(UUID uuid) {
             HashSet<String> hashSet = HashSet<>()
             for (Map.Entry entry : this.restMap.entrySet()) {
                 ((HashSet) entry.getValue()).remove(uuid)
@@ -198,7 +198,7 @@ private /* synthetic */ Int[] m231getcomlumiyaviewerlumiyaslprotomodulesrlvRLVRe
             }
         }
 
-        public Unit removeRestriction(UUID uuid, String str) {
+        fun removeRestriction(UUID uuid, String str) {
             HashSet hashSet = this.restMap.get(str)
             if (hashSet != null) {
                 hashSet.remove(uuid)

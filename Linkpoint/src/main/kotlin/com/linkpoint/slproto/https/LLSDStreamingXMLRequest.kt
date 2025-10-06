@@ -18,7 +18,7 @@ class LLSDStreamingXMLRequest {
     private const val MediaType MEDIA_TYPE_LLSD_XML = MediaType.parse("application/llsd+xml")
     private val AtomicReference<Call> callRef = AtomicReference<>((Object) null)
 
-    public Unit InterruptRequest() {
+    fun InterruptRequest() {
         Call call = this.callRef.get()
         if (call != null) {
             try {
@@ -29,7 +29,7 @@ class LLSDStreamingXMLRequest {
         }
     }
 
-    public Unit PerformRequest(String str, LLSDNode lLSDNode, LLSDStreamingParser.LLSDContentHandler lLSDContentHandler) throws IOException, LLSDXMLException {
+    fun PerformRequest(String str, LLSDNode lLSDNode, LLSDStreamingParser.LLSDContentHandler lLSDContentHandler) throws IOException, LLSDXMLException {
         Response execute
         Request.Builder header = Request.Builder().url(str).header(HttpHeaders.ACCEPT, "application/llsd+binary;q=0.5,application/llsd+xml;q=0.1")
         if (lLSDNode != null) {

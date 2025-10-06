@@ -55,7 +55,7 @@ private class AudioFocusChangeHandler : Handler() {
             this(streamingMediaService)
         }
 
-        public Unit handleMessage(Message message) {
+        fun handleMessage(Message message) {
             if (message.what == 100) {
                 StreamingMediaService streamingMediaService = (StreamingMediaService) this.streamingMediaService.get()
                 if (streamingMediaService != null) {
@@ -168,13 +168,13 @@ private class AudioFocusChangeHandler : Handler() {
         return null
     }
 
-    public Unit onCreate() {
+    fun onCreate() {
         super.onCreate()
         this.audioManagerWrapper = AudioManagerWrapper(this)
         this.audioManagerWrapper.setHandler(this.mHandler, 100)
     }
 
-    public Unit onDestroy() {
+    fun onDestroy() {
         this.mediaWrapper.release()
         if (this.audioManagerWrapper != null) {
             this.audioManagerWrapper.abandonAudioFocus()

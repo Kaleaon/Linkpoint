@@ -63,17 +63,17 @@ class GridList {
             return this.predefinedGrid
         }
 
-        public Unit saveToPreferences(SharedPreferences.Editor editor, String str) {
+        fun saveToPreferences(SharedPreferences.Editor editor, String str) {
             editor.putString(str + "_grid_name", this.GridName)
             editor.putString(str + "_login_url", this.LoginURL)
             editor.putString(str + "_grid", this.GridUUID.toString())
         }
 
-        public Unit setGridName(String str) {
+        fun setGridName(String str) {
             this.GridName = str
         }
 
-        public Unit setLoginURL(String str) {
+        fun setLoginURL(String str) {
             this.LoginURL = str
         }
 
@@ -92,12 +92,12 @@ class GridList {
         loadGrids()
     }
 
-    public Unit addNewGrid(GridInfo gridInfo) {
+    fun addNewGrid(GridInfo gridInfo) {
         this.customGrids.add(gridInfo)
         savePreferences()
     }
 
-    public Unit deleteGrid(GridInfo gridInfo) {
+    fun deleteGrid(GridInfo gridInfo) {
         this.customGrids.remove(gridInfo)
         savePreferences()
     }
@@ -169,7 +169,7 @@ class GridList {
         return gridList
     }
 
-    public Unit loadGrids() {
+    fun loadGrids() {
         this.customGrids.clear()
         SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext())
         Int i = defaultSharedPreferences.getInt("custom_grid_1_count", 0)
@@ -178,7 +178,7 @@ class GridList {
         }
     }
 
-    public Unit savePreferences() {
+    fun savePreferences() {
         SharedPreferences.Editor edit = PreferenceManager.getDefaultSharedPreferences(this.context.getApplicationContext()).edit()
         edit.putInt("custom_grid_1_count", this.customGrids.size())
         Int i = 0

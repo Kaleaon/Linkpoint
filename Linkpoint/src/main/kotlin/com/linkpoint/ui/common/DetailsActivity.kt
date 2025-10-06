@@ -90,7 +90,7 @@ private class DetailsStackEntry : Parcelable {
             return fragment2
         }
 
-        public Unit writeToParcel(Parcel parcel, Int i) {
+        fun writeToParcel(Parcel parcel, Int i) {
             parcel.writeString(this.className)
             if (this.arguments != null) {
                 parcel.writeByte((Byte) 1)
@@ -145,7 +145,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Unit addDetailsToStack(FragmentManager fragmentManager) {
+    fun addDetailsToStack(FragmentManager fragmentManager) {
         Fragment findFragmentById = fragmentManager.findFragmentById(R.id.details)
         if (findFragmentById != null) {
             this.detailsStack.add(DetailsStackEntry(findFragmentById, (DetailsStackEntry) null))
@@ -153,7 +153,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: package-private */
-    public Unit clearDetailsStack() {
+    fun clearDetailsStack() {
         this.detailsStack.clear()
     }
 
@@ -192,7 +192,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         if (bundle != null) {
             ArrayList parcelableArrayList = bundle.getParcelableArrayList(DETAILS_STACK_TAG)
@@ -218,17 +218,17 @@ private class DetailsStackEntry : Parcelable {
         return false
     }
 
-    public Unit onFragmentTitleUpdated() {
+    fun onFragmentTitleUpdated() {
         updateTitle()
     }
 
     /* access modifiers changed from: protected */
-    public Unit onPostCreate(@android.support.annotation.Nullable Bundle bundle) {
+    fun onPostCreate(@android.support.annotation.Nullable Bundle bundle) {
         super.onPostCreate(bundle)
         updateTitle()
     }
 
-    public Unit onRequestPermissionsResult(Int i, String[] strArr, Int[] iArr) {
+    fun onRequestPermissionsResult(Int i, String[] strArr, Int[] iArr) {
         super.onRequestPermissionsResult(i, strArr, iArr)
         List<Fragment> fragments = getSupportFragmentManager().getFragments()
         if (fragments != null) {
@@ -239,7 +239,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Unit onSaveInstanceState(Bundle bundle) {
+    fun onSaveInstanceState(Bundle bundle) {
         bundle.putParcelableArrayList(DETAILS_STACK_TAG, this.detailsStack)
         bundle.putString(DEFAULT_TITLE_TAG, this.defaultTitle)
         bundle.putString(DEFAULT_SUBTITLE_TAG, this.defaultSubTitle)
@@ -247,7 +247,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Unit removeAllDetails() {
+    fun removeAllDetails() {
         FragmentManager supportFragmentManager = getSupportFragmentManager()
         if (supportFragmentManager.findFragmentById(R.id.details) != null) {
             clearDetailsStack()
@@ -256,7 +256,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Unit replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment) {
+    fun replaceDetailsFragment(FragmentManager fragmentManager, Fragment fragment) {
         FragmentTransaction beginTransaction = fragmentManager.beginTransaction()
         beginTransaction.setCustomAnimations(R.anim.slide_from_right, 0, 0, R.anim.slide_to_right)
         beginTransaction.replace(R.id.details, fragment)
@@ -266,7 +266,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Unit setActivityTitle(String str, String str2) {
+    fun setActivityTitle(String str, String str2) {
         ActionBar supportActionBar = getSupportActionBar()
         Debug.Printf("updateTitle: title '%s' actionBar %s", str, supportActionBar)
         if (supportActionBar != null) {
@@ -286,7 +286,7 @@ private class DetailsStackEntry : Parcelable {
         return true
     }
 
-    public Unit setDefaultTitle(String str, String str2) {
+    fun setDefaultTitle(String str, String str2) {
         this.defaultTitle = str
         this.defaultSubTitle = str2
         updateTitle()
@@ -344,7 +344,7 @@ private class DetailsStackEntry : Parcelable {
     /* JADX WARNING: Removed duplicated region for block: B:14:0x007c  */
     /* JADX WARNING: Removed duplicated region for block: B:18:? A[RETURN, SYNTHETIC] */
     /* Code decompiled incorrectly, please refer to instructions dump. */
-    public Unit updateTitle() {
+    fun updateTitle() {
         /*
             r7 = this
             r6 = 2
@@ -410,7 +410,7 @@ private class DetailsStackEntry : Parcelable {
     }
 
     /* access modifiers changed from: protected */
-    public Unit updateTitleNoDetails() {
+    fun updateTitleNoDetails() {
         if (this.defaultTitle != null) {
             setActivityTitle(this.defaultTitle, this.defaultSubTitle)
         }

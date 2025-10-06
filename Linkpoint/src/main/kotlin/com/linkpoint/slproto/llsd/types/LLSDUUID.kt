@@ -56,13 +56,13 @@ class LLSDUUID : LLSDNode() {
         return this.value
     }
 
-    public Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    fun toBinary(DataOutputStream dataOutputStream) throws IOException {
         dataOutputStream.writeByte(117)
         dataOutputStream.writeLong(this.value.getMostSignificantBits())
         dataOutputStream.writeLong(this.value.getLeastSignificantBits())
     }
 
-    public Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    fun toXML(XmlSerializer xmlSerializer) throws IOException {
         xmlSerializer.startTag("", "uuid")
         if (this.value != null) {
             xmlSerializer.text(this.value.toString())

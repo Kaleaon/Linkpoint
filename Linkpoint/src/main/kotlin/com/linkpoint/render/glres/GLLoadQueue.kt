@@ -21,15 +21,15 @@ abstract class GLLoadQueue {
 
     public abstract Unit RunLoadQueue(RenderContext renderContext)
 
-    public Unit StopLoadQueue() {
+    fun StopLoadQueue() {
         this.loadQueue.clear()
     }
 
-    public Unit add(GLLoadable gLLoadable) {
+    fun add(GLLoadable gLLoadable) {
         this.loadQueue.offer(gLLoadable)
     }
 
-    public Unit remove(GLLoadable gLLoadable) {
+    fun remove(GLLoadable gLLoadable) {
         this.loadQueue.remove(gLLoadable)
     }
 }

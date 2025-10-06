@@ -221,7 +221,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         }
 
         @Subscribe
-        public Unit onChatMessage(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
+        fun onChatMessage(ActiveChattersManager.ChatMessageEvent chatMessageEvent) {
             CardboardActivity.this.runOnUiThread(Runnable(this, chatMessageEvent) {
 
                 /* renamed from: -$f0 */
@@ -356,7 +356,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             CardboardActivity.this.handleMoveControl(moveControl, 0.0f)
         }
 
-        public Unit onConnectionStateChanged(Int i) {
+        fun onConnectionStateChanged(Int i) {
             super.onConnectionStateChanged(i)
             Object[] objArr = Object[1]
             objArr[0] = i == 3 ? "connected" : "disconnected"
@@ -364,7 +364,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             CardboardActivity.this.controllerConnectionState.set(i)
         }
 
-        public Unit onUpdate() {
+        fun onUpdate() {
             MoveControl moveControl
             Float f = 0.0f
             super.onUpdate()
@@ -982,11 +982,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
     private ControllerManager controllerManager
     private val ControllerManager.EventListener controllerManagerEventListener = ControllerManager.EventListener() {
-        public Unit onApiStatusChanged(Int i) {
+        fun onApiStatusChanged(Int i) {
             Debug.Printf("Cardboard: controller API status: %d", Integer.valueOf(i))
         }
 
-        public Unit onRecentered() {
+        fun onRecentered() {
             if (CardboardActivity.this.gvrView != null) {
                 CardboardActivity.this.gvrView.recenterHeadTracker()
             }
@@ -1061,7 +1061,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     /* access modifiers changed from: private */
     @SuppressLint({"HandlerLeak"})
     val Handler handler = Handler() {
-        public Unit handleMessage(Message message) {
+        fun handleMessage(Message message) {
             Boolean z = false
             switch (message.what) {
                 case 1:
@@ -1203,7 +1203,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     @BindView(2131755271)
     TextView objectNameView
     private val View.OnClickListener onDialogButtonClick = View.OnClickListener() {
-        public Unit onClick(View view) {
+        fun onClick(View view) {
             if (CardboardActivity.this.activeScriptDialog != null) {
                 Int i = 0
                 while (true) {
@@ -1850,20 +1850,20 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     /* access modifiers changed from: private */
     public Int primaryButtonsViewBottom = 0
     private val RecognitionListener recognitionListener = RecognitionListener() {
-        public Unit onBeginningOfSpeech() {
+        fun onBeginningOfSpeech() {
             Debug.Printf("Cardboard: beginning of speech", Object[0])
         }
 
-        public Unit onBufferReceived(Byte[] bArr) {
+        fun onBufferReceived(Byte[] bArr) {
         }
 
-        public Unit onEndOfSpeech() {
+        fun onEndOfSpeech() {
             Debug.Printf("Cardboard: end of speech", Object[0])
             CardboardActivity.this.speakLevelIndicator.setVisibility(4)
             CardboardActivity.this.speakNowText.setVisibility(4)
         }
 
-        public Unit onError(Int i) {
+        fun onError(Int i) {
             String string
             Debug.Printf("Cardboard: speech error %d", Integer.valueOf(i))
             switch (i) {
@@ -1896,10 +1896,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             CardboardActivity.this.showSpeechRecognitionError(string)
         }
 
-        public Unit onEvent(Int i, Bundle bundle) {
+        fun onEvent(Int i, Bundle bundle) {
         }
 
-        public Unit onPartialResults(Bundle bundle) {
+        fun onPartialResults(Bundle bundle) {
             Debug.Printf("Cardboard: speech recognition: got partial results", Object[0])
             ArrayList<String> stringArrayList = bundle.getStringArrayList("results_recognition")
             if (stringArrayList != null && stringArrayList.size() > 0) {
@@ -1912,11 +1912,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             }
         }
 
-        public Unit onReadyForSpeech(Bundle bundle) {
+        fun onReadyForSpeech(Bundle bundle) {
             CardboardActivity.this.speakNowText.setVisibility(0)
         }
 
-        public Unit onResults(Bundle bundle) {
+        fun onResults(Bundle bundle) {
             Debug.Printf("Cardboard: speech recognition: got some results", Object[0])
             ArrayList<String> stringArrayList = bundle.getStringArrayList("results_recognition")
             if (stringArrayList != null && stringArrayList.size() > 0) {
@@ -1931,7 +1931,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             }
         }
 
-        public Unit onRmsChanged(Float f) {
+        fun onRmsChanged(Float f) {
             if (!CardboardActivity.this.isSpeechFinished) {
                 if (Float.isNaN(CardboardActivity.this.speechRmsMin) || f < CardboardActivity.this.speechRmsMin) {
                     Float unused = CardboardActivity.this.speechRmsMin = f
@@ -2265,7 +2265,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             CardboardActivity.this.draw2DUI()
         }
 
-        public Unit onDrawEye(Eye eye) {
+        fun onDrawEye(Eye eye) {
             Int type = eye.getType()
             Float f = (type == 1 ? -0.5f : 0.5f) * this.eyeSeparation
             for (Int i = 0; i < 4; i++) {
@@ -2286,7 +2286,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             }
         }
 
-        public Unit onFinishFrame(Viewport viewport) {
+        fun onFinishFrame(Viewport viewport) {
             CardboardActivity.this.renderer.onFinishFrame()
             if (this.externalTexture != null) {
                 Int width = (Int) (((((this.eyeHitTests[0] + this.eyeHitTests[2]) / 2.0f) * 2.0f) + 0.5f) * ((Float) this.externalTexture.getWidth()))
@@ -2397,7 +2397,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             }
         }
 
-        public Unit onNewFrame(HeadTransform headTransform) {
+        fun onNewFrame(HeadTransform headTransform) {
             SLAvatarControl sLAvatarControl = (SLAvatarControl) CardboardActivity.this.avatarControl.get()
             Long uptimeMillis = SystemClock.uptimeMillis()
             headTransform.getQuaternion(this.headTransformCompat.rotationQuat, 0)
@@ -2485,13 +2485,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             }
         }
 
-        public Unit onRendererShutdown() {
+        fun onRendererShutdown() {
             this.externalTexture.release()
             this.externalTexture = null
             CardboardActivity.this.renderer.onRendererShutdown()
         }
 
-        public Unit onSurfaceChanged(Int i, Int i2) {
+        fun onSurfaceChanged(Int i, Int i2) {
             this.viewportWidth = i
             this.viewportHeight = i2
             CardboardActivity.this.renderer.onSurfaceChanged((GL10) null, i, i2)
@@ -2586,7 +2586,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
         }
 
-        public Unit onSurfaceCreated(EGLConfig eGLConfig) {
+        fun onSurfaceCreated(EGLConfig eGLConfig) {
             CardboardActivity.this.renderer.onSurfaceCreated((GL10) null, eGLConfig, true)
         }
     }
@@ -2630,7 +2630,7 @@ private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwi
     }
 
     /* access modifiers changed from: private */
-    public Unit draw2DUI() {
+    fun draw2DUI() {
         GLExternalTexture gLExternalTexture = this.externalTextureRef.get()
         if (gLExternalTexture != null) {
             try {
@@ -2649,7 +2649,7 @@ private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwi
 
     /* access modifiers changed from: private */
     /* renamed from: drawViews */
-    public Unit m761com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref15() {
+    fun m761com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref15() {
         this.viewDrawPosted.set(false)
         Debug.Printf("Cardboard: drawing 2D UI", Object[0])
         draw2DUI()
@@ -2685,7 +2685,7 @@ private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwi
     }
 
     /* access modifiers changed from: private */
-    public Unit handleMoveControl(MoveControl moveControl, Float f) {
+    fun handleMoveControl(MoveControl moveControl, Float f) {
         SLAvatarControl sLAvatarControl = this.avatarControl.get()
         if (sLAvatarControl != null) {
             switch (m734getcomlumiyaviewerlumiyauirenderMoveControlSwitchesValues()[moveControl.ordinal()]) {
@@ -2746,7 +2746,7 @@ private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwi
     }
 
     /* access modifiers changed from: private */
-    public Unit handlePickedObject(ObjectIntersectInfo objectIntersectInfo) {
+    fun handlePickedObject(ObjectIntersectInfo objectIntersectInfo) {
         SLObjectInfo sLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
         if (sLObjectInfo != null) {
             this.pickedObject.set(objectIntersectInfo)
@@ -2884,7 +2884,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onAgentCircuit */
-    public Unit m754com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref0(SLAgentCircuit sLAgentCircuit) {
+    fun m754com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref0(SLAgentCircuit sLAgentCircuit) {
         SLAvatarControl sLAvatarControl = null
         updateDrawingEnabled()
         AtomicReference<SLAvatarControl> atomicReference = this.avatarControl
@@ -2896,7 +2896,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onCardboardTrigger */
-    public Unit m759com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref13() {
+    fun m759com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref13() {
         Object[] objArr = Object[3]
         objArr[0] = Integer.valueOf(this.hoveringOverButton != null ? this.hoveringOverButton.getId() : -1)
         objArr[1] = Integer.valueOf(this.hoveringPressedButton != null ? this.hoveringPressedButton.getId() : -1)
@@ -2923,7 +2923,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onCurrentLocationChanged */
-    public Unit m765com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref3(CurrentLocationInfo currentLocationInfo2) {
+    fun m765com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref3(CurrentLocationInfo currentLocationInfo2) {
         updateVoiceIndication()
     }
 
@@ -2940,7 +2940,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: private */
-    public Unit onExternalButtonAction(Boolean z) {
+    fun onExternalButtonAction(Boolean z) {
         Long uptimeMillis = SystemClock.uptimeMillis()
         if (z) {
             MotionEvent obtain = MotionEvent.obtain(uptimeMillis, uptimeMillis, 0, (Float) this.hitPointX, (Float) this.hitPointY, 0)
@@ -3166,7 +3166,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onMyAvatarState */
-    public Unit m755com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref1(MyAvatarState myAvatarState2) {
+    fun m755com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref1(MyAvatarState myAvatarState2) {
         SLAvatarControl sLAvatarControl
         if (myAvatarState2.isSitting()) {
             this.moveButtonsLayout.setVisibility(0)
@@ -3184,26 +3184,26 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: private */
-    public Unit onNewExternalTexture(GLExternalTexture gLExternalTexture) {
+    fun onNewExternalTexture(GLExternalTexture gLExternalTexture) {
         this.externalTextureRef.set(gLExternalTexture)
         ((CardboardControlsPlaceholder) findViewById(R.id.controls_placeholder)).setFixedSize(gLExternalTexture.getWidth(), gLExternalTexture.getHeight())
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onPickedAvatarNameUpdated */
-    public Unit m763com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref17(ChatterNameRetriever chatterNameRetriever) {
+    fun m763com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref17(ChatterNameRetriever chatterNameRetriever) {
         this.objectNameView.setText(chatterNameRetriever.getResolvedName())
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onSelectedObjectProfile */
-    public Unit m757com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref11(SLObjectProfileData sLObjectProfileData) {
+    fun m757com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref11(SLObjectProfileData sLObjectProfileData) {
         this.objectNameView.setText(sLObjectProfileData.name().or(getString(R.string.object_name_loading)))
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onViewsInvalidated */
-    public Unit m758com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref12() {
+    fun m758com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref12() {
         if (!this.viewDrawPosted.getAndSet(true)) {
             Debug.Printf("Cardboard: posting draw views", Object[0])
             this.handler.post(Runnable(this) {
@@ -3286,7 +3286,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceActiveChatter */
-    public Unit m766com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref4(ChatterID chatterID) {
+    fun m766com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref4(ChatterID chatterID) {
         if (this.voiceStatusView != null) {
             this.voiceStatusView.setChatterID(chatterID)
         }
@@ -3299,13 +3299,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceChatInfo */
-    public Unit m767com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref5(VoiceChatInfo voiceChatInfo2) {
+    fun m767com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref5(VoiceChatInfo voiceChatInfo2) {
         updateVoiceIndication()
     }
 
     /* access modifiers changed from: private */
     /* renamed from: onVoiceLoginStatusChanged */
-    public Unit m764com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref2(Boolean bool) {
+    fun m764com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref2(Boolean bool) {
         updateVoiceIndication()
     }
 
@@ -3360,7 +3360,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: private */
-    public Unit setControlsPage(ControlsPage controlsPage) {
+    fun setControlsPage(ControlsPage controlsPage) {
         ControlsPage[] values = ControlsPage.values()
         Int length = values.length
         for (Int i = 0; i < length; i++) {
@@ -3371,7 +3371,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: private */
-    public Unit showSpeechRecognitionError(String str) {
+    fun showSpeechRecognitionError(String str) {
         this.speakNowText.setVisibility(4)
         this.speakLevelIndicator.setVisibility(4)
         this.buttonSpeechSend.setVisibility(4)
@@ -3409,7 +3409,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: private */
-    public Unit updateExternalTexturePointer() {
+    fun updateExternalTexturePointer() {
         if (this.hitPointUpdatePosted.getAndSet(false)) {
             synchronized (this.hitPointLock) {
                 i = this.postedHitPointX
@@ -3606,7 +3606,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     @OnClick({2131755257})
-    public Unit onChatButton() {
+    fun onChatButton() {
         if (this.userManager != null) {
             setControlsPage(ControlsPage.pageDetails)
             Bundle makeFragmentArguments = ActivityUtils.makeFragmentArguments(this.userManager.getUserID(), (Bundle) null)
@@ -3616,7 +3616,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         setTheme(R.style.Theme_Linkpoint_Light)
         super.onCreate(bundle)
         requestWindowFeature(1)
@@ -4106,7 +4106,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    public Unit onDestroy() {
+    fun onDestroy() {
         if (this.gvrView != null) {
             this.gvrView.setOnCardboardTriggerListener((Runnable) null)
             this.gvrView.shutdown()
@@ -4122,7 +4122,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         return true
     }
 
-    public Unit onNewObjectPopup(SLChatEvent sLChatEvent) {
+    fun onNewObjectPopup(SLChatEvent sLChatEvent) {
         if (sLChatEvent instanceof SLChatScriptDialog) {
             if (this.currentControlsPage != ControlsPage.pageYesNo) {
                 SLChatScriptDialog sLChatScriptDialog = (SLChatScriptDialog) sLChatEvent
@@ -4148,7 +4148,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     @OnClick({2131755275})
-    public Unit onNoButton() {
+    fun onNoButton() {
         if (!(this.activeYesNoEvent == null || this.userManager == null)) {
             this.activeYesNoEvent.onYesAction(this, this.userManager)
             this.activeYesNoEvent = null
@@ -4158,7 +4158,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     @OnClick({2131755270})
-    public Unit onObjectChat() {
+    fun onObjectChat() {
         SLAgentCircuit data = this.agentCircuit.getData()
         ObjectIntersectInfo objectIntersectInfo = this.pickedObject.get()
         SLObjectInfo sLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
@@ -4180,11 +4180,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         }
     }
 
-    public Unit onObjectPopupCountChanged(Int i) {
+    fun onObjectPopupCountChanged(Int i) {
     }
 
     @OnClick({2131755269})
-    public Unit onObjectSit() {
+    fun onObjectSit() {
         SLAgentCircuit data = this.agentCircuit.getData()
         ObjectIntersectInfo objectIntersectInfo = this.pickedObject.get()
         SLObjectInfo sLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
@@ -4196,7 +4196,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     @OnClick({2131755268})
-    public Unit onObjectTouch() {
+    fun onObjectTouch() {
         SLAgentCircuit data = this.agentCircuit.getData()
         ObjectIntersectInfo objectIntersectInfo = this.pickedObject.get()
         SLObjectInfo sLObjectInfo = objectIntersectInfo != null ? objectIntersectInfo.objInfo : null
@@ -4211,7 +4211,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    public Unit onPause() {
+    fun onPause() {
         if (this.speechRecognizer != null) {
             this.speechRecognizer.destroy()
             this.speechRecognizer = null
@@ -4235,7 +4235,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    public Unit onResume() {
+    fun onResume() {
         super.onResume()
         if (this.gvrView != null) {
             this.gvrView.onResume()
@@ -4280,7 +4280,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     @OnClick({2131755256})
-    public Unit onSpeakButton() {
+    fun onSpeakButton() {
         if (this.userManager != null) {
             startDictation(ChatterID.getLocalChatterID(this.userManager.getUserID()))
         }
@@ -4299,7 +4299,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     @OnClick({2131755281})
-    public Unit onSpeechSendButton() {
+    fun onSpeechSendButton() {
         SLAgentCircuit activeAgentCircuit
         if (!Strings.isNullOrEmpty(this.lastSpeechRecognitionResults)) {
             if (!(this.userManager == null || (activeAgentCircuit = this.userManager.getActiveAgentCircuit()) == null || this.dictationChatterID == null)) {
@@ -4311,7 +4311,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     @OnClick({2131755264})
-    public Unit onStandUpButton() {
+    fun onStandUpButton() {
         SLAvatarControl sLAvatarControl = this.avatarControl.get()
         if (sLAvatarControl != null) {
             sLAvatarControl.Stand()
@@ -4319,7 +4319,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         this.voiceEnabled = GlobalOptions.getInstance().getVoiceEnabled()
         this.controllerManager.start()
@@ -4341,7 +4341,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     /* access modifiers changed from: protected */
-    public Unit onStop() {
+    fun onStop() {
         this.voiceActiveChatter.unsubscribe()
         this.voiceLoggedIn.unsubscribe()
         this.currentLocationInfo.unsubscribe()
@@ -4353,17 +4353,17 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     }
 
     @OnClick({2131755255})
-    public Unit onTouchButton() {
+    fun onTouchButton() {
         setControlsPage(ControlsPage.pageTouchAim)
     }
 
-    public Unit onWindowFocusChanged(Boolean z) {
+    fun onWindowFocusChanged(Boolean z) {
         super.onWindowFocusChanged(z)
         this.fullscreenMode.onWindowFocusChanged(z)
     }
 
     @OnClick({2131755274})
-    public Unit onYesButton() {
+    fun onYesButton() {
         if (!(this.activeYesNoEvent == null || this.userManager == null)) {
             this.activeYesNoEvent.onYesAction(this, this.userManager)
             this.activeYesNoEvent = null
@@ -4386,7 +4386,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         }
     }
 
-    public Unit startDictation(ChatterID chatterID) {
+    fun startDictation(ChatterID chatterID) {
         setControlsPage(ControlsPage.pageSpeech)
         this.dictationChatterID = chatterID
         this.speakNowText.setVisibility(4)

@@ -29,14 +29,14 @@ class DrawableTerrainPatch : ResourceConsumer {
         TerrainPatchGeometry.GLPrepare(renderContext)
     }
 
-    public Unit GLDraw(RenderContext renderContext) {
+    fun GLDraw(RenderContext renderContext) {
         TerrainPatchGeometry terrainPatchGeometry = this.geometry
         if (terrainPatchGeometry != null) {
             terrainPatchGeometry.GLDraw(renderContext, this.objWorldMatrix, this.texture)
         }
     }
 
-    public Unit OnResourceReady(Object obj, Boolean z) {
+    fun OnResourceReady(Object obj, Boolean z) {
         Object[] objArr = Object[1]
         objArr[0] = obj != null ? obj.toString() : "null"
         Debug.Printf("DrawableTerrainPatch: got resource = %s", objArr)

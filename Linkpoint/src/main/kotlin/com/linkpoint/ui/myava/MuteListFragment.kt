@@ -179,7 +179,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
     }
 
     /* access modifiers changed from: private */
-    public Unit doUnblock(MuteListEntry muteListEntry) {
+    fun doUnblock(MuteListEntry muteListEntry) {
         try {
             this.agentCircuit.get().getModules().muteList.Unblock(muteListEntry)
         } catch (SubscriptionData.DataNotReadyException e) {
@@ -196,7 +196,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
 
     /* access modifiers changed from: private */
     /* renamed from: onMuteList */
-    public Unit m649com_lumiyaviewer_lumiya_ui_myava_MuteListFragmentmthref0(ImmutableList<MuteListEntry> immutableList) {
+    fun m649com_lumiyaviewer_lumiya_ui_myava_MuteListFragmentmthref0(ImmutableList<MuteListEntry> immutableList) {
         if (this.adapter != null) {
             this.adapter.setData(immutableList)
         }
@@ -216,7 +216,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
     }
 
     @OnClick({2131755492})
-    public Unit onAddMuteListButtonClick() {
+    fun onAddMuteListButtonClick() {
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
         FragmentActivity activity = getActivity()
         if (activity != null && userManager != null) {
@@ -239,7 +239,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         }
     }
 
-    public Unit onCreate(Bundle bundle) {
+    fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
     }
 
@@ -254,7 +254,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
                 return true
             }
 
-            public Unit onDismiss(ListView listView, Int i) {
+            fun onDismiss(ListView listView, Int i) {
                 MuteListEntry item
                 ListAdapter adapter = listView.getAdapter()
                 if ((adapter instanceof MuteListAdapter) && (item = ((MuteListAdapter) adapter).getItem(i)) != null) {
@@ -335,7 +335,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         return inflate
     }
 
-    public Unit onDestroyView() {
+    fun onDestroyView() {
         if (this.unbinder != null) {
             this.unbinder.unbind()
             this.unbinder = null
@@ -343,7 +343,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         super.onDestroyView()
     }
 
-    public Unit onStart() {
+    fun onStart() {
         super.onStart()
         setTitle(getString(R.string.mute_list_fragment_title), (String) null)
         UserManager userManager = ActivityUtils.getUserManager(getArguments())
@@ -353,7 +353,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.myava.-$Lambda$dnt
         }
     }
 
-    public Unit onStop() {
+    fun onStop() {
         this.muteListData.unsubscribe()
         this.agentCircuit.unsubscribe()
         super.onStop()

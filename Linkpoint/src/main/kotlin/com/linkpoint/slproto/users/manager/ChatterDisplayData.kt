@@ -29,7 +29,7 @@ class ChatterDisplayData : ChatterDisplayInfo, Comparable<ChatterDisplayData> {
         this.voiceActive = z2
     }
 
-    public Unit buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
+    fun buildView(Context context, ChatterItemViewBuilder chatterItemViewBuilder, UserManager userManager) {
         chatterItemViewBuilder.setLabel(this.displayName)
         chatterItemViewBuilder.setThumbnailChatterID(this.chatterID, this.displayName)
         chatterItemViewBuilder.setOnlineStatusIcon(this.isOnline, this.isOnline)
