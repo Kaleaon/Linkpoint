@@ -8,7 +8,7 @@ class AsyncLimitsRequestHandler<K>(
     private val isCancellable: Boolean,
     private val maxRequests: Int,
     private val requestTimeout: Long
-) : AsyncRequestHandler<K>(executor, requestHandler), RequestHandlerLimits {
+) : AsyncRequestHandler<K>(executor, requestHandler), RequestHandlerLimits, RequestHandler<K> {
 
     override fun getMaxRequestsInFlight(): Int {
         return maxRequests
