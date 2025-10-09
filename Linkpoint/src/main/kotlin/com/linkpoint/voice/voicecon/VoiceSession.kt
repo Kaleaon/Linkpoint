@@ -12,207 +12,184 @@ import com.vivox.service.vx_req_session_media_disconnect_t
 import com.vivox.service.vx_req_session_set_3d_position_t
 import com.vivox.service.vx_req_session_terminate_t
 import com.vivox.service.vx_termination_status
-import java.util.HashSet
-import java.util.Iterator
-import java.util.Set
-import java.util.UUID
+import java.util.*
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class VoiceSession {
-    private Boolean disposed = false
-    private val String handle
-    private val Boolean isIncoming
-    private Boolean localMicActive = false
-    private val VivoxMessageController messageController
-    private VoiceChatInfo.VoiceChatState previousState
-    private val String sessionGroupHandle
-    private val Set<UUID> speakers
-    private VoiceChatInfo.VoiceChatState state
-    private val Object stateLock = Object()
-    private val VoiceChannelInfo voiceChannelInfo
+class VoiceSession(
+    private val messageController: VivoxMessageController,
+    sessionAddedEvent: vx_evt_session_added_t,
+    voiceChannelInfoParam: VoiceChannelInfo?
+) {
+    private var disposed: Boolean = false
+    private val handle: String
+    private val isIncoming: Boolean
+    private var localMicActive: Boolean = false
+    private var previousState: VoiceChatInfo.VoiceChatState
+    private val sessionGroupHandle: String
+    private val speakers: MutableSet<UUID>
+    private var state: VoiceChatInfo.VoiceChatState
+    private val stateLock = Any()
+    val voiceChannelInfo: VoiceChannelInfo
 
-    /*
-     * Enabled aggressive block sorting
-     */
-    public VoiceSession(VivoxMessageController vivoxMessageController, vx_evt_session_added_t vx_evt_session_added_t2, VoiceChannelInfo voiceChannelInfo) {
+    init {
         this.previousState = VoiceChatInfo.VoiceChatState.Connecting
         this.state = VoiceChatInfo.VoiceChatState.Connecting
-        this.speakers = HashSet<UUID>()
-        this.messageController = vivoxMessageController
-        this.handle = vx_evt_session_added_t2.getSession_handle()
-        this.sessionGroupHandle = vx_evt_session_added_t2.getSessiongroup_handle()
-        if (voiceChannelInfo == null) {
-            voiceChannelInfo = VoiceChannelInfo(vx_evt_session_added_t2.getUri(), false, false)
-        }
-        this.voiceChannelInfo = voiceChannelInfo
-        Boolean bl = vx_evt_session_added_t2.getIncoming() != 0
-        this.isIncoming = bl
+        this.speakers = HashSet()
+        this.handle = sessionAddedEvent.session_handle
+        this.sessionGroupHandle = sessionAddedEvent.sessiongroup_handle
+        this.voiceChannelInfo = voiceChannelInfoParam 
+            ?: VoiceChannelInfo(sessionAddedEvent.uri, false, false)
+        this.isIncoming = sessionAddedEvent.incoming != 0
         Debug.Printf("Voice: created session: %s (uri %s)", this.handle, this.voiceChannelInfo.voiceChannelURI)
     }
 
     fun dispose() {
-        if (!this.disposed) {
-            this.disposed = true
-            vx_req_session_terminate_t vx_req_session_terminate_t2 = vx_req_session_terminate_t()
-            vx_req_session_terminate_t2.setSession_handle(this.handle)
-            this.messageController.sendRequestAndWait(vx_req_session_terminate_t2.getBase())
+        if (!disposed) {
+            disposed = true
+            val terminateRequest = vx_req_session_terminate_t()
+            terminateRequest.session_handle = handle
+            messageController.sendRequestAndWait(terminateRequest.base)
         }
     }
 
-    public String getHandle() {
-        return this.handle
-    }
+    fun getHandle(): String = handle
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
-    public VoiceChatInfo.VoiceChatState getState() {
-        Object object = this.stateLock
-        synchronized (object) {
-            return this.state
+    fun getState(): VoiceChatInfo.VoiceChatState {
+        synchronized(stateLock) {
+            return state
         }
     }
 
-    public VoiceChannelInfo getVoiceChannelInfo() {
-        return this.voiceChannelInfo
-    }
+    fun getVoiceChannelInfo(): VoiceChannelInfo = voiceChannelInfo
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
-    public VoiceChatInfo getVoiceChatInfo() {
-        Object object
-        Object object2 = this.stateLock
-        synchronized (object2) {
-            Debug.Printf("Voice: got session state: %s (%s)", Object[]{this.state, this})
-            if (this.state == VoiceChatInfo.VoiceChatState.None && this.previousState == VoiceChatInfo.VoiceChatState.None) {
-                object = VoiceChatInfo.empty()
-                Debug.Printf("Voice: returning empty session state", Object[0])
+    fun getVoiceChatInfo(): VoiceChatInfo {
+        val result: VoiceChatInfo
+        synchronized(stateLock) {
+            Debug.Printf("Voice: got session state: %s (%s)", state, this)
+            result = if (state == VoiceChatInfo.VoiceChatState.None && 
+                        previousState == VoiceChatInfo.VoiceChatState.None) {
+                Debug.Printf("Voice: returning empty session state", emptyArray<Any>())
+                VoiceChatInfo.empty()
             } else {
-                VoiceChatInfo voiceChatInfo = null
-                object = voiceChatInfo
-                if (!this.speakers.isEmpty()) {
-                    Iterator<UUID> iterator = this.speakers.iterator()
-                    object = voiceChatInfo
-                    if (iterator.hasNext()) {
-                        object = iterator.next()
-                    }
-                }
-                object = VoiceChatInfo.create(this.state, this.previousState, this.speakers.size(), (UUID)object, this.voiceChannelInfo.isConference, this.localMicActive)
+                val firstSpeaker: UUID? = speakers.firstOrNull()
+                VoiceChatInfo.create(
+                    state, 
+                    previousState, 
+                    speakers.size, 
+                    firstSpeaker, 
+                    voiceChannelInfo.isConference, 
+                    localMicActive
+                )
             }
-            this.previousState = this.state
+            previousState = state
         }
-        Debug.Printf("Voice: returning session state: %s", Object[]{((VoiceChatInfo)object).state})
-        return object
+        Debug.Printf("Voice: returning session state: %s", result.state)
+        return result
     }
 
-    public Boolean isIncoming() {
-        return this.isIncoming
-    }
+    fun isIncoming(): Boolean = isIncoming
 
     fun mediaConnect() {
-        vx_req_session_media_connect_t vx_req_session_media_connect_t2 = vx_req_session_media_connect_t()
-        vx_req_session_media_connect_t2.setSession_handle(this.handle)
-        vx_req_session_media_connect_t2.setSessiongroup_handle(this.sessionGroupHandle)
-        vx_req_session_media_connect_t2.setSession_font_id(0)
-        this.messageController.sendRequest(vx_req_session_media_connect_t2.getBase())
+        val connectRequest = vx_req_session_media_connect_t()
+        connectRequest.session_handle = handle
+        connectRequest.sessiongroup_handle = sessionGroupHandle
+        connectRequest.session_font_id = 0
+        messageController.sendRequest(connectRequest.base)
     }
 
-    fun mediaDisconnect(vx_termination_status vx_termination_status2) {
-        vx_req_session_media_disconnect_t vx_req_session_media_disconnect_t2 = vx_req_session_media_disconnect_t()
-        vx_req_session_media_disconnect_t2.setSession_handle(this.handle)
-        vx_req_session_media_disconnect_t2.setSessiongroup_handle(this.sessionGroupHandle)
-        vx_req_session_media_disconnect_t2.setTermination_status(vx_termination_status2)
-        this.messageController.sendRequest(vx_req_session_media_disconnect_t2.getBase())
+    fun mediaDisconnect(terminationStatus: vx_termination_status) {
+        val disconnectRequest = vx_req_session_media_disconnect_t()
+        disconnectRequest.session_handle = handle
+        disconnectRequest.sessiongroup_handle = sessionGroupHandle
+        disconnectRequest.termination_status = terminationStatus
+        messageController.sendRequest(disconnectRequest.base)
     }
 
-    fun set3DPosition(Voice3DPosition voice3DPosition, Voice3DPosition voice3DPosition2) {
-        Debug.Printf("Voice: set3D: speaker %s", voice3DPosition.toString())
-        Debug.Printf("Voice: set3D: listener %s", voice3DPosition2.toString())
-        vx_req_session_set_3d_position_t vx_req_session_set_3d_position_t2 = vx_req_session_set_3d_position_t()
-        vx_req_session_set_3d_position_t2.setSession_handle(this.handle)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_position_item(vx_req_session_set_3d_position_t2, 0, voice3DPosition.position.x)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_position_item(vx_req_session_set_3d_position_t2, 1, voice3DPosition.position.y)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_position_item(vx_req_session_set_3d_position_t2, 2, voice3DPosition.position.z)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_velocity_item(vx_req_session_set_3d_position_t2, 0, voice3DPosition.velocity.x)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_velocity_item(vx_req_session_set_3d_position_t2, 1, voice3DPosition.velocity.y)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_velocity_item(vx_req_session_set_3d_position_t2, 2, voice3DPosition.velocity.z)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_at_orientation_item(vx_req_session_set_3d_position_t2, 0, voice3DPosition.atOrientation.x)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_at_orientation_item(vx_req_session_set_3d_position_t2, 1, voice3DPosition.atOrientation.y)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_at_orientation_item(vx_req_session_set_3d_position_t2, 2, voice3DPosition.atOrientation.z)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_up_orientation_item(vx_req_session_set_3d_position_t2, 0, voice3DPosition.upOrientation.x)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_up_orientation_item(vx_req_session_set_3d_position_t2, 1, voice3DPosition.upOrientation.y)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_up_orientation_item(vx_req_session_set_3d_position_t2, 2, voice3DPosition.upOrientation.z)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_left_orientation_item(vx_req_session_set_3d_position_t2, 0, voice3DPosition.leftOrientation.x)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_left_orientation_item(vx_req_session_set_3d_position_t2, 1, voice3DPosition.leftOrientation.y)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_left_orientation_item(vx_req_session_set_3d_position_t2, 2, voice3DPosition.leftOrientation.z)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_position_item(vx_req_session_set_3d_position_t2, 0, voice3DPosition2.position.x)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_position_item(vx_req_session_set_3d_position_t2, 1, voice3DPosition2.position.y)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_position_item(vx_req_session_set_3d_position_t2, 2, voice3DPosition2.position.z)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_velocity_item(vx_req_session_set_3d_position_t2, 0, voice3DPosition2.velocity.x)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_velocity_item(vx_req_session_set_3d_position_t2, 1, voice3DPosition2.velocity.y)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_velocity_item(vx_req_session_set_3d_position_t2, 2, voice3DPosition2.velocity.z)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_at_orientation_item(vx_req_session_set_3d_position_t2, 0, voice3DPosition2.atOrientation.x)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_at_orientation_item(vx_req_session_set_3d_position_t2, 1, voice3DPosition2.atOrientation.y)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_at_orientation_item(vx_req_session_set_3d_position_t2, 2, voice3DPosition2.atOrientation.z)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_up_orientation_item(vx_req_session_set_3d_position_t2, 0, voice3DPosition2.upOrientation.x)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_up_orientation_item(vx_req_session_set_3d_position_t2, 1, voice3DPosition2.upOrientation.y)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_up_orientation_item(vx_req_session_set_3d_position_t2, 2, voice3DPosition2.upOrientation.z)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_left_orientation_item(vx_req_session_set_3d_position_t2, 0, voice3DPosition2.leftOrientation.x)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_left_orientation_item(vx_req_session_set_3d_position_t2, 1, voice3DPosition2.leftOrientation.y)
-        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_left_orientation_item(vx_req_session_set_3d_position_t2, 2, voice3DPosition2.leftOrientation.z)
-        this.messageController.sendRequest(vx_req_session_set_3d_position_t2.getBase())
+    fun set3DPosition(speakerPosition: Voice3DPosition, listenerPosition: Voice3DPosition) {
+        Debug.Printf("Voice: set3D: speaker %s", speakerPosition.toString())
+        Debug.Printf("Voice: set3D: listener %s", listenerPosition.toString())
+        
+        val positionRequest = vx_req_session_set_3d_position_t()
+        positionRequest.session_handle = handle
+        
+        // Set speaker position
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_position_item(positionRequest, 0, speakerPosition.position.x)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_position_item(positionRequest, 1, speakerPosition.position.y)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_position_item(positionRequest, 2, speakerPosition.position.z)
+        
+        // Set speaker velocity
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_velocity_item(positionRequest, 0, speakerPosition.velocity.x)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_velocity_item(positionRequest, 1, speakerPosition.velocity.y)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_velocity_item(positionRequest, 2, speakerPosition.velocity.z)
+        
+        // Set speaker orientations
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_at_orientation_item(positionRequest, 0, speakerPosition.atOrientation.x)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_at_orientation_item(positionRequest, 1, speakerPosition.atOrientation.y)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_at_orientation_item(positionRequest, 2, speakerPosition.atOrientation.z)
+        
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_up_orientation_item(positionRequest, 0, speakerPosition.upOrientation.x)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_up_orientation_item(positionRequest, 1, speakerPosition.upOrientation.y)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_up_orientation_item(positionRequest, 2, speakerPosition.upOrientation.z)
+        
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_left_orientation_item(positionRequest, 0, speakerPosition.leftOrientation.x)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_left_orientation_item(positionRequest, 1, speakerPosition.leftOrientation.y)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_speaker_left_orientation_item(positionRequest, 2, speakerPosition.leftOrientation.z)
+        
+        // Set listener position
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_position_item(positionRequest, 0, listenerPosition.position.x)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_position_item(positionRequest, 1, listenerPosition.position.y)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_position_item(positionRequest, 2, listenerPosition.position.z)
+        
+        // Set listener velocity
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_velocity_item(positionRequest, 0, listenerPosition.velocity.x)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_velocity_item(positionRequest, 1, listenerPosition.velocity.y)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_velocity_item(positionRequest, 2, listenerPosition.velocity.z)
+        
+        // Set listener orientations
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_at_orientation_item(positionRequest, 0, listenerPosition.atOrientation.x)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_at_orientation_item(positionRequest, 1, listenerPosition.atOrientation.y)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_at_orientation_item(positionRequest, 2, listenerPosition.atOrientation.z)
+        
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_up_orientation_item(positionRequest, 0, listenerPosition.upOrientation.x)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_up_orientation_item(positionRequest, 1, listenerPosition.upOrientation.y)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_up_orientation_item(positionRequest, 2, listenerPosition.upOrientation.z)
+        
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_left_orientation_item(positionRequest, 0, listenerPosition.leftOrientation.x)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_left_orientation_item(positionRequest, 1, listenerPosition.leftOrientation.y)
+        VxClientProxy.vx_req_session_set_3d_position_t_set_listener_left_orientation_item(positionRequest, 2, listenerPosition.leftOrientation.z)
+        
+        messageController.sendRequest(positionRequest.base)
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
-    public Boolean setLocalMicActive(Boolean bl) {
-        Object object = this.stateLock
-        synchronized (object) {
-            Boolean bl2 = bl != this.localMicActive
-            this.localMicActive = bl
-            return bl2
+    fun setLocalMicActive(active: Boolean): Boolean {
+        synchronized(stateLock) {
+            val changed = active != localMicActive
+            localMicActive = active
+            return changed
         }
     }
 
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
-    public Boolean setSpeakerSpeaking(UUID uUID, Boolean bl) {
-        Object object = this.stateLock
-        synchronized (object) {
-            if (!bl) return this.speakers.remove(uUID)
-            return this.speakers.add(uUID)
-        }
-    }
-
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
-    public Boolean setState(VoiceChatInfo.VoiceChatState voiceChatState) {
-        Boolean bl = false
-        Object object = this.stateLock
-        synchronized (object) {
-            if (this.state != voiceChatState) {
-                this.previousState = this.state
-                this.state = voiceChatState
-                bl = true
-                Debug.Printf("Voice: session state: %s (%s)", Object[]{this.state, this})
+    fun setSpeakerSpeaking(speakerId: UUID, isSpeaking: Boolean): Boolean {
+        synchronized(stateLock) {
+            return if (isSpeaking) {
+                speakers.add(speakerId)
+            } else {
+                speakers.remove(speakerId)
             }
-            return bl
         }
+    }
+
+    fun setState(newState: VoiceChatInfo.VoiceChatState): Boolean {
+        synchronized(stateLock) {
+            val changed = state != newState
+            previousState = state
+            state = newState
+            return changed
+        }
+    }
+
+    companion object {
+        private const val TAG = "VoiceSession"
     }
 }
-
