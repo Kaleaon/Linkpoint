@@ -3,7 +3,7 @@ import java.util.*
 
 import com.linkpoint.render.RenderContext
 import com.linkpoint.render.glres.buffers.GLLoadableBuffer
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 
 class SLAnimatedMeshData : SLMeshData() {
     private const val BUF_INDEX: Int = 1

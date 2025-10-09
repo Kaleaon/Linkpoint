@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.eventbus
+package com.linkpoint.eventbus
 
 /**
  * Rate limiter for event publishing to prevent excessive event firing.

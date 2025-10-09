@@ -10,7 +10,7 @@ import com.linkpoint.render.glres.textures.GLLoadedTexture
 import com.linkpoint.slproto.terrain.TerrainPatchHeightMap
 import com.linkpoint.slproto.types.LLVector3
 import com.linkpoint.utils.IdentityMatrix
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 
 class TerrainPatchGeometry {
 const val D: IntrawPatchSize = 16

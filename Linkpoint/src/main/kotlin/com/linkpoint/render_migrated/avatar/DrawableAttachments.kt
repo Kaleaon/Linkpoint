@@ -11,7 +11,7 @@ import com.linkpoint.render.DrawableObject
 import com.linkpoint.render.RenderContext
 import com.linkpoint.render.glres.buffers.GLLoadableBuffer
 import com.linkpoint.slproto.avatar.SLSkeletonBoneID
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 import javax.annotation.concurrent.Immutable

@@ -7,9 +7,9 @@
  * Android adaptation for Linkpoint
  */
 
-package com.lumiyaviewer.lumiya.slproto.llsd.kotlin
+package com.linkpoint.slproto.llsd.kotlin
 
-import com.lumiyaviewer.lumiya.slproto.llsd.types.*
+import com.linkpoint.slproto.llsd.types.*
 import java.net.URI
 import java.util.*
 

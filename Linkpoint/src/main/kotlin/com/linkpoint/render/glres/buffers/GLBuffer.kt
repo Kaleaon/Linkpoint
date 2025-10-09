@@ -5,7 +5,7 @@ import com.linkpoint.Debug
 import com.linkpoint.render.TextureMemoryTracker
 import com.linkpoint.render.glres.GLResource
 import com.linkpoint.render.glres.GLResourceManager
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 
 class GLBuffer : GLResource() {
     /* access modifiers changed from: private */

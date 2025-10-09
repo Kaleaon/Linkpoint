@@ -4,7 +4,7 @@ import com.google.common.primitives.UnsignedBytes
 import com.linkpoint.Debug
 import com.linkpoint.openjpeg.OpenJPEG
 import com.linkpoint.render.GLTexture
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 import java.io.DataInputStream
 import java.io.IOException
 import java.nio.ByteBuffer

@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.eventbus
+package com.linkpoint.eventbus
 
 /**
  * Annotation to mark methods as event handlers in the EventBus system.

@@ -7,7 +7,7 @@ import android.opengl.GLES20
 import android.opengl.GLES30
 import com.linkpoint.render.RenderContext
 import com.linkpoint.render.glres.GLCleanable
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 import javax.annotation.Nonnull
 
 class GLLoadableBuffer : GLCleanable {

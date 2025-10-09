@@ -4,10 +4,10 @@
  * Demonstrates Android-compatible Kotlin LLSD DSL usage
  */
 
-package com.lumiyaviewer.lumiya.slproto.llsd.kotlin
+package com.linkpoint.slproto.llsd.kotlin
 
 import android.util.Log
-import com.lumiyaviewer.lumiya.slproto.llsd.integration.LLSDIntegrationBridge
+import com.linkpoint.slproto.llsd.integration.LLSDIntegrationBridge
 import java.util.*
 
 /**

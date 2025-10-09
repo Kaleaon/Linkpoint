@@ -7,29 +7,23 @@ import com.linkpoint.voice.common.model.VoiceChatInfo
 import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
-class VoiceChannelStatus : VoicePluginMessage {
-    val VoiceChannelInfo channelInfo
-    val VoiceChatInfo chatInfo
-    val String errorMessage
+class VoiceChannelStatus(
+    val channelInfo: VoiceChannelInfo,
+    val chatInfo: VoiceChatInfo,
+    val errorMessage: String?
+) : VoicePluginMessage {
+    
+    constructor(bundle: Bundle) : this(
+        VoiceChannelInfo(bundle.getBundle("channelInfo")!!),
+        VoiceChatInfo.create(bundle.getBundle("chatInfo")!!),
+        bundle.getString("errorMessage")
+    )
 
-    public VoiceChannelStatus(Bundle bundle) {
-        this.channelInfo = VoiceChannelInfo(bundle.getBundle("channelInfo"))
-        this.chatInfo = VoiceChatInfo.create(bundle.getBundle("chatInfo"))
-        this.errorMessage = bundle.getString("errorMessage")
-    }
-
-    public VoiceChannelStatus(VoiceChannelInfo voiceChannelInfo, VoiceChatInfo voiceChatInfo, String string2) {
-        this.channelInfo = voiceChannelInfo
-        this.chatInfo = voiceChatInfo
-        this.errorMessage = string2
-    }
-
-    override Bundle toBundle() {
-        Bundle bundle = Bundle()
-        bundle.putBundle("channelInfo", this.channelInfo.toBundle())
-        bundle.putBundle("chatInfo", this.chatInfo.toBundle())
-        bundle.putString("errorMessage", this.errorMessage)
+    override fun toBundle(): Bundle {
+        val bundle = Bundle()
+        bundle.putBundle("channelInfo", channelInfo.toBundle())
+        bundle.putBundle("chatInfo", chatInfo.toBundle())
+        bundle.putString("errorMessage", errorMessage)
         return bundle
     }
 }
-

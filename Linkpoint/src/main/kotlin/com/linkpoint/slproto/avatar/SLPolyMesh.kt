@@ -6,7 +6,7 @@ import com.linkpoint.openjpeg.OpenJPEG
 import com.linkpoint.render.GLTexture
 import com.linkpoint.slproto.types.LLQuaternion
 import com.linkpoint.slproto.types.LLVector3
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 import java.io.DataInputStream
 import java.io.IOException
 import java.nio.FloatBuffer

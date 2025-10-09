@@ -12,7 +12,7 @@ import com.linkpoint.slproto.avatar.SLAttachmentPoint
 import com.linkpoint.slproto.avatar.SLSkeletonBoneID
 import com.linkpoint.slproto.llsd.LLSDException
 import com.linkpoint.slproto.llsd.LLSDNode
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 import java.io.DataInputStream
 import java.io.File
 import java.io.FileInputStream

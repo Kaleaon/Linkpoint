@@ -2,7 +2,7 @@ package com.linkpoint.slproto.avatar
 
 import com.linkpoint.slproto.types.LLQuaternion
 import com.linkpoint.slproto.types.LLVector3
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 
 class SLMeshData {
     protected DirectByteBuffer indexBuffer
