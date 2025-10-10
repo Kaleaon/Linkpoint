@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     // Kotlin support enabled for advanced LLSD features (@Kaleaon's implementation)
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-parcelize'
 }
 
 android {
@@ -90,109 +91,9 @@ android {
         main {
             manifest.srcFile 'src/main/AndroidManifest.xml'
             java.srcDirs = ['src/main/java']
-            kotlin.srcDirs = ['src/main/java']  // Kotlin files in same directory structure
+            kotlin.srcDirs = ['src/main/kotlin']
             res.srcDirs = ['src/main/res']
             assets.srcDirs = ['src/main/assets']
-
-            // Exclude problematic decompiled files and complex dependencies
-            java.excludes = [
-                '**/$Lambda$*.java',                 // Lambda artifacts from decompilation
-                '**/*$Lambda$*.java',                // More lambda artifacts
-
-                '**/Debug.java',                     // Debug classes might have issues
-                '**/base64/**/*.java',               // Base64 encoding - decompiled issues
-                '**/utils/**/*.java',                // Utils classes - decompiled issues
-                '**/cloud/**/*.java',                // Cloud features
-                '**/dao/**/*.java',                  // Database access objects
-                '**/eventbus/**/*.java',             // Event bus
-                '**/fixes/**/*.java',                // Fixes
-                '**/licensing/**/*.java',            // Licensing
-                '**/media/**/*.java',                // Media
-                '**/memory/**/*.java',               // Memory management
-                '**/modern/**/*.java',               // Modern components
-                '**/openjpeg/**/*.java',             // OpenJPEG
-                '**/orm/**/*.java',                  // Object-relational mapping
-                '**/react/**/*.java',                // React components
-                '**/render/**/*.java',               // Rendering
-                '**/res/**/*.java',                  // Resource management
-                '**/slproto/**/*.java',              // SL protocol - too complex for now
-                '!**/slproto/llsd/integration/**/*.java', // EXCEPT our LLSD integration
-                '!**/slproto/llsd/LLSDException.java', // EXCEPT basic LLSD exceptions
-                '!**/slproto/llsd/LLSDXMLException.java',
-                '!**/slproto/llsd/LLSDValueTypeException.java',
-                '!**/slproto/llsd/LLSDInvalidKeyException.java',
-                '!**/slproto/llsd/types/LLSDString.java', // EXCEPT basic LLSD types
-                '!**/slproto/llsd/types/LLSDInt.java',
-                '!**/slproto/llsd/types/LLSDDouble.java',
-                '!**/slproto/llsd/types/LLSDBoolean.java',
-                '!**/slproto/llsd/types/LLSDUUID.java',
-                '!**/slproto/llsd/types/LLSDURI.java',
-                '!**/slproto/llsd/types/LLSDDate.java',
-                '!**/slproto/llsd/types/LLSDArray.java',
-                '!**/slproto/llsd/types/LLSDMap.java',
-                '!**/slproto/llsd/types/LLSDUndefined.java',
-                '**/sync/**/*.java',                 // Sync
-
-                '**/ui/accounts/**/*.java',          // UI accounts
-                '**/ui/avapicker/**/*.java',         // Avatar picker
-                '**/ui/chat/**/*.java',              // Chat UI
-                '**/ui/common/**/*.java',            // Common UI
-                '**/ui/grids/**/*.java',             // Grids UI
-                '**/ui/inventory/**/*.java',         // Inventory UI
-                '**/ui/main/**/*.java',              // Main UI (except modern)
-                '**/ui/media/**/*.java',             // Media UI
-                '**/ui/minimap/**/*.java',           // Minimap
-                '**/ui/myava/**/*.java',             // My avatar UI
-                '**/ui/notify/**/*.java',            // Notifications UI
-                '**/ui/objects/**/*.java',           // Objects UI
-                '**/ui/objpopup/**/*.java',          // Object popup UI
-                '**/ui/outfits/**/*.java',           // Outfits UI
-                '**/ui/render/**/*.java',            // Render UI
-                '**/ui/search/**/*.java',            // Search UI
-                '**/ui/settings/**/*.java',          // Settings UI
-                '**/ui/voice/**/*.java',             // Voice UI
-                '**/voice/**/*.java',                // Voice
-                '**/voiceintf/**/*.java',            // Voice interface
-                '**/modern/protocol/**/*.java',      // Modern protocol with syntax errors
-                '**/modern/chat/**/*.java',          // Modern chat with syntax errors
-                '**/modern/demos/**/*.java',         // Modern demos with syntax errors
-                '**/modern/connection/**/*.java',    // Modern connection with issues
-                '**/modern/samples/ModernLinkpointDemo.java', // Demo with WebSocket dependencies
-                '**/modern/features/**/*.java',      // Modern features with protocol dependencies
-                '**/ui/modern/**/*.java',            // Modern UI with issues
-                '**/GlobalOptions.java',            // Global options with many dependencies
-                '**/slproto/types/CameraParams.java', // Camera params with render dependencies
-                '**/dao/**/*.java'                   // DAO classes with GreenDao dependencies
-            ]
-            
-            // Include only essential modern auth components and core classes for tests
-            java.includes = [
-
-                '**/modern/auth/**/*.java',          // Working auth components (needed for tests)
-                '**/modern/avatar/**/*.java',        // Working avatar components (needed for tests)
-                '**/modern/graphics/**/*.java',      // Working graphics (needed for tests)
-                '**/modern/llsd/**/*.java',          // LLSD codec
-                '**/modern/samples/ProtocolCompatibilityDemo.java', // Working demo
-                '**/modern/utils/**/*.java',         // Modern utilities
-                '**/modern/voice/**/*.java',         // Voice components (needed for tests)
-                '**/llsd/**/*.java',                 // LLSD protocol
-                '**/base64/**/*.java',               // Base64 encoding
-                '**/Debug.java',                     // Debug utilities
-                '**/utils/UUIDPool.java',            // UUID utilities
-                '**/utils/StringUtils.java',         // String utilities
-                '**/utils/HashUtils.java',           // Hash utilities
-                '**/utils/HasPriority.java',         // Priority interface
-                '**/utils/Identifiable.java',       // Identifiable interface
-                '**/eventbus/**/*.java',             // Event bus
-                '**/slproto/types/LLVector*.java',   // Vector types only
-                '**/slproto/types/LLQuaternion.java', // Quaternion type
-                '**/slproto/types/ImmutableVector.java', // Vector stub
-                '**/slproto/llsd/**/*.java',         // LLSD types
-                '**/slproto/https/**/*.java',        // HTTPS requests
-                '**/slproto/SLMessage.java',         // SLMessage stub
-                '**/com/google/common/logging/nano/Vr.java' // Vr stub
-
-            ]
         }
     }
 
