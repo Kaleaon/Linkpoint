@@ -104,7 +104,7 @@ class SLCircuit(
         
         // Add pending ACKs to this packet if available
         val acksToSend = synchronized(ackQueue) {
-            val acks = ackQueue.take(255.coalesce { it <= 255 })
+            val acks = ackQueue.take(255.coerceAtMost(ackQueue.size))
             ackQueue.removeAll(acks)
             acks
         }

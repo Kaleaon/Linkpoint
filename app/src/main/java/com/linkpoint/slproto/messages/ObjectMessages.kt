@@ -4,6 +4,7 @@ import com.linkpoint.slproto.SLMessage
 import com.linkpoint.slproto.types.LLVector3
 import com.linkpoint.slproto.types.LLQuaternion
 import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 /**

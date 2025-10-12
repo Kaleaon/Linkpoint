@@ -1,6 +1,6 @@
 package com.linkpoint.slproto.auth
 
-import com.linkpoint.utils.HashUtils
+import com.lumiyaviewer.lumiya.utils.HashUtils
 import java.io.IOException
 import java.util.LinkedList
 

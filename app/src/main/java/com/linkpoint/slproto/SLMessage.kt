@@ -94,7 +94,7 @@ abstract class SLMessage : Parcelable {
             
             // Extract ACKs if present
             if ((flags and LL_ACK_FLAG) != 0.toByte()) {
-                val ackCount = buffer.get(buffer.limit() - 1)
+                val ackCount = buffer.get(buffer.limit() - 1).toInt() and 0xFF
                 var ackPos = buffer.limit() - 1 - (ackCount * 4)
                 
                 for (i in 0 until ackCount) {
@@ -111,9 +111,9 @@ abstract class SLMessage : Parcelable {
                 decodedBuffer.order(ByteOrder.BIG_ENDIAN)
                 zeroDecode(decodedBuffer, buffer)
                 decodedBuffer.flip()
-                decodedBuffer
+                decodedBuffer as ByteBuffer
             } else {
-                buffer
+                buffer as ByteBuffer
             }
             
             // Create message instance
