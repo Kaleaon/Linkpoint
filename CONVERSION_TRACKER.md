@@ -9,7 +9,22 @@ Convert all 1,895 Java files to modern Kotlin with proper null safety, coroutine
 - **Converted Previously**: 104
 - **Remaining**: 1,789
 - **Target for this session**: 500 files minimum
-- **Current Session Progress**: 86/500
+- **Current Session Progress**: 102/500
+
+### Batch 29: SLProto, Render, and UI Fragments - 16 files
+- [x] slproto/SLCircuitInfo.java → SLCircuitInfo.kt
+- [x] slproto/SLDefaultMessage.java → SLDefaultMessage.kt
+- [x] slproto/avatar/BakedTextureIndex.java → BakedTextureIndex.kt
+- [x] slproto/objects/HoverText.java → HoverText.kt
+- [x] slproto/objects/SLPrimObjectDisplayInfo.java → SLPrimObjectDisplayInfo.kt
+- [x] slproto/inventory/SLTaskInventory.java → SLTaskInventory.kt
+- [x] render/spatial/SpatialBox.java → SpatialBox.kt
+- [x] render/tex/TextureClass.java → TextureClass.kt
+- [x] ui/chat/contacts/FriendListFragment.java → FriendListFragment.kt
+- [x] ui/chat/contacts/GroupListFragment.java → GroupListFragment.kt
+- [x] ui/chat/contacts/NearbyUsersFragment.java → NearbyUsersFragment.kt
+- [x] ui/chat/contacts/ActiveChattersFragment.java → ActiveChattersFragment.kt
+- [x] ui/common/ConnectionFragment.java → ConnectionFragment.kt
 
 ### Batch 28: DAO Entity Classes - 15 files
 - [x] dao/CachedAsset.java → CachedAsset.kt
