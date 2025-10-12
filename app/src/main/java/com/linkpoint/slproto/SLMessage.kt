@@ -83,7 +83,7 @@ abstract class SLMessage : Parcelable {
             val originalLimit = buffer.limit()
             
             // Read header
-            val flags = buffer.get()
+            val flags = buffer.get().toInt() and 0xFF
             val sequenceNum = buffer.getInt()
             val extraHeaderBytes = buffer.get()
             
@@ -93,8 +93,9 @@ abstract class SLMessage : Parcelable {
             }
             
             // Extract ACKs if present
-            if ((flags and LL_ACK_FLAG) != 0.toByte()) {
-                val ackCount = buffer.get(buffer.limit() - 1).toInt() and 0xFF
+            if ((flags and LL_ACK_FLAG.toInt()) != 0) {
+                val ackByte = buffer.get(buffer.limit() - 1)
+                val ackCount = ackByte.toInt() and 0xFF
                 var ackPos = buffer.limit() - 1 - (ackCount * 4)
                 
                 for (i in 0 until ackCount) {
@@ -106,7 +107,7 @@ abstract class SLMessage : Parcelable {
             }
             
             // Decode zero-coded message if needed
-            val payloadBuffer = if ((flags and LL_ZERO_CODE_FLAG) != 0.toByte()) {
+            val payloadBuffer = if ((flags and LL_ZERO_CODE_FLAG.toInt()) != 0) {
                 decodedBuffer.clear()
                 decodedBuffer.order(ByteOrder.BIG_ENDIAN)
                 zeroDecode(decodedBuffer, buffer)
@@ -122,9 +123,9 @@ abstract class SLMessage : Parcelable {
             
             // Set message properties
             message.seqNum = sequenceNum
-            message.isReliable = (flags and LL_RELIABLE_FLAG) != 0.toByte()
-            message.isResent = (flags and LL_RESENT_FLAG) != 0.toByte()
-            message.zeroCoded = (flags and LL_ZERO_CODE_FLAG) != 0.toByte()
+            message.isReliable = (flags and LL_RELIABLE_FLAG.toInt()) != 0
+            message.isResent = (flags and LL_RESENT_FLAG.toInt()) != 0
+            message.zeroCoded = (flags and LL_ZERO_CODE_FLAG.toInt()) != 0
             
             // Unpack payload
             try {
