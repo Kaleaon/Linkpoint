@@ -9,7 +9,40 @@ Convert all 1,895 Java files to modern Kotlin with proper null safety, coroutine
 - **Converted Previously**: 104
 - **Remaining**: 1,789
 - **Target for this session**: 500 files minimum
-- **Current Session Progress**: 53/500
+- **Current Session Progress**: 86/500
+
+### Batch 28: DAO Entity Classes - 15 files
+- [x] dao/CachedAsset.java → CachedAsset.kt
+- [x] dao/CachedResponse.java → CachedResponse.kt
+- [x] dao/Chatter.java → Chatter.kt
+- [x] dao/Friend.java → Friend.kt
+- [x] dao/GroupMember.java → GroupMember.kt
+- [x] dao/GroupMemberList.java → GroupMemberList.kt
+- [x] dao/GroupRoleMember.java → GroupRoleMember.kt
+- [x] dao/GroupRoleMemberList.java → GroupRoleMemberList.kt
+- [x] dao/MoneyTransaction.java → MoneyTransaction.kt
+- [x] dao/MuteListCachedData.java → MuteListCachedData.kt
+- [x] dao/SearchGridResult.java → SearchGridResult.kt
+- [x] dao/User.java → User.kt
+- [x] dao/UserName.java → UserName.kt
+- [x] dao/UserPic.java → UserPic.kt
+
+### Batch 27: Shader Programs and Utilities - 13 files
+- [x] render/shaders/StarsProgram.java → StarsProgram.kt
+- [x] render/spatial/DrawEntryList.java → DrawEntryList.kt
+- [x] res/executors/LoaderExecutor.java → LoaderExecutor.kt
+- [x] ui/login/WhatsNewActivity.java → WhatsNewActivity.kt
+- [x] render/shaders/AvatarProgram.java → AvatarProgram.kt
+- [x] render/shaders/FXAAProgram.java → FXAAProgram.kt
+- [x] slproto/modules/mutelist/MuteListEntry.java → MuteListEntry.kt
+- [x] slproto/types/EDeRezDestination.java → EDeRezDestination.kt
+- [x] slproto/users/events/EventUserInfoChanged.java → EventUserInfoChanged.kt
+- [x] ui/common/ChatterReloadableFragment.java → ChatterReloadableFragment.kt
+- [x] res/executors/ResourceCleanupExecutor.java → ResourceCleanupExecutor.kt
+- [x] slproto/objects/SLObjectDisplayInfo.java → SLObjectDisplayInfo.kt
+- [x] slproto/prims/PrimParamsPool.java → PrimParamsPool.kt
+- [x] ui/notify/NotificationChannelManager.java → NotificationChannelManager.kt
+- [x] voice/common/VoicePluginMessageType.java → VoicePluginMessageType.kt
 
 ### Batch 26: Additional Medium Files - 5 files
 - [x] render/shaders/RiggedMeshProgram.java → RiggedMeshProgram.kt
@@ -80,18 +113,20 @@ Convert all 1,895 Java files to modern Kotlin with proper null safety, coroutine
 
 ## Session 2: Starting New Batch Conversions
 
-### Batch 21: Cloud Package - 5 files
+### Batch 21: Cloud Package - 12 files
 - [x] cloud/AgentSyncConnections.java → AgentSyncConnections.kt
 - [ ] cloud/ConnectionResolutionActivity.java → ConnectionResolutionActivity.kt
 - [x] cloud/Debug.java → Debug.kt
-- [ ] cloud/DriveChatLogFolder.java → DriveChatLogFolder.kt
-- [ ] cloud/DriveConnectibleFile.java → DriveConnectibleFile.kt
-- [ ] cloud/DriveConnectibleFolder.java → DriveConnectibleFolder.kt
+- [x] cloud/DriveChatLogFolder.java → DriveChatLogFolder.kt
+- [x] cloud/DriveConnectibleFile.java → DriveConnectibleFile.kt
+- [x] cloud/DriveConnectibleFolder.java → DriveConnectibleFolder.kt
 - [ ] cloud/DriveConnectibleResource.java → DriveConnectibleResource.kt
 - [x] cloud/DriveLogEntry.java → DriveLogEntry.kt
 - [ ] cloud/DriveSyncService.java → DriveSyncService.kt
 - [ ] cloud/DriveSynchronizer.java → DriveSynchronizer.kt
 - [x] cloud/DriveTextFile.java → DriveTextFile.kt
+- [x] cloud/ErrorResolutionTracker.java → ErrorResolutionTracker.kt
+- [x] cloud/LogWriteTracker.java → LogWriteTracker.kt
 - [x] cloud/MessageSyncBatch.java → MessageSyncBatch.kt
 
 ## Files Converted (Session 1)
