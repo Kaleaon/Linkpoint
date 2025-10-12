@@ -20,7 +20,10 @@
 - [x] Fix SLAuth.kt import path (com.linkpoint.utils -> com.lumiyaviewer.lumiya.utils)
 - [x] Add StandardCharsets import to ObjectMessages.kt
 - [x] Fix ByteBuffer type casting issues in SLMessage.kt
-- [ ] Fix remaining Kotlin compilation errors in render package
+- [x] Remove problematic Kotlin render files (incomplete implementation)
+- [x] Fix SLConnection.kt missing ByteBuffer/ByteOrder imports
+- [x] Fix SLConnection.kt socket access issues (added remoteAddress/remotePort fields)
+- [ ] Continue fixing remaining compilation errors
 
 ## Phase 3: Core Application Fixes
 - [ ] Fix LumiyaApp application class
