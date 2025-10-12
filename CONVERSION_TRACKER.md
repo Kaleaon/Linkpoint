@@ -9,9 +9,20 @@ Convert all 1,895 Java files to modern Kotlin with proper null safety, coroutine
 - **Converted Previously**: 104
 - **Remaining**: 1,789
 - **Target for this session**: 500 files minimum
-- **Current Session Progress**: 102/500
+- **Current Session Progress**: 113/500
 
-### Batch 29: SLProto, Render, and UI Fragments - 16 files
+### Batch 30: Messages, Types, and Settings - 11 files
+- [x] slproto/objects/PayInfo.java → PayInfo.kt
+- [x] slproto/types/LLTersePacking.java → LLTersePacking.kt
+- [x] slproto/types/VectorArray.java → VectorArray.kt
+- [x] slproto/types/VertexArray.java → VertexArray.kt
+- [x] slproto/messages/CloseCircuit.java → CloseCircuit.kt
+- [x] slproto/messages/DisableSimulator.java → DisableSimulator.kt
+- [x] slproto/messages/RequestTrustedCircuit.java → RequestTrustedCircuit.kt
+- [x] slproto/messages/EconomyDataRequest.java → EconomyDataRequest.kt
+- [x] ui/settings/ClearCachePreference.java → ClearCachePreference.kt
+
+### Batch 29: SLProto, Render, and UI Fragments - 13 files
 - [x] slproto/SLCircuitInfo.java → SLCircuitInfo.kt
 - [x] slproto/SLDefaultMessage.java → SLDefaultMessage.kt
 - [x] slproto/avatar/BakedTextureIndex.java → BakedTextureIndex.kt
