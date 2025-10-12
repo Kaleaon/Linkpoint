@@ -333,15 +333,27 @@ public class ModernLinkpointDemo {
     public void demonstrateModernAuthentication(String username, String password) {
         Log.i(TAG, "Demonstrating modern OAuth2 authentication...");
         
+        if (authManager == null) {
+            Log.w(TAG, "Auth manager not available - authentication skipped");
+            return;
+        }
+        
         authManager.authenticateUser(username, password)
             .thenAccept(result -> {
                 if (result.isSuccess()) {
                     Log.i(TAG, "OAuth2 authentication successful!");
-                    transport.setAuthToken(result.getToken());
+                    if (transport != null) {
+                        transport.setAuthToken(result.getToken());
+                    }
                     demonstrateAssetStreaming();
                 } else {
                     Log.w(TAG, "Authentication failed: " + result.getMessage());
                 }
+            })
+            .exceptionally(throwable -> {
+                Log.e(TAG, "Authentication error", throwable);
+                return null;
+            });
     }
     
     /**
@@ -350,6 +362,11 @@ public class ModernLinkpointDemo {
     public void demonstrateAssetStreaming() {
         Log.i(TAG, "Demonstrating intelligent asset streaming...");
         
+        if (assetManager == null) {
+            Log.w(TAG, "Asset manager not available - asset streaming skipped");
+            return;
+        }
+        
         String[] textureIds = {"texture_001", "texture_002", "texture_003"};
         
         for (String textureId : textureIds) {
@@ -357,8 +374,14 @@ public class ModernLinkpointDemo {
                 .thenAccept(assetData -> {
                     if (assetData != null) {
                         Log.d(TAG, "Loaded texture asset: " + assetData.getId());
-                        textureManager.processModernTexture(assetData.getData());
+                        if (textureManager != null) {
+                            textureManager.processModernTexture(assetData.getData());
+                        }
                     }
+                })
+                .exceptionally(throwable -> {
+                    Log.e(TAG, "Error loading asset: " + textureId, throwable);
+                    return null;
                 });
         }
     }
