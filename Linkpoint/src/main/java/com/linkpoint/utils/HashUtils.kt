@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.utils
+package com.linkpoint.utils
 
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException

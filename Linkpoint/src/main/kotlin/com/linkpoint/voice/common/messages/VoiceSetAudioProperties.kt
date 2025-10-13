@@ -5,47 +5,34 @@ import com.linkpoint.voice.common.VoicePluginMessage
 import com.linkpoint.voice.common.model.VoiceAudioDevice
 import javax.annotation.Nullable
 
-class VoiceSetAudioProperties : VoicePluginMessage {
-    val VoiceAudioDevice audioDevice
-    val Float speakerVolume
-    val Boolean speakerVolumeValid
-
-    public VoiceSetAudioProperties(Float f, Boolean bl, VoiceAudioDevice voiceAudioDevice) {
-        this.speakerVolume = f
-        this.speakerVolumeValid = bl
-        this.audioDevice = voiceAudioDevice
-    }
-
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
-    public VoiceSetAudioProperties(Bundle bundle) {
-        this.speakerVolumeValid = bundle.containsKey("speakerVolume")
-        Float f = this.speakerVolumeValid ? bundle.getFloat("speakerVolume") : Float.NaN
-        this.speakerVolume = f
-        VoiceAudioDevice voiceAudioDevice = null
+class VoiceSetAudioProperties(
+    val speakerVolume: Float,
+    val speakerVolumeValid: Boolean,
+    val audioDevice: VoiceAudioDevice?
+) : VoicePluginMessage {
+    
+    constructor(bundle: Bundle) : this(
+        if (bundle.containsKey("speakerVolume")) bundle.getFloat("speakerVolume") else Float.NaN,
+        bundle.containsKey("speakerVolume"),
         if (bundle.containsKey("audioDevice")) {
             try {
-                voiceAudioDevice = VoiceAudioDevice.valueOf(bundle.getString("audioDevice"))
+                VoiceAudioDevice.valueOf(bundle.getString("audioDevice") ?: "")
+            } catch (e: IllegalArgumentException) {
+                null
             }
-            catch (IllegalArgumentException illegalArgumentException) {
-                voiceAudioDevice = null
-            }
+        } else {
+            null
         }
-        this.audioDevice = voiceAudioDevice
-    }
+    )
 
-    override Bundle toBundle() {
-        Bundle bundle = Bundle()
-        if (this.speakerVolumeValid) {
-            bundle.putFloat("speakerVolume", this.speakerVolume)
+    override fun toBundle(): Bundle {
+        val bundle = Bundle()
+        if (speakerVolumeValid) {
+            bundle.putFloat("speakerVolume", speakerVolume)
         }
-        if (this.audioDevice != null) {
-            bundle.putString("audioDevice", this.audioDevice.name())
+        audioDevice?.let {
+            bundle.putString("audioDevice", it.name)
         }
         return bundle
     }
 }
-

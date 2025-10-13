@@ -7,7 +7,7 @@ import com.linkpoint.render.avatar.AvatarSkeleton
 import com.linkpoint.render.glres.buffers.GLLoadableBuffer
 import com.linkpoint.render.shaders.RiggedMeshProgram30
 import com.linkpoint.utils.InternPool
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 import java.util.Arrays
 import javax.annotation.Nonnull
 

@@ -4,7 +4,7 @@
  * Tests @Kaleaon's enhanced LLSD implementation in Android environment
  */
 
-package com.lumiyaviewer.lumiya.slproto.llsd.kotlin
+package com.linkpoint.slproto.llsd.kotlin
 
 import android.util.Log
 import java.util.*

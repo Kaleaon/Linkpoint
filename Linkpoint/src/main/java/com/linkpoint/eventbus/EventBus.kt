@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.eventbus
+package com.linkpoint.eventbus
 
 import android.app.Activity
 import android.os.Handler

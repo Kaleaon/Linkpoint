@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.react
+package com.linkpoint.react
 
 /**
  * Interface for objects that can request a refresh without parameters.

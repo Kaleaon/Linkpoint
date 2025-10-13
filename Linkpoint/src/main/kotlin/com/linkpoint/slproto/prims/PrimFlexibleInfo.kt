@@ -6,7 +6,7 @@ import com.linkpoint.render.RenderContext
 import com.linkpoint.render.glres.buffers.GLLoadableBuffer
 import com.linkpoint.slproto.types.LLQuaternion
 import com.linkpoint.slproto.types.LLVector3
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 
 class PrimFlexibleInfo {
     private const val FLEXIBLE_OBJECT_MAX_INTERNAL_TENSION_FORCE: Float = 0.99f

@@ -16,7 +16,7 @@ import com.linkpoint.slproto.prims.PrimFlexibleInfo
 import com.linkpoint.slproto.types.LLVector2
 import com.linkpoint.slproto.types.LLVector3
 import com.linkpoint.utils.CreateFailureException
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 
 val class DrawableGeometry : GLCleanable {
     private val Int FaceCount

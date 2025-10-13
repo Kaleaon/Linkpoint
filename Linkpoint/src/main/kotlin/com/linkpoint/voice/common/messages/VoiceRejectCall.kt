@@ -5,25 +5,20 @@ import com.linkpoint.voice.common.VoicePluginMessage
 import com.linkpoint.voice.common.model.VoiceChannelInfo
 import javax.annotation.Nonnull
 
-class VoiceRejectCall : VoicePluginMessage {
-    val String sessionHandle
-    val VoiceChannelInfo voiceChannelInfo
+class VoiceRejectCall(
+    val sessionHandle: String?,
+    val voiceChannelInfo: VoiceChannelInfo
+) : VoicePluginMessage {
+    
+    constructor(bundle: Bundle) : this(
+        bundle.getString("sessionHandle"),
+        VoiceChannelInfo(bundle.getBundle("voiceChannelInfo")!!)
+    )
 
-    public VoiceRejectCall(Bundle bundle) {
-        this.sessionHandle = bundle.getString("sessionHandle")
-        this.voiceChannelInfo = VoiceChannelInfo(bundle.getBundle("voiceChannelInfo"))
-    }
-
-    public VoiceRejectCall(String string2, VoiceChannelInfo voiceChannelInfo) {
-        this.sessionHandle = string2
-        this.voiceChannelInfo = voiceChannelInfo
-    }
-
-    override Bundle toBundle() {
-        Bundle bundle = Bundle()
-        bundle.putString("sessionHandle", this.sessionHandle)
-        bundle.putBundle("voiceChannelInfo", this.voiceChannelInfo.toBundle())
+    override fun toBundle(): Bundle {
+        val bundle = Bundle()
+        bundle.putString("sessionHandle", sessionHandle)
+        bundle.putBundle("voiceChannelInfo", voiceChannelInfo.toBundle())
         return bundle
     }
 }
-

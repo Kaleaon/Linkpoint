@@ -6,7 +6,7 @@ import com.linkpoint.slproto.llsd.LLSDException
 import com.linkpoint.slproto.llsd.LLSDNode
 import com.linkpoint.slproto.types.LLVector2
 import com.linkpoint.slproto.types.LLVector3
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.ShortBuffer

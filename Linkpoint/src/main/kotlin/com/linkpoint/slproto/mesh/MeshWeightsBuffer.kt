@@ -1,6 +1,6 @@
 package com.linkpoint.slproto.mesh
 
-import com.lumiyaviewer.rawbuffers.DirectByteBuffer
+import com.linkpoint.rawbuffers.DirectByteBuffer
 import javax.annotation.Nonnull
 
 class MeshWeightsBuffer {

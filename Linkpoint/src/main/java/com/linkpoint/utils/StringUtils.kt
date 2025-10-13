@@ -1,4 +1,4 @@
-package com.lumiyaviewer.lumiya.utils
+package com.linkpoint.utils
 
 /**
  * String utility functions converted to Kotlin with null safety.
