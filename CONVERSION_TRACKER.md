@@ -9,7 +9,13 @@ Convert all 1,895 Java files to modern Kotlin with proper null safety, coroutine
 - **Converted Previously**: 104
 - **Remaining**: 1,789
 - **Target for this session**: 500 files minimum
-- **Current Session Progress**: 113/500
+- **Current Session Progress**: 117/500
+
+### Batch 31: UI Components (Accounts) - 4 files
+- [x] ui/accounts/AccountEditDialog.java → AccountEditDialog.kt
+- [x] ui/accounts/AccountList.java → AccountList.kt
+- [x] ui/accounts/ManageAccountsActivity.java → ManageAccountsActivity.kt
+- [x] ui/accounts/$Lambda$c901yk_brt0jPczBoAMr-Jn1w74.java -> DELETED
 
 ### Batch 30: Messages, Types, and Settings - 11 files
 - [x] slproto/objects/PayInfo.java → PayInfo.kt
