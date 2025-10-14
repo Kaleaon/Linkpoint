@@ -16,13 +16,11 @@ import android.widget.Toast
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.auth.SLAuth
 import com.lumiyaviewer.lumiya.ui.grids.GridList
-import java.util.UUID
 
 internal class AccountEditDialog(
     context: Context,
-    private var editAccount: AccountList.AccountInfo?
+    private var editAccount: AccountList.AccountInfo?,
 ) : AppCompatDialog(context), View.OnClickListener, TextWatcher {
-
     private lateinit var gridList: GridList
     private var onAccountEditResultListener: OnAccountEditResultListener? = null
 
@@ -33,7 +31,11 @@ internal class AccountEditDialog(
 
     internal interface OnAccountEditResultListener {
         fun onAccountEditCancelled()
-        fun onAccountEdited(accountInfo: AccountList.AccountInfo, isNew: Boolean)
+
+        fun onAccountEdited(
+            accountInfo: AccountList.AccountInfo,
+            isNew: Boolean,
+        )
     }
 
     override fun onCreate(bundle: Bundle?) {
@@ -87,7 +89,12 @@ internal class AccountEditDialog(
 
     override fun afterTextChanged(editable: Editable) {}
 
-    override fun beforeTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
+    override fun beforeTextChanged(
+        charSequence: CharSequence,
+        i: Int,
+        i2: Int,
+        i3: Int,
+    ) {
         if (loginPasswordText.tag != null) {
             loginPasswordText.tag = null
             loginPasswordText.transformationMethod = PasswordTransformationMethod.getInstance()
@@ -95,7 +102,12 @@ internal class AccountEditDialog(
         }
     }
 
-    override fun onTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {}
+    override fun onTextChanged(
+        charSequence: CharSequence,
+        i: Int,
+        i2: Int,
+        i3: Int,
+    ) {}
 
     override fun onClick(view: View) {
         when (view.id) {
@@ -111,23 +123,25 @@ internal class AccountEditDialog(
                 }
 
                 val isPasswordSaved = password == "(Saved password)"
-                val passwordHash = if (isPasswordSaved) {
-                    editAccount?.getPasswordHash() ?: ""
-                } else if (password.isNotEmpty()) {
-                    SLAuth.getPasswordHash(password)
-                } else {
-                    ""
-                }
+                val passwordHash =
+                    if (isPasswordSaved) {
+                        editAccount?.getPasswordHash() ?: ""
+                    } else if (password.isNotEmpty()) {
+                        SLAuth.getPasswordHash(password)
+                    } else {
+                        ""
+                    }
 
                 dismiss()
 
-                val accountInfo = editAccount?.also {
-                    it.setLoginName(loginName)
-                    it.setGridUUID(gridUUID)
-                    if (!isPasswordSaved) {
-                        it.setPasswordHash(passwordHash)
-                    }
-                } ?: AccountList.AccountInfo(loginName, passwordHash, gridUUID)
+                val accountInfo =
+                    editAccount?.also {
+                        it.setLoginName(loginName)
+                        it.setGridUUID(gridUUID)
+                        if (!isPasswordSaved) {
+                            it.setPasswordHash(passwordHash)
+                        }
+                    } ?: AccountList.AccountInfo(loginName, passwordHash, gridUUID)
 
                 onAccountEditResultListener?.onAccountEdited(accountInfo, editAccount == null)
             }

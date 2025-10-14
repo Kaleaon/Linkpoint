@@ -23,57 +23,65 @@ internal class ErrorResolutionTracker(private val context: Context) {
             if (iterator.hasNext()) {
                 val uuid = iterator.next()
                 val resolvableError = resolvableErrors[uuid] ?: return
-                
+
                 var message = resolvableError.status.statusMessage
                 if (Strings.isNullOrEmpty(message)) {
                     message = context.getString(2131099704)
                 }
-                
-                val finalMessage = if (resolvableError.resourceName != null) {
-                    "${resolvableError.resourceName}: $message"
-                } else {
-                    message
-                }
-                
+
+                val finalMessage =
+                    if (resolvableError.resourceName != null) {
+                        "${resolvableError.resourceName}: $message"
+                    } else {
+                        message
+                    }
+
                 val intent = ConnectionResolutionActivity.getResolvableErrorIntent(context, uuid)
                 showSyncingError(uuid, context.getString(2131099703), finalMessage, intent)
             }
         }
     }
 
-    private fun showSyncingError(uuid: UUID, title: String, message: String, intent: Intent) {
-        val deleteIntent = Intent(context, DriveSyncService::class.java).apply {
-            putExtra(DELETE_RESOLVABLE_ERROR_TAG, uuid.toString())
-        }
-        
+    private fun showSyncingError(
+        uuid: UUID,
+        title: String,
+        message: String,
+        intent: Intent,
+    ) {
+        val deleteIntent =
+            Intent(context, DriveSyncService::class.java).apply {
+                putExtra(DELETE_RESOLVABLE_ERROR_TAG, uuid.toString())
+            }
+
         notificationDisplayed = true
-        
-        val notification = NotificationCompat.Builder(context)
-            .setSmallIcon(2130837609)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setDefaults(0)
-            .setOngoing(false)
-            .setAutoCancel(true)
-            .setDeleteIntent(
-                PendingIntent.getService(
-                    context,
-                    0,
-                    deleteIntent,
-                    PendingIntent.FLAG_IMMUTABLE
+
+        val notification =
+            NotificationCompat.Builder(context)
+                .setSmallIcon(2130837609)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setDefaults(0)
+                .setOngoing(false)
+                .setAutoCancel(true)
+                .setDeleteIntent(
+                    PendingIntent.getService(
+                        context,
+                        0,
+                        deleteIntent,
+                        PendingIntent.FLAG_IMMUTABLE,
+                    ),
                 )
-            )
-            .setContentIntent(
-                PendingIntent.getActivity(
-                    context,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_IMMUTABLE
+                .setContentIntent(
+                    PendingIntent.getActivity(
+                        context,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_IMMUTABLE,
+                    ),
                 )
-            )
-            .setOnlyAlertOnce(true)
-            .build()
-        
+                .setOnlyAlertOnce(true)
+                .build()
+
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(2131427332, notification)
     }
@@ -84,16 +92,19 @@ internal class ErrorResolutionTracker(private val context: Context) {
         showMoreErrors()
     }
 
-    fun clearError(uuid: UUID, resolved: Boolean) {
+    fun clearError(
+        uuid: UUID,
+        resolved: Boolean,
+    ) {
         val resolvableError = resolvableErrors.remove(uuid)
         val message = resolvableError?.status?.statusMessage
-        
+
         Debug.Printf("LumiyaCloud: clearing error (resolved: %b): %s", resolved, message)
-        
+
         if (resolvableError != null && resolved && resolvableError.operation != null) {
             resolvableError.operation.tryRestartingOperation()
         }
-        
+
         showMoreErrors()
     }
 
@@ -110,7 +121,7 @@ internal class ErrorResolutionTracker(private val context: Context) {
     class ResolvableError(
         val resourceName: String?,
         val status: Status,
-        val operation: RestartableOperation?
+        val operation: RestartableOperation?,
     )
 
     interface RestartableOperation {

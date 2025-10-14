@@ -4,122 +4,76 @@ import android.opengl.Matrix
 import com.lumiyaviewer.lumiya.render.RenderContext
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import com.lumiyaviewer.lumiya.slproto.types.LLVector4
-import kotlin.math.abs
 
 object GLRayTrace {
 
-    data class RayIntersectInfo(
-        val intersectPoint: LLVector4,
-        val s: Float,
-        val t: Float
-    ) {
-        override fun toString(): String {
-            return "RayIntersectInfo{intersectPoint=$intersectPoint, s=$s, t=$t}"
+    object RayIntersectInfo {
+        LLVector4 intersectPoint
+        float s
+        float t
+
+        RayIntersectInfo(LLVector4 lLVector4, float f, float f2) {
+            this.intersectPoint = lLVector4
+            this.s = f
+            this.t = f2
+        }
+
+        fun toString(): String {
+            return "RayIntersectInfo{intersectPoint=" + this.intersectPoint + ", s=" + this.s + ", t=" + this.t + '}';
         }
     }
 
-    @JvmStatic
-    fun getIntersectionDepth(
-        renderContext: RenderContext,
-        point: LLVector4,
-        matrix: FloatArray
-    ): Float {
-        val v1 = FloatArray(4)
-        val result = FloatArray(8)
-        
-        v1[0] = point.x
-        v1[1] = point.y
-        v1[2] = point.z
-        v1[3] = 1.0f
-        
-        Matrix.multiplyMV(result, 0, matrix, 0, v1, 0)
-        
+    fun getIntersectionDepth(renderContext: RenderContext, lLVector4: LLVector4, fArr: FloatArray): Float {
+        r4 = new float[4]
+        float[] fArr2 = new float[8]
+        r4[0] = lLVector4.x
+        r4[1] = lLVector4.y
+        r4[2] = lLVector4.z
+        r4[3] = 1.0f
+        Matrix.multiplyMV(fArr2, 0, fArr, 0, r4, 0)
         if (renderContext.hasGL20) {
-            Matrix.multiplyMV(
-                result, 4,
-                renderContext.modelViewMatrix.matrixData,
-                renderContext.modelViewMatrix.matrixDataOffset,
-                result, 0
-            )
+            Matrix.multiplyMV(fArr2, 4, renderContext.modelViewMatrix.getMatrixData(), renderContext.modelViewMatrix.getMatrixDataOffset(), fArr2, 0)
         } else {
-            Matrix.multiplyMV(
-                result, 4,
-                renderContext.projectionMatrix.matrixData,
-                renderContext.projectionMatrix.matrixDataOffset,
-                result, 0
-            )
+            Matrix.multiplyMV(fArr2, 4, renderContext.projectionMatrix.getMatrixData(), renderContext.projectionMatrix.getMatrixDataOffset(), fArr2, 0)
         }
-        
-        return result[6]
+        return fArr2[6]
     }
 
-    @JvmStatic
-    fun intersect_RayTriangle(
-        rayOrigin: LLVector3,
-        rayEnd: LLVector3,
-        vertices: Array<LLVector3>,
-        offset: Int
-    ): RayIntersectInfo? {
-        // Triangle edges
-        val edge1 = LLVector3.sub(vertices[offset + 1], vertices[offset + 0])
-        val edge2 = LLVector3.sub(vertices[offset + 2], vertices[offset + 0])
-        
-        // Calculate normal
-        val normal = LLVector3.cross(edge1, edge2)
-        if (normal.isZero()) {
-            return null // Degenerate triangle
-        }
-        
-        // Ray direction
-        val rayDir = LLVector3.sub(rayEnd, rayOrigin)
-        
-        // Calculate intersection distance
-        val d = -normal.dot(LLVector3.sub(rayOrigin, vertices[offset + 0]))
-        val denominator = normal.dot(rayDir)
-        
-        if (abs(denominator) < 1.0E-7f) {
-            return null // Ray parallel to triangle
-        }
-        
-        val t = d / denominator
-        if (t < 0.0) {
-            return null // Triangle behind ray origin
-        }
-        
-        // Calculate intersection point
-        val intersectionPoint = LLVector3(rayDir).apply {
-            mul(t)
-            add(rayOrigin)
-        }
-        
-        // Barycentric coordinates test
-        val dot00 = edge1.dot(edge1)
-        val dot01 = edge1.dot(edge2)
-        val dot11 = edge2.dot(edge2)
-        
-        val v = LLVector3.sub(intersectionPoint, vertices[offset + 0])
-        val dot20 = v.dot(edge1)
-        val dot21 = v.dot(edge2)
-        
-        val invDenom = (dot01 * dot01) - (dot00 * dot11)
-        if (abs(invDenom) < 1.0E-7f) {
+    fun intersect_RayTriangle(lLVector3: LLVector3, lLVector32: LLVector3, lLVector3Arr: Array<LLVector3>, i: Int): RayIntersectInfo {
+        LLVector3 sub = LLVector3.sub(lLVector3Arr[i + 1], lLVector3Arr[i + 0])
+        LLVector3 sub2 = LLVector3.sub(lLVector3Arr[i + 2], lLVector3Arr[i + 0])
+        LLVector3 cross = LLVector3.cross(sub, sub2)
+        if (cross.isZero()) {
             return null
         }
-        
-        val u = ((dot01 * dot21) - (dot11 * dot20)) / invDenom
-        if (u < 0.0 || u > 1.0) {
+        LLVector3 sub3 = LLVector3.sub(lLVector32, lLVector3)
+        float f = -cross.dot(LLVector3.sub(lLVector3, lLVector3Arr[i + 0]))
+        float dot = cross.dot(sub3)
+        if (Math.abs(dot) < 1.0E-7f) {
             return null
         }
-        
-        val w = ((dot20 * dot01) - (dot21 * dot00)) / invDenom
-        if (w < 0.0 || u + w > 1.0) {
+        dot = f / dot
+        if (((double) dot) < 0.0d) {
             return null
         }
-        
-        return RayIntersectInfo(
-            LLVector4(intersectionPoint.x, intersectionPoint.y, intersectionPoint.z, t),
-            u,
-            w
-        )
+        LLVector3 lLVector33 = new LLVector3(sub3)
+        lLVector33.mul(dot)
+        lLVector33.add(lLVector3)
+        float dot2 = sub.dot(sub)
+        float dot3 = sub.dot(sub2)
+        float dot4 = sub2.dot(sub2)
+        LLVector3 sub4 = LLVector3.sub(lLVector33, lLVector3Arr[i + 0])
+        float dot5 = sub4.dot(sub)
+        float dot6 = sub4.dot(sub2)
+        float f2 = (dot3 * dot3) - (dot2 * dot4)
+        if (Math.abs(f2) < 1.0E-7f) {
+            return null
+        }
+        dot4 = ((dot3 * dot6) - (dot4 * dot5)) / f2
+        if (((double) dot4) < 0.0d || ((double) dot4) > 1.0d) {
+            return null
+        }
+        dot5 = ((dot5 * dot3) - (dot6 * dot2)) / f2
+        return (((double) dot5) < 0.0d || ((double) (dot4 + dot5)) > 1.0d) ? null : new RayIntersectInfo(new LLVector4(lLVector33.x, lLVector33.y, lLVector33.z, dot), dot4, dot5)
     }
 }

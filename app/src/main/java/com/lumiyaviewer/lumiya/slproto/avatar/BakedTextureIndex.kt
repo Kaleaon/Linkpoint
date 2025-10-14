@@ -6,5 +6,5 @@ enum class BakedTextureIndex(val faceIndex: AvatarTextureFaceIndex) {
     BAKED_LOWER(AvatarTextureFaceIndex.TEX_LOWER_BAKED),
     BAKED_EYES(AvatarTextureFaceIndex.TEX_EYES_BAKED),
     BAKED_SKIRT(AvatarTextureFaceIndex.TEX_SKIRT_BAKED),
-    BAKED_HAIR(AvatarTextureFaceIndex.TEX_HAIR_BAKED)
+    BAKED_HAIR(AvatarTextureFaceIndex.TEX_HAIR_BAKED),
 }

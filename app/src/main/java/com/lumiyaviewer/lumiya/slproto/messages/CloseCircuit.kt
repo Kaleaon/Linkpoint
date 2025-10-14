@@ -4,7 +4,6 @@ import com.lumiyaviewer.lumiya.slproto.SLMessage
 import java.nio.ByteBuffer
 
 class CloseCircuit : SLMessage() {
-    
     init {
         zeroCoded = false
     }

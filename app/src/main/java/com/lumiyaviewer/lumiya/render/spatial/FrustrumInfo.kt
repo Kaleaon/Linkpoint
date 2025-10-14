@@ -4,66 +4,52 @@ import android.opengl.Matrix
 import java.util.Arrays
 
 class FrustrumInfo {
-    
-    val viewX: Float
-    val viewY: Float
-    val viewZ: Float
-    val viewDistance: Float
-    val mvpMatrix: FloatArray
+    Float[] mvpMatrix
+    Float viewDistance
+    Float viewX
+    Float viewY
+    Float viewZ
 
-    constructor(
-        viewX: Float,
-        viewY: Float,
-        viewZ: Float,
-        viewDistance: Float,
-        matrix: FloatArray,
-        matrixOffset: Int
-    ) {
-        this.viewX = viewX
-        this.viewY = viewY
-        this.viewZ = viewZ
-        this.viewDistance = viewDistance
-        this.mvpMatrix = FloatArray(16)
-        System.arraycopy(matrix, matrixOffset, mvpMatrix, 0, 16)
+    constructor(f: Float, f2: Float, f3: Float, f4: Float, fArr: FloatArray, i: Int) {
+        this.viewX = f
+        this.viewY = f2
+        this.viewZ = f3
+        this.viewDistance = f4
+        this.mvpMatrix = Float[16]
+        System.arraycopy(fArr, i, this.mvpMatrix, 0, 16)
     }
 
-    constructor(
-        viewX: Float,
-        viewY: Float,
-        viewZ: Float,
-        viewDistance: Float,
-        modelView: FloatArray,
-        modelViewOffset: Int,
-        projection: FloatArray,
-        projectionOffset: Int
-    ) {
-        this.viewX = viewX
-        this.viewY = viewY
-        this.viewZ = viewZ
-        this.viewDistance = viewDistance
-        this.mvpMatrix = FloatArray(16)
-        Matrix.multiplyMM(mvpMatrix, 0, projection, projectionOffset, modelView, modelViewOffset)
+    constructor(f: Float, f2: Float, f3: Float, f4: Float, fArr: FloatArray, i: Int, fArr2: FloatArray, i2: Int) {
+        this.viewX = f
+        this.viewY = f2
+        this.viewZ = f3
+        this.viewDistance = f4
+        this.mvpMatrix = Float[16]
+        Matrix.multiplyMM(this.mvpMatrix, 0, fArr2, i2, fArr, i)
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other !is FrustrumInfo) {
+    /* DevToolsApp WARNING: Missing block: B:7:0x0018, code:
+            return false
+     */
+    fun equals(obj: java.lang.Any): Boolean {
+        if (!(obj instanceof FrustrumInfo)) {
             return false
         }
-
-        if (viewX.compareTo(other.viewX) != 0) return false
-        if (viewY.compareTo(other.viewY) != 0) return false
-        if (viewZ.compareTo(other.viewZ) != 0) return false
-        if (viewDistance.compareTo(other.viewDistance) != 0) return false
-
-        return Arrays.equals(mvpMatrix, other.mvpMatrix)
+        
+        FrustrumInfo other = (FrustrumInfo) obj
+        
+        // Compare all Float fields
+        if (Float.compare(other.viewX, this.viewX) != 0) return false
+        if (Float.compare(other.viewY, this.viewY) != 0) return false
+        if (Float.compare(other.viewZ, this.viewZ) != 0) return false
+        if (Float.compare(other.viewDistance, this.viewDistance) != 0) return false
+        
+        // Compare matrix arrays
+        return Arrays == this.mvpMatrix, other.mvpMatrix
+    }
     }
 
-    override fun hashCode(): Int {
-        var result = viewX.toBits()
-        result = 31 * result + viewY.toBits()
-        result = 31 * result + viewZ.toBits()
-        result = 31 * result + viewDistance.toBits()
-        result = 31 * result + Arrays.hashCode(mvpMatrix)
-        return result
+    fun hashCode(): Int {
+        return ((((Float.floatToIntBits(this.viewX) + 0) + Float.floatToIntBits(this.viewY)) + Float.floatToIntBits(this.viewZ)) + Float.floatToIntBits(this.viewDistance)) + Arrays.hashCode(this.mvpMatrix)
     }
 }

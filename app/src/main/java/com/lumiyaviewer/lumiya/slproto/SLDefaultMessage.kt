@@ -4,7 +4,6 @@ import com.lumiyaviewer.lumiya.slproto.messages.SLMessageHandler
 import java.nio.ByteBuffer
 
 class SLDefaultMessage : SLMessage() {
-    
     override fun CalcPayloadSize(): Int {
         return 0
     }

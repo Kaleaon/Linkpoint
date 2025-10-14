@@ -16,13 +16,16 @@ object Debug {
      * @param args Optional format arguments
      */
     @JvmStatic
-    fun AlwaysPrintf(format: String, vararg args: Any?) {
+    fun AlwaysPrintf(
+        format: String,
+        vararg args: Any?,
+    ) {
         val stackTrace = Thread.currentThread().stackTrace
         if (stackTrace.size > 3) {
             val element = stackTrace[3]
             val className = element.className
             val simpleClassName = className.substring(className.lastIndexOf('.') + 1)
-            val message = "[${simpleClassName}::${element.methodName}] ${String.format(format, *args)}"
+            val message = "[$simpleClassName::${element.methodName}] ${String.format(format, *args)}"
             Log.d(LOG_TAG, message)
         }
     }
@@ -33,7 +36,10 @@ object Debug {
      * @param buffer The ByteBuffer to dump
      */
     @JvmStatic
-    fun DumpBuffer(label: String, buffer: ByteBuffer) {
+    fun DumpBuffer(
+        label: String,
+        buffer: ByteBuffer,
+    ) {
         // No-op in release builds
     }
 
@@ -43,7 +49,10 @@ object Debug {
      * @param data The byte array to dump
      */
     @JvmStatic
-    fun DumpBuffer(label: String, data: ByteArray) {
+    fun DumpBuffer(
+        label: String,
+        data: ByteArray,
+    ) {
         // No-op in release builds
     }
 
@@ -54,7 +63,11 @@ object Debug {
      * @param length Number of bytes to dump
      */
     @JvmStatic
-    fun DumpBuffer(label: String, data: ByteArray, length: Int) {
+    fun DumpBuffer(
+        label: String,
+        data: ByteArray,
+        length: Int,
+    ) {
         // No-op in release builds
     }
 
@@ -73,13 +86,17 @@ object Debug {
      * @param args Optional format arguments
      */
     @JvmStatic
-    fun Printf(format: String, vararg args: Any?) {
+    fun Printf(
+        format: String,
+        vararg args: Any?,
+    ) {
         try {
-            val message = if (args.isEmpty()) {
-                format
-            } else {
-                String.format(format, *args)
-            }
+            val message =
+                if (args.isEmpty()) {
+                    format
+                } else {
+                    String.format(format, *args)
+                }
             Log.d(LOG_TAG, message)
         } catch (e: Exception) {
             Log.d(LOG_TAG, "$format (format error: ${e.message})")

@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.ui.chat.contacts
+import java.util.*
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -9,27 +10,31 @@ import android.widget.ListAdapter
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo
 
-abstract class ChatterListAdapter(
-    protected val context: Context,
-    protected val userManager: UserManager
-) : BaseAdapter(), ListAdapter {
+abstract class ChatterListAdapter : BaseAdapter : ListAdapter {
+    protected Context context
+    private LayoutInflater inflater
+    private Boolean userDistanceInline = true
+    protected UserManager userManager
+    private ChatterItemViewBuilder viewBuilder = ChatterItemViewBuilder()
 
-    private val inflater: LayoutInflater = LayoutInflater.from(context)
-    private val viewBuilder = ChatterItemViewBuilder()
-    private var userDistanceInline = true
-
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View? {
-        val item = getItem(position)
-        if (item !is ChatterDisplayInfo) {
-            return null
-        }
-
-        viewBuilder.reset()
-        item.buildView(context, viewBuilder, userManager)
-        return viewBuilder.getView(inflater, convertView, parent, userDistanceInline)
+    ChatterListAdapter(Context context2, UserManager userManager2) {
+        this.context = context2
+        this.userManager = userManager2
+        this.inflater = LayoutInflater.from(context2)
     }
 
-    internal fun setUserDistanceInline(inline: Boolean) {
-        userDistanceInline = inline
+    View getView(Int i, View view, ViewGroup viewGroup) {
+        Any item = getItem(i)
+        if (!(item instanceof ChatterDisplayInfo)) {
+            return null
+        }
+        this.viewBuilder.reset()
+        ((ChatterDisplayInfo) item).buildView(this.context, this.viewBuilder, this.userManager)
+        return this.viewBuilder.getView(this.inflater, view, viewGroup, this.userDistanceInline)
+    }
+
+    /* access modifiers changed from: package-private */
+    Unit setUserDistanceInline(Boolean z) {
+        this.userDistanceInline = z
     }
 }

@@ -1,0 +1,63 @@
+package com.lumiyaviewer.lumiya.slproto.users.manager
+
+import android.os.Parcel
+import android.os.Parcelable
+import java.util.UUID
+import javax.annotation.Nonnull
+
+class AvatarPickKey : Parcelable {
+    Parcelable.Creator<AvatarPickKey> CREATOR = Parcelable.Creator<AvatarPickKey>() {
+        AvatarPickKey createFromParcel(Parcel parcel) {
+            return AvatarPickKey(parcel)
+        }
+
+        AvatarPickKey[] newArray(Int i) {
+            return AvatarPickKey[i]
+        }
+    }
+    @Nonnull
+    UUID avatarID
+    @Nonnull
+    UUID pickID
+
+    protected AvatarPickKey(Parcel parcel) {
+        this.avatarID = UUID.fromString(parcel.readString())
+        this.pickID = UUID.fromString(parcel.readString())
+    }
+
+    AvatarPickKey(@Nonnull UUID uuid, @Nonnull UUID uuid2) {
+        this.avatarID = uuid
+        this.pickID = uuid2
+    }
+
+    Int describeContents() {
+        return 0
+    }
+
+    Boolean equals(Any obj) {
+        if (this == obj) {
+            return true
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false
+        }
+        AvatarPickKey avatarPickKey = (AvatarPickKey) obj
+        if (!this.avatarID.equals(avatarPickKey.avatarID)) {
+            return false
+        }
+        return this.pickID.equals(avatarPickKey.pickID)
+    }
+
+    Int hashCode() {
+        return (this.avatarID.hashCode() * 31) + this.pickID.hashCode()
+    }
+
+    String toString() {
+        return "AvatarPicksKey{avatarID=" + this.avatarID + ", pickID=" + this.pickID + '}'
+    }
+
+    Unit writeToParcel(Parcel parcel, Int i) {
+        parcel.writeString(this.avatarID.toString())
+        parcel.writeString(this.pickID.toString())
+    }
+}

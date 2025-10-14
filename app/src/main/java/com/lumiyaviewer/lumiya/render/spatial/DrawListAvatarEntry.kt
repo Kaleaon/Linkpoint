@@ -1,38 +1,56 @@
 package com.lumiyaviewer.lumiya.render.spatial
+import java.util.*
 
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatarStub
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectAvatarInfo
 import java.lang.ref.WeakReference
+import javax.annotation.Nonnull
 
-class DrawListAvatarEntry(private val objectAvatarInfo: SLObjectAvatarInfo) : DrawListObjectEntry(objectAvatarInfo) {
-    
-    private var drawableAvatar: WeakReference<DrawableAvatar>? = null
-    private var drawableAvatarStub: WeakReference<DrawableAvatarStub>? = null
+class DrawListAvatarEntry : DrawListObjectEntry {
+    private var drawableAvatar: WeakReference<DrawableAvatar> = null
+    private var drawableAvatarStub: WeakReference<DrawableAvatarStub> = null
+    @Nonnull
+    private SLObjectAvatarInfo objectAvatarInfo
 
-    override fun addToDrawList(drawList: DrawList) {
-        if (drawList.avatars.size < drawList.avatarCountLimit || objectAvatarInfo.isMyAvatar()) {
-            // Add full avatar
-            var avatar = drawableAvatar?.get()
-            if (avatar == null) {
-                avatar = drawList.drawableStore.drawableAvatarCache.getUnchecked(objectAvatarInfo)
-                drawableAvatar = WeakReference(avatar)
-            }
-            drawList.avatars.add(avatar)
-            
-            if (objectAvatarInfo.isMyAvatar()) {
-                drawList.myAvatar = avatar
-            }
-        } else {
-            // Add avatar stub (simplified representation)
-            var stub = drawableAvatarStub?.get()
-            if (stub == null) {
-                stub = drawList.drawableStore.drawableAvatarStubCache.getUnchecked(objectAvatarInfo)
-                drawableAvatarStub = WeakReference(stub)
-            }
-            drawList.avatarStubs.add(stub)
-        }
+    constructor(sLObjectAvatarInfo: SLObjectAvatarInfo) {
+        super(sLObjectAvatarInfo)
+        this.objectAvatarInfo = sLObjectAvatarInfo
     }
 
-    fun getObjectAvatarInfo(): SLObjectAvatarInfo = objectAvatarInfo
+    fun addToDrawList(drawList: DrawList): Unit {
+        Any obj = null
+        WeakReference weakReference
+        if (drawList.avatars.size() < drawList.avatarCountLimit || this.objectAvatarInfo.isMyAvatar()) {
+            DrawableAvatar drawableAvatar
+            weakReference = this.drawableAvatar
+            if (weakReference != null) {
+                drawableAvatar = (DrawableAvatar) weakReference.get()
+            }
+            if (drawableAvatar == null) {
+                drawableAvatar = (DrawableAvatar) drawList.drawableStore.drawableAvatarCache.getUnchecked(this.objectAvatarInfo)
+                this.drawableAvatar = WeakReference(drawableAvatar)
+            }
+            drawList.avatars.add(drawableAvatar)
+            if (this.objectAvatarInfo.isMyAvatar()) {
+                drawList.myAvatar = drawableAvatar
+                return
+            }
+            return
+        }
+        weakReference = this.drawableAvatarStub
+        if (weakReference != null) {
+            obj = (DrawableAvatarStub) weakReference.get()
+        }
+        if (obj == null) {
+            obj = (DrawableAvatarStub) drawList.drawableStore.drawableAvatarStubCache.getUnchecked(this.objectAvatarInfo)
+            this.drawableAvatarStub = WeakReference(obj)
+        }
+        drawList.avatarStubs.add(obj)
+    }
+
+    @Nonnull
+    fun getObjectAvatarInfo(): SLObjectAvatarInfo {
+        return this.objectAvatarInfo
+    }
 }

@@ -8,5 +8,5 @@ data class MoneyTransaction(
     var timestamp: Date? = null,
     var agentUUID: UUID? = null,
     var transactionAmount: Int = 0,
-    var newBalance: Int = 0
+    var newBalance: Int = 0,
 )

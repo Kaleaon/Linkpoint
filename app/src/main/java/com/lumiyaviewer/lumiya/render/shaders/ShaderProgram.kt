@@ -3,41 +3,38 @@ package com.lumiyaviewer.lumiya.render.shaders
 import android.opengl.GLES20
 import com.lumiyaviewer.lumiya.Debug
 
-abstract class ShaderProgram(
-    private val vertexShader: Shader,
-    private val fragmentShader: Shader
-) {
-    protected var handle: Int = 0
-        private set
+abstract class ShaderProgram {
+    private Shader fragmentShader
+    protected int handle
+    private Shader vertexShader
 
-    @Throws(ShaderCompileException::class)
-    fun Compile(preprocessor: ShaderPreprocessor): Int {
-        vertexShader.Compile(preprocessor)
-        fragmentShader.Compile(preprocessor)
-        
-        Debug.Printf("Shaders: Linking...")
-        
-        handle = GLES20.glCreateProgram()
-        GLES20.glAttachShader(handle, vertexShader.handle)
-        GLES20.glAttachShader(handle, fragmentShader.handle)
-        GLES20.glLinkProgram(handle)
-        
-        val linkStatus = IntArray(1)
-        GLES20.glGetProgramiv(handle, GLES20.GL_LINK_STATUS, linkStatus, 0)
-        
-        if (linkStatus[0] != GLES20.GL_TRUE) {
-            val errorLog = GLES20.glGetProgramInfoLog(handle)
-            throw ShaderCompileException("Shader link error: '$errorLog'")
-        }
-        
-        Debug.Printf("Shaders: Binding variables...")
-        bindVariables()
-        Debug.Printf("Shaders: Compiled, handle %d", handle)
-        
-        return handle
+    ShaderProgram(Shader shader, Shader shader2) {
+        this.vertexShader = shader
+        this.fragmentShader = shader2
     }
 
-    protected abstract fun bindVariables()
+    int Compile(ShaderPreprocessor shaderPreprocessor) throws ShaderCompileException {
+        this.vertexShader.Compile(shaderPreprocessor)
+        this.fragmentShader.Compile(shaderPreprocessor)
+        Debug.Printf("Shaders: Linking...", new Object[0]);
+        this.handle = GLES20.glCreateProgram()
+        GLES20.glAttachShader(this.handle, this.vertexShader.getHandle())
+        GLES20.glAttachShader(this.handle, this.fragmentShader.getHandle())
+        GLES20.glLinkProgram(this.handle)
+        int[] iArr = new int[1]
+        GLES20.glGetProgramiv(this.handle, 35714, iArr, 0)
+        if (iArr[0] != 1) {
+            throw new ShaderCompileException(String.format("Shader link error: '%s'", new Object[]{GLES20.glGetProgramInfoLog(this.handle)}));
+        }
+        Debug.Printf("Shaders: Binding variables...", new Object[0]);
+        bindVariables()
+        Debug.Printf("Shaders: Compiled, handle %d", Integer.valueOf(this.handle));
+        return this.handle
+    }
 
-    fun getHandle(): Int = handle
+    protected abstract fun bindVariables(): Unit
+
+    fun getHandle(): Int {
+        return this.handle
+    }
 }

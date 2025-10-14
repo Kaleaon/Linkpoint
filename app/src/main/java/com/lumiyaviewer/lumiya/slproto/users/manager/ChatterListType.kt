@@ -5,5 +5,5 @@ enum class ChatterListType {
     Friends,
     Active,
     Groups,
-    Nearby
+    Nearby,
 }

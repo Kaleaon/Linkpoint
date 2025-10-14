@@ -1,39 +1,47 @@
 package com.lumiyaviewer.lumiya.render.spatial
+import java.util.*
 
 import com.lumiyaviewer.lumiya.utils.InlineList
 import com.lumiyaviewer.lumiya.utils.InlineListEntry
+import javax.annotation.Nonnull
 
-abstract class DrawListEntry : InlineListEntry<DrawListEntry> {
-    
-    val boundingBox = FloatArray(6)
-    
-    @Volatile
-    private var list: InlineList<DrawListEntry>? = null
-    
+abstract class DrawListEntry implements InlineListEntry<DrawListEntry> {
+    @Nonnull
+    float[] boundingBox = new float[6]
+    private volatile InlineList<DrawListEntry> list
     private var next: DrawListEntry? = null
     private var prev: DrawListEntry? = null
 
-    abstract fun addToDrawList(drawList: DrawList)
+    abstract fun addToDrawList(drawList: DrawList): Unit
 
-    override fun getList(): InlineList<DrawListEntry>? = list
-
-    override fun getNext(): DrawListEntry? = next
-
-    override fun getPrev(): DrawListEntry? = prev
-
-    override fun setList(list: InlineList<DrawListEntry>?) {
-        this.list = list
+    fun getList(): InlineList<DrawListEntry> {
+        return this.list
     }
 
-    override fun setNext(entry: DrawListEntry?) {
-        next = entry
+    fun getNext(): DrawListEntry {
+        return this.next
     }
 
-    override fun setPrev(entry: DrawListEntry?) {
-        prev = entry
+    fun getPrev(): DrawListEntry {
+        return this.prev
     }
 
-    fun requestEntryRemoval() {
-        list?.requestEntryRemoval(this)
+    fun requestEntryRemoval(): Unit {
+        InlineList inlineList = this.list
+        if (inlineList != null) {
+            inlineList.requestEntryRemoval(this)
+        }
+    }
+
+    fun setList(inlineList: InlineList<DrawListEntry>): Unit {
+        this.list = inlineList
+    }
+
+    fun setNext(drawListEntry: DrawListEntry): Unit {
+        this.next = drawListEntry
+    }
+
+    fun setPrev(drawListEntry: DrawListEntry): Unit {
+        this.prev = drawListEntry
     }
 }

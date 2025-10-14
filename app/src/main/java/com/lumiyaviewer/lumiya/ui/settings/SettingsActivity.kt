@@ -3,46 +3,51 @@ package com.lumiyaviewer.lumiya.ui.settings
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.support.annotation.Nullable
+import android.support.v4.app.Fragment
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory
 import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity
 
-class SettingsActivity : MasterDetailsActivity() {
+class SettingsActivity : MasterDetailsActivity {
+    private FragmentActivityFactory detailsFragmentFactory = FragmentActivityFactory() {
+        Intent createIntent(Context context, Bundle bundle) {
+            return null
+        }
 
-    private val detailsFragmentFactory = object : FragmentActivityFactory {
-        override fun createIntent(context: Context, args: Bundle?): Intent? = null
-
-        override fun getFragmentClass(): Class<out Fragment> = SettingsFragment::class.java
-    }
-
-    override fun getDetailsFragmentFactory(): FragmentActivityFactory {
-        return detailsFragmentFactory
-    }
-
-    override fun getNewDetailsFragmentArguments(
-        selectedItem: Bundle?,
-        itemFroDetails: Bundle?
-    ): Bundle? {
-        return if (selectedItem == null) {
-            SettingsFragment.makeSelection(SettingsPage.PageConnection.pageResourceId)
-        } else {
-            super.getNewDetailsFragmentArguments(selectedItem, itemFroDetails)
+        Class<? : Fragment> getFragmentClass() {
+            return SettingsFragment.class
         }
     }
 
-    override fun handleConnectionEvents(): Boolean = false
-
-    override fun isRootDetailsFragment(fragmentClass: Class<out Fragment>): Boolean {
-        return fragmentClass == SettingsFragment::class.java
+    /* access modifiers changed from: protected */
+    FragmentActivityFactory getDetailsFragmentFactory() {
+        return this.detailsFragmentFactory
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setDefaultTitle(getString(R.string.settings_title), null)
+    /* access modifiers changed from: protected */
+    Bundle getNewDetailsFragmentArguments(@Nullable Bundle bundle, @Nullable Bundle bundle2) {
+        return bundle == null ? SettingsFragment.makeSelection(SettingsPage.PageConnection.getPageResourceId()) : super.getNewDetailsFragmentArguments(bundle, bundle2)
     }
 
-    override fun onCreateMasterFragment(intent: Intent, savedInstanceState: Bundle?): Fragment {
+    /* access modifiers changed from: protected */
+    Boolean handleConnectionEvents() {
+        return false
+    }
+
+    /* access modifiers changed from: protected */
+    Boolean isRootDetailsFragment(Class<? : Fragment> cls) {
+        return cls == SettingsFragment.class
+    }
+
+    /* access modifiers changed from: protected */
+    Unit onCreate(@Nullable Bundle bundle) {
+        super.onCreate(bundle)
+        setDefaultTitle(getString(R.string.settings_title), (String) null)
+    }
+
+    /* access modifiers changed from: protected */
+    Fragment onCreateMasterFragment(Intent intent, @Nullable Bundle bundle) {
         return SettingsSelectionFragment()
     }
 }

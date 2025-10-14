@@ -1,37 +1,47 @@
 package com.lumiyaviewer.lumiya.render.spatial
+import java.util.*
 
 import com.lumiyaviewer.lumiya.render.DrawableObject
 import com.lumiyaviewer.lumiya.render.DrawableStore
 import com.lumiyaviewer.lumiya.render.avatar.DrawableAvatar
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo
 import java.lang.ref.WeakReference
+import javax.annotation.Nonnull
 
-class DrawListPrimEntry(objectInfo: SLObjectInfo) : DrawListObjectEntry(objectInfo) {
-    
-    @Volatile
-    private var drawableObject: WeakReference<DrawableObject>? = null
+class DrawListPrimEntry : DrawListObjectEntry {
+    private volatile WeakReference<DrawableObject> drawableObject = null
 
-    override fun addToDrawList(drawList: DrawList) {
-        var drawable = drawableObject?.get()
-        if (drawable == null) {
-            drawable = DrawableObject(drawList.drawableStore, objectInfo, null)
-            drawableObject = WeakReference(drawable)
-        }
-        drawList.objects.add(drawable)
+    constructor(sLObjectInfo: SLObjectInfo) {
+        super(sLObjectInfo)
     }
 
+    fun addToDrawList(drawList: DrawList): Unit {
+        WeakReference weakReference = this.drawableObject
+        Any obj = weakReference != null ? (DrawableObject) weakReference.get() : null
+        if (obj == null) {
+            obj = DrawableObject(drawList.drawableStore, this.objectInfo, null)
+            this.drawableObject = WeakReference(obj)
+        }
+        drawList.objects.add(obj)
+    }
+
+    @Nonnull
     fun getDrawableAttachment(drawableStore: DrawableStore, drawableAvatar: DrawableAvatar): DrawableObject {
-        var drawable = drawableObject?.get()
-        if (drawable != null) {
-            return drawable
+        DrawableObject drawableObject = null
+        WeakReference weakReference = this.drawableObject
+        if (weakReference != null) {
+            drawableObject = (DrawableObject) weakReference.get()
         }
-        
-        drawable = DrawableObject(drawableStore, objectInfo, drawableAvatar)
-        drawableObject = WeakReference(drawable)
-        return drawable
+        if (drawableObject != null) {
+            return drawableObject
+        }
+        drawableObject = DrawableObject(drawableStore, this.objectInfo, drawableAvatar)
+        this.drawableObject = WeakReference(drawableObject)
+        return drawableObject
     }
 
-    fun getDrawableObject(): DrawableObject? {
-        return drawableObject?.get()
+    fun getDrawableObject(): DrawableObject {
+        WeakReference weakReference = this.drawableObject
+        return weakReference != null ? (DrawableObject) weakReference.get() : null
     }
 }

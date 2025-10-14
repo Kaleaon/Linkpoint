@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.cloud
 import com.google.common.collect.ImmutableList
 
 internal class LogWriteTracker(
-    private val onLoggingDone: OnLoggingDoneListener?
+    private val onLoggingDone: OnLoggingDoneListener?,
 ) {
     private var isLoggingSuspended: Boolean = false
     private val openedFiles: MutableSet<DriveTextFile> = HashSet()
@@ -55,6 +55,7 @@ internal class LogWriteTracker(
 
     interface OnLoggingDoneListener {
         fun onLoggingDone()
+
         fun onLoggingNeeded()
     }
 }

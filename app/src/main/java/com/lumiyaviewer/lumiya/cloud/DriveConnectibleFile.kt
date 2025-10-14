@@ -13,48 +13,49 @@ internal open class DriveConnectibleFile(
     parentResource: DriveConnectibleResource?,
     googleApiClient: GoogleApiClient,
     resourceName: String,
-    private val mimeType: String
+    private val mimeType: String,
 ) : DriveConnectibleResource(
-    context,
-    driveSynchronizer,
-    null,
-    parentResource,
-    googleApiClient,
-    resourceName
-) {
+        context,
+        driveSynchronizer,
+        null,
+        parentResource,
+        googleApiClient,
+        resourceName,
+    ) {
+    private val fileCreatedCallback =
+        ResultCallback<DriveFolder.DriveFileResult> { result ->
+            val status = result.status
 
-    private val fileCreatedCallback = ResultCallback<DriveFolder.DriveFileResult> { result ->
-        val status = result.status
-        
-        when {
-            status.isSuccess -> {
-                onResourceCreated(result.driveFile)
-            }
-            status.hasResolution() -> {
-                ErrorResolutionTracker.getInstance()?.addResolvableError(
-                    ErrorResolutionTracker.ResolvableError(
-                        resourceName,
-                        status,
-                        object : ErrorResolutionTracker.RestartableOperation {
-                            override fun tryRestartingOperation() {
-                                startCreatingResource()
-                            }
-                        }
+            when {
+                status.isSuccess -> {
+                    onResourceCreated(result.driveFile)
+                }
+                status.hasResolution() -> {
+                    ErrorResolutionTracker.getInstance()?.addResolvableError(
+                        ErrorResolutionTracker.ResolvableError(
+                            resourceName,
+                            status,
+                            object : ErrorResolutionTracker.RestartableOperation {
+                                override fun tryRestartingOperation() {
+                                    startCreatingResource()
+                                }
+                            },
+                        ),
                     )
-                )
-            }
-            else -> {
-                onResourceCreationFailed(status.statusMessage)
+                }
+                else -> {
+                    onResourceCreationFailed(status.statusMessage)
+                }
             }
         }
-    }
 
     override fun createResource(driveFolder: DriveFolder) {
-        val metadataChangeSet = MetadataChangeSet.Builder()
-            .setTitle(resourceName)
-            .setMimeType(mimeType)
-            .build()
-        
+        val metadataChangeSet =
+            MetadataChangeSet.Builder()
+                .setTitle(resourceName)
+                .setMimeType(mimeType)
+                .build()
+
         driveFolder.createFile(googleApiClient, metadataChangeSet, null)
             .setResultCallback(fileCreatedCallback)
     }
@@ -64,8 +65,8 @@ internal open class DriveConnectibleFile(
     }
 
     override fun isMetadataOk(metadata: Metadata): Boolean {
-        return !metadata.isTrashed && 
-               !metadata.isExplicitlyTrashed && 
-               !metadata.isFolder
+        return !metadata.isTrashed &&
+            !metadata.isExplicitlyTrashed &&
+            !metadata.isFolder
     }
 }

@@ -15,13 +15,12 @@ data class User(
     var badUUID: Boolean = false,
     var isFriend: Boolean = false,
     var rightsGiven: Int = 0,
-    var rightsHas: Int = 0
+    var rightsHas: Int = 0,
 ) : ChatterDisplayInfo {
-
     override fun buildView(
         context: Context,
         chatterItemViewBuilder: ChatterItemViewBuilder,
-        userManager: UserManager
+        userManager: UserManager,
     ) {
         chatterItemViewBuilder.setLabel(displayName)
         chatterItemViewBuilder.setThumbnailChatterID(getChatterID(userManager), displayName)

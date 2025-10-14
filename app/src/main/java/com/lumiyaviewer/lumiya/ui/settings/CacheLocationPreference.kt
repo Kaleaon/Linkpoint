@@ -1,47 +1,39 @@
 package com.lumiyaviewer.lumiya.ui.settings
 
 import android.content.Context
+import android.support.v7.preference.Preference
 import android.util.AttributeSet
-import androidx.preference.Preference
 import com.google.common.base.Strings
 import com.lumiyaviewer.lumiya.R
 
 class CacheLocationPreference : Preference {
-
-    constructor(context: Context) : super(context)
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : 
-        super(context, attrs, defStyleAttr, defStyleRes)
-
-    override fun getSummary(): CharSequence {
-        val persistedString = getPersistedString(null)
-        return if (Strings.isNullOrEmpty(persistedString)) {
-            context.getString(R.string.default_cache_location)
-        } else {
-            makeDisplayableCacheLocation(persistedString!!)
-        }
+    CacheLocationPreference(Context context) {
+        super(context)
     }
 
-    companion object {
-        @JvmStatic
-        fun makeDisplayableCacheLocation(path: String): String {
-            var result = path
-            
-            val androidIndex = result.indexOf("/Android")
-            if (androidIndex >= 0) {
-                result = result.substring(0, androidIndex)
-            }
-            
-            val packageIndex = result.indexOf("/com.lumiyaviewer.lumiya")
-            if (packageIndex >= 0) {
-                result = result.substring(0, packageIndex)
-            }
-            
-            return result
+    CacheLocationPreference(Context context, AttributeSet attributeSet) {
+        super(context, attributeSet)
+    }
+
+    CacheLocationPreference(Context context, AttributeSet attributeSet, Int i) {
+        super(context, attributeSet, i)
+    }
+
+    CacheLocationPreference(Context context, AttributeSet attributeSet, Int i, Int i2) {
+        super(context, attributeSet, i, i2)
+    }
+
+    String makeDisplayableCacheLocation(String str) {
+        Int indexOf = str.indexOf("/Android")
+        if (indexOf >= 0) {
+            str = str.substring(0, indexOf)
         }
+        Int indexOf2 = str.indexOf("/com.lumiyaviewer.lumiya")
+        return indexOf2 >= 0 ? str.substring(0, indexOf2) : str
+    }
+
+    CharSequence getSummary() {
+        String persistedString = getPersistedString((String) null)
+        return Strings.isNullOrEmpty(persistedString) ? getContext().getString(R.string.default_cache_location) : makeDisplayableCacheLocation(persistedString)
     }
 }

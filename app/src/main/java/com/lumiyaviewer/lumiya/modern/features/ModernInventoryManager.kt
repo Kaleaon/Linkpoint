@@ -11,33 +11,32 @@ import java.util.concurrent.ConcurrentHashMap
  * Compatible with Second Life, Firestorm, and OpenSimulator inventory systems
  */
 class ModernInventoryManager(private val protocolManager: HybridProtocolManager?) {
-    
     private val inventoryCache = ConcurrentHashMap<UUID, InventoryItem>()
     private val folderCache = ConcurrentHashMap<UUID, InventoryFolder>()
-    
+
     // Inventory state
     @Volatile
     private var inventoryLoaded = false
     private var rootFolderId: UUID? = null
-    
+
     init {
         Log.i(TAG, "Modern inventory manager initialized")
     }
-    
+
     /**
      * Initialize inventory system
      */
     fun initializeAsync(): CompletableFuture<Boolean> {
         Log.i(TAG, "Initializing modern inventory system")
-        
+
         return CompletableFuture.supplyAsync {
             try {
                 // Initialize root folder
                 rootFolderId = UUID.randomUUID()
-                
+
                 // Create default folder structure
                 createDefaultFolders()
-                
+
                 inventoryLoaded = true
                 Log.i(TAG, "Inventory system initialized successfully")
                 true
@@ -47,26 +46,27 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
             }
         }
     }
-    
+
     /**
      * Create default inventory folders (compatible with SL/Firestorm structure)
      */
     private fun createDefaultFolders() {
         // Standard Second Life inventory folders
-        val defaultFolders = arrayOf(
-            "Textures", "Sounds", "Calling Cards", "Landmarks", "Clothing",
-            "Objects", "Notecards", "Scripts", "Body Parts", "Trash",
-            "Photo Album", "Lost And Found", "Animations", "Gestures",
-            "Current Outfit", "My Outfits"
-        )
-        
+        val defaultFolders =
+            arrayOf(
+                "Textures", "Sounds", "Calling Cards", "Landmarks", "Clothing",
+                "Objects", "Notecards", "Scripts", "Body Parts", "Trash",
+                "Photo Album", "Lost And Found", "Animations", "Gestures",
+                "Current Outfit", "My Outfits",
+            )
+
         for (folderName in defaultFolders) {
             val folderId = UUID.randomUUID()
             val folder = InventoryFolder(folderId, folderName, rootFolderId)
             folderCache[folderId] = folder
         }
     }
-    
+
     /**
      * Fetch inventory item
      */
@@ -76,7 +76,7 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
             if (inventoryCache.containsKey(itemId)) {
                 return@supplyAsync inventoryCache[itemId]
             }
-            
+
             // Fetch from protocol manager if available
             if (protocolManager?.isConnected == true) {
                 try {
@@ -90,11 +90,11 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
                     Log.e(TAG, "Failed to fetch item: $itemId", e)
                 }
             }
-            
+
             null
         }
     }
-    
+
     /**
      * Request item from grid (stub - would use actual protocol)
      */
@@ -103,28 +103,31 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
         Log.d(TAG, "Requesting item from grid: $itemId")
         return null
     }
-    
+
     /**
      * Get all items in folder
      */
     fun getFolderContentsAsync(folderId: UUID): CompletableFuture<List<InventoryItem>> {
         return CompletableFuture.supplyAsync {
             val items = mutableListOf<InventoryItem>()
-            
+
             for (item in inventoryCache.values) {
                 if (item.parentFolderId == folderId) {
                     items.add(item)
                 }
             }
-            
+
             items
         }
     }
-    
+
     /**
      * Move item to folder
      */
-    fun moveItemAsync(itemId: UUID, targetFolderId: UUID): CompletableFuture<Boolean> {
+    fun moveItemAsync(
+        itemId: UUID,
+        targetFolderId: UUID,
+    ): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync {
             try {
                 val item = inventoryCache[itemId]
@@ -132,15 +135,15 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
                     Log.w(TAG, "Item not found: $itemId")
                     return@supplyAsync false
                 }
-                
+
                 item.parentFolderId = targetFolderId
-                
+
                 // Update on grid if connected
                 if (protocolManager?.isConnected == true) {
                     // Send update to grid
                     Log.d(TAG, "Updating item location on grid: $itemId")
                 }
-                
+
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to move item: $itemId", e)
@@ -148,7 +151,7 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
             }
         }
     }
-    
+
     /**
      * Delete item
      */
@@ -160,12 +163,12 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
                     Log.w(TAG, "Item not found: $itemId")
                     return@supplyAsync false
                 }
-                
+
                 // Move to trash folder on grid if connected
                 if (protocolManager?.isConnected == true) {
                     Log.d(TAG, "Moving item to trash on grid: $itemId")
                 }
-                
+
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to delete item: $itemId", e)
@@ -173,15 +176,15 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
             }
         }
     }
-    
+
     fun isInventoryLoaded(): Boolean {
         return inventoryLoaded
     }
-    
+
     fun getRootFolderId(): UUID? {
         return rootFolderId
     }
-    
+
     /**
      * Inventory item model (compatible with SL/Firestorm)
      */
@@ -192,14 +195,25 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
         var parentFolderId: UUID,
         val type: InventoryType,
         val assetId: UUID,
-        val creationDate: Long = System.currentTimeMillis()
+        val creationDate: Long = System.currentTimeMillis(),
     ) {
         enum class InventoryType {
-            TEXTURE, SOUND, CALLING_CARD, LANDMARK, CLOTHING, OBJECT,
-            NOTECARD, SCRIPT, BODY_PART, ANIMATION, GESTURE, MESH, SETTINGS
+            TEXTURE,
+            SOUND,
+            CALLING_CARD,
+            LANDMARK,
+            CLOTHING,
+            OBJECT,
+            NOTECARD,
+            SCRIPT,
+            BODY_PART,
+            ANIMATION,
+            GESTURE,
+            MESH,
+            SETTINGS,
         }
     }
-    
+
     /**
      * Inventory folder model
      */
@@ -207,9 +221,9 @@ class ModernInventoryManager(private val protocolManager: HybridProtocolManager?
         val folderId: UUID,
         val name: String,
         val parentFolderId: UUID?,
-        val childFolders: MutableList<UUID> = mutableListOf()
+        val childFolders: MutableList<UUID> = mutableListOf(),
     )
-    
+
     companion object {
         private const val TAG = "ModernInventoryManager"
     }

@@ -12,7 +12,6 @@ import java.util.*
  * Converted from Java to Kotlin with improved type safety and coroutines support.
  */
 class EventBus private constructor() {
-    
     private val handlers = mutableListOf<HandlerInfo>()
 
     /**
@@ -23,9 +22,8 @@ class EventBus private constructor() {
         private val activity: Activity?,
         private val subscriber: Any,
         private val method: Method,
-        private val handler: Handler?
+        private val handler: Handler?,
     ) : Runnable {
-
         override fun run() {
             try {
                 method.invoke(subscriber, event)
@@ -51,14 +49,16 @@ class EventBus private constructor() {
         val method: Method,
         subscriber: Any,
         activity: Activity?,
-        handler: Handler?
+        handler: Handler?,
     ) {
         private val subscriberRef = WeakReference(subscriber)
         private val activityRef = WeakReference(activity)
         private val handlerRef = WeakReference(handler)
 
         fun getActivity(): Activity? = activityRef.get()
+
         fun getHandler(): Handler? = handlerRef.get()
+
         fun getSubscriber(): Any? = subscriberRef.get()
 
         fun matchesEvent(event: Any): Boolean = event.javaClass == eventClass
@@ -69,10 +69,10 @@ class EventBus private constructor() {
      */
     companion object {
         private const val TAG = "EventBus"
-        
+
         @JvmStatic
         fun getInstance(): EventBus = InstanceHolder.instance
-        
+
         private object InstanceHolder {
             val instance = EventBus()
         }
@@ -84,7 +84,7 @@ class EventBus private constructor() {
     @Synchronized
     fun publish(event: Any) {
         val deadHandlers = mutableListOf<HandlerInfo>()
-        
+
         for (handler in handlers) {
             if (handler.matchesEvent(event)) {
                 val subscriber = handler.getSubscriber()
@@ -96,12 +96,12 @@ class EventBus private constructor() {
                         handler.getActivity(),
                         subscriber,
                         handler.method,
-                        handler.getHandler()
+                        handler.getHandler(),
                     ).runOnUIThread()
                 }
             }
         }
-        
+
         // Clean up dead references
         handlers.removeAll(deadHandlers)
     }
@@ -131,10 +131,14 @@ class EventBus private constructor() {
      */
     @JvmOverloads
     @Synchronized
-    fun subscribe(subscriber: Any, activity: Activity?, handler: Handler? = null) {
+    fun subscribe(
+        subscriber: Any,
+        activity: Activity?,
+        handler: Handler? = null,
+    ) {
         // Clean up any existing dead references and duplicate subscriptions
         val deadHandlers = mutableListOf<HandlerInfo>()
-        
+
         for (handlerInfo in handlers) {
             val existingSubscriber = handlerInfo.getSubscriber()
             when {
@@ -142,9 +146,9 @@ class EventBus private constructor() {
                 existingSubscriber == null -> deadHandlers.add(handlerInfo)
             }
         }
-        
+
         handlers.removeAll(deadHandlers)
-        
+
         // Register event handler methods
         for (method in subscriber.javaClass.methods) {
             if (method.isAnnotationPresent(EventHandler::class.java)) {
@@ -152,7 +156,7 @@ class EventBus private constructor() {
                 require(parameterTypes.size == 1) {
                     "EventHandler methods must specify a single parameter"
                 }
-                
+
                 handlers.add(HandlerInfo(parameterTypes[0], method, subscriber, activity, handler))
             }
         }

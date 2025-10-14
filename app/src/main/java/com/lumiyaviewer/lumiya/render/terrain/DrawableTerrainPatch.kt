@@ -1,4 +1,5 @@
 package com.lumiyaviewer.lumiya.render.terrain
+import java.util.*
 
 import android.opengl.Matrix
 import com.lumiyaviewer.lumiya.Debug
@@ -9,47 +10,37 @@ import com.lumiyaviewer.lumiya.res.ResourceConsumer
 import com.lumiyaviewer.lumiya.res.terrain.TerrainGeometryCache
 import com.lumiyaviewer.lumiya.slproto.terrain.TerrainPatchInfo
 
-class DrawableTerrainPatch(
-    terrainGeometryCache: TerrainGeometryCache,
-    terrainTextureCache: GLTerrainTextureCache?,
-    terrainPatchInfo: TerrainPatchInfo,
-    patchX: Int,
-    patchY: Int
-) : ResourceConsumer {
+class DrawableTerrainPatch : ResourceConsumer {
+    private volatile TerrainPatchGeometry geometry
+    private Float[] objWorldMatrix = Float[16]
+    private volatile GLLoadedTexture texture
 
-    companion object {
-        @JvmStatic
-        fun GLPrepare(renderContext: RenderContext) {
-            TerrainPatchGeometry.GLPrepare(renderContext)
+    constructor(terrainGeometryCache: TerrainGeometryCache, gLTerrainTextureCache: GLTerrainTextureCache, terrainPatchInfo: TerrainPatchInfo, i: Int, i2: Int) {
+        Matrix.setIdentityM(this.objWorldMatrix, 0)
+        Matrix.translateM(this.objWorldMatrix, 0, (Float) (i * 16), (Float) (i2 * 16), 0.0f)
+        terrainGeometryCache.RequestResource(terrainPatchInfo.getHeightMap(), this)
+        gLTerrainTextureCache?.RequestResource(terrainPatchInfo, this)
         }
     }
 
-    private val objWorldMatrix = FloatArray(16)
-    
-    @Volatile
-    private var geometry: TerrainPatchGeometry? = null
-    
-    @Volatile
-    private var texture: GLLoadedTexture? = null
-
-    init {
-        Matrix.setIdentityM(objWorldMatrix, 0)
-        Matrix.translateM(objWorldMatrix, 0, (patchX * 16).toFloat(), (patchY * 16).toFloat(), 0.0f)
-        
-        terrainGeometryCache.RequestResource(terrainPatchInfo.heightMap, this)
-        terrainTextureCache?.RequestResource(terrainPatchInfo, this)
+    fun GLPrepare(renderContext: RenderContext): Unit {
+        TerrainPatchGeometry.GLPrepare(renderContext)
     }
 
-    fun GLDraw(renderContext: RenderContext) {
-        geometry?.GLDraw(renderContext, objWorldMatrix, texture)
+    fun GLDraw(renderContext: RenderContext): Unit {
+        TerrainPatchGeometry terrainPatchGeometry = this.geometry
+        terrainPatchGeometry?.GLDraw(renderContext, this.objWorldMatrix, this.texture)
+        }
     }
 
-    override fun OnResourceReady(resource: Any?, priority: Boolean) {
-        Debug.Printf("DrawableTerrainPatch: got resource = %s", resource?.toString() ?: "null")
-        
-        when (resource) {
-            is TerrainPatchGeometry -> geometry = resource
-            is GLLoadedTexture -> texture = resource
+    fun OnResourceReady(obj: Any, z: Boolean): Unit {
+        Any[] objArr = Any[1]
+        objArr[0] = obj != null ? obj.toString() : "null";
+        Debug.Printf("DrawableTerrainPatch: got resource = %s", objArr);
+        if (obj instanceof TerrainPatchGeometry) {
+            this.geometry = (TerrainPatchGeometry) obj
+        } else if (obj instanceof GLLoadedTexture) {
+            this.texture = (GLLoadedTexture) obj
         }
     }
 }

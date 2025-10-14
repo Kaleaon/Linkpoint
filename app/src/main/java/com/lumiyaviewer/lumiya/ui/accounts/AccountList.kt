@@ -49,7 +49,10 @@ class AccountList(private val context: Context) {
             return PasswordHash
         }
 
-        fun saveToPreferences(editor: SharedPreferences.Editor, str: String) {
+        fun saveToPreferences(
+            editor: SharedPreferences.Editor,
+            str: String,
+        ) {
             editor.putString("${str}_login_name", LoginName)
             editor.putString("${str}_pwd_hash", PasswordHash)
             editor.putString("${str}_grid", GridUUID?.toString())
@@ -67,7 +70,10 @@ class AccountList(private val context: Context) {
             this.PasswordHash = str
         }
 
-        override fun writeToParcel(parcel: Parcel, i: Int) {
+        override fun writeToParcel(
+            parcel: Parcel,
+            i: Int,
+        ) {
             parcel.writeString(LoginName)
             parcel.writeString(PasswordHash)
             parcel.writeString(GridUUID?.toString() ?: "")
@@ -96,11 +102,18 @@ class AccountList(private val context: Context) {
         accounts.remove(accountInfo)
     }
 
-    fun findAccount(loginName: String, uuid: UUID): AccountInfo? {
+    fun findAccount(
+        loginName: String,
+        uuid: UUID,
+    ): AccountInfo? {
         return accounts.firstOrNull { it.getLoginName() == loginName && it.getGridUUID() == uuid }
     }
 
-    fun findOrAddAccount(loginName: String, passwordHash: String, uuid: UUID): AccountInfo {
+    fun findOrAddAccount(
+        loginName: String,
+        passwordHash: String,
+        uuid: UUID,
+    ): AccountInfo {
         val existingAccount = findAccount(loginName, uuid)
         if (existingAccount != null) {
             existingAccount.setPasswordHash(passwordHash)

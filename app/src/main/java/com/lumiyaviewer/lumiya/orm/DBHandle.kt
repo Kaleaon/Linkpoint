@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteQuery
 
 class DBHandle(private val sqliteDB: SQLiteDatabase) : SQLiteDatabase.CursorFactory {
-
     init {
         require(sqliteDB != null) { "SQLiteDatabase cannot be null" }
     }
@@ -20,7 +19,7 @@ class DBHandle(private val sqliteDB: SQLiteDatabase) : SQLiteDatabase.CursorFact
         db: SQLiteDatabase?,
         masterQuery: SQLiteCursorDriver?,
         editTable: String?,
-        query: SQLiteQuery?
+        query: SQLiteQuery?,
     ): Cursor {
         requireNotNull(db) { "SQLiteDatabase cannot be null" }
         return DBHandleCursor(db, masterQuery, editTable, query)
@@ -30,6 +29,6 @@ class DBHandle(private val sqliteDB: SQLiteDatabase) : SQLiteDatabase.CursorFact
         db: SQLiteDatabase,
         driver: SQLiteCursorDriver?,
         editTable: String?,
-        query: SQLiteQuery?
+        query: SQLiteQuery?,
     ) : SQLiteCursor(db, driver, editTable, query)
 }

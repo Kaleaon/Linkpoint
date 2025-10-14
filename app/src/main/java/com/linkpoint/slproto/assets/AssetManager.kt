@@ -13,18 +13,18 @@ import java.util.concurrent.ConcurrentHashMap
  */
 class AssetManager(
     private val capsManager: CapsManager,
-    private val cacheDir: File
+    private val cacheDir: File,
 ) {
-    
     private val assetCache = ConcurrentHashMap<UUID, Asset>()
     private val downloadQueue = ConcurrentHashMap<UUID, Job>()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
-    private val httpClient = OkHttpClient.Builder()
-        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-        .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
-        .build()
-    
+
+    private val httpClient =
+        OkHttpClient.Builder()
+            .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+
     companion object {
         // Asset types
         const val ASSET_TYPE_TEXTURE = 0
@@ -45,140 +45,154 @@ class AssetManager(
         const val ASSET_TYPE_SETTINGS = 56
         const val ASSET_TYPE_MATERIAL = 57
     }
-    
+
     init {
         // Create cache directory if it doesn't exist
         if (!cacheDir.exists()) {
             cacheDir.mkdirs()
         }
     }
-    
+
     /**
      * Request an asset
      */
     suspend fun requestAsset(
         assetId: UUID,
         assetType: Int,
-        priority: Int = 0
-    ): Asset? = withContext(Dispatchers.IO) {
-        // Check cache first
-        assetCache[assetId]?.let { return@withContext it }
-        
-        // Check disk cache
-        val cacheFile = File(cacheDir, "$assetId.asset")
-        if (cacheFile.exists()) {
-            val data = cacheFile.readBytes()
-            val asset = Asset(assetId, assetType, data)
-            assetCache[assetId] = asset
-            return@withContext asset
+        priority: Int = 0,
+    ): Asset? =
+        withContext(Dispatchers.IO) {
+            // Check cache first
+            assetCache[assetId]?.let { return@withContext it }
+
+            // Check disk cache
+            val cacheFile = File(cacheDir, "$assetId.asset")
+            if (cacheFile.exists()) {
+                val data = cacheFile.readBytes()
+                val asset = Asset(assetId, assetType, data)
+                assetCache[assetId] = asset
+                return@withContext asset
+            }
+
+            // Download from server
+            downloadAsset(assetId, assetType, priority)
         }
-        
-        // Download from server
-        downloadAsset(assetId, assetType, priority)
-    }
-    
+
     /**
      * Download asset from server
      */
     private suspend fun downloadAsset(
         assetId: UUID,
         assetType: Int,
-        priority: Int
-    ): Asset? = withContext(Dispatchers.IO) {
-        // Check if already downloading
-        if (downloadQueue.containsKey(assetId)) {
-            downloadQueue[assetId]?.join()
-            return@withContext assetCache[assetId]
-        }
-        
-        val job = async {
-            try {
-                val data = when (assetType) {
-                    ASSET_TYPE_TEXTURE, ASSET_TYPE_TEXTURE_TGA -> downloadTexture(assetId)
-                    ASSET_TYPE_MESH -> downloadMesh(assetId)
-                    else -> downloadGenericAsset(assetId, assetType)
-                }
-                
-                if (data != null) {
-                    val asset = Asset(assetId, assetType, data)
-                    assetCache[assetId] = asset
-                    
-                    // Save to disk cache
-                    val cacheFile = File(cacheDir, "$assetId.asset")
-                    cacheFile.writeBytes(data)
-                    
-                    asset
-                } else {
-                    null
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            } finally {
-                downloadQueue.remove(assetId)
+        priority: Int,
+    ): Asset? =
+        withContext(Dispatchers.IO) {
+            // Check if already downloading
+            if (downloadQueue.containsKey(assetId)) {
+                downloadQueue[assetId]?.join()
+                return@withContext assetCache[assetId]
             }
+
+            val job =
+                async {
+                    try {
+                        val data =
+                            when (assetType) {
+                                ASSET_TYPE_TEXTURE, ASSET_TYPE_TEXTURE_TGA -> downloadTexture(assetId)
+                                ASSET_TYPE_MESH -> downloadMesh(assetId)
+                                else -> downloadGenericAsset(assetId, assetType)
+                            }
+
+                        if (data != null) {
+                            val asset = Asset(assetId, assetType, data)
+                            assetCache[assetId] = asset
+
+                            // Save to disk cache
+                            val cacheFile = File(cacheDir, "$assetId.asset")
+                            cacheFile.writeBytes(data)
+
+                            asset
+                        } else {
+                            null
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        null
+                    } finally {
+                        downloadQueue.remove(assetId)
+                    }
+                }
+
+            downloadQueue[assetId] = job
+            job.await()
         }
-        
-        downloadQueue[assetId] = job
-        job.await()
-    }
-    
+
     /**
      * Download texture via GetTexture capability
      */
-    private suspend fun downloadTexture(textureId: UUID): ByteArray? = withContext(Dispatchers.IO) {
-        val getTextureUrl = capsManager.getCapability(CapsManager.CAP_GET_TEXTURE)
-            ?: return@withContext null
-        
-        val url = "$getTextureUrl?texture_id=$textureId"
-        
-        val request = Request.Builder()
-            .url(url)
-            .get()
-            .build()
-        
-        val response = httpClient.newCall(request).execute()
-        
-        if (response.isSuccessful) {
-            response.body?.bytes()
-        } else {
-            null
+    private suspend fun downloadTexture(textureId: UUID): ByteArray? =
+        withContext(Dispatchers.IO) {
+            val getTextureUrl =
+                capsManager.getCapability(CapsManager.CAP_GET_TEXTURE)
+                    ?: return@withContext null
+
+            val url = "$getTextureUrl?texture_id=$textureId"
+
+            val request =
+                Request.Builder()
+                    .url(url)
+                    .get()
+                    .build()
+
+            val response = httpClient.newCall(request).execute()
+
+            if (response.isSuccessful) {
+                response.body?.bytes()
+            } else {
+                null
+            }
         }
-    }
-    
+
     /**
      * Download mesh via GetMesh capability
      */
-    private suspend fun downloadMesh(meshId: UUID): ByteArray? = withContext(Dispatchers.IO) {
-        val getMeshUrl = capsManager.getCapability(CapsManager.CAP_GET_MESH2)
-            ?: capsManager.getCapability(CapsManager.CAP_GET_MESH)
-            ?: return@withContext null
-        
-        val url = "$getMeshUrl?mesh_id=$meshId"
-        
-        val request = Request.Builder()
-            .url(url)
-            .get()
-            .build()
-        
-        val response = httpClient.newCall(request).execute()
-        
-        if (response.isSuccessful) {
-            response.body?.bytes()
-        } else {
-            null
+    private suspend fun downloadMesh(meshId: UUID): ByteArray? =
+        withContext(Dispatchers.IO) {
+            val getMeshUrl =
+                capsManager.getCapability(CapsManager.CAP_GET_MESH2)
+                    ?: capsManager.getCapability(CapsManager.CAP_GET_MESH)
+                    ?: return@withContext null
+
+            val url = "$getMeshUrl?mesh_id=$meshId"
+
+            val request =
+                Request.Builder()
+                    .url(url)
+                    .get()
+                    .build()
+
+            val response = httpClient.newCall(request).execute()
+
+            if (response.isSuccessful) {
+                response.body?.bytes()
+            } else {
+                null
+            }
         }
-    }
-    
+
     /**
      * Download generic asset
      */
-    private suspend fun downloadGenericAsset(assetId: UUID, assetType: Int): ByteArray? = withContext(Dispatchers.IO) {
-        // For generic assets, we might need to use UDP transfer or other methods
-        // This is a placeholder for now
-        null
-    }
-    
+    private suspend fun downloadGenericAsset(
+        assetId: UUID,
+        assetType: Int,
+    ): ByteArray? =
+        withContext(Dispatchers.IO) {
+            // For generic assets, we might need to use UDP transfer or other methods
+            // This is a placeholder for now
+            null
+        }
+
     /**
      * Upload an asset
      */
@@ -186,28 +200,29 @@ class AssetManager(
         data: ByteArray,
         assetType: Int,
         name: String,
-        description: String
-    ): UUID? = withContext(Dispatchers.IO) {
-        try {
-            val assetTypeString = getAssetTypeString(assetType)
-            val response = capsManager.uploadAsset(assetTypeString, data, name, description)
-            
-            if (response is LLSDMap) {
-                val assetIdStr = (response["new_asset"] as? LLSDString)?.value
-                if (assetIdStr != null) {
-                    UUID.fromString(assetIdStr)
+        description: String,
+    ): UUID? =
+        withContext(Dispatchers.IO) {
+            try {
+                val assetTypeString = getAssetTypeString(assetType)
+                val response = capsManager.uploadAsset(assetTypeString, data, name, description)
+
+                if (response is LLSDMap) {
+                    val assetIdStr = (response["new_asset"] as? LLSDString)?.value
+                    if (assetIdStr != null) {
+                        UUID.fromString(assetIdStr)
+                    } else {
+                        null
+                    }
                 } else {
                     null
                 }
-            } else {
+            } catch (e: Exception) {
+                e.printStackTrace()
                 null
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
         }
-    }
-    
+
     /**
      * Get asset type string for CAPS
      */
@@ -221,7 +236,7 @@ class AssetManager(
             else -> "unknown"
         }
     }
-    
+
     /**
      * Clear cache
      */
@@ -229,7 +244,7 @@ class AssetManager(
         assetCache.clear()
         cacheDir.listFiles()?.forEach { it.delete() }
     }
-    
+
     /**
      * Cleanup
      */
@@ -244,7 +259,7 @@ class AssetManager(
 data class Asset(
     val assetId: UUID,
     val assetType: Int,
-    val data: ByteArray
+    val data: ByteArray,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -254,7 +269,7 @@ data class Asset(
         if (!data.contentEquals(other.data)) return false
         return true
     }
-    
+
     override fun hashCode(): Int {
         var result = assetId.hashCode()
         result = 31 * result + assetType

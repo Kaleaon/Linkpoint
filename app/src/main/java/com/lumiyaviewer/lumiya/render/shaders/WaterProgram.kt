@@ -2,27 +2,30 @@ package com.lumiyaviewer.lumiya.render.shaders
 
 import android.opengl.GLES20
 
-class WaterProgram : ShaderProgram(Shader.WaterVertexShader, Shader.WaterFragmentShader) {
+class WaterProgram : ShaderProgram {
+    Int uAmplitude
+    Int uDirection
+    Int uFrequency
+    Int uMVPMatrix
+    Int uObjWorldMatrix
+    Int uPhase
+    Int uTime
+    Int vColor
+    Int vPosition
 
-    var vPosition: Int = 0
-    var vColor: Int = 0
-    var uMVPMatrix: Int = 0
-    var uObjWorldMatrix: Int = 0
-    var uTime: Int = 0
-    var uFrequency: Int = 0
-    var uPhase: Int = 0
-    var uAmplitude: Int = 0
-    var uDirection: Int = 0
+    constructor() {
+        super(Shader.WaterVertexShader, Shader.WaterFragmentShader)
+    }
 
-    override fun bindVariables() {
-        vPosition = GLES20.glGetAttribLocation(handle, "vPosition")
-        vColor = GLES20.glGetUniformLocation(handle, "vColor")
-        uMVPMatrix = GLES20.glGetUniformLocation(handle, "uMVPMatrix")
-        uObjWorldMatrix = GLES20.glGetUniformLocation(handle, "uObjWorldMatrix")
-        uTime = GLES20.glGetUniformLocation(handle, "time")
-        uFrequency = GLES20.glGetUniformLocation(handle, "frequency")
-        uPhase = GLES20.glGetUniformLocation(handle, "phase")
-        uAmplitude = GLES20.glGetUniformLocation(handle, "amplitude")
-        uDirection = GLES20.glGetUniformLocation(handle, "direction")
+    protected fun bindVariables(): Unit {
+        this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition");
+        this.vColor = GLES20.glGetUniformLocation(this.handle, "vColor");
+        this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix");
+        this.uObjWorldMatrix = GLES20.glGetUniformLocation(this.handle, "uObjWorldMatrix");
+        this.uTime = GLES20.glGetUniformLocation(this.handle, "time");
+        this.uFrequency = GLES20.glGetUniformLocation(this.handle, "frequency");
+        this.uPhase = GLES20.glGetUniformLocation(this.handle, "phase");
+        this.uAmplitude = GLES20.glGetUniformLocation(this.handle, "amplitude");
+        this.uDirection = GLES20.glGetUniformLocation(this.handle, "direction");
     }
 }

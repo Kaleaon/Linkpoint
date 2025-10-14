@@ -9,22 +9,22 @@ import java.util.UUID
  */
 data class LogSyncStart(
     val appVersionCode: Int,
-    val agentUUID: UUID
+    val agentUUID: UUID,
 ) : Bundleable {
-    
     /**
      * Creates a LogSyncStart from a Bundle
      */
     constructor(bundle: Bundle) : this(
         appVersionCode = bundle.getInt("appVersionCode"),
-        agentUUID = UUID.fromString(bundle.getString("agentUUID") ?: "")
+        agentUUID = UUID.fromString(bundle.getString("agentUUID") ?: ""),
     )
-    
+
     /**
      * Converts this message to a Bundle
      */
-    override fun toBundle(): Bundle = Bundle().apply {
-        putInt("appVersionCode", appVersionCode)
-        putString("agentUUID", agentUUID.toString())
-    }
+    override fun toBundle(): Bundle =
+        Bundle().apply {
+            putInt("appVersionCode", appVersionCode)
+            putString("agentUUID", agentUUID.toString())
+        }
 }

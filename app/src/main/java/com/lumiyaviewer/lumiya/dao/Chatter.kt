@@ -10,5 +10,5 @@ data class Chatter(
     var muted: Boolean = false,
     var unreadCount: Int = 0,
     var lastMessageID: Long? = null,
-    var lastSessionID: UUID? = null
+    var lastSessionID: UUID? = null,
 )

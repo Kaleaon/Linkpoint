@@ -8,6 +8,6 @@ interface RLVCommand {
         objectUUID: UUID,
         commands: RLVCommands,
         param1: String,
-        param2: String
+        param2: String,
     )
 }

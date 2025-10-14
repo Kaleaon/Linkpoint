@@ -9,13 +9,14 @@ open class AnimationSequenceInfo protected constructor(
     protected val stoppingSequenceID: Int,
     protected val stoppingRunningSince: Long,
     protected val stoppingEasingOutSince: Long,
-    protected val dontEaseIn: Boolean
+    protected val dontEaseIn: Boolean,
 ) {
-
     fun hasStopped(currentTime: Long): Boolean {
-        return sequenceID == INVALID_SEQUENCE_ID && 
-               (stoppingSequenceID == INVALID_SEQUENCE_ID || 
-                currentTime >= stoppingEasingOutSince + MAX_ANIMATION_LENGTH)
+        return sequenceID == INVALID_SEQUENCE_ID &&
+            (
+                stoppingSequenceID == INVALID_SEQUENCE_ID ||
+                    currentTime >= stoppingEasingOutSince + MAX_ANIMATION_LENGTH
+            )
     }
 
     companion object {
@@ -24,7 +25,11 @@ open class AnimationSequenceInfo protected constructor(
         const val MAX_ANIMATION_LENGTH = 60000L
 
         @JvmStatic
-        fun newSequence(animationID: UUID, currentTime: Long, sequenceID: Int): AnimationSequenceInfo {
+        fun newSequence(
+            animationID: UUID,
+            currentTime: Long,
+            sequenceID: Int,
+        ): AnimationSequenceInfo {
             return AnimationSequenceInfo(
                 animationID,
                 sequenceID,
@@ -32,7 +37,7 @@ open class AnimationSequenceInfo protected constructor(
                 INVALID_SEQUENCE_ID,
                 INVALID_TIMESTAMP,
                 INVALID_TIMESTAMP,
-                false
+                false,
             )
         }
 
@@ -40,7 +45,7 @@ open class AnimationSequenceInfo protected constructor(
         fun restartSequence(
             currentTime: Long,
             newSequenceID: Int,
-            previousInfo: AnimationSequenceInfo
+            previousInfo: AnimationSequenceInfo,
         ): AnimationSequenceInfo {
             return if (previousInfo.sequenceID != INVALID_SEQUENCE_ID) {
                 AnimationSequenceInfo(
@@ -50,7 +55,7 @@ open class AnimationSequenceInfo protected constructor(
                     previousInfo.sequenceID,
                     previousInfo.runningSince,
                     currentTime,
-                    true
+                    true,
                 )
             } else {
                 AnimationSequenceInfo(
@@ -60,13 +65,16 @@ open class AnimationSequenceInfo protected constructor(
                     previousInfo.stoppingSequenceID,
                     previousInfo.stoppingRunningSince,
                     previousInfo.stoppingRunningSince,
-                    true
+                    true,
                 )
             }
         }
 
         @JvmStatic
-        fun stopSequence(currentTime: Long, previousInfo: AnimationSequenceInfo): AnimationSequenceInfo? {
+        fun stopSequence(
+            currentTime: Long,
+            previousInfo: AnimationSequenceInfo,
+        ): AnimationSequenceInfo? {
             if (previousInfo.sequenceID == INVALID_SEQUENCE_ID) {
                 return null
             }
@@ -77,7 +85,7 @@ open class AnimationSequenceInfo protected constructor(
                 previousInfo.sequenceID,
                 previousInfo.runningSince,
                 currentTime,
-                previousInfo.dontEaseIn
+                previousInfo.dontEaseIn,
             )
         }
     }

@@ -5,7 +5,6 @@ import com.lumiyaviewer.lumiya.slproto.SLMessage
 import java.nio.ByteBuffer
 
 class EconomyDataRequest : SLMessage() {
-    
     init {
         zeroCoded = false
     }

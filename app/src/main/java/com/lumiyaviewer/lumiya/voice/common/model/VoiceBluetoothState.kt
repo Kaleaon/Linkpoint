@@ -9,5 +9,5 @@ enum class VoiceBluetoothState {
     Connecting,
     Connected,
     Active,
-    Error
+    Error,
 }

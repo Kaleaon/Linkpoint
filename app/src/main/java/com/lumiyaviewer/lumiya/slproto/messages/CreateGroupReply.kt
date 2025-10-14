@@ -1,0 +1,49 @@
+package com.lumiyaviewer.lumiya.slproto.messages
+
+import com.lumiyaviewer.lumiya.slproto.SLMessage
+import java.nio.ByteBuffer
+import java.util.UUID
+
+class CreateGroupReply : SLMessage {
+    AgentData AgentData_Field = AgentData()
+    ReplyData ReplyData_Field = ReplyData()
+
+    class AgentData {
+        UUID AgentID
+    }
+
+    class ReplyData {
+        UUID GroupID
+        byte[] Message
+        Boolean Success
+    }
+
+    CreateGroupReply() {
+        this.zeroCoded = false
+    }
+
+    Int CalcPayloadSize() {
+        return this.ReplyData_Field.Message.length + 18 + 20
+    }
+
+    Unit Handle(SLMessageHandler sLMessageHandler) {
+        sLMessageHandler.HandleCreateGroupReply(this)
+    }
+
+    Unit PackPayload(ByteBuffer byteBuffer) {
+        byteBuffer.putShort(-1)
+        byteBuffer.put((byte) 1)
+        byteBuffer.put((byte) 84)
+        packUUID(byteBuffer, this.AgentData_Field.AgentID)
+        packUUID(byteBuffer, this.ReplyData_Field.GroupID)
+        packBoolean(byteBuffer, this.ReplyData_Field.Success)
+        packVariable(byteBuffer, this.ReplyData_Field.Message, 1)
+    }
+
+    Unit UnpackPayload(ByteBuffer byteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        this.ReplyData_Field.GroupID = unpackUUID(byteBuffer)
+        this.ReplyData_Field.Success = unpackBoolean(byteBuffer)
+        this.ReplyData_Field.Message = unpackVariable(byteBuffer, 1)
+    }
+}

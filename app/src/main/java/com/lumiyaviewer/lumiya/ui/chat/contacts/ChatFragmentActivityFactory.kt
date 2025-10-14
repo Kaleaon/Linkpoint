@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.ui.chat.contacts
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.support.v4.app.Fragment
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID
 import com.lumiyaviewer.lumiya.ui.chat.ChatFragment
 import com.lumiyaviewer.lumiya.ui.chat.ChatNewActivity
@@ -12,32 +12,31 @@ import com.lumiyaviewer.lumiya.ui.common.ChatterFragment
 import com.lumiyaviewer.lumiya.ui.common.FragmentActivityFactory
 import com.lumiyaviewer.lumiya.ui.common.MasterDetailsActivity
 
-class ChatFragmentActivityFactory private constructor() : FragmentActivityFactory {
+class ChatFragmentActivityFactory : FragmentActivityFactory {
 
-    companion object {
-        @JvmStatic
-        fun getInstance(): ChatFragmentActivityFactory = INSTANCE
+    private class InstanceHolder {
+        /* access modifiers changed from: private */
+        ChatFragmentActivityFactory Instance = ChatFragmentActivityFactory()
 
-        private val INSTANCE = ChatFragmentActivityFactory()
+        private InstanceHolder() {
+        }
     }
 
-    override fun createIntent(context: Context, args: Bundle?): Intent {
-        val intent = Intent(context, ChatNewActivity::class.java)
-        intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, args)
-        
-        args?.let { bundle ->
-            if (bundle.containsKey(ChatterFragment.CHATTER_ID_KEY)) {
-                val chatterID = bundle.getParcelable<ChatterID>(ChatterFragment.CHATTER_ID_KEY)
-                chatterID?.let {
-                    ActivityUtils.setActiveAgentID(intent, it.agentUUID)
-                }
-            }
+    ChatFragmentActivityFactory getInstance() {
+        return InstanceHolder.Instance
+    }
+
+    Intent createIntent(Context context, Bundle bundle) {
+        ChatterID chatterID
+        Intent intent = Intent(context, ChatNewActivity.class)
+        intent.putExtra(MasterDetailsActivity.INTENT_SELECTION_KEY, bundle)
+        if (!(bundle == null || !bundle.containsKey(ChatterFragment.CHATTER_ID_KEY) || (chatterID = (ChatterID) bundle.getParcelable(ChatterFragment.CHATTER_ID_KEY)) == null)) {
+            ActivityUtils.setActiveAgentID(intent, chatterID.agentUUID)
         }
-        
         return intent
     }
 
-    override fun getFragmentClass(): Class<out Fragment> {
-        return ChatFragment::class.java
+    Class<? : Fragment> getFragmentClass() {
+        return ChatFragment.class
     }
 }

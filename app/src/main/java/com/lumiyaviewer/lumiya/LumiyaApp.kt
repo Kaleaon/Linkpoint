@@ -1,365 +1,335 @@
 package com.lumiyaviewer.lumiya
 
 import android.app.AlarmManager
+import android.app.Application
 import android.app.LauncherActivity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.AssetManager
-import android.os.Build
 import android.preference.PreferenceManager
-import android.util.DisplayMetrics
-import android.util.Log
-import android.view.WindowManager
+import androidx.core.app.NotificationCompat
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
-import com.lumiyaviewer.lumiya.debug.AutoLogUploader
+import android.util.DisplayMetrics
+import android.util.Log
+import android.view.Display
+import android.view.WindowManager
 import com.lumiyaviewer.lumiya.fixes.ResourceConflictResolver
 import com.lumiyaviewer.lumiya.modern.samples.ModernLinkpointDemo
-import kotlin.math.sqrt
+import com.lumiyaviewer.lumiya.debug.AutoLogUploader
 
 /**
- * Main Application class for Lumiya Viewer.
- *
+ * Main Application object for Lumiya Viewer.
+ * 
  * Handles global application state, resource conflict resolution, and system-wide initialization.
  * Updated to use AndroidX libraries and modern Android development practices.
  * Extends MultiDexApplication to support large applications with 64K+ methods.
  */
-class LumiyaApp : MultiDexApplication() {
+object LumiyaApp extends MultiDexApplication {
+    private String TAG = "LumiyaApp";
+    private DisplayMetrics displayMetrics = new DisplayMetrics()
+    private Context mContext
+    private SharedPreferences prefs
+    
+    // Modern components
+    private ModernLinkpointDemo modernDemo
 
-    companion object {
-        private const val TAG = "LumiyaApp"
-        private val displayMetrics = DisplayMetrics()
-
-        @Volatile
-        private var mContext: Context? = null
-
-        @Volatile
-        private var prefs: SharedPreferences? = null
-
-        @Volatile
-        private var modernDemo: ModernLinkpointDemo? = null
-
-        @JvmStatic
-        fun getAppVersion(): String {
-            return try {
-                val context = mContext ?: return ""
-                context.packageManager.getPackageInfo(context.packageName, 0).versionName
-            } catch (e: PackageManager.NameNotFoundException) {
-                Log.w(TAG, "Could not get app version", e)
-                ""
-            }
+    fun getAppVersion(): String {
+        try {
+            return mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionName
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Could not get app version", e);
+            return "";
         }
-
-        /**
-         * Get application startup status and any initialization errors
-         */
-        @JvmStatic
-        fun getStartupStatus(): String {
-            val context = mContext
-            if (context == null) {
-                return "Application context not initialized"
-            }
-
-            return buildString {
-                append("Lumiya Application Status:\n")
-                append("- Context: ${if (mContext != null) "OK" else "NULL"}\n")
-                append("- Modern Components: ${if (modernDemo != null) "Active" else "Safe Mode"}\n")
-
-                modernDemo?.let { demo ->
-                    try {
-                        append("- Graphics: ${demo.graphicsInfo}\n")
-                        append("- Connection: ${if (demo.isConnected) "Connected" else "Disconnected"}\n")
-                    } catch (e: Exception) {
-                        append("- Component Status: Error checking - ${e.message}\n")
-                    }
-                } ?: append("- Running in Safe Mode - basic functionality only\n")
-            }
+    }
+    
+    /**
+     * Get application startup status and any initialization errors
+     */
+    fun getStartupStatus(): String {
+        if (mContext == null) {
+            return "Application context not initialized";
         }
-
-        /**
-         * Upload debug logs immediately (for debug builds only)
-         */
-        @JvmStatic
-        fun uploadDebugLogsNow(reason: String) {
-            mContext?.let { context ->
-                try {
-                    AutoLogUploader.getInstance(context).uploadLogsNow(reason)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to trigger log upload", e)
-                }
-            }
-        }
-
-        /**
-         * Report a crash for automatic upload (debug builds only)
-         */
-        @JvmStatic
-        fun reportCrash(crash: Throwable, additionalInfo: String) {
-            mContext?.let { context ->
-                try {
-                    AutoLogUploader.getInstance(context).uploadCrashReport(crash, additionalInfo)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to upload crash report", e)
-                }
-            }
-        }
-
-        @JvmStatic
-        fun getAssetManager(): AssetManager? {
-            return mContext?.assets
-        }
-
-        @JvmStatic
-        fun getContext(): Context? {
-            return mContext
-        }
-
-        @JvmStatic
-        fun getDefaultSharedPreferences(): SharedPreferences? {
-            if (prefs == null) {
-                prefs = getContext()?.let { PreferenceManager.getDefaultSharedPreferences(it) }
-            }
-            return prefs
-        }
-
-        @JvmStatic
-        fun isSplitScreenNeeded(context: Context): Boolean {
-            val splitScreenPref = getDefaultSharedPreferences()?.getString("split_screens", "auto") ?: "auto"
-
-            return when (splitScreenPref) {
-                "never" -> false
-                "always" -> true
-                "landscape" -> {
-                    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                    val display = windowManager.defaultDisplay
-                    display.width > display.height
-                }
-                else -> { // "auto"
-                    val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                    val display = windowManager.defaultDisplay
-                    display.getMetrics(displayMetrics)
-
-                    val heightInches = displayMetrics.heightPixels / displayMetrics.ydpi
-                    val widthInches = displayMetrics.widthPixels / displayMetrics.xdpi
-                    val diagonalInches = sqrt(
-                        (heightInches * heightInches + widthInches * widthInches).toDouble()
-                    )
-
-                    if (diagonalInches <= 6.5 || widthInches < 5.0f) {
-                        false
-                    } else {
-                        Log.i(
-                            TAG,
-                            String.format(
-                                "LumiyaApp: Display width in dp: %.2f, xInches %.1f, diag %.1f",
-                                display.width / displayMetrics.density,
-                                widthInches,
-                                diagonalInches
-                            )
-                        )
-                        display.width / displayMetrics.density >= 1000.0f
-                    }
-                }
-            }
-        }
-
-        @JvmStatic
-        fun restartApp() {
+        
+        StringBuilder status = new StringBuilder()
+        status.append("Lumiya Application Status:\n");
+        status.append("- Context: ").append(mContext != null ? "OK" : "NULL").append("\n");
+        status.append("- Modern Components: ").append(modernDemo != null ? "Active" : "Safe Mode").append("\n");
+        
+        if (modernDemo != null) {
             try {
-                val context = getContext() ?: return
-                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                val intent = Intent(context, LauncherActivity::class.java)
-                val pendingIntent = PendingIntent.getActivity(
-                    context,
-                    0,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent)
-                System.exit(0)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to restart app", e)
+                status.append("- Graphics: ").append(modernDemo.getGraphicsInfo()).append("\n");
+                status.append("- Connection: ").append(modernDemo.isConnected() ? "Connected" : "Disconnected").append("\n");
+            } catch (Exception e) {
+                status.append("- Component Status: Error checking - ").append(e.getMessage()).append("\n");
+            }
+        } else {
+            status.append("- Running in Safe Mode - basic functionality only\n");
+        }
+        
+        return status.toString()
+    }
+    
+    /**
+     * Upload debug logs immediately (for debug builds only)
+     */
+    fun uploadDebugLogsNow(reason: String): Unit {
+        if (mContext != null) {
+            try {
+                AutoLogUploader.getInstance(mContext).uploadLogsNow(reason)
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to trigger log upload", e);
             }
         }
-
-        /**
-         * Get modern components demo instance
-         */
-        @JvmStatic
-        fun getModernDemo(): ModernLinkpointDemo? {
-            return modernDemo
+    }
+    
+    /**
+     * Report a crash for automatic upload (debug builds only)
+     */
+    fun reportCrash(crash: Throwable, additionalInfo: String): Unit {
+        if (mContext != null) {
+            try {
+                AutoLogUploader.getInstance(mContext).uploadCrashReport(crash, additionalInfo)
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to upload crash report", e);
+            }
         }
     }
 
-    override fun onCreate() {
+    fun getAssetManager(): AssetManager {
+        return mContext != null ? mContext.getAssets() : null
+    }
+
+    fun getContext(): Context {
+        return mContext
+    }
+
+    fun getDefaultSharedPreferences(): SharedPreferences {
+        if (prefs == null) {
+            prefs = PreferenceManager.getDefaultSharedPreferences(getContext())
+        }
+        return prefs
+    }
+
+    fun isSplitScreenNeeded(context: Context): Boolean {
+        String string = getDefaultSharedPreferences().getString("split_screens", "auto");
+        if (string.equals("never")) {
+            return false
+        }
+        if (string.equals("always")) {
+            return true
+        }
+        Display defaultDisplay = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
+        if (string.equals("landscape")) {
+            return defaultDisplay.getWidth() > defaultDisplay.getHeight()
+        } else {
+            defaultDisplay.getMetrics(displayMetrics)
+            float f = ((float) displayMetrics.heightPixels) / displayMetrics.ydpi
+            float f2 = ((float) displayMetrics.widthPixels) / displayMetrics.xdpi
+            double diagonalInches = Math.sqrt((double) ((f * f) + (f2 * f2)))
+            if (diagonalInches <= 6.5d || f2 < 5.0f) {
+                return false
+            }
+            Log.i(TAG, String.format("LumiyaApp: Display width in dp: %.2f, xInches %.1f, diag %.1f", 
+                ((float) defaultDisplay.getWidth()) / displayMetrics.density, f2, diagonalInches))
+            return ((float) defaultDisplay.getWidth()) / displayMetrics.density >= 1000.0f
+        }
+    }
+
+    fun restartApp(): Unit {
+        try {
+            AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE)
+            PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, 
+                new Intent(getContext(), LauncherActivity.class), 
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE)
+            alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent)
+            System.exit(0)
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to restart app", e);
+        }
+    }
+
+    override fun onCreate(): Unit {
         super.onCreate()
-
-        Log.i(TAG, "Lumiya Application starting up")
-
+        
+        Log.i(TAG, "Lumiya Application starting up");
+        
         try {
             // Set global context first - this is critical for all other operations
             mContext = this
-            Log.i(TAG, "Global context set successfully")
-
+            Log.i(TAG, "Global context set successfully");
+            
             // CRITICAL: Initialize resource conflict resolver before any other initialization
             // This fixes build-breaking resource conflicts between AndroidX and support libraries
             try {
                 ResourceConflictResolver.initialize(this)
-                Log.i(TAG, "Resource conflict resolver initialized successfully")
-            } catch (e: Exception) {
-                Log.e(TAG, "Resource conflict resolver failed - continuing anyway", e)
+                Log.i(TAG, "Resource conflict resolver initialized successfully");
+            } catch (Exception e) {
+                Log.e(TAG, "Resource conflict resolver failed - continuing anyway", e);
             }
-
+            
+            // Initialize global options after resource conflicts are resolved
+            // GlobalOptions.getInstance().initialize();  // Temporarily disabled due to dependencies
+            
             // Initialize modern Linkpoint components with comprehensive exception handling
             initializeModernSystems()
-
+            
             // Initialize automatic log upload for debug builds
             initializeDebugLogUpload()
-
-            Log.i(TAG, "Lumiya Application initialization complete")
-        } catch (t: Throwable) {
+            
+            Log.i(TAG, "Lumiya Application initialization complete");
+        } catch (Throwable e) {
             // Catch all throwables including OutOfMemoryError, LinkageError, etc.
-            Log.e(TAG, "CRITICAL: Application initialization failed", t)
-
+            Log.e(TAG, "CRITICAL: Application initialization failed", e);
+            
             // Upload crash report for debug builds
             try {
-                AutoLogUploader.getInstance(this).uploadCrashReport(t, "Application initialization failure")
-            } catch (uploadError: Exception) {
-                Log.e(TAG, "Failed to upload crash report", uploadError)
+                AutoLogUploader.getInstance(this).uploadCrashReport(e, "Application initialization failure");
+            } catch (Exception uploadError) {
+                Log.e(TAG, "Failed to upload crash report", uploadError);
             }
-
+            
             // Log specific error types for debugging
-            when (t) {
-                is OutOfMemoryError -> Log.e(TAG, "Out of memory during initialization")
-                is NoClassDefFoundError -> Log.e(TAG, "Missing class definition: ${t.message}")
-                is UnsatisfiedLinkError -> Log.e(TAG, "Native library linking failed: ${t.message}")
+            if (e instanceof OutOfMemoryError) {
+                Log.e(TAG, "Out of memory during initialization");
+            } else if (e instanceof NoClassDefFoundError) {
+                Log.e(TAG, "Missing object definition: " + e.getMessage());
+            } else if (e instanceof UnsatisfiedLinkError) {
+                Log.e(TAG, "Native library linking failed: " + e.getMessage());
             }
-
+            
             // Set a safe fallback state
             modernDemo = null
-            Log.w(TAG, "Application will continue in SAFE MODE with basic functionality only")
-
+            Log.w(TAG, "Application will continue in SAFE MODE with basic functionality only");
+            
             // Don't re-throw - allow the app to continue running
         }
     }
-
+    
     /**
      * Initialize modern Second Life protocol and rendering systems
      * Uses defensive programming to prevent crashes if modern components fail
      */
-    private fun initializeModernSystems() {
-        Log.i(TAG, "Initializing modern Linkpoint components...")
-
+    private fun initializeModernSystems(): Unit {
+        Log.i(TAG, "Initializing modern Linkpoint components...");
+        
         try {
             // Pre-flight checks before initializing modern components
             if (!performSystemChecks()) {
-                Log.w(TAG, "System compatibility checks failed - skipping modern components")
+                Log.w(TAG, "System compatibility checks failed - skipping modern components");
                 modernDemo = null
                 return
             }
-
+            
             // Initialize modern components with individual exception handling
-            modernDemo = ModernLinkpointDemo(this)
-            Log.i(TAG, "Modern Linkpoint systems initialized successfully")
-
-        } catch (e: NoClassDefFoundError) {
-            Log.e(TAG, "Modern system class not found - likely missing dependency", e)
-            Log.e(TAG, "Missing class: ${e.message}")
+            modernDemo = new ModernLinkpointDemo(this)
+            Log.i(TAG, "Modern Linkpoint systems initialized successfully");
+            
+        } catch (NoClassDefFoundError e) {
+            Log.e(TAG, "Modern system object not found - likely missing dependency", e);
+            Log.e(TAG, "Missing class: " + e.getMessage());
             modernDemo = null
-
-        } catch (e: UnsatisfiedLinkError) {
-            Log.e(TAG, "Native library loading failed - modern graphics features will be disabled", e)
-            Log.e(TAG, "Library loading error: ${e.message}")
+            
+        } catch (UnsatisfiedLinkError e) {
+            Log.e(TAG, "Native library loading failed - modern graphics features will be disabled", e);
+            Log.e(TAG, "Library loading error: " + e.getMessage());
             modernDemo = null
-
-        } catch (e: SecurityException) {
-            Log.e(TAG, "Security error during modern system initialization", e)
+            
+        } catch (SecurityException e) {
+            Log.e(TAG, "Security error during modern system initialization", e);
             modernDemo = null
-
-        } catch (e: OutOfMemoryError) {
-            Log.e(TAG, "Out of memory during modern system initialization", e)
+            
+        } catch (OutOfMemoryError e) {
+            Log.e(TAG, "Out of memory during modern system initialization", e);
             modernDemo = null
             // Force garbage collection
             System.gc()
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize modern systems - continuing with graceful degradation", e)
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize modern systems - continuing with graceful degradation", e);
             modernDemo = null
-
+            
             // Log specific error for debugging
-            Log.e(TAG, "Modern component initialization failed: ${e.javaClass.simpleName} - ${e.message}")
-
-        } catch (t: Throwable) {
+            Log.e(TAG, "Modern component initialization failed: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            
+        } catch (Throwable t) {
             // Catch any other throwables that might occur
-            Log.e(TAG, "Unexpected error during modern system initialization", t)
+            Log.e(TAG, "Unexpected error during modern system initialization", t);
             modernDemo = null
         }
-
-        // Log final status
+        
+        // Log status
         if (modernDemo != null) {
-            Log.i(TAG, "Modern components active - full feature set available")
+            Log.i(TAG, "Modern components active - full feature set available");
         } else {
-            Log.w(TAG, "Modern components disabled - using legacy compatibility mode")
-            Log.w(TAG, "App will function with basic Second Life viewer features only")
+            Log.w(TAG, "Modern components disabled - using legacy compatibility mode");
+            Log.w(TAG, "App will function with basic Second Life viewer features only");
         }
     }
-
+    
     /**
      * Perform system compatibility checks before initializing modern components
      */
     private fun performSystemChecks(): Boolean {
-        return try {
+        try {
             // Check if we have a valid context
             if (mContext == null) {
-                Log.e(TAG, "Context is null - cannot initialize modern components")
+                Log.e(TAG, "Context is null - cannot initialize modern components");
                 return false
             }
-
+            
             // Check if we have basic Android API requirements
-            val apiLevel = Build.VERSION.SDK_INT
+            int apiLevel = android.os.Build.VERSION.SDK_INT
             if (apiLevel < 21) { // API 21 = Android 5.0 minimum
-                Log.w(TAG, "Android API level $apiLevel below minimum for modern components (21)")
+                Log.w(TAG, "Android API level " + apiLevel + " below minimum for modern components (21)");
                 return false
             }
-
+            
             // Check available memory
-            val runtime = Runtime.getRuntime()
-            val freeMemory = runtime.freeMemory()
-            val totalMemory = runtime.totalMemory()
-            val memoryUsage = (totalMemory - freeMemory).toDouble() / totalMemory
-
+            Runtime runtime = Runtime.getRuntime()
+            long freeMemory = runtime.freeMemory()
+            long totalMemory = runtime.totalMemory()
+            double memoryUsage = (double)(totalMemory - freeMemory) / totalMemory
+            
             if (memoryUsage > 0.8) { // If using more than 80% of heap
-                Log.w(TAG, "Memory usage too high (${memoryUsage * 100}%) - skipping modern components")
+                Log.w(TAG, "Memory usage too high (" + (memoryUsage * 100) + "%) - skipping modern components");
                 return false
             }
-
-            Log.i(TAG, "System checks passed - proceeding with modern component initialization")
-            true
-
-        } catch (e: Exception) {
-            Log.e(TAG, "Error during system checks", e)
-            false
+            
+            Log.i(TAG, "System checks passed - proceeding with modern component initialization");
+            return true
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error during system checks", e);
+            return false
         }
     }
-
+    
     /**
      * Initialize debug log upload system for debug builds only
      */
-    private fun initializeDebugLogUpload() {
+    private fun initializeDebugLogUpload(): Unit {
         try {
-            val logUploader = AutoLogUploader.getInstance(this)
+            AutoLogUploader logUploader = AutoLogUploader.getInstance(this)
             logUploader.initializeAutoUpload()
-            Log.i(TAG, "Debug log upload system initialized")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize debug log upload", e)
+            Log.i(TAG, "Debug log upload system initialized");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to initialize debug log upload", e);
             // Don't crash the app if log upload fails
         }
     }
+    
+    /**
+     * Get modern components demo instance
+     */
+    fun getModernDemo(): ModernLinkpointDemo {
+        return modernDemo
+    }
 
-    override fun attachBaseContext(base: Context) {
+    override protected fun attachBaseContext(base: Context): Unit {
         super.attachBaseContext(base)
         MultiDex.install(this)
     }

@@ -1,39 +1,60 @@
 package com.lumiyaviewer.lumiya.ui.chat.contacts
+import java.util.*
 
 import android.content.Context
 import com.google.common.collect.ImmutableList
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.chat.ChatterDisplayInfo
+import javax.annotation.Nullable
 
-internal open class ChatterListSimpleAdapter(
-    context: Context,
-    userManager: UserManager
-) : ChatterListAdapter(context, userManager) {
+class ChatterListSimpleAdapter : ChatterListAdapter {
+    @Nullable
+    private ImmutableList<? : ChatterDisplayInfo> data = null
 
-    private var data: ImmutableList<out ChatterDisplayInfo>? = null
-
-    override fun areAllItemsEnabled(): Boolean = true
-
-    override fun getCount(): Int = data?.size ?: 0
-
-    override fun getItem(position: Int): Any? {
-        val currentData = data ?: return null
-        if (position < 0 || position >= currentData.size) {
-            return null
-        }
-        return currentData[position]
+    ChatterListSimpleAdapter(Context context, UserManager userManager) {
+        super(context, userManager)
     }
 
-    override fun getItemId(position: Int): Long = 0
+    Boolean areAllItemsEnabled() {
+        return true
+    }
 
-    override fun hasStableIds(): Boolean = false
+    Int getCount() {
+        if (this.data != null) {
+            return this.data.size()
+        }
+        return 0
+    }
 
-    override fun isEmpty(): Boolean = data?.isEmpty() ?: true
+    Any getItem(Int i) {
+        if (this.data == null || i < 0 || i >= this.data.size()) {
+            return null
+        }
+        return this.data.get(i)
+    }
 
-    override fun isEnabled(position: Int): Boolean = true
+    Long getItemId(Int i) {
+        return 0
+    }
 
-    protected fun setData(newData: ImmutableList<out ChatterDisplayInfo>?) {
-        data = newData
+    Boolean hasStableIds() {
+        return false
+    }
+
+    Boolean isEmpty() {
+        if (this.data != null) {
+            return this.data.isEmpty()
+        }
+        return true
+    }
+
+    Boolean isEnabled(Int i) {
+        return true
+    }
+
+    /* access modifiers changed from: protected */
+    Unit setData(@Nullable ImmutableList<? : ChatterDisplayInfo> immutableList) {
+        this.data = immutableList
         notifyDataSetChanged()
     }
 }

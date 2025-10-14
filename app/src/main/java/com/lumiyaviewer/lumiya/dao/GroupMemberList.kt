@@ -4,5 +4,5 @@ import java.util.UUID
 
 data class GroupMemberList(
     var groupID: UUID,
-    var requestID: UUID? = null
+    var requestID: UUID? = null,
 )

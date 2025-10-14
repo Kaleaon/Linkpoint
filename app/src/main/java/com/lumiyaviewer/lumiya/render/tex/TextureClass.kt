@@ -5,5 +5,5 @@ enum class TextureClass(val storePath: String) {
     Sculpt("sculpt"),
     Baked("baked"),
     Asset("asset"),
-    Terrain("terrain")
+    Terrain("terrain"),
 }

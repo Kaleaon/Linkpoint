@@ -1,28 +1,32 @@
 package com.lumiyaviewer.lumiya.render.spatial
+import java.util.*
 
 import com.lumiyaviewer.lumiya.utils.InlineList
 
-class MyAvatarTreeNode(private val spatialTree: SpatialTree) : InlineList<DrawListEntry>() {
+class MyAvatarTreeNode : InlineList<DrawListEntry> {
+    private SpatialTree spatialTree
 
-    fun addDrawables(drawList: DrawList) {
-        var entry = first
-        while (entry != null) {
-            entry.addToDrawList(drawList)
-            entry = entry.next
+    constructor(spatialTree: SpatialTree) {
+        this.spatialTree = spatialTree
+    }
+
+    fun addDrawables(drawList: DrawList): Unit {
+        for (DrawListEntry drawListEntry = (DrawListEntry) getFirst(); drawListEntry != null; drawListEntry = drawListEntry.getNext()) {
+            drawListEntry.addToDrawList(drawList)
         }
     }
 
-    override fun addEntry(entry: DrawListEntry) {
-        super.addEntry(entry)
-        spatialTree.setDrawListChanged()
+    fun addEntry(drawListEntry: DrawListEntry): Unit {
+        super.addEntry(drawListEntry)
+        this.spatialTree.setDrawListChanged()
     }
 
-    override fun removeEntry(entry: DrawListEntry) {
-        super.removeEntry(entry)
-        spatialTree.setDrawListChanged()
+    fun removeEntry(drawListEntry: DrawListEntry): Unit {
+        super.removeEntry(drawListEntry)
+        this.spatialTree.setDrawListChanged()
     }
 
-    override fun requestEntryRemoval(entry: DrawListEntry) {
-        spatialTree.spatialObjectIndex.requestEntryRemoval(entry)
+    fun requestEntryRemoval(drawListEntry: DrawListEntry): Unit {
+        this.spatialTree.spatialObjectIndex.requestEntryRemoval(drawListEntry)
     }
 }

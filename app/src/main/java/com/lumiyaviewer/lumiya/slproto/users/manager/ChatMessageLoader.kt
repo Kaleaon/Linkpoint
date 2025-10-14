@@ -1,0 +1,51 @@
+package com.lumiyaviewer.lumiya.slproto.users.manager
+
+import com.lumiyaviewer.lumiya.dao.ChatMessage
+import com.lumiyaviewer.lumiya.dao.ChatMessageDao
+import com.lumiyaviewer.lumiya.dao.Chatter
+import com.lumiyaviewer.lumiya.slproto.users.ChatterID
+import com.lumiyaviewer.lumiya.utils.wlist.ChunkedListLoader
+import de.greenrobot.dao.query.QueryBuilder
+import de.greenrobot.dao.query.WhereCondition
+import java.util.ArrayList
+import java.util.List
+import java.util.concurrent.Executor
+import javax.annotation.Nonnull
+import javax.annotation.Nullable
+
+class ChatMessageLoader : ChunkedListLoader<ChatMessage> {
+    @Nonnull
+    private ChatMessageDao chatMessageDao
+    @Nullable
+    private Chatter chatter = null
+    @Nonnull
+    private ChatterID chatterID
+    @Nonnull
+    private UserManager userManager
+
+    ChatMessageLoader(@Nonnull UserManager userManager2, @Nonnull ChatterID chatterID2, Int i, @Nonnull Executor executor, Boolean z, @Nonnull ChunkedListLoader.EventListener eventListener) {
+        super(i, executor, z, eventListener)
+        this.chatterID = chatterID2
+        this.userManager = userManager2
+        this.chatMessageDao = userManager2.getDaoSession().getChatMessageDao()
+    }
+
+    /* access modifiers changed from: protected */
+    ChunkedListLoader.LoadResult<ChatMessage> loadInBackground(Int i, Long j, Boolean z) {
+        if (this.chatter == null) {
+            this.chatter = this.userManager.getChatterList().getActiveChattersManager().getChatter(this.chatterID, true)
+        }
+        if (this.chatter == null) {
+            return ChunkedListLoader.LoadResult<>(ArrayList(), false, j)
+        }
+        QueryBuilder where = this.chatMessageDao.queryBuilder().where(ChatMessageDao.Properties.ChatterID.eq(this.chatter.getId()), WhereCondition[0])
+        QueryBuilder orderAsc = z ? where.where(ChatMessageDao.Properties.Id.gt(Long.valueOf(j)), WhereCondition[0]).orderAsc(ChatMessageDao.Properties.Id) : where.where(ChatMessageDao.Properties.Id.lt(Long.valueOf(j)), WhereCondition[0]).orderDesc(ChatMessageDao.Properties.Id)
+        orderAsc.limit(i + 1)
+        List list = orderAsc.list()
+        Boolean z2 = list.size() > i
+        if (z2) {
+            list.remove(list.size() - 1)
+        }
+        return ChunkedListLoader.LoadResult<>(list, z2, j)
+    }
+}

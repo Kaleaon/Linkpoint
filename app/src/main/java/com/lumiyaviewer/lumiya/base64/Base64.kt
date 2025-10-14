@@ -7,7 +7,6 @@ import android.util.Base64 as AndroidBase64
  * Provides encoding/decoding functionality using Android's built-in Base64
  */
 object Base64 {
-    
     /**
      * Decodes a Base64 encoded string to bytes
      * @param input The Base64 encoded string
@@ -15,11 +14,11 @@ object Base64 {
      */
     @JvmStatic
     fun decode(input: String?): ByteArray {
-        return input?.let { 
-            AndroidBase64.decode(it, AndroidBase64.DEFAULT) 
+        return input?.let {
+            AndroidBase64.decode(it, AndroidBase64.DEFAULT)
         } ?: byteArrayOf()
     }
-    
+
     /**
      * Encodes bytes to a Base64 string
      * @param input The byte array to encode
@@ -27,11 +26,11 @@ object Base64 {
      */
     @JvmStatic
     fun encode(input: ByteArray?): String {
-        return input?.let { 
-            AndroidBase64.encodeToString(it, AndroidBase64.DEFAULT) 
+        return input?.let {
+            AndroidBase64.encodeToString(it, AndroidBase64.DEFAULT)
         } ?: ""
     }
-    
+
     /**
      * Decodes a Base64 encoded string to bytes with specified flags
      * @param input The Base64 encoded string
@@ -39,12 +38,15 @@ object Base64 {
      * @return Decoded byte array
      */
     @JvmStatic
-    fun decode(input: String?, flags: Int): ByteArray {
-        return input?.let { 
-            AndroidBase64.decode(it, flags) 
+    fun decode(
+        input: String?,
+        flags: Int,
+    ): ByteArray {
+        return input?.let {
+            AndroidBase64.decode(it, flags)
         } ?: byteArrayOf()
     }
-    
+
     /**
      * Encodes bytes to a Base64 string with specified flags
      * @param input The byte array to encode
@@ -52,9 +54,12 @@ object Base64 {
      * @return Base64 encoded string
      */
     @JvmStatic
-    fun encode(input: ByteArray?, flags: Int): String {
-        return input?.let { 
-            AndroidBase64.encodeToString(it, flags) 
+    fun encode(
+        input: ByteArray?,
+        flags: Int,
+    ): String {
+        return input?.let {
+            AndroidBase64.encodeToString(it, flags)
         } ?: ""
     }
 }

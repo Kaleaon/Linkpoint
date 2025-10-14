@@ -12,34 +12,33 @@ import java.util.concurrent.ConcurrentHashMap
  * Supports mesh objects, sculpties, and modern PBR materials
  */
 class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
-    
     private val objectCache = ConcurrentHashMap<UUID, WorldObject>()
     private val propertiesCache = ConcurrentHashMap<UUID, ObjectProperties>()
-    
+
     // Object tracking
     @Volatile
     private var managerInitialized = false
-    
+
     init {
         Log.i(TAG, "Modern object manager initialized")
     }
-    
+
     /**
      * Initialize object manager
      */
     fun initializeAsync(): CompletableFuture<Boolean> {
         Log.i(TAG, "Initializing modern object management system")
-        
+
         return CompletableFuture.supplyAsync {
             try {
                 // Initialize object tracking systems
                 setupObjectTracking()
-                
+
                 // Setup event listeners for object updates
                 if (protocolManager?.isConnected == true) {
                     setupProtocolListeners()
                 }
-                
+
                 managerInitialized = true
                 Log.i(TAG, "Object management system initialized successfully")
                 true
@@ -49,7 +48,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
             }
         }
     }
-    
+
     /**
      * Setup object tracking systems
      */
@@ -57,7 +56,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         Log.d(TAG, "Setting up object tracking systems")
         // Initialize tracking data structures
     }
-    
+
     /**
      * Setup protocol listeners for object updates
      */
@@ -65,7 +64,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         Log.d(TAG, "Setting up protocol listeners for object updates")
         // Would register callbacks with HybridProtocolManager
     }
-    
+
     /**
      * Get object by UUID
      */
@@ -75,7 +74,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
             if (objectCache.containsKey(objectId)) {
                 return@supplyAsync objectCache[objectId]
             }
-            
+
             // Fetch from grid if connected
             if (protocolManager?.isConnected == true) {
                 try {
@@ -88,11 +87,11 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
                     Log.e(TAG, "Failed to fetch object: $objectId", e)
                 }
             }
-            
+
             null
         }
     }
-    
+
     /**
      * Request object from grid (stub)
      */
@@ -100,14 +99,14 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         Log.d(TAG, "Requesting object from grid: $objectId")
         return null
     }
-    
+
     /**
      * Update object position/rotation
      */
     fun updateObjectTransformAsync(
         objectId: UUID,
         position: FloatArray,
-        rotation: FloatArray
+        rotation: FloatArray,
     ): CompletableFuture<Boolean> {
         return CompletableFuture.supplyAsync {
             try {
@@ -116,15 +115,15 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
                     Log.w(TAG, "Object not found: $objectId")
                     return@supplyAsync false
                 }
-                
+
                 obj.position = position
                 obj.rotation = rotation
-                
+
                 // Send update to grid if connected
                 if (protocolManager?.isConnected == true) {
                     sendObjectUpdateToGrid(objectId, obj)
                 }
-                
+
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to update object transform: $objectId", e)
@@ -132,15 +131,18 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
             }
         }
     }
-    
+
     /**
      * Send object update to grid (stub)
      */
-    private fun sendObjectUpdateToGrid(objectId: UUID, obj: WorldObject) {
+    private fun sendObjectUpdateToGrid(
+        objectId: UUID,
+        obj: WorldObject,
+    ) {
         Log.d(TAG, "Sending object update to grid: $objectId")
         // Would use HybridProtocolManager to send update
     }
-    
+
     /**
      * Get object properties
      */
@@ -149,7 +151,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
             if (propertiesCache.containsKey(objectId)) {
                 return@supplyAsync propertiesCache[objectId]
             }
-            
+
             // Request from grid
             if (protocolManager?.isConnected == true) {
                 try {
@@ -162,11 +164,11 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
                     Log.e(TAG, "Failed to fetch object properties: $objectId", e)
                 }
             }
-            
+
             null
         }
     }
-    
+
     /**
      * Request properties from grid (stub)
      */
@@ -174,7 +176,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         Log.d(TAG, "Requesting object properties from grid: $objectId")
         return null
     }
-    
+
     /**
      * Touch object (SL interaction)
      */
@@ -182,13 +184,13 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         return CompletableFuture.supplyAsync {
             try {
                 Log.i(TAG, "Touching object: $objectId")
-                
+
                 // Send touch event to grid
                 if (protocolManager?.isConnected == true) {
                     sendTouchEventToGrid(objectId)
                     return@supplyAsync true
                 }
-                
+
                 Log.w(TAG, "Cannot touch object - not connected to grid")
                 false
             } catch (e: Exception) {
@@ -197,7 +199,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
             }
         }
     }
-    
+
     /**
      * Send touch event to grid (stub)
      */
@@ -205,31 +207,31 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         Log.d(TAG, "Sending touch event to grid: $objectId")
         // Would use HybridProtocolManager to send touch event
     }
-    
+
     /**
      * Rez object from inventory
      */
     fun rezObjectAsync(
         inventoryItemId: UUID,
         position: FloatArray,
-        rotation: FloatArray
+        rotation: FloatArray,
     ): CompletableFuture<UUID?> {
         return CompletableFuture.supplyAsync {
             try {
                 Log.i(TAG, "Rezzing object from inventory: $inventoryItemId")
-                
+
                 // Create new object UUID
                 val newObjectId = UUID.randomUUID()
-                
+
                 // Create world object
                 val obj = WorldObject(newObjectId, "New Object", position, rotation)
                 objectCache[newObjectId] = obj
-                
+
                 // Send rez command to grid
                 if (protocolManager?.isConnected == true) {
                     sendRezCommandToGrid(inventoryItemId, newObjectId, position, rotation)
                 }
-                
+
                 newObjectId
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to rez object: $inventoryItemId", e)
@@ -237,7 +239,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
             }
         }
     }
-    
+
     /**
      * Send rez command to grid (stub)
      */
@@ -245,12 +247,12 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         inventoryItemId: UUID,
         objectId: UUID,
         position: FloatArray,
-        rotation: FloatArray
+        rotation: FloatArray,
     ) {
         Log.d(TAG, "Sending rez command to grid: $inventoryItemId")
         // Would use HybridProtocolManager to rez object
     }
-    
+
     /**
      * Delete object
      */
@@ -262,12 +264,12 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
                     Log.w(TAG, "Object not found: $objectId")
                     return@supplyAsync false
                 }
-                
+
                 // Send delete command to grid
                 if (protocolManager?.isConnected == true) {
                     sendDeleteCommandToGrid(objectId)
                 }
-                
+
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to delete object: $objectId", e)
@@ -275,7 +277,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
             }
         }
     }
-    
+
     /**
      * Send delete command to grid (stub)
      */
@@ -283,11 +285,11 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         Log.d(TAG, "Sending delete command to grid: $objectId")
         // Would use HybridProtocolManager to delete object
     }
-    
+
     fun isInitialized(): Boolean {
         return managerInitialized
     }
-    
+
     /**
      * World object model
      */
@@ -297,28 +299,32 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         var position: FloatArray,
         var rotation: FloatArray,
         var scale: FloatArray = floatArrayOf(1.0f, 1.0f, 1.0f),
-        var type: ObjectType = ObjectType.PRIMITIVE
+        var type: ObjectType = ObjectType.PRIMITIVE,
     ) {
         enum class ObjectType {
-            PRIMITIVE, SCULPT, MESH, AVATAR, ATTACHMENT
+            PRIMITIVE,
+            SCULPT,
+            MESH,
+            AVATAR,
+            ATTACHMENT,
         }
-        
+
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
-            
+
             other as WorldObject
-            
+
             if (objectId != other.objectId) return false
             if (name != other.name) return false
             if (!position.contentEquals(other.position)) return false
             if (!rotation.contentEquals(other.rotation)) return false
             if (!scale.contentEquals(other.scale)) return false
             if (type != other.type) return false
-            
+
             return true
         }
-        
+
         override fun hashCode(): Int {
             var result = objectId.hashCode()
             result = 31 * result + name.hashCode()
@@ -329,7 +335,7 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
             return result
         }
     }
-    
+
     /**
      * Object properties model
      */
@@ -342,9 +348,9 @@ class ModernObjectManager(private val protocolManager: HybridProtocolManager?) {
         var permissions: Int = 0,
         var phantom: Boolean = false,
         var physical: Boolean = false,
-        var temporary: Boolean = false
+        var temporary: Boolean = false,
     )
-    
+
     companion object {
         private const val TAG = "ModernObjectManager"
     }

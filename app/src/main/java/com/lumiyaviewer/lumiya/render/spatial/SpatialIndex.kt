@@ -5,55 +5,70 @@ import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo
 import com.lumiyaviewer.lumiya.slproto.terrain.TerrainData
 import java.lang.ref.WeakReference
 
-class SpatialIndex private constructor() {
+object SpatialIndex {
+    private volatile WeakReference<Object> indexHolder
+    private volatile SpatialObjectIndex objectIndex
 
-    companion object {
-        @JvmStatic
-        fun getInstance(): SpatialIndex = INSTANCE
+    private object InstanceHolder {
+        private SpatialIndex instance = new SpatialIndex()
 
-        private val INSTANCE = SpatialIndex()
+        
     }
 
-    @Volatile
-    private var indexHolder: WeakReference<Any>? = null
+    private SpatialIndex() {
+        this.indexHolder = null
+        this.objectIndex = null
+    }
 
-    @Volatile
-    private var objectIndex: SpatialObjectIndex? = null
+    /* synthetic */ SpatialIndex(SpatialIndex spatialIndex) {
+        this()
+    }
 
-    @Synchronized
-    fun DisableObjectIndex(holder: Any?) {
-        val currentIndex = objectIndex
-        val currentHolder = indexHolder?.get()
+    fun getInstance(): SpatialIndex {
+        return InstanceHolder.instance
+    }
 
-        if (currentIndex != null && (currentHolder == holder || currentHolder == null)) {
-            currentIndex.disableIndex()
+    synchronized void DisableObjectIndex(Object obj) {
+        Object obj2 = null
+        synchronized (this) {
+            SpatialObjectIndex spatialObjectIndex = this.objectIndex
+            if (this.indexHolder != null) {
+                obj2 = this.indexHolder.get()
+            }
+            if (spatialObjectIndex != null && (obj2 == obj || obj2 == null)) {
+                spatialObjectIndex.disableIndex()
+            }
+            this.indexHolder = null
+            this.objectIndex = null
         }
-
-        indexHolder = null
-        objectIndex = null
     }
 
-    @Synchronized
-    fun EnableObjectIndex(newIndex: SpatialObjectIndex, holder: Any): SpatialObjectIndex {
-        objectIndex = newIndex
-        indexHolder = WeakReference(holder)
-        return newIndex
+    synchronized SpatialObjectIndex EnableObjectIndex(SpatialObjectIndex spatialObjectIndex, Object obj) {
+        this.objectIndex = spatialObjectIndex
+        this.indexHolder = new WeakReference(obj)
+        return this.objectIndex
     }
 
-    @Synchronized
-    fun getObjectIndex(): SpatialObjectIndex? {
-        return objectIndex
+    fun getDrawableAvatar(sLObjectInfo: SLObjectInfo): DrawableAvatar {
+        SpatialObjectIndex spatialObjectIndex = this.objectIndex
+        return spatialObjectIndex != null ? spatialObjectIndex.getDrawableAvatar(sLObjectInfo) : null
     }
 
-    fun getDrawableAvatar(objectInfo: SLObjectInfo): DrawableAvatar? {
-        return objectIndex?.getDrawableAvatar(objectInfo)
+    synchronized SpatialObjectIndex getObjectIndex() {
+        return this.objectIndex
     }
 
-    fun setAvatarCountLimit(limit: Int) {
-        objectIndex?.setAvatarCountLimit(limit)
+    fun setAvatarCountLimit(i: Int): Unit {
+        SpatialObjectIndex spatialObjectIndex = this.objectIndex
+        if (spatialObjectIndex != null) {
+            spatialObjectIndex.setAvatarCountLimit(i)
+        }
     }
 
-    fun updateTerrainPatch(x: Int, y: Int, terrainData: TerrainData) {
-        objectIndex?.updateTerrainPatch(x, y, terrainData)
+    fun updateTerrainPatch(i: Int, i2: Int, terrainData: TerrainData): Unit {
+        SpatialObjectIndex spatialObjectIndex = this.objectIndex
+        if (spatialObjectIndex != null) {
+            spatialObjectIndex.updateTerrainPatch(i, i2, terrainData)
+        }
     }
 }

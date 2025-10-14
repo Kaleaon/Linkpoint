@@ -4,53 +4,51 @@ import android.opengl.Matrix
 import com.lumiyaviewer.lumiya.slproto.types.LLVector4
 
 class IntersectInfo {
-    
-    val intersectPoint: LLVector4
-    val faceID: Int
-    val s: Float
-    val t: Float
-    val u: Float
-    val v: Float
-    val faceKnown: Boolean
+    Int faceID
+    Boolean faceKnown
+    LLVector4 intersectPoint
+    Float s
+    Float t
+    Float u
+    Float v
 
-    constructor(point: LLVector4) {
-        intersectPoint = point
-        faceID = 0
-        u = 0f
-        v = 0f
-        s = 0f
-        t = 0f
-        faceKnown = false
-    }
-
-    constructor(point: LLVector4, faceID: Int, u: Float, v: Float) {
-        intersectPoint = point
-        this.faceID = faceID
-        this.u = u
-        this.v = v
-        s = u
-        t = v
-        faceKnown = true
-    }
-
-    constructor(source: IntersectInfo, matrix: FloatArray, offset: Int) {
-        intersectPoint = source.intersectPoint
-        faceID = source.faceID
-        s = source.s
-        t = source.t
-        faceKnown = source.faceKnown
-
-        if (faceKnown) {
-            val tempArray = FloatArray(8)
-            tempArray[0] = s
-            tempArray[1] = t
-            tempArray[3] = 1.0f
-            Matrix.multiplyMV(tempArray, 4, matrix, offset, tempArray, 0)
-            u = tempArray[4]
-            v = tempArray[5]
-        } else {
-            u = source.u
-            v = source.v
+    constructor(intersectInfo: IntersectInfo, fArr: FloatArray, i: Int) {
+        this.intersectPoint = intersectInfo.intersectPoint
+        this.faceID = intersectInfo.faceID
+        this.s = intersectInfo.s
+        this.t = intersectInfo.t
+        this.faceKnown = intersectInfo.faceKnown
+        if (this.faceKnown) {
+            Float[] fArr2 = Float[8]
+            fArr2[0] = this.s
+            fArr2[1] = this.t
+            fArr2[3] = 1.0f
+            Matrix.multiplyMV(fArr2, 4, fArr, i, fArr2, 0)
+            this.u = fArr2[4]
+            this.v = fArr2[5]
+            return
         }
+        this.u = intersectInfo.u
+        this.v = intersectInfo.v
+    }
+
+    constructor(lLVector4: LLVector4) {
+        this.intersectPoint = lLVector4
+        this.faceID = 0
+        this.u = 0.0f
+        this.v = 0.0f
+        this.s = 0.0f
+        this.t = 0.0f
+        this.faceKnown = false
+    }
+
+    constructor(lLVector4: LLVector4, i: Int, f: Float, f2: Float) {
+        this.intersectPoint = lLVector4
+        this.faceID = i
+        this.u = f
+        this.v = f2
+        this.s = f
+        this.t = f2
+        this.faceKnown = true
     }
 }

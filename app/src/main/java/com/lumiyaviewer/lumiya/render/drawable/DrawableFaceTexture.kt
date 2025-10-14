@@ -7,56 +7,54 @@ import com.lumiyaviewer.lumiya.render.glres.textures.GLTextureCache
 import com.lumiyaviewer.lumiya.render.tex.DrawableTextureParams
 import com.lumiyaviewer.lumiya.res.ResourceConsumer
 
-class DrawableFaceTexture(
-    private val drawableTextureParams: DrawableTextureParams
-) : ResourceConsumer, GLCleanable {
+class DrawableFaceTexture : ResourceConsumer, GLCleanable {
+    private DrawableTextureParams drawableTextureParams
+    private var glTextureCache: GLTextureCache = null
+    private volatile Boolean hasAlphaLayer = false
+    private volatile GLLoadedTexture loadedTexture = null
+    private var textureRequested: Boolean = false
 
-    private var glTextureCache: GLTextureCache? = null
-    private var textureRequested = false
-    
-    @Volatile
-    private var loadedTexture: GLLoadedTexture? = null
-    
-    @Volatile
-    private var hasAlphaLayer = false
+    constructor(drawableTextureParams2: DrawableTextureParams) {
+        this.drawableTextureParams = drawableTextureParams2
+    }
 
-    fun GLDraw(renderContext: RenderContext): Boolean {
-        val texture = loadedTexture
-        if (texture != null) {
-            texture.GLDraw()
-            return true
+    fun GLCleanup(): Unit {
+        if (this.glTextureCache != null) {
+            this.glTextureCache.CancelRequest(this)
         }
+        this.textureRequested = false
+        this.loadedTexture = null
+        this.hasAlphaLayer = false
+    }
 
-        if (textureRequested) {
+    Boolean GLDraw(RenderContext renderContext) {
+        GLLoadedTexture gLLoadedTexture = this.loadedTexture
+        gLLoadedTexture?.GLDraw()
+            return true
+        } else if (this.textureRequested) {
+            return false
+        } else {
+            this.textureRequested = true
+            this.glTextureCache = renderContext.drawableStore.glTextureCache
+            renderContext.glResourceManager.addCleanable(this)
+            this.glTextureCache.RequestResource(this.drawableTextureParams, this)
             return false
         }
-
-        textureRequested = true
-        glTextureCache = renderContext.drawableStore.glTextureCache
-        renderContext.glResourceManager.addCleanable(this)
-        glTextureCache?.RequestResource(drawableTextureParams, this)
-        return false
     }
 
-    override fun GLCleanup() {
-        glTextureCache?.CancelRequest(this)
-        textureRequested = false
-        loadedTexture = null
-        hasAlphaLayer = false
-    }
-
-    override fun OnResourceReady(resource: Any?, priority: Boolean) {
-        when (resource) {
-            is GLLoadedTexture -> {
-                loadedTexture = resource
-                hasAlphaLayer = resource.hasAlphaLayer()
-            }
-            null -> {
-                loadedTexture = null
-                hasAlphaLayer = false
-            }
+    fun OnResourceReady(obj: Any, z: Boolean): Unit {
+        if (obj instanceof GLLoadedTexture) {
+            GLLoadedTexture gLLoadedTexture = (GLLoadedTexture) obj
+            this.loadedTexture = gLLoadedTexture
+            this.hasAlphaLayer = gLLoadedTexture.hasAlphaLayer()
+        } else if (obj == null) {
+            this.loadedTexture = null
+            this.hasAlphaLayer = false
         }
     }
 
-    internal fun hasAlphaLayer(): Boolean = hasAlphaLayer
+    /* access modifiers changed from: package-private */
+    fun hasAlphaLayer(): Boolean {
+        return this.hasAlphaLayer
+    }
 }

@@ -6,5 +6,5 @@ data class GroupRoleMember(
     var groupID: UUID,
     var requestID: UUID,
     var roleID: UUID,
-    var userID: UUID
+    var userID: UUID,
 )

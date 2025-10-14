@@ -9,14 +9,14 @@ import java.util.*
  */
 class PacketAckMessage : SLMessage() {
     val packets = mutableListOf<Int>()
-    
+
     override fun packPayload(buffer: ByteBuffer) {
         buffer.put(packets.size.toByte())
         for (packetId in packets) {
             buffer.putInt(packetId)
         }
     }
-    
+
     override fun unpackPayload(buffer: ByteBuffer) {
         val count = buffer.get().toInt() and 0xFF
         packets.clear()
@@ -24,8 +24,9 @@ class PacketAckMessage : SLMessage() {
             packets.add(buffer.getInt())
         }
     }
-    
+
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.PACKET_ACK
+
     override fun getMessageName(): String = "PacketAck"
 }
 
@@ -36,7 +37,7 @@ class OpenCircuitMessage : SLMessage() {
     var circuitCode: Int = 0
     var sessionId: UUID = UUID.randomUUID()
     var agentId: UUID = UUID.randomUUID()
-    
+
     override fun packPayload(buffer: ByteBuffer) {
         buffer.putInt(circuitCode)
         buffer.putLong(sessionId.mostSignificantBits)
@@ -44,7 +45,7 @@ class OpenCircuitMessage : SLMessage() {
         buffer.putLong(agentId.mostSignificantBits)
         buffer.putLong(agentId.leastSignificantBits)
     }
-    
+
     override fun unpackPayload(buffer: ByteBuffer) {
         circuitCode = buffer.getInt()
         val sessionMsb = buffer.getLong()
@@ -54,8 +55,9 @@ class OpenCircuitMessage : SLMessage() {
         val agentLsb = buffer.getLong()
         agentId = UUID(agentMsb, agentLsb)
     }
-    
+
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.OPEN_CIRCUIT
+
     override fun getMessageName(): String = "OpenCircuit"
 }
 
@@ -66,11 +68,12 @@ class CloseCircuitMessage : SLMessage() {
     override fun packPayload(buffer: ByteBuffer) {
         // No payload
     }
-    
+
     override fun unpackPayload(buffer: ByteBuffer) {
         // No payload
     }
-    
+
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.CLOSE_CIRCUIT
+
     override fun getMessageName(): String = "CloseCircuit"
 }

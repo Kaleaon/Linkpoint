@@ -9,17 +9,16 @@ import java.util.*
  * Base class for all LLSD types
  */
 sealed class LLSD {
-    
     /**
      * Convert to JSON representation
      */
     abstract fun toJson(): Any
-    
+
     /**
      * Convert to XML representation
      */
     abstract fun toXml(): String
-    
+
     companion object {
         /**
          * Parse LLSD from JSON
@@ -50,7 +49,7 @@ sealed class LLSD {
                 else -> LLSDString(json.toString())
             }
         }
-        
+
         /**
          * Parse LLSD from XML
          */
@@ -66,6 +65,7 @@ sealed class LLSD {
  */
 object LLSDUndefined : LLSD() {
     override fun toJson(): Any = JSONObject.NULL
+
     override fun toXml(): String = "<undef />"
 }
 
@@ -74,6 +74,7 @@ object LLSDUndefined : LLSD() {
  */
 data class LLSDBoolean(val value: Boolean) : LLSD() {
     override fun toJson(): Any = value
+
     override fun toXml(): String = "<boolean>${if (value) "true" else "false"}</boolean>"
 }
 
@@ -82,6 +83,7 @@ data class LLSDBoolean(val value: Boolean) : LLSD() {
  */
 data class LLSDInteger(val value: Int) : LLSD() {
     override fun toJson(): Any = value
+
     override fun toXml(): String = "<integer>$value</integer>"
 }
 
@@ -90,6 +92,7 @@ data class LLSDInteger(val value: Int) : LLSD() {
  */
 data class LLSDReal(val value: Double) : LLSD() {
     override fun toJson(): Any = value
+
     override fun toXml(): String = "<real>$value</real>"
 }
 
@@ -98,6 +101,7 @@ data class LLSDReal(val value: Double) : LLSD() {
  */
 data class LLSDString(val value: String) : LLSD() {
     override fun toJson(): Any = value
+
     override fun toXml(): String = "<string>$value</string>"
 }
 
@@ -106,6 +110,7 @@ data class LLSDString(val value: String) : LLSD() {
  */
 data class LLSDUUID(val value: UUID) : LLSD() {
     override fun toJson(): Any = value.toString()
+
     override fun toXml(): String = "<uuid>$value</uuid>"
 }
 
@@ -114,6 +119,7 @@ data class LLSDUUID(val value: UUID) : LLSD() {
  */
 data class LLSDDate(val value: Date) : LLSD() {
     override fun toJson(): Any = value.time
+
     override fun toXml(): String = "<date>${value.time}</date>"
 }
 
@@ -122,6 +128,7 @@ data class LLSDDate(val value: Date) : LLSD() {
  */
 data class LLSDURI(val value: String) : LLSD() {
     override fun toJson(): Any = value
+
     override fun toXml(): String = "<uri>$value</uri>"
 }
 
@@ -130,14 +137,15 @@ data class LLSDURI(val value: String) : LLSD() {
  */
 data class LLSDBinary(val value: ByteArray) : LLSD() {
     override fun toJson(): Any = Base64.getEncoder().encodeToString(value)
+
     override fun toXml(): String = "<binary>${Base64.getEncoder().encodeToString(value)}</binary>"
-    
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is LLSDBinary) return false
         return value.contentEquals(other.value)
     }
-    
+
     override fun hashCode(): Int = value.contentHashCode()
 }
 
@@ -152,7 +160,7 @@ data class LLSDArray(val value: MutableList<LLSD> = mutableListOf()) : LLSD() {
         }
         return array
     }
-    
+
     override fun toXml(): String {
         val sb = StringBuilder("<array>")
         for (item in value) {
@@ -161,9 +169,13 @@ data class LLSDArray(val value: MutableList<LLSD> = mutableListOf()) : LLSD() {
         sb.append("</array>")
         return sb.toString()
     }
-    
+
     operator fun get(index: Int): LLSD = value.getOrNull(index) ?: LLSDUndefined
-    operator fun set(index: Int, element: LLSD) {
+
+    operator fun set(
+        index: Int,
+        element: LLSD,
+    ) {
         if (index >= value.size) {
             // Expand array
             while (value.size <= index) {
@@ -172,8 +184,9 @@ data class LLSDArray(val value: MutableList<LLSD> = mutableListOf()) : LLSD() {
         }
         value[index] = element
     }
-    
+
     fun add(element: LLSD) = value.add(element)
+
     fun size(): Int = value.size
 }
 
@@ -188,7 +201,7 @@ data class LLSDMap(val value: MutableMap<String, LLSD> = mutableMapOf()) : LLSD(
         }
         return obj
     }
-    
+
     override fun toXml(): String {
         val sb = StringBuilder("<map>")
         for ((key, llsdValue) in value) {
@@ -198,13 +211,18 @@ data class LLSDMap(val value: MutableMap<String, LLSD> = mutableMapOf()) : LLSD(
         sb.append("</map>")
         return sb.toString()
     }
-    
+
     operator fun get(key: String): LLSD = value[key] ?: LLSDUndefined
-    operator fun set(key: String, llsdValue: LLSD) {
+
+    operator fun set(
+        key: String,
+        llsdValue: LLSD,
+    ) {
         value[key] = llsdValue
     }
-    
+
     fun containsKey(key: String): Boolean = value.containsKey(key)
+
     fun keys(): Set<String> = value.keys
 }
 
@@ -212,7 +230,6 @@ data class LLSDMap(val value: MutableMap<String, LLSD> = mutableMapOf()) : LLSD(
  * LLSD helper functions
  */
 object LLSDHelper {
-    
     /**
      * Create LLSD from Kotlin value
      */
@@ -247,7 +264,7 @@ object LLSDHelper {
             else -> LLSDString(value.toString())
         }
     }
-    
+
     /**
      * Convert LLSD to Kotlin value
      */

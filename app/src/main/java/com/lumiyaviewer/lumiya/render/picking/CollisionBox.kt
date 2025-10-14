@@ -2,19 +2,17 @@ package com.lumiyaviewer.lumiya.render.picking
 
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 
-class CollisionBox private constructor() {
+object CollisionBox {
+    LLVector3[] vertices
 
-    companion object {
-        @JvmStatic
-        fun getInstance(): CollisionBox = INSTANCE
+    private object InstanceHolder {
+        private CollisionBox Instance = new CollisionBox()
 
-        private val INSTANCE = CollisionBox()
+        
     }
 
-    val vertices = Array<LLVector3>(36) { LLVector3(0f, 0f, 0f) }
-
-    init {
-        // Initialize collision box faces
+    private CollisionBox() {
+        this.vertices = new LLVector3[36]
         addCollisionFace(0, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0)
         addCollisionFace(1, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0)
         addCollisionFace(2, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 1)
@@ -23,39 +21,35 @@ class CollisionBox private constructor() {
         addCollisionFace(5, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 2)
     }
 
-    private fun addCollisionFace(
-        faceIndex: Int,
-        minU: Float,
-        minV: Float,
-        maxU: Float,
-        maxV: Float,
-        depth: Float,
-        axis: Int
-    ) {
-        val baseIndex = faceIndex * 2 * 3
-        
-        val v0 = getCollisionVertex(minU, minV, depth, axis)
-        val v1 = getCollisionVertex(maxU, minV, depth, axis)
-        val v2 = getCollisionVertex(maxU, maxV, depth, axis)
-        val v3 = getCollisionVertex(minU, maxV, depth, axis)
-        
-        // First triangle
-        vertices[baseIndex + 0] = v0
-        vertices[baseIndex + 1] = v1
-        vertices[baseIndex + 2] = v3
-        
-        // Second triangle
-        vertices[baseIndex + 3] = v1
-        vertices[baseIndex + 4] = v2
-        vertices[baseIndex + 5] = v3
+    /* synthetic */ CollisionBox(CollisionBox collisionBox) {
+        this()
     }
 
-    private fun getCollisionVertex(u: Float, v: Float, depth: Float, axis: Int): LLVector3 {
-        return when (axis) {
-            0 -> LLVector3(depth, u, v)  // X-axis face
-            1 -> LLVector3(u, depth, v)  // Y-axis face
-            2 -> LLVector3(u, v, depth)  // Z-axis face
-            else -> LLVector3(0f, 0f, 0f)
+    private fun addCollisionFace(i: Int, f: Float, f2: Float, f3: Float, f4: Float, f5: Float, i2: Int): Unit {
+        int i3 = (i * 2) * 3
+        LLVector3[] lLVector3Arr = new LLVector3[]{getCollisionVertex(f, f2, f5, i2), getCollisionVertex(f3, f2, f5, i2), getCollisionVertex(f3, f4, f5, i2), getCollisionVertex(f, f4, f5, i2)}
+        this.vertices[i3 + 0] = lLVector3Arr[0]
+        this.vertices[i3 + 1] = lLVector3Arr[1]
+        this.vertices[i3 + 2] = lLVector3Arr[3]
+        this.vertices[i3 + 3] = lLVector3Arr[1]
+        this.vertices[i3 + 4] = lLVector3Arr[2]
+        this.vertices[i3 + 5] = lLVector3Arr[3]
+    }
+
+    private fun getCollisionVertex(f: Float, f2: Float, f3: Float, i: Int): LLVector3 {
+        switch (i) {
+            case 0:
+                return new LLVector3(f3, f, f2)
+            case 1:
+                return new LLVector3(f, f3, f2)
+            case 2:
+                return new LLVector3(f, f2, f3)
+            default:
+                return null
         }
+    }
+
+    fun getInstance(): CollisionBox {
+        return InstanceHolder.Instance
     }
 }

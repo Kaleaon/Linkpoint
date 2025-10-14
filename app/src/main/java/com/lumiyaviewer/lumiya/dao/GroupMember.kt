@@ -10,5 +10,5 @@ data class GroupMember(
     var onlineStatus: String,
     var agentPowers: Long,
     var title: String,
-    var isOwner: Boolean
+    var isOwner: Boolean,
 )

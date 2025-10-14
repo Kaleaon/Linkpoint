@@ -19,7 +19,7 @@ class VertexArray(length: Int) {
         tempVec3_1: LLVector3,
         tempVec3_2: LLVector3,
         tempVec2_1: LLVector2,
-        tempVec2_2: LLVector2
+        tempVec2_2: LLVector2,
     ) {
         // Calculate vertex position
         vertex2.vertices.getSub(index2, baseVertex.vertices, baseIndex, tempVec3_1)

@@ -1,51 +1,63 @@
 package com.lumiyaviewer.lumiya.render.spatial
+import java.util.*
 
 import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo
-import kotlin.math.max
-import kotlin.math.min
+import com.lumiyaviewer.lumiya.slproto.types.Vector3Array
+import javax.annotation.Nonnull
 
-abstract class DrawListObjectEntry(protected val objectInfo: SLObjectInfo) : DrawListEntry() {
+abstract class DrawListObjectEntry extends DrawListEntry {
+    @Nonnull
+    SLObjectInfo objectInfo
 
-    fun getObjectInfo(): SLObjectInfo = objectInfo
+    constructor(sLObjectInfo: SLObjectInfo) {
+        this.objectInfo = sLObjectInfo
+    }
 
-    fun updateBoundingBox() {
-        val worldMatrix = objectInfo.worldMatrix ?: return
-        
-        val objectCoords = objectInfo.objectCoords
-        val data = objectCoords.data
-        val elementOffset = objectCoords.getElementOffset(1)
+    @Nonnull
+    fun getObjectInfo(): SLObjectInfo {
+        return this.objectInfo
+    }
 
-        // Initialize bounding box with position
-        for (i in 0..2) {
-            val pos = worldMatrix[i + 12]
-            boundingBox[i] = pos
-            boundingBox[i + 3] = pos
-        }
-
-        // Expand bounding box based on object size and rotation
-        for (axis in 0..2) {
-            for (component in 0..2) {
-                val matrixValue = worldMatrix[axis * 4 + component]
-                val halfSize = data[elementOffset + component] / 2.0f
-                
-                val negContribution = matrixValue * -halfSize
-                val posContribution = matrixValue * halfSize
-                
-                if (negContribution < posContribution) {
-                    boundingBox[axis] += negContribution
-                    boundingBox[axis + 3] += posContribution
-                } else {
-                    boundingBox[axis] += posContribution
-                    boundingBox[axis + 3] += negContribution
+    fun updateBoundingBox(): Unit {
+        float[] fArr = this.objectInfo.worldMatrix
+        if (fArr != null) {
+            float f
+            Vector3Array objectCoords = this.objectInfo.getObjectCoords()
+            float[] data = objectCoords.getData()
+            int elementOffset = objectCoords.getElementOffset(1)
+            for (i = 0; i < 3; i++) {
+                float[] fArr2 = this.boundingBox
+                f = fArr[i + 12]
+                this.boundingBox[i + 3] = f
+                fArr2[i] = f
+            }
+            for (int i2 = 0; i2 < 3; i2++) {
+                for (i = 0; i < 3; i++) {
+                    f = fArr[(i2 * 4) + i] * ((-data[elementOffset + i]) / 2.0f)
+                    float f2 = fArr[(i2 * 4) + i] * (data[elementOffset + i] / 2.0f)
+                    float[] fArr3
+                    if (f < f2) {
+                        fArr3 = this.boundingBox
+                        fArr3[i2] = f + fArr3[i2]
+                        float[] fArr4 = this.boundingBox
+                        i3 = i2 + 3
+                        fArr4[i3] = f2 + fArr4[i3]
+                    } else {
+                        fArr3 = this.boundingBox
+                        fArr3[i2] = f2 + fArr3[i2]
+                        float[] fArr5 = this.boundingBox
+                        i3 = i2 + 3
+                        fArr5[i3] = f + fArr5[i3]
+                    }
                 }
             }
-        }
-
-        // Clamp to world bounds
-        for (i in 0..2) {
-            val maxBound = if (i == 2) 4096.0f else 256.0f
-            boundingBox[i] = min(maxBound, max(0.0f, boundingBox[i]))
-            boundingBox[i + 3] = min(maxBound, max(0.0f, boundingBox[i + 3]))
+            i = 0
+            while (i < 3) {
+                float f3 = i == 2 ? 4096.0f : 256.0f
+                this.boundingBox[i] = Math.min(f3, Math.max(0.0f, this.boundingBox[i]))
+                this.boundingBox[i + 3] = Math.min(f3, Math.max(0.0f, this.boundingBox[i + 3]))
+                i++
+            }
         }
     }
 }

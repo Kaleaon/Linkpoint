@@ -5,15 +5,14 @@ import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 
 internal class AvatarRunningAnimation(
     private val sequence: AvatarRunningSequence,
-    private val jointSet: AnimationJointSet
+    private val jointSet: AnimationJointSet,
 ) : Comparable<AvatarRunningAnimation> {
-
     fun animate(
         avatarSkeleton: AvatarSkeleton,
         rotations: FloatArray,
         positions: FloatArray,
         quaternions: Array<LLQuaternion>,
-        vectors: Array<LLVector3>
+        vectors: Array<LLVector3>,
     ) {
         jointSet.animate(avatarSkeleton, sequence, rotations, positions, quaternions, vectors)
     }
@@ -23,7 +22,7 @@ internal class AvatarRunningAnimation(
         if (priorityDiff != 0) {
             return priorityDiff
         }
-        
+
         val sequenceDiff = other.sequence.sequenceID - this.sequence.sequenceID
         return if (sequenceDiff != 0) sequenceDiff else 0
     }

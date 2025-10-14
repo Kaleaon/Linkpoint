@@ -12,5 +12,5 @@ data class SLAuthParams(
     val version: String = "1.0.0",
     val macAddress: String = "00:00:00:00:00:00",
     val id0: String = "",
-    val skipOptionalUpdate: Boolean = false
+    val skipOptionalUpdate: Boolean = false,
 )
