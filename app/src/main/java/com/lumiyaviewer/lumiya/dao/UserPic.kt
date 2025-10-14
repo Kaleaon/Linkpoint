@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.dao
 data class UserPic(
     var id: Long? = null,
     var uuid: String? = null,
-    var bitmap: ByteArray? = null
+    var bitmap: ByteArray? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -16,7 +16,9 @@ data class UserPic(
         if (bitmap != null) {
             if (other.bitmap == null) return false
             if (!bitmap.contentEquals(other.bitmap)) return false
-        } else if (other.bitmap != null) return false
+        } else if (other.bitmap != null) {
+            return false
+        }
 
         return true
     }

@@ -9,5 +9,5 @@ data class SearchGridResult(
     var itemUUID: UUID? = null,
     var itemName: String? = null,
     var levensteinDistance: Int = 0,
-    var memberCount: Int? = null
+    var memberCount: Int? = null,
 )

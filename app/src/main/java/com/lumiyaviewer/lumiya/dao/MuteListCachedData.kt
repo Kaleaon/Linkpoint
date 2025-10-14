@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.dao
 data class MuteListCachedData(
     var id: Long? = null,
     var CRC: Int = 0,
-    var data: ByteArray? = null
+    var data: ByteArray? = null,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -16,7 +16,9 @@ data class MuteListCachedData(
         if (data != null) {
             if (other.data == null) return false
             if (!data.contentEquals(other.data)) return false
-        } else if (other.data != null) return false
+        } else if (other.data != null) {
+            return false
+        }
 
         return true
     }

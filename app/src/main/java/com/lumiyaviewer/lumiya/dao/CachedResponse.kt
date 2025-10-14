@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.dao
 data class CachedResponse(
     var key: String,
     var data: ByteArray? = null,
-    var mustRevalidate: Boolean = false
+    var mustRevalidate: Boolean = false,
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -15,7 +15,9 @@ data class CachedResponse(
         if (data != null) {
             if (other.data == null) return false
             if (!data.contentEquals(other.data)) return false
-        } else if (other.data != null) return false
+        } else if (other.data != null) {
+            return false
+        }
         if (mustRevalidate != other.mustRevalidate) return false
 
         return true

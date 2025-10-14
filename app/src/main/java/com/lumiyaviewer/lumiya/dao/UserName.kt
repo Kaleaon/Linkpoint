@@ -7,7 +7,7 @@ data class UserName(
     var uuid: UUID,
     var userName: String? = null,
     var displayName: String? = null,
-    var isBadUUID: Boolean = false
+    var isBadUUID: Boolean = false,
 ) {
     fun isComplete(): Boolean {
         return if (isBadUUID) {
@@ -22,7 +22,7 @@ data class UserName(
             this.isBadUUID = true
             return true
         }
-        
+
         if (this.isBadUUID) {
             return false
         }
