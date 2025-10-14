@@ -684,7 +684,10 @@ class SLAgentCircuit(
     }
 
     private fun sendInstantMessage(targetUUID: UUID, message: String, dialogType: Int): Boolean {
-        if (!modules.rlvController.canSendIM(targetUUID)) {
+        val rlv = modules?.rlvController
+        if (rlv != null && !rlv.canSendIM(targetUUID)) {
+            return false
+        }
             return false
         }
         
