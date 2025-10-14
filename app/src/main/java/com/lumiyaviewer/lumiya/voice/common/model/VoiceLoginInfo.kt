@@ -12,7 +12,7 @@ data class VoiceLoginInfo(
     val voiceAccountServerName: String,
     val agentUUID: UUID,
     val userName: String,
-    val password: String
+    val password: String,
 ) {
     /**
      * Creates VoiceLoginInfo from a Bundle
@@ -22,17 +22,18 @@ data class VoiceLoginInfo(
         voiceAccountServerName = bundle.getString("voiceAccountServerName") ?: "",
         agentUUID = UUID.fromString(bundle.getString("agentUUID") ?: ""),
         userName = bundle.getString("userName") ?: "",
-        password = bundle.getString("password") ?: ""
+        password = bundle.getString("password") ?: "",
     )
-    
+
     /**
      * Converts this login info to a Bundle
      */
-    fun toBundle(): Bundle = Bundle().apply {
-        putString("voiceSipUriHostname", voiceSipUriHostname)
-        putString("voiceAccountServerName", voiceAccountServerName)
-        putString("agentUUID", agentUUID.toString())
-        putString("userName", userName)
-        putString("password", password)
-    }
+    fun toBundle(): Bundle =
+        Bundle().apply {
+            putString("voiceSipUriHostname", voiceSipUriHostname)
+            putString("voiceAccountServerName", voiceAccountServerName)
+            putString("agentUUID", agentUUID.toString())
+            putString("userName", userName)
+            putString("password", password)
+        }
 }

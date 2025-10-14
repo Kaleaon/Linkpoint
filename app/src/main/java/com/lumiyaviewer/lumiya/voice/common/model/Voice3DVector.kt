@@ -10,7 +10,7 @@ import android.os.Bundle
 data class Voice3DVector(
     val x: Float,
     val y: Float,
-    val z: Float
+    val z: Float,
 ) {
     /**
      * Creates a Voice3DVector from a Bundle
@@ -18,29 +18,34 @@ data class Voice3DVector(
     constructor(bundle: Bundle) : this(
         x = bundle.getFloat("x"),
         y = bundle.getFloat("y"),
-        z = bundle.getFloat("z")
+        z = bundle.getFloat("z"),
     )
-    
+
     companion object {
         /**
          * Creates a Voice3DVector from Linden Lab (Second Life) coordinates
          * Converts from LL coordinate system to voice coordinate system
          */
         @JvmStatic
-        fun fromLLCoords(x: Float, y: Float, z: Float): Voice3DVector {
+        fun fromLLCoords(
+            x: Float,
+            y: Float,
+            z: Float,
+        ): Voice3DVector {
             return Voice3DVector(x, z, -y)
         }
     }
-    
+
     /**
      * Converts this vector to a Bundle
      */
-    fun toBundle(): Bundle = Bundle().apply {
-        putFloat("x", x)
-        putFloat("y", y)
-        putFloat("z", z)
-    }
-    
+    fun toBundle(): Bundle =
+        Bundle().apply {
+            putFloat("x", x)
+            putFloat("y", y)
+            putFloat("z", z)
+        }
+
     /**
      * String representation with formatted floats
      */

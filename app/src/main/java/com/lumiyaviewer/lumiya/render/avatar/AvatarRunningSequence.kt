@@ -7,10 +7,9 @@ internal class AvatarRunningSequence(
     val sequenceID: Int,
     private val runningSince: Long,
     private val stoppingSince: Long,
-    private val dontEaseIn: Boolean
+    private val dontEaseIn: Boolean,
 ) : AnimationTiming() {
-
-    private val runningAnimations: ImmutableList<AvatarRunningAnimation> = 
+    private val runningAnimations: ImmutableList<AvatarRunningAnimation> =
         animationData.createRunningAnimations(this)
 
     fun getAnimationPriority(): Int {
@@ -27,7 +26,7 @@ internal class AvatarRunningSequence(
             runningSince,
             stoppingSince,
             dontEaseIn,
-            this
+            this,
         )
     }
 }

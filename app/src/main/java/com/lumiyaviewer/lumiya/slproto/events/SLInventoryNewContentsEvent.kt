@@ -8,14 +8,18 @@ class SLInventoryNewContentsEvent {
     var firstParentUUID: UUID? = null
     var newFolderCount = 0
     var newItemCount = 0
-    
-    fun AddItem(isFolder: Boolean, parentUUID: UUID, itemName: String) {
+
+    fun AddItem(
+        isFolder: Boolean,
+        parentUUID: UUID,
+        itemName: String,
+    ) {
         if (isFolder) {
             newFolderCount++
         } else {
             newItemCount++
         }
-        
+
         if (firstParentUUID == null) {
             firstIsFolder = isFolder
             firstParentUUID = parentUUID
@@ -26,6 +30,6 @@ class SLInventoryNewContentsEvent {
             firstItemName = itemName
         }
     }
-    
+
     fun isEmpty(): Boolean = newFolderCount == 0 && newItemCount == 0
 }

@@ -13,47 +13,48 @@ internal class DriveConnectibleFolder(
     driveId: String?,
     parentResource: DriveConnectibleResource?,
     googleApiClient: GoogleApiClient,
-    resourceName: String
+    resourceName: String,
 ) : DriveConnectibleResource(
-    context,
-    driveSynchronizer,
-    driveId,
-    parentResource,
-    googleApiClient,
-    resourceName
-) {
+        context,
+        driveSynchronizer,
+        driveId,
+        parentResource,
+        googleApiClient,
+        resourceName,
+    ) {
+    private val folderCreatedCallback =
+        ResultCallback<DriveFolder.DriveFolderResult> { result ->
+            val status = result.status
 
-    private val folderCreatedCallback = ResultCallback<DriveFolder.DriveFolderResult> { result ->
-        val status = result.status
-        
-        when {
-            status.isSuccess -> {
-                onResourceCreated(result.driveFolder)
-            }
-            status.hasResolution() -> {
-                ErrorResolutionTracker.getInstance()?.addResolvableError(
-                    ErrorResolutionTracker.ResolvableError(
-                        resourceName,
-                        status,
-                        object : ErrorResolutionTracker.RestartableOperation {
-                            override fun tryRestartingOperation() {
-                                startCreatingResource()
-                            }
-                        }
+            when {
+                status.isSuccess -> {
+                    onResourceCreated(result.driveFolder)
+                }
+                status.hasResolution() -> {
+                    ErrorResolutionTracker.getInstance()?.addResolvableError(
+                        ErrorResolutionTracker.ResolvableError(
+                            resourceName,
+                            status,
+                            object : ErrorResolutionTracker.RestartableOperation {
+                                override fun tryRestartingOperation() {
+                                    startCreatingResource()
+                                }
+                            },
+                        ),
                     )
-                )
-            }
-            else -> {
-                onResourceCreationFailed(status.statusMessage)
+                }
+                else -> {
+                    onResourceCreationFailed(status.statusMessage)
+                }
             }
         }
-    }
 
     override fun createResource(driveFolder: DriveFolder) {
-        val metadataChangeSet = MetadataChangeSet.Builder()
-            .setTitle(resourceName)
-            .build()
-        
+        val metadataChangeSet =
+            MetadataChangeSet.Builder()
+                .setTitle(resourceName)
+                .build()
+
         driveFolder.createFolder(googleApiClient, metadataChangeSet)
             .setResultCallback(folderCreatedCallback)
     }
@@ -63,8 +64,8 @@ internal class DriveConnectibleFolder(
     }
 
     override fun isMetadataOk(metadata: Metadata): Boolean {
-        return !metadata.isTrashed && 
-               !metadata.isExplicitlyTrashed && 
-               metadata.isFolder
+        return !metadata.isTrashed &&
+            !metadata.isExplicitlyTrashed &&
+            metadata.isFolder
     }
 }

@@ -5,5 +5,5 @@ import com.lumiyaviewer.lumiya.slproto.objects.SLObjectInfo
 data class ObjectIntersectInfo(
     val intersectInfo: IntersectInfo,
     val objInfo: SLObjectInfo,
-    val pickDepth: Float
+    val pickDepth: Float,
 )

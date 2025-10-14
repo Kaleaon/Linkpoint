@@ -7,7 +7,6 @@
 package com.lumiyaviewer.lumiya.slproto.llsd.kotlin
 
 import android.util.Log
-import com.lumiyaviewer.lumiya.slproto.llsd.integration.LLSDIntegrationBridge
 import java.util.*
 
 /**
@@ -15,10 +14,9 @@ import java.util.*
  * adapted for Android compatibility.
  */
 class KotlinLLSDDemo {
-    
     companion object {
         private const val TAG = "KotlinLLSDDemo"
-        
+
         /**
          * Demo Second Life agent data creation using Kotlin DSL
          * Shows the elegance of @Kaleaon's approach adapted for Android
@@ -28,98 +26,112 @@ class KotlinLLSDDemo {
                 "agent_id" to java.util.UUID.randomUUID()
                 "name" to "Avatar Name"
                 "display_name" to "Display Name"
-                
-                "position" to kotlinLlsdArray {
-                    +128.0  // x
-                    +128.0  // y
-                    +23.0   // z
-                }
-                
-                "rotation" to kotlinLlsdArray {
-                    +0.0  // x
-                    +0.0  // y
-                    +0.0  // z
-                    +1.0  // w (quaternion)
-                }
-                
-                "status" to kotlinLlsdMap {
-                    "online" to true
-                    "typing" to false
-                    "away" to false
-                    "busy" to false
-                }
-                
-                "groups" to kotlinLlsdArray {
-                    // Groups would be added here
-                }
-                
-                "attachments" to kotlinLlsdMap {
-                    "count" to 5
-                    "rendering_cost" to 15000
-                    "complexity" to "medium"
-                }
-                
-                "metadata" to kotlinLlsdMap {
-                    "created" to java.util.Date()
-                    "version" to "linkpoint-3.4.3"
-                    "client" to "Linkpoint Android"
-                }
+
+                "position" to
+                    kotlinLlsdArray {
+                        +128.0 // x
+                        +128.0 // y
+                        +23.0 // z
+                    }
+
+                "rotation" to
+                    kotlinLlsdArray {
+                        +0.0 // x
+                        +0.0 // y
+                        +0.0 // z
+                        +1.0 // w (quaternion)
+                    }
+
+                "status" to
+                    kotlinLlsdMap {
+                        "online" to true
+                        "typing" to false
+                        "away" to false
+                        "busy" to false
+                    }
+
+                "groups" to
+                    kotlinLlsdArray {
+                        // Groups would be added here
+                    }
+
+                "attachments" to
+                    kotlinLlsdMap {
+                        "count" to 5
+                        "rendering_cost" to 15000
+                        "complexity" to "medium"
+                    }
+
+                "metadata" to
+                    kotlinLlsdMap {
+                        "created" to java.util.Date()
+                        "version" to "linkpoint-3.4.3"
+                        "client" to "Linkpoint Android"
+                    }
             }
         }
-        
+
         /**
          * Demo chat message creation
          */
-        fun createChatMessage(message: String, fromId: java.util.UUID): KotlinLLSDValue.Map {
+        fun createChatMessage(
+            message: String,
+            fromId: java.util.UUID,
+        ): KotlinLLSDValue.Map {
             return kotlinLlsdMap {
                 "message" to message
                 "from_id" to fromId
                 "timestamp" to java.util.Date()
                 "channel" to 0
-                "type" to 0  // Normal chat
-                
-                "source" to kotlinLlsdMap {
-                    "name" to "Avatar Name"
-                    "position" to kotlinLlsdArray {
-                        +128.0
-                        +128.0  
-                        +23.0
+                "type" to 0 // Normal chat
+
+                "source" to
+                    kotlinLlsdMap {
+                        "name" to "Avatar Name"
+                        "position" to
+                            kotlinLlsdArray {
+                                +128.0
+                                +128.0
+                                +23.0
+                            }
                     }
-                }
             }
         }
-        
+
         /**
          * Demo inventory data creation
          */
         fun createInventoryData(): KotlinLLSDValue.Map {
             return kotlinLlsdMap {
-                "folders" to kotlinLlsdArray {
-                    // Folder items would be added here using DSL
-                }
-                
-                "items" to kotlinLlsdArray {
-                    // Individual items
-                }
-                
-                "stats" to kotlinLlsdMap {
-                    "total_items" to 1500
-                    "total_folders" to 200
-                    "complexity" to "high"
-                }
+                "folders" to
+                    kotlinLlsdArray {
+                        // Folder items would be added here using DSL
+                    }
+
+                "items" to
+                    kotlinLlsdArray {
+                        // Individual items
+                    }
+
+                "stats" to
+                    kotlinLlsdMap {
+                        "total_items" to 1500
+                        "total_folders" to 200
+                        "complexity" to "high"
+                    }
             }
         }
-        
+
         /**
          * Demonstrate the Kotlin LLSD functionality
          */
         fun runDemo() {
             Log.i(TAG, "=== Kotlin LLSD Demo (Inspired by @Kaleaon's library) ===")
-            
+
             // Create agent data using elegant DSL
             val agentData = createAgentData()
             Log.i(TAG, "Agent data created with ${agentData.size} top-level keys")
-            
+
             // Safe access examples - using proper get method calls
             val agentId = agentData.get("agent_id").asUUID()
             val agentName = agentData.get("name").asString("Unknown")
@@ -127,52 +139,52 @@ class KotlinLLSDDemo {
             val isOnline = statusMap["online"]?.asBoolean(false) ?: false
             val positionArray = agentData.get("position").asArray()
             val positionX = if (positionArray.isNotEmpty()) positionArray[0].asDouble(0.0) else 0.0
-            
+
             Log.i(TAG, "Agent: $agentName (${agentId?.toString()?.substring(0, 8)}...)")
             Log.i(TAG, "Online: $isOnline, Position X: $positionX")
-            
+
             // Convert to Linkpoint LLSD for compatibility - simplified version
             val linkpointData = agentData.toLinkpointLLSD()
             Log.i(TAG, "Converted to Linkpoint LLSD: ${linkpointData.length} chars")
-            
+
             // Demonstrate chat message
             val chatMsg = createChatMessage("Hello from Kotlin LLSD!", java.util.UUID.randomUUID())
             val message = chatMsg["message"].asString()
             val timestamp = chatMsg["timestamp"].asString()
             Log.i(TAG, "Chat: '$message' at $timestamp")
-            
+
             // Show integration with existing system - using basic integration
             Log.i(TAG, "Basic integration successful")
-            
+
             Log.i(TAG, "=== Demo Complete ===")
         }
-        
+
         /**
          * Demonstrate performance and memory efficiency
          */
         fun performanceDemo() {
             Log.i(TAG, "=== Performance Demo ===")
-            
+
             val startTime = System.currentTimeMillis()
-            
+
             // Create 1000 agent data structures
             val agents = mutableListOf<KotlinLLSDValue.Map>()
             repeat(1000) {
                 agents.add(createAgentData())
             }
-            
+
             val creationTime = System.currentTimeMillis() - startTime
             Log.i(TAG, "Created 1000 agent data structures in ${creationTime}ms")
-            
+
             // Test conversion performance
             val conversionStart = System.currentTimeMillis()
             agents.forEach { it.toLinkpointLLSD() }
             val conversionTime = System.currentTimeMillis() - conversionStart
-            
+
             Log.i(TAG, "Converted 1000 structures in ${conversionTime}ms")
             Log.i(TAG, "Average: ${creationTime / 1000.0}ms creation, ${conversionTime / 1000.0}ms conversion per item")
         }
-        
+
         /**
          * Get status of Kotlin LLSD implementation
          */
@@ -192,7 +204,7 @@ class KotlinLLSDDemo {
                 - Sealed class hierarchy prevents runtime errors
                 - Extension functions for easy conversion
                 - Android-optimized performance
-            """.trimIndent()
+                """.trimIndent()
         }
     }
 }

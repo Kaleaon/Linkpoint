@@ -10,41 +10,43 @@ internal class DriveChatLogFolder(
     folderName: String?,
     parentResource: DriveConnectibleResource?,
     private val googleApiClient: GoogleApiClient,
-    folderTitle: String
+    folderTitle: String,
 ) {
     private val files: MutableMap<String, DriveTextFile> = HashMap()
-    private val folder: DriveConnectibleFolder = DriveConnectibleFolder(
-        context,
-        synchronizer,
-        folderName,
-        parentResource,
-        googleApiClient,
-        folderTitle
-    )
+    private val folder: DriveConnectibleFolder =
+        DriveConnectibleFolder(
+            context,
+            synchronizer,
+            folderName,
+            parentResource,
+            googleApiClient,
+            folderTitle,
+        )
 
     fun getChatLogFile(
         agentSyncConnections: AgentSyncConnections,
         uuid: UUID,
         fileName: String,
         logWriteTracker: LogWriteTracker,
-        createIfMissing: Boolean
+        createIfMissing: Boolean,
     ): DriveTextFile? {
         var file = files[fileName]
-        
+
         if (file == null && createIfMissing) {
-            file = DriveTextFile(
-                context,
-                synchronizer,
-                agentSyncConnections,
-                uuid,
-                folder,
-                googleApiClient,
-                fileName,
-                logWriteTracker
-            )
+            file =
+                DriveTextFile(
+                    context,
+                    synchronizer,
+                    agentSyncConnections,
+                    uuid,
+                    folder,
+                    googleApiClient,
+                    fileName,
+                    logWriteTracker,
+                )
             files[fileName] = file
         }
-        
+
         return file
     }
 

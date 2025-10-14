@@ -1,0 +1,49 @@
+package com.lumiyaviewer.lumiya.slproto.chat
+
+import android.content.Context
+import com.lumiyaviewer.lumiya.dao.ChatMessage
+import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent
+import com.lumiyaviewer.lumiya.slproto.users.chatsrc.ChatMessageSource
+import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
+import java.util.UUID
+import javax.annotation.Nonnull
+
+class SLChatSystemMessageEvent : SLChatEvent {
+    @Nonnull
+    private String text
+
+    SLChatSystemMessageEvent(ChatMessage chatMessage, @Nonnull UUID uuid) {
+        super(chatMessage, uuid)
+        this.text = chatMessage.getMessageText()
+    }
+
+    SLChatSystemMessageEvent(@Nonnull ChatMessageSource chatMessageSource, @Nonnull UUID uuid, @Nonnull String str) {
+        super(chatMessageSource, uuid)
+        this.text = str
+    }
+
+    /* access modifiers changed from: protected */
+    @Nonnull
+    SLChatEvent.ChatMessageType getMessageType() {
+        return SLChatEvent.ChatMessageType.SystemMessage
+    }
+
+    /* access modifiers changed from: protected */
+    String getText(Context context, @Nonnull UserManager userManager) {
+        return this.text
+    }
+
+    SLChatEvent.ChatMessageViewType getViewType() {
+        return SLChatEvent.ChatMessageViewType.VIEW_TYPE_PLAIN
+    }
+
+    /* access modifiers changed from: protected */
+    Boolean isActionMessage(@Nonnull UserManager userManager) {
+        return true
+    }
+
+    Unit serializeToDatabaseObject(@Nonnull ChatMessage chatMessage) {
+        super.serializeToDatabaseObject(chatMessage)
+        chatMessage.setMessageText(this.text)
+    }
+}

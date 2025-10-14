@@ -9,33 +9,33 @@ import android.os.Bundle
 data class LogSyncStatus(
     val pluginVersionCode: Int,
     val status: Status,
-    val errorMessage: String?
+    val errorMessage: String?,
 ) : Bundleable {
-    
     /**
      * Synchronization status enum
      */
     enum class Status {
         Ready,
         AppVersionRejected,
-        GoogleDriveError
+        GoogleDriveError,
     }
-    
+
     /**
      * Creates a LogSyncStatus from a Bundle
      */
     constructor(bundle: Bundle) : this(
         pluginVersionCode = bundle.getInt("pluginVersionCode"),
         status = Status.valueOf(bundle.getString("status") ?: "Ready"),
-        errorMessage = bundle.getString("errorMessage")
+        errorMessage = bundle.getString("errorMessage"),
     )
-    
+
     /**
      * Converts this status to a Bundle
      */
-    override fun toBundle(): Bundle = Bundle().apply {
-        putInt("pluginVersionCode", pluginVersionCode)
-        putString("status", status.toString())
-        putString("errorMessage", errorMessage)
-    }
+    override fun toBundle(): Bundle =
+        Bundle().apply {
+            putInt("pluginVersionCode", pluginVersionCode)
+            putString("status", status.toString())
+            putString("errorMessage", errorMessage)
+        }
 }

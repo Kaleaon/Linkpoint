@@ -11,10 +11,12 @@ import com.lumiyaviewer.lumiya.StreamingMediaService
  * Handles audio-related broadcast intents, particularly when audio becomes noisy
  */
 class AudioIntentReceiver : BroadcastReceiver() {
-    
-    override fun onReceive(context: Context?, intent: Intent?) {
+    override fun onReceive(
+        context: Context?,
+        intent: Intent?,
+    ) {
         if (context == null || intent == null) return
-        
+
         when (intent.action) {
             AudioManager.ACTION_AUDIO_BECOMING_NOISY -> {
                 // Stop media playback when headphones are unplugged

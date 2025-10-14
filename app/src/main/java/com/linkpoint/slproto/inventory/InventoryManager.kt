@@ -10,69 +10,70 @@ import java.util.concurrent.ConcurrentHashMap
  * Inventory management system
  */
 class InventoryManager(private val capsManager: CapsManager) {
-    
     private val inventoryCache = ConcurrentHashMap<UUID, InventoryItem>()
     private val folderCache = ConcurrentHashMap<UUID, InventoryFolder>()
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    
+
     /**
      * Fetch inventory from server
      */
-    suspend fun fetchInventory(folderId: UUID): List<InventoryItem> = withContext(Dispatchers.IO) {
-        val fetchUrl = capsManager.getCapability(CapsManager.CAP_FETCH_INVENTORY_DESCENDENTS)
-            ?: throw Exception("FetchInventoryDescendents capability not available")
-        
-        val request = LLSDMap()
-        request["folder_id"] = LLSDUUID(folderId)
-        request["owner_id"] = LLSDUUID(UUID.randomUUID()) // Should be agent ID
-        request["sort_order"] = LLSDInteger(0)
-        request["fetch_folders"] = LLSDBoolean(true)
-        request["fetch_items"] = LLSDBoolean(true)
-        
-        val response = capsManager.postLLSD(fetchUrl, request)
-        
-        val items = mutableListOf<InventoryItem>()
-        
-        if (response is LLSDMap) {
-            val itemsArray = response["items"]
-            if (itemsArray is LLSDArray) {
-                for (itemData in itemsArray.value) {
-                    if (itemData is LLSDMap) {
-                        val item = parseInventoryItem(itemData)
-                        items.add(item)
-                        inventoryCache[item.itemId] = item
+    suspend fun fetchInventory(folderId: UUID): List<InventoryItem> =
+        withContext(Dispatchers.IO) {
+            val fetchUrl =
+                capsManager.getCapability(CapsManager.CAP_FETCH_INVENTORY_DESCENDENTS)
+                    ?: throw Exception("FetchInventoryDescendents capability not available")
+
+            val request = LLSDMap()
+            request["folder_id"] = LLSDUUID(folderId)
+            request["owner_id"] = LLSDUUID(UUID.randomUUID()) // Should be agent ID
+            request["sort_order"] = LLSDInteger(0)
+            request["fetch_folders"] = LLSDBoolean(true)
+            request["fetch_items"] = LLSDBoolean(true)
+
+            val response = capsManager.postLLSD(fetchUrl, request)
+
+            val items = mutableListOf<InventoryItem>()
+
+            if (response is LLSDMap) {
+                val itemsArray = response["items"]
+                if (itemsArray is LLSDArray) {
+                    for (itemData in itemsArray.value) {
+                        if (itemData is LLSDMap) {
+                            val item = parseInventoryItem(itemData)
+                            items.add(item)
+                            inventoryCache[item.itemId] = item
+                        }
+                    }
+                }
+
+                val foldersArray = response["folders"]
+                if (foldersArray is LLSDArray) {
+                    for (folderData in foldersArray.value) {
+                        if (folderData is LLSDMap) {
+                            val folder = parseInventoryFolder(folderData)
+                            folderCache[folder.folderId] = folder
+                        }
                     }
                 }
             }
-            
-            val foldersArray = response["folders"]
-            if (foldersArray is LLSDArray) {
-                for (folderData in foldersArray.value) {
-                    if (folderData is LLSDMap) {
-                        val folder = parseInventoryFolder(folderData)
-                        folderCache[folder.folderId] = folder
-                    }
-                }
-            }
+
+            items
         }
-        
-        items
-    }
-    
+
     /**
      * Get inventory item from cache
      */
     fun getItem(itemId: UUID): InventoryItem? {
         return inventoryCache[itemId]
     }
-    
+
     /**
      * Get inventory folder from cache
      */
     fun getFolder(folderId: UUID): InventoryFolder? {
         return folderCache[folderId]
     }
-    
+
     /**
      * Parse inventory item from LLSD
      */
@@ -93,10 +94,10 @@ class InventoryManager(private val capsManager: CapsManager) {
             salePrice = (data["sale_price"] as? LLSDInteger)?.value ?: 0,
             saleType = (data["sale_type"] as? LLSDInteger)?.value ?: 0,
             permissions = parsePermissions(data["permissions"] as? LLSDMap),
-            creationDate = (data["creation_date"] as? LLSDInteger)?.value ?: 0
+            creationDate = (data["creation_date"] as? LLSDInteger)?.value ?: 0,
         )
     }
-    
+
     /**
      * Parse inventory folder from LLSD
      */
@@ -106,55 +107,61 @@ class InventoryManager(private val capsManager: CapsManager) {
             parentId = UUID.fromString((data["parent_id"] as? LLSDString)?.value ?: UUID.randomUUID().toString()),
             name = (data["name"] as? LLSDString)?.value ?: "Unknown",
             type = (data["type"] as? LLSDInteger)?.value ?: -1,
-            preferredType = (data["preferred_type"] as? LLSDInteger)?.value ?: -1
+            preferredType = (data["preferred_type"] as? LLSDInteger)?.value ?: -1,
         )
     }
-    
+
     /**
      * Parse permissions from LLSD
      */
     private fun parsePermissions(data: LLSDMap?): InventoryPermissions {
         if (data == null) return InventoryPermissions()
-        
+
         return InventoryPermissions(
             baseMask = (data["base_mask"] as? LLSDInteger)?.value ?: 0,
             ownerMask = (data["owner_mask"] as? LLSDInteger)?.value ?: 0,
             groupMask = (data["group_mask"] as? LLSDInteger)?.value ?: 0,
             everyoneMask = (data["everyone_mask"] as? LLSDInteger)?.value ?: 0,
             nextOwnerMask = (data["next_owner_mask"] as? LLSDInteger)?.value ?: 0,
-            isOwnerGroup = (data["is_owner_group"] as? LLSDBoolean)?.value ?: false
+            isOwnerGroup = (data["is_owner_group"] as? LLSDBoolean)?.value ?: false,
         )
     }
-    
+
     /**
      * Create a new inventory folder
      */
     suspend fun createFolder(
         parentId: UUID,
         name: String,
-        type: Int
-    ): InventoryFolder? = withContext(Dispatchers.IO) {
-        // TODO: Implement folder creation via CAPS
-        null
-    }
-    
+        type: Int,
+    ): InventoryFolder? =
+        withContext(Dispatchers.IO) {
+            // TODO: Implement folder creation via CAPS
+            null
+        }
+
     /**
      * Move inventory item
      */
-    suspend fun moveItem(itemId: UUID, newParentId: UUID): Boolean = withContext(Dispatchers.IO) {
-        // TODO: Implement item move via CAPS
-        false
-    }
-    
+    suspend fun moveItem(
+        itemId: UUID,
+        newParentId: UUID,
+    ): Boolean =
+        withContext(Dispatchers.IO) {
+            // TODO: Implement item move via CAPS
+            false
+        }
+
     /**
      * Delete inventory item
      */
-    suspend fun deleteItem(itemId: UUID): Boolean = withContext(Dispatchers.IO) {
-        // TODO: Implement item deletion via CAPS
-        inventoryCache.remove(itemId)
-        true
-    }
-    
+    suspend fun deleteItem(itemId: UUID): Boolean =
+        withContext(Dispatchers.IO) {
+            // TODO: Implement item deletion via CAPS
+            inventoryCache.remove(itemId)
+            true
+        }
+
     /**
      * Cleanup
      */
@@ -182,7 +189,7 @@ data class InventoryItem(
     val salePrice: Int,
     val saleType: Int,
     val permissions: InventoryPermissions,
-    val creationDate: Int
+    val creationDate: Int,
 )
 
 /**
@@ -193,7 +200,7 @@ data class InventoryFolder(
     val parentId: UUID,
     val name: String,
     val type: Int,
-    val preferredType: Int
+    val preferredType: Int,
 )
 
 /**
@@ -205,7 +212,7 @@ data class InventoryPermissions(
     val groupMask: Int = 0,
     val everyoneMask: Int = 0,
     val nextOwnerMask: Int = 0,
-    val isOwnerGroup: Boolean = false
+    val isOwnerGroup: Boolean = false,
 ) {
     companion object {
         const val PERM_TRANSFER = 0x00002000
@@ -214,10 +221,13 @@ data class InventoryPermissions(
         const val PERM_MOVE = 0x00080000
         const val PERM_ALL = 0x7FFFFFFF
     }
-    
+
     fun canTransfer(): Boolean = (ownerMask and PERM_TRANSFER) != 0
+
     fun canModify(): Boolean = (ownerMask and PERM_MODIFY) != 0
+
     fun canCopy(): Boolean = (ownerMask and PERM_COPY) != 0
+
     fun canMove(): Boolean = (ownerMask and PERM_MOVE) != 0
 }
 

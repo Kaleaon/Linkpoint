@@ -6,5 +6,5 @@ open class SpatialBox(
     protected val s: Float,
     protected val xs: Float,
     protected val ys: Float,
-    protected val zs: Float
+    protected val zs: Float,
 )

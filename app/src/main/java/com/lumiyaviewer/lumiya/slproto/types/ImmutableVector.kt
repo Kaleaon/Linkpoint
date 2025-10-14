@@ -6,5 +6,5 @@ package com.lumiyaviewer.lumiya.slproto.types
 data class ImmutableVector(
     val x: Float,
     val y: Float,
-    val z: Float
+    val z: Float,
 )

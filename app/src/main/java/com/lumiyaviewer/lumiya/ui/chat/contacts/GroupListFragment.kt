@@ -8,11 +8,10 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import com.lumiyaviewer.lumiya.ui.common.UserListFragment
 
 class GroupListFragment : UserListFragment() {
-    
     override fun createListAdapter(
         context: Context,
         loaderManager: LoaderManager,
-        userManager: UserManager
+        userManager: UserManager,
     ): ListAdapter {
         return ChatterListSubscriptionAdapter(context, userManager, ChatterListType.Groups)
     }

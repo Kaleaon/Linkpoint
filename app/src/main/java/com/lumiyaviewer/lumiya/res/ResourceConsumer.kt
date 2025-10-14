@@ -10,5 +10,8 @@ interface ResourceConsumer {
      * @param resource The loaded resource
      * @param success Whether the resource loaded successfully
      */
-    fun OnResourceReady(resource: Any?, success: Boolean)
+    fun OnResourceReady(
+        resource: Any?,
+        success: Boolean,
+    )
 }

@@ -11,9 +11,11 @@ import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.ui.common.ThemedActivity
 import com.lumiyaviewer.lumiya.ui.grids.GridList
 
-class ManageAccountsActivity : ThemedActivity(), AccountEditDialog.OnAccountEditResultListener,
-    AdapterView.OnItemClickListener, View.OnClickListener {
-
+class ManageAccountsActivity :
+    ThemedActivity(),
+    AccountEditDialog.OnAccountEditResultListener,
+    AdapterView.OnItemClickListener,
+    View.OnClickListener {
     private lateinit var accountList: AccountList
     private lateinit var adapter: AccountListAdapter
     private val displayList = ArrayList<AccountList.AccountInfo>()
@@ -21,14 +23,18 @@ class ManageAccountsActivity : ThemedActivity(), AccountEditDialog.OnAccountEdit
 
     private class AccountListAdapter(
         context: Context,
-        list: List<AccountList.AccountInfo>
+        list: List<AccountList.AccountInfo>,
     ) : ArrayAdapter<AccountList.AccountInfo>(context, R.layout.account_list_item, list) {
-
         private val gridList: GridList = GridList(context)
 
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view = convertView ?: LayoutInflater.from(context)
-                .inflate(R.layout.account_list_item, parent, false)
+        override fun getView(
+            position: Int,
+            convertView: View?,
+            parent: ViewGroup,
+        ): View {
+            val view =
+                convertView ?: LayoutInflater.from(context)
+                    .inflate(R.layout.account_list_item, parent, false)
 
             val accountNameTextView = view.findViewById<TextView>(R.id.accountNameTextView)
             val gridNameTextView = view.findViewById<TextView>(R.id.gridNameTextView)
@@ -86,7 +92,11 @@ class ManageAccountsActivity : ThemedActivity(), AccountEditDialog.OnAccountEdit
         }
     }
 
-    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo) {
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo,
+    ) {
         super.onCreateContextMenu(menu, v, menuInfo)
         menuInflater.inflate(R.menu.account_list_context_menu, menu)
     }
@@ -123,12 +133,18 @@ class ManageAccountsActivity : ThemedActivity(), AccountEditDialog.OnAccountEdit
         }
     }
 
-    override fun onItemClick(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+    override fun onItemClick(
+        parent: AdapterView<*>,
+        view: View,
+        position: Int,
+        id: Long,
+    ) {
         val item = parent.getItemAtPosition(position)
         if (item is AccountList.AccountInfo) {
-            val resultIntent = Intent().apply {
-                putExtra("selected_account", item)
-            }
+            val resultIntent =
+                Intent().apply {
+                    putExtra("selected_account", item)
+                }
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
         }
@@ -138,7 +154,10 @@ class ManageAccountsActivity : ThemedActivity(), AccountEditDialog.OnAccountEdit
         // No action needed
     }
 
-    override fun onAccountEdited(accountInfo: AccountList.AccountInfo, isNew: Boolean) {
+    override fun onAccountEdited(
+        accountInfo: AccountList.AccountInfo,
+        isNew: Boolean,
+    ) {
         if (isNew) {
             accountList.addNewAccount(accountInfo)
         }

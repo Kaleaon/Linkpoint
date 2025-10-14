@@ -6,7 +6,6 @@ import com.lumiyaviewer.lumiya.utils.UUIDPool
 import java.util.UUID
 
 open class ConnectionFragment : Fragment() {
-    
     companion object {
         const val EXTRA_ACTIVE_AGENT_UUID = "activeAgentUUID"
 

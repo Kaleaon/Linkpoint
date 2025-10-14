@@ -22,55 +22,56 @@ class AgentUpdateMessage : SLMessage() {
     var far: Float = 0f
     var controlFlags: Int = 0
     var flags: Byte = 0
-    
+
     override fun packPayload(buffer: ByteBuffer) {
         // Agent data block
         buffer.putLong(agentId.mostSignificantBits)
         buffer.putLong(agentId.leastSignificantBits)
         buffer.putLong(sessionId.mostSignificantBits)
         buffer.putLong(sessionId.leastSignificantBits)
-        
+
         bodyRotation.pack(buffer)
         headRotation.pack(buffer)
-        
+
         buffer.put(state)
-        
+
         cameraCenter.pack(buffer)
         cameraAtAxis.pack(buffer)
         cameraLeftAxis.pack(buffer)
         cameraUpAxis.pack(buffer)
-        
+
         buffer.putFloat(far)
         buffer.putInt(controlFlags)
         buffer.put(flags)
     }
-    
+
     override fun unpackPayload(buffer: ByteBuffer) {
         // Agent data block
         val agentMsb = buffer.getLong()
         val agentLsb = buffer.getLong()
         agentId = UUID(agentMsb, agentLsb)
-        
+
         val sessionMsb = buffer.getLong()
         val sessionLsb = buffer.getLong()
         sessionId = UUID(sessionMsb, sessionLsb)
-        
+
         bodyRotation = LLQuaternion.unpack(buffer)
         headRotation = LLQuaternion.unpack(buffer)
-        
+
         state = buffer.get()
-        
+
         cameraCenter = LLVector3.unpack(buffer)
         cameraAtAxis = LLVector3.unpack(buffer)
         cameraLeftAxis = LLVector3.unpack(buffer)
         cameraUpAxis = LLVector3.unpack(buffer)
-        
+
         far = buffer.getFloat()
         controlFlags = buffer.getInt()
         flags = buffer.get()
     }
-    
+
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.AGENT_UPDATE
+
     override fun getMessageName(): String = "AgentUpdate"
 }
 
@@ -80,21 +81,21 @@ class AgentUpdateMessage : SLMessage() {
 class AgentAnimationMessage : SLMessage() {
     var agentId: UUID = UUID.randomUUID()
     var sessionId: UUID = UUID.randomUUID()
-    
+
     data class AnimationBlock(
         var animId: UUID = UUID.randomUUID(),
-        var startAnim: Boolean = true
+        var startAnim: Boolean = true,
     )
-    
+
     val animationList = mutableListOf<AnimationBlock>()
-    
+
     override fun packPayload(buffer: ByteBuffer) {
         // Agent data
         buffer.putLong(agentId.mostSignificantBits)
         buffer.putLong(agentId.leastSignificantBits)
         buffer.putLong(sessionId.mostSignificantBits)
         buffer.putLong(sessionId.leastSignificantBits)
-        
+
         // Animation list
         buffer.put(animationList.size.toByte())
         for (anim in animationList) {
@@ -103,17 +104,17 @@ class AgentAnimationMessage : SLMessage() {
             buffer.put(if (anim.startAnim) 1 else 0)
         }
     }
-    
+
     override fun unpackPayload(buffer: ByteBuffer) {
         // Agent data
         val agentMsb = buffer.getLong()
         val agentLsb = buffer.getLong()
         agentId = UUID(agentMsb, agentLsb)
-        
+
         val sessionMsb = buffer.getLong()
         val sessionLsb = buffer.getLong()
         sessionId = UUID(sessionMsb, sessionLsb)
-        
+
         // Animation list
         val count = buffer.get().toInt() and 0xFF
         animationList.clear()
@@ -125,7 +126,8 @@ class AgentAnimationMessage : SLMessage() {
             animationList.add(AnimationBlock(animId, startAnim))
         }
     }
-    
+
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.AGENT_ANIMATION
+
     override fun getMessageName(): String = "AgentAnimation"
 }

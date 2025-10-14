@@ -1,0 +1,86 @@
+package com.lumiyaviewer.lumiya.slproto.messages
+
+import com.google.common.primitives.UnsignedBytes
+import com.lumiyaviewer.lumiya.slproto.SLMessage
+import java.nio.ByteBuffer
+import java.util.ArrayList
+import java.util.Iterator
+import java.util.UUID
+
+class GroupAccountDetailsReply : SLMessage {
+    AgentData AgentData_Field
+    ArrayList<HistoryData> HistoryData_Fields = ArrayList<>()
+    MoneyData MoneyData_Field
+
+    class AgentData {
+        UUID AgentID
+        UUID GroupID
+    }
+
+    class HistoryData {
+        Int Amount
+        byte[] Description
+    }
+
+    class MoneyData {
+        Int CurrentInterval
+        Int IntervalDays
+        UUID RequestID
+        byte[] StartDate
+    }
+
+    GroupAccountDetailsReply() {
+        this.zeroCoded = true
+        this.AgentData_Field = AgentData()
+        this.MoneyData_Field = MoneyData()
+    }
+
+    Int CalcPayloadSize() {
+        Int length = this.MoneyData_Field.StartDate.length + 25 + 36 + 1
+        Iterator<T> it = this.HistoryData_Fields.iterator()
+        while (true) {
+            Int i = length
+            if (!it.hasNext()) {
+                return i
+            }
+            length = ((HistoryData) it.next()).Description.length + 1 + 4 + i
+        }
+    }
+
+    Unit Handle(SLMessageHandler sLMessageHandler) {
+        sLMessageHandler.HandleGroupAccountDetailsReply(this)
+    }
+
+    Unit PackPayload(ByteBuffer byteBuffer) {
+        byteBuffer.putShort(-1)
+        byteBuffer.put((byte) 1)
+        byteBuffer.put((byte) 100)
+        packUUID(byteBuffer, this.AgentData_Field.AgentID)
+        packUUID(byteBuffer, this.AgentData_Field.GroupID)
+        packUUID(byteBuffer, this.MoneyData_Field.RequestID)
+        packInt(byteBuffer, this.MoneyData_Field.IntervalDays)
+        packInt(byteBuffer, this.MoneyData_Field.CurrentInterval)
+        packVariable(byteBuffer, this.MoneyData_Field.StartDate, 1)
+        byteBuffer.put((byte) this.HistoryData_Fields.size())
+        for (HistoryData historyData : this.HistoryData_Fields) {
+            packVariable(byteBuffer, historyData.Description, 1)
+            packInt(byteBuffer, historyData.Amount)
+        }
+    }
+
+    Unit UnpackPayload(ByteBuffer byteBuffer) {
+        this.AgentData_Field.AgentID = unpackUUID(byteBuffer)
+        this.AgentData_Field.GroupID = unpackUUID(byteBuffer)
+        this.MoneyData_Field.RequestID = unpackUUID(byteBuffer)
+        this.MoneyData_Field.IntervalDays = unpackInt(byteBuffer)
+        this.MoneyData_Field.CurrentInterval = unpackInt(byteBuffer)
+        this.MoneyData_Field.StartDate = unpackVariable(byteBuffer, 1)
+        byte b = byteBuffer.get() & UnsignedBytes.MAX_VALUE
+        for (Int i = 0; i < b; i++) {
+            HistoryData historyData = HistoryData()
+            historyData.Description = unpackVariable(byteBuffer, 1)
+            historyData.Amount = unpackInt(byteBuffer)
+            this.HistoryData_Fields.add(historyData)
+        }
+    }
+}

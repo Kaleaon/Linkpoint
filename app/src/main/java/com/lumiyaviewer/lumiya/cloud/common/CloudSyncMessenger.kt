@@ -10,7 +10,6 @@ import android.os.RemoteException
  * Handles sending messages for cloud synchronization
  */
 object CloudSyncMessenger {
-    
     /**
      * Sends a message to a cloud sync service
      * @param messenger The target messenger
@@ -24,20 +23,22 @@ object CloudSyncMessenger {
         messenger: Messenger?,
         messageType: MessageType,
         bundleable: Bundleable,
-        replyTo: Messenger? = null
+        replyTo: Messenger? = null,
     ): Boolean {
         if (messenger == null) return false
-        
+
         return try {
-            val bundle = Bundle().apply {
-                putString("messageType", messageType.toString())
-                putBundle("message", bundleable.toBundle())
-            }
-            
-            val message = Message.obtain(null, MessageType.CLOUD_PLUGIN_MESSAGE, bundle).apply {
-                this.replyTo = replyTo
-            }
-            
+            val bundle =
+                Bundle().apply {
+                    putString("messageType", messageType.toString())
+                    putBundle("message", bundleable.toBundle())
+                }
+
+            val message =
+                Message.obtain(null, MessageType.CLOUD_PLUGIN_MESSAGE, bundle).apply {
+                    this.replyTo = replyTo
+                }
+
             messenger.send(message)
             true
         } catch (e: RemoteException) {

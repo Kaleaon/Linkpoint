@@ -8,5 +8,5 @@ enum class TexturePriority {
     Terrain,
     PrimVisibleFar,
     PrimInvisible,
-    Lowest
+    Lowest,
 }

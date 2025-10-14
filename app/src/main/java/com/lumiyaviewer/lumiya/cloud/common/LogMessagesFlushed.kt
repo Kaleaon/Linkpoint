@@ -10,32 +10,33 @@ import java.util.UUID
  */
 data class LogMessagesFlushed(
     val agentUUID: UUID,
-    val messageIDs: ImmutableList<Long>
+    val messageIDs: ImmutableList<Long>,
 ) : Bundleable {
-    
     /**
      * Creates a LogMessagesFlushed from a Bundle
      */
     constructor(bundle: Bundle) : this(
         agentUUID = UUID.fromString(bundle.getString("agentUUID") ?: ""),
-        messageIDs = ImmutableList.copyOf(
-            (bundle.getLongArray("messageIDs") ?: longArrayOf()).toList()
-        )
+        messageIDs =
+            ImmutableList.copyOf(
+                (bundle.getLongArray("messageIDs") ?: longArrayOf()).toList(),
+            ),
     )
-    
+
     /**
      * Convenience constructor that accepts a Collection
      */
     constructor(agentUUID: UUID, messageIDs: Collection<Long>) : this(
         agentUUID = agentUUID,
-        messageIDs = ImmutableList.copyOf(messageIDs)
+        messageIDs = ImmutableList.copyOf(messageIDs),
     )
-    
+
     /**
      * Converts this message to a Bundle
      */
-    override fun toBundle(): Bundle = Bundle().apply {
-        putString("agentUUID", agentUUID.toString())
-        putLongArray("messageIDs", messageIDs.toLongArray())
-    }
+    override fun toBundle(): Bundle =
+        Bundle().apply {
+            putString("agentUUID", agentUUID.toString())
+            putLongArray("messageIDs", messageIDs.toLongArray())
+        }
 }

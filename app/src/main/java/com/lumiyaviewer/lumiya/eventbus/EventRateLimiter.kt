@@ -6,14 +6,14 @@ package com.lumiyaviewer.lumiya.eventbus
  */
 abstract class EventRateLimiter(
     private val bus: EventBus?,
-    private val minInterval: Long
+    private val minInterval: Long,
 ) {
     @Volatile
     private var isPending = false
-    
+
     @Volatile
     private var lastTimeFired = 0L
-    
+
     private val lock = Any()
 
     /**
@@ -30,20 +30,21 @@ abstract class EventRateLimiter(
      * Fire any pending events if enough time has passed since the last firing.
      */
     fun firePending() {
-        val shouldFire = synchronized(lock) {
-            if (isPending) {
-                val currentTime = System.currentTimeMillis()
-                if (currentTime >= lastTimeFired + minInterval) {
-                    isPending = false
-                    lastTimeFired = currentTime
-                    true
+        val shouldFire =
+            synchronized(lock) {
+                if (isPending) {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime >= lastTimeFired + minInterval) {
+                        isPending = false
+                        lastTimeFired = currentTime
+                        true
+                    } else {
+                        false
+                    }
                 } else {
                     false
                 }
-            } else {
-                false
             }
-        }
 
         if (shouldFire) {
             onActualFire()

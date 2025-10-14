@@ -15,7 +15,7 @@ class TeleportRequestMessage : SLMessage() {
     var regionHandle: Long = 0L
     var position: LLVector3 = LLVector3()
     var lookAt: LLVector3 = LLVector3()
-    
+
     override fun packPayload(buffer: ByteBuffer) {
         buffer.putLong(agentId.mostSignificantBits)
         buffer.putLong(agentId.leastSignificantBits)
@@ -25,7 +25,7 @@ class TeleportRequestMessage : SLMessage() {
         position.pack(buffer)
         lookAt.pack(buffer)
     }
-    
+
     override fun unpackPayload(buffer: ByteBuffer) {
         agentId = UUID(buffer.getLong(), buffer.getLong())
         sessionId = UUID(buffer.getLong(), buffer.getLong())
@@ -33,8 +33,9 @@ class TeleportRequestMessage : SLMessage() {
         position = LLVector3.unpack(buffer)
         lookAt = LLVector3.unpack(buffer)
     }
-    
+
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.TELEPORT_REQUEST
+
     override fun getMessageName(): String = "TeleportRequest"
 }
 
@@ -43,16 +44,17 @@ class TeleportRequestMessage : SLMessage() {
  */
 class TeleportStartMessage : SLMessage() {
     var flags: Int = 0
-    
+
     override fun packPayload(buffer: ByteBuffer) {
         buffer.putInt(flags)
     }
-    
+
     override fun unpackPayload(buffer: ByteBuffer) {
         flags = buffer.getInt()
     }
-    
+
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.TELEPORT_START
+
     override fun getMessageName(): String = "TeleportStart"
 }
 
@@ -68,48 +70,49 @@ class TeleportFinishMessage : SLMessage() {
     var seedCapability: String = ""
     var simAccess: Byte = 0
     var teleportFlags: Int = 0
-    
+
     override fun packPayload(buffer: ByteBuffer) {
         buffer.putLong(agentId.mostSignificantBits)
         buffer.putLong(agentId.leastSignificantBits)
         buffer.putInt(locationId)
-        
+
         val ipBytes = simIp.toByteArray(StandardCharsets.UTF_8)
         buffer.put(ipBytes.size.toByte())
         buffer.put(ipBytes)
-        
+
         buffer.putInt(simPort)
         buffer.putLong(regionHandle)
-        
+
         val seedBytes = seedCapability.toByteArray(StandardCharsets.UTF_8)
         buffer.putShort(seedBytes.size.toShort())
         buffer.put(seedBytes)
-        
+
         buffer.put(simAccess)
         buffer.putInt(teleportFlags)
     }
-    
+
     override fun unpackPayload(buffer: ByteBuffer) {
         agentId = UUID(buffer.getLong(), buffer.getLong())
         locationId = buffer.getInt()
-        
+
         val ipLength = buffer.get().toInt() and 0xFF
         val ipBytes = ByteArray(ipLength)
         buffer.get(ipBytes)
         simIp = String(ipBytes, StandardCharsets.UTF_8)
-        
+
         simPort = buffer.getInt()
         regionHandle = buffer.getLong()
-        
+
         val seedLength = buffer.getShort().toInt() and 0xFFFF
         val seedBytes = ByteArray(seedLength)
         buffer.get(seedBytes)
         seedCapability = String(seedBytes, StandardCharsets.UTF_8)
-        
+
         simAccess = buffer.get()
         teleportFlags = buffer.getInt()
     }
-    
+
     override fun getMessageID(): Int = SLMessageFactory.MessageIDs.TELEPORT_FINISH
+
     override fun getMessageName(): String = "TeleportFinish"
 }
