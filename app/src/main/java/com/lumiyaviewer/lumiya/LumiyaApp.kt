@@ -120,7 +120,7 @@ class LumiyaApp : MultiDexApplication() {
         @JvmStatic
         fun getDefaultSharedPreferences(): SharedPreferences? {
             if (prefs == null) {
-                prefs = PreferenceManager.getDefaultSharedPreferences(getContext())
+                prefs = getContext()?.let { PreferenceManager.getDefaultSharedPreferences(it) }
             }
             return prefs
         }

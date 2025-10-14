@@ -20,7 +20,11 @@ class FriendlyEditTextPreference : EditTextPreference {
         return if (TextUtils.isEmpty(text) || summary == null) {
             null
         } else {
-            String.format(summary.toString(), text)
+            try {
+                String.format(summary.toString(), text)
+            } catch (e: java.util.IllegalFormatException) {
+                summary
+            }
         }
     }
 }
