@@ -201,7 +201,14 @@ class CloudSyncServiceConnection(
     fun showSyncingError(title: String, message: String, intent: Intent) {
 val notification = NotificationCompat.Builder(context, "cloud_sync")
 ...
-                    PendingIntent.getActivity(
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
                         context,
                         0,
                         intent,
