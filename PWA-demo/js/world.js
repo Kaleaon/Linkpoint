@@ -8,20 +8,17 @@ class WorldViewer extends Utils.EventEmitter {
     super();
     this.protocol = protocolManager;
     this.canvas = null;
-    this.ctx = null;
+    this.graphics3d = null;
+    this.camera3d = null;
+    this.scene3d = null;
     this.animationId = null;
     this.fps = 0;
     this.lastFrameTime = 0;
     this.frameCount = 0;
+    this.use3D = true; // Toggle between 2D and 3D
     
-    // Camera
-    this.camera = {
-      x: 128,
-      y: 128,
-      z: 25,
-      rotation: 0,
-      zoom: 1
-    };
+    // Legacy 2D context (fallback)
+    this.ctx = null;
 
     // World state
     this.region = {
@@ -32,19 +29,32 @@ class WorldViewer extends Utils.EventEmitter {
 
     this.objects = [];
     this.avatars = [];
+    
+    // 3D mode
+    this.objectMeshes = new Map();
   }
 
   /**
    * Initialize world viewer
    */
-  init() {
+  async init() {
     this.canvas = document.getElementById('world-canvas');
     if (!this.canvas) {
       console.error('World canvas not found');
       return;
     }
 
-    this.ctx = this.canvas.getContext('2d');
+    // Try to initialize 3D graphics
+    try {
+      await this.init3D();
+      this.use3D = true;
+      console.log('✅ 3D graphics initialized');
+    } catch (error) {
+      console.warn('3D initialization failed, falling back to 2D:', error);
+      this.use3D = false;
+      this.ctx = this.canvas.getContext('2d');
+    }
+
     this.resizeCanvas();
 
     // Setup event listeners
@@ -55,8 +65,80 @@ class WorldViewer extends Utils.EventEmitter {
     this.protocol.on('object_update', (data) => this.handleObjectUpdate(data));
     this.protocol.on('avatar_update', (data) => this.handleAvatarUpdate(data));
 
+    // Add demo 3D objects
+    if (this.use3D) {
+      this.addDemo3DObjects();
+    }
+
     // Start rendering
     this.startRendering();
+  }
+
+  /**
+   * Initialize 3D graphics
+   */
+  async init3D() {
+    // Create 3D systems
+    this.graphics3d = new Graphics3D(this.canvas);
+    await this.graphics3d.init();
+
+    this.camera3d = new Camera3D();
+    this.camera3d.setPosition(128, 138, 35);
+    this.camera3d.setRotation(-0.3, -Math.PI / 2, 0);
+    this.camera3d.setMode('orbit');
+    this.camera3d.setOrbitTarget(128, 128, 25);
+
+    this.scene3d = new Scene3D(this.graphics3d, this.camera3d);
+    await this.scene3d.init();
+
+    // Listen to camera events
+    this.camera3d.on('position_changed', (pos) => {
+      this.emit('camera_moved', { x: pos[0], y: pos[1], z: pos[2] });
+    });
+  }
+
+  /**
+   * Add demo 3D objects
+   */
+  addDemo3DObjects() {
+    // Add ground plane
+    this.scene3d.addObject('ground', {
+      mesh: 'plane',
+      position: [128, 128, 0],
+      scale: [25.6, 25.6, 1],
+      color: [0.2, 0.4, 0.2, 1],
+      material: 'basic'
+    });
+
+    // Add some cubes
+    for (let i = 0; i < 5; i++) {
+      const x = 128 + (Math.random() - 0.5) * 50;
+      const y = 128 + (Math.random() - 0.5) * 50;
+      const size = 2 + Math.random() * 3;
+      
+      this.scene3d.addObject(`cube_${i}`, {
+        mesh: 'cube',
+        position: [x, y, size / 2],
+        scale: [size, size, size],
+        color: [Math.random(), Math.random(), Math.random(), 1],
+        material: 'basic'
+      });
+    }
+
+    // Add spheres
+    for (let i = 0; i < 3; i++) {
+      const x = 128 + (Math.random() - 0.5) * 40;
+      const y = 128 + (Math.random() - 0.5) * 40;
+      const size = 1.5 + Math.random() * 2;
+      
+      this.scene3d.addObject(`sphere_${i}`, {
+        mesh: 'sphere',
+        position: [x, y, size + 5],
+        scale: [size, size, size],
+        color: [Math.random(), Math.random(), Math.random(), 1],
+        material: 'basic'
+      });
+    }
   }
 
   /**
@@ -102,12 +184,20 @@ class WorldViewer extends Utils.EventEmitter {
    * Move camera
    */
   moveCamera(dx, dy, dz) {
-    this.camera.x = Utils.clamp(this.camera.x + dx, 0, 256);
-    this.camera.y = Utils.clamp(this.camera.y + dy, 0, 256);
-    this.camera.z = Utils.clamp(this.camera.z + dz, 0, 4096);
-    
-    this.updateLocationDisplay();
-    this.emit('camera_moved', this.camera);
+    if (this.use3D && this.camera3d) {
+      this.camera3d.move(dy, dx, dz);
+      const pos = this.camera3d.position;
+      this.updateLocationDisplay();
+      this.emit('camera_moved', { x: pos[0], y: pos[1], z: pos[2] });
+    } else {
+      // 2D fallback
+      this.camera.x = Utils.clamp(this.camera.x + dx, 0, 256);
+      this.camera.y = Utils.clamp(this.camera.y + dy, 0, 256);
+      this.camera.z = Utils.clamp(this.camera.z + dz, 0, 4096);
+      
+      this.updateLocationDisplay();
+      this.emit('camera_moved', this.camera);
+    }
   }
 
   /**
@@ -169,7 +259,11 @@ class WorldViewer extends Utils.EventEmitter {
     const dx = e.clientX - this.lastMouseX;
     const dy = e.clientY - this.lastMouseY;
 
-    this.camera.rotation += dx * 0.01;
+    if (this.use3D && this.camera3d) {
+      this.camera3d.rotate(-dy * this.camera3d.rotateSpeed, -dx * this.camera3d.rotateSpeed);
+    } else {
+      this.camera.rotation += dx * 0.01;
+    }
     
     this.lastMouseX = e.clientX;
     this.lastMouseY = e.clientY;
@@ -187,8 +281,14 @@ class WorldViewer extends Utils.EventEmitter {
    */
   handleWheel(e) {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    this.camera.zoom = Utils.clamp(this.camera.zoom * delta, 0.5, 3);
+    
+    if (this.use3D && this.camera3d) {
+      const delta = e.deltaY > 0 ? 0.1 : -0.1;
+      this.camera3d.zoom(delta);
+    } else {
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      this.camera.zoom = Utils.clamp(this.camera.zoom * delta, 0.5, 3);
+    }
   }
 
   /**
@@ -203,7 +303,15 @@ class WorldViewer extends Utils.EventEmitter {
     }
 
     if (coordinates) {
-      coordinates.textContent = `${Math.floor(this.camera.x)}, ${Math.floor(this.camera.y)}, ${Math.floor(this.camera.z)}`;
+      let x, y, z;
+      if (this.use3D && this.camera3d) {
+        [x, y, z] = this.camera3d.position;
+      } else {
+        x = this.camera.x;
+        y = this.camera.y;
+        z = this.camera.z;
+      }
+      coordinates.textContent = `${Math.floor(x)}, ${Math.floor(y)}, ${Math.floor(z)}`;
     }
   }
 
@@ -257,8 +365,6 @@ class WorldViewer extends Utils.EventEmitter {
    * Main render loop
    */
   render(timestamp) {
-    if (!this.ctx) return;
-
     // Calculate FPS
     this.frameCount++;
     if (timestamp - this.lastFrameTime >= 1000) {
@@ -272,6 +378,34 @@ class WorldViewer extends Utils.EventEmitter {
       }
     }
 
+    if (this.use3D && this.scene3d) {
+      // 3D rendering
+      this.render3D(timestamp);
+    } else if (this.ctx) {
+      // 2D fallback rendering
+      this.render2D(timestamp);
+    }
+  }
+
+  /**
+   * 3D render
+   */
+  render3D(timestamp) {
+    // Update camera matrices
+    this.camera3d.updateMatrices();
+
+    // Render scene
+    this.scene3d.render();
+
+    // Get and display stats
+    const stats = this.graphics3d.getStats();
+    // console.log('Draw calls:', stats.drawCalls, 'Triangles:', stats.triangles);
+  }
+
+  /**
+   * 2D render (fallback)
+   */
+  render2D(timestamp) {
     // Clear canvas
     this.ctx.fillStyle = '#0a0e27';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -401,11 +535,28 @@ class WorldViewer extends Utils.EventEmitter {
   }
 
   /**
+   * Toggle between 2D and 3D
+   */
+  toggle3D() {
+    if (!this.graphics3d) {
+      Utils.showToast('3D graphics not available', 'warning');
+      return;
+    }
+
+    this.use3D = !this.use3D;
+    Utils.showToast(`Switched to ${this.use3D ? '3D' : '2D'} mode`, 'info');
+  }
+
+  /**
    * Cleanup
    */
   destroy() {
     this.stopRendering();
     window.removeEventListener('resize', () => this.resizeCanvas());
+    
+    if (this.graphics3d) {
+      this.graphics3d.destroy();
+    }
   }
 }
 

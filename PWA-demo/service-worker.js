@@ -15,6 +15,17 @@ const STATIC_FILES = [
   './js/chat.js',
   './js/protocol.js',
   './js/utils.js',
+  './js/voice.js',
+  './js/inventory.js',
+  './js/friends.js',
+  './js/teleport.js',
+  './js/search.js',
+  './js/preferences.js',
+  './js/notifications.js',
+  './js/graphics3d.js',
+  './js/camera3d.js',
+  './js/primitives3d.js',
+  './js/scene3d.js',
   './manifest.json'
 ];
 
