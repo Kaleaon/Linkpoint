@@ -87,19 +87,68 @@ class XMLRPCClient {
 
   /**
    * Send XML-RPC request
+   * Supports: Electron, Tauri, Capacitor, and browser
    */
   static async sendRequest(url, xmlRequest) {
     try {
-      // Use Electron proxy if available
-      const targetUrl = window.ELECTRON_PROXY_URL 
-        ? `${window.ELECTRON_PROXY_URL}/sl-login`
-        : url;
+      // Detect environment and use appropriate method
       
-      if (window.IS_ELECTRON) {
-        console.log('[SL] Using Electron proxy for login');
+      // 1. Capacitor (Mobile) - Use native HTTP
+      if (window.Capacitor && window.Capacitor.Plugins.CapacitorHttp) {
+        console.log('[SL] Using Capacitor native HTTP for login');
+        const { CapacitorHttp } = window.Capacitor.Plugins;
+        const response = await CapacitorHttp.post({
+          url: url,
+          headers: {
+            'Content-Type': 'text/xml',
+            'Accept': 'text/xml, application/xml'
+          },
+          data: xmlRequest
+        });
+        return this.parseLoginResponse(response.data);
       }
       
-      const response = await fetch(targetUrl, {
+      // 2. Electron - Use local proxy
+      if (window.ELECTRON_PROXY_URL) {
+        console.log('[SL] Using Electron proxy for login');
+        const targetUrl = `${window.ELECTRON_PROXY_URL}/sl-login`;
+        const response = await fetch(targetUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/xml',
+            'Accept': 'text/xml, application/xml'
+          },
+          body: xmlRequest
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const responseText = await response.text();
+        return this.parseLoginResponse(responseText);
+      }
+      
+      // 3. Tauri - Use local proxy
+      if (window.TAURI_PROXY_URL) {
+        console.log('[SL] Using Tauri proxy for login');
+        const targetUrl = `${window.TAURI_PROXY_URL}/sl-login`;
+        const response = await fetch(targetUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/xml',
+            'Accept': 'text/xml, application/xml'
+          },
+          body: xmlRequest
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const responseText = await response.text();
+        return this.parseLoginResponse(responseText);
+      }
+      
+      // 4. Browser - Direct fetch (will fail due to CORS unless proxy configured)
+      console.log('[SL] Using direct fetch (requires CORS proxy)');
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/xml',
@@ -118,6 +167,12 @@ class XMLRPCClient {
       
     } catch (error) {
       console.error('XML-RPC request failed:', error);
+      
+      // Provide helpful error message based on context
+      if (error.message && error.message.includes('CORS')) {
+        throw new Error('CORS blocked. Please use desktop app or configure CORS proxy.');
+      }
+      
       throw error;
     }
   }

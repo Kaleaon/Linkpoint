@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+    
+    <!-- Allow all domains for SL connectivity -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">login.agni.lindenlab.com</domain>
+        <domain includeSubdomains="true">login.aditi.lindenlab.com</domain>
+        <domain includeSubdomains="true">login.osgrid.org</domain>
+        <domain includeSubdomains="true">lindenlab.com</domain>
+        <domain includeSubdomains="true">secondlife.com</domain>
+    </domain-config>
+</network-security-config>
