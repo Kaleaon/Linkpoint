@@ -34,7 +34,7 @@ class vx_user_channel_t {
                 return
             }
             this.swigCMemOwn = false
-            UnsupportedOperationException unsupportedOperationException = UnsupportedOperationException("C++ destructor does not have access");
+            UnsupportedOperationException unsupportedOperationException = UnsupportedOperationException("C++ destructor does not have access")
             throw unsupportedOperationException
         }
     }

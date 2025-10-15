@@ -14,7 +14,7 @@ class GLQuery extends GLResource {
     ThreadLocal<int[]> idQuery = new ThreadLocal<int[]>() {
         /* access modifiers changed from: protected */
         int[] initialValue() {
-            return new int[1]
+            return IntArray(1)
         }
     }
     private boolean isQueryRunning = false
@@ -30,7 +30,7 @@ class GLQuery extends GLResource {
         void GLFree() {
             int[] iArr = (int[]) GLQuery.idQuery.get()
             iArr[0] = this.handle
-            Debug.Printf("GLBuffer: deleted buffer %d", Integer.valueOf(iArr[0]));
+            Debug.Printf("GLBuffer: deleted buffer %d", Integer.valueOf(iArr[0]))
             GLES30.glDeleteQueries(1, iArr, 0)
         }
     }
@@ -43,7 +43,7 @@ class GLQuery extends GLResource {
 
     GLQuery(GLResourceManager gLResourceManager) {
         super(gLResourceManager)
-        new GLQueryReference(this, this.handle, gLResourceManager)
+        GLQueryReference(this, this.handle, gLResourceManager)
     }
 
     /* access modifiers changed from: protected */

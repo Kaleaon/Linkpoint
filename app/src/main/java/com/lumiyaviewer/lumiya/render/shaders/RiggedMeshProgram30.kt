@@ -26,20 +26,20 @@ class RiggedMeshProgram30 : PrimProgram {
     @TargetApi(18)
     protected fun bindVariables(): Unit {
         super.bindVariables()
-        this.vWeight = GLES20.glGetAttribLocation(this.handle, "vWeight");
-        this.vJoint = GLES20.glGetAttribLocation(this.handle, "vJoint");
-        this.uBindShapeMatrix = GLES20.glGetUniformLocation(this.handle, "uBindShapeMatrix");
+        this.vWeight = GLES20.glGetAttribLocation(this.handle, "vWeight")
+        this.vJoint = GLES20.glGetAttribLocation(this.handle, "vJoint")
+        this.uBindShapeMatrix = GLES20.glGetUniformLocation(this.handle, "uBindShapeMatrix")
         Int[] iArr = Int[1]
-        this.uAnimationDataBlockIndex = GLES30.glGetUniformBlockIndex(this.handle, "AnimationData");
+        this.uAnimationDataBlockIndex = GLES30.glGetUniformBlockIndex(this.handle, "AnimationData")
         GLES30.glGetActiveUniformBlockiv(this.handle, this.uAnimationDataBlockIndex, 35392, iArr, 0)
         this.uAnimationDataBlockSize = iArr[0]
         GLES30.glUniformBlockBinding(this.handle, this.uAnimationDataBlockIndex, 1)
-        this.uRiggingDataBlockIndex = GLES30.glGetUniformBlockIndex(this.handle, "RiggingData");
+        this.uRiggingDataBlockIndex = GLES30.glGetUniformBlockIndex(this.handle, "RiggingData")
         GLES30.glGetActiveUniformBlockiv(this.handle, this.uRiggingDataBlockIndex, 35392, iArr, 0)
         this.uRiggingDataBlockSize = iArr[0]
         Int[] iArr2 = Int[2]
         Int[] iArr3 = Int[2]
-        GLES30.glGetUniformIndices(this.handle, Array<String>{"jointMap", "jointMatrices"}, iArr2, 0);
+        GLES30.glGetUniformIndices(this.handle, Array<String>{"jointMap", "jointMatrices"}, iArr2, 0)
         GLES30.glGetActiveUniformsiv(this.handle, 2, iArr2, 0, 35387, iArr3, 0)
         this.uJointMapOffset = iArr3[0]
         this.uJointMatricesOffset = iArr3[1]

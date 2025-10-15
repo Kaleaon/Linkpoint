@@ -17,7 +17,7 @@ enum class VoicePluginMessageType {
     VoiceEnableMic,
     VoiceSetAudioProperties,
     VoiceAudioProperties,
-    ;
+    
 
     companion object {
         const val VOICE_PLUGIN_MESSAGE = 200

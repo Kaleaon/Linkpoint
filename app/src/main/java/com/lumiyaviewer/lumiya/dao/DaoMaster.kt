@@ -18,7 +18,7 @@ class DaoMaster extends AbstractDaoMaster {
         }
 
         fun onCreate(sQLiteDatabase: SQLiteDatabase): Unit {
-            Log.i("greenDAO", "Creating tables for schema version 71");
+            Log.i("greenDAO", "Creating tables for schema version 71")
             DaoMaster.createAllTables(sQLiteDatabase, false)
         }
     }
@@ -29,7 +29,7 @@ class DaoMaster extends AbstractDaoMaster {
         }
 
         fun onUpgrade(sQLiteDatabase: SQLiteDatabase, i: Int, i2: Int): Unit {
-            Log.i("greenDAO", "Upgrading schema from version " + i + " to " + i2 + " by dropping all tables");
+            Log.i("greenDAO", "Upgrading schema from version " + i + " to " + i2 + " by dropping all tables")
             DaoMaster.dropAllTables(sQLiteDatabase, true)
             onCreate(sQLiteDatabase)
         }
@@ -91,10 +91,10 @@ class DaoMaster extends AbstractDaoMaster {
     }
 
     fun newSession(): DaoSession {
-        return new DaoSession(this.db, IdentityScopeType.Session, this.daoConfigMap)
+        return DaoSession(this.db, IdentityScopeType.Session, this.daoConfigMap)
     }
 
     fun newSession(identityScopeType: IdentityScopeType): DaoSession {
-        return new DaoSession(this.db, identityScopeType, this.daoConfigMap)
+        return DaoSession(this.db, identityScopeType, this.daoConfigMap)
     }
 }

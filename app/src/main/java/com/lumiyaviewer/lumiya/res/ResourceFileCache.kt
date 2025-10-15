@@ -34,7 +34,7 @@ abstract class ResourceFileCache<ResourceParams, ResourceType> extends ResourceM
     /* access modifiers changed from: protected */
     fun CreateNewRequest(resourceparams: ResourceParams, resourceManager: ResourceType>): ResourceRequest<ResourceParams, ResourceType> {
         File resourceFile = getResourceFile(resourceparams)
-        return resourceFile.exists() ? new ResourceLoadRequest(resourceparams, resourceManager, resourceFile) : createResourceGenRequest(resourceparams, resourceManager, resourceFile)
+        return resourceFile.exists() ? ResourceLoadRequest(resourceparams, resourceManager, resourceFile) : createResourceGenRequest(resourceparams, resourceManager, resourceFile)
     }
 
     /* access modifiers changed from: protected */

@@ -163,7 +163,7 @@ object AnimationCache extends ResourceMemoryCache<UUID, AnimationData> {
                 r1 = r2
                 goto L_0x0053
             */
-            throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.anim.AnimationCache.AssetLoadRequest.run():void");
+            throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.anim.AnimationCache.AssetLoadRequest.run():void")
         }
     }
 
@@ -205,9 +205,9 @@ object AnimationCache extends ResourceMemoryCache<UUID, AnimationData> {
                 completeRequest((AnimationData) null)
                 return
             }
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(assetData.getData())
+            ByteArrayInputStream byteArrayInputStream = ByteArrayInputStream(assetData.getData())
             try {
-                animationData = new AnimationData((UUID) getParams(), byteArrayInputStream)
+                animationData = AnimationData((UUID) getParams(), byteArrayInputStream)
                 try {
                     byteArrayInputStream.close()
                 } catch (IOException e) {
@@ -231,7 +231,7 @@ object AnimationCache extends ResourceMemoryCache<UUID, AnimationData> {
 
     private object InstanceHolder {
         /* access modifiers changed from: private */
-        AnimationCache Instance = new AnimationCache((AnimationCache) null)
+        AnimationCache Instance = AnimationCache((AnimationCache) null)
 
         
     }
@@ -242,7 +242,7 @@ object AnimationCache extends ResourceMemoryCache<UUID, AnimationData> {
         AssetManager assetManager = LumiyaApp.getAssetManager()
         if (assetManager != null) {
             try {
-                String[] list = assetManager.list("anims");
+                String[] list = assetManager.list("anims")
                 if (list != null) {
                     builder.addAll((Iterable) Arrays.asList(list))
                 }
@@ -264,7 +264,7 @@ object AnimationCache extends ResourceMemoryCache<UUID, AnimationData> {
     /* access modifiers changed from: protected */
     fun CreateNewRequest(uuid: UUID, resourceManager: AnimationData>): ResourceRequest<UUID, AnimationData> {
         String uuid2 = uuid.toString()
-        return this.assetAnimations.contains(uuid2) ? new AssetLoadRequest(uuid, resourceManager, uuid2) : new DownloadRequest(uuid, resourceManager)
+        return this.assetAnimations.contains(uuid2) ? AssetLoadRequest(uuid, resourceManager, uuid2) : DownloadRequest(uuid, resourceManager)
     }
 
     fun setAssetResponseCacher(assetResponseCacher2: AssetResponseCacher): Unit {

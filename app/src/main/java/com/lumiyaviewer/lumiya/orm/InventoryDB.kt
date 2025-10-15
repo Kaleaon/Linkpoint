@@ -15,7 +15,7 @@ class InventoryDB {
 
     constructor(sQLiteDatabase: SQLiteDatabase) {
         if (sQLiteDatabase == null) {
-            throw IllegalArgumentException("SQLiteDatabase cannot be null");
+            throw IllegalArgumentException("SQLiteDatabase cannot be null")
         }
         this.db = sQLiteDatabase
     }
@@ -30,7 +30,7 @@ class InventoryDB {
 
     Unit deleteEntry(@Nonnull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
         if (sLInventoryEntry == null) {
-            throw IllegalArgumentException("SLInventoryEntry cannot be null");
+            throw IllegalArgumentException("SLInventoryEntry cannot be null")
         }
         sLInventoryEntry.delete(this.db)
     }
@@ -47,7 +47,7 @@ class InventoryDB {
     @Nonnull
     fun findEntryOrCreate(uuid: UUID): SLInventoryEntry {
         if (uuid == null) {
-            throw IllegalArgumentException("UUID cannot be null");
+            throw IllegalArgumentException("UUID cannot be null")
         }
         SLInventoryEntry findEntry = findEntry(uuid)
         if (findEntry != null) {
@@ -63,7 +63,7 @@ class InventoryDB {
         SLInventoryEntry sLInventoryEntry = null
         Cursor query = null
         try {
-            query = SLInventoryEntry.query(this.db, "isFolder AND typeDefault = ? AND parent_id = ?", Array<String>{Int.toString(i), Long.toString(j)}, null);
+            query = SLInventoryEntry.query(this.db, "isFolder AND typeDefault = ? AND parent_id = ?", Array<String>{Int.toString(i), Long.toString(j)}, null)
             if (query.moveToNext()) {
                 sLInventoryEntry = SLInventoryEntry(query)
             }
@@ -82,7 +82,7 @@ class InventoryDB {
         SLInventoryEntry sLInventoryEntry = null
         Cursor query = null
         try {
-            query = SLInventoryEntry.query(this.db, "isFolder AND typeDefault = ? AND parentUUID_high = ? AND parentUUID_low = ?", Array<String>{Int.toString(i), Long.toString(uuid.getMostSignificantBits()), Long.toString(uuid.getLeastSignificantBits())}, null);
+            query = SLInventoryEntry.query(this.db, "isFolder AND typeDefault = ? AND parentUUID_high = ? AND parentUUID_low = ?", Array<String>{Int.toString(i), Long.toString(uuid.getMostSignificantBits()), Long.toString(uuid.getLeastSignificantBits())}, null)
             if (query.moveToNext()) {
                 sLInventoryEntry = SLInventoryEntry(query)
             }
@@ -125,7 +125,7 @@ class InventoryDB {
     }
 
     /* JADX WARNING: Code restructure failed: missing block: B:29:?, code lost:
-        com.lumiyaviewer.lumiya.Debug.Log("retainChildren: parentId = " + r16 + ", deleteCount = " + r3);
+        com.lumiyaviewer.lumiya.Debug.Log("retainChildren: parentId = " + r16 + ", deleteCount = " + r3)
      */
     /* JADX WARNING: Code restructure failed: missing block: B:45:?, code lost:
         return
@@ -257,12 +257,12 @@ class InventoryDB {
             r5 = r2
             goto L_0x0090
         */
-        throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.orm.InventoryDB.retainChildren(Long, java.util.Set):Unit");
+        throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.orm.InventoryDB.retainChildren(Long, java.util.Set):Unit")
     }
 
     Unit saveEntry(@Nonnull SLInventoryEntry sLInventoryEntry) throws DBObject.DatabaseBindingException {
         if (sLInventoryEntry == null) {
-            throw IllegalArgumentException("SLInventoryEntry cannot be null");
+            throw IllegalArgumentException("SLInventoryEntry cannot be null")
         }
         sLInventoryEntry.save(this.db)
     }

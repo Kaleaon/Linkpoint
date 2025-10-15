@@ -24,12 +24,12 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.Nonnull
 
 object AvatarSkeleton extends SLDefaultSkeleton {
-    private SLSkeletonBone[] animatedBones = new SLSkeletonBone[133]
-    private AttachmentPoint[] attachmentPoints = new AttachmentPoint[56]
+    private SLSkeletonBone[] animatedBones = Array<SLSkeletonBone>(133)
+    private AttachmentPoint[] attachmentPoints = Array<AttachmentPoint>(56)
     private float bodySize
-    private AtomicBoolean forceAnimate = new AtomicBoolean(true)
+    private AtomicBoolean forceAnimate = AtomicBoolean(true)
     private boolean hasExtendedBones
-    private Map<MeshIndex, float[]> partMorphParams = new EnumMap(MeshIndex.class)
+    private Map<MeshIndex, float[]> partMorphParams = EnumMap(MeshIndex.class)
     private float pelvisOffset
     private float pelvisToFoot
 
@@ -39,7 +39,7 @@ object AvatarSkeleton extends SLDefaultSkeleton {
         SLAttachmentPoint point
 
         private AttachmentPoint(SLSkeletonBone sLSkeletonBone, SLAttachmentPoint sLAttachmentPoint) {
-            this.matrix = new float[16]
+            this.matrix = FloatArray(16)
             this.bone = sLSkeletonBone
             this.point = sLAttachmentPoint
         }
@@ -58,7 +58,7 @@ object AvatarSkeleton extends SLDefaultSkeleton {
                 this.animatedBones[i] = (SLSkeletonBone) entry.getValue()
             }
         }
-        Map enumMap = new EnumMap(SLSkeletonBoneID.class)
+        Map enumMap = EnumMap(SLSkeletonBoneID.class)
         SLBaseAvatar instance = SLBaseAvatar.getInstance()
         applyJointTranslations(meshJointTranslations)
         this.pelvisOffset = meshJointTranslations.pelvisOffset
@@ -68,7 +68,7 @@ object AvatarSkeleton extends SLDefaultSkeleton {
             this.partMorphParams.put(meshIndex, obj)
         }
         for (Object obj2 : SLSkeletonBoneID.VALUES) {
-            enumMap.put(obj2, new SkeletonParamValue(new LLVector3(), new LLVector3()))
+            enumMap.put(obj2, SkeletonParamValue(LLVector3(), LLVector3()))
             ((SkeletonParamValue) enumMap.get(obj2)).scale.set(1.0f, 1.0f, 1.0f)
             ((SkeletonParamValue) enumMap.get(obj2)).offset.set(0.0f, 0.0f, 0.0f)
         }
@@ -105,10 +105,10 @@ object AvatarSkeleton extends SLDefaultSkeleton {
                     if (sLSkeletonBoneID != null) {
                         SLSkeletonBone sLSkeletonBone = (SLSkeletonBone) this.bones.get(sLSkeletonBoneID)
                         if (sLSkeletonBone != null) {
-                            this.attachmentPoints[i] = new AttachmentPoint(sLSkeletonBone, sLAttachmentPoint, null)
+                            this.attachmentPoints[i] = AttachmentPoint(sLSkeletonBone, sLAttachmentPoint, null)
                         }
                     } else {
-                        this.attachmentPoints[i] = new AttachmentPoint(null, sLAttachmentPoint, null)
+                        this.attachmentPoints[i] = AttachmentPoint(null, sLAttachmentPoint, null)
                     }
                 }
                 i3 = i + 1
@@ -166,7 +166,7 @@ object AvatarSkeleton extends SLDefaultSkeleton {
     }
 
     private fun updateAttachmentMatrix(): Unit {
-        float[] fArr = new float[16]
+        float[] fArr = FloatArray(16)
         for (int i = 0; i < 56; i++) {
             AttachmentPoint attachmentPoint = this.attachmentPoints[i]
             if (attachmentPoint != null) {

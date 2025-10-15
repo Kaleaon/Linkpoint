@@ -39,19 +39,19 @@ import javax.annotation.Nullable
 
 class ConnectionResolutionActivity
 : Activity {
-    private String CONNECTION_RESULT_TAG = "connectionResult";
-    private String RESOLVABLE_ERROR_TAG = "resolvableError";
+    private String CONNECTION_RESULT_TAG = "connectionResult"
+    private String RESOLVABLE_ERROR_TAG = "resolvableError"
     private int RESOLVE_CONNECTION_REQUEST_CODE = 1
     private int RESOLVE_RESOLVABLE_REQUEST_CODE = 2
-    private val serviceConnection: ServiceConnection = new ServiceConnection(this){
+    private val serviceConnection: ServiceConnection = ServiceConnection(this){
         ConnectionResolutionActivity this$0
         {
             this.this$0 = connectionResolutionActivity
         }
 
         fun onServiceConnected(componentName: ComponentName, iBinder: IBinder): Unit {
-            Debug.Printf("LumiyaCloud: bound to local service", new Object[0]);
-            ConnectionResolutionActivity.access$002(this.this$0, new Messenger(iBinder))
+            Debug.Printf("LumiyaCloud: bound to local service", Array<Object>(0))
+            ConnectionResolutionActivity.access$002(this.this$0, Messenger(iBinder))
         }
 
         fun onServiceDisconnected(componentName: ComponentName): Unit {
@@ -67,14 +67,14 @@ class ConnectionResolutionActivity
     }
 
     Intent getResolvableErrorIntent(Context context, @Nonnull UUID uUID) {
-        context = new Intent(context, ConnectionResolutionActivity.class)
+        context = Intent(context, ConnectionResolutionActivity.class)
         context.putExtra(RESOLVABLE_ERROR_TAG, uUID.toString())
         context.setFlags(0x10000000)
         return context
     }
 
     void startForConnectionResolution(Context context, @Nonnull ConnectionResult connectionResult) {
-        Intent intent = new Intent(context, ConnectionResolutionActivity.class)
+        Intent intent = Intent(context, ConnectionResolutionActivity.class)
         intent.putExtra(CONNECTION_RESULT_TAG, (Parcelable)connectionResult)
         intent.setFlags(0x10000000)
         context.startActivity(intent)
@@ -90,7 +90,7 @@ class ConnectionResolutionActivity
         void var3_8
         boolean bl = true
         Object var3_4 = null
-        Debug.Printf("LumiyaCloud: got result code: %d", n2);
+        Debug.Printf("LumiyaCloud: got result code: %d", n2)
         switch (n) {
             case 1: {
                 if (this.serviceMessenger != null) {
@@ -109,7 +109,7 @@ class ConnectionResolutionActivity
                             Debug.Warning(remoteException)
                         }
                     }
-                    Debug.Printf("LumiyaCloud: unbinding from local service", new Object[0]);
+                    Debug.Printf("LumiyaCloud: unbinding from local service", Array<Object>(0))
                     this.serviceMessenger = null
                     this.unbindService(this.serviceConnection)
                 }
@@ -145,8 +145,8 @@ class ConnectionResolutionActivity
         super.onCreate((Bundle)object)
         object = this.getIntent()
         if (object.hasExtra(CONNECTION_RESULT_TAG)) {
-            Debug.Printf("LumiyaCloud: binding to local service", new Object[0]);
-            if (this.serviceMessenger == null && !this.bindService(new Intent((Context)this, DriveSyncService.class), this.serviceConnection, 0)) {
+            Debug.Printf("LumiyaCloud: binding to local service", Array<Object>(0))
+            if (this.serviceMessenger == null && !this.bindService(Intent((Context)this, DriveSyncService.class), this.serviceConnection, 0)) {
                 this.finish()
                 return
             }
@@ -156,7 +156,7 @@ class ConnectionResolutionActivity
                 return
             }
             catch (IntentSender.SendIntentException sendIntentException) {
-                Debug.Printf("ahhhh on connection failed completely %s", sendIntentException.getMessage());
+                Debug.Printf("ahhhh on connection failed completely %s", sendIntentException.getMessage())
                 Debug.Warning(sendIntentException)
             }
             return
@@ -187,9 +187,9 @@ class ConnectionResolutionActivity
     }
 
     protected fun onDestroy(): Unit {
-        Debug.Printf("LumiyaCloud: destroyed resolution activity", new Object[0]);
+        Debug.Printf("LumiyaCloud: destroyed resolution activity", Array<Object>(0))
         if (this.serviceMessenger != null) {
-            Debug.Printf("LumiyaCloud: unbinding from local service", new Object[0]);
+            Debug.Printf("LumiyaCloud: unbinding from local service", Array<Object>(0))
             this.serviceMessenger = null
             this.unbindService(this.serviceConnection)
         }

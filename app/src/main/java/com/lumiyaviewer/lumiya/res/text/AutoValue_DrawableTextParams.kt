@@ -6,7 +6,7 @@ class AutoValue_DrawableTextParams : DrawableTextParams {
 
     AutoValue_DrawableTextParams(String str, Int i) {
         if (str == null) {
-            throw NullPointerException("Null text");
+            throw NullPointerException("Null text")
         }
         this.text = str
         this.backgroundColor = i
@@ -39,6 +39,6 @@ class AutoValue_DrawableTextParams : DrawableTextParams {
     }
 
     fun toString(): String {
-        return "DrawableTextParams{text=" + this.text + ", " + "backgroundColor=" + this.backgroundColor + "}";
+        return "DrawableTextParams{text=" + this.text + ", " + "backgroundColor=" + this.backgroundColor + "}"
     }
 }

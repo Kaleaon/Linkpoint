@@ -11,7 +11,7 @@ enum class MessageType {
     LogMessagesCompleted,
     LogFlushMessages,
     LogMessagesFlushed,
-    ;
+    
 
     companion object {
         const val CLOUD_PLUGIN_MESSAGE = 100

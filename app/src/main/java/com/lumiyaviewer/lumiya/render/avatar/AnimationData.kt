@@ -24,7 +24,7 @@ class AnimationData {
     private String expressionName
     private int handPose
     private float inPoint
-    private val jointSets: SparseArray<AnimationJointSet> = new SparseArray()
+    private val jointSets: SparseArray<AnimationJointSet> = SparseArray()
     private boolean loop
     private float outPoint
 
@@ -41,7 +41,7 @@ class AnimationData {
             }
             this.rotKeyframes = new AnimationRotKeyframe[readInt]
             for (i = 0; i < readInt; i++) {
-                this.rotKeyframes[i] = new AnimationRotKeyframe(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), 0.0f, f), LLQuaternion.unpackFromVector3(new LLVector3(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -1.0f, 1.0f), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -1.0f, 1.0f), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -1.0f, 1.0f))))
+                this.rotKeyframes[i] = AnimationRotKeyframe(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), 0.0f, f), LLQuaternion.unpackFromVector3(LLVector3(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -1.0f, 1.0f), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -1.0f, 1.0f), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -1.0f, 1.0f))))
             }
             readInt = littleEndianDataInputStream.readInt()
             if (readInt < 0 || readInt > EventType.STREET_VIEW_COLLECTION) {
@@ -49,7 +49,7 @@ class AnimationData {
             }
             this.posKeyframes = new AnimationPosKeyframe[readInt]
             for (i = 0; i < readInt; i++) {
-                this.posKeyframes[i] = new AnimationPosKeyframe(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), 0.0f, f), new LLVector3(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -5.0f, AnimationData.LL_MAX_PELVIS_OFFSET), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -5.0f, AnimationData.LL_MAX_PELVIS_OFFSET), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -5.0f, AnimationData.LL_MAX_PELVIS_OFFSET)))
+                this.posKeyframes[i] = AnimationPosKeyframe(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), 0.0f, f), LLVector3(uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -5.0f, AnimationData.LL_MAX_PELVIS_OFFSET), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -5.0f, AnimationData.LL_MAX_PELVIS_OFFSET), uint16ToFloat(littleEndianDataInputStream.readUnsignedShort(), -5.0f, AnimationData.LL_MAX_PELVIS_OFFSET)))
             }
         }
 
@@ -115,20 +115,20 @@ class AnimationData {
 
         fun toString(): String {
             int i = 0
-            StringBuilder stringBuilder = new StringBuilder()
-            stringBuilder.append("Priority ").append(this.Priority);
-            stringBuilder.append(", pos frames ").append(this.posKeyframes.length).append("[");
+            StringBuilder stringBuilder = StringBuilder()
+            stringBuilder.append("Priority ").append(this.Priority)
+            stringBuilder.append(", pos frames ").append(this.posKeyframes.length).append("[")
             for (AnimationPosKeyframe animationPosKeyframe : this.posKeyframes) {
                 stringBuilder.append(animationPosKeyframe.toString())
             }
-            stringBuilder.append("], rot frames ").append(this.rotKeyframes.length).append("[");
+            stringBuilder.append("], rot frames ").append(this.rotKeyframes.length).append("[")
             AnimationRotKeyframe[] animationRotKeyframeArr = this.rotKeyframes
             int length = animationRotKeyframeArr.length
             while (i < length) {
                 stringBuilder.append(animationRotKeyframeArr[i].toString())
                 i++
             }
-            stringBuilder.append("]");
+            stringBuilder.append("]")
             return stringBuilder.toString()
         }
     }
@@ -140,7 +140,7 @@ class AnimationData {
         private int priority
 
         private AnimationJointSet(UUID uuid, float f, int i) {
-            this.jointAnims = new SparseArray()
+            this.jointAnims = SparseArray()
             this.animationUUID = uuid
             this.animLength = f
             this.priority = i
@@ -158,8 +158,8 @@ class AnimationData {
             float f = animationTiming.inAnimationTime
             float f2 = animationTiming.inFactor * animationTiming.outFactor
             if (f2 > 0.0f) {
-                LLQuaternion lLQuaternion = new LLQuaternion()
-                LLVector3 lLVector3 = new LLVector3()
+                LLQuaternion lLQuaternion = LLQuaternion()
+                LLVector3 lLVector3 = LLVector3()
                 int size = this.jointAnims.size()
                 for (int i = 0; i < size; i++) {
                     int keyAt = this.jointAnims.keyAt(i)
@@ -169,10 +169,10 @@ class AnimationData {
         }
 
         void dumpJoints() {
-            Debug.Printf("Anim -- joint set -- length %f prio %d joints %d", Float.valueOf(this.animLength), Integer.valueOf(this.priority), Integer.valueOf(this.jointAnims.size()));
+            Debug.Printf("Anim -- joint set -- length %f prio %d joints %d", Float.valueOf(this.animLength), Integer.valueOf(this.priority), Integer.valueOf(this.jointAnims.size()))
             int size = this.jointAnims.size()
             for (int i = 0; i < size; i++) {
-                Debug.Printf("Anim -- joint[%d] - jointIndex %d, %s", Integer.valueOf(i), Integer.valueOf(this.jointAnims.keyAt(i)), ((AnimationJointData) this.jointAnims.valueAt(i)).toString());
+                Debug.Printf("Anim -- joint[%d] - jointIndex %d, %s", Integer.valueOf(i), Integer.valueOf(this.jointAnims.keyAt(i)), ((AnimationJointData) this.jointAnims.valueAt(i)).toString())
             }
         }
 
@@ -252,7 +252,7 @@ class AnimationData {
     AnimationData(UUID uuid, InputStream inputStream) throws IOException {
         int i = 0
         this.animationUUID = uuid
-        LittleEndianDataInputStream littleEndianDataInputStream = new LittleEndianDataInputStream(inputStream)
+        LittleEndianDataInputStream littleEndianDataInputStream = LittleEndianDataInputStream(inputStream)
         littleEndianDataInputStream.skipBytes(4)
         this.animPriority = littleEndianDataInputStream.readInt()
         this.animLength = littleEndianDataInputStream.readFloat()
@@ -266,13 +266,13 @@ class AnimationData {
         int readInt = littleEndianDataInputStream.readInt()
         while (i < readInt) {
             SLSkeletonBoneID sLSkeletonBoneID = (SLSkeletonBoneID) SLSkeletonBoneID.bones.get(littleEndianDataInputStream.readZeroTerminatedString())
-            AnimationJointData animationJointData = new AnimationJointData(littleEndianDataInputStream, this.animLength)
+            AnimationJointData animationJointData = AnimationJointData(littleEndianDataInputStream, this.animLength)
             if (sLSkeletonBoneID != null) {
                 int i2 = sLSkeletonBoneID.animatedIndex
                 if (i2 >= 0) {
                     AnimationJointSet animationJointSet = (AnimationJointSet) this.jointSets.get(animationJointData.Priority)
                     if (animationJointSet == null) {
-                        animationJointSet = new AnimationJointSet(uuid, this.animLength, animationJointData.Priority, null)
+                        animationJointSet = AnimationJointSet(uuid, this.animLength, animationJointData.Priority, null)
                         this.jointSets.put(animationJointData.Priority, animationJointSet)
                     }
                     animationJointSet.addJointData(i2, animationJointData)
@@ -354,22 +354,22 @@ class AnimationData {
     }
 
     ImmutableList<AvatarRunningAnimation> createRunningAnimations(AvatarRunningSequence avatarRunningSequence) {
-        Debug.Printf("Animation: creating anims: %d anims", Integer.valueOf(this.jointSets.size()));
+        Debug.Printf("Animation: creating anims: %d anims", Integer.valueOf(this.jointSets.size()))
         Builder builder = ImmutableList.builder()
         for (int i = 0; i < r2; i++) {
-            builder.add(new AvatarRunningAnimation(avatarRunningSequence, (AnimationJointSet) this.jointSets.valueAt(i)))
+            builder.add(AvatarRunningAnimation(avatarRunningSequence, (AnimationJointSet) this.jointSets.valueAt(i)))
         }
         return builder.build()
     }
 
     fun dumpAnimationData(): Unit {
-        Debug.Printf("Animation -- dump -- priority %d length %f joint sets %d (inPoint %f outPoint %f loop %b easeIn %f easeOut %f)", Integer.valueOf(this.animPriority), Float.valueOf(this.animLength), Integer.valueOf(this.jointSets.size()), Float.valueOf(this.inPoint), Float.valueOf(this.outPoint), Boolean.valueOf(this.loop), Float.valueOf(this.easeInTime), Float.valueOf(this.easeOutTime));
+        Debug.Printf("Animation -- dump -- priority %d length %f joint sets %d (inPoint %f outPoint %f loop %b easeIn %f easeOut %f)", Integer.valueOf(this.animPriority), Float.valueOf(this.animLength), Integer.valueOf(this.jointSets.size()), Float.valueOf(this.inPoint), Float.valueOf(this.outPoint), Boolean.valueOf(this.loop), Float.valueOf(this.easeInTime), Float.valueOf(this.easeOutTime))
         for (int i = 0; i < this.jointSets.size(); i++) {
             int keyAt = this.jointSets.keyAt(i)
-            Debug.Printf("Anim -- joint set %d: prio %d", Integer.valueOf(i), Integer.valueOf(keyAt));
+            Debug.Printf("Anim -- joint set %d: prio %d", Integer.valueOf(i), Integer.valueOf(keyAt))
             ((AnimationJointSet) this.jointSets.valueAt(i)).dumpJoints()
         }
-        Debug.Printf("Animation -- dump end", new Object[0]);
+        Debug.Printf("Animation -- dump end", Array<Object>(0))
     }
 
     fun getPriority(): Int {

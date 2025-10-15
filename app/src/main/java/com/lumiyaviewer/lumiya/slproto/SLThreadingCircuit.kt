@@ -28,7 +28,7 @@ class SLThreadingCircuit : SLCircuit : Executor {
                     break
                 }
             }
-            Debug.Printf("SLThreadingCircuit: working thread exiting.", Any[0]);
+            Debug.Printf("SLThreadingCircuit: working thread exiting.", Any[0])
         }
     }
     private val workingThread: Thread = Thread(this.workingRunnable, "SLCircuit")

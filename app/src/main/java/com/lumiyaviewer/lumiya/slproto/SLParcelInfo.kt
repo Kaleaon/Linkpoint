@@ -232,9 +232,9 @@ class SLParcelInfo {
             size = this.objectNamesQueue.size()
         }
         multipleChatterNameRetriever.retainChatters(hashSet)
-        String str = "getDisplayObjects: objectList is %s, load queue %d";
+        String str = "getDisplayObjects: objectList is %s, load queue %d"
         Any[] objArr = Any[2]
-        objArr[0] = addDisplayObjects != null ? Int.toString(addDisplayObjects.size()) : "null";
+        objArr[0] = addDisplayObjects != null ? Int.toString(addDisplayObjects.size()) : "null"
         objArr[1] = Int.valueOf(size)
         Debug.Printf(str, objArr)
         if (addDisplayObjects != null) {
@@ -496,7 +496,7 @@ class SLParcelInfo {
     }
 
     Unit setSunHour(Float f) {
-        Debug.Printf("Windlight: Simulator sun hour set to %f", Float.valueOf(f));
+        Debug.Printf("Windlight: Simulator sun hour set to %f", Float.valueOf(f))
         synchronized (this.simSunHourLock) {
             this.simSunHour = f
             this.simSunHourDirty = true

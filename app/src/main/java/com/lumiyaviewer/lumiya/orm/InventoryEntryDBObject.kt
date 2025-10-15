@@ -21,11 +21,11 @@ class InventoryEntryDBObject : DBObject : Parcelable {
             return InventoryEntryDBObject[i]
         }
     }
-    protected Array<String> fieldNames = {"_id", "parent_id", "uuid_high", "uuid_low", "parentUUID_high", "parentUUID_low", "name", "isFolder", "typeDefault", "version", "sessionID_high", "sessionID_low", "fetchFailed", "description", "flags", "invType", "assetType", "creationDate", "_blobField"};
-    String insertQuery = "INSERT INTO Entries (parent_id,uuid_high,uuid_low,parentUUID_high,parentUUID_low,name,isFolder,typeDefault,version,sessionID_high,sessionID_low,fetchFailed,description,flags,invType,assetType,creationDate,_blobField) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+    protected Array<String> fieldNames = {"_id", "parent_id", "uuid_high", "uuid_low", "parentUUID_high", "parentUUID_low", "name", "isFolder", "typeDefault", "version", "sessionID_high", "sessionID_low", "fetchFailed", "description", "flags", "invType", "assetType", "creationDate", "_blobField"}
+    String insertQuery = "INSERT INTO Entries (parent_id,uuid_high,uuid_low,parentUUID_high,parentUUID_low,name,isFolder,typeDefault,version,sessionID_high,sessionID_low,fetchFailed,description,flags,invType,assetType,creationDate,_blobField) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);"
     Int insertUpdateParamCount = 18
-    String tableName = "Entries";
-    String updateQuery = "UPDATE Entries SET parent_id=?,uuid_high=?,uuid_low=?,parentUUID_high=?,parentUUID_low=?,name=?,isFolder=?,typeDefault=?,version=?,sessionID_high=?,sessionID_low=?,fetchFailed=?,description=?,flags=?,invType=?,assetType=?,creationDate=?,_blobField=?";
+    String tableName = "Entries"
+    String updateQuery = "UPDATE Entries SET parent_id=?,uuid_high=?,uuid_low=?,parentUUID_high=?,parentUUID_low=?,name=?,isFolder=?,typeDefault=?,version=?,sessionID_high=?,sessionID_low=?,fetchFailed=?,description=?,flags=?,invType=?,assetType=?,creationDate=?,_blobField=?"
     UUID agentUUID
     Int assetType
     UUID assetUUID
@@ -100,19 +100,19 @@ class InventoryEntryDBObject : DBObject : Parcelable {
     }
 
     Array<String> getCreateTableStatements() {
-        return Array<String>{"DROP TABLE IF EXISTS Entries;", "CREATE TABLE Entries (_id INTEGER PRIMARY KEY,parent_id BIGINT,uuid_high BIGINT,uuid_low BIGINT,parentUUID_high BIGINT,parentUUID_low BIGINT,name TEXT,isFolder BOOLEAN,typeDefault INTEGER,version INTEGER,sessionID_high BIGINT,sessionID_low BIGINT,fetchFailed BOOLEAN,description TEXT,flags INTEGER,invType INTEGER,assetType INTEGER,creationDate INTEGER,_blobField BLOB);", "CREATE INDEX Entries_parent_id ON Entries (parent_id);", "CREATE INDEX Entries_uuid ON Entries (uuid_high, uuid_low);"};
+        return Array<String>{"DROP TABLE IF EXISTS Entries;", "CREATE TABLE Entries (_id INTEGER PRIMARY KEY,parent_id BIGINT,uuid_high BIGINT,uuid_low BIGINT,parentUUID_high BIGINT,parentUUID_low BIGINT,name TEXT,isFolder BOOLEAN,typeDefault INTEGER,version INTEGER,sessionID_high BIGINT,sessionID_low BIGINT,fetchFailed BOOLEAN,description TEXT,flags INTEGER,invType INTEGER,assetType INTEGER,creationDate INTEGER,_blobField BLOB);", "CREATE INDEX Entries_parent_id ON Entries (parent_id);", "CREATE INDEX Entries_uuid ON Entries (uuid_high, uuid_low);"}
     }
 
     Cursor query(SQLiteDatabase sQLiteDatabase, String str, Array<String> strArr, String str2) throws DBObject.DatabaseBindingException {
         if (sQLiteDatabase == null) {
-            throw DBObject.DatabaseBindingException("Database not opened");
+            throw DBObject.DatabaseBindingException("Database not opened")
         }
         return sQLiteDatabase.query(tableName, fieldNames, str, strArr, (String) null, (String) null, str2)
     }
 
     Cursor query(DBHandle dBHandle, String str, Array<String> strArr, String str2) throws DBObject.DatabaseBindingException {
         if (dBHandle == null) {
-            throw DBObject.DatabaseBindingException("Database not opened");
+            throw DBObject.DatabaseBindingException("Database not opened")
         }
         return dBHandle.getDB().queryWithFactory(dBHandle, false, tableName, fieldNames, str, strArr, (String) null, (String) null, str2, (String) null)
     }
@@ -222,38 +222,38 @@ class InventoryEntryDBObject : DBObject : Parcelable {
 
     fun getContentValues(): ContentValues {
         ContentValues contentValues = ContentValues()
-        contentValues.put("parent_id", Long.valueOf(this.parent_id));
+        contentValues.put("parent_id", Long.valueOf(this.parent_id))
         if (this.uuid != null) {
-            contentValues.put("uuid_high", Long.valueOf(this.uuid.getMostSignificantBits()));
-            contentValues.put("uuid_low", Long.valueOf(this.uuid.getLeastSignificantBits()));
+            contentValues.put("uuid_high", Long.valueOf(this.uuid.getMostSignificantBits()))
+            contentValues.put("uuid_low", Long.valueOf(this.uuid.getLeastSignificantBits()))
         } else {
-            contentValues.put("uuid_high", 0L);
-            contentValues.put("uuid_low", 0L);
+            contentValues.put("uuid_high", 0L)
+            contentValues.put("uuid_low", 0L)
         }
         if (this.parentUUID != null) {
-            contentValues.put("parentUUID_high", Long.valueOf(this.parentUUID.getMostSignificantBits()));
-            contentValues.put("parentUUID_low", Long.valueOf(this.parentUUID.getLeastSignificantBits()));
+            contentValues.put("parentUUID_high", Long.valueOf(this.parentUUID.getMostSignificantBits()))
+            contentValues.put("parentUUID_low", Long.valueOf(this.parentUUID.getLeastSignificantBits()))
         } else {
-            contentValues.put("parentUUID_high", 0L);
-            contentValues.put("parentUUID_low", 0L);
+            contentValues.put("parentUUID_high", 0L)
+            contentValues.put("parentUUID_low", 0L)
         }
-        contentValues.put("name", this.name);
-        contentValues.put("isFolder", Boolean.valueOf(this.isFolder));
-        contentValues.put("typeDefault", Int.valueOf(this.typeDefault));
-        contentValues.put("version", Int.valueOf(this.version));
+        contentValues.put("name", this.name)
+        contentValues.put("isFolder", Boolean.valueOf(this.isFolder))
+        contentValues.put("typeDefault", Int.valueOf(this.typeDefault))
+        contentValues.put("version", Int.valueOf(this.version))
         if (this.sessionID != null) {
-            contentValues.put("sessionID_high", Long.valueOf(this.sessionID.getMostSignificantBits()));
-            contentValues.put("sessionID_low", Long.valueOf(this.sessionID.getLeastSignificantBits()));
+            contentValues.put("sessionID_high", Long.valueOf(this.sessionID.getMostSignificantBits()))
+            contentValues.put("sessionID_low", Long.valueOf(this.sessionID.getLeastSignificantBits()))
         } else {
-            contentValues.put("sessionID_high", 0L);
-            contentValues.put("sessionID_low", 0L);
+            contentValues.put("sessionID_high", 0L)
+            contentValues.put("sessionID_low", 0L)
         }
-        contentValues.put("fetchFailed", Boolean.valueOf(this.fetchFailed));
-        contentValues.put("description", this.description);
-        contentValues.put("flags", Int.valueOf(this.flags));
-        contentValues.put("invType", Int.valueOf(this.invType));
-        contentValues.put("assetType", Int.valueOf(this.assetType));
-        contentValues.put("creationDate", Int.valueOf(this.creationDate));
+        contentValues.put("fetchFailed", Boolean.valueOf(this.fetchFailed))
+        contentValues.put("description", this.description)
+        contentValues.put("flags", Int.valueOf(this.flags))
+        contentValues.put("invType", Int.valueOf(this.invType))
+        contentValues.put("assetType", Int.valueOf(this.assetType))
+        contentValues.put("creationDate", Int.valueOf(this.creationDate))
         ByteBuffer wrap = ByteBuffer.wrap(Byte[Vr.VREvent.VrCore.ErrorCode.CONTROLLER_BATTERY_READ_FAILED])
         if (this.agentUUID != null) {
             wrap.putLong(this.agentUUID.getMostSignificantBits())
@@ -305,7 +305,7 @@ class InventoryEntryDBObject : DBObject : Parcelable {
         wrap.putInt(this.everyoneMask)
         wrap.putInt(this.saleType)
         wrap.putInt(this.salePrice)
-        contentValues.put("_blobField", wrap.array());
+        contentValues.put("_blobField", wrap.array())
         return contentValues
     }
 

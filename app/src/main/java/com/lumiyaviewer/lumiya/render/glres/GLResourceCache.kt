@@ -103,7 +103,7 @@ abstract class GLResourceCache<ResourceParams, RawType, ResourceType extends GLS
 
     /* access modifiers changed from: protected */
     fun CreateNewRequest(resourceparams: ResourceParams, resourceManager: ResourceType>): ResourceRequest<ResourceParams, ResourceType> {
-        return new LoadRequest(resourceparams, resourceManager)
+        return LoadRequest(resourceparams, resourceManager)
     }
 
     /* access modifiers changed from: protected */

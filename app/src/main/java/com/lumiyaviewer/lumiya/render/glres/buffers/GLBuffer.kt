@@ -28,7 +28,7 @@ class GLBuffer : GLResource {
         fun GLFree(): Unit {
             Int[] iArr = (Int[]) GLBuffer.idBuffer.get()
             iArr[0] = this.handle
-            Debug.Printf("GLBuffer: deleted buffer %d", Int.valueOf(iArr[0]));
+            Debug.Printf("GLBuffer: deleted buffer %d", Int.valueOf(iArr[0]))
             GLES11.glDeleteBuffers(1, iArr, 0)
             if (this.rawBuffer != null) {
                 TextureMemoryTracker.releaseBufferMemory(this.rawBuffer.getCapacity())
@@ -49,7 +49,7 @@ class GLBuffer : GLResource {
     fun Allocate(gLResourceManager: GLResourceManager): Int {
         Int[] iArr = idBuffer.get()
         GLES11.glGenBuffers(1, iArr, 0)
-        Debug.Printf("GLBuffer: allocated buffer %d", Int.valueOf(iArr[0]));
+        Debug.Printf("GLBuffer: allocated buffer %d", Int.valueOf(iArr[0]))
         return iArr[0]
     }
 }

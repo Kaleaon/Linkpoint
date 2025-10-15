@@ -28,21 +28,21 @@ class ShaderPreprocessor {
                 return readLine
             }
             if (readLine.startsWith("#ifdef") || readLine.startsWith("#ifndef")) {
-                Boolean startsWith = readLine.startsWith("#ifdef");
+                Boolean startsWith = readLine.startsWith("#ifdef")
                 Boolean containsKey = this.definedMacros.containsKey(readLine.substring(readLine.indexOf(32)).trim())
                 Any processCode = processCode(bufferedReader, startsWith == containsKey ? stringBuilder : null)
                 if (Objects.equal(processCode, "#else")) {
                     processCode = processCode(bufferedReader, startsWith != containsKey ? stringBuilder : null)
                 }
                 if (!Objects.equal(processCode, "#endif")) {
-                    throw IOException("#endif expected");
+                    throw IOException("#endif expected")
                 }
             } else if (stringBuilder != null) {
                 String str2 = readLine
                 for (Entry entry : this.definedMacros.entrySet()) {
                     str2 = str2.replace((CharSequence) entry.getKey(), (CharSequence) entry.getValue())
                 }
-                stringBuilder.append(str2).append("\r\n");
+                stringBuilder.append(str2).append("\r\n")
                 str = str2
             }
             str = readLine

@@ -15,11 +15,11 @@ import java.util.concurrent.atomic.AtomicInteger
  * with improved reliability, retry logic, and fallback mechanisms.
  */
 class ModernConnectionManager {
-    private String TAG = "ModernConnectionManager";
+    private String TAG = "ModernConnectionManager"
     
     // Updated login endpoints (fix for DNS issues)
-    private String MAIN_GRID_LOGIN = "https://login.agni.lindenlab.com/cgi-bin/login.cgi";
-    private String BETA_GRID_LOGIN = "https://login.aditi.lindenlab.com/cgi-bin/login.cgi";
+    private String MAIN_GRID_LOGIN = "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
+    private String BETA_GRID_LOGIN = "https://login.aditi.lindenlab.com/cgi-bin/login.cgi"
     
     // Retry configuration
     private int MAX_RETRY_ATTEMPTS = 3
@@ -29,7 +29,7 @@ class ModernConnectionManager {
     private Context context
     private ConnectionDiagnostics diagnostics
     private ExecutorService executor
-    private AtomicInteger activeConnections = new AtomicInteger(0)
+    private AtomicInteger activeConnections = AtomicInteger(0)
     
     // Connection state
     private volatile ConnectionState state = ConnectionState.DISCONNECTED
@@ -46,9 +46,9 @@ class ModernConnectionManager {
 
     ModernConnectionManager(Context context) {
         this.context = context.getApplicationContext()
-        this.diagnostics = new ConnectionDiagnostics(context)
+        this.diagnostics = ConnectionDiagnostics(context)
         this.executor = Executors.newCachedThreadPool(r -> {
-            Thread t = new Thread(r, "SL-Connection-" + r.hashCode());
+            Thread t = Thread(r, "SL-Connection-" + r.hashCode())
             t.setDaemon(true)
             return t
         })
@@ -58,7 +58,7 @@ class ModernConnectionManager {
      * Establish connection to Second Life grid with modern reliability features.
      */
     CompletableFuture<SLAuthReply> connectAsync(SLAuthParams authParams) {
-        Log.i(TAG, "Starting modern connection attempt to: " + authParams.gridName);
+        Log.i(TAG, "Starting modern connection attempt to: " + authParams.gridName)
         
         setState(ConnectionState.CONNECTING)
         
@@ -67,11 +67,11 @@ class ModernConnectionManager {
             .thenCompose(diagnosticResult -> {
                 if (diagnosticResult.getOverallHealth() == ConnectionDiagnostics.DiagnosticResult.HealthLevel.NO_CONNECTIVITY) {
                     setState(ConnectionState.ERROR)
-                    throw new ConnectionException("No network connectivity available");
+                    throw ConnectionException("No network connectivity available")
                 }
                 
                 if (diagnosticResult.getOverallHealth() == ConnectionDiagnostics.DiagnosticResult.HealthLevel.CRITICAL) {
-                    Log.w(TAG, "Poor connectivity detected, will attempt connection with fallbacks");
+                    Log.w(TAG, "Poor connectivity detected, will attempt connection with fallbacks")
                 }
                 
                 return attemptConnectionWithRetry(authParams, 0)
@@ -80,22 +80,22 @@ class ModernConnectionManager {
                 if (throwable != null) {
                     setState(ConnectionState.ERROR)
                     lastError = throwable.getMessage()
-                    Log.e(TAG, "Connection failed: " + throwable.getMessage(), throwable);
+                    Log.e(TAG, "Connection failed: " + throwable.getMessage(), throwable)
                 } else {
                     setState(ConnectionState.CONNECTED)
                     activeConnections.incrementAndGet()
-                    Log.i(TAG, "Connection established successfully");
+                    Log.i(TAG, "Connection established successfully")
                 }
             })
     }
 
     private ConnectionDiagnostics.DiagnosticResult performPreConnectionDiagnostics() {
-        Log.d(TAG, "Performing pre-connection diagnostics");
+        Log.d(TAG, "Performing pre-connection diagnostics")
         
         try {
             return diagnostics.diagnoseAsync().get(15, TimeUnit.SECONDS)
         } catch (Exception e) {
-            Log.w(TAG, "Diagnostic check failed, proceeding with connection attempt", e);
+            Log.w(TAG, "Diagnostic check failed, proceeding with connection attempt", e)
             // Return a minimal result indicating we should try anyway
             ConnectionDiagnostics.DiagnosticResult result = new ConnectionDiagnostics.DiagnosticResult()
             result.networkAvailable = true; // Assume network is available
@@ -105,33 +105,33 @@ class ModernConnectionManager {
 
     private CompletableFuture<SLAuthReply> attemptConnectionWithRetry(SLAuthParams authParams, int attemptNumber) {
         if (attemptNumber >= MAX_RETRY_ATTEMPTS) {
-            throw new ConnectionException("Maximum retry attempts exceeded (" + MAX_RETRY_ATTEMPTS + ")");
+            throw ConnectionException("Maximum retry attempts exceeded (" + MAX_RETRY_ATTEMPTS + ")")
         }
         
-        Log.d(TAG, "Connection attempt " + (attemptNumber + 1) + "/" + MAX_RETRY_ATTEMPTS);
+        Log.d(TAG, "Connection attempt " + (attemptNumber + 1) + "/" + MAX_RETRY_ATTEMPTS)
         
         return CompletableFuture
             .supplyAsync(() -> performActualConnection(authParams), executor)
             .handle((result, throwable) -> {
                 if (throwable != null) {
-                    Log.w(TAG, "Connection attempt " + (attemptNumber + 1) + " failed: " + throwable.getMessage());
+                    Log.w(TAG, "Connection attempt " + (attemptNumber + 1) + " failed: " + throwable.getMessage())
                     
                     if (attemptNumber < MAX_RETRY_ATTEMPTS - 1) {
                         // Calculate exponential backoff delay
                         long delay = (long)(INITIAL_RETRY_DELAY_MS * Math.pow(RETRY_BACKOFF_MULTIPLIER, attemptNumber))
-                        Log.i(TAG, "Retrying connection in " + delay + "ms");
+                        Log.i(TAG, "Retrying connection in " + delay + "ms")
                         
                         try {
                             Thread.sleep(delay)
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt()
-                            throw new ConnectionException("Connection retry interrupted");
+                            throw ConnectionException("Connection retry interrupted")
                         }
                         
                         setState(ConnectionState.RECONNECTING)
                         return attemptConnectionWithRetry(authParams, attemptNumber + 1).join()
                     } else {
-                        throw new ConnectionException("All connection attempts failed", throwable);
+                        throw ConnectionException("All connection attempts failed", throwable)
                     }
                 }
                 
@@ -151,17 +151,17 @@ class ModernConnectionManager {
             SLAuthReply result = auth.Login(correctedParams)
             
             if (result == null) {
-                throw new ConnectionException("Authentication returned null response");
+                throw ConnectionException("Authentication returned null response")
             }
             
             if (!result.success) {
-                throw new ConnectionException("Authentication failed: " + result.message);
+                throw ConnectionException("Authentication failed: " + result.message)
             }
             
             return result
             
         } catch (Exception e) {
-            throw new ConnectionException("Connection failed during authentication", e);
+            throw ConnectionException("Connection failed during authentication", e)
         }
     }
 
@@ -170,26 +170,26 @@ class ModernConnectionManager {
         
         // Fix common login URL issues
         if (loginURL == null || loginURL.isEmpty()) {
-            Log.i(TAG, "No login URL specified, using main grid default");
+            Log.i(TAG, "No login URL specified, using main grid default")
             loginURL = MAIN_GRID_LOGIN
         }
         
         // Handle legacy URLs or incorrect domains
         if (loginURL.contains("login.secondlife.com")) {
-            Log.i(TAG, "Correcting legacy login URL to use login.agni.lindenlab.com");
+            Log.i(TAG, "Correcting legacy login URL to use login.agni.lindenlab.com")
             loginURL = MAIN_GRID_LOGIN
         }
         
         // Ensure HTTPS
         if (loginURL.startsWith("http://")) {
-            Log.i(TAG, "Upgrading login URL from HTTP to HTTPS");
-            loginURL = loginURL.replace("http://", "https://");
+            Log.i(TAG, "Upgrading login URL from HTTP to HTTPS")
+            loginURL = loginURL.replace("http://", "https://")
         }
         
         // Create corrected auth params if URL was changed
         if (!loginURL.equals(original.loginURL)) {
-            Log.i(TAG, "Creating new auth params with corrected login URL");
-            return new SLAuthParams(
+            Log.i(TAG, "Creating new auth params with corrected login URL")
+            return SLAuthParams(
                 original.loginName,
                 original.passwordHash,
                 original.clientID,
@@ -206,7 +206,7 @@ class ModernConnectionManager {
         if (this.state != newState) {
             ConnectionState oldState = this.state
             this.state = newState
-            Log.d(TAG, "Connection state changed: " + oldState + " -> " + newState);
+            Log.d(TAG, "Connection state changed: " + oldState + " -> " + newState)
             // TODO: Emit state change event for UI updates
         }
     }
@@ -224,7 +224,7 @@ class ModernConnectionManager {
     }
 
     void shutdown() {
-        Log.i(TAG, "Shutting down connection manager");
+        Log.i(TAG, "Shutting down connection manager")
         executor.shutdown()
         try {
             if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {

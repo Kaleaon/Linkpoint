@@ -14,7 +14,7 @@ import java.util.UUID
  * Integrates existing avatar system with new rendering components
  */
 class ModernAvatarManager {
-    private String TAG = "ModernAvatarManager";
+    private String TAG = "ModernAvatarManager"
     
     private Context context
     private ExecutorService executor
@@ -37,22 +37,22 @@ class ModernAvatarManager {
         this.context = null; // Context not needed in protocol-based implementation
         this.executor = Executors.newFixedThreadPool(2)
         
-        Log.i(TAG, "Modern avatar manager initialized");
+        Log.i(TAG, "Modern avatar manager initialized")
     }
     
     /**
      * Initialize avatar manager
      */
     CompletableFuture<Boolean> initializeAsync() {
-        Log.i(TAG, "Initializing modern avatar management system");
+        Log.i(TAG, "Initializing modern avatar management system")
         
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Initialize avatar tracking systems
-                Log.i(TAG, "Avatar management system initialized successfully");
+                Log.i(TAG, "Avatar management system initialized successfully")
                 return true
             } catch (Exception e) {
-                Log.e(TAG, "Failed to initialize avatar management system", e);
+                Log.e(TAG, "Failed to initialize avatar management system", e)
                 return false
             }
         }, executor)
@@ -64,7 +64,7 @@ class ModernAvatarManager {
     CompletableFuture<Boolean> createAvatar(UUID avatarId, MockSLObject avatarObject) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                Log.i(TAG, "Creating avatar: " + avatarId);
+                Log.i(TAG, "Creating avatar: " + avatarId)
                 
                 // Create avatar state
                 AvatarState state = fun AvatarState(): new
@@ -78,13 +78,13 @@ class ModernAvatarManager {
                 AvatarAppearance defaultAppearance = createDefaultAppearance()
                 updateAvatarAppearance(avatarId, defaultAppearance).join()
                 
-                Log.i(TAG, "Avatar created successfully: " + avatarId);
+                Log.i(TAG, "Avatar created successfully: " + avatarId)
                 return true
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to create avatar: " + avatarId, e);
+                Log.e(TAG, "Failed to create avatar: " + avatarId, e)
                 if (avatarListener != null) {
-                    avatarListener.onAvatarRenderingError(avatarId, "Creation failed: " + e.getMessage());
+                    avatarListener.onAvatarRenderingError(avatarId, "Creation failed: " + e.getMessage())
                 }
                 return false
             }
@@ -101,7 +101,7 @@ class ModernAvatarManager {
                 Object visualState = visualStates.get(avatarId)
                 
                 if (state == null || visualState == null) {
-                    Log.w(TAG, "Avatar not found for appearance update: " + avatarId);
+                    Log.w(TAG, "Avatar not found for appearance update: " + avatarId)
                     return false
                 }
                 
@@ -113,13 +113,13 @@ class ModernAvatarManager {
                     avatarListener.onAvatarAppearanceChanged(avatarId, appearance)
                 }
                 
-                Log.i(TAG, "Avatar appearance updated: " + avatarId);
+                Log.i(TAG, "Avatar appearance updated: " + avatarId)
                 return true
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to update avatar appearance: " + avatarId, e);
+                Log.e(TAG, "Failed to update avatar appearance: " + avatarId, e)
                 if (avatarListener != null) {
-                    avatarListener.onAvatarRenderingError(avatarId, "Appearance update failed: " + e.getMessage());
+                    avatarListener.onAvatarRenderingError(avatarId, "Appearance update failed: " + e.getMessage())
                 }
                 return false
             }
@@ -136,7 +136,7 @@ class ModernAvatarManager {
                 Object visualState = visualStates.get(avatarId)
                 
                 if (state == null || visualState == null) {
-                    Log.w(TAG, "Avatar not found for texture update: " + avatarId);
+                    Log.w(TAG, "Avatar not found for texture update: " + avatarId)
                     return false
                 }
                 
@@ -152,13 +152,13 @@ class ModernAvatarManager {
                     avatarListener.onAvatarTextureUpdated(avatarId, textureId.toString())
                 }
                 
-                Log.i(TAG, "Avatar texture updated: " + avatarId + " (" + textureType + ")");
+                Log.i(TAG, "Avatar texture updated: " + avatarId + " (" + textureType + ")")
                 return true
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to update avatar texture: " + avatarId, e);
+                Log.e(TAG, "Failed to update avatar texture: " + avatarId, e)
                 if (avatarListener != null) {
-                    avatarListener.onAvatarRenderingError(avatarId, "Texture update failed: " + e.getMessage());
+                    avatarListener.onAvatarRenderingError(avatarId, "Texture update failed: " + e.getMessage())
                 }
                 return false
             }
@@ -175,7 +175,7 @@ class ModernAvatarManager {
                 Object visualState = visualStates.get(avatarId)
                 
                 if (state == null || visualState == null) {
-                    Log.w(TAG, "Avatar not found for animation: " + avatarId);
+                    Log.w(TAG, "Avatar not found for animation: " + avatarId)
                     return false
                 }
                 
@@ -189,13 +189,13 @@ class ModernAvatarManager {
                     avatarListener.onAvatarAnimationChanged(avatarId, animationId)
                 }
                 
-                Log.i(TAG, "Avatar animation started: " + avatarId + " (" + animationId + ")");
+                Log.i(TAG, "Avatar animation started: " + avatarId + " (" + animationId + ")")
                 return true
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to start avatar animation: " + avatarId, e);
+                Log.e(TAG, "Failed to start avatar animation: " + avatarId, e)
                 if (avatarListener != null) {
-                    avatarListener.onAvatarRenderingError(avatarId, "Animation failed: " + e.getMessage());
+                    avatarListener.onAvatarRenderingError(avatarId, "Animation failed: " + e.getMessage())
                 }
                 return false
             }
@@ -230,14 +230,14 @@ class ModernAvatarManager {
                     state.cleanup()
                     // Visual state cleanup is handled by the existing system
                     
-                    Log.i(TAG, "Avatar removed: " + avatarId);
+                    Log.i(TAG, "Avatar removed: " + avatarId)
                     return true
                 }
                 
                 return false
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to remove avatar: " + avatarId, e);
+                Log.e(TAG, "Failed to remove avatar: " + avatarId, e)
                 return false
             }
         }, executor)
@@ -249,7 +249,7 @@ class ModernAvatarManager {
     CompletableFuture<Boolean> validateAvatarRendering() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                Log.i(TAG, "Validating avatar rendering system...");
+                Log.i(TAG, "Validating avatar rendering system...")
                 
                 // Check if we have the necessary rendering components
                 // This ensures the integration between old and new systems works
@@ -258,15 +258,15 @@ class ModernAvatarManager {
                 boolean hasTextureSystem = true;     // Texture management is available
                 
                 if (hasVisualStateSystem && hasDrawableSystem && hasTextureSystem) {
-                    Log.i(TAG, "Avatar rendering system validation passed");
+                    Log.i(TAG, "Avatar rendering system validation passed")
                     return true
                 } else {
-                    Log.w(TAG, "Avatar rendering system validation failed - missing components");
+                    Log.w(TAG, "Avatar rendering system validation failed - missing components")
                     return false
                 }
                 
             } catch (Exception e) {
-                Log.e(TAG, "Avatar rendering validation error", e);
+                Log.e(TAG, "Avatar rendering validation error", e)
                 return false
             }
         }, executor)
@@ -308,7 +308,7 @@ class ModernAvatarManager {
         avatarStates.clear()
         visualStates.clear()
         
-        Log.i(TAG, "Avatar manager cleaned up");
+        Log.i(TAG, "Avatar manager cleaned up")
     }
     
     // Data classes for avatar management
@@ -408,17 +408,17 @@ class ModernAvatarManager {
             }
             
             Builder withSkinColor(float r, float g, float b, float a) {
-                this.skinColor = new float[]{r, g, b, a}
+                this.skinColor = arrayOf(){r, g, b, a}
                 return this
             }
             
             Builder withHairColor(float r, float g, float b, float a) {
-                this.hairColor = new float[]{r, g, b, a}
+                this.hairColor = arrayOf(){r, g, b, a}
                 return this
             }
             
             Builder withEyeColor(float r, float g, float b, float a) {
-                this.eyeColor = new float[]{r, g, b, a}
+                this.eyeColor = arrayOf(){r, g, b, a}
                 return this
             }
             

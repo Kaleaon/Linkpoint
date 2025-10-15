@@ -9,10 +9,10 @@ import java.io.IOException
  * Test object for ModernTextureManager functionality
  */
 object ModernTextureManagerTest {
-    private String TAG = "ModernTextureManagerTest";
+    private String TAG = "ModernTextureManagerTest"
     
     fun runBasicTests(context: Context): Unit {
-        Log.i(TAG, "Starting ModernTextureManager tests...");
+        Log.i(TAG, "Starting ModernTextureManager tests...")
         
         try {
             // Test initialization
@@ -24,50 +24,50 @@ object ModernTextureManagerTest {
             // Test format utilities
             testFormatUtilities()
             
-            // Test TextureData object testTextureDataClass();
+            // Test TextureData object testTextureDataClass()
             
-            Log.i(TAG, "All tests completed successfully");
+            Log.i(TAG, "All tests completed successfully")
             
         } catch (Exception e) {
-            Log.e(TAG, "Test failed with exception", e);
+            Log.e(TAG, "Test failed with exception", e)
         }
     }
     
     private void testInitialization(Context context) {
-        Log.i(TAG, "Testing initialization...");
+        Log.i(TAG, "Testing initialization...")
         
         try {
-            ModernTextureManager manager = new ModernTextureManager(context)
+            ModernTextureManager manager = ModernTextureManager(context)
             if (manager != null && manager.isInitialized()) {
-                Log.i(TAG, "✓ ModernTextureManager created and initialized successfully");
+                Log.i(TAG, "✓ ModernTextureManager created and initialized successfully")
             } else {
-                Log.e(TAG, "✗ ModernTextureManager not properly initialized");
+                Log.e(TAG, "✗ ModernTextureManager not properly initialized")
             }
         } catch (Exception e) {
-            Log.e(TAG, "✗ Failed to create ModernTextureManager", e);
+            Log.e(TAG, "✗ Failed to create ModernTextureManager", e)
         }
     }
     
     private void testGPUCapabilities(Context context) {
-        Log.i(TAG, "Testing GPU capability detection...");
+        Log.i(TAG, "Testing GPU capability detection...")
         
         try {
-            ModernTextureManager manager = new ModernTextureManager(context)
+            ModernTextureManager manager = ModernTextureManager(context)
             if (manager.isInitialized()) {
                 int optimalFormat = manager.getOptimalTextureFormat()
                 String formatName = ModernTextureManager.getFormatName(optimalFormat)
                 
-                Log.i(TAG, "✓ Optimal texture format detected: " + formatName + " (" + optimalFormat + ")");
+                Log.i(TAG, "✓ Optimal texture format detected: " + formatName + " (" + optimalFormat + ")")
             } else {
-                Log.e(TAG, "✗ Manager not initialized, cannot test capabilities");
+                Log.e(TAG, "✗ Manager not initialized, cannot test capabilities")
             }
         } catch (Exception e) {
-            Log.e(TAG, "✗ Failed to test GPU capabilities", e);
+            Log.e(TAG, "✗ Failed to test GPU capabilities", e)
         }
     }
     
     private void testFormatUtilities() {
-        Log.i(TAG, "Testing format utilities...");
+        Log.i(TAG, "Testing format utilities...")
         
         // Test format name mapping
         String astcName = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_ASTC_4x4_RGBA)
@@ -76,7 +76,7 @@ object ModernTextureManagerTest {
         String rgbaName = ModernTextureManager.getFormatName(ModernTextureManager.FORMAT_RGBA32)
         
         Log.i(TAG, "✓ Format names: ASTC=" + astcName + ", ETC2=" + etc2Name + 
-                   ", BC7=" + bc7Name + ", RGBA=" + rgbaName);
+                   ", BC7=" + bc7Name + ", RGBA=" + rgbaName)
         
         // Test OpenGL format mapping
         int astcGL = ModernTextureManager.getOpenGLFormat(ModernTextureManager.FORMAT_ASTC_4x4_RGBA)
@@ -87,20 +87,20 @@ object ModernTextureManagerTest {
         Log.i(TAG, "✓ OpenGL formats: ASTC=0x" + Integer.toHexString(astcGL) + 
                    ", ETC2=0x" + Integer.toHexString(etc2GL) + 
                    ", BC7=0x" + Integer.toHexString(bc7GL) + 
-                   ", RGBA=0x" + Integer.toHexString(rgbaGL));
+                   ", RGBA=0x" + Integer.toHexString(rgbaGL))
     }
     
     private void testTextureDataClass() {
-        Log.i(TAG, "Testing TextureData class...");
+        Log.i(TAG, "Testing TextureData class...")
         
-        byte[] testData = new byte[1024]
+        byte[] testData = ByteArray(1024)
         ModernTextureManager.TextureData textureData = new ModernTextureManager.TextureData(
                 256, 256, 1, ModernTextureManager.FORMAT_ASTC_4x4_RGBA, testData
         )
         
-        Log.i(TAG, "✓ TextureData created: " + textureData.toString());
-        Log.i(TAG, "✓ Is compressed: " + textureData.isCompressed());
-        Log.i(TAG, "✓ Format name: " + textureData.getFormatName());
-        Log.i(TAG, "✓ OpenGL format: 0x" + Integer.toHexString(textureData.getOpenGLFormat()));
+        Log.i(TAG, "✓ TextureData created: " + textureData.toString())
+        Log.i(TAG, "✓ Is compressed: " + textureData.isCompressed())
+        Log.i(TAG, "✓ Format name: " + textureData.getFormatName())
+        Log.i(TAG, "✓ OpenGL format: 0x" + Integer.toHexString(textureData.getOpenGLFormat()))
     }
 }

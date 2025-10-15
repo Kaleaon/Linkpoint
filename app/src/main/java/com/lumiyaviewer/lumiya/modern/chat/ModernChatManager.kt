@@ -19,7 +19,7 @@ import java.util.concurrent.Executors
  * Extends existing chat system with modern features
  */
 class ModernChatManager {
-    private String TAG = "ModernChatManager";
+    private String TAG = "ModernChatManager"
     
     private Context context
     private ExecutorService executor
@@ -46,22 +46,22 @@ class ModernChatManager {
         this.eventClient = null; // Event client will be initialized from protocol manager
         this.executor = Executors.newFixedThreadPool(2)
         
-        Log.i(TAG, "Modern chat manager initialized");
+        Log.i(TAG, "Modern chat manager initialized")
     }
     
     /**
      * Initialize chat manager
      */
     CompletableFuture<Boolean> initializeAsync() {
-        Log.i(TAG, "Initializing modern chat management system");
+        Log.i(TAG, "Initializing modern chat management system")
         
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Initialize chat systems
-                Log.i(TAG, "Chat management system initialized successfully");
+                Log.i(TAG, "Chat management system initialized successfully")
                 return true
             } catch (Exception e) {
-                Log.e(TAG, "Failed to initialize chat management system", e);
+                Log.e(TAG, "Failed to initialize chat management system", e)
                 return false
             }
         }, executor)
@@ -73,9 +73,9 @@ class ModernChatManager {
     CompletableFuture<Boolean> sendLocalChatMessage(String message, int channel) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                Log.i(TAG, "Sending local chat message: " + message);
+                Log.i(TAG, "Sending local chat message: " + message)
                 
-                ChatMessage chatMsg = new ChatMessage(
+                ChatMessage chatMsg = ChatMessage(
                     UUID.randomUUID().toString(),
                     ChatMessage.Type.LOCAL,
                     message,
@@ -91,16 +91,16 @@ class ModernChatManager {
                 // Send via WebSocket for real-time delivery
                 if (eventClient != null) {
                     String payload = createChatPayload(chatMsg)
-                    return eventClient.sendMessage("chat.local", payload).join();
+                    return eventClient.sendMessage("chat.local", payload).join()
                 }
                 
                 // Fallback to traditional SL protocol if WebSocket unavailable
                 fun sendViaTraditionalProtocol(): return
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to send local chat message", e);
+                Log.e(TAG, "Failed to send local chat message", e)
                 if (chatListener != null) {
-                    chatListener.onChatError("Failed to send message: " + e.getMessage());
+                    chatListener.onChatError("Failed to send message: " + e.getMessage())
                 }
                 return false
             }
@@ -113,9 +113,9 @@ class ModernChatManager {
     CompletableFuture<Boolean> sendGroupChatMessage(String message, String groupId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                Log.i(TAG, "Sending group chat message to group: " + groupId);
+                Log.i(TAG, "Sending group chat message to group: " + groupId)
                 
-                ChatMessage chatMsg = new ChatMessage(
+                ChatMessage chatMsg = ChatMessage(
                     UUID.randomUUID().toString(),
                     ChatMessage.Type.GROUP,
                     message,
@@ -139,15 +139,15 @@ class ModernChatManager {
                 // Send via modern protocol
                 if (eventClient != null) {
                     String payload = createGroupChatPayload(chatMsg, groupId)
-                    return eventClient.sendMessage("chat.group", payload).join();
+                    return eventClient.sendMessage("chat.group", payload).join()
                 }
                 
                 fun sendViaTraditionalProtocol(): return
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to send group chat message", e);
+                Log.e(TAG, "Failed to send group chat message", e)
                 if (chatListener != null) {
-                    chatListener.onChatError("Failed to send group message: " + e.getMessage());
+                    chatListener.onChatError("Failed to send group message: " + e.getMessage())
                 }
                 return false
             }
@@ -160,7 +160,7 @@ class ModernChatManager {
     CompletableFuture<Boolean> joinGroupChat(String groupId, String groupName) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                Log.i(TAG, "Joining group chat: " + groupName + " (" + groupId + ")");
+                Log.i(TAG, "Joining group chat: " + groupName + " (" + groupId + ")")
                 
                 ChatSession session = fun ChatSession(): new
                 session.setGroupName(groupName)
@@ -168,16 +168,16 @@ class ModernChatManager {
                 
                 // Request to join group via modern protocol
                 if (eventClient != null) {
-                    String joinPayload = "{\"action\":\"join\",\"groupId\":\"" + groupId + "\"}";
-                    return eventClient.sendMessage("chat.group.join", joinPayload).join();
+                    String joinPayload = "{\"action\":\"join\",\"groupId\":\"" + groupId + "\"}"
+                    return eventClient.sendMessage("chat.group.join", joinPayload).join()
                 }
                 
                 return true
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to join group chat", e);
+                Log.e(TAG, "Failed to join group chat", e)
                 if (chatListener != null) {
-                    chatListener.onChatError("Failed to join group: " + e.getMessage());
+                    chatListener.onChatError("Failed to join group: " + e.getMessage())
                 }
                 return false
             }
@@ -192,18 +192,18 @@ class ModernChatManager {
             try {
                 ChatSession session = activeSessions.remove(groupId)
                 if (session != null) {
-                    Log.i(TAG, "Left group chat: " + session.getGroupName());
+                    Log.i(TAG, "Left group chat: " + session.getGroupName())
                     
                     // Notify server via modern protocol
                     if (eventClient != null) {
-                        String leavePayload = "{\"action\":\"leave\",\"groupId\":\"" + groupId + "\"}";
-                        return eventClient.sendMessage("chat.group.leave", leavePayload).join();
+                        String leavePayload = "{\"action\":\"leave\",\"groupId\":\"" + groupId + "\"}"
+                        return eventClient.sendMessage("chat.group.leave", leavePayload).join()
                     }
                 }
                 return true
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to leave group chat", e);
+                Log.e(TAG, "Failed to leave group chat", e)
                 return false
             }
         }, executor)
@@ -216,11 +216,11 @@ class ModernChatManager {
         executor.execute(() -> {
             try {
                 if (eventClient != null) {
-                    String payload = "{\"sessionId\":\"" + sessionId + "\",\"typing\":" + isTyping + "}";
-                    eventClient.sendMessage("chat.typing", payload);
+                    String payload = "{\"sessionId\":\"" + sessionId + "\",\"typing\":" + isTyping + "}"
+                    eventClient.sendMessage("chat.typing", payload)
                 }
             } catch (Exception e) {
-                Log.w(TAG, "Failed to send typing indicator", e);
+                Log.w(TAG, "Failed to send typing indicator", e)
             }
     }
     
@@ -244,10 +244,10 @@ class ModernChatManager {
                         handleTypingIndicator(payload)
                         break
                     default:
-                        Log.w(TAG, "Unknown chat message type: " + messageType);
+                        Log.w(TAG, "Unknown chat message type: " + messageType)
                 }
             } catch (Exception e) {
-                Log.e(TAG, "Error handling incoming message", e);
+                Log.e(TAG, "Error handling incoming message", e)
             }
     }
     
@@ -280,7 +280,7 @@ class ModernChatManager {
             ChatMessage message = parseChatMessage(payload, ChatMessage.Type.LOCAL)
             
             // Store in history
-            List<ChatMessage> history = messageHistory.computeIfAbsent("local", k -> new ArrayList<>());
+            List<ChatMessage> history = messageHistory.computeIfAbsent("local", k -> new ArrayList<>())
             history.add(message)
             
             // Limit history size
@@ -294,7 +294,7 @@ class ModernChatManager {
             }
             
         } catch (Exception e) {
-            Log.e(TAG, "Error handling local chat message", e);
+            Log.e(TAG, "Error handling local chat message", e)
         }
     }
     
@@ -326,7 +326,7 @@ class ModernChatManager {
             }
             
         } catch (Exception e) {
-            Log.e(TAG, "Error handling group chat message", e);
+            Log.e(TAG, "Error handling group chat message", e)
         }
     }
     
@@ -340,23 +340,23 @@ class ModernChatManager {
             }
             
         } catch (Exception e) {
-            Log.e(TAG, "Error handling group invitation", e);
+            Log.e(TAG, "Error handling group invitation", e)
         }
     }
     
     private void handleTypingIndicator(String payload) {
         try {
             // Parse typing indicator - simplified JSON parsing
-            String userId = extractJsonValue(payload, "userId");
-            String sessionId = extractJsonValue(payload, "sessionId");
-            boolean isTyping = Boolean.parseBoolean(extractJsonValue(payload, "typing"));
+            String userId = extractJsonValue(payload, "userId")
+            String sessionId = extractJsonValue(payload, "sessionId")
+            boolean isTyping = Boolean.parseBoolean(extractJsonValue(payload, "typing"))
             
             if (chatListener != null) {
                 chatListener.onTypingIndicator(userId, sessionId, isTyping)
             }
             
         } catch (Exception e) {
-            Log.e(TAG, "Error handling typing indicator", e);
+            Log.e(TAG, "Error handling typing indicator", e)
         }
     }
     
@@ -364,24 +364,24 @@ class ModernChatManager {
         return "{\"id\":\"" + message.getId() + "\"," +
                "\"message\":\"" + escapeJson(message.getMessage()) + "\"," +
                "\"timestamp\":" + message.getTimestamp() + "," +
-               "\"channel\":" + message.getChannel() + "}";
+               "\"channel\":" + message.getChannel() + "}"
     }
     
     private String createGroupChatPayload(ChatMessage message, String groupId) {
         return "{\"id\":\"" + message.getId() + "\"," +
                "\"message\":\"" + escapeJson(message.getMessage()) + "\"," +
                "\"timestamp\":" + message.getTimestamp() + "," +
-               "\"groupId\":\"" + groupId + "\"}";
+               "\"groupId\":\"" + groupId + "\"}"
     }
     
     private ChatMessage parseChatMessage(String payload, ChatMessage.Type type) {
         // Simplified JSON parsing for chat messages
-        String id = extractJsonValue(payload, "id");
-        String message = extractJsonValue(payload, "message");
-        String timestampStr = extractJsonValue(payload, "timestamp");
-        String senderId = extractJsonValue(payload, "senderId");
-        String sessionId = extractJsonValue(payload, "sessionId");
-        String channelStr = extractJsonValue(payload, "channel");
+        String id = extractJsonValue(payload, "id")
+        String message = extractJsonValue(payload, "message")
+        String timestampStr = extractJsonValue(payload, "timestamp")
+        String senderId = extractJsonValue(payload, "senderId")
+        String sessionId = extractJsonValue(payload, "sessionId")
+        String channelStr = extractJsonValue(payload, "channel")
         
         long timestamp = timestampStr != null ? Long.parseLong(timestampStr) : System.currentTimeMillis()
         int channel = channelStr != null ? Integer.parseInt(channelStr) : 0
@@ -390,10 +390,10 @@ class ModernChatManager {
     }
     
     private GroupChatInvitation parseGroupInvitation(String payload) {
-        String groupId = extractJsonValue(payload, "groupId");
-        String groupName = extractJsonValue(payload, "groupName");
-        String inviterId = extractJsonValue(payload, "inviterId");
-        String inviterName = extractJsonValue(payload, "inviterName");
+        String groupId = extractJsonValue(payload, "groupId")
+        String groupName = extractJsonValue(payload, "groupName")
+        String inviterId = extractJsonValue(payload, "inviterId")
+        String inviterName = extractJsonValue(payload, "inviterName")
         
         return fun GroupChatInvitation(): new
     }
@@ -401,13 +401,13 @@ class ModernChatManager {
     private boolean sendViaTraditionalProtocol(ChatMessage message) {
         // Fallback to existing SL protocol implementation
         // This would integrate with existing SLChatTextEvent system
-        Log.i(TAG, "Sending via traditional SL protocol");
+        Log.i(TAG, "Sending via traditional SL protocol")
         return true; // Mock implementation
     }
     
     // Simple JSON value extraction (avoiding full JSON parser for minimal dependencies)
     private String extractJsonValue(String json, String key) {
-        String searchKey = "\"" + key + "\":";
+        String searchKey = "\"" + key + "\":"
         int startIndex = json.indexOf(searchKey)
         if (startIndex == -1) return null
         
@@ -422,9 +422,9 @@ class ModernChatManager {
         if (firstChar == '"') {
             // String value
             startIndex++
-            int endIndex = json.indexOf('"', startIndex);
+            int endIndex = json.indexOf('"', startIndex)
             while (endIndex != -1 && json.charAt(endIndex - 1) == '\\') {
-                endIndex = json.indexOf('"', endIndex + 1);
+                endIndex = json.indexOf('"', endIndex + 1)
             }
             return endIndex != -1 ? json.substring(startIndex, endIndex) : null
         } else {
@@ -441,12 +441,12 @@ class ModernChatManager {
     }
     
     private String escapeJson(String text) {
-        if (text == null) return "";
+        if (text == null) return ""
         return text.replace("\\", "\\\\")
                   .replace("\"", "\\\"")
                   .replace("\n", "\\n")
                   .replace("\r", "\\r")
-                  .replace("\t", "\\t");
+                  .replace("\t", "\\t")
     }
     
     /**
@@ -460,7 +460,7 @@ class ModernChatManager {
         messageQueue.clear()
         messageHistory.clear()
         
-        Log.i(TAG, "Chat manager cleaned up");
+        Log.i(TAG, "Chat manager cleaned up")
     }
     
     // Inner classes for chat data structures

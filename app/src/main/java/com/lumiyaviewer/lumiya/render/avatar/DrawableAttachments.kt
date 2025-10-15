@@ -47,7 +47,7 @@ class DrawableAttachments {
         }
         this.nonRigged = builder.build()
         this.rigged = builder2.build()
-        Debug.Printf("Created drawableAttachments: %d rigged, %d non-rigged", Int.valueOf(this.rigged.size()), Int.valueOf(this.nonRigged.size()));
+        Debug.Printf("Created drawableAttachments: %d rigged, %d non-rigged", Int.valueOf(this.rigged.size()), Int.valueOf(this.nonRigged.size()))
     }
 
     DrawableAttachments(@Nonnull DrawableAttachments drawableAttachments) {
@@ -67,7 +67,7 @@ class DrawableAttachments {
         this.nonRigged = builder.build()
         this.rigged = builder2.build()
         this.glAnimationDataBuffer = drawableAttachments.glAnimationDataBuffer
-        Debug.Printf("Updated drawableAttachments: %d rigged, %d non-rigged", Int.valueOf(this.rigged.size()), Int.valueOf(this.nonRigged.size()));
+        Debug.Printf("Updated drawableAttachments: %d rigged, %d non-rigged", Int.valueOf(this.rigged.size()), Int.valueOf(this.nonRigged.size()))
     }
 
     @SuppressLint({"NewApi"})

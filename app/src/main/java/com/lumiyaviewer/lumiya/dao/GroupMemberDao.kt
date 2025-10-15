@@ -9,17 +9,17 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class GroupMemberDao : AbstractDao<GroupMember, Void> {
-    String TABLENAME = "GroupMembers";
+    String TABLENAME = "GroupMembers"
 
     class Properties {
-        Property AgentPowers = Property(5, Long.TYPE, "agentPowers", false, "AGENT_POWERS");
-        Property Contribution = Property(3, Int.TYPE, "contribution", false, "CONTRIBUTION");
-        Property GroupID = Property(0, UUID.class, "groupID", false, "GROUP_ID");
-        Property IsOwner = Property(7, Boolean.TYPE, "isOwner", false, "IS_OWNER");
-        Property OnlineStatus = Property(4, String.class, "onlineStatus", false, "ONLINE_STATUS");
-        Property RequestID = Property(1, UUID.class, "requestID", false, "REQUEST_ID");
-        Property Title = Property(6, String.class, "title", false, "TITLE");
-        Property UserID = Property(2, UUID.class, "userID", false, "USER_ID");
+        Property AgentPowers = Property(5, Long.TYPE, "agentPowers", false, "AGENT_POWERS")
+        Property Contribution = Property(3, Int.TYPE, "contribution", false, "CONTRIBUTION")
+        Property GroupID = Property(0, UUID.class, "groupID", false, "GROUP_ID")
+        Property IsOwner = Property(7, Boolean.TYPE, "isOwner", false, "IS_OWNER")
+        Property OnlineStatus = Property(4, String.class, "onlineStatus", false, "ONLINE_STATUS")
+        Property RequestID = Property(1, UUID.class, "requestID", false, "REQUEST_ID")
+        Property Title = Property(6, String.class, "title", false, "TITLE")
+        Property UserID = Property(2, UUID.class, "userID", false, "USER_ID")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -31,13 +31,13 @@ class GroupMemberDao : AbstractDao<GroupMember, Void> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : "";
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'GroupMembers' (" + "'GROUP_ID' TEXT NOT NULL ," + "'REQUEST_ID' TEXT NOT NULL ," + "'USER_ID' TEXT NOT NULL ," + "'CONTRIBUTION' INTEGER NOT NULL ," + "'ONLINE_STATUS' TEXT NOT NULL ," + "'AGENT_POWERS' INTEGER NOT NULL ," + "'TITLE' TEXT NOT NULL ," + "'IS_OWNER' INTEGER NOT NULL );");
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_GroupMembers_GROUP_ID_REQUEST_ID ON GroupMembers" + " (GROUP_ID,REQUEST_ID);");
+        String str = z ? "IF NOT EXISTS " : ""
+        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'GroupMembers' (" + "'GROUP_ID' TEXT NOT NULL ," + "'REQUEST_ID' TEXT NOT NULL ," + "'USER_ID' TEXT NOT NULL ," + "'CONTRIBUTION' INTEGER NOT NULL ," + "'ONLINE_STATUS' TEXT NOT NULL ," + "'AGENT_POWERS' INTEGER NOT NULL ," + "'TITLE' TEXT NOT NULL ," + "'IS_OWNER' INTEGER NOT NULL );")
+        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_GroupMembers_GROUP_ID_REQUEST_ID ON GroupMembers" + " (GROUP_ID,REQUEST_ID);")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupMembers'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupMembers'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, groupMember: GroupMember): Unit {

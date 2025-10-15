@@ -26,9 +26,9 @@ import java.util.UUID
 class SLGridConnection extends SLConnection {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
     private /* synthetic */ int[] syntheticField = null
-    private String DEFAULT_SYSTEM_ACCOUNT = "Second Life";
+    private String DEFAULT_SYSTEM_ACCOUNT = "Second Life"
     private boolean autoresponseEnabled = false
-    private String autoresponseText = "";
+    private String autoresponseText = ""
     private UUID activeAgentUUID
     private SLAgentCircuit agentCircuit
     private SLAuthParams authParams
@@ -41,9 +41,9 @@ class SLGridConnection extends SLConnection {
     private volatile boolean isReconnecting = false
     private volatile Thread loginThread = null
     private SLModules modules
-    SLParcelInfo parcelInfo = new SLParcelInfo()
+    SLParcelInfo parcelInfo = SLParcelInfo()
     private volatile int reconnectAttempts = 0
-    private Map<SLAuthReply, SLTempCircuit> tempCircuits = Collections.synchronizedMap(new HashMap())
+    private Map<SLAuthReply, SLTempCircuit> tempCircuits = Collections.synchronizedMap(HashMap())
     private UserManager userManager
     private volatile boolean userWantsConnected = false
 
@@ -57,7 +57,7 @@ class SLGridConnection extends SLConnection {
         private long serialVersionUID = 2164121452714562470L
 
         NotConnectedException() {
-            super("Grid not connected");
+            super("Grid not connected")
         }
     }
 
@@ -85,7 +85,7 @@ class SLGridConnection extends SLConnection {
 
     private void DoConnect(SLAuthParams sLAuthParams, String str) {
         try {
-            SLAuthReply Login = new SLAuth().Login(sLAuthParams.withLocation(str))
+            SLAuthReply Login = SLAuth().Login(sLAuthParams.withLocation(str))
             if (Login.success) {
                 synchronized (this) {
                     if (this.connectionState == ConnectionState.Idle) {
@@ -106,7 +106,7 @@ class SLGridConnection extends SLConnection {
             reconnectOrDrop(true, false, Login.message)
         } catch (Exception e) {
             setConnectionState(ConnectionState.Idle)
-            reconnectOrDrop(true, false, "Failed to connect to login server.");
+            reconnectOrDrop(true, false, "Failed to connect to login server.")
         }
     }
 
@@ -145,7 +145,7 @@ class SLGridConnection extends SLConnection {
         this.eventBus.publish(new com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent(this.reconnectAttempts))
         
         // Start connecting with "last" location
-        startConnecting(true, "last");
+        startConnecting(true, "last")
         
         return true
     }
@@ -161,9 +161,9 @@ class SLGridConnection extends SLConnection {
                 GridConnectionManager.removeConnection(this.activeAgentUUID, this)
             }
             if (z) {
-                this.eventBus.publish(new SLLoginResultEvent(false, str, this.activeAgentUUID))
+                this.eventBus.publish(SLLoginResultEvent(false, str, this.activeAgentUUID))
             } else {
-                this.eventBus.publish(new SLDisconnectEvent(z2, str))
+                this.eventBus.publish(SLDisconnectEvent(z2, str))
             }
         }
     }
@@ -176,24 +176,24 @@ class SLGridConnection extends SLConnection {
     private void setConnectionState(ConnectionState connectionState) {
         if (this.connectionState != connectionState) {
             this.connectionState = connectionState
-            this.eventBus.publish(new SLConnectionStateChangedEvent(connectionState))
+            this.eventBus.publish(SLConnectionStateChangedEvent(connectionState))
         }
     }
 
     private void startCircuit(SLAuthReply sLAuthReply, SLTempCircuit sLTempCircuit) {
-        Debug.Log("login reply: ip = " + sLAuthReply.simAddress.toString() + ", port = " + sLAuthReply.simPort + ", ccode = " + sLAuthReply.circuitCode);
+        Debug.Log("login reply: ip = " + sLAuthReply.simAddress.toString() + ", port = " + sLAuthReply.simPort + ", ccode = " + sLAuthReply.circuitCode)
         if (sLAuthReply.inventoryRoot != null) {
-            Debug.Log("inventory root: " + sLAuthReply.inventoryRoot.toString());
+            Debug.Log("inventory root: " + sLAuthReply.inventoryRoot.toString())
         } else {
-            Debug.Log("inventory root is null");
+            Debug.Log("inventory root is null")
         }
-        SLCaps sLCaps = new SLCaps()
+        SLCaps sLCaps = SLCaps()
         sLCaps.GetCapabilites(this.authReply.loginURL, this.authReply.seedCapability)
         try {
-            this.agentCircuit = new SLAgentCircuit(this, new SLCircuitInfo(sLAuthReply), sLAuthReply, sLCaps, sLTempCircuit)
+            this.agentCircuit = SLAgentCircuit(this, SLCircuitInfo(sLAuthReply), sLAuthReply, sLCaps, sLTempCircuit)
             this.modules = this.agentCircuit.getModules()
             try {
-                this.capEventQueue = new SLCapEventQueue(sLCaps.getCapabilityOrThrow(SLCapability.EventQueueGet), this.agentCircuit)
+                this.capEventQueue = SLCapEventQueue(sLCaps.getCapabilityOrThrow(SLCapability.EventQueueGet), this.agentCircuit)
             } catch (NoSuchCapabilityException e) {
                 e.printStackTrace()
             }
@@ -204,12 +204,12 @@ class SLGridConnection extends SLConnection {
             this.firstConnect = false
         } catch (IOException e2) {
             setConnectionState(ConnectionState.Idle)
-            reconnectOrDrop(true, false, "Failed to connect to the simulator.");
+            reconnectOrDrop(true, false, "Failed to connect to the simulator.")
         }
     }
 
     private void startConnecting(boolean z, String str) {
-        this.loginThread = new Thread(new Runnable() {
+        this.loginThread = Thread(Runnable() {
             void run() {
                 if (z) {
                     try {
@@ -251,7 +251,7 @@ class SLGridConnection extends SLConnection {
         if (this.agentCircuit != null) {
             this.agentCircuit.SendLogoutRequest()
         } else {
-            processDisconnect(true, "Logged out");
+            processDisconnect(true, "Logged out")
         }
     }
 
@@ -271,7 +271,7 @@ class SLGridConnection extends SLConnection {
     synchronized void addTempCircuit(SLAuthReply sLAuthReply) {
         if (!this.tempCircuits.containsKey(sLAuthReply)) {
             try {
-                SLCircuit sLTempCircuit = new SLTempCircuit(this, new SLCircuitInfo(sLAuthReply), sLAuthReply)
+                SLCircuit sLTempCircuit = SLTempCircuit(this, SLCircuitInfo(sLAuthReply), sLAuthReply)
                 this.tempCircuits.put(sLAuthReply, sLTempCircuit)
                 AddCircuit(sLTempCircuit)
                 sLTempCircuit.SendUseCode()
@@ -311,15 +311,15 @@ class SLGridConnection extends SLConnection {
             this.isReconnecting = false
             this.hadConnected = false
         }
-        Debug.Log("GridConnection: forceDisconnect() called, fromLogoutRequest = " + (z ? "true" : "false"));
+        Debug.Log("GridConnection: forceDisconnect() called, fromLogoutRequest = " + (z ? "true" : "false"))
         switch (m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues()[this.connectionState.ordinal()]) {
             case 1:
                 closeConnectionObjects()
-                reconnectOrDrop(false, z, "Network connection lost.");
+                reconnectOrDrop(false, z, "Network connection lost.")
                 break
             case 2:
                 closeConnectionObjects()
-                reconnectOrDrop(true, z, "Network connection lost.");
+                reconnectOrDrop(true, z, "Network connection lost.")
                 break
         }
     }
@@ -332,7 +332,7 @@ class SLGridConnection extends SLConnection {
         if (this.agentCircuit != null) {
             return this.agentCircuit
         }
-        throw new NotConnectedException()
+        throw NotConnectedException()
     }
 
     synchronized ConnectionState getConnectionState() {
@@ -345,7 +345,7 @@ class SLGridConnection extends SLConnection {
 
     synchronized SLModules getModules() throws NotConnectedException {
         if (this.modules == null) {
-            throw new NotConnectedException()
+            throw NotConnectedException()
         }
         return this.modules
     }
@@ -371,7 +371,7 @@ class SLGridConnection extends SLConnection {
         if (this.activeAgentUUID != null) {
             GridConnectionManager.setConnection(this.activeAgentUUID, this)
         }
-        this.eventBus.publish(new SLLoginResultEvent(true, null, this.activeAgentUUID))
+        this.eventBus.publish(SLLoginResultEvent(true, null, this.activeAgentUUID))
     }
 
     synchronized void processDisconnect(boolean z, String str) {

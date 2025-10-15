@@ -49,7 +49,7 @@ class DrawableGeometry : GLCleanable {
         this.IndexCount = i2
         this.VertexCount = i
         if (i2 == 0 || i == 0) {
-            throw CreateFailureException("Mesh data has zero indices or vertices");
+            throw CreateFailureException("Mesh data has zero indices or vertices")
         }
         this.FaceIndexStartsCounts = Int[(this.FaceCount * 3)]
         this.FaceVertexStartsCounts = Int[(this.FaceCount * 2)]
@@ -69,7 +69,7 @@ class DrawableGeometry : GLCleanable {
             DirectByteBuffer texCoords = face2.getTexCoords()
             Int numVertices = face2.getNumVertices()
             if (face2.getNumVertices() == 0 || face2.getNumIndices() == 0) {
-                throw CreateFailureException("Empty mesh");
+                throw CreateFailureException("Empty mesh")
             }
             if (vertices != null) {
                 directByteBuffer.copyFromFloat(i5 * 6, vertices, 0, numVertices * 6)
@@ -80,7 +80,7 @@ class DrawableGeometry : GLCleanable {
                 Int numIndices = face2.getNumIndices()
                 for (Int i9 = 0; i9 < numIndices; i9++) {
                     if ((indices.getShort(i9) & 65535) >= numVertices) {
-                        throw CreateFailureException("Too many vertices");
+                        throw CreateFailureException("Too many vertices")
                     }
                 }
                 directByteBuffer2.copyFromShort(i4, face2.getIndices(), 0, face2.getNumIndices())
@@ -104,7 +104,7 @@ class DrawableGeometry : GLCleanable {
         this.VertexBuffer = GLLoadableBuffer(directByteBuffer)
         this.IndexBuffer = GLLoadableBuffer(directByteBuffer2)
         this.TexCoordsBuffer = GLLoadableBuffer(directByteBuffer3)
-        Debug.Printf("Mesh drawable created,  index count %d, vertex count %d", Int.valueOf(this.IndexCount), Int.valueOf(this.VertexCount));
+        Debug.Printf("Mesh drawable created,  index count %d, vertex count %d", Int.valueOf(this.IndexCount), Int.valueOf(this.VertexCount))
         if (this.isRiggedMesh) {
             this.meshData = meshData2
         } else {
@@ -317,7 +317,7 @@ class DrawableGeometry : GLCleanable {
             r13.TexCoordsBuffer = r0
             return
         */
-        throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.render.drawable.DrawableGeometry.<init>(com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams, com.lumiyaviewer.lumiya.openjpeg.OpenJPEG):Unit");
+        throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.render.drawable.DrawableGeometry.<init>(com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams, com.lumiyaviewer.lumiya.openjpeg.OpenJPEG):Unit")
     }
 
     /* access modifiers changed from: package-private */

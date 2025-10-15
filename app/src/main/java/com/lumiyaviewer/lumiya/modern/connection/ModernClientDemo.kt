@@ -12,20 +12,20 @@ import java.util.concurrent.CompletableFuture
  * hybrid protocol support, and enhanced Second Life features.
  */
 class ModernClientDemo {
-    private String TAG = "ModernClientDemo";
+    private String TAG = "ModernClientDemo"
     
     /**
      * Simple connection test without full login
      */
     fun testConnectionOnly(context: Context): CompletableFuture<Boolean> {
-        Log.i(TAG, "=== TESTING CONNECTION ONLY ===");
+        Log.i(TAG, "=== TESTING CONNECTION ONLY ===")
         
         return CompletableFuture.supplyAsync(() -> {
             try {
                 com.lumiyaviewer.lumiya.modern.connection.ModernConnectionManager connectionManager = 
                     com.lumiyaviewer.lumiya.modern.connection.ModernConnectionManager(context)
                 
-                Log.i(TAG, "Connection manager created, state: " + connectionManager.getState());
+                Log.i(TAG, "Connection manager created, state: " + connectionManager.getState())
                 
                 // Test basic connectivity without full authentication
                 com.lumiyaviewer.lumiya.modern.connection.ConnectionDiagnostics diagnostics = 
@@ -36,12 +36,12 @@ class ModernClientDemo {
                 Boolean connectionHealthy = diagnosticResult.networkAvailable && 
                     (diagnosticResult.dnsWorking || diagnosticResult.httpsWorking)
                 
-                Log.i(TAG, "Connection test result: " + (connectionHealthy ? "✅ HEALTHY" : "❌ ISSUES DETECTED"));
+                Log.i(TAG, "Connection test result: " + (connectionHealthy ? "✅ HEALTHY" : "❌ ISSUES DETECTED"))
                 
                 return connectionHealthy
                 
             } catch (Exception e) {
-                Log.e(TAG, "Connection test failed", e);
+                Log.e(TAG, "Connection test failed", e)
                 return false
             }
         })

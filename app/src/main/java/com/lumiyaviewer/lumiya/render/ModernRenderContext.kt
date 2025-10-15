@@ -12,7 +12,7 @@ import com.lumiyaviewer.lumiya.modern.graphics.ModernRenderPipeline
  * Implements the modernization plan from Graphics_Engine_Modernization_Plan.md
  */
 class ModernRenderContext {
-    private String TAG = "ModernRenderContext";
+    private String TAG = "ModernRenderContext"
     
     // OpenGL ES version requirements
     private Int MIN_GL_VERSION = 30; // ES 3.0 minimum
@@ -45,7 +45,7 @@ class ModernRenderContext {
     private Int[] viewport = Int[4]
     
     constructor() {
-        Log.i(TAG, "Initializing Modern Render Context for OpenGL ES 3.0+");
+        Log.i(TAG, "Initializing Modern Render Context for OpenGL ES 3.0+")
         
         // Initialize matrices to identity
         Matrix.setIdentityM(modelMatrix, 0)
@@ -64,7 +64,7 @@ class ModernRenderContext {
     fun initialize(): Boolean {
         // Verify OpenGL ES 3.0+ support - this is now mandatory
         if (!checkOpenGLVersion()) {
-            Log.e(TAG, "OpenGL ES 3.0+ required but not available - device not supported");
+            Log.e(TAG, "OpenGL ES 3.0+ required but not available - device not supported")
             return false
         }
         
@@ -74,14 +74,14 @@ class ModernRenderContext {
         // Initialize modern rendering pipeline
         Boolean success = renderPipeline.initialize()
         if (!success) {
-            Log.e(TAG, "Failed to initialize modern rendering pipeline");
+            Log.e(TAG, "Failed to initialize modern rendering pipeline")
             return false
         }
         
         // Enable modern OpenGL features
         enableModernFeatures()
         
-        Log.i(TAG, "Modern render context initialized successfully");
+        Log.i(TAG, "Modern render context initialized successfully")
         logCapabilities()
         return true
     }
@@ -91,14 +91,14 @@ class ModernRenderContext {
      */
     private fun checkOpenGLVersion(): Boolean {
         String version = GLES30.glGetString(GLES30.GL_VERSION)
-        Log.i(TAG, "OpenGL ES version: " + version);
+        Log.i(TAG, "OpenGL ES version: " + version)
         
         if (version == null) {
             return false
         }
         
         // Require ES 3.0 minimum - no fallback to legacy versions
-        return version.contains("OpenGL ES 3.") || version.contains("OpenGL ES 3.");
+        return version.contains("OpenGL ES 3.") || version.contains("OpenGL ES 3.")
     }
     
     /**
@@ -111,14 +111,14 @@ class ModernRenderContext {
         // Check for compute shader support (ES 3.1+)
         if (version.contains("OpenGL ES 3.1") || version.contains("OpenGL ES 3.2")) {
             hasComputeShaders = true
-            Log.i(TAG, "Compute shaders supported");
+            Log.i(TAG, "Compute shaders supported")
         }
         
         // Check for tessellation support (ES 3.2+)
         if (version.contains("OpenGL ES 3.2")) {
             hasTessellation = true
             hasGeometryShaders = true
-            Log.i(TAG, "Tessellation and geometry shaders supported");
+            Log.i(TAG, "Tessellation and geometry shaders supported")
         }
     }
     
@@ -193,7 +193,7 @@ class ModernRenderContext {
         GLES30.glFlush()
         
         // Check for OpenGL errors
-        checkGLError("endFrame");
+        checkGLError("endFrame")
     }
     
     /**
@@ -202,12 +202,12 @@ class ModernRenderContext {
     fun pushMatrix(): Unit {
         // Store current model matrix state
         // In modern OpenGL, we manage matrix stack manually
-        Log.d(TAG, "Matrix push - managed in application code");
+        Log.d(TAG, "Matrix push - managed in application code")
     }
     
     fun popMatrix(): Unit {
         // Restore previous model matrix state  
-        Log.d(TAG, "Matrix pop - managed in application code");
+        Log.d(TAG, "Matrix pop - managed in application code")
     }
     
     fun setModelMatrix(matrix: FloatArray): Unit {
@@ -277,7 +277,7 @@ class ModernRenderContext {
     fun checkGLError(operation: String): Unit {
         Int error = GLES30.glGetError()
         if (error != GLES30.GL_NO_ERROR) {
-            Log.e(TAG, "OpenGL error in " + operation + ": " + error);
+            Log.e(TAG, "OpenGL error in " + operation + ": " + error)
         }
     }
     
@@ -285,13 +285,13 @@ class ModernRenderContext {
      * Log detected capabilities
      */
     private fun logCapabilities(): Unit {
-        Log.i(TAG, "=== Modern Render Context Capabilities ===");
-        Log.i(TAG, "OpenGL ES 3.0 baseline: YES (mandatory)");
-        Log.i(TAG, "Compute shaders (ES 3.1+): " + hasComputeShaders);
-        Log.i(TAG, "Tessellation (ES 3.2+): " + hasTessellation);  
-        Log.i(TAG, "Geometry shaders (ES 3.2+): " + hasGeometryShaders);
-        Log.i(TAG, "Modern PBR pipeline: " + renderPipeline.isModernPipelineAvailable());
-        Log.i(TAG, "==========================================");
+        Log.i(TAG, "=== Modern Render Context Capabilities ===")
+        Log.i(TAG, "OpenGL ES 3.0 baseline: YES (mandatory)")
+        Log.i(TAG, "Compute shaders (ES 3.1+): " + hasComputeShaders)
+        Log.i(TAG, "Tessellation (ES 3.2+): " + hasTessellation)
+        Log.i(TAG, "Geometry shaders (ES 3.2+): " + hasGeometryShaders)
+        Log.i(TAG, "Modern PBR pipeline: " + renderPipeline.isModernPipelineAvailable())
+        Log.i(TAG, "==========================================")
     }
     
     /**
@@ -307,7 +307,7 @@ class ModernRenderContext {
      * Cleanup resources
      */
     fun cleanup(): Unit {
-        Log.i(TAG, "Cleaning up Modern Render Context");
+        Log.i(TAG, "Cleaning up Modern Render Context")
         renderPipeline.cleanup()
     }
 }

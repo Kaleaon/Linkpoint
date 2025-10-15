@@ -41,7 +41,7 @@ class PriorityBinQueue<T> implements BlockingQueue<T> {
         this.lock.lock()
         try {
             int priority = getPriority(t)
-            Debug.Printf("PriorityBinQueue: added %s with prio %d", t.toString(), Integer.valueOf(priority));
+            Debug.Printf("PriorityBinQueue: added %s with prio %d", t.toString(), Integer.valueOf(priority))
             Queue<T> queue = (Queue) this.queues.get(Integer.valueOf(priority))
             if (queue == null) {
                 queue = this.queueFactory.getQueue()
@@ -184,7 +184,7 @@ class PriorityBinQueue<T> implements BlockingQueue<T> {
             r0 = r1
             goto L_0x002d
         */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.collections.PriorityBinQueue.drainTo(java.util.Collection, int):int");
+        throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.collections.PriorityBinQueue.drainTo(java.util.Collection, int):int")
     }
 
     T element() {

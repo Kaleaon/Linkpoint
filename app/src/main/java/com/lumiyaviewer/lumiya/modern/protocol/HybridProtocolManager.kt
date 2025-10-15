@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
  * Supports UDP (legacy), HTTP/2 (CAPS), and WebSocket (real-time events) transports.
  */
 class HybridProtocolManager {
-    private String TAG = "HybridProtocol";
+    private String TAG = "HybridProtocol"
     
     // Transport types
     enum class class Transport {
@@ -50,17 +50,17 @@ class HybridProtocolManager {
             .build()
             
         // WebSocket manager for real-time events
-        this.webSocketManager = new WebSocketManager()
+        this.webSocketManager = WebSocketManager()
         
         // Legacy UDP manager for compatibility
-        this.udpManager = new LegacyUDPManager()
+        this.udpManager = LegacyUDPManager()
         
         // Protocol router to determine optimal transport
-        this.router = new ProtocolRouter()
+        this.router = ProtocolRouter()
         
         // Executor for async operations
         this.executor = Executors.newCachedThreadPool(r -> {
-            Thread t = new Thread(r, "HybridProtocol-" + r.hashCode());
+            Thread t = Thread(r, "HybridProtocol-" + r.hashCode())
             t.setDaemon(true)
             return t
         })
@@ -70,20 +70,20 @@ class HybridProtocolManager {
      * Initialize the hybrid protocol system with grid endpoints
      */
     CompletableFuture<Boolean> initializeAsync(String capsURL, String websocketURL) {
-        Log.i(TAG, "Initializing hybrid protocol system");
+        Log.i(TAG, "Initializing hybrid protocol system")
         
         return CompletableFuture.supplyAsync(() -> {
             try {
                 // Initialize WebSocket connection for real-time events
                 boolean wsConnected = webSocketManager.connectAsync(websocketURL).get(15, TimeUnit.SECONDS)
                 if (!wsConnected) {
-                    Log.w(TAG, "WebSocket connection failed, real-time features may be limited");
+                    Log.w(TAG, "WebSocket connection failed, real-time features may be limited")
                 }
                 
                 // Test HTTP/2 CAPS connectivity
                 boolean capsWorking = testCapsConnectivity(capsURL)
                 if (!capsWorking) {
-                    Log.w(TAG, "CAPS HTTP/2 connection issues detected");
+                    Log.w(TAG, "CAPS HTTP/2 connection issues detected")
                 }
                 
                 // Initialize UDP legacy support
@@ -92,18 +92,18 @@ class HybridProtocolManager {
                 isConnected = wsConnected || capsWorking || udpInitialized
                 
                 if (isConnected) {
-                    Log.i(TAG, "Hybrid protocol initialized successfully");
-                    Log.i(TAG, "  WebSocket: " + (wsConnected ? "✅" : "❌"));
-                    Log.i(TAG, "  HTTP/2 CAPS: " + (capsWorking ? "✅" : "❌"));
-                    Log.i(TAG, "  UDP Legacy: " + (udpInitialized ? "✅" : "❌"));
+                    Log.i(TAG, "Hybrid protocol initialized successfully")
+                    Log.i(TAG, "  WebSocket: " + (wsConnected ? "✅" : "❌"))
+                    Log.i(TAG, "  HTTP/2 CAPS: " + (capsWorking ? "✅" : "❌"))
+                    Log.i(TAG, "  UDP Legacy: " + (udpInitialized ? "✅" : "❌"))
                 } else {
-                    Log.e(TAG, "Failed to initialize any protocol transport");
+                    Log.e(TAG, "Failed to initialize any protocol transport")
                 }
                 
                 return isConnected
                 
             } catch (Exception e) {
-                Log.e(TAG, "Protocol initialization failed", e);
+                Log.e(TAG, "Protocol initialization failed", e)
                 return false
             }
         }, executor)
@@ -120,7 +120,7 @@ class HybridProtocolManager {
         // Determine optimal transport for this message
         Transport transport = router.getOptimalTransport(message)
         
-        Log.d(TAG, "Sending message via " + transport + ": " + message.getClass().getSimpleName());
+        Log.d(TAG, "Sending message via " + transport + ": " + message.getClass().getSimpleName())
         
         switch (transport) {
             case HTTP2_CAPS:
@@ -130,7 +130,7 @@ class HybridProtocolManager {
             case UDP_LEGACY:
                 return sendViaUDP(message)
             default:
-                Log.e(TAG, "Unknown transport type: " + transport);
+                Log.e(TAG, "Unknown transport type: " + transport)
                 return CompletableFuture.completedFuture(false)
         }
     }
@@ -140,7 +140,7 @@ class HybridProtocolManager {
             try {
                 // Convert SL message to HTTP/2 request
                 byte[] messageData = serializeMessage(message)
-                RequestBody body = RequestBody.create(messageData, MediaType.get("application/octet-stream"));
+                RequestBody body = RequestBody.create(messageData, MediaType.get("application/octet-stream"))
                 
                 Request request = new Request.Builder()
                     .url("https://example.com/caps/" + message.getClass().getSimpleName()) // This would be actual CAPS URL
@@ -151,12 +151,12 @@ class HybridProtocolManager {
                 
                 try (Response response = http2Client.newCall(request).execute()) {
                     boolean success = response.isSuccessful()
-                    Log.d(TAG, "HTTP/2 message result: " + response.code());
+                    Log.d(TAG, "HTTP/2 message result: " + response.code())
                     return success
                 }
                 
             } catch (Exception e) {
-                Log.e(TAG, "HTTP/2 message sending failed", e);
+                Log.e(TAG, "HTTP/2 message sending failed", e)
                 return false
             }
         }, executor)
@@ -181,7 +181,7 @@ class HybridProtocolManager {
                 return response.isSuccessful() || response.code() == 405; // 405 Method Not Allowed is OK
             }
         } catch (Exception e) {
-            Log.w(TAG, "CAPS connectivity test failed", e);
+            Log.w(TAG, "CAPS connectivity test failed", e)
             return false
         }
     }
@@ -192,8 +192,8 @@ class HybridProtocolManager {
         try {
             return message.serialize()
         } catch (Exception e) {
-            Log.e(TAG, "Message serialization failed", e);
-            return new byte[0]
+            Log.e(TAG, "Message serialization failed", e)
+            return ByteArray(0)
         }
     }
     
@@ -215,34 +215,34 @@ class HybridProtocolManager {
                         .url(websocketURL)
                         .build()
                     
-                    webSocket = client.newWebSocket(request, new WebSocketListener() {
+                    webSocket = client.newWebSocket(request, WebSocketListener() {
                         @Override
                         void onOpen(WebSocket webSocket, Response response) {
-                            Log.i(TAG, "WebSocket connected");
+                            Log.i(TAG, "WebSocket connected")
                             connected = true
                         }
                         
                         @Override
                         void onMessage(WebSocket webSocket, String text) {
-                            Log.d(TAG, "WebSocket text message received: " + text);
+                            Log.d(TAG, "WebSocket text message received: " + text)
                             // Handle incoming text messages
                         }
                         
                         @Override
                         void onMessage(WebSocket webSocket, ByteString bytes) {
-                            Log.d(TAG, "WebSocket binary message received: " + bytes.size() + " bytes");
+                            Log.d(TAG, "WebSocket binary message received: " + bytes.size() + " bytes")
                             // Handle incoming binary messages
                         }
                         
                         @Override
                         void onFailure(WebSocket webSocket, Throwable t, Response response) {
-                            Log.e(TAG, "WebSocket connection failed", t);
+                            Log.e(TAG, "WebSocket connection failed", t)
                             connected = false
                         }
                         
                         @Override
                         void onClosed(WebSocket webSocket, int code, String reason) {
-                            Log.i(TAG, "WebSocket closed: " + code + " " + reason);
+                            Log.i(TAG, "WebSocket closed: " + code + " " + reason)
                             connected = false
                         }
                     })
@@ -252,7 +252,7 @@ class HybridProtocolManager {
                     return connected
                     
                 } catch (Exception e) {
-                    Log.e(TAG, "WebSocket connection failed", e);
+                    Log.e(TAG, "WebSocket connection failed", e)
                     return false
                 }
             })
@@ -267,10 +267,10 @@ class HybridProtocolManager {
                 try {
                     byte[] messageData = message.serialize()
                     boolean sent = webSocket.send(ByteString.of(messageData))
-                    Log.d(TAG, "WebSocket message sent: " + sent);
+                    Log.d(TAG, "WebSocket message sent: " + sent)
                     return sent
                 } catch (Exception e) {
-                    Log.e(TAG, "WebSocket message sending failed", e);
+                    Log.e(TAG, "WebSocket message sending failed", e)
                     return false
                 }
             })
@@ -283,7 +283,7 @@ class HybridProtocolManager {
     private class LegacyUDPManager {
         boolean initialize() {
             // Initialize UDP socket for legacy protocol
-            Log.d(TAG, "Legacy UDP manager initialized");
+            Log.d(TAG, "Legacy UDP manager initialized")
             return true; // Simplified for now
         }
         
@@ -291,10 +291,10 @@ class HybridProtocolManager {
             return CompletableFuture.supplyAsync(() -> {
                 try {
                     // Send via existing UDP implementation
-                    Log.d(TAG, "Sending message via legacy UDP");
+                    Log.d(TAG, "Sending message via legacy UDP")
                     return true; // Simplified for now
                 } catch (Exception e) {
-                    Log.e(TAG, "UDP message sending failed", e);
+                    Log.e(TAG, "UDP message sending failed", e)
                     return false
                 }
             })
@@ -323,12 +323,12 @@ class HybridProtocolManager {
      * Shutdown the protocol manager
      */
     void shutdown() {
-        Log.i(TAG, "Shutting down hybrid protocol manager");
+        Log.i(TAG, "Shutting down hybrid protocol manager")
         
         isConnected = false
         
         if (webSocketManager.webSocket != null) {
-            webSocketManager.webSocket.close(1000, "Shutdown");
+            webSocketManager.webSocket.close(1000, "Shutdown")
         }
         
         executor.shutdown()

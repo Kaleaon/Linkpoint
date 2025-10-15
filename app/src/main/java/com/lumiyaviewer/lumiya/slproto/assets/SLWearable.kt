@@ -32,12 +32,12 @@ class SLWearable implements Subscription.OnData<AssetData>, Subscription.OnError
         this.itemID = uuid
         this.assetID = uuid2
         this.statusChangeListener = onWearableStatusChangeListener
-        Debug.Printf("Wearable: subscribing for wearable %s", uuid2);
+        Debug.Printf("Wearable: subscribing for wearable %s", uuid2)
         this.assetSubscription = userManager.getAssetResponseCacher().getPool().subscribe(AssetKey.createAssetKey((UUID) null, (UUID) null, uuid2, sLWearableType.getAssetType().getTypeCode()), executor, this, this)
     }
 
     void dispose() {
-        Debug.Printf("Wearable: unsubscribing for wearable %s", this.assetID);
+        Debug.Printf("Wearable: unsubscribing for wearable %s", this.assetID)
         this.assetSubscription.unsubscribe()
     }
 
@@ -54,7 +54,7 @@ class SLWearable implements Subscription.OnData<AssetData>, Subscription.OnError
             return this.inventoryName
         }
         SLWearableData sLWearableData = this.wearableData
-        return sLWearableData != null ? sLWearableData.name : this.isFailed ? "(Failed to load)" : "(loading)";
+        return sLWearableData != null ? sLWearableData.name : this.isFailed ? "(Failed to load)" : "(loading)"
     }
 
     @Nullable
@@ -65,15 +65,15 @@ class SLWearable implements Subscription.OnData<AssetData>, Subscription.OnError
     void onData(AssetData assetData) {
         if (assetData != null) {
             if (assetData.getStatus() != 1 || assetData.getData() == null) {
-                Debug.Printf("Wearable: asset transfer failed for asset %s", this.assetID);
+                Debug.Printf("Wearable: asset transfer failed for asset %s", this.assetID)
                 this.isFailed = true
             } else {
                 try {
-                    this.wearableData = new SLWearableData(assetData.getData())
-                    Debug.Printf("Wearable: retrieved wearable data for asset %s", this.assetID);
+                    this.wearableData = SLWearableData(assetData.getData())
+                    Debug.Printf("Wearable: retrieved wearable data for asset %s", this.assetID)
                     this.isFailed = false
                 } catch (SLWearableData.WearableFormatException e) {
-                    Debug.Printf("Wearable: failed to parse wearable data for asset %s", this.assetID);
+                    Debug.Printf("Wearable: failed to parse wearable data for asset %s", this.assetID)
                     this.isFailed = true
                 }
             }
@@ -84,7 +84,7 @@ class SLWearable implements Subscription.OnData<AssetData>, Subscription.OnError
     }
 
     void onError(Throwable th) {
-        Debug.Printf("Wearable: got error for asset %s", this.assetID);
+        Debug.Printf("Wearable: got error for asset %s", this.assetID)
         this.isFailed = true
         if (this.statusChangeListener != null) {
             this.statusChangeListener.onWearableStatusChanged(this)

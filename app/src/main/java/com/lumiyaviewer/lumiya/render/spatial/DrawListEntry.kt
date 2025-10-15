@@ -7,7 +7,7 @@ import javax.annotation.Nonnull
 
 abstract class DrawListEntry implements InlineListEntry<DrawListEntry> {
     @Nonnull
-    float[] boundingBox = new float[6]
+    float[] boundingBox = FloatArray(6)
     private volatile InlineList<DrawListEntry> list
     private var next: DrawListEntry? = null
     private var prev: DrawListEntry? = null

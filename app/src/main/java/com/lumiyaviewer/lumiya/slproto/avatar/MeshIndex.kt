@@ -9,7 +9,7 @@ enum class MeshIndex {
     MESH_ID_EYEBALL_LEFT,
     MESH_ID_EYEBALL_RIGHT,
     MESH_ID_SKIRT,
-    ;
+    
 
     companion object {
         @JvmField

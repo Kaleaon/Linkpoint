@@ -78,16 +78,16 @@ abstract class DriveConnectibleResource {
              */
             @Override
             void onSyncCompleted() {
-                Debug.Printf("LumiyaCloud: '%s': sync completed", this.this$0.resourceName);
+                Debug.Printf("LumiyaCloud: '%s': sync completed", this.this$0.resourceName)
                 if (this.this$0.needInvalidate && this.this$0.needRecreate) {
-                    Debug.Printf("LumiyaCloud: '%s': re-creating because requested", this.this$0.resourceName);
+                    Debug.Printf("LumiyaCloud: '%s': re-creating because requested", this.this$0.resourceName)
                     DriveConnectibleResource.access$002(this.this$0, false)
                     DriveConnectibleResource.access$102(this.this$0, false)
                     this.this$0.startCreatingResource()
                     return
                 }
                 boolean bl = false
-                Debug.Printf("LumiyaCloud: '%s': key %s, needInvalidate %b", this.this$0.resourceName, this.this$0.preferencesKey, this.this$0.needInvalidate);
+                Debug.Printf("LumiyaCloud: '%s': key %s, needInvalidate %b", this.this$0.resourceName, this.this$0.preferencesKey, this.this$0.needInvalidate)
                 boolean bl2 = bl
                 if (this.this$0.preferencesKey != null) {
                     bl2 = bl
@@ -98,7 +98,7 @@ abstract class DriveConnectibleResource {
                             String string2 = sharedPreferences.getString(this.this$0.preferencesKey, null)
                             bl2 = bl
                             if (string2 != null) {
-                                Debug.Printf("Resource '%s': has stored DriveId: %s", this.this$0.resourceName, string2);
+                                Debug.Printf("Resource '%s': has stored DriveId: %s", this.this$0.resourceName, string2)
                                 try {
                                     DriveId.decodeFromString(string2).asDriveFolder().getMetadata(this.this$0.googleApiClient).setResultCallback(this.this$0.onFolderMetadata)
                                     bl2 = true
@@ -114,16 +114,16 @@ abstract class DriveConnectibleResource {
                 DriveConnectibleResource.access$002(this.this$0, false)
                 if (bl2) return
                 if (this.this$0.parentFolder != null) {
-                    Debug.Printf("Resource '%s': need parent folder to search in", this.this$0.resourceName);
+                    Debug.Printf("Resource '%s': need parent folder to search in", this.this$0.resourceName)
                     this.this$0.parentFolder.getResource(this.this$0.onParentFolderReadyForSearch)
                     return
                 }
-                Debug.Printf("LumiyaCloud: '%s': searching root folder", this.this$0.resourceName);
+                Debug.Printf("LumiyaCloud: '%s': searching root folder", this.this$0.resourceName)
                 DriveFolder driveFolder = Drive.DriveApi.getRootFolder(this.this$0.googleApiClient)
                 this.this$0.startSearching(driveFolder)
             }
         }
-        this.onParentFolderReadyForSearch = new OnResourceReadyListener(this){
+        this.onParentFolderReadyForSearch = OnResourceReadyListener(this){
             DriveConnectibleResource this$0
             {
                 this.this$0 = driveConnectibleResource
@@ -155,7 +155,7 @@ abstract class DriveConnectibleResource {
                 MetadataBuffer metadataBuffer
                 block2: {
                     metadataBuffer = object.getMetadataBuffer()
-                    Debug.Printf("Resource '%s': got %d results.", this.this$0.resourceName, metadataBuffer.getCount());
+                    Debug.Printf("Resource '%s': got %d results.", this.this$0.resourceName, metadataBuffer.getCount())
                     boolean bl2 = false
                     Iterator iterator = metadataBuffer.iterator()
                     do {
@@ -163,12 +163,12 @@ abstract class DriveConnectibleResource {
                         if (!iterator.hasNext()) break block2
                     } while (!this.this$0.isMetadataOk((Metadata)(object = (Metadata)iterator.next())))
                     bl = true
-                    Debug.Printf("Resource '%s': found good one.", this.this$0.resourceName);
+                    Debug.Printf("Resource '%s': found good one.", this.this$0.resourceName)
                     this.this$0.invokeListeners(((Metadata)object).getDriveId().asDriveResource(), null)
                 }
                 metadataBuffer.release()
                 if (!bl) {
-                    Debug.Printf("Resource '%s': not found good one.", this.this$0.resourceName);
+                    Debug.Printf("Resource '%s': not found good one.", this.this$0.resourceName)
                     this.this$0.startCreatingResource()
                 }
             }
@@ -186,14 +186,14 @@ abstract class DriveConnectibleResource {
             @Override
             void onResult(@Nonnull DriveResource.MetadataResult object) {
                 Status status = object.getStatus()
-                Debug.Printf("Resource '%s': metadata received, success %b", this.this$0.resourceName, status.isSuccess());
+                Debug.Printf("Resource '%s': metadata received, success %b", this.this$0.resourceName, status.isSuccess())
                 if (status.isSuccess()) {
                     if (!this.this$0.isMetadataOk(object.getMetadata())) {
-                        Debug.Printf("Resource '%s': metadata is not ok.", this.this$0.resourceName);
+                        Debug.Printf("Resource '%s': metadata is not ok.", this.this$0.resourceName)
                         this.this$0.startCreatingResource()
                         return
                     }
-                    Debug.Printf("Resource '%s': metadata is ok.", this.this$0.resourceName);
+                    Debug.Printf("Resource '%s': metadata is ok.", this.this$0.resourceName)
                     this.this$0.invokeListeners(object.getMetadata().getDriveId().asDriveResource(), null)
                     return
                 }
@@ -213,11 +213,11 @@ abstract class DriveConnectibleResource {
                     }))
                     return
                 }
-                Debug.Printf("Resource '%s': no metadata, resource will have to be created.", this.this$0.resourceName);
+                Debug.Printf("Resource '%s': no metadata, resource will have to be created.", this.this$0.resourceName)
                 this.this$0.startCreatingResource()
             }
         }
-        this.onParentFolderReady = new OnResourceReadyListener(this){
+        this.onParentFolderReady = OnResourceReadyListener(this){
             DriveConnectibleResource this$0
             {
                 this.this$0 = driveConnectibleResource
@@ -229,7 +229,7 @@ abstract class DriveConnectibleResource {
              */
             @Override
             void onResourceReady(@Nullable DriveResource driveResource, @Nullable String string2) {
-                Debug.Printf("Resource '%s': parent folder ready: %s", this.this$0.resourceName, driveResource);
+                Debug.Printf("Resource '%s': parent folder ready: %s", this.this$0.resourceName, driveResource)
                 if (driveResource != null && driveResource instanceof DriveFolder) {
                     driveResource = (DriveFolder)driveResource
                     this.this$0.createResource((DriveFolder)driveResource)
@@ -260,7 +260,7 @@ abstract class DriveConnectibleResource {
      * Enabled aggressive block sorting
      */
     private void invokeListeners(DriveResource driveResource, String string2) {
-        Debug.Printf("Resource '%s': calling listeners, resource %s, message %s.", this.resourceName, driveResource, string2);
+        Debug.Printf("Resource '%s': calling listeners, resource %s, message %s.", this.resourceName, driveResource, string2)
         if (driveResource != null) {
             this.requestedParentInvalidate = false
         }
@@ -277,7 +277,7 @@ abstract class DriveConnectibleResource {
     }
 
     private void startRequestingResource() {
-        Debug.Printf("Resource '%s': starting work.", this.resourceName);
+        Debug.Printf("Resource '%s': starting work.", this.resourceName)
         this.state = State.Working
         if (this.needInvalidate) {
             this.synchronizer.invalidateSync()
@@ -286,7 +286,7 @@ abstract class DriveConnectibleResource {
     }
 
     private void startSearching(DriveFolder driveFolder) {
-        Debug.Printf("Resource '%s': starting to search", this.resourceName);
+        Debug.Printf("Resource '%s': starting to search", this.resourceName)
         Query query = new Query.Builder().addFilter(Filters.and(Filters.eq(SearchableField.TITLE, this.resourceName), Filters.eq(SearchableField.TRASHED, false), Filters.eq(SearchableField.MIME_TYPE, this.getMimeType()))).build()
         driveFolder.queryChildren(this.googleApiClient, query).setResultCallback(this.onQueryResults)
     }
@@ -300,7 +300,7 @@ abstract class DriveConnectibleResource {
      * Enabled aggressive block sorting
      */
     void getResource(OnResourceReadyListener onResourceReadyListener) {
-        Debug.Printf("Asked for resource '%s', state %s", new Object[]{this.resourceName, this.state});
+        Debug.Printf("Asked for resource '%s', state %s", new Object[]{this.resourceName, this.state})
         if (this.driveResource != null) {
             if (onResourceReadyListener == null) return
             onResourceReadyListener.onResourceReady(this.driveResource, null)
@@ -321,7 +321,7 @@ abstract class DriveConnectibleResource {
     protected abstract fun isMetadataOk(var1: Metadata): Boolean
 
     void onResourceCreated(DriveResource driveResource) {
-        Debug.Printf("Resource '%s': created.", this.resourceName);
+        Debug.Printf("Resource '%s': created.", this.resourceName)
         if (this.preferencesKey != null) {
             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences((Context)this.context).edit()
             editor.putString(this.preferencesKey, driveResource.getDriveId().encodeToString())
@@ -335,22 +335,22 @@ abstract class DriveConnectibleResource {
      * Lifted jumps to return sites
      */
     void onResourceCreationFailed(String string2) {
-        Debug.Printf("Resource '%s': creation failed, requestedParentInvalidate %b.", this.resourceName, this.requestedParentInvalidate);
+        Debug.Printf("Resource '%s': creation failed, requestedParentInvalidate %b.", this.resourceName, this.requestedParentInvalidate)
         if (!this.requestedParentInvalidate) {
             this.requestedParentInvalidate = true
-            Debug.Printf("Resource '%s': requesting invalidate.", this.resourceName);
+            Debug.Printf("Resource '%s': requesting invalidate.", this.resourceName)
             this.requestInvalidate(false, true)
             this.startRequestingResource()
             return
         }
-        Debug.Printf("Resource '%s': creation failed completely.", this.resourceName);
+        Debug.Printf("Resource '%s': creation failed completely.", this.resourceName)
         this.invokeListeners(null, string2)
         this.state = State.Error
         this.errorMessage = string2
     }
 
     void requestInvalidate(boolean bl, boolean bl2) {
-        Debug.Printf("LumiyaCloud: invalidate requested for '%s', recreate %b, parents %b", this.resourceName, bl, bl2);
+        Debug.Printf("LumiyaCloud: invalidate requested for '%s', recreate %b, parents %b", this.resourceName, bl, bl2)
         this.needInvalidate = true
         this.needRecreate |= bl
         if (this.state == State.Error) {
@@ -370,11 +370,11 @@ abstract class DriveConnectibleResource {
      */
     void startCreatingResource() {
         if (this.parentFolder != null) {
-            Debug.Printf("Resource '%s': asking for parent folder", this.resourceName);
+            Debug.Printf("Resource '%s': asking for parent folder", this.resourceName)
             this.parentFolder.getResource(this.onParentFolderReady)
             return
         }
-        Debug.Printf("Resource '%s': creating resource in root folder.", this.resourceName);
+        Debug.Printf("Resource '%s': creating resource in root folder.", this.resourceName)
         this.createResource(Drive.DriveApi.getRootFolder(this.googleApiClient))
     }
 

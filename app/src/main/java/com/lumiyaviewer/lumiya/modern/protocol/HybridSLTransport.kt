@@ -13,18 +13,18 @@ import java.util.HashMap
  * Based on Second Life Integration Guide modernization plans
  */
 class HybridSLTransport {
-    private String TAG = "HybridSLTransport";
+    private String TAG = "HybridSLTransport"
     
     private HTTP2CapsClient capsClient;        // Modern CAPS using HTTP/2
     private WebSocketEventClient eventClient;  // Real-time events
     private MessageRouter router
     
     HybridSLTransport() {
-        this.capsClient = new HTTP2CapsClient()
-        this.eventClient = new WebSocketEventClient()
-        this.router = new MessageRouter()
+        this.capsClient = HTTP2CapsClient()
+        this.eventClient = WebSocketEventClient()
+        this.router = MessageRouter()
         
-        Log.i(TAG, "Hybrid transport layer initialized");
+        Log.i(TAG, "Hybrid transport layer initialized")
     }
     
     /**
@@ -33,7 +33,7 @@ class HybridSLTransport {
     void setAuthToken(String token) {
         capsClient.setAuthToken(token)
         eventClient.setAuthToken(token)
-        Log.d(TAG, "Auth token configured for all transports");
+        Log.d(TAG, "Auth token configured for all transports")
     }
     
     /**
@@ -43,21 +43,21 @@ class HybridSLTransport {
         try {
             // Configure HTTP/2 CAPS client
             if (seedCapability != null) {
-                Log.i(TAG, "Configuring CAPS client with seed capability");
+                Log.i(TAG, "Configuring CAPS client with seed capability")
                 Map<String, String> capsUrls = parseSeedCapability(seedCapability)
                 capsClient.configureCapabilities(capsUrls)
             }
             
             // Configure WebSocket event client
             if (eventQueueUrl != null) {
-                Log.i(TAG, "Connecting to event queue: " + eventQueueUrl);
+                Log.i(TAG, "Connecting to event queue: " + eventQueueUrl)
                 eventClient.connect(eventQueueUrl)
             }
             
-            Log.i(TAG, "Hybrid transport initialized successfully");
+            Log.i(TAG, "Hybrid transport initialized successfully")
             
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize hybrid transport", e);
+            Log.e(TAG, "Failed to initialize hybrid transport", e)
         }
     }
     
@@ -67,7 +67,7 @@ class HybridSLTransport {
     CompletableFuture<SLResponse> sendMessage(ModernMessage message) {
         TransportRoute route = router.selectOptimalRoute(message)
         
-        Log.d(TAG, "Routing message via " + route.getTransport() + ": " + message.getClass().getSimpleName());
+        Log.d(TAG, "Routing message via " + route.getTransport() + ": " + message.getClass().getSimpleName())
         
         switch (route.getTransport()) {
             case HTTP2_CAPS:
@@ -82,11 +82,11 @@ class HybridSLTransport {
             case UDP_LEGACY:
                 // Legacy UDP not available in modern-only build
                 return CompletableFuture.failedFuture(
-                    new UnsupportedOperationException("UDP transport not available"));
+                    UnsupportedOperationException("UDP transport not available"))
                     
             default:
                 return CompletableFuture.failedFuture(
-                    new UnsupportedOperationException("Unknown transport: " + route));
+                    UnsupportedOperationException("Unknown transport: " + route))
         }
     }
     
@@ -98,26 +98,26 @@ class HybridSLTransport {
         
         try {
             if (!eventClient.isConnected()) {
-                future.completeExceptionally(new IllegalStateException("WebSocket not connected"));
+                future.completeExceptionally(IllegalStateException("WebSocket not connected"))
                 return future
             }
             
             // Convert message to WebSocket format
             String jsonMessage = message.toJSON()
-            Log.d(TAG, "Sending WebSocket message: " + jsonMessage.substring(0, Math.min(100, jsonMessage.length())));
+            Log.d(TAG, "Sending WebSocket message: " + jsonMessage.substring(0, Math.min(100, jsonMessage.length())))
             
             // Send via WebSocket (OkHttp WebSocket send returns boolean)
             boolean sent = eventClient.sendRawMessage(jsonMessage)
             
             if (sent) {
                 // Simulate immediate acknowledgment for real-time messages
-                future.complete(new SLResponse("websocket_ack", "Message sent successfully"));
+                future.complete(SLResponse("websocket_ack", "Message sent successfully"))
             } else {
-                future.completeExceptionally(new RuntimeException("Failed to send WebSocket message"));
+                future.completeExceptionally(RuntimeException("Failed to send WebSocket message"))
             }
             
         } catch (Exception e) {
-            Log.e(TAG, "Error sending WebSocket message", e);
+            Log.e(TAG, "Error sending WebSocket message", e)
             future.completeExceptionally(e)
         }
         
@@ -154,13 +154,13 @@ class HybridSLTransport {
                 if (matcher.find()) {
                     String capUrl = matcher.group(1).trim()
                     capabilities.put(capName, capUrl)
-                    Log.d(TAG, "Parsed capability: " + capName + " -> " + capUrl);
+                    Log.d(TAG, "Parsed capability: " + capName + " -> " + capUrl)
                 }
             }
             
             // Also try simplified key:value parsing for JSON-like formats
             if (capabilities.isEmpty() && seedCapability.contains(":")) {
-                Pattern jsonPattern = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"([^\"]+)\"");
+                Pattern jsonPattern = Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"([^\"]+)\"")
                 Matcher jsonMatcher = jsonPattern.matcher(seedCapability)
                 
                 while (jsonMatcher.find()) {
@@ -171,17 +171,17 @@ class HybridSLTransport {
                     for (String capName : capabilityNames) {
                         if (key.equalsIgnoreCase(capName)) {
                             capabilities.put(capName, value)
-                            Log.d(TAG, "Parsed JSON capability: " + key + " -> " + value);
+                            Log.d(TAG, "Parsed JSON capability: " + key + " -> " + value)
                             break
                         }
                     }
                 }
             }
             
-            Log.i(TAG, "Parsed " + capabilities.size() + " capabilities from seed");
+            Log.i(TAG, "Parsed " + capabilities.size() + " capabilities from seed")
             
         } catch (Exception e) {
-            Log.e(TAG, "Failed to parse seed capability", e);
+            Log.e(TAG, "Failed to parse seed capability", e)
         }
         
         return capabilities
@@ -194,24 +194,24 @@ class HybridSLTransport {
     private SLResponse parseHTTP2Response(String responseData) {
         try {
             // Basic LLSD-XML parsing for Second Life responses
-            String responseType = "caps_response";
+            String responseType = "caps_response"
             String parsedData = responseData
             
             if (responseData != null) {
                 // Extract common LLSD response patterns
                 if (responseData.contains("<map>")) {
-                    responseType = "llsd_map";
+                    responseType = "llsd_map"
                     
                     // Extract key-value pairs from LLSD map
-                    Pattern mapPattern = Pattern.compile("<key>([^<]+)</key>\\s*<(string|integer|real|boolean)>([^<]*)</\\2>");
+                    Pattern mapPattern = Pattern.compile("<key>([^<]+)</key>\\s*<(string|integer|real|boolean)>([^<]*)</\\2>")
                     Matcher matcher = mapPattern.matcher(responseData)
                     
-                    StringBuilder parsed = new StringBuilder("LLSD Map: ");
+                    StringBuilder parsed = StringBuilder("LLSD Map: ")
                     while (matcher.find()) {
                         String key = matcher.group(1)
                         String type = matcher.group(2)
                         String value = matcher.group(3)
-                        parsed.append(key).append("=").append(value).append(" ");
+                        parsed.append(key).append("=").append(value).append(" ")
                     }
                     
                     if (parsed.length() > "LLSD Map: ".length()) {
@@ -219,32 +219,32 @@ class HybridSLTransport {
                     }
                     
                 } else if (responseData.contains("<array>")) {
-                    responseType = "llsd_array";
-                    parsedData = "LLSD Array with " + responseData.split("<").length + " elements";
+                    responseType = "llsd_array"
+                    parsedData = "LLSD Array with " + responseData.split("<").length + " elements"
                     
                 } else if (responseData.contains("<string>")) {
                     // Simple string response
-                    Pattern stringPattern = Pattern.compile("<string>([^<]*)</string>");
+                    Pattern stringPattern = Pattern.compile("<string>([^<]*)</string>")
                     Matcher stringMatcher = stringPattern.matcher(responseData)
                     if (stringMatcher.find()) {
                         parsedData = stringMatcher.group(1)
-                        responseType = "llsd_string";
+                        responseType = "llsd_string"
                     }
                 }
                 
                 // Check for common error responses
                 if (responseData.toLowerCase().contains("error") || 
                     responseData.toLowerCase().contains("fail")) {
-                    responseType = "error_response";
+                    responseType = "error_response"
                 }
             }
             
-            Log.d(TAG, "Parsed CAPS response type: " + responseType);
-            return new SLResponse(responseType, parsedData)
+            Log.d(TAG, "Parsed CAPS response type: " + responseType)
+            return SLResponse(responseType, parsedData)
             
         } catch (Exception e) {
-            Log.e(TAG, "Failed to parse HTTP/2 response", e);
-            return new SLResponse("parse_error", "Failed to parse response: " + e.getMessage());
+            Log.e(TAG, "Failed to parse HTTP/2 response", e)
+            return SLResponse("parse_error", "Failed to parse response: " + e.getMessage())
         }
     }
     
@@ -286,7 +286,7 @@ class HybridSLTransport {
          * Override in subclasses to provide specific data
          */
         protected String getMessageDataJSON() {
-            return "{}";
+            return "{}"
         }
     }
     
@@ -295,7 +295,7 @@ class HybridSLTransport {
      */
     void subscribeToEvents(String eventType, WebSocketEventClient.EventListener listener) {
         eventClient.subscribe(eventType, listener)
-        Log.d(TAG, "Subscribed to event type: " + eventType);
+        Log.d(TAG, "Subscribed to event type: " + eventType)
     }
     
     /**
@@ -319,7 +319,7 @@ class HybridSLTransport {
      * Shutdown all transport layers
      */
     void shutdown() {
-        Log.i(TAG, "Shutting down hybrid transport");
+        Log.i(TAG, "Shutting down hybrid transport")
         capsClient.shutdown()
         eventClient.shutdown()
     }
@@ -336,17 +336,17 @@ class HybridSLTransport {
             // Route asset-related messages via HTTP/2 CAPS
             if (messageType.contains("Asset") || messageType.contains("Upload") || 
                 messageType.contains("Texture") || messageType.contains("Inventory")) {
-                return new TransportRoute(TransportType.HTTP2_CAPS, "https://example.com/caps");
+                return TransportRoute(TransportType.HTTP2_CAPS, "https://example.com/caps")
             }
             
             // Route real-time messages via WebSocket
             if (messageType.contains("Chat") || messageType.contains("ObjectUpdate") || 
                 messageType.contains("Avatar") || messageType.contains("Position")) {
-                return new TransportRoute(TransportType.WEBSOCKET_REALTIME, null)
+                return TransportRoute(TransportType.WEBSOCKET_REALTIME, null)
             }
             
             // Default to HTTP/2 for modern build
-            return new TransportRoute(TransportType.HTTP2_CAPS, "https://example.com/caps");
+            return TransportRoute(TransportType.HTTP2_CAPS, "https://example.com/caps")
         }
     }
     

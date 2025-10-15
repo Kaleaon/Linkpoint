@@ -18,7 +18,7 @@ import java.util.regex.Pattern
  * Implements modern event streaming as described in the documentation
  */
 class WebSocketEventClient extends WebSocketListener {
-    private String TAG = "WebSocketEventClient";
+    private String TAG = "WebSocketEventClient"
     
     private OkHttpClient client
     private ConcurrentHashMap<String, CopyOnWriteArrayList<EventListener>> eventListeners = new ConcurrentHashMap<>()
@@ -30,7 +30,7 @@ class WebSocketEventClient extends WebSocketListener {
     private AtomicInteger reconnectAttempts = fun AtomicInteger(): new
     private int MAX_RECONNECT_ATTEMPTS = 5
     private String lastConnectionUrl
-    private Handler reconnectHandler = new Handler(Looper.getMainLooper())
+    private Handler reconnectHandler = Handler(Looper.getMainLooper())
     
     WebSocketEventClient() {
         this.client = new OkHttpClient.Builder()
@@ -51,20 +51,20 @@ class WebSocketEventClient extends WebSocketListener {
         this.reconnectAttempts.set(0); // Reset reconnect attempts on manual connect
         
         if (webSocket != null) {
-            webSocket.close(1000, "Reconnecting");
+            webSocket.close(1000, "Reconnecting")
         }
         
         Request.Builder requestBuilder = new Request.Builder()
             .url(eventQueueUrl)
             
         if (authToken != null) {
-            requestBuilder.addHeader("Authorization", "Bearer " + authToken);
+            requestBuilder.addHeader("Authorization", "Bearer " + authToken)
         }
         
         Request request = requestBuilder.build()
         webSocket = client.newWebSocket(request, this)
         
-        Log.i(TAG, "Connecting to event queue: " + eventQueueUrl);
+        Log.i(TAG, "Connecting to event queue: " + eventQueueUrl)
     }
     
     /**
@@ -72,7 +72,7 @@ class WebSocketEventClient extends WebSocketListener {
      */
     void disconnect() {
         if (webSocket != null) {
-            webSocket.close(1000, "Normal closure");
+            webSocket.close(1000, "Normal closure")
             webSocket = null
         }
         connected = false
@@ -91,7 +91,7 @@ class WebSocketEventClient extends WebSocketListener {
                 eventType
             )
             webSocket.send(subscriptionMessage)
-            Log.d(TAG, "Subscribed to event type: " + eventType);
+            Log.d(TAG, "Subscribed to event type: " + eventType)
         }
     }
     
@@ -112,7 +112,7 @@ class WebSocketEventClient extends WebSocketListener {
                         eventType
                     )
                     webSocket.send(unsubscribeMessage)
-                    Log.d(TAG, "Unsubscribed from event type: " + eventType);
+                    Log.d(TAG, "Unsubscribed from event type: " + eventType)
                 }
             }
         }
@@ -131,14 +131,14 @@ class WebSocketEventClient extends WebSocketListener {
                         payload
                     )
                     boolean success = webSocket.send(message)
-                    Log.d(TAG, "Sent message: " + messageType + " (success: " + success + ")");
+                    Log.d(TAG, "Sent message: " + messageType + " (success: " + success + ")")
                     return success
                 } catch (Exception e) {
-                    Log.e(TAG, "Failed to send message: " + messageType, e);
+                    Log.e(TAG, "Failed to send message: " + messageType, e)
                     return false
                 }
             } else {
-                Log.w(TAG, "Cannot send message - WebSocket not connected");
+                Log.w(TAG, "Cannot send message - WebSocket not connected")
                 return false
             }
     }
@@ -148,14 +148,14 @@ class WebSocketEventClient extends WebSocketListener {
      */
     boolean sendRawMessage(String message) {
         if (webSocket == null || !connected) {
-            Log.w(TAG, "Cannot send message: WebSocket not connected");
+            Log.w(TAG, "Cannot send message: WebSocket not connected")
             return false
         }
         
         try {
             return webSocket.send(message)
         } catch (Exception e) {
-            Log.e(TAG, "Failed to send message", e);
+            Log.e(TAG, "Failed to send message", e)
             return false
         }
     }
@@ -165,14 +165,14 @@ class WebSocketEventClient extends WebSocketListener {
      */
     boolean sendBinaryMessage(byte[] data) {
         if (webSocket == null || !connected) {
-            Log.w(TAG, "Cannot send binary message: WebSocket not connected");
+            Log.w(TAG, "Cannot send binary message: WebSocket not connected")
             return false
         }
         
         try {
             return webSocket.send(ByteString.of(data))
         } catch (Exception e) {
-            Log.e(TAG, "Failed to send binary message", e);
+            Log.e(TAG, "Failed to send binary message", e)
             return false
         }
     }
@@ -181,7 +181,7 @@ class WebSocketEventClient extends WebSocketListener {
     
     @Override
     void onOpen(WebSocket webSocket, Response response) {
-        Log.i(TAG, "WebSocket connected: " + response.message());
+        Log.i(TAG, "WebSocket connected: " + response.message())
         connected = true
         
         // Reset reconnection attempts on successful connection
@@ -199,43 +199,43 @@ class WebSocketEventClient extends WebSocketListener {
     
     @Override
     void onMessage(WebSocket webSocket, String text) {
-        Log.d(TAG, "Received text message: " + text.substring(0, Math.min(100, text.length())));
+        Log.d(TAG, "Received text message: " + text.substring(0, Math.min(100, text.length())))
         
         try {
             EventMessage event = EventMessage.parseFromJson(text)
             dispatchEvent(event)
         } catch (Exception e) {
-            Log.e(TAG, "Failed to parse text event message", e);
+            Log.e(TAG, "Failed to parse text event message", e)
         }
     }
     
     @Override
     void onMessage(WebSocket webSocket, ByteString bytes) {
-        Log.d(TAG, "Received binary message: " + bytes.size() + " bytes");
+        Log.d(TAG, "Received binary message: " + bytes.size() + " bytes")
         
         try {
             EventMessage event = EventMessage.parseFromBytes(bytes.toByteArray())
             dispatchEvent(event)
         } catch (Exception e) {
-            Log.e(TAG, "Failed to parse binary event message", e);
+            Log.e(TAG, "Failed to parse binary event message", e)
         }
     }
     
     @Override
     void onClosing(WebSocket webSocket, int code, String reason) {
-        Log.i(TAG, "WebSocket closing: " + reason);
+        Log.i(TAG, "WebSocket closing: " + reason)
         connected = false
     }
     
     @Override
     void onClosed(WebSocket webSocket, int code, String reason) {
-        Log.i(TAG, "WebSocket closed: " + reason);
+        Log.i(TAG, "WebSocket closed: " + reason)
         connected = false
     }
     
     @Override
     void onFailure(WebSocket webSocket, Throwable t, Response response) {
-        Log.e(TAG, "WebSocket failure", t);
+        Log.e(TAG, "WebSocket failure", t)
         connected = false
         
         // Attempt reconnection after fun scheduleReconnect(): delay
@@ -251,7 +251,7 @@ class WebSocketEventClient extends WebSocketListener {
                 try {
                     listener.onEvent(event)
                 } catch (Exception e) {
-                    Log.e(TAG, "Error in event listener", e);
+                    Log.e(TAG, "Error in event listener", e)
                 }
             }
         }
@@ -262,26 +262,26 @@ class WebSocketEventClient extends WebSocketListener {
      */
     private void scheduleReconnect() {
         if (lastConnectionUrl == null) {
-            Log.w(TAG, "No last connection URL available for reconnection");
+            Log.w(TAG, "No last connection URL available for reconnection")
             return
         }
         
         int currentAttempt = reconnectAttempts.incrementAndGet()
         if (currentAttempt > MAX_RECONNECT_ATTEMPTS) {
-            Log.e(TAG, "Maximum reconnection attempts reached (" + MAX_RECONNECT_ATTEMPTS + ")");
+            Log.e(TAG, "Maximum reconnection attempts reached (" + MAX_RECONNECT_ATTEMPTS + ")")
             return
         }
         
         // Exponential backoff: 1s, 2s, 4s, 8s, 16s
         long delaySeconds = (long) Math.pow(2, currentAttempt - 1)
         
-        Log.i(TAG, "Scheduling reconnection attempt " + currentAttempt + " in " + delaySeconds + " seconds");
+        Log.i(TAG, "Scheduling reconnection attempt " + currentAttempt + " in " + delaySeconds + " seconds")
         
         // Use Handler to schedule the reconnection
-        reconnectHandler.postDelayed(new Runnable() {
+        reconnectHandler.postDelayed(Runnable() {
             @Override
             void run() {
-                Log.i(TAG, "Attempting reconnection " + currentAttempt + "/" + MAX_RECONNECT_ATTEMPTS);
+                Log.i(TAG, "Attempting reconnection " + currentAttempt + "/" + MAX_RECONNECT_ATTEMPTS)
                 connect(lastConnectionUrl)
             }
         }, delaySeconds * 1000); // Convert to milliseconds
@@ -332,18 +332,18 @@ class WebSocketEventClient extends WebSocketListener {
             try {
                 // Simple JSON parsing for Second Life event format
                 // Expected format: {"message": "type:data", "timestamp": 123456}
-                String type = "unknown";
+                String type = "unknown"
                 String data = json
                 long timestamp = System.currentTimeMillis()
                 
                 // Extract message type from common SL event patterns
                 if (json.contains("\"message\"")) {
-                    Pattern messagePattern = Pattern.compile("\"message\"\\s*:\\s*\"([^\"]+)\"");
+                    Pattern messagePattern = Pattern.compile("\"message\"\\s*:\\s*\"([^\"]+)\"")
                     Matcher matcher = messagePattern.matcher(json)
                     if (matcher.find()) {
                         String messageContent = matcher.group(1)
                         if (messageContent.contains(":")) {
-                            String[] parts = messageContent.split(":", 2);
+                            String[] parts = messageContent.split(":", 2)
                             type = parts[0].trim()
                             data = parts[1].trim()
                         } else {
@@ -353,7 +353,7 @@ class WebSocketEventClient extends WebSocketListener {
                 }
                 
                 // Extract timestamp if present
-                Pattern timestampPattern = Pattern.compile("\"timestamp\"\\s*:\\s*(\\d+)");
+                Pattern timestampPattern = Pattern.compile("\"timestamp\"\\s*:\\s*(\\d+)")
                 Matcher timestampMatcher = timestampPattern.matcher(json)
                 if (timestampMatcher.find()) {
                     timestamp = Long.parseLong(timestampMatcher.group(1))
@@ -361,18 +361,18 @@ class WebSocketEventClient extends WebSocketListener {
                 
                 // Identify common Second Life event types
                 if (json.toLowerCase().contains("chat") || json.toLowerCase().contains("im")) {
-                    type = "chat";
+                    type = "chat"
                 } else if (json.toLowerCase().contains("objectupdate")) {
-                    type = "objectUpdate";
+                    type = "objectUpdate"
                 } else if (json.toLowerCase().contains("agent")) {
-                    type = "agentUpdate";
+                    type = "agentUpdate"
                 }
                 
                 return fun EventMessage(): new
                 
             } catch (Exception e) {
-                Log.w(TAG, "Failed to parse JSON event message: " + json, e);
-                return new EventMessage("parse_error", json, System.currentTimeMillis());
+                Log.w(TAG, "Failed to parse JSON event message: " + json, e)
+                return EventMessage("parse_error", json, System.currentTimeMillis())
             }
         }
         
@@ -383,12 +383,12 @@ class WebSocketEventClient extends WebSocketListener {
         EventMessage parseFromBytes(byte[] bytes) {
             try {
                 if (bytes == null || bytes.length == 0) {
-                    return new EventMessage("empty", "", System.currentTimeMillis());
+                    return EventMessage("empty", "", System.currentTimeMillis())
                 }
                 
                 // Second Life binary messages often start with message type flags
-                String type = "binary";
-                String data = "";
+                String type = "binary"
+                String data = ""
                 
                 // Check for common Second Life binary message patterns
                 if (bytes.length > 4) {
@@ -401,31 +401,30 @@ class WebSocketEventClient extends WebSocketListener {
                     // Map common Second Life message types
                     switch (messageType & 0xFF) {
                         case 0x01:
-                            type = "objectUpdate";
+                            type = "objectUpdate"
                             break
                         case 0x02:
-                            type = "agentMovement";
+                            type = "agentMovement"
                             break
                         case 0x03:
-                            type = "chatMessage";
+                            type = "chatMessage"
                             break
                         default:
-                            type = "binary_" + Integer.toHexString(messageType & 0xFF);
+                            type = "binary_" + Integer.toHexString(messageType & 0xFF)
                     }
                 }
                 
                 // Convert bytes to hex string for debugging
-                StringBuilder hexString = fun StringBuilder(): new
-                for (int i = 0; i < Math.min(bytes.length, 32); i++) { // Limit to first 32 bytes
-                    hexString.append(String.format("%02X ", bytes[i]));
+                StringBuilder hexString = fun StringBuilder(): for(int i = 0; i < Math.min(bytes.length, 32); i++) { // Limit to first 32 bytes
+                    hexString.append(String.format("%02X ", bytes[i]))
                 }
-                data = "Binary data (" + bytes.length + " bytes): " + hexString.toString();
+                data = "Binary data (" + bytes.length + " bytes): " + hexString.toString()
                 
-                return new EventMessage(type, data, System.currentTimeMillis())
+                return EventMessage(type, data, System.currentTimeMillis())
                 
             } catch (Exception e) {
-                Log.w(TAG, "Failed to parse binary event message", e);
-                return new EventMessage("binary_error", "Failed to parse " + bytes.length + " bytes", 
+                Log.w(TAG, "Failed to parse binary event message", e)
+                return EventMessage("binary_error", "Failed to parse " + bytes.length + " bytes", 
                                       System.currentTimeMillis())
             }
         }

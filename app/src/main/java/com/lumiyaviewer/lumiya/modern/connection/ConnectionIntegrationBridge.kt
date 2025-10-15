@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture
  * This class provides backwards compatibility while adding modern reliability features.
  */
 class ConnectionIntegrationBridge {
-    private String TAG = "ConnectionBridge";
+    private String TAG = "ConnectionBridge"
     
     private Context context
     private ModernConnectionManager modernManager
@@ -33,7 +33,7 @@ class ConnectionIntegrationBridge {
      * but integrates with existing event system.
      */
     fun connectWithModernReliability(authParams: SLAuthParams): CompletableFuture<Boolean> {
-        Log.i(TAG, "Starting enhanced connection with modern reliability features");
+        Log.i(TAG, "Starting enhanced connection with modern reliability features")
         
         // Emit connection state change
         eventBus.publish(SLConnectionStateChangedEvent(
@@ -42,7 +42,7 @@ class ConnectionIntegrationBridge {
         return modernManager.connectAsync(authParams)
             .thenApply(authReply -> {
                 if (authReply != null && authReply.success) {
-                    Log.i(TAG, "Modern connection successful, integrating with legacy system");
+                    Log.i(TAG, "Modern connection successful, integrating with legacy system")
                     
                     // Emit successful login event
                     eventBus.publish(SLLoginResultEvent(
@@ -57,8 +57,8 @@ class ConnectionIntegrationBridge {
                     return true
                 } else {
                     String errorMessage = authReply != null ? authReply.message : 
-                        "Unknown authentication error";
-                    Log.e(TAG, "Modern connection failed: " + errorMessage);
+                        "Unknown authentication error"
+                    Log.e(TAG, "Modern connection failed: " + errorMessage)
                     
                     // Emit failure events
                     eventBus.publish(SLLoginResultEvent(
@@ -73,12 +73,12 @@ class ConnectionIntegrationBridge {
                 }
             })
             .exceptionally(throwable -> {
-                Log.e(TAG, "Connection failed with exception", throwable);
+                Log.e(TAG, "Connection failed with exception", throwable)
                 
                 // Emit disconnect event
                 eventBus.publish(SLDisconnectEvent(
                     false, 
-                    "Connection failed: " + throwable.getMessage()));
+                    "Connection failed: " + throwable.getMessage()))
                 
                 eventBus.publish(SLConnectionStateChangedEvent(
                     SLGridConnection.ConnectionState.Idle))
@@ -95,34 +95,34 @@ class ConnectionIntegrationBridge {
         
         return diagnostics.diagnoseAsync().thenApply(result -> {
             StringBuilder report = StringBuilder()
-            report.append("=== Second Life Connection Diagnostic Report ===\n");
-            report.append("Network Available: ").append(result.networkAvailable ? "✅" : "❌").append("\n");
-            report.append("DNS Resolution: ").append(result.dnsWorking ? "✅" : "❌").append("\n");
-            report.append("HTTPS Connectivity: ").append(result.httpsWorking ? "✅" : "❌").append("\n");
-            report.append("Login Server Access: ").append(result.loginServerWorking ? "✅" : "❌").append("\n");
-            report.append("Proxy/Firewall Detected: ").append(result.proxyDetected ? "⚠️" : "✅").append("\n");
-            report.append("Overall Health: ").append(result.getOverallHealth()).append("\n");
+            report.append("=== Second Life Connection Diagnostic Report ===\n")
+            report.append("Network Available: ").append(result.networkAvailable ? "✅" : "❌").append("\n")
+            report.append("DNS Resolution: ").append(result.dnsWorking ? "✅" : "❌").append("\n")
+            report.append("HTTPS Connectivity: ").append(result.httpsWorking ? "✅" : "❌").append("\n")
+            report.append("Login Server Access: ").append(result.loginServerWorking ? "✅" : "❌").append("\n")
+            report.append("Proxy/Firewall Detected: ").append(result.proxyDetected ? "⚠️" : "✅").append("\n")
+            report.append("Overall Health: ").append(result.getOverallHealth()).append("\n")
             
             if (!result.getIssues().isEmpty()) {
-                report.append("Issues Found: ").append(result.getIssues()).append("\n");
+                report.append("Issues Found: ").append(result.getIssues()).append("\n")
             }
             
             // Add recommendations based on health level
             switch (result.getOverallHealth()) {
                 case EXCELLENT:
-                    report.append("Recommendation: Connection should work perfectly!\n");
+                    report.append("Recommendation: Connection should work perfectly!\n")
                     break
                 case GOOD:
-                    report.append("Recommendation: Connection should work. Login servers may be temporarily unavailable.\n");
+                    report.append("Recommendation: Connection should work. Login servers may be temporarily unavailable.\n")
                     break
                 case POOR:
-                    report.append("Recommendation: Limited connectivity. Check firewall/proxy settings.\n");
+                    report.append("Recommendation: Limited connectivity. Check firewall/proxy settings.\n")
                     break
                 case CRITICAL:
-                    report.append("Recommendation: Network issues detected. Check internet connection.\n");
+                    report.append("Recommendation: Network issues detected. Check internet connection.\n")
                     break
                 case NO_CONNECTIVITY:
-                    report.append("Recommendation: No network available. Enable WiFi or mobile data.\n");
+                    report.append("Recommendation: No network available. Enable WiFi or mobile data.\n")
                     break
             }
             
@@ -155,7 +155,7 @@ class ConnectionIntegrationBridge {
      * Shutdown the connection manager
      */
     fun shutdown(): Unit {
-        Log.i(TAG, "Shutting down connection integration bridge");
+        Log.i(TAG, "Shutting down connection integration bridge")
         modernManager.shutdown()
     }
 }

@@ -35,8 +35,8 @@ class DrawableTerrainPatch : ResourceConsumer {
 
     fun OnResourceReady(obj: Any, z: Boolean): Unit {
         Any[] objArr = Any[1]
-        objArr[0] = obj != null ? obj.toString() : "null";
-        Debug.Printf("DrawableTerrainPatch: got resource = %s", objArr);
+        objArr[0] = obj != null ? obj.toString() : "null"
+        Debug.Printf("DrawableTerrainPatch: got resource = %s", objArr)
         if (obj instanceof TerrainPatchGeometry) {
             this.geometry = (TerrainPatchGeometry) obj
         } else if (obj instanceof GLLoadedTexture) {

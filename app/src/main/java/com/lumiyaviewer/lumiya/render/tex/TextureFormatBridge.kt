@@ -13,7 +13,7 @@ import java.io.InputStream
  * This class provides a migration path and fallback mechanisms
  */
 class TextureFormatBridge {
-    private String TAG = "TextureFormatBridge";
+    private String TAG = "TextureFormatBridge"
     
     private ModernTextureManager modernManager
     private boolean modernManagerInitialized = false
@@ -23,11 +23,11 @@ class TextureFormatBridge {
      */
     void initialize(Context context) {
         try {
-            modernManager = new ModernTextureManager(context)
+            modernManager = ModernTextureManager(context)
             modernManagerInitialized = true
-            Log.i(TAG, "Modern texture manager initialized successfully");
+            Log.i(TAG, "Modern texture manager initialized successfully")
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize modern texture manager, falling back to legacy system", e);
+            Log.e(TAG, "Failed to initialize modern texture manager, falling back to legacy system", e)
             modernManagerInitialized = false
         }
     }
@@ -45,7 +45,7 @@ class TextureFormatBridge {
     TextureFormat detectTextureFormat(InputStream stream) throws IOException {
         // Read first few bytes to detect format
         stream.mark(16)
-        byte[] header = new byte[12]
+        byte[] header = ByteArray(12)
         int bytesRead = stream.read(header)
         stream.reset()
         
@@ -80,19 +80,19 @@ class TextureFormatBridge {
             case JPEG2000:
                 return loadJPEG2000Texture(stream)
             default:
-                throw new IOException("Unsupported texture format: " + format);
+                throw IOException("Unsupported texture format: " + format)
         }
     }
     
     private TextureData loadKTX2Texture(InputStream stream) throws IOException {
         if (!isModernTextureSystemAvailable()) {
-            throw new IOException("Modern texture system not available");
+            throw IOException("Modern texture system not available")
         }
         
         ModernTextureManager.TextureData modernData = modernManager.loadKTX2Texture(stream)
         
         // Convert to unified TextureData format
-        return new TextureData(
+        return TextureData(
             modernData.width,
             modernData.height,
             modernData.data,
@@ -105,7 +105,7 @@ class TextureFormatBridge {
     private TextureData loadJPEG2000Texture(InputStream stream) throws IOException {
         // This would integrate with the existing OpenJPEG system
         // For now, return a placeholder
-        throw new IOException("JPEG2000 texture loading not implemented in bridge");
+        throw IOException("JPEG2000 texture loading not implemented in bridge")
     }
     
     /**
@@ -140,7 +140,7 @@ class TextureFormatBridge {
         @Override
         String toString() {
             return String.format("TextureData[%dx%d, %s, %s, %d bytes]",
-                    width, height, format, compressed ? "compressed" : "uncompressed", data.length);
+                    width, height, format, compressed ? "compressed" : "uncompressed", data.length)
         }
     }
 }

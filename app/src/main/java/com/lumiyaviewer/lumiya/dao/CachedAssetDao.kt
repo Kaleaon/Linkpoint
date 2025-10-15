@@ -9,13 +9,13 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class CachedAssetDao : AbstractDao<CachedAsset, String> {
-    String TABLENAME = "CachedAssets";
+    String TABLENAME = "CachedAssets"
 
     class Properties {
-        Property Data = Property(2, Byte[].class, "data", false, "DATA");
-        Property Key = Property(0, String.class, "key", true, "KEY");
-        Property MustRevalidate = Property(3, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE");
-        Property Status = Property(1, Int.TYPE, NotificationCompat.CATEGORY_STATUS, false, "STATUS");
+        Property Data = Property(2, Byte[].class, "data", false, "DATA")
+        Property Key = Property(0, String.class, "key", true, "KEY")
+        Property MustRevalidate = Property(3, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE")
+        Property Status = Property(1, Int.TYPE, NotificationCompat.CATEGORY_STATUS, false, "STATUS")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -27,11 +27,11 @@ class CachedAssetDao : AbstractDao<CachedAsset, String> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'CachedAssets' (" + "'KEY' TEXT PRIMARY KEY NOT NULL ," + "'STATUS' INTEGER NOT NULL ," + "'DATA' BLOB," + "'MUST_REVALIDATE' INTEGER NOT NULL );");
+        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'CachedAssets' (" + "'KEY' TEXT PRIMARY KEY NOT NULL ," + "'STATUS' INTEGER NOT NULL ," + "'DATA' BLOB," + "'MUST_REVALIDATE' INTEGER NOT NULL );")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CachedAssets'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CachedAssets'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, cachedAsset: CachedAsset): Unit {

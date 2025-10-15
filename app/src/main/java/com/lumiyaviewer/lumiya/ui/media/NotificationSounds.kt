@@ -9,7 +9,7 @@ enum class NotificationSounds(val resourceId: Int) {
     LocalChat(R.raw.lumiya_local_chat_message),
     IM(R.raw.lumiya_private_message),
     Group(R.raw.lumiya_group_message),
-    ;
+    
 
     fun getUri(): Uri {
         return getResourceUri(resourceId)

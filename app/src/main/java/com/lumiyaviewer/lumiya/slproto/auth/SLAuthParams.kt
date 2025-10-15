@@ -13,12 +13,12 @@ class SLAuthParams {
     String startLocation
 
     constructor(intent: Intent) {
-        this.loginName = intent.getStringExtra("login");
-        this.passwordHash = intent.getStringExtra("password");
-        this.clientID = UUIDPool.getUUID(intent.getStringExtra("client_id"));
-        this.startLocation = intent.getStringExtra("start_location");
-        this.loginURL = intent.getStringExtra("login_url");
-        this.gridName = intent.getStringExtra("grid_name");
+        this.loginName = intent.getStringExtra("login")
+        this.passwordHash = intent.getStringExtra("password")
+        this.clientID = UUIDPool.getUUID(intent.getStringExtra("client_id"))
+        this.startLocation = intent.getStringExtra("start_location")
+        this.loginURL = intent.getStringExtra("login_url")
+        this.gridName = intent.getStringExtra("grid_name")
     }
 
     constructor(str: String, str2: String, uuid: UUID, str3: String, str4: String, str5: String) {

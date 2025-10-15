@@ -52,7 +52,7 @@ class DriveSynchronizer {
 
             @Override
             void onResult(@Nonnull Status object) {
-                Debug.Printf("LumiyaCloud: drive sync done, success: %b.", ((Status)object).isSuccess());
+                Debug.Printf("LumiyaCloud: drive sync done, success: %b.", ((Status)object).isSuccess())
                 DriveSynchronizer.access$002(this.this$0, false)
                 DriveSynchronizer.access$102(this.this$0, true)
                 object = ImmutableList.copyOf(this.this$0.waitingForSyncComplete)
@@ -112,7 +112,7 @@ class DriveSynchronizer {
 
     void flushOpenFiles(boolean bl, long l) {
         for (DriveTextFile driveTextFile : this.logWriteTracker.getOpenedFiles()) {
-            Debug.Printf("FlushOpenFiles: file opened for %d millis", driveTextFile.getOpenedTimeMillis(l));
+            Debug.Printf("FlushOpenFiles: file opened for %d millis", driveTextFile.getOpenedTimeMillis(l))
             if (!bl && driveTextFile.getOpenedTimeMillis(l) < 300000L) continue
             driveTextFile.flush()
         }
@@ -148,7 +148,7 @@ class DriveSynchronizer {
         }
         this.waitingForSyncComplete.add(onSyncCompletedListener)
         if (this.isSyncing) return
-        Debug.Printf("LumiyaCloud: requesting drive sync.", new Object[0]);
+        Debug.Printf("LumiyaCloud: requesting drive sync.", Array<Object>(0))
         this.isSyncing = true
         Drive.DriveApi.requestSync(this.googleApiClient).setResultCallback(this.onRequestSyncResult)
     }

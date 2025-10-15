@@ -21,7 +21,7 @@ import java.util.ArrayList
  * Implements advanced asset management features for mobile virtual world clients
  */
 class ModernAssetManager {
-    private String TAG = "ModernAssetManager";
+    private String TAG = "ModernAssetManager"
     
     // Cache size limits (256MB total as per specifications)
     private long MAX_CACHE_SIZE = 256 * 1024 * 1024; // 256MB
@@ -42,26 +42,26 @@ class ModernAssetManager {
         this.context = context
         this.loadingExecutor = createPriorityExecutor()
         this.assetCache = new ConcurrentHashMap<>()
-        this.totalCacheSize = new AtomicLong(0)
-        this.networkMonitor = new NetworkQualityMonitor()
-        this.priorityQueue = new AssetPriorityQueue()
+        this.totalCacheSize = AtomicLong(0)
+        this.networkMonitor = NetworkQualityMonitor()
+        this.priorityQueue = AssetPriorityQueue()
         
         // Start background cache management
         startCacheManagement()
         
-        Log.i(TAG, "Modern asset manager initialized with " + MAX_CACHE_SIZE / (1024*1024) + "MB cache");
+        Log.i(TAG, "Modern asset manager initialized with " + MAX_CACHE_SIZE / (1024*1024) + "MB cache")
     }
     
     /**
      * Create priority-based executor for asset loading
      */
     private ExecutorService createPriorityExecutor() {
-        return new ThreadPoolExecutor(
+        return ThreadPoolExecutor(
             2, // Core threads
             4, // Max threads
             60L, TimeUnit.SECONDS,
             new PriorityBlockingQueue<Runnable>(),
-            r -> new Thread(r, "AssetLoader-" + System.currentTimeMillis())
+            r -> Thread(r, "AssetLoader-" + System.currentTimeMillis())
         )
     }
     
@@ -92,18 +92,18 @@ class ModernAssetManager {
         CachedAsset cached = assetCache.get(cacheKey)
         if (cached != null && !cached.isExpired()) {
             cached.updateAccessTime(); // LRU update
-            Log.d(TAG, "Cache hit for " + assetId + " at quality " + quality);
+            Log.d(TAG, "Cache hit for " + assetId + " at quality " + quality)
             return CompletableFuture.completedFuture(cached.assetData)
         }
         
         // Create prioritized loading task
-        PrioritizedAssetTask task = new PrioritizedAssetTask(assetId, type, priority, quality, cacheKey)
+        PrioritizedAssetTask task = PrioritizedAssetTask(assetId, type, priority, quality, cacheKey)
         
         return CompletableFuture.supplyAsync(() -> {
             try {
                 return task.get()
             } catch (Exception e) {
-                Log.e(TAG, "Failed to load asset with LOD: " + assetId, e);
+                Log.e(TAG, "Failed to load asset with LOD: " + assetId, e)
                 return null
             }
         }, loadingExecutor)
@@ -114,7 +114,7 @@ class ModernAssetManager {
      */
     void setQualityLevel(QualityLevel quality) {
         this.currentQuality = quality
-        Log.i(TAG, "Quality level set to: " + quality);
+        Log.i(TAG, "Quality level set to: " + quality)
     }
     
     void setAdaptiveQuality(boolean adaptive) {
@@ -124,14 +124,14 @@ class ModernAssetManager {
         } else {
             networkMonitor.stopMonitoring()
         }
-        Log.i(TAG, "Adaptive quality " + (adaptive ? "enabled" : "disabled"));
+        Log.i(TAG, "Adaptive quality " + (adaptive ? "enabled" : "disabled"))
     }
     
     /**
      * Get current cache statistics
      */
     CacheStats getCacheStats() {
-        return new CacheStats(
+        return CacheStats(
             assetCache.size(),
             totalCacheSize.get(),
             MAX_CACHE_SIZE,
@@ -146,7 +146,7 @@ class ModernAssetManager {
     void clearCache() {
         assetCache.clear()
         totalCacheSize.set(0)
-        Log.i(TAG, "Asset cache cleared");
+        Log.i(TAG, "Asset cache cleared")
     }
     
     // Asset loading priority levels
@@ -277,7 +277,7 @@ class ModernAssetManager {
                 }
                 return data
             } catch (Exception e) {
-                Log.e(TAG, "Failed to load prioritized asset: " + assetId, e);
+                Log.e(TAG, "Failed to load prioritized asset: " + assetId, e)
                 throw e
             }
         }
@@ -290,12 +290,12 @@ class ModernAssetManager {
         
         void startMonitoring() {
             monitoring = true
-            Log.d(TAG, "Network quality monitoring started");
+            Log.d(TAG, "Network quality monitoring started")
         }
         
         void stopMonitoring() {
             monitoring = false
-            Log.d(TAG, "Network quality monitoring stopped");
+            Log.d(TAG, "Network quality monitoring stopped")
         }
         
         long getCurrentBandwidth() { return currentBandwidth; }
@@ -341,7 +341,7 @@ class ModernAssetManager {
     
     // Private helper methods
     private String generateCacheKey(String assetId, QualityLevel quality) {
-        return assetId + "_" + quality.name();
+        return assetId + "_" + quality.name()
     }
     
     private AssetPriority determinePriority(String assetId, AssetType type) {
@@ -357,7 +357,7 @@ class ModernAssetManager {
     
     private AssetData loadAssetData(String assetId, AssetType type, QualityLevel quality) {
         try {
-            Log.d(TAG, "Loading " + assetId + " at quality " + quality + " (" + quality.scaleFactor + "x)");
+            Log.d(TAG, "Loading " + assetId + " at quality " + quality + " (" + quality.scaleFactor + "x)")
             
             // Simulate network delay based on quality
             int delay = (int)(500 * quality.scaleFactor); // Higher quality = longer load
@@ -373,15 +373,15 @@ class ModernAssetManager {
                 data[i] = (byte)(i % 256)
             }
             
-            Log.d(TAG, "Loaded " + assetId + ": " + scaledSize + " bytes at quality " + quality);
-            return new AssetData(assetId, type, data, quality)
+            Log.d(TAG, "Loaded " + assetId + ": " + scaledSize + " bytes at quality " + quality)
+            return AssetData(assetId, type, data, quality)
             
         } catch (InterruptedException e) {
-            Log.w(TAG, "Asset loading interrupted: " + assetId);
+            Log.w(TAG, "Asset loading interrupted: " + assetId)
             Thread.currentThread().interrupt()
             return null
         } catch (Exception e) {
-            Log.e(TAG, "Failed to load asset: " + assetId, e);
+            Log.e(TAG, "Failed to load asset: " + assetId, e)
             return null
         }
     }
@@ -399,7 +399,7 @@ class ModernAssetManager {
     private void cacheAsset(String cacheKey, AssetData assetData) {
         if (assetData == null) return
         
-        CachedAsset cached = new CachedAsset(assetData)
+        CachedAsset cached = CachedAsset(assetData)
         
         // Check cache size limits
         long newSize = totalCacheSize.addAndGet(assetData.getSize())
@@ -409,11 +409,11 @@ class ModernAssetManager {
         }
         
         assetCache.put(cacheKey, cached)
-        Log.d(TAG, "Cached " + assetData.getId() + " (" + assetData.getSize() + " bytes)");
+        Log.d(TAG, "Cached " + assetData.getId() + " (" + assetData.getSize() + " bytes)")
     }
     
     private void evictLRUAssets() {
-        Log.d(TAG, "Cache eviction triggered - size: " + totalCacheSize.get() / 1024 + "KB, entries: " + assetCache.size());
+        Log.d(TAG, "Cache eviction triggered - size: " + totalCacheSize.get() / 1024 + "KB, entries: " + assetCache.size())
         
         // Find LRU assets to evict
         List<Map.Entry<String, CachedAsset>> entries = new ArrayList<>(assetCache.entrySet())
@@ -427,12 +427,12 @@ class ModernAssetManager {
             totalCacheSize.addAndGet(-entry.getValue().assetData.getSize())
         }
         
-        Log.d(TAG, "Evicted " + evictCount + " assets. New size: " + totalCacheSize.get() / 1024 + "KB");
+        Log.d(TAG, "Evicted " + evictCount + " assets. New size: " + totalCacheSize.get() / 1024 + "KB")
     }
     
     private void startCacheManagement() {
         // Background thread for cache maintenance
-        Thread cacheManager = new Thread(() -> {
+        Thread cacheManager = Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     Thread.sleep(60000); // Check every minute
@@ -453,14 +453,14 @@ class ModernAssetManager {
                     }
                     
                     if (!expired.isEmpty()) {
-                        Log.d(TAG, "Removed " + expired.size() + " expired cache entries");
+                        Log.d(TAG, "Removed " + expired.size() + " expired cache entries")
                     }
                     
                     // Adaptive quality adjustment
                     if (adaptiveQuality) {
                         QualityLevel recommended = networkMonitor.recommendQuality()
                         if (recommended != currentQuality) {
-                            Log.i(TAG, "Adaptive quality change: " + currentQuality + " -> " + recommended);
+                            Log.i(TAG, "Adaptive quality change: " + currentQuality + " -> " + recommended)
                             currentQuality = recommended
                         }
                     }
@@ -470,7 +470,7 @@ class ModernAssetManager {
                     break
                 }
             }
-        }, "CacheManager");
+        }, "CacheManager")
         
         cacheManager.setDaemon(true)
         cacheManager.start()
@@ -484,6 +484,6 @@ class ModernAssetManager {
             loadingExecutor.shutdown()
         }
         assetCache.clear()
-        Log.i(TAG, "Modern asset manager shut down");
+        Log.i(TAG, "Modern asset manager shut down")
     }
 }

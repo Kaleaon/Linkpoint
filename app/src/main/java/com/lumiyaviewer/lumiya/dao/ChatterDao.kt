@@ -9,17 +9,17 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class ChatterDao : AbstractDao<Chatter, Long> {
-    String TABLENAME = "CHATTER";
+    String TABLENAME = "CHATTER"
 
     class Properties {
-        Property Active = Property(3, Boolean.TYPE, "active", false, "ACTIVE");
-        Property Id = Property(0, Long.class, "id", true, "_id");
-        Property LastMessageID = Property(6, Long.class, "lastMessageID", false, "LAST_MESSAGE_ID");
-        Property LastSessionID = Property(7, UUID.class, "lastSessionID", false, "LAST_SESSION_ID");
-        Property Muted = Property(4, Boolean.TYPE, "muted", false, "MUTED");
-        Property Type = Property(1, Int.TYPE, "type", false, "TYPE");
-        Property UnreadCount = Property(5, Int.TYPE, "unreadCount", false, "UNREAD_COUNT");
-        Property Uuid = Property(2, UUID.class, "uuid", false, "UUID");
+        Property Active = Property(3, Boolean.TYPE, "active", false, "ACTIVE")
+        Property Id = Property(0, Long.class, "id", true, "_id")
+        Property LastMessageID = Property(6, Long.class, "lastMessageID", false, "LAST_MESSAGE_ID")
+        Property LastSessionID = Property(7, UUID.class, "lastSessionID", false, "LAST_SESSION_ID")
+        Property Muted = Property(4, Boolean.TYPE, "muted", false, "MUTED")
+        Property Type = Property(1, Int.TYPE, "type", false, "TYPE")
+        Property UnreadCount = Property(5, Int.TYPE, "unreadCount", false, "UNREAD_COUNT")
+        Property Uuid = Property(2, UUID.class, "uuid", false, "UUID")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -31,13 +31,13 @@ class ChatterDao : AbstractDao<Chatter, Long> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : "";
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'CHATTER' (" + "'_id' INTEGER PRIMARY KEY ," + "'TYPE' INTEGER NOT NULL ," + "'UUID' TEXT," + "'ACTIVE' INTEGER NOT NULL ," + "'MUTED' INTEGER NOT NULL ," + "'UNREAD_COUNT' INTEGER NOT NULL ," + "'LAST_MESSAGE_ID' INTEGER," + "'LAST_SESSION_ID' TEXT);");
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHATTER_TYPE_UUID ON CHATTER" + " (TYPE,UUID);");
+        String str = z ? "IF NOT EXISTS " : ""
+        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'CHATTER' (" + "'_id' INTEGER PRIMARY KEY ," + "'TYPE' INTEGER NOT NULL ," + "'UUID' TEXT," + "'ACTIVE' INTEGER NOT NULL ," + "'MUTED' INTEGER NOT NULL ," + "'UNREAD_COUNT' INTEGER NOT NULL ," + "'LAST_MESSAGE_ID' INTEGER," + "'LAST_SESSION_ID' TEXT);")
+        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHATTER_TYPE_UUID ON CHATTER" + " (TYPE,UUID);")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CHATTER'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CHATTER'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, chatter: Chatter): Unit {

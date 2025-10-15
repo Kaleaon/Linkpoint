@@ -73,10 +73,10 @@ implements LogWriteTracker.OnLoggingDoneListener {
     private DriveSynchronizer synchronizer = null
 
     DriveSyncService() {
-        this.agentSyncConnections = new AgentSyncConnections()
-        this.errorResolutionTracker = new ErrorResolutionTracker((Context)this)
-        this.periodicSyncHandler = new Handler()
-        this.mMessenger = new Messenger((Handler)new IncomingHandler(this))
+        this.agentSyncConnections = AgentSyncConnections()
+        this.errorResolutionTracker = ErrorResolutionTracker((Context)this)
+        this.periodicSyncHandler = Handler()
+        this.mMessenger = Messenger((Handler)IncomingHandler(this))
         this.connectionCallbacks = new GoogleApiClient.ConnectionCallbacks(this){
             DriveSyncService this$0
             {
@@ -88,12 +88,12 @@ implements LogWriteTracker.OnLoggingDoneListener {
              */
             @Override
             void onConnected(@Nullable Bundle bundle) {
-                Debug.Printf("LumiyaCloud: connected.", new Object[0]);
+                Debug.Printf("LumiyaCloud: connected.", Array<Object>(0))
                 if (this.this$0.synchronizer == null) {
                     DriveSyncService.access$702(this.this$0, GoogleApiState.Connected)
-                    DriveSyncService.access$602(this.this$0, new DriveSynchronizer((Context)this.this$0, this.this$0.mGoogleApiClient, this.this$0))
+                    DriveSyncService.access$602(this.this$0, DriveSynchronizer((Context)this.this$0, this.this$0.mGoogleApiClient, this.this$0))
                 } else {
-                    Debug.Printf("LumiyaCloud: resuming sync.", new Object[0]);
+                    Debug.Printf("LumiyaCloud: resuming sync.", Array<Object>(0))
                     this.this$0.synchronizer.resumeSyncing()
                 }
                 this.this$0.periodicSyncHandler.removeCallbacks(this.this$0.periodicSync)
@@ -104,7 +104,7 @@ implements LogWriteTracker.OnLoggingDoneListener {
 
             @Override
             void onConnectionSuspended(int n) {
-                Debug.Printf("LumiyaCloud: connection suspended (%d)", n);
+                Debug.Printf("LumiyaCloud: connection suspended (%d)", n)
                 if (this.this$0.synchronizer != null) {
                     this.this$0.synchronizer.suspendSyncing()
                 }
@@ -112,7 +112,7 @@ implements LogWriteTracker.OnLoggingDoneListener {
                 DriveSyncService.access$1002(this.this$0, false)
             }
         }
-        this.periodicSync = new Runnable(this){
+        this.periodicSync = Runnable(this){
             DriveSyncService this$0
             {
                 this.this$0 = driveSyncService
@@ -121,7 +121,7 @@ implements LogWriteTracker.OnLoggingDoneListener {
             @Override
             void run() {
                 if (this.this$0.synchronizer != null) {
-                    Debug.Printf("FlushFiles: checking for files to flush", new Object[0]);
+                    Debug.Printf("FlushFiles: checking for files to flush", Array<Object>(0))
                     long l = System.currentTimeMillis()
                     this.this$0.synchronizer.flushOpenFiles(false, l)
                     this.this$0.periodicSyncHandler.removeCallbacks(this.this$0.periodicSync)
@@ -146,12 +146,12 @@ implements LogWriteTracker.OnLoggingDoneListener {
             @Override
             void onConnectionFailed(@Nonnull ConnectionResult connectionResult) {
                 String string2
-                Debug.Printf("LumiyaCloud: connection failed, has resolution: %b", connectionResult.hasResolution());
+                Debug.Printf("LumiyaCloud: connection failed, has resolution: %b", connectionResult.hasResolution())
                 if (connectionResult.hasResolution()) {
                     ConnectionResolutionActivity.startForConnectionResolution((Context)this.this$0, connectionResult)
                     return
                 }
-                Debug.Printf("LumiyaCloud: no resolution at all (%d), error message %s", connectionResult.getErrorCode(), connectionResult.getErrorMessage());
+                Debug.Printf("LumiyaCloud: no resolution at all (%d), error message %s", connectionResult.getErrorCode(), connectionResult.getErrorMessage())
                 String string3 = string2 = connectionResult.getErrorMessage()
                 if (Strings.isNullOrEmpty(string2)) {
                     string3 = this.this$0.getString(2131099702, new Object[]{connectionResult.getErrorCode()})
@@ -189,7 +189,7 @@ implements LogWriteTracker.OnLoggingDoneListener {
     }
 
     private String logFileNameForChatter(String string2) {
-        return string2.replaceAll("[/.:*\\\\]", "_").trim() + ".txt";
+        return string2.replaceAll("[/.:*\\\\]", "_").trim() + ".txt"
     }
 
     /*
@@ -203,7 +203,7 @@ implements LogWriteTracker.OnLoggingDoneListener {
             PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
             for (Messenger messenger : this.syncRequestSources) {
                 MessageType messageType = MessageType.LogSyncStatus
-                LogSyncStatus logSyncStatus = new LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.GoogleDriveError, string2)
+                LogSyncStatus logSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.GoogleDriveError, string2)
                 CloudSyncMessenger.sendMessage(messenger, messageType, logSyncStatus, null)
             }
         }
@@ -233,7 +233,7 @@ implements LogWriteTracker.OnLoggingDoneListener {
 
     private void onLogMessageBatch(LogMessageBatch logMessageBatch, Messenger object) {
         if (this.synchronizer != null && logMessageBatch != null && logMessageBatch.agentName != null) {
-            MessageSyncBatch messageSyncBatch = new MessageSyncBatch(logMessageBatch, new MessageSyncBatch.OnMessageBatchSyncedListener(this, (Messenger)object, logMessageBatch){
+            MessageSyncBatch messageSyncBatch = MessageSyncBatch(logMessageBatch, new MessageSyncBatch.OnMessageBatchSyncedListener(this, (Messenger)object, logMessageBatch){
                 DriveSyncService this$0
                 LogMessageBatch val$message
                 Messenger val$replyTo
@@ -245,11 +245,11 @@ implements LogWriteTracker.OnLoggingDoneListener {
 
                 @Override
                 void onMessageBatchSynced(MessageSyncBatch messageSyncBatch) {
-                    CloudSyncMessenger.sendMessage(this.val$replyTo, MessageType.LogMessagesCompleted, new LogMessagesCompleted(this.val$message.agentUUID, this.val$message.lastMessageID), null)
+                    CloudSyncMessenger.sendMessage(this.val$replyTo, MessageType.LogMessagesCompleted, LogMessagesCompleted(this.val$message.agentUUID, this.val$message.lastMessageID), null)
                 }
             for (LogChatMessage logChatMessage : logMessageBatch.messages) {
                 if (logChatMessage == null || logChatMessage.chatterName == null || logChatMessage.messageText == null) continue
-                this.synchronizer.logString(this.agentSyncConnections, logMessageBatch.agentUUID, logMessageBatch.agentName, this.logFileNameForChatter(logChatMessage.chatterName), new DriveLogEntry(logChatMessage.messageText, messageSyncBatch, logChatMessage.messageID))
+                this.synchronizer.logString(this.agentSyncConnections, logMessageBatch.agentUUID, logMessageBatch.agentName, this.logFileNameForChatter(logChatMessage.chatterName), DriveLogEntry(logChatMessage.messageText, messageSyncBatch, logChatMessage.messageID))
             }
         }
     }
@@ -265,7 +265,7 @@ implements LogWriteTracker.OnLoggingDoneListener {
             if (bundleable.appVersionCode < 58) {
                 PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
                 MessageType messageType = MessageType.LogSyncStatus
-                LogSyncStatus logSyncStatus = new LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.AppVersionRejected, null)
+                LogSyncStatus logSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.AppVersionRejected, null)
                 CloudSyncMessenger.sendMessage((Messenger)var2_4, messageType, logSyncStatus, null)
                 return
             }
@@ -292,7 +292,7 @@ implements LogWriteTracker.OnLoggingDoneListener {
             if (this.synchronizer == null) return
             for (Messenger messenger : this.syncRequestSources) {
                 MessageType messageType = MessageType.LogSyncStatus
-                LogSyncStatus logSyncStatus = new LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.Ready, null)
+                LogSyncStatus logSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.Ready, null)
                 CloudSyncMessenger.sendMessage(messenger, messageType, logSyncStatus, null)
             }
             this.syncRequestSources.clear()
@@ -311,8 +311,8 @@ implements LogWriteTracker.OnLoggingDoneListener {
             case 1: {
                 if (this.syncRequestSources.isEmpty()) return
                 this.googleApiState = GoogleApiState.Connecting
-                Debug.Printf("Starting service.", new Object[0]);
-                this.startService(new Intent((Context)this, DriveSyncService.class))
+                Debug.Printf("Starting service.", Array<Object>(0))
+                this.startService(Intent((Context)this, DriveSyncService.class))
                 if (this.mGoogleApiClient != null) return
                 this.mGoogleApiClient = new GoogleApiClient.Builder((Context)this).addApi(Drive.API).addScope(Drive.SCOPE_FILE).addConnectionCallbacks(this.connectionCallbacks).addOnConnectionFailedListener(this.onConnectionFailedListener).build()
                 this.mGoogleApiClient.connect()
@@ -341,13 +341,13 @@ implements LogWriteTracker.OnLoggingDoneListener {
 
     @Nullable
     IBinder onBind(Intent intent) {
-        Debug.Printf("DriveSyncService is bound", new Object[0]);
+        Debug.Printf("DriveSyncService is bound", Array<Object>(0))
         this.isServiceBound = true
         return this.mMessenger.getBinder()
     }
 
     void onDestroy() {
-        Debug.Printf("Service destroyed", new Object[0]);
+        Debug.Printf("Service destroyed", Array<Object>(0))
         super.onDestroy()
     }
 
@@ -365,9 +365,9 @@ implements LogWriteTracker.OnLoggingDoneListener {
     }
 
     int onStartCommand(Intent object, int n, int n2) {
-        Debug.Printf("Service started.", new Object[0]);
+        Debug.Printf("Service started.", Array<Object>(0))
         if (object.hasExtra("deleteResolvableError")) {
-            object = UUID.fromString(object.getStringExtra("deleteResolvableError"));
+            object = UUID.fromString(object.getStringExtra("deleteResolvableError"))
             this.errorResolutionTracker.clearError((UUID)object, false)
             this.errorResolutionTracker.clearNotification()
         }
@@ -375,7 +375,7 @@ implements LogWriteTracker.OnLoggingDoneListener {
     }
 
     boolean onUnbind(Intent intent) {
-        Debug.Printf("DriveSyncService is unbound", new Object[0]);
+        Debug.Printf("DriveSyncService is unbound", Array<Object>(0))
         this.isServiceBound = false
         if (this.synchronizer != null) {
             this.synchronizer.flushOpenFiles(true, System.currentTimeMillis())
@@ -423,7 +423,7 @@ implements LogWriteTracker.OnLoggingDoneListener {
              *     at org.benf.cfr.reader.CfrDriverImpl.analyse(CfrDriverImpl.java:76)
              *     at org.benf.cfr.reader.Main.main(Main.java:54)
              */
-            throw new IllegalStateException("Decompilation failed");
+            throw IllegalStateException("Decompilation failed")
         }
     }
 }
