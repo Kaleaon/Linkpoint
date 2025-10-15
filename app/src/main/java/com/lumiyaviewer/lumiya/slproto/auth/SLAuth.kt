@@ -375,7 +375,7 @@ object SLAuth {
             r1 = r0
             goto L_0x0031
         */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.auth.SLAuth.SendLoginRequest(com.lumiyaviewer.lumiya.slproto.auth.SLAuthParams):com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply")
+        throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.auth.SLAuth.SendLoginRequest(com.lumiyaviewer.lumiya.slproto.auth.SLAuthParams):com.lumiyaviewer.lumiya.slproto.auth.SLAuthReply")
     }
 
     fun getPasswordHash(str: String): String {
@@ -391,7 +391,7 @@ object SLAuth {
             return SendLoginRequest(sLAuthParams)
         } catch (Exception e) {
             e.printStackTrace()
-            throw new IOException("Failed to login to simulator")
+            throw IOException("Failed to login to simulator")
         }
     }
 }

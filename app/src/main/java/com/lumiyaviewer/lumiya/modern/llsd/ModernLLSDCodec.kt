@@ -28,9 +28,9 @@ object ModernLLSDCodec {
     fun toJSON(llsd: LLSDNode): JSONObject {
         try {
             // Simplified approach for now - just return basic JSON structure
-            return new JSONObject().put("simplified", true)
+            return JSONObject().put("simplified", true)
         } catch (JSONException e) {
-            return new JSONObject()
+            return JSONObject()
         }
     }
     
@@ -41,36 +41,36 @@ object ModernLLSDCodec {
         
         fun createVector3(vector: LLVector3): LLSDMap {
             Map<String, LLSDNode> map = new HashMap<>()
-            map.put("X", new LLSDDouble(vector.x))
-            map.put("Y", new LLSDDouble(vector.y))
-            map.put("Z", new LLSDDouble(vector.z))
-            return new LLSDMap(map)
+            map.put("X", LLSDDouble(vector.x))
+            map.put("Y", LLSDDouble(vector.y))
+            map.put("Z", LLSDDouble(vector.z))
+            return LLSDMap(map)
         }
         
         fun createQuaternion(quat: LLQuaternion): LLSDMap {
             Map<String, LLSDNode> map = new HashMap<>()
-            map.put("X", new LLSDDouble(quat.x))
-            map.put("Y", new LLSDDouble(quat.y))
-            map.put("Z", new LLSDDouble(quat.z))
-            map.put("W", new LLSDDouble(quat.w))
-            return new LLSDMap(map)
+            map.put("X", LLSDDouble(quat.x))
+            map.put("Y", LLSDDouble(quat.y))
+            map.put("Z", LLSDDouble(quat.z))
+            map.put("W", LLSDDouble(quat.w))
+            return LLSDMap(map)
         }
         
         fun createUUID(uuid: UUID): LLSDUUID {
-            return new LLSDUUID(uuid)
+            return LLSDUUID(uuid)
         }
         
         fun createDate(date: Date): LLSDDate {
-            return new LLSDDate(date)
+            return LLSDDate(date)
         }
         
         fun createColor4(r: Float, g: Float, b: Float, a: Float): LLSDMap {
             Map<String, LLSDNode> map = new HashMap<>()
-            map.put("R", new LLSDDouble(r))
-            map.put("G", new LLSDDouble(g))
-            map.put("B", new LLSDDouble(b))
-            map.put("A", new LLSDDouble(a))
-            return new LLSDMap(map)
+            map.put("R", LLSDDouble(r))
+            map.put("G", LLSDDouble(g))
+            map.put("B", LLSDDouble(b))
+            map.put("A", LLSDDouble(a))
+            return LLSDMap(map)
         }
     }
     
@@ -83,12 +83,12 @@ object ModernLLSDCodec {
             try {
                 // Use simplified parsing approach
                 if (input == null || input.trim().isEmpty()) {
-                    return new LLSDMap(new HashMap<>())
+                    return LLSDMap(new HashMap<>())
                 }
                 // For now, return a simple map - full LLSD parsing is complex
-                return new LLSDMap(new HashMap<>())
+                return LLSDMap(new HashMap<>())
             } catch (Exception e) {
-                return new LLSDMap(new HashMap<>())
+                return LLSDMap(new HashMap<>())
             }
         }
         

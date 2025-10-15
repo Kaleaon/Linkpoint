@@ -37,7 +37,7 @@ object ModernTextureManagerTest {
         Log.i(TAG, "Testing initialization...")
         
         try {
-            ModernTextureManager manager = new ModernTextureManager(context)
+            ModernTextureManager manager = ModernTextureManager(context)
             if (manager != null && manager.isInitialized()) {
                 Log.i(TAG, "✓ ModernTextureManager created and initialized successfully")
             } else {
@@ -52,7 +52,7 @@ object ModernTextureManagerTest {
         Log.i(TAG, "Testing GPU capability detection...")
         
         try {
-            ModernTextureManager manager = new ModernTextureManager(context)
+            ModernTextureManager manager = ModernTextureManager(context)
             if (manager.isInitialized()) {
                 int optimalFormat = manager.getOptimalTextureFormat()
                 String formatName = ModernTextureManager.getFormatName(optimalFormat)
@@ -93,7 +93,7 @@ object ModernTextureManagerTest {
     private void testTextureDataClass() {
         Log.i(TAG, "Testing TextureData class...")
         
-        byte[] testData = new byte[1024]
+        byte[] testData = ByteArray(1024)
         ModernTextureManager.TextureData textureData = new ModernTextureManager.TextureData(
                 256, 256, 1, ModernTextureManager.FORMAT_ASTC_4x4_RGBA, testData
         )

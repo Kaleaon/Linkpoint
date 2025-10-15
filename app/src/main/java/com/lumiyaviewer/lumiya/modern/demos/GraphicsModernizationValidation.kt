@@ -35,7 +35,7 @@ object GraphicsModernizationValidation {
         Log.i(TAG, "\n--- Testing Modern Pipeline Features ---")
         
         try {
-            ModernLinkpointDemo demo = new ModernLinkpointDemo(context)
+            ModernLinkpointDemo demo = ModernLinkpointDemo(context)
             demo.initializeGraphics()
             demo.demonstrateModernGraphics()
             

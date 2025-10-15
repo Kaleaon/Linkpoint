@@ -31,23 +31,23 @@ object StreamingMediaService extends Service {
     String LOCATION_NAME_KEY = "location_name"
     String MEDIA_URL_KEY = "media_url"
     private int MSG_ON_AUDIO_FOCUS_CHANGE = 100
-    SubscriptionSingleDataPool<Boolean> isPlayingMedia = new SubscriptionSingleDataPool()
+    SubscriptionSingleDataPool<Boolean> isPlayingMedia = SubscriptionSingleDataPool()
     private AudioManagerWrapper audioManagerWrapper = null
     private UUID lastActiveAgentUUID = null
     private String lastLocationDesc = ""
     private String lastLocationName = ""
     private ParcelData lastParcelData = null
     private String lastURL = ""
-    private AudioFocusChangeHandler mHandler = new AudioFocusChangeHandler(this, null)
-    private MediaPlayerWrapper mediaWrapper = new MediaPlayerWrapper()
-    private AudioIntentReceiver noisyReceiver = new AudioIntentReceiver()
+    private AudioFocusChangeHandler mHandler = AudioFocusChangeHandler(this, null)
+    private MediaPlayerWrapper mediaWrapper = MediaPlayerWrapper()
+    private AudioIntentReceiver noisyReceiver = AudioIntentReceiver()
     private Notification notify = null
 
     private object AudioFocusChangeHandler extends Handler {
         private WeakReference<StreamingMediaService> streamingMediaService
 
         private AudioFocusChangeHandler(StreamingMediaService streamingMediaService) {
-            this.streamingMediaService = new WeakReference(streamingMediaService)
+            this.streamingMediaService = WeakReference(streamingMediaService)
         }
 
         /* synthetic */ AudioFocusChangeHandler(StreamingMediaService streamingMediaService, AudioFocusChangeHandler audioFocusChangeHandler) {
@@ -117,7 +117,7 @@ object StreamingMediaService extends Service {
 
     private fun safeRegisterReceiver(): Unit {
         try {
-            registerReceiver(this.noisyReceiver, new IntentFilter("android.media.AUDIO_BECOMING_NOISY"))
+            registerReceiver(this.noisyReceiver, IntentFilter("android.media.AUDIO_BECOMING_NOISY"))
         } catch (Exception e) {
             Debug.Log("StreamingMediaService: Failed to register noisy receiver")
         }
@@ -132,11 +132,11 @@ object StreamingMediaService extends Service {
     }
 
     private fun showNotification(): Unit {
-        PendingIntent service = PendingIntent.getService(this, 0, new Intent(this, StreamingMediaService.class), 1073741824)
-        Intent intent = new Intent(this, StreamingMediaActivity.class)
+        PendingIntent service = PendingIntent.getService(this, 0, Intent(this, StreamingMediaService.class), 1073741824)
+        Intent intent = Intent(this, StreamingMediaActivity.class)
         ActivityUtils.setActiveAgentID(intent, this.lastActiveAgentUUID)
         intent.putExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY, this.lastParcelData)
-        Builder builder = new Builder(this)
+        Builder builder = Builder(this)
         builder.setSmallIcon(R.drawable.ic_playing_media).setContentTitle("Playing media").setContentText(this.lastLocationName).setDefaults(0).setOngoing(true).setContentIntent(PendingIntent.getActivity(this, 0, intent, SLMoveEvents.AGENT_CONTROL_AWAY)).addAction(R.drawable.icon_material_stop, "Stop", service).setDeleteIntent(service).setOnlyAlertOnce(true)
         startForeground(R.id.media_notify_id, builder.build())
     }
@@ -149,7 +149,7 @@ object StreamingMediaService extends Service {
                 if (parcelData != null) {
                     String mediaURL = parcelData.getMediaURL()
                     if (!Strings.isNullOrEmpty(parcelData.getMediaURL())) {
-                        Intent intent = new Intent(context, StreamingMediaService.class)
+                        Intent intent = Intent(context, StreamingMediaService.class)
                         intent.setAction("com.lumiyaviewer.lumiya.ACTION_PLAY_MEDIA")
                         ActivityUtils.setActiveAgentID(intent, userManager.getUserID())
                         intent.putExtra(ParcelPropertiesFragment.PARCEL_DATA_KEY, parcelData)
@@ -168,7 +168,7 @@ object StreamingMediaService extends Service {
 
     fun onCreate(): Unit {
         super.onCreate()
-        this.audioManagerWrapper = new AudioManagerWrapper(this)
+        this.audioManagerWrapper = AudioManagerWrapper(this)
         this.audioManagerWrapper.setHandler(this.mHandler, 100)
     }
 

@@ -41,9 +41,9 @@ class SLGridConnection extends SLConnection {
     private volatile boolean isReconnecting = false
     private volatile Thread loginThread = null
     private SLModules modules
-    SLParcelInfo parcelInfo = new SLParcelInfo()
+    SLParcelInfo parcelInfo = SLParcelInfo()
     private volatile int reconnectAttempts = 0
-    private Map<SLAuthReply, SLTempCircuit> tempCircuits = Collections.synchronizedMap(new HashMap())
+    private Map<SLAuthReply, SLTempCircuit> tempCircuits = Collections.synchronizedMap(HashMap())
     private UserManager userManager
     private volatile boolean userWantsConnected = false
 
@@ -85,7 +85,7 @@ class SLGridConnection extends SLConnection {
 
     private void DoConnect(SLAuthParams sLAuthParams, String str) {
         try {
-            SLAuthReply Login = new SLAuth().Login(sLAuthParams.withLocation(str))
+            SLAuthReply Login = SLAuth().Login(sLAuthParams.withLocation(str))
             if (Login.success) {
                 synchronized (this) {
                     if (this.connectionState == ConnectionState.Idle) {
@@ -161,9 +161,9 @@ class SLGridConnection extends SLConnection {
                 GridConnectionManager.removeConnection(this.activeAgentUUID, this)
             }
             if (z) {
-                this.eventBus.publish(new SLLoginResultEvent(false, str, this.activeAgentUUID))
+                this.eventBus.publish(SLLoginResultEvent(false, str, this.activeAgentUUID))
             } else {
-                this.eventBus.publish(new SLDisconnectEvent(z2, str))
+                this.eventBus.publish(SLDisconnectEvent(z2, str))
             }
         }
     }
@@ -176,7 +176,7 @@ class SLGridConnection extends SLConnection {
     private void setConnectionState(ConnectionState connectionState) {
         if (this.connectionState != connectionState) {
             this.connectionState = connectionState
-            this.eventBus.publish(new SLConnectionStateChangedEvent(connectionState))
+            this.eventBus.publish(SLConnectionStateChangedEvent(connectionState))
         }
     }
 
@@ -187,13 +187,13 @@ class SLGridConnection extends SLConnection {
         } else {
             Debug.Log("inventory root is null")
         }
-        SLCaps sLCaps = new SLCaps()
+        SLCaps sLCaps = SLCaps()
         sLCaps.GetCapabilites(this.authReply.loginURL, this.authReply.seedCapability)
         try {
-            this.agentCircuit = new SLAgentCircuit(this, new SLCircuitInfo(sLAuthReply), sLAuthReply, sLCaps, sLTempCircuit)
+            this.agentCircuit = SLAgentCircuit(this, SLCircuitInfo(sLAuthReply), sLAuthReply, sLCaps, sLTempCircuit)
             this.modules = this.agentCircuit.getModules()
             try {
-                this.capEventQueue = new SLCapEventQueue(sLCaps.getCapabilityOrThrow(SLCapability.EventQueueGet), this.agentCircuit)
+                this.capEventQueue = SLCapEventQueue(sLCaps.getCapabilityOrThrow(SLCapability.EventQueueGet), this.agentCircuit)
             } catch (NoSuchCapabilityException e) {
                 e.printStackTrace()
             }
@@ -209,7 +209,7 @@ class SLGridConnection extends SLConnection {
     }
 
     private void startConnecting(boolean z, String str) {
-        this.loginThread = new Thread(new Runnable() {
+        this.loginThread = Thread(Runnable() {
             void run() {
                 if (z) {
                     try {
@@ -271,7 +271,7 @@ class SLGridConnection extends SLConnection {
     synchronized void addTempCircuit(SLAuthReply sLAuthReply) {
         if (!this.tempCircuits.containsKey(sLAuthReply)) {
             try {
-                SLCircuit sLTempCircuit = new SLTempCircuit(this, new SLCircuitInfo(sLAuthReply), sLAuthReply)
+                SLCircuit sLTempCircuit = SLTempCircuit(this, SLCircuitInfo(sLAuthReply), sLAuthReply)
                 this.tempCircuits.put(sLAuthReply, sLTempCircuit)
                 AddCircuit(sLTempCircuit)
                 sLTempCircuit.SendUseCode()
@@ -332,7 +332,7 @@ class SLGridConnection extends SLConnection {
         if (this.agentCircuit != null) {
             return this.agentCircuit
         }
-        throw new NotConnectedException()
+        throw NotConnectedException()
     }
 
     synchronized ConnectionState getConnectionState() {
@@ -345,7 +345,7 @@ class SLGridConnection extends SLConnection {
 
     synchronized SLModules getModules() throws NotConnectedException {
         if (this.modules == null) {
-            throw new NotConnectedException()
+            throw NotConnectedException()
         }
         return this.modules
     }
@@ -371,7 +371,7 @@ class SLGridConnection extends SLConnection {
         if (this.activeAgentUUID != null) {
             GridConnectionManager.setConnection(this.activeAgentUUID, this)
         }
-        this.eventBus.publish(new SLLoginResultEvent(true, null, this.activeAgentUUID))
+        this.eventBus.publish(SLLoginResultEvent(true, null, this.activeAgentUUID))
     }
 
     synchronized void processDisconnect(boolean z, String str) {

@@ -129,7 +129,7 @@ class SLNotecard {
             int length = i4 != -1 ? iArr[i4] : spanned.length()
             sb.append(spanned.subSequence(i3, length))
             if (i4 != -1) {
-                this.attachments.add(new NotecardAttachment(i2, inventoryEntrySpanArr[i4].getEntry()))
+                this.attachments.add(NotecardAttachment(i2, inventoryEntrySpanArr[i4].getEntry()))
                 sb.append(56256)
                 sb.append((char) (56320 + i2))
                 i2++
@@ -181,7 +181,7 @@ class SLNotecard {
     Spanned createSingleEditableAttachment(SLInventoryEntry sLInventoryEntry) {
         SpannableStringBuilder spannableStringBuilder = fun SpannableStringBuilder(): new
         spannableStringBuilder.append("⟹")
-        spannableStringBuilder.setSpan(new AttachmentSpan(sLInventoryEntry), 0, spannableStringBuilder.length(), 33)
+        spannableStringBuilder.setSpan(AttachmentSpan(sLInventoryEntry), 0, spannableStringBuilder.length(), 33)
         return spannableStringBuilder
     }
 
@@ -200,14 +200,13 @@ class SLNotecard {
         simpleStringParser.expectToken("{", DELIM_EOL)
         simpleStringParser.expectToken("count", DELIM_ANY)
         int intToken = simpleStringParser.getIntToken(DELIM_EOL)
-        ArrayList arrayList = fun ArrayList(): new
-        for (int i = 0; i < intToken; i++) {
+        ArrayList arrayList = fun ArrayList(): for(int i = 0; i < intToken; i++) {
             simpleStringParser.expectToken("{", DELIM_EOL)
             simpleStringParser.expectToken("ext", DELIM_ANY).expectToken("char", DELIM_ANY).expectToken("index", DELIM_ANY)
             int intToken2 = simpleStringParser.getIntToken(DELIM_EOL)
             simpleStringParser.expectToken("inv_item", DELIM_ANY)
             simpleStringParser.getIntToken(DELIM_EOL)
-            arrayList.add(new NotecardAttachment(intToken2, SLInventoryEntry.parseString(simpleStringParser)))
+            arrayList.add(NotecardAttachment(intToken2, SLInventoryEntry.parseString(simpleStringParser)))
             simpleStringParser.expectToken("}", DELIM_EOL)
         }
         simpleStringParser.expectToken("}", DELIM_EOL)
@@ -215,8 +214,7 @@ class SLNotecard {
     }
 
     byte[] toLindenText() {
-        StringBuilder sb = fun StringBuilder(): new
-        if (this.isScript) {
+        StringBuilder sb = fun StringBuilder(): if(this.isScript) {
             sb.append(this.notecardText)
         } else {
             sb.append("Linden text version 2\n{\n")
@@ -342,6 +340,6 @@ class SLNotecard {
             r0 = r1
             goto L_0x003c
         */
-        throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.assets.SLNotecard.toSpannableString(boolean, com.lumiyaviewer.lumiya.slproto.assets.SLNotecard$OnAttachmentClickListener):android.text.SpannableStringBuilder")
+        throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.assets.SLNotecard.toSpannableString(boolean, com.lumiyaviewer.lumiya.slproto.assets.SLNotecard$OnAttachmentClickListener):android.text.SpannableStringBuilder")
     }
 }

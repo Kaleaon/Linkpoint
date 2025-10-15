@@ -29,7 +29,7 @@ class ModernConnectionManager {
     private Context context
     private ConnectionDiagnostics diagnostics
     private ExecutorService executor
-    private AtomicInteger activeConnections = new AtomicInteger(0)
+    private AtomicInteger activeConnections = AtomicInteger(0)
     
     // Connection state
     private volatile ConnectionState state = ConnectionState.DISCONNECTED
@@ -46,9 +46,9 @@ class ModernConnectionManager {
 
     ModernConnectionManager(Context context) {
         this.context = context.getApplicationContext()
-        this.diagnostics = new ConnectionDiagnostics(context)
+        this.diagnostics = ConnectionDiagnostics(context)
         this.executor = Executors.newCachedThreadPool(r -> {
-            Thread t = new Thread(r, "SL-Connection-" + r.hashCode())
+            Thread t = Thread(r, "SL-Connection-" + r.hashCode())
             t.setDaemon(true)
             return t
         })
@@ -67,7 +67,7 @@ class ModernConnectionManager {
             .thenCompose(diagnosticResult -> {
                 if (diagnosticResult.getOverallHealth() == ConnectionDiagnostics.DiagnosticResult.HealthLevel.NO_CONNECTIVITY) {
                     setState(ConnectionState.ERROR)
-                    throw new ConnectionException("No network connectivity available")
+                    throw ConnectionException("No network connectivity available")
                 }
                 
                 if (diagnosticResult.getOverallHealth() == ConnectionDiagnostics.DiagnosticResult.HealthLevel.CRITICAL) {
@@ -105,7 +105,7 @@ class ModernConnectionManager {
 
     private CompletableFuture<SLAuthReply> attemptConnectionWithRetry(SLAuthParams authParams, int attemptNumber) {
         if (attemptNumber >= MAX_RETRY_ATTEMPTS) {
-            throw new ConnectionException("Maximum retry attempts exceeded (" + MAX_RETRY_ATTEMPTS + ")")
+            throw ConnectionException("Maximum retry attempts exceeded (" + MAX_RETRY_ATTEMPTS + ")")
         }
         
         Log.d(TAG, "Connection attempt " + (attemptNumber + 1) + "/" + MAX_RETRY_ATTEMPTS)
@@ -125,13 +125,13 @@ class ModernConnectionManager {
                             Thread.sleep(delay)
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt()
-                            throw new ConnectionException("Connection retry interrupted")
+                            throw ConnectionException("Connection retry interrupted")
                         }
                         
                         setState(ConnectionState.RECONNECTING)
                         return attemptConnectionWithRetry(authParams, attemptNumber + 1).join()
                     } else {
-                        throw new ConnectionException("All connection attempts failed", throwable)
+                        throw ConnectionException("All connection attempts failed", throwable)
                     }
                 }
                 
@@ -151,17 +151,17 @@ class ModernConnectionManager {
             SLAuthReply result = auth.Login(correctedParams)
             
             if (result == null) {
-                throw new ConnectionException("Authentication returned null response")
+                throw ConnectionException("Authentication returned null response")
             }
             
             if (!result.success) {
-                throw new ConnectionException("Authentication failed: " + result.message)
+                throw ConnectionException("Authentication failed: " + result.message)
             }
             
             return result
             
         } catch (Exception e) {
-            throw new ConnectionException("Connection failed during authentication", e)
+            throw ConnectionException("Connection failed during authentication", e)
         }
     }
 
@@ -189,7 +189,7 @@ class ModernConnectionManager {
         // Create corrected auth params if URL was changed
         if (!loginURL.equals(original.loginURL)) {
             Log.i(TAG, "Creating new auth params with corrected login URL")
-            return new SLAuthParams(
+            return SLAuthParams(
                 original.loginName,
                 original.passwordHash,
                 original.clientID,

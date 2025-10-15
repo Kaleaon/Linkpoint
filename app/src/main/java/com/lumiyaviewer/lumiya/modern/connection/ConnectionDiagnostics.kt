@@ -53,7 +53,7 @@ class ConnectionDiagnostics {
         return CompletableFuture.supplyAsync(() -> {
             Log.i(TAG, "Starting comprehensive Second Life connection diagnosis")
             
-            DiagnosticResult result = new DiagnosticResult()
+            DiagnosticResult result = DiagnosticResult()
             
             // Test 1: Network availability
             result.networkAvailable = isNetworkAvailable()
@@ -192,7 +192,7 @@ class ConnectionDiagnostics {
         boolean loginServerWorking = false
         boolean proxyDetected = false
         
-        private StringBuilder issues = new StringBuilder()
+        private StringBuilder issues = StringBuilder()
         
         void addIssue(String issue) {
             if (issues.length() > 0) {

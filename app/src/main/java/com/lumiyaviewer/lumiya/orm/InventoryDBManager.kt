@@ -9,8 +9,8 @@ import java.util.UUID
 import javax.annotation.Nullable
 
 object InventoryDBManager {
-    private Object lock = new Object()
-    private Map<UUID, InventoryDB> userDBs = new HashMap()
+    private Object lock = Object()
+    private Map<UUID, InventoryDB> userDBs = HashMap()
 
     @Nullable
     fun getUserInventoryDB(uuid: UUID): InventoryDB {
@@ -24,11 +24,11 @@ object InventoryDBManager {
                 try {
                     File cacheDir = GlobalOptions.getInstance().getCacheDir("database")
                     if (cacheDir == null) {
-                        throw new IllegalStateException("Database cache directory is null")
+                        throw IllegalStateException("Database cache directory is null")
                     }
                     
-                    File dbFile = new File(cacheDir, "inventory-" + uuid.toString() + ".db")
-                    inventoryDB = new InventoryDB(SLInventoryOpenHelper.getInstance().openOrCreateDatabase(dbFile.getAbsolutePath()))
+                    File dbFile = File(cacheDir, "inventory-" + uuid.toString() + ".db")
+                    inventoryDB = InventoryDB(SLInventoryOpenHelper.getInstance().openOrCreateDatabase(dbFile.getAbsolutePath()))
                     userDBs.put(uuid, inventoryDB)
                 } catch (Exception e) {
                     android.util.Log.e("InventoryDBManager", "Failed to create InventoryDB for user " + uuid, e)

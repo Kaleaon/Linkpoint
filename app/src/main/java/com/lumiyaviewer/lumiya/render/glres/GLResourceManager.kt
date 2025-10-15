@@ -10,12 +10,12 @@ import java.util.Set
 import java.util.WeakHashMap
 
 class GLResourceManager {
-    private val glCleanableLock: Any = new Object()
-    private val glCleanables: Set<GLCleanable> = Collections.newSetFromMap(new WeakHashMap())
+    private val glCleanableLock: Any = Object()
+    private val glCleanables: Set<GLCleanable> = Collections.newSetFromMap(WeakHashMap())
     /* access modifiers changed from: private */
     ReferenceQueue<GLGenericResource> refQueue = new ReferenceQueue<>()
     /* access modifiers changed from: private */
-    Set<GLGenericResourceReference> refSet = Collections.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap()))
+    Set<GLGenericResourceReference> refSet = Collections.synchronizedSet(Collections.newSetFromMap(IdentityHashMap()))
 
     abstract class GLGenericResourceReference extends PhantomReference<GLGenericResource> {
         GLGenericResourceReference(GLGenericResource gLGenericResource, GLResourceManager gLResourceManager) {

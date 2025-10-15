@@ -30,7 +30,7 @@ import com.lumiyaviewer.lumiya.debug.AutoLogUploader
  */
 object LumiyaApp extends MultiDexApplication {
     private String TAG = "LumiyaApp"
-    private DisplayMetrics displayMetrics = new DisplayMetrics()
+    private DisplayMetrics displayMetrics = DisplayMetrics()
     private Context mContext
     private SharedPreferences prefs
     
@@ -54,7 +54,7 @@ object LumiyaApp extends MultiDexApplication {
             return "Application context not initialized"
         }
         
-        StringBuilder status = new StringBuilder()
+        StringBuilder status = StringBuilder()
         status.append("Lumiya Application Status:\n")
         status.append("- Context: ").append(mContext != null ? "OK" : "NULL").append("\n")
         status.append("- Modern Components: ").append(modernDemo != null ? "Active" : "Safe Mode").append("\n")
@@ -143,7 +143,7 @@ object LumiyaApp extends MultiDexApplication {
         try {
             AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE)
             PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, 
-                new Intent(getContext(), LauncherActivity.class), 
+                Intent(getContext(), LauncherActivity.class), 
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE)
             alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent)
             System.exit(0)
@@ -225,7 +225,7 @@ object LumiyaApp extends MultiDexApplication {
             }
             
             // Initialize modern components with individual exception handling
-            modernDemo = new ModernLinkpointDemo(this)
+            modernDemo = ModernLinkpointDemo(this)
             Log.i(TAG, "Modern Linkpoint systems initialized successfully")
             
         } catch (NoClassDefFoundError e) {

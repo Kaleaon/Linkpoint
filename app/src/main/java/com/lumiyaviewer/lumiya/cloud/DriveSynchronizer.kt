@@ -148,7 +148,7 @@ class DriveSynchronizer {
         }
         this.waitingForSyncComplete.add(onSyncCompletedListener)
         if (this.isSyncing) return
-        Debug.Printf("LumiyaCloud: requesting drive sync.", new Object[0])
+        Debug.Printf("LumiyaCloud: requesting drive sync.", Array<Object>(0))
         this.isSyncing = true
         Drive.DriveApi.requestSync(this.googleApiClient).setResultCallback(this.onRequestSyncResult)
     }

@@ -42,9 +42,9 @@ class ModernAssetManager {
         this.context = context
         this.loadingExecutor = createPriorityExecutor()
         this.assetCache = new ConcurrentHashMap<>()
-        this.totalCacheSize = new AtomicLong(0)
-        this.networkMonitor = new NetworkQualityMonitor()
-        this.priorityQueue = new AssetPriorityQueue()
+        this.totalCacheSize = AtomicLong(0)
+        this.networkMonitor = NetworkQualityMonitor()
+        this.priorityQueue = AssetPriorityQueue()
         
         // Start background cache management
         startCacheManagement()
@@ -56,12 +56,12 @@ class ModernAssetManager {
      * Create priority-based executor for asset loading
      */
     private ExecutorService createPriorityExecutor() {
-        return new ThreadPoolExecutor(
+        return ThreadPoolExecutor(
             2, // Core threads
             4, // Max threads
             60L, TimeUnit.SECONDS,
             new PriorityBlockingQueue<Runnable>(),
-            r -> new Thread(r, "AssetLoader-" + System.currentTimeMillis())
+            r -> Thread(r, "AssetLoader-" + System.currentTimeMillis())
         )
     }
     
@@ -97,7 +97,7 @@ class ModernAssetManager {
         }
         
         // Create prioritized loading task
-        PrioritizedAssetTask task = new PrioritizedAssetTask(assetId, type, priority, quality, cacheKey)
+        PrioritizedAssetTask task = PrioritizedAssetTask(assetId, type, priority, quality, cacheKey)
         
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -131,7 +131,7 @@ class ModernAssetManager {
      * Get current cache statistics
      */
     CacheStats getCacheStats() {
-        return new CacheStats(
+        return CacheStats(
             assetCache.size(),
             totalCacheSize.get(),
             MAX_CACHE_SIZE,
@@ -374,7 +374,7 @@ class ModernAssetManager {
             }
             
             Log.d(TAG, "Loaded " + assetId + ": " + scaledSize + " bytes at quality " + quality)
-            return new AssetData(assetId, type, data, quality)
+            return AssetData(assetId, type, data, quality)
             
         } catch (InterruptedException e) {
             Log.w(TAG, "Asset loading interrupted: " + assetId)
@@ -399,7 +399,7 @@ class ModernAssetManager {
     private void cacheAsset(String cacheKey, AssetData assetData) {
         if (assetData == null) return
         
-        CachedAsset cached = new CachedAsset(assetData)
+        CachedAsset cached = CachedAsset(assetData)
         
         // Check cache size limits
         long newSize = totalCacheSize.addAndGet(assetData.getSize())
@@ -432,7 +432,7 @@ class ModernAssetManager {
     
     private void startCacheManagement() {
         // Background thread for cache maintenance
-        Thread cacheManager = new Thread(() -> {
+        Thread cacheManager = Thread(() -> {
             while (!Thread.currentThread().isInterrupted()) {
                 try {
                     Thread.sleep(60000); // Check every minute

@@ -17,9 +17,9 @@ import javax.annotation.Nonnull
 
 class WeakQueue<T> implements BlockingQueue<T> {
     private Lock lock = fun ReentrantLock(): new
-    private Set<T> lowPriorityQueue = Collections.newSetFromMap(new WeakHashMap())
+    private Set<T> lowPriorityQueue = Collections.newSetFromMap(WeakHashMap())
     private Condition notEmpty = this.lock.newCondition()
-    private Set<T> queue = Collections.newSetFromMap(new WeakHashMap())
+    private Set<T> queue = Collections.newSetFromMap(WeakHashMap())
 
     interface LowPriority {
     }

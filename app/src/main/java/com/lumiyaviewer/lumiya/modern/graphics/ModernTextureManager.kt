@@ -177,7 +177,7 @@ class ModernTextureManager {
      * Analyze texture data to determine format and properties
      */
     private TextureInfo analyzeTextureData(byte[] data) {
-        TextureInfo info = new TextureInfo()
+        TextureInfo info = TextureInfo()
         
         // Check for common texture format headers
         if (data.length >= 12) {
@@ -322,7 +322,7 @@ class ModernTextureManager {
      * Upload texture data to GPU
      */
     private int uploadToGPU(byte[] textureData, int format) {
-        int[] textureHandle = new int[1]
+        int[] textureHandle = IntArray(1)
         GLES30.glGenTextures(1, textureHandle, 0)
         
         if (textureHandle[0] == 0) {

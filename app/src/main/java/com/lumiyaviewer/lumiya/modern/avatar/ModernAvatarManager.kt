@@ -408,17 +408,17 @@ class ModernAvatarManager {
             }
             
             Builder withSkinColor(float r, float g, float b, float a) {
-                this.skinColor = new float[]{r, g, b, a}
+                this.skinColor = arrayOf(){r, g, b, a}
                 return this
             }
             
             Builder withHairColor(float r, float g, float b, float a) {
-                this.hairColor = new float[]{r, g, b, a}
+                this.hairColor = arrayOf(){r, g, b, a}
                 return this
             }
             
             Builder withEyeColor(float r, float g, float b, float a) {
-                this.eyeColor = new float[]{r, g, b, a}
+                this.eyeColor = arrayOf(){r, g, b, a}
                 return this
             }
             

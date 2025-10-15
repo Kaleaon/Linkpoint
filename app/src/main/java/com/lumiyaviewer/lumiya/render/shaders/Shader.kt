@@ -46,7 +46,7 @@ enum class class Shader {
 
     private String getShaderCode(ShaderPreprocessor shaderPreprocessor) {
         try {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(LumiyaApp.getAssetManager().open("shaders/" + this.fileName)))
+            BufferedReader bufferedReader = BufferedReader(InputStreamReader(LumiyaApp.getAssetManager().open("shaders/" + this.fileName)))
             String processCode = shaderPreprocessor.processCode(bufferedReader)
             bufferedReader.close()
             return processCode
@@ -60,18 +60,18 @@ enum class class Shader {
         String shaderCode = getShaderCode(shaderPreprocessor)
         if (shaderCode == null) {
             this.handle = 0
-            throw new ShaderCompileException("No shader code for " + this.fileName)
+            throw ShaderCompileException("No shader code for " + this.fileName)
         }
         this.handle = GLES20.glCreateShader(this.type)
         GLES20.glShaderSource(this.handle, shaderCode)
         GLES20.glCompileShader(this.handle)
-        int[] iArr = new int[1]
+        int[] iArr = IntArray(1)
         GLES20.glGetShaderiv(this.handle, 35713, iArr, 0)
         if (iArr[0] == 1) {
             return this.handle
         }
         shaderCode = GLES20.glGetShaderInfoLog(this.handle)
-        throw new ShaderCompileException(String.format("Shader (%s) compile error: '%s'", new Object[]{this.fileName, shaderCode}))
+        throw ShaderCompileException(String.format("Shader (%s) compile error: '%s'", new Object[]{this.fileName, shaderCode}))
     }
 
     int getHandle() {

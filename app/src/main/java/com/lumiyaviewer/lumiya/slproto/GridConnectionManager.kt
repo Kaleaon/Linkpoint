@@ -7,8 +7,8 @@ import javax.annotation.Nonnull
 import javax.annotation.Nullable
 
 object GridConnectionManager {
-    private Map<UUID, SLGridConnection> connections = new WeakHashMap()
-    private Object lock = new Object()
+    private Map<UUID, SLGridConnection> connections = WeakHashMap()
+    private Object lock = Object()
 
     @Nullable
     fun getConnection(uuid: UUID): SLGridConnection {

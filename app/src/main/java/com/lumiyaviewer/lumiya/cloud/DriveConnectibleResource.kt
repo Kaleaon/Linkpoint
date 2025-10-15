@@ -123,7 +123,7 @@ abstract class DriveConnectibleResource {
                 this.this$0.startSearching(driveFolder)
             }
         }
-        this.onParentFolderReadyForSearch = new OnResourceReadyListener(this){
+        this.onParentFolderReadyForSearch = OnResourceReadyListener(this){
             DriveConnectibleResource this$0
             {
                 this.this$0 = driveConnectibleResource
@@ -217,7 +217,7 @@ abstract class DriveConnectibleResource {
                 this.this$0.startCreatingResource()
             }
         }
-        this.onParentFolderReady = new OnResourceReadyListener(this){
+        this.onParentFolderReady = OnResourceReadyListener(this){
             DriveConnectibleResource this$0
             {
                 this.this$0 = driveConnectibleResource

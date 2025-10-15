@@ -49,7 +49,7 @@ class DBHandleCache {
 
     private class InstanceHolder {
         /* access modifiers changed from: private */
-        DBHandleCache Instance = new DBHandleCache((DBHandleCache) null)
+        DBHandleCache Instance = DBHandleCache((DBHandleCache) null)
 
         private InstanceHolder() {
         }
@@ -59,7 +59,7 @@ class DBHandleCache {
         this.refQueue = new ReferenceQueue<>()
         this.refMap = fun IdentityHashMap(): new
         this.fileMap = fun HashMap(): new
-        Debug.Printf("DBHandleCache: Initialized.", new Object[0])
+        Debug.Printf("DBHandleCache: Initialized.", Array<Object>(0))
     }
 
     /* synthetic */ DBHandleCache(DBHandleCache dBHandleCache) {
@@ -117,7 +117,7 @@ class DBHandleCache {
                 throw e
             }
         }
-        dBHandle = new DBHandle(dBOpenRef.getDB())
+        dBHandle = DBHandle(dBOpenRef.getDB())
         dBOpenRef.acquireReference()
         this.refMap.put(new PhantomReference<>(dBHandle, this.refQueue), dBOpenRef)
         return dBHandle

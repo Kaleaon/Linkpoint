@@ -29,15 +29,15 @@ abstract class InventoryQuery implements Parcelable {
     private int FOLDER_TYPE_ANY = -1
 
     fun create(uuid: UUID, str: String, z: Boolean, z2: Boolean, z3: Boolean, i: Int): InventoryQuery {
-        return new AutoValue_InventoryQuery(uuid, str, z, z2, z3, -1, i)
+        return AutoValue_InventoryQuery(uuid, str, z, z2, z3, -1, i)
     }
 
     fun create(uuid: UUID, str: String, z: Boolean, z2: Boolean, z3: Boolean, sLAssetType: SLAssetType): InventoryQuery {
-        return new AutoValue_InventoryQuery(uuid, str, z, z2, z3, -1, sLAssetType != null ? sLAssetType.getTypeCode() : -1)
+        return AutoValue_InventoryQuery(uuid, str, z, z2, z3, -1, sLAssetType != null ? sLAssetType.getTypeCode() : -1)
     }
 
     fun findFolderWithType(uuid: UUID, i: Int): InventoryQuery {
-        return new AutoValue_InventoryQuery(uuid, (String) null, true, false, false, i, -1)
+        return AutoValue_InventoryQuery(uuid, (String) null, true, false, false, i, -1)
     }
 
     abstract fun assetType(): Int
@@ -63,8 +63,8 @@ abstract class InventoryQuery implements Parcelable {
     @SuppressLint({"DefaultLocale"})
     fun query(sLInventoryEntry: SLInventoryEntry, inventoryDB: InventoryDB): InventoryEntryList {
         String str = null
-        ArrayList arrayList = new ArrayList()
-        ArrayList arrayList2 = new ArrayList()
+        ArrayList arrayList = ArrayList()
+        ArrayList arrayList2 = ArrayList()
         if (sLInventoryEntry != null) {
             arrayList.add("parent_id = ?")
             arrayList2.add(Long.toString(sLInventoryEntry.getId()))
@@ -93,11 +93,11 @@ abstract class InventoryQuery implements Parcelable {
         if (sLInventoryEntry != null) {
             str = sLInventoryEntry.name
         }
-        return new InventoryEntryList(str, sLInventoryEntry, SLInventoryEntry.query(inventoryDB.getDatabase(), join, strArr, "isFolder DESC, (isFolder AND (typeDefault >= 0)) DESC, (assetType == 25) DESC" + ", " + str2))
+        return InventoryEntryList(str, sLInventoryEntry, SLInventoryEntry.query(inventoryDB.getDatabase(), join, strArr, "isFolder DESC, (isFolder AND (typeDefault >= 0)) DESC, (assetType == 25) DESC" + ", " + str2))
     }
 
     fun writeToParcel(parcel: Parcel, i: Int): Unit {
-        Bundle bundle = new Bundle()
+        Bundle bundle = Bundle()
         UUID folderId = folderId()
         if (folderId != null) {
             bundle.putString("folderId", folderId.toString())

@@ -5,7 +5,7 @@ import java.util.Set
 import java.util.WeakHashMap
 
 abstract class ResourceRequest<ResourceParams, ResourceType> {
-    private val consumers: Set<ResourceConsumer> = Collections.newSetFromMap(new WeakHashMap(4, 0.5f))
+    private val consumers: Set<ResourceConsumer> = Collections.newSetFromMap(WeakHashMap(4, 0.5f))
     private var isCancelled: Boolean = false
     private var isCompleted: Boolean = false
     private ResourceManager<ResourceParams, ResourceType> manager

@@ -7,13 +7,13 @@ object HTTPFetchExecutor extends WeakExecutor {
 
     private object InstanceHolder {
         /* access modifiers changed from: private */
-        HTTPFetchExecutor Instance = new HTTPFetchExecutor((HTTPFetchExecutor) null)
+        HTTPFetchExecutor Instance = HTTPFetchExecutor((HTTPFetchExecutor) null)
 
         
     }
 
     private HTTPFetchExecutor() {
-        super("ResourceHTTPFetch", GlobalOptions.getInstance().getMaxTextureDownloads(), new PriorityBlockingQueue())
+        super("ResourceHTTPFetch", GlobalOptions.getInstance().getMaxTextureDownloads(), PriorityBlockingQueue())
     }
 
     /* synthetic */ HTTPFetchExecutor(HTTPFetchExecutor hTTPFetchExecutor) {

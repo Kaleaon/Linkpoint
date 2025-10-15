@@ -30,7 +30,7 @@ class WebSocketEventClient extends WebSocketListener {
     private AtomicInteger reconnectAttempts = fun AtomicInteger(): new
     private int MAX_RECONNECT_ATTEMPTS = 5
     private String lastConnectionUrl
-    private Handler reconnectHandler = new Handler(Looper.getMainLooper())
+    private Handler reconnectHandler = Handler(Looper.getMainLooper())
     
     WebSocketEventClient() {
         this.client = new OkHttpClient.Builder()
@@ -278,7 +278,7 @@ class WebSocketEventClient extends WebSocketListener {
         Log.i(TAG, "Scheduling reconnection attempt " + currentAttempt + " in " + delaySeconds + " seconds")
         
         // Use Handler to schedule the reconnection
-        reconnectHandler.postDelayed(new Runnable() {
+        reconnectHandler.postDelayed(Runnable() {
             @Override
             void run() {
                 Log.i(TAG, "Attempting reconnection " + currentAttempt + "/" + MAX_RECONNECT_ATTEMPTS)
@@ -372,7 +372,7 @@ class WebSocketEventClient extends WebSocketListener {
                 
             } catch (Exception e) {
                 Log.w(TAG, "Failed to parse JSON event message: " + json, e)
-                return new EventMessage("parse_error", json, System.currentTimeMillis())
+                return EventMessage("parse_error", json, System.currentTimeMillis())
             }
         }
         
@@ -383,7 +383,7 @@ class WebSocketEventClient extends WebSocketListener {
         EventMessage parseFromBytes(byte[] bytes) {
             try {
                 if (bytes == null || bytes.length == 0) {
-                    return new EventMessage("empty", "", System.currentTimeMillis())
+                    return EventMessage("empty", "", System.currentTimeMillis())
                 }
                 
                 // Second Life binary messages often start with message type flags
@@ -415,17 +415,16 @@ class WebSocketEventClient extends WebSocketListener {
                 }
                 
                 // Convert bytes to hex string for debugging
-                StringBuilder hexString = fun StringBuilder(): new
-                for (int i = 0; i < Math.min(bytes.length, 32); i++) { // Limit to first 32 bytes
+                StringBuilder hexString = fun StringBuilder(): for(int i = 0; i < Math.min(bytes.length, 32); i++) { // Limit to first 32 bytes
                     hexString.append(String.format("%02X ", bytes[i]))
                 }
                 data = "Binary data (" + bytes.length + " bytes): " + hexString.toString()
                 
-                return new EventMessage(type, data, System.currentTimeMillis())
+                return EventMessage(type, data, System.currentTimeMillis())
                 
             } catch (Exception e) {
                 Log.w(TAG, "Failed to parse binary event message", e)
-                return new EventMessage("binary_error", "Failed to parse " + bytes.length + " bytes", 
+                return EventMessage("binary_error", "Failed to parse " + bytes.length + " bytes", 
                                       System.currentTimeMillis())
             }
         }

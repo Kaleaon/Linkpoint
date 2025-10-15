@@ -89,7 +89,7 @@ object GLLoadedTexture extends GLResourceTexture {
             Bitmap decodeStream = BitmapFactory.decodeStream(open)
             open.close()
             if (decodeStream != null) {
-                return new GLLoadedTexture(renderContext, decodeStream)
+                return GLLoadedTexture(renderContext, decodeStream)
             }
             return null
         } catch (IOException e) {

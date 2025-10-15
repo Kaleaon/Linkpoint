@@ -22,7 +22,7 @@ object AvatarShapeParams {
         for (i = 0; i < avatarAppearance.AppearanceData_Fields.size(); i++) {
             Debug.Printf("appData[%d]: appVer %d, cofVer %d, flags 0x%x", Integer.valueOf(i), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).AppearanceVersion), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).CofVersion), Integer.valueOf(((AppearanceData) avatarAppearance.AppearanceData_Fields.get(i)).Flags))
         }
-        int[] iArr = new int[218]
+        int[] iArr = IntArray(218)
         i = 0
         while (i < 218) {
             if (i < avatarAppearance.VisualParam_Fields.size()) {
@@ -32,13 +32,13 @@ object AvatarShapeParams {
             }
             i++
         }
-        return new AvatarShapeParams(iArr)
+        return AvatarShapeParams(iArr)
     }
 
     @Nonnull
     fun create(avatarShapeParams: AvatarShapeParams, iArr: IntArray): AvatarShapeParams {
         if (iArr.length != 218) {
-            Object obj = new int[218]
+            Object obj = IntArray(218)
             System.arraycopy(iArr, 0, obj, 0, Math.min(iArr.length, 218))
             Object iArr2
             if (iArr2.length >= 218 || avatarShapeParams == null) {
@@ -48,7 +48,7 @@ object AvatarShapeParams {
                 iArr2 = obj
             }
         }
-        return new AvatarShapeParams(iArr2)
+        return AvatarShapeParams(iArr2)
     }
 
     fun equals(obj: Any): Boolean {

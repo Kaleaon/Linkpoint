@@ -28,10 +28,10 @@ class ModernSecondLifeFeatures {
     
     ModernSecondLifeFeatures(HybridProtocolManager protocolManager) {
         this.protocolManager = protocolManager
-        this.avatarManager = new ModernAvatarManager(protocolManager)
-        this.inventoryManager = new ModernInventoryManager(protocolManager)
-        this.chatManager = new ModernChatManager(protocolManager)
-        this.objectManager = new ModernObjectManager(protocolManager)
+        this.avatarManager = ModernAvatarManager(protocolManager)
+        this.inventoryManager = ModernInventoryManager(protocolManager)
+        this.chatManager = ModernChatManager(protocolManager)
+        this.objectManager = ModernObjectManager(protocolManager)
     }
     
     /**
@@ -121,7 +121,7 @@ class ModernSecondLifeFeatures {
         CompletableFuture<AvatarData> getAvatarDataAsync(UUID avatarId) {
             return CompletableFuture.supplyAsync(() -> {
                 // Fetch avatar data with modern features
-                AvatarData data = new AvatarData()
+                AvatarData data = AvatarData()
                 data.id = avatarId
                 data.name = "Avatar " + avatarId.toString().substring(0, 8)
                 data.supportsPBR = true; // Modern PBR material support
@@ -179,14 +179,14 @@ class ModernSecondLifeFeatures {
                 List<InventoryItem> items = new ArrayList<>()
                 
                 // Create sample items with modern features
-                InventoryItem item1 = new InventoryItem()
+                InventoryItem item1 = InventoryItem()
                 item1.id = UUID.randomUUID()
                 item1.name = "Modern PBR Shirt"
                 item1.type = InventoryItemType.CLOTHING
                 item1.supportsPBR = true
                 items.add(item1)
                 
-                InventoryItem item2 = new InventoryItem()
+                InventoryItem item2 = InventoryItem()
                 item2.id = UUID.randomUUID()
                 item2.name = "Smart Object"
                 item2.type = InventoryItemType.OBJECT
@@ -241,7 +241,7 @@ class ModernSecondLifeFeatures {
             return CompletableFuture.supplyAsync(() -> {
                 Log.d(TAG, "Sending chat message via modern system: " + message)
                 
-                ChatMessage chatMsg = new ChatMessage()
+                ChatMessage chatMsg = ChatMessage()
                 chatMsg.id = UUID.randomUUID()
                 chatMsg.content = message
                 chatMsg.channel = channel
@@ -299,7 +299,7 @@ class ModernSecondLifeFeatures {
                 }
                 
                 // Create modern object with advanced features
-                WorldObject obj = new WorldObject()
+                WorldObject obj = WorldObject()
                 obj.id = objectID
                 obj.name = "Modern Object " + objectID.toString().substring(0, 8)
                 obj.supportsPBR = true

@@ -20,9 +20,9 @@ class HybridSLTransport {
     private MessageRouter router
     
     HybridSLTransport() {
-        this.capsClient = new HTTP2CapsClient()
-        this.eventClient = new WebSocketEventClient()
-        this.router = new MessageRouter()
+        this.capsClient = HTTP2CapsClient()
+        this.eventClient = WebSocketEventClient()
+        this.router = MessageRouter()
         
         Log.i(TAG, "Hybrid transport layer initialized")
     }
@@ -82,11 +82,11 @@ class HybridSLTransport {
             case UDP_LEGACY:
                 // Legacy UDP not available in modern-only build
                 return CompletableFuture.failedFuture(
-                    new UnsupportedOperationException("UDP transport not available"))
+                    UnsupportedOperationException("UDP transport not available"))
                     
             default:
                 return CompletableFuture.failedFuture(
-                    new UnsupportedOperationException("Unknown transport: " + route))
+                    UnsupportedOperationException("Unknown transport: " + route))
         }
     }
     
@@ -98,7 +98,7 @@ class HybridSLTransport {
         
         try {
             if (!eventClient.isConnected()) {
-                future.completeExceptionally(new IllegalStateException("WebSocket not connected"))
+                future.completeExceptionally(IllegalStateException("WebSocket not connected"))
                 return future
             }
             
@@ -111,9 +111,9 @@ class HybridSLTransport {
             
             if (sent) {
                 // Simulate immediate acknowledgment for real-time messages
-                future.complete(new SLResponse("websocket_ack", "Message sent successfully"))
+                future.complete(SLResponse("websocket_ack", "Message sent successfully"))
             } else {
-                future.completeExceptionally(new RuntimeException("Failed to send WebSocket message"))
+                future.completeExceptionally(RuntimeException("Failed to send WebSocket message"))
             }
             
         } catch (Exception e) {
@@ -206,7 +206,7 @@ class HybridSLTransport {
                     Pattern mapPattern = Pattern.compile("<key>([^<]+)</key>\\s*<(string|integer|real|boolean)>([^<]*)</\\2>")
                     Matcher matcher = mapPattern.matcher(responseData)
                     
-                    StringBuilder parsed = new StringBuilder("LLSD Map: ")
+                    StringBuilder parsed = StringBuilder("LLSD Map: ")
                     while (matcher.find()) {
                         String key = matcher.group(1)
                         String type = matcher.group(2)
@@ -240,11 +240,11 @@ class HybridSLTransport {
             }
             
             Log.d(TAG, "Parsed CAPS response type: " + responseType)
-            return new SLResponse(responseType, parsedData)
+            return SLResponse(responseType, parsedData)
             
         } catch (Exception e) {
             Log.e(TAG, "Failed to parse HTTP/2 response", e)
-            return new SLResponse("parse_error", "Failed to parse response: " + e.getMessage())
+            return SLResponse("parse_error", "Failed to parse response: " + e.getMessage())
         }
     }
     
@@ -336,17 +336,17 @@ class HybridSLTransport {
             // Route asset-related messages via HTTP/2 CAPS
             if (messageType.contains("Asset") || messageType.contains("Upload") || 
                 messageType.contains("Texture") || messageType.contains("Inventory")) {
-                return new TransportRoute(TransportType.HTTP2_CAPS, "https://example.com/caps")
+                return TransportRoute(TransportType.HTTP2_CAPS, "https://example.com/caps")
             }
             
             // Route real-time messages via WebSocket
             if (messageType.contains("Chat") || messageType.contains("ObjectUpdate") || 
                 messageType.contains("Avatar") || messageType.contains("Position")) {
-                return new TransportRoute(TransportType.WEBSOCKET_REALTIME, null)
+                return TransportRoute(TransportType.WEBSOCKET_REALTIME, null)
             }
             
             // Default to HTTP/2 for modern build
-            return new TransportRoute(TransportType.HTTP2_CAPS, "https://example.com/caps")
+            return TransportRoute(TransportType.HTTP2_CAPS, "https://example.com/caps")
         }
     }
     

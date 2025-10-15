@@ -31,7 +31,7 @@ class HTTP2CapsClient {
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
-            .addInterceptor(new AuthenticationInterceptor())
+            .addInterceptor(AuthenticationInterceptor())
             .build()
     }
     
@@ -74,7 +74,7 @@ class HTTP2CapsClient {
             .addHeader("Accept", "application/llsd+xml")
             .build()
             
-        client.newCall(request).enqueue(new Callback() {
+        client.newCall(request).enqueue(Callback() {
             @Override
             void onFailure(Call call, IOException e) {
                 Log.e(TAG, "CAPS request failed for " + capUrl, e)
@@ -89,7 +89,7 @@ class HTTP2CapsClient {
                         Log.d(TAG, "CAPS response received: " + result.length() + " bytes")
                         future.complete(result)
                     } else {
-                        future.completeExceptionally(new IOException(
+                        future.completeExceptionally(IOException(
                             "CAPS request failed: " + response.code() + " " + response.message()))
                     }
                 }
@@ -105,7 +105,7 @@ class HTTP2CapsClient {
                                                      String contentType, ProgressListener progressListener) {
         CompletableFuture<String> future = new CompletableFuture<>()
         
-        RequestBody body = new ProgressRequestBody(
+        RequestBody body = ProgressRequestBody(
             RequestBody.create(assetData, MediaType.get(contentType)),
             progressListener
         )
@@ -116,7 +116,7 @@ class HTTP2CapsClient {
             .addHeader("User-Agent", "Lumiya/3.4.3 (Android)")
             .build()
             
-        client.newCall(request).enqueue(new Callback() {
+        client.newCall(request).enqueue(Callback() {
             @Override
             void onFailure(Call call, IOException e) {
                 Log.e(TAG, "Asset upload failed", e)
@@ -129,7 +129,7 @@ class HTTP2CapsClient {
                     if (response.isSuccessful() && responseBody != null) {
                         future.complete(responseBody.string())
                     } else {
-                        future.completeExceptionally(new IOException(
+                        future.completeExceptionally(IOException(
                             "Asset upload failed: " + response.code()))
                     }
                 }

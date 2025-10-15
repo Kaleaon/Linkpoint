@@ -7,11 +7,11 @@ import javax.annotation.Nullable
 
 abstract class DrawableTextureParams {
     fun create(uuid: UUID, textureClass: TextureClass): DrawableTextureParams {
-        return new AutoValue_DrawableTextureParams(uuid, textureClass, null, null)
+        return AutoValue_DrawableTextureParams(uuid, textureClass, null, null)
     }
 
     fun create(uuid: UUID, avatarTextureFaceIndex: AvatarTextureFaceIndex, uuid2: UUID): DrawableTextureParams {
-        return new AutoValue_DrawableTextureParams(uuid, TextureClass.Baked, avatarTextureFaceIndex, uuid2)
+        return AutoValue_DrawableTextureParams(uuid, TextureClass.Baked, avatarTextureFaceIndex, uuid2)
     }
 
     @Nullable
@@ -27,7 +27,7 @@ abstract class DrawableTextureParams {
         if (textureClass() == TextureClass.Prim && z) {
             storePath = storePath + "-hq"
         }
-        return new File(file, String.format("%s-raw/%02x/%s.raw", new Object[]{storePath, Integer.valueOf(i), uuid().toString()}))
+        return File(file, String.format("%s-raw/%02x/%s.raw", new Object[]{storePath, Integer.valueOf(i), uuid().toString()}))
     }
 
     abstract fun textureClass(): TextureClass

@@ -92,7 +92,7 @@ class ModernPerformanceMonitor {
     
     synchronized ModernPerformanceMonitor getInstance() {
         if (instance == null) {
-            instance = new ModernPerformanceMonitor()
+            instance = ModernPerformanceMonitor()
         }
         return instance
     }
@@ -160,7 +160,7 @@ class ModernPerformanceMonitor {
         double operationsPerSecond = totalOperations > 0 ? (1000.0 / averageDuration) : 0
         long memoryUsage = memoryUsageSnapshots.getOrDefault(operationName, 0L)
         
-        return new PerformanceMetrics(operationName, totalOperations, averageDuration,
+        return PerformanceMetrics(operationName, totalOperations, averageDuration,
                                      minDuration, maxDuration, operationsPerSecond, memoryUsage)
     }
     
@@ -195,7 +195,7 @@ class ModernPerformanceMonitor {
         String summary = generateBenchmarkSummary(category, categoryMetrics, benchmarkDuration)
         
         Log.i(TAG, "Completed benchmark for " + category.getDisplayName() + " in " + benchmarkDuration + "ms")
-        return new BenchmarkResult(category, categoryMetrics, benchmarkDuration, summary)
+        return BenchmarkResult(category, categoryMetrics, benchmarkDuration, summary)
     }
     
     private List<PerformanceMetrics> benchmarkAuthentication() {
@@ -364,7 +364,7 @@ class ModernPerformanceMonitor {
     private String generateBenchmarkSummary(BenchmarkCategory category, 
                                           List<PerformanceMetrics> metrics, 
                                           long benchmarkDuration) {
-        StringBuilder summary = new StringBuilder()
+        StringBuilder summary = StringBuilder()
         summary.append("=== ").append(category.getDisplayName()).append(" Benchmark Results ===\n\n")
         summary.append("Category: ").append(category.getDescription()).append("\n")
         summary.append("Total Benchmark Duration: ").append(benchmarkDuration).append("ms\n\n")
@@ -419,7 +419,7 @@ class ModernPerformanceMonitor {
         long usedMemory = totalMemory - freeMemory
         long maxMemory = runtime.maxMemory()
         
-        StringBuilder report = new StringBuilder()
+        StringBuilder report = StringBuilder()
         report.append("=== Memory Usage Report ===\n")
         report.append("Used Memory: ").append(formatMemoryUsage(usedMemory)).append("\n")
         report.append("Free Memory: ").append(formatMemoryUsage(freeMemory)).append("\n")
@@ -455,7 +455,7 @@ class ModernPerformanceMonitor {
      * Export performance data as formatted report
      */
     String exportPerformanceReport() {
-        StringBuilder report = new StringBuilder()
+        StringBuilder report = StringBuilder()
         report.append("=== Linkpoint Modern Performance Report ===\n")
         report.append("Generated: ").append(new java.util.Date()).append("\n\n")
         

@@ -51,16 +51,16 @@ class ModernLinkpointClient {
         this.context = context.getApplicationContext()
         
         // Initialize core systems
-        this.connectionManager = new ModernConnectionManager(context)
-        this.diagnostics = new ConnectionDiagnostics(context)
-        this.connectionBridge = new ConnectionIntegrationBridge(context)
-        this.authManager = new ModernAuthManager(context)
-        this.protocolManager = new HybridProtocolManager()
-        this.featuresManager = new ModernSecondLifeFeatures(protocolManager)
+        this.connectionManager = ModernConnectionManager(context)
+        this.diagnostics = ConnectionDiagnostics(context)
+        this.connectionBridge = ConnectionIntegrationBridge(context)
+        this.authManager = ModernAuthManager(context)
+        this.protocolManager = HybridProtocolManager()
+        this.featuresManager = ModernSecondLifeFeatures(protocolManager)
         
         // Executor for async operations
         this.executor = Executors.newCachedThreadPool(r -> {
-            Thread t = new Thread(r, "ModernLinkpoint-" + r.hashCode())
+            Thread t = Thread(r, "ModernLinkpoint-" + r.hashCode())
             t.setDaemon(true)
             return t
         })
@@ -84,7 +84,7 @@ class ModernLinkpointClient {
                     diagnostics.diagnoseAsync().get()
                 
                 if (diagnostic.getOverallHealth() == ConnectionDiagnostics.DiagnosticResult.HealthLevel.NO_CONNECTIVITY) {
-                    throw new LoginException("No network connectivity available")
+                    throw LoginException("No network connectivity available")
                 }
                 
                 Log.i(TAG, "Connection health: " + diagnostic.getOverallHealth())
@@ -97,7 +97,7 @@ class ModernLinkpointClient {
                     authManager.authenticateAsync(username, password).get()
                 
                 if (!authResult.isSuccessful()) {
-                    throw new LoginException("Authentication failed: " + authResult.getErrorMessage())
+                    throw LoginException("Authentication failed: " + authResult.getErrorMessage())
                 }
                 
                 Log.i(TAG, "Authentication successful")
@@ -112,7 +112,7 @@ class ModernLinkpointClient {
                 boolean connectionSuccess = connectionBridge.connectWithModernReliability(authParams).get()
                 
                 if (!connectionSuccess) {
-                    throw new LoginException("Connection to Second Life failed")
+                    throw LoginException("Connection to Second Life failed")
                 }
                 
                 setState(ClientState.CONNECTED)
@@ -160,7 +160,7 @@ class ModernLinkpointClient {
      */
     CompletableFuture<String> getStatusReportAsync() {
         return CompletableFuture.supplyAsync(() -> {
-            StringBuilder report = new StringBuilder()
+            StringBuilder report = StringBuilder()
             report.append("=== MODERN LINKPOINT CLIENT STATUS ===\n")
             report.append("Generated: ").append(new java.util.Date()).append("\n\n")
             
@@ -221,7 +221,7 @@ class ModernLinkpointClient {
         String loginUrl = gridUrl != null ? gridUrl : "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
         String gridName = deriveGridName(loginUrl)
         
-        return new SLAuthParams(username, password, clientId, startLocation, loginUrl, gridName)
+        return SLAuthParams(username, password, clientId, startLocation, loginUrl, gridName)
     }
     
     private String deriveGridName(String loginUrl) {

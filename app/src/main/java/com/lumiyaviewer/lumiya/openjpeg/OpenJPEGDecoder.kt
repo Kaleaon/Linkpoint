@@ -107,7 +107,7 @@ class OpenJPEGDecoder {
         }
         
         // Create minimal test data (not valid J2K, but tests native call)
-        byte[] testData = new byte[] {0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20}
+        byte[] testData = arrayOf() {0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20}
         
         try {
             int[] dimensions = getImageDimensions(testData)

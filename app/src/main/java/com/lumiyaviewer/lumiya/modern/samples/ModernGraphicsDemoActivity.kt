@@ -26,13 +26,13 @@ class ModernGraphicsDemoActivity : Activity {
         
         try {
             // Create OpenGL ES surface view
-            glSurfaceView = new GLSurfaceView(this)
+            glSurfaceView = GLSurfaceView(this)
             
             // Request OpenGL ES 3.0 context
             glSurfaceView.setEGLContextClientVersion(3)
             
             // Create modern renderer
-            renderer = new SimpleModernRenderer()
+            renderer = SimpleModernRenderer()
             glSurfaceView.setRenderer(renderer)
             
             // Set render mode to continuous for animation

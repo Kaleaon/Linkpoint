@@ -50,17 +50,17 @@ class HybridProtocolManager {
             .build()
             
         // WebSocket manager for real-time events
-        this.webSocketManager = new WebSocketManager()
+        this.webSocketManager = WebSocketManager()
         
         // Legacy UDP manager for compatibility
-        this.udpManager = new LegacyUDPManager()
+        this.udpManager = LegacyUDPManager()
         
         // Protocol router to determine optimal transport
-        this.router = new ProtocolRouter()
+        this.router = ProtocolRouter()
         
         // Executor for async operations
         this.executor = Executors.newCachedThreadPool(r -> {
-            Thread t = new Thread(r, "HybridProtocol-" + r.hashCode())
+            Thread t = Thread(r, "HybridProtocol-" + r.hashCode())
             t.setDaemon(true)
             return t
         })
@@ -193,7 +193,7 @@ class HybridProtocolManager {
             return message.serialize()
         } catch (Exception e) {
             Log.e(TAG, "Message serialization failed", e)
-            return new byte[0]
+            return ByteArray(0)
         }
     }
     
@@ -215,7 +215,7 @@ class HybridProtocolManager {
                         .url(websocketURL)
                         .build()
                     
-                    webSocket = client.newWebSocket(request, new WebSocketListener() {
+                    webSocket = client.newWebSocket(request, WebSocketListener() {
                         @Override
                         void onOpen(WebSocket webSocket, Response response) {
                             Log.i(TAG, "WebSocket connected")

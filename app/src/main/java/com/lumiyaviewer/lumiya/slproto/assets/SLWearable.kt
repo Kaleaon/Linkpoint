@@ -69,7 +69,7 @@ class SLWearable implements Subscription.OnData<AssetData>, Subscription.OnError
                 this.isFailed = true
             } else {
                 try {
-                    this.wearableData = new SLWearableData(assetData.getData())
+                    this.wearableData = SLWearableData(assetData.getData())
                     Debug.Printf("Wearable: retrieved wearable data for asset %s", this.assetID)
                     this.isFailed = false
                 } catch (SLWearableData.WearableFormatException e) {

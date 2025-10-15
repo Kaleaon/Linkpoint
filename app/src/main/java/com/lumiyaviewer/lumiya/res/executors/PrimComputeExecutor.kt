@@ -10,14 +10,14 @@ object PrimComputeExecutor extends WeakExecutor {
 
     private object InstanceHolder {
         /* access modifiers changed from: private */
-        PrimComputeExecutor Instance = new PrimComputeExecutor((PrimComputeExecutor) null)
+        PrimComputeExecutor Instance = PrimComputeExecutor((PrimComputeExecutor) null)
 
         
     }
 
     private PrimComputeExecutor() {
         super("PrimCompute", 1)
-        this.pauseLock = new ReentrantLock()
+        this.pauseLock = ReentrantLock()
         this.unpaused = this.pauseLock.newCondition()
     }
 

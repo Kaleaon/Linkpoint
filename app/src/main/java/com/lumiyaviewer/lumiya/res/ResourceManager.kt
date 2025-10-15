@@ -17,15 +17,15 @@ import javax.annotation.Nonnull
 
 abstract class ResourceManager<ResourceParams, ResourceType> {
     /* access modifiers changed from: private */
-    Queue<ResourceRequest<ResourceParams, ResourceType>> cancelledRequests = new ConcurrentLinkedQueue()
-    private val cleanup: Runnable = new Runnable() {
+    Queue<ResourceRequest<ResourceParams, ResourceType>> cancelledRequests = ConcurrentLinkedQueue()
+    private val cleanup: Runnable = Runnable() {
         fun run(): Unit {
             ResourceManager.this.collectReferences()
         }
     }
     private volatile ScheduledFuture<?> cleanupFuture = null
     private Cache<ResourceConsumer, ResourceRequest<ResourceParams, ResourceType>> consumerMap = CacheBuilder.newBuilder().weakKeys().removalListener(this.removalListener).build()
-    private val lock: Any = new Object()
+    private val lock: Any = Object()
     private RemovalListener<ResourceConsumer, ResourceRequest<ResourceParams, ResourceType>> removalListener = new RemovalListener<ResourceConsumer, ResourceRequest<ResourceParams, ResourceType>>() {
         fun onRemoval(removalNotification: ResourceType>>): Unit {
             ResourceConsumer key = removalNotification.getKey()

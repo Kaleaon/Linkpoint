@@ -91,10 +91,10 @@ class DaoMaster extends AbstractDaoMaster {
     }
 
     fun newSession(): DaoSession {
-        return new DaoSession(this.db, IdentityScopeType.Session, this.daoConfigMap)
+        return DaoSession(this.db, IdentityScopeType.Session, this.daoConfigMap)
     }
 
     fun newSession(identityScopeType: IdentityScopeType): DaoSession {
-        return new DaoSession(this.db, identityScopeType, this.daoConfigMap)
+        return DaoSession(this.db, identityScopeType, this.daoConfigMap)
     }
 }

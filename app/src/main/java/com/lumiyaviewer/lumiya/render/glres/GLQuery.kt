@@ -14,7 +14,7 @@ class GLQuery extends GLResource {
     ThreadLocal<int[]> idQuery = new ThreadLocal<int[]>() {
         /* access modifiers changed from: protected */
         int[] initialValue() {
-            return new int[1]
+            return IntArray(1)
         }
     }
     private boolean isQueryRunning = false
@@ -43,7 +43,7 @@ class GLQuery extends GLResource {
 
     GLQuery(GLResourceManager gLResourceManager) {
         super(gLResourceManager)
-        new GLQueryReference(this, this.handle, gLResourceManager)
+        GLQueryReference(this, this.handle, gLResourceManager)
     }
 
     /* access modifiers changed from: protected */

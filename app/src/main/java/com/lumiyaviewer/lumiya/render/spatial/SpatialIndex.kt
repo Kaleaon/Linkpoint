@@ -10,7 +10,7 @@ object SpatialIndex {
     private volatile SpatialObjectIndex objectIndex
 
     private object InstanceHolder {
-        private SpatialIndex instance = new SpatialIndex()
+        private SpatialIndex instance = SpatialIndex()
 
         
     }
@@ -45,7 +45,7 @@ object SpatialIndex {
 
     synchronized SpatialObjectIndex EnableObjectIndex(SpatialObjectIndex spatialObjectIndex, Object obj) {
         this.objectIndex = spatialObjectIndex
-        this.indexHolder = new WeakReference(obj)
+        this.indexHolder = WeakReference(obj)
         return this.objectIndex
     }
 

@@ -75,7 +75,7 @@ class ModernChatManager {
             try {
                 Log.i(TAG, "Sending local chat message: " + message)
                 
-                ChatMessage chatMsg = new ChatMessage(
+                ChatMessage chatMsg = ChatMessage(
                     UUID.randomUUID().toString(),
                     ChatMessage.Type.LOCAL,
                     message,
@@ -115,7 +115,7 @@ class ModernChatManager {
             try {
                 Log.i(TAG, "Sending group chat message to group: " + groupId)
                 
-                ChatMessage chatMsg = new ChatMessage(
+                ChatMessage chatMsg = ChatMessage(
                     UUID.randomUUID().toString(),
                     ChatMessage.Type.GROUP,
                     message,
