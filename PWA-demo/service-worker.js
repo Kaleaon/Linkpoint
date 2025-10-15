@@ -26,6 +26,13 @@ const STATIC_FILES = [
   './js/camera3d.js',
   './js/primitives3d.js',
   './js/scene3d.js',
+  './js/sl-xmlrpc.js',
+  './js/sl-messages.js',
+  './js/sl-circuit.js',
+  './js/sl-protocol-real.js',
+  './js/sl-connection-full.js',
+  './js/sl-mesh-loader.js',
+  './js/sl-object-manager.js',
   './manifest.json'
 ];
 

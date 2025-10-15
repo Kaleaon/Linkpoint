@@ -77,12 +77,16 @@ class ChatManager extends Utils.EventEmitter {
         channel: 'local'
       };
 
-      // Send to protocol (in real implementation)
-      if (this.protocol.isConnected()) {
+      // Send to protocol (real implementation)
+      if (this.protocol.sendChat) {
+        // Using SLConnectionFull
+        await this.protocol.sendChat(message, 0, 1);
+      } else if (this.protocol.isConnected && this.protocol.isConnected()) {
+        // Using ProtocolManager
         this.protocol.sendMessage('ChatFromViewer', {
           message: message,
-          channel: 0, // Local chat
-          type: 1 // Normal chat
+          channel: 0,
+          type: 1
         });
       }
 

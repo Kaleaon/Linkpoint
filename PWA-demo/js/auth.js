@@ -107,8 +107,16 @@ class AuthManager extends Utils.EventEmitter {
     }
 
     try {
-      // Attempt login
-      const response = await this.protocol.login(grid, username, password);
+      // Attempt login using real SL protocol
+      let response;
+      if (this.protocol.connect) {
+        // Using SLConnectionFull (real implementation)
+        await this.protocol.connect(grid, username, password, 'last');
+        response = this.protocol.authReply;
+      } else {
+        // Using ProtocolManager (demo implementation)
+        response = await this.protocol.login(grid, username, password);
+      }
 
       // Store credentials if remember me is checked
       if (rememberMe) {

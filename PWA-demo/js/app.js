@@ -30,7 +30,8 @@ class LinkpointApp {
     await this.registerServiceWorker();
 
     // Initialize managers
-    this.protocol = new ProtocolManager();
+    // Use real SL protocol implementation
+    this.protocol = window.SLConnectionFull ? new SLConnectionFull() : new ProtocolManager();
     this.preferences = new PreferencesManager();
     this.auth = new AuthManager(this.protocol);
     this.world = new WorldViewer(this.protocol);
@@ -41,11 +42,28 @@ class LinkpointApp {
     this.teleport = new TeleportManager(this.protocol, this.auth, this.world);
     this.search = new SearchManager(this.protocol);
     this.notifications = new NotificationsManager(this.protocol, this.auth, this.preferences);
+    
+    // Real SL components
+    this.meshLoader = null;
+    this.objectManager = null;
 
     // Initialize modules
     await this.preferences.init();
     this.auth.init();
-    this.world.init();
+    await this.world.init();
+    
+    // Initialize SL-specific components if 3D is available
+    if (this.world.graphics3d && window.SLMeshLoader && window.SLObjectManager) {
+      this.meshLoader = new SLMeshLoader(this.world.graphics3d);
+      this.objectManager = new SLObjectManager(this.world.scene3d, this.meshLoader);
+      
+      // Connect protocol events to object manager
+      this.protocol.on('object_update', (msg) => this.objectManager.handleObjectUpdate(msg));
+      this.protocol.on('kill_object', (msg) => this.objectManager.handleKillObject(msg));
+      
+      console.log('✅ SL Mesh and Object systems initialized');
+    }
+    
     this.chat.init();
     await this.voice.init();
     await this.inventory.init();
