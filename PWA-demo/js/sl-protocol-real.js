@@ -18,6 +18,27 @@ class SLProtocol extends Utils.EventEmitter {
     this.region = null;
     this.inventoryRoot = null;
     this.friends = [];
+    
+    // WebSocket bridge for UDP-like communication
+    this.wsConnection = null;
+    this.messageQueue = [];
+    this.seqNum = 0;
+    
+    // Message handlers
+    this.messageHandlers = new Map();
+    this.setupMessageHandlers();
+  }
+
+  /**
+   * Setup message handlers
+   */
+  setupMessageHandlers() {
+    this.messageHandlers.set(SLMessageTypes.MessageIDs.CHAT_FROM_SIMULATOR, 
+      (msg) => this.handleChatFromSimulator(msg));
+    this.messageHandlers.set(SLMessageTypes.MessageIDs.OBJECT_UPDATE, 
+      (msg) => this.handleObjectUpdate(msg));
+    this.messageHandlers.set(SLMessageTypes.MessageIDs.REGION_HANDSHAKE, 
+      (msg) => this.handleRegionHandshake(msg));
   }
 
   /**
@@ -120,11 +141,12 @@ class SLProtocol extends Utils.EventEmitter {
 
       // Get additional data
       this.region = {
-        name: response.region || 'Unknown',
+        name: response['sim_name'] || 'Unknown',
         x: parseInt(response.region_x) || 0,
         y: parseInt(response.region_y) || 0,
         sizeX: parseInt(response.region_size_x) || 256,
-        sizeY: parseInt(response.region_size_y) || 256
+        sizeY: parseInt(response.region_size_y) || 256,
+        handle: response.region_handle
       };
 
       this.connected = true;
@@ -132,6 +154,11 @@ class SLProtocol extends Utils.EventEmitter {
       // Fetch capabilities from seed capability
       if (this.seedCapability) {
         await this.fetchCapabilities();
+      }
+
+      // Start event queue
+      if (this.capabilities.EventQueueGet) {
+        this.startEventQueue();
       }
 
       this.emit('login_success', {
