@@ -178,7 +178,8 @@ class ChatManager extends Utils.EventEmitter {
 
     // Convert URLs to links
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    formatted = formatted.replace(urlRegex, '<a href="$1" target="_blank">$1</a>');
+```suggestion
+    formatted = formatted.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer nofollow">$1</a>');
 
     // Handle emotes (simple implementation)
     formatted = formatted.replace(/:\)/g, '🙂');
