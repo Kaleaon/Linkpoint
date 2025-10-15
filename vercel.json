@@ -2,7 +2,7 @@
   "version": 2,
   "name": "linkpoint-pwa",
   "buildCommand": null,
-  "outputDirectory": ".",
+  "outputDirectory": "PWA-demo",
   "devCommand": null,
   "installCommand": null,
   "framework": null,
