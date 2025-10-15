@@ -60,7 +60,8 @@ class LinkpointApp {
     }
 
     try {
-      this.serviceWorkerRegistration = await navigator.serviceWorker.register('/service-worker.js');
+```suggestion
+      this.serviceWorkerRegistration = await navigator.serviceWorker.register('service-worker.js');
       console.log('✅ Service Worker registered');
 
       // Listen for updates
