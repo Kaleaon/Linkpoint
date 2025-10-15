@@ -8,6 +8,13 @@ class LinkpointApp {
     this.auth = null;
     this.world = null;
     this.chat = null;
+    this.voice = null;
+    this.inventory = null;
+    this.friends = null;
+    this.teleport = null;
+    this.search = null;
+    this.preferences = null;
+    this.notifications = null;
     this.currentView = 'login';
     this.deferredPrompt = null;
     this.serviceWorkerRegistration = null;
@@ -24,14 +31,28 @@ class LinkpointApp {
 
     // Initialize managers
     this.protocol = new ProtocolManager();
+    this.preferences = new PreferencesManager();
     this.auth = new AuthManager(this.protocol);
     this.world = new WorldViewer(this.protocol);
     this.chat = new ChatManager(this.protocol, this.auth);
+    this.voice = new VoiceManager(this.protocol, this.auth);
+    this.inventory = new InventoryManager(this.protocol, this.auth);
+    this.friends = new FriendsManager(this.protocol, this.auth);
+    this.teleport = new TeleportManager(this.protocol, this.auth, this.world);
+    this.search = new SearchManager(this.protocol);
+    this.notifications = new NotificationsManager(this.protocol, this.auth, this.preferences);
 
     // Initialize modules
+    await this.preferences.init();
     this.auth.init();
     this.world.init();
     this.chat.init();
+    await this.voice.init();
+    await this.inventory.init();
+    await this.friends.init();
+    await this.teleport.init();
+    await this.search.init();
+    await this.notifications.init();
 
     // Setup UI
     this.setupUI();
@@ -60,7 +81,7 @@ class LinkpointApp {
     }
 
     try {
-```suggestion
+      // Use relative path for service worker to support subpath hosting
       this.serviceWorkerRegistration = await navigator.serviceWorker.register('service-worker.js');
       console.log('✅ Service Worker registered');
 

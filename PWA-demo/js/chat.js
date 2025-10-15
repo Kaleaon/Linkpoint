@@ -176,9 +176,8 @@ class ChatManager extends Utils.EventEmitter {
     // Escape HTML
     let formatted = this.escapeHtml(text);
 
-    // Convert URLs to links
+    // Convert URLs to links (with security attributes)
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-```suggestion
     formatted = formatted.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer nofollow">$1</a>');
 
     // Handle emotes (simple implementation)

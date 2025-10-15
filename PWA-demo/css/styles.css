@@ -626,6 +626,8 @@ a:hover {
   padding: var(--spacing-md);
   background: var(--background);
   border-radius: var(--border-radius);
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 .inventory-item {
@@ -633,10 +635,123 @@ a:hover {
   border-radius: var(--border-radius);
   cursor: pointer;
   transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .inventory-item:hover {
   background: var(--surface-light);
+}
+
+.inventory-item.selected {
+  background: var(--primary-color);
+  color: white;
+}
+
+.inventory-item.expanded > .folder-icon::before {
+  content: '📂';
+}
+
+.folder-children {
+  padding-left: var(--spacing-lg);
+  margin-top: var(--spacing-xs);
+}
+
+.item-count {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin-left: auto;
+}
+
+/* Friend Cards */
+.friend-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--surface-light);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-sm);
+  transition: var(--transition);
+  border-left: 3px solid transparent;
+}
+
+.friend-card.online {
+  border-left-color: var(--success-color);
+}
+
+.friend-card.offline {
+  border-left-color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.friend-card:hover {
+  background: var(--surface);
+  transform: translateX(4px);
+}
+
+.friend-card.selected {
+  background: var(--primary-color);
+  color: white;
+}
+
+.friend-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.friend-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.friend-name {
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.friend-status {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.friend-card.selected .friend-status {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.friend-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+}
+
+.action-btn {
+  padding: var(--spacing-sm);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--text-primary);
+}
+
+.action-btn:hover {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: var(--primary-dark);
 }
 
 .empty-state {

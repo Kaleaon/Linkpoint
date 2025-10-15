@@ -31,10 +31,12 @@ const Utils = {
 
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
+    // Escape HTML to prevent XSS
+    const escapedMessage = String(message).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     toast.innerHTML = `
       <div class="toast-content">
         <strong>${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
-        <p>${message}</p>
+        <p>${escapedMessage}</p>
       </div>
     `;
 

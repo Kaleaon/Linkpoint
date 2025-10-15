@@ -4,18 +4,18 @@ const CACHE_STATIC = `${CACHE_VERSION}-static`;
 const CACHE_DYNAMIC = `${CACHE_VERSION}-dynamic`;
 const CACHE_ASSETS = `${CACHE_VERSION}-assets`;
 
-// Static files to cache on install
+// Static files to cache on install (relative paths for subpath hosting)
 const STATIC_FILES = [
-  '/',
-  '/index.html',
-  '/css/styles.css',
-  '/js/app.js',
-  '/js/auth.js',
-  '/js/world.js',
-  '/js/chat.js',
-  '/js/protocol.js',
-  '/js/utils.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './css/styles.css',
+  './js/app.js',
+  './js/auth.js',
+  './js/world.js',
+  './js/chat.js',
+  './js/protocol.js',
+  './js/utils.js',
+  './manifest.json'
 ];
 
 // Maximum cache size for dynamic content
