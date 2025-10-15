@@ -1,0 +1,33 @@
+{
+  "name": "linkpoint-pwa",
+  "version": "1.0.0",
+  "description": "Modern Progressive Web App for Second Life and OpenSimulator virtual worlds with 3D graphics",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx http-server -p 8000 -c-1",
+    "serve": "npx http-server -p 8000",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "pwa",
+    "progressive-web-app",
+    "second-life",
+    "opensimulator",
+    "virtual-world",
+    "webgl",
+    "3d-graphics",
+    "offline-first"
+  ],
+  "author": "Linkpoint Team",
+  "license": "GPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/linkpoint-pwa"
+  },
+  "homepage": "https://linkpoint-pwa.vercel.app",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}
