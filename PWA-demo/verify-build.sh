@@ -103,6 +103,12 @@ check_file "js/scene3d.js"
 check_file "js/sl-mesh-loader.js"
 check_file "js/sl-object-manager.js"
 
+# Advanced SL features (ported from Android)
+check_file "js/terrain.js"
+check_file "js/windlight.js"
+check_file "js/displaynames.js"
+check_file "js/assets.js"
+
 # Feature managers
 check_file "js/preferences.js"
 check_file "js/auth.js"
