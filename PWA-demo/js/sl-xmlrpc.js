@@ -90,7 +90,16 @@ class XMLRPCClient {
    */
   static async sendRequest(url, xmlRequest) {
     try {
-      const response = await fetch(url, {
+      // Use Electron proxy if available
+      const targetUrl = window.ELECTRON_PROXY_URL 
+        ? `${window.ELECTRON_PROXY_URL}/sl-login`
+        : url;
+      
+      if (window.IS_ELECTRON) {
+        console.log('[SL] Using Electron proxy for login');
+      }
+      
+      const response = await fetch(targetUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/xml',
