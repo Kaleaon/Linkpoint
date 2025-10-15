@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Modern Progressive Web App for Second Life and OpenSimulator virtual worlds with 3D graphics">
+  <meta name="keywords" content="second life, opensimulator, virtual world, pwa, progressive web app, 3d graphics, webgl">
+  <meta name="author" content="Linkpoint Team">
+  <meta name="theme-color" content="#16213e">
+  
+  <!-- Apple iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Linkpoint">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192x192.png">
+  
+  <!-- Microsoft -->
+  <meta name="msapplication-TileColor" content="#16213e">
+  <meta name="msapplication-TileImage" content="assets/icons/icon-144x144.png">
+  
+  <!-- Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-72x72.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192x192.png">
+  
+  <!-- Preload critical assets -->
+  <link rel="preload" href="css/styles.css" as="style">
+  <link rel="preload" href="js/utils.js" as="script">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+  
+  <title>Linkpoint - Virtual World Viewer</title>
+</head>
+<body>
+  <!-- App Container -->
+  <div class="app-container">
+    
+    <!-- Header -->
+    <header class="app-header">
+      <button id="menu-toggle" class="menu-button" aria-label="Toggle menu">
+        <span class="hamburger"></span>
+      </button>
+      <h1 class="app-title">Linkpoint</h1>
+      <div class="header-actions">
+        <div id="connection-status" class="status-indicator offline">
+          <span class="status-dot"></span>
+          <span class="status-text">Offline</span>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="app-main">
+      
+      <!-- Sidebar Navigation -->
+      <nav id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <h2>Navigation</h2>
+          <button id="sidebar-close" class="close-button" aria-label="Close sidebar">&times;</button>
+        </div>
+        <ul class="nav-menu">
+          <li><a href="#" data-view="login" class="nav-item active">
+            <span class="nav-icon">🔑</span>
+            <span class="nav-text">Login</span>
+          </a></li>
+          <li><a href="#" data-view="world" class="nav-item">
+            <span class="nav-icon">🌍</span>
+            <span class="nav-text">World Viewer</span>
+          </a></li>
+          <li><a href="#" data-view="chat" class="nav-item">
+            <span class="nav-icon">💬</span>
+            <span class="nav-text">Chat</span>
+          </a></li>
+          <li><a href="#" data-view="inventory" class="nav-item">
+            <span class="nav-icon">🎒</span>
+            <span class="nav-text">Inventory</span>
+          </a></li>
+          <li><a href="#" data-view="friends" class="nav-item">
+            <span class="nav-icon">👥</span>
+            <span class="nav-text">Friends</span>
+          </a></li>
+          <li><a href="#" data-view="teleport" class="nav-item">
+            <span class="nav-icon">📍</span>
+            <span class="nav-text">Teleport</span>
+          </a></li>
+          <li><a href="#" data-view="search" class="nav-item">
+            <span class="nav-icon">🔍</span>
+            <span class="nav-text">Search</span>
+          </a></li>
+          <li><a href="#" data-view="preferences" class="nav-item">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-text">Settings</span>
+          </a></li>
+        </ul>
+      </nav>
+      
+      <!-- Content Area -->
+      <div class="content-area">
+        
+        <!-- Login View -->
+        <section id="login-view" class="view-container active">
+          <div class="view-content centered">
+            <div class="login-card">
+              <div class="logo-container">
+                <img src="assets/icons/icon-192x192.png" alt="Linkpoint Logo" class="app-logo">
+                <h2>Welcome to Linkpoint</h2>
+                <p>Connect to virtual worlds</p>
+              </div>
+              
+              <form id="login-form" class="login-form">
+                <div class="form-group">
+                  <label for="grid-select">Grid</label>
+                  <select id="grid-select" class="form-control" required>
+                    <option value="secondlife">Second Life (Agni)</option>
+                    <option value="aditi">Second Life Beta (Aditi)</option>
+                    <option value="osgrid">OSGrid</option>
+                    <option value="custom">Custom Grid</option>
+                  </select>
+                </div>
+                
+                <div id="custom-grid-url" class="form-group" style="display: none;">
+                  <label for="login-url">Login URL</label>
+                  <input type="url" id="login-url" class="form-control" placeholder="https://login.yourgrid.com/cgi-bin/login.cgi">
+                </div>
+                
+                <div class="form-group">
+                  <label for="username">Username</label>
+                  <input type="text" id="username" class="form-control" placeholder="FirstName LastName" required>
+                </div>
+                
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input type="password" id="password" class="form-control" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block" id="login-button">
+                  <span>Login</span>
+                </button>
+              </form>
+              
+              <div class="help-text">
+                <p><small>Don't have an account? <a href="https://secondlife.com/my/account/request.php" target="_blank" rel="noopener">Sign up for Second Life</a></small></p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- World View -->
+        <section id="world-view" class="view-container">
+          <div class="view-content">
+            <div id="world-container" class="world-container">
+              <canvas id="world-canvas"></canvas>
+              
+              <!-- World Controls -->
+              <div class="world-controls">
+                <div class="control-group">
+                  <button class="control-btn" data-action="move-forward" title="Move Forward (W)">↑</button>
+                </div>
+                <div class="control-group">
+                  <button class="control-btn" data-action="move-left" title="Move Left (A)">←</button>
+                  <button class="control-btn" data-action="move-backward" title="Move Back (S)">↓</button>
+                  <button class="control-btn" data-action="move-right" title="Move Right (D)">→</button>
+                </div>
+                <div class="control-group">
+                  <button class="control-btn" data-action="move-up" title="Move Up (E)">⬆️</button>
+                  <button class="control-btn" data-action="move-down" title="Move Down (C)">⬇️</button>
+                </div>
+              </div>
+              
+              <!-- Stats Overlay -->
+              <div class="stats-overlay">
+                <div class="stat-item">
+                  <span class="stat-label">FPS:</span>
+                  <span id="fps-counter" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Ping:</span>
+                  <span id="ping-counter" class="stat-value">0ms</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Objects:</span>
+                  <span id="object-counter" class="stat-value">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Chat View -->
+        <section id="chat-view" class="view-container">
+          <div class="view-content chat-layout">
+            <div id="chat-messages" class="chat-messages"></div>
+            <form id="chat-form" class="chat-input-form">
+              <input type="text" id="chat-input" class="chat-input" placeholder="Type a message..." autocomplete="off">
+              <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+          </div>
+        </section>
+        
+        <!-- Inventory View -->
+        <section id="inventory-view" class="view-container">
+          <div class="view-content">
+            <h2>Inventory</h2>
+            <div id="inventory-container" class="inventory-container">
+              <p class="placeholder-text">Loading inventory...</p>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Friends View -->
+        <section id="friends-view" class="view-container">
+          <div class="view-content">
+            <h2>Friends</h2>
+            <div id="friends-container" class="friends-container">
+              <p class="placeholder-text">Loading friends list...</p>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Teleport View -->
+        <section id="teleport-view" class="view-container">
+          <div class="view-content">
+            <h2>Teleport</h2>
+            <div id="teleport-container" class="teleport-container">
+              <div class="form-group">
+                <label for="teleport-location">Location</label>
+                <input type="text" id="teleport-location" class="form-control" placeholder="Region Name (x, y, z)">
+              </div>
+              <button id="teleport-button" class="btn btn-primary">Teleport</button>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Search View -->
+        <section id="search-view" class="view-container">
+          <div class="view-content">
+            <h2>Search</h2>
+            <div id="search-container" class="search-container">
+              <div class="form-group">
+                <input type="text" id="search-input" class="form-control" placeholder="Search places, people, events...">
+                <button id="search-button" class="btn btn-primary">Search</button>
+              </div>
+              <div id="search-results" class="search-results"></div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Preferences View -->
+        <section id="preferences-view" class="view-container">
+          <div class="view-content">
+            <h2>Settings</h2>
+            <div id="preferences-container" class="preferences-container">
+              <div class="settings-section">
+                <h3>Graphics</h3>
+                <div class="form-group">
+                  <label for="graphics-quality">Quality</label>
+                  <select id="graphics-quality" class="form-control">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                    <option value="ultra">Ultra</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="settings-section">
+                <h3>Notifications</h3>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="notifications-enabled" checked>
+                    Enable notifications
+                  </label>
+                </div>
+              </div>
+              
+              <div class="settings-section">
+                <h3>About</h3>
+                <p>Linkpoint PWA v1.0.0</p>
+                <p><small>Not affiliated with Linden Lab or Second Life™</small></p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+      </div>
+      
+    </main>
+    
+    <!-- Footer/Status Bar -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <span id="status-message">Ready</span>
+      </div>
+    </footer>
+    
+  </div>
+  
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+  
+  <!-- PWA Install Banner -->
+  <div id="install-banner" class="install-banner" style="display: none;">
+    <div class="banner-content">
+      <span>Install Linkpoint for a better experience</span>
+      <button id="install-button" class="btn btn-small">Install</button>
+      <button id="install-dismiss" class="btn btn-small btn-text">Not now</button>
+    </div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+    <p id="loading-message">Loading...</p>
+  </div>
+  
+  <!-- Scripts - Load in dependency order -->
+  <!-- Utilities first -->
+  <script src="js/utils.js"></script>
+  
+  <!-- Core protocol and SL implementation -->
+  <script src="js/protocol.js"></script>
+  <script src="js/sl-xmlrpc.js"></script>
+  <script src="js/sl-messages.js"></script>
+  <script src="js/sl-circuit.js"></script>
+  <script src="js/sl-protocol-real.js"></script>
+  <script src="js/sl-connection-full.js"></script>
+  
+  <!-- 3D Graphics system -->
+  <script src="js/primitives3d.js"></script>
+  <script src="js/camera3d.js"></script>
+  <script src="js/graphics3d.js"></script>
+  <script src="js/scene3d.js"></script>
+  <script src="js/sl-mesh-loader.js"></script>
+  <script src="js/sl-object-manager.js"></script>
+  
+  <!-- Feature managers -->
+  <script src="js/preferences.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/chat.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/inventory.js"></script>
+  <script src="js/friends.js"></script>
+  <script src="js/teleport.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/notifications.js"></script>
+  
+  <!-- Main app - must be last -->
+  <script src="js/app.js"></script>
+  
+  <!-- Initialize app -->
+  <script>
+    // Initialize app when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+    
+    function initApp() {
+      // Create and initialize app
+      window.app = new LinkpointApp();
+      window.app.init().catch(err => {
+        console.error('Failed to initialize app:', err);
+        Utils.showToast('Failed to initialize app. Please refresh the page.', 'error');
+      });
+    }
+  </script>
+</body>
+</html>
