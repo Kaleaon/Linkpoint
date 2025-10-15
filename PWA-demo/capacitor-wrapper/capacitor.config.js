@@ -1,14 +1,11 @@
-import { CapacitorConfig } from '@capacitor/cli';
-
-const config: CapacitorConfig = {
+const config = {
   appId: 'com.linkpoint.pwa',
   appName: 'Linkpoint',
-  webDir: '..',
+  webDir: 'www',
   server: {
     androidScheme: 'https',
     iosScheme: 'https',
     hostname: 'linkpoint.app',
-    // Allow navigation to all URLs (bypasses CORS)
     allowNavigation: [
       'https://login.agni.lindenlab.com',
       'https://login.aditi.lindenlab.com',
@@ -40,4 +37,4 @@ const config: CapacitorConfig = {
   }
 };
 
-export default config;
+module.exports = config;
