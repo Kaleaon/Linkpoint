@@ -1,0 +1,6 @@
+{
+  "appId": "com.linkpoint.pwa",
+  "appName": "Linkpoint",
+  "webDir": "../../..",
+  "bundledWebRuntime": false
+}

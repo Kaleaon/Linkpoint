@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Linkpoint</string>
+    <string name="title_activity_main">Linkpoint</string>
+    <string name="package_name">com.linkpoint.pwa</string>
+    <string name="custom_url_scheme">com.linkpoint.pwa</string>
+</resources>
