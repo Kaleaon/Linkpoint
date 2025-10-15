@@ -85,6 +85,9 @@ network_*.java
 *.bat
 !gradlew
 !gradlew.bat
+# Allow PWA-demo scripts
+!PWA-demo/*.sh
+!scripts/*.sh
 
 # Build artifacts and backups
 *.backup
