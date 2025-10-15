@@ -45,7 +45,7 @@ class GLSyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
             }
         }
         if (i2 != 0) {
-            Debug.Printf("waitForMemory: loadedCount %d, size %d", Int.valueOf(i2), Int.valueOf(i));
+            Debug.Printf("waitForMemory: loadedCount %d, size %d", Int.valueOf(i2), Int.valueOf(i))
         }
     }
 }

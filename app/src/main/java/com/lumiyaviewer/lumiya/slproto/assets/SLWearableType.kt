@@ -18,7 +18,7 @@ enum class class SLWearableType {
     WT_SKIRT(12, SLAssetType.AT_CLOTHING, false, "Skirt"),
     WT_ALPHA(13, SLAssetType.AT_CLOTHING, false, "Alpha"),
     WT_TATTOO(14, SLAssetType.AT_CLOTHING, false, "Tattoo"),
-    WT_PHYSICS(15, SLAssetType.AT_CLOTHING, false, "Physics");
+    WT_PHYSICS(15, SLAssetType.AT_CLOTHING, false, "Physics")
     
     private SLAssetType assetType
     private boolean isCritical

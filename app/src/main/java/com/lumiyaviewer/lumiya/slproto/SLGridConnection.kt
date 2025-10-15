@@ -26,9 +26,9 @@ import java.util.UUID
 class SLGridConnection extends SLConnection {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
     private /* synthetic */ int[] syntheticField = null
-    private String DEFAULT_SYSTEM_ACCOUNT = "Second Life";
+    private String DEFAULT_SYSTEM_ACCOUNT = "Second Life"
     private boolean autoresponseEnabled = false
-    private String autoresponseText = "";
+    private String autoresponseText = ""
     private UUID activeAgentUUID
     private SLAgentCircuit agentCircuit
     private SLAuthParams authParams
@@ -57,7 +57,7 @@ class SLGridConnection extends SLConnection {
         private long serialVersionUID = 2164121452714562470L
 
         NotConnectedException() {
-            super("Grid not connected");
+            super("Grid not connected")
         }
     }
 
@@ -106,7 +106,7 @@ class SLGridConnection extends SLConnection {
             reconnectOrDrop(true, false, Login.message)
         } catch (Exception e) {
             setConnectionState(ConnectionState.Idle)
-            reconnectOrDrop(true, false, "Failed to connect to login server.");
+            reconnectOrDrop(true, false, "Failed to connect to login server.")
         }
     }
 
@@ -145,7 +145,7 @@ class SLGridConnection extends SLConnection {
         this.eventBus.publish(new com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent(this.reconnectAttempts))
         
         // Start connecting with "last" location
-        startConnecting(true, "last");
+        startConnecting(true, "last")
         
         return true
     }
@@ -181,11 +181,11 @@ class SLGridConnection extends SLConnection {
     }
 
     private void startCircuit(SLAuthReply sLAuthReply, SLTempCircuit sLTempCircuit) {
-        Debug.Log("login reply: ip = " + sLAuthReply.simAddress.toString() + ", port = " + sLAuthReply.simPort + ", ccode = " + sLAuthReply.circuitCode);
+        Debug.Log("login reply: ip = " + sLAuthReply.simAddress.toString() + ", port = " + sLAuthReply.simPort + ", ccode = " + sLAuthReply.circuitCode)
         if (sLAuthReply.inventoryRoot != null) {
-            Debug.Log("inventory root: " + sLAuthReply.inventoryRoot.toString());
+            Debug.Log("inventory root: " + sLAuthReply.inventoryRoot.toString())
         } else {
-            Debug.Log("inventory root is null");
+            Debug.Log("inventory root is null")
         }
         SLCaps sLCaps = new SLCaps()
         sLCaps.GetCapabilites(this.authReply.loginURL, this.authReply.seedCapability)
@@ -204,7 +204,7 @@ class SLGridConnection extends SLConnection {
             this.firstConnect = false
         } catch (IOException e2) {
             setConnectionState(ConnectionState.Idle)
-            reconnectOrDrop(true, false, "Failed to connect to the simulator.");
+            reconnectOrDrop(true, false, "Failed to connect to the simulator.")
         }
     }
 
@@ -251,7 +251,7 @@ class SLGridConnection extends SLConnection {
         if (this.agentCircuit != null) {
             this.agentCircuit.SendLogoutRequest()
         } else {
-            processDisconnect(true, "Logged out");
+            processDisconnect(true, "Logged out")
         }
     }
 
@@ -311,15 +311,15 @@ class SLGridConnection extends SLConnection {
             this.isReconnecting = false
             this.hadConnected = false
         }
-        Debug.Log("GridConnection: forceDisconnect() called, fromLogoutRequest = " + (z ? "true" : "false"));
+        Debug.Log("GridConnection: forceDisconnect() called, fromLogoutRequest = " + (z ? "true" : "false"))
         switch (m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues()[this.connectionState.ordinal()]) {
             case 1:
                 closeConnectionObjects()
-                reconnectOrDrop(false, z, "Network connection lost.");
+                reconnectOrDrop(false, z, "Network connection lost.")
                 break
             case 2:
                 closeConnectionObjects()
-                reconnectOrDrop(true, z, "Network connection lost.");
+                reconnectOrDrop(true, z, "Network connection lost.")
                 break
         }
     }

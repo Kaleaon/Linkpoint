@@ -9,12 +9,12 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class GroupRoleMemberListDao : AbstractDao<GroupRoleMemberList, UUID> {
-    String TABLENAME = "GroupRoleMemberLists";
+    String TABLENAME = "GroupRoleMemberLists"
 
     class Properties {
-        Property GroupID = Property(0, UUID.class, "groupID", true, "GROUP_ID");
-        Property MustRevalidate = Property(2, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE");
-        Property RequestID = Property(1, UUID.class, "requestID", false, "REQUEST_ID");
+        Property GroupID = Property(0, UUID.class, "groupID", true, "GROUP_ID")
+        Property MustRevalidate = Property(2, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE")
+        Property RequestID = Property(1, UUID.class, "requestID", false, "REQUEST_ID")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -26,11 +26,11 @@ class GroupRoleMemberListDao : AbstractDao<GroupRoleMemberList, UUID> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'GroupRoleMemberLists' (" + "'GROUP_ID' TEXT PRIMARY KEY ," + "'REQUEST_ID' TEXT NOT NULL ," + "'MUST_REVALIDATE' INTEGER NOT NULL );");
+        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'GroupRoleMemberLists' (" + "'GROUP_ID' TEXT PRIMARY KEY ," + "'REQUEST_ID' TEXT NOT NULL ," + "'MUST_REVALIDATE' INTEGER NOT NULL );")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupRoleMemberLists'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupRoleMemberLists'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, groupRoleMemberList: GroupRoleMemberList): Unit {

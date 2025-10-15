@@ -12,11 +12,11 @@ class SLWearableData {
 
     class WearableFormatException : AssetFormatException {
         WearableFormatException() {
-            super("Unsupported wearable format");
+            super("Unsupported wearable format")
         }
 
         WearableFormatException(Throwable th) {
-            super("Unsupported wearable format", th);
+            super("Unsupported wearable format", th)
         }
     }
 
@@ -42,7 +42,7 @@ class SLWearableData {
 
     SLWearableData(Byte[] bArr) throws WearableFormatException {
         try {
-            Array<String> split = String(bArr, "ISO-8859-1").trim().split("\n+");
+            Array<String> split = String(bArr, "ISO-8859-1").trim().split("\n+")
             if (split.length < 2) {
                 throw WearableFormatException()
             } else if (!split[0].trim().startsWith("LLWearable")) {
@@ -54,7 +54,7 @@ class SLWearableData {
                     ImmutableList.Builder builder2 = ImmutableList.builder()
                     Int i2 = 2
                     while (i2 < split.length) {
-                        Array<String> split2 = split[i2].trim().split("\\s+");
+                        Array<String> split2 = split[i2].trim().split("\\s+")
                         if (split2.length < 1) {
                             i2++
                         } else if (split2[0].equalsIgnoreCase("permissions") || split2[0].equalsIgnoreCase("sale_info")) {
@@ -85,7 +85,7 @@ class SLWearableData {
                                         throw WearableFormatException()
                                     }
                                     try {
-                                        Array<String> split3 = split[i].trim().split("\\s+");
+                                        Array<String> split3 = split[i].trim().split("\\s+")
                                         if (split3.length < 2) {
                                             throw WearableFormatException()
                                         }
@@ -107,7 +107,7 @@ class SLWearableData {
                                         throw WearableFormatException()
                                     }
                                     try {
-                                        Array<String> split4 = split[i].trim().split("\\s+");
+                                        Array<String> split4 = split[i].trim().split("\\s+")
                                         if (split4.length < 2) {
                                             throw WearableFormatException()
                                         }

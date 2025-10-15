@@ -58,7 +58,7 @@ class SpatialTree {
     }
 
     Unit addDrawables(DrawList drawList) {
-        Debug.Printf("SpatialTree: adding drawables.", Any[0]);
+        Debug.Printf("SpatialTree: adding drawables.", Any[0])
         this.myAvatarTreeNode.addDrawables(drawList)
         for (SpatialTreeNode spatialTreeNode : this.bins) {
             for (SpatialTreeNode spatialTreeNode2 = r3[r1]; spatialTreeNode2 != null; spatialTreeNode2 = spatialTreeNode2.nextDepth) {
@@ -114,7 +114,7 @@ class SpatialTree {
     }
 
     Unit walkTree(FrustrumPlanes frustrumPlanes, Float f) {
-        Debug.Printf("SpatialTree: walkTree: starting to walk.", Any[0]);
+        Debug.Printf("SpatialTree: walkTree: starting to walk.", Any[0])
         this.drawDistance = f
         this.rootNode.walkTree(frustrumPlanes, 1, this.depthBuf)
         this.treeWalkNeeded = false

@@ -85,7 +85,7 @@ class WeakExecutor : ThreadPoolExecutor {
 
     WeakExecutor(String str, Int i) {
         super(i, i, 60, TimeUnit.SECONDS, WeakQueue(), $Lambda$paN_qX4OegT79dFg6kmGbliJfA0(str))
-        Debug.Printf("Executor for %s: maxThreads %d", str, Int.valueOf(i));
+        Debug.Printf("Executor for %s: maxThreads %d", str, Int.valueOf(i))
         allowCoreThreadTimeOut(true)
     }
 
@@ -220,14 +220,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.res.executors.-$Lambd
             	at jadx.core.dex.nodes.ClassNode.decompile(ClassNode.java:273)
             
 */
-        Debug.Printf("Executor for %s: maxThreads %d", str, Int.valueOf(i));
+        Debug.Printf("Executor for %s: maxThreads %d", str, Int.valueOf(i))
         allowCoreThreadTimeOut(true)
     }
 
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106  reason: not valid java name */
     /* synthetic */ Thread m107lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_1106(String str, Runnable runnable) {
         Thread thread = Thread(runnable, str)
-        Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()));
+        Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()))
         thread.setPriority(4)
         return thread
     }
@@ -235,7 +235,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.res.executors.-$Lambd
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531  reason: not valid java name */
     /* synthetic */ Thread m108lambda$com_lumiyaviewer_lumiya_res_executors_WeakExecutor_531(String str, Runnable runnable) {
         Thread thread = Thread(runnable, str)
-        Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()));
+        Debug.Printf("Creating thread %s got %d", str, Long.valueOf(thread.getId()))
         thread.setPriority(4)
         return thread
     }

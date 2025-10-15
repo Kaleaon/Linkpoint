@@ -9,12 +9,12 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class MuteListCachedDataDao : AbstractDao<MuteListCachedData, Long> {
-    String TABLENAME = "MUTE_LIST_CACHED_DATA";
+    String TABLENAME = "MUTE_LIST_CACHED_DATA"
 
     class Properties {
-        Property CRC = Property(1, Int.TYPE, "CRC", false, "CRC");
-        Property Data = Property(2, Byte[].class, "data", false, "DATA");
-        Property Id = Property(0, Long.class, "id", true, "_id");
+        Property CRC = Property(1, Int.TYPE, "CRC", false, "CRC")
+        Property Data = Property(2, Byte[].class, "data", false, "DATA")
+        Property Id = Property(0, Long.class, "id", true, "_id")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -26,11 +26,11 @@ class MuteListCachedDataDao : AbstractDao<MuteListCachedData, Long> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'MUTE_LIST_CACHED_DATA' (" + "'_id' INTEGER PRIMARY KEY ," + "'CRC' INTEGER NOT NULL ," + "'DATA' BLOB NOT NULL );");
+        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'MUTE_LIST_CACHED_DATA' (" + "'_id' INTEGER PRIMARY KEY ," + "'CRC' INTEGER NOT NULL ," + "'DATA' BLOB NOT NULL );")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'MUTE_LIST_CACHED_DATA'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'MUTE_LIST_CACHED_DATA'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, muteListCachedData: MuteListCachedData): Unit {

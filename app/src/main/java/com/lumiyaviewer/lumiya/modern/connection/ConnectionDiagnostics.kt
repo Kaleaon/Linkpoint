@@ -19,7 +19,7 @@ import okhttp3.Response
  * Provides comprehensive testing and troubleshooting capabilities.
  */
 class ConnectionDiagnostics {
-    private String TAG = "ConnectionDiagnostics";
+    private String TAG = "ConnectionDiagnostics"
     
     // Second Life endpoints for testing
     private String[] SL_LOGIN_ENDPOINTS = {
@@ -51,42 +51,42 @@ class ConnectionDiagnostics {
      */
     CompletableFuture<DiagnosticResult> diagnoseAsync() {
         return CompletableFuture.supplyAsync(() -> {
-            Log.i(TAG, "Starting comprehensive Second Life connection diagnosis");
+            Log.i(TAG, "Starting comprehensive Second Life connection diagnosis")
             
             DiagnosticResult result = new DiagnosticResult()
             
             // Test 1: Network availability
             result.networkAvailable = isNetworkAvailable()
             if (!result.networkAvailable) {
-                result.addIssue("No network connection available");
+                result.addIssue("No network connection available")
                 return result
             }
             
             // Test 2: DNS resolution
             result.dnsWorking = testDNSResolution()
             if (!result.dnsWorking) {
-                result.addIssue("DNS resolution failed for Second Life domains");
+                result.addIssue("DNS resolution failed for Second Life domains")
             }
             
             // Test 3: HTTPS connectivity
             result.httpsWorking = testHTTPSConnectivity()
             if (!result.httpsWorking) {
-                result.addIssue("HTTPS connectivity issues detected");
+                result.addIssue("HTTPS connectivity issues detected")
             }
             
             // Test 4: Second Life login server accessibility
             result.loginServerWorking = testLoginServerAccess()
             if (!result.loginServerWorking) {
-                result.addIssue("Cannot reach Second Life login servers");
+                result.addIssue("Cannot reach Second Life login servers")
             }
             
             // Test 5: Firewall/proxy detection
             result.proxyDetected = detectProxyOrFirewall()
             if (result.proxyDetected) {
-                result.addIssue("Proxy or firewall detected - may impact connectivity");
+                result.addIssue("Proxy or firewall detected - may impact connectivity")
             }
             
-            Log.i(TAG, "Diagnosis complete. Overall health: " + result.getOverallHealth());
+            Log.i(TAG, "Diagnosis complete. Overall health: " + result.getOverallHealth())
             return result
         })
     }
@@ -101,7 +101,7 @@ class ConnectionDiagnostics {
             NetworkInfo activeNetwork = cm.getActiveNetworkInfo()
             return activeNetwork != null && activeNetwork.isConnectedOrConnecting()
         } catch (Exception e) {
-            Log.e(TAG, "Error checking network availability", e);
+            Log.e(TAG, "Error checking network availability", e)
             return false
         }
     }
@@ -112,11 +112,11 @@ class ConnectionDiagnostics {
                 InetAddress[] addresses = InetAddress.getAllByName(domain)
                 if (addresses.length > 0) {
                     Log.d(TAG, "DNS resolution successful for " + domain + 
-                        " -> " + addresses[0].getHostAddress());
+                        " -> " + addresses[0].getHostAddress())
                     return true; // At least one domain resolves
                 }
             } catch (Exception e) {
-                Log.w(TAG, "DNS resolution failed for " + domain, e);
+                Log.w(TAG, "DNS resolution failed for " + domain, e)
             }
         }
         return false
@@ -133,7 +133,7 @@ class ConnectionDiagnostics {
                 return response.isSuccessful()
             }
         } catch (Exception e) {
-            Log.w(TAG, "HTTPS connectivity test failed", e);
+            Log.w(TAG, "HTTPS connectivity test failed", e)
             return false
         }
     }
@@ -148,12 +148,12 @@ class ConnectionDiagnostics {
                     
                 try (Response response = httpClient.newCall(request).execute()) {
                     if (response.isSuccessful() || response.code() == 405) { // 405 Method Not Allowed is OK for login endpoint
-                        Log.d(TAG, "Login server accessible: " + endpoint);
+                        Log.d(TAG, "Login server accessible: " + endpoint)
                         return true
                     }
                 }
             } catch (Exception e) {
-                Log.w(TAG, "Login server test failed for " + endpoint, e);
+                Log.w(TAG, "Login server test failed for " + endpoint, e)
             }
         }
         return false
@@ -177,7 +177,7 @@ class ConnectionDiagnostics {
                 return true; // Can reach internet but not SL servers - likely proxy/firewall
             }
         } catch (Exception e) {
-            Log.d(TAG, "Proxy detection test error", e);
+            Log.d(TAG, "Proxy detection test error", e)
         }
         return false
     }
@@ -196,7 +196,7 @@ class ConnectionDiagnostics {
         
         void addIssue(String issue) {
             if (issues.length() > 0) {
-                issues.append("; ");
+                issues.append("; ")
             }
             issues.append(issue)
         }

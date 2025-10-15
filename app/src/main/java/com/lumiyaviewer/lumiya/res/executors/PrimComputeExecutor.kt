@@ -16,7 +16,7 @@ object PrimComputeExecutor extends WeakExecutor {
     }
 
     private PrimComputeExecutor() {
-        super("PrimCompute", 1);
+        super("PrimCompute", 1)
         this.pauseLock = new ReentrantLock()
         this.unpaused = this.pauseLock.newCondition()
     }

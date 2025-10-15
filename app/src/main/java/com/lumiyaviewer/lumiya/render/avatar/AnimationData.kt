@@ -116,19 +116,19 @@ class AnimationData {
         fun toString(): String {
             int i = 0
             StringBuilder stringBuilder = new StringBuilder()
-            stringBuilder.append("Priority ").append(this.Priority);
-            stringBuilder.append(", pos frames ").append(this.posKeyframes.length).append("[");
+            stringBuilder.append("Priority ").append(this.Priority)
+            stringBuilder.append(", pos frames ").append(this.posKeyframes.length).append("[")
             for (AnimationPosKeyframe animationPosKeyframe : this.posKeyframes) {
                 stringBuilder.append(animationPosKeyframe.toString())
             }
-            stringBuilder.append("], rot frames ").append(this.rotKeyframes.length).append("[");
+            stringBuilder.append("], rot frames ").append(this.rotKeyframes.length).append("[")
             AnimationRotKeyframe[] animationRotKeyframeArr = this.rotKeyframes
             int length = animationRotKeyframeArr.length
             while (i < length) {
                 stringBuilder.append(animationRotKeyframeArr[i].toString())
                 i++
             }
-            stringBuilder.append("]");
+            stringBuilder.append("]")
             return stringBuilder.toString()
         }
     }
@@ -169,10 +169,10 @@ class AnimationData {
         }
 
         void dumpJoints() {
-            Debug.Printf("Anim -- joint set -- length %f prio %d joints %d", Float.valueOf(this.animLength), Integer.valueOf(this.priority), Integer.valueOf(this.jointAnims.size()));
+            Debug.Printf("Anim -- joint set -- length %f prio %d joints %d", Float.valueOf(this.animLength), Integer.valueOf(this.priority), Integer.valueOf(this.jointAnims.size()))
             int size = this.jointAnims.size()
             for (int i = 0; i < size; i++) {
-                Debug.Printf("Anim -- joint[%d] - jointIndex %d, %s", Integer.valueOf(i), Integer.valueOf(this.jointAnims.keyAt(i)), ((AnimationJointData) this.jointAnims.valueAt(i)).toString());
+                Debug.Printf("Anim -- joint[%d] - jointIndex %d, %s", Integer.valueOf(i), Integer.valueOf(this.jointAnims.keyAt(i)), ((AnimationJointData) this.jointAnims.valueAt(i)).toString())
             }
         }
 
@@ -354,7 +354,7 @@ class AnimationData {
     }
 
     ImmutableList<AvatarRunningAnimation> createRunningAnimations(AvatarRunningSequence avatarRunningSequence) {
-        Debug.Printf("Animation: creating anims: %d anims", Integer.valueOf(this.jointSets.size()));
+        Debug.Printf("Animation: creating anims: %d anims", Integer.valueOf(this.jointSets.size()))
         Builder builder = ImmutableList.builder()
         for (int i = 0; i < r2; i++) {
             builder.add(new AvatarRunningAnimation(avatarRunningSequence, (AnimationJointSet) this.jointSets.valueAt(i)))
@@ -363,13 +363,13 @@ class AnimationData {
     }
 
     fun dumpAnimationData(): Unit {
-        Debug.Printf("Animation -- dump -- priority %d length %f joint sets %d (inPoint %f outPoint %f loop %b easeIn %f easeOut %f)", Integer.valueOf(this.animPriority), Float.valueOf(this.animLength), Integer.valueOf(this.jointSets.size()), Float.valueOf(this.inPoint), Float.valueOf(this.outPoint), Boolean.valueOf(this.loop), Float.valueOf(this.easeInTime), Float.valueOf(this.easeOutTime));
+        Debug.Printf("Animation -- dump -- priority %d length %f joint sets %d (inPoint %f outPoint %f loop %b easeIn %f easeOut %f)", Integer.valueOf(this.animPriority), Float.valueOf(this.animLength), Integer.valueOf(this.jointSets.size()), Float.valueOf(this.inPoint), Float.valueOf(this.outPoint), Boolean.valueOf(this.loop), Float.valueOf(this.easeInTime), Float.valueOf(this.easeOutTime))
         for (int i = 0; i < this.jointSets.size(); i++) {
             int keyAt = this.jointSets.keyAt(i)
-            Debug.Printf("Anim -- joint set %d: prio %d", Integer.valueOf(i), Integer.valueOf(keyAt));
+            Debug.Printf("Anim -- joint set %d: prio %d", Integer.valueOf(i), Integer.valueOf(keyAt))
             ((AnimationJointSet) this.jointSets.valueAt(i)).dumpJoints()
         }
-        Debug.Printf("Animation -- dump end", new Object[0]);
+        Debug.Printf("Animation -- dump end", new Object[0])
     }
 
     fun getPriority(): Int {

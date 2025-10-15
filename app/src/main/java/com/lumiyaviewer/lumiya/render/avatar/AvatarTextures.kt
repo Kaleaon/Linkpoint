@@ -10,7 +10,7 @@ import java.util.Map
 import java.util.UUID
 
 class AvatarTextures {
-    UUID DEFAULT_AVATAR_TEXTURE = UUID.fromString("c228d1cf-4b5d-4ba8-84f4-899a0796aa97");
+    UUID DEFAULT_AVATAR_TEXTURE = UUID.fromString("c228d1cf-4b5d-4ba8-84f4-899a0796aa97")
     private val avatarTextures: Map<AvatarTextureFaceIndex, UUID> = EnumMap(AvatarTextureFaceIndex.class)
 
     synchronized Boolean ApplyAvatarAppearance(AvatarAppearance avatarAppearance) {

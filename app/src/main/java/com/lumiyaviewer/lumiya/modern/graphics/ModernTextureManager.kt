@@ -13,7 +13,7 @@ import java.util.concurrent.Executors
  * Based on C++ Integration Guide specifications
  */
 class ModernTextureManager {
-    private String TAG = "ModernTextureManager";
+    private String TAG = "ModernTextureManager"
     
     private Context context
     private ExecutorService transcodingExecutor
@@ -36,12 +36,12 @@ class ModernTextureManager {
                 // Use native transcoding when available
                 System.loadLibrary("openjpeg"); // Changed to match CMake target name
                 nativeInitialize()
-                Log.i(TAG, "Native Basis Universal library loaded successfully");
+                Log.i(TAG, "Native Basis Universal library loaded successfully")
             } else {
-                Log.i(TAG, "Using enhanced Java-based texture processing");
+                Log.i(TAG, "Using enhanced Java-based texture processing")
             }
         } catch (UnsatisfiedLinkError e) {
-            Log.i(TAG, "Native library not available, using advanced Java fallback", e);
+            Log.i(TAG, "Native library not available, using advanced Java fallback", e)
             nativeLibraryLoaded = false
         }
     }
@@ -52,26 +52,26 @@ class ModernTextureManager {
     CompletableFuture<Integer> loadTextureAsync(String textureId, TexturePriority priority) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                Log.d(TAG, "Loading texture: " + textureId + " with priority: " + priority);
+                Log.d(TAG, "Loading texture: " + textureId + " with priority: " + priority)
                 
                 // Check cache first
                 Integer cachedTexture = getCachedTexture(textureId)
                 if (cachedTexture != null) {
-                    Log.d(TAG, "Texture found in cache: " + textureId);
+                    Log.d(TAG, "Texture found in cache: " + textureId)
                     return cachedTexture
                 }
                 
                 // Load and transcode texture
                 byte[] textureData = loadTextureData(textureId)
                 if (textureData == null) {
-                    Log.w(TAG, "Failed to load texture data: " + textureId);
+                    Log.w(TAG, "Failed to load texture data: " + textureId)
                     return -1
                 }
                 
                 // Transcode to optimal format
                 byte[] transcodedData = transcodeTexture(textureData, optimalFormat)
                 if (transcodedData == null) {
-                    Log.w(TAG, "Failed to transcode texture: " + textureId);
+                    Log.w(TAG, "Failed to transcode texture: " + textureId)
                     return -1
                 }
                 
@@ -79,13 +79,13 @@ class ModernTextureManager {
                 int textureHandle = uploadToGPU(transcodedData, optimalFormat)
                 if (textureHandle > 0) {
                     cacheTexture(textureId, textureHandle)
-                    Log.d(TAG, "Texture loaded successfully: " + textureId + " -> " + textureHandle);
+                    Log.d(TAG, "Texture loaded successfully: " + textureId + " -> " + textureHandle)
                 }
                 
                 return textureHandle
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to load texture: " + textureId, e);
+                Log.e(TAG, "Failed to load texture: " + textureId, e)
                 return -1
             }
         }, transcodingExecutor)
@@ -99,16 +99,16 @@ class ModernTextureManager {
         String extensions = GLES30.glGetString(GLES30.GL_EXTENSIONS)
         if (extensions != null) {
             if (extensions.contains("GL_KHR_texture_compression_astc_ldr")) {
-                Log.i(TAG, "ASTC compression supported");
+                Log.i(TAG, "ASTC compression supported")
                 return FORMAT_ASTC_4x4_RGBA
             }
             if (extensions.contains("GL_OES_compressed_ETC2_RGB8_texture")) {
-                Log.i(TAG, "ETC2 compression supported");
+                Log.i(TAG, "ETC2 compression supported")
                 return FORMAT_ETC2_RGBA
             }
         }
         
-        Log.i(TAG, "Using fallback RGBA32 format");
+        Log.i(TAG, "Using fallback RGBA32 format")
         return FORMAT_RGBA32
     }
     
@@ -117,7 +117,7 @@ class ModernTextureManager {
      */
     private byte[] loadTextureData(String textureId) {
         // TODO: Implement actual texture loading from SL asset system
-        Log.d(TAG, "TODO: Load texture data for " + textureId);
+        Log.d(TAG, "TODO: Load texture data for " + textureId)
         return null
     }
     
@@ -131,7 +131,7 @@ class ModernTextureManager {
                 // Call native transcoding function when available
                 return nativeTranscodeTexture(sourceData, targetFormat)
             } catch (Exception e) {
-                Log.e(TAG, "Native transcoding failed, falling back to Java", e);
+                Log.e(TAG, "Native transcoding failed, falling back to Java", e)
             }
         }
         
@@ -144,13 +144,13 @@ class ModernTextureManager {
      * Provides sophisticated format conversion and optimization
      */
     private byte[] processTextureJava(byte[] sourceData, int targetFormat) {
-        Log.d(TAG, "Processing texture with advanced Java implementation");
+        Log.d(TAG, "Processing texture with advanced Java implementation")
         
         try {
             // Analyze source data format
             TextureInfo info = analyzeTextureData(sourceData)
             Log.d(TAG, "Source texture: " + info.width + "x" + info.height + 
-                      " format=" + info.format + " size=" + sourceData.length);
+                      " format=" + info.format + " size=" + sourceData.length)
             
             // Apply quality optimizations based on target format
             byte[] processedData = applyQualityOptimizations(sourceData, info, targetFormat)
@@ -161,14 +161,14 @@ class ModernTextureManager {
             // Generate mipmaps if needed
             if (info.width >= 256 && info.height >= 256) {
                 processedData = generateMipmaps(processedData, info)
-                Log.d(TAG, "Generated mipmaps for large texture");
+                Log.d(TAG, "Generated mipmaps for large texture")
             }
             
-            Log.d(TAG, "Java texture processing complete: " + processedData.length + " bytes");
+            Log.d(TAG, "Java texture processing complete: " + processedData.length + " bytes")
             return processedData
             
         } catch (Exception e) {
-            Log.e(TAG, "Java texture processing failed", e);
+            Log.e(TAG, "Java texture processing failed", e)
             return sourceData; // Return original as fallback
         }
     }
@@ -184,25 +184,25 @@ class ModernTextureManager {
             // Check for KTX2 format (AB 4B 54 58 20 32 30 BB 0D 0A 1A 0A)
             if (data.length >= 4 && data[0] == (byte)0xAB && data[1] == 0x4B && 
                 data[2] == 0x54 && data[3] == 0x58) {
-                info.format = "KTX2";
+                info.format = "KTX2"
                 info.width = 512; // Default assumption
                 info.height = 512
             }
             // Check for JPEG header (FF D8 FF)
             else if (data.length >= 3 && data[0] == (byte)0xFF && data[1] == (byte)0xD8 && 
                      data[2] == (byte)0xFF) {
-                info.format = "JPEG";
+                info.format = "JPEG"
                 info.width = 256; // Default assumption
                 info.height = 256
             }
             // Default assumptions for unknown formats
             else {
-                info.format = "Raw";
+                info.format = "Raw"
                 info.width = 128
                 info.height = 128
             }
         } else {
-            info.format = "Small";
+            info.format = "Small"
             info.width = 64
             info.height = 64
         }
@@ -216,16 +216,16 @@ class ModernTextureManager {
     private byte[] applyQualityOptimizations(byte[] data, TextureInfo info, int targetFormat) {
         switch (targetFormat) {
             case FORMAT_ASTC_4x4_RGBA:
-                Log.d(TAG, "Applying ASTC quality optimizations");
+                Log.d(TAG, "Applying ASTC quality optimizations")
                 return optimizeForAstc(data, info)
                 
             case FORMAT_ETC2_RGBA:
-                Log.d(TAG, "Applying ETC2 quality optimizations");
+                Log.d(TAG, "Applying ETC2 quality optimizations")
                 return optimizeForEtc2(data, info)
                 
             case FORMAT_RGBA32:
             default:
-                Log.d(TAG, "Applying RGBA32 quality optimizations");
+                Log.d(TAG, "Applying RGBA32 quality optimizations")
                 return optimizeForRgba32(data, info)
         }
     }
@@ -234,12 +234,12 @@ class ModernTextureManager {
      * Apply mobile-specific optimizations
      */
     private byte[] applyMobileOptimizations(byte[] data, TextureInfo info, int targetFormat) {
-        Log.d(TAG, "Applying mobile GPU optimizations for " + info.format + " texture");
+        Log.d(TAG, "Applying mobile GPU optimizations for " + info.format + " texture")
         
         // Simulate memory bandwidth optimization
         int maxSize = getMaxTextureSize(targetFormat)
         if (data.length > maxSize) {
-            Log.d(TAG, "Texture size reduced from " + data.length + " to " + maxSize + " bytes");
+            Log.d(TAG, "Texture size reduced from " + data.length + " to " + maxSize + " bytes")
             byte[] optimized = new byte[maxSize]
             System.arraycopy(data, 0, optimized, 0, maxSize)
             return optimized
@@ -252,7 +252,7 @@ class ModernTextureManager {
      * Generate mipmaps for large textures
      */
     private byte[] generateMipmaps(byte[] data, TextureInfo info) {
-        Log.d(TAG, "Generating mipmaps for " + info.width + "x" + info.height + " texture");
+        Log.d(TAG, "Generating mipmaps for " + info.width + "x" + info.height + " texture")
         
         // Simulate mipmap generation (33% size increase for mipmap chain)
         int mipmapSize = data.length / 3
@@ -315,7 +315,7 @@ class ModernTextureManager {
     private class TextureInfo {
         int width = 128
         int height = 128
-        String format = "Unknown";
+        String format = "Unknown"
     }
     
     /**
@@ -326,7 +326,7 @@ class ModernTextureManager {
         GLES30.glGenTextures(1, textureHandle, 0)
         
         if (textureHandle[0] == 0) {
-            Log.e(TAG, "Failed to generate texture handle");
+            Log.e(TAG, "Failed to generate texture handle")
             return -1
         }
         
@@ -338,24 +338,24 @@ class ModernTextureManager {
         switch (format) {
             case FORMAT_ASTC_4x4_RGBA:
                 // TODO: Upload ASTC compressed data
-                Log.d(TAG, "Uploading ASTC texture");
+                Log.d(TAG, "Uploading ASTC texture")
                 break
                 
             case FORMAT_ETC2_RGBA:
                 // TODO: Upload ETC2 compressed data
-                Log.d(TAG, "Uploading ETC2 texture");
+                Log.d(TAG, "Uploading ETC2 texture")
                 break
                 
             case FORMAT_RGBA32:
             default:
                 // TODO: Upload uncompressed RGBA data
-                Log.d(TAG, "Uploading RGBA32 texture");
+                Log.d(TAG, "Uploading RGBA32 texture")
                 break
         }
         
         int error = GLES30.glGetError()
         if (error != GLES30.GL_NO_ERROR) {
-            Log.e(TAG, "OpenGL error during texture upload: " + error);
+            Log.e(TAG, "OpenGL error during texture upload: " + error)
             GLES30.glDeleteTextures(1, textureHandle, 0)
             return -1
         }
@@ -376,7 +376,7 @@ class ModernTextureManager {
      */
     private void cacheTexture(String textureId, int textureHandle) {
         // TODO: Implement texture caching
-        Log.d(TAG, "TODO: Cache texture " + textureId + " -> " + textureHandle);
+        Log.d(TAG, "TODO: Cache texture " + textureId + " -> " + textureHandle)
     }
     
     /**
@@ -392,13 +392,13 @@ class ModernTextureManager {
     String getFormatName(int format) {
         switch (format) {
             case FORMAT_ASTC_4x4_RGBA:
-                return "ASTC_4x4_RGBA";
+                return "ASTC_4x4_RGBA"
             case FORMAT_ETC2_RGBA:
-                return "ETC2_RGBA";
+                return "ETC2_RGBA"
             case FORMAT_RGBA32:
-                return "RGBA32";
+                return "RGBA32"
             default:
-                return "UNKNOWN";
+                return "UNKNOWN"
         }
     }
     
@@ -407,14 +407,14 @@ class ModernTextureManager {
      */
     void shutdown() {
         transcodingExecutor.shutdown()
-        Log.i(TAG, "Texture manager shut down");
+        Log.i(TAG, "Texture manager shut down")
     }
     
     /**
      * Process modern texture data from asset manager
      */
     void processModernTexture(byte[] textureData) {
-        Log.d(TAG, "Processing modern texture data: " + textureData.length + " bytes");
+        Log.d(TAG, "Processing modern texture data: " + textureData.length + " bytes")
         
         // In real implementation, this would:
         // 1. Determine optimal format for the texture
@@ -422,7 +422,7 @@ class ModernTextureManager {
         // 3. Upload to GPU with proper format
         // 4. Cache the result
         
-        Log.d(TAG, "Modern texture processing complete (simulated)");
+        Log.d(TAG, "Modern texture processing complete (simulated)")
     }
     
     /**

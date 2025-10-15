@@ -10,7 +10,7 @@ import android.util.Log
  * Implements PBR-style rendering for capable mobile devices
  */
 class ModernRenderPipeline {
-    private String TAG = "ModernRenderPipeline";
+    private String TAG = "ModernRenderPipeline"
     
     private var isES3Available: Boolean = false
     private var pbrShaderProgram: Int = -1
@@ -38,15 +38,15 @@ class ModernRenderPipeline {
     fun initialize(): Boolean {
         // Check OpenGL ES version
         String version = GLES30.glGetString(GLES30.GL_VERSION)
-        Log.i(TAG, "OpenGL ES version: " + version);
+        Log.i(TAG, "OpenGL ES version: " + version)
         
-        isES3Available = version != null && (version.contains("OpenGL ES 3.") || version.contains("OpenGL ES 3."));
+        isES3Available = version != null && (version.contains("OpenGL ES 3.") || version.contains("OpenGL ES 3."))
         
         if (isES3Available) {
-            Log.i(TAG, "OpenGL ES 3.0+ detected, enabling modern rendering features");
+            Log.i(TAG, "OpenGL ES 3.0+ detected, enabling modern rendering features")
             return initializeModernPipeline()
         } else {
-            Log.i(TAG, "Using legacy OpenGL ES 2.0 rendering");
+            Log.i(TAG, "Using legacy OpenGL ES 2.0 rendering")
             return initializeLegacyPipeline()
         }
     }
@@ -58,25 +58,25 @@ class ModernRenderPipeline {
         
         pbrShaderProgram = createShaderProgram(vertexShader, fragmentShader)
         if (pbrShaderProgram == -1) {
-            Log.e(TAG, "Failed to create PBR shader program");
+            Log.e(TAG, "Failed to create PBR shader program")
             return false
         }
         
         // Get uniform locations
         GLES30.glUseProgram(pbrShaderProgram)
-        uMVPMatrix = GLES30.glGetUniformLocation(pbrShaderProgram, "u_MVPMatrix");
-        uModelMatrix = GLES30.glGetUniformLocation(pbrShaderProgram, "u_ModelMatrix");
-        uNormalMatrix = GLES30.glGetUniformLocation(pbrShaderProgram, "u_NormalMatrix");
-        uCameraPos = GLES30.glGetUniformLocation(pbrShaderProgram, "u_CameraPos");
-        uAlbedoTexture = GLES30.glGetUniformLocation(pbrShaderProgram, "u_AlbedoTexture");
-        uNormalTexture = GLES30.glGetUniformLocation(pbrShaderProgram, "u_NormalTexture");
-        uMetallicRoughnessTexture = GLES30.glGetUniformLocation(pbrShaderProgram, "u_MetallicRoughnessTexture");
+        uMVPMatrix = GLES30.glGetUniformLocation(pbrShaderProgram, "u_MVPMatrix")
+        uModelMatrix = GLES30.glGetUniformLocation(pbrShaderProgram, "u_ModelMatrix")
+        uNormalMatrix = GLES30.glGetUniformLocation(pbrShaderProgram, "u_NormalMatrix")
+        uCameraPos = GLES30.glGetUniformLocation(pbrShaderProgram, "u_CameraPos")
+        uAlbedoTexture = GLES30.glGetUniformLocation(pbrShaderProgram, "u_AlbedoTexture")
+        uNormalTexture = GLES30.glGetUniformLocation(pbrShaderProgram, "u_NormalTexture")
+        uMetallicRoughnessTexture = GLES30.glGetUniformLocation(pbrShaderProgram, "u_MetallicRoughnessTexture")
         
-        uDirectionalLight = GLES30.glGetUniformLocation(pbrShaderProgram, "u_DirectionalLight");
-        uPointLights = GLES30.glGetUniformLocation(pbrShaderProgram, "u_PointLights");
-        uNumPointLights = GLES30.glGetUniformLocation(pbrShaderProgram, "u_NumPointLights");
+        uDirectionalLight = GLES30.glGetUniformLocation(pbrShaderProgram, "u_DirectionalLight")
+        uPointLights = GLES30.glGetUniformLocation(pbrShaderProgram, "u_PointLights")
+        uNumPointLights = GLES30.glGetUniformLocation(pbrShaderProgram, "u_NumPointLights")
         
-        Log.i(TAG, "Modern PBR pipeline initialized successfully");
+        Log.i(TAG, "Modern PBR pipeline initialized successfully")
         return true
     }
     
@@ -87,11 +87,11 @@ class ModernRenderPipeline {
         
         legacyShaderProgram = createShaderProgram(vertexShader, fragmentShader)
         if (legacyShaderProgram == -1) {
-            Log.e(TAG, "Failed to create legacy shader program");
+            Log.e(TAG, "Failed to create legacy shader program")
             return false
         }
         
-        Log.i(TAG, "Legacy rendering pipeline initialized");
+        Log.i(TAG, "Legacy rendering pipeline initialized")
         return true
     }
     
@@ -141,19 +141,19 @@ class ModernRenderPipeline {
         // Draw geometry
         if (params.vertexBuffer > 0) {
             // TODO: Implement actual geometry rendering
-            Log.d(TAG, "Modern rendering: drawing geometry");
+            Log.d(TAG, "Modern rendering: drawing geometry")
         }
         
-        checkGLError("renderModernFrame");
+        checkGLError("renderModernFrame")
     }
     
     private fun renderLegacyFrame(params: RenderParams): Unit {
         GLES30.glUseProgram(legacyShaderProgram)
         
         // Basic legacy rendering
-        Log.d(TAG, "Legacy rendering: basic draw call");
+        Log.d(TAG, "Legacy rendering: basic draw call")
         
-        checkGLError("renderLegacyFrame");
+        checkGLError("renderLegacyFrame")
     }
     
     private fun createShaderProgram(vertexSource: String, fragmentSource: String): Int {
@@ -169,7 +169,7 @@ class ModernRenderPipeline {
         
         Int program = GLES30.glCreateProgram()
         if (program == 0) {
-            Log.e(TAG, "Error creating shader program");
+            Log.e(TAG, "Error creating shader program")
             return -1
         }
         
@@ -180,7 +180,7 @@ class ModernRenderPipeline {
         Int[] linkStatus = Int[1]
         GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0)
         if (linkStatus[0] != GLES30.GL_TRUE) {
-            Log.e(TAG, "Error linking program: " + GLES30.glGetProgramInfoLog(program));
+            Log.e(TAG, "Error linking program: " + GLES30.glGetProgramInfoLog(program))
             GLES30.glDeleteProgram(program)
             return -1
         }
@@ -195,7 +195,7 @@ class ModernRenderPipeline {
     private fun loadShader(type: Int, shaderCode: String): Int {
         Int shader = GLES30.glCreateShader(type)
         if (shader == 0) {
-            Log.e(TAG, "Error creating shader");
+            Log.e(TAG, "Error creating shader")
             return 0
         }
         
@@ -205,7 +205,7 @@ class ModernRenderPipeline {
         Int[] compiled = Int[1]
         GLES30.glGetShaderiv(shader, GLES30.GL_COMPILE_STATUS, compiled, 0)
         if (compiled[0] == 0) {
-            Log.e(TAG, "Error compiling shader: " + GLES30.glGetShaderInfoLog(shader));
+            Log.e(TAG, "Error compiling shader: " + GLES30.glGetShaderInfoLog(shader))
             GLES30.glDeleteShader(shader)
             return 0
         }
@@ -216,7 +216,7 @@ class ModernRenderPipeline {
     private fun checkGLError(operation: String): Unit {
         Int error = GLES30.glGetError()
         if (error != GLES30.GL_NO_ERROR) {
-            Log.e(TAG, "OpenGL error in " + operation + ": " + error);
+            Log.e(TAG, "OpenGL error in " + operation + ": " + error)
         }
     }
     
@@ -245,7 +245,7 @@ class ModernRenderPipeline {
                "    v_Tangent = normalize(u_NormalMatrix * a_Tangent);\n" +
                "    v_Bitangent = cross(v_Normal, v_Tangent);\n" +
                "    gl_Position = u_MVPMatrix * vec4(a_Position, 1.0);\n" +
-               "}";
+               "}"
     }
     
     private fun getModernFragmentShader(): String {
@@ -297,7 +297,7 @@ class ModernRenderPipeline {
                "    color += albedo * 0.1;\n" +
                "    \n" +
                "    fragColor = vec4(color, 1.0);\n" +
-               "}";
+               "}"
     }
     
     // Legacy shaders for OpenGL ES 2.0
@@ -309,7 +309,7 @@ class ModernRenderPipeline {
                "Unit main() {\n" +
                "    v_TexCoord = a_TexCoord;\n" +
                "    gl_Position = u_MVPMatrix * vec4(a_Position, 1.0);\n" +
-               "}";
+               "}"
     }
     
     private fun getLegacyFragmentShader(): String {
@@ -318,7 +318,7 @@ class ModernRenderPipeline {
                "uniform sampler2D u_Texture;\n" +
                "Unit main() {\n" +
                "    gl_FragColor = texture2D(u_Texture, v_TexCoord);\n" +
-               "}";
+               "}"
     }
     
     fun isModernPipelineAvailable(): Boolean {

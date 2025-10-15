@@ -56,7 +56,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
         @Nullable
         private fun createContext(): EGLContext {
             Int i = 3
-            Debug.Printf("TexLoad: create[1]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()));
+            Debug.Printf("TexLoad: create[1]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
             EGL10 r2 = GLAsyncLoadQueue.this.egl10
             EGLDisplay r3 = GLAsyncLoadQueue.this.eglDisplay
             EGLConfig r4 = GLAsyncLoadQueue.this.eglConfig
@@ -69,15 +69,15 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
             iArr[1] = i
             iArr[2] = 12344
             EGLContext eglCreateContext = r2.eglCreateContext(r3, r4, r5, iArr)
-            Debug.Printf("TexLoad: create[2]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()));
+            Debug.Printf("TexLoad: create[2]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
             EGLSurface eglCreatePbufferSurface = GLAsyncLoadQueue.this.egl10.eglCreatePbufferSurface(GLAsyncLoadQueue.this.eglDisplay, GLAsyncLoadQueue.this.eglConfig, Int[]{12374, 128, 12375, 128, 12344})
-            Debug.Printf("TexLoad: create[3]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()));
+            Debug.Printf("TexLoad: create[3]: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
             if (eglCreateContext == null || eglCreateContext == EGL10.EGL_NO_CONTEXT) {
-                Debug.Printf("TexLoad: Failed to create loader context", Any[0]);
+                Debug.Printf("TexLoad: Failed to create loader context", Any[0])
                 GLAsyncLoadQueue.this.egl10.eglDestroySurface(GLAsyncLoadQueue.this.eglDisplay, eglCreatePbufferSurface)
                 return null
             }
-            Debug.Printf("TexLoad: texture loader context created (%s)", eglCreateContext);
+            Debug.Printf("TexLoad: texture loader context created (%s)", eglCreateContext)
             this.eglSurface = eglCreatePbufferSurface
             return eglCreateContext
         }
@@ -87,15 +87,15 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
             EGLContext createContext = createContext()
             Int i = 0
             Long j = 0
-            Debug.Printf("TexLoad: Signaling context readiness.", Any[0]);
+            Debug.Printf("TexLoad: Signaling context readiness.", Any[0])
             synchronized (GLAsyncLoadQueue.this.contextReadyLock) {
                 Boolean unused = GLAsyncLoadQueue.this.contextFailed = createContext == null
                 Boolean unused2 = GLAsyncLoadQueue.this.contextReady = true
                 GLAsyncLoadQueue.this.contextReadyLock.notifyAll()
             }
             if (createContext != null) {
-                Debug.Printf("TexLoad: thread init: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()));
-                Debug.Printf("TexLoad: thread init: rc = %b, eglGetError = %d", Boolean.valueOf(GLAsyncLoadQueue.this.egl10.eglMakeCurrent(GLAsyncLoadQueue.this.eglDisplay, this.eglSurface, this.eglSurface, createContext)), Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()));
+                Debug.Printf("TexLoad: thread init: eglGetError = %d", Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
+                Debug.Printf("TexLoad: thread init: rc = %b, eglGetError = %d", Boolean.valueOf(GLAsyncLoadQueue.this.egl10.eglMakeCurrent(GLAsyncLoadQueue.this.eglDisplay, this.eglSurface, this.eglSurface, createContext)), Int.valueOf(GLAsyncLoadQueue.this.egl10.eglGetError()))
                 while (true) {
                     Int i2 = i
                     if (GLAsyncLoadQueue.this.mustExit.get()) {
@@ -110,7 +110,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
                             if (i >= 10) {
                                 Long uptimeMillis = SystemClock.uptimeMillis()
                                 if (uptimeMillis - j >= AnimationSequenceInfo.MAX_ANIMATION_LENGTH) {
-                                    Debug.Printf("TexLoad: invoking GC.", Any[0]);
+                                    Debug.Printf("TexLoad: invoking GC.", Any[0])
                                     System.gc()
                                     i = 0
                                     j = uptimeMillis
@@ -125,7 +125,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
                     }
                 }
                 GLAsyncLoadQueue.this.loadedQueue.clear()
-                Debug.Printf("TexLoad: Working thread exiting.", Any[0]);
+                Debug.Printf("TexLoad: Working thread exiting.", Any[0])
                 GLAsyncLoadQueue.this.egl10.eglMakeCurrent(GLAsyncLoadQueue.this.eglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT)
                 GLAsyncLoadQueue.this.egl10.eglDestroyContext(GLAsyncLoadQueue.this.eglDisplay, createContext)
                 GLAsyncLoadQueue.this.egl10.eglDestroySurface(GLAsyncLoadQueue.this.eglDisplay, this.eglSurface)
@@ -141,24 +141,24 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
         this.requestGL30 = z
         this.eglBaseContext = egl102.eglGetCurrentContext()
         if (this.eglBaseContext == null || this.eglBaseContext == EGL10.EGL_NO_CONTEXT) {
-            throw InstantiationException("TexLoad: current context was null");
+            throw InstantiationException("TexLoad: current context was null")
         }
-        this.thread = Thread(EGLLoadThread(this, renderContext, (EGLLoadThread) null), "EGLLoader");
+        this.thread = Thread(EGLLoadThread(this, renderContext, (EGLLoadThread) null), "EGLLoader")
         this.thread.setPriority(4)
         this.thread.start()
         try {
-            Debug.Printf("TexLoad: Waiting for thread to create context", Any[0]);
+            Debug.Printf("TexLoad: Waiting for thread to create context", Any[0])
             synchronized (this.contextReadyLock) {
                 while (!this.contextReady) {
                     this.contextReadyLock.wait()
                 }
             }
-            Debug.Printf("TexLoad: Context created, failed = %b", Boolean.valueOf(this.contextFailed));
+            Debug.Printf("TexLoad: Context created, failed = %b", Boolean.valueOf(this.contextFailed))
             if (this.contextFailed) {
-                throw InstantiationException("TexLoad: failed to create context");
+                throw InstantiationException("TexLoad: failed to create context")
             }
         } catch (InterruptedException e) {
-            throw InstantiationException("Interrupted: " + e.getMessage());
+            throw InstantiationException("Interrupted: " + e.getMessage())
         }
     }
 
@@ -177,7 +177,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
     }
 
     fun StopLoadQueue(): Unit {
-        Debug.Printf("TexLoad: StopLoadQueue called.", Any[0]);
+        Debug.Printf("TexLoad: StopLoadQueue called.", Any[0])
         this.mustExit.set(true)
         this.thread.interrupt()
         try {
@@ -185,7 +185,7 @@ class GLAsyncLoadQueue : GLLoadQueue : GLLoadQueue.GLLoadHandler {
         } catch (InterruptedException e) {
         }
         super.StopLoadQueue()
-        Debug.Printf("TexLoad: StopLoadQueue exiting.", Any[0]);
+        Debug.Printf("TexLoad: StopLoadQueue exiting.", Any[0])
     }
 
     fun remove(gLLoadable: GLLoadQueue.GLLoadable): Unit {

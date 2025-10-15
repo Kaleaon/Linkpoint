@@ -9,13 +9,13 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class UserNameDao : AbstractDao<UserName, UUID> {
-    String TABLENAME = "UserNames";
+    String TABLENAME = "UserNames"
 
     class Properties {
-        Property DisplayName = Property(2, String.class, "displayName", false, "DISPLAY_NAME");
-        Property IsBadUUID = Property(3, Boolean.TYPE, "isBadUUID", false, "IS_BAD_UUID");
-        Property UserName = Property(1, String.class, "userName", false, "USER_NAME");
-        Property Uuid = Property(0, UUID.class, "uuid", true, "UUID");
+        Property DisplayName = Property(2, String.class, "displayName", false, "DISPLAY_NAME")
+        Property IsBadUUID = Property(3, Boolean.TYPE, "isBadUUID", false, "IS_BAD_UUID")
+        Property UserName = Property(1, String.class, "userName", false, "USER_NAME")
+        Property Uuid = Property(0, UUID.class, "uuid", true, "UUID")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -27,11 +27,11 @@ class UserNameDao : AbstractDao<UserName, UUID> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'UserNames' (" + "'UUID' TEXT PRIMARY KEY ," + "'USER_NAME' TEXT," + "'DISPLAY_NAME' TEXT," + "'IS_BAD_UUID' INTEGER NOT NULL );");
+        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'UserNames' (" + "'UUID' TEXT PRIMARY KEY ," + "'USER_NAME' TEXT," + "'DISPLAY_NAME' TEXT," + "'IS_BAD_UUID' INTEGER NOT NULL );")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'UserNames'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'UserNames'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, userName: UserName): Unit {

@@ -27,11 +27,11 @@ class SkyProgram : ShaderProgram {
     }
 
     protected fun bindVariables(): Unit {
-        this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition");
-        this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix");
-        this.skyColor = GLES20.glGetUniformLocation(this.handle, "skyColor");
-        this.hazeHorizon = GLES20.glGetUniformLocation(this.handle, "hazeHorizon");
-        this.hazeColor = GLES20.glGetUniformLocation(this.handle, "hazeColor");
+        this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
+        this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix")
+        this.skyColor = GLES20.glGetUniformLocation(this.handle, "skyColor")
+        this.hazeHorizon = GLES20.glGetUniformLocation(this.handle, "hazeHorizon")
+        this.hazeColor = GLES20.glGetUniformLocation(this.handle, "hazeColor")
     }
 
     fun hasCloudsTexture(): Boolean {

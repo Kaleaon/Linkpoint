@@ -10,14 +10,14 @@ import java.util.Date
 import java.util.UUID
 
 class MoneyTransactionDao : AbstractDao<MoneyTransaction, Long> {
-    String TABLENAME = "MONEY_TRANSACTION";
+    String TABLENAME = "MONEY_TRANSACTION"
 
     class Properties {
-        Property AgentUUID = Property(2, UUID.class, "agentUUID", false, "AGENT_UUID");
-        Property Id = Property(0, Long.class, "id", true, "_id");
-        Property NewBalance = Property(4, Int.TYPE, "newBalance", false, "NEW_BALANCE");
-        Property Timestamp = Property(1, Date.class, "timestamp", false, "TIMESTAMP");
-        Property TransactionAmount = Property(3, Int.TYPE, "transactionAmount", false, "TRANSACTION_AMOUNT");
+        Property AgentUUID = Property(2, UUID.class, "agentUUID", false, "AGENT_UUID")
+        Property Id = Property(0, Long.class, "id", true, "_id")
+        Property NewBalance = Property(4, Int.TYPE, "newBalance", false, "NEW_BALANCE")
+        Property Timestamp = Property(1, Date.class, "timestamp", false, "TIMESTAMP")
+        Property TransactionAmount = Property(3, Int.TYPE, "transactionAmount", false, "TRANSACTION_AMOUNT")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -29,11 +29,11 @@ class MoneyTransactionDao : AbstractDao<MoneyTransaction, Long> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'MONEY_TRANSACTION' (" + "'_id' INTEGER PRIMARY KEY ," + "'TIMESTAMP' INTEGER NOT NULL ," + "'AGENT_UUID' TEXT," + "'TRANSACTION_AMOUNT' INTEGER NOT NULL ," + "'NEW_BALANCE' INTEGER NOT NULL );");
+        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'MONEY_TRANSACTION' (" + "'_id' INTEGER PRIMARY KEY ," + "'TIMESTAMP' INTEGER NOT NULL ," + "'AGENT_UUID' TEXT," + "'TRANSACTION_AMOUNT' INTEGER NOT NULL ," + "'NEW_BALANCE' INTEGER NOT NULL );")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'MONEY_TRANSACTION'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'MONEY_TRANSACTION'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, moneyTransaction: MoneyTransaction): Unit {

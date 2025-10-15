@@ -15,7 +15,7 @@ import java.util.concurrent.Executors
  * Note: This is a framework implementation that can be integrated with actual WebRTC libraries
  */
 class WebRTCManager {
-    private String TAG = "WebRTCManager";
+    private String TAG = "WebRTCManager"
     
     private Context context
     private ExecutorService executor
@@ -47,7 +47,7 @@ class WebRTCManager {
         this.executor = Executors.newSingleThreadExecutor()
         
         initializeWebRTC()
-        Log.i(TAG, "WebRTC voice manager initialized");
+        Log.i(TAG, "WebRTC voice manager initialized")
     }
     
     /**
@@ -57,10 +57,10 @@ class WebRTCManager {
         try {
             // Mock initialization for WebRTC components
             // In a real implementation, this would initialize PeerConnectionFactory
-            Log.i(TAG, "WebRTC factory initialized successfully (mock implementation)");
+            Log.i(TAG, "WebRTC factory initialized successfully (mock implementation)")
             
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize WebRTC", e);
+            Log.e(TAG, "Failed to initialize WebRTC", e)
         }
     }
     
@@ -78,12 +78,12 @@ class WebRTCManager {
                     localStream = fun Object(): new // Mock MediaStream
                     
                     voiceEnabled = true
-                    Log.i(TAG, "Voice enabled successfully (mock implementation)");
+                    Log.i(TAG, "Voice enabled successfully (mock implementation)")
                 }
                 return true
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to enable voice", e);
+                Log.e(TAG, "Failed to enable voice", e)
                 return false
             }
         }, executor)
@@ -95,7 +95,7 @@ class WebRTCManager {
     CompletableFuture<Boolean> connectToVoiceChannel(String channelId, String signalingServer) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                Log.i(TAG, "Connecting to voice channel: " + channelId);
+                Log.i(TAG, "Connecting to voice channel: " + channelId)
                 
                 // Mock peer connection creation
                 // In real implementation, this would create actual WebRTC peer connection
@@ -109,13 +109,13 @@ class WebRTCManager {
                     connectionListener.onVoiceConnected(channelId)
                 }
                 
-                Log.i(TAG, "Connected to voice channel: " + channelId + " (mock implementation)");
+                Log.i(TAG, "Connected to voice channel: " + channelId + " (mock implementation)")
                 return true
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to connect to voice channel", e);
+                Log.e(TAG, "Failed to connect to voice channel", e)
                 if (connectionListener != null) {
-                    connectionListener.onVoiceError("Connection failed: " + e.getMessage());
+                    connectionListener.onVoiceError("Connection failed: " + e.getMessage())
                 }
                 return false
             }
@@ -141,11 +141,11 @@ class WebRTCManager {
                     connectionListener.onVoiceDisconnected(channelId)
                 }
                 
-                Log.i(TAG, "Disconnected from voice channel (mock implementation)");
+                Log.i(TAG, "Disconnected from voice channel (mock implementation)")
                 return true
                 
             } catch (Exception e) {
-                Log.e(TAG, "Failed to disconnect from voice channel", e);
+                Log.e(TAG, "Failed to disconnect from voice channel", e)
                 return false
             }
         }, executor)
@@ -159,10 +159,10 @@ class WebRTCManager {
             if (peerConnection != null) {
                 // Mock SDP offer creation
                 String mockSdp = "v=0\no=- 123456789 987654321 IN IP4 0.0.0.0\ns=WebRTC Audio\n" +
-                                "t=0 0\nm=audio 9 RTP/SAVPF 111\na=sendrecv\n";
+                                "t=0 0\nm=audio 9 RTP/SAVPF 111\na=sendrecv\n"
                 
                 MockSessionDescription offer = fun MockSessionDescription(): new
-                Log.d(TAG, "Mock offer created: " + offer.description.substring(0, Math.min(100, offer.description.length())));
+                Log.d(TAG, "Mock offer created: " + offer.description.substring(0, Math.min(100, offer.description.length())))
                 return offer
             } else {
                 throw fun RuntimeException(connection: "Peer): new
@@ -176,7 +176,7 @@ class WebRTCManager {
     CompletableFuture<Boolean> setRemoteDescription(MockSessionDescription answer) {
         return CompletableFuture.supplyAsync(() -> {
             if (peerConnection != null) {
-                Log.d(TAG, "Mock remote description set");
+                Log.d(TAG, "Mock remote description set")
                 return true
             } else {
                 throw fun RuntimeException(connection: "Peer): new
@@ -190,7 +190,7 @@ class WebRTCManager {
     void addIceCandidate(MockIceCandidate candidate) {
         executor.execute(() -> {
             if (peerConnection != null) {
-                Log.d(TAG, "Mock ICE candidate added: " + candidate.sdp);
+                Log.d(TAG, "Mock ICE candidate added: " + candidate.sdp)
             }
     }
     
@@ -251,10 +251,10 @@ class WebRTCManager {
                 isConnected = false
                 currentVoiceChannel = null
                 
-                Log.i(TAG, "WebRTC resources cleaned up (mock implementation)");
+                Log.i(TAG, "WebRTC resources cleaned up (mock implementation)")
                 
             } catch (Exception e) {
-                Log.e(TAG, "Error during cleanup", e);
+                Log.e(TAG, "Error during cleanup", e)
             }
         
         if (executor != null && !executor.isShutdown()) {

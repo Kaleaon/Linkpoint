@@ -25,10 +25,10 @@ class SkyCloudsProgram : SkyProgram {
 
     protected fun bindVariables(): Unit {
         super.bindVariables()
-        this.textureSampler = GLES20.glGetUniformLocation(this.handle, "textureSampler");
-        this.cloudColor = GLES20.glGetUniformLocation(this.handle, "cloudColor");
-        this.cloudGamma = GLES20.glGetUniformLocation(this.handle, "cloudGamma");
-        this.cloudAdd = GLES20.glGetUniformLocation(this.handle, "cloudAdd");
+        this.textureSampler = GLES20.glGetUniformLocation(this.handle, "textureSampler")
+        this.cloudColor = GLES20.glGetUniformLocation(this.handle, "cloudColor")
+        this.cloudGamma = GLES20.glGetUniformLocation(this.handle, "cloudGamma")
+        this.cloudAdd = GLES20.glGetUniformLocation(this.handle, "cloudAdd")
     }
 
     fun hasCloudsTexture(): Boolean {

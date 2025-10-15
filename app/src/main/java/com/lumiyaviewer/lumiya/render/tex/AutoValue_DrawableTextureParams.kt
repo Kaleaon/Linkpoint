@@ -12,11 +12,11 @@ class AutoValue_DrawableTextureParams : DrawableTextureParams {
 
     AutoValue_DrawableTextureParams(UUID uuid, TextureClass textureClass, @Nullable AvatarTextureFaceIndex avatarTextureFaceIndex, @Nullable UUID uuid2) {
         if (uuid == null) {
-            throw NullPointerException("Null uuid");
+            throw NullPointerException("Null uuid")
         }
         this.uuid = uuid
         if (textureClass == null) {
-            throw NullPointerException("Null textureClass");
+            throw NullPointerException("Null textureClass")
         }
         this.textureClass = textureClass
         this.avatarFaceIndex = avatarTextureFaceIndex
@@ -66,7 +66,7 @@ class AutoValue_DrawableTextureParams : DrawableTextureParams {
     }
 
     fun toString(): String {
-        return "DrawableTextureParams{uuid=" + this.uuid + ", " + "textureClass=" + this.textureClass + ", " + "avatarFaceIndex=" + this.avatarFaceIndex + ", " + "avatarUUID=" + this.avatarUUID + "}";
+        return "DrawableTextureParams{uuid=" + this.uuid + ", " + "textureClass=" + this.textureClass + ", " + "avatarFaceIndex=" + this.avatarFaceIndex + ", " + "avatarUUID=" + this.avatarUUID + "}"
     }
 
     fun uuid(): UUID {

@@ -28,7 +28,7 @@ object ModernLLSDCodec {
     fun toJSON(llsd: LLSDNode): JSONObject {
         try {
             // Simplified approach for now - just return basic JSON structure
-            return new JSONObject().put("simplified", true);
+            return new JSONObject().put("simplified", true)
         } catch (JSONException e) {
             return new JSONObject()
         }
@@ -41,18 +41,18 @@ object ModernLLSDCodec {
         
         fun createVector3(vector: LLVector3): LLSDMap {
             Map<String, LLSDNode> map = new HashMap<>()
-            map.put("X", new LLSDDouble(vector.x));
-            map.put("Y", new LLSDDouble(vector.y));
-            map.put("Z", new LLSDDouble(vector.z));
+            map.put("X", new LLSDDouble(vector.x))
+            map.put("Y", new LLSDDouble(vector.y))
+            map.put("Z", new LLSDDouble(vector.z))
             return new LLSDMap(map)
         }
         
         fun createQuaternion(quat: LLQuaternion): LLSDMap {
             Map<String, LLSDNode> map = new HashMap<>()
-            map.put("X", new LLSDDouble(quat.x));
-            map.put("Y", new LLSDDouble(quat.y));
-            map.put("Z", new LLSDDouble(quat.z));
-            map.put("W", new LLSDDouble(quat.w));
+            map.put("X", new LLSDDouble(quat.x))
+            map.put("Y", new LLSDDouble(quat.y))
+            map.put("Z", new LLSDDouble(quat.z))
+            map.put("W", new LLSDDouble(quat.w))
             return new LLSDMap(map)
         }
         
@@ -66,10 +66,10 @@ object ModernLLSDCodec {
         
         fun createColor4(r: Float, g: Float, b: Float, a: Float): LLSDMap {
             Map<String, LLSDNode> map = new HashMap<>()
-            map.put("R", new LLSDDouble(r));
-            map.put("G", new LLSDDouble(g));
-            map.put("B", new LLSDDouble(b));
-            map.put("A", new LLSDDouble(a));
+            map.put("R", new LLSDDouble(r))
+            map.put("G", new LLSDDouble(g))
+            map.put("B", new LLSDDouble(b))
+            map.put("A", new LLSDDouble(a))
             return new LLSDMap(map)
         }
     }
@@ -95,9 +95,9 @@ object ModernLLSDCodec {
         fun serializeModern(node: LLSDNode): String {
             try {
                 // Simplified serialization for now
-                return "<llsd><map /></llsd>";
+                return "<llsd><map /></llsd>"
             } catch (Exception e) {
-                return "<llsd><map /></llsd>";
+                return "<llsd><map /></llsd>"
             }
         }
     }

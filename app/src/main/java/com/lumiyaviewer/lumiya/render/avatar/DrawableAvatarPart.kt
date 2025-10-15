@@ -15,7 +15,7 @@ import java.util.Arrays
 import java.util.UUID
 
 class DrawableAvatarPart : ResourceConsumer {
-    UUID DEFAULT_AVATAR_TEXTURE = UUID.fromString("c228d1cf-4b5d-4ba8-84f4-899a0796aa97");
+    UUID DEFAULT_AVATAR_TEXTURE = UUID.fromString("c228d1cf-4b5d-4ba8-84f4-899a0796aa97")
     private UUID avatarUUID
     private AvatarTextureFaceIndex faceIndex
     private Boolean hasGL20
@@ -25,13 +25,13 @@ class DrawableAvatarPart : ResourceConsumer {
         fun run(): Unit {
             GLTexture -get3
             Float[] -get2
-            Debug.Printf("Avatar: meshUpdate entered for part %s", DrawableAvatarPart.this.faceIndex.toString());
+            Debug.Printf("Avatar: meshUpdate entered for part %s", DrawableAvatarPart.this.faceIndex.toString())
             synchronized (DrawableAvatarPart.this.updateLock) {
                 -get3 = DrawableAvatarPart.this.rawTexture
                 -get2 = DrawableAvatarPart.this.partMorphParams
             }
             if (-get2 != null && -get3 != null) {
-                Debug.Printf("Avatar: meshUpdate: part %s params %s", DrawableAvatarPart.this.faceIndex.toString(), Arrays.toString(-get2));
+                Debug.Printf("Avatar: meshUpdate: part %s params %s", DrawableAvatarPart.this.faceIndex.toString(), Arrays.toString(-get2))
                 SLMeshData sLAnimatedMeshData = SLAnimatedMeshData(DrawableAvatarPart.this.referenceMeshData, DrawableAvatarPart.this.hasGL20)
                 DrawableAvatarPart.this.referenceMeshData.applyMorphData(sLAnimatedMeshData, -get2, -get3)
                 synchronized (DrawableAvatarPart.this.updateLock) {
@@ -83,10 +83,10 @@ class DrawableAvatarPart : ResourceConsumer {
     }
 
     fun OnResourceReady(obj: Any, z: Boolean): Unit {
-        String str = "Avatar: (requesting meshUpdate) face %s texture %s";
+        String str = "Avatar: (requesting meshUpdate) face %s texture %s"
         Any[] objArr = Any[2]
         objArr[0] = this.faceIndex.toString()
-        objArr[1] = obj != null ? obj.toString() : "null";
+        objArr[1] = obj != null ? obj.toString() : "null"
         Debug.Printf(str, objArr)
         if (obj instanceof OpenJPEG) {
             synchronized (this.updateLock) {
@@ -109,7 +109,7 @@ class DrawableAvatarPart : ResourceConsumer {
             }
         }
         if (equals != 0) {
-            Debug.Printf("Avatar: (requesting meshUpdate) morphParams for part %s", this.faceIndex.toString());
+            Debug.Printf("Avatar: (requesting meshUpdate) morphParams for part %s", this.faceIndex.toString())
             RequestMeshUpdate()
         }
     }
@@ -122,7 +122,7 @@ class DrawableAvatarPart : ResourceConsumer {
             // Log texture change for debugging
             Debug.Printf("Avatar: face %s texture %s", 
                 this.faceIndex.toString(), 
-                textureUUID != null ? textureUUID.toString() : "null");
+                textureUUID != null ? textureUUID.toString() : "null")
             
             // Handle null or zero UUID by setting to null or default avatar texture
             if (textureUUID != null && com.lumiyaviewer.lumiya.utils.UUIDPool.ZeroUUID == textureUUID) {

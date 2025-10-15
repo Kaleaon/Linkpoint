@@ -8,12 +8,12 @@ import de.greenrobot.dao.Property
 import de.greenrobot.dao.internal.DaoConfig
 
 class UserPicDao : AbstractDao<UserPic, Long> {
-    String TABLENAME = "USER_PIC";
+    String TABLENAME = "USER_PIC"
 
     class Properties {
-        Property Bitmap = Property(2, Byte[].class, "bitmap", false, "BITMAP");
-        Property Id = Property(0, Long.class, "id", true, "_id");
-        Property Uuid = Property(1, String.class, "uuid", false, "UUID");
+        Property Bitmap = Property(2, Byte[].class, "bitmap", false, "BITMAP")
+        Property Id = Property(0, Long.class, "id", true, "_id")
+        Property Uuid = Property(1, String.class, "uuid", false, "UUID")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -25,13 +25,13 @@ class UserPicDao : AbstractDao<UserPic, Long> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : "";
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'USER_PIC' (" + "'_id' INTEGER PRIMARY KEY ," + "'UUID' TEXT," + "'BITMAP' BLOB);");
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_USER_PIC_UUID ON USER_PIC" + " (UUID);");
+        String str = z ? "IF NOT EXISTS " : ""
+        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'USER_PIC' (" + "'_id' INTEGER PRIMARY KEY ," + "'UUID' TEXT," + "'BITMAP' BLOB);")
+        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_USER_PIC_UUID ON USER_PIC" + " (UUID);")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'USER_PIC'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'USER_PIC'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, userPic: UserPic): Unit {

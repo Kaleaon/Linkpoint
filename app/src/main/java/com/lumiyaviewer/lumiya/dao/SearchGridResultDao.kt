@@ -9,16 +9,16 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class SearchGridResultDao : AbstractDao<SearchGridResult, Long> {
-    String TABLENAME = "SearchGridResults";
+    String TABLENAME = "SearchGridResults"
 
     class Properties {
-        Property Id = Property(0, Long.class, "id", true, "_id");
-        Property ItemName = Property(4, String.class, "itemName", false, "ITEM_NAME");
-        Property ItemType = Property(2, Int.TYPE, "itemType", false, "ITEM_TYPE");
-        Property ItemUUID = Property(3, UUID.class, "itemUUID", false, "ITEM_UUID");
-        Property LevensteinDistance = Property(5, Int.TYPE, "levensteinDistance", false, "LEVENSTEIN_DISTANCE");
-        Property MemberCount = Property(6, Int.class, "memberCount", false, "MEMBER_COUNT");
-        Property SearchUUID = Property(1, UUID.class, "searchUUID", false, "SEARCH_UUID");
+        Property Id = Property(0, Long.class, "id", true, "_id")
+        Property ItemName = Property(4, String.class, "itemName", false, "ITEM_NAME")
+        Property ItemType = Property(2, Int.TYPE, "itemType", false, "ITEM_TYPE")
+        Property ItemUUID = Property(3, UUID.class, "itemUUID", false, "ITEM_UUID")
+        Property LevensteinDistance = Property(5, Int.TYPE, "levensteinDistance", false, "LEVENSTEIN_DISTANCE")
+        Property MemberCount = Property(6, Int.class, "memberCount", false, "MEMBER_COUNT")
+        Property SearchUUID = Property(1, UUID.class, "searchUUID", false, "SEARCH_UUID")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -30,13 +30,13 @@ class SearchGridResultDao : AbstractDao<SearchGridResult, Long> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : "";
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'SearchGridResults' (" + "'_id' INTEGER PRIMARY KEY ," + "'SEARCH_UUID' TEXT NOT NULL ," + "'ITEM_TYPE' INTEGER NOT NULL ," + "'ITEM_UUID' TEXT NOT NULL ," + "'ITEM_NAME' TEXT NOT NULL ," + "'LEVENSTEIN_DISTANCE' INTEGER NOT NULL ," + "'MEMBER_COUNT' INTEGER);");
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_SearchGridResults_SEARCH_UUID ON SearchGridResults" + " (SEARCH_UUID);");
+        String str = z ? "IF NOT EXISTS " : ""
+        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'SearchGridResults' (" + "'_id' INTEGER PRIMARY KEY ," + "'SEARCH_UUID' TEXT NOT NULL ," + "'ITEM_TYPE' INTEGER NOT NULL ," + "'ITEM_UUID' TEXT NOT NULL ," + "'ITEM_NAME' TEXT NOT NULL ," + "'LEVENSTEIN_DISTANCE' INTEGER NOT NULL ," + "'MEMBER_COUNT' INTEGER);")
+        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_SearchGridResults_SEARCH_UUID ON SearchGridResults" + " (SEARCH_UUID);")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'SearchGridResults'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'SearchGridResults'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, searchGridResult: SearchGridResult): Unit {

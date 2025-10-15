@@ -132,9 +132,9 @@ class DrawableHUD {
         }
         renderContext.glModelPopMatrix()
         if (!(touchHUDEvent == null || objectIntersectInfo == null)) {
-            Debug.Printf("TouchHUD event: pickDepth %f objID %d", Float.valueOf(objectIntersectInfo.pickDepth), Int.valueOf(objectIntersectInfo.objInfo.localID));
+            Debug.Printf("TouchHUD event: pickDepth %f objID %d", Float.valueOf(objectIntersectInfo.pickDepth), Int.valueOf(objectIntersectInfo.objInfo.localID))
             if (objectIntersectInfo.intersectInfo != null) {
-                Debug.Printf("TouchHUD event: intersect face %d uv (%f, %f) st (%f, %f)", Int.valueOf(objectIntersectInfo.intersectInfo.faceID), Float.valueOf(objectIntersectInfo.intersectInfo.u), Float.valueOf(objectIntersectInfo.intersectInfo.v), Float.valueOf(objectIntersectInfo.intersectInfo.s), Float.valueOf(objectIntersectInfo.intersectInfo.t));
+                Debug.Printf("TouchHUD event: intersect face %d uv (%f, %f) st (%f, %f)", Int.valueOf(objectIntersectInfo.intersectInfo.faceID), Float.valueOf(objectIntersectInfo.intersectInfo.u), Float.valueOf(objectIntersectInfo.intersectInfo.v), Float.valueOf(objectIntersectInfo.intersectInfo.s), Float.valueOf(objectIntersectInfo.intersectInfo.t))
             }
         }
         return objectIntersectInfo

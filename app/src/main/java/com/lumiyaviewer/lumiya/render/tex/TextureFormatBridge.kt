@@ -13,7 +13,7 @@ import java.io.InputStream
  * This class provides a migration path and fallback mechanisms
  */
 class TextureFormatBridge {
-    private String TAG = "TextureFormatBridge";
+    private String TAG = "TextureFormatBridge"
     
     private ModernTextureManager modernManager
     private boolean modernManagerInitialized = false
@@ -25,9 +25,9 @@ class TextureFormatBridge {
         try {
             modernManager = new ModernTextureManager(context)
             modernManagerInitialized = true
-            Log.i(TAG, "Modern texture manager initialized successfully");
+            Log.i(TAG, "Modern texture manager initialized successfully")
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize modern texture manager, falling back to legacy system", e);
+            Log.e(TAG, "Failed to initialize modern texture manager, falling back to legacy system", e)
             modernManagerInitialized = false
         }
     }
@@ -80,13 +80,13 @@ class TextureFormatBridge {
             case JPEG2000:
                 return loadJPEG2000Texture(stream)
             default:
-                throw new IOException("Unsupported texture format: " + format);
+                throw new IOException("Unsupported texture format: " + format)
         }
     }
     
     private TextureData loadKTX2Texture(InputStream stream) throws IOException {
         if (!isModernTextureSystemAvailable()) {
-            throw new IOException("Modern texture system not available");
+            throw new IOException("Modern texture system not available")
         }
         
         ModernTextureManager.TextureData modernData = modernManager.loadKTX2Texture(stream)
@@ -105,7 +105,7 @@ class TextureFormatBridge {
     private TextureData loadJPEG2000Texture(InputStream stream) throws IOException {
         // This would integrate with the existing OpenJPEG system
         // For now, return a placeholder
-        throw new IOException("JPEG2000 texture loading not implemented in bridge");
+        throw new IOException("JPEG2000 texture loading not implemented in bridge")
     }
     
     /**
@@ -140,7 +140,7 @@ class TextureFormatBridge {
         @Override
         String toString() {
             return String.format("TextureData[%dx%d, %s, %s, %d bytes]",
-                    width, height, format, compressed ? "compressed" : "uncompressed", data.length);
+                    width, height, format, compressed ? "compressed" : "uncompressed", data.length)
         }
     }
 }

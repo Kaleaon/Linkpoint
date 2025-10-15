@@ -92,8 +92,8 @@ class InventoryEntryList : AbstractList<SLInventoryEntry> {
         if (this.cursor == null || !(!this.cursor.isClosed())) {
             Any[] objArr = Any[2]
             objArr[0] = Int.valueOf(i)
-            objArr[1] = this.cursor == null ? "null" : "closed";
-            Debug.Printf("InventoryEntryList: returning null for %d because cursor is %s", objArr);
+            objArr[1] = this.cursor == null ? "null" : "closed"
+            Debug.Printf("InventoryEntryList: returning null for %d because cursor is %s", objArr)
             return null
         }
         try {

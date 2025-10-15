@@ -163,7 +163,7 @@ object AnimationCache extends ResourceMemoryCache<UUID, AnimationData> {
                 r1 = r2
                 goto L_0x0053
             */
-            throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.anim.AnimationCache.AssetLoadRequest.run():void");
+            throw new UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.anim.AnimationCache.AssetLoadRequest.run():void")
         }
     }
 
@@ -242,7 +242,7 @@ object AnimationCache extends ResourceMemoryCache<UUID, AnimationData> {
         AssetManager assetManager = LumiyaApp.getAssetManager()
         if (assetManager != null) {
             try {
-                String[] list = assetManager.list("anims");
+                String[] list = assetManager.list("anims")
                 if (list != null) {
                     builder.addAll((Iterable) Arrays.asList(list))
                 }

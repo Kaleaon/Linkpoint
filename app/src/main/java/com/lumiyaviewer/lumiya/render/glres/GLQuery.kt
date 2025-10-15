@@ -30,7 +30,7 @@ class GLQuery extends GLResource {
         void GLFree() {
             int[] iArr = (int[]) GLQuery.idQuery.get()
             iArr[0] = this.handle
-            Debug.Printf("GLBuffer: deleted buffer %d", Integer.valueOf(iArr[0]));
+            Debug.Printf("GLBuffer: deleted buffer %d", Integer.valueOf(iArr[0]))
             GLES30.glDeleteQueries(1, iArr, 0)
         }
     }

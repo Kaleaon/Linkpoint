@@ -11,39 +11,39 @@ import java.util.Date
 import java.util.UUID
 
 class ChatMessageDao : AbstractDao<ChatMessage, Long> {
-    String TABLENAME = "CHAT_MESSAGE";
+    String TABLENAME = "CHAT_MESSAGE"
 
     class Properties {
-        Property Accepted = Property(22, Boolean.class, "accepted", false, "ACCEPTED");
-        Property AssetType = Property(17, Int.class, "assetType", false, "ASSET_TYPE");
-        Property ChatChannel = Property(20, Int.class, "chatChannel", false, "CHAT_CHANNEL");
-        Property ChatterID = Property(1, Long.TYPE, ChatterFragment.CHATTER_ID_KEY, false, "CHATTER_ID");
-        Property DialogButtons = Property(26, Byte[].class, "dialogButtons", false, "DIALOG_BUTTONS");
-        Property DialogIgnored = Property(21, Boolean.class, "dialogIgnored", false, "DIALOG_IGNORED");
-        Property DialogSelectedOption = Property(27, String.class, "dialogSelectedOption", false, "DIALOG_SELECTED_OPTION");
-        Property EventState = Property(12, Int.class, "eventState", false, "EVENT_STATE");
-        Property Id = Property(0, Long.class, "id", true, "_id");
-        Property IsOffline = Property(5, Boolean.class, "isOffline", false, "IS_OFFLINE");
-        Property ItemID = Property(15, UUID.class, "itemID", false, "ITEM_ID");
-        Property ItemName = Property(16, String.class, "itemName", false, "ITEM_NAME");
-        Property MessageText = Property(10, String.class, "messageText", false, "MESSAGE_TEXT");
-        Property MessageType = Property(11, Int.TYPE, "messageType", false, "MESSAGE_TYPE");
-        Property NewBalance = Property(19, Int.class, "newBalance", false, "NEW_BALANCE");
-        Property ObjectName = Property(24, String.class, "objectName", false, "OBJECT_NAME");
-        Property OrigIMType = Property(13, Int.class, "origIMType", false, "ORIG_IMTYPE");
-        Property OrigTimestamp = Property(4, Date.class, "origTimestamp", false, "ORIG_TIMESTAMP");
-        Property QuestionMask = Property(25, Int.class, "questionMask", false, "QUESTION_MASK");
-        Property SenderLegacyName = Property(9, String.class, "senderLegacyName", false, "SENDER_LEGACY_NAME");
-        Property SenderName = Property(8, String.class, "senderName", false, "SENDER_NAME");
-        Property SenderType = Property(7, Int.class, "senderType", false, "SENDER_TYPE");
-        Property SenderUUID = Property(6, UUID.class, "senderUUID", false, "SENDER_UUID");
-        Property SessionID = Property(14, UUID.class, "sessionID", false, "SESSION_ID");
-        Property SyncedToGoogleDrive = Property(29, Boolean.TYPE, "syncedToGoogleDrive", false, "SYNCED_TO_GOOGLE_DRIVE");
-        Property TextBoxButtonIndex = Property(28, Int.class, "textBoxButtonIndex", false, "TEXT_BOX_BUTTON_INDEX");
-        Property Timestamp = Property(2, Date.class, "timestamp", false, "TIMESTAMP");
-        Property TransactionAmount = Property(18, Int.class, "transactionAmount", false, "TRANSACTION_AMOUNT");
-        Property UserID = Property(23, UUID.class, "userID", false, "USER_ID");
-        Property ViewType = Property(3, Int.TYPE, "viewType", false, "VIEW_TYPE");
+        Property Accepted = Property(22, Boolean.class, "accepted", false, "ACCEPTED")
+        Property AssetType = Property(17, Int.class, "assetType", false, "ASSET_TYPE")
+        Property ChatChannel = Property(20, Int.class, "chatChannel", false, "CHAT_CHANNEL")
+        Property ChatterID = Property(1, Long.TYPE, ChatterFragment.CHATTER_ID_KEY, false, "CHATTER_ID")
+        Property DialogButtons = Property(26, Byte[].class, "dialogButtons", false, "DIALOG_BUTTONS")
+        Property DialogIgnored = Property(21, Boolean.class, "dialogIgnored", false, "DIALOG_IGNORED")
+        Property DialogSelectedOption = Property(27, String.class, "dialogSelectedOption", false, "DIALOG_SELECTED_OPTION")
+        Property EventState = Property(12, Int.class, "eventState", false, "EVENT_STATE")
+        Property Id = Property(0, Long.class, "id", true, "_id")
+        Property IsOffline = Property(5, Boolean.class, "isOffline", false, "IS_OFFLINE")
+        Property ItemID = Property(15, UUID.class, "itemID", false, "ITEM_ID")
+        Property ItemName = Property(16, String.class, "itemName", false, "ITEM_NAME")
+        Property MessageText = Property(10, String.class, "messageText", false, "MESSAGE_TEXT")
+        Property MessageType = Property(11, Int.TYPE, "messageType", false, "MESSAGE_TYPE")
+        Property NewBalance = Property(19, Int.class, "newBalance", false, "NEW_BALANCE")
+        Property ObjectName = Property(24, String.class, "objectName", false, "OBJECT_NAME")
+        Property OrigIMType = Property(13, Int.class, "origIMType", false, "ORIG_IMTYPE")
+        Property OrigTimestamp = Property(4, Date.class, "origTimestamp", false, "ORIG_TIMESTAMP")
+        Property QuestionMask = Property(25, Int.class, "questionMask", false, "QUESTION_MASK")
+        Property SenderLegacyName = Property(9, String.class, "senderLegacyName", false, "SENDER_LEGACY_NAME")
+        Property SenderName = Property(8, String.class, "senderName", false, "SENDER_NAME")
+        Property SenderType = Property(7, Int.class, "senderType", false, "SENDER_TYPE")
+        Property SenderUUID = Property(6, UUID.class, "senderUUID", false, "SENDER_UUID")
+        Property SessionID = Property(14, UUID.class, "sessionID", false, "SESSION_ID")
+        Property SyncedToGoogleDrive = Property(29, Boolean.TYPE, "syncedToGoogleDrive", false, "SYNCED_TO_GOOGLE_DRIVE")
+        Property TextBoxButtonIndex = Property(28, Int.class, "textBoxButtonIndex", false, "TEXT_BOX_BUTTON_INDEX")
+        Property Timestamp = Property(2, Date.class, "timestamp", false, "TIMESTAMP")
+        Property TransactionAmount = Property(18, Int.class, "transactionAmount", false, "TRANSACTION_AMOUNT")
+        Property UserID = Property(23, UUID.class, "userID", false, "USER_ID")
+        Property ViewType = Property(3, Int.TYPE, "viewType", false, "VIEW_TYPE")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -55,14 +55,14 @@ class ChatMessageDao : AbstractDao<ChatMessage, Long> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : "";
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'CHAT_MESSAGE' (" + "'_id' INTEGER PRIMARY KEY ," + "'CHATTER_ID' INTEGER NOT NULL ," + "'TIMESTAMP' INTEGER NOT NULL ," + "'VIEW_TYPE' INTEGER NOT NULL ," + "'ORIG_TIMESTAMP' INTEGER," + "'IS_OFFLINE' INTEGER," + "'SENDER_UUID' TEXT," + "'SENDER_TYPE' INTEGER," + "'SENDER_NAME' TEXT," + "'SENDER_LEGACY_NAME' TEXT," + "'MESSAGE_TEXT' TEXT," + "'MESSAGE_TYPE' INTEGER NOT NULL ," + "'EVENT_STATE' INTEGER," + "'ORIG_IMTYPE' INTEGER," + "'SESSION_ID' TEXT," + "'ITEM_ID' TEXT," + "'ITEM_NAME' TEXT," + "'ASSET_TYPE' INTEGER," + "'TRANSACTION_AMOUNT' INTEGER," + "'NEW_BALANCE' INTEGER," + "'CHAT_CHANNEL' INTEGER," + "'DIALOG_IGNORED' INTEGER," + "'ACCEPTED' INTEGER," + "'USER_ID' TEXT," + "'OBJECT_NAME' TEXT," + "'QUESTION_MASK' INTEGER," + "'DIALOG_BUTTONS' BLOB," + "'DIALOG_SELECTED_OPTION' TEXT," + "'TEXT_BOX_BUTTON_INDEX' INTEGER," + "'SYNCED_TO_GOOGLE_DRIVE' INTEGER NOT NULL );");
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHAT_MESSAGE_CHATTER_ID ON CHAT_MESSAGE" + " (CHATTER_ID);");
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHAT_MESSAGE__id_SYNCED_TO_GOOGLE_DRIVE ON CHAT_MESSAGE" + " (_id,SYNCED_TO_GOOGLE_DRIVE);");
+        String str = z ? "IF NOT EXISTS " : ""
+        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'CHAT_MESSAGE' (" + "'_id' INTEGER PRIMARY KEY ," + "'CHATTER_ID' INTEGER NOT NULL ," + "'TIMESTAMP' INTEGER NOT NULL ," + "'VIEW_TYPE' INTEGER NOT NULL ," + "'ORIG_TIMESTAMP' INTEGER," + "'IS_OFFLINE' INTEGER," + "'SENDER_UUID' TEXT," + "'SENDER_TYPE' INTEGER," + "'SENDER_NAME' TEXT," + "'SENDER_LEGACY_NAME' TEXT," + "'MESSAGE_TEXT' TEXT," + "'MESSAGE_TYPE' INTEGER NOT NULL ," + "'EVENT_STATE' INTEGER," + "'ORIG_IMTYPE' INTEGER," + "'SESSION_ID' TEXT," + "'ITEM_ID' TEXT," + "'ITEM_NAME' TEXT," + "'ASSET_TYPE' INTEGER," + "'TRANSACTION_AMOUNT' INTEGER," + "'NEW_BALANCE' INTEGER," + "'CHAT_CHANNEL' INTEGER," + "'DIALOG_IGNORED' INTEGER," + "'ACCEPTED' INTEGER," + "'USER_ID' TEXT," + "'OBJECT_NAME' TEXT," + "'QUESTION_MASK' INTEGER," + "'DIALOG_BUTTONS' BLOB," + "'DIALOG_SELECTED_OPTION' TEXT," + "'TEXT_BOX_BUTTON_INDEX' INTEGER," + "'SYNCED_TO_GOOGLE_DRIVE' INTEGER NOT NULL );")
+        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHAT_MESSAGE_CHATTER_ID ON CHAT_MESSAGE" + " (CHATTER_ID);")
+        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_CHAT_MESSAGE__id_SYNCED_TO_GOOGLE_DRIVE ON CHAT_MESSAGE" + " (_id,SYNCED_TO_GOOGLE_DRIVE);")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CHAT_MESSAGE'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'CHAT_MESSAGE'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, chatMessage: ChatMessage): Unit {

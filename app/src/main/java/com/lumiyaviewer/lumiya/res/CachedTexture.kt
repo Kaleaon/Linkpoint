@@ -69,6 +69,6 @@ class CachedTexture {
                 ", size=" + width + "x" + height +
                 ", format=0x" + Int.toHexString(format) +
                 ", estimated=" + getEstimatedSize() + " bytes" +
-                "}";
+                "}"
     }
 }

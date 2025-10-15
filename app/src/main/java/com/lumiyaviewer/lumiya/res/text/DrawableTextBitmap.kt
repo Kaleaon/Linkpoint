@@ -15,7 +15,7 @@ class DrawableTextBitmap {
         paint.setTextSize((Float) i)
         paint.setAntiAlias(true)
         paint.setTextAlign(Paint.Align.CENTER)
-        Array<String> split = drawableTextParams.text().split("\n");
+        Array<String> split = drawableTextParams.text().split("\n")
         Int length = split.length
         Int i2 = 0
         Int i3 = 1

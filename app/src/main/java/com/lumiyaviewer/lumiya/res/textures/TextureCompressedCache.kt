@@ -78,7 +78,7 @@ class TextureCompressedCache : ResourceManager<DrawableTextureParams, File> {
             SLTextureFetchRequest sLTextureFetchRequest
             SLTextureFetcher sLTextureFetcher
             Future<?> future
-            Debug.Printf("TextureFetchRequest: cancelled (%s)", ((DrawableTextureParams) getParams()).uuid().toString());
+            Debug.Printf("TextureFetchRequest: cancelled (%s)", ((DrawableTextureParams) getParams()).uuid().toString())
             synchronized (this) {
                 sLTextureFetchRequest = this.fetchRequest
                 sLTextureFetcher = this.fetcher
@@ -327,7 +327,7 @@ class TextureCompressedCache : ResourceManager<DrawableTextureParams, File> {
                 r2 = r4
                 goto L_0x01a5
             */
-            throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.textures.TextureCompressedCache.TextureFetchRequest.run():Unit");
+            throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.textures.TextureCompressedCache.TextureFetchRequest.run():Unit")
         }
 
         fun start(): Unit {

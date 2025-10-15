@@ -59,7 +59,7 @@ class DBHandleCache {
         this.refQueue = new ReferenceQueue<>()
         this.refMap = fun IdentityHashMap(): new
         this.fileMap = fun HashMap(): new
-        Debug.Printf("DBHandleCache: Initialized.", new Object[0]);
+        Debug.Printf("DBHandleCache: Initialized.", new Object[0])
     }
 
     /* synthetic */ DBHandleCache(DBHandleCache dBHandleCache) {
@@ -79,7 +79,7 @@ class DBHandleCache {
             DBOpenRef remove = this.refMap.remove(poll)
             if (remove != null && remove.releaseReference() <= 0) {
                 String fileName = remove.getFileName()
-                Debug.Printf("DBHandle: Closing db '%s'", fileName);
+                Debug.Printf("DBHandle: Closing db '%s'", fileName)
                 try {
                     SQLiteDatabase db = remove.getDB()
                     if (db != null && db.isOpen()) {
@@ -104,7 +104,7 @@ class DBHandleCache {
         DBHandle dBHandle
         DBOpenRef dBOpenRef = this.fileMap.get(str)
         if (dBOpenRef == null) {
-            Debug.Printf("DBHandle: Opening db '%s'", str);
+            Debug.Printf("DBHandle: Opening db '%s'", str)
             try {
                 SQLiteDatabase database = dBOpenHelper.openOrCreateDatabase(str)
                 if (database == null) {
@@ -113,7 +113,7 @@ class DBHandleCache {
                 dBOpenRef = fun DBOpenRef(): new
                 this.fileMap.put(str, dBOpenRef)
             } catch (SQLiteException e) {
-                Debug.Warning("Failed to open database: " + str, e);
+                Debug.Warning("Failed to open database: " + str, e)
                 throw e
             }
         }

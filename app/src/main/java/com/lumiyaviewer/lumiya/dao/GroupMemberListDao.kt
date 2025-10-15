@@ -9,11 +9,11 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class GroupMemberListDao : AbstractDao<GroupMemberList, UUID> {
-    String TABLENAME = "GroupMemberLists";
+    String TABLENAME = "GroupMemberLists"
 
     class Properties {
-        Property GroupID = Property(0, UUID.class, "groupID", true, "GROUP_ID");
-        Property RequestID = Property(1, UUID.class, "requestID", false, "REQUEST_ID");
+        Property GroupID = Property(0, UUID.class, "groupID", true, "GROUP_ID")
+        Property RequestID = Property(1, UUID.class, "requestID", false, "REQUEST_ID")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -25,11 +25,11 @@ class GroupMemberListDao : AbstractDao<GroupMemberList, UUID> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'GroupMemberLists' (" + "'GROUP_ID' TEXT PRIMARY KEY ," + "'REQUEST_ID' TEXT NOT NULL );");
+        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'GroupMemberLists' (" + "'GROUP_ID' TEXT PRIMARY KEY ," + "'REQUEST_ID' TEXT NOT NULL );")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupMemberLists'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupMemberLists'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, groupMemberList: GroupMemberList): Unit {

@@ -10,7 +10,7 @@ import com.lumiyaviewer.lumiya.memory.MemoryPressureListener
  * Texture cache that integrates with MemoryManager for proper memory management
  */
 class TextureCache : MemoryPressureListener {
-    private String TAG = "TextureCache";
+    private String TAG = "TextureCache"
     private Int DEFAULT_CACHE_SIZE_MB = 32
     
     private MemoryManager memoryManager
@@ -31,7 +31,7 @@ class TextureCache : MemoryPressureListener {
             
             override protected fun entryRemoved(evicted: Boolean, key: String, oldValue: CachedTexture, newValue: CachedTexture): Unit {
                 if (oldValue != null) {
-                    memoryManager.trackDeallocation("texture_" + key, oldValue.getEstimatedSize());
+                    memoryManager.trackDeallocation("texture_" + key, oldValue.getEstimatedSize())
                     oldValue.release()
                 }
             }
@@ -42,7 +42,7 @@ class TextureCache : MemoryPressureListener {
     
     fun put(key: String, texture: CachedTexture): Unit {
         if (texture != null) {
-            memoryManager.trackAllocation("texture_" + key, texture, texture.getEstimatedSize());
+            memoryManager.trackAllocation("texture_" + key, texture, texture.getEstimatedSize())
             cache.put(key, texture)
         }
     }
@@ -54,7 +54,7 @@ class TextureCache : MemoryPressureListener {
     fun remove(key: String): Unit {
         CachedTexture texture = cache.remove(key)
         if (texture != null) {
-            memoryManager.trackDeallocation("texture_" + key, texture.getEstimatedSize());
+            memoryManager.trackDeallocation("texture_" + key, texture.getEstimatedSize())
             texture.release()
         }
     }
@@ -68,7 +68,7 @@ class TextureCache : MemoryPressureListener {
     }
     
     override fun onMemoryPressure(): Unit {
-        Log.i(TAG, "Memory pressure detected, trimming texture cache");
+        Log.i(TAG, "Memory pressure detected, trimming texture cache")
         // Trim to 50% of current size
         cache.trimToSize(cache.size() / 2)
     }

@@ -19,8 +19,8 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 class AvatarVisualState {
-    private ImmutableSet<UUID> basicAnimations = Builder().add(UUID.fromString("2408fe9e-df1d-1d7d-f4ff-1384fa7b350f")).add(UUID.fromString("15468e00-3400-bb66-cecc-646d7c14458e")).add(UUID.fromString("370f3a20-6ca6-9971-848c-9a01bc42ae3c")).add(UUID.fromString("42b46214-4b44-79ae-deb8-0df61424ff4b")).add(UUID.fromString("f22fed8b-a5ed-2c93-64d5-bdd8b93c889f")).add(UUID.fromString("201f3fdf-cb1f-dbec-201f-7333e328ae7c")).add(UUID.fromString("47f5f6fb-22e5-ae44-f871-73aaaf4a6022")).add(UUID.fromString("aec4610c-757f-bc4e-c092-c6e9caf18daf")).add(UUID.fromString("2b5a38b2-5e00-3a97-a495-4c826bc443e6")).add(UUID.fromString("4ae8016b-31b9-03bb-c401-b1ea941db41d")).add(UUID.fromString("20f063ea-8306-2562-0b07-5c853b37b31e")).add(UUID.fromString("62c5de58-cb33-5743-3d07-9e4cd4352864")).add(UUID.fromString("05ddbff8-aaa9-92a1-2b74-8fe77a29b445")).add(UUID.fromString("6ed24bd8-91aa-4b12-ccc7-c97c857ab4e0")).add(UUID.fromString("f5fc7433-043d-e819-8298-f519a119b688")).build();
-    private UUID defaultStandingAnimation = UUID.fromString("2408fe9e-df1d-1d7d-f4ff-1384fa7b350f");
+    private ImmutableSet<UUID> basicAnimations = Builder().add(UUID.fromString("2408fe9e-df1d-1d7d-f4ff-1384fa7b350f")).add(UUID.fromString("15468e00-3400-bb66-cecc-646d7c14458e")).add(UUID.fromString("370f3a20-6ca6-9971-848c-9a01bc42ae3c")).add(UUID.fromString("42b46214-4b44-79ae-deb8-0df61424ff4b")).add(UUID.fromString("f22fed8b-a5ed-2c93-64d5-bdd8b93c889f")).add(UUID.fromString("201f3fdf-cb1f-dbec-201f-7333e328ae7c")).add(UUID.fromString("47f5f6fb-22e5-ae44-f871-73aaaf4a6022")).add(UUID.fromString("aec4610c-757f-bc4e-c092-c6e9caf18daf")).add(UUID.fromString("2b5a38b2-5e00-3a97-a495-4c826bc443e6")).add(UUID.fromString("4ae8016b-31b9-03bb-c401-b1ea941db41d")).add(UUID.fromString("20f063ea-8306-2562-0b07-5c853b37b31e")).add(UUID.fromString("62c5de58-cb33-5743-3d07-9e4cd4352864")).add(UUID.fromString("05ddbff8-aaa9-92a1-2b74-8fe77a29b445")).add(UUID.fromString("6ed24bd8-91aa-4b12-ccc7-c97c857ab4e0")).add(UUID.fromString("f5fc7433-043d-e819-8298-f519a119b688")).build()
+    private UUID defaultStandingAnimation = UUID.fromString("2408fe9e-df1d-1d7d-f4ff-1384fa7b350f")
     private UUID agentUUID
     private val animations: Map<UUID, AnimationSequenceInfo> = ConcurrentHashMap()
     private SLObjectAvatarInfo avatarObject
@@ -38,7 +38,7 @@ class AvatarVisualState {
         AnimationSequenceInfo animationSequenceInfo
         AnimationSequenceInfo animationSequenceInfo2 = (AnimationSequenceInfo) this.animations.get(uuid)
         if (animationSequenceInfo2 == null) {
-            Debug.Printf("Anim: Starting animation %s seqID %d", uuid.toString(), Int.valueOf(i));
+            Debug.Printf("Anim: Starting animation %s seqID %d", uuid.toString(), Int.valueOf(i))
             animationSequenceInfo2 = AnimationSequenceInfo.newSequence(uuid, j, i)
             this.animations.put(uuid, animationSequenceInfo2)
             animationSequenceInfo = animationSequenceInfo2
@@ -116,7 +116,7 @@ class AvatarVisualState {
                     i |= drawableAvatar.IsAnimationStopped(uuid2)
                 }
                 if (i != 0) {
-                    Debug.Printf("Anim: Stopping animation %s", uuid2.toString());
+                    Debug.Printf("Anim: Stopping animation %s", uuid2.toString())
                     this.animations.remove(uuid2)
                     drawableAvatar?.AnimationRemove(uuid2)
                     }

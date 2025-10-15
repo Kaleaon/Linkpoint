@@ -17,7 +17,7 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> extends Resourc
                 .weakValues()
                 .removalListener(notification -> {
                     if (notification.getValue() != null) {
-                        String key = "final_" + String.valueOf(notification.getKey().hashCode());
+                        String key = "final_" + String.valueOf(notification.getKey().hashCode())
                         this.memoryManager.trackDeallocation(key, estimateSize(notification.getValue()))
                     }
                 })
@@ -27,7 +27,7 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> extends Resourc
                 .weakValues()
                 .removalListener(notification -> {
                     if (notification.getValue() != null) {
-                        String key = "intermediate_" + String.valueOf(notification.getKey().hashCode());
+                        String key = "intermediate_" + String.valueOf(notification.getKey().hashCode())
                         this.memoryManager.trackDeallocation(key, estimateSize(notification.getValue()))
                     }
                 })
@@ -40,7 +40,7 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> extends Resourc
 
     fun CompleteRequest(resourceparams: ResourceParams, resourcetype: ResourceType, set: Set<ResourceConsumer>): Unit {
         if (resourcetype != null) {
-            String key = "final_" + String.valueOf(resourceparams.hashCode());
+            String key = "final_" + String.valueOf(resourceparams.hashCode())
             memoryManager.trackAllocation(key, resourcetype, estimateSize(resourcetype))
             this.finalResults.put(resourceparams, resourcetype)
         } else {
@@ -51,7 +51,7 @@ abstract class ResourceMemoryCache<ResourceParams, ResourceType> extends Resourc
 
     fun IntermediateResult(resourceparams: ResourceParams, resourcetype: ResourceType, set: Set<ResourceConsumer>): Unit {
         if (resourcetype != null) {
-            String key = "intermediate_" + String.valueOf(resourceparams.hashCode());
+            String key = "intermediate_" + String.valueOf(resourceparams.hashCode())
             memoryManager.trackAllocation(key, resourcetype, estimateSize(resourcetype))
             this.intermediateResults.put(resourceparams, resourcetype)
         } else {

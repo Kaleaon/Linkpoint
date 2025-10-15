@@ -19,7 +19,7 @@ abstract class InventoryQuery implements Parcelable {
     Parcelable.Creator<InventoryQuery> CREATOR = new Parcelable.Creator<InventoryQuery>() {
         fun createFromParcel(parcel: Parcel): InventoryQuery {
             Bundle readBundle = parcel.readBundle(getClass().getClassLoader())
-            return InventoryQuery.create(UUIDPool.getUUID(readBundle.getString("folderId")), readBundle.getString("containsString"), readBundle.getBoolean("includeFolders"), readBundle.getBoolean("includeItems"), readBundle.getBoolean("newestFirst"), readBundle.getInt("assetType", -1));
+            return InventoryQuery.create(UUIDPool.getUUID(readBundle.getString("folderId")), readBundle.getString("containsString"), readBundle.getBoolean("includeFolders"), readBundle.getBoolean("includeItems"), readBundle.getBoolean("newestFirst"), readBundle.getInt("assetType", -1))
         }
 
         InventoryQuery[] newArray(int i) {
@@ -66,47 +66,47 @@ abstract class InventoryQuery implements Parcelable {
         ArrayList arrayList = new ArrayList()
         ArrayList arrayList2 = new ArrayList()
         if (sLInventoryEntry != null) {
-            arrayList.add("parent_id = ?");
+            arrayList.add("parent_id = ?")
             arrayList2.add(Long.toString(sLInventoryEntry.getId()))
         }
         String containsString = containsString()
         if (!Strings.isNullOrEmpty(containsString)) {
-            arrayList.add("name LIKE ?");
-            arrayList2.add("%" + containsString + "%");
+            arrayList.add("name LIKE ?")
+            arrayList2.add("%" + containsString + "%")
         }
         if (includeFolders() && (!includeItems())) {
-            arrayList.add(String.format("(isFolder OR (invType == %d AND assetType == %d))", new Object[]{8, Integer.valueOf(SLAssetType.AT_LINK_FOLDER.getTypeCode())}));
+            arrayList.add(String.format("(isFolder OR (invType == %d AND assetType == %d))", new Object[]{8, Integer.valueOf(SLAssetType.AT_LINK_FOLDER.getTypeCode())}))
         } else if (includeItems() && (!includeFolders())) {
-            arrayList.add(String.format("(NOT (isFolder OR (invType == %d AND assetType == %d)))", new Object[]{8, Integer.valueOf(SLAssetType.AT_LINK_FOLDER.getTypeCode())}));
+            arrayList.add(String.format("(NOT (isFolder OR (invType == %d AND assetType == %d)))", new Object[]{8, Integer.valueOf(SLAssetType.AT_LINK_FOLDER.getTypeCode())}))
         }
         if (folderType() != -1) {
-            arrayList.add("(typeDefault = ?)");
+            arrayList.add("(typeDefault = ?)")
             arrayList2.add(Integer.toString(folderType()))
-            arrayList.add("isFolder");
+            arrayList.add("isFolder")
         }
         if (assetType() != -1) {
-            arrayList.add(String.format("(isFolder OR assetType == %d)", new Object[]{Integer.valueOf(assetType())}));
+            arrayList.add(String.format("(isFolder OR assetType == %d)", new Object[]{Integer.valueOf(assetType())}))
         }
-        String str2 = newestFirst() ? "creationDate DESC, name" : "name, creationDate DESC";
-        String join = Joiner.on(" AND ").join((Iterable<?>) arrayList);
+        String str2 = newestFirst() ? "creationDate DESC, name" : "name, creationDate DESC"
+        String join = Joiner.on(" AND ").join((Iterable<?>) arrayList)
         String[] strArr = (String[]) Iterables.toArray(arrayList2, String.class)
         if (sLInventoryEntry != null) {
             str = sLInventoryEntry.name
         }
-        return new InventoryEntryList(str, sLInventoryEntry, SLInventoryEntry.query(inventoryDB.getDatabase(), join, strArr, "isFolder DESC, (isFolder AND (typeDefault >= 0)) DESC, (assetType == 25) DESC" + ", " + str2));
+        return new InventoryEntryList(str, sLInventoryEntry, SLInventoryEntry.query(inventoryDB.getDatabase(), join, strArr, "isFolder DESC, (isFolder AND (typeDefault >= 0)) DESC, (assetType == 25) DESC" + ", " + str2))
     }
 
     fun writeToParcel(parcel: Parcel, i: Int): Unit {
         Bundle bundle = new Bundle()
         UUID folderId = folderId()
         if (folderId != null) {
-            bundle.putString("folderId", folderId.toString());
+            bundle.putString("folderId", folderId.toString())
         }
-        bundle.putString("containsString", containsString());
-        bundle.putBoolean("includeFolders", includeFolders());
-        bundle.putBoolean("includeItems", includeItems());
-        bundle.putBoolean("newestFirst", newestFirst());
-        bundle.putInt("assetType", assetType());
+        bundle.putString("containsString", containsString())
+        bundle.putBoolean("includeFolders", includeFolders())
+        bundle.putBoolean("includeItems", includeItems())
+        bundle.putBoolean("newestFirst", newestFirst())
+        bundle.putInt("assetType", assetType())
         parcel.writeBundle(bundle)
     }
 }

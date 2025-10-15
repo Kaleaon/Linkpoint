@@ -9,17 +9,17 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class UserDao : AbstractDao<User, Long> {
-    String TABLENAME = "Users";
+    String TABLENAME = "Users"
 
     class Properties {
-        Property BadUUID = Property(4, Boolean.TYPE, "badUUID", false, "BAD_UUID");
-        Property DisplayName = Property(3, String.class, "displayName", false, "DISPLAY_NAME");
-        Property Id = Property(0, Long.class, "id", true, "_id");
-        Property IsFriend = Property(5, Boolean.TYPE, "isFriend", false, "IS_FRIEND");
-        Property RightsGiven = Property(6, Int.TYPE, "rightsGiven", false, "RIGHTS_GIVEN");
-        Property RightsHas = Property(7, Int.TYPE, "rightsHas", false, "RIGHTS_HAS");
-        Property UserName = Property(2, String.class, "userName", false, "USER_NAME");
-        Property Uuid = Property(1, UUID.class, "uuid", false, "UUID");
+        Property BadUUID = Property(4, Boolean.TYPE, "badUUID", false, "BAD_UUID")
+        Property DisplayName = Property(3, String.class, "displayName", false, "DISPLAY_NAME")
+        Property Id = Property(0, Long.class, "id", true, "_id")
+        Property IsFriend = Property(5, Boolean.TYPE, "isFriend", false, "IS_FRIEND")
+        Property RightsGiven = Property(6, Int.TYPE, "rightsGiven", false, "RIGHTS_GIVEN")
+        Property RightsHas = Property(7, Int.TYPE, "rightsHas", false, "RIGHTS_HAS")
+        Property UserName = Property(2, String.class, "userName", false, "USER_NAME")
+        Property Uuid = Property(1, UUID.class, "uuid", false, "UUID")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -31,13 +31,13 @@ class UserDao : AbstractDao<User, Long> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : "";
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'Users' (" + "'_id' INTEGER PRIMARY KEY ," + "'UUID' TEXT," + "'USER_NAME' TEXT," + "'DISPLAY_NAME' TEXT," + "'BAD_UUID' INTEGER NOT NULL ," + "'IS_FRIEND' INTEGER NOT NULL ," + "'RIGHTS_GIVEN' INTEGER NOT NULL ," + "'RIGHTS_HAS' INTEGER NOT NULL );");
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_Users_UUID ON Users" + " (UUID);");
+        String str = z ? "IF NOT EXISTS " : ""
+        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'Users' (" + "'_id' INTEGER PRIMARY KEY ," + "'UUID' TEXT," + "'USER_NAME' TEXT," + "'DISPLAY_NAME' TEXT," + "'BAD_UUID' INTEGER NOT NULL ," + "'IS_FRIEND' INTEGER NOT NULL ," + "'RIGHTS_GIVEN' INTEGER NOT NULL ," + "'RIGHTS_HAS' INTEGER NOT NULL );")
+        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_Users_UUID ON Users" + " (UUID);")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'Users'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'Users'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, user: User): Unit {

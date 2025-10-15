@@ -8,15 +8,15 @@ import java.util.concurrent.atomic.AtomicBoolean
  * This provides a clean interface to the native OpenJPEG implementation.
  */
 class OpenJPEGDecoder {
-    private String TAG = "OpenJPEGDecoder";
+    private String TAG = "OpenJPEGDecoder"
     private AtomicBoolean initialized = fun AtomicBoolean(): new
     
     {
         try {
-            System.loadLibrary("openjpeg");
-            Log.i(TAG, "OpenJPEG native library loaded successfully");
+            System.loadLibrary("openjpeg")
+            Log.i(TAG, "OpenJPEG native library loaded successfully")
         } catch (UnsatisfiedLinkError e) {
-            Log.e(TAG, "Failed to load OpenJPEG native library", e);
+            Log.e(TAG, "Failed to load OpenJPEG native library", e)
         }
     }
     
@@ -32,10 +32,10 @@ class OpenJPEGDecoder {
         try {
             boolean result = initializeNative()
             initialized.set(result)
-            Log.i(TAG, "OpenJPEG decoder initialized: " + result);
+            Log.i(TAG, "OpenJPEG decoder initialized: " + result)
             return result
         } catch (UnsatisfiedLinkError e) {
-            Log.e(TAG, "Failed to initialize OpenJPEG decoder", e);
+            Log.e(TAG, "Failed to initialize OpenJPEG decoder", e)
             return false
         }
     }
@@ -47,25 +47,25 @@ class OpenJPEGDecoder {
      */
     byte[] decodeJ2K(byte[] j2kData) {
         if (!initialized.get() && !initialize()) {
-            Log.e(TAG, "OpenJPEG decoder not initialized");
+            Log.e(TAG, "OpenJPEG decoder not initialized")
             return null
         }
         
         if (j2kData == null || j2kData.length == 0) {
-            Log.e(TAG, "Invalid J2K data provided");
+            Log.e(TAG, "Invalid J2K data provided")
             return null
         }
         
         try {
             byte[] result = decodeJ2KNative(j2kData)
             if (result != null) {
-                Log.d(TAG, "Successfully decoded J2K image: " + result.length + " bytes");
+                Log.d(TAG, "Successfully decoded J2K image: " + result.length + " bytes")
             } else {
-                Log.w(TAG, "Failed to decode J2K image");
+                Log.w(TAG, "Failed to decode J2K image")
             }
             return result
         } catch (Exception e) {
-            Log.e(TAG, "Error decoding J2K image", e);
+            Log.e(TAG, "Error decoding J2K image", e)
             return null
         }
     }
@@ -77,19 +77,19 @@ class OpenJPEGDecoder {
      */
     int[] getImageDimensions(byte[] j2kData) {
         if (!initialized.get() && !initialize()) {
-            Log.e(TAG, "OpenJPEG decoder not initialized");
+            Log.e(TAG, "OpenJPEG decoder not initialized")
             return null
         }
         
         if (j2kData == null || j2kData.length == 0) {
-            Log.e(TAG, "Invalid J2K data provided for dimensions");
+            Log.e(TAG, "Invalid J2K data provided for dimensions")
             return null
         }
         
         try {
             fun getJ2KDimensionsNative(): return
         } catch (Exception e) {
-            Log.e(TAG, "Error getting J2K dimensions", e);
+            Log.e(TAG, "Error getting J2K dimensions", e)
             return null
         }
     }
@@ -99,10 +99,10 @@ class OpenJPEGDecoder {
      * @return true if the test passed
      */
     boolean testDecoder() {
-        Log.i(TAG, "Testing OpenJPEG decoder...");
+        Log.i(TAG, "Testing OpenJPEG decoder...")
         
         if (!initialize()) {
-            Log.e(TAG, "Decoder test failed: initialization failed");
+            Log.e(TAG, "Decoder test failed: initialization failed")
             return false
         }
         
@@ -112,14 +112,14 @@ class OpenJPEGDecoder {
         try {
             int[] dimensions = getImageDimensions(testData)
             if (dimensions != null && dimensions.length == 2) {
-                Log.i(TAG, "Decoder test passed: dimensions " + dimensions[0] + "x" + dimensions[1]);
+                Log.i(TAG, "Decoder test passed: dimensions " + dimensions[0] + "x" + dimensions[1])
                 return true
             } else {
-                Log.w(TAG, "Decoder test: got null dimensions (expected for test data)");
+                Log.w(TAG, "Decoder test: got null dimensions (expected for test data)")
                 return true; // This is actually expected for invalid test data
             }
         } catch (Exception e) {
-            Log.e(TAG, "Decoder test failed with exception", e);
+            Log.e(TAG, "Decoder test failed with exception", e)
             return false
         }
     }
@@ -131,9 +131,9 @@ class OpenJPEGDecoder {
         try {
             cleanupNative()
             initialized.set(false)
-            Log.i(TAG, "OpenJPEG decoder cleaned up");
+            Log.i(TAG, "OpenJPEG decoder cleaned up")
         } catch (Exception e) {
-            Log.e(TAG, "Error during cleanup", e);
+            Log.e(TAG, "Error during cleanup", e)
         }
     }
     

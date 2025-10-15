@@ -9,13 +9,13 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class GroupRoleMemberDao : AbstractDao<GroupRoleMember, Void> {
-    String TABLENAME = "GroupRoleMembers";
+    String TABLENAME = "GroupRoleMembers"
 
     class Properties {
-        Property GroupID = Property(0, UUID.class, "groupID", false, "GROUP_ID");
-        Property RequestID = Property(1, UUID.class, "requestID", false, "REQUEST_ID");
-        Property RoleID = Property(2, UUID.class, "roleID", false, "ROLE_ID");
-        Property UserID = Property(3, UUID.class, "userID", false, "USER_ID");
+        Property GroupID = Property(0, UUID.class, "groupID", false, "GROUP_ID")
+        Property RequestID = Property(1, UUID.class, "requestID", false, "REQUEST_ID")
+        Property RoleID = Property(2, UUID.class, "roleID", false, "ROLE_ID")
+        Property UserID = Property(3, UUID.class, "userID", false, "USER_ID")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -27,13 +27,13 @@ class GroupRoleMemberDao : AbstractDao<GroupRoleMember, Void> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        String str = z ? "IF NOT EXISTS " : "";
-        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'GroupRoleMembers' (" + "'GROUP_ID' TEXT NOT NULL ," + "'REQUEST_ID' TEXT NOT NULL ," + "'ROLE_ID' TEXT NOT NULL ," + "'USER_ID' TEXT NOT NULL );");
-        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_GroupRoleMembers_GROUP_ID_ROLE_ID_REQUEST_ID ON GroupRoleMembers" + " (GROUP_ID,ROLE_ID,REQUEST_ID);");
+        String str = z ? "IF NOT EXISTS " : ""
+        sQLiteDatabase.execSQL("CREATE TABLE " + str + "'GroupRoleMembers' (" + "'GROUP_ID' TEXT NOT NULL ," + "'REQUEST_ID' TEXT NOT NULL ," + "'ROLE_ID' TEXT NOT NULL ," + "'USER_ID' TEXT NOT NULL );")
+        sQLiteDatabase.execSQL("CREATE INDEX " + str + "IDX_GroupRoleMembers_GROUP_ID_ROLE_ID_REQUEST_ID ON GroupRoleMembers" + " (GROUP_ID,ROLE_ID,REQUEST_ID);")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupRoleMembers'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'GroupRoleMembers'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, groupRoleMember: GroupRoleMember): Unit {

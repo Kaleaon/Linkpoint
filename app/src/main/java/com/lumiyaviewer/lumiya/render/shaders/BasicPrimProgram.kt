@@ -39,18 +39,18 @@ class BasicPrimProgram : ShaderProgram {
     }
 
     protected fun bindVariables(): Unit {
-        this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition");
-        this.vTexCoord = GLES20.glGetAttribLocation(this.handle, "vTexCoord");
-        this.vNormal = GLES20.glGetAttribLocation(this.handle, "vNormal");
-        this.vColor = GLES20.glGetUniformLocation(this.handle, "vColor");
-        this.sTexture = GLES20.glGetUniformLocation(this.handle, "sTexture");
-        this.useTexture = GLES20.glGetUniformLocation(this.handle, "useTexture");
-        this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix");
-        this.uObjWorldMatrix = GLES20.glGetUniformLocation(this.handle, "uObjWorldMatrix");
-        this.uObjCoordScale = GLES20.glGetUniformLocation(this.handle, "uObjCoordScale");
-        this.LightDiffuseDir = GLES20.glGetUniformLocation(this.handle, "LightDiffuseDir");
-        this.LightDiffuseColor = GLES20.glGetUniformLocation(this.handle, "LightDiffuseColor");
-        this.LightAmbientColor = GLES20.glGetUniformLocation(this.handle, "LightAmbientColor");
+        this.vPosition = GLES20.glGetAttribLocation(this.handle, "vPosition")
+        this.vTexCoord = GLES20.glGetAttribLocation(this.handle, "vTexCoord")
+        this.vNormal = GLES20.glGetAttribLocation(this.handle, "vNormal")
+        this.vColor = GLES20.glGetUniformLocation(this.handle, "vColor")
+        this.sTexture = GLES20.glGetUniformLocation(this.handle, "sTexture")
+        this.useTexture = GLES20.glGetUniformLocation(this.handle, "useTexture")
+        this.uMVPMatrix = GLES20.glGetUniformLocation(this.handle, "uMVPMatrix")
+        this.uObjWorldMatrix = GLES20.glGetUniformLocation(this.handle, "uObjWorldMatrix")
+        this.uObjCoordScale = GLES20.glGetUniformLocation(this.handle, "uObjCoordScale")
+        this.LightDiffuseDir = GLES20.glGetUniformLocation(this.handle, "LightDiffuseDir")
+        this.LightDiffuseColor = GLES20.glGetUniformLocation(this.handle, "LightDiffuseColor")
+        this.LightAmbientColor = GLES20.glGetUniformLocation(this.handle, "LightAmbientColor")
     }
 
     fun setTextureEnabled(z: Boolean): Unit {

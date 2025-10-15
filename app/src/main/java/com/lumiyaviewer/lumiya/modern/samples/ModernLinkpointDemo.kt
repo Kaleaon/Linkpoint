@@ -17,7 +17,7 @@ import com.lumiyaviewer.lumiya.modern.llsd.ModernLLSDCodec
  * Shows integration of HTTP/2, WebSocket, LLSD codec, and advanced graphics
  */
 class ModernLinkpointDemo {
-    private String TAG = "ModernLinkpointDemo";
+    private String TAG = "ModernLinkpointDemo"
     
     private Context context
     private HybridSLTransport transport
@@ -30,7 +30,7 @@ class ModernLinkpointDemo {
     constructor(context: Context) {
         this.context = context
         
-        Log.i(TAG, "Initializing ModernLinkpointDemo components...");
+        Log.i(TAG, "Initializing ModernLinkpointDemo components...")
         
         // Initialize components with individual error handling to prevent cascading failures
         this.transport = initializeTransport()
@@ -40,7 +40,7 @@ class ModernLinkpointDemo {
         this.assetManager = initializeAssetManager(context)
         this.protocolDemo = initializeProtocolDemo(context)
         
-        Log.i(TAG, "Modern Linkpoint components initialized with graceful error handling");
+        Log.i(TAG, "Modern Linkpoint components initialized with graceful error handling")
     }
     
     /**
@@ -50,7 +50,7 @@ class ModernLinkpointDemo {
         try {
             return HybridSLTransport()
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize transport - using null fallback", e);
+            Log.e(TAG, "Failed to initialize transport - using null fallback", e)
             return null
         }
     }
@@ -62,7 +62,7 @@ class ModernLinkpointDemo {
         try {
             return ModernTextureManager(context)
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize texture manager - using null fallback", e);
+            Log.e(TAG, "Failed to initialize texture manager - using null fallback", e)
             return null
         }
     }
@@ -74,7 +74,7 @@ class ModernLinkpointDemo {
         try {
             return ModernRenderPipeline()
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize render pipeline - using null fallback", e);
+            Log.e(TAG, "Failed to initialize render pipeline - using null fallback", e)
             return null
         }
     }
@@ -86,7 +86,7 @@ class ModernLinkpointDemo {
         try {
             return OAuth2AuthManager(context)
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize auth manager - using null fallback", e);
+            Log.e(TAG, "Failed to initialize auth manager - using null fallback", e)
             return null 
         }
     }
@@ -98,7 +98,7 @@ class ModernLinkpointDemo {
         try {
             return ModernAssetManager(context)
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize asset manager - using null fallback", e);
+            Log.e(TAG, "Failed to initialize asset manager - using null fallback", e)
             return null
         }
     }
@@ -110,7 +110,7 @@ class ModernLinkpointDemo {
         try {
             return ProtocolCompatibilityDemo(context)
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize protocol demo - using null fallback", e);
+            Log.e(TAG, "Failed to initialize protocol demo - using null fallback", e)
             return null
         }
     }
@@ -119,10 +119,10 @@ class ModernLinkpointDemo {
      * Initialize modern Second Life connection
      */
     fun connectToSecondLife(eventQueueUrl: String, seedCapability: String, authToken: String): Unit {
-        Log.i(TAG, "Connecting to Second Life with modern protocols...");
+        Log.i(TAG, "Connecting to Second Life with modern protocols...")
         
         if (transport == null) {
-            Log.w(TAG, "Transport not available - cannot connect to Second Life");
+            Log.w(TAG, "Transport not available - cannot connect to Second Life")
             return
         }
         
@@ -136,21 +136,21 @@ class ModernLinkpointDemo {
             // Subscribe to real-time events
             transport.subscribeToEvents("chat", WebSocketEventClient.EventListener() {
                 override fun onEvent(event: WebSocketEventClient.EventMessage): Unit {
-                    Log.d(TAG, "Received chat event: " + event.getData());
+                    Log.d(TAG, "Received chat event: " + event.getData())
                     // TODO: Process chat message
                 }
             })
         
             transport.subscribeToEvents("objectUpdate", WebSocketEventClient.EventListener() {
                 override fun onEvent(event: WebSocketEventClient.EventMessage): Unit {
-                    Log.d(TAG, "Received object update: " + event.getData());
+                    Log.d(TAG, "Received object update: " + event.getData())
                     // TODO: Update 3D world objects
                 }
             })
             
-            Log.i(TAG, "Modern transport layer connected successfully");
+            Log.i(TAG, "Modern transport layer connected successfully")
         } catch (Exception e) {
-            Log.e(TAG, "Failed to connect to Second Life", e);
+            Log.e(TAG, "Failed to connect to Second Life", e)
         }
     }
     
@@ -158,10 +158,10 @@ class ModernLinkpointDemo {
      * Initialize modern graphics system with OpenGL ES 3.0 baseline
      */
     fun initializeGraphics(): Unit {
-        Log.i(TAG, "Initializing modernized graphics system (ES 3.0+ only)...");
+        Log.i(TAG, "Initializing modernized graphics system (ES 3.0+ only)...")
         
         if (renderPipeline == null) {
-            Log.w(TAG, "Render pipeline not available - graphics initialization skipped");
+            Log.w(TAG, "Render pipeline not available - graphics initialization skipped")
             return
         }
         
@@ -170,11 +170,11 @@ class ModernLinkpointDemo {
             Boolean success = renderPipeline.initialize()
             if (success) {
                 if (renderPipeline.isModernPipelineAvailable()) {
-                    Log.i(TAG, "Modern PBR rendering pipeline enabled (ES 3.0+)");
-                    Log.i(TAG, "Legacy ES 1.1/2.0 code paths removed");
+                    Log.i(TAG, "Modern PBR rendering pipeline enabled (ES 3.0+)")
+                    Log.i(TAG, "Legacy ES 1.1/2.0 code paths removed")
                 } else {
-                    Log.e(TAG, "CRITICAL: OpenGL ES 3.0+ required but not available");
-                    Log.e(TAG, "Device does not meet minimum graphics requirements");
+                    Log.e(TAG, "CRITICAL: OpenGL ES 3.0+ required but not available")
+                    Log.e(TAG, "Device does not meet minimum graphics requirements")
                     return
                 }
             }
@@ -184,18 +184,18 @@ class ModernLinkpointDemo {
                 try {
                     Int optimalFormat = textureManager.getOptimalTextureFormat()
                     String formatName = getFormatName(optimalFormat)
-                    Log.i(TAG, "Optimal texture format: " + formatName + " (ES 3.0 ETC2+ only)");
-                    Log.i(TAG, "Legacy JPEG2000 format support removed");
+                    Log.i(TAG, "Optimal texture format: " + formatName + " (ES 3.0 ETC2+ only)")
+                    Log.i(TAG, "Legacy JPEG2000 format support removed")
                 } catch (Exception e) {
-                    Log.w(TAG, "Modern texture manager not fully available - using fallback", e);
+                    Log.w(TAG, "Modern texture manager not fully available - using fallback", e)
                 }
             } else {
-                Log.w(TAG, "Texture manager not available - texture operations will be limited");
+                Log.w(TAG, "Texture manager not available - texture operations will be limited")
             }
             
-            Log.i(TAG, "Graphics system initialized successfully");
+            Log.i(TAG, "Graphics system initialized successfully")
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initialize graphics system", e);
+            Log.e(TAG, "Failed to initialize graphics system", e)
         }
     }
     
@@ -203,10 +203,10 @@ class ModernLinkpointDemo {
      * Load texture with modern transcoding
      */
     fun loadTexture(textureId: String): Unit {
-        Log.d(TAG, "Loading texture with modern pipeline: " + textureId);
+        Log.d(TAG, "Loading texture with modern pipeline: " + textureId)
         
         if (textureManager == null) {
-            Log.w(TAG, "Texture manager not available - texture loading skipped");
+            Log.w(TAG, "Texture manager not available - texture loading skipped")
             return
         }
         
@@ -214,18 +214,18 @@ class ModernLinkpointDemo {
             textureManager.loadTextureAsync(textureId, ModernTextureManager.TexturePriority.NORMAL)
                 .thenAccept(textureHandle -> {
                     if (textureHandle > 0) {
-                        Log.d(TAG, "Texture loaded successfully: " + textureId + " -> " + textureHandle);
+                        Log.d(TAG, "Texture loaded successfully: " + textureId + " -> " + textureHandle)
                         // TODO: Use texture in rendering
                     } else {
-                        Log.w(TAG, "Failed to load texture: " + textureId);
+                        Log.w(TAG, "Failed to load texture: " + textureId)
                     }
                 })
                 .exceptionally(throwable -> {
-                    Log.e(TAG, "Error loading texture: " + textureId, throwable);
+                    Log.e(TAG, "Error loading texture: " + textureId, throwable)
                     return null
                 })
         } catch (Exception e) {
-            Log.e(TAG, "Failed to initiate texture loading: " + textureId, e);
+            Log.e(TAG, "Failed to initiate texture loading: " + textureId, e)
         }
     }
     
@@ -233,10 +233,10 @@ class ModernLinkpointDemo {
      * Send modern message
      */
     fun sendMessage(messageType: String, content: String): Unit {
-        Log.d(TAG, "Sending modern message: " + messageType);
+        Log.d(TAG, "Sending modern message: " + messageType)
         
         if (transport == null) {
-            Log.w(TAG, "Transport not available - message sending skipped");
+            Log.w(TAG, "Transport not available - message sending skipped")
             return
         }
         
@@ -245,20 +245,20 @@ class ModernLinkpointDemo {
             HybridSLTransport.ModernMessage message = HybridSLTransport.ModernMessage(messageType) {
                 override fun toLLSDXML(): String {
                     return "<llsd><map><key>type</key><string>" + getType() + 
-                           "</string><key>content</key><string>" + content + "</string></map></llsd>";
+                           "</string><key>content</key><string>" + content + "</string></map></llsd>"
                 }
             }
             
             transport.sendMessage(message)
                 .thenAccept(response -> {
-                    Log.d(TAG, "Message sent successfully: " + response.getType());
+                    Log.d(TAG, "Message sent successfully: " + response.getType())
                 })
                 .exceptionally(throwable -> {
-                    Log.e(TAG, "Failed to send message", throwable);
+                    Log.e(TAG, "Failed to send message", throwable)
                     return null
                 })
         } catch (Exception e) {
-            Log.e(TAG, "Failed to create or send message", e);
+            Log.e(TAG, "Failed to create or send message", e)
         }
     }
     
@@ -267,7 +267,7 @@ class ModernLinkpointDemo {
      */
     fun renderFrame(viewMatrix: FloatArray, projectionMatrix: FloatArray): Unit {
         if (renderPipeline == null) {
-            Log.w(TAG, "Render pipeline not available - frame rendering skipped");
+            Log.w(TAG, "Render pipeline not available - frame rendering skipped")
             return
         }
         
@@ -292,7 +292,7 @@ class ModernLinkpointDemo {
             // Render the frame
             renderPipeline.renderFrame(params)
         } catch (Exception e) {
-            Log.e(TAG, "Error during frame rendering", e);
+            Log.e(TAG, "Error during frame rendering", e)
         }
     }
     
@@ -300,7 +300,7 @@ class ModernLinkpointDemo {
      * Shutdown modern components
      */
     fun shutdown(): Unit {
-        Log.i(TAG, "Shutting down modern Linkpoint components");
+        Log.i(TAG, "Shutting down modern Linkpoint components")
         
         try {
             transport?.shutdown()
@@ -314,9 +314,9 @@ class ModernLinkpointDemo {
             assetManager?.shutdown()
             }
             
-            Log.i(TAG, "Modern components shut down successfully");
+            Log.i(TAG, "Modern components shut down successfully")
         } catch (Exception e) {
-            Log.e(TAG, "Error during component shutdown", e);
+            Log.e(TAG, "Error during component shutdown", e)
         }
     }
     
@@ -324,26 +324,26 @@ class ModernLinkpointDemo {
      * Demonstrate modern authentication with OAuth2
      */
     fun demonstrateModernAuthentication(username: String, password: String): Unit {
-        Log.i(TAG, "Demonstrating modern OAuth2 authentication...");
+        Log.i(TAG, "Demonstrating modern OAuth2 authentication...")
         
         if (authManager == null) {
-            Log.w(TAG, "Auth manager not available - authentication skipped");
+            Log.w(TAG, "Auth manager not available - authentication skipped")
             return
         }
         
         authManager.authenticateUser(username, password)
             .thenAccept(result -> {
                 if (result.isSuccess()) {
-                    Log.i(TAG, "OAuth2 authentication successful!");
+                    Log.i(TAG, "OAuth2 authentication successful!")
                     transport?.setAuthToken(result.getToken())
                     }
                     demonstrateAssetStreaming()
                 } else {
-                    Log.w(TAG, "Authentication failed: " + result.getMessage());
+                    Log.w(TAG, "Authentication failed: " + result.getMessage())
                 }
             })
             .exceptionally(throwable -> {
-                Log.e(TAG, "Authentication error", throwable);
+                Log.e(TAG, "Authentication error", throwable)
                 return null
             })
     }
@@ -352,26 +352,26 @@ class ModernLinkpointDemo {
      * Demonstrate intelligent asset streaming
      */
     fun demonstrateAssetStreaming(): Unit {
-        Log.i(TAG, "Demonstrating intelligent asset streaming...");
+        Log.i(TAG, "Demonstrating intelligent asset streaming...")
         
         if (assetManager == null) {
-            Log.w(TAG, "Asset manager not available - asset streaming skipped");
+            Log.w(TAG, "Asset manager not available - asset streaming skipped")
             return
         }
         
-        Array<String> textureIds = {"texture_001", "texture_002", "texture_003"};
+        Array<String> textureIds = {"texture_001", "texture_002", "texture_003"}
         
         for (String textureId : textureIds) {
             assetManager.loadAsset(textureId, ModernAssetManager.AssetType.TEXTURE)
                 .thenAccept(assetData -> {
                     if (assetData != null) {
-                        Log.d(TAG, "Loaded texture asset: " + assetData.getId());
+                        Log.d(TAG, "Loaded texture asset: " + assetData.getId())
                         textureManager?.processModernTexture(assetData.getData())
                         }
                     }
                 })
                 .exceptionally(throwable -> {
-                    Log.e(TAG, "Error loading asset: " + textureId, throwable);
+                    Log.e(TAG, "Error loading asset: " + textureId, throwable)
                     return null
                 })
         }
@@ -395,7 +395,7 @@ class ModernLinkpointDemo {
      * Test modern LLSD codec and protocol compatibility
      */
     fun testModernLLSDCodec(): Unit {
-        Log.i(TAG, "Testing Modern LLSD Codec with LibreMetaverse compatibility...");
+        Log.i(TAG, "Testing Modern LLSD Codec with LibreMetaverse compatibility...")
         protocolDemo.runFullDemo()
     }
     
@@ -409,7 +409,7 @@ class ModernLinkpointDemo {
         try {
             return transport.isConnected()
         } catch (Exception e) {
-            Log.e(TAG, "Error checking connection status", e);
+            Log.e(TAG, "Error checking connection status", e)
             return false
         }
     }
@@ -428,10 +428,10 @@ class ModernLinkpointDemo {
             String formatName = getFormatName(textureFormat)
             
             return String.format("Modern Pipeline: %s, Optimal Texture: %s", 
-                               modernPipeline ? "Available" : "Legacy", formatName);
+                               modernPipeline ? "Available" : "Legacy", formatName)
         } catch (Exception e) {
-            Log.e(TAG, "Error getting graphics info", e);
-            return "Graphics info unavailable";
+            Log.e(TAG, "Error getting graphics info", e)
+            return "Graphics info unavailable"
         }
     }
     
@@ -440,41 +440,41 @@ class ModernLinkpointDemo {
      * Shows the removal of OpenGL ES 1.1 compatibility and ES 3.0+ features
      */
     fun demonstrateModernGraphics(): Unit {
-        Log.i(TAG, "=== Modern Graphics Pipeline Demonstration ===");
+        Log.i(TAG, "=== Modern Graphics Pipeline Demonstration ===")
         
         // Show capabilities that are now mandatory (ES 3.0+)
-        Log.i(TAG, "Mandatory ES 3.0+ features:");
-        Log.i(TAG, "  - Programmable shaders (vertex/fragment)");
-        Log.i(TAG, "  - Vertex Array Objects (VAOs)");
-        Log.i(TAG, "  - Uniform Buffer Objects (UBOs)");
-        Log.i(TAG, "  - ETC2 texture compression");
-        Log.i(TAG, "  - Transform feedback");
-        Log.i(TAG, "  - Multiple render targets (MRT)");
+        Log.i(TAG, "Mandatory ES 3.0+ features:")
+        Log.i(TAG, "  - Programmable shaders (vertex/fragment)")
+        Log.i(TAG, "  - Vertex Array Objects (VAOs)")
+        Log.i(TAG, "  - Uniform Buffer Objects (UBOs)")
+        Log.i(TAG, "  - ETC2 texture compression")
+        Log.i(TAG, "  - Transform feedback")
+        Log.i(TAG, "  - Multiple render targets (MRT)")
         
         // Show removed legacy features
-        Log.i(TAG, "Removed legacy ES 1.1 features:");
-        Log.i(TAG, "  - Fixed-function pipeline");
-        Log.i(TAG, "  - Matrix stack (glPushMatrix/glPopMatrix)");
-        Log.i(TAG, "  - Immediate mode rendering");
-        Log.i(TAG, "  - glTexEnv texture combiners");
-        Log.i(TAG, "  - Client-side vertex arrays");
+        Log.i(TAG, "Removed legacy ES 1.1 features:")
+        Log.i(TAG, "  - Fixed-function pipeline")
+        Log.i(TAG, "  - Matrix stack (glPushMatrix/glPopMatrix)")
+        Log.i(TAG, "  - Immediate mode rendering")
+        Log.i(TAG, "  - glTexEnv texture combiners")
+        Log.i(TAG, "  - Client-side vertex arrays")
         
         // Demonstrate modern PBR capabilities
         try {
             if (renderPipeline != null && renderPipeline.isModernPipelineAvailable()) {
-                Log.i(TAG, "PBR pipeline features available:");
-                Log.i(TAG, "  - Metallic/Roughness workflow");
-                Log.i(TAG, "  - Normal mapping");
-                Log.i(TAG, "  - Image-based lighting");
-                Log.i(TAG, "  - Dynamic directional/point lights");
+                Log.i(TAG, "PBR pipeline features available:")
+                Log.i(TAG, "  - Metallic/Roughness workflow")
+                Log.i(TAG, "  - Normal mapping")
+                Log.i(TAG, "  - Image-based lighting")
+                Log.i(TAG, "  - Dynamic directional/point lights")
             } else {
-                Log.i(TAG, "PBR pipeline features: Not available (render pipeline null or not modern)");
+                Log.i(TAG, "PBR pipeline features: Not available (render pipeline null or not modern)")
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error checking PBR pipeline features", e);
+            Log.e(TAG, "Error checking PBR pipeline features", e)
         }
         
-        Log.i(TAG, "=============================================");
+        Log.i(TAG, "=============================================")
     }
     
     /**
@@ -482,10 +482,10 @@ class ModernLinkpointDemo {
      */
     private fun getFormatName(format: Int): String {
         switch (format) {
-            case 0x93B0: return "ASTC 4x4 RGBA";
-            case 0x9278: return "ETC2 RGBA"; 
-            case 0x1908: return "RGBA32";
-            default: return "Unknown Format";
+            case 0x93B0: return "ASTC 4x4 RGBA"
+            case 0x9278: return "ETC2 RGBA"
+            case 0x1908: return "RGBA32"
+            default: return "Unknown Format"
         }
     }
 }

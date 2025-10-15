@@ -29,7 +29,7 @@ class GLTerrainTextureCache : GLResourceCache<TerrainPatchInfo, OpenJPEG, GLLoad
 
     /* access modifiers changed from: protected */
     fun LoadResource(terrainPatchInfo: TerrainPatchInfo, openJPEG: OpenJPEG, renderContext: RenderContext): GLLoadedTexture {
-        Debug.Printf("Terrain: Loading baked texture into GL", Any[0]);
+        Debug.Printf("Terrain: Loading baked texture into GL", Any[0])
         return GLLoadedTexture(renderContext, openJPEG)
     }
 

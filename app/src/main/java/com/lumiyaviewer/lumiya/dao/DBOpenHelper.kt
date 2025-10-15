@@ -17,34 +17,34 @@ class DBOpenHelper : DevOpenHelper {
             return false
         }
         try {
-            Debug.Printf("Upgrading to database version 71 from %d", Int.valueOf(fromVersion));
+            Debug.Printf("Upgrading to database version 71 from %d", Int.valueOf(fromVersion))
             
             // Start transaction for atomic upgrade
             sQLiteDatabase.beginTransaction()
             try {
-                sQLiteDatabase.execSQL("ALTER TABLE CHAT_MESSAGE ADD COLUMN " + Properties.SyncedToGoogleDrive.columnName + " INTEGER DEFAULT 0 NOT NULL;");
-                sQLiteDatabase.execSQL("CREATE INDEX IDX_CHAT_MESSAGE__id_SYNCED_TO_GOOGLE_DRIVE ON CHAT_MESSAGE (_id,SYNCED_TO_GOOGLE_DRIVE);");
+                sQLiteDatabase.execSQL("ALTER TABLE CHAT_MESSAGE ADD COLUMN " + Properties.SyncedToGoogleDrive.columnName + " INTEGER DEFAULT 0 NOT NULL;")
+                sQLiteDatabase.execSQL("CREATE INDEX IDX_CHAT_MESSAGE__id_SYNCED_TO_GOOGLE_DRIVE ON CHAT_MESSAGE (_id,SYNCED_TO_GOOGLE_DRIVE);")
                 sQLiteDatabase.setTransactionSuccessful()
             } finally {
                 sQLiteDatabase.endTransaction()
             }
             
-            Debug.Printf("Successfully upgraded database to version 71");
+            Debug.Printf("Successfully upgraded database to version 71")
             return true
         } catch (Throwable e) {
-            Debug.Warning("Database upgrade to version 71 failed", e);
+            Debug.Warning("Database upgrade to version 71 failed", e)
             return false
         }
     }
 
     fun onDowngrade(sQLiteDatabase: SQLiteDatabase, oldVersion: Int, newVersion: Int): Unit {
-        Debug.Printf("Database downgrade requested from %d to %d", oldVersion, newVersion);
+        Debug.Printf("Database downgrade requested from %d to %d", oldVersion, newVersion)
         // Call onUpgrade which will recreate the database if needed
         super.onUpgrade(sQLiteDatabase, oldVersion, newVersion)
     }
 
     fun onUpgrade(sQLiteDatabase: SQLiteDatabase, oldVersion: Int, newVersion: Int): Unit {
-        Debug.Printf("Database upgrade requested from %d to %d", oldVersion, newVersion);
+        Debug.Printf("Database upgrade requested from %d to %d", oldVersion, newVersion)
         
         Boolean upgradeSuccessful = false
         if (newVersion == 71) {
@@ -52,9 +52,9 @@ class DBOpenHelper : DevOpenHelper {
         }
         
         if (upgradeSuccessful) {
-            Debug.Printf("Database upgrade completed successfully", Any[0]);
+            Debug.Printf("Database upgrade completed successfully", Any[0])
         } else {
-            Debug.Printf("Database upgrade failed or not supported, recreating database", Any[0]);
+            Debug.Printf("Database upgrade failed or not supported, recreating database", Any[0])
             super.onUpgrade(sQLiteDatabase, oldVersion, newVersion)
         }
     }

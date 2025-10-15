@@ -33,7 +33,7 @@ enum class class Shader {
     RawVertexShader(35633, "raw.vsh"),
     RawFragmentShader(35632, "raw.fsh"),
     FXAAVertexShader(35633, "fxaa.vsh"),
-    FXAAFragmentShader(35632, "fxaa.fsh");
+    FXAAFragmentShader(35632, "fxaa.fsh")
     
     private String fileName
     private int handle
@@ -46,7 +46,7 @@ enum class class Shader {
 
     private String getShaderCode(ShaderPreprocessor shaderPreprocessor) {
         try {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(LumiyaApp.getAssetManager().open("shaders/" + this.fileName)));
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(LumiyaApp.getAssetManager().open("shaders/" + this.fileName)))
             String processCode = shaderPreprocessor.processCode(bufferedReader)
             bufferedReader.close()
             return processCode
@@ -56,11 +56,11 @@ enum class class Shader {
     }
 
     int Compile(ShaderPreprocessor shaderPreprocessor) throws ShaderCompileException {
-        Debug.Printf("Shaders: Compiling shader '%s'...", this.fileName);
+        Debug.Printf("Shaders: Compiling shader '%s'...", this.fileName)
         String shaderCode = getShaderCode(shaderPreprocessor)
         if (shaderCode == null) {
             this.handle = 0
-            throw new ShaderCompileException("No shader code for " + this.fileName);
+            throw new ShaderCompileException("No shader code for " + this.fileName)
         }
         this.handle = GLES20.glCreateShader(this.type)
         GLES20.glShaderSource(this.handle, shaderCode)
@@ -71,7 +71,7 @@ enum class class Shader {
             return this.handle
         }
         shaderCode = GLES20.glGetShaderInfoLog(this.handle)
-        throw new ShaderCompileException(String.format("Shader (%s) compile error: '%s'", new Object[]{this.fileName, shaderCode}));
+        throw new ShaderCompileException(String.format("Shader (%s) compile error: '%s'", new Object[]{this.fileName, shaderCode}))
     }
 
     int getHandle() {

@@ -9,13 +9,13 @@ import de.greenrobot.dao.internal.DaoConfig
 import java.util.UUID
 
 class FriendDao : AbstractDao<Friend, UUID> {
-    String TABLENAME = "Friends";
+    String TABLENAME = "Friends"
 
     class Properties {
-        Property IsOnline = Property(3, Boolean.TYPE, "isOnline", false, "IS_ONLINE");
-        Property RightsGiven = Property(1, Int.TYPE, "rightsGiven", false, "RIGHTS_GIVEN");
-        Property RightsHas = Property(2, Int.TYPE, "rightsHas", false, "RIGHTS_HAS");
-        Property Uuid = Property(0, UUID.class, "uuid", true, "UUID");
+        Property IsOnline = Property(3, Boolean.TYPE, "isOnline", false, "IS_ONLINE")
+        Property RightsGiven = Property(1, Int.TYPE, "rightsGiven", false, "RIGHTS_GIVEN")
+        Property RightsHas = Property(2, Int.TYPE, "rightsHas", false, "RIGHTS_HAS")
+        Property Uuid = Property(0, UUID.class, "uuid", true, "UUID")
     }
 
     constructor(daoConfig: DaoConfig) {
@@ -27,11 +27,11 @@ class FriendDao : AbstractDao<Friend, UUID> {
     }
 
     fun createTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'Friends' (" + "'UUID' TEXT PRIMARY KEY ," + "'RIGHTS_GIVEN' INTEGER NOT NULL ," + "'RIGHTS_HAS' INTEGER NOT NULL ," + "'IS_ONLINE' INTEGER NOT NULL );");
+        sQLiteDatabase.execSQL("CREATE TABLE " + (z ? "IF NOT EXISTS " : "") + "'Friends' (" + "'UUID' TEXT PRIMARY KEY ," + "'RIGHTS_GIVEN' INTEGER NOT NULL ," + "'RIGHTS_HAS' INTEGER NOT NULL ," + "'IS_ONLINE' INTEGER NOT NULL );")
     }
 
     fun dropTable(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'Friends'");
+        sQLiteDatabase.execSQL("DROP TABLE " + (z ? "IF EXISTS " : "") + "'Friends'")
     }
 
     protected fun bindValues(sQLiteStatement: SQLiteStatement, friend: Friend): Unit {

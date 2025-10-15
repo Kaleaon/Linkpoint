@@ -13,7 +13,7 @@ object HTTPFetchExecutor extends WeakExecutor {
     }
 
     private HTTPFetchExecutor() {
-        super("ResourceHTTPFetch", GlobalOptions.getInstance().getMaxTextureDownloads(), new PriorityBlockingQueue());
+        super("ResourceHTTPFetch", GlobalOptions.getInstance().getMaxTextureDownloads(), new PriorityBlockingQueue())
     }
 
     /* synthetic */ HTTPFetchExecutor(HTTPFetchExecutor hTTPFetchExecutor) {

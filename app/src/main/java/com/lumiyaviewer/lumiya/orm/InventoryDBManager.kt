@@ -22,16 +22,16 @@ object InventoryDBManager {
             InventoryDB inventoryDB = userDBs.get(uuid)
             if (inventoryDB == null) {
                 try {
-                    File cacheDir = GlobalOptions.getInstance().getCacheDir("database");
+                    File cacheDir = GlobalOptions.getInstance().getCacheDir("database")
                     if (cacheDir == null) {
-                        throw new IllegalStateException("Database cache directory is null");
+                        throw new IllegalStateException("Database cache directory is null")
                     }
                     
-                    File dbFile = new File(cacheDir, "inventory-" + uuid.toString() + ".db");
+                    File dbFile = new File(cacheDir, "inventory-" + uuid.toString() + ".db")
                     inventoryDB = new InventoryDB(SLInventoryOpenHelper.getInstance().openOrCreateDatabase(dbFile.getAbsolutePath()))
                     userDBs.put(uuid, inventoryDB)
                 } catch (Exception e) {
-                    android.util.Log.e("InventoryDBManager", "Failed to create InventoryDB for user " + uuid, e);
+                    android.util.Log.e("InventoryDBManager", "Failed to create InventoryDB for user " + uuid, e)
                     return null
                 }
             }
@@ -53,7 +53,7 @@ object InventoryDBManager {
                 try {
                     inventoryDB.getDatabase().close()
                 } catch (Exception e) {
-                    android.util.Log.w("InventoryDBManager", "Error closing inventory database for user " + uuid, e);
+                    android.util.Log.w("InventoryDBManager", "Error closing inventory database for user " + uuid, e)
                 }
             }
         }
@@ -68,7 +68,7 @@ object InventoryDBManager {
                 try {
                     entry.getValue().getDatabase().close()
                 } catch (Exception e) {
-                    android.util.Log.w("InventoryDBManager", "Error closing inventory database for user " + entry.getKey(), e);
+                    android.util.Log.w("InventoryDBManager", "Error closing inventory database for user " + entry.getKey(), e)
                 }
             }
             userDBs.clear()

@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap
  * Based on LibreMetaverse patterns with mobile optimization
  */
 class HTTP2CapsClient {
-    private String TAG = "HTTP2CapsClient";
-    private MediaType JSON = MediaType.get("application/json; charset=utf-8");
-    private MediaType LLSD_XML = MediaType.get("application/llsd+xml; charset=utf-8");
+    private String TAG = "HTTP2CapsClient"
+    private MediaType JSON = MediaType.get("application/json; charset=utf-8")
+    private MediaType LLSD_XML = MediaType.get("application/llsd+xml; charset=utf-8")
     
     private OkHttpClient client
     private String authToken
@@ -45,11 +45,11 @@ class HTTP2CapsClient {
     void configureCapabilities(Map<String, String> capabilitiesMap) {
         capabilities.clear()
         capabilities.putAll(capabilitiesMap)
-        Log.i(TAG, "Configured " + capabilities.size() + " capabilities");
+        Log.i(TAG, "Configured " + capabilities.size() + " capabilities")
         
         // Log available capabilities for debugging
         for (Map.Entry<String, String> entry : capabilities.entrySet()) {
-            Log.d(TAG, "Capability: " + entry.getKey() + " -> " + entry.getValue());
+            Log.d(TAG, "Capability: " + entry.getKey() + " -> " + entry.getValue())
         }
     }
     
@@ -77,7 +77,7 @@ class HTTP2CapsClient {
         client.newCall(request).enqueue(new Callback() {
             @Override
             void onFailure(Call call, IOException e) {
-                Log.e(TAG, "CAPS request failed for " + capUrl, e);
+                Log.e(TAG, "CAPS request failed for " + capUrl, e)
                 future.completeExceptionally(e)
             }
             
@@ -86,11 +86,11 @@ class HTTP2CapsClient {
                 try (ResponseBody responseBody = response.body()) {
                     if (response.isSuccessful() && responseBody != null) {
                         String result = responseBody.string()
-                        Log.d(TAG, "CAPS response received: " + result.length() + " bytes");
+                        Log.d(TAG, "CAPS response received: " + result.length() + " bytes")
                         future.complete(result)
                     } else {
                         future.completeExceptionally(new IOException(
-                            "CAPS request failed: " + response.code() + " " + response.message()));
+                            "CAPS request failed: " + response.code() + " " + response.message()))
                     }
                 }
             }
@@ -119,7 +119,7 @@ class HTTP2CapsClient {
         client.newCall(request).enqueue(new Callback() {
             @Override
             void onFailure(Call call, IOException e) {
-                Log.e(TAG, "Asset upload failed", e);
+                Log.e(TAG, "Asset upload failed", e)
                 future.completeExceptionally(e)
             }
             
@@ -130,7 +130,7 @@ class HTTP2CapsClient {
                         future.complete(responseBody.string())
                     } else {
                         future.completeExceptionally(new IOException(
-                            "Asset upload failed: " + response.code()));
+                            "Asset upload failed: " + response.code()))
                     }
                 }
             }

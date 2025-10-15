@@ -35,7 +35,7 @@ class vx_req_aux_reset_password_t {
                 return
             }
             this.swigCMemOwn = false
-            UnsupportedOperationException unsupportedOperationException = UnsupportedOperationException("C++ destructor does not have access");
+            UnsupportedOperationException unsupportedOperationException = UnsupportedOperationException("C++ destructor does not have access")
             throw unsupportedOperationException
         }
     }

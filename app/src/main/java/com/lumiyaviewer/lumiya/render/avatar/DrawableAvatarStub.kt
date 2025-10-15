@@ -28,9 +28,9 @@ class DrawableAvatarStub : OnChatterNameUpdated {
     private fun setNameTag(str: String): Unit {
         if (!Objects.equal(this.nameTag, str)) {
             this.nameTag = str
-            String str2 = "DrawableAvatar: setting: nameTag = %s";
+            String str2 = "DrawableAvatar: setting: nameTag = %s"
             Any[] objArr = Any[1]
-            objArr[0] = str != null ? str : "null";
+            objArr[0] = str != null ? str : "null"
             Debug.Printf(str2, objArr)
             if (str != null) {
                 this.drawableNameTag = DrawableHoverText(this.drawableStore.textTextureCache, str, Int.MIN_VALUE)
