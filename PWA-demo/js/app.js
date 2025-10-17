@@ -122,8 +122,8 @@ class LinkpointApp {
    * Setup UI components
    */
   setupUI() {
-    // Setup navigation
-    const navLinks = document.querySelectorAll('.nav-link');
+    // Setup navigation (support both .nav-link and .nav-item)
+    const navLinks = document.querySelectorAll('.nav-link, .nav-item');
     navLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -220,14 +220,21 @@ class LinkpointApp {
    * Switch view
    */
   switchView(viewName) {
-    // Update nav links
-    document.querySelectorAll('.nav-link').forEach(link => {
+    console.log(`[App] Switching to view: ${viewName}`);
+    
+    // Update nav links (support both .nav-link and .nav-item)
+    document.querySelectorAll('.nav-link, .nav-item').forEach(link => {
       link.classList.toggle('active', link.dataset.view === viewName);
     });
 
-    // Update views
-    document.querySelectorAll('.view').forEach(view => {
-      view.classList.toggle('active', view.id === `view-${viewName}`);
+    // Update views (support both #view-{name} and #{name}-view patterns)
+    document.querySelectorAll('.view, .view-container').forEach(view => {
+      const isActive = view.id === `view-${viewName}` || view.id === `${viewName}-view`;
+      view.classList.toggle('active', isActive);
+      
+      if (isActive) {
+        console.log(`[App] Activated view: ${view.id}`);
+      }
     });
 
     // Close sidebar on mobile
@@ -241,6 +248,7 @@ class LinkpointApp {
 
     this.currentView = viewName;
     this.emit('view_changed', viewName);
+    console.log(`[App] Current view is now: ${this.currentView}`);
   }
 
   /**

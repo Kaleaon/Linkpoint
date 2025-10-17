@@ -146,11 +146,17 @@ class AuthManager extends Utils.EventEmitter {
       // Emit login success event
       this.emit('login_success', this.user);
 
+      console.log('[Auth] Login successful, user:', this.user);
       Utils.showToast(`Welcome, ${this.user.fullName}!`, 'success');
 
       // Switch to world view
+      console.log('[Auth] Switching to world view...');
       setTimeout(() => {
-        window.app?.switchView('world');
+        if (window.app && typeof window.app.switchView === 'function') {
+          window.app.switchView('world');
+        } else {
+          console.error('[Auth] window.app or switchView not available');
+        }
       }, 1000);
 
     } catch (error) {
