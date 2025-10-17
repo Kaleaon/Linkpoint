@@ -146,14 +146,46 @@ class XMLRPCClient {
         return this.parseLoginResponse(responseText);
       }
       
-      // 4. Browser - Direct fetch (will fail due to CORS unless proxy configured)
-      console.log('[SL] Using direct fetch (requires CORS proxy)');
-      const response = await fetch(url, {
+      // 4. Browser - Check if installed as PWA or web
+      const isInstalled = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone || 
+                          document.referrer.includes('android-app://');
+      
+      if (isInstalled) {
+        // Installed PWA - Try direct connection (may work on some platforms)
+        console.log('[SL] Using direct fetch (installed PWA)');
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'text/xml',
+              'Accept': 'text/xml, application/xml'
+            },
+            body: xmlRequest
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const responseText = await response.text();
+          return this.parseLoginResponse(responseText);
+        } catch (directError) {
+          // If direct connection fails in installed PWA, fall through to CORS proxy
+          console.warn('[SL] Direct connection failed in installed PWA, trying CORS proxy:', directError.message);
+        }
+      }
+      
+      // 5. Web Browser or fallback - Use CORS proxy
+      console.log('[SL] Using CORS proxy for web browser');
+      const corsProxyUrl = 'https://corsproxy.io/?';
+      const proxiedUrl = corsProxyUrl + encodeURIComponent(url);
+      
+      const response = await fetch(proxiedUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/xml',
-          'Accept': 'text/xml, application/xml',
-          'User-Agent': 'Linkpoint PWA/1.0.0'
+          'Accept': 'text/xml, application/xml'
         },
         body: xmlRequest
       });
@@ -169,8 +201,8 @@ class XMLRPCClient {
       console.error('XML-RPC request failed:', error);
       
       // Provide helpful error message based on context
-      if (error.message && error.message.includes('CORS')) {
-        throw new Error('CORS blocked. Please use desktop app or configure CORS proxy.');
+      if (error.message && (error.message.includes('CORS') || error.message.includes('Failed to fetch'))) {
+        throw new Error('Network error: Unable to connect to Second Life servers. Please check your internet connection or try again later.');
       }
       
       throw error;
