@@ -192,7 +192,22 @@
         <!-- Chat View -->
         <section id="chat-view" class="view-container">
           <div class="view-content chat-layout">
-            <div id="chat-messages" class="chat-messages"></div>
+            <!-- Chat Tabs -->
+            <div class="chat-tabs">
+              <button class="chat-tab active" data-chat-type="local">Local</button>
+              <button class="chat-tab" data-chat-type="group">Group</button>
+              <button class="chat-tab" data-chat-type="im">IM</button>
+            </div>
+            
+            <!-- Chat Messages Area -->
+            <div id="chat-messages" class="chat-messages">
+              <div class="chat-message system">
+                <span class="chat-timestamp">[00:00]</span>
+                <span class="chat-text">Welcome to Linkpoint! Chat will appear here.</span>
+              </div>
+            </div>
+            
+            <!-- Chat Input Form -->
             <form id="chat-form" class="chat-input-form">
               <input type="text" id="chat-input" class="chat-input" placeholder="Type a message..." autocomplete="off">
               <button type="submit" class="btn btn-primary">Send</button>
@@ -203,9 +218,53 @@
         <!-- Inventory View -->
         <section id="inventory-view" class="view-container">
           <div class="view-content">
-            <h2>Inventory</h2>
+            <div class="inventory-header">
+              <h2>Inventory</h2>
+              <div class="inventory-actions">
+                <input type="text" id="inventory-search" class="form-control" placeholder="Search inventory...">
+                <button class="btn btn-small" id="inventory-refresh">Refresh</button>
+              </div>
+            </div>
+            
             <div id="inventory-container" class="inventory-container">
-              <p class="placeholder-text">Loading inventory...</p>
+              <!-- Inventory Folders -->
+              <div class="inventory-tree">
+                <div class="inventory-folder" data-folder="root">
+                  <span class="folder-icon">📁</span>
+                  <span class="folder-name">My Inventory</span>
+                  <div class="folder-children">
+                    <div class="inventory-folder" data-folder="objects">
+                      <span class="folder-icon">📦</span>
+                      <span class="folder-name">Objects</span>
+                    </div>
+                    <div class="inventory-folder" data-folder="clothing">
+                      <span class="folder-icon">👕</span>
+                      <span class="folder-name">Clothing</span>
+                    </div>
+                    <div class="inventory-folder" data-folder="landmarks">
+                      <span class="folder-icon">📍</span>
+                      <span class="folder-name">Landmarks</span>
+                    </div>
+                    <div class="inventory-folder" data-folder="notecards">
+                      <span class="folder-icon">📄</span>
+                      <span class="folder-name">Notecards</span>
+                    </div>
+                    <div class="inventory-folder" data-folder="scripts">
+                      <span class="folder-icon">📜</span>
+                      <span class="folder-name">Scripts</span>
+                    </div>
+                    <div class="inventory-folder" data-folder="textures">
+                      <span class="folder-icon">🖼️</span>
+                      <span class="folder-name">Textures</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Inventory Items -->
+              <div id="inventory-items" class="inventory-items">
+                <p class="placeholder-text">Select a folder to view items</p>
+              </div>
             </div>
           </div>
         </section>
@@ -213,9 +272,27 @@
         <!-- Friends View -->
         <section id="friends-view" class="view-container">
           <div class="view-content">
-            <h2>Friends</h2>
+            <div class="friends-header">
+              <h2>Friends</h2>
+              <button class="btn btn-small" id="add-friend-btn">Add Friend</button>
+            </div>
+            
             <div id="friends-container" class="friends-container">
-              <p class="placeholder-text">Loading friends list...</p>
+              <!-- Online Friends -->
+              <div class="friends-section">
+                <h3 class="section-title">Online</h3>
+                <div id="friends-online" class="friends-list">
+                  <p class="placeholder-text">No friends online</p>
+                </div>
+              </div>
+              
+              <!-- Offline Friends -->
+              <div class="friends-section">
+                <h3 class="section-title">Offline</h3>
+                <div id="friends-offline" class="friends-list">
+                  <p class="placeholder-text">No offline friends</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -224,12 +301,33 @@
         <section id="teleport-view" class="view-container">
           <div class="view-content">
             <h2>Teleport</h2>
+            
             <div id="teleport-container" class="teleport-container">
-              <div class="form-group">
-                <label for="teleport-location">Location</label>
-                <input type="text" id="teleport-location" class="form-control" placeholder="Region Name (x, y, z)">
+              <!-- Direct Teleport -->
+              <div class="teleport-section">
+                <h3>Direct Teleport</h3>
+                <div class="form-group">
+                  <label for="teleport-location">Location (Region/X/Y/Z)</label>
+                  <input type="text" id="teleport-location" class="form-control" placeholder="Ahern/128/128/24">
+                </div>
+                <button id="teleport-button" class="btn btn-primary">Teleport</button>
               </div>
-              <button id="teleport-button" class="btn btn-primary">Teleport</button>
+              
+              <!-- Recent Locations -->
+              <div class="teleport-section">
+                <h3>Recent Locations</h3>
+                <div id="recent-locations" class="location-list">
+                  <p class="placeholder-text">No recent locations</p>
+                </div>
+              </div>
+              
+              <!-- Landmarks -->
+              <div class="teleport-section">
+                <h3>Landmarks</h3>
+                <div id="landmarks-list" class="location-list">
+                  <p class="placeholder-text">No landmarks found</p>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -238,12 +336,29 @@
         <section id="search-view" class="view-container">
           <div class="view-content">
             <h2>Search</h2>
+            
             <div id="search-container" class="search-container">
-              <div class="form-group">
-                <input type="text" id="search-input" class="form-control" placeholder="Search places, people, events...">
-                <button id="search-button" class="btn btn-primary">Search</button>
+              <!-- Search Form -->
+              <div class="search-form">
+                <div class="form-group">
+                  <select id="search-type" class="form-control">
+                    <option value="all">All</option>
+                    <option value="places">Places</option>
+                    <option value="people">People</option>
+                    <option value="events">Events</option>
+                    <option value="groups">Groups</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <input type="text" id="search-input" class="form-control" placeholder="Search...">
+                  <button id="search-button" class="btn btn-primary">Search</button>
+                </div>
               </div>
-              <div id="search-results" class="search-results"></div>
+              
+              <!-- Search Results -->
+              <div id="search-results" class="search-results">
+                <p class="placeholder-text">Enter a search term to find places, people, events, and groups</p>
+              </div>
             </div>
           </div>
         </section>
@@ -252,7 +367,9 @@
         <section id="preferences-view" class="view-container">
           <div class="view-content">
             <h2>Settings</h2>
+            
             <div id="preferences-container" class="preferences-container">
+              <!-- Graphics Settings -->
               <div class="settings-section">
                 <h3>Graphics</h3>
                 <div class="form-group">
@@ -264,22 +381,114 @@
                     <option value="ultra">Ultra</option>
                   </select>
                 </div>
+                <div class="form-group">
+                  <label for="draw-distance">Draw Distance</label>
+                  <input type="range" id="draw-distance" min="64" max="512" value="256" step="64">
+                  <span id="draw-distance-value">256m</span>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="shadows-enabled" checked>
+                    Enable Shadows
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="reflections-enabled">
+                    Enable Water Reflections
+                  </label>
+                </div>
               </div>
               
+              <!-- Audio Settings -->
+              <div class="settings-section">
+                <h3>Audio</h3>
+                <div class="form-group">
+                  <label for="master-volume">Master Volume</label>
+                  <input type="range" id="master-volume" min="0" max="100" value="75">
+                  <span id="master-volume-value">75%</span>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="voice-enabled">
+                    Enable Voice Chat
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Notifications Settings -->
               <div class="settings-section">
                 <h3>Notifications</h3>
                 <div class="form-group">
                   <label>
                     <input type="checkbox" id="notifications-enabled" checked>
-                    Enable notifications
+                    Enable Notifications
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="chat-notifications" checked>
+                    Chat Messages
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="friend-notifications" checked>
+                    Friends Online/Offline
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="group-notifications">
+                    Group Notices
                   </label>
                 </div>
               </div>
               
+              <!-- Privacy Settings -->
+              <div class="settings-section">
+                <h3>Privacy</h3>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="show-online-status" checked>
+                    Show Online Status
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" id="accept-friend-requests" checked>
+                    Accept Friend Requests
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Storage Settings -->
+              <div class="settings-section">
+                <h3>Storage</h3>
+                <div class="storage-info">
+                  <div class="storage-stat">
+                    <span class="stat-label">Cache Usage:</span>
+                    <span id="cache-usage" class="stat-value">0 MB</span>
+                  </div>
+                  <div class="storage-stat">
+                    <span class="stat-label">Available:</span>
+                    <span id="cache-available" class="stat-value">0 GB</span>
+                  </div>
+                  <div class="storage-stat">
+                    <span class="stat-label">Persistent:</span>
+                    <span id="cache-persistent" class="stat-value">No</span>
+                  </div>
+                </div>
+                <button id="clear-cache-btn" class="btn btn-secondary">Clear Cache</button>
+              </div>
+              
+              <!-- About -->
               <div class="settings-section">
                 <h3>About</h3>
-                <p>Linkpoint PWA v1.0.0</p>
+                <p><strong>Linkpoint PWA</strong> v1.0.0</p>
+                <p>A modern Progressive Web App for Second Life and OpenSimulator virtual worlds.</p>
                 <p><small>Not affiliated with Linden Lab or Second Life™</small></p>
+                <p><small>Open source software - <a href="https://github.com/Kaleaon/Linkpoint" target="_blank">GitHub</a></small></p>
               </div>
             </div>
           </div>
