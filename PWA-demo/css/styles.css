@@ -286,12 +286,12 @@ a:hover {
   background: var(--background);
 }
 
-.view {
+.view, .view-container {
   display: none;
   animation: fadeIn 0.3s ease;
 }
 
-.view.active {
+.view.active, .view-container.active {
   display: block;
 }
 
