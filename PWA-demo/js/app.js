@@ -217,6 +217,82 @@ class LinkpointApp {
   }
 
   /**
+   * Activate post-login features
+   * This connects the real SL protocol features after successful authentication
+   */
+  activatePostLoginFeatures() {
+    console.log('[App] Activating post-login features...');
+    
+    try {
+      // 1. Setup protocol event handlers for chat
+      if (this.protocol.on) {
+        // Handle incoming chat messages
+        this.protocol.on('chat_from_simulator', (data) => {
+          console.log('[App] Chat message from simulator:', data);
+          if (this.chat && this.chat.handleIncomingMessage) {
+            this.chat.handleIncomingMessage(data);
+          }
+          
+          // Show notification
+          if (this.currentView !== 'chat') {
+            this.incrementNotificationCount();
+            Utils.showToast(`${data.fromName || 'Unknown'}: ${data.message}`, 'info');
+          }
+        });
+        
+        // Handle object updates for 3D rendering
+        this.protocol.on('object_update', (data) => {
+          console.log('[App] Object update received');
+          if (this.objectManager) {
+            this.objectManager.handleObjectUpdate(data);
+          }
+        });
+        
+        // Handle region handshake
+        this.protocol.on('region_handshake', (data) => {
+          console.log('[App] Region handshake:', data);
+          if (this.world && this.world.updateRegionInfo) {
+            this.world.updateRegionInfo(data);
+          }
+        });
+        
+        console.log('[App] Protocol event handlers registered');
+      }
+      
+      // 2. Start event queue if using SLConnectionFull
+      if (this.protocol.eventQueueRunning === false && this.protocol.startEventQueue) {
+        console.log('[App] Starting event queue...');
+        this.protocol.startEventQueue();
+      }
+      
+      // 3. Activate 3D rendering if available
+      if (this.world && this.world.startRendering) {
+        console.log('[App] Starting 3D rendering...');
+        this.world.startRendering();
+      }
+      
+      // 4. Subscribe to capabilities-based services
+      if (this.protocol.capabilities) {
+        console.log('[App] Available capabilities:', Object.keys(this.protocol.capabilities));
+        
+        // Start fetching display names if available
+        if (this.protocol.capabilities.GetDisplayNames && window.DisplayNameManager) {
+          const displayNameManager = new DisplayNameManager(this.protocol);
+          console.log('[App] Display name manager initialized');
+        }
+      }
+      
+      // 5. Show status
+      Utils.showToast('Connected to Second Life', 'success');
+      console.log('[App] ✅ Post-login features activated');
+      
+    } catch (error) {
+      console.error('[App] Error activating post-login features:', error);
+      Utils.showToast('Warning: Some features may not be fully active', 'warning');
+    }
+  }
+
+  /**
    * Switch view
    */
   switchView(viewName) {

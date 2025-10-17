@@ -341,6 +341,24 @@ class WorldViewer extends Utils.EventEmitter {
   }
 
   /**
+   * Update region info from protocol
+   */
+  updateRegionInfo(data) {
+    console.log('[World] Updating region info:', data);
+    if (data.name) {
+      this.region.name = data.name;
+    }
+    if (data.x !== undefined) {
+      this.region.x = data.x;
+    }
+    if (data.y !== undefined) {
+      this.region.y = data.y;
+    }
+    this.updateLocationDisplay();
+    this.emit('region_updated', this.region);
+  }
+
+  /**
    * Start rendering loop
    */
   startRendering() {
