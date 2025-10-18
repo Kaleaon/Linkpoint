@@ -18,15 +18,24 @@ class InventoryCore {
     // Feature 21: Inventory folder structure
     this.folders = new Map();
     this.rootFolderUUID = null;
+    this.systemFolders = new Map(); // Special system folders
     
     // Feature 22: Item properties
     this.items = new Map();
     
     // Feature 23: Folder sorting
     this.sortPreferences = new Map();
+    this.defaultSortPreference = { sortBy: 'name', ascending: true };
     
     // Feature 24: Item movement tracking
     this.moveQueue = [];
+    
+    // Feature 25: Search and filtering
+    this.searchIndex = new Map(); // name -> Set of UUIDs
+    this.filterCallbacks = [];
+    
+    // Change notifications
+    this.changeCallbacks = [];
     
     // Standard folder types
     this.folderTypes = {
@@ -58,10 +67,22 @@ class InventoryCore {
       SETTINGS: 56
     };
     
-    // TODO: Implement folder capability fetching
-    // TODO: Implement inventory caching to IndexedDB
-    // TODO: Connect to protocol layer
-    // TODO: Implement change notifications
+    // Item types
+    this.itemTypes = {
+      TEXTURE: 0,
+      SOUND: 1,
+      CALLING_CARD: 2,
+      LANDMARK: 3,
+      OBJECT: 6,
+      NOTECARD: 7,
+      LSL_TEXT: 10,
+      BODYPART: 13,
+      WEARABLE: 18,
+      ANIMATION: 19,
+      GESTURE: 20,
+      MESH: 22,
+      SETTINGS: 25
+    };
   }
   
   /**
@@ -69,6 +90,8 @@ class InventoryCore {
    * @param {Object} folder - Folder data
    */
   setFolder(folder) {
+    const isUpdate = this.folders.has(folder.uuid);
+    
     const folderData = {
       uuid: folder.uuid,
       parentUUID: folder.parentUUID || null,
@@ -86,7 +109,8 @@ class InventoryCore {
       this.rootFolderUUID = folder.uuid;
     }
     
-    // TODO: Notify listeners of folder update
+    const action = isUpdate ? 'update' : 'add';
+    this.notifyChange(action, 'folder', folder.uuid);
   }
   
   /**
@@ -128,6 +152,12 @@ class InventoryCore {
    * @param {Object} item - Item data
    */
   setItem(item) {
+    // Remove old item from search index if updating
+    const oldItem = this.items.get(item.uuid);
+    if (oldItem) {
+      this.removeFromSearchIndex(oldItem);
+    }
+    
     const itemData = {
       uuid: item.uuid,
       parentUUID: item.parentUUID,
@@ -144,9 +174,10 @@ class InventoryCore {
     };
     
     this.items.set(item.uuid, itemData);
+    this.updateSearchIndex(itemData);
     
-    // TODO: Update parent folder's descendent count
-    // TODO: Notify listeners of item update
+    const action = oldItem ? 'update' : 'add';
+    this.notifyChange(action, 'item', item.uuid);
   }
   
   /**
@@ -313,6 +344,281 @@ class InventoryCore {
     });
     
     return count;
+  }
+  
+  /**
+   * Register system folder (like Trash, Lost and Found, etc.)
+   * @param {string} type - Folder type name
+   * @param {string} folderUUID - UUID of the folder
+   */
+  registerSystemFolder(type, folderUUID) {
+    this.systemFolders.set(type, folderUUID);
+  }
+  
+  /**
+   * Get system folder UUID
+   * @param {string} type - Folder type name (e.g., 'TRASH', 'LOST_AND_FOUND')
+   * @returns {string|null} Folder UUID or null
+   */
+  getSystemFolder(type) {
+    return this.systemFolders.get(type) || null;
+  }
+  
+  /**
+   * Check if folder is a system folder
+   * @param {string} folderUUID - UUID of the folder
+   * @returns {boolean} True if system folder
+   */
+  isSystemFolder(folderUUID) {
+    for (const systemFolderUUID of this.systemFolders.values()) {
+      if (systemFolderUUID === folderUUID) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
+  /**
+   * Update search index for item
+   * @param {Object} item - Item data
+   */
+  updateSearchIndex(item) {
+    const terms = item.name.toLowerCase().split(/\s+/);
+    terms.forEach(term => {
+      if (!this.searchIndex.has(term)) {
+        this.searchIndex.set(term, new Set());
+      }
+      this.searchIndex.get(term).add(item.uuid);
+    });
+  }
+  
+  /**
+   * Remove item from search index
+   * @param {Object} item - Item data
+   */
+  removeFromSearchIndex(item) {
+    const terms = item.name.toLowerCase().split(/\s+/);
+    terms.forEach(term => {
+      const uuids = this.searchIndex.get(term);
+      if (uuids) {
+        uuids.delete(item.uuid);
+        if (uuids.size === 0) {
+          this.searchIndex.delete(term);
+        }
+      }
+    });
+  }
+  
+  /**
+   * Fast search using index
+   * @param {string} searchTerm - Search term
+   * @returns {Array} Array of matching items
+   */
+  fastSearch(searchTerm) {
+    const term = searchTerm.toLowerCase().trim();
+    const matchingUUIDs = this.searchIndex.get(term);
+    
+    if (!matchingUUIDs) {
+      return [];
+    }
+    
+    return Array.from(matchingUUIDs)
+      .map(uuid => this.getItem(uuid))
+      .filter(item => item !== null);
+  }
+  
+  /**
+   * Get items by type
+   * @param {number} itemType - Item type
+   * @param {string} folderUUID - Optional folder to search in
+   * @returns {Array} Array of items
+   */
+  getItemsByType(itemType, folderUUID = null) {
+    const results = [];
+    
+    this.items.forEach((item, uuid) => {
+      if (folderUUID && item.parentUUID !== folderUUID) {
+        return;
+      }
+      
+      if (item.type === itemType) {
+        results.push(item);
+      }
+    });
+    
+    return results;
+  }
+  
+  /**
+   * Get folders by type
+   * @param {number} folderType - Folder type
+   * @returns {Array} Array of folders
+   */
+  getFoldersByType(folderType) {
+    const results = [];
+    
+    this.folders.forEach((folder, uuid) => {
+      if (folder.type === folderType) {
+        results.push(folder);
+      }
+    });
+    
+    return results;
+  }
+  
+  /**
+   * Get recent items
+   * @param {number} count - Number of items to return
+   * @returns {Array} Array of recent items
+   */
+  getRecentItems(count = 20) {
+    const allItems = Array.from(this.items.values());
+    allItems.sort((a, b) => b.creationDate - a.creationDate);
+    return allItems.slice(0, count);
+  }
+  
+  /**
+   * Get folder depth (distance from root)
+   * @param {string} folderUUID - UUID of the folder
+   * @returns {number} Folder depth
+   */
+  getFolderDepth(folderUUID) {
+    let depth = 0;
+    let currentUUID = folderUUID;
+    
+    while (currentUUID && currentUUID !== this.rootFolderUUID) {
+      const folder = this.getFolder(currentUUID);
+      if (!folder) break;
+      depth++;
+      currentUUID = folder.parentUUID;
+    }
+    
+    return depth;
+  }
+  
+  /**
+   * Check if folder is ancestor of another
+   * @param {string} ancestorUUID - Potential ancestor UUID
+   * @param {string} descendantUUID - Potential descendant UUID
+   * @returns {boolean} True if ancestor
+   */
+  isAncestor(ancestorUUID, descendantUUID) {
+    let currentUUID = descendantUUID;
+    
+    while (currentUUID) {
+      if (currentUUID === ancestorUUID) {
+        return true;
+      }
+      
+      const folder = this.getFolder(currentUUID);
+      if (!folder) break;
+      currentUUID = folder.parentUUID;
+    }
+    
+    return false;
+  }
+  
+  /**
+   * Get all folders (flat list)
+   * @returns {Array} Array of all folders
+   */
+  getAllFolders() {
+    return Array.from(this.folders.values());
+  }
+  
+  /**
+   * Get all items (flat list)
+   * @returns {Array} Array of all items
+   */
+  getAllItems() {
+    return Array.from(this.items.values());
+  }
+  
+  /**
+   * Get inventory statistics
+   * @returns {Object} Statistics
+   */
+  getStatistics() {
+    return {
+      totalFolders: this.folders.size,
+      totalItems: this.items.size,
+      rootFolderUUID: this.rootFolderUUID,
+      systemFolders: this.systemFolders.size,
+      searchIndexTerms: this.searchIndex.size
+    };
+  }
+  
+  /**
+   * Register change callback
+   * @param {Function} callback - Callback function(action, type, uuid)
+   */
+  onChange(callback) {
+    this.changeCallbacks.push(callback);
+  }
+  
+  /**
+   * Notify change
+   * @param {string} action - 'add', 'update', 'delete'
+   * @param {string} type - 'folder' or 'item'
+   * @param {string} uuid - UUID
+   */
+  notifyChange(action, type, uuid) {
+    this.changeCallbacks.forEach(cb => {
+      try {
+        cb(action, type, uuid);
+      } catch (error) {
+        console.error('Error in inventory change callback:', error);
+      }
+    });
+  }
+  
+  /**
+   * Delete item
+   * @param {string} itemUUID - UUID of the item
+   */
+  deleteItem(itemUUID) {
+    const item = this.items.get(itemUUID);
+    if (item) {
+      this.removeFromSearchIndex(item);
+      this.items.delete(itemUUID);
+      this.notifyChange('delete', 'item', itemUUID);
+    }
+  }
+  
+  /**
+   * Delete folder (must be empty)
+   * @param {string} folderUUID - UUID of the folder
+   * @returns {boolean} True if deleted
+   */
+  deleteFolder(folderUUID) {
+    const folder = this.folders.get(folderUUID);
+    if (!folder) return false;
+    
+    // Check if empty
+    const childFolders = this.getChildFolders(folderUUID);
+    const items = this.getItemsInFolder(folderUUID);
+    
+    if (childFolders.length > 0 || items.length > 0) {
+      console.warn('Cannot delete non-empty folder');
+      return false;
+    }
+    
+    this.folders.delete(folderUUID);
+    this.notifyChange('delete', 'folder', folderUUID);
+    return true;
+  }
+  
+  /**
+   * Clear all inventory data
+   */
+  clear() {
+    this.folders.clear();
+    this.items.clear();
+    this.sortPreferences.clear();
+    this.systemFolders.clear();
+    this.searchIndex.clear();
+    this.moveQueue = [];
+    this.rootFolderUUID = null;
   }
 }
 
