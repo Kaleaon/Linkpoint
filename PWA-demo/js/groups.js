@@ -47,17 +47,20 @@ class GroupsManager {
     
     // Feature 43: Group roles
     this.groupRoles = new Map(); // groupUUID -> Map of roleUUID -> role data
+    this.roleMembers = new Map(); // groupUUID -> Map of roleUUID -> Set of memberUUIDs
     
     // Feature 44: Group chat
     this.groupChatSessions = new Map(); // groupUUID -> chat session
+    this.chatHistories = new Map(); // groupUUID -> message array
     
     // Feature 45: Group notices
     this.groupNotices = new Map(); // groupUUID -> array of notices
     
-    // TODO: Implement group capability requests
-    // TODO: Connect to protocol layer
-    // TODO: Implement group invitations
-    // TODO: Add group land management
+    // Additional features
+    this.groupInvitations = new Map(); // Pending invitations
+    this.groupLandParcels = new Map(); // groupUUID -> array of parcel data
+    this.groupProposals = new Map(); // groupUUID -> array of proposals
+    this.changeCallbacks = [];
   }
   
   /**
@@ -376,6 +379,331 @@ class GroupsManager {
       const v = c === 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
+  }
+  
+  /**
+   * Send group invitation
+   * @param {string} groupUUID - UUID of the group
+   * @param {string} targetUUID - UUID of user to invite
+   * @param {string} roleUUID - UUID of role to assign
+   */
+  async sendInvitation(groupUUID, targetUUID, roleUUID) {
+    console.log(`Sending invitation to ${targetUUID} for group ${groupUUID}`);
+    
+    const invitation = {
+      groupUUID,
+      targetUUID,
+      roleUUID,
+      timestamp: Date.now(),
+      status: 'pending'
+    };
+    
+    this.groupInvitations.set(targetUUID, invitation);
+    // TODO: Send InviteGroupMember message
+  }
+  
+  /**
+   * Accept group invitation
+   * @param {string} groupUUID - UUID of the group
+   */
+  async acceptInvitation(groupUUID) {
+    const invitation = this.groupInvitations.get(groupUUID);
+    if (!invitation) {
+      console.warn('No pending invitation for this group');
+      return false;
+    }
+    
+    invitation.status = 'accepted';
+    this.groupInvitations.delete(groupUUID);
+    
+    // TODO: Send AcceptInvitation message
+    return true;
+  }
+  
+  /**
+   * Decline group invitation
+   * @param {string} groupUUID - UUID of the group
+   */
+  declineInvitation(groupUUID) {
+    this.groupInvitations.delete(groupUUID);
+    // TODO: Send DeclineInvitation message
+  }
+  
+  /**
+   * Get pending invitations
+   * @returns {Array} Array of pending invitations
+   */
+  getPendingInvitations() {
+    return Array.from(this.groupInvitations.values())
+      .filter(inv => inv.status === 'pending');
+  }
+  
+  /**
+   * Assign member to role
+   * @param {string} groupUUID - UUID of the group
+   * @param {string} memberUUID - UUID of the member
+   * @param {string} roleUUID - UUID of the role
+   */
+  assignMemberToRole(groupUUID, memberUUID, roleUUID) {
+    if (!this.roleMembers.has(groupUUID)) {
+      this.roleMembers.set(groupUUID, new Map());
+    }
+    
+    const roleMap = this.roleMembers.get(groupUUID);
+    if (!roleMap.has(roleUUID)) {
+      roleMap.set(roleUUID, new Set());
+    }
+    
+    roleMap.get(roleUUID).add(memberUUID);
+    
+    // Update member data
+    const member = this.getGroupMember(groupUUID, memberUUID);
+    if (member) {
+      const role = this.getGroupRole(groupUUID, roleUUID);
+      if (role) {
+        member.title = role.title;
+        member.powers = role.powers;
+      }
+    }
+    
+    // TODO: Send UpdateGroupMemberRole message
+  }
+  
+  /**
+   * Remove member from role
+   * @param {string} groupUUID - UUID of the group
+   * @param {string} memberUUID - UUID of the member
+   * @param {string} roleUUID - UUID of the role
+   */
+  removeMemberFromRole(groupUUID, memberUUID, roleUUID) {
+    const roleMap = this.roleMembers.get(groupUUID);
+    if (!roleMap) return;
+    
+    const members = roleMap.get(roleUUID);
+    if (members) {
+      members.delete(memberUUID);
+    }
+    
+    // TODO: Send UpdateGroupMemberRole message
+  }
+  
+  /**
+   * Get members in specific role
+   * @param {string} groupUUID - UUID of the group
+   * @param {string} roleUUID - UUID of the role
+   * @returns {Array} Array of member UUIDs
+   */
+  getMembersInRole(groupUUID, roleUUID) {
+    const roleMap = this.roleMembers.get(groupUUID);
+    if (!roleMap) return [];
+    
+    const members = roleMap.get(roleUUID);
+    return members ? Array.from(members) : [];
+  }
+  
+  /**
+   * Get chat history for group
+   * @param {string} groupUUID - UUID of the group
+   * @param {number} limit - Number of messages to return
+   * @returns {Array} Array of chat messages
+   */
+  getGroupChatHistory(groupUUID, limit = 100) {
+    const history = this.chatHistories.get(groupUUID) || [];
+    return history.slice(-limit);
+  }
+  
+  /**
+   * Clear group chat history
+   * @param {string} groupUUID - UUID of the group
+   */
+  clearGroupChatHistory(groupUUID) {
+    this.chatHistories.delete(groupUUID);
+  }
+  
+  /**
+   * Eject member from group
+   * @param {string} groupUUID - UUID of the group
+   * @param {string} memberUUID - UUID of member to eject
+   */
+  async ejectMember(groupUUID, memberUUID) {
+    console.log(`Ejecting member ${memberUUID} from group ${groupUUID}`);
+    
+    const members = this.groupMembers.get(groupUUID);
+    if (members) {
+      members.delete(memberUUID);
+    }
+    
+    // Remove from all roles
+    const roleMap = this.roleMembers.get(groupUUID);
+    if (roleMap) {
+      roleMap.forEach(members => members.delete(memberUUID));
+    }
+    
+    // TODO: Send EjectGroupMember message
+  }
+  
+  /**
+   * Update group charter
+   * @param {string} groupUUID - UUID of the group
+   * @param {string} charter - New charter text
+   */
+  updateCharter(groupUUID, charter) {
+    const group = this.groups.get(groupUUID);
+    if (group) {
+      group.charter = charter;
+      this.notifyChange('group-updated', groupUUID);
+    }
+    
+    // TODO: Send UpdateGroupInfo message
+  }
+  
+  /**
+   * Set group insignia
+   * @param {string} groupUUID - UUID of the group
+   * @param {string} insigniaID - Texture UUID for group insignia
+   */
+  setInsignia(groupUUID, insigniaID) {
+    const group = this.groups.get(groupUUID);
+    if (group) {
+      group.insigniaID = insigniaID;
+      this.notifyChange('group-updated', groupUUID);
+    }
+    
+    // TODO: Send UpdateGroupInfo message
+  }
+  
+  /**
+   * Add land parcel to group
+   * @param {string} groupUUID - UUID of the group
+   * @param {Object} parcelData - Parcel information
+   */
+  addLandParcel(groupUUID, parcelData) {
+    if (!this.groupLandParcels.has(groupUUID)) {
+      this.groupLandParcels.set(groupUUID, []);
+    }
+    
+    this.groupLandParcels.get(groupUUID).push({
+      parcelID: parcelData.parcelID,
+      name: parcelData.name,
+      area: parcelData.area,
+      location: parcelData.location,
+      forSale: parcelData.forSale || false
+    });
+  }
+  
+  /**
+   * Get group land parcels
+   * @param {string} groupUUID - UUID of the group
+   * @returns {Array} Array of parcel data
+   */
+  getLandParcels(groupUUID) {
+    return this.groupLandParcels.get(groupUUID) || [];
+  }
+  
+  /**
+   * Create group proposal
+   * @param {string} groupUUID - UUID of the group
+   * @param {Object} proposalData - Proposal information
+   */
+  createProposal(groupUUID, proposalData) {
+    if (!this.groupProposals.has(groupUUID)) {
+      this.groupProposals.set(groupUUID, []);
+    }
+    
+    const proposal = {
+      proposalID: this.generateSessionID(),
+      title: proposalData.title,
+      text: proposalData.text,
+      createdBy: proposalData.createdBy,
+      createdAt: Date.now(),
+      votesFor: 0,
+      votesAgainst: 0,
+      quorum: proposalData.quorum || 0.5,
+      duration: proposalData.duration || 604800000, // 7 days
+      status: 'active',
+      votes: new Map()
+    };
+    
+    this.groupProposals.get(groupUUID).push(proposal);
+    
+    // TODO: Send CreateProposal message
+    return proposal.proposalID;
+  }
+  
+  /**
+   * Vote on proposal
+   * @param {string} groupUUID - UUID of the group
+   * @param {string} proposalID - UUID of the proposal
+   * @param {boolean} vote - True for yes, false for no
+   * @param {string} voterUUID - UUID of voter
+   */
+  voteOnProposal(groupUUID, proposalID, vote, voterUUID) {
+    const proposals = this.groupProposals.get(groupUUID);
+    if (!proposals) return;
+    
+    const proposal = proposals.find(p => p.proposalID === proposalID);
+    if (!proposal) return;
+    
+    // Record vote
+    proposal.votes.set(voterUUID, vote);
+    
+    // Update counts
+    proposal.votesFor = 0;
+    proposal.votesAgainst = 0;
+    proposal.votes.forEach(v => {
+      if (v) proposal.votesFor++;
+      else proposal.votesAgainst++;
+    });
+    
+    // TODO: Send VoteOnProposal message
+  }
+  
+  /**
+   * Get group proposals
+   * @param {string} groupUUID - UUID of the group
+   * @returns {Array} Array of proposals
+   */
+  getProposals(groupUUID) {
+    return this.groupProposals.get(groupUUID) || [];
+  }
+  
+  /**
+   * Register change callback
+   * @param {Function} callback - Callback function(event, groupUUID)
+   */
+  onChange(callback) {
+    this.changeCallbacks.push(callback);
+  }
+  
+  /**
+   * Notify change
+   * @param {string} event - Event type
+   * @param {string} groupUUID - UUID of affected group
+   */
+  notifyChange(event, groupUUID) {
+    this.changeCallbacks.forEach(cb => {
+      try {
+        cb(event, groupUUID);
+      } catch (error) {
+        console.error('Error in group change callback:', error);
+      }
+    });
+  }
+  
+  /**
+   * Get all groups summary
+   * @returns {Object} Summary statistics
+   */
+  getSummary() {
+    return {
+      totalGroups: this.groups.size,
+      activeGroup: this.activeGroupUUID,
+      totalMembers: Array.from(this.groupMembers.values())
+        .reduce((sum, members) => sum + members.size, 0),
+      totalNotices: Array.from(this.groupNotices.values())
+        .reduce((sum, notices) => sum + notices.length, 0),
+      pendingInvitations: this.getPendingInvitations().length
+    };
   }
 }
 
