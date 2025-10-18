@@ -20,6 +20,7 @@ class ObjectManagerExtended {
     // Feature 17: Prim parameters (shape, material, texture)
     this.objects = new Map();
     this.primParams = new Map();
+    this.objectProperties = new Map();
     
     // Feature 18: Object permissions
     this.permissions = new Map();
@@ -27,15 +28,38 @@ class ObjectManagerExtended {
     // Feature 19: Object selection
     this.selectedObjects = new Set();
     this.selectionCallbacks = [];
+    this.selectionMode = 'single'; // 'single' or 'multiple'
     
     // Feature 20: Parent-child relationships
     this.parentChildMap = new Map();
     this.childrenMap = new Map();
     
-    // TODO: Implement object caching
-    // TODO: Implement permission checks
-    // TODO: Connect to protocol layer
-    // TODO: Integrate with 3D rendering
+    // Object caching
+    this.objectCache = new Map();
+    this.cacheTimeout = 300000; // 5 minutes
+    
+    // Material types
+    this.MATERIALS = {
+      STONE: 0,
+      METAL: 1,
+      GLASS: 2,
+      WOOD: 3,
+      FLESH: 4,
+      PLASTIC: 5,
+      RUBBER: 6
+    };
+    
+    // Prim types
+    this.PRIM_TYPES = {
+      BOX: 0,
+      CYLINDER: 1,
+      PRISM: 2,
+      SPHERE: 3,
+      TORUS: 4,
+      TUBE: 5,
+      RING: 6,
+      SCULPT: 7
+    };
   }
   
   /**
@@ -279,6 +303,302 @@ class ObjectManagerExtended {
    */
   isRoot(objectUUID) {
     return !this.parentChildMap.has(objectUUID);
+  }
+  
+  /**
+   * Get root object for a given object
+   * @param {string} objectUUID - UUID of the object
+   * @returns {string} UUID of root object
+   */
+  getRootObject(objectUUID) {
+    let current = objectUUID;
+    let parent = this.getParent(current);
+    
+    while (parent) {
+      current = parent;
+      parent = this.getParent(current);
+    }
+    
+    return current;
+  }
+  
+  /**
+   * Get link set (root and all children)
+   * @param {string} objectUUID - UUID of any object in the link set
+   * @returns {Set} Set of all object UUIDs in the link set
+   */
+  getLinkSet(objectUUID) {
+    const root = this.getRootObject(objectUUID);
+    const linkSet = new Set([root]);
+    const descendants = this.getAllDescendants(root);
+    descendants.forEach(d => linkSet.add(d));
+    return linkSet;
+  }
+  
+  /**
+   * Get link number (position in link set, 1-indexed)
+   * @param {string} objectUUID - UUID of the object
+   * @returns {number} Link number (1 = root, 2+ = children)
+   */
+  getLinkNumber(objectUUID) {
+    const root = this.getRootObject(objectUUID);
+    if (root === objectUUID) return 1;
+    
+    const linkSet = Array.from(this.getLinkSet(root));
+    return linkSet.indexOf(objectUUID) + 1;
+  }
+  
+  /**
+   * Set object property
+   * @param {string} objectUUID - UUID of the object
+   * @param {Object} properties - Object properties
+   */
+  setObjectProperties(objectUUID, properties) {
+    this.objectProperties.set(objectUUID, {
+      name: properties.name || '',
+      description: properties.description || '',
+      position: properties.position || [0, 0, 0],
+      rotation: properties.rotation || [0, 0, 0, 1],
+      scale: properties.scale || [0.5, 0.5, 0.5],
+      velocity: properties.velocity || [0, 0, 0],
+      angularVelocity: properties.angularVelocity || [0, 0, 0],
+      clickAction: properties.clickAction || 0,
+      flags: properties.flags || 0,
+      timestamp: Date.now()
+    });
+    
+    this.cacheObject(objectUUID, properties);
+  }
+  
+  /**
+   * Get object properties
+   * @param {string} objectUUID - UUID of the object
+   * @returns {Object|null} Object properties or null
+   */
+  getObjectProperties(objectUUID) {
+    return this.objectProperties.get(objectUUID) || null;
+  }
+  
+  /**
+   * Cache object data
+   * @param {string} objectUUID - UUID of the object
+   * @param {Object} data - Object data to cache
+   */
+  cacheObject(objectUUID, data) {
+    this.objectCache.set(objectUUID, {
+      data,
+      timestamp: Date.now(),
+      expires: Date.now() + this.cacheTimeout
+    });
+  }
+  
+  /**
+   * Get cached object
+   * @param {string} objectUUID - UUID of the object
+   * @returns {Object|null} Cached object data or null
+   */
+  getCachedObject(objectUUID) {
+    const cached = this.objectCache.get(objectUUID);
+    
+    if (!cached) return null;
+    
+    if (Date.now() > cached.expires) {
+      this.objectCache.delete(objectUUID);
+      return null;
+    }
+    
+    return cached.data;
+  }
+  
+  /**
+   * Clear cache for object
+   * @param {string} objectUUID - UUID of the object
+   */
+  clearCache(objectUUID) {
+    this.objectCache.delete(objectUUID);
+  }
+  
+  /**
+   * Clear all expired cache entries
+   */
+  clearExpiredCache() {
+    const now = Date.now();
+    for (const [uuid, cached] of this.objectCache) {
+      if (now > cached.expires) {
+        this.objectCache.delete(uuid);
+      }
+    }
+  }
+  
+  /**
+   * Set texture for specific face
+   * @param {string} objectUUID - UUID of the object
+   * @param {number} face - Face index (-1 for all faces)
+   * @param {Object} texture - Texture properties
+   */
+  setFaceTexture(objectUUID, face, texture) {
+    const params = this.primParams.get(objectUUID);
+    if (!params) return;
+    
+    if (!params.textures) {
+      params.textures = [];
+    }
+    
+    const textureEntry = {
+      textureId: texture.textureId || '00000000-0000-0000-0000-000000000000',
+      color: texture.color || [1, 1, 1, 1],
+      repeatU: texture.repeatU || 1.0,
+      repeatV: texture.repeatV || 1.0,
+      offsetU: texture.offsetU || 0,
+      offsetV: texture.offsetV || 0,
+      rotation: texture.rotation || 0,
+      glow: texture.glow || 0,
+      material: texture.material || 0,
+      mediaFlags: texture.mediaFlags || 0
+    };
+    
+    if (face === -1) {
+      // Set for all faces
+      for (let i = 0; i < 8; i++) {
+        params.textures[i] = { ...textureEntry };
+      }
+    } else {
+      params.textures[face] = textureEntry;
+    }
+  }
+  
+  /**
+   * Get texture for specific face
+   * @param {string} objectUUID - UUID of the object
+   * @param {number} face - Face index
+   * @returns {Object|null} Texture properties or null
+   */
+  getFaceTexture(objectUUID, face) {
+    const params = this.primParams.get(objectUUID);
+    if (!params || !params.textures) return null;
+    return params.textures[face] || null;
+  }
+  
+  /**
+   * Set material type
+   * @param {string} objectUUID - UUID of the object
+   * @param {number} material - Material type (0-6)
+   */
+  setMaterial(objectUUID, material) {
+    const params = this.primParams.get(objectUUID);
+    if (params) {
+      params.material = material;
+    }
+  }
+  
+  /**
+   * Get material name
+   * @param {number} materialType - Material type
+   * @returns {string} Material name
+   */
+  getMaterialName(materialType) {
+    const names = Object.keys(this.MATERIALS);
+    for (const name of names) {
+      if (this.MATERIALS[name] === materialType) {
+        return name;
+      }
+    }
+    return 'UNKNOWN';
+  }
+  
+  /**
+   * Calculate bounding box for object
+   * @param {string} objectUUID - UUID of the object
+   * @returns {Object} Bounding box {min, max}
+   */
+  getBoundingBox(objectUUID) {
+    const props = this.getObjectProperties(objectUUID);
+    const params = this.getPrimParams(objectUUID);
+    
+    if (!props || !params) {
+      return { min: [0, 0, 0], max: [0, 0, 0] };
+    }
+    
+    const scale = props.scale;
+    const halfScale = scale.map(s => s / 2);
+    
+    return {
+      min: props.position.map((p, i) => p - halfScale[i]),
+      max: props.position.map((p, i) => p + halfScale[i])
+    };
+  }
+  
+  /**
+   * Check if point is inside object bounding box
+   * @param {string} objectUUID - UUID of the object
+   * @param {Array} point - Point [x, y, z]
+   * @returns {boolean} True if point is inside
+   */
+  containsPoint(objectUUID, point) {
+    const bbox = this.getBoundingBox(objectUUID);
+    
+    return point[0] >= bbox.min[0] && point[0] <= bbox.max[0] &&
+           point[1] >= bbox.min[1] && point[1] <= bbox.max[1] &&
+           point[2] >= bbox.min[2] && point[2] <= bbox.max[2];
+  }
+  
+  /**
+   * Get all objects in region
+   * @returns {Array} Array of object UUIDs
+   */
+  getAllObjects() {
+    return Array.from(this.objects.keys());
+  }
+  
+  /**
+   * Get object count
+   * @returns {number} Total number of objects
+   */
+  getObjectCount() {
+    return this.objects.size;
+  }
+  
+  /**
+   * Remove object and clean up
+   * @param {string} objectUUID - UUID of the object
+   */
+  removeObject(objectUUID) {
+    this.objects.delete(objectUUID);
+    this.primParams.delete(objectUUID);
+    this.permissions.delete(objectUUID);
+    this.objectProperties.delete(objectUUID);
+    this.objectCache.delete(objectUUID);
+    this.selectedObjects.delete(objectUUID);
+    
+    // Clean up parent-child relationships
+    const children = this.getChildren(objectUUID);
+    children.forEach(child => {
+      this.parentChildMap.delete(child);
+    });
+    this.childrenMap.delete(objectUUID);
+    
+    const parent = this.getParent(objectUUID);
+    if (parent) {
+      const siblings = this.childrenMap.get(parent);
+      if (siblings) {
+        siblings.delete(objectUUID);
+      }
+      this.parentChildMap.delete(objectUUID);
+    }
+  }
+  
+  /**
+   * Clear all objects
+   */
+  clearAll() {
+    this.objects.clear();
+    this.primParams.clear();
+    this.permissions.clear();
+    this.objectProperties.clear();
+    this.objectCache.clear();
+    this.selectedObjects.clear();
+    this.parentChildMap.clear();
+    this.childrenMap.clear();
   }
 }
 
