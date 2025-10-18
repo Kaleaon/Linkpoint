@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "npx http-server -p 8000 -c-1",
     "serve": "npx http-server -p 8000",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "keywords": [
     "pwa",
@@ -28,6 +31,20 @@
   "engines": {
     "node": ">=14.0.0"
   },
-  "devDependencies": {},
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "js/phase2/*.js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
   "dependencies": {}
 }
