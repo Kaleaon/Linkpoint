@@ -41,6 +41,7 @@ class FriendsExtended {
     // Feature 47: Online notifications
     this.friends = new Map(); // UUID -> friend data
     this.onlineStatusCallbacks = [];
+    this.statusChangeHistory = []; // Track status changes
     
     // Feature 48: Friend permissions
     this.myRights = new Map(); // UUID -> rights I've granted
@@ -51,11 +52,25 @@ class FriendsExtended {
     
     // Feature 50: Friend groups/folders
     this.friendGroups = new Map(); // groupName -> Set of UUIDs
+    this.defaultGroups = ['Close Friends', 'Acquaintances', 'Business'];
     
-    // TODO: Connect to protocol layer
-    // TODO: Implement notification system
-    // TODO: Sync with inventory for calling cards
-    // TODO: Persist friend data
+    // Additional features
+    this.recentInteractions = []; // Track recent interactions with friends
+    this.blockedUsers = new Set(); // Blocked users
+    this.changeCallbacks = [];
+    
+    this.initDefaultGroups();
+  }
+  
+  /**
+   * Initialize default friend groups
+   */
+  initDefaultGroups() {
+    this.defaultGroups.forEach(groupName => {
+      if (!this.friendGroups.has(groupName)) {
+        this.friendGroups.set(groupName, new Set());
+      }
+    });
   }
   
   /**
@@ -416,6 +431,298 @@ class FriendsExtended {
   getFriendsInGroup(groupName) {
     const group = this.friendGroups.get(groupName);
     return group ? Array.from(group) : [];
+  }
+  
+  /**
+   * Search friends by name
+   * @param {string} query - Search query
+   * @returns {Array} Array of matching friends
+   */
+  searchFriends(query) {
+    const lowerQuery = query.toLowerCase();
+    const results = [];
+    
+    this.friends.forEach((friend, uuid) => {
+      if (friend.name.toLowerCase().includes(lowerQuery)) {
+        results.push({ uuid, ...friend });
+      }
+    });
+    
+    return results;
+  }
+  
+  /**
+   * Get friends sorted by last online time
+   * @param {number} limit - Number of friends to return
+   * @returns {Array} Array of friends
+   */
+  getRecentlyOnlineFriends(limit = 10) {
+    const friendsArray = Array.from(this.friends.entries())
+      .map(([uuid, friend]) => ({ uuid, ...friend }))
+      .filter(f => f.lastOnline);
+    
+    friendsArray.sort((a, b) => b.lastOnline - a.lastOnline);
+    
+    return friendsArray.slice(0, limit);
+  }
+  
+  /**
+   * Track interaction with friend
+   * @param {string} friendUUID - UUID of friend
+   * @param {string} type - Type of interaction (chat, teleport, etc.)
+   */
+  recordInteraction(friendUUID, type) {
+    this.recentInteractions.push({
+      friendUUID,
+      type,
+      timestamp: Date.now()
+    });
+    
+    // Keep only last 100 interactions
+    if (this.recentInteractions.length > 100) {
+      this.recentInteractions.shift();
+    }
+    
+    // Update friend's last interaction time
+    const friend = this.friends.get(friendUUID);
+    if (friend) {
+      friend.lastInteraction = Date.now();
+    }
+  }
+  
+  /**
+   * Get recent interactions
+   * @param {number} limit - Number of interactions to return
+   * @returns {Array} Array of interactions
+   */
+  getRecentInteractions(limit = 20) {
+    return this.recentInteractions.slice(-limit);
+  }
+  
+  /**
+   * Get interactions with specific friend
+   * @param {string} friendUUID - UUID of friend
+   * @returns {Array} Array of interactions
+   */
+  getInteractionsWith(friendUUID) {
+    return this.recentInteractions.filter(i => i.friendUUID === friendUUID);
+  }
+  
+  /**
+   * Block user
+   * @param {string} userUUID - UUID of user to block
+   */
+  blockUser(userUUID) {
+    this.blockedUsers.add(userUUID);
+    
+    // Remove from friends if present
+    this.removeFriend(userUUID);
+    
+    // TODO: Send block message to server
+  }
+  
+  /**
+   * Unblock user
+   * @param {string} userUUID - UUID of user to unblock
+   */
+  unblockUser(userUUID) {
+    this.blockedUsers.delete(userUUID);
+    // TODO: Send unblock message to server
+  }
+  
+  /**
+   * Check if user is blocked
+   * @param {string} userUUID - UUID of user
+   * @returns {boolean} True if blocked
+   */
+  isBlocked(userUUID) {
+    return this.blockedUsers.has(userUUID);
+  }
+  
+  /**
+   * Get blocked users
+   * @returns {Array} Array of blocked user UUIDs
+   */
+  getBlockedUsers() {
+    return Array.from(this.blockedUsers);
+  }
+  
+  /**
+   * Get friend statistics
+   * @returns {Object} Friend statistics
+   */
+  getStatistics() {
+    const onlineFriends = Array.from(this.friends.values())
+      .filter(f => f.status === FriendStatus.ONLINE);
+    
+    return {
+      totalFriends: this.friends.size,
+      onlineFriends: onlineFriends.length,
+      offlineFriends: this.friends.size - onlineFriends.length,
+      pendingRequests: this.pendingRequests.size,
+      sentRequests: this.sentRequests.size,
+      totalGroups: this.friendGroups.size,
+      blockedUsers: this.blockedUsers.size,
+      recentInteractions: this.recentInteractions.length
+    };
+  }
+  
+  /**
+   * Get friends with specific permission
+   * @param {number} permission - Friend right flag
+   * @returns {Array} Array of friend UUIDs
+   */
+  getFriendsWithPermission(permission) {
+    const results = [];
+    
+    this.myRights.forEach((rights, uuid) => {
+      if (rights & permission) {
+        results.push(uuid);
+      }
+    });
+    
+    return results;
+  }
+  
+  /**
+   * Check if friend can see me online
+   * @param {string} friendUUID - UUID of friend
+   * @returns {boolean} True if they can see online status
+   */
+  canFriendSeeOnline(friendUUID) {
+    const rights = this.myRights.get(friendUUID) || 0;
+    return (rights & FriendRights.CAN_SEE_ONLINE) !== 0;
+  }
+  
+  /**
+   * Check if friend can see me on map
+   * @param {string} friendUUID - UUID of friend
+   * @returns {boolean} True if they can see on map
+   */
+  canFriendSeeOnMap(friendUUID) {
+    const rights = this.myRights.get(friendUUID) || 0;
+    return (rights & FriendRights.CAN_SEE_ON_MAP) !== 0;
+  }
+  
+  /**
+   * Check if friend can modify my objects
+   * @param {string} friendUUID - UUID of friend
+   * @returns {boolean} True if they can modify objects
+   */
+  canFriendModifyObjects(friendUUID) {
+    const rights = this.myRights.get(friendUUID) || 0;
+    return (rights & FriendRights.CAN_MODIFY_OBJECTS) !== 0;
+  }
+  
+  /**
+   * Get status change history
+   * @param {number} limit - Number of changes to return
+   * @returns {Array} Array of status changes
+   */
+  getStatusChangeHistory(limit = 50) {
+    return this.statusChangeHistory.slice(-limit);
+  }
+  
+  /**
+   * Export friends list to JSON
+   * @returns {string} JSON string of friends
+   */
+  exportToJSON() {
+    const friendsData = {
+      friends: Array.from(this.friends.entries()).map(([uuid, friend]) => ({
+        uuid,
+        ...friend
+      })),
+      groups: Array.from(this.friendGroups.entries()).map(([name, members]) => ({
+        name,
+        members: Array.from(members)
+      })),
+      myRights: Array.from(this.myRights.entries()).map(([uuid, rights]) => ({ uuid, rights })),
+      theirRights: Array.from(this.theirRights.entries()).map(([uuid, rights]) => ({ uuid, rights }))
+    };
+    
+    return JSON.stringify(friendsData, null, 2);
+  }
+  
+  /**
+   * Import friends from JSON
+   * @param {string} jsonData - JSON string of friends data
+   */
+  importFromJSON(jsonData) {
+    try {
+      const data = JSON.parse(jsonData);
+      
+      if (data.friends) {
+        data.friends.forEach(friend => {
+          this.friends.set(friend.uuid, friend);
+        });
+      }
+      
+      if (data.groups) {
+        data.groups.forEach(group => {
+          this.friendGroups.set(group.name, new Set(group.members));
+        });
+      }
+      
+      if (data.myRights) {
+        data.myRights.forEach(({ uuid, rights }) => {
+          this.myRights.set(uuid, rights);
+        });
+      }
+      
+      if (data.theirRights) {
+        data.theirRights.forEach(({ uuid, rights }) => {
+          this.theirRights.set(uuid, rights);
+        });
+      }
+      
+      console.log('Successfully imported friends data');
+    } catch (error) {
+      console.error('Failed to import friends data:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Register change callback
+   * @param {Function} callback - Callback function
+   */
+  onChange(callback) {
+    this.changeCallbacks.push(callback);
+  }
+  
+  /**
+   * Notify change
+   * @param {string} event - Event type
+   * @param {string} friendUUID - UUID of affected friend
+   */
+  notifyChange(event, friendUUID) {
+    this.changeCallbacks.forEach(cb => {
+      try {
+        cb(event, friendUUID);
+      } catch (error) {
+        console.error('Error in friend change callback:', error);
+      }
+    });
+  }
+  
+  /**
+   * Clear all friend data
+   */
+  clear() {
+    this.friends.clear();
+    this.pendingRequests.clear();
+    this.sentRequests.clear();
+    this.myRights.clear();
+    this.theirRights.clear();
+    this.callingCards.clear();
+    this.recentInteractions = [];
+    this.statusChangeHistory = [];
+    this.blockedUsers.clear();
+    
+    // Keep default groups
+    this.friendGroups.clear();
+    this.initDefaultGroups();
   }
 }
 
