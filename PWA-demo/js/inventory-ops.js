@@ -21,14 +21,27 @@ class InventoryOps {
     // Operation queue for batch processing
     this.operationQueue = [];
     this.isProcessing = false;
+    this.processingPromise = null;
     
     // Operation callbacks
     this.callbacks = new Map();
     
-    // TODO: Implement capability-based operations
-    // TODO: Implement undo/redo support
-    // TODO: Add operation validation
-    // TODO: Connect to protocol layer
+    // Operation history for undo/redo
+    this.undoStack = [];
+    this.redoStack = [];
+    this.maxUndoSize = 50;
+    
+    // Operation states
+    this.OPERATION_STATES = {
+      PENDING: 'pending',
+      PROCESSING: 'processing',
+      COMPLETED: 'completed',
+      FAILED: 'failed',
+      CANCELLED: 'cancelled'
+    };
+    
+    // Trash folder UUID (set via setTrashFolder)
+    this.trashFolderUUID = null;
   }
   
   /**
@@ -333,6 +346,377 @@ class InventoryOps {
     }
     
     return results;
+  }
+  
+  /**
+   * Set trash folder UUID
+   * @param {string} folderUUID - UUID of trash folder
+   */
+  setTrashFolder(folderUUID) {
+    this.trashFolderUUID = folderUUID;
+  }
+  
+  /**
+   * Move item to trash
+   * @param {string} itemUUID - UUID of item to trash
+   * @param {boolean} isFolder - True if item is a folder
+   * @returns {Promise<boolean>} True if succeeded
+   */
+  async moveToTrash(itemUUID, isFolder = false) {
+    if (!this.trashFolderUUID) {
+      console.error('Trash folder not set');
+      return false;
+    }
+    
+    const result = await this.moveItem(itemUUID, this.trashFolderUUID);
+    
+    if (result && isFolder) {
+      return await this.moveFolder(itemUUID, this.trashFolderUUID);
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Restore item from trash
+   * @param {string} itemUUID - UUID of item to restore
+   * @param {string} targetFolderUUID - UUID of destination folder
+   * @returns {Promise<boolean>} True if succeeded
+   */
+  async restoreFromTrash(itemUUID, targetFolderUUID) {
+    return await this.moveItem(itemUUID, targetFolderUUID);
+  }
+  
+  /**
+   * Empty trash (delete all items in trash permanently)
+   * @returns {Promise<number>} Number of items deleted
+   */
+  async emptyTrash() {
+    if (!this.trashFolderUUID || !this.inventoryCore) {
+      return 0;
+    }
+    
+    const items = this.inventoryCore.getItemsInFolder(this.trashFolderUUID);
+    const folders = this.inventoryCore.getChildFolders(this.trashFolderUUID);
+    
+    let deleted = 0;
+    
+    // Delete all items
+    for (const itemUUID of items) {
+      if (await this.deleteItem(itemUUID, false)) {
+        deleted++;
+      }
+    }
+    
+    // Delete all folders recursively
+    for (const folderUUID of folders) {
+      if (await this.deleteFolderRecursive(folderUUID)) {
+        deleted++;
+      }
+    }
+    
+    return deleted;
+  }
+  
+  /**
+   * Delete folder and all contents recursively
+   * @param {string} folderUUID - UUID of folder to delete
+   * @returns {Promise<boolean>} True if succeeded
+   */
+  async deleteFolderRecursive(folderUUID) {
+    if (!this.inventoryCore) return false;
+    
+    // Get all children
+    const childFolders = this.inventoryCore.getChildFolders(folderUUID);
+    const items = this.inventoryCore.getItemsInFolder(folderUUID);
+    
+    // Delete all items
+    for (const itemUUID of items) {
+      await this.deleteItem(itemUUID, false);
+    }
+    
+    // Recursively delete child folders
+    for (const childUUID of childFolders) {
+      await this.deleteFolderRecursive(childUUID);
+    }
+    
+    // Delete the folder itself
+    return await this.deleteItem(folderUUID, true);
+  }
+  
+  /**
+   * Validate operation before execution
+   * @param {string} operation - Operation type
+   * @param {Object} params - Operation parameters
+   * @returns {Object} Validation result {valid, error}
+   */
+  validateOperation(operation, params) {
+    if (!this.inventoryCore) {
+      return { valid: false, error: 'Inventory core not available' };
+    }
+    
+    switch (operation) {
+      case 'move':
+        // Check if source exists
+        const item = this.inventoryCore.getItem(params.itemUUID);
+        if (!item) {
+          return { valid: false, error: 'Source item not found' };
+        }
+        
+        // Check if target folder exists
+        const targetFolder = this.inventoryCore.getFolder(params.targetUUID);
+        if (!targetFolder) {
+          return { valid: false, error: 'Target folder not found' };
+        }
+        
+        // Check if not moving to self
+        if (params.itemUUID === params.targetUUID) {
+          return { valid: false, error: 'Cannot move to self' };
+        }
+        
+        break;
+        
+      case 'copy':
+        // Similar validation as move
+        if (!this.inventoryCore.getItem(params.itemUUID)) {
+          return { valid: false, error: 'Source item not found' };
+        }
+        
+        if (!this.inventoryCore.getFolder(params.targetUUID)) {
+          return { valid: false, error: 'Target folder not found' };
+        }
+        
+        break;
+        
+      case 'rename':
+        if (!params.newName || params.newName.trim().length === 0) {
+          return { valid: false, error: 'Invalid name' };
+        }
+        
+        if (params.newName.length > 63) {
+          return { valid: false, error: 'Name too long (max 63 characters)' };
+        }
+        
+        break;
+        
+      case 'create':
+        if (!params.name || params.name.trim().length === 0) {
+          return { valid: false, error: 'Invalid folder name' };
+        }
+        
+        if (!this.inventoryCore.getFolder(params.parentUUID)) {
+          return { valid: false, error: 'Parent folder not found' };
+        }
+        
+        break;
+    }
+    
+    return { valid: true };
+  }
+  
+  /**
+   * Add operation to undo stack
+   * @param {Object} operation - Operation data
+   */
+  addToUndoStack(operation) {
+    this.undoStack.push(operation);
+    
+    if (this.undoStack.length > this.maxUndoSize) {
+      this.undoStack.shift();
+    }
+    
+    // Clear redo stack when new operation is performed
+    this.redoStack = [];
+  }
+  
+  /**
+   * Undo last operation
+   * @returns {Promise<boolean>} True if undo succeeded
+   */
+  async undo() {
+    if (this.undoStack.length === 0) {
+      return false;
+    }
+    
+    const operation = this.undoStack.pop();
+    
+    try {
+      // Reverse the operation
+      switch (operation.type) {
+        case 'create':
+          await this.deleteItem(operation.uuid, operation.isFolder);
+          break;
+          
+        case 'delete':
+          // Would need to restore from backup
+          console.warn('Cannot undo delete without backup data');
+          break;
+          
+        case 'move':
+          await this.moveItem(operation.uuid, operation.oldParent);
+          break;
+          
+        case 'rename':
+          await this.renameItem(operation.uuid, operation.oldName, operation.isFolder);
+          break;
+          
+        case 'copy':
+          await this.deleteItem(operation.newUUID, false);
+          break;
+      }
+      
+      this.redoStack.push(operation);
+      return true;
+    } catch (error) {
+      console.error('Undo failed:', error);
+      this.undoStack.push(operation); // Put it back
+      return false;
+    }
+  }
+  
+  /**
+   * Redo last undone operation
+   * @returns {Promise<boolean>} True if redo succeeded
+   */
+  async redo() {
+    if (this.redoStack.length === 0) {
+      return false;
+    }
+    
+    const operation = this.redoStack.pop();
+    
+    try {
+      // Re-execute the operation
+      switch (operation.type) {
+        case 'create':
+          await this.createFolder(operation.parentUUID, operation.name, operation.folderType);
+          break;
+          
+        case 'delete':
+          await this.deleteItem(operation.uuid, operation.isFolder);
+          break;
+          
+        case 'move':
+          await this.moveItem(operation.uuid, operation.newParent);
+          break;
+          
+        case 'rename':
+          await this.renameItem(operation.uuid, operation.newName, operation.isFolder);
+          break;
+          
+        case 'copy':
+          await this.copyItem(operation.uuid, operation.targetUUID, operation.newName);
+          break;
+      }
+      
+      this.undoStack.push(operation);
+      return true;
+    } catch (error) {
+      console.error('Redo failed:', error);
+      this.redoStack.push(operation); // Put it back
+      return false;
+    }
+  }
+  
+  /**
+   * Get undo stack size
+   * @returns {number} Number of undoable operations
+   */
+  canUndo() {
+    return this.undoStack.length > 0;
+  }
+  
+  /**
+   * Get redo stack size
+   * @returns {number} Number of redoable operations
+   */
+  canRedo() {
+    return this.redoStack.length > 0;
+  }
+  
+  /**
+   * Clear undo/redo history
+   */
+  clearHistory() {
+    this.undoStack = [];
+    this.redoStack = [];
+  }
+  
+  /**
+   * Queue operation for processing
+   * @param {Object} operation - Operation to queue
+   * @returns {Promise} Promise that resolves when operation completes
+   */
+  queueOperation(operation) {
+    return new Promise((resolve, reject) => {
+      operation.resolve = resolve;
+      operation.reject = reject;
+      operation.state = this.OPERATION_STATES.PENDING;
+      
+      this.operationQueue.push(operation);
+      
+      // Start processing if not already
+      if (!this.isProcessing) {
+        this.processQueue();
+      }
+    });
+  }
+  
+  /**
+   * Process operation queue
+   */
+  async processQueue() {
+    if (this.isProcessing || this.operationQueue.length === 0) {
+      return;
+    }
+    
+    this.isProcessing = true;
+    
+    while (this.operationQueue.length > 0) {
+      const operation = this.operationQueue.shift();
+      operation.state = this.OPERATION_STATES.PROCESSING;
+      
+      try {
+        let result;
+        
+        switch (operation.type) {
+          case 'create':
+            result = await this.createFolder(operation.parentUUID, operation.name, operation.folderType);
+            break;
+          case 'delete':
+            result = await this.deleteItem(operation.uuid, operation.isFolder);
+            break;
+          case 'move':
+            result = await this.moveItem(operation.uuid, operation.targetUUID);
+            break;
+          case 'copy':
+            result = await this.copyItem(operation.uuid, operation.targetUUID, operation.newName);
+            break;
+          case 'rename':
+            result = await this.renameItem(operation.uuid, operation.newName, operation.isFolder);
+            break;
+        }
+        
+        operation.state = this.OPERATION_STATES.COMPLETED;
+        operation.resolve(result);
+      } catch (error) {
+        operation.state = this.OPERATION_STATES.FAILED;
+        operation.reject(error);
+      }
+    }
+    
+    this.isProcessing = false;
+  }
+  
+  /**
+   * Get operation queue status
+   * @returns {Object} Queue status
+   */
+  getQueueStatus() {
+    return {
+      pending: this.operationQueue.length,
+      isProcessing: this.isProcessing
+    };
   }
 }
 
