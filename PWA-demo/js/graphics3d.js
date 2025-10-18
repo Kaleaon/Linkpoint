@@ -68,7 +68,8 @@ class Graphics3D extends Utils.EventEmitter {
     this.gl.cullFace(this.gl.BACK);
     this.gl.frontFace(this.gl.CCW);
     this.gl.depthFunc(this.gl.LEQUAL);
-    this.gl.clearColor(0.05, 0.05, 0.1, 1.0);
+    // Lighter sky color for better visibility
+    this.gl.clearColor(0.53, 0.81, 0.92, 1.0); // Light blue sky color
 
     // Create default shaders
     await this.createDefaultShaders();

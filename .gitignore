@@ -60,7 +60,10 @@ lint/tmp/
 *.args
 classes.dex.xml
 debug.keystore
-index.html
+# Ignore decompiled index.html but not PWA index.html
+/app/src/main/**/index.html
+/sources/**/index.html
+/tools/**/index.html
 
 # Decompiled and temporary directories
 sources/
@@ -82,6 +85,9 @@ network_*.java
 *.bat
 !gradlew
 !gradlew.bat
+# Allow PWA-demo scripts
+!PWA-demo/*.sh
+!scripts/*.sh
 
 # Build artifacts and backups
 *.backup
