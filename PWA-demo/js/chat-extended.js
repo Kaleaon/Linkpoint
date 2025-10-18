@@ -63,12 +63,51 @@ class ChatExtended {
     this.typingTimeout = 5000; // 5 seconds
     this.typingCheckInterval = null;
     
-    // TODO: Implement IndexedDB persistence
-    // TODO: Connect to protocol layer
-    // TODO: Implement notification system
-    // TODO: Add chat export functionality
-    
+    // Additional features
+    this.dbName = 'ChatHistory';
+    this.dbVersion = 1;
+    this.db = null;
+    this.initIndexedDB();
     this.initTypingCheck();
+  }
+  
+  /**
+   * Initialize IndexedDB for chat history persistence
+   */
+  async initIndexedDB() {
+    if (!('indexedDB' in window)) {
+      console.warn('IndexedDB not available, using localStorage fallback');
+      this.loadHistory(); // Load from localStorage
+      return;
+    }
+    
+    try {
+      const request = indexedDB.open(this.dbName, this.dbVersion);
+      
+      request.onerror = () => {
+        console.error('Failed to open IndexedDB');
+        this.loadHistory(); // Fallback to localStorage
+      };
+      
+      request.onsuccess = (event) => {
+        this.db = event.target.result;
+        this.loadHistoryFromDB();
+      };
+      
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        
+        if (!db.objectStoreNames.contains('messages')) {
+          const objectStore = db.createObjectStore('messages', { keyPath: 'id', autoIncrement: true });
+          objectStore.createIndex('timestamp', 'timestamp', { unique: false });
+          objectStore.createIndex('fromUUID', 'fromUUID', { unique: false });
+          objectStore.createIndex('channel', 'channel', { unique: false });
+        }
+      };
+    } catch (error) {
+      console.error('IndexedDB initialization error:', error);
+      this.loadHistory(); // Fallback
+    }
   }
   
   /**
@@ -161,14 +200,77 @@ class ChatExtended {
    * Persist history to storage
    * TODO: Implement IndexedDB storage
    */
-  persistHistory() {
-    // TODO: Save to IndexedDB
-    // For now, use localStorage as fallback (limited size)
+  async persistHistory() {
+    if (this.db) {
+      await this.persistToIndexedDB();
+    } else {
+      this.persistToLocalStorage();
+    }
+  }
+  
+  /**
+   * Persist to IndexedDB
+   */
+  async persistToIndexedDB() {
+    if (!this.db) return;
+    
+    try {
+      const transaction = this.db.transaction(['messages'], 'readwrite');
+      const objectStore = transaction.objectStore('messages');
+      
+      // Clear old data first
+      objectStore.clear();
+      
+      // Add current history
+      this.chatHistory.forEach(msg => {
+        objectStore.add(msg);
+      });
+      
+      await new Promise((resolve, reject) => {
+        transaction.oncomplete = resolve;
+        transaction.onerror = reject;
+      });
+    } catch (error) {
+      console.error('Failed to persist to IndexedDB:', error);
+      this.persistToLocalStorage(); // Fallback
+    }
+  }
+  
+  /**
+   * Persist to localStorage (fallback)
+   */
+  persistToLocalStorage() {
     try {
       const recentHistory = this.chatHistory.slice(-100); // Only save last 100
       localStorage.setItem('chat_history', JSON.stringify(recentHistory));
     } catch (e) {
       console.warn('Failed to persist chat history:', e);
+    }
+  }
+  
+  /**
+   * Load history from IndexedDB
+   */
+  async loadHistoryFromDB() {
+    if (!this.db) return;
+    
+    try {
+      const transaction = this.db.transaction(['messages'], 'readonly');
+      const objectStore = transaction.objectStore('messages');
+      const request = objectStore.getAll();
+      
+      request.onsuccess = () => {
+        this.chatHistory = request.result || [];
+        console.log(`Loaded ${this.chatHistory.length} messages from IndexedDB`);
+      };
+      
+      request.onerror = () => {
+        console.error('Failed to load from IndexedDB');
+        this.loadHistory(); // Fallback to localStorage
+      };
+    } catch (error) {
+      console.error('Error loading from IndexedDB:', error);
+      this.loadHistory();
     }
   }
   
@@ -388,6 +490,220 @@ class ChatExtended {
   destroy() {
     if (this.typingCheckInterval) {
       clearInterval(this.typingCheckInterval);
+    }
+    
+    if (this.db) {
+      this.db.close();
+    }
+  }
+  
+  /**
+   * Export chat history to JSON
+   * @param {Object} filters - Optional filters
+   * @returns {string} JSON string of chat history
+   */
+  exportToJSON(filters = {}) {
+    const history = this.getHistory(this.maxHistorySize, filters);
+    return JSON.stringify(history, null, 2);
+  }
+  
+  /**
+   * Export chat history to plain text
+   * @param {Object} filters - Optional filters
+   * @returns {string} Plain text chat history
+   */
+  exportToText(filters = {}) {
+    const history = this.getHistory(this.maxHistorySize, filters);
+    let output = '';
+    
+    for (const msg of history) {
+      const date = new Date(msg.timestamp).toLocaleString();
+      const typeStr = this.getChatTypeName(msg.type);
+      output += `[${date}] [${typeStr}] ${msg.fromName}: ${msg.message}\n`;
+    }
+    
+    return output;
+  }
+  
+  /**
+   * Export chat history to CSV
+   * @param {Object} filters - Optional filters
+   * @returns {string} CSV formatted chat history
+   */
+  exportToCSV(filters = {}) {
+    const history = this.getHistory(this.maxHistorySize, filters);
+    let csv = 'Timestamp,Type,Source,From UUID,From Name,Message,Channel\n';
+    
+    for (const msg of history) {
+      const date = new Date(msg.timestamp).toISOString();
+      const typeStr = this.getChatTypeName(msg.type);
+      const sourceStr = this.getSourceTypeName(msg.sourceType);
+      const message = msg.message.replace(/"/g, '""'); // Escape quotes
+      
+      csv += `"${date}","${typeStr}","${sourceStr}","${msg.fromUUID}","${msg.fromName}","${message}",${msg.channel}\n`;
+    }
+    
+    return csv;
+  }
+  
+  /**
+   * Download chat export
+   * @param {string} format - Export format ('json', 'text', 'csv')
+   * @param {Object} filters - Optional filters
+   */
+  downloadExport(format = 'text', filters = {}) {
+    let content, filename, mimeType;
+    
+    switch (format) {
+      case 'json':
+        content = this.exportToJSON(filters);
+        filename = `chat_export_${Date.now()}.json`;
+        mimeType = 'application/json';
+        break;
+      case 'csv':
+        content = this.exportToCSV(filters);
+        filename = `chat_export_${Date.now()}.csv`;
+        mimeType = 'text/csv';
+        break;
+      case 'text':
+      default:
+        content = this.exportToText(filters);
+        filename = `chat_export_${Date.now()}.txt`;
+        mimeType = 'text/plain';
+        break;
+    }
+    
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+  
+  /**
+   * Search chat history
+   * @param {string} query - Search query
+   * @param {Object} options - Search options
+   * @returns {Array} Matching messages
+   */
+  searchHistory(query, options = {}) {
+    const caseSensitive = options.caseSensitive || false;
+    const searchTerm = caseSensitive ? query : query.toLowerCase();
+    
+    return this.chatHistory.filter(msg => {
+      const messageText = caseSensitive ? msg.message : msg.message.toLowerCase();
+      const nameText = caseSensitive ? msg.fromName : msg.fromName.toLowerCase();
+      
+      if (options.searchInMessage !== false && messageText.includes(searchTerm)) {
+        return true;
+      }
+      
+      if (options.searchInName && nameText.includes(searchTerm)) {
+        return true;
+      }
+      
+      return false;
+    });
+  }
+  
+  /**
+   * Get statistics about chat history
+   * @returns {Object} Chat statistics
+   */
+  getStatistics() {
+    const stats = {
+      totalMessages: this.chatHistory.length,
+      byType: {},
+      bySource: {},
+      byChannel: {},
+      uniqueSenders: new Set(),
+      dateRange: {
+        oldest: null,
+        newest: null
+      }
+    };
+    
+    for (const msg of this.chatHistory) {
+      // Count by type
+      const typeName = this.getChatTypeName(msg.type);
+      stats.byType[typeName] = (stats.byType[typeName] || 0) + 1;
+      
+      // Count by source
+      const sourceName = this.getSourceTypeName(msg.sourceType);
+      stats.bySource[sourceName] = (stats.bySource[sourceName] || 0) + 1;
+      
+      // Count by channel
+      stats.byChannel[msg.channel] = (stats.byChannel[msg.channel] || 0) + 1;
+      
+      // Unique senders
+      stats.uniqueSenders.add(msg.fromUUID);
+      
+      // Date range
+      if (!stats.dateRange.oldest || msg.timestamp < stats.dateRange.oldest) {
+        stats.dateRange.oldest = msg.timestamp;
+      }
+      if (!stats.dateRange.newest || msg.timestamp > stats.dateRange.newest) {
+        stats.dateRange.newest = msg.timestamp;
+      }
+    }
+    
+    stats.uniqueSenders = stats.uniqueSenders.size;
+    
+    return stats;
+  }
+  
+  /**
+   * Get chat type name
+   * @param {number} type - Chat type
+   * @returns {string} Type name
+   */
+  getChatTypeName(type) {
+    const names = Object.keys(ChatType);
+    for (const name of names) {
+      if (ChatType[name] === type) {
+        return name;
+      }
+    }
+    return 'UNKNOWN';
+  }
+  
+  /**
+   * Get source type name
+   * @param {number} type - Source type
+   * @returns {string} Type name
+   */
+  getSourceTypeName(type) {
+    const names = Object.keys(ChatSourceType);
+    for (const name of names) {
+      if (ChatSourceType[name] === type) {
+        return name;
+      }
+    }
+    return 'UNKNOWN';
+  }
+  
+  /**
+   * Import chat history from JSON
+   * @param {string} jsonData - JSON string of chat history
+   */
+  importFromJSON(jsonData) {
+    try {
+      const imported = JSON.parse(jsonData);
+      
+      if (!Array.isArray(imported)) {
+        throw new Error('Invalid format: expected array');
+      }
+      
+      for (const msg of imported) {
+        this.addToHistory(msg);
+      }
+      
+      console.log(`Imported ${imported.length} messages`);
+    } catch (error) {
+      console.error('Failed to import chat history:', error);
+      throw error;
     }
   }
 }
