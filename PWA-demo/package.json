@@ -7,8 +7,10 @@
     "dev": "npx http-server -p 8000 -c-1",
     "serve": "npx http-server -p 8000",
     "deploy": "vercel --prod",
+
     "test": "node tests/phase2/avatar.test.js && node tests/phase2/objects-extended.test.js && node tests/phase2/inventory-core.test.js && node tests/phase2/inventory-ops.test.js && node tests/phase2/inventory-types.test.js && node tests/phase2/chat-extended.test.js && node tests/phase2/groups.test.js && node tests/phase2/friends-extended.test.js",
     "lint": "node -c js/avatar.js && node -c js/objects-extended.js && node -c js/inventory-core.js && node -c js/inventory-ops.js && node -c js/inventory-types.js && node -c js/chat-extended.js && node -c js/groups.js && node -c js/friends-extended.js"
+
   },
   "keywords": [
     "pwa",
@@ -30,6 +32,20 @@
   "engines": {
     "node": ">=14.0.0"
   },
-  "devDependencies": {},
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "js/phase2/*.js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  },
   "dependencies": {}
 }

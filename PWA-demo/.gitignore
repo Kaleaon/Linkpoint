@@ -41,3 +41,4 @@ temp/
 # User data (for local testing)
 test-data/
 user-data/
+node_modules/

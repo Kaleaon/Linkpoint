@@ -82,6 +82,10 @@
             <span class="nav-icon">👥</span>
             <span class="nav-text">Friends</span>
           </a></li>
+          <li><a href="#" data-view="groups" class="nav-item">
+            <span class="nav-icon">👨‍👨‍👧‍👦</span>
+            <span class="nav-text">Groups</span>
+          </a></li>
           <li><a href="#" data-view="teleport" class="nav-item">
             <span class="nav-icon">📍</span>
             <span class="nav-text">Teleport</span>
@@ -144,6 +148,21 @@
               <div class="help-text">
                 <p><small>Don't have an account? <a href="https://secondlife.com/my/account/request.php" target="_blank" rel="noopener">Sign up for Second Life</a></small></p>
               </div>
+              
+              <!-- CORS Status Info -->
+              <div class="cors-status-info" id="cors-status-info" style="margin-top: 1rem;">
+                <details>
+                  <summary style="cursor: pointer; color: var(--text-secondary); font-size: 0.875rem;">
+                    <span id="cors-env-name">Connection Status</span> ▼
+                  </summary>
+                  <div style="margin-top: 0.5rem; padding: 0.75rem; background: var(--surface-light); border-radius: 0.5rem; font-size: 0.875rem;">
+                    <p><strong>Environment:</strong> <span id="cors-env-type">Detecting...</span></p>
+                    <p><strong>CORS Support:</strong> <span id="cors-support-type">Checking...</span></p>
+                    <p><strong>Status:</strong> <span id="cors-status-message">Ready</span></p>
+                    <div id="cors-recommendations" style="margin-top: 0.5rem;"></div>
+                  </div>
+                </details>
+              </div>
             </div>
           </div>
         </section>
@@ -183,6 +202,22 @@
                 <div class="stat-item">
                   <span class="stat-label">Objects:</span>
                   <span id="object-counter" class="stat-value">0</span>
+                </div>
+              </div>
+              
+              <!-- Voice Controls Overlay -->
+              <div class="voice-controls-overlay">
+                <div class="voice-status" id="voice-status">
+                  <span class="voice-icon" id="voice-icon">🔇</span>
+                  <span class="voice-text" id="voice-text">Voice: Off</span>
+                </div>
+                <div class="voice-buttons">
+                  <button class="voice-btn" id="voice-toggle-btn" title="Enable Voice">
+                    <span>🎤</span>
+                  </button>
+                  <button class="voice-btn" id="voice-mute-btn" title="Mute" style="display: none;">
+                    <span id="mute-icon">🔇</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -291,6 +326,75 @@
                 <h3 class="section-title">Offline</h3>
                 <div id="friends-offline" class="friends-list">
                   <p class="placeholder-text">No offline friends</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Groups View -->
+        <section id="groups-view" class="view-container">
+          <div class="view-content">
+            <div class="groups-header">
+              <h2>Groups</h2>
+              <button class="btn btn-small" id="create-group-btn">Create Group</button>
+            </div>
+            
+            <div id="groups-container" class="groups-container">
+              <!-- My Groups List -->
+              <div class="groups-section">
+                <h3 class="section-title">My Groups</h3>
+                <div id="groups-list" class="groups-list">
+                  <p class="placeholder-text">No groups</p>
+                </div>
+              </div>
+              
+              <!-- Group Details -->
+              <div id="group-details" class="group-details" style="display: none;">
+                <div class="group-detail-header">
+                  <h3 id="group-detail-name">Group Name</h3>
+                  <button class="btn btn-small" id="leave-group-btn">Leave Group</button>
+                </div>
+                
+                <div class="group-tabs">
+                  <button class="group-tab active" data-tab="info">Info</button>
+                  <button class="group-tab" data-tab="members">Members</button>
+                  <button class="group-tab" data-tab="roles">Roles</button>
+                  <button class="group-tab" data-tab="notices">Notices</button>
+                </div>
+                
+                <div class="group-tab-content">
+                  <!-- Group Info Tab -->
+                  <div id="group-info-tab" class="group-tab-panel active">
+                    <div class="group-info-content">
+                      <p><strong>Charter:</strong></p>
+                      <p id="group-charter" class="group-charter">Loading...</p>
+                      <p><strong>Founder:</strong> <span id="group-founder">Loading...</span></p>
+                      <p><strong>Membership Fee:</strong> L$<span id="group-fee">0</span></p>
+                      <p><strong>Open Enrollment:</strong> <span id="group-enrollment">No</span></p>
+                    </div>
+                  </div>
+                  
+                  <!-- Group Members Tab -->
+                  <div id="group-members-tab" class="group-tab-panel">
+                    <div id="group-members-list" class="members-list">
+                      <p class="placeholder-text">Loading members...</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Group Roles Tab -->
+                  <div id="group-roles-tab" class="group-tab-panel">
+                    <div id="group-roles-list" class="roles-list">
+                      <p class="placeholder-text">Loading roles...</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Group Notices Tab -->
+                  <div id="group-notices-tab" class="group-tab-panel">
+                    <div id="group-notices-list" class="notices-list">
+                      <p class="placeholder-text">No notices</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -529,6 +633,7 @@
   <!-- Utilities first -->
   <script src="js/utils.js"></script>
   <script src="js/storage-manager.js"></script>
+  <script src="js/cors-handler.js"></script>
   
   <!-- Core protocol and SL implementation -->
   <script src="js/protocol.js"></script>
@@ -562,8 +667,11 @@
   <script src="js/world.js"></script>
   <script src="js/chat.js"></script>
   <script src="js/voice.js"></script>
+  <script src="js/sl-voice-bridge.js"></script>
   <script src="js/inventory.js"></script>
   <script src="js/friends.js"></script>
+  <script src="js/phase2/groups.js"></script>
+  <script src="js/groups-ui.js"></script>
   <script src="js/teleport.js"></script>
   <script src="js/search.js"></script>
   <script src="js/notifications.js"></script>

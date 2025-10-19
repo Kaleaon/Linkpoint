@@ -11,6 +11,7 @@ class LinkpointApp {
     this.voice = null;
     this.inventory = null;
     this.friends = null;
+    this.groups = null;
     this.teleport = null;
     this.search = null;
     this.preferences = null;
@@ -39,6 +40,7 @@ class LinkpointApp {
     this.voice = new VoiceManager(this.protocol, this.auth);
     this.inventory = new InventoryManager(this.protocol, this.auth);
     this.friends = new FriendsManager(this.protocol, this.auth);
+    this.groups = new GroupsUIManager(this.protocol, this.auth);
     this.teleport = new TeleportManager(this.protocol, this.auth, this.world);
     this.search = new SearchManager(this.protocol);
     this.notifications = new NotificationsManager(this.protocol, this.auth, this.preferences);
@@ -68,6 +70,7 @@ class LinkpointApp {
     await this.voice.init();
     await this.inventory.init();
     await this.friends.init();
+    this.groups.init();
     await this.teleport.init();
     await this.search.init();
     await this.notifications.init();
@@ -78,6 +81,9 @@ class LinkpointApp {
 
     // Setup PWA install prompt
     this.setupInstallPrompt();
+    
+    // Update CORS status display
+    this.updateCORSStatus();
 
     // Check for updates
     this.checkForUpdates();
@@ -167,6 +173,82 @@ class LinkpointApp {
     notificationsBtn?.addEventListener('click', () => {
       this.showNotifications();
     });
+    
+    // Setup voice controls
+    this.setupVoiceControls();
+    
+    // Setup groups loading when view is switched
+    this.on('view_changed', (view) => {
+      if (view === 'groups' && this.groups) {
+        this.groups.loadGroups();
+      }
+    });
+  }
+  
+  /**
+   * Setup voice controls UI
+   */
+  setupVoiceControls() {
+    const voiceToggleBtn = document.getElementById('voice-toggle-btn');
+    const voiceMuteBtn = document.getElementById('voice-mute-btn');
+    const voiceStatus = document.getElementById('voice-status');
+    const voiceIcon = document.getElementById('voice-icon');
+    const voiceText = document.getElementById('voice-text');
+    const muteIcon = document.getElementById('mute-icon');
+    
+    // Voice toggle button
+    if (voiceToggleBtn) {
+      voiceToggleBtn.addEventListener('click', async () => {
+        if (this.voice.isEnabled()) {
+          this.voice.disable();
+          voiceToggleBtn.innerHTML = '<span>🎤</span>';
+          voiceToggleBtn.title = 'Enable Voice';
+          if (voiceMuteBtn) voiceMuteBtn.style.display = 'none';
+          if (voiceIcon) voiceIcon.textContent = '🔇';
+          if (voiceText) voiceText.textContent = 'Voice: Off';
+        } else {
+          const enabled = await this.voice.enable();
+          if (enabled) {
+            voiceToggleBtn.innerHTML = '<span>🎤</span>';
+            voiceToggleBtn.title = 'Disable Voice';
+            if (voiceMuteBtn) voiceMuteBtn.style.display = 'inline-block';
+            if (voiceIcon) voiceIcon.textContent = '🔊';
+            if (voiceText) voiceText.textContent = 'Voice: On';
+          }
+        }
+      });
+    }
+    
+    // Voice mute button
+    if (voiceMuteBtn) {
+      voiceMuteBtn.addEventListener('click', () => {
+        const muted = this.voice.toggleMute();
+        if (muteIcon) {
+          muteIcon.textContent = muted ? '🔇' : '🔊';
+        }
+        if (voiceIcon) {
+          voiceIcon.textContent = muted ? '🔇' : '🔊';
+        }
+        voiceMuteBtn.title = muted ? 'Unmute' : 'Mute';
+      });
+    }
+    
+    // Voice events
+    if (this.voice) {
+      this.voice.on('voice_enabled', () => {
+        if (voiceStatus) voiceStatus.classList.add('active');
+        Utils.showToast('Voice chat enabled', 'success');
+      });
+      
+      this.voice.on('voice_disabled', () => {
+        if (voiceStatus) voiceStatus.classList.remove('active');
+        Utils.showToast('Voice chat disabled', 'info');
+      });
+      
+      this.voice.on('voice_error', (error) => {
+        Utils.showToast(`Voice error: ${error.message || error}`, 'error');
+      });
+    }
   }
 
   /**
@@ -467,6 +549,69 @@ class LinkpointApp {
       } catch (error) {
         console.error('Update check failed:', error);
       }
+    }
+  }
+  
+  /**
+   * Update CORS status display
+   */
+  updateCORSStatus() {
+    if (!window.corsHandler) {
+      console.warn('[App] CORS handler not available');
+      return;
+    }
+    
+    const status = window.corsHandler.displayStatus();
+    
+    // Update UI elements
+    const envName = document.getElementById('cors-env-name');
+    const envType = document.getElementById('cors-env-type');
+    const supportType = document.getElementById('cors-support-type');
+    const statusMessage = document.getElementById('cors-status-message');
+    const recommendations = document.getElementById('cors-recommendations');
+    
+    if (envName) {
+      envName.textContent = `${status.environment.name}`;
+    }
+    
+    if (envType) {
+      envType.textContent = status.environment.name;
+    }
+    
+    if (supportType) {
+      let supportText = status.environment.corsSupport;
+      let emoji = '✅';
+      
+      if (status.environment.needsProxy) {
+        emoji = '⚠️';
+        supportText += ' (using public proxy)';
+      }
+      
+      supportType.innerHTML = `${emoji} ${supportText}`;
+    }
+    
+    if (statusMessage) {
+      if (status.environment.needsProxy) {
+        statusMessage.innerHTML = '⚠️ Using public CORS proxy (may be slower)';
+      } else {
+        statusMessage.innerHTML = '✅ Optimal connection (no proxy needed)';
+      }
+    }
+    
+    if (recommendations && status.solution) {
+      let html = `<p><strong>💡 ${status.solution.primary}</strong></p>`;
+      html += `<p style="font-size: 0.8rem; color: var(--text-secondary);">${status.solution.instructions}</p>`;
+      
+      if (status.solution.alternatives.length > 0) {
+        html += `<p style="font-size: 0.8rem; margin-top: 0.5rem;"><strong>Alternatives:</strong></p>`;
+        html += '<ul style="font-size: 0.8rem; margin: 0; padding-left: 1.5rem;">';
+        status.solution.alternatives.forEach(alt => {
+          html += `<li>${alt}</li>`;
+        });
+        html += '</ul>';
+      }
+      
+      recommendations.innerHTML = html;
     }
   }
 
