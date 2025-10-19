@@ -1,9 +1,9 @@
 package com.lumiyaviewer.lumiya.res.anim
 
-import android.content.res.AssetManager
 import com.google.common.collect.ImmutableSet
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.LumiyaApp
+import com.lumiyaviewer.lumiya.memory.MemoryManager
 import com.lumiyaviewer.lumiya.react.Subscription
 import com.lumiyaviewer.lumiya.render.avatar.AnimationData
 import com.lumiyaviewer.lumiya.res.ResourceManager
@@ -15,259 +15,183 @@ import com.lumiyaviewer.lumiya.slproto.users.manager.assets.AssetKey
 import com.lumiyaviewer.lumiya.slproto.users.manager.assets.AssetResponseCacher
 import java.io.ByteArrayInputStream
 import java.io.IOException
-import java.util.Arrays
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 
-object AnimationCache extends ResourceMemoryCache<UUID, AnimationData> {
-    private ImmutableSet<String> assetAnimations
-    /* access modifiers changed from: private */
-    AtomicReference<AssetResponseCacher> assetResponseCacher
+/**
+ * Cache for animation data
+ * Loads animations from assets or downloads them
+ */
+object AnimationCache : ResourceMemoryCache<UUID, AnimationData>(MemoryManager.getInstance()) {
+    
+    private val assetAnimations: ImmutableSet<String>
+    private val assetResponseCacher = AtomicReference<AssetResponseCacher?>()
 
-    private object AssetLoadRequest extends ResourceRequest<UUID, AnimationData> implements Runnable {
-        private String assetName
+    /**
+     * Request to load animation from asset bundle
+     */
+    private class AssetLoadRequest(
+        uuid: UUID,
+        manager: ResourceManager<UUID, AnimationData>,
+        private val assetName: String
+    ) : ResourceRequest<UUID, AnimationData>(uuid, manager), Runnable {
 
-        AssetLoadRequest(UUID uuid, ResourceManager<UUID, AnimationData> resourceManager, String str) {
-            super(uuid, resourceManager)
-            this.assetName = str
-        }
-
-        fun cancelRequest(): Unit {
+        override fun cancelRequest() {
             LoaderExecutor.getInstance().remove(this)
             super.cancelRequest()
         }
 
-        fun execute(): Unit {
+        override fun execute() {
             LoaderExecutor.getInstance().execute(this)
         }
 
-        /* JADX WARNING: Code restructure failed: missing block: B:24:?, code lost:
-            r2.close()
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:25:0x0067, code lost:
-            r0 = move-exception
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:26:0x0068, code lost:
-            com.lumiyaviewer.lumiya.Debug.Warning(r0)
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:31:?, code lost:
-            r3.close()
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:33:0x0074, code lost:
-            r1 = move-exception
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:34:0x0075, code lost:
-            com.lumiyaviewer.lumiya.Debug.Warning(r1)
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:35:0x0079, code lost:
-            r0 = th
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:40:0x0082, code lost:
-            r0 = e
-         */
-        /* JADX WARNING: Code restructure failed: missing block: B:41:0x0083, code lost:
-            r2 = r3
-         */
-        /* JADX WARNING: Failed to process nested try/catch */
-        /* JADX WARNING: Removed duplicated region for block: B:23:0x0063 A[SYNTHETIC, Splitter:B:23:0x0063] */
-        /* JADX WARNING: Removed duplicated region for block: B:30:0x0070 A[SYNTHETIC, Splitter:B:30:0x0070] */
-        /* JADX WARNING: Removed duplicated region for block: B:35:0x0079 A[ExcHandler: all (th java.lang.Throwable), Splitter:B:5:0x0023] */
-        /* Code decompiled incorrectly, please refer to instructions dump. */
-        fun run(): Unit {
-            /*
-                r6 = this
-                r2 = 0
-                android.content.res.AssetManager r0 = com.lumiyaviewer.lumiya.LumiyaApp.getAssetManager()
-                if (r0 == 0) goto L_0x0087
-                java.lang.StringBuilder r1 = new java.lang.StringBuilder     // Catch:{ IOException -> 0x005c, all -> 0x006c }
-                r1.<init>()     // Catch:{ IOException -> 0x005c, all -> 0x006c }
-                java.lang.String r3 = "anims/"
-                java.lang.StringBuilder r1 = r1.append(r3)     // Catch:{ IOException -> 0x005c, all -> 0x006c }
-                java.lang.String r3 = r6.assetName     // Catch:{ IOException -> 0x005c, all -> 0x006c }
-                java.lang.StringBuilder r1 = r1.append(r3)     // Catch:{ IOException -> 0x005c, all -> 0x006c }
-                java.lang.String r1 = r1.toString()     // Catch:{ IOException -> 0x005c, all -> 0x006c }
-                java.io.InputStream r3 = r0.open(r1)     // Catch:{ IOException -> 0x005c, all -> 0x006c }
-                if (r3 == 0) goto L_0x0085
-                com.lumiyaviewer.lumiya.render.avatar.AnimationData r1 = new com.lumiyaviewer.lumiya.render.avatar.AnimationData     // Catch:{ IOException -> 0x007e, all -> 0x0079 }
-                java.lang.Object r0 = r6.getParams()     // Catch:{ IOException -> 0x007e, all -> 0x0079 }
-                java.util.UUID r0 = (java.util.UUID) r0     // Catch:{ IOException -> 0x007e, all -> 0x0079 }
-                r1.<init>(r0, r3)     // Catch:{ IOException -> 0x007e, all -> 0x0079 }
-                int r0 = r1.getPriority()     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
-                r2 = 6
-                if (r0 < r2) goto L_0x004e
-                java.lang.String r0 = "Animation: priority %d loaded from asset %s"
-                r2 = 2
-                java.lang.Object[] r2 = new java.lang.Object[r2]     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
-                int r4 = r1.getPriority()     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
-                java.lang.Integer r4 = java.lang.Integer.valueOf(r4)     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
-                r5 = 0
-                r2[r5] = r4     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
-                java.lang.String r4 = r6.assetName     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
-                r5 = 1
-                r2[r5] = r4     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
-                com.lumiyaviewer.lumiya.Debug.Printf(r0, r2)     // Catch:{ IOException -> 0x0082, all -> 0x0079 }
-            L_0x004e:
-                if (r3 == 0) goto L_0x0053
-                r3.close()     // Catch:{ IOException -> 0x0057 }
-            L_0x0053:
-                r6.completeRequest(r1)
+        override fun run() {
+            val assetManager = LumiyaApp.getAssetManager() ?: run {
+                completeRequest(null)
                 return
-            L_0x0057:
-                r0 = move-exception
-                com.lumiyaviewer.lumiya.Debug.Warning(r0)
-                goto L_0x0053
-            L_0x005c:
-                r0 = move-exception
-                r1 = r2
-            L_0x005e:
-                com.lumiyaviewer.lumiya.Debug.Warning(r0)     // Catch:{ all -> 0x007b }
-                if (r2 == 0) goto L_0x0053
-                r2.close()     // Catch:{ IOException -> 0x0067 }
-                goto L_0x0053
-            L_0x0067:
-                r0 = move-exception
-                com.lumiyaviewer.lumiya.Debug.Warning(r0)
-                goto L_0x0053
-            L_0x006c:
-                r0 = move-exception
-                r3 = r2
-            L_0x006e:
-                if (r3 == 0) goto L_0x0073
-                r3.close()     // Catch:{ IOException -> 0x0074 }
-            L_0x0073:
-                throw r0
-            L_0x0074:
-                r1 = move-exception
-                com.lumiyaviewer.lumiya.Debug.Warning(r1)
-                goto L_0x0073
-            L_0x0079:
-                r0 = move-exception
-                goto L_0x006e
-            L_0x007b:
-                r0 = move-exception
-                r3 = r2
-                goto L_0x006e
-            L_0x007e:
-                r0 = move-exception
-                r1 = r2
-                r2 = r3
-                goto L_0x005e
-            L_0x0082:
-                r0 = move-exception
-                r2 = r3
-                goto L_0x005e
-            L_0x0085:
-                r1 = r2
-                goto L_0x004e
-            L_0x0087:
-                r1 = r2
-                goto L_0x0053
-            */
-            throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.anim.AnimationCache.AssetLoadRequest.run():void")
+            }
+            
+            var animData: AnimationData? = null
+            try {
+                val path = "anims/$assetName"
+                assetManager.open(path)?.use { inputStream ->
+                    animData = AnimationData(getParams() as UUID, inputStream)
+                    
+                    animData?.let { data ->
+                        if (data.getPriority() >= 6) {
+                            Debug.Printf(
+                                "Animation: priority %d loaded from asset %s",
+                                data.getPriority(),
+                                assetName
+                            )
+                        }
+                    }
+                }
+            } catch (e: IOException) {
+                Debug.Warning(e)
+            }
+            
+            completeRequest(animData)
         }
     }
 
-    private object DownloadRequest extends ResourceRequest<UUID, AnimationData> implements Subscription.OnData<AssetData>, Subscription.OnError {
-        private Subscription<AssetKey, AssetData> assetSubscription
+    /**
+     * Request to download animation from asset server
+     */
+    private class DownloadRequest(
+        uuid: UUID,
+        manager: ResourceManager<UUID, AnimationData>
+    ) : ResourceRequest<UUID, AnimationData>(uuid, manager),
+        Subscription.OnData<AssetData>,
+        Subscription.OnError {
+        
+        private var assetSubscription: Subscription<AssetKey, AssetData>? = null
 
-        DownloadRequest(UUID uuid, ResourceManager<UUID, AnimationData> resourceManager) {
-            super(uuid, resourceManager)
-        }
-
-        fun cancelRequest(): Unit {
-            Subscription<AssetKey, AssetData> subscription = this.assetSubscription
-            if (subscription != null) {
-                subscription.unsubscribe()
-            }
+        override fun cancelRequest() {
+            assetSubscription?.unsubscribe()
             super.cancelRequest()
         }
 
-        fun completeRequest(animationData: AnimationData): Unit {
-            Subscription<AssetKey, AssetData> subscription = this.assetSubscription
-            if (subscription != null) {
-                subscription.unsubscribe()
-            }
-            super.completeRequest(animationData)
+        override fun completeRequest(resource: AnimationData?) {
+            assetSubscription?.unsubscribe()
+            super.completeRequest(resource)
         }
 
-        fun execute(): Unit {
-            AssetResponseCacher assetResponseCacher = (AssetResponseCacher) AnimationCache.this.assetResponseCacher.get()
-            if (assetResponseCacher != null) {
-                this.assetSubscription = assetResponseCacher.getPool().subscribe(AssetKey.createAssetKey((UUID) null, (UUID) null, (UUID) getParams(), 20), LoaderExecutor.getInstance(), this, this)
+        override fun execute() {
+            val cacher = AnimationCache.assetResponseCacher.get()
+            if (cacher != null) {
+                val key = AssetKey.createAssetKey(
+                    null,
+                    null,
+                    getParams() as UUID,
+                    20 // Animation asset type
+                )
+                assetSubscription = cacher.getPool().subscribe(
+                    key,
+                    LoaderExecutor.getInstance(),
+                    this,
+                    this
+                )
             } else {
-                completeRequest((AnimationData) null)
+                completeRequest(null)
             }
         }
 
-        fun onData(assetData: AssetData): Unit {
-            AnimationData animationData
-            if (assetData == null || assetData.getData() == null || assetData.getStatus() != 1) {
-                completeRequest((AnimationData) null)
+        override fun onData(assetData: AssetData?) {
+            if (assetData?.getData() == null || assetData.getStatus() != 1) {
+                completeRequest(null)
                 return
             }
-            ByteArrayInputStream byteArrayInputStream = ByteArrayInputStream(assetData.getData())
+            
+            var animData: AnimationData? = null
             try {
-                animationData = AnimationData((UUID) getParams(), byteArrayInputStream)
-                try {
-                    byteArrayInputStream.close()
-                } catch (IOException e) {
-                    e = e
-                    Debug.Warning(e)
-                    completeRequest(animationData)
+                ByteArrayInputStream(assetData.getData()).use { inputStream ->
+                    animData = AnimationData(getParams() as UUID, inputStream)
                 }
-            } catch (IOException e2) {
-                e = e2
-                animationData = null
+            } catch (e: IOException) {
                 Debug.Warning(e)
-                completeRequest(animationData)
             }
-            completeRequest(animationData)
+            
+            completeRequest(animData)
         }
 
-        fun onError(th: Throwable): Unit {
-            completeRequest((AnimationData) null)
+        override fun onError(throwable: Throwable) {
+            completeRequest(null)
         }
     }
 
-    private object InstanceHolder {
-        /* access modifiers changed from: private */
-        AnimationCache Instance = AnimationCache((AnimationCache) null)
-
+    init {
+        // Build set of available asset animations
+        val builder = ImmutableSet.builder<String>()
+        val assetManager = LumiyaApp.getAssetManager()
         
-    }
-
-    private AnimationCache() {
-        this.assetResponseCacher = new AtomicReference<>((Object) null)
-        ImmutableSet.Builder builder = ImmutableSet.builder()
-        AssetManager assetManager = LumiyaApp.getAssetManager()
         if (assetManager != null) {
             try {
-                String[] list = assetManager.list("anims")
-                if (list != null) {
-                    builder.addAll((Iterable) Arrays.asList(list))
+                val animFiles = assetManager.list("anims")
+                if (animFiles != null) {
+                    builder.addAll(animFiles.toList())
                 }
-            } catch (IOException e) {
+            } catch (e: IOException) {
                 Debug.Warning(e)
             }
         }
-        this.assetAnimations = builder.build()
+        
+        assetAnimations = builder.build()
     }
 
-    /* synthetic */ AnimationCache(AnimationCache animationCache) {
-        this()
+    /**
+     * Get singleton instance
+     */
+    fun getInstance(): AnimationCache = this
+
+    /**
+     * Create new animation load request
+     */
+    override fun CreateNewRequest(
+        params: UUID,
+        manager: ResourceManager<UUID, AnimationData>
+    ): ResourceRequest<UUID, AnimationData> {
+        val uuidString = params.toString()
+        
+        return if (assetAnimations.contains(uuidString)) {
+            AssetLoadRequest(params, manager, uuidString)
+        } else {
+            DownloadRequest(params, manager)
+        }
     }
 
-    fun getInstance(): AnimationCache {
-        return InstanceHolder.Instance
+    /**
+     * Set the asset response cacher for downloading animations
+     */
+    fun setAssetResponseCacher(cacher: AssetResponseCacher) {
+        assetResponseCacher.set(cacher)
     }
-
-    /* access modifiers changed from: protected */
-    fun CreateNewRequest(uuid: UUID, resourceManager: AnimationData>): ResourceRequest<UUID, AnimationData> {
-        String uuid2 = uuid.toString()
-        return this.assetAnimations.contains(uuid2) ? AssetLoadRequest(uuid, resourceManager, uuid2) : DownloadRequest(uuid, resourceManager)
-    }
-
-    fun setAssetResponseCacher(assetResponseCacher2: AssetResponseCacher): Unit {
-        this.assetResponseCacher.set(assetResponseCacher2)
+    
+    /**
+     * Estimate memory size of animation data
+     */
+    override fun estimateSize(resource: AnimationData): Long {
+        // Rough estimate: 1KB per animation
+        return 1024L
     }
 }

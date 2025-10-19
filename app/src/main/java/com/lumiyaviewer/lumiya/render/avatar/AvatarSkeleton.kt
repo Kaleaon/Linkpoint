@@ -1,237 +1,317 @@
 package com.lumiyaviewer.lumiya.render.avatar
 
 import android.opengl.Matrix
-import com.lumiyaviewer.lumiya.slproto.avatar.MeshIndex
-import com.lumiyaviewer.lumiya.slproto.avatar.SLAttachmentPoint
-import com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams
-import com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.AvatarParam
-import com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.DrivenParam
-import com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.ParamSet
-import com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.SkeletonParamDefinition
-import com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.SkeletonParamValue
-import com.lumiyaviewer.lumiya.slproto.avatar.SLBaseAvatar
-import com.lumiyaviewer.lumiya.slproto.avatar.SLDefaultSkeleton
-import com.lumiyaviewer.lumiya.slproto.avatar.SLSkeletonBone
-import com.lumiyaviewer.lumiya.slproto.avatar.SLSkeletonBoneID
-import com.lumiyaviewer.lumiya.slproto.avatar.SLVisualParamID
+import com.lumiyaviewer.lumiya.slproto.avatar.*
+import com.lumiyaviewer.lumiya.slproto.avatar.SLAvatarParams.*
 import com.lumiyaviewer.lumiya.slproto.mesh.MeshJointTranslations
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
-import java.util.Arrays
-import java.util.EnumMap
-import java.util.Map
-import java.util.Map.Entry
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.annotation.Nonnull
 
-object AvatarSkeleton extends SLDefaultSkeleton {
-    private SLSkeletonBone[] animatedBones = Array<SLSkeletonBone>(133)
-    private AttachmentPoint[] attachmentPoints = Array<AttachmentPoint>(56)
-    private float bodySize
-    private AtomicBoolean forceAnimate = AtomicBoolean(true)
-    private boolean hasExtendedBones
-    private Map<MeshIndex, float[]> partMorphParams = EnumMap(MeshIndex.class)
-    private float pelvisOffset
-    private float pelvisToFoot
+/**
+ * Avatar skeleton with shape morphing and attachment points
+ * Manages bone hierarchy and visual parameters
+ */
+class AvatarSkeleton(
+    avatarShapeParams: AvatarShapeParams,
+    meshJointTranslations: MeshJointTranslations,
+    hasExtendedBones: Boolean
+) : SLDefaultSkeleton() {
+    
+    private val animatedBones = Array<SLSkeletonBone?>(133) { null }
+    private val attachmentPoints = Array<AttachmentPoint?>(56) { null }
+    private val bodySize: Float
+    private val forceAnimate = AtomicBoolean(true)
+    private val hasExtendedBones: Boolean
+    private val partMorphParams = EnumMap<MeshIndex, FloatArray>(MeshIndex::class.java)
+    private val pelvisOffset: Float
+    private val pelvisToFoot: Float
 
-    private object AttachmentPoint {
-        SLSkeletonBone bone
-        float[] matrix
-        SLAttachmentPoint point
-
-        private AttachmentPoint(SLSkeletonBone sLSkeletonBone, SLAttachmentPoint sLAttachmentPoint) {
-            this.matrix = FloatArray(16)
-            this.bone = sLSkeletonBone
-            this.point = sLAttachmentPoint
-        }
-
-        /* synthetic */ AttachmentPoint(SLSkeletonBone sLSkeletonBone, SLAttachmentPoint sLAttachmentPoint, AttachmentPoint attachmentPoint) {
-            this(sLSkeletonBone, sLAttachmentPoint)
-        }
+    /**
+     * Attachment point for worn objects
+     */
+    private class AttachmentPoint(
+        val bone: SLSkeletonBone?,
+        val point: SLAttachmentPoint
+    ) {
+        val matrix = FloatArray(16)
     }
 
-    AvatarSkeleton(@Nonnull AvatarShapeParams avatarShapeParams, @Nonnull MeshJointTranslations meshJointTranslations, boolean z) {
-        this.hasExtendedBones = z
+    init {
+        this.hasExtendedBones = hasExtendedBones
         prepareSkeleton()
-        for (Entry entry : this.bones.entrySet()) {
-            i = ((SLSkeletonBoneID) entry.getKey()).animatedIndex
-            if (i >= 0 && i < 133) {
-                this.animatedBones[i] = (SLSkeletonBone) entry.getValue()
+        
+        // Map bones to animated bone array
+        for ((boneId, bone) in bones) {
+            val index = boneId.animatedIndex
+            if (index in 0..132) {
+                animatedBones[index] = bone
             }
         }
-        Map enumMap = EnumMap(SLSkeletonBoneID.class)
-        SLBaseAvatar instance = SLBaseAvatar.getInstance()
+        
+        // Initialize skeleton param values
+        val skeletonParams = EnumMap<SLSkeletonBoneID, SkeletonParamValue>(SLSkeletonBoneID::class.java)
+        val avatar = SLBaseAvatar.getInstance()
+        
         applyJointTranslations(meshJointTranslations)
-        this.pelvisOffset = meshJointTranslations.pelvisOffset
-        for (MeshIndex meshIndex : MeshIndex.VALUES) {
-            obj = new float[instance.getMeshEntry(meshIndex).polyMesh.getNumMorphs()]
-            Arrays.fill(obj, 0.0f)
-            this.partMorphParams.put(meshIndex, obj)
+        pelvisOffset = meshJointTranslations.pelvisOffset
+        
+        // Initialize morph parameters for each mesh
+        for (meshIndex in MeshIndex.VALUES) {
+            val numMorphs = avatar.getMeshEntry(meshIndex).polyMesh.getNumMorphs()
+            val morphArray = FloatArray(numMorphs)
+            Arrays.fill(morphArray, 0.0f)
+            partMorphParams[meshIndex] = morphArray
         }
-        for (Object obj2 : SLSkeletonBoneID.VALUES) {
-            enumMap.put(obj2, SkeletonParamValue(LLVector3(), LLVector3()))
-            ((SkeletonParamValue) enumMap.get(obj2)).scale.set(1.0f, 1.0f, 1.0f)
-            ((SkeletonParamValue) enumMap.get(obj2)).offset.set(0.0f, 0.0f, 0.0f)
+        
+        // Initialize skeleton param values
+        for (boneId in SLSkeletonBoneID.VALUES) {
+            val paramValue = SkeletonParamValue(LLVector3(), LLVector3())
+            paramValue.scale.set(1.0f, 1.0f, 1.0f)
+            paramValue.offset.set(0.0f, 0.0f, 0.0f)
+            skeletonParams[boneId] = paramValue
         }
-        int paramCount = avatarShapeParams.getParamCount()
-        for (int i2 = 0; i2 < paramCount; i2++) {
-            ParamSet paramSet = SLAvatarParams.paramDefs[i2]
-            for (AvatarParam avatarParam : paramSet.params) {
-                float paramValue = ((((float) avatarShapeParams.getParamValue(i2)) * (avatarParam.maxValue - avatarParam.minValue)) / 255.0f) + avatarParam.minValue
-                ApplyMorphParam(instance, enumMap, avatarParam, paramSet.name, paramValue)
-                if (avatarParam.drivenParams != null) {
-                    for (DrivenParam drivenParam : avatarParam.drivenParams) {
-                        ParamSet paramSet2 = (ParamSet) SLAvatarParams.paramByIDs.get(Integer.valueOf(drivenParam.drivenID))
-                        if (paramSet2 != null) {
-                            for (AvatarParam avatarParam2 : paramSet2.params) {
-                                ApplyMorphParam(instance, enumMap, avatarParam2, paramSet2.name, getDrivenWeight(paramValue, avatarParam, drivenParam, avatarParam2))
-                            }
-                        }
+        
+        // Apply visual parameters from shape
+        val paramCount = avatarShapeParams.getParamCount()
+        for (i in 0 until paramCount) {
+            val paramSet = SLAvatarParams.paramDefs[i]
+            
+            for (avatarParam in paramSet.params) {
+                val rawValue = avatarShapeParams.getParamValue(i).toFloat()
+                val paramValue = ((rawValue * (avatarParam.maxValue - avatarParam.minValue)) / 255.0f) + avatarParam.minValue
+                
+                ApplyMorphParam(avatar, skeletonParams, avatarParam, paramSet.name, paramValue)
+                
+                // Apply driven parameters
+                avatarParam.drivenParams?.forEach { drivenParam ->
+                    val drivenParamSet = SLAvatarParams.paramByIDs[drivenParam.drivenID]
+                    drivenParamSet?.params?.forEach { drivenAvatarParam ->
+                        val drivenWeight = getDrivenWeight(paramValue, avatarParam, drivenParam, drivenAvatarParam)
+                        ApplyMorphParam(avatar, skeletonParams, drivenAvatarParam, drivenParamSet.name, drivenWeight)
                     }
                 }
             }
         }
-        for (Object obj22 : SLSkeletonBoneID.VALUES) {
-            ((SLSkeletonBone) this.bones.get(obj22)).deformHierarchy(((SkeletonParamValue) enumMap.get(obj22)).offset, ((SkeletonParamValue) enumMap.get(obj22)).scale)
+        
+        // Apply deformations to skeleton
+        for (boneId in SLSkeletonBoneID.VALUES) {
+            val bone = bones[boneId]
+            val params = skeletonParams[boneId]
+            bone?.deformHierarchy(params?.offset, params?.scale)
         }
-        this.pelvisToFoot = super.getPelvisToFoot()
-        this.bodySize = super.getBodySize()
-        int i3 = 0
-        while (true) {
-            i = i3
-            if (i < 56) {
-                SLAttachmentPoint sLAttachmentPoint = SLAttachmentPoint.attachmentPoints[i]
-                if (!(sLAttachmentPoint == null || sLAttachmentPoint.isHUD)) {
-                    SLSkeletonBoneID sLSkeletonBoneID = sLAttachmentPoint.bone
-                    if (sLSkeletonBoneID != null) {
-                        SLSkeletonBone sLSkeletonBone = (SLSkeletonBone) this.bones.get(sLSkeletonBoneID)
-                        if (sLSkeletonBone != null) {
-                            this.attachmentPoints[i] = AttachmentPoint(sLSkeletonBone, sLAttachmentPoint, null)
-                        }
-                    } else {
-                        this.attachmentPoints[i] = AttachmentPoint(null, sLAttachmentPoint, null)
-                    }
-                }
-                i3 = i + 1
-            } else {
-                updateAttachmentMatrix()
-                return
+        
+        pelvisToFoot = super.getPelvisToFoot()
+        bodySize = super.getBodySize()
+        
+        // Initialize attachment points
+        for (i in 0 until 56) {
+            val attachPoint = SLAttachmentPoint.attachmentPoints[i]
+            
+            if (attachPoint != null && !attachPoint.isHUD) {
+                val bone = attachPoint.bone?.let { bones[it] }
+                attachmentPoints[i] = AttachmentPoint(bone, attachPoint)
             }
         }
+        
+        updateAttachmentMatrix()
     }
 
-    private fun ApplyMorphParam(sLBaseAvatar: SLBaseAvatar, map: SkeletonParamValue>, avatarParam: AvatarParam, sLVisualParamID: SLVisualParamID, f: Float): Unit {
+    /**
+     * Apply morph parameter to avatar
+     */
+    private fun ApplyMorphParam(
+        avatar: SLBaseAvatar,
+        skeletonParams: MutableMap<SLSkeletonBoneID, SkeletonParamValue>,
+        avatarParam: AvatarParam,
+        paramId: SLVisualParamID,
+        value: Float
+    ) {
+        // Apply mesh morphs
         if (avatarParam.morph && avatarParam.meshIndex != null) {
-            float[] fArr = (float[]) this.partMorphParams.get(avatarParam.meshIndex)
-            if (fArr != null) {
-                int morphIndex = sLBaseAvatar.getMeshEntry(avatarParam.meshIndex).polyMesh.getMorphIndex(sLVisualParamID)
+            partMorphParams[avatarParam.meshIndex]?.let { morphArray ->
+                val morphIndex = avatar.getMeshEntry(avatarParam.meshIndex!!).polyMesh.getMorphIndex(paramId)
                 if (morphIndex != -1) {
-                    fArr[morphIndex] = fArr[morphIndex] + f
+                    morphArray[morphIndex] += value
                 }
             }
         }
-        if (avatarParam.skeletonParams != null) {
-            for (Entry entry : avatarParam.skeletonParams.entrySet()) {
-                SkeletonParamValue skeletonParamValue = (SkeletonParamValue) map.get(entry.getKey())
-                SkeletonParamDefinition skeletonParamDefinition = (SkeletonParamDefinition) entry.getValue()
-                if (skeletonParamDefinition.scale != null) {
-                    skeletonParamValue.scale.mulWeighted(skeletonParamDefinition.scale, f)
+        
+        // Apply skeleton deformations
+        avatarParam.skeletonParams?.forEach { (boneId, paramDef) ->
+            skeletonParams[boneId]?.let { paramValue ->
+                paramDef.scale?.let { scale ->
+                    paramValue.scale.mulWeighted(scale, value)
                 }
-                if (skeletonParamDefinition.offset != null) {
-                    skeletonParamValue.offset.addMul(skeletonParamDefinition.offset, f)
+                paramDef.offset?.let { offset ->
+                    paramValue.offset.addMul(offset, value)
                 }
             }
         }
     }
 
-    fun getDrivenWeight(f: Float, avatarParam: AvatarParam, drivenParam: DrivenParam, avatarParam2: AvatarParam): Float {
-        float f2 = avatarParam.minValue
-        float f3 = avatarParam.maxValue
-        float f4 = avatarParam2.minValue
-        float f5 = avatarParam2.maxValue
-        if (f <= drivenParam.min1) {
-            return (drivenParam.min1 != drivenParam.max1 || drivenParam.min1 > f2) ? f4 : f5
-        } else {
-            if (f <= drivenParam.max1) {
-                return ((f5 - f4) * ((f - drivenParam.min1) / (drivenParam.max1 - drivenParam.min1))) + f4
-            } else if (f <= drivenParam.max2) {
-                return f5
+    /**
+     * Calculate driven parameter weight
+     */
+    fun getDrivenWeight(
+        drivingValue: Float,
+        drivingParam: AvatarParam,
+        drivenParam: DrivenParam,
+        drivenAvatarParam: AvatarParam
+    ): Float {
+        val drivingMin = drivingParam.minValue
+        val drivingMax = drivingParam.maxValue
+        val drivenMin = drivenAvatarParam.minValue
+        val drivenMax = drivenAvatarParam.maxValue
+        
+        return when {
+            drivingValue <= drivenParam.min1 -> {
+                if (drivenParam.min1 != drivenParam.max1 || drivenParam.min1 > drivingMin) {
+                    drivenMin
+                } else {
+                    drivenMax
+                }
+            }
+            drivingValue <= drivenParam.max1 -> {
+                val t = (drivingValue - drivenParam.min1) / (drivenParam.max1 - drivenParam.min1)
+                ((drivenMax - drivenMin) * t) + drivenMin
+            }
+            drivingValue <= drivenParam.max2 -> {
+                drivenMax
+            }
+            drivingValue > drivenParam.min2 -> {
+                if (drivenParam.max2 < drivingMax) drivenMin else drivenMax
+            }
+            else -> {
+                val t = (drivingValue - drivenParam.max2) / (drivenParam.min2 - drivenParam.max2)
+                drivenMax + ((drivenMin - drivenMax) * t)
+            }
+        }
+    }
+
+    /**
+     * Update attachment matrices
+     */
+    private fun updateAttachmentMatrix() {
+        val tempMatrix = FloatArray(16)
+        
+        for (i in 0 until 56) {
+            val attachment = attachmentPoints[i] ?: continue
+            
+            val bone = attachment.bone
+            if (bone != null) {
+                // Attachment to bone
+                Matrix.translateM(
+                    tempMatrix, 0,
+                    bone.getGlobalMatrix(), 0,
+                    attachment.point.position.x * bone.getScaleX(),
+                    attachment.point.position.y * bone.getScaleY(),
+                    attachment.point.position.z * bone.getScaleZ()
+                )
+                Matrix.multiplyMM(
+                    attachment.matrix, 0,
+                    tempMatrix, 0,
+                    attachment.point.rotation.getInverseMatrix(), 0
+                )
             } else {
-                if (f > drivenParam.min2) {
-                    return drivenParam.max2 < f3 ? f4 : f5
-                } else {
-                    return f5 + ((f4 - f5) * ((f - drivenParam.max2) / (drivenParam.min2 - drivenParam.max2)))
-                }
+                // Attachment to root
+                Matrix.setIdentityM(tempMatrix, 0)
+                Matrix.translateM(
+                    tempMatrix, 0,
+                    rootBone.getPositionX(),
+                    rootBone.getPositionY(),
+                    rootBone.getPositionZ()
+                )
+                Matrix.translateM(
+                    tempMatrix, 0,
+                    attachment.point.position.x,
+                    attachment.point.position.y,
+                    attachment.point.position.z
+                )
+                Matrix.multiplyMM(
+                    attachment.matrix, 0,
+                    tempMatrix, 0,
+                    attachment.point.rotation.getInverseMatrix(), 0
+                )
+            }
+            
+            // Update joint world matrix for rendering
+            val nonHUDIndex = SLAttachmentPoint.attachmentPoints[i].nonHUDindex
+            if (nonHUDIndex >= 0) {
+                System.arraycopy(
+                    attachment.matrix, 0,
+                    jointWorldMatrix,
+                    (nonHUDIndex + SLSkeletonBoneID.VALUES.size) * 16,
+                    16
+                )
             }
         }
     }
 
-    private fun updateAttachmentMatrix(): Unit {
-        float[] fArr = FloatArray(16)
-        for (int i = 0; i < 56; i++) {
-            AttachmentPoint attachmentPoint = this.attachmentPoints[i]
-            if (attachmentPoint != null) {
-                SLSkeletonBone sLSkeletonBone = attachmentPoint.bone
-                if (sLSkeletonBone != null) {
-                    Matrix.translateM(fArr, 0, sLSkeletonBone.getGlobalMatrix(), 0, attachmentPoint.point.position.x * sLSkeletonBone.getScaleX(), attachmentPoint.point.position.y * sLSkeletonBone.getScaleY(), attachmentPoint.point.position.z * sLSkeletonBone.getScaleZ())
-                    Matrix.multiplyMM(attachmentPoint.matrix, 0, fArr, 0, attachmentPoint.point.rotation.getInverseMatrix(), 0)
-                } else {
-                    Matrix.setIdentityM(fArr, 0)
-                    Matrix.translateM(fArr, 0, this.rootBone.getPositionX(), this.rootBone.getPositionY(), this.rootBone.getPositionZ())
-                    Matrix.translateM(fArr, 0, attachmentPoint.point.position.x, attachmentPoint.point.position.y, attachmentPoint.point.position.z)
-                    Matrix.multiplyMM(attachmentPoint.matrix, 0, fArr, 0, attachmentPoint.point.rotation.getInverseMatrix(), 0)
-                }
-                int i2 = SLAttachmentPoint.attachmentPoints[i].nonHUDindex
-                if (i2 >= 0) {
-                    System.arraycopy(attachmentPoint.matrix, 0, this.jointWorldMatrix, (i2 + SLSkeletonBoneID.VALUES.length) * 16, 16)
-                }
-            }
-        }
-    }
-
-    fun UpdateGlobalPositions(animationSkeletonData: AnimationSkeletonData): Unit {
+    /**
+     * Update global positions with animation data
+     */
+    fun UpdateGlobalPositions(animationSkeletonData: AnimationSkeletonData) {
         super.UpdateGlobalPositions(animationSkeletonData)
         updateAttachmentMatrix()
     }
 
-    fun getAnimatedBone(i: Int): SLSkeletonBone {
-        return this.animatedBones[i]
+    /**
+     * Get animated bone by index
+     */
+    fun getAnimatedBone(index: Int): SLSkeletonBone? {
+        return animatedBones.getOrNull(index)
     }
 
-    float[] getAttachmentMatrix(int i) {
-        if (i >= 0 && i < this.attachmentPoints.length) {
-            AttachmentPoint attachmentPoint = this.attachmentPoints[i]
-            if (attachmentPoint != null) {
-                return attachmentPoint.matrix
-            }
+    /**
+     * Get attachment matrix
+     */
+    fun getAttachmentMatrix(index: Int): FloatArray? {
+        return if (index in attachmentPoints.indices) {
+            attachmentPoints[index]?.matrix
+        } else {
+            null
         }
-        return null
     }
 
-    float getBodySize() {
-        return this.bodySize
+    /**
+     * Get body size
+     */
+    fun getBodySize(): Float = bodySize
+
+    /**
+     * Get morph parameters for mesh
+     */
+    fun getMorphParams(meshIndex: MeshIndex): FloatArray? {
+        return partMorphParams[meshIndex]
     }
 
-    float[] getMorphParams(MeshIndex meshIndex) {
-        return (float[]) this.partMorphParams.get(meshIndex)
-    }
+    /**
+     * Get pelvis offset
+     */
+    fun getPelvisOffset(): Float = pelvisOffset
 
-    float getPelvisOffset() {
-        return this.pelvisOffset
-    }
+    /**
+     * Get pelvis to foot distance
+     */
+    fun getPelvisToFoot(): Float = pelvisToFoot
 
-    float getPelvisToFoot() {
-        return this.pelvisToFoot
-    }
+    /**
+     * Check if skeleton has extended bones
+     */
+    fun hasExtendedBones(): Boolean = hasExtendedBones
 
-    fun hasExtendedBones(): Boolean {
-        return this.hasExtendedBones
-    }
-
+    /**
+     * Check if skeleton needs forced animation update
+     */
     fun needForceAnimate(): Boolean {
-        return this.forceAnimate.getAndSet(false)
+        return forceAnimate.getAndSet(false)
     }
 
-    fun setForceAnimate(): Unit {
-        this.forceAnimate.set(true)
+    /**
+     * Set forced animation flag
+     */
+    fun setForceAnimate() {
+        forceAnimate.set(true)
     }
 }

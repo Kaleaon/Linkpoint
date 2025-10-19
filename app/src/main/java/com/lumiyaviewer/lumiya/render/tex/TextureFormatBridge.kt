@@ -111,7 +111,7 @@ class TextureFormatBridge {
     /**
      * Texture format enumeration
      */
-    enum class class TextureFormat {
+    enum class TextureFormat {
         JPEG2000,
         KTX2
     }

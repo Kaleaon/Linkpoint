@@ -428,7 +428,7 @@ class ModernTextureManager {
     /**
      * Texture loading priority
      */
-    enum class class TexturePriority {
+    enum class TexturePriority {
         CRITICAL,   // Avatar textures, UI elements
         HIGH,       // Nearby objects
         NORMAL,     // General world textures  

@@ -9,198 +9,305 @@ import android.os.Parcelable
 import java.nio.ByteBuffer
 import java.util.UUID
 
-abstract class DBObject implements Parcelable {
-    protected long _id
+/**
+ * Base class for database-backed objects with ORM functionality
+ */
+abstract class DBObject : Parcelable {
+    
+    protected var _id: Long = 0
 
-    class DatabaseBindingException extends Exception {
-        DatabaseBindingException(Class<?> cls, String str) {
-            super("Failed to bind " + cls.getSimpleName() + ": " + str)
-        }
+    /**
+     * Exception for database binding errors
+     */
+    class DatabaseBindingException : Exception {
+        constructor(cls: Class<*>, message: String) : super(
+            "Failed to bind ${cls.simpleName}: $message"
+        )
 
-        DatabaseBindingException(String str) {
-            super(str)
-        }
+        constructor(message: String) : super(message)
     }
 
+    /**
+     * Default constructor
+     */
     constructor() {
-        this._id = 0
+        _id = 0
     }
 
+    /**
+     * Construct from cursor
+     */
     constructor(cursor: Cursor) {
         loadFromCursor(cursor)
     }
 
-    DBObject(SQLiteDatabase sQLiteDatabase, long j) throws DatabaseBindingException {
-        if (sQLiteDatabase == null) {
-            throw DatabaseBindingException(getClass(), "database not opened.")
-        }
-        Cursor query = null
-        try {
-            query = sQLiteDatabase.query(getTableName(), getFieldNames(), "_id = ?", new String[]{Long.toString(j)}, null, null, null)
-            if (!query.moveToFirst()) {
-                throw DatabaseBindingException(getClass(), "not found: _id = " + j)
-            }
-            loadFromCursor(query)
-        } finally {
-            if (query != null) {
-                query.close()
-            }
-        }
-    }
-
-    /* access modifiers changed from: protected */
-    fun UUIDfromBlob(bArr: ByteArray): UUID {
-        ByteBuffer wrap = ByteBuffer.wrap(bArr)
-        return UUID(wrap.getLong(), wrap.getLong())
-    }
-
-    /* access modifiers changed from: protected */
-    byte[] UUIDtoBlob(UUID uuid) {
-        ByteBuffer wrap = ByteBuffer.wrap(ByteArray(16))
-        wrap.putLong(uuid.getMostSignificantBits())
-        wrap.putLong(uuid.getLeastSignificantBits())
-        return wrap.array()
-    }
-
-    abstract fun bindInsertOrUpdate(sQLiteStatement: SQLiteStatement): Unit
-
-    void delete(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
-        if (sQLiteDatabase == null) {
-            throw DatabaseBindingException(getClass(), "database not opened.")
-        }
-        if (this._id != 0) {
-            try {
-                int rowsDeleted = sQLiteDatabase.delete(getTableName(), "_id = ?", new String[]{Long.toString(this._id)})
-                if (rowsDeleted > 0) {
-                    this._id = 0; // Reset ID after successful deletion
-                }
-            } catch (SQLiteException e) {
-                DatabaseBindingException databaseBindingException = DatabaseBindingException(getClass(), "delete failed")
-                databaseBindingException.initCause(e)
-                throw databaseBindingException
-            }
-        }
-    }
-
-    abstract fun getContentValues(): ContentValues
-
-    /* access modifiers changed from: protected */
-    abstract String[] getFieldNames()
-
-    fun getId(): Long {
-        return this._id
-    }
-
-    /* access modifiers changed from: protected */
-    abstract fun getTableName(): String
-
-    abstract fun loadFromCursor(cursor: Cursor): Unit
-
-    void reload(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
-        if (sQLiteDatabase == null) {
-            throw DatabaseBindingException(getClass(), "database not opened.")
-        } else if (this._id != 0) {
-            Cursor query = null
-            try {
-                query = sQLiteDatabase.query(getTableName(), getFieldNames(), "_id = ?", new String[]{Long.toString(this._id)}, null, null, null)
-                if (query.moveToFirst()) {
-                    loadFromCursor(query)
-                }
-            } finally {
-                if (query != null) {
-                    query.close()
-                }
-            }
-        }
-    }
-
-    fun resetId(): Unit {
-        this._id = 0
-    }
-
-    void save(SQLiteDatabase sQLiteDatabase) throws DatabaseBindingException {
-        if (sQLiteDatabase == null) {
-            throw DatabaseBindingException(getClass(), "database not opened.")
-        }
-        String tableName = getTableName()
-        ContentValues contentValues = getContentValues()
-        if (contentValues == null) {
-            throw DatabaseBindingException(getClass(), "getContentValues() returned null")
+    /**
+     * Construct from database by ID
+     */
+    @Throws(DatabaseBindingException::class)
+    constructor(database: SQLiteDatabase, id: Long) {
+        if (!database.isOpen) {
+            throw DatabaseBindingException(javaClass, "database not opened.")
         }
         
+        var cursor: Cursor? = null
         try {
-            if (this._id != 0) {
-                int rowsUpdated = sQLiteDatabase.update(tableName, contentValues, "_id = ?", new String[]{Long.toString(this._id)})
+            cursor = database.query(
+                getTableName(),
+                getFieldNames(),
+                "_id = ?",
+                arrayOf(id.toString()),
+                null,
+                null,
+                null
+            )
+            
+            if (!cursor.moveToFirst()) {
+                throw DatabaseBindingException(javaClass, "not found: _id = $id")
+            }
+            
+            loadFromCursor(cursor)
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    /**
+     * Convert UUID to blob for storage
+     */
+    protected fun UUIDtoBlob(uuid: UUID): ByteArray {
+        val buffer = ByteBuffer.wrap(ByteArray(16))
+        buffer.putLong(uuid.mostSignificantBits)
+        buffer.putLong(uuid.leastSignificantBits)
+        return buffer.array()
+    }
+
+    /**
+     * Convert blob to UUID
+     */
+    protected fun UUIDfromBlob(blob: ByteArray): UUID {
+        val buffer = ByteBuffer.wrap(blob)
+        return UUID(buffer.long, buffer.long)
+    }
+
+    /**
+     * Bind parameters for insert or update
+     */
+    abstract fun bindInsertOrUpdate(statement: SQLiteStatement)
+
+    /**
+     * Delete this object from database
+     */
+    @Throws(DatabaseBindingException::class)
+    fun delete(database: SQLiteDatabase) {
+        if (!database.isOpen) {
+            throw DatabaseBindingException(javaClass, "database not opened.")
+        }
+        
+        if (_id != 0L) {
+            try {
+                val rowsDeleted = database.delete(
+                    getTableName(),
+                    "_id = ?",
+                    arrayOf(_id.toString())
+                )
+                if (rowsDeleted > 0) {
+                    _id = 0
+                }
+            } catch (e: SQLiteException) {
+                throw DatabaseBindingException(javaClass, "delete failed").apply {
+                    initCause(e)
+                }
+            }
+        }
+    }
+
+    /**
+     * Get content values for this object
+     */
+    abstract fun getContentValues(): ContentValues
+
+    /**
+     * Get field names for queries
+     */
+    protected abstract fun getFieldNames(): Array<String>
+
+    /**
+     * Get object ID
+     */
+    fun getId(): Long = _id
+
+    /**
+     * Get table name
+     */
+    protected abstract fun getTableName(): String
+
+    /**
+     * Load data from cursor
+     */
+    abstract fun loadFromCursor(cursor: Cursor)
+
+    /**
+     * Reload object from database
+     */
+    @Throws(DatabaseBindingException::class)
+    fun reload(database: SQLiteDatabase) {
+        if (!database.isOpen) {
+            throw DatabaseBindingException(javaClass, "database not opened.")
+        }
+        
+        if (_id == 0L) return
+        
+        var cursor: Cursor? = null
+        try {
+            cursor = database.query(
+                getTableName(),
+                getFieldNames(),
+                "_id = ?",
+                arrayOf(_id.toString()),
+                null,
+                null,
+                null
+            )
+            
+            if (cursor.moveToFirst()) {
+                loadFromCursor(cursor)
+            }
+        } finally {
+            cursor?.close()
+        }
+    }
+
+    /**
+     * Reset object ID
+     */
+    fun resetId() {
+        _id = 0
+    }
+
+    /**
+     * Save object to database (insert or update)
+     */
+    @Throws(DatabaseBindingException::class)
+    fun save(database: SQLiteDatabase) {
+        if (!database.isOpen) {
+            throw DatabaseBindingException(javaClass, "database not opened.")
+        }
+        
+        val tableName = getTableName()
+        val contentValues = getContentValues()
+            ?: throw DatabaseBindingException(javaClass, "getContentValues() returned null")
+        
+        try {
+            if (_id != 0L) {
+                val rowsUpdated = database.update(
+                    tableName,
+                    contentValues,
+                    "_id = ?",
+                    arrayOf(_id.toString())
+                )
+                
                 if (rowsUpdated == 0) {
                     // Row may have been deleted, try insert
-                    this._id = sQLiteDatabase.insert(tableName, null, contentValues)
-                    if (this._id == -1) {
+                    _id = database.insert(tableName, null, contentValues)
+                    if (_id == -1L) {
                         throw SQLiteException("Insert failed after update returned 0 rows")
                     }
                 }
             } else {
-                this._id = sQLiteDatabase.insert(tableName, null, contentValues)
-                if (this._id == -1) {
+                _id = database.insert(tableName, null, contentValues)
+                if (_id == -1L) {
                     throw SQLiteException("Insert failed")
                 }
             }
-        } catch (SQLiteException e) {
-            DatabaseBindingException databaseBindingException = DatabaseBindingException(getClass(), "insert or update failed")
-            databaseBindingException.initCause(e)
-            throw databaseBindingException
+        } catch (e: SQLiteException) {
+            throw DatabaseBindingException(javaClass, "insert or update failed").apply {
+                initCause(e)
+            }
         }
     }
 
-    /* access modifiers changed from: protected */
-    void updateOrInsert(SQLiteDatabase sQLiteDatabase, String str, String[] strArr) throws DatabaseBindingException {
-        if (sQLiteDatabase == null) {
-            throw DatabaseBindingException(getClass(), "database not opened.")
-        }
-        if (str == null) {
-            throw DatabaseBindingException(getClass(), "whereClause cannot be null")
+    /**
+     * Update or insert using where clause
+     */
+    @Throws(DatabaseBindingException::class)
+    protected fun updateOrInsert(
+        database: SQLiteDatabase,
+        whereClause: String?,
+        whereArgs: Array<String>?
+    ) {
+        if (!database.isOpen) {
+            throw DatabaseBindingException(javaClass, "database not opened.")
         }
         
-        String tableName = getTableName()
-        ContentValues contentValues = getContentValues()
-        if (contentValues == null) {
-            throw DatabaseBindingException(getClass(), "getContentValues() returned null")
+        requireNotNull(whereClause) {
+            "whereClause cannot be null"
         }
+        
+        val tableName = getTableName()
+        val contentValues = getContentValues()
+            ?: throw DatabaseBindingException(javaClass, "getContentValues() returned null")
         
         try {
-            int rowsUpdated = sQLiteDatabase.update(tableName, contentValues, str, strArr)
+            val rowsUpdated = database.update(tableName, contentValues, whereClause, whereArgs)
+            
             if (rowsUpdated == 0) {
-                this._id = sQLiteDatabase.insert(tableName, null, contentValues)
-                if (this._id == -1) {
+                _id = database.insert(tableName, null, contentValues)
+                if (_id == -1L) {
                     throw SQLiteException("Insert failed after update returned 0 rows")
                 }
             }
-        } catch (SQLiteException e) {
-            DatabaseBindingException databaseBindingException = DatabaseBindingException(getClass(), "insert or update failed")
-            databaseBindingException.initCause(e)
-            throw databaseBindingException
+        } catch (e: SQLiteException) {
+            throw DatabaseBindingException(javaClass, "insert or update failed").apply {
+                initCause(e)
+            }
         }
     }
 
-    /* access modifiers changed from: protected */
-    void updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) throws DatabaseBindingException {
-        if (sQLiteStatement == null || sQLiteStatement2 == null) {
-            throw DatabaseBindingException(getClass(), "SQLiteStatements cannot be null")
-        }
-        
+    /**
+     * Update or insert using prepared statements
+     */
+    @Throws(DatabaseBindingException::class)
+    protected fun updateOrInsert(
+        updateStatement: SQLiteStatement,
+        insertStatement: SQLiteStatement
+    ) {
         try {
-            bindInsertOrUpdate(sQLiteStatement)
-            int rowsUpdated = sQLiteStatement.executeUpdateDelete()
+            bindInsertOrUpdate(updateStatement)
+            val rowsUpdated = updateStatement.executeUpdateDelete()
+            
             if (rowsUpdated == 0) {
-                bindInsertOrUpdate(sQLiteStatement2)
-                this._id = sQLiteStatement2.executeInsert()
-                if (this._id == -1) {
+                bindInsertOrUpdate(insertStatement)
+                _id = insertStatement.executeInsert()
+                if (_id == -1L) {
                     throw SQLiteException("Insert failed after update returned 0 rows")
                 }
             }
-        } catch (SQLiteException e) {
-            DatabaseBindingException databaseBindingException = DatabaseBindingException(getClass(), "insert or update failed")
-            databaseBindingException.initCause(e)
-            throw databaseBindingException
+        } catch (e: SQLiteException) {
+            throw DatabaseBindingException(javaClass, "insert or update failed").apply {
+                initCause(e)
+            }
+        }
+    }
+    
+    companion object {
+        @JvmField
+        val CREATOR = object : Parcelable.Creator<InventoryQuery> {
+            override fun createFromParcel(parcel: Parcel): InventoryQuery {
+                val bundle = parcel.readBundle(javaClass.classLoader)!!
+                return InventoryQuery.create(
+                    UUIDPool.getUUID(bundle.getString("folderId")),
+                    bundle.getString("containsString"),
+                    bundle.getBoolean("includeFolders"),
+                    bundle.getBoolean("includeItems"),
+                    bundle.getBoolean("newestFirst"),
+                    bundle.getInt("assetType", -1)
+                )
+            }
+
+            override fun newArray(size: Int): Array<InventoryQuery?> {
+                return arrayOfNulls(size)
+            }
         }
     }
 }

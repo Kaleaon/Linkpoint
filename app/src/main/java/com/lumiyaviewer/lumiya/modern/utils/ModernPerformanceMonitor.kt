@@ -28,7 +28,7 @@ class ModernPerformanceMonitor {
     private Map<String, Long> memoryUsageSnapshots = new ConcurrentHashMap<>()
     
     // Benchmark categories
-    enum class class BenchmarkCategory {
+    enum class BenchmarkCategory {
         AUTHENTICATION("Authentication", "OAuth2 and login operations"),
         NETWORK("Network Transport", "HTTP/2 CAPS and WebSocket operations"),
         GRAPHICS("Graphics Pipeline", "OpenGL ES 3.0+ rendering operations"),

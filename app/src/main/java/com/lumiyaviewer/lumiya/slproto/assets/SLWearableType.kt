@@ -2,7 +2,12 @@ package com.lumiyaviewer.lumiya.slproto.assets
 
 import com.lumiyaviewer.lumiya.slproto.inventory.SLAssetType
 
-enum class class SLWearableType {
+enum class SLWearableType(
+    private val typeCode: Int,
+    private val assetType: SLAssetType,
+    private val isCritical: Boolean,
+    private val name: String
+) {
     WT_SHAPE(0, SLAssetType.AT_BODYPART, true, "Shape"),
     WT_SKIN(1, SLAssetType.AT_BODYPART, true, "Skin"),
     WT_HAIR(2, SLAssetType.AT_BODYPART, false, "Hair"),

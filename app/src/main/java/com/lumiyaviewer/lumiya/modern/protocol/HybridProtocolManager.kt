@@ -24,7 +24,7 @@ class HybridProtocolManager {
     private String TAG = "HybridProtocol"
     
     // Transport types
-    enum class class Transport {
+    enum class Transport {
         UDP_LEGACY,     // Traditional Second Life UDP messages
         HTTP2_CAPS,     // HTTP/2 for CAPS (Capabilities) requests
         WEBSOCKET_RT    // WebSocket for real-time events

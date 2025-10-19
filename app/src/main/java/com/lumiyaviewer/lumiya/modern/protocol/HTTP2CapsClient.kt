@@ -2,31 +2,34 @@ package com.lumiyaviewer.lumiya.modern.protocol
 
 import android.util.Log
 import okhttp3.*
-import okhttp3.MediaType
-import okhttp3.RequestBody
-
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import okio.Buffer
+import okio.BufferedSink
+import okio.ForwardingSink
+import okio.buffer
 import java.io.IOException
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
-import java.util.Map
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 
 /**
  * Modern HTTP/2 CAPS client for Second Life protocol
  * Based on LibreMetaverse patterns with mobile optimization
  */
 class HTTP2CapsClient {
-    private String TAG = "HTTP2CapsClient"
-    private MediaType JSON = MediaType.get("application/json; charset=utf-8")
-    private MediaType LLSD_XML = MediaType.get("application/llsd+xml; charset=utf-8")
     
-    private OkHttpClient client
-    private String authToken
-    private Map<String, String> capabilities = new ConcurrentHashMap<>()
+    private val TAG = "HTTP2CapsClient"
+    private val JSON = "application/json; charset=utf-8".toMediaType()
+    private val LLSD_XML = "application/llsd+xml; charset=utf-8".toMediaType()
     
-    HTTP2CapsClient() {
-        this.client = new OkHttpClient.Builder()
-            .protocols(java.util.Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))
+    private val client: OkHttpClient
+    private var authToken: String? = null
+    private val capabilities = ConcurrentHashMap<String, String>()
+    
+    init {
+        client = OkHttpClient.Builder()
+            .protocols(listOf(Protocol.HTTP_2, Protocol.HTTP_1_1))
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
@@ -35,65 +38,68 @@ class HTTP2CapsClient {
             .build()
     }
     
-    void setAuthToken(String token) {
-        this.authToken = token
+    /**
+     * Set authentication token
+     */
+    fun setAuthToken(token: String) {
+        authToken = token
     }
     
     /**
      * Configure capability URLs from seed capability response
      */
-    void configureCapabilities(Map<String, String> capabilitiesMap) {
+    fun configureCapabilities(capabilitiesMap: Map<String, String>) {
         capabilities.clear()
         capabilities.putAll(capabilitiesMap)
-        Log.i(TAG, "Configured " + capabilities.size() + " capabilities")
+        Log.i(TAG, "Configured ${capabilities.size} capabilities")
         
         // Log available capabilities for debugging
-        for (Map.Entry<String, String> entry : capabilities.entrySet()) {
-            Log.d(TAG, "Capability: " + entry.getKey() + " -> " + entry.getValue())
+        capabilities.forEach { (name, url) ->
+            Log.d(TAG, "Capability: $name -> $url")
         }
     }
     
     /**
      * Get capability URL by name
      */
-    String getCapabilityUrl(String capabilityName) {
-        return capabilities.get(capabilityName)
+    fun getCapabilityUrl(capabilityName: String): String? {
+        return capabilities[capabilityName]
     }
     
     /**
      * Send async CAPS request with modern error handling
      */
-    CompletableFuture<String> sendAsync(String capUrl, String llsdData) {
-        CompletableFuture<String> future = new CompletableFuture<>()
+    fun sendAsync(capUrl: String, llsdData: String): CompletableFuture<String> {
+        val future = CompletableFuture<String>()
         
-        RequestBody body = RequestBody.create(llsdData, LLSD_XML)
-        Request request = new Request.Builder()
+        val body = llsdData.toRequestBody(LLSD_XML)
+        val request = Request.Builder()
             .url(capUrl)
             .post(body)
             .addHeader("User-Agent", "Lumiya/3.4.3 (Android)")
             .addHeader("Accept", "application/llsd+xml")
             .build()
             
-        client.newCall(request).enqueue(Callback() {
-            @Override
-            void onFailure(Call call, IOException e) {
-                Log.e(TAG, "CAPS request failed for " + capUrl, e)
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e(TAG, "CAPS request failed for $capUrl", e)
                 future.completeExceptionally(e)
             }
             
-            @Override
-            void onResponse(Call call, Response response) throws IOException {
-                try (ResponseBody responseBody = response.body()) {
-                    if (response.isSuccessful() && responseBody != null) {
-                        String result = responseBody.string()
-                        Log.d(TAG, "CAPS response received: " + result.length() + " bytes")
+            override fun onResponse(call: Call, response: Response) {
+                response.body?.use { responseBody ->
+                    if (response.isSuccessful) {
+                        val result = responseBody.string()
+                        Log.d(TAG, "CAPS response received: ${result.length} bytes")
                         future.complete(result)
                     } else {
-                        future.completeExceptionally(IOException(
-                            "CAPS request failed: " + response.code() + " " + response.message()))
+                        future.completeExceptionally(
+                            IOException("CAPS request failed: ${response.code} ${response.message}")
+                        )
                     }
-                }
+                } ?: future.completeExceptionally(IOException("Empty response body"))
             }
+        })
         
         return future
     }
@@ -101,39 +107,43 @@ class HTTP2CapsClient {
     /**
      * Asset upload with progress monitoring
      */
-    CompletableFuture<String> uploadAssetAsync(String uploadUrl, byte[] assetData, 
-                                                     String contentType, ProgressListener progressListener) {
-        CompletableFuture<String> future = new CompletableFuture<>()
+    fun uploadAssetAsync(
+        uploadUrl: String,
+        assetData: ByteArray,
+        contentType: String,
+        progressListener: ProgressListener?
+    ): CompletableFuture<String> {
+        val future = CompletableFuture<String>()
         
-        RequestBody body = ProgressRequestBody(
-            RequestBody.create(assetData, MediaType.get(contentType)),
-            progressListener
-        )
+        val baseBody = assetData.toRequestBody(contentType.toMediaType())
+        val body = progressListener?.let { 
+            ProgressRequestBody(baseBody, it)
+        } ?: baseBody
         
-        Request request = new Request.Builder()
+        val request = Request.Builder()
             .url(uploadUrl)
             .post(body)
             .addHeader("User-Agent", "Lumiya/3.4.3 (Android)")
             .build()
             
-        client.newCall(request).enqueue(Callback() {
-            @Override
-            void onFailure(Call call, IOException e) {
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
                 Log.e(TAG, "Asset upload failed", e)
                 future.completeExceptionally(e)
             }
             
-            @Override
-            void onResponse(Call call, Response response) throws IOException {
-                try (ResponseBody responseBody = response.body()) {
-                    if (response.isSuccessful() && responseBody != null) {
+            override fun onResponse(call: Call, response: Response) {
+                response.body?.use { responseBody ->
+                    if (response.isSuccessful) {
                         future.complete(responseBody.string())
                     } else {
-                        future.completeExceptionally(IOException(
-                            "Asset upload failed: " + response.code()))
+                        future.completeExceptionally(
+                            IOException("Asset upload failed: ${response.code}")
+                        )
                     }
-                }
+                } ?: future.completeExceptionally(IOException("Empty response body"))
             }
+        })
         
         return future
     }
@@ -141,64 +151,54 @@ class HTTP2CapsClient {
     /**
      * Authentication interceptor for CAPS requests
      */
-    private class AuthenticationInterceptor implements Interceptor {
-        @Override
-        Response intercept(Chain chain) throws IOException {
-            Request original = chain.request()
+    private inner class AuthenticationInterceptor : Interceptor {
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val original = chain.request()
             
-            if (authToken != null) {
-                Request authenticated = original.newBuilder()
-                    .addHeader("Authorization", "Bearer " + authToken)
+            val authenticated = authToken?.let { token ->
+                original.newBuilder()
+                    .addHeader("Authorization", "Bearer $token")
                     .build()
-                return chain.proceed(authenticated)
-            }
+            } ?: original
             
-            return chain.proceed(original)
+            return chain.proceed(authenticated)
         }
     }
     
     /**
      * Progress tracking request body wrapper
      */
-    private class ProgressRequestBody extends RequestBody {
-        private RequestBody delegate
-        private ProgressListener listener
+    private class ProgressRequestBody(
+        private val delegate: RequestBody,
+        private val listener: ProgressListener
+    ) : RequestBody() {
         
-        ProgressRequestBody(RequestBody delegate, ProgressListener listener) {
-            this.delegate = delegate
-            this.listener = listener
+        override fun contentType(): MediaType? = delegate.contentType()
+        
+        override fun contentLength(): Long = try {
+            delegate.contentLength()
+        } catch (e: IOException) {
+            -1
         }
         
-        @Override
-        MediaType contentType() {
-            return delegate.contentType()
-        }
-        
-        @Override
-        long contentLength() throws IOException {
-            return delegate.contentLength()
-        }
-        
-        @Override
-        void writeTo(okio.BufferedSink sink) throws IOException {
-            okio.ForwardingSink forwardingSink = new okio.ForwardingSink(sink) {
-                long bytesWritten = 0L
-                long contentLength = 0L
+        override fun writeTo(sink: BufferedSink) {
+            val forwardingSink = object : ForwardingSink(sink) {
+                var bytesWritten = 0L
+                var contentLength = 0L
                 
-                @Override
-                void write(okio.Buffer source, long byteCount) throws IOException {
+                override fun write(source: Buffer, byteCount: Long) {
                     super.write(source, byteCount)
-                    if (contentLength == 0) {
+                    
+                    if (contentLength == 0L) {
                         contentLength = contentLength()
                     }
+                    
                     bytesWritten += byteCount
-                    if (listener != null) {
-                        listener.onProgress(bytesWritten, contentLength)
-                    }
+                    listener.onProgress(bytesWritten, contentLength)
                 }
             }
             
-            okio.BufferedSink bufferedSink = okio.Okio.buffer(forwardingSink)
+            val bufferedSink = forwardingSink.buffer()
             delegate.writeTo(bufferedSink)
             bufferedSink.close()
         }
@@ -207,12 +207,15 @@ class HTTP2CapsClient {
     /**
      * Progress callback interface
      */
-    interface ProgressListener {
-        fun onProgress(bytesWritten: Long, contentLength: Long): Unit
+    fun interface ProgressListener {
+        fun onProgress(bytesWritten: Long, contentLength: Long)
     }
     
-    void shutdown() {
-        client.dispatcher().executorService().shutdown()
-        client.connectionPool().evictAll()
+    /**
+     * Shutdown the client and cleanup resources
+     */
+    fun shutdown() {
+        client.dispatcher.executorService.shutdown()
+        client.connectionPool.evictAll()
     }
 }

@@ -7,7 +7,10 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 
-enum class class Shader {
+enum class Shader(
+    private val type: Int,
+    private val fileName: String
+) {
     PrimFragmentShader(35632, "prim.fsh"),
     PrimFragmentShader30(35632, "prim_30.fsh"),
     PrimOpaqueFragmentShader(35632, "prim_opaque.fsh"),
