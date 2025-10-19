@@ -1,430 +1,383 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  android.annotation.SuppressLint
- *  android.app.Service
- *  android.content.Context
- *  android.content.Intent
- *  android.content.pm.PackageInfo
- *  android.content.pm.PackageManager$NameNotFoundException
- *  android.os.Bundle
- *  android.os.Handler
- *  android.os.IBinder
- *  android.os.Message
- *  android.os.Messenger
- */
 package com.lumiyaviewer.lumiya.cloud
 
 import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.drive.Drive
 import com.google.common.base.Strings
-import com.lumiyaviewer.lumiya.cloud.AgentSyncConnections
-import com.lumiyaviewer.lumiya.cloud.ConnectionResolutionActivity
-import com.lumiyaviewer.lumiya.cloud.Debug
-import com.lumiyaviewer.lumiya.cloud.DriveLogEntry
-import com.lumiyaviewer.lumiya.cloud.DriveSynchronizer
-import com.lumiyaviewer.lumiya.cloud.ErrorResolutionTracker
-import com.lumiyaviewer.lumiya.cloud.LogWriteTracker
-import com.lumiyaviewer.lumiya.cloud.MessageSyncBatch
-import com.lumiyaviewer.lumiya.cloud.common.CloudSyncMessenger
-import com.lumiyaviewer.lumiya.cloud.common.LogChatMessage
-import com.lumiyaviewer.lumiya.cloud.common.LogFlushMessages
-import com.lumiyaviewer.lumiya.cloud.common.LogMessageBatch
-import com.lumiyaviewer.lumiya.cloud.common.LogMessagesCompleted
-import com.lumiyaviewer.lumiya.cloud.common.LogSyncStart
-import com.lumiyaviewer.lumiya.cloud.common.LogSyncStatus
-import com.lumiyaviewer.lumiya.cloud.common.MessageType
-import java.util.HashSet
-import java.util.Set
+import com.lumiyaviewer.lumiya.cloud.common.*
 import java.util.UUID
-import javax.annotation.Nonnull
-import javax.annotation.Nullable
+import java.util.concurrent.ConcurrentHashMap
 
-class DriveSyncService
-extends Service
-implements LogWriteTracker.OnLoggingDoneListener {
-    private long PERIODIC_SYNC_INTERVAL = 30000L
-    private int REQUIRED_APP_VERSION = 58
-    private AgentSyncConnections agentSyncConnections
-    private GoogleApiClient.ConnectionCallbacks connectionCallbacks
-    private ErrorResolutionTracker errorResolutionTracker
-    private GoogleApiState googleApiState = GoogleApiState.Idle
-    private boolean isServiceBound = false
-    private GoogleApiClient mGoogleApiClient = null
-    private Messenger mMessenger
-    private GoogleApiClient.OnConnectionFailedListener onConnectionFailedListener
-    private Runnable periodicSync
-    private boolean periodicSyncEnabled = false
-    private Handler periodicSyncHandler
-    private Set<Messenger> syncRequestSources = new HashSet<Messenger>()
-    private DriveSynchronizer synchronizer = null
-
-    DriveSyncService() {
-        this.agentSyncConnections = AgentSyncConnections()
-        this.errorResolutionTracker = ErrorResolutionTracker((Context)this)
-        this.periodicSyncHandler = Handler()
-        this.mMessenger = Messenger((Handler)IncomingHandler(this))
-        this.connectionCallbacks = new GoogleApiClient.ConnectionCallbacks(this){
-            DriveSyncService this$0
-            {
-                this.this$0 = driveSyncService
-            }
-
-            /*
-             * Enabled aggressive block sorting
-             */
-            @Override
-            void onConnected(@Nullable Bundle bundle) {
-                Debug.Printf("LumiyaCloud: connected.", Array<Object>(0))
-                if (this.this$0.synchronizer == null) {
-                    DriveSyncService.access$702(this.this$0, GoogleApiState.Connected)
-                    DriveSyncService.access$602(this.this$0, DriveSynchronizer((Context)this.this$0, this.this$0.mGoogleApiClient, this.this$0))
-                } else {
-                    Debug.Printf("LumiyaCloud: resuming sync.", Array<Object>(0))
-                    this.this$0.synchronizer.resumeSyncing()
-                }
-                this.this$0.periodicSyncHandler.removeCallbacks(this.this$0.periodicSync)
-                this.this$0.periodicSyncHandler.postDelayed(this.this$0.periodicSync, 30000L)
-                DriveSyncService.access$1002(this.this$0, true)
-                this.this$0.processSyncReady()
-            }
-
-            @Override
-            void onConnectionSuspended(int n) {
-                Debug.Printf("LumiyaCloud: connection suspended (%d)", n)
-                if (this.this$0.synchronizer != null) {
-                    this.this$0.synchronizer.suspendSyncing()
-                }
-                this.this$0.periodicSyncHandler.removeCallbacks(this.this$0.periodicSync)
-                DriveSyncService.access$1002(this.this$0, false)
-            }
-        }
-        this.periodicSync = Runnable(this){
-            DriveSyncService this$0
-            {
-                this.this$0 = driveSyncService
-            }
-
-            @Override
-            void run() {
-                if (this.this$0.synchronizer != null) {
-                    Debug.Printf("FlushFiles: checking for files to flush", Array<Object>(0))
-                    long l = System.currentTimeMillis()
-                    this.this$0.synchronizer.flushOpenFiles(false, l)
-                    this.this$0.periodicSyncHandler.removeCallbacks(this.this$0.periodicSync)
-                    DriveSyncService.access$1002(this.this$0, false)
-                    if (!this.this$0.synchronizer.isLoggingDone()) {
-                        this.this$0.periodicSyncHandler.postDelayed(this.this$0.periodicSync, 30000L)
-                        DriveSyncService.access$1002(this.this$0, true)
-                    }
-                }
-            }
-        }
-        this.onConnectionFailedListener = new GoogleApiClient.OnConnectionFailedListener(this){
-            DriveSyncService this$0
-            {
-                this.this$0 = driveSyncService
-            }
-
-            /*
-             * Enabled force condition propagation
-             * Lifted jumps to return sites
-             */
-            @Override
-            void onConnectionFailed(@Nonnull ConnectionResult connectionResult) {
-                String string2
-                Debug.Printf("LumiyaCloud: connection failed, has resolution: %b", connectionResult.hasResolution())
-                if (connectionResult.hasResolution()) {
-                    ConnectionResolutionActivity.startForConnectionResolution((Context)this.this$0, connectionResult)
-                    return
-                }
-                Debug.Printf("LumiyaCloud: no resolution at all (%d), error message %s", connectionResult.getErrorCode(), connectionResult.getErrorMessage())
-                String string3 = string2 = connectionResult.getErrorMessage()
-                if (Strings.isNullOrEmpty(string2)) {
-                    string3 = this.this$0.getString(2131099702, new Object[]{connectionResult.getErrorCode()})
-                }
-                this.this$0.notifyError(string3)
-            }
-        }
-    }
-
-    /* synthetic */ void access$000(DriveSyncService driveSyncService, LogSyncStart logSyncStart, Messenger messenger) {
-        driveSyncService.onLogSyncStart(logSyncStart, messenger)
-    }
-
-    /* synthetic */ void access$100(DriveSyncService driveSyncService, LogMessageBatch logMessageBatch, Messenger messenger) {
-        driveSyncService.onLogMessageBatch(logMessageBatch, messenger)
-    }
-
-    /* synthetic */ boolean access$1002(DriveSyncService driveSyncService, boolean bl) {
-        driveSyncService.periodicSyncEnabled = bl
-        return bl
-    }
-
-    /* synthetic */ void access$200(DriveSyncService driveSyncService, LogFlushMessages logFlushMessages) {
-        driveSyncService.onFlushMessages(logFlushMessages)
-    }
-
-    /* synthetic */ DriveSynchronizer access$602(DriveSyncService driveSyncService, DriveSynchronizer driveSynchronizer) {
-        driveSyncService.synchronizer = driveSynchronizer
-        return driveSynchronizer
-    }
-
-    /* synthetic */ GoogleApiState access$702(DriveSyncService driveSyncService, GoogleApiState googleApiState) {
-        driveSyncService.googleApiState = googleApiState
-        return googleApiState
-    }
-
-    private String logFileNameForChatter(String string2) {
-        return string2.replaceAll("[/.:*\\\\]", "_").trim() + ".txt"
-    }
-
-    /*
-     * WARNING - Removed back jump from a try to a catch block - possible behaviour change.
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
+/**
+ * Service for syncing chat logs to Google Drive
+ * Manages Google Drive API connection and file synchronization
+ */
+class DriveSyncService : Service(), LogWriteTracker.OnLoggingDoneListener {
+    
+    private val PERIODIC_SYNC_INTERVAL = 30000L
+    private val REQUIRED_APP_VERSION = 58
+    
+    private val agentSyncConnections = AgentSyncConnections()
+    private val errorResolutionTracker = ErrorResolutionTracker(this)
+    private val periodicSyncHandler = Handler(Looper.getMainLooper())
+    private val mMessenger = Messenger(IncomingHandler(this))
+    private val syncRequestSources = ConcurrentHashMap.newKeySet<Messenger>()
+    
+    private var googleApiState = GoogleApiState.Idle
+    private var isServiceBound = false
+    private var mGoogleApiClient: GoogleApiClient? = null
+    private var synchronizer: DriveSynchronizer? = null
+    private var periodicSyncEnabled = false
+    
+    /**
+     * Google API connection states
      */
-    private void notifyError(@Nullable String string2) {
-        try {
-            PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
-            for (Messenger messenger : this.syncRequestSources) {
-                MessageType messageType = MessageType.LogSyncStatus
-                LogSyncStatus logSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.GoogleDriveError, string2)
-                CloudSyncMessenger.sendMessage(messenger, messageType, logSyncStatus, null)
-            }
-        }
-        catch (PackageManager.NameNotFoundException nameNotFoundException) {
-            Debug.Warning(nameNotFoundException)
-            return
-        }
-        {
-            this.syncRequestSources.clear()
-            return
-        }
-    }
-
-    /*
-     * Enabled force condition propagation
-     * Lifted jumps to return sites
-     */
-    private void onFlushMessages(LogFlushMessages logFlushMessages) {
-        if (logFlushMessages.agentName != null && logFlushMessages.chatterName != null) {
-            if (this.synchronizer != null) {
-                this.synchronizer.flushFile(this.agentSyncConnections, logFlushMessages.agentUUID, logFlushMessages.agentName, this.logFileNameForChatter(logFlushMessages.chatterName))
-            }
-            return
-        }
-        this.synchronizer.flushOpenFiles(true, System.currentTimeMillis())
-    }
-
-    private void onLogMessageBatch(LogMessageBatch logMessageBatch, Messenger object) {
-        if (this.synchronizer != null && logMessageBatch != null && logMessageBatch.agentName != null) {
-            MessageSyncBatch messageSyncBatch = MessageSyncBatch(logMessageBatch, new MessageSyncBatch.OnMessageBatchSyncedListener(this, (Messenger)object, logMessageBatch){
-                DriveSyncService this$0
-                LogMessageBatch val$message
-                Messenger val$replyTo
-                {
-                    this.this$0 = driveSyncService
-                    this.val$replyTo = messenger
-                    this.val$message = logMessageBatch
-                }
-
-                @Override
-                void onMessageBatchSynced(MessageSyncBatch messageSyncBatch) {
-                    CloudSyncMessenger.sendMessage(this.val$replyTo, MessageType.LogMessagesCompleted, LogMessagesCompleted(this.val$message.agentUUID, this.val$message.lastMessageID), null)
-                }
-            for (LogChatMessage logChatMessage : logMessageBatch.messages) {
-                if (logChatMessage == null || logChatMessage.chatterName == null || logChatMessage.messageText == null) continue
-                this.synchronizer.logString(this.agentSyncConnections, logMessageBatch.agentUUID, logMessageBatch.agentName, this.logFileNameForChatter(logChatMessage.chatterName), DriveLogEntry(logChatMessage.messageText, messageSyncBatch, logChatMessage.messageID))
-            }
-        }
-    }
-
-    /*
-     * WARNING - void declaration
-     * Enabled force condition propagation
-     * Lifted jumps to return sites
-     */
-    private void onLogSyncStart(LogSyncStart bundleable, Messenger messenger) {
-        try {
-            void var2_4
-            if (bundleable.appVersionCode < 58) {
-                PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
-                MessageType messageType = MessageType.LogSyncStatus
-                LogSyncStatus logSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.AppVersionRejected, null)
-                CloudSyncMessenger.sendMessage((Messenger)var2_4, messageType, logSyncStatus, null)
-                return
-            }
-            this.syncRequestSources.add((Messenger)var2_4)
-            this.agentSyncConnections.addSyncConnection(bundleable.agentUUID, (Messenger)var2_4)
-            this.updateGoogleApiConnection()
-            this.processSyncReady()
-            return
-        }
-        catch (PackageManager.NameNotFoundException nameNotFoundException) {
-            Debug.Warning(nameNotFoundException)
-            return
-        }
-    }
-
-    /*
-     * Enabled aggressive block sorting
-     * Enabled unnecessary exception pruning
-     * Enabled aggressive exception aggregation
-     */
-    private void processSyncReady() {
-        try {
-            PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
-            if (this.synchronizer == null) return
-            for (Messenger messenger : this.syncRequestSources) {
-                MessageType messageType = MessageType.LogSyncStatus
-                LogSyncStatus logSyncStatus = LogSyncStatus(packageInfo.versionCode, LogSyncStatus.Status.Ready, null)
-                CloudSyncMessenger.sendMessage(messenger, messageType, logSyncStatus, null)
-            }
-            this.syncRequestSources.clear()
-            return
-        }
-        catch (PackageManager.NameNotFoundException nameNotFoundException) {
-            Debug.Warning(nameNotFoundException)
-        }
-    }
-
-    /*
-     * Enabled aggressive block sorting
-     */
-    private void updateGoogleApiConnection() {
-        switch (5.$SwitchMap$com$lumiyaviewer$lumiya$cloud$DriveSyncService$GoogleApiState[this.googleApiState.ordinal()]) {
-            case 1: {
-                if (this.syncRequestSources.isEmpty()) return
-                this.googleApiState = GoogleApiState.Connecting
-                Debug.Printf("Starting service.", Array<Object>(0))
-                this.startService(Intent((Context)this, DriveSyncService.class))
-                if (this.mGoogleApiClient != null) return
-                this.mGoogleApiClient = new GoogleApiClient.Builder((Context)this).addApi(Drive.API).addScope(Drive.SCOPE_FILE).addConnectionCallbacks(this.connectionCallbacks).addOnConnectionFailedListener(this.onConnectionFailedListener).build()
-                this.mGoogleApiClient.connect()
-            }
-            default: {
-                return
-            }
-            case 2: 
-            case 3: 
-        }
-        if (!this.syncRequestSources.isEmpty()) return
-        if (this.isServiceBound) return
-        if (this.synchronizer != null) {
-            if (!this.synchronizer.isLoggingDone()) return
-        }
-        this.googleApiState = GoogleApiState.Idle
-        this.periodicSyncHandler.removeCallbacks(this.periodicSync)
-        this.periodicSyncEnabled = false
-        if (this.mGoogleApiClient != null) {
-            this.mGoogleApiClient.disconnect()
-            this.mGoogleApiClient = null
-            this.synchronizer = null
-        }
-        this.stopSelf()
-    }
-
-    @Nullable
-    IBinder onBind(Intent intent) {
-        Debug.Printf("DriveSyncService is bound", Array<Object>(0))
-        this.isServiceBound = true
-        return this.mMessenger.getBinder()
-    }
-
-    void onDestroy() {
-        Debug.Printf("Service destroyed", Array<Object>(0))
-        super.onDestroy()
-    }
-
-    @Override
-    void onLoggingDone() {
-        this.updateGoogleApiConnection()
-    }
-
-    @Override
-    void onLoggingNeeded() {
-        if (!this.periodicSyncEnabled) {
-            this.periodicSyncEnabled = true
-            this.periodicSyncHandler.postDelayed(this.periodicSync, 30000L)
-        }
-    }
-
-    int onStartCommand(Intent object, int n, int n2) {
-        Debug.Printf("Service started.", Array<Object>(0))
-        if (object.hasExtra("deleteResolvableError")) {
-            object = UUID.fromString(object.getStringExtra("deleteResolvableError"))
-            this.errorResolutionTracker.clearError((UUID)object, false)
-            this.errorResolutionTracker.clearNotification()
-        }
-        return 2
-    }
-
-    boolean onUnbind(Intent intent) {
-        Debug.Printf("DriveSyncService is unbound", Array<Object>(0))
-        this.isServiceBound = false
-        if (this.synchronizer != null) {
-            this.synchronizer.flushOpenFiles(true, System.currentTimeMillis())
-        }
-        this.updateGoogleApiConnection()
-        return super.onUnbind(intent)
-    }
-
     private enum class GoogleApiState {
         Idle,
         Connecting,
         Connected
-
     }
 
-    @SuppressLint(value={"HandlerLeak"})
-    private class IncomingHandler
-    extends Handler {
-        DriveSyncService this$0
-
-        private IncomingHandler(DriveSyncService driveSyncService) {
-            this.this$0 = driveSyncService
+    /**
+     * Connection callbacks for Google API
+     */
+    private val connectionCallbacks = object : GoogleApiClient.ConnectionCallbacks {
+        override fun onConnected(bundle: Bundle?) {
+            Debug.Printf("LumiyaCloud: connected.")
+            
+            if (synchronizer == null) {
+                googleApiState = GoogleApiState.Connected
+                synchronizer = DriveSynchronizer(
+                    this@DriveSyncService,
+                    mGoogleApiClient!!,
+                    this@DriveSyncService
+                )
+            } else {
+                Debug.Printf("LumiyaCloud: resuming sync.")
+                synchronizer?.resumeSyncing()
+            }
+            
+            periodicSyncHandler.removeCallbacks(periodicSync)
+            periodicSyncHandler.postDelayed(periodicSync, PERIODIC_SYNC_INTERVAL)
+            periodicSyncEnabled = true
+            processSyncReady()
         }
 
-        /*
-         * Exception decompiling
-         */
-        void handleMessage(Message var1_1) {
-            /*
-             * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
-             * 
-             * org.benf.cfr.reader.util.ConfusedCFRException: Back jump on a try block [egrp 1[TRYBLOCK] [2 : 130->190)] java.lang.Exception
-             *     at org.benf.cfr.reader.bytecode.analysis.opgraph.Op02WithProcessedDataAndRefs.insertExceptionBlocks(Op02WithProcessedDataAndRefs.java:2283)
-             *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisInner(CodeAnalyser.java:415)
-             *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysisOrWrapFail(CodeAnalyser.java:278)
-             *     at org.benf.cfr.reader.bytecode.CodeAnalyser.getAnalysis(CodeAnalyser.java:201)
-             *     at org.benf.cfr.reader.entities.attributes.AttributeCode.analyse(AttributeCode.java:94)
-             *     at org.benf.cfr.reader.entities.Method.analyse(Method.java:531)
-             *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1055)
-             *     at org.benf.cfr.reader.entities.ClassFile.analyseInnerClassesPass1(ClassFile.java:923)
-             *     at org.benf.cfr.reader.entities.ClassFile.analyseMid(ClassFile.java:1035)
-             *     at org.benf.cfr.reader.entities.ClassFile.analyseTop(ClassFile.java:942)
-             *     at org.benf.cfr.reader.Driver.doJarVersionTypes(Driver.java:257)
-             *     at org.benf.cfr.reader.Driver.doJar(Driver.java:139)
-             *     at org.benf.cfr.reader.CfrDriverImpl.analyse(CfrDriverImpl.java:76)
-             *     at org.benf.cfr.reader.Main.main(Main.java:54)
-             */
-            throw IllegalStateException("Decompilation failed")
+        override fun onConnectionSuspended(cause: Int) {
+            Debug.Printf("LumiyaCloud: connection suspended ($cause)")
+            synchronizer?.suspendSyncing()
+            periodicSyncHandler.removeCallbacks(periodicSync)
+            periodicSyncEnabled = false
+        }
+    }
+    
+    /**
+     * Periodic sync runnable
+     */
+    private val periodicSync = Runnable {
+        synchronizer?.let { sync ->
+            Debug.Printf("FlushFiles: checking for files to flush")
+            val currentTime = System.currentTimeMillis()
+            sync.flushOpenFiles(forceFlush = false, currentTime)
+            periodicSyncHandler.removeCallbacks(periodicSync)
+            periodicSyncEnabled = false
+            
+            if (!sync.isLoggingDone()) {
+                periodicSyncHandler.postDelayed(periodicSync, PERIODIC_SYNC_INTERVAL)
+                periodicSyncEnabled = true
+            }
+        }
+    }
+    
+    /**
+     * Connection failed listener
+     */
+    private val onConnectionFailedListener = GoogleApiClient.OnConnectionFailedListener { result ->
+        Debug.Printf(
+            "LumiyaCloud: connection failed, has resolution: %b",
+            result.hasResolution()
+        )
+        
+        if (result.hasResolution()) {
+            ConnectionResolutionActivity.startForConnectionResolution(this, result)
+        } else {
+            Debug.Printf(
+                "LumiyaCloud: no resolution at all (%d), error message %s",
+                result.errorCode,
+                result.errorMessage
+            )
+            
+            val errorMsg = if (Strings.isNullOrEmpty(result.errorMessage)) {
+                getString(R.string.cloud_sync_error_format, result.errorCode)
+            } else {
+                result.errorMessage
+            }
+            
+            notifyError(errorMsg)
+        }
+    }
+
+    /**
+     * Get log filename for a chatter
+     */
+    private fun logFileNameForChatter(chatterName: String): String {
+        return chatterName.replace(Regex("[/.:*\\\\]"), "_").trim() + ".txt"
+    }
+
+    /**
+     * Notify error to sync requestors
+     */
+    private fun notifyError(errorMessage: String?) {
+        try {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            
+            syncRequestSources.forEach { messenger ->
+                val status = LogSyncStatus(
+                    packageInfo.versionCode,
+                    LogSyncStatus.Status.GoogleDriveError,
+                    errorMessage
+                )
+                CloudSyncMessenger.sendMessage(messenger, MessageType.LogSyncStatus, status, null)
+            }
+        } catch (e: PackageManager.NameNotFoundException) {
+            Debug.Warning(e)
+        } finally {
+            syncRequestSources.clear()
+        }
+    }
+
+    /**
+     * Handle flush messages request
+     */
+    private fun onFlushMessages(message: LogFlushMessages) {
+        val sync = synchronizer ?: return
+        
+        if (message.agentName != null && message.chatterName != null) {
+            sync.flushFile(
+                agentSyncConnections,
+                message.agentUUID,
+                message.agentName!!,
+                logFileNameForChatter(message.chatterName!!)
+            )
+        } else {
+            sync.flushOpenFiles(forceFlush = true, System.currentTimeMillis())
+        }
+    }
+
+    /**
+     * Handle log message batch
+     */
+    private fun onLogMessageBatch(message: LogMessageBatch, replyTo: Messenger) {
+        val sync = synchronizer ?: return
+        if (message.agentName == null) return
+        
+        val batch = MessageSyncBatch(message) { _ ->
+            CloudSyncMessenger.sendMessage(
+                replyTo,
+                MessageType.LogMessagesCompleted,
+                LogMessagesCompleted(message.agentUUID, message.lastMessageID),
+                null
+            )
+        }
+        
+        for (chatMessage in message.messages) {
+            if (chatMessage?.chatterName != null && chatMessage.messageText != null) {
+                sync.logString(
+                    agentSyncConnections,
+                    message.agentUUID,
+                    message.agentName!!,
+                    logFileNameForChatter(chatMessage.chatterName!!),
+                    DriveLogEntry(chatMessage.messageText!!, batch, chatMessage.messageID)
+                )
+            }
+        }
+    }
+
+    /**
+     * Handle log sync start request
+     */
+    private fun onLogSyncStart(message: LogSyncStart, messenger: Messenger) {
+        try {
+            if (message.appVersionCode < REQUIRED_APP_VERSION) {
+                val packageInfo = packageManager.getPackageInfo(packageName, 0)
+                val status = LogSyncStatus(
+                    packageInfo.versionCode,
+                    LogSyncStatus.Status.AppVersionRejected,
+                    null
+                )
+                CloudSyncMessenger.sendMessage(messenger, MessageType.LogSyncStatus, status, null)
+                return
+            }
+            
+            syncRequestSources.add(messenger)
+            agentSyncConnections.addSyncConnection(message.agentUUID, messenger)
+            updateGoogleApiConnection()
+            processSyncReady()
+        } catch (e: PackageManager.NameNotFoundException) {
+            Debug.Warning(e)
+        }
+    }
+
+    /**
+     * Notify all requestors that sync is ready
+     */
+    private fun processSyncReady() {
+        if (synchronizer == null) return
+        
+        try {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            
+            syncRequestSources.forEach { messenger ->
+                val status = LogSyncStatus(
+                    packageInfo.versionCode,
+                    LogSyncStatus.Status.Ready,
+                    null
+                )
+                CloudSyncMessenger.sendMessage(messenger, MessageType.LogSyncStatus, status, null)
+            }
+            
+            syncRequestSources.clear()
+        } catch (e: PackageManager.NameNotFoundException) {
+            Debug.Warning(e)
+        }
+    }
+
+    /**
+     * Update Google API connection state
+     */
+    private fun updateGoogleApiConnection() {
+        when (googleApiState) {
+            GoogleApiState.Idle -> {
+                if (syncRequestSources.isNotEmpty()) {
+                    googleApiState = GoogleApiState.Connecting
+                    Debug.Printf("Starting service.")
+                    startService(Intent(this, DriveSyncService::class.java))
+                    
+                    if (mGoogleApiClient == null) {
+                        mGoogleApiClient = GoogleApiClient.Builder(this)
+                            .addApi(Drive.API)
+                            .addScope(Drive.SCOPE_FILE)
+                            .addConnectionCallbacks(connectionCallbacks)
+                            .addOnConnectionFailedListener(onConnectionFailedListener)
+                            .build()
+                        mGoogleApiClient?.connect()
+                    }
+                }
+            }
+            
+            GoogleApiState.Connecting, GoogleApiState.Connected -> {
+                if (syncRequestSources.isEmpty() && !isServiceBound) {
+                    if (synchronizer?.isLoggingDone() != false) {
+                        googleApiState = GoogleApiState.Idle
+                        periodicSyncHandler.removeCallbacks(periodicSync)
+                        periodicSyncEnabled = false
+                        
+                        mGoogleApiClient?.disconnect()
+                        mGoogleApiClient = null
+                        synchronizer = null
+                        
+                        stopSelf()
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onBind(intent: Intent?): IBinder {
+        Debug.Printf("DriveSyncService is bound")
+        isServiceBound = true
+        return mMessenger.binder
+    }
+
+    override fun onDestroy() {
+        Debug.Printf("Service destroyed")
+        super.onDestroy()
+    }
+
+    override fun onLoggingDone() {
+        updateGoogleApiConnection()
+    }
+
+    override fun onLoggingNeeded() {
+        if (!periodicSyncEnabled) {
+            periodicSyncEnabled = true
+            periodicSyncHandler.postDelayed(periodicSync, PERIODIC_SYNC_INTERVAL)
+        }
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Debug.Printf("Service started.")
+        
+        intent?.let {
+            if (it.hasExtra("deleteResolvableError")) {
+                val errorUUID = UUID.fromString(it.getStringExtra("deleteResolvableError"))
+                errorResolutionTracker.clearError(errorUUID, false)
+                errorResolutionTracker.clearNotification()
+            }
+        }
+        
+        return START_NOT_STICKY
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        Debug.Printf("DriveSyncService is unbound")
+        isServiceBound = false
+        synchronizer?.flushOpenFiles(forceFlush = true, System.currentTimeMillis())
+        updateGoogleApiConnection()
+        return super.onUnbind(intent)
+    }
+
+    /**
+     * Handler for incoming messages from clients
+     */
+    @SuppressLint("HandlerLeak")
+    private class IncomingHandler(
+        service: DriveSyncService
+    ) : Handler(Looper.getMainLooper()) {
+        
+        private val serviceRef = WeakReference(service)
+
+        override fun handleMessage(msg: Message) {
+            val service = serviceRef.get() ?: return
+            
+            try {
+                val messageType = MessageType.values()[msg.what]
+                val replyTo = msg.replyTo
+                
+                when (messageType) {
+                    MessageType.LogSyncStart -> {
+                        val data = CloudSyncMessenger.extractMessage<LogSyncStart>(msg)
+                        data?.let { service.onLogSyncStart(it, replyTo) }
+                    }
+                    
+                    MessageType.LogMessageBatch -> {
+                        val data = CloudSyncMessenger.extractMessage<LogMessageBatch>(msg)
+                        data?.let { service.onLogMessageBatch(it, replyTo) }
+                    }
+                    
+                    MessageType.LogFlushMessages -> {
+                        val data = CloudSyncMessenger.extractMessage<LogFlushMessages>(msg)
+                        data?.let { service.onFlushMessages(it) }
+                    }
+                    
+                    else -> {
+                        Debug.Printf("DriveSyncService: Unknown message type: $messageType")
+                    }
+                }
+            } catch (e: Exception) {
+                Debug.Warning(e)
+            }
         }
     }
 }
-

@@ -1,100 +1,123 @@
 package com.lumiyaviewer.lumiya.dao
-import java.util.*
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteDatabase.CursorFactory
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import de.greenrobot.dao.AbstractDaoMaster
 import de.greenrobot.dao.identityscope.IdentityScopeType
 
-class DaoMaster extends AbstractDaoMaster {
-    int SCHEMA_VERSION = 71
-
-    abstract class OpenHelper extends SQLiteOpenHelper {
-        OpenHelper(Context context, String str, CursorFactory cursorFactory) {
-            super(context, str, cursorFactory, 71)
+/**
+ * Master database manager using GreenDAO
+ */
+class DaoMaster(database: SQLiteDatabase) : AbstractDaoMaster(database, SCHEMA_VERSION) {
+    
+    companion object {
+        const val SCHEMA_VERSION = 71
+        
+        /**
+         * Create all database tables
+         */
+        fun createAllTables(db: SQLiteDatabase, ifNotExists: Boolean) {
+            CachedResponseDao.createTable(db, ifNotExists)
+            CachedAssetDao.createTable(db, ifNotExists)
+            MoneyTransactionDao.createTable(db, ifNotExists)
+            MuteListCachedDataDao.createTable(db, ifNotExists)
+            SearchGridResultDao.createTable(db, ifNotExists)
+            GroupMemberDao.createTable(db, ifNotExists)
+            GroupMemberListDao.createTable(db, ifNotExists)
+            GroupRoleMemberDao.createTable(db, ifNotExists)
+            GroupRoleMemberListDao.createTable(db, ifNotExists)
+            UserDao.createTable(db, ifNotExists)
+            FriendDao.createTable(db, ifNotExists)
+            UserNameDao.createTable(db, ifNotExists)
+            UserPicDao.createTable(db, ifNotExists)
+            ChatMessageDao.createTable(db, ifNotExists)
+            ChatterDao.createTable(db, ifNotExists)
         }
 
-        fun onCreate(sQLiteDatabase: SQLiteDatabase): Unit {
-            Log.i("greenDAO", "Creating tables for schema version 71")
-            DaoMaster.createAllTables(sQLiteDatabase, false)
+        /**
+         * Drop all database tables
+         */
+        fun dropAllTables(db: SQLiteDatabase, ifExists: Boolean) {
+            CachedResponseDao.dropTable(db, ifExists)
+            CachedAssetDao.dropTable(db, ifExists)
+            MoneyTransactionDao.dropTable(db, ifExists)
+            MuteListCachedDataDao.dropTable(db, ifExists)
+            SearchGridResultDao.dropTable(db, ifExists)
+            GroupMemberDao.dropTable(db, ifExists)
+            GroupMemberListDao.dropTable(db, ifExists)
+            GroupRoleMemberDao.dropTable(db, ifExists)
+            GroupRoleMemberListDao.dropTable(db, ifExists)
+            UserDao.dropTable(db, ifExists)
+            FriendDao.dropTable(db, ifExists)
+            UserNameDao.dropTable(db, ifExists)
+            UserPicDao.dropTable(db, ifExists)
+            ChatMessageDao.dropTable(db, ifExists)
+            ChatterDao.dropTable(db, ifExists)
         }
     }
 
-    class DevOpenHelper extends OpenHelper {
-        DevOpenHelper(Context context, String str, CursorFactory cursorFactory) {
-            super(context, str, cursorFactory)
+    /**
+     * Base open helper for database
+     */
+    abstract class OpenHelper(
+        context: Context,
+        name: String,
+        factory: SQLiteDatabase.CursorFactory?
+    ) : SQLiteOpenHelper(context, name, factory, SCHEMA_VERSION) {
+
+        override fun onCreate(db: SQLiteDatabase) {
+            Log.i("greenDAO", "Creating tables for schema version $SCHEMA_VERSION")
+            createAllTables(db, ifNotExists = false)
         }
+    }
 
-        fun onUpgrade(sQLiteDatabase: SQLiteDatabase, i: Int, i2: Int): Unit {
-            Log.i("greenDAO", "Upgrading schema from version " + i + " to " + i2 + " by dropping all tables")
-            DaoMaster.dropAllTables(sQLiteDatabase, true)
-            onCreate(sQLiteDatabase)
+    /**
+     * Development open helper that drops tables on upgrade
+     */
+    class DevOpenHelper(
+        context: Context,
+        name: String,
+        factory: SQLiteDatabase.CursorFactory? = null
+    ) : OpenHelper(context, name, factory) {
+
+        override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            Log.i("greenDAO", "Upgrading schema from version $oldVersion to $newVersion by dropping all tables")
+            dropAllTables(db, ifExists = true)
+            onCreate(db)
         }
     }
 
-    constructor(sQLiteDatabase: SQLiteDatabase) {
-        super(sQLiteDatabase, 71)
-        registerDaoClass(CachedResponseDao.class)
-        registerDaoClass(CachedAssetDao.class)
-        registerDaoClass(MoneyTransactionDao.class)
-        registerDaoClass(MuteListCachedDataDao.class)
-        registerDaoClass(SearchGridResultDao.class)
-        registerDaoClass(GroupMemberDao.class)
-        registerDaoClass(GroupMemberListDao.class)
-        registerDaoClass(GroupRoleMemberDao.class)
-        registerDaoClass(GroupRoleMemberListDao.class)
-        registerDaoClass(UserDao.class)
-        registerDaoClass(FriendDao.class)
-        registerDaoClass(UserNameDao.class)
-        registerDaoClass(UserPicDao.class)
-        registerDaoClass(ChatMessageDao.class)
-        registerDaoClass(ChatterDao.class)
+    init {
+        registerDaoClass(CachedResponseDao::class.java)
+        registerDaoClass(CachedAssetDao::class.java)
+        registerDaoClass(MoneyTransactionDao::class.java)
+        registerDaoClass(MuteListCachedDataDao::class.java)
+        registerDaoClass(SearchGridResultDao::class.java)
+        registerDaoClass(GroupMemberDao::class.java)
+        registerDaoClass(GroupMemberListDao::class.java)
+        registerDaoClass(GroupRoleMemberDao::class.java)
+        registerDaoClass(GroupRoleMemberListDao::class.java)
+        registerDaoClass(UserDao::class.java)
+        registerDaoClass(FriendDao::class.java)
+        registerDaoClass(UserNameDao::class.java)
+        registerDaoClass(UserPicDao::class.java)
+        registerDaoClass(ChatMessageDao::class.java)
+        registerDaoClass(ChatterDao::class.java)
     }
 
-    fun createAllTables(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        CachedResponseDao.createTable(sQLiteDatabase, z)
-        CachedAssetDao.createTable(sQLiteDatabase, z)
-        MoneyTransactionDao.createTable(sQLiteDatabase, z)
-        MuteListCachedDataDao.createTable(sQLiteDatabase, z)
-        SearchGridResultDao.createTable(sQLiteDatabase, z)
-        GroupMemberDao.createTable(sQLiteDatabase, z)
-        GroupMemberListDao.createTable(sQLiteDatabase, z)
-        GroupRoleMemberDao.createTable(sQLiteDatabase, z)
-        GroupRoleMemberListDao.createTable(sQLiteDatabase, z)
-        UserDao.createTable(sQLiteDatabase, z)
-        FriendDao.createTable(sQLiteDatabase, z)
-        UserNameDao.createTable(sQLiteDatabase, z)
-        UserPicDao.createTable(sQLiteDatabase, z)
-        ChatMessageDao.createTable(sQLiteDatabase, z)
-        ChatterDao.createTable(sQLiteDatabase, z)
-    }
-
-    fun dropAllTables(sQLiteDatabase: SQLiteDatabase, z: Boolean): Unit {
-        CachedResponseDao.dropTable(sQLiteDatabase, z)
-        CachedAssetDao.dropTable(sQLiteDatabase, z)
-        MoneyTransactionDao.dropTable(sQLiteDatabase, z)
-        MuteListCachedDataDao.dropTable(sQLiteDatabase, z)
-        SearchGridResultDao.dropTable(sQLiteDatabase, z)
-        GroupMemberDao.dropTable(sQLiteDatabase, z)
-        GroupMemberListDao.dropTable(sQLiteDatabase, z)
-        GroupRoleMemberDao.dropTable(sQLiteDatabase, z)
-        GroupRoleMemberListDao.dropTable(sQLiteDatabase, z)
-        UserDao.dropTable(sQLiteDatabase, z)
-        FriendDao.dropTable(sQLiteDatabase, z)
-        UserNameDao.dropTable(sQLiteDatabase, z)
-        UserPicDao.dropTable(sQLiteDatabase, z)
-        ChatMessageDao.dropTable(sQLiteDatabase, z)
-        ChatterDao.dropTable(sQLiteDatabase, z)
-    }
-
+    /**
+     * Create new DAO session
+     */
     fun newSession(): DaoSession {
-        return DaoSession(this.db, IdentityScopeType.Session, this.daoConfigMap)
+        return DaoSession(db, IdentityScopeType.Session, daoConfigMap)
     }
 
+    /**
+     * Create new DAO session with custom identity scope
+     */
     fun newSession(identityScopeType: IdentityScopeType): DaoSession {
-        return DaoSession(this.db, identityScopeType, this.daoConfigMap)
+        return DaoSession(db, identityScopeType, daoConfigMap)
     }
 }

@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class OpenJPEGDecoder {
     private String TAG = "OpenJPEGDecoder"
-    private AtomicBoolean initialized = fun AtomicBoolean(): new
+    private val initialized = AtomicBoolean(false)
     
     {
         try {

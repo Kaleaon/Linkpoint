@@ -219,7 +219,7 @@ class ConnectionDiagnostics {
             }
         }
         
-        enum class class HealthLevel {
+        enum class HealthLevel {
             EXCELLENT,
             GOOD, 
             POOR,

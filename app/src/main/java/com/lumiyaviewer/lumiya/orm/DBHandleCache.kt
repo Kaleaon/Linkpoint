@@ -4,126 +4,124 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import com.lumiyaviewer.lumiya.Debug
 import java.lang.ref.PhantomReference
-import java.lang.ref.Reference
 import java.lang.ref.ReferenceQueue
-import java.util.HashMap
-import java.util.IdentityHashMap
-import java.util.Map
 
-class DBHandleCache {
-    private Map<String, DBOpenRef> fileMap
-    private Map<PhantomReference<DBHandle>, DBOpenRef> refMap
-    private ReferenceQueue<DBHandle> refQueue
+/**
+ * Cache for database handles with automatic cleanup via phantom references
+ */
+class DBHandleCache private constructor() {
+    
+    private val refQueue = ReferenceQueue<DBHandle>()
+    private val refMap = mutableMapOf<PhantomReference<DBHandle>, DBOpenRef>()
+    private val fileMap = mutableMapOf<String, DBOpenRef>()
 
-    interface DBOpenHelper {
-        SQLiteDatabase openOrCreateDatabase(String str) throws SQLiteException
+    /**
+     * Interface for opening databases
+     */
+    fun interface DBOpenHelper {
+        @Throws(SQLiteException::class)
+        fun openOrCreateDatabase(filename: String): SQLiteDatabase
     }
 
-    private class DBOpenRef {
-        private String fileName
-        private int handleCount = 0
-        private SQLiteDatabase sqliteDB
+    /**
+     * Database open reference with handle counting
+     */
+    private class DBOpenRef(
+        val fileName: String,
+        val sqliteDB: SQLiteDatabase
+    ) {
+        private var handleCount = 0
 
-        DBOpenRef(String str, SQLiteDatabase sQLiteDatabase) {
-            this.fileName = str
-            this.sqliteDB = sQLiteDatabase
+        fun acquireReference() {
+            handleCount++
         }
 
-        void acquireReference() {
-            this.handleCount++
-        }
+        fun getDB(): SQLiteDatabase = sqliteDB
 
-        SQLiteDatabase getDB() {
-            return this.sqliteDB
-        }
+        fun getFileName(): String = fileName
 
-        String getFileName() {
-            return this.fileName
-        }
-
-        int releaseReference() {
-            this.handleCount--
-            return this.handleCount
-        }
-    }
-
-    private class InstanceHolder {
-        /* access modifiers changed from: private */
-        DBHandleCache Instance = DBHandleCache((DBHandleCache) null)
-
-        private InstanceHolder() {
+        fun releaseReference(): Int {
+            handleCount--
+            return handleCount
         }
     }
 
-    private DBHandleCache() {
-        this.refQueue = new ReferenceQueue<>()
-        this.refMap = fun IdentityHashMap(): new
-        this.fileMap = fun HashMap(): new
-        Debug.Printf("DBHandleCache: Initialized.", Array<Object>(0))
+    init {
+        Debug.Printf("DBHandleCache: Initialized.")
     }
 
-    /* synthetic */ DBHandleCache(DBHandleCache dBHandleCache) {
-        this()
-    }
-
-    DBHandleCache getInstance() {
-        return InstanceHolder.Instance
-    }
-
-    synchronized void Cleanup() {
+    /**
+     * Clean up unreferenced database handles
+     */
+    @Synchronized
+    fun Cleanup() {
         while (true) {
-            Reference<? extends DBHandle> poll = this.refQueue.poll()
-            if (poll == null) {
-                break; // Exit when no more references to process
-            }
-            DBOpenRef remove = this.refMap.remove(poll)
-            if (remove != null && remove.releaseReference() <= 0) {
-                String fileName = remove.getFileName()
+            val ref = refQueue.poll() ?: break
+            
+            val openRef = refMap.remove(ref)
+            if (openRef != null && openRef.releaseReference() <= 0) {
+                val fileName = openRef.getFileName()
                 Debug.Printf("DBHandle: Closing db '%s'", fileName)
+                
                 try {
-                    SQLiteDatabase db = remove.getDB()
-                    if (db != null && db.isOpen()) {
+                    val db = openRef.getDB()
+                    if (db.isOpen) {
                         db.close()
                     }
-                } catch (SQLiteException e) {
+                } catch (e: SQLiteException) {
                     Debug.Warning(e)
                 }
-                this.fileMap.remove(fileName)
+                
+                fileMap.remove(fileName)
             }
         }
     }
 
-    synchronized DBHandle OpenDB(String str, DBOpenHelper dBOpenHelper) throws SQLiteException {
-        if (str == null || str.trim().isEmpty()) {
-            throw fun IllegalArgumentException(filename: "Database): new
-        }
-        if (dBOpenHelper == null) {
-            throw fun IllegalArgumentException(cannot: "DBOpenHelper): new
-        }
+    /**
+     * Open or get existing database handle
+     */
+    @Synchronized
+    @Throws(SQLiteException::class)
+    fun OpenDB(filename: String, helper: DBOpenHelper): DBHandle {
+        require(filename.trim().isNotEmpty()) { "Database filename cannot be empty" }
         
-        DBHandle dBHandle
-        DBOpenRef dBOpenRef = this.fileMap.get(str)
-        if (dBOpenRef == null) {
-            Debug.Printf("DBHandle: Opening db '%s'", str)
+        var openRef = fileMap[filename]
+        
+        if (openRef == null) {
+            Debug.Printf("DBHandle: Opening db '%s'", filename)
             try {
-                SQLiteDatabase database = dBOpenHelper.openOrCreateDatabase(str)
-                if (database == null) {
-                    throw fun SQLiteException(to: "Failed): new
-                }
-                dBOpenRef = fun DBOpenRef(): new
-                this.fileMap.put(str, dBOpenRef)
-            } catch (SQLiteException e) {
-                Debug.Warning("Failed to open database: " + str, e)
+                val database = helper.openOrCreateDatabase(filename)
+                openRef = DBOpenRef(filename, database)
+                fileMap[filename] = openRef
+            } catch (e: SQLiteException) {
+                Debug.Warning("Failed to open database: $filename", e)
                 throw e
             }
         }
-        dBHandle = DBHandle(dBOpenRef.getDB())
-        dBOpenRef.acquireReference()
-        this.refMap.put(new PhantomReference<>(dBHandle, this.refQueue), dBOpenRef)
-        return dBHandle
+        
+        val handle = DBHandle(openRef.getDB())
+        openRef.acquireReference()
+        refMap[PhantomReference(handle, refQueue)] = openRef
+        
+        return handle
     }
 
-    synchronized boolean hasOpenHandles() {
-        return !this.fileMap.isEmpty() || !this.refMap.isEmpty()
+    /**
+     * Check if there are any open database handles
+     */
+    @Synchronized
+    fun hasOpenHandles(): Boolean {
+        return fileMap.isNotEmpty() || refMap.isNotEmpty()
+    }
+    
+    companion object {
+        /**
+         * Get singleton instance
+         */
+        fun getInstance(): DBHandleCache = InstanceHolder.INSTANCE
+        
+        private object InstanceHolder {
+            val INSTANCE = DBHandleCache()
+        }
     }
 }

@@ -10,107 +10,136 @@ import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.openjpeg.OpenJPEG
 import com.lumiyaviewer.lumiya.render.RenderContext
 import java.io.IOException
-import java.io.InputStream
-import javax.annotation.Nullable
 
-object GLLoadedTexture extends GLResourceTexture {
-    private boolean hasAlphaLayer
-    private int height
-    private int width
+/**
+ * GL texture loaded from bitmap or OpenJPEG data
+ */
+class GLLoadedTexture : GLResourceTexture {
+    
+    private val hasAlphaLayer: Boolean
+    val height: Int
+    val width: Int
 
-    GLLoadedTexture(RenderContext renderContext, Bitmap bitmap) {
-        super(renderContext.glResourceManager, bitmap.getHeight() * bitmap.getRowBytes())
+    /**
+     * Create texture from bitmap
+     */
+    constructor(renderContext: RenderContext, bitmap: Bitmap) : super(
+        renderContext.glResourceManager,
+        bitmap.height * bitmap.rowBytes
+    ) {
+        // Bind texture
         if (renderContext.hasGL20) {
-            GLES20.glBindTexture(3553, this.handle)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, handle)
         } else {
-            GLES10.glBindTexture(3553, this.handle)
+            GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, handle)
         }
-        this.hasAlphaLayer = bitmap.hasAlpha()
-        this.width = bitmap.getWidth()
-        this.height = bitmap.getHeight()
+        
+        hasAlphaLayer = bitmap.hasAlpha()
+        width = bitmap.width
+        height = bitmap.height
+        
         renderContext.KeepTexture(bitmap)
-        GLUtils.texImage2D(3553, 0, bitmap, 0)
+        GLUtils.texImage2D(GLES10.GL_TEXTURE_2D, 0, bitmap, 0)
+        
+        // Set texture parameters
         if (renderContext.hasGL20) {
-            GLES20.glTexParameteri(3553, 10240, 9729)
-            GLES20.glTexParameteri(3553, 10241, 9729)
-            GLES20.glTexParameteri(3553, 10242, 10497)
-            GLES20.glTexParameteri(3553, 10243, 10497)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
         } else {
-            GLES10.glTexParameterf(3553, 10240, 9728.0f)
-            GLES10.glTexParameterf(3553, 10241, 9728.0f)
-            GLES10.glTexParameterf(3553, 10242, 10497.0f)
-            GLES10.glTexParameterf(3553, 10243, 10497.0f)
-        }
-        if (renderContext.hasGL20) {
-            GLES20.glBindTexture(3553, 0)
-        } else {
-            GLES10.glBindTexture(3553, 0)
+            GLES10.glTexParameterf(GLES10.GL_TEXTURE_2D, GLES10.GL_TEXTURE_MIN_FILTER, GLES10.GL_NEAREST.toFloat())
+            GLES10.glTexParameterf(GLES10.GL_TEXTURE_2D, GLES10.GL_TEXTURE_MAG_FILTER, GLES10.GL_NEAREST.toFloat())
+            GLES10.glTexParameterf(GLES10.GL_TEXTURE_2D, GLES10.GL_TEXTURE_WRAP_S, GLES10.GL_REPEAT.toFloat())
+            GLES10.glTexParameterf(GLES10.GL_TEXTURE_2D, GLES10.GL_TEXTURE_WRAP_T, GLES10.GL_REPEAT.toFloat())
+            GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, 0)
         }
     }
 
-    GLLoadedTexture(RenderContext renderContext, OpenJPEG openJPEG) {
-        super(renderContext.glResourceManager, openJPEG.getLoadedSize())
+    /**
+     * Create texture from OpenJPEG data
+     */
+    constructor(renderContext: RenderContext, openJPEG: OpenJPEG) : super(
+        renderContext.glResourceManager,
+        openJPEG.getLoadedSize()
+    ) {
+        // Bind texture
         if (renderContext.hasGL20) {
-            GLES20.glBindTexture(3553, this.handle)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, handle)
         } else {
-            GLES10.glBindTexture(3553, this.handle)
+            GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, handle)
         }
-        this.hasAlphaLayer = openJPEG.hasAlphaLayer()
-        this.width = openJPEG.getWidth()
-        this.height = openJPEG.getHeight()
+        
+        hasAlphaLayer = openJPEG.hasAlphaLayer()
+        width = openJPEG.getWidth()
+        height = openJPEG.getHeight()
+        
         renderContext.KeepTexture(openJPEG)
+        
+        // Upload texture data
         if (renderContext.hasGL30) {
             openJPEG.SetAsImmutableTexture()
         } else {
             openJPEG.SetAsTexture()
         }
+        
+        // Set texture parameters
         if (renderContext.hasGL20) {
-            GLES20.glTexParameteri(3553, 10240, 9729)
-            GLES20.glTexParameteri(3553, 10241, 9729)
-            GLES20.glTexParameteri(3553, 10242, 10497)
-            GLES20.glTexParameteri(3553, 10243, 10497)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT)
+            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT)
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
         } else {
-            GLES10.glTexParameterf(3553, 10240, 9728.0f)
-            GLES10.glTexParameterf(3553, 10241, 9728.0f)
-            GLES10.glTexParameterf(3553, 10242, 10497.0f)
-            GLES10.glTexParameterf(3553, 10243, 10497.0f)
-        }
-        if (renderContext.hasGL20) {
-            GLES20.glBindTexture(3553, 0)
-        } else {
-            GLES10.glBindTexture(3553, 0)
+            GLES10.glTexParameterf(GLES10.GL_TEXTURE_2D, GLES10.GL_TEXTURE_MIN_FILTER, GLES10.GL_NEAREST.toFloat())
+            GLES10.glTexParameterf(GLES10.GL_TEXTURE_2D, GLES10.GL_TEXTURE_MAG_FILTER, GLES10.GL_NEAREST.toFloat())
+            GLES10.glTexParameterf(GLES10.GL_TEXTURE_2D, GLES10.GL_TEXTURE_WRAP_S, GLES10.GL_REPEAT.toFloat())
+            GLES10.glTexParameterf(GLES10.GL_TEXTURE_2D, GLES10.GL_TEXTURE_WRAP_T, GLES10.GL_REPEAT.toFloat())
+            GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, 0)
         }
     }
 
-    @Nullable
-    fun loadFromAssets(renderContext: RenderContext, context: Context, str: String): GLLoadedTexture {
-        try {
-            InputStream open = context.getAssets().open(str)
-            Bitmap decodeStream = BitmapFactory.decodeStream(open)
-            open.close()
-            if (decodeStream != null) {
-                return GLLoadedTexture(renderContext, decodeStream)
+    /**
+     * Bind texture for drawing
+     */
+    fun GLDraw() {
+        GLES10.glBindTexture(GLES10.GL_TEXTURE_2D, handle)
+    }
+
+    /**
+     * Get texture height
+     */
+    fun getHeight(): Int = height
+
+    /**
+     * Get texture width
+     */
+    fun getWidth(): Int = width
+
+    /**
+     * Check if texture has alpha channel
+     */
+    fun hasAlphaLayer(): Boolean = hasAlphaLayer
+
+    companion object {
+        /**
+         * Load texture from assets
+         */
+        fun loadFromAssets(
+            renderContext: RenderContext,
+            context: Context,
+            path: String
+        ): GLLoadedTexture? {
+            return try {
+                context.assets.open(path).use { inputStream ->
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    bitmap?.let { GLLoadedTexture(renderContext, it) }
+                }
+            } catch (e: IOException) {
+                Debug.Warning(e)
+                null
             }
-            return null
-        } catch (IOException e) {
-            Debug.Warning(e)
-            return null
         }
-    }
-
-    void GLDraw() {
-        GLES10.glBindTexture(3553, this.handle)
-    }
-
-    fun getHeight(): Int {
-        return this.height
-    }
-
-    fun getWidth(): Int {
-        return this.width
-    }
-
-    fun hasAlphaLayer(): Boolean {
-        return this.hasAlphaLayer
     }
 }

@@ -2,41 +2,48 @@ package com.lumiyaviewer.lumiya.modern
 
 import android.content.Context
 import android.util.Log
-import com.lumiyaviewer.lumiya.modern.connection.ModernConnectionManager
+import com.lumiyaviewer.lumiya.modern.auth.ModernAuthManager
 import com.lumiyaviewer.lumiya.modern.connection.ConnectionDiagnostics
 import com.lumiyaviewer.lumiya.modern.connection.ConnectionIntegrationBridge
-import com.lumiyaviewer.lumiya.modern.auth.ModernAuthManager
-import com.lumiyaviewer.lumiya.modern.protocol.HybridProtocolManager
+import com.lumiyaviewer.lumiya.modern.connection.ModernConnectionManager
 import com.lumiyaviewer.lumiya.modern.features.ModernSecondLifeFeatures
+import com.lumiyaviewer.lumiya.modern.protocol.HybridProtocolManager
 import com.lumiyaviewer.lumiya.slproto.auth.SLAuthParams
+import java.util.Date
+import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Complete modern Second Life client implementation bringing together
  * all modern systems: connection management, authentication, protocol handling,
- * and advanced Second Life features.
+ * and advanced Second Life features
  */
-class ModernLinkpointClient {
-    private String TAG = "ModernLinkpoint"
+class ModernLinkpointClient(context: Context) {
     
-    private Context context
+    private val TAG = "ModernLinkpoint"
+    
+    private val context: Context = context.applicationContext
     
     // Core systems
-    private ModernConnectionManager connectionManager
-    private ConnectionDiagnostics diagnostics
-    private ConnectionIntegrationBridge connectionBridge
-    private ModernAuthManager authManager
-    private HybridProtocolManager protocolManager
-    private ModernSecondLifeFeatures featuresManager
+    private val connectionManager = ModernConnectionManager(context)
+    private val diagnostics = ConnectionDiagnostics(context)
+    private val connectionBridge = ConnectionIntegrationBridge(context)
+    private val authManager = ModernAuthManager(context)
+    private val protocolManager = HybridProtocolManager()
+    private val featuresManager = ModernSecondLifeFeatures(protocolManager)
     
     // Client state
-    private volatile ClientState currentState = ClientState.DISCONNECTED
-    private ExecutorService executor
-    private volatile String lastError = null
+    @Volatile private var currentState = ClientState.DISCONNECTED
+    private val executor: ExecutorService
+    @Volatile private var lastError: String? = null
     
-    enum class class ClientState {
+    /**
+     * Client states
+     */
+    enum class ClientState {
         DISCONNECTED,
         INITIALIZING,
         AUTHENTICATING,
@@ -47,23 +54,13 @@ class ModernLinkpointClient {
         ERROR
     }
     
-    ModernLinkpointClient(Context context) {
-        this.context = context.getApplicationContext()
-        
-        // Initialize core systems
-        this.connectionManager = ModernConnectionManager(context)
-        this.diagnostics = ConnectionDiagnostics(context)
-        this.connectionBridge = ConnectionIntegrationBridge(context)
-        this.authManager = ModernAuthManager(context)
-        this.protocolManager = HybridProtocolManager()
-        this.featuresManager = ModernSecondLifeFeatures(protocolManager)
-        
+    init {
         // Executor for async operations
-        this.executor = Executors.newCachedThreadPool(r -> {
-            Thread t = Thread(r, "ModernLinkpoint-" + r.hashCode())
-            t.setDaemon(true)
-            return t
-        })
+        executor = Executors.newCachedThreadPool { r ->
+            Thread(r, "ModernLinkpoint-${r.hashCode()}").apply {
+                isDaemon = true
+            }
+        }
         
         Log.i(TAG, "Modern Linkpoint client initialized")
     }
@@ -71,33 +68,31 @@ class ModernLinkpointClient {
     /**
      * Complete login and connection flow with modern features
      */
-    CompletableFuture<Boolean> loginAsync(String username, String password, String gridUrl) {
-        Log.i(TAG, "Starting modern login flow for user: " + username)
+    fun loginAsync(username: String, password: String, gridUrl: String): CompletableFuture<Boolean> {
+        Log.i(TAG, "Starting modern login flow for user: $username")
         
         setState(ClientState.INITIALIZING)
         
-        return CompletableFuture.supplyAsync(() -> {
+        return CompletableFuture.supplyAsync({
             try {
                 // Step 1: Run connection diagnostics
                 Log.i(TAG, "Step 1: Running connection diagnostics...")
-                ConnectionDiagnostics.DiagnosticResult diagnostic = 
-                    diagnostics.diagnoseAsync().get()
+                val diagnostic = diagnostics.diagnoseAsync().get()
                 
                 if (diagnostic.getOverallHealth() == ConnectionDiagnostics.DiagnosticResult.HealthLevel.NO_CONNECTIVITY) {
                     throw LoginException("No network connectivity available")
                 }
                 
-                Log.i(TAG, "Connection health: " + diagnostic.getOverallHealth())
+                Log.i(TAG, "Connection health: ${diagnostic.getOverallHealth()}")
                 
                 // Step 2: Authenticate user
                 setState(ClientState.AUTHENTICATING)
                 Log.i(TAG, "Step 2: Authenticating user...")
                 
-                ModernAuthManager.AuthResult authResult = 
-                    authManager.authenticateAsync(username, password).get()
+                val authResult = authManager.authenticateAsync(username, password).get()
                 
                 if (!authResult.isSuccessful()) {
-                    throw LoginException("Authentication failed: " + authResult.getErrorMessage())
+                    throw LoginException("Authentication failed: ${authResult.getErrorMessage()}")
                 }
                 
                 Log.i(TAG, "Authentication successful")
@@ -107,9 +102,9 @@ class ModernLinkpointClient {
                 Log.i(TAG, "Step 3: Establishing connection...")
                 
                 // Create SL auth params with corrected URL
-                SLAuthParams authParams = createAuthParams(username, password, gridUrl)
+                val authParams = createAuthParams(username, password, gridUrl)
                 
-                boolean connectionSuccess = connectionBridge.connectWithModernReliability(authParams).get()
+                val connectionSuccess = connectionBridge.connectWithModernReliability(authParams).get()
                 
                 if (!connectionSuccess) {
                     throw LoginException("Connection to Second Life failed")
@@ -121,10 +116,10 @@ class ModernLinkpointClient {
                 // Step 4: Initialize protocol layer
                 Log.i(TAG, "Step 4: Initializing protocol layer...")
                 
-                String capsUrl = deriveCapsUrl(gridUrl)
-                String wsUrl = deriveWebSocketUrl(gridUrl)
+                val capsUrl = deriveCapsUrl(gridUrl)
+                val wsUrl = deriveWebSocketUrl(gridUrl)
                 
-                boolean protocolReady = protocolManager.initializeAsync(capsUrl, wsUrl).get()
+                val protocolReady = protocolManager.initializeAsync(capsUrl, wsUrl).get()
                 
                 if (!protocolReady) {
                     Log.w(TAG, "Protocol initialization had issues, some features may be limited")
@@ -134,7 +129,7 @@ class ModernLinkpointClient {
                 setState(ClientState.FEATURES_LOADING)
                 Log.i(TAG, "Step 5: Loading modern Second Life features...")
                 
-                boolean featuresReady = featuresManager.initializeAsync().get()
+                val featuresReady = featuresManager.initializeAsync().get()
                 
                 if (!featuresReady) {
                     Log.w(TAG, "Some features failed to initialize, client will work with limited functionality")
@@ -144,13 +139,13 @@ class ModernLinkpointClient {
                 setState(ClientState.READY)
                 Log.i(TAG, "🎉 Modern Linkpoint login complete! Client is ready.")
                 
-                return true
+                true
                 
-            } catch (Exception e) {
+            } catch (e: Exception) {
                 setState(ClientState.ERROR)
-                lastError = e.getMessage()
-                Log.e(TAG, "Login failed: " + e.getMessage(), e)
-                return false
+                lastError = e.message
+                Log.e(TAG, "Login failed: ${e.message}", e)
+                false
             }
         }, executor)
     }
@@ -158,131 +153,124 @@ class ModernLinkpointClient {
     /**
      * Get comprehensive client status report
      */
-    CompletableFuture<String> getStatusReportAsync() {
-        return CompletableFuture.supplyAsync(() -> {
-            StringBuilder report = StringBuilder()
-            report.append("=== MODERN LINKPOINT CLIENT STATUS ===\n")
-            report.append("Generated: ").append(new java.util.Date()).append("\n\n")
-            
-            // Overall state
-            report.append("CLIENT STATE: ").append(currentState).append("\n")
-            if (lastError != null) {
-                report.append("Last Error: ").append(lastError).append("\n")
+    fun getStatusReportAsync(): CompletableFuture<String> {
+        return CompletableFuture.supplyAsync({
+            buildString {
+                append("=== MODERN LINKPOINT CLIENT STATUS ===\n")
+                append("Generated: ${Date()}\n\n")
+                
+                // Overall state
+                append("CLIENT STATE: $currentState\n")
+                lastError?.let { append("Last Error: $it\n") }
+                append("\n")
+                
+                // System status
+                append("SYSTEM STATUS:\n")
+                append("  Connection Manager: ${getSystemStatus(connectionManager.getState().toString())}\n")
+                append("  Protocol Manager: ${if (protocolManager.isConnected()) "✅ Connected" else "❌ Disconnected"}\n")
+                append("  Features Manager: ${if (featuresManager.areFeaturesInitialized()) "✅ Ready" else "⚠️ Limited"}\n")
+                append("  Active Connections: ${connectionManager.getActiveConnectionCount()}\n")
+                append("\n")
+                
+                // Available features
+                append("AVAILABLE FEATURES:\n")
+                if (featuresManager.areFeaturesInitialized()) {
+                    append("  ✅ Modern Avatar System\n")
+                    append("  ✅ Advanced Inventory Management\n")
+                    append("  ✅ Enhanced Chat & Communication\n")
+                    append("  ✅ Smart Object Management\n")
+                    append("  ✅ PBR Material Support\n")
+                    append("  ✅ Real-time Event Streaming\n")
+                } else {
+                    append("  ⚠️ Features loading or limited functionality\n")
+                }
+                
+                append("\nCLIENT CAPABILITIES:\n")
+                append("  • Hybrid Protocol Support (UDP/HTTP2/WebSocket)\n")
+                append("  • Advanced Connection Diagnostics\n")
+                append("  • Secure Authentication & Token Caching\n")
+                append("  • Connection Retry with Exponential Backoff\n")
+                append("  • Network Health Monitoring\n")
+                append("  • Modern Second Life Feature Set\n")
             }
-            report.append("\n")
-            
-            // System status
-            report.append("SYSTEM STATUS:\n")
-            report.append("  Connection Manager: ").append(getSystemStatus(connectionManager.getState().toString())).append("\n")
-            report.append("  Protocol Manager: ").append(protocolManager.isConnected() ? "✅ Connected" : "❌ Disconnected").append("\n")
-            report.append("  Features Manager: ").append(featuresManager.areFeaturesInitialized() ? "✅ Ready" : "⚠️ Limited").append("\n")
-            report.append("  Active Connections: ").append(connectionManager.getActiveConnectionCount()).append("\n")
-            
-            report.append("\n")
-            
-            // Available features
-            report.append("AVAILABLE FEATURES:\n")
-            if (featuresManager.areFeaturesInitialized()) {
-                report.append("  ✅ Modern Avatar System\n")
-                report.append("  ✅ Advanced Inventory Management\n")
-                report.append("  ✅ Enhanced Chat & Communication\n")
-                report.append("  ✅ Smart Object Management\n")
-                report.append("  ✅ PBR Material Support\n")
-                report.append("  ✅ Real-time Event Streaming\n")
-            } else {
-                report.append("  ⚠️ Features loading or limited functionality\n")
-            }
-            
-            report.append("\nCLIENT CAPABILITIES:\n")
-            report.append("  • Hybrid Protocol Support (UDP/HTTP2/WebSocket)\n")
-            report.append("  • Advanced Connection Diagnostics\n")
-            report.append("  • Secure Authentication & Token Caching\n")
-            report.append("  • Connection Retry with Exponential Backoff\n")
-            report.append("  • Network Health Monitoring\n")
-            report.append("  • Modern Second Life Feature Set\n")
-            
-            return report.toString()
         }, executor)
     }
     
-    private String getSystemStatus(String state) {
-        switch (state.toLowerCase()) {
-            case "connected": return "✅ " + state
-            case "connecting": return "🔄 " + state
-            case "error": return "❌ " + state
-            default: return "⚠️ " + state
+    /**
+     * Get status indicator for system
+     */
+    private fun getSystemStatus(state: String): String {
+        return when (state.lowercase()) {
+            "connected" -> "✅ $state"
+            "connecting" -> "🔄 $state"
+            "error" -> "❌ $state"
+            else -> "⚠️ $state"
         }
     }
     
-    private SLAuthParams createAuthParams(String username, String password, String gridUrl) {
-        // Create proper auth params with modern defaults
-        java.util.UUID clientId = java.util.UUID.randomUUID()
-        String startLocation = "last"; // or "home"
-        String loginUrl = gridUrl != null ? gridUrl : "https://login.agni.lindenlab.com/cgi-bin/login.cgi"
-        String gridName = deriveGridName(loginUrl)
+    /**
+     * Create auth parameters
+     */
+    private fun createAuthParams(username: String, password: String, gridUrl: String): SLAuthParams {
+        val clientId = UUID.randomUUID()
+        val startLocation = "last"
+        val loginUrl = gridUrl.ifEmpty { "https://login.agni.lindenlab.com/cgi-bin/login.cgi" }
+        val gridName = deriveGridName(loginUrl)
         
         return SLAuthParams(username, password, clientId, startLocation, loginUrl, gridName)
     }
     
-    private String deriveGridName(String loginUrl) {
-        if (loginUrl.contains("agni")) {
-            return "Second Life Main Grid"
-        } else if (loginUrl.contains("aditi")) {
-            return "Second Life Beta Grid"
-        } else {
-            return "OpenSimulator Grid"
+    /**
+     * Derive grid name from login URL
+     */
+    private fun deriveGridName(loginUrl: String): String {
+        return when {
+            loginUrl.contains("agni") -> "Second Life Main Grid"
+            loginUrl.contains("aditi") -> "Second Life Beta Grid"
+            else -> "OpenSimulator Grid"
         }
     }
     
-    private String deriveCapsUrl(String gridUrl) {
+    /**
+     * Derive CAPS URL from grid URL
+     */
+    private fun deriveCapsUrl(gridUrl: String): String {
         // In real implementation, this would come from login response
         return "https://sim1.agni.lindenlab.com/caps/example"
     }
     
-    private String deriveWebSocketUrl(String gridUrl) {
+    /**
+     * Derive WebSocket URL from grid URL
+     */
+    private fun deriveWebSocketUrl(gridUrl: String): String {
         // In real implementation, this would be provided by the grid
         return "wss://events.agni.lindenlab.com/websocket"
     }
     
-    private void setState(ClientState newState) {
-        if (this.currentState != newState) {
-            ClientState oldState = this.currentState
-            this.currentState = newState
-            Log.d(TAG, "Client state changed: " + oldState + " -> " + newState)
-            // TODO: Emit state change event for UI updates
+    /**
+     * Set client state
+     */
+    private fun setState(newState: ClientState) {
+        if (currentState != newState) {
+            val oldState = currentState
+            currentState = newState
+            Log.d(TAG, "Client state changed: $oldState -> $newState")
         }
     }
     
-    // Getter methods for accessing subsystems
-    ModernConnectionManager getConnectionManager() {
-        return connectionManager
-    }
-    
-    ModernAuthManager getAuthManager() {
-        return authManager
-    }
-    
-    HybridProtocolManager getProtocolManager() {
-        return protocolManager
-    }
-    
-    ModernSecondLifeFeatures getFeaturesManager() {
-        return featuresManager
-    }
-    
-    ClientState getCurrentState() {
-        return currentState
-    }
-    
-    String getLastError() {
-        return lastError
-    }
+    // Accessors for subsystems
+    fun getConnectionManager(): ModernConnectionManager = connectionManager
+    fun getAuthManager(): ModernAuthManager = authManager
+    fun getProtocolManager(): HybridProtocolManager = protocolManager
+    fun getFeaturesManager(): ModernSecondLifeFeatures = featuresManager
+    fun getCurrentState(): ClientState = currentState
+    fun getLastError(): String? = lastError
     
     /**
      * Perform logout and cleanup
      */
-    CompletableFuture<Boolean> logoutAsync() {
-        return CompletableFuture.supplyAsync(() -> {
+    fun logoutAsync(): CompletableFuture<Boolean> {
+        return CompletableFuture.supplyAsync({
             Log.i(TAG, "Starting logout process")
             
             try {
@@ -292,17 +280,13 @@ class ModernLinkpointClient {
                 // Shutdown connection bridge
                 connectionBridge.shutdown()
                 
-                // Clear auth cache if requested
-                // authManager.clearAuthCache()
-                
                 setState(ClientState.DISCONNECTED)
                 Log.i(TAG, "Logout completed successfully")
                 
-                return true
-                
-            } catch (Exception e) {
+                true
+            } catch (e: Exception) {
                 Log.e(TAG, "Error during logout", e)
-                return false
+                false
             }
         }, executor)
     }
@@ -310,18 +294,18 @@ class ModernLinkpointClient {
     /**
      * Shutdown the entire client
      */
-    void shutdown() {
+    fun shutdown() {
         Log.i(TAG, "Shutting down Modern Linkpoint client")
         
-        logoutAsync(); // Async logout
+        logoutAsync() // Async logout
         
         // Shutdown executor
         executor.shutdown()
         try {
-            if (!executor.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS)) {
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
                 executor.shutdownNow()
             }
-        } catch (InterruptedException e) {
+        } catch (e: InterruptedException) {
             executor.shutdownNow()
             Thread.currentThread().interrupt()
         }
@@ -332,13 +316,8 @@ class ModernLinkpointClient {
     /**
      * Custom exception for login-related errors
      */
-    class LoginException extends RuntimeException {
-        LoginException(String message) {
-            super(message)
-        }
-        
-        LoginException(String message, Throwable cause) {
-            super(message, cause)
-        }
+    class LoginException : RuntimeException {
+        constructor(message: String) : super(message)
+        constructor(message: String, cause: Throwable) : super(message, cause)
     }
 }

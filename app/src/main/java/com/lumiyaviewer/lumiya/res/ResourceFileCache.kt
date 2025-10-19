@@ -1,48 +1,74 @@
 package com.lumiyaviewer.lumiya.res
 
+import com.lumiyaviewer.lumiya.memory.MemoryManager
 import com.lumiyaviewer.lumiya.res.executors.LoaderExecutor
 import java.io.File
 
-abstract class ResourceFileCache<ResourceParams, ResourceType> extends ResourceMemoryCache<ResourceParams, ResourceType> {
+/**
+ * File-backed resource cache that extends memory cache
+ */
+abstract class ResourceFileCache<ResourceParams, ResourceType>(
+    memoryManager: MemoryManager
+) : ResourceMemoryCache<ResourceParams, ResourceType>(memoryManager) {
 
-    private class ResourceLoadRequest<ResParams extends ResourceParams, ResType extends ResourceType> extends ResourceRequest<ResourceParams, ResourceType> implements Runnable {
-        private File file
+    /**
+     * Resource load request from file
+     */
+    private inner class ResourceLoadRequest(
+        params: ResourceParams,
+        manager: ResourceManager<ResourceParams, ResourceType>,
+        private val file: File
+    ) : ResourceRequest<ResourceParams, ResourceType>(params, manager), Runnable {
 
-        ResourceLoadRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager, File file2) {
-            super(resourceparams, resourceManager)
-            this.file = file2
-        }
-
-        fun cancelRequest(): Unit {
+        override fun cancelRequest() {
             LoaderExecutor.getInstance().remove(this)
             super.cancelRequest()
         }
 
-        fun execute(): Unit {
+        override fun execute() {
             LoaderExecutor.getInstance().execute(this)
         }
 
-        fun run(): Unit {
+        override fun run() {
             try {
-                completeRequest(ResourceFileCache.this.createResourceFromFile(getParams(), this.file))
-            } catch (Exception e) {
+                completeRequest(createResourceFromFile(getParams(), file))
+            } catch (e: Exception) {
                 completeRequest(null)
             }
         }
     }
 
-    /* access modifiers changed from: protected */
-    fun CreateNewRequest(resourceparams: ResourceParams, resourceManager: ResourceType>): ResourceRequest<ResourceParams, ResourceType> {
-        File resourceFile = getResourceFile(resourceparams)
-        return resourceFile.exists() ? ResourceLoadRequest(resourceparams, resourceManager, resourceFile) : createResourceGenRequest(resourceparams, resourceManager, resourceFile)
+    /**
+     * Create a new resource request
+     */
+    protected fun CreateNewRequest(
+        params: ResourceParams,
+        manager: ResourceManager<ResourceParams, ResourceType>
+    ): ResourceRequest<ResourceParams, ResourceType> {
+        val resourceFile = getResourceFile(params)
+        return if (resourceFile.exists()) {
+            ResourceLoadRequest(params, manager, resourceFile)
+        } else {
+            createResourceGenRequest(params, manager, resourceFile)
+        }
     }
 
-    /* access modifiers changed from: protected */
-    abstract fun createResourceFromFile(resourceparams: ResourceParams, file: File): ResourceType
+    /**
+     * Create resource from file
+     */
+    protected abstract fun createResourceFromFile(params: ResourceParams, file: File): ResourceType
 
-    /* access modifiers changed from: protected */
-    abstract fun createResourceGenRequest(resourceparams: ResourceParams, resourceManager: ResourceType>, file: File): ResourceRequest<ResourceParams, ResourceType>
+    /**
+     * Create resource generation request for missing files
+     */
+    protected abstract fun createResourceGenRequest(
+        params: ResourceParams,
+        manager: ResourceManager<ResourceParams, ResourceType>,
+        file: File
+    ): ResourceRequest<ResourceParams, ResourceType>
 
-    /* access modifiers changed from: protected */
-    abstract fun getResourceFile(resourceparams: ResourceParams): File
+    /**
+     * Get file path for resource parameters
+     */
+    protected abstract fun getResourceFile(params: ResourceParams): File
 }

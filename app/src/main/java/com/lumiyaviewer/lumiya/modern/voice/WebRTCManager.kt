@@ -73,9 +73,9 @@ class WebRTCManager {
                 if (!voiceEnabled) {
                     // Mock audio source and track creation
                     // In real implementation, this would create actual WebRTC audio components
-                    audioSource = fun Object(): new // Mock AudioSource
-                    localAudioTrack = fun Object(): new // Mock AudioTrack
-                    localStream = fun Object(): new // Mock MediaStream
+                    audioSource = Any() // Mock AudioSource
+                    localAudioTrack = Any() // Mock AudioTrack
+                    localStream = Any() // Mock MediaStream
                     
                     voiceEnabled = true
                     Log.i(TAG, "Voice enabled successfully (mock implementation)")
@@ -99,7 +99,7 @@ class WebRTCManager {
                 
                 // Mock peer connection creation
                 // In real implementation, this would create actual WebRTC peer connection
-                peerConnection = fun Object(): new // Mock PeerConnection
+                peerConnection = Any() // Mock PeerConnection
                 
                 currentVoiceChannel = channelId
                 isConnected = true

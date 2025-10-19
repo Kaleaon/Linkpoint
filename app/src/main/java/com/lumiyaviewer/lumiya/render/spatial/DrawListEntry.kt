@@ -1,47 +1,48 @@
 package com.lumiyaviewer.lumiya.render.spatial
-import java.util.*
 
 import com.lumiyaviewer.lumiya.utils.InlineList
 import com.lumiyaviewer.lumiya.utils.InlineListEntry
-import javax.annotation.Nonnull
 
-abstract class DrawListEntry implements InlineListEntry<DrawListEntry> {
-    @Nonnull
-    float[] boundingBox = FloatArray(6)
-    private volatile InlineList<DrawListEntry> list
+/**
+ * Base class for entries in a spatial draw list
+ * Manages bounding box and linked list functionality
+ */
+abstract class DrawListEntry : InlineListEntry<DrawListEntry> {
+    
+    val boundingBox = FloatArray(6)
+    
+    @Volatile
+    private var list: InlineList<DrawListEntry>? = null
     private var next: DrawListEntry? = null
     private var prev: DrawListEntry? = null
 
-    abstract fun addToDrawList(drawList: DrawList): Unit
+    /**
+     * Add this entry to a draw list
+     */
+    abstract fun addToDrawList(drawList: DrawList)
 
-    fun getList(): InlineList<DrawListEntry> {
-        return this.list
+    override fun getList(): InlineList<DrawListEntry>? = list
+
+    override fun getNext(): DrawListEntry? = next
+
+    override fun getPrev(): DrawListEntry? = prev
+
+    /**
+     * Request removal of this entry from its list
+     */
+    fun requestEntryRemoval() {
+        list?.requestEntryRemoval(this)
     }
 
-    fun getNext(): DrawListEntry {
-        return this.next
-    }
-
-    fun getPrev(): DrawListEntry {
-        return this.prev
-    }
-
-    fun requestEntryRemoval(): Unit {
-        InlineList inlineList = this.list
-        if (inlineList != null) {
-            inlineList.requestEntryRemoval(this)
-        }
-    }
-
-    fun setList(inlineList: InlineList<DrawListEntry>): Unit {
+    override fun setList(inlineList: InlineList<DrawListEntry>?) {
         this.list = inlineList
     }
 
-    fun setNext(drawListEntry: DrawListEntry): Unit {
-        this.next = drawListEntry
+    override fun setNext(entry: DrawListEntry?) {
+        this.next = entry
     }
 
-    fun setPrev(drawListEntry: DrawListEntry): Unit {
-        this.prev = drawListEntry
+    override fun setPrev(entry: DrawListEntry?) {
+        this.prev = entry
     }
 }

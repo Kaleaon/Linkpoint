@@ -1,117 +1,161 @@
 package com.lumiyaviewer.lumiya.render.glres
 
 import com.lumiyaviewer.lumiya.Debug
+import com.lumiyaviewer.lumiya.memory.MemoryManager
 import com.lumiyaviewer.lumiya.render.RenderContext
-import com.lumiyaviewer.lumiya.render.glres.GLLoadQueue
-import com.lumiyaviewer.lumiya.render.glres.GLSizedResource
 import com.lumiyaviewer.lumiya.res.ResourceConsumer
 import com.lumiyaviewer.lumiya.res.ResourceManager
 import com.lumiyaviewer.lumiya.res.ResourceMemoryCache
 import com.lumiyaviewer.lumiya.res.ResourceRequest
 
-abstract class GLResourceCache<ResourceParams, RawType, ResourceType extends GLSizedResource> extends ResourceMemoryCache<ResourceParams, ResourceType> {
-    /* access modifiers changed from: private */
-    GLLoadQueue loadQueue
+/**
+ * Base class for caching GL resources
+ * Manages loading raw resources onto the GPU
+ */
+abstract class GLResourceCache<ResourceParams, RawType, ResourceType : GLSizedResource>(
+    memoryManager: MemoryManager,
+    private val loadQueue: GLLoadQueue
+) : ResourceMemoryCache<ResourceParams, ResourceType>(memoryManager) {
 
-    private class LoadRequest<Raw extends RawType> extends ResourceRequest<ResourceParams, ResourceType> implements GLLoadQueue.GLLoadable, ResourceConsumer {
-        private volatile boolean finalResult
-        private volatile boolean loadedFinal
-        private volatile ResourceType loadedResource
-        private volatile Raw rawResource
+    /**
+     * Load request that handles GPU resource loading
+     */
+    private inner class LoadRequest(
+        params: ResourceParams,
+        manager: ResourceManager<ResourceParams, ResourceType>
+    ) : ResourceRequest<ResourceParams, ResourceType>(params, manager), 
+        GLLoadQueue.GLLoadable, 
+        ResourceConsumer {
+        
+        @Volatile private var finalResult = false
+        @Volatile private var loadedFinal = false
+        @Volatile private var loadedResource: ResourceType? = null
+        @Volatile private var rawResource: RawType? = null
 
-        LoadRequest(ResourceParams resourceparams, ResourceManager<ResourceParams, ResourceType> resourceManager) {
-            super(resourceparams, resourceManager)
-        }
-
-        fun GLCompleteLoad(): Unit {
-            ResourceType resourcetype
-            synchronized (this) {
-                resourcetype = this.loadedResource
-                z = this.loadedFinal
+        /**
+         * Complete the GL load on render thread
+         */
+        override fun GLCompleteLoad() {
+            val (resource, isFinal) = synchronized(this) {
+                Pair(loadedResource, loadedFinal)
             }
-            if (z) {
-                completeRequest(resourcetype)
+            
+            if (isFinal) {
+                completeRequest(resource)
             } else {
-                intermediateResult(resourcetype)
+                intermediateResult(resource)
             }
         }
 
-        fun GLGetLoadSize(): Int {
-            Raw raw
-            synchronized (this) {
-                raw = this.rawResource
-            }
-            if (raw != null) {
-                return GLResourceCache.this.GetResourceSize(raw)
-            }
-            return 0
+        /**
+         * Get the size of the resource to load
+         */
+        override fun GLGetLoadSize(): Int {
+            val raw = synchronized(this) { rawResource }
+            return raw?.let { GetResourceSize(it) } ?: 0
         }
 
-        fun GLLoad(renderContext: RenderContext, gLLoadHandler: GLLoadQueue.GLLoadHandler): Int {
-            Raw raw
-            synchronized (this) {
-                raw = this.rawResource
-                z = this.finalResult
+        /**
+         * Load the resource on the GL thread
+         */
+        override fun GLLoad(
+            renderContext: RenderContext,
+            loadHandler: GLLoadQueue.GLLoadHandler
+        ): Int {
+            val (raw, isFinal) = synchronized(this) {
+                Pair(rawResource, finalResult)
             }
-            ResourceType LoadResource = GLResourceCache.this.LoadResource(getParams(), raw, renderContext)
-            int loadedSize = LoadResource != null ? LoadResource.getLoadedSize() : 0
-            synchronized (this) {
-                this.loadedResource = LoadResource
-                this.loadedFinal = z
+            
+            val loadedRes = LoadResource(getParams(), raw, renderContext)
+            val loadedSize = loadedRes?.getLoadedSize() ?: 0
+            
+            synchronized(this) {
+                loadedResource = loadedRes
+                loadedFinal = isFinal
             }
-            if (LoadResource != null) {
-                gLLoadHandler.GLResourceLoaded(this)
+            
+            loadedRes?.let {
+                loadHandler.GLResourceLoaded(this)
             }
+            
             return loadedSize
         }
 
-        fun OnResourceReady(obj: Any, z: Boolean): Unit {
-            if (obj != null) {
+        /**
+         * Called when raw resource is ready
+         */
+        override fun OnResourceReady(resource: Any?, isIntermediate: Boolean) {
+            if (resource != null) {
                 try {
-                    synchronized (this) {
-                        this.rawResource = obj
-                        this.finalResult = !z
+                    @Suppress("UNCHECKED_CAST")
+                    val rawRes = resource as RawType
+                    
+                    synchronized(this) {
+                        rawResource = rawRes
+                        finalResult = !isIntermediate
                     }
-                    GLResourceCache.this.loadQueue.add(this)
-                } catch (ClassCastException e) {
+                    loadQueue.add(this)
+                } catch (e: ClassCastException) {
                     Debug.Warning(e)
                     completeRequest(null)
                 }
             } else {
                 completeRequest(null)
             }
-            GLResourceCache.this.collectReferences()
+            collectReferences()
         }
 
-        fun cancelRequest(): Unit {
-            GLResourceCache.this.loadQueue.remove(this)
-            GLResourceCache.this.CancelRawResource(this)
+        /**
+         * Cancel the load request
+         */
+        override fun cancelRequest() {
+            loadQueue.remove(this)
+            CancelRawResource(this)
             super.cancelRequest()
         }
 
-        fun execute(): Unit {
-            GLResourceCache.this.RequestRawResource(getParams(), this)
+        /**
+         * Execute the request
+         */
+        override fun execute() {
+            RequestRawResource(getParams(), this)
         }
     }
 
-    protected GLResourceCache(GLLoadQueue gLLoadQueue) {
-        this.loadQueue = gLLoadQueue
+    /**
+     * Create a new load request
+     */
+    override fun CreateNewRequest(
+        params: ResourceParams,
+        manager: ResourceManager<ResourceParams, ResourceType>
+    ): ResourceRequest<ResourceParams, ResourceType> {
+        return LoadRequest(params, manager)
     }
 
-    /* access modifiers changed from: protected */
-    abstract fun CancelRawResource(resourceConsumer: ResourceConsumer): Unit
+    /**
+     * Cancel loading of raw resource
+     */
+    protected abstract fun CancelRawResource(consumer: ResourceConsumer)
 
-    /* access modifiers changed from: protected */
-    fun CreateNewRequest(resourceparams: ResourceParams, resourceManager: ResourceType>): ResourceRequest<ResourceParams, ResourceType> {
-        return LoadRequest(resourceparams, resourceManager)
-    }
+    /**
+     * Get the size of a raw resource
+     */
+    protected abstract fun GetResourceSize(raw: RawType?): Int
 
-    /* access modifiers changed from: protected */
-    abstract fun GetResourceSize(rawtype: RawType): Int
+    /**
+     * Load raw resource into GL resource
+     */
+    protected abstract fun LoadResource(
+        params: ResourceParams,
+        raw: RawType?,
+        renderContext: RenderContext
+    ): ResourceType?
 
-    /* access modifiers changed from: protected */
-    abstract fun LoadResource(resourceparams: ResourceParams, rawtype: RawType, renderContext: RenderContext): ResourceType
-
-    /* access modifiers changed from: protected */
-    abstract fun RequestRawResource(resourceparams: ResourceParams, resourceConsumer: ResourceConsumer): Unit
+    /**
+     * Request loading of raw resource
+     */
+    protected abstract fun RequestRawResource(
+        params: ResourceParams,
+        consumer: ResourceConsumer
+    )
 }

@@ -213,7 +213,7 @@ class ModernSecondLifeFeatures {
             Map<String, Object> metadata = new ConcurrentHashMap<>()
         }
         
-        enum class class InventoryItemType {
+        enum class InventoryItemType {
             TEXTURE, SOUND, CALLING_CARD, LANDMARK, SCRIPT, CLOTHING, OBJECT, NOTECARD, ANIMATION, GESTURE, MESH
         }
     }
@@ -267,7 +267,7 @@ class ModernSecondLifeFeatures {
             boolean hasEmojiSupport = false
         }
         
-        enum class class ChatChannel {
+        enum class ChatChannel {
             SAY, SHOUT, WHISPER, GROUP, IM, SYSTEM
         }
     }

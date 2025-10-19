@@ -1,258 +1,239 @@
 package com.lumiyaviewer.lumiya.modern.protocol
 
-import android.util.Log
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import okhttp3.*
 import okio.ByteString
-
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.regex.Matcher
 import java.util.regex.Pattern
+import kotlin.math.min
+import kotlin.math.pow
 
 /**
  * WebSocket-based event client for real-time Second Life events
- * Implements modern event streaming as described in the documentation
+ * Implements modern event streaming with automatic reconnection
  */
-class WebSocketEventClient extends WebSocketListener {
-    private String TAG = "WebSocketEventClient"
+class WebSocketEventClient : WebSocketListener() {
     
-    private OkHttpClient client
-    private ConcurrentHashMap<String, CopyOnWriteArrayList<EventListener>> eventListeners = new ConcurrentHashMap<>()
-    private WebSocket webSocket
-    private volatile boolean connected = false
-    private String authToken
+    private val TAG = "WebSocketEventClient"
+    
+    private val client: OkHttpClient
+    private val eventListeners = ConcurrentHashMap<String, CopyOnWriteArrayList<EventListener>>()
+    private var webSocket: WebSocket? = null
+    
+    @Volatile private var connected = false
+    private var authToken: String? = null
     
     // Reconnection management
-    private AtomicInteger reconnectAttempts = fun AtomicInteger(): new
-    private int MAX_RECONNECT_ATTEMPTS = 5
-    private String lastConnectionUrl
-    private Handler reconnectHandler = Handler(Looper.getMainLooper())
+    private val reconnectAttempts = AtomicInteger(0)
+    private val MAX_RECONNECT_ATTEMPTS = 5
+    private var lastConnectionUrl: String? = null
+    private val reconnectHandler = Handler(Looper.getMainLooper())
     
-    WebSocketEventClient() {
-        this.client = new OkHttpClient.Builder()
+    init {
+        client = OkHttpClient.Builder()
             .pingInterval(30, TimeUnit.SECONDS)
             .retryOnConnectionFailure(true)
             .build()
     }
     
-    void setAuthToken(String token) {
-        this.authToken = token
+    /**
+     * Set authentication token
+     */
+    fun setAuthToken(token: String) {
+        authToken = token
     }
     
     /**
      * Connect to Second Life event queue via WebSocket
      */
-    void connect(String eventQueueUrl) {
-        this.lastConnectionUrl = eventQueueUrl
-        this.reconnectAttempts.set(0); // Reset reconnect attempts on manual connect
+    fun connect(eventQueueUrl: String) {
+        lastConnectionUrl = eventQueueUrl
+        reconnectAttempts.set(0) // Reset reconnect attempts on manual connect
         
-        if (webSocket != null) {
-            webSocket.close(1000, "Reconnecting")
+        webSocket?.close(1000, "Reconnecting")
+        
+        val requestBuilder = Request.Builder().url(eventQueueUrl)
+        
+        authToken?.let {
+            requestBuilder.addHeader("Authorization", "Bearer $it")
         }
         
-        Request.Builder requestBuilder = new Request.Builder()
-            .url(eventQueueUrl)
-            
-        if (authToken != null) {
-            requestBuilder.addHeader("Authorization", "Bearer " + authToken)
-        }
-        
-        Request request = requestBuilder.build()
+        val request = requestBuilder.build()
         webSocket = client.newWebSocket(request, this)
         
-        Log.i(TAG, "Connecting to event queue: " + eventQueueUrl)
+        Log.i(TAG, "Connecting to event queue: $eventQueueUrl")
     }
     
     /**
      * Disconnect from event queue
      */
-    void disconnect() {
-        if (webSocket != null) {
-            webSocket.close(1000, "Normal closure")
-            webSocket = null
-        }
+    fun disconnect() {
+        webSocket?.close(1000, "Normal closure")
+        webSocket = null
         connected = false
     }
     
     /**
      * Subscribe to a specific event type
      */
-    void subscribe(String eventType, EventListener listener) {
-        eventListeners.computeIfAbsent(eventType, k -> new CopyOnWriteArrayList<>()).add(listener)
+    fun subscribe(eventType: String, listener: EventListener) {
+        eventListeners.computeIfAbsent(eventType) { CopyOnWriteArrayList() }.add(listener)
         
         // Send subscription message if connected
         if (connected && webSocket != null) {
-            String subscriptionMessage = String.format(
-                "{\"action\":\"subscribe\",\"eventType\":\"%s\"}", 
-                eventType
-            )
-            webSocket.send(subscriptionMessage)
-            Log.d(TAG, "Subscribed to event type: " + eventType)
+            val subscriptionMessage = """{"action":"subscribe","eventType":"$eventType"}"""
+            webSocket?.send(subscriptionMessage)
+            Log.d(TAG, "Subscribed to event type: $eventType")
         }
     }
     
     /**
      * Unsubscribe from an event type
      */
-    void unsubscribe(String eventType, EventListener listener) {
-        CopyOnWriteArrayList<EventListener> listeners = eventListeners.get(eventType)
-        if (listeners != null) {
+    fun unsubscribe(eventType: String, listener: EventListener) {
+        eventListeners[eventType]?.let { listeners ->
             listeners.remove(listener)
             if (listeners.isEmpty()) {
                 eventListeners.remove(eventType)
                 
                 // Send unsubscription message if connected
                 if (connected && webSocket != null) {
-                    String unsubscribeMessage = String.format(
-                        "{\"action\":\"unsubscribe\",\"eventType\":\"%s\"}", 
-                        eventType
-                    )
-                    webSocket.send(unsubscribeMessage)
-                    Log.d(TAG, "Unsubscribed from event type: " + eventType)
+                    val unsubscribeMessage = """{"action":"unsubscribe","eventType":"$eventType"}"""
+                    webSocket?.send(unsubscribeMessage)
+                    Log.d(TAG, "Unsubscribed from event type: $eventType")
                 }
             }
         }
     }
     
     /**
-     * Send a formatted message through the WebSocket connection (from main branch)
+     * Send a formatted message through the WebSocket connection
      */
-    java.util.concurrent.CompletableFuture<Boolean> sendMessage(String messageType, String payload) {
-        return java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+    fun sendMessage(messageType: String, payload: String): CompletableFuture<Boolean> {
+        return CompletableFuture.supplyAsync {
             if (connected && webSocket != null) {
                 try {
-                    String message = String.format(
-                        "{\"type\":\"%s\",\"payload\":%s}", 
-                        messageType, 
-                        payload
-                    )
-                    boolean success = webSocket.send(message)
-                    Log.d(TAG, "Sent message: " + messageType + " (success: " + success + ")")
-                    return success
-                } catch (Exception e) {
-                    Log.e(TAG, "Failed to send message: " + messageType, e)
-                    return false
+                    val message = """{"type":"$messageType","payload":$payload}"""
+                    val success = webSocket?.send(message) ?: false
+                    Log.d(TAG, "Sent message: $messageType (success: $success)")
+                    success
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to send message: $messageType", e)
+                    false
                 }
             } else {
                 Log.w(TAG, "Cannot send message - WebSocket not connected")
-                return false
+                false
             }
+        }
     }
     
     /**
-     * Send raw message through WebSocket connection (enhanced version)
+     * Send raw message through WebSocket connection
      */
-    boolean sendRawMessage(String message) {
+    fun sendRawMessage(message: String): Boolean {
         if (webSocket == null || !connected) {
             Log.w(TAG, "Cannot send message: WebSocket not connected")
             return false
         }
         
-        try {
-            return webSocket.send(message)
-        } catch (Exception e) {
+        return try {
+            webSocket?.send(message) ?: false
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to send message", e)
-            return false
+            false
         }
     }
     
     /**
-     * Send binary message through WebSocket connection (enhanced version)
+     * Send binary message through WebSocket connection
      */
-    boolean sendBinaryMessage(byte[] data) {
+    fun sendBinaryMessage(data: ByteArray): Boolean {
         if (webSocket == null || !connected) {
             Log.w(TAG, "Cannot send binary message: WebSocket not connected")
             return false
         }
         
-        try {
-            return webSocket.send(ByteString.of(data))
-        } catch (Exception e) {
+        return try {
+            webSocket?.send(ByteString.of(*data)) ?: false
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to send binary message", e)
-            return false
+            false
         }
     }
     
     // WebSocketListener implementation
     
-    @Override
-    void onOpen(WebSocket webSocket, Response response) {
-        Log.i(TAG, "WebSocket connected: " + response.message())
+    override fun onOpen(webSocket: WebSocket, response: Response) {
+        Log.i(TAG, "WebSocket connected: ${response.message}")
         connected = true
         
         // Reset reconnection attempts on successful connection
         reconnectAttempts.set(0)
         
         // Re-subscribe to all event types
-        for (String eventType : eventListeners.keySet()) {
-            String subscriptionMessage = String.format(
-                "{\"action\":\"subscribe\",\"eventType\":\"%s\"}", 
-                eventType
-            )
+        eventListeners.keys.forEach { eventType ->
+            val subscriptionMessage = """{"action":"subscribe","eventType":"$eventType"}"""
             webSocket.send(subscriptionMessage)
         }
     }
     
-    @Override
-    void onMessage(WebSocket webSocket, String text) {
-        Log.d(TAG, "Received text message: " + text.substring(0, Math.min(100, text.length())))
+    override fun onMessage(webSocket: WebSocket, text: String) {
+        val preview = text.substring(0, min(100, text.length))
+        Log.d(TAG, "Received text message: $preview")
         
         try {
-            EventMessage event = EventMessage.parseFromJson(text)
+            val event = EventMessage.parseFromJson(text)
             dispatchEvent(event)
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to parse text event message", e)
         }
     }
     
-    @Override
-    void onMessage(WebSocket webSocket, ByteString bytes) {
-        Log.d(TAG, "Received binary message: " + bytes.size() + " bytes")
+    override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+        Log.d(TAG, "Received binary message: ${bytes.size()} bytes")
         
         try {
-            EventMessage event = EventMessage.parseFromBytes(bytes.toByteArray())
+            val event = EventMessage.parseFromBytes(bytes.toByteArray())
             dispatchEvent(event)
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to parse binary event message", e)
         }
     }
     
-    @Override
-    void onClosing(WebSocket webSocket, int code, String reason) {
-        Log.i(TAG, "WebSocket closing: " + reason)
+    override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+        Log.i(TAG, "WebSocket closing: $reason")
         connected = false
     }
     
-    @Override
-    void onClosed(WebSocket webSocket, int code, String reason) {
-        Log.i(TAG, "WebSocket closed: " + reason)
+    override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+        Log.i(TAG, "WebSocket closed: $reason")
         connected = false
     }
     
-    @Override
-    void onFailure(WebSocket webSocket, Throwable t, Response response) {
+    override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         Log.e(TAG, "WebSocket failure", t)
         connected = false
         
-        // Attempt reconnection after fun scheduleReconnect(): delay
+        // Attempt reconnection with delay
+        scheduleReconnect()
     }
     
     /**
      * Dispatch event to registered listeners
      */
-    private void dispatchEvent(EventMessage event) {
-        CopyOnWriteArrayList<EventListener> listeners = eventListeners.get(event.getType())
-        if (listeners != null) {
-            for (EventListener listener : listeners) {
-                try {
-                    listener.onEvent(event)
-                } catch (Exception e) {
-                    Log.e(TAG, "Error in event listener", e)
-                }
+    private fun dispatchEvent(event: EventMessage) {
+        eventListeners[event.type]?.forEach { listener ->
+            try {
+                listener.onEvent(event)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in event listener", e)
             }
         }
     }
@@ -260,179 +241,154 @@ class WebSocketEventClient extends WebSocketListener {
     /**
      * Schedule reconnection with exponential backoff
      */
-    private void scheduleReconnect() {
-        if (lastConnectionUrl == null) {
+    private fun scheduleReconnect() {
+        val lastUrl = lastConnectionUrl
+        if (lastUrl == null) {
             Log.w(TAG, "No last connection URL available for reconnection")
             return
         }
         
-        int currentAttempt = reconnectAttempts.incrementAndGet()
+        val currentAttempt = reconnectAttempts.incrementAndGet()
         if (currentAttempt > MAX_RECONNECT_ATTEMPTS) {
-            Log.e(TAG, "Maximum reconnection attempts reached (" + MAX_RECONNECT_ATTEMPTS + ")")
+            Log.e(TAG, "Maximum reconnection attempts reached ($MAX_RECONNECT_ATTEMPTS)")
             return
         }
         
         // Exponential backoff: 1s, 2s, 4s, 8s, 16s
-        long delaySeconds = (long) Math.pow(2, currentAttempt - 1)
+        val delaySeconds = 2.0.pow(currentAttempt - 1).toLong()
         
-        Log.i(TAG, "Scheduling reconnection attempt " + currentAttempt + " in " + delaySeconds + " seconds")
+        Log.i(TAG, "Scheduling reconnection attempt $currentAttempt in $delaySeconds seconds")
         
-        // Use Handler to schedule the reconnection
-        reconnectHandler.postDelayed(Runnable() {
-            @Override
-            void run() {
-                Log.i(TAG, "Attempting reconnection " + currentAttempt + "/" + MAX_RECONNECT_ATTEMPTS)
-                connect(lastConnectionUrl)
-            }
-        }, delaySeconds * 1000); // Convert to milliseconds
+        reconnectHandler.postDelayed({
+            Log.i(TAG, "Attempting reconnection $currentAttempt/$MAX_RECONNECT_ATTEMPTS")
+            connect(lastUrl)
+        }, delaySeconds * 1000)
     }
     
-    boolean isConnected() {
-        return connected
+    /**
+     * Check if connected
+     */
+    fun isConnected(): Boolean = connected
+    
+    /**
+     * Shutdown the client
+     */
+    fun shutdown() {
+        disconnect()
+        client.dispatcher.executorService.shutdown()
+        client.connectionPool.evictAll()
     }
     
     /**
      * Event listener interface
      */
-    interface EventListener {
-        fun onEvent(event: EventMessage): Unit
+    fun interface EventListener {
+        fun onEvent(event: EventMessage)
     }
     
     /**
      * Event message wrapper
      */
-    class EventMessage {
-        private String type
-        private String data
-        private long timestamp
-        
-        EventMessage(String type, String data, long timestamp) {
-            this.type = type
-            this.data = data
-            this.timestamp = timestamp
-        }
-        
-        String getType() {
-            return type
-        }
-        
-        String getData() {
-            return data
-        }
-        
-        long getTimestamp() {
-            return timestamp
-        }
-        
-        /**
-         * Parse event message from JSON text
-         * Supports Second Life event queue format
-         */
-        EventMessage parseFromJson(String json) {
-            try {
-                // Simple JSON parsing for Second Life event format
-                // Expected format: {"message": "type:data", "timestamp": 123456}
-                String type = "unknown"
-                String data = json
-                long timestamp = System.currentTimeMillis()
-                
-                // Extract message type from common SL event patterns
-                if (json.contains("\"message\"")) {
-                    Pattern messagePattern = Pattern.compile("\"message\"\\s*:\\s*\"([^\"]+)\"")
-                    Matcher matcher = messagePattern.matcher(json)
-                    if (matcher.find()) {
-                        String messageContent = matcher.group(1)
-                        if (messageContent.contains(":")) {
-                            String[] parts = messageContent.split(":", 2)
-                            type = parts[0].trim()
-                            data = parts[1].trim()
-                        } else {
-                            data = messageContent
+    data class EventMessage(
+        val type: String,
+        val data: String,
+        val timestamp: Long
+    ) {
+        companion object {
+            /**
+             * Parse event message from JSON text
+             */
+            fun parseFromJson(json: String): EventMessage {
+                try {
+                    var type = "unknown"
+                    var data = json
+                    var timestamp = System.currentTimeMillis()
+                    
+                    // Extract message type from common SL event patterns
+                    if (json.contains("\"message\"")) {
+                        val messagePattern = Pattern.compile("\"message\"\\s*:\\s*\"([^\"]+)\"")
+                        val matcher = messagePattern.matcher(json)
+                        if (matcher.find()) {
+                            val messageContent = matcher.group(1)
+                            if (messageContent.contains(":")) {
+                                val parts = messageContent.split(":", limit = 2)
+                                type = parts[0].trim()
+                                data = parts[1].trim()
+                            } else {
+                                data = messageContent
+                            }
                         }
                     }
-                }
-                
-                // Extract timestamp if present
-                Pattern timestampPattern = Pattern.compile("\"timestamp\"\\s*:\\s*(\\d+)")
-                Matcher timestampMatcher = timestampPattern.matcher(json)
-                if (timestampMatcher.find()) {
-                    timestamp = Long.parseLong(timestampMatcher.group(1))
-                }
-                
-                // Identify common Second Life event types
-                if (json.toLowerCase().contains("chat") || json.toLowerCase().contains("im")) {
-                    type = "chat"
-                } else if (json.toLowerCase().contains("objectupdate")) {
-                    type = "objectUpdate"
-                } else if (json.toLowerCase().contains("agent")) {
-                    type = "agentUpdate"
-                }
-                
-                return fun EventMessage(): new
-                
-            } catch (Exception e) {
-                Log.w(TAG, "Failed to parse JSON event message: " + json, e)
-                return EventMessage("parse_error", json, System.currentTimeMillis())
-            }
-        }
-        
-        /**
-         * Parse event message from binary data
-         * Handles Second Life UDP-style binary messages
-         */
-        EventMessage parseFromBytes(byte[] bytes) {
-            try {
-                if (bytes == null || bytes.length == 0) {
-                    return EventMessage("empty", "", System.currentTimeMillis())
-                }
-                
-                // Second Life binary messages often start with message type flags
-                String type = "binary"
-                String data = ""
-                
-                // Check for common Second Life binary message patterns
-                if (bytes.length > 4) {
-                    // First 4 bytes often contain message type information
-                    int messageType = ((bytes[0] & 0xFF) << 24) | 
-                                    ((bytes[1] & 0xFF) << 16) |
-                                    ((bytes[2] & 0xFF) << 8) | 
-                                    (bytes[3] & 0xFF)
                     
-                    // Map common Second Life message types
-                    switch (messageType & 0xFF) {
-                        case 0x01:
-                            type = "objectUpdate"
-                            break
-                        case 0x02:
-                            type = "agentMovement"
-                            break
-                        case 0x03:
-                            type = "chatMessage"
-                            break
-                        default:
-                            type = "binary_" + Integer.toHexString(messageType & 0xFF)
+                    // Extract timestamp if present
+                    val timestampPattern = Pattern.compile("\"timestamp\"\\s*:\\s*(\\d+)")
+                    val timestampMatcher = timestampPattern.matcher(json)
+                    if (timestampMatcher.find()) {
+                        timestamp = timestampMatcher.group(1).toLong()
                     }
+                    
+                    // Identify common Second Life event types
+                    val lowerJson = json.lowercase()
+                    type = when {
+                        lowerJson.contains("chat") || lowerJson.contains("im") -> "chat"
+                        lowerJson.contains("objectupdate") -> "objectUpdate"
+                        lowerJson.contains("agent") -> "agentUpdate"
+                        else -> type
+                    }
+                    
+                    return EventMessage(type, data, timestamp)
+                    
+                } catch (e: Exception) {
+                    Log.w("EventMessage", "Failed to parse JSON event message: $json", e)
+                    return EventMessage("parse_error", json, System.currentTimeMillis())
                 }
-                
-                // Convert bytes to hex string for debugging
-                StringBuilder hexString = fun StringBuilder(): for(int i = 0; i < Math.min(bytes.length, 32); i++) { // Limit to first 32 bytes
-                    hexString.append(String.format("%02X ", bytes[i]))
+            }
+            
+            /**
+             * Parse event message from binary data
+             */
+            fun parseFromBytes(bytes: ByteArray): EventMessage {
+                try {
+                    if (bytes.isEmpty()) {
+                        return EventMessage("empty", "", System.currentTimeMillis())
+                    }
+                    
+                    var type = "binary"
+                    
+                    // Check for common Second Life binary message patterns
+                    if (bytes.size > 4) {
+                        // First 4 bytes often contain message type information
+                        val messageType = ((bytes[0].toInt() and 0xFF) shl 24) or
+                                        ((bytes[1].toInt() and 0xFF) shl 16) or
+                                        ((bytes[2].toInt() and 0xFF) shl 8) or
+                                        (bytes[3].toInt() and 0xFF)
+                        
+                        // Map common Second Life message types
+                        type = when (messageType and 0xFF) {
+                            0x01 -> "objectUpdate"
+                            0x02 -> "agentMovement"
+                            0x03 -> "chatMessage"
+                            else -> "binary_${Integer.toHexString(messageType and 0xFF)}"
+                        }
+                    }
+                    
+                    // Convert bytes to hex string for debugging (first 32 bytes)
+                    val hexString = bytes.take(min(bytes.size, 32))
+                        .joinToString(" ") { "%02X".format(it) }
+                    
+                    val data = "Binary data (${bytes.size} bytes): $hexString"
+                    
+                    return EventMessage(type, data, System.currentTimeMillis())
+                    
+                } catch (e: Exception) {
+                    Log.w("EventMessage", "Failed to parse binary event message", e)
+                    return EventMessage(
+                        "binary_error",
+                        "Failed to parse ${bytes.size} bytes",
+                        System.currentTimeMillis()
+                    )
                 }
-                data = "Binary data (" + bytes.length + " bytes): " + hexString.toString()
-                
-                return EventMessage(type, data, System.currentTimeMillis())
-                
-            } catch (Exception e) {
-                Log.w(TAG, "Failed to parse binary event message", e)
-                return EventMessage("binary_error", "Failed to parse " + bytes.length + " bytes", 
-                                      System.currentTimeMillis())
             }
         }
-    }
-    
-    void shutdown() {
-        disconnect()
-        client.dispatcher().executorService().shutdown()
-        client.connectionPool().evictAll()
     }
 }
