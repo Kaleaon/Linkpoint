@@ -81,6 +81,9 @@ class LinkpointApp {
 
     // Setup PWA install prompt
     this.setupInstallPrompt();
+    
+    // Update CORS status display
+    this.updateCORSStatus();
 
     // Check for updates
     this.checkForUpdates();
