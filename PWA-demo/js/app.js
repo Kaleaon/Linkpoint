@@ -170,6 +170,82 @@ class LinkpointApp {
     notificationsBtn?.addEventListener('click', () => {
       this.showNotifications();
     });
+    
+    // Setup voice controls
+    this.setupVoiceControls();
+    
+    // Setup groups loading when view is switched
+    this.on('view_changed', (view) => {
+      if (view === 'groups' && this.groups) {
+        this.groups.loadGroups();
+      }
+    });
+  }
+  
+  /**
+   * Setup voice controls UI
+   */
+  setupVoiceControls() {
+    const voiceToggleBtn = document.getElementById('voice-toggle-btn');
+    const voiceMuteBtn = document.getElementById('voice-mute-btn');
+    const voiceStatus = document.getElementById('voice-status');
+    const voiceIcon = document.getElementById('voice-icon');
+    const voiceText = document.getElementById('voice-text');
+    const muteIcon = document.getElementById('mute-icon');
+    
+    // Voice toggle button
+    if (voiceToggleBtn) {
+      voiceToggleBtn.addEventListener('click', async () => {
+        if (this.voice.isEnabled()) {
+          this.voice.disable();
+          voiceToggleBtn.innerHTML = '<span>🎤</span>';
+          voiceToggleBtn.title = 'Enable Voice';
+          if (voiceMuteBtn) voiceMuteBtn.style.display = 'none';
+          if (voiceIcon) voiceIcon.textContent = '🔇';
+          if (voiceText) voiceText.textContent = 'Voice: Off';
+        } else {
+          const enabled = await this.voice.enable();
+          if (enabled) {
+            voiceToggleBtn.innerHTML = '<span>🎤</span>';
+            voiceToggleBtn.title = 'Disable Voice';
+            if (voiceMuteBtn) voiceMuteBtn.style.display = 'inline-block';
+            if (voiceIcon) voiceIcon.textContent = '🔊';
+            if (voiceText) voiceText.textContent = 'Voice: On';
+          }
+        }
+      });
+    }
+    
+    // Voice mute button
+    if (voiceMuteBtn) {
+      voiceMuteBtn.addEventListener('click', () => {
+        const muted = this.voice.toggleMute();
+        if (muteIcon) {
+          muteIcon.textContent = muted ? '🔇' : '🔊';
+        }
+        if (voiceIcon) {
+          voiceIcon.textContent = muted ? '🔇' : '🔊';
+        }
+        voiceMuteBtn.title = muted ? 'Unmute' : 'Mute';
+      });
+    }
+    
+    // Voice events
+    if (this.voice) {
+      this.voice.on('voice_enabled', () => {
+        if (voiceStatus) voiceStatus.classList.add('active');
+        Utils.showToast('Voice chat enabled', 'success');
+      });
+      
+      this.voice.on('voice_disabled', () => {
+        if (voiceStatus) voiceStatus.classList.remove('active');
+        Utils.showToast('Voice chat disabled', 'info');
+      });
+      
+      this.voice.on('voice_error', (error) => {
+        Utils.showToast(`Voice error: ${error.message || error}`, 'error');
+      });
+    }
   }
 
   /**
