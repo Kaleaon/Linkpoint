@@ -6,11 +6,25 @@
 class CORSHandler {
   constructor() {
     this.environment = this.detectEnvironment();
-    this.corsProxyUrl = 'https://corsproxy.io/?';
-    this.alternativeProxies = [
-      'https://api.allorigins.win/raw?url=',
-      'https://cors-anywhere.herokuapp.com/',
+    // Updated CORS proxies - corsproxy.io has restrictions now
+    this.corsProxies = [
+      { 
+        url: 'https://api.allorigins.win/raw?url=', 
+        name: 'AllOrigins',
+        encode: true
+      },
+      { 
+        url: 'https://api.codetabs.com/v1/proxy?quest=', 
+        name: 'CodeTabs',
+        encode: true
+      },
+      {
+        url: 'https://thingproxy.freeboard.io/fetch/',
+        name: 'ThingProxy',
+        encode: false
+      }
     ];
+    this.currentProxyIndex = 0;
   }
 
   /**
