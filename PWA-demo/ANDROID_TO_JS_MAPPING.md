@@ -360,3 +360,199 @@ These four new modules bring essential Second Life functionality from the Androi
 - **Feature Completeness**: Asset handling for inventory interaction
 
 The PWA now has **28 JavaScript modules** (up from 24), with critical functionality ported from the Android codebase while maintaining web platform compatibility.
+
+---
+
+## Phase 2: Core Protocol Extensions (Features 5-50)
+
+**Status**: Initial stubs created, implementation in progress
+
+### 5. Avatar Manager
+
+**JavaScript**: `js/avatar.js`
+
+**Android Source**:
+- `com.lumiyaviewer.lumiya.slproto.avatar/`
+
+**Features (13-16)**:
+- Avatar appearance parameters
+- Attachment points management
+- Visual parameters (shape, skin settings)
+- Avatar skeleton basics
+
+**TODO Checklist**:
+- [ ] Implement appearance parameter updates
+- [ ] Load attachment point positions from skeleton data
+- [ ] Connect to protocol layer for avatar updates
+- [ ] Implement texture baking
+- [ ] Add wearable system integration
+- [ ] Implement animation blending
+
+### 6. Object Manager Extended
+
+**JavaScript**: `js/objects-extended.js`
+
+**Android Source**:
+- `com.lumiyaviewer.lumiya.slproto.objects/`
+- `com.lumiyaviewer.lumiya.slproto.prims/`
+
+**Features (17-20)**:
+- Prim parameters (shape, material, texture)
+- Object permissions management
+- Object selection handling
+- Parent-child relationships
+
+**TODO Checklist**:
+- [ ] Implement object caching
+- [ ] Add permission checks for operations
+- [ ] Connect to protocol layer (ObjectSelect, ObjectDeselect messages)
+- [ ] Integrate with 3D rendering for highlights
+- [ ] Send LinkObject/DelinkObject messages
+- [ ] Update object transforms based on parent
+
+### 7. Inventory Core
+
+**JavaScript**: `js/inventory-core.js`
+
+**Android Source**:
+- `com.lumiyaviewer.lumiya.slproto.inventory/`
+
+**Features (21-25)**:
+- Inventory folder structure
+- Item properties management
+- Folder sorting
+- Item movement tracking
+- Search functionality
+
+**TODO Checklist**:
+- [ ] Implement folder capability fetching
+- [ ] Add inventory caching to IndexedDB
+- [ ] Connect to protocol layer
+- [ ] Implement change notifications
+- [ ] Add bulk folder/item loading
+
+### 8. Inventory Operations
+
+**JavaScript**: `js/inventory-ops.js`
+
+**Android Source**:
+- `com.lumiyaviewer.lumiya.slproto.inventory/`
+
+**Features (26-30)**:
+- Create folder
+- Delete item/folder
+- Move item
+- Copy item
+- Rename operations
+
+**TODO Checklist**:
+- [ ] Implement capability-based operations
+- [ ] Send protocol messages (CreateInventoryFolder, MoveInventoryItem, etc.)
+- [ ] Add undo/redo support
+- [ ] Implement operation validation
+- [ ] Handle trash vs permanent delete
+- [ ] Add batch operation processing
+
+### 9. Inventory Types
+
+**JavaScript**: `js/inventory-types.js`
+
+**Android Source**:
+- `com.lumiyaviewer.lumiya.slproto.inventory/`
+
+**Features (31-35)**:
+- Gesture parsing and serialization
+- Animation parsing (BVH format)
+- Script parsing and validation (LSL)
+- Sound format detection
+- Texture format detection
+
+**TODO Checklist**:
+- [ ] Implement full gesture parsing
+- [ ] Add BVH animation parsing
+- [ ] Implement LSL syntax validation
+- [ ] Add sound metadata extraction (WAV, OGG)
+- [ ] Implement texture dimension extraction
+- [ ] Add JPEG2000 parsing
+
+### 10. Chat Extended
+
+**JavaScript**: `js/chat-extended.js`
+
+**Android Source**:
+- `com.lumiyaviewer.lumiya.slproto.chat/`
+
+**Features (36-40)**:
+- Chat history persistence
+- Chat filtering
+- Mute list management
+- Chat range (whisper/shout)
+- Typing indicators
+
+**TODO Checklist**:
+- [ ] Implement IndexedDB persistence
+- [ ] Connect to protocol layer
+- [ ] Send MuteListUpdate messages
+- [ ] Implement notification system
+- [ ] Add chat export functionality
+- [ ] Send typing indicator messages
+
+### 11. Groups Manager
+
+**JavaScript**: `js/groups.js`
+
+**Android Source**:
+- `com.lumiyaviewer.lumiya.slproto.users/`
+
+**Features (41-45)**:
+- Group information management
+- Group members tracking
+- Group roles and permissions
+- Group chat sessions
+- Group notices
+
+**TODO Checklist**:
+- [ ] Implement group capability requests
+- [ ] Connect to protocol layer
+- [ ] Send group chat messages (ImprovedInstantMessage)
+- [ ] Handle group invitations
+- [ ] Add group land management
+- [ ] Implement group notice sending
+
+### 12. Friends Extended
+
+**JavaScript**: `js/friends-extended.js`
+
+**Android Source**:
+- `com.lumiyaviewer.lumiya.slproto.users/`
+
+**Features (46-50)**:
+- Friend requests
+- Online notifications
+- Friend permissions/rights
+- Calling cards
+- Friend groups
+
+**TODO Checklist**:
+- [ ] Connect to protocol layer
+- [ ] Send OfferCallingCard, AcceptFriendship messages
+- [ ] Implement notification system
+- [ ] Sync with inventory for calling cards
+- [ ] Persist friend data
+- [ ] Send GrantUserRights messages
+
+## Phase 2 Implementation Progress
+
+**Files Created**: 8 JavaScript modules + 8 test stubs
+**Lines of Code**: ~53,000 characters of stub implementation
+**Test Coverage**: Test stubs created, implementation pending
+
+**Next Steps**:
+1. Implement features in batches of 10
+2. Add comprehensive tests for each module
+3. Connect modules to protocol layer
+4. Integrate with existing PWA modules
+5. Test cross-browser compatibility
+6. Profile and optimize performance
+
+**Expected Timeline**: Incremental delivery over multiple iterations

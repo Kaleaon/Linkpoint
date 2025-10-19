@@ -1,4 +1,5 @@
 /**
+
  * Unit tests for Inventory Core module
  * Tests inventory folder and item management
  */
@@ -294,3 +295,4 @@ describe('InventoryCore', () => {
     });
   });
 });
+ 
