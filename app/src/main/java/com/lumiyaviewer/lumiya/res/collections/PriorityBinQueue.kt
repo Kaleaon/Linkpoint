@@ -2,430 +2,262 @@ package com.lumiyaviewer.lumiya.res.collections
 
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.utils.HasPriority
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.Collection
-import java.util.Iterator
-import java.util.NoSuchElementException
-import java.util.Queue
-import java.util.SortedMap
-import java.util.TreeMap
+import java.util.*
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.Condition
-import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
-class PriorityBinQueue<T> implements BlockingQueue<T> {
-    private Lock lock = fun ReentrantLock(): new
-    private Condition notEmpty = this.lock.newCondition()
-    private QueueFactory<T> queueFactory
-    private SortedMap<Integer, Queue<T>> queues = fun TreeMap(): new
+/**
+ * Priority-based blocking queue that bins items by priority level
+ * Higher priority items are processed before lower priority items
+ */
+class PriorityBinQueue<T>(
+    private val queueFactory: QueueFactory<T>
+) : BlockingQueue<T> {
+    
+    private val lock = ReentrantLock()
+    private val notEmpty = lock.newCondition()
+    private val queues: SortedMap<Int, Queue<T>> = TreeMap()
 
-    interface QueueFactory<T> {
+    /**
+     * Factory for creating queue instances for each priority bin
+     */
+    fun interface QueueFactory<T> {
         fun getQueue(): Queue<T>
     }
 
-    PriorityBinQueue(QueueFactory<T> queueFactory2) {
-        this.queueFactory = queueFactory2
+    /**
+     * Get priority of an item
+     */
+    private fun getPriority(item: Any?): Int {
+        return if (item is HasPriority) item.getPriority() else 0
     }
 
-    private int getPriority(Object obj) {
-        if (obj instanceof HasPriority) {
-            return ((HasPriority) obj).getPriority()
+    override fun add(element: T): Boolean {
+        lock.withLock {
+            val priority = getPriority(element)
+            Debug.Printf("PriorityBinQueue: added %s with prio %d", element.toString(), priority)
+            
+            val queue = queues.getOrPut(priority) { queueFactory.getQueue() }
+            val result = queue.add(element)
+            notEmpty.signalAll()
+            return result
         }
-        return 0
     }
 
-    boolean add(T t) {
-        this.lock.lock()
-        try {
-            int priority = getPriority(t)
-            Debug.Printf("PriorityBinQueue: added %s with prio %d", t.toString(), Integer.valueOf(priority))
-            Queue<T> queue = (Queue) this.queues.get(Integer.valueOf(priority))
-            if (queue == null) {
-                queue = this.queueFactory.getQueue()
-                this.queues.put(Integer.valueOf(priority), queue)
+    override fun addAll(elements: Collection<T>): Boolean {
+        lock.withLock {
+            var modified = false
+            for (element in elements) {
+                val priority = getPriority(element)
+                val queue = queues.getOrPut(priority) { queueFactory.getQueue() }
+                modified = queue.add(element) or modified
+                notEmpty.signalAll()
             }
-            boolean add = queue.add(t)
-            this.notEmpty.signalAll()
-            return add
-        } finally {
-            this.lock.unlock()
+            return modified
         }
     }
 
-    boolean addAll(Collection<? extends T> collection) {
-        this.lock.lock()
-        boolean z = false
-        try {
-            Iterator<T> it = collection.iterator()
-            while (true) {
-                boolean z2 = z
-                if (!it.hasNext()) {
-                    return z2
-                }
-                T next = it.next()
-                int priority = getPriority(next)
-                Queue<T> queue = (Queue) this.queues.get(Integer.valueOf(priority))
-                if (queue == null) {
-                    queue = this.queueFactory.getQueue()
-                    this.queues.put(Integer.valueOf(priority), queue)
-                }
-                z = queue.add(next) | z2
-                this.notEmpty.signalAll()
+    override fun clear() {
+        lock.withLock {
+            queues.clear()
+        }
+    }
+
+    override fun contains(element: T): Boolean {
+        lock.withLock {
+            val queue = queues[getPriority(element)]
+            return queue?.contains(element) ?: false
+        }
+    }
+
+    override fun containsAll(elements: Collection<T>): Boolean {
+        lock.withLock {
+            return elements.all { element ->
+                val queue = queues[getPriority(element)]
+                queue?.contains(element) == true
             }
-        } finally {
-            this.lock.unlock()
         }
     }
 
-    void clear() {
-        this.lock.lock()
-        try {
-            this.queues.clear()
-        } finally {
-            this.lock.unlock()
-        }
-    }
-
-    boolean contains(Object obj) {
-        this.lock.lock()
-        try {
-            Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(obj)))
-            if (queue != null) {
-                return queue.contains(obj)
-            }
-            this.lock.unlock()
-            return false
-        } finally {
-            this.lock.unlock()
-        }
-    }
-
-    boolean containsAll(Collection<?> collection) {
-        this.lock.lock()
-        try {
-            Iterator<T> it = collection.iterator()
-            while (true) {
-                if (!it.hasNext()) {
-                    z = true
-                    break
-                }
-                T next = it.next()
-                Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(next)))
-                if (queue != null && !queue.contains(next)) {
-                    z = false
-                    break
-                }
-            }
-            return z
-        } finally {
-            this.lock.unlock()
-        }
-    }
-
-    int drainTo(Collection<? super T> collection) {
-        this.lock.lock()
-        int i = 0
-        try {
-            for (Queue queue : this.queues.values()) {
+    override fun drainTo(c: MutableCollection<in T>): Int {
+        lock.withLock {
+            var count = 0
+            for (queue in queues.values) {
                 while (true) {
-                    Object poll = queue.poll()
-                    if (poll != null) {
-                        collection.add(poll)
-                        i++
-                    }
+                    val item = queue.poll() ?: break
+                    c.add(item)
+                    count++
                 }
             }
-            this.queues.clear()
-            return i
-        } finally {
-            this.lock.unlock()
+            queues.clear()
+            return count
         }
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:20:0x002c A[SYNTHETIC] */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    int drainTo(java.util.Collection<? super T> r5, int r6) {
-        /*
-            r4 = this
-            java.util.concurrent.locks.Lock r0 = r4.lock
-            r0.lock()
-            r1 = 0
-            java.util.SortedMap<java.lang.Integer, java.util.Queue<T>> r0 = r4.queues     // Catch:{ all -> 0x0033 }
-            java.util.Collection r0 = r0.values()     // Catch:{ all -> 0x0033 }
-            java.util.Iterator r2 = r0.iterator()     // Catch:{ all -> 0x0033 }
-        L_0x0010:
-            boolean r0 = r2.hasNext()     // Catch:{ all -> 0x0033 }
-            if (r0 == 0) goto L_0x003a
-            java.lang.Object r0 = r2.next()     // Catch:{ all -> 0x0033 }
-            java.util.Queue r0 = (java.util.Queue) r0     // Catch:{ all -> 0x0033 }
-        L_0x001c:
-            java.lang.Object r3 = r0.poll()     // Catch:{ all -> 0x0033 }
-            if (r3 == 0) goto L_0x002a
-            if (r1 >= r6) goto L_0x002a
-            r5.add(r3)     // Catch:{ all -> 0x0033 }
-            int r1 = r1 + 1
-            goto L_0x001c
-        L_0x002a:
-            if (r1 < r6) goto L_0x0010
-            r0 = r1
-        L_0x002d:
-            java.util.concurrent.locks.Lock r1 = r4.lock
-            r1.unlock()
-            return r0
-        L_0x0033:
-            r0 = move-exception
-            java.util.concurrent.locks.Lock r1 = r4.lock
-            r1.unlock()
-            throw r0
-        L_0x003a:
-            r0 = r1
-            goto L_0x002d
-        */
-        throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.res.collections.PriorityBinQueue.drainTo(java.util.Collection, int):int")
-    }
-
-    T element() {
-        T peek = peek()
-        if (peek != null) {
-            return peek
-        }
-        throw fun NoSuchElementException(): new
-    }
-
-    boolean isEmpty() {
-        this.lock.lock()
-        try {
-            Iterator<T> it = this.queues.values().iterator()
-            while (true) {
-                if (it.hasNext()) {
-                    if (!((Queue) it.next()).isEmpty()) {
-                        z = false
-                        break
-                    }
-                } else {
-                    z = true
-                    break
+    override fun drainTo(c: MutableCollection<in T>, maxElements: Int): Int {
+        lock.withLock {
+            var count = 0
+            for (queue in queues.values) {
+                while (count < maxElements) {
+                    val item = queue.poll() ?: break
+                    c.add(item)
+                    count++
                 }
+                if (count >= maxElements) break
             }
-            return z
-        } finally {
-            this.lock.unlock()
+            return count
         }
     }
 
-    Iterator<T> iterator() {
-        throw fun UnsupportedOperationException(not: "Iterator): new
+    override fun element(): T {
+        return peek() ?: throw NoSuchElementException()
     }
 
-    boolean offer(T t) {
-        fun add(): return
+    override fun isEmpty(): Boolean {
+        lock.withLock {
+            return queues.values.all { it.isEmpty() }
+        }
     }
 
-    boolean offer(T t, long j, TimeUnit timeUnit) throws InterruptedException {
-        fun add(): return
+    override fun iterator(): MutableIterator<T> {
+        throw UnsupportedOperationException("Iterator not supported for PriorityBinQueue")
     }
 
-    T peek() {
-        this.lock.lock()
-        try {
-            for (Queue queue : this.queues.values()) {
-                if (!queue.isEmpty()) {
-                    for (T next : queue) {
-                        if (next != null) {
-                            return next
-                        }
+    override fun offer(e: T): Boolean = add(e)
+
+    override fun offer(e: T, timeout: Long, unit: TimeUnit): Boolean = add(e)
+
+    override fun peek(): T? {
+        lock.withLock {
+            for (queue in queues.values) {
+                if (queue.isNotEmpty()) {
+                    for (item in queue) {
+                        item?.let { return it }
                     }
-                    continue
                 }
             }
-            this.lock.unlock()
             return null
-        } finally {
-            this.lock.unlock()
         }
     }
 
-    T poll() {
-        this.lock.lock()
-        try {
-            for (Queue it : this.queues.values()) {
-                Iterator it2 = it.iterator()
-                while (true) {
-                    if (it2.hasNext()) {
-                        T next = it2.next()
-                        if (next != null) {
-                            it2.remove()
-                            return next
-                        }
+    override fun poll(): T? {
+        lock.withLock {
+            for (queue in queues.values) {
+                val iterator = queue.iterator()
+                while (iterator.hasNext()) {
+                    val item = iterator.next()
+                    item?.let {
+                        iterator.remove()
+                        return it
                     }
                 }
             }
-            this.lock.unlock()
             return null
-        } finally {
-            this.lock.unlock()
         }
     }
 
-    T poll(long j, TimeUnit timeUnit) throws InterruptedException {
-        this.lock.lock()
-        do {
-            try {
-                T poll = poll()
-                if (poll != null) {
-                    this.lock.unlock()
-                    return poll
+    override fun poll(timeout: Long, unit: TimeUnit): T? {
+        lock.withLock {
+            do {
+                poll()?.let { return it }
+            } while (notEmpty.await(timeout, unit))
+            return null
+        }
+    }
+
+    override fun put(e: T) {
+        add(e)
+    }
+
+    override fun remainingCapacity(): Int = Integer.MAX_VALUE
+
+    override fun remove(): T {
+        return poll() ?: throw NoSuchElementException()
+    }
+
+    override fun remove(element: T): Boolean {
+        lock.withLock {
+            val queue = queues[getPriority(element)]
+            return queue?.remove(element) ?: false
+        }
+    }
+
+    override fun removeAll(elements: Collection<T>): Boolean {
+        lock.withLock {
+            var modified = false
+            for (element in elements) {
+                val queue = queues[getPriority(element)]
+                queue?.let {
+                    modified = it.remove(element) or modified
                 }
-            } finally {
-                this.lock.unlock()
             }
-        } while (this.notEmpty.await(j, timeUnit))
-        return null
-    }
-
-    void put(T t) throws InterruptedException {
-        add(t)
-    }
-
-    int remainingCapacity() {
-        return Integer.MAX_VALUE
-    }
-
-    T remove() {
-        T poll = poll()
-        if (poll != null) {
-            return poll
-        }
-        throw fun NoSuchElementException(): new
-    }
-
-    boolean remove(Object obj) {
-        this.lock.lock()
-        try {
-            Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(obj)))
-            if (queue != null) {
-                return queue.remove(obj)
-            }
-            this.lock.unlock()
-            return false
-        } finally {
-            this.lock.unlock()
+            return modified
         }
     }
 
-    boolean removeAll(Collection<?> collection) {
-        this.lock.lock()
-        boolean z = false
-        try {
-            for (T next : collection) {
-                Queue queue = (Queue) this.queues.get(Integer.valueOf(getPriority(next)))
-                z = queue != null ? queue.remove(next) | z : z
+    override fun retainAll(elements: Collection<T>): Boolean {
+        lock.withLock {
+            var modified = false
+            for (queue in queues.values) {
+                modified = queue.retainAll(elements.toSet()) or modified
             }
-            return z
-        } finally {
-            this.lock.unlock()
+            return modified
         }
     }
 
-    boolean retainAll(Collection<?> collection) {
-        this.lock.lock()
-        boolean z = false
-        try {
-            Iterator<T> it = this.queues.values().iterator()
+    override fun size(): Int {
+        lock.withLock {
+            return queues.values.sumOf { it.size }
+        }
+    }
+
+    override fun take(): T {
+        lock.withLock {
             while (true) {
-                boolean z2 = z
-                if (!it.hasNext()) {
-                    return z2
-                }
-                z = ((Queue) it.next()).retainAll(collection) | z2
-            }
-        } finally {
-            this.lock.unlock()
-        }
-    }
-
-    int size() {
-        this.lock.lock()
-        int i = 0
-        try {
-            Iterator<T> it = this.queues.values().iterator()
-            while (true) {
-                int i2 = i
-                if (!it.hasNext()) {
-                    return i2
-                }
-                i = ((Queue) it.next()).size() + i2
-            }
-        } finally {
-            this.lock.unlock()
-        }
-    }
-
-    T take() throws InterruptedException {
-        this.lock.lock()
-        while (true) {
-            try {
-                T poll = poll()
-                if (poll != null) {
-                    return poll
-                }
-                this.notEmpty.await()
-            } finally {
-                this.lock.unlock()
+                poll()?.let { return it }
+                notEmpty.await()
             }
         }
     }
 
-    Object[] toArray() {
-        int i = 0
-        this.lock.lock()
-        try {
-            ArrayList<Object[]> arrayList = new ArrayList<>()
-            int i2 = 0
-            for (Queue array : this.queues.values()) {
-                Object[] array2 = array.toArray()
-                arrayList.add(array2)
-                i2 = array2.length + i2
+    override fun toArray(): Array<Any?> {
+        lock.withLock {
+            val arrays = queues.values.map { it.toTypedArray() }
+            val totalSize = arrays.sumOf { it.size }
+            val result = arrayOfNulls<Any>(totalSize)
+            
+            var offset = 0
+            for (array in arrays) {
+                System.arraycopy(array, 0, result, offset, array.size)
+                offset += array.size
             }
-            Object[] objArr = new Object[i2]
-            for (Object[] objArr2 : arrayList) {
-                System.arraycopy(objArr2, 0, objArr, i, objArr2.length)
-                i = objArr2.length + i
-            }
-            arrayList.clear()
-            return objArr
-        } finally {
-            this.lock.unlock()
+            
+            return result
         }
     }
 
-    <T1> T1[] toArray(T1[] t1Arr) {
-        int i = 0
-        this.lock.lock()
-        try {
-            ArrayList<Object[]> arrayList = new ArrayList<>()
-            int i2 = 0
-            for (Queue array : this.queues.values()) {
-                Object[] array2 = array.toArray()
-                arrayList.add(array2)
-                i2 = array2.length + i2
-            }
-            if (t1Arr.length >= i2) {
-                Arrays.fill(t1Arr, (Object) null)
+    @Suppress("UNCHECKED_CAST")
+    override fun <T1> toArray(a: Array<T1>): Array<T1> {
+        lock.withLock {
+            val arrays = queues.values.map { it.toTypedArray() }
+            val totalSize = arrays.sumOf { it.size }
+            
+            val result = if (a.size >= totalSize) {
+                Arrays.fill(a, null)
+                a
             } else {
-                t1Arr = new Object[i2]
+                arrayOfNulls<Any>(totalSize) as Array<T1>
             }
-            for (Object[] objArr : arrayList) {
-                System.arraycopy(objArr, 0, t1Arr, i, objArr.length)
-                i = objArr.length + i
+            
+            var offset = 0
+            for (array in arrays) {
+                System.arraycopy(array, 0, result, offset, array.size)
+                offset += array.size
             }
-            arrayList.clear()
-            return t1Arr
-        } finally {
-            this.lock.unlock()
+            
+            return result
         }
     }
 }

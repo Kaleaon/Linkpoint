@@ -1,334 +1,263 @@
 package com.lumiyaviewer.lumiya.res.collections
 
 import com.google.common.collect.ObjectArrays
-import java.util.Arrays
-import java.util.Collection
-import java.util.Collections
-import java.util.Iterator
-import java.util.NoSuchElementException
-import java.util.Set
-import java.util.WeakHashMap
+import java.util.*
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.Condition
-import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
-import javax.annotation.Nonnull
+import kotlin.concurrent.withLock
 
-class WeakQueue<T> implements BlockingQueue<T> {
-    private Lock lock = fun ReentrantLock(): new
-    private Set<T> lowPriorityQueue = Collections.newSetFromMap(WeakHashMap())
-    private Condition notEmpty = this.lock.newCondition()
-    private Set<T> queue = Collections.newSetFromMap(WeakHashMap())
+/**
+ * A weak-reference based blocking queue with priority support
+ * Items implementing LowPriority are processed after regular items
+ */
+class WeakQueue<T> : BlockingQueue<T> {
+    
+    private val lock = ReentrantLock()
+    private val notEmpty = lock.newCondition()
+    private val queue: MutableSet<T> = Collections.newSetFromMap(WeakHashMap())
+    private val lowPriorityQueue: MutableSet<T> = Collections.newSetFromMap(WeakHashMap())
 
-    interface LowPriority {
-    }
+    /**
+     * Marker interface for low priority items
+     */
+    interface LowPriority
 
-    boolean add(T t) {
-        if (t == null) {
-            return false
-        }
-        this.lock.lock()
-        try {
-            if (t instanceof LowPriority) {
-                this.lowPriorityQueue.add(t)
+    override fun add(element: T): Boolean {
+        if (element == null) return false
+        
+        lock.withLock {
+            if (element is LowPriority) {
+                lowPriorityQueue.add(element)
             } else {
-                this.queue.add(t)
+                queue.add(element)
             }
-            this.notEmpty.signalAll()
+            notEmpty.signalAll()
             return true
-        } finally {
-            this.lock.unlock()
         }
     }
 
-    boolean addAll(Collection<? extends T> collection) {
-        this.lock.lock()
-        try {
-            for (T next : collection) {
-                if (next instanceof LowPriority) {
-                    this.lowPriorityQueue.add(next)
+    override fun addAll(elements: Collection<T>): Boolean {
+        lock.withLock {
+            for (element in elements) {
+                if (element is LowPriority) {
+                    lowPriorityQueue.add(element)
                 } else {
-                    this.queue.add(next)
+                    queue.add(element)
                 }
             }
-            this.notEmpty.signalAll()
+            notEmpty.signalAll()
             return true
-        } finally {
-            this.lock.unlock()
         }
     }
 
-    void clear() {
-        this.lock.lock()
-        try {
-            this.queue.clear()
-            this.lowPriorityQueue.clear()
-        } finally {
-            this.lock.unlock()
+    override fun clear() {
+        lock.withLock {
+            queue.clear()
+            lowPriorityQueue.clear()
         }
     }
 
-    boolean contains(Object obj) {
-        this.lock.lock()
-        try {
-            return !this.queue.contains(obj) ? this.lowPriorityQueue.contains(obj) : true
-        } finally {
-            this.lock.unlock()
+    override fun contains(element: T): Boolean {
+        lock.withLock {
+            return queue.contains(element) || lowPriorityQueue.contains(element)
         }
     }
 
-    boolean containsAll(Collection<?> collection) {
-        this.lock.lock()
-        try {
-            return !this.queue.containsAll(collection) ? this.lowPriorityQueue.containsAll(collection) : true
-        } finally {
-            this.lock.unlock()
+    override fun containsAll(elements: Collection<T>): Boolean {
+        lock.withLock {
+            return queue.containsAll(elements) || lowPriorityQueue.containsAll(elements)
         }
     }
 
-    int drainTo(Collection<? super T> collection) {
-        this.lock.lock()
-        int i = 0
-        try {
-            for (T next : this.queue) {
-                if (next != null) {
-                    collection.add(next)
-                    i++
+    override fun drainTo(c: MutableCollection<in T>): Int {
+        lock.withLock {
+            var count = 0
+            for (item in queue) {
+                item?.let {
+                    c.add(it)
+                    count++
                 }
             }
-            this.queue.clear()
-            for (T next2 : this.lowPriorityQueue) {
-                if (next2 != null) {
-                    collection.add(next2)
-                    i++
+            queue.clear()
+            
+            for (item in lowPriorityQueue) {
+                item?.let {
+                    c.add(it)
+                    count++
                 }
             }
-            this.lowPriorityQueue.clear()
-            return i
-        } finally {
-            this.lock.unlock()
+            lowPriorityQueue.clear()
+            
+            return count
         }
     }
 
-    int drainTo(Collection<? super T> collection, int i) {
-        this.lock.lock()
-        int i2 = 0
-        try {
-            Iterator<T> it = this.queue.iterator()
-            while (it.hasNext() && i2 < i) {
-                T next = it.next()
-                if (next != null) {
-                    collection.add(next)
-                    i2++
+    override fun drainTo(c: MutableCollection<in T>, maxElements: Int): Int {
+        lock.withLock {
+            var count = 0
+            val queueIterator = queue.iterator()
+            
+            while (queueIterator.hasNext() && count < maxElements) {
+                val item = queueIterator.next()
+                item?.let {
+                    c.add(it)
+                    count++
                 }
-                it.remove()
+                queueIterator.remove()
             }
-            Iterator<T> it2 = this.lowPriorityQueue.iterator()
-            while (it2.hasNext() && i2 < i) {
-                T next2 = it2.next()
-                if (next2 != null) {
-                    collection.add(next2)
-                    i2++
+            
+            val lowPriorityIterator = lowPriorityQueue.iterator()
+            while (lowPriorityIterator.hasNext() && count < maxElements) {
+                val item = lowPriorityIterator.next()
+                item?.let {
+                    c.add(it)
+                    count++
                 }
-                it2.remove()
+                lowPriorityIterator.remove()
             }
-            return i2
-        } finally {
-            this.lock.unlock()
+            
+            return count
         }
     }
 
-    T element() {
-        T peek = peek()
-        if (peek != null) {
-            return peek
-        }
-        throw fun NoSuchElementException(): new
+    override fun element(): T {
+        return peek() ?: throw NoSuchElementException()
     }
 
-    boolean isEmpty() {
-        this.lock.lock()
-        try {
-            return this.queue.isEmpty() ? this.lowPriorityQueue.isEmpty() : false
-        } finally {
-            this.lock.unlock()
+    override fun isEmpty(): Boolean {
+        lock.withLock {
+            return queue.isEmpty() && lowPriorityQueue.isEmpty()
         }
     }
 
-    Iterator<T> iterator() {
-        throw fun UnsupportedOperationException(over: "Iterating): new
+    override fun iterator(): MutableIterator<T> {
+        throw UnsupportedOperationException("Iterating over WeakQueue is not supported")
     }
 
-    boolean offer(T t) {
-        fun add(): return
-    }
+    override fun offer(e: T): Boolean = add(e)
 
-    boolean offer(T t, long j, TimeUnit timeUnit) throws InterruptedException {
-        fun add(): return
-    }
+    override fun offer(e: T, timeout: Long, unit: TimeUnit): Boolean = add(e)
 
-    T peek() {
-        this.lock.lock()
-        try {
-            if (!this.queue.isEmpty()) {
-                for (T next : this.queue) {
-                    if (next != null) {
-                        return next
-                    }
+    override fun peek(): T? {
+        lock.withLock {
+            // Check regular queue first
+            if (queue.isNotEmpty()) {
+                for (item in queue) {
+                    item?.let { return it }
                 }
             }
-            if (!this.lowPriorityQueue.isEmpty()) {
-                for (T next2 : this.lowPriorityQueue) {
-                    if (next2 != null) {
-                        this.lock.unlock()
-                        return next2
-                    }
+            
+            // Then check low priority queue
+            if (lowPriorityQueue.isNotEmpty()) {
+                for (item in lowPriorityQueue) {
+                    item?.let { return it }
                 }
             }
-            this.lock.unlock()
+            
             return null
-        } finally {
-            this.lock.unlock()
         }
     }
 
-    T poll() {
-        this.lock.lock()
-        try {
-            if (!this.queue.isEmpty()) {
-                Iterator<T> it = this.queue.iterator()
-                while (it.hasNext()) {
-                    T next = it.next()
-                    if (next != null) {
-                        it.remove()
-                        return next
+    override fun poll(): T? {
+        lock.withLock {
+            // Poll from regular queue first
+            if (queue.isNotEmpty()) {
+                val iterator = queue.iterator()
+                while (iterator.hasNext()) {
+                    val item = iterator.next()
+                    item?.let {
+                        iterator.remove()
+                        return it
                     }
                 }
             }
-            if (!this.lowPriorityQueue.isEmpty()) {
-                Iterator<T> it2 = this.lowPriorityQueue.iterator()
-                while (it2.hasNext()) {
-                    T next2 = it2.next()
-                    if (next2 != null) {
-                        it2.remove()
-                        this.lock.unlock()
-                        return next2
+            
+            // Then poll from low priority queue
+            if (lowPriorityQueue.isNotEmpty()) {
+                val iterator = lowPriorityQueue.iterator()
+                while (iterator.hasNext()) {
+                    val item = iterator.next()
+                    item?.let {
+                        iterator.remove()
+                        return it
                     }
                 }
             }
-            this.lock.unlock()
+            
             return null
-        } finally {
-            this.lock.unlock()
         }
     }
 
-    T poll(long j, TimeUnit timeUnit) throws InterruptedException {
-        this.lock.lock()
-        do {
-            try {
-                T poll = poll()
-                if (poll != null) {
-                    this.lock.unlock()
-                    return poll
-                }
-            } finally {
-                this.lock.unlock()
-            }
-        } while (this.notEmpty.await(j, timeUnit))
-        return null
-    }
-
-    void put(T t) throws InterruptedException {
-        add(t)
-    }
-
-    int remainingCapacity() {
-        return Integer.MAX_VALUE
-    }
-
-    T remove() {
-        T poll = poll()
-        if (poll != null) {
-            return poll
-        }
-        throw fun NoSuchElementException(): new
-    }
-
-    boolean remove(Object obj) {
-        this.lock.lock()
-        try {
-            return this.queue.remove(obj) | this.lowPriorityQueue.remove(obj)
-        } finally {
-            this.lock.unlock()
+    override fun poll(timeout: Long, unit: TimeUnit): T? {
+        lock.withLock {
+            do {
+                poll()?.let { return it }
+            } while (notEmpty.await(timeout, unit))
+            return null
         }
     }
 
-    boolean removeAll(@Nonnull Collection<?> collection) {
-        this.lock.lock()
-        try {
-            return this.queue.removeAll(collection) | this.lowPriorityQueue.removeAll(collection)
-        } finally {
-            this.lock.unlock()
+    override fun put(e: T) {
+        add(e)
+    }
+
+    override fun remainingCapacity(): Int = Integer.MAX_VALUE
+
+    override fun remove(): T {
+        return poll() ?: throw NoSuchElementException()
+    }
+
+    override fun remove(element: T): Boolean {
+        lock.withLock {
+            return queue.remove(element) or lowPriorityQueue.remove(element)
         }
     }
 
-    boolean retainAll(Collection<?> collection) {
-        this.lock.lock()
-        try {
-            return this.queue.retainAll(collection) | this.lowPriorityQueue.retainAll(collection)
-        } finally {
-            this.lock.unlock()
+    override fun removeAll(elements: Collection<T>): Boolean {
+        lock.withLock {
+            return queue.removeAll(elements.toSet()) or lowPriorityQueue.removeAll(elements.toSet())
         }
     }
 
-    int size() {
-        this.lock.lock()
-        try {
-            return this.queue.size() + this.lowPriorityQueue.size()
-        } finally {
-            this.lock.unlock()
+    override fun retainAll(elements: Collection<T>): Boolean {
+        lock.withLock {
+            return queue.retainAll(elements.toSet()) or lowPriorityQueue.retainAll(elements.toSet())
         }
     }
 
-    T take() throws InterruptedException {
-        this.lock.lock()
-        while (true) {
-            try {
-                T poll = poll()
-                if (poll != null) {
-                    return poll
-                }
-                this.notEmpty.await()
-            } finally {
-                this.lock.unlock()
+    override fun size(): Int {
+        lock.withLock {
+            return queue.size + lowPriorityQueue.size
+        }
+    }
+
+    override fun take(): T {
+        lock.withLock {
+            while (true) {
+                poll()?.let { return it }
+                notEmpty.await()
             }
         }
     }
 
-    Object[] toArray() {
-        this.lock.lock()
-        try {
-            return ObjectArrays.concat(this.queue.toArray(), this.lowPriorityQueue.toArray(), Object.class)
-        } finally {
-            this.lock.unlock()
+    override fun toArray(): Array<Any?> {
+        lock.withLock {
+            return ObjectArrays.concat(queue.toTypedArray(), lowPriorityQueue.toTypedArray(), Any::class.java)
         }
     }
 
-    <T1> T1[] toArray(T1[] t1Arr) {
-        this.lock.lock()
-        try {
-            T1[] array = toArray()
-            if (array.length <= t1Arr.length) {
-                Arrays.fill(t1Arr, (Object) null)
-                System.arraycopy(array, 0, t1Arr, 0, array.length)
-                return t1Arr
+    @Suppress("UNCHECKED_CAST")
+    override fun <T1> toArray(a: Array<T1>): Array<T1> {
+        lock.withLock {
+            val array = toArray()
+            return if (array.size <= a.size) {
+                Arrays.fill(a, null)
+                System.arraycopy(array, 0, a, 0, array.size)
+                a
+            } else {
+                array as Array<T1>
             }
-            this.lock.unlock()
-            return array
-        } finally {
-            this.lock.unlock()
         }
     }
 }
