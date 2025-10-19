@@ -14,6 +14,8 @@ bin/
 gen/
 out/
 build/
+# Exception: Include Filament build configuration
+!Filament/build/
 
 # Gradle files
 .gradle/
