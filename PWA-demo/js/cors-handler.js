@@ -210,22 +210,39 @@ class CORSHandler {
    * Enhance error with helpful message
    */
   enhanceError(error) {
-    if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+    if (error.message.includes('CORS') || error.message.includes('Failed to fetch') || error.message.includes('502') || error.message.includes('403')) {
       const env = this.environment;
-      let helpMessage = 'CORS Error: Unable to connect to Second Life servers.\n\n';
+      let helpMessage = '🚫 Connection Error\n\n';
       
-      if (env.type === 'browser') {
+      if (error.message.includes('502') || error.message.includes('Bad Gateway')) {
+        helpMessage += '⚠️ HTTP 502 Error (Bad Gateway)\n\n';
+        helpMessage += 'This often happens when:\n';
+        helpMessage += '• Using a VPN (try disabling it)\n';
+        helpMessage += '• Network filtering/firewall\n';
+        helpMessage += '• CORS proxy is temporarily down\n';
+        helpMessage += '• ISP is blocking the connection\n\n';
+      } else if (error.message.includes('403') || error.message.includes('Forbidden')) {
+        helpMessage += '⚠️ HTTP 403 Error (Forbidden)\n\n';
+        helpMessage += 'This happens when:\n';
+        helpMessage += '• CORS proxy has rate limits\n';
+        helpMessage += '• VPN/proxy is detected and blocked\n';
+        helpMessage += '• IP address is temporarily banned\n\n';
+      }
+      
+      if (env.type === 'browser' || env.type === 'pwa-installed') {
         helpMessage += '💡 Solutions:\n';
-        helpMessage += '1. Install the PWA to your device (click Install button)\n';
-        helpMessage += '2. Download the desktop app (Electron or Tauri wrapper)\n';
-        helpMessage += '3. Use a mobile app (Capacitor wrapper)\n';
-        helpMessage += '4. The app is using a public CORS proxy, which may be temporarily unavailable';
+        helpMessage += '1. **Try without VPN** - Most VPNs cause CORS proxy issues\n';
+        helpMessage += '2. **Use different network** - Try mobile hotspot or different WiFi\n';
+        helpMessage += '3. **Download desktop app** - ZERO CORS issues, no proxy needed\n';
+        helpMessage += '4. **Wait and retry** - Proxy may be temporarily unavailable\n\n';
+        helpMessage += '📱 Best Solution: Use Electron/Tauri desktop app for direct connections\n';
       } else if (env.type === 'pwa-installed') {
-        helpMessage += '💡 The PWA is using a public CORS proxy.\n';
-        helpMessage += 'For best experience, consider using the desktop app.';
+        helpMessage += '💡 The PWA is using public CORS proxies which may be blocked by your VPN.\n';
+        helpMessage += 'For best experience with VPN, use the desktop app.';
       }
       
       error.helpMessage = helpMessage;
+      error.isNetworkError = true;
     }
     
     return error;
