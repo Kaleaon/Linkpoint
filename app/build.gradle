@@ -267,10 +267,10 @@ dependencies {
     // Graphics - OpenGL ES helper libraries
     implementation 'androidx.opengl:opengl:1.0.0-alpha01'
     
-    // Filament rendering engine
-    implementation project(':Filament:android:filament-android')
-    implementation project(':Filament:android:filament-utils-android')
-    implementation project(':Filament:android:gltfio-android')
+    // Filament rendering engine - Using official Maven Central releases
+    implementation 'com.google.android.filament:filament-android:1.66.0'
+    implementation 'com.google.android.filament:filament-utils-android:1.66.0'
+    implementation 'com.google.android.filament:gltfio-android:1.66.0'
 
     // Testing
     testImplementation 'junit:junit:4.13.2'
