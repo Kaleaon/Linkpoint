@@ -42,6 +42,9 @@ class FilamentWorldRenderer(
     private var cameraRotationX = 0f
     private var cameraRotationY = 0f
     
+    // Material manager
+    private lateinit var materialManager: FilamentMaterialManager
+    
     // Test renderable (a simple triangle for now)
     @Entity private var testRenderable = 0
     private var testMaterial: Material? = null
@@ -57,6 +60,10 @@ class FilamentWorldRenderer(
         }
         
         try {
+            // Initialize material manager
+            materialManager = FilamentMaterialManager(context, engine)
+            materialManager.preloadMaterials()
+            
             // Create a simple test scene
             createTestTriangle()
             
@@ -74,8 +81,8 @@ class FilamentWorldRenderer(
      * Create a simple test triangle to verify rendering works
      */
     private fun createTestTriangle() {
-        // Create a simple colored material (inline material)
-        testMaterial = createSimpleMaterial()
+        // Get material from material manager
+        testMaterial = materialManager.getMaterial(FilamentMaterialManager.MaterialType.UNLIT_COLOR)
         
         // Create vertex and index buffers
         createTriangleMesh()
@@ -251,10 +258,14 @@ class FilamentWorldRenderer(
                 renderContext.entityManager.destroy(testRenderable)
             }
             
-            // Destroy buffers
+            // Destroy buffers (but not materials - manager handles those)
             testVertexBuffer?.let { engine.destroyVertexBuffer(it) }
             testIndexBuffer?.let { engine.destroyIndexBuffer(it) }
-            testMaterial?.let { engine.destroyMaterial(it) }
+            
+            // Destroy material manager
+            if (::materialManager.isInitialized) {
+                materialManager.destroy()
+            }
             
             Log.i(TAG, "FilamentWorldRenderer destroyed")
         } catch (e: Exception) {
