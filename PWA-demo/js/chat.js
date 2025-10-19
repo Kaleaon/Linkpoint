@@ -12,6 +12,8 @@ class ChatManager extends Utils.EventEmitter {
     this.chatInput = null;
     this.chatMessages = null;
     this.sendBtn = null;
+    this.currentChatType = 'local'; // local, group, im
+    this.currentGroupId = null;
   }
 
   /**
