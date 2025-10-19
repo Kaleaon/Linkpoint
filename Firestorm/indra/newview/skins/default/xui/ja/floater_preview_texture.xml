@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="preview_texture">
+	<floater.string name="Title">
+		テクスチャ：[NAME]
+	</floater.string>
+	<floater.string name="Copy">
+		インベントリにコピー
+	</floater.string>
+	<floater.string name="DateTime">
+		[year,datetime,slt]年[month,datetime,slt]月[day,datetime,slt]日（[weekday,datetime,slt]）[hour24,datetime,slt]：[min,datetime,slt]：[second,datetime,slt] [timezone,datetime,slt]
+	</floater.string>
+	<floater.string name="UploaderDateTime">
+		[UPLOADER]が[DATE_TIME]にアップロード
+	</floater.string>
+	<text name="desc txt">
+		説明：
+	</text>
+	<button label="プロフィール" name="openprofile"/>
+	<panel name="dimensions_panel">
+		<text name="dimensions">
+			[WIDTH]px✕[HEIGHT]px
+		</text>
+		<button label="ＵＵＩＤ" name="copyuuid" tool_tip="ＵＵＩＤをクリップボードにコピーします。"/>
+		<text name="aspect_ratio">
+			縦横比のプレビュー
+		</text>
+		<combo_box name="combo_aspect_ratio" tool_tip="固定した縦横比でプレビューします。"/>
+	</panel>
+	<panel name="button_panel">
+		<button label="ＯＫ" name="Keep" />
+		<button label="破棄" name="Discard"/>
+		<flyout_button label="保存…" name="save_tex_btn">
+			<flyout_button.item label="ＴＧＡで保存" name="save_item_tga"/>
+			<flyout_button.item label="ＰＮＧで保存" name="save_item_png"/>
+		</flyout_button>
+	</panel>
+</floater>

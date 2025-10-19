@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="floater_about" title="關於 [APP_NAME]">
+	<tab_container name="about_tab">
+		<panel label="資訊" name="support_panel">
+			<text name="support_intro">
+如需瞭解有關 Firestorm 的最新資訊，請存取
+https://www.firestormviewer.org
+			</text>
+			<button label="複製到剪貼簿" name="copy_btn" />
+			<button label="尋找是否有更新版本" name="update_btn" />
+		</panel>
+		<panel label="鳴謝" name="credits_panel">
+			<text name="linden_intro">
+如果沒有林登實驗室將第二人生檢視器原始碼開放的決定，Firestorm 就不可能出現。
+
+"第二人生"由林登實驗室提供、
+開放原始碼的貢獻者：
+			</text>
+			<text_editor name="contrib_names">
+				運行時會替換虛擬名稱
+			</text_editor>
+		</panel>
+		<!-- Firestorm Credits -->
+		<panel label="Firestorm" name="fs_credits_panel" height="930">
+			<scroll_container name="fs_credits_scroll_container">
+				<panel name="fs_credits_scroll_container_content_panel">
+					<text name="firestorm_intro" height="120">
+Firestorm是一個改善SecondLife(tm)檢視器體驗的社群檔案。 我們將社群開發人員的貢獻與林登實驗室的代碼以及我們自己的擴充結合起來， 以提供高品質、功能豐富的瀏覽器體驗。我們擁有一支龐大的志願者支援團隊。 Firestorm由非營利組織The Phoenix Firestorm Project, Inc提供。
+
+Firestorm開發團隊：
+					</text>
+					<text name="fs_contrib_intro">
+附加程式碼來自:
+					</text>
+					<text name="fs_support_intro">
+特別感謝我們的Firestorm支援團隊、wiki作者、教學和翻譯人員：
+					</text>
+					<text name="fs_art_intro">
+火風暴包含為火風暴修改的Starlight。它是由社群中的居民開發的設計的， 旨在提供一個更友好、更易於使用的界面。更多詳情，請參閱  &lt;nolink&gt;https://wiki.secondlife.com/wiki/Viewer_Skins/Starlight&lt;/nolink&gt;.
+
+UI 藝術家和設計師：
+					</text>
+				</panel>
+			</scroll_container>
+		</panel>
+		<panel label="許可" name="licenses_panel">
+			<text_editor name="licenses_editor">
+				3Dconnexion SDK Copyright (C) 1992-2009 3Dconnexion
+APR Copyright (C) 2011 The Apache Software Foundation
+Collada DOM Copyright 2006 Sony Computer Entertainment Inc.
+cURL Copyright (C) 1996-2010, Daniel Stenberg, (daniel@haxx.se)
+DBus/dbus-glib Copyright (C) 2002, 2003  CodeFactory AB / Copyright (C) 2003, 2004 Red Hat, Inc.
+expat Copyright (C) 1998, 1999, 2000 Thai Open Source Software Center Ltd.
+FMOD Sound System Copyright (C) Firelight Technologies Pty, Ltd., 1994-2020
+FreeType Copyright (C) 1996-2002, 2006 David Turner, Robert Wilhelm, and Werner Lemberg.
+GL Copyright (C) 1999-2004 Brian Paul.
+Havok.com(TM) Copyright (C) 1999-2001, Telekinesys Research Limited.
+HACD Copyright (C) 2011, Khaled Mamou (kmamou@gmail.com)
+jpeg2000 Copyright (C) 2001, David Taubman, The University of New South Wales (UNSW)
+jpeglib Copyright (C) 1991-1998, Thomas G. Lane.
+meshoptimizer Copyright (c) 2016-2021 Arseny Kapoulkine
+ogg/vorbis Copyright (C) 2002, Xiphophorus
+OpenSSL Copyright (C) 1998-2008 The OpenSSL Project.
+PCRE Copyright (c) 1997-2012 University of Cambridge
+SDL Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002 Sam Lantinga
+SSLeay Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
+xxHash Copyright (C) 2012-2020 Yann Collet.
+zlib Copyright (C) 1995-2012 Jean-loup Gailly and Mark Adler.
+
+第二人生檢視器採用 Havok (TM) 物理引擎。 (c)Copyright 1999-2010 Havok.com Inc.（及其放照人）。 保留一切權利。 詳情見 www.havok.com。
+
+本套裝軟體含 NVIDIA 公司提供的原始碼。
+
+保留一切權利。  詳情見 licenses.txt。
+
+語音聊天音訊技術：Polycom(R) Siren14(TM) (ITU-T Rec. G.722.1 Annex C)
+			</text_editor>
+		</panel>
+	</tab_container>
+</floater>

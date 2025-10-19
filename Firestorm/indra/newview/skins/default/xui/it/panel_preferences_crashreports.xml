@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel label="Segnalazione crash" name="crash_reports">
+    <check_box label="Invia segnalazione del crash a firestormviewer.org" name="checkSendCrashReports" />
+    <check_box label="Chiedi sempre prima di inviare" name="checkSendCrashReportsAlwaysAsk" />
+    <check_box label="Include il file settings.xml" name="checkSendSettings" />
+    <text name="textSendSettings">
+        (contiene il tuo nome utente)
+    </text>
+    <check_box label="Includi nome utente" name="checkSendName" />
+    <text name="textSendName">
+        (per chiedere altre info se necessario)
+    </text>
+    <text name="textRestartRequired">
+        Qualsiasi modifica apportata a queste impostazioni, richiede il riavvio.
+    </text>
+    <text name="textInformation1" width="500">
+        Tutte le spunte forniscono segnalazioni di crash contenenti solo le informazioni del crash.
+    </text>
+    <text name="textInformation2">
+        I log non vengono inviati, si prega di esaminare il contenuto ed inviarli
+    </text>
+    <text name="textInformation3">
+         con una e-mail a parte, includendo se si vuole le informazioni aggiuntive.
+    </text>
+    <text name="textInformation4">
+        Tutela della privacy: [URL]
+    </text>
+</panel>

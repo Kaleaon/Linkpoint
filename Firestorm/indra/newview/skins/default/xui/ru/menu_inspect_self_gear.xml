@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<toggleable_menu name="Gear Menu">
+	<menu_item_call label="Сесть" name="Sit Down Here"/>
+	<menu_item_call label="Встать" name="Stand Up"/>
+	<context_menu label="Снять" name="Take Off &gt;">
+		<context_menu label="Одежду" name="Clothes &gt;">
+			<menu_item_call label="Рубашку" name="Shirt"/>
+			<menu_item_call label="Штаны" name="Pants"/>
+			<menu_item_call label="Юбку" name="Skirt"/>
+			<menu_item_call label="Обувь" name="Shoes"/>
+			<menu_item_call label="Носки" name="Socks"/>
+			<menu_item_call label="Куртку" name="Jacket"/>
+			<menu_item_call label="Перчатки" name="Gloves"/>
+			<menu_item_call label="Майку" name="Self Undershirt"/>
+			<menu_item_call label="Трусы" name="Self Underpants"/>
+			<menu_item_call label="Татуировку" name="Self Tattoo"/>
+			<menu_item_call label="Альфа" name="Self Alpha"/>
+			<menu_item_call label="Всю одежду" name="All Clothes"/>
+		</context_menu>
+		<context_menu label="Отделить" name="Inspect Self Detach"/>
+		<menu_item_call label="Отделить все" name="Detach All"/>
+	</context_menu>
+	<menu_item_call label="Сменить комплект" name="Chenge Outfit"/>
+	<menu_item_call label="Править комплект" name="Edit Outfit"/>
+	<menu_item_call label="Править фигуру" name="Edit My Shape"/>
+	<menu_item_call label="Друзья" name="Friends..."/>
+	<menu_item_call label="Группы" name="Groups..."/>
+	<menu_item_call label="Профиль" name="Profile..."/>
+	<menu_item_call label="Отладка" name="Debug..."/>
+	<menu_item_call label="Дамп XML" name="Dump XML"/>
+</toggleable_menu>

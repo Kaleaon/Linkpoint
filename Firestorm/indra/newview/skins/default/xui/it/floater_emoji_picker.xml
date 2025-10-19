@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="emojipicker" title="Scegli Emoji">
+	<floater.string name="title_for_frequently_used" value="Usate di frequente"/>
+	<floater.string name="text_no_emoji_for_filter" value="Nessuna emoji trovata per '[FILTER]'"/>
+	<text name="Dummy">
+		Nessuna emoji selezionata
+	</text>
+</floater>

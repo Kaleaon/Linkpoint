@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="camera_floater" title="Управление Камерой">
+	<floater.string name="rotate_tooltip">
+		Повернуть камеру вокруг точки фокусировки
+	</floater.string>
+	<floater.string name="zoom_tooltip">
+		Приблизить/отдалить камеру относительно точки фокусировки
+	</floater.string>
+	<floater.string name="move_tooltip">
+		Переместить камеру вверх, вниз, влево или вправо
+	</floater.string>
+	<floater.string name="free_mode_title">
+		Обзор объекта
+	</floater.string>
+	<string name="inactive_combo_text">Предустановки</string>
+	<panel name="buttons_panel">
+		<panel_camera_item name="front_view" tool_tip="Вид спереди" />
+		<panel_camera_item name="group_view" tool_tip="Вид сбоку" />
+		<panel_camera_item name="rear_view" tool_tip="Вид сзади" />
+		<panel_camera_item name="object_view" tool_tip="Вид на объект"/>
+		<panel_camera_item name="mouselook_view" tool_tip="Вид от первого лица"/>
+		<panel_camera_item name="reset_view" tool_tip="Сбросить вид"/>
+	</panel>
+	<panel name="zoom">
+		<layout_stack name="camera_view_layout_stack">
+			<layout_panel name="camera_rotate_layout_panel">
+				<joystick_rotate name="cam_rotate_stick" tool_tip="Вращение камеры вокруг точки фокусировки"/>
+				<button name="roll_left" tool_tip="Вращать камеру влево"/>
+				<button name="roll_right" tool_tip="Вращать камеру вправо"/>
+			</layout_panel>
+			<layout_panel name="camera_zoom_layout_panel">
+				<slider_bar name="zoom_slider" tool_tip="Приблизить/отдалить камеру к/от точки фокусировки"/>
+			</layout_panel>
+			<layout_panel name="panel_track">
+				<joystick_track name="cam_track_stick" tool_tip="Двигать камеру вверх и вниз, влево и вправо"/>
+			</layout_panel>
+		</layout_stack>
+	</panel>
+	<panel name="preset_buttons_panel">
+		<button label="Позиция..." name="camera_position_btn"/>
+		<button name="save_preset_btn" tool_tip="Сохранить как Предустановку"/>
+		<combo_box name="preset_combo">
+			<combo_box.item label="Предустановки" name="Use preset"/>
+		</combo_box>
+		<button name="gear_btn" tool_tip="Предустановки Камеры"/>
+	</panel>
+</floater>

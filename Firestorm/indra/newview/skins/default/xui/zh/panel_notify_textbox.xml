@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="私聊" name="panel_notify_textbox">
+	<panel label="info_panel" name="textbox_panel">
+		<text_editor name="message" value="訊息" />
+	</panel>
+	<panel label="control_panel" name="control_panel">
+		<button label="送出" name="btn_submit" />
+		<button label="忽視" name="ignore_btn" />
+	</panel>
+</panel>

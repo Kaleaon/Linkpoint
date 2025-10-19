@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel name="panel_performance_preferences">
+	<text name="back_lbl" width="60">
+		Indietro
+	</text>
+	<text name="settings_title">
+		Impostazioni grafiche
+	</text>
+	<text name="quality_lbl">
+		Qualità vs velocità
+	</text>
+	<text name="FasterText" width="50">
+		Velocità
+	</text>
+	<icon left_delta="52" name="LowGraphicsDivet" />
+	<text left_delta="12" name="BetterText" width="100">
+		Maggior qualità
+	</text>
+	<slider left_delta="-277" name="quality_vs_perf_selection" />
+	<text left="173" name="ShadersPrefText">
+		Bassa
+	</text>
+	<text name="ShadersPrefText2">
+		Media
+	</text>
+	<text name="ShadersPrefText3">
+		Alta
+	</text>
+	<text name="ShadersPrefText4">
+		Ultra
+	</text>
+	<text name="quality_desc">
+		Scegliendo uno di questi preset, perderai le modifiche apportate.
+	</text>
+	<text name="distance_lbl">
+		Distanza di visibilità
+	</text>
+	<text name="faster_lbl" width="50">
+		Velocità
+	</text>
+	<slider name="draw_distance" left_pad="-5" width="300" />
+	<text name="farther_lbl" width="50">
+		Distanza
+	</text>
+	<text name="distance_desc1">
+		Con un valore basso migliori le prestazioni, con uno alto vedi più lontano.
+	</text>
+	<text name="environment_lbl">
+		Ambiente
+	</text>
+	<text name="enhancements_desc">
+Riducendo o eliminando le ombre, possono aumentare considerevolmente
+gli FPS, andando però ad impattare sull'aspetto della scena.
+	</text>
+	<text name="RenderShadowDetailText">
+		Ombre:
+	</text>
+	<combo_box name="ShadowDetail">
+		<combo_box.item label="Nessuna" name="0" />
+		<combo_box.item label="Sole/Luna" name="1" />
+		<combo_box.item label="Sole/Luna + Proiettori" name="2" />
+	</combo_box>
+	<text name="water_lbl">
+		Acqua
+	</text>
+	<text name="water_desc">
+Riducendo la qualità degli effetti sull'acqua, possono aumentare
+considerevolmente gli FPS.
+	</text>
+	<text name="ReflectionsText">
+		Riflesso sull'Acqua:
+	</text>
+	<combo_box name="Reflections">
+		<combo_box.item label="Nessuno (opaco)" name="-2" />
+		<combo_box.item label="Nessuno (trasparente)" name="-1" />
+		<combo_box.item label="Minimo" name="0" />
+		<combo_box.item label="Terreno e alberi" name="1" />
+		<combo_box.item label="Tutti gli oggetti statici" name="2" />
+		<combo_box.item label="Tutti gli avatar e gli oggetti" name="3" />
+		<combo_box.item label="Tutto" name="4" />
+	</combo_box>
+	<text name="photo_lbl">
+		Fotografia
+	</text>
+	<text name="photo_desc">
+I fotografi necessitano di alta qualità a discapito
+degli FPS. [APP_NAME] PhotoTools può essere molto
+utile per trovare il giusto bilanciamento.
+	</text>
+	<button name="open_phototools" label="PhotoTools" tool_tip="Apri PhotoTools per le impostazioni fotografiche avanzate." />
+</panel>

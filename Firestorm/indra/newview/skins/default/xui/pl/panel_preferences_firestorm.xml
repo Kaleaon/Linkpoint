@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel name="firestorm">
+<panel.string name="BeamsOffLabel">
+    === WYŁĄCZONE ===
+</panel.string>
+<string name="EmbeddedItemNotSet">
+    Brak ustawionego
+</string>
+<string name="EmbeddedItemNotAvailable">
+    Niedostępny
+</string>
+<string name="EmbeddedItemNotLoggedIn">
+    Zaloguj się
+</string>
+<tab_container label="Ust. Firestorma" name="tabs">
+    <panel label="Dodatki" name="tab-extras">
+        <check_box name="checkMiscRLVa" label="Sterowanie Firestormem przez skrypty (RLVa)" />
+        <text name="textMiscRLVaRestart">
+            (wymaga restartu)
+        </text>
+        <check_box label="Zawsze próbuj rezzować obiekty jako członek grupy zarządzającej działką" name="grouplandrez" tool_tip="Zawsze próbuj rezzować obiekty jako członek grupy zarządzającej działką niezależnie od tego, czy masz ją akurat aktywną, czy nie." />
+        <check_box label="Twórz efekty cząsteczkowe, gdy skrypty się komunikują" name="EffectScriptChatParticles" tool_tip="Gdy włączysz tą opcję, to oskryptowane obiekty będą wyświetlać wirujące cząsteczki świetlne, gdy skrypty będą się komunikować." />
+        <check_box label="Wyłączaj emiter śledzenia po osiągnięciu awatara docelowego (&lt;= 3m)" name="FSDisableAvatarTrackerAtCloseIn" tool_tip="Gdy włączysz tą opcję, to emiter śledzenia będzie wyłączany automatycznie, jeśli dystans od awatara docelowego jest mniejszy niż 3m (domyślne)." />
+        <check_box label="Wyłącz ekran postępu logowania się" name="login_screen_toggle" tool_tip="Wyłącza czarny ekran postępu logowania się" />
+        <check_box label="Napraw animację bezczynności dla Bento" name="play_default_bento_idle_animation_toggle" tool_tip="Gdy włączysz tą opcję, to przeglądarka będzie uruchamiać domyślną animację Bento o priorytecie 0, która ustawia dłonie, skrzydła, usta i ogon w naturalnej pozycji, gdy nie jest uruchomiona żadna inna animacja Bento." />
+		<check_box label="Resetuj szkielet awatara po wstaniu" name="FSResetSkeletonOnStandUp" tool_tip="Jeśli ta opcja jest włączona, to przeglądarka automatycznie zresetuje szkielet Twojego awatara po wstaniu. Reset zostanie też wysłany do otaczających awatarów, aby ich przeglądarki zaktualizowały Twój wygląd." />
+        <check_box label="Wyłącz ekran postępu wylogowywania się" name="logout_screen_toggle" tool_tip="Wyłącza czarny ekran postępu wylogowywania się." />
+        <check_box label="Stopniowe powiększanie pola widzenia" name="FSRenderFarClipStepping" tool_tip="Jeśli włączysz tą opcję, to Firestorm będzie stopniowo zwiększać pole widzenia po teleportacji." />
+        <slider name="progressive_draw_distance_interval" tool_tip="Odstęp w sekundach pomiędzy każdym kolejnym powiększeniem pola widzenia." />
+        <check_box name="UseLSLBridge" label="Włącz Most w LScript Language" tool_tip="Pozwala Firestormowi na używanie oskryptowanego dodatku (Mostu), aby rozszerzyć znacznie swoje możliwości" />
+        <combo_box name="UseLSLFlightAssist" tool_tip="Włącza skrypt pomagający latać i zawisać na większych wysokościach">
+            <combo_box.item label="Pomocnik lotu: Wyłączony" name="flight_disabled" />
+            <combo_box.item label="Pomocnik lotu: Lekkie przyspieszanie" name="flight_mild" />
+            <combo_box.item label="Pomocnik lotu: Umiarkowane przyspieszanie" name="flight_moderate" />
+            <combo_box.item label="Pomocnik lotu: Silne przyspieszanie" name="flight_strong" />
+            <combo_box.item label="Pomocnik lotu: Ekstremalne przyspieszanie" name="flight_extreme" />
+        </combo_box>
+        <slider name="manual_environment_change_transition_period" label="Czas przejścia otoczenia:" tool_tip="Interwał w sekundach, w czasie którego ręczne zmiany środowiska będą zachodzić. Zero oznacza natychmiast." />
+        <check_box name="EnvironmentPersistAcrossLogin" label="Trzymaj ustawienia otoczenia pomiędzy sesjami" tool_tip="Przywraca aktualne ustawienia otoczenia po następnym zalogowaniu." />
+        <check_box name="FSRepeatedEnvTogglesShared" label="Skróty klawiszowe zmiany otoczenia przy powtarzaniu przełączają na otoczenie współdzielone" tool_tip="Sprawia, że powielone używanie skrótów klawiszowych (np. ctrl+shift+y) przełącza między wybranym wstępnie zapisanym otoczeniem, a otoczeniem współdzielonym." />
+    </panel>
+    <panel label="Ochrona" name="ProtectionTab">
+        <check_box label="Blokuj siadanie na obiektach przez kliknięcie lewym przyciskiem myszy" name="FSBlockClickSit" />
+        <check_box label="Pozwól skryptom na pokazywanie interfejsu mapy (llMapDestination)" name="ScriptsCanShowUI" />
+        <text name="revokepermissions_txt">
+         Cofnij zezwolenia do animowania:
+         </text>
+        <radio_group name="FSRevokePerms">
+            <radio_item label="Nigdy (oryginalne zachowanie)" name="never_radio" />
+            <radio_item label="Podczas siadania" name="sit_radio" />
+            <radio_item label="Podczas wstawania" name="stand_radio" />
+            <radio_item label="Podczas siadania i wstawania" name="sitnstand_radio" />
+        </radio_group>
+        <text name="SurfaceAreaThreshholdLabel">
+         Chroń przed lagowaniem od tekstur (może psuć obiekty):
+        </text>
+        <check_box label="Ukrywaj duże obiekty, z dużym poteksturowanym obszarem. Próg: " name="RenderVolumeSAProtection" tool_tip="Chroni przed obiektami z bardzo dużymi teksturami nałożonymi na ogromne powierzchnie często stworzone po to, aby spowodować awarię Przeglądarki. Domyślnie to 5000 metrów kwadratowych, ale jeśli jakieś -normalne- obiekty się nie renderują, a ta opcja jest włączona, to możesz zwiększyć limit." />
+        <check_box label="Włącz antyspam" name="UseAntiSpam" />
+        <check_box label="Włącz antyspam nawet dla Twoich własnych obiektów" name="FSUseAntiSpamMine" tool_tip="Włączenie tej opcji spowoduje aktywowanie ochrony antyspamowej nawet dla Twoich własnych obiektów."/>
+        <text name="AntiSpamText1">
+           Maks. ilość linii w poj. wiadomości:
+        </text>
+        <spinner name="_NACL_AntiSpamNewlines" tool_tip="Maksymalna ilość linii, jaka zostanie zaakceptowana w pojedynczej wiadomości tekstowej [domyślnie: 70]" />
+        <text name="AntiSpamText2">
+           Maks. ilość zdarzeń z poj. źródła:
+        </text>
+        <spinner name="_NACL_AntiSpamAmount" tool_tip="Maksymalna ilość podobnych zdarzeń, jaka zostanie zaakceptowana w ciągu 2 sekund z tego samego źródła [domyślnie: 10]" />
+        <text name="AntiSpamText3">
+           Mnożnik dla zdarzeń odtw. dźwięku:
+        </text>
+        <spinner name="_NACL_AntiSpamSoundMulti" tool_tip="Mnożnik dla wydarzeń odtwarzania dźwięku [domyślnie: 10]" />
+        <text name="AntiSpamText4">
+           Mnożnik dla zdarzeń bufor. dźwięku:
+        </text>
+        <spinner name="_NACL_AntiSpamSoundPreloadMulti" tool_tip="Mnożnik dla zdarzeń buforowania dźwięku [domyślnie: 4]" />
+        <button name="AntiSpamUnblock" label="Odblokuj wszystkie źródła spamu" />
+        <check_box label="Potwierdź przed płaceniem. Próg:" name="FSConfirmPayments" tool_tip="Pokaż okienko z potwierdzeniem przed płaceniem sum większych, niż ustawiony tutaj próg. Aby zawsze pokazywać potwierdzenie ustaw próg na 0." />
+        <spinner name="FSPaymentConfirmationThreshold" tool_tip="Pokaż okienko z potwierdzeniem przed płaceniem sum większych, niż ustawiony tutaj próg. Aby zawsze pokazywać potwierdzenie ustaw próg na 0." />
+    </panel>
+    <panel label="Awatar" name="firestorm_avatar">
+        <text name="HeadMovement">
+            Ustaw, jak mocno głowa Awatara śledzi myszkę ('0' oznacza brak ruchu):
+        </text>
+        <slider label="Pionowy maksymalny zakres śledzenia:" tool_tip="Pionowy maksymalny zakres śledzenia przez głowę, w stopniach" name="PitchFromMousePositionSlider" />
+        <text name="PitchFromMousePositionText">
+            stopni
+        </text>
+        <slider label="Poziomy maksymalny zakres śledzenia:" tool_tip="Poziomy maksymalny zakres śledzenia przez głowę, w stopniach" name="YawFromMousePositionSlider" />
+        <text name="YawFromMousePositionText">
+            stopni
+        </text>
+        <text name="note_lookat">
+             (Śledzenie spojrzeń Awatara w zakładce Prywatność)
+        </text>
+        <check_box label="Wyłącz losowe ruchy gałek ocznych awatara" name="FSStaticEyes" />
+        <text name="BeamPrefs">
+            Efekty wiązki wyboru
+        </text>
+        <button name="BeamColor_delete" label="Usuń" tool_tip="Usuń to Ustawienie" />
+        <combo_box name="BeamColor_combo" tool_tip="Wybierz wcześniej zdefiniowane Ustawienie dla wiązki wyboru" />
+        <button name="BeamColor_new" label="Utwórz nowe" tool_tip="Utwórz nowe Ustawienie" />
+        <button name="BeamColor_refresh" label="Odśwież listę" tool_tip="Odśwież listę Ustawień" />
+        <slider name="FSMaxBeamsPerSecond" label="Aktualizacje/sek:" tool_tip="Ile aktualizacji wiązki wysyłać w ciągu sekundy. Domyślnie 40" />
+        <check_box label="Włącz wiązkę wyboru" name="SLPartBeam" tool_tip="Wyłączenie tego ustawienia spowoduje, że wiązki wyboru nie będą renderowane lokalnie. Nie zapobiega to wysyłaniu wiązek wyboru do innych awatarów. Jeśli nie chcesz pokazywać swojego wyboru, to możesz temu zapobiec w Ustawienia -&gt; Prywatność -&gt; Śledzenie spojrzeń -&gt; Nie pokazuj innym celów moich wskazań." />
+        <check_box label="Wysyłaj dane selekcji na czat" name="FSParticleChat" tool_tip="Wysyła dane selekcji (rozpoczęcie jej lub zakończenie plus pozycję globalną) na kanał czatu 9000" />
+        <combo_box name="FSBeamShape_combo" tool_tip="Wybierz kształt wiązki cząsteczek" />
+        <button name="delete_beam" label="Usuń" tool_tip="Usuń tą wiązkę" />
+        <button name="custom_beam_btn" label="Utwórz nowy" tool_tip="Dopasuj kształt wiązki" />
+        <button name="refresh_beams" label="Odśwież listę" tool_tip="Odśwież listę wiązek" />
+        <slider name="FSBeamShapeScale" label="Rozm.:" tool_tip="Zmień rozmiar użytego kształtu wiązki" />
+        <text name="BridgeProtocols">
+            Integracja Mostu LSL z zewnętrznymi protokołami:
+        </text>
+        <check_box label="Zezwól protokołowi OpenCollar na włączanie lub wyłączanie wbudowanego Animatora" name="BridgeIntegrationOC" />
+        <check_box label="Zezwól protokołowi LockMeister na włączanie lub wyłączanie wbudowanego Animatora" name="BridgeIntegrationLM" />
+    </panel>
+    <panel label="Buduj 1" name="BuildTab">
+        <text name="text_box_objprams">
+         Domyślny rozmiar
+        </text>
+        <text name="text_box_objprams2">
+         Właściwości
+        </text>
+        <text name="text_box_objprams3">
+         Tekstura
+        </text>
+        <spinner label="Roz. X" name="X size" />
+        <spinner label="Roz. Y" name="Y size" />
+        <spinner label="Roz. Z" name="Z size" />
+        <check_box label="Widmowy" name="FSBuildPrefs_PhantomToggle"/>
+        <check_box label="Fizyczny" name="FSBuildPrefs_PhysicalToggle"/>
+        <check_box label="Tymczasowy" name="FSBuildPrefs_TemporaryToggle"/>
+        <combo_box name="material">
+             <combo_item name="Stone" label="Kamień"/>
+             <combo_item name="Glass" label="Szkło"/>
+             <combo_item name="Wood" label="Drewno"/>
+             <combo_item name="Flesh" label="Ciało"/>
+             <combo_item name="Plastic" label="Plastik"/>
+             <combo_item name="Rubber" label="Guma"/>
+        </combo_box>
+        <texture_picker label="Tekstura" name="texture control" tool_tip="Kliknij, aby wybrać obraz"/>
+        <color_swatch label="Kolor" name="colorswatch" tool_tip="Kliknij, aby wybrać kolor"/>
+        <spinner label="Przezr." name="alpha"/>
+        <spinner label="Blask" name="glow"/>
+        <check_box label="Superjasność" name="EmFBToggle"/>
+        <combo_box name="combobox shininess" tool_tip="Określ, jak mocny połysk ma mieć obiekt">
+          <combo_item name="None" label="Żaden"/>
+          <combo_item name="Low" label="Niski"/>
+          <combo_item name="Medium" label="Średni"/>
+          <combo_item name="High" label="Wysoki"/>
+        </combo_box>
+        <check_box name="FSBuildPrefs_EmbedItem" label="Umieszczaj obiekt w nowych primach"/>
+        <fs_embedded_item_drop_target name="embed_item" tool_tip="Upuść przedmiot w tym miejscu.">
+         Upuść przedmiot w tym miejscu.
+        </fs_embedded_item_drop_target>
+        <text name="build_item_add_disp_rect_txt">
+         Obecnie: [ITEM]
+        </text>
+        <text name="text_box_pivotpoint">
+          Punkt obracania osi
+        </text>
+        <check_box label="Oś na poz. gł. primy" tool_tip="Domyślne zachowanie to pokazywanie osi na środku masy zbioru części. Gdy włączysz tą opcję, to będzie ona pokazywana zamiast tego na głównej primie." name="FSBuildPrefsActualRoot_toggle" />
+        <spinner label="Poz. X" name="X pos" />
+        <spinner label="Poz. Y" name="Y pos" />
+        <spinner label="Poz. Z" name="Z pos" />
+        <check_box label="Wart. procentowo" tool_tip="Domyślne ustawienie jako procenty, a każda oś na 50" name="FSPivotPercToggle" />
+        <button label="Domyślne uprawnienia tworzenia" name="fs_default_creation_permissions" />
+        <text name="text_box_scripting_font" width="150">
+            Czcionka edytora skryptów:
+        </text>
+        <combo_box name="FSScriptingFontName" tool_tip="Nazwa czcionki używanej w edytorze skryptów LSL" />
+        <combo_box name="FSScriptingFontSize" tool_tip="Rozmiar czcionki używanej w edytorze skryptów LSL">
+            <combo_item name="Small" label="Mała"/>
+            <combo_item name="Medium" label="Średnia"/>
+            <combo_item name="Large" label="Duża"/>
+        </combo_box>
+        <check_box label="Włącz preprocesor LSL" tool_tip="Preprocesor LSL będzie aktywny, gdy ta opcja zostanie zaznaczona." name="preproc_checkbox" />
+        <check_box label="Optymalizator" tool_tip="Gdy ta opcja zostanie zaznaczona, to preprocesor będzie LSL optymalizować miejsce zajmowane przez skrypty." name="preprocoptimizer_checkbox" />
+        <check_box label="Instrukcja switch()" tool_tip="Gdy ta opcja zostanie zaznaczona, to preprocesor LSL pozwoli na korzystanie z instrukcji switch() do sterowania przepływem skryptu." name="preprocswitch_checkbox" />
+        <check_box label="Wolne listy" tool_tip="Gdy ta opcja zostanie zaznaczona, to preprocesor LSL pozwoli na korzystanie z rozszerzeń składni do obsługi list." name="preproclazy_checkbox" />
+        <check_box label="#includes z twardego dysku" tool_tip="Gdy ta opcja zostanie zaznaczona, to preprocesor LSL pozwoli odnosić się instrukcjom #include (dołączania) do plików na Twoim dysku twardym." name="preprocinclude_checkbox" />
+        <text name="lslpreprocinclude_textbox">
+          Ścieżka dołączania preprocesora:
+        </text>
+        <button label="Przeglądaj" label_selected="Przeglądaj" name="SetPreprocInclude" />
+        <text name="externaleditor_textbox">
+          Zewnętrzny edytor:
+        </text>
+        <button label="Przeglądaj" label_selected="Przeglądaj" name="SetExternalEditor" />
+    </panel>
+    <panel label="Buduj 2" name="BuildTab2">
+        <check_box label="Podświetlanie wybranych primów" tool_tip="Gdy odznaczysz tą opcję, to żółte/niebieskie podświetlenia krawędzi nie są renderowane - zwiększa wydajność, gdy zaznaczonych jest wiele primów." name="FSBuildPrefsRenderHighlight_toggle" />
+        <check_box label="Podświetlanie granic wybranej w danej chwili działki" name="RenderParcelSelection" />
+        <check_box label="Pokazuj granice do maksymalnej wysokości, na jakiej można budować" name="FSRenderParcelSelectionToMaxBuildHeight" />
+        <check_box label="Ogranicz dystans selekcji prim (metry):" name="LimitSelectDistance" width="237" />
+        <spinner name="MaxSelectDistance" tool_tip="Maksymalna dozwolona odległość zaznaczania obiektów (metry od awatara) [Domyślnie: 128.000]" />
+        <check_box label="Ogranicz dystans przeciągania (metry):" name="LimitDragDistance" width="237" />
+        <spinner name="MaxDragDistance" tool_tip="Maksymalna dozwolona odległość przeciągnięcia obiektu narzędziem przesuwania w pojedynczej operacji (metry od punktu startu) [Domyślnie: 48.000]" />
+        <text name="RotationStepText1" width="175">
+          Stosuj rotację do wielokrotności
+        </text>
+        <spinner name="RotationStep" tool_tip="Wszystkie rotacje wykonywane przez narzędzie obracania są wymuszane do wielokrotności tej jednostki [Domyślnie: 1.0]"/>
+        <text name="RotationStepText2">
+          stopni, gdy 'przyciągaj do siatki' nie jest używane
+        </text>
+        <check_box label="Pytaj o potwierdzenie przy rozłączaniu jeśli zbiór ma przynajmniej" name="FSUnlinkConfirmEnabled" width="380"/>
+        <text name="MinObjectsForUnlinkConfirmText2">
+          części
+        </text>
+        <check_box label="Stare zachowanie &quot;ustaw obiekt na sprzedaż&quot; (zmiana ceny od razu, bez kliku na 'Zastosuj')" tool_tip="Gdy zaznaczone, to informacja o tym, że obiekt jest na sprzedaż zapisywana jest już po zmianie, nie wymagając potwierdzenia." name="FSCommitForSaleOnChange_toggle" />
+        <check_box label="Zapisuj skrypty edytowane w Szafie jako Mono" tool_tip="Gdy zaznaczone, to wszystkie skrypty edytowane w Szafie są zapisywane jako Mono zamiast LSL." name="FSSaveInventoryScriptsAsMono_toggle" />
+        <check_box label="Zapisuj tekstury z Szafy na dysk domyślnie jako PNG zamiast TGA" tool_tip="Używane w oknie podglądu tekstur oraz menu kontekstowym Szafy." name="FSTextureDefaultSaveAsFormat" />
+        <check_box label="Używaj CTRL+myszki, aby chwytać obiekty i manipulować nimi" tool_tip="Gdy zaznaczysz tą opcję, to będziesz w stanie chwytać i przesuwać obiekty za pomocą myszki oraz klawisza CTRL." name="FSEnableGrab" />
+        <check_box label="Przesuwaj / skaluj tekstury budując, gdy trzymany jest przycisk myszy oraz klawisz caps-lock" tool_tip="Gdy zaznaczysz tą opcję, to będziesz mógł/mogła przesuwać lub skalować strony tekstur trzymając przycisk myszy (wraz z klawiszem caps-lock) w trybie budowania. Ta funkcja jest eksperymentalna i powinna być używana ostrożnie." name="FSExperimentalDragTexture" />
+        <check_box label="Podgląd animacji na własnym awatarze podczas przesyłania ich na serwer" tool_tip="Gdy zaznaczysz tą opcję, to będziesz w stanie oglądać animacje na swoim własnym awatarze podczas przesyłania ich na serwer" name="FSUploadAnimationOnOwnAvatar" />
+        <check_box label="Zawsze rozwijaj zaawansowane informacje o podglądzie animacji" tool_tip="Domyślnie rozwiń zaawansowane informacje o animacji w oknie podglądu animacji" name="FSAnimationPreviewExpanded" />
+        <check_box label="Włącz rozszerzanie funkcjonalności informacji o skryptach" tool_tip="Gdy zaznaczysz tą opcję, to podstawowa funkcjonalność informacji o skryptach zostanie rozszerzona za pomocą różnych szczegółów przydatnych dla budowniczych" name="FSScriptInfoExtended" />
+        <check_box label="Sortuj miejsca dodatków w sekcjach menu &quot;Dołącz do&quot; alfabetycznie (wymaga restartu)" tool_tip="Jeśli ta opcja jest włączona, to lista miejsc dla doczepienia dodatków pojawiająca się w menusach &quot;Dołącz do&quot; będzie posortowana alfabetycznie" name="FSSortAttachmentSpotsAlphabetically" />
+        <check_box label="Nowy panel tekstur [APP_NAME] w panelu budowania (wymaga restartu)" tool_tip="Gdy zaznaczysz tą opcję, to narzędzia do edycji tekstur będą korzystać z udoskonalonego panelu [APP_NAME] i pozwolą na edycję tekstur BlinnPhong oraz PBR." name="FSUseNewTexturePanel" />
+    </panel>
+    <panel label="Nowe pliki" name="UploadsTab">
+        <text name="title">
+            Obecne lokalizacje dla nowych plików:
+        </text>
+        <text name="title_images">
+            Obrazy
+        </text>
+        <text name="title_sounds">
+            Dźwięki
+        </text>
+        <text name="title_animations">
+            Animacje
+        </text>
+        <text name="title_models">
+            Modele
+        </text>
+        <text name="title_pbr">
+            Materiały PBR
+        </text>
+        <text name="upload_help">
+            Aby zmienić folder docelowy kliknij na nim prawym przyciskiem myszy w Szafie
+i użyj opcji "ustaw jako domyślne dla"
+        </text>
+        <button name="reset_default_folders" label="Reset folderów domyślnych" />
+    </panel>
+</tab_container>
+</panel>

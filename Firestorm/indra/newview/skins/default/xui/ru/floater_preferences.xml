@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Preferences" title="Настройки">
+	<button label="Применить" label_selected="Применить" name="Apply"/>
+	<button label="Отменить" label_selected="Отменить" name="Cancel"/>
+	<panel name="search_panel">
+		<search_editor label="Поиск настроек" name="search_prefs_edit" tool_tip="Введите интересующий вас термин для поиска здесь. Результаты будут отображены для частичного совпадения полного текста в названии параметра или комментариях."/>
+		<button name="copy_search_slurl_btn" tool_tip="Копировать поисковый запрос как SLURL"/>
+	</panel>
+	<tab_container name="pref core">
+		<panel label="Общие" name="general"/>
+		<panel label="Чат" name="chat"/>
+		<panel label="Цвета" name="colors"/>
+		<panel label="Графика" name="display"/>
+		<panel label="Звук и медиа" name="audio"/>
+		<panel label="Сеть и файлы" name="input"/>
+		<panel label="Движение и вид" name="move"/>
+		<panel label="Управление" name="controls"/>
+		<panel label="Уведомления" name="msgs"/>
+		<panel label="Приватность" name="im"/>
+		<panel label="Расширеное" name="advanced1"/>
+		<panel label="Интерфейс" name="ui"/>
+		<panel label="Темы" name="skins"/>
+		<panel label="Ошибки" name="crashreports"/>
+		<panel label="Firestorm" name="firestorm"/>
+		<panel label="OpenSim" name="opensim"/>
+		<panel label="Резервная копия" name="backup"/>
+	</tab_container>
+</floater>

@@ -1,0 +1,37 @@
+[package]
+name = "llsd"
+version = "1.0.0"
+authors = ["Linden Lab"]
+edition = "2021"
+description = "Rust implementation of LLSD (Linden Lab Structured Data) format"
+license = "MIT"
+repository = "https://github.com/Kaleaon/llsd-java"
+keywords = ["llsd", "second-life", "firestorm", "linden-lab", "serialization"]
+categories = ["encoding", "parser-implementations", "data-structures"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+quick-xml = { version = "0.31", features = ["serialize"] }
+uuid = { version = "1.0", features = ["serde", "v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+base64 = "0.21"
+thiserror = "1.0"
+bytes = "1.0"
+tokio = { version = "1.0", features = ["full"], optional = true }
+
+[dev-dependencies]
+tokio-test = "0.4"
+criterion = "0.5"
+proptest = "1.0"
+
+[features]
+default = ["std"]
+std = []
+async = ["tokio"]
+firestorm = []
+secondlife = []
+
+[[bench]]
+name = "llsd_benchmarks"
+harness = false

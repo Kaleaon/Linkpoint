@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater
+ name="avatarrendersettings"
+ help_topic="fs_avatar_render_settings"
+ title="Avatar Display Exceptions"
+ min_width="350"
+ min_height="320"
+ width="450"
+ height="320"
+ save_rect="true"
+ single_instance="false"
+ reuse_instance="false"
+ can_resize="true"
+ can_minimize="true"
+ can_close="true"
+ can_drag_on_left="false">
+	<floater.string name="av_render_never">
+		Never
+	</floater.string>
+	<floater.string name="av_render_always">
+		Always
+	</floater.string>
+	<filter_editor
+	 follows="left|top|right"
+	 height="23"
+	 layout="topleft"
+	 left="4"
+	 label="Filter Avatars"
+	 max_length_chars="300"
+	 name="filter_input"
+	 top="4"
+	 right="-35" />
+	<menu_button
+	 follows="top|right"
+	 height="23"
+	 image_hover_unselected="Toolbar_Middle_Over"
+	 image_overlay="AddItem_Off"
+	 image_selected="Toolbar_Middle_Selected"
+	 image_unselected="Toolbar_Middle_Off"
+	 layout="topleft"
+	 left_pad="2"
+	 menu_filename="menu_avatar_rendering_settings_add.xml"
+	 menu_position="bottomleft"
+	 name="plus_btn"
+	 tool_tip="Add new person to the list"
+	 top="4"
+	 right="-4" />
+	<name_list
+	 column_padding="0"
+	 draw_heading="true"
+	 follows="all"
+	 layout="topleft"
+	 left="4"
+	 right="-4"
+	 top="30"
+	 bottom="-32"
+	 name="avatar_list"
+	 name_column="name"
+	 draw_stripes="true"
+	 multi_select="true"
+	 content_type="Agents"
+	 sort_column="0"
+	 sort_ascending="true">
+		<name_list.columns
+		 dynamic_width="true"
+		 label="Name"
+		 name="name" />
+		<name_list.columns
+		 label="Full detail"
+		 name="render_setting"
+		 width="100" />
+	</name_list>
+	<button
+	 name="close_btn"
+	 label="Close"
+	 font="SansSerif"
+	 height="23"
+	 width="80"
+	 right="-10"
+	 bottom="-5"
+	 follows="right|bottom"/>
+</floater>

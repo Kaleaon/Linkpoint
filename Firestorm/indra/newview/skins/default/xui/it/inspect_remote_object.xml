@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="inspect_remote_object">
+	<text name="object_owner_label">
+		Proprietario:
+	</text>
+	<button label="Mappa" name="map_btn"/>
+	<button label="Blocca" name="block_btn"/>
+	<button label="Chiudi" name="close_btn"/>
+</floater>

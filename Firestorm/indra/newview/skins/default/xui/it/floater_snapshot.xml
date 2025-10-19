@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Snapshot" title="Scatta Foto">
+	<floater.string name="unknown">
+		sconosciuto
+	</floater.string>
+	<string name="postcard_progress_str">
+		Invio e-mail in corso
+	</string>
+	<string name="profile_progress_str">
+		Caricamento in corso
+	</string>
+	<string name="inventory_progress_str">
+		Salva in inventario
+	</string>
+	<string name="local_progress_str">
+		Salvataggio sul computer in corso
+	</string>
+	<string name="profile_succeeded_str">
+		Immagine caricata
+	</string>
+	<string name="postcard_succeeded_str">
+		E-mail inviata
+	</string>
+	<string name="inventory_succeeded_str">
+		Salvata in inventario
+	</string>
+	<string name="local_succeeded_str">
+		Salvata sul computer
+	</string>
+	<string name="profile_failed_str">
+		Caricamento immagine sul feed del profilo non riuscito.
+	</string>
+	<string name="postcard_failed_str">
+		Invio e-mail non riuscito
+	</string>
+	<string name="inventory_failed_str">
+		Non salvata in inventario
+	</string>
+	<string name="local_failed_str">
+		Non salvata sul computer
+	</string>
+	<view name="controls_container">
+		<button label="Aggiorna" name="new_snapshot_btn"/>
+		<panel name="advanced_options_panel">
+			<text name="layer_type_label">
+				Cattura:
+			</text>
+			<combo_box label="Elementi immagine" name="layer_types">
+				<combo_box.item label="Colori" name="Colors"/>
+				<combo_box.item label="Profondità" name="Depth"/>
+				<combo_box.item label="Profondità (24 bit)" name="Depth24"/>
+			</combo_box>
+			<check_box label="Interfaccia" name="ui_check"/>
+			<check_box label="Credito L$" name="currency_check" />
+			<check_box label="HUD" name="hud_check" />
+			<check_box label="Mostra frame di cattura" tool_tip="Mostra una cornice sullo schermo che circonda le aree della foto. Le parti della scena che sono al di fuori della foto saranno desaturate e leggermente sfocate" name="show_frame" />
+			<check_box label="Mostra guida all'inquadratura" tool_tip="Mostra la guida all'inquadratura (regola dei terzi) all'interno della cornice della foto" name="show_guides" />
+			<check_box label="Fermo immagine (tutto schermo)" name="freeze_frame_check"/>
+			<check_box label="Aggiornamento automatico" name="auto_snapshot_check"/>
+			<check_box label="Nessuna post-elaborazione" name="no_post_check" />
+			<text name="filter_list_label">
+				Filtro:
+			</text>
+			<combo_box name="filters_combobox" tool_tip="Filtri immagine">
+				<combo_box.item label="Nessun filtro" name="NoFilter"/>
+			</combo_box>
+		</panel>
+		<panel name="succeeded_panel">
+			<text name="succeeded_lbl">
+				Completato
+			</text>
+		</panel>
+		<panel name="failed_panel">
+			<text name="failed_lbl">
+				Non completato
+			</text>
+		</panel>
+		<text name="working_lbl">
+			In corso
+		</text>
+		<text name="refresh_lbl">
+			Aggiorna per salvare
+		</text>
+	</view>
+	<text name="image_res_text">
+		[WIDTH] x [HEIGHT] pixel (base x altezza)
+	</text>
+	<button label="Foto a 360°" name="360_label" />
+</floater>

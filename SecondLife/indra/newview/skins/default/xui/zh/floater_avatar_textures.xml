@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="avatar_texture_debug" title="化身材質">
+	<floater.string name="InvalidAvatar">
+		無效的化身
+	</floater.string>
+	<scroll_container name="profile_scroll">
+		<panel name="scroll_content_panel">
+			<text name="label">
+				確定產出的
+材質
+			</text>
+			<text name="composite_label">
+				合成
+材質
+			</text>
+			<button label="傾印 ID 到控制臺" label_selected="傾印" name="Dump"/>
+			<panel name="scroll_content_panel2">
+				<texture_picker label="頭髮" name="hair-baked"/>
+				<texture_picker label="頭髮" name="hair_grain"/>
+				<texture_picker label="頭髮半透明" name="hair_alpha"/>
+				<texture_picker label="頭部" name="head-baked"/>
+				<texture_picker label="化妝" name="head_bodypaint"/>
+				<texture_picker label="頭部半透明" name="head_alpha"/>
+				<texture_picker label="頭部刺青" name="head_tattoo"/>
+				<texture_picker label="眼睛" name="eyes-baked"/>
+				<texture_picker label="眼睛" name="eyes_iris"/>
+				<texture_picker label="眼睛半透明" name="eyes_alpha"/>
+				<texture_picker label="上半身" name="upper-baked"/>
+				<texture_picker label="上半身身體部位" name="upper_bodypaint"/>
+				<texture_picker label="內衣" name="upper_undershirt"/>
+				<texture_picker label="手套" name="upper_gloves"/>
+				<texture_picker label="襯衫" name="upper_shirt"/>
+				<texture_picker label="上半身夾克" name="upper_jacket"/>
+				<texture_picker label="上半身半透明" name="upper_alpha"/>
+				<texture_picker label="上半身刺青" name="upper_tattoo"/>
+				<texture_picker label="下半身" name="lower-baked"/>
+				<texture_picker label="下半身身體部位" name="lower_bodypaint"/>
+				<texture_picker label="內褲" name="lower_underpants"/>
+				<texture_picker label="襪子" name="lower_socks"/>
+				<texture_picker label="鞋子" name="lower_shoes"/>
+				<texture_picker label="褲子" name="lower_pants"/>
+				<texture_picker label="夾克" name="lower_jacket"/>
+				<texture_picker label="下半身半透明" name="lower_alpha"/>
+				<texture_picker label="下半身刺青" name="lower_tattoo"/>
+				<texture_picker label="裙子" name="skirt-baked"/>
+				<texture_picker label="裙子" name="skirt"/>
+			</panel>
+		</panel>
+	</scroll_container>
+</floater>

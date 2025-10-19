@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="url_entry">
+	<text name="media_label">
+		メディアＵＲＬ：
+	</text>
+	<button label="ＯＫ" name="ok_btn"/>
+	<button label="キャンセル" name="cancel_btn"/>
+	<button label="クリア" name="clear_btn"/>
+	<text name="loading_label">
+		読み込んでいます…
+	</text>
+</floater>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Abiti" name="appearance panel">
+	<string name="No Outfit" value="Nessun abito"/>
+	<string name="Unsaved Changes" value="Modifiche non salvate"/>
+	<string name="Now Wearing" value="Abito attuale..."/>
+	<string name="Changing outfits" value="Cambio abito"/>
+	<panel name="panel_currentlook">
+		<button label="" name="edit_outfit_btn" tool_tip="Modifica questo abito"/>
+	</panel>
+	<filter_editor label="Filtri per gli abiti" name="Filter"/>
+</panel>

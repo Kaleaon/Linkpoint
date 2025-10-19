@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel
+ follows="top|right|left"
+ height="20"
+ layout="topleft"
+ left="0"
+ name="teleport_history_item"
+ top="0"
+ width="380">
+    <panel.string name="DateFmt">
+        [mthnum,datetime,utc]/[day,datetime,utc]/[year,datetime,utc], [hour12,datetime,utc]:[min,datetime,utc] [ampm,datetime,utc]
+    </panel.string>
+    <icon
+     follows="top|right|left"
+     height="20"
+     image_name="ListItem_Over"
+     layout="topleft"
+     left="0"
+     name="hovered_icon"
+     top="0"
+     visible="false"
+     width="380" />
+    <icon
+     height="20"
+     follows="top|right|left"
+     image_name="ListItem_Select"
+     layout="topleft"
+     left="0"
+     name="selected_icon"
+     top="0"
+     visible="false"
+     width="380" />
+    <icon
+     height="16"
+     follows="top|left"
+     image_name="Inv_Landmark"
+     layout="topleft"
+     left="0"
+     name="landmark_icon"
+     top="0"
+     width="16" />
+
+    <layout_stack
+     name="ls_item"
+     layout="topleft"
+     follows="all"
+     top="0"
+     left="21"
+     width="335"
+     height="25"
+     border_size="0"
+     orientation="horizontal">
+        <layout_panel
+         name="lp_region"
+         auto_resize="true"
+         height="25"
+         width="145"
+         layout="topleft"
+         visible="true"
+         follows="top|left|right">
+
+    <text
+     follows="left|right"
+     height="20"
+     layout="topleft"
+     parse_urls="false"
+     use_ellipses="true"
+     name="region"
+     text_color="White"
+     top="4"
+     value="..."
+     width="145" />
+
+        </layout_panel>
+        <layout_panel
+         visibility_control="FSTeleportHistoryShowPosition"
+         name="lp_position"
+         auto_resize="false"
+         height="25"
+         width="85"
+         layout="topleft"
+         visible="false"
+         follows="top|left|right">
+
+    <text
+     follows="left|right"
+     height="20"
+     layout="topleft"
+     parse_urls="false"
+     use_ellipses="true"
+     name="position"
+     text_color="White"
+     top="4"
+     value="0, 0, 0"
+     width="80" />
+
+        </layout_panel>
+        <layout_panel
+         visibility_control="FSTeleportHistoryShowDate"
+         name="lp_date"
+         auto_resize="false"
+         height="25"
+         width="120"
+         layout="topleft"
+         visible="false"
+         follows="top|left|right">
+
+    <text
+     follows="left|right"
+     height="20"
+     layout="topleft"
+     parse_urls="false"
+     use_ellipses="true"
+     name="timestamp"
+     text_color="White"
+     top="4"
+     value="01/01/2000 12:00PM"
+     width="120" />
+
+        </layout_panel>
+    </layout_stack>
+
+    <button
+     follows="right"
+     height="20"
+     image_overlay="ForwardArrow_Off"
+     layout="topleft"
+     left_pad="5"
+     right="-3"
+     name="profile_btn"
+     tab_stop="false"
+     tool_tip="Show item info"
+     top="1"
+     visible="false"
+     width="20" />
+</panel>

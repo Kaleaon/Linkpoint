@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<context_menu name="Outfit Wearable Context Menu">
+	<menu_item_call label="Ersetzen" name="wear_replace"/>
+	<menu_item_call label="Anziehen" name="wear_wear"/>
+	<menu_item_call label="Hinzufügen" name="wear_add"/>
+	<menu_item_call label="Berühren" name="touch" />
+	<menu_item_call label="Ausziehen / Abnehmen" name="take_off_or_detach"/>
+	<menu_item_call label="Abnehmen" name="detach"/>
+	<context_menu label="Anhängen an" name="wearable_attach_to"/>
+	<context_menu label="An HUD hängen" name="wearable_attach_to_hud"/>
+	<menu_item_call label="Ausziehen" name="take_off"/>
+	<menu_item_call label="Bearbeiten" name="edit"/>
+	<menu_item_call label="Objektprofil" name="object_profile"/>
+	<menu_item_call label="Original anzeigen" name="show_original"/>
+</context_menu>

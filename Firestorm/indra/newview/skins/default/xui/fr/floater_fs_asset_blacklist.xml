@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="fs_asset_blacklist" title="Éléments Blacklistés">
+	<floater.string name="asset_object">Objet</floater.string>
+	<floater.string name="asset_texture">Texture</floater.string>
+	<floater.string name="asset_sound">Son</floater.string>
+	<floater.string name="asset_animation">Animation</floater.string>
+	<floater.string name="asset_resident">Résident</floater.string>
+	<floater.string name="blacklist_flag_mute_avatar_worn_objects_sounds">Sons obj. portés AV</floater.string>
+	<floater.string name="blacklist_flag_mute_avatar_rezzed_objects_sounds">Sons obj. rezzés AV</floater.string>
+	<floater.string name="blacklist_flag_mute_avatar_gestures_sounds">Sons gestes AV</floater.string>
+	<floater.string name="blacklist_flag_unknown"> Drapeau inconnu </floater.string>
+	<floater.string name="asset_unknown">Inconnu</floater.string>
+	<floater.string name="unknown_object">Objet inconnu</floater.string>
+	<floater.string name="unknown_region">Région inconnue</floater.string>
+	<filter_editor label="Filtrer les éléments blacklistés" name="filter_input"/>
+	<fs_scroll_list name="result_list">
+		<columns name="name" label="Nom"/>
+		<columns name="region" label="Région"/>
+		<columns name="type" label="Type"/>
+		<columns name="flags" label="Drapeaux"/>
+		<columns name="date" label="Date"/>
+	</fs_scroll_list>
+	<button name="remove_btn" label="Supprimer la sélection des éléments blacklistés" height="23" width="320"/>
+	<button name="remove_temp_btn" label="Suppr. temporairement"/>
+	<button name="play_btn" label="Jouer le son" tool_tip="Lecture du son sélectionné ; un seul élément sonore à la fois peut être sélectionné pour la lecture.." width="120" />
+	<button name="stop_btn" label="Ne pas jouer" tool_tip="Arrête la lecture du son en cours." width="120" />
+	<button name="close_btn" label="Fermer"/>
+</floater>

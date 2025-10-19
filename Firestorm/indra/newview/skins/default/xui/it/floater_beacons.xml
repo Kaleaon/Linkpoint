@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="beacons" title="Marcatori">
+	<panel name="beacons_panel">
+		<text name="label_show">
+			Mostra:
+		</text>
+		<check_box label="Contenitori per le luci di scena" name="lights_bounding_boxes"/>
+		<check_box label="Marcatori" name="beacons"/>
+		<check_box label="In evidenza" name="highlights"/>
+		<check_box label="Info marcatore nella finestra viewer" name="FSRenderBeaconText"/>
+		<text name="beacon_width_label" tool_tip="Larghezza marcatore">
+			Larghezza:
+		</text>
+		<text name="label_objects">
+			Per questi oggetti:
+		</text>
+		<check_box label="Oggetti fisici" name="physical"/>
+		<check_box label="Oggetti scriptati" name="scripted"/>
+		<check_box label="Solo cliccabili" name="touch_only"/>
+		<check_box label="Sorgenti suoni" name="sounds"/>
+		<check_box label="Sorgenti particelle" name="particles"/>
+		<check_box label="Sorgenti multimedia" name="moapbeacon"/>
+		<text name="label_direction">
+			Mostra direzione:
+		</text>
+		<check_box label="Sole" name="sun"/>
+		<check_box label="Luna" name="moon"/>
+	</panel>
+</floater>

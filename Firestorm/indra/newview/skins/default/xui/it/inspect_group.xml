@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="inspect_group">
+	<string name="PrivateGroup">
+		Gruppo privato
+	</string>
+	<string name="FreeToJoin">
+		Adesione libera
+	</string>
+	<string name="CostToJoin">
+		[AMOUNT]L$ per aderire
+	</string>
+	<string name="YouAreMember">
+		Sei iscritto
+	</string>
+	<button label="Iscriviti" name="join_btn"/>
+	<button label="Abbandona" name="leave_btn"/>
+	<button label="Vedi profilo" name="view_profile_btn"/>
+</floater>

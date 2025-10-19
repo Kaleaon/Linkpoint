@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<toggleable_menu name="Gear Outfit">
+	<menu_item_call label="Переодеться (заменить)" name="wear"/>
+	<menu_item_call label="Надеть (добавить)" name="wear_add"/>
+	<menu_item_call label="Снять" name="take_off"/>
+	<menu_item_call label="Изображение" name="thumbnail"/>
+	<menu_item_call label="Добавить в избранные костюмы" name="favorites_add"/>
+	<menu_item_call label="Удалить из избранных костюмы" name="favorites_remove"/>
+	<menu_item_call label="Переименовать костюм" name="rename"/>
+	<menu_item_call label="Сохранить в этот костюм" name="save"/>
+	<menu_item_call label="Удалить костюм" name="delete_outfit"/>
+	<menu_item_check label="Всегда сортировать папки по имени" name="sort_folders_by_name"/>
+	<menu_item_call label="Развернуть все папки" name="expand"/>
+	<menu_item_call label="Свернуть все папки" name="collapse"/>
+	<context_menu label="Новая одежда" name="New Clothes">
+		<menu_item_call label="Новая рубашка" name="New Shirt"/>
+		<menu_item_call label="Новые штаны" name="New Pants"/>
+		<menu_item_call label="Новая обувь" name="New Shoes"/>
+		<menu_item_call label="Новые носки" name="New Socks"/>
+		<menu_item_call label="Новая куртка" name="New Jacket"/>
+		<menu_item_call label="Новая юбка" name="New Skirt"/>
+		<menu_item_call label="Новые перчатки" name="New Gloves"/>
+		<menu_item_call label="Новая майка" name="New Undershirt"/>
+		<menu_item_call label="Новые трусы" name="New Underpants"/>
+		<menu_item_call label="Новая альфа" name="New Alpha"/>
+		<menu_item_call label="Новая физика" name="New Physics"/>
+		<menu_item_call label="Новая татуировка" name="New Tattoo"/>
+		<menu_item_call label="Новый универсальный" name="New Universal"/>
+	</context_menu>
+	<context_menu label="Новые части тела" name="New Body Parts">
+		<menu_item_call label="Новая фигура" name="New Shape"/>
+		<menu_item_call label="Новая кожа" name="New Skin"/>
+		<menu_item_call label="Новые волосы" name="New Hair"/>
+		<menu_item_call label="Новые глаза" name="New Eyes"/>
+	</context_menu>
+	<menu_item_check label="Настройки инвентаря..." name="inventory_settings"/>
+</toggleable_menu>

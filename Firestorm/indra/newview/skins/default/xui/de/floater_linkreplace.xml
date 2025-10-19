@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="linkreplace" title="Inventar-Links ersetzen">
+	<string name="Ready">
+		Bereit...
+	</string>
+	<string name="TargetNotFound">
+		Ziel-Objekt nicht gefunden.
+	</string>
+	<string name="ItemsIdentical">
+		Quell- und Ziel-Objekt sind identisch.
+	</string>
+	<string name="ItemsFound">
+		[NUM] Inventar-Links gefunden.
+	</string>
+	<string name="ItemsRemaining">
+		Objekte verbleibend: [NUM]
+	</string>
+	<string name="ReplaceFinished">
+		Ersetzen von Inventar-Links beendet.
+	</string>
+	<text name="source_label">
+		Alt:
+	</text>
+	<inventory_link_replace_drop_target name="source_uuid_editor" tool_tip="Quell-Objekt aus dem Inventar hier per Drag&amp;Drop hineinziehen."/>
+	<text name="delete_text">
+		Verknüpfungen zu diesem Objekt werden entfernt.
+	</text>
+	<text name="target_label">
+		Neu:
+	</text>
+	<inventory_link_replace_drop_target name="target_uuid_editor" tool_tip="Ziel-Objekt aus dem Inventar hier per Drag&amp;Drop hineinziehen."/>
+	<check_box label="Nur Verknüpfungen entfernen" name="delete_links_only"/>
+	<text name="status_text">
+		Bereit...
+	</text>
+	<button name="btn_refresh" label="Aktualisieren"/>
+	<button name="btn_start" label="Starten"/>
+	<button name="btn_stop" label="Stoppen"/>
+</floater>

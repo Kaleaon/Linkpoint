@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="floater_new_feature_notification" title="新功能">
+	<floater.string name="title_txt_inventory">
+		庫存的新功能
+	</floater.string>
+	<floater.string name="description_txt_inventory">
+		您現在可以將物件和資料夾標記為收藏。已收藏的項目會出現在庫存的“收藏”選項卡中，並在主庫存視圖中預設以星標突出顯示。
+	</floater.string>
+	<text name="title_txt">
+		新功能
+	</text>
+	<text name="description_txt">
+		功能描述
+	</text>
+	<button label="我明白了！" name="close_btn" />
+</floater>

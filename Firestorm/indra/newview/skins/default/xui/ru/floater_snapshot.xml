@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Snapshot" title="Просмотр снимка">
+	<floater.string name="unknown">
+		неизвестно
+	</floater.string>
+	<string name="postcard_progress_str">
+		Отправка письма
+	</string>
+	<string name="facebook_progress_str">
+		Публикация в Facebook
+	</string>
+	<string name="profile_progress_str">
+		Публикация
+	</string>
+	<string name="inventory_progress_str">
+		Сохранение в -инвентарь
+	</string>
+	<string name="local_progress_str">
+		Сохранение на компьютере
+	</string>
+	<string name="facebook_succeeded_str">
+		Изображение загружено
+	</string>
+	<string name="profile_succeeded_str">
+		Изображение отправлено
+	</string>
+	<string name="postcard_succeeded_str">
+		Письмо отправлено!
+	</string>
+	<string name="inventory_succeeded_str">
+		Сохранено в инвентаре!
+	</string>
+	<string name="local_succeeded_str">
+		Сохранено на компьютере!
+	</string>
+	<string name="facebook_failed_str">
+		Не удалось передать изображение на вашу хронику Facebook.
+	</string>
+	<string name="profile_failed_str">
+		Не удалось передать изображение в ваш профиль.
+	</string>
+	<string name="postcard_failed_str">
+		Не удалось отправить письмо.
+	</string>
+	<string name="inventory_failed_str">
+		Не удалось сохранить в инвентаре.
+	</string>
+	<string name="local_failed_str">
+		Не удалось сохранить на компьютере.
+	</string>
+	<view name="controls_container">
+	<button label="Обновить" name="new_snapshot_btn"/>
+	<panel name="advanced_options_panel">
+		<text name="layer_type_label">
+			Захват:
+		</text>
+		<combo_box label="Слои изображения" name="layer_types">
+			<combo_box.item label="Цвета" name="Colors"/>
+			<combo_box.item label="Глубина" name="Depth"/>
+			<combo_box.item label="Глубина (24 бит)" name="Depth24"/>
+		</combo_box>
+		<check_box label="Интерфейс" name="ui_check"/>
+		<check_box label="L$ Баланс" name="currency_check"/>
+		<check_box label="Данные в игре" name="hud_check"/>
+		<check_box label="Показать кадр захвата" tool_tip="Показать на экране рамку, окружающую области снимка. Части сцены, находящиеся за пределами снимка, будут обесцвечены и слегка размыты." name="show_frame" />
+		<check_box label="Показать кадрирование" tool_tip="Показать руководство по кадрированию (правило третей) внутри рамки снимка" name="show_guides" />
+		<check_box label="Стоп-кадр (полноэкранный)" name="freeze_frame_check"/>
+		<check_box label="Автообновление" name="auto_snapshot_check"/>
+		<check_box label="Без постобработки" name="no_post_check" />
+		<text name="filter_list_label" width="60">
+            Фильтр:
+        </text>
+		<combo_box name="filters_combobox" left="60" >
+            <combo_box.item label="Без фильтра" name="NoFilter"/>
+        </combo_box>
+	</panel>
+	</view>
+	<text name="image_res_text">
+		[WIDTH] (ширина) x [HEIGHT] (высота) пикс.
+	</text>
+	<text name="file_size_label">
+		[SIZE] КБ
+	</text>
+	<button label="360° снимок" name="360_label"/>
+</floater>

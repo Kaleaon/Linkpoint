@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Give Money">
+	<string name="payee_group">
+		グループに支払う
+	</string>
+	<string name="payee_resident">
+		住人に支払う
+	</string>
+	<text name="payee_name">
+		非常に長い名前が途中で切れていないかをテストして確認
+	</text>
+	<text name="amount text">
+		もしくは金額を選ぶ：
+	</text>
+	<text name="payment_message_label">
+		説明（任意項目）：
+	</text>
+	<button label="支払う" label_selected="支払う" name="pay btn"/>
+	<button label="キャンセル" label_selected="キャンセル" name="cancel btn"/>
+</floater>

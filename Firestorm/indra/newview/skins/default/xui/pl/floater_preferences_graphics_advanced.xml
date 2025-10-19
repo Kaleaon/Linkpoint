@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="prefs_graphics_advanced" title="Zaawansowane ustawienia graficzne">
+	<text name="GeneralText">
+		Ogólne
+	</text>
+	<slider label="Pole widzenia:" name="DrawDistance" />
+	<slider label="Maks. ilość cząsteczek:" name="MaxParticleCount" />
+	<slider label="Jakość post-procesu:" name="RenderPostProcess" />
+	<text name="PostProcessText">
+		Niska
+	</text>
+	<slider label="Maks. świateł:" name="MaxLights" />
+	<text name="MaxTextureResolutionLabel">
+		Maks. rozdzielcz. LOD:
+	</text>
+	<combo_box name="MaxTextureResolution" tool_tip="Maksymalna rozdzielczość 'poziomu szczegółowości' tekstur" />
+	<check_box label="Włącz VSync" name="vsync" tool_tip="Synchronizuje liczbę klatek na sekundę z częstotliwością odświeżania monitora, może skutkować zmniejszeniem widocznej płynności i opóźnieniami." />
+	<text name="AvatarText">
+		Awatar
+	</text>
+	<text name="AvatarComplexityModeLabel">
+		Render awatarów:
+	</text>
+	<combo_box name="AvatarComplexityMode">
+		<combo_box.item label="Ogranicz po złożoności" name="0" />
+		<combo_box.item label="Zawsze pokazuj znajomych" name="1" />
+		<combo_box.item label="Pokazuj tylko znajomych" name="2" />
+	</combo_box>
+	<slider tool_tip="Kontroluje w jakim momencie awatar, który jest graficznie złożony zostanie zastąpiony przez mniej obciążającą komputer formę (tzw. JellyDoll)" label="Maks. szczegółowość awatarów:" name="IndirectMaxComplexity" />
+	<slider label="Maks. il. animowanych awatarów:" name="IndirectMaxNonImpostors" />
+	<slider label="Detale:" name="AvatarMeshDetail" />
+	<text name="AvatarMeshDetailText">
+		Mało
+	</text>
+	<slider label="Fizyka:" name="AvatarPhysicsDetail" />
+	<text name="AvatarPhysicsDetailText">
+		Mało
+	</text>
+	<text name="HardwareText">
+		Sprzętowe
+	</text>
+	<check_box label="Filtrowanie anizotropowe (wolniej, gdy włączone)" name="ani" />
+	<check_box label="Włącz stratną kompresję tekstur (wymaga restartu)" name="texture compression" tool_tip="Kompresuje tekstury w pamięci wideo. Umożliwi to ładowanie tekstur w wyższej rozdzielczości / większej ich ilości, ale kosztem jakości obrazu." />
+	<check_box label="Włącz wsparcie dla ekranów HiDPI (wymaga restartu)" name="use HiDPI" tool_tip="Włącz funkcje OpenGL dla rysowania w wysokich rozdzielczościach." />
+	<text name="antialiasing label">
+		Antyaliasing:
+	</text>
+	<combo_box label="Antyaliasing" name="fsaa">
+		<combo_box.item label="Wyłączony" name="FSAADisabled" />
+	</combo_box>
+	<text name="antialiasing quality label">
+		Jakość antyaliasingu:
+	</text>
+	<combo_box name="fsaa quality">
+		<combo_box.item label="Niska" name="Low" />
+		<combo_box.item label="Średnia" name="Medium" />
+		<combo_box.item label="Wysoka" name="High" />
+		<combo_box.item label="Ultra" name="Ultra" />
+	</combo_box>
+	<text name="MeshText">
+		Mesz
+	</text>
+	<slider label="Szczegóły terenu:" name="TerrainMeshDetail" />
+	<text name="TerrainMeshDetailText">
+		Mało
+	</text>
+	<slider label="Drzewa:" name="TreeMeshDetail" />
+	<text name="TreeMeshDetailText">
+		Mało
+	</text>
+	<slider label="Obiekty i skulpty:" name="ObjectMeshDetail" />
+	<text name="ObjectMeshDetailText">
+		Mało
+	</text>
+	<slider label="Obiekty elastyczne:" name="FlexibleMeshDetail" />
+	<text name="FlexibleMeshDetailText">
+		Mało
+	</text>
+	<text name="antialiasing restart">
+		(wymaga restartu)
+	</text>
+	<text name="ShadersText">
+		Cieniowanie
+	</text>
+	<check_box label="Przezroczysta woda" name="TransparentWater" />
+	<slider label="Niebo:" name="SkyMeshDetail" />
+	<text name="SkyMeshDetailText">
+		Nisko
+	</text>
+	<check_box label="Okluzja otoczenia (SSAO)" name="UseSSAO" />
+	<check_box label="Włącz głębię ostrości" name="UseDoF" />
+	<check_box label="HDR i emisyjność" name="VintageMode" />
+	<text name="RenderShadowDetailText">
+		Cienie:
+	</text>
+	<combo_box name="ShadowDetail">
+		<combo_box.item label="Brak" name="0" />
+		<combo_box.item label="Słońce/Księżyc" name="1" />
+		<combo_box.item label="Słońce/Księżyc + inne źródła" name="2" />
+	</combo_box>
+	<check_box label="Odbicia obszaru ekranu (SSR)" name="ScreenSpaceReflections" />
+	<text name="ReflectionDetailText">
+		Szczegóły odbić:
+	</text>
+	<combo_box name="ReflectionDetail">
+		<combo_box.item label="Tylko statyczne" name="0" />
+		<combo_box.item label="Statyczne + dynamiczne" name="1" />
+		<combo_box.item label="W czasie rzeczywistym" name="2" />
+	</combo_box>
+	<text name="ReflectionProbeText">
+		Zasięg odbić:
+	</text>
+	<combo_box name="ReflectionLevel">
+		<combo_box.item label="Brak" name="0" />
+		<combo_box.item label="Tylko ręczne" name="1" />
+		<combo_box.item label="Ręczne + podłoże" name="2" />
+		<combo_box.item label="Pełna scena" name="3" />
+	</combo_box>
+	<text name="ReflectionProbeCount">
+		Il. sond refleksyjnych:
+	</text>
+	<combo_box label="Il. sond refleksyjnych:" name="ProbeCount">
+		<combo_box.item label="Brak" name="1" />
+		<combo_box.item label="Mało" name="32" />
+		<combo_box.item label="Średnio" name="64" />
+		<combo_box.item label="Dużo" name="128" />
+	</combo_box>
+	<slider label="Ekspozycja:" name="RenderExposure" />
+	<check_box label="Lustra" name="Mirrors" />
+	<text name="MirrorResolutionText">
+		Rozdzielczość luster:
+	</text>
+	<text name="HeroProbeUpdateText">
+		Odświeżanie luster:
+	</text>
+	<combo_box name="HeroProbeUpdateRate">
+		<combo_box.item label="Powoli" name="6"/>
+		<combo_box.item label="Średnio" name="3" />
+		<combo_box.item label="Szybko" name="1" />
+	</combo_box>
+	<slider label="Wyostrzanie:" name="RenderSharpness" />
+	<text name="TonemapTypeText">
+		Tone mapping:
+	</text>
+	<slider label="Miks tone mappingu:" tool_tip="Łączenie kolorów liniowych i tonalnie odwzorowanych (mappingowanych)" name="TonemapMix" />
+	<button label="Zresetuj wartości ustawień grafiki" name="Defaults" />
+	<button label="Anuluj" label_selected="Anuluj" name="Cancel" />
+</floater>

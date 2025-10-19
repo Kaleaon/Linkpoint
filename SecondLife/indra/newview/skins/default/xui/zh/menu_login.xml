@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<menu_bar name="Login Menu">
+	<menu label="我自己" name="File">
+		<menu_item_call label="偏好設定…" name="Preferences..."/>
+		<menu_item_call label="關閉視窗" name="Close Window"/>
+		<menu_item_check label="顯示格線挑選器" name="Show Grid Picker"/>
+		<menu_item_call label="退出 [APP_NAME]" name="Quit"/>
+	</menu>
+	<menu label="幫助" name="Help">
+		<menu_item_call label="簡易教學…" name="How To"/>
+		<menu_item_call label="快速上手" name="Quickstart"/>
+		<menu_item_call label="知識庫" name="Knowledge Base"/>
+		<menu_item_call label="維基" name="Wiki"/>
+		<menu_item_call label="社群論壇" name="Community Forums"/>
+		<menu_item_call label="支援入口" name="Support portal"/>
+		<menu_item_call label="[SECOND_LIFE] 最新消息" name="Second Life News"/>
+		<menu_item_call label="[SECOND_LIFE] 部落格" name="Second Life Blogs"/>
+		<menu_item_call label="回報錯誤" name="Report Bug"/>
+		<menu_item_call label="關於 [APP_NAME]" name="About Second Life"/>
+	</menu>
+	<menu_item_check label="顯示除錯選單" name="Show Debug Menu"/>
+	<menu label="除錯" name="Debug">
+		<menu_item_call label="顯示除錯設定" name="Debug Settings"/>
+		<menu_item_call label="XUI 預覽工具" name="UI Preview Tool"/>
+		<menu label="UI 測試" name="UI Tests"/>
+		<menu_item_call label="設定視窗大小..." name="Set Window Size..."/>
+		<menu_item_call label="顯示 TOS" name="TOS"/>
+		<menu_item_call label="顯示嚴重訊息" name="Critical"/>
+		<menu_item_call label="媒體瀏覽器" name="Media Browser"/>
+		<menu label="設定記錄細節" name="Set Logging Level">
+			<menu_item_check label="除錯" name="Debug"/>
+			<menu_item_check label="資訊" name="Info"/>
+			<menu_item_check label="警告" name="Warning"/>
+			<menu_item_check label="錯誤" name="Error"/>
+			<menu_item_check label="無" name="None"/>
+		</menu>
+		<menu_item_call label="顯示通知控制台" name="Show Notifications Console"/>
+	</menu>
+</menu_bar>

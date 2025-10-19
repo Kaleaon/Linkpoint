@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<context_menu name="Object Pie">
+	<menu_item_call label="Tocca" name="Object Touch">
+		<menu_item_call.on_enable name="EnableTouch" parameter="Tocca"/>
+	</menu_item_call>
+	<menu_item_call label="Modifica" name="Edit..."/>
+	<menu_item_call label="Modifica materiale PBR" name="EditGLTFMaterial"/>
+	<menu_item_call label="Crea" name="Build"/>
+	<menu_item_call label="Apri" name="Open"/>
+	<menu_item_call label="Siediti qui" name="Object Sit"/>
+	<menu_item_call label="Alzati" name="Object Stand Up"/>
+	<context_menu label="Oggetto" name="Object Features">
+		<menu_item_call label="Profilo dell'oggetto" name="Object Inspect"/>
+		<menu_item_call label="Ispeziona" name="Object_Inspect_Floater"/>
+		<menu_item_call label="Info sugli script" name="ScriptInfo"/>
+		<menu_item_call label="Collega" name="Object Link"/>
+		<menu_item_call label="Scollega" name="Object Unlink"/>
+		<menu_item_check label="Modifica parti collegate" name="Object Edit Linked Parts"/>
+		<menu_item_call label="Compila (Mono)" name="Mono"/>
+		<menu_item_call label="Compila (LSL)" name="LSL"/>
+		<menu_item_call label="Ripristina script" name="Object Reset Scripts"/>
+		<menu_item_call label="Avvia script" name="Object Set Scripts to Running"/>
+		<menu_item_call label="Ferma script" name="Object Set Scripts to Not Running"/>
+		<menu_item_call label="Rimuovi script" name="Remove Scripts From Selection"/>
+	</context_menu>
+	<menu_item_call label="Inquadra" name="Zoom In"/>
+	<menu_item_call label="Mostra in Oggetti Regione" name="show_in_linksets"/>
+	<menu_item_call label="Mostra in Personaggi" name="show_in_characters"/>
+	<context_menu label="Metti" name="Put On">
+		<menu_item_call label="Indossa" name="Wear"/>
+		<menu_item_call label="Aggiungi" name="Add"/>
+		<context_menu label="Attacca" name="Object Attach"/>
+		<context_menu label="Attacca HUD" name="Object Attach HUD"/>
+	</context_menu>
+	<context_menu label="Gestisci" name="Remove">
+		<menu_item_call label="Segnala abuso" name="Report Abuse..."/>
+		<menu_item_call label="Blocca" name="Object Mute"/>
+		<menu_item_call label="Sblocca" name="Object Unmute"/>
+	</context_menu>
+	<menu_item_call label="Ricarica texture" name="Texture Refresh"/>
+	<menu_item_call label="De-rendi" name="Derender"/>
+	<menu_item_call label="De-rendi + lista nera" name="DerenderPermanent"/>
+	<menu_item_call label="Restituisci" name="Return..."/>
+	<menu_item_call label="Prendi" name="Pie Object Take" />
+	<menu_item_call label="Prendi copia" name="Take Copy" />
+	<context_menu label="Prendi più" name="Take Multiple">
+		<menu_item_call label="Prendi come multi-oggetto" name="Take combined" />
+		<menu_item_call label="Prendi copia come multi-oggetto" name="Take Copy combined" />
+		<menu_item_call label="Prendi come oggetti separati" name="Take Separate" />
+		<menu_item_call label="Prendi copie come oggetti separati" name="Take Copy Separate" />
+	</context_menu>
+	<menu_item_call label="Paga" name="Pay..."/>
+	<menu_item_call label="Acquista" name="Buy..."/>
+	<context_menu label="Esporta" name="Export Menu">
+		<menu_item_call label="Salva copia" name="Backup"/>
+		<menu_item_call label="Collada" name="Collada"/>
+	</context_menu>
+	<menu_item_call label="Elimina" name="Delete"/>
+	<menu_item_call label="Blocca proprietario particelle" name="Mute Particle"/>
+	<menu_item_call label="Dump XML" name="Dump XML"/>
+	<menu_item_call label="Ripristina scheletro" name="Reset Skeleton"/>
+</context_menu>

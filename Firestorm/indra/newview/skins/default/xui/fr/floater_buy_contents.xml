@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="floater_buy_contents" title="Acheter le contenu">
+	<floater.string name="no_copy_text">(Non copiable)</floater.string>
+	<floater.string name="no_modify_text">(Non modifiable)</floater.string>
+	<floater.string name="no_transfer_text">(Non transférable)</floater.string>
+	<text name="contains_text">&lt;nolink&gt;[NAME]&lt;/nolink&gt; contient :</text>
+	<text name="buy_text">Acheter pour [AMOUNT] L$ à [NAME]?</text>
+	<check_box label="Porter les vêtements maintenant" name="wear_check"/>
+	<button label="Acheter" label_selected="Acheter" name="buy_btn"/>
+	<button label="Annuler" label_selected="Annuler" name="cancel_btn"/>
+</floater>

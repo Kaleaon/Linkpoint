@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel name="world_map">
+	<panel.string name="Loading">
+		Ładowanie...
+	</panel.string>
+	<panel.string name="InvalidLocation">
+		Niewłaściwa lokalizacja
+	</panel.string>
+	<panel.string name="world_map_person">
+		1 osoba
+	</panel.string>
+	<panel.string name="world_map_people">
+		[NUMBER] ludzi
+	</panel.string>
+</panel>

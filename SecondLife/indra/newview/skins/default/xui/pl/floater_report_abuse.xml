@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="floater_report_abuse" title="RAPORT O NADUŻYCIU">
+	<floater.string name="Screenshot">
+		Zdjęcie ekranu
+	</floater.string>
+	<check_box label="Załącz zdjęcie" name="screen_check" />
+	<text name="reporter_title">
+		Zgłasza:
+	</text>
+	<text name="pos_title">
+		Pozycja:
+	</text>
+	<text name="select_object_label">
+		Kliknij na przycisk, a następnie na obiekt:
+	</text>
+	<button name="pick_btn" tool_tip="Wybór obiektu - wybierz obiekt, którego dotyczy raport" />
+	<text name="object_name_label">
+		Obiekt:
+	</text>
+	<text name="owner_name_label">
+		Właściciel:
+	</text>
+	<combo_box name="category_combo" tool_tip="Wybór kategorii - wybierz kategorię, której dotyczy raport">
+		<combo_box.item label="Wybierz kategorię" name="Select_category" />
+		<combo_box.item label="Wiek &gt; Udawanie nieletniej osoby" name="Age__Age_play" />
+		<combo_box.item label="Napaść &gt; Bezpieczny obszar" name="Assault__Safe_area" />
+		<combo_box.item label="Prywatność &gt; Dane osobiste ze świata realnego" name="Disclosure__Real_world_information" />
+		<combo_box.item label="Zakłócanie spokoju &gt; Przesadnie skryptowane obiekty" name="Disturbing_the_peace__Excessive_scripted_objects" />
+		<combo_box.item label="Zakłócanie spokoju &gt; Śmiecenie obiektami" name="Disturbing_the_peace__Object_littering" />
+		<combo_box.item label="Zakłócanie spokoju &gt; Ciągły spam" name="Disturbing_the_peace__Repetitive_spam" />
+		<combo_box.item label="Oszustwo &gt; US$" name="Fraud__US$" />
+		<combo_box.item label="Prześladowanie &gt; Namawianie/zachęcanie innych do łamania warunków umowy (ToS)" name="Harassment__Solicting_inciting_others_to_violate_ToS" />
+		<combo_box.item label="Nieprzyzwoitość &gt; Obraźliwa treść lub postępowanie" name="Indecency__Broadly_offensive_content_or_conduct" />
+		<combo_box.item label="Nieprzyzwoitość &gt; Niestosowne imię awatara" name="Indecency__Inappropriate_avatar_name" />
+		<combo_box.item label="Nieprzyzwoitość &gt; Treść lub postępowanie niestosowne do regionu" name="Indecency__Mature_content_in_PG_region" />
+		<combo_box.item label="Nietolerancja" name="Intolerance" />
+		<combo_box.item label="Działki &gt; Wtargnięcie &gt; Obiekty/tekstury" name="Land__Encroachment__Objects_textures" />
+		<combo_box.item label="Zakłady/Hazard" name="Wagering_gambling" />
+	</combo_box>
+	<text name="abuser_name_title">
+		Imię/nazwa sprawcy:
+	</text>
+	<button label="Wybierz" name="select_abuser" tool_tip="Wybierz imię lub nazwę Rezydenta z listy" />
+	<text name="abuser_name_title2">
+		Miejsce nadużycia:
+	</text>
+	<text name="sum_title">
+		Podsumowanie:
+	</text>
+	<text name="dscr_title">
+		Detale:
+	</text>
+	<text name="bug_aviso">
+		Bądź tak dokładny/a jak to tylko możliwe
+	</text>
+	<text name="incomplete_title">
+		* Niekompletne raporty nie będą rozpatrywane
+	</text>
+	<button label="Zgłoś nadużycie" label_selected="Zgłoś nadużycie" name="send_btn" />
+	<button label="Anuluj" label_selected="Anuluj" name="cancel_btn" />
+</floater>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="preview_sound">
+	<floater.string name="Title">
+		聲音： [NAME]
+	</floater.string>
+	<text name="desc txt">
+		描述：
+	</text>
+	<button label="在虛擬世界播放" label_selected="在虛擬世界播放" name="Sound play btn" tool_tip="播放此聲音讓他人聽見"/>
+	<button label="在本地播放" label_selected="在本地播放" name="Sound audition btn" tool_tip="播放此聲音，只讓自己聽見"/>
+</floater>

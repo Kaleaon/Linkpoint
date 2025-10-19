@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Snapshot" title="快照">
+	<floater.string name="unknown">
+		未知
+	</floater.string>
+	<string name="postcard_progress_str">
+		正在傳送電子郵件
+	</string>
+	<string name="profile_progress_str">
+		發布
+	</string>
+	<string name="inventory_progress_str">
+		儲存到庫存
+	</string>
+	<string name="local_progress_str">
+		正在存到電腦
+	</string>
+	<string name="profile_succeeded_str">
+		圖像已上傳
+	</string>
+	<string name="postcard_succeeded_str">
+		電子郵件傳送成功！
+	</string>
+	<string name="inventory_succeeded_str">
+		成功存入庫存！
+	</string>
+	<string name="local_succeeded_str">
+		成功存入電腦！
+	</string>
+	<string name="profile_failed_str">
+		上傳圖像到你的檔案發布時出錯。
+	</string>
+	<string name="postcard_failed_str">
+		電子郵件傳送失敗。
+	</string>
+	<string name="inventory_failed_str">
+		無法存入庫存。
+	</string>
+	<string name="local_failed_str">
+		無法存入電腦。
+	</string>
+	<view name="controls_container">
+		<button label="更新" name="new_snapshot_btn" />
+		<panel name="advanced_options_panel">
+			<text name="layer_type_label">
+				取得快照：
+			</text>
+			<combo_box label="圖層" name="layer_types">
+				<combo_box.item label="顏色" name="Colors" />
+				<combo_box.item label="深度" name="Depth" />
+				<combo_box.item label="深度 (24位元元元)" name="Depth24" />
+			</combo_box>
+			<check_box label="使用者界面" name="ui_check" />
+			<check_box label="L$帳戶餘額" name="currency_check" />
+			<check_box label="HUD" name="hud_check" />
+			<check_box label="顯示捕捉框架" tool_tip="在螢幕上顯示一個框架，圍繞快照區域。場景中超出快照範圍的部分將被去飽和並稍微模糊。" name="show_frame"/>
+			<check_box label="顯示拍攝輔助線" name="show_guides" tool_tip="在取景範圍內顯示拍攝輔助線（井字構圖）。" />
+			<button tool_tip="打開拍攝輔助線設定" name="guide_settings_btn" />
+			<check_box label="將影格凍結（全螢幕）" name="freeze_frame_check" />
+			<check_box label="自動更新" name="auto_snapshot_check" />
+			<check_box label="無後期處理" name="no_post_check" />
+			<text name="filter_list_label">
+				濾鏡：
+			</text>
+			<combo_box name="filters_combobox" tool_tip="圖像濾鏡">
+				<combo_box.item label="不用濾鏡" name="NoFilter" />
+			</combo_box>
+		</panel>
+		<panel name="succeeded_panel">
+			<text name="succeeded_lbl">
+				成功
+			</text>
+		</panel>
+		<panel name="failed_panel">
+			<text name="failed_lbl">
+				失敗
+			</text>
+		</panel>
+		<text name="working_lbl">
+			請等待
+		</text>
+		<text name="refresh_lbl">
+			更新以儲存
+		</text>
+	</view>
+	<text name="image_res_text">
+		[WIDTH]畫素（寬）x [HEIGHT]畫素（高）
+	</text>
+	<text name="file_size_label">
+		[SIZE] KB
+	</text>
+	<button label="製作360°相片" name="360_label" />
+</floater>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="queue" title="Avanzamento Ripristino">
+	<floater.string name="Starting">
+		Avvio di [START] su [COUNT] oggetti.
+	</floater.string>
+	<floater.string name="Done">
+		Fine.
+	</floater.string>
+	<floater.string name="Resetting">
+		Ripristino in corso
+	</floater.string>
+	<floater.string name="Running">
+		In esecuzione
+	</floater.string>
+	<floater.string name="NotRunning">
+		Non in esecuzione
+	</floater.string>
+	<floater.string name="Timeout">
+		Tempo limite: [OBJECT_NAME]
+	</floater.string>
+	<floater.string name="LoadingObjInv">
+		Carico inventario per: [OBJECT_NAME]
+	</floater.string>
+	<floater.string name="Deleting">
+		Cancellazione
+	</floater.string>
+	<floater.string name="SkippingPermissions">
+		Sto saltando: [OBJECT_NAME] (permessi)
+	</floater.string>
+	<floater.string name="Compiling">
+		Compilazione di "[OBJECT_NAME]"...
+	</floater.string>
+	<floater.string name="CompileSuccess">
+		Compilazione di "[OBJECT_NAME]" riuscita
+	</floater.string>
+	<floater.string name="CompileFailure">
+		Compilazione di "[OBJECT_NAME]" non riuscita:
+	</floater.string>
+	<button label="Chiudi" label_selected="Chiudi" name="close"/>
+</floater>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<floater name="save_pref_preset" title="TERCİHLİ ÖN AYAR OLARAK KAYDET">
+	<text name="Preset">
+		Ön ayar için bir ad girin veya mevcut bir ön ayarı seçin.
+	</text>
+	<button label="Kaydet" name="save"/>
+	<button label="İptal" name="cancel"/>
+</floater>

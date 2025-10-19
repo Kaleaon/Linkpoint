@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="floaterbulkperms" title="Permessi dei contenuti">
+	<floater.string name="nothing_to_modify_text">
+		La selezione non contiene contenuti modificabili.
+	</floater.string>
+	<floater.string name="status_text">
+		Impostazione permessi su [NAME]
+	</floater.string>
+	<floater.string name="start_text">
+		Avvio richiesta di modifica dei permessi...
+	</floater.string>
+	<floater.string name="done_text">
+		Conclusa richiesta di modifica dei permessi.
+	</floater.string>
+	<icon name="icon_animation" tool_tip="Animazioni"/>
+	<icon name="icon_bodypart" tool_tip="Parti del corpo"/>
+	<icon name="icon_clothing" tool_tip="Vestiti"/>
+	<icon name="icon_gesture" tool_tip="Gesti"/>
+	<icon name="icon_notecard" tool_tip="Annotazioni"/>
+	<icon name="icon_object" tool_tip="Oggetti"/>
+	<icon name="icon_script" tool_tip="Script"/>
+	<icon name="icon_sound" tool_tip="Suoni"/>
+	<icon name="icon_texture" tool_tip="Texture"/>
+	<icon name="icon_setting" tool_tip="Ambienti"/>
+	<icon name="icon_materials" tool_tip="Materiali"/>
+	<button label="√ Tutti" name="check_all"/>
+	<button label="Nessuno" label_selected="Nessuno" name="check_none"/>
+	<text name="newperms">
+		Imposta i permessi dei contenuti
+	</text>
+	<text name="GroupLabel">
+		Gruppo:
+	</text>
+	<check_box label="Condividi" name="share_with_group" tool_tip="Consenti a tutti i membri del gruppo selezionato di condividere i tuoi diritti di modifica per questo oggetto. Per attivare le restrizioni per ruolo devi prima effettuare la cessione."/>
+	<text name="AnyoneLabel">
+		Chiunque:
+	</text>
+	<check_box label="Copiare" name="everyone_copy" tool_tip="Chiunque può prendere una copia di questo oggetto. L&apos;oggetto e tutti i suoi contenuti devono avere il permesso di copia e trasferimento."/>
+	<text name="NextOwnerLabel">
+		Propr. successivo:
+	</text>
+	<check_box label="Modificare" name="next_owner_modify" tool_tip="Il prossimo proprietario può modificare le proprietà dell&apos;oggetto come il nome o la scala."/>
+	<check_box label="Copiare" name="next_owner_copy" tool_tip="Il prossimo proprietario può prendere infinite copie di questo oggetto. Le copie mantengono le informazioni sul creatore e non possono avere permessi maggiori di quelli posseduti dall&apos;oggetto copiato."/>
+	<check_box initial_value="true" label="Trasferire" name="next_owner_transfer" tool_tip="Il prossimo proprietario può regalare o rivendere questo oggetto."/>
+	<button label="Applica" name="apply"/>
+	<button label="Annulla" name="close"/>
+</floater>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="land holdings floater" title="Terrains possédés">
+	<floater.string name="area_string">[AREA] m²</floater.string>
+	<scroll_list name="parcel list">
+		<scroll_list.columns label="Terrain" name="name"/>
+		<scroll_list.columns label="Région" name="location"/>
+		<scroll_list.columns label="Type" name="type"/>
+		<scroll_list.columns label="Surface" name="area"/>
+	</scroll_list>
+	<button label="Téléporter" label_selected="Téléporter" name="Teleport" tool_tip="Se téléporter au centre de cette parcelle."/>
+	<button label="Carte" label_selected="Carte" name="Show on Map" tool_tip="Afficher ce terrain sur la carte"/>
+	<text name="contrib_label">Contributions à vos groupes :</text>
+	<scroll_list name="grant list">
+		<scroll_list.columns label="Groupe" name="group"/>
+		<scroll_list.columns label="Surface" name="area"/>
+	</scroll_list>
+	<text name="allowed_label">Avoirs fonciers disponibles avec l'abonnement actuel :</text>
+	<text name="allowed_text">[AREA] m²</text>
+	<text name="current_label">Possédés :</text>
+	<text name="current_text">[AREA] m²</text>
+	<text name="available_label">Disponibles à l'achat :</text>
+	<text name="available_text">[AREA] m²</text>
+</floater>

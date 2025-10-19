@@ -1,0 +1,1484 @@
+<llsd>
+    <map>
+    <key>AvatarHoverOffsetZ</key>
+    <map>
+      <key>Comment</key>
+      <string>After-everything-else fixup for avatar Z position.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+        <real>0.0</real>
+    </map>
+    <key>AvatarHoverOffsetStepSize</key>
+    <map>
+      <key>Comment</key>
+      <string>Step-size for the zoffset_up and zoffset_down command line commands to change avatar Z position.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+        <real>0.05</real>
+    </map>
+    <key>RLVaLoginLastLocation</key>
+        <map>
+        <key>Comment</key>
+            <string>Determines whether the next login will be forced to the last logoff location (set by the viewer)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>HideFromEditor</key>
+        <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <boolean>1</boolean>
+        </map>
+    <key>DoNotDisturbResponseChanged</key>
+        <map>
+        <key>Comment</key>
+            <string>Does user's do not disturb mode message differ from default?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>DoNotDisturbModeResponse</key>
+        <map>
+        <key>Comment</key>
+            <string>Auto response to instant messages while in do not disturb mode.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string>This resident has turned on &apos;Do Not Disturb&apos; and will see your message later.</string>
+        </map>
+    <key>ConversationsExpandMessagePaneFirst</key>
+    <map>
+        <key>Comment</key>
+            <string>Expand either messages or conversations list pane from Conversations compact mode.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+    </map>
+    <key>ConversationsListPaneCollapsed</key>
+    <map>
+        <key>Comment</key>
+            <string>Stores the expanded/collapsed state of the conversations list pane in Conversations floater.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+    </map>
+    <key>ConversationsListPaneWidth</key>
+    <map>
+        <key>Comment</key>
+            <string>Conversations floater list pane width.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>S32</string>
+        <key>Value</key>
+            <integer>205</integer>
+    </map>
+    <key>ConversationsMessagePaneCollapsed</key>
+    <map>
+        <key>Comment</key>
+            <string>Stores the expanded/collapsed state of Conversations floater message pane.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+    </map>
+    <key>ConversationsMessagePaneWidth</key>
+    <map>
+        <key>Comment</key>
+            <string>Conversations floater message pane width.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>S32</string>
+        <key>Value</key>
+            <integer>412</integer>
+    </map>
+    <key>ConversationsParticipantListCollapsed</key>
+    <map>
+        <key>Comment</key>
+            <string>Stores the expanded/collapsed state of Nearby chat participant list</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+    </map> 
+         <key>NavigationBarRatio</key>	
+   	 <map>	
+        <key>Comment</key>
+            <string>The ratio between the width of Navigation layout panel and the width of whole Navigation layout stack</string>	
+        <key>Persist</key>	
+            <integer>1</integer>
+        <key>Type</key>
+	            <string>F32</string>	
+        <key>Value</key>	
+            <real>0.6</real>	
+    </map>  
+    <key>FSAutorespondMode</key>
+        <map>
+        <key>Comment</key>
+            <string>Has the user selected autorespond mode?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSAutorespondModeResponse</key>
+        <map>
+        <key>Comment</key>
+            <string>Auto response to instant messages while in autorespond mode.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string>The Resident you messaged has activated Firestorm viewer&apos;s &apos;autorespond mode&apos; which means they have requested not to be disturbed.  Your message will still be shown in their IM panel for later viewing.</string>
+        </map>
+    <key>FSAutoResponseChanged</key>
+        <map>
+        <key>Comment</key>
+            <string>Does user's auto response mode message differ from default?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSAutorespondNonFriendsMode</key>
+        <map>
+        <key>Comment</key>
+            <string>Has the user selected autorespond mode for those who aren't in the friends list?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSAutorespondNonFriendsResponse</key>
+        <map>
+        <key>Comment</key>
+            <string>Auto response to instant messages from non-friends while in autorespond to non-friends mode.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string>The Resident you messaged has activated Firestorm viewer&apos;s &apos;autorespond mode&apos; which means they have requested not to be disturbed.  Your message will still be shown in their IM panel for later viewing.</string>
+        </map>
+    <key>FSAutoResponseNonFriendsChanged</key>
+        <map>
+        <key>Comment</key>
+            <string>Does user's auto response to non-friends mode message differ from default?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSRejectAllGroupInvitesMode</key>
+        <map>
+        <key>Comment</key>
+            <string>Has the user selected reject all group invites mode?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSRejectTeleportOffersMode</key>
+        <map>
+        <key>Comment</key>
+            <string>Has the user selected reject all teleport offers and requests mode?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSRejectTeleportOffersResponse</key>
+        <map>
+        <key>Comment</key>
+            <string>Auto response to instant messages from all avatars while in reject all teleport offers and requests mode.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string>The Resident you messaged has activated Firestorm viewer&apos;s &apos;reject all teleport offers and requests mode&apos; which means they have requested not to be disturbed with teleport offers and requests. You may still send an IM message manually.</string>
+        </map>
+    <key>FSRejectTeleportOffersResponseChanged</key>
+        <map>
+        <key>Comment</key>
+            <string>Does user's reject teleport offers and requests response message differ from default?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSDontRejectTeleportOffersFromFriends</key>
+        <map>
+        <key>Comment</key>
+            <string>Don't reject teleport offers and requests from friends.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSRejectFriendshipRequestsMode</key>
+        <map>
+        <key>Comment</key>
+            <string>Has the user selected reject all friendship requests mode?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSRejectFriendshipRequestsResponse</key>
+        <map>
+        <key>Comment</key>
+            <string>Auto response to instant messages from all avatars while in reject all friendship requests mode.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string>The Resident you messaged has activated Firestorm viewer&apos;s &apos;reject all friendship requests mode&apos; which means they have requested not to be disturbed with friendship requests. You may still send an IM message manually.</string>
+        </map>
+    <key>FSRejectFriendshipRequestsResponseChanged</key>
+        <map>
+        <key>Comment</key>
+            <string>Does user's reject friendship requests response message differ from default?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSSendAwayAvatarResponse</key>
+        <map>
+        <key>Comment</key>
+            <string>Has the user checked 'send autoresponse when in AWAY mode'?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSAwayAvatarResponse</key>
+        <map>
+        <key>Comment</key>
+            <string>Auto response to instant messages from all avatars while in away mode.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string>The Resident you messaged is currently away from keyboard. Your message will still be shown in their IM panel for later viewing.</string>
+        </map>
+    <key>FSAwayAvatarResponseChanged</key>
+        <map>
+        <key>Comment</key>
+            <string>Does user's away response message differ from default?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSMutedAvatarResponse</key>
+        <map>
+        <key>Comment</key>
+            <string>Auto response to instant messages from avatars this account's muted.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string>The Resident you messaged has blocked you from sending them any messages.</string>
+        </map>
+    <key>FSSendMutedAvatarResponse</key>
+        <map>
+        <key>Comment</key>
+            <string>True if the user wants to send a special autoresponse to muted avatars</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSMutedAvatarResponseChanged</key>
+        <map>
+        <key>Comment</key>
+            <string>Does user's muted avatar response message differ from default?</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>GlobalOnlineStatusToggle</key>
+        <map>
+        <key>Comment</key>
+            <string>Saves the state of global online status permission for friends</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+    </map>
+    <key>InstantMessageLogPath</key>
+        <map>
+        <key>Comment</key>
+            <string>Path to your log files.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string />
+        </map>
+    <key>InventoryInboxHeight</key>
+    <map>
+        <key>Comment</key>
+            <string>Inventory inbox panel height in Inventory floater.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>S32</string>
+        <key>Value</key>
+            <integer>200</integer>
+    </map>
+    <key>InventoryInboxToggleState</key>
+    <map>
+        <key>Comment</key>
+            <string>Stores the open/closed state of inventory Received Items panel.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+    </map>
+    <key>LastInventoryInboxActivity</key>
+        <map>
+        <key>Comment</key>
+            <string>The last time the received items inbox was poked by the user.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>U32</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>LastLogoff</key>
+        <map>
+        <key>Comment</key>
+            <string>Last logoff</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>U32</string>
+        <key>Value</key>
+            <integer>0</integer>
+        <key>Backup</key>
+            <integer>0</integer>
+        </map>
+    <key>LastPostcardRecipient</key>
+      <map>
+        <key>Comment</key>
+          <string>Last recipient of postcard</string>
+        <key>Persist</key>
+          <integer>1</integer>
+        <key>Type</key>
+          <string>String</string>
+        <key>Value</key>
+          <string />
+      </map>
+    <key>LogNearbyChat</key>
+        <map>
+        <key>Comment</key>
+            <string>Log Nearby Chat messages to a file. Is used instead of LogChat but with the "1" default value.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>LogTimestamp</key>
+        <map>
+        <key>Comment</key>
+            <string>Log Timestamp</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <key>LogShowHistory</key>
+        <map>
+        <key>Comment</key>
+            <string>Log Show History</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <key>LogTimestampDate</key>
+        <map>
+        <key>Comment</key>
+            <string>Include Date with Timestamp</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <key>FetchGroupChatHistory</key>
+      <map>
+        <key>Comment</key>
+        <string>Fetch recent messages from group chat servers when a group window opens</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <integer>1</integer>
+      </map>
+    <key>VoiceCallsFriendsOnly</key>
+    <map>
+        <key>Comment</key>
+        <string>Only accept voice calls and receive IMs from residents on your friends list</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <integer>0</integer>
+    </map>
+    <key>VoiceEffectDefault</key>
+    <map>
+        <key>Comment</key>
+            <string>Selected Voice Morph</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string>00000000-0000-0000-0000-000000000000</string>
+    </map>
+    <key>LogFileNamewithDate</key>
+      <map>
+        <key>Comment</key>
+        <string>Add Date Stamp to chat and IM Logs with format chat-YYYY-MM-DD and 'IM file name'-YYYY-MM.</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <integer>0</integer>
+      </map>
+    <key>PreviousScreenshotForReport</key>
+    <map>
+      <key>Comment</key>
+      <string>Use Previous Screenshot for Abuse report</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <!-- Settings below are for back compatibility only.
+    They are not used in current viewer anymore. But they can't be removed to avoid
+    influence on previous versions of the viewer in case of settings are not used or default value
+    should be changed. See EXT-6661. -->
+		
+	<key>LogInstantMessages</key>
+        <map>
+		<key>Comment</key>
+            <string>(DEPRECATED) Only used for restoring settings!!! Use KeepConversationLogTranscripts</string>
+		<key>Persist</key>
+            <integer>1</integer>
+		<key>HideFromEditor</key>
+			<integer>1</integer>
+		<key>Type</key>
+            <string>Boolean</string>
+		<key>Value</key>
+            <integer>1</integer>
+		<key>Backup</key>
+			<integer>0</integer>
+        </map>
+
+    <!-- 1.23 settings -->
+    <key>LogChat</key>
+        <map>
+        <key>Comment</key>
+            <string>Obsolete - this setting is no longer used and has no effect.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>LogChatIM</key>
+        <map>
+        <key>Comment</key>
+            <string>Obsolete - this setting is no longer used and has no effect.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>LogChatTimestamp</key>
+        <map>
+        <key>Comment</key>
+            <string>Obsolete - this setting is no longer used and has no effect.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <!-- End of back compatibility settings -->
+    <key>TranslatingEnabled</key>
+        <map>
+        <key>Comment</key>
+            <string>Translation prefs are set</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>KeepConversationLogTranscripts</key>
+    	<map>
+      	<key>Comment</key>
+      		<string>Keep a conversation log and transcripts 2 - both, 1 - logs, 0 - none</string>
+      	<key>Persist</key>
+      		<integer>1</integer>
+      	<key>Type</key>
+      		<string>S32</string>
+      	<key>Value</key>
+      		<integer>2</integer>
+    	</map>    
+    <key>NearbyChatIsNotTornOff</key>
+    <map>
+      <key>Comment</key>
+      <string>saving torn-off state of the nearby chat between sessions</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
+    <key>NearbyChatIsNotCollapsed</key>
+    <map>
+      <key>Comment</key>
+      <string>Saving expanded/collapsed state of the nearby chat between sessions</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>ShowFavoritesOnLogin</key>
+        <map>
+        <key>Comment</key>
+             <string>Determines whether favorites of last logged in user will be saved on exit from viewer and shown on login screen</string>
+        <key>Persist</key>
+             <integer>1</integer>
+        <key>Type</key>
+             <string>Boolean</string>
+        <key>Value</key>
+             <integer>1</integer>
+        </map>
+      <key>ModelUploadFolder</key>
+      <map>
+        <key>Comment</key>
+        <string>All model uploads will be stored in this directory (UUID)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>String</string>
+        <key>Value</key>
+        <string></string>
+      </map>
+      <key>PBRUploadFolder</key>
+      <map>
+        <key>Comment</key>
+        <string>All pbr uploads will be stored in this directory (UUID)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>String</string>
+        <key>Value</key>
+        <string></string>
+      </map>
+      <key>TextureUploadFolder</key>
+      <map>
+        <key>Comment</key>
+        <string>All image(texture) uploads will be stored in this directory (UUID)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>String</string>
+        <key>Value</key>
+        <string></string>
+      </map>
+      <key>SoundUploadFolder</key>
+      <map>
+        <key>Comment</key>
+        <string>All sound uploads will be stored in this directory (UUID)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>String</string>
+        <key>Value</key>
+        <string></string>
+      </map>
+      <key>AnimationUploadFolder</key>
+      <map>
+        <key>Comment</key>
+        <string>All animation uploads will be stored in this directory (UUID)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>String</string>
+        <key>Value</key>
+        <string></string>
+      </map>
+      <key>SnapshotBaseDir</key>
+      <map>
+        <key>Comment</key>
+        <string>Path to last snapshot save location</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>String</string>
+        <key>Value</key>
+        <string></string>
+      </map>
+      <key>SnapshotBaseName</key>
+      <map>
+        <key>Comment</key>
+        <string>Pattern for naming snapshots</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>String</string>
+        <key>Value</key>
+        <string>Snapshot</string>
+      </map>
+      <key>ExperienceSearchMaturity</key>
+      <map>
+        <key>Comment</key>
+        <string>Setting for the user's preferred Max Content rating for Experiences search (Default rating is General)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>U32</string>
+        <key>Value</key>
+        <integer>2</integer>
+      </map>
+    
+    <!-- Firestorm settings -->
+    <key>DebugLookAt</key>
+        <map>
+        <key>Comment</key>
+            <string>Show Debug LookAt targets</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>S32</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>DebugLookAtHideOwn</key>
+        <map>
+        <key>Comment</key>
+            <string>Don't show own LookAt target with DebugLookAt</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <key>UseAO</key>
+        <map>
+        <key>Comment</key>
+            <string>Use the viewer side Animation Overrider</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>PauseAO</key>
+        <map>
+        <key>Comment</key>
+            <string>Pause the viewer side Animation Overrider</string>
+        <key>Persist</key>
+            <integer>0</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>UseAOStands</key>
+        <map>
+        <key>Comment</key>
+            <string>Use the viewer side Animation Overrider for standing and turning animations when enabled</string>
+        <key>Persist</key>
+            <integer>0</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <key>UseFullAOInterface</key>
+        <map>
+        <key>Comment</key>
+            <string>Use the full Animation Overrider interface (TRUE) or the small, reduced interface (FALSE).</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>LockAOFolders</key>
+        <map>
+        <key>Comment</key>
+            <string>Keep the AO folders in Inventory safe from manual changes.</string>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <key>floater_rect_animation_overrider_full</key>
+        <map>
+        <key>Comment</key>
+            <string>Position and size for the full Animation Overrider interface. The defaults are just dummy values.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Rect</string>
+        <key>Value</key>
+            <array>
+                <integer>0</integer>
+                <integer>0</integer>
+                <integer>0</integer>
+                <integer>0</integer>
+            </array>
+        </map>
+    <key>LockBridgeFolder</key>
+        <map>
+        <key>Comment</key>
+            <string>Keep the Bridge folder in Inventory safe from manual changes.</string>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <key>LockWearableFavoritesFolders</key>
+      <map>
+        <key>Comment</key>
+            <string>Keep the Wearable Favorites folder in Inventory safe from manual changes.</string>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+      </map>
+
+	<key>FSKeywordOn</key>
+	<map>
+		<key>Comment</key>
+			<string>Turns on keyword alerts</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>Boolean</string>
+		<key>Value</key>
+			<integer>0</integer>
+	</map>
+	<key>FSKeywordInChat</key>
+	<map>
+		<key>Comment</key>
+			<string>Look for keywords in local chat</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>Boolean</string>
+		<key>Value</key>
+			<integer>0</integer>
+	</map>
+	<key>FSKeywordInIM</key>
+	<map>
+		<key>Comment</key>
+			<string>Look for keywords in IMs and group chats</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>Boolean</string>
+		<key>Value</key>
+			<integer>0</integer>
+	</map>
+	<key>FSLastOpenIMs</key>
+	<map>
+		<key>Comment</key>
+			<string>List of IM session IDs that were open when the viewer was last closed</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>LLSD</string>
+		<key>Value</key>
+			<array>
+			</array>
+	</map>
+	<key>FSKeywordCaseSensitive</key>
+	<map>
+		<key>Comment</key>
+			<string>Keywords are case-sensitive</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>Boolean</string>
+		<key>Value</key>
+			<integer>0</integer>
+	</map>
+	<key>FSKeywordMatchWholeWords</key>
+	<map>
+		<key>Comment</key>
+			<string>Keywords will only match whole words</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>Boolean</string>
+		<key>Value</key>
+			<integer>0</integer>
+	</map>
+	<key>FSKeywordSpeakersName</key>
+	<map>
+		<key>Comment</key>
+			<string>Look for Keywords in the names of speakers</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>Boolean</string>
+		<key>Value</key>
+			<integer>0</integer>
+	</map>
+	<key>FSKeywords</key>
+	<map>
+		<key>Comment</key>
+			<string>Comma seperated list of keywords</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>String</string>
+		<key>Value</key>
+			<string/>
+	</map>
+	<key>FSKeywordChangeColor</key>
+	<map>
+		<key>Comment</key>
+			<string>change message color if keyword found</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>Boolean</string>
+		<key>Value</key>
+			<integer>0</integer>
+	</map>
+	<key>FSKeywordColor</key>
+	<map>
+		<key>Comment</key>
+			<string>Color of keyword detects messages</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>Color4</string>
+		<key>Value</key>
+		<array>
+			<real>1.0</real>
+			<real>0.600000023842</real>
+			<real>0.0</real>
+			<real>1.0</real>
+		</array>
+	</map>
+	<key>FirestormTagColor</key>
+	<map>
+	    <key>Comment</key>
+	    <string>The tag color you wish to have.</string>
+	    <key>Persist</key>
+	    <integer>1</integer>
+	    <key>Type</key>    
+	    <string>Color4</string>
+	    <key>Value</key>
+	    <array>
+	    <real>1.0</real>
+	    <real>0.0</real>
+	    <real>0.0</real>
+	    <real>1.0</real>
+	</array>
+	</map>
+	<key>FSShowOnlyActiveGestures</key>
+	<map>
+		<key>Comment</key>
+			<string>Show only active gestures in the gestures floater</string>
+		<key>Persist</key>
+			<integer>1</integer>
+		<key>Type</key>
+			<string>Boolean</string>
+		<key>Value</key>
+			<string>0</string>
+	</map>
+    <key>UseLSLFlightAssist</key>
+        <map>
+        <key>Comment</key>
+            <string>Use the client LSL bridge for flight boost - boost power: 0.0 (disabled), 0.5 (mild), 1.0 (moderate), 2.0 (high), 15.0 (extreme).</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>F32</string>
+        <key>Value</key>
+            <real>0.0</real>
+        </map>
+    <key>UseMoveLock</key>
+        <map>
+        <key>Comment</key>
+            <string>Use the client LSL Bridge for movelock</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>RelockMoveLockAfterMovement</key>
+        <map>
+        <key>Comment</key>
+            <string>If movelock built-in into LSL Bridge is active, then lock and unlock position after stopping or starting movement</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <key>MoveLockInfoVisibleOnScreen</key>
+        <map>
+        <key>Comment</key>
+            <string>If movelock built-in into LSL Bridge is active, then show info on screen all the time</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <key>BridgeIntegrationOC</key>
+        <map>
+        <key>Comment</key>
+            <string>Allow OpenCollar protocol to enable or disable built in AO. Client LSL Bridge needs to be enabled.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <key>BridgeIntegrationLM</key>
+        <map>
+        <key>Comment</key>
+            <string>Allow LockMeister protocol to enable or disable built in AO. Client LSL Bridge needs to be enabled.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    <!-- End of Firestorm settings -->
+
+    <key>FSStoredCameraPos</key>
+        <map>
+        <key>Comment</key>
+            <string>Stored camera position in camera tools</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Vector3D</string>
+        <key>Value</key>
+            <array>
+                <real>0.0</real>
+                <real>0.0</real>
+                <real>0.0</real>
+            </array>
+        </map>
+    <key>FSStoredCameraFocus</key>
+        <map>
+        <key>Comment</key>
+            <string>Stored camera focus position in camera tools</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Vector3D</string>
+        <key>Value</key>
+            <array>
+                <real>0.0</real>
+                <real>0.0</real>
+                <real>0.0</real>
+            </array>
+        </map>
+<!-- <FS:Chanayane> Camera roll (from Alchemy) -->
+    <key>ALStoredCameraRoll</key>
+        <map>
+        <key>Comment</key>
+            <string>Stored camera roll in camera tools</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>F32</string>
+        <key>Value</key>
+            <real>0.0</real>
+        </map>
+<!-- </FS:Chanayane> -->
+    <key>FSStoredCameraFocusObjectId</key>
+        <map>
+        <key>Comment</key>
+            <string>Stored object ID of camera focus in camera tools</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string/>
+        </map>
+    <key>FSAutoresponseItemUUID</key>
+        <map>
+            <key>Comment</key>
+                <string>UUID of the inventory item that is sent as part of an auto-response message</string>
+            <key>Persist</key>
+                <integer>1</integer>
+            <key>Type</key>
+                <string>String</string>
+            <key>Value</key>
+               <string/>
+        </map>
+    <key>FSBuildPrefs_EmbedItem</key>
+        <map>
+            <key>Comment</key>
+                <string>New object created default of adding content</string>
+            <key>Persist</key>
+                <integer>1</integer>
+            <key>Type</key>
+                <string>Boolean</string>
+            <key>Value</key>
+               <integer>0</integer>
+        </map>
+    <key>FSBuildPrefs_Item</key>
+        <map>
+            <key>Comment</key>
+                <string>Item UUID to add to the contents of the new object created</string>
+            <key>Persist</key>
+                <integer>1</integer>
+            <key>Type</key>
+                <string>String</string>
+            <key>Value</key>
+                <string/>
+        </map>
+	<key>FSllOwnerSayToScriptDebugWindow</key>
+		<map>
+			<key>Comment</key>
+				<string>Show llOwnerSays in script debug window instead of local chat</string>
+			<key>Persist</key>
+				<integer>1</integer>
+			<key>Type</key>
+				<string>Boolean</string>
+			<key>Value</key>
+				<integer>0</integer>
+		</map>
+    <!-- Settings imported from Exodus -->
+    <key>ExodusFlickrToken</key>
+        <map>
+        <key>Comment</key>
+            <string>Flickr OAuth Token</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string/>
+        </map>
+    <key>ExodusFlickrTokenSecret</key>
+        <map>
+        <key>Comment</key>
+            <string>Flickr OAuth Token Secret</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string/>
+        </map>
+    <key>ExodusFlickrNSID</key>
+        <map>
+        <key>Comment</key>
+            <string>Flickr User ID</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string/>
+        </map>
+    <key>ExodusFlickrUsername</key>
+        <map>
+        <key>Comment</key>
+            <string>Flickr Username</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string/>
+        </map>
+    <key>ExodusFlickrFullName</key>
+        <map>
+        <key>Comment</key>
+            <string>Flickr Username</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string/>
+        </map>
+    <!-- End of settings imported from Exodus -->
+    <key>layout_size_chat_bar_stack</key>
+        <map>
+        <key>Backup</key>
+            <boolean>1</boolean>
+        <key>Comment</key>
+            <string>Fractional size for layout panel chat_bar_stack</string>
+        <key>Type</key>
+            <string>LLSD</string>
+        <key>Value</key>
+            <array>
+                <integer>400</integer>
+                <integer>600</integer>
+            </array>
+        </map>
+    <key>FSLastNotificationsTab</key>
+        <map>
+        <key>Comment</key>
+            <string>Stores the last selected tab in the notifications list floater</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>HideFromEditor</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>S32</string>
+        <key>Value</key>
+           <integer>0</integer>
+        </map>
+    <key>FSCrouchToggle</key>
+        <map>
+        <key>Comment</key>
+            <string>Enables using the crouch key as a toggle.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>FSCrouchToggleStatus</key>
+        <map>
+        <key>Comment</key>
+            <string>Status of crouch toggle.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        <key>Backup</key>
+            <integer>0</integer>
+        </map>
+    <key>FSStaticEyes</key>
+        <map>
+        <key>Comment</key>
+            <string>Disables built in random eye moment on own avatar via animation defined at FSStaticEyesUUID.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+    <key>PlayModeUISndFSKeywordSound</key>
+        <map>
+        <key>Comment</key>
+                <string>Play a sound when a keyword is found.</string>
+        <key>Persist</key>
+                <integer>1</integer>
+        <key>Type</key>
+                <string>Boolean</string>
+        <key>Value</key>
+                <integer>0</integer>
+        </map>
+    <key>UISndFSKeywordSound</key>
+        <map>
+        <key>Comment</key>
+            <string>UUID of sound to play on keyword alert.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string>a3f48b85-c29f-1f97-ebb6-644b7c053512</string>
+        </map>
+    <key>FSRenderFriendsOnly</key>
+        <map>
+        <key>Comment</key>
+            <string>If enabled, only avatars on your friend list will be rendered.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+     <key>FSRenderFriendsOnlyPersistsTP</key>
+        <map>
+        <key>Comment</key>
+            <string>If enabled, Render Only Friends will persist across TPs. Default (false)</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+     <key>FSRememberSnapshotPathSessions</key>
+        <map>
+        <key>Comment</key>
+            <string>If enabled, remember the path and filename of snapshots between sessions. Default (true)</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+     <key>FSEnableDiscordIntegration</key>
+        <map>
+        <key>Comment</key>
+            <string>If enabled, will allow Firestorm to connect to discord if open and share location data with. Default (false)</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+     <key>FSMaxSharedMaturity</key>
+        <map>
+        <key>Comment</key>
+            <string>Max maturity rating to share with Discord</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>U32</string>
+        <key>Value</key>
+            <integer>13</integer>
+        </map>
+     <key>FSBlacklistedRegionNames</key>
+        <map>
+        <key>Comment</key>
+            <string>List of region names to never share with Discord</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>LLSD</string>
+        <key>Value</key>
+        <array></array>
+        </map>
+     <key>FSShareNameToDiscord</key>
+        <map>
+        <key>Comment</key>
+            <string>If enabled, will allow Firestorm to share avatar user and display name with discord. Default (false)</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+     <key>FSPrimfeedOAuthToken</key>
+        <map>
+        <key>Comment</key>
+            <string>contains the secure authentication toke to post to your primfeed account (do not share)</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string></string>
+        </map>
+     <key>FSPrimfeedProfileLink</key>
+        <map>
+        <key>Comment</key>
+            <string>The profile page for the account associated with the currently linked Primfeed account</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string></string>
+        </map>
+     <key>FSPrimfeedPlan</key>
+        <map>
+        <key>Comment</key>
+            <string>The plan type associated with the currently linked Primfeed account</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string></string>
+        </map>
+     <key>FSPrimfeedUsername</key>
+        <map>
+        <key>Comment</key>
+            <string>The username associated with the currently linked Primfeed account</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>String</string>
+        <key>Value</key>
+            <string></string>
+        </map>
+     <key>FSPrimfeedCommercialContent</key>
+        <map>
+        <key>Comment</key>
+            <string>Does this post contain commercial content</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+     <key>FSPrimfeedAddToPublicGallery</key>
+        <map>
+        <key>Comment</key>
+            <string>Should this post go to the public gallery?</string>
+        <key>Persist</key>
+            <integer>0</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+     <key>FSPrimfeedOpenURLOnPost</key>
+        <map>
+        <key>Comment</key>
+            <string>if true open the URL in a browser when the post completes</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <integer>0</integer>
+        </map>
+     <key>FSProtectedFolders</key>
+        <map>
+        <key>Comment</key>
+            <string>A list of folder UUIDs that are protected from moving and deleting.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>LLSD</string>
+        <key>Value</key>
+            <array/>
+        </map>
+     <key>FSPrimfeedPhotoRating</key>
+        <map>
+        <key>Comment</key>
+            <string>Content rating to be shared with Primfeed.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Integer</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+     <key>FlickrPhotoRating</key>
+        <map>
+        <key>Comment</key>
+            <string>Content rating to be shared with Flickr.</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Integer</string>
+        <key>Value</key>
+            <integer>1</integer>
+        </map>
+    </map>
+</llsd>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Inventory Finder" title="INVENTORY_RECENT_ITEMS">
+	<check_box label="Анимация" name="check_animation"/>
+	<check_box label="Визитки" name="check_calling_card"/>
+	<check_box label="Одежда" name="check_clothing"/>
+	<check_box label="Жесты" name="check_gesture"/>
+	<check_box label="Закладки" name="check_landmark"/>
+	<check_box label="Материалы" name="check_material"/>
+	<check_box label="Заметки" name="check_notecard"/>
+	<check_box label="Полисетки" name="check_mesh"/>
+	<check_box label="Объекты" name="check_object"/>
+	<check_box label="Скрипты" name="check_script"/>
+	<check_box label="Звуки" name="check_sound"/>
+	<check_box label="Текстуры" name="check_texture"/>
+	<check_box label="Снимки" name="check_snapshot"/>
+	<check_box label="Настройки" name="check_settings"/>
+	<button label="Все" label_selected="Все" name="All"/>
+	<button label="Нет" label_selected="Нет" name="None"/>
+	<check_box label="Изм." name="check_modify"/>
+	<check_box label="Коп." name="check_copy"/>
+	<check_box label="Пер." name="check_transfer"/>
+	<check_box label="Показывать папки" name="check_show_empty"/>
+	<check_box label="Объединенные" name="check_only_coalesced" width="110" />
+	<combo_box name="inventory_filter_show_links_combo" tool_tip="Фильтрует связанные объекты" width="145">
+		<combo_box.item name="show_links" label="Показывать ссылки"/>
+		<combo_box.item name="show_links_only" label="Только ссылки"/>
+		<combo_box.item name="hide_links" label="Скрывать ссылки"/>
+	</combo_box>
+	<check_box label="Создано мной" name="check_created_by_me"/>
+	<check_box label="Создано другими" name="check_created_by_others"/>
+	<check_box label="С момента выхода" name="check_since_logoff"/>
+	<text name="- OR -">
+		- ИЛИ -
+	</text>
+	<radio_group name="date_search_direction">
+		<radio_item label="Новее, чем" name="newer"/>
+		<radio_item label="Старше, чем" name="older"/>
+	</radio_group>
+	<spinner label="Часов назад" name="spin_hours_ago"/>
+	<text name="label_hours">
+		Часы
+	</text>
+	<spinner label="Дней назад" name="spin_days_ago"/>
+	<text name="label_days">
+		Дни
+	</text>
+	<button label="Сброс" label_selected="Сброс" name="btnReset"/>
+	<button label="Закрыть" label_selected="Закрыть" name="Close"/>
+</floater>

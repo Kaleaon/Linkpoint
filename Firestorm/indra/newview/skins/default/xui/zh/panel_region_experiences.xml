@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="體驗" name="Experiences">
+	<panel.string name="trusted_estate_text">
+		任何體驗都可以成為必要體驗。
+必要體驗可在此領地運行。
+此外，即使這個領地平常不開放進入，參與任何必要體驗的居民，只要維持處在「必要體驗」狀態，仍可進入領地停留。
+	</panel.string>
+	<panel.string name="allowed_estate_text">
+		只允許「土地範圍」的體驗。
+
+獲準的體驗可在此領地運行。
+	</panel.string>
+	<panel.string name="blocked_estate_text">
+		只封鎖「類比網路範圍」的體驗。
+
+遭封鎖的體驗不得在此領地運行。
+	</panel.string>
+	<panel.string name="estate_caption">
+		變更此索引標籤中的設定會影響這個領地內的全部區域設定。
+	</panel.string>
+	<panel.string name="allowed_parcel_text">
+		只允許「土地範圍」的體驗。
+
+獲準的體驗若未被領地封鎖，就可在此地塊運行。
+	</panel.string>
+	<panel.string name="blocked_parcel_text">
+		任何居民的體驗都可以加以封鎖。
+
+遭封鎖的體驗不得在此地塊運行。
+	</panel.string>
+</panel>

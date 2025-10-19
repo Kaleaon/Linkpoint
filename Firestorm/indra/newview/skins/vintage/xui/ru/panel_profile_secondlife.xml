@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel name="panel_profile" label="Профиль">
+	<string name="status_online">В сети</string>
+	<string name="status_offline">Не в сети</string>
+	<string name="status_unknown">Неизвестно</string>
+	<string name="BadgeBeta" value="Оригинальный бета-тестер" />
+	<string name="BadgeBetaLifetime" value="Участник бета-версии пожизненно" />
+	<string name="BadgeLifetime" value="Член пожизненно" />
+	<string name="BadgeLinden" value="Сотрудник лаборатории Линден" />
+	<string name="BadgePremiumLifetime" value="Премиум пожизненно" />
+	<string name="BadgePremiumPlusLifetime" value="Премиум Плюс пожизненно" />
+	<string name="BadgeTeam" value="Член [APP_NAME]" />
+	<string name="no_partner_text" value="Нет" />
+	<string name="no_group_text" value="Нет" />
+	<string name="age_format_short">
+		Возраст: [REG_DATE]
+	</string>
+	<string name="age_format_full">
+Возраст: [REG_DATE]
+([AGE])
+	</string>
+	<string name="FSDev" value=" Разработчик" />
+	<string name="FSSupp" value=" Поддержка" />
+	<string name="FSQualityAssurance" value=" Отладчик" />
+	<string name="FSGW" value=" Шлюз" />
+	<string name="texture_picker_label" value="Фотография профиля" />
+	<text name="name_label" value="Имя:"/>
+	<button name="set_name" label="Имя:" tool_tip="Установить Отображаемое имя"/>
+	<panel name="name_holder">
+		<text_editor name="complete_name" value="(загрузка...)"/>
+		<menu_button name="copy_btn" tool_tip="Копировать параметры"/>
+	</panel>
+	<text name="Key:" value="Ключ:" />
+	<layout_stack name="imagepositioner">
+		<layout_panel name="image_action_panel">
+			<menu_button name="image_action_btn" tool_tip="Выполнить действия, связанные с изображением профиля"/>
+		</layout_panel>
+		<layout_panel name="label_stack">
+			<icon name="can_see_online" tool_tip="Друг может видеть мой онлайн-статус"/>
+			<icon name="cant_see_online" tool_tip="Друг не может видеть мой онлайн-статус"/>
+			<icon name="can_see_on_map" tool_tip="Друг может видеть меня на карте"/>
+			<icon name="cant_see_on_map" tool_tip="Друг не может видеть меня на карте"/>
+			<icon name="can_edit_objects" tool_tip="Друг может править мои объекты"/>
+			<icon name="cant_edit_objects" tool_tip="Друг не может править мои объекты"/>
+			<text_editor name="user_age" value="(загрузка...)"/>
+			<text name="label2" value="Аккаунт:"/>
+			<panel name="badge_layout">
+				<layout_stack name="badge_stacker">
+					<layout_panel name="top_badge_layout">
+						<icon name="top_badge_icon" tool_tip="Сотрудник лаборатории Линден"/>
+					</layout_panel>
+					<layout_panel name="bottom_badge_layout">
+						<icon name="bottom_badge_icon" tool_tip="Сотрудник лаборатории Линден"/>
+					</layout_panel>
+				</layout_stack>
+			</panel>
+			<text name="partner_label" value="Партнер:"/>
+		</layout_panel>
+	</layout_stack>
+	<text name="Groups:" value="Группы:"/>
+	<button name="group_invite" tool_tip="Пригласить в Группу"/>
+	<text name="About:" value="О себе:"/>
+	<text name="Give item:" value="Дать:"/>
+	<text name="Give inventory" tool_tip="Бросьте сюда предметы инвентаря, чтобы передать их этому человеку.">
+		Сбросьте объект из инвентаря сюда.
+	</text>
+	<layout_stack name="buttonstack">
+		<layout_panel name="left_buttonstack">
+			<button name="show_on_map_btn" label="На Карте" label_selected="На Карте" tool_tip="Найдите Жителя на карте"/>
+			<button name="pay" label="Платить" label_selected="Платить" tool_tip="Выплатить деньги Жителю"/>
+		</layout_panel>
+		<layout_panel name="middle_buttonstack">
+			<button name="teleport" label="Предложить Телепорт" label_selected="Предложить Телепорт" tool_tip="Предложить Телепорт Жителю"/>
+			<button name="im" label="Быстрое Сообщение" label_selected="Быстрое Сообщение" tool_tip="Открыть сеанс мгновенных сообщений"/>
+		</layout_panel>
+		<layout_panel name="right_buttonstack">
+			<button name="add_friend" label="Добавить Друга" label_selected="Добавить Друга" tool_tip="Предложить дружбу Жителю"/>
+			<button name="remove_friend" label="Удалить друга" label_selected="Удалить друга" tool_tip="Прекратить дружбу с жителем"/>
+			<button name="block" label="Блокировать" tool_tip="Заблокировать этого Жителя"/>
+			<button name="unblock" label="Разблокировать" tool_tip="Разблокировать этого Жителя"/>
+		</layout_panel>
+	</layout_stack>
+	<check_box name="show_in_search" label="Показать в поиске" tool_tip="Пусть люди видят вас в результатах поиска"/>
+	<check_box name="hide_sl_age" label="Показать полную дату рождения" tool_tip="Позволить людям видеть ваш возраст в СЛ"/>
+	<button name="save_description_changes" label="Сохранить"/>
+	<button name="discard_description_changes" label="Отклонить"/>
+</panel>

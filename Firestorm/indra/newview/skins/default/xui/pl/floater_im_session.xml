@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="panel_im">
+	<floater.string name="participant_added" value="[NAME] został/a zaproszony/a do rozmowy." />
+	<floater.string name="multiple_participants_added" value="[NAME] zostali zaproszeni do rozmowy." />
+	<floater.string name="tooltip_to_separate_window" value="Przenieś rozmowę do osobnego okna" />
+	<floater.string name="tooltip_to_main_window" value="Przenieś rozmowę z powrotem do głównego okna" />
+	<floater.string name="start_call_button_tooltip" value="Rozpocznij rozmowę głosową" />
+	<floater.string name="end_call_button_tooltip" value="Zakończ rozmowę głosową" />
+	<floater.string name="expcol_button_not_tearoff_tooltip" value="Zwiń ten panel" />
+	<floater.string name="expcol_button_tearoff_and_expanded_tooltip" value="Zwiń listę uczestników" />
+	<floater.string name="expcol_button_tearoff_and_collapsed_tooltip" value="Rozwiń listę uczestników" />
+	<view name="contents_view">
+		<layout_stack name="main_stack">
+            <layout_panel name="toolbar_panel">
+				<menu_button name="view_options_btn" tool_tip="Opcje widoku/sortowania" />
+				<menu_button name="gear_btn" tool_tip="Akcje dotyczące wybranej osoby" />
+				<button name="add_btn" tool_tip="Dodaj osobę do tej rozmowy" />
+				<button name="voice_call_btn" tool_tip="Rozpocznij rozmowę głosową" />
+				<button name="close_btn" tool_tip="Zakończ tą rozmowę" />
+				<button name="expand_collapse_btn" tool_tip="Zwiń/Rozwiń ten panel" />
+			</layout_panel>
+			<layout_panel name="chat_layout_panel">
+				<layout_stack name="input_panels">
+					<layout_panel name="input_editor_layout_panel">
+						<button name="emoji_recent_panel_toggle_btn" tool_tip="Pokaż/ukryj ostatnie emoji" />
+					</layout_panel>
+					<layout_panel name="input_button_layout_panel">
+						<button name="minz_btn" tool_tip="Pokaż/ukryj panel wiadomości" />
+					</layout_panel>
+				</layout_stack>
+			</layout_panel>
+			<layout_panel name="emoji_recent_layout_panel">
+				<text name="emoji_recent_empty_text">
+					Tutaj pojawią się ostatnio używane emoji
+				</text>
+			</layout_panel>
+		</layout_stack>
+	</view>
+</floater>

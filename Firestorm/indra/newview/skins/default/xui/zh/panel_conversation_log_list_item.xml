@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="conversation_log_list_item">
+	<icon name="voice_session_icon" tool_tip="包含語音聊天" />
+	<icon name="unread_ims_icon" tool_tip="訊息在你離線期間傳來" />
+	<button name="delete_btn" tool_tip="刪除此項目" />
+</panel>

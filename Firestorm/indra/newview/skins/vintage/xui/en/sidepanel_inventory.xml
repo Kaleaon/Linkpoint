@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+	follows="all"
+	height="550"
+	label="Things"
+	layout="topleft"
+	name="objects panel"
+	width="328">
+    <panel
+		follows="all"
+		layout="topleft"
+		left="0"
+		name="sidepanel_inventory_panel"
+		top="0"
+		label=""
+		height="550"
+		visible="true"
+		width="330">
+		<tab_container
+			follows="left|right|top|bottom"
+			layout="topleft"
+			left="0"
+			top="0"
+			open_tabs_on_drag_and_drop="true"
+			tab_position="bottom"
+			name="inventory_tab_container"
+			height="550"
+			width="330">
+			<panel
+				label="Inventory"
+				class="panel_main_inventory"
+				filename="panel_main_inventory.xml"
+				follows="all"
+				layout="topleft"
+				name="panel_main_inventory" />
+			<panel
+				follows="all"
+				layout="topleft"
+				label="Marketplace"
+				name="marketplace_inbox"
+				class="panel_marketplace_inbox"
+				top="0"
+				height="550">
+				<string name="InboxLabelWithArg">Received Items ([NUM])</string>
+				<string name="InboxLabelNoArg">Received Items</string>
+				<text
+					layout="topleft"
+					value="Received Items"
+					name="inbox_label"
+					height="16"
+					width="200"
+					follows="top|left|right"
+					h_pad="3"
+					top="0"
+					left="2" />
+				<!-- gets auto-hidden in preview editor, change name to view -->
+				<text
+					type="string"
+					length="1"
+					follows="right|top"
+					layout="topleft"
+					height="16"
+					top_delta="0"
+					right="-3"
+					name="inbox_fresh_new_count"
+					halign="right"
+					width="300">
+					[NUM] New
+				</text>
+				<view_border
+					layout="topleft"
+					follows="all"
+					bevel_style="in"
+					left="3"
+					height="529"
+					right="-3"
+					top_pad="2" />
+				<panel
+					name="inbox_inventory_placeholder_panel"
+					follows="all"
+					left_delta="0"
+					height="529"
+					right="-3"
+					top_delta="1"
+					tool_tip="Drag and drop items to your inventory to manage and use them">
+					<text
+						name="inbox_inventory_placeholder"
+						type="string"
+						follows="all"
+						left="0"
+						bottom="-1"
+						right="-1"
+						top="0"
+						layout="topleft"
+						wrap="true"
+						halign="center">
+						Purchases from the marketplace will be delivered here.
+					</text>
+				</panel>
+			</panel>
+		</tab_container>
+	</panel>
+</panel>

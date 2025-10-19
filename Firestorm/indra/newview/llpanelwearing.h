@@ -1,0 +1,130 @@
+/**
+ * @file llpanelwearing.h
+ * @brief List of agent's worn items.
+ *
+ * $LicenseInfo:firstyear=2010&license=viewerlgpl$
+ * Second Life Viewer Source Code
+ * Copyright (C) 2010, Linden Research, Inc.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation;
+ * version 2.1 of the License only.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Linden Research, Inc., 945 Battery Street, San Francisco, CA  94111  USA
+ * $/LicenseInfo$
+ */
+
+#ifndef LL_LLPANELWEARING_H
+#define LL_LLPANELWEARING_H
+
+#include "llpanel.h"
+
+// newview
+#include "llpanelappearancetab.h"
+#include "llselectmgr.h"
+#include "lltimer.h"
+
+class LLAccordionCtrl;
+class LLAccordionCtrlTab;
+class LLInventoryCategoriesObserver;
+class LLListContextMenu;
+class LLScrollListCtrl;
+class LLWearableItemsList;
+class LLWearingGearMenu;
+class LLTextBox;
+
+/**
+ * @class LLPanelWearing
+ *
+ * A list of agents's currently worn items represented by
+ * a flat list view.
+ * Starts fetching necessary inventory content on first opening.
+ */
+class LLPanelWearing : public LLPanelAppearanceTab
+{
+public:
+    LLPanelWearing();
+    virtual ~LLPanelWearing();
+
+    /*virtual*/ bool postBuild();
+
+    /*virtual*/ void draw();
+
+    /*virtual*/ void onOpen(const LLSD& info);
+
+    /*virtual*/ void onFilterSubStringChanged(const std::string& new_string, const std::string& old_string);
+
+    /*virtual*/ bool isActionEnabled(const LLSD& userdata);
+
+    /*virtual*/ void getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const;
+
+    /*virtual*/ void copyToClipboard();
+
+    void startUpdateTimer();
+    void updateAttachmentsList();
+
+    boost::signals2::connection setSelectionChangeCallback(commit_callback_t cb);
+
+    bool hasItemSelected();
+
+    bool populateAttachmentsList(bool update = false);
+    void onAccordionTabStateChanged();
+    void setAttachmentDetails(LLSD content);
+    void requestAttachmentDetails();
+    void onRemoveItem();
+    void onEditAttachment();
+    void onRemoveAttachment();
+
+    void updateMenuItemsVisibility() {};
+    LLToggleableMenu* getGearMenu();
+    LLToggleableMenu* getSortMenu();
+    bool getTrashMenuVisible() { return false; }
+
+    // <FS:Ansariel> Show avatar complexity in appearance floater
+    void updateAvatarComplexity(U32 complexity, const std::map<LLUUID, U32>& item_complexity, const std::map<LLUUID, U32>& temp_item_complexity, U32 body_parts_complexity);
+
+private:
+    void onWearableItemsListRightClick(LLUICtrl* ctrl, S32 x, S32 y);
+    void onTempAttachmentsListRightClick(LLUICtrl* ctrl, S32 x, S32 y);
+
+    void getAttachmentLimitsCoro(std::string url);
+
+    // <FS:Ansariel> FIRE-22484: Double-click wear in outfits list
+    void onDoubleClick();
+
+    LLWearableItemsList*            mCOFItemsList;
+    LLScrollListCtrl*               mTempItemsList;
+    LLWearingGearMenu*              mGearMenu;
+    boost::signals2::connection     mGearMenuConnection;
+    LLListContextMenu*              mContextMenu;
+    LLListContextMenu*              mAttachmentsMenu;
+
+    LLAccordionCtrlTab*             mWearablesTab;
+    LLAccordionCtrlTab*             mAttachmentsTab;
+    LLAccordionCtrl*                mAccordionCtrl;
+
+    // <FS:Ansariel> Show avatar complexity in appearance floater
+    LLTextBox*                      mAvatarComplexityLabel;
+    std::map<LLUUID, U32>           mTempItemComplexityMap;
+
+    std::map<LLUUID, LLViewerObject*> mAttachmentsMap;
+
+    std::map<LLUUID, std::string>   mObjectNames;
+
+    boost::signals2::connection     mAttachmentsChangedConnection;
+    LLFrameTimer                    mUpdateTimer;
+
+    bool                            mIsInitialized;
+};
+
+#endif //LL_LLPANELWEARING_H

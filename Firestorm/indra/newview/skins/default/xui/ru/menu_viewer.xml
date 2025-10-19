@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<menu_bar name="Main Menu">
+	<menu label="Аватар" name="Me">
+		<menu_item_call label="Ваш аккаунт" name="Manage Account"/>
+		<menu_item_call label="Торговые списки..." name="MarketplaceListings"/>
+		<menu_item_call label="Купить L$" name="Buy and Sell L$"/>
+
+		<menu_item_call label="Новое окно Инвентаря" name="NewInventoryWindow"/>
+		<menu_item_check label="Инвентарь" name="Inventory"/>
+		<menu_item_check label="Защищенные папки" name="Protected Folders"/>
+		<menu_item_check label="Избранные Одежды" name="WearableFavorites"/>
+		<menu_item_call label="Места" name="Picks"/>
+		<menu_item_call label="Приключения" name="Experiences"/>
+
+		<menu_item_call label="Профиль" name="Profile"/>
+		<menu_item_call label="Сейчас надето..." name="NowWearing"/>
+		<menu_item_check label="Внешность" name="ChangeOutfit"/>
+		<menu label="Снять" name="Take Off &gt;">
+			<menu label="Одежда" name="Clothes &gt;">
+				<menu_item_call label="Рубашка" name="Shirt"/>
+				<menu_item_call label="Штаны" name="Pants"/>
+				<menu_item_call label="Юбка" name="Skirt"/>
+				<menu_item_call label="Обувь" name="Shoes"/>
+				<menu_item_call label="Носки" name="Socks"/>
+				<menu_item_call label="Пиджак" name="Jacket"/>
+				<menu_item_call label="Перчатки" name="Gloves"/>
+				<menu_item_call label="Майка" name="Self Undershirt"/>
+				<menu_item_call label="Трусы" name="Self Underpants"/>
+				<menu_item_call label="Татуировка" name="Self Tattoo"/>
+				<menu_item_call label="Физика" name="Self Physics"/>
+				<menu_item_call label="Альфа" name="Self Alpha"/>
+				<menu_item_call label="Вся одежда" name="All Clothes"/>
+			</menu>
+			<menu label="Экран" name="Avatar Detach HUD" />
+			<menu label="Отсоединить" name="Avatar Detach" />
+			<menu_item_call label="Отсоединить Все" name="Detach All"/>
+		</menu>
+
+		<menu_item_call label="Выберите аватар" name="Avatar Picker"/>
+		<menu_item_call label="Удалить выбранные присоединения" name="Remove Selected Attachments"/>
+		<menu_item_call label="Приветственный пакет Аватара..." name="Avatar Welcome Pack" />
+		<menu_item_call label="Высота смещения" name="HoverHeight"/>
+		<menu label="Движение" name="Movement">
+			<menu_item_call label="Встать" name="Stand up"/>
+			<menu_item_call label="Сесть" name="Sit Down Here"/>
+			<menu_item_check label="Летать" name="Fly"/>
+			<menu_item_call label="Прекратить летать" name="Stop flying"/>
+			<menu_item_check label="Всегда бежать" name="Always Run"/>
+			<menu_item_check label="Принудительно сесть на землю" name="Force Toggle Sitting"/>
+			<menu_item_check label="Заблокировать перемещение" name="Move Lock"/>
+			<menu_item_check label="Быстрый прыжок" name="Avatar Ignore Prejump"/>
+		</menu>
+		<menu_item_check label="Управление движением" name="Movement Controls"/>
+		<menu_item_check label="Управление камерой" name="Camera Controls"/>
+
+		<menu label="Исправление аватара" name="avhealth">
+			<menu_item_call label="Остановить анимации аватара" name="Stop Animating My Avatar"/>
+			<menu_item_call label="Остановить анимации аватара и отменить разрешения" name="Stop Animating My Avatar With Revoke"/>
+			<menu_item_call label="Раздеформировать аватара" name="undeform_avatar"/>
+			<menu_item_call label="Сброс скелета" name="Reset Skeleton"/>
+			<menu_item_call label="Сброс скелета и анимаций" name="Reset Skeleton And Animations"/>
+			<menu_item_call label="Принудительное обновление внешности (Rebake)" name="Rebake Texture"/>
+			<menu_item_call label="Обновить присоединения" name="Refresh Attachments"/>
+			<menu_item_call label="Сброс настроек мужского аватара  (Тест персонажа)" name="ResetDefaultAvM"/>
+			<menu_item_call label="Сброс настроек женского аватара (Тест персонажа)" name="ResetDefaultAvF"/>
+			<menu_item_check label="Показать информацию сложности аватаров" name="Avatar Draw Info"/>
+			<menu_item_call label="Мои скрипты..." name="MyScripts"/>
+			<menu_item_call label="Измерение лагов" name="Lag Meter"/>
+			<menu_item_call label="Пересоздать LSL мост" name="Recreate LSL Bridge"/>
+		</menu>
+
+		<menu_item_call label="Снимок" name="Take Snapshot"/>
+		<menu_item_call label="360° Снимок" name="Capture 360"/>
+		<menu_item_call label="Отслеживание денег" name="money_tracker"/>
+		<menu_item_call label="Поза редактирования..." name="pose_stand"/>
+		<menu_item_check label="Позер" name="Poser"/>
+
+		<menu_item_call label="Настройки" name="Preferences"/>
+		<menu_item_call label="Кнопки панели инструментов" name="Toolbar Buttons"/>
+
+		<menu_item_check label="Показывать присоединенные HUD" name="Show HUD Attachments"/>
+		<menu_item_check label="Показывать Интерфейс Пользователя" name="Show User Interface"/>
+		<menu_item_call label="Запрос статуса 'Администратор'" name="Request Admin Options"/>
+		<menu_item_call label="Выход из статуса 'Администратор'" name="Leave Admin Options"/>
+		<menu_item_call label="Выход из [APP_NAME]" name="Quit"/>
+	</menu>
+
+<!-- Comm Menu -->
+
+	<menu label="Общение" name="Communicate">
+		<menu label="Статус в сети" name="Status">
+			<menu_item_check label="Нет на месте" name="Away"/>
+			<menu_item_check label="Не беспокоить" name="Do Not Disturb" />
+			<menu_item_check label="Автоответчик" name="Set Autorespond"/>
+			<menu_item_check label="Автоответчик не друзьям" name="Set Autorespond to non-friends"/>
+			<menu_item_check label="Отклонять предложения и запросы телепортации" name="Automatically reject teleport offers"/>
+			<menu_item_check label="Отклонять все приглашения в группы" name="Reject all group invites"/>
+			<menu_item_check label="Отклонять все запросы дружбы" name="Reject all friendship requests"/>
+		</menu>
+		<menu_item_call label="Друзья" name="My Friends"/>
+		<menu_item_check label="Контакты" name="Contacts"/>
+		<menu_item_call label="Набор контактов" name="Contact Sets"/>
+		<menu_item_call label="Группы" name="My Groups"/>
+		<menu_item_check label="Общий чат..." name="Nearby Chat"/>
+		<menu_item_check label="Люди" name="People"/>
+		<menu_item_check label="Разговоры" name="Conversations"/>
+		<menu_item_check label="Жесты" name="Gestures"/>
+		<menu_item_check name="Conversation Log..." label="Журнал разговоров..."/>
+		<menu_item_check label="Ближайшие голоса" name="Nearby Voice"/>
+		<menu_item_call label="Список заблокированных" name="Block List"/>
+		<menu_item_check label="Показать экранную консоль чата" name="Show On-screen Console"/>
+	</menu>
+
+	<!-- World Menu -->
+
+	<menu label="Мир" name="World">
+		<menu_item_call label="Синхронизация анимации" name="Resync Animations"/>
+		<menu_item_call label="Ближайшие аватары" name="Active Speakers"/>
+		<menu_item_check label="Радар" name="Radar"/>
+		<menu_item_call label="История телепортаций" name="Teleport History"/>
+		<menu_item_check label="Места" name="Places"/>
+		<menu_item_call label="Пункты" name="Destinations"/>
+		<menu_item_call label="События" name="Events"/>
+		<menu_item_check label="Мини карта" name="Mini-Map"/>
+		<menu_item_check label="Карта мира" name="World Map"/>
+		<menu_item_check label="Отслеживание региона" name="Region Tracker"/>
+		<menu_item_check label="Название Потока" name="Stream Title"/>
+		<menu_item_call label="Создать закладку" name="Create Landmark Here"/>
+		<menu_item_call label="Профиль локации" name="Place Profile"/>
+		<menu_item_call label="Детали участка" name="About Land"/>
+		<menu_item_call label="Детали региона" name="RegionEstate"/>
+		<menu_item_call label="Установить 'Дом' тут" name="Set Home to Here"/>
+		<menu_item_call label="Купить эту землю" name="Buy Land"/>
+		<menu_item_call label="Показать собственные земли" name="My Land"/>
+		<menu_item_call label="Мой Линден Дом..." name="Linden Home"/>
+		<menu label="Показать больше" name="LandShow">
+			<menu_item_check label="Скрыть Запрещающие линии" name="Hide Ban Lines"/>
+			<menu_item_check label="Показать Запрещающие линии при столкновении" name="Show Ban Lines On Collision"/>
+			<menu_item_check label="Показать Запрещающие линии при приближении" name="Show Ban Lines On Proximity"/>
+			<menu_item_check label="Маяки" name="beacons"/>
+			<menu_item_check label="Линии собственности" name="Property Lines"/>
+			<menu_item_check label="Владельцев земли" name="Land Owners"/>
+			<menu_item_check label="Координаты" name="Coordinates"/>
+			<menu_item_check label="Права участка" name="Parcel Properties"/>
+			<menu_item_check label="Расширенное меню" name="Show Advanced Menu"/>
+		</menu>
+		<menu_item_check label="Увеличить скорость графики ..." name="Performance"/>
+		<menu_item_call label="Телепортироваться домой" name="Teleport Home"/>
+
+		<menu label="Окружающая среда" name="Environment">
+			<menu_item_check label="Восход" name="Sunrise"/>
+			<menu_item_check label="Полдень" name="Noon"/>
+			<menu_item_check label="Полдень (устаревшее)" name="legacy noon"/>
+			<menu_item_check label="Закат" name="Sunset"/>
+			<menu_item_check label="Полночь" name="Midnight"/>
+			<menu_item_check label="Использовать Совместную Окружающую среду" name="Use Shared Environment"/>
+			<menu_item_call label="Моя Окружающая среда..." name="my_environs"/>
+			<menu_item_call label="Личное Освещение..." name="adjustment_tool"/>
+			<menu_item_check label="Пауза Облаков" name="pause_clouds"/>
+			<menu label="Массовый импорт" name="WL Bulk Import">
+				<menu_item_call label="Дни..." name="WL Bulk Import Days"/>
+				<menu_item_call label="Небеса..." name="WL Bulk Import Skies"/>
+				<menu_item_call label="Вода..." name="WL Bulk Import Water"/>
+			</menu>
+		</menu>
+
+		<!-- <menu label="Положение солнца" name="Environment Settings">
+			<menu_item_check label="Восход" name="Sunrise"/>
+			<menu_item_check label="Полдень" name="Noon"/>
+			<menu_item_check label="Закат" name="Sunset"/>
+			<menu_item_check label="Полночь" name="Midnight"/>
+			<menu_item_check label="Время острова" name="Revert to Region Default"/>
+		</menu>
+		<menu label="Редактор окружающей среды" name="Environment Editor">
+			<menu_item_call label="Параметры среды..." name="Environment Settings"/>
+			<menu name="Water Presets" label="Предустановки воды">
+				<menu_item_call label="Новая предустановка..." name="new_water_preset"/>
+				<menu_item_call label="Редактировать предустановку..." name="edit_water_preset"/>
+				<menu_item_call label="Удалить предустановку..." name="delete_water_preset"/>
+			</menu>
+			<menu name="Sky Presets" label="Предустановки неба">
+				<menu_item_call label="Новая предустановка..." name="new_sky_preset"/>
+				<menu_item_call label="Редактировать предустановку..." name="edit_sky_preset"/>
+				<menu_item_call label="Удалить предустановку..." name="delete_sky_preset"/>
+			</menu>
+			<menu name="Day Presets" label="Предустановки дня">
+				<menu_item_call label="Новая предустановка..." name="new_day_preset"/>
+				<menu_item_call label="Редактировать предустановку..." name="edit_day_preset"/>
+				<menu_item_call label="Удалить предустановку..." name="delete_day_preset"/>
+			</menu>
+		</menu> -->
+
+		<menu name="photo_and_video" label="Фото и Видео">
+			<menu_item_call label="Инструменты фото" name="phototools_item_call"/>
+			<menu_item_call label="Инструменты камеры" name="cameratools_item_call"/>
+			<menu_item_check label="Блокировка фокуса Глубины резкости" name="lock_focus_point"/>
+			<menu_item_check label="Рисовать перекрестие фокуса Глубины резкости" name="render_focus_point"/>
+		</menu>
+		<menu_item_call label="Поиск вокруг" name="area_search"/>
+		<menu_item_call label="Проводник звуков" name="Sound Explorer"/>
+		<menu_item_call label="Проводник анимаций" name="Animation Explorer"/>
+		<menu_item_call label="Черный список активов" name="asset_blacklist"/>
+		<menu_item_call label="Настройки отображения аватаров" name="Avatar Render Settings"/>
+		<menu label="Отображение аватара" name="AvatarComplexityMode">
+			<menu_item_check label="Ограничение по сложности" name="complexity_limit_everone"/>
+			<menu_item_check label="Всегда показывать друзей" name="complexity_always_show_friends"/>
+			<menu_item_check label="Показывать только друзей" name="complexity_only_show_friends"/>
+		</menu>
+		<menu_item_check label="Показывать только друзей" name="Render Friends Only"/>
+	</menu>
+
+	<menu label="Строить" name="BuildTools">
+		<menu_item_check label="Строить" name="Show Build Tools"/>
+		<menu label="Выбор инструмента строительства" name="Select Tool">
+			<menu_item_call label="Фокус" name="Focus"/>
+			<menu_item_call label="Двигать" name="Move"/>
+			<menu_item_call label="Редактировать" name="Edit"/>
+			<menu_item_call label="Создать" name="Create"/>
+			<menu_item_call label="Править землю" name="Land"/>
+		</menu>
+		<menu label="Выберите элементы" name="Select Elements">
+			<menu_item_call label="Выбрать следующую часть или грань" name="Select Next Part or Face"/>
+			<menu_item_call label="Выбрать предыдущую часть или грань" name="Select Previous Part or Face"/>
+			<menu_item_call label="Включать следующую часть или грань" name="Include Next Part or Face"/>
+			<menu_item_call label="Включать предыдущую часть или грань" name="Include Previous Part or Face"/>
+		</menu>
+		<menu_item_call label="Соеденить" name="Link"/>
+		<menu_item_call label="Разделить" name="Unlink"/>
+		<menu_item_check label="Править соединенные части" name="Edit Linked Parts"/>
+		<menu label="Выбрать соединенные части" name="Select Linked Parts">
+			<menu_item_call label="Выбрать следующую часть" name="Select Next Part"/>
+			<menu_item_call label="Выбрать предыдущую часть" name="Select Previous Part"/>
+			<menu_item_call label="Включать следующую часть" name="Include Next Part"/>
+			<menu_item_call label="Включать предыдущую часть" name="Include Previous Part"/>
+		</menu>
+		<menu_item_call label="Сфокусироваться на выбранном" name="Focus on Selection"/>
+		<menu_item_call label="Увеличить выбранное" name="Zoom to Selection"/>
+		<menu label="Объект" name="Object">
+			<menu_item_call label="Купить" name="Menu Object Buy"/>
+			<menu_item_call label="Взять" name="Menu Object Take"/>
+			<menu_item_call label="Взять копию" name="Take Copy"/>
+			<menu_item_call label="Дублировать" name="Duplicate"/>
+			<menu_item_call label="Править частицы" name="Menu Object Edit Particles"/>
+			<menu_item_call label="Сохранить с возвращением в инвентарь" name="Save Object Back to My Inventory"/>
+			<menu_item_call label="Сохранить объект в инвентаре" name="Save Object Back to My Inventory"/>
+			<menu_item_call label="Сохранить в содержимом объекта" name="Save Object Back to Object Contents"/>
+			<menu_item_call label="Вернуть объект" name="Return Object back to Owner"/>
+			<menu label="Сохранить как" name="Export Menu">
+				<menu_item_call label="Резервную копию" name="Backup"/>
+				<menu_item_call label="Collada" name="Collada"/>
+			</menu>
+		</menu>
+		<menu label="Скрипты" name="Scripts">
+			<menu_item_call label="Показать предупреждения/ошибки скриптов" name="Script Debug"/>
+			<menu_item_call label="Информация о скриптах (Счетчик)" name="Script Info"/>
+			<menu_item_call label="Перекомпилировать скрипты (Моно)" name="Mono"/>
+			<menu_item_call label="Перекомпилировать скрипты (LSL)" name="LSL"/>
+			<menu_item_call label="Сбросить скрипты" name="Reset Scripts"/>
+			<menu_item_call label="Запустить скрипты" name="Set Scripts to Running"/>
+			<menu_item_call label="Остановить скрипты" name="Set Scripts to Not Running"/>
+			<menu_item_call label="Удалить скрипты в выбранном" name="Remove Scripts From Selection"/>
+		</menu>
+		<menu label="Поиск пути" name="Pathfinding">
+			<menu_item_call label="Группы каналов..." name="pathfinding_linksets_menu_item"/>
+			<menu_item_call label="Персонажей..." name="pathfinding_characters_menu_item"/>
+			<menu_item_call label="Просмотр / тест..." name="pathfinding_console_menu_item"/>
+			<menu_item_call label="Пересоздать регион" name="pathfinding_rebake_navmesh_item"/>
+		</menu>
+		<menu label="Параметры" name="Options">
+			<menu_item_check label="Показать дополнительные разрешения" name="DebugPermissions"/>
+			<menu_item_check label="Выбирать только мои объекты" name="Select Only My Objects"/>
+			<menu_item_check label="Выбирать только подвижные объекты" name="Select Only Movable Objects"/>
+			<menu_item_check label="Выбирать только блокированные объекты" name="Select Only Locked Objects"/>
+			<menu_item_check label="Выбирать только копируемые объекты" name="Select Only Copyable Objects"/>
+			<menu_item_check label="Выбирать невидимые объекты" name="Select Invisible Objects"/>
+			<menu_item_check label="Выбирать датчики отражения" name="Select Reflection Probes"/>
+			<menu_item_check label="Включать объекты собственности группы" name="Include Group-Owned Objects"/>
+			<menu_item_check label="Выбирать окружающее" name="Select By Surrounding"/>
+			<menu_item_check label="Показать физическую форму" name="Show Physics Shape"/>
+			<menu_item_check label="Показать контуры выбранного" name="Show Selection Outlines"/>
+			<menu_item_check label="Показать скрытый выбор" name="Show Hidden Selection"/>
+			<menu_item_check label="Показать радиус света для выбранных" name="Show Light Radius for Selection"/>
+			<menu_item_check label="Показать уровни датчиков отражения" name="Show Reflection Probe Volumes" />
+			<menu_item_check label="Показать луч выбора" name="Show Selection Beam"/>
+			<menu_item_check label="Подсветка прозрачного" name="Highlight Transparent"/>
+			<menu_item_check label="- включая ригованное прозрачное" name="Include Transparent Rigged"/>
+			<menu_item_check label="Никакой постобработки" name="No Post"/>
+			<menu label="Выбор уровня детализации" name="Selection level of detail">
+				<menu_item_check label="По умолчанию" name="Default lod setting"/>
+				<menu_item_check label="Высокий" name="High lod setting"/>
+				<menu_item_check label="Средний" name="Medium lod setting"/>
+				<menu_item_check label="Низкий" name="Low lod setting"/>
+				<menu_item_check label="Самый низкий" name="Lowest lod setting"/>
+			</menu>
+			<menu_item_check label="Привязка к сетке" name="Snap to Grid"/>
+			<menu_item_call label="Привязка XY объекта к сетке" name="Snap Object XY to Grid"/>
+			<menu_item_call label="Использовать выбранное для сетки" name="Use Selection for Grid"/>
+			<menu_item_call label="Параметры сетки..." name="Grid Options"/>
+			<menu_item_call label="Установить разрешения по умолчанию..." name="Set default permissions"/>
+		</menu>
+		<menu label="Загрузить" name="Upload">
+			<menu_item_call label="Изображение..." name="Upload Image"/>
+			<menu_item_call label="Звук (L$[COST])..." name="Upload Sound"/>
+			<menu_item_call label="Анимацию (L$[COST])..." name="Upload Animation"/>
+			<menu_item_call label="Меш модель..." name="Upload Model"/>
+			<menu_item_call label="Материалы..." name="Upload Material"/>
+			<menu_item_call label="Несколько..." name="Bulk Upload"/>
+			<menu_item_call label="Импортировать..." name="import linkset"/>
+		</menu>
+		<menu_item_call label="Локальный Меш" name="local_mesh"/>
+		<menu_item_call label="Отменить" name="Undo"/>
+		<menu_item_call label="Повторить" name="Redo"/>
+	</menu>
+	<!-- Content Menu -->
+	<menu label="Содержимое" name="Content">
+		<menu_item_check label="Поиск" name="Search"/>
+		<menu_item_call label="Торговая площадка SL (Marketplace)" name="SL Marketplace"/>
+		<menu_item_call label="Торговые данные L$" name="LindenXchange"/>
+		<menu_item_call label="Библиотека скриптов" name="Script Library"/>
+		<menu_item_call label="SL Сообщество (блоги, форумы, новости)" name="SL Community Pages"/>
+		<menu_item_call label="Блог Firestorm" name="Firestorm Blog"/>
+		<menu_item_call label="Firestorm Flickr" name="Firestorm Flickr"/>
+		<menu_item_call label="Firestorm YouTube" name="Firestorm YouTube"/>
+		<menu_item_call label="Firestorm Twitter" name="Firestorm Twitter"/>
+		<menu_item_call label="Firestorm Plurk" name="Firestorm Plurk"/>
+		<menu_item_call label="Сообщение дня" name="Firestorm MoTD"/>
+	</menu>
+	<!-- Help Menu -->
+	<menu label="Помощь" name="Help">
+		<menu_item_check label="Включить подсказки интерфейса клиента" name="Enable Hints"/>
+		<menu_item_call label="Firestorm Wiki" name="Firestorm Wiki"/>
+		<menu_item_call label="Поиск решения Проблем" name="Troubleshooting"/>
+		<menu_item_call label="Вступить в группу поддержки Firestorm" name="firestorm_support_group"/>
+		<menu_item_call label="Расписание обучений Firestorm" name="Firestorm Classes Schedule"/>
+		<menu_item_call label="Календарь Событий Firestorm" name="Firestorm Events Calendar"/>
+		<menu_item_check label="Обучение" name="How To"/>
+		<!-- <menu_item_call label="Second Life Help" name="Second Life Help"/> -->
+		<menu_item_call label="[CURRENT_GRID] помощь" name="current_grid_help"/>
+		<menu_item_call label="О [CURRENT_GRID]" name="current_grid_about"/>
+		<!-- <menu_item_call label="Tutorial" name="Tutorial"/>
+		<menu_item_call label="Knowledge Base" name="Knowledge Base"/>
+		<menu_item_call label="Wiki" name="Wiki"/>
+		<menu_item_call label="Community Forums" name="Community Forums"/>
+		<menu_item_call label="Support portal" name="Support portal"/>
+		<menu_item_call label="[SECOND_LIFE] Blogs" name="Second Life Blogs"/> -->
+		<menu_item_call name="whitelist_folders" label="Советник Белого Списка"/>
+		<menu_item_call label="Проверка статуса сети (Grid Status)" name="Grid Status"/>
+		<menu_item_call label="Пожаловаться" name="Report Abuse"/>
+		<menu_item_call label="Сообщить об ошибке" name="Report Bug"/>
+		<menu_item_call label="Удары, толчки и попадания" name="Bumps, Pushes &amp;amp; Hits"/>
+		<menu_item_check label="Включить кнопку системной информации" name="Enable Sysinfo Button"/>
+		<menu_item_call label="Информация о [APP_NAME]" name="About Second Life"/>
+	</menu>
+	<menu name="RLVa Main">
+		<menu label="Отладка" name="Debug">
+			<menu_item_check label="Отобразить RLVa в меню" name="Show Top-level RLVa Menu"/>
+			<menu_item_check label="Показать сообщения отладки" name="Show Debug Messages"/>
+			<menu_item_check label="Скрытие дублирующих сообщений" name="Hide Unset or Duplicate Messages"/>
+			<menu_item_check label="Показать принятые ошибки" name="Show Assertion Failures"/>
+			<menu_item_check label="Скрыть заблокированные слои" name="Hide Locked Layers"/>
+			<menu_item_check label="Скрыть заблокированные вложения" name="Hide Locked Attachments"/>
+			<menu_item_check label="Включить старые имена (Legacy Naming)" name="Enable Legacy Naming"/>
+			<menu_item_check label="Включить 'Делиться одеждой' (Shared Wear)" name="Enable Shared Wear"/>
+			<menu_item_check label="Переименование общих элементов при ношении" name="Rename Shared Items on Wear"/>
+			<menu_item_check label="Блокировки..." name="Locks"/>
+		</menu>
+		<menu_item_check label="Разрешить не ролевой чат (Вышел из Роли)" name="Allow OOC Chat"/>
+		<menu_item_check label="Показать фильтрованый чат" name="Show Filtered Chat"/>
+		<menu_item_check label="Показать 'Печатает' в Перенаправленном Чате" name="Show Redirected Chat Typing"/>
+		<menu_item_check label="Разделять длинный Перенаправленный Чат" name="Split Long Redirected Chat"/>
+		<menu_item_check label="Разрешить временное присоединение" name="Allow Temporary Attachments"/>
+		<menu_item_check label="Запретить получение в папку #RLV" name="Forbid Give to #RLV"/>
+		<menu_item_check label="Замена одежды разблокирована" name="Wear Replaces Unlocked"/>
+		<menu_item_check label="Консоль..." name="Console"/>
+		<menu_item_check label="Ограничения..." name="Restrictions"/>
+		<menu_item_check label="Строки..." name="Strings"/>
+	</menu>
+
+	<!-- Advanced Menu -->
+	<menu label="Расширенное" name="Advanced">
+		<menu_item_call label="Перегрузить текстуры (rebake)" name="Rebake Texture"/>
+		<menu_item_call label="Обновить присоединения" name="Refresh Attachments"/>
+		<menu_item_call label="Восстановить исходный размер интерфейса" name="Set UI Size to Default"/>
+		<menu_item_call label="Установить размер окна..." name="Set Window Size..."/>
+		<menu_item_check label="Ограничить расстояние выбора" name="Limit Select Distance"/>
+		<menu_item_check label="Отключить ограничения камеры" name="Disable Camera Distance"/>
+		<menu_item_check label="Снимок высокого разрешения" name="HighResSnapshot"/>
+		<menu_item_check label="Тихий снимок" name="QuietSnapshotsToDisk"/>
+		<menu label="Инструменты производительности" name="Performance Tools">
+			<menu_item_call label="Измерение лагов" name="Lag Meter"/>
+			<menu_item_check label="Окно статистики" name="Statistics Bar"/>
+			<menu_item_check label="Статистика загрузки сцены" name="Scene Load Statistics"/>
+			<menu_item_check label="Увеличить скорость графики ..." name="Performance"/>
+			<menu_item_check label="Показать информацию сложности аватаров" name="Avatar Draw Info"/>
+		</menu>
+		<menu label="Подсветка и видимость" name="Highlighting and Visibility">
+			<menu_item_check label="Мигающие маяки" name="Cheesy Beacon"/>
+			<menu_item_check label="Скрыть частицы" name="Hide Particles"/>
+			<menu_item_check label="Скрыть выбранное" name="Hide Selected"/>
+			<menu_item_check label="Показывать прицел при виде от первого лица" name="ShowCrosshairs"/>
+			<menu label="Всплывающие подсказки" name="Hover Tips">
+				<menu_item_check label="Показывать Подсказки" name="Show Tips"/>
+				<menu_item_check label="Подсказки о земле" name="Land Tips"/>
+				<menu_item_check label="Подсказки на все объекты" name="Tips On All Objects"/>
+			</menu>
+		</menu>
+		<menu label="Типы визуализации" name="Rendering Types">
+			<menu_item_check label="Простой" name="Rendering Type Simple"/>
+			<menu_item_check label="Материалы" name="Rendering Type Materials"/>
+			<menu_item_check label="Альфа маска" name="Rendering Type Alpha Mask"/>
+			<menu_item_check label="Полный яркий Альфа маска" name="Rendering Type Fullbright Alpha Mask"/>
+			<menu_item_check label="Свечение" name="Rendering Type Glow"/>
+			<menu_item_check label="Полный яркий" name="Rendering Type Fullbright"/>
+			<menu_item_check label="Альфа" name="Rendering Type Alpha"/>
+			<menu_item_check label="Дерево" name="Rendering Type Tree"/>
+			<menu_item_check label="Аватары" name="Rendering Type Character"/>
+			<menu_item_check label="Анимированный меш" name="Rendering Type Control Avatar"/>
+			<menu_item_check label="Исправление поверхности" name="Rendering Type Surface Patch"/>
+			<menu_item_check label="Небо" name="Rendering Type Sky"/>
+			<menu_item_check label="Вода" name="Rendering Type Water"/>
+			<menu_item_check label="Земля" name="Rendering Type Ground"/>
+			<menu_item_check label="Объем" name="Rendering Type Volume"/>
+			<menu_item_check label="Трава" name="Rendering Type Grass"/>
+			<menu_item_check label="Облака" name="Rendering Type Clouds"/>
+			<menu_item_check label="Частицы" name="Rendering Type Particles"/>
+			<menu_item_check label="Рельефное" name="Rendering Type Bump"/>
+		</menu>
+		<menu label="Визуализация возможностей" name="Rendering Features">
+			<menu_item_check label="Интерфейс пользователя" name="ToggleUI"/>
+			<menu_item_check label="Выбранный" name="Selected"/>
+			<menu_item_check label="Выделенные" name="Highlighted"/>
+			<menu_item_check label="Динамические текстуры" name="Dynamic Textures"/>
+			<menu_item_check label="Тени от ног" name="Foot Shadows"/>
+			<menu_item_check label="Туман" name="Fog"/>
+			<menu_item_check label="Гибкие объекты" name="Flexible Objects"/>
+		</menu>
+		<menu label="Резервные копии медиа потоков" name="media_stream_import_export">
+			<menu_item_call label="Импорт списка потоков XML..." name="media_stream_import"/>
+			<menu_item_call label="Экспорт списка потоков XML..." name="media_stream_export"/>
+		</menu>
+		<menu_item_check label="Использовать плагин чтения сообщений" name="Use Plugin Read Thread"/>
+		<menu_item_call label="Очистить кэш группы" name="ClearGroupCache"/>
+		<menu_item_check label="Сглаживание мыши" name="Mouse Smoothing"/>
+		<menu_item_call label="Отменить добавление элементов управления кнопками" name="Release Keys"/>
+		<menu label="Горячие клавиши" name="Shortcuts">
+			<menu_item_call label="Загрузить изображение ([COST])..." name="Upload Image"/>
+			<menu_item_check label="Поиск" name="Search"/>
+			<menu_item_check label="Телепортация двойным нажатием" name="DoubleClick Teleport"/>
+			<menu_item_check label="Всегда бежать" name="Always Run"/>
+			<menu_item_check label="Лететь" name="Fly"/>
+			<menu_item_call label="Закрыть окно" name="Close Window"/>
+			<menu_item_call label="Закрыть группу окон" name="Close Window Group"/>
+			<menu_item_call label="Закрыть все окна" name="Close All Windows"/>
+			<menu_item_call label="Снимок на диск" name="Snapshot to Disk"/>
+			<menu_item_call label="Вид от первого лица" name="Mouselook"/>
+			<menu_item_call label="Обзор джойстиком" name="Joystick Flycam"/>
+			<menu_item_call label="Сброс вида" name="Reset View"/>
+			<menu_item_call label="Сброс ракурса" name="Reset Camera Angles"/>
+			<menu_item_call label="Смотреть на последнего говорившего" name="Look at Last Chatter"/>
+			<menu_item_call label="Приблизить" name="Zoom In"/>
+			<menu_item_call label="Увеличение по умолчанию" name="Zoom Default"/>
+			<menu_item_call label="Отдалить" name="Zoom Out"/>
+		</menu>
+		<menu_item_check label="Летать принудительно" name="Fly Override"/>
+		<menu_item_check label="Контроль скриптами (RLVa)" name="RLV API"/>
+		<menu_item_call label="Показать настройки отладки" name="Debug Settings"/>
+		<menu_item_check label="Показать меню разработчиков" name="Debug Mode"/>
+	</menu>
+	<menu label="Разработка" name="Develop">
+		<menu label="Консоли" name="Consoles">
+			<menu_item_check label="Консоль текстур" name="Texture Console"/>
+			<menu_item_check label="Консоль отладки" name="Debug Console"/>
+			<menu_item_call label="Консоль уведомлений" name="Notifications"/>
+			<menu_item_check label="Консоль отладки региона" name="Region Debug Console"/>
+			<menu_item_check label="Оперативные таймеры" name="Fast Timers"/>
+			<menu_item_check label="Память" name="Memory"/>
+			<menu_item_check label="Статистика по сцене" name="Scene Statistics"/>
+			<menu_item_check label="Монитор загрузки сцены" name="Scene Loading Monitor"/>
+			<menu_item_call label="Консоль отладки получения текстур" name="Texture Fetch Debug Console"/>
+			<menu_item_check label="Консоль отладки региона" name="Region Debug Console"/>
+			<menu_item_call label="Данные о регионе на консоль отладки" name="Region Info to Debug Console"/>
+			<menu_item_call label="Данные о группе на консоль отладки" name="Group Info to Debug Console"/>
+			<menu_item_call label="Данные о способностях на консоль отладки" name="Capabilities Info to Debug Console"/>
+			<menu_item_check label="Камера" name="Camera"/>
+			<menu_item_check label="Ветер" name="Wind"/>
+			<menu_item_check label="Угол обзора" name="FOV"/>
+			<menu_item_check label="Значок" name="Badge"/>
+			<menu_item_check label="Куки" name="Cookies"/>
+		</menu>
+		<menu label="Отображать информацию" name="Display Info">
+			<menu_item_check label="Показывать время" name="Show Time"/>
+			<menu_item_check label="Показывать трансакции загрузки" name="Show Upload Transaction"/>
+			<menu_item_check label="Показать данные о текстурах" name="Show Texture Info"/>
+			<menu_item_call label="VRAM используемая каждым объектом" name="VRAM usage per object"/>
+			<menu_item_check label="Показать данные по отрисовке аватара" name="Show Avatar Render Info"/>
+			<menu_item_check label="Показать данные по отрисовке" name="Show Render Info"/>
+			<menu_item_check label="Показать матрицы" name="Show Matrices"/>
+			<menu_item_check label="Показать цвет под курсором" name="Show Color Under Cursor"/>
+			<menu_item_check label="Показать память" name="Show Memory"/>
+			<menu_item_check label="Показать обновления объектов" name="Show Updates"/>
+		</menu>
+		<menu label="Профилирование/Телеметрия" name="Enable / Disable telemetry capture">
+			<menu_item_check label="Профилирование" name="Profiling"/>
+			<menu_item_check label="Начать при подключении" name="Start when telemetry client connects"/>
+		</menu>
+		<menu label="Принудительно вызвать ошибку" name="Force Errors">
+			<menu_item_call label="Точка остановки (breakpoint)" name="Force Breakpoint"/>
+			<menu_item_call label="Ошибка LL и сбой" name="Force LLError And Crash"/>
+			<menu_item_call label="Ошибка LL, Сообщение и Сбой" name="Force LLError Message And Crash"/>
+			<menu_item_call label="Неправильный доступ к памяти" name="Force Bad Memory Access"/>
+			<menu_item_call label="Неправильной доступ к памяти в сопрограмме" name="Force Bad Memory Access in Coroutine"/>
+			<menu_item_call label="Бесконечный цикл" name="Force Infinite Loop"/>
+			<menu_item_call label="Сбой драйвера" name="Force Driver Carsh"/>
+			<menu_item_call label="Исключение в программе" name="Force Software Exception"/>
+			<menu_item_call label="Исключение в операционной системе" name="Force OS Exception"/>
+			<menu_item_call label="Исключение программного обеспечения в сопрограмме" name="Force Software Exception in Coroutine"/>
+			<menu_item_call label="Вызвать сбой в потоке" name="Force a Crash in a Thread"/>
+			<menu_item_call label="Отключение клиента" name="Force Disconnect Viewer"/>
+			<menu_item_call label="Имитировать утечку памяти" name="Memory Leaking Simulation"/>
+		</menu>
+		<menu label="GLTF" name="GLTF">
+			<menu_item_call label="Открыть..." name="Open..."/>
+			<menu_item_call label="Сохранить как..." name="Save As..."/>
+			<menu_item_call label="Загрузить..." name="Upload..."/>
+			<menu_item_call label="Редактировать..." name="Edit..."/>
+		</menu>
+		<menu label="Видео" name="Video"/>
+		<menu label="Тестирование прорисовки" name="Render Tests">
+			<menu_item_check label="Смещение камеры" name="Camera Offset"/>
+			<menu_item_check label="Случайная частота кадров" name="Randomize Framerate"/>
+			<menu_item_check label="Периодическое замедление кадров" name="Periodic Slow Frame"/>
+			<menu_item_check label="Тест кадров" name="Frame Test"/>
+			<menu_item_call label="Профиль кадра" name="Frame Profile"/>
+			<menu_item_call label="Стандарт (benchmark)" name="Benchmark"/>
+			<menu_item_call label="HDRI Предпросмотр" name="HDRI Preview"/>
+			<menu_item_call label="GLTF Предпросмотр сцены" name="GLTF Scene Preview"/>
+		</menu>
+		<menu label="Метаданные прорисовки" name="Render Metadata">
+			<menu_item_check label="Ограничительные рамки (Bounding Boxes)" name="Bounding Boxes"/>
+			<menu_item_check label="Хитбоксы аватара (Hitboxy)" name="Avatar Hitboxes"/>
+			<menu_item_check label="Нормали" name="Normals"/>
+			<menu_item_check label="Октадерево" name="Octree"/>
+			<menu_item_check label="GLTF Узлы" name="GLTF Nodes"/>
+			<menu_item_check label="Тень усеченного конуса (Shadow Frusta)" name="Shadow Frusta"/>
+			<menu_item_check label="Физические формы" name="Physics Shapes"/>
+			<menu_item_check label="Окклюзия" name="Occlusion"/>
+			<menu_item_check label="Пакетная прорисовка" name="Render Batches"/>
+			<menu_item_check label="Тип обновления" name="Update Type"/>
+			<menu_item_check label="Анимация текстуры" name="Texture Anim"/>
+			<menu_item_check label="Приоритет текстуры" name="Texture Priority"/>
+			<menu_item_check label="Площадь текстуры" name="Texture Area"/>
+			<menu_item_check label="Площадь грани" name="Face Area"/>
+			<menu_item_check label="Информация об уровнях детализации" name="LOD Info"/>
+			<menu_item_check label="Счетчик Треугольников" name="Triangle Count"/>
+			<menu_item_check label="Строительство очереди" name="Build Queue"/>
+			<menu_item_check label="Освещение" name="Lights"/>
+			<menu_item_check label="Датчики отражений" name="Reflection Probes"/>
+			<menu_item_check label="Обновления датчиков" name="Probe Updates"/>
+			<menu_item_check label="Частицы" name="Particles"/>
+			<menu_item_check label="Каркас столкновений" name="Collision Skeleton"/>
+			<menu_item_check label="Стыки" name="Joints"/>
+			<menu_item_check label="Лучи" name="Raycast"/>
+			<menu_item_check label="Направления ветра" name="Wind Vectors"/>
+			<menu_item_check label="Сложность прорисовки" name="rendercomplexity"/>
+			<menu_item_check label="Байты присоединения" name="attachment bytes"/>
+			<menu_item_check label="Лепка" name="Sculpt"/>
+			<menu_item_check label="Размер текстуры" name="Texture Size"/>
+			<menu label="Плотность текстуры" name="Texture Density">
+				<menu_item_check label="Нет" name="None"/>
+				<menu_item_check label="Текущая" name="Current"/>
+				<menu_item_check label="Желаемая" name="Desired"/>
+				<menu_item_check label="Полная" name="Full"/>
+			</menu>
+		</menu>
+		<menu label="Прорисовка" name="Rendering">
+			<menu_item_check label="Оси" name="Axes"/>
+			<menu_item_check label="Касательный базис" name="Tangent Basis"/>
+			<menu_item_check label="Основная информация выбранной текстуры" name="Selected Texture Info Basis"/>
+			<menu_item_call label="Информация выбранного материала" name="Selected Material Info"/>
+			<menu_item_check label="Каркас" name="Wireframe"/>
+			<menu_item_check label="Окклюзия объект-объект" name="Object-Object Occlusion"/>
+			<menu_item_check label="Расширенное освещение" name="Advanced Lighting Model"/>
+			<menu_item_check label="Тени для Солнца/Луны/Прожекторо" name="Shadows from Sun/Moon/Projectors"/>
+			<menu_item_check label="SSAO и сглаживание теней" name="SSAO and Shadow Smoothing"/>
+			<menu_item_check label="Запустить Отладку GL при следующем запуске" name="Debug GL"/>
+			<menu_item_check label="Отладка конвейера" name="Debug Pipeline"/>
+			<menu_item_check label="Автоматические альфа-маски (отложенные)" name="Automatic Alpha Masks (deferred)"/>
+			<menu_item_check label="Автоматические альфа-маски (не отложенные)" name="Automatic Alpha Masks (non-deferred)"/>
+			<menu_item_check label="Текстуры анимаций" name="Animation Textures"/>
+			<menu_item_check label="Отключение текстур" name="Disable Textures"/>
+			<menu_item_call label="Не отрисовывать все анимеши" name="Derender Animesh"/>
+			<menu_item_check label="Отключить Окружающую среду" name="Disable Ambient"/>
+			<menu_item_check label="Отключить Солнечный свет" name="Disable Sunlight"/>
+			<menu_item_check label="Отключить Местные огни" name="Disable Local Lights"/>
+			<menu_item_check label="Текстуры в полном разрешении (ОПАСНО)" name="Full Res Textures"/>
+			<menu_item_check label="Прорисовка присоединенных источников света" name="Render Attached Lights"/>
+			<menu_item_check label="Прорисовка присоединенных частиц" name="Render Attached Particles"/>
+			<menu_item_check label="Сбор буферов вершин шрифтов" name="Collect Font Vertex Buffers"/>
+			<menu_item_check label="Включить кэш шейдеров" name="Enable Shader Cache"/>
+			<menu_item_call label="Очистить кэш шейдеров" name="Shader Cache Clear"/>
+			<menu_item_call label="Восстановить местность" name="Rebuild Terrain"/>
+		</menu>
+		<menu label="Сеть" name="Network">
+			<menu_item_check label="Приостановить аватара" name="AgentPause"/>
+			<menu_item_call label="Включить журнал сообщений" name="Enable Message Log"/>
+			<menu_item_call label="Отключить журнал сообщений" name="Disable Message Log"/>
+			<menu_item_check label="Скорость интерполяции объектов" name="Velocity Interpolate Objects"/>
+			<menu_item_check label="Время ответа интерполяции позиции объекта" name="Ping Interpolate Object Positions"/>
+			<menu_item_call label="Сбросить пакет" name="Drop a Packet"/>
+		</menu>
+		<menu label="Кэш" name="Cache">
+			<menu_item_call label="Очистить кэш диска" name="Purge Disk Cache"/>
+		</menu>
+		<menu_item_call label="Дамп камеры со скриптами" name="Dump Scripted Camera"/>
+		<menu label="Запись" name="Recorder">
+			<menu_item_call label="Старт записи события" name="Start event recording"/>
+			<menu_item_call label="Конец записи события" name="Stop event recording"/>
+			<menu_item_call label="Воспроизведение записи события" name="Playback event recording"/>
+			<menu_item_call label="Начать воспроизведение" name="Start Playback"/>
+			<menu_item_call label="Остановить воспроизведение" name="Stop Playback"/>
+			<menu_item_call label="Зациклить воспроизведение" name="Loop Playback"/>
+			<menu_item_call label="Начало записи" name="Start Record"/>
+			<menu_item_call label="Конец записи" name="Stop Record"/>
+		</menu>
+		<menu label="Мир" name="DevelopWorld">
+			<menu_item_check label="Перекрытие солнца в симуляторе" name="Sim Sun Override"/>
+			<menu_item_check label="Фиксированная погода" name="Fixed Weather"/>
+			<menu_item_call label="Дамп кэша объектов региона" name="Dump Region Object Cache"/>
+			<menu_item_check label="Записывать статистику в файл" name="Stats Recorder File"/>
+			<menu_item_check label="Списки интересов в режиме 360" name="Interest List: 360 Mode"/>
+			<menu_item_call label="Сброс списков интересов" name="Reset Interest Lists"/>
+			<menu_item_call label="Дамп возможностей симулятора в общий чат" name="DumpSimFeaturesToChat"/>
+		</menu>
+		<menu label="Местность" name="DevelopTerrain">
+			<menu_item_call label="Перестроить местность" name="Rebuild Terrain"/>
+			<menu_item_call label="Создать локальный рисунок карты" name="Create Local Paintmap"/>
+			<menu_item_call label="Удалить локальный рисунок карты" name="Delete Local Paintmap"/>
+		</menu>
+		<menu label="Интерфейс пользователя" name="UI">
+			<menu_item_call label="Тест браузера для просмотра медиа" name="Web Browser Test"/>
+			<menu_item_check label="Тест перезапуска региона..." name="Region Restart Test"/>
+			<menu_item_call label="Браузер Web содержимого" name="Web Content Browser"/>
+			<menu_item_call label="Помощник по созданию миниатюр инвентаря" name="Inventory Thumbnails Helper"/>
+			<menu_item_call label="Дамп шрифтов" name="Dump Fonts"/>
+			<menu_item_call label="Дамп текстур шрифтов" name="Dump Font Textures"/>
+			<menu_item_call label="Тест соединения с Facebook" name="FB Connect Test"/>
+			<menu_item_call label="Дамп SelectMgr" name="Dump SelectMgr"/>
+			<menu_item_call label="Дамп инвентаря" name="Dump Inventory"/>
+			<menu_item_call label="Дамп таймеров" name="Dump Timers"/>
+			<menu_item_call label="Дамп средств фокусировки" name="Dump Focus Holder"/>
+			<menu_item_call label="Печать информации о выбранных объектах" name="Print Selected Object Info"/>
+			<menu_item_call label="Печать информации об агенте" name="Print Agent Info"/>
+			<menu_item_check label="Двойное нажатие - Автопилот" name="Double-ClickAuto-Pilot"/>
+			<menu_item_check label="Двойное нажатие - Телепортация" name="DoubleClick Teleport"/>
+			<menu_item_check label="Отладка SelectMgr" name="Debug SelectMgr"/>
+			<menu_item_check label="Отладка нажатий" name="Debug Clicks"/>
+			<menu_item_check label="Отладка обзора" name="Debug Views"/>
+			<menu_item_check label="Отладка Юникода" name="Debug Unicode"/>
+			<menu_item_check label="Отладка управления камеры" name="Debug Camera Controls"/>
+			<menu_item_check label="Отладка названий инструментов подсказки" name="Debug Name Tooltips"/>
+			<menu_item_check label="Отладка событий мышки" name="Debug Mouse Events"/>
+			<menu_item_check label="Отладка клавиш" name="Debug Keys"/>
+			<menu_item_check label="Отладка окна процесса" name="Debug WindowProc"/>
+		</menu>
+		<menu label="XUI" name="XUI">
+			<menu_item_call label="Показать настройки цвета" name="Color Settings"/>
+			<menu_item_call label="Перезагрузить настройки цвета" name="Reload Color Settings"/>
+			<menu_item_call label="Показать проверку шрифтов" name="Show Font Test"/>
+			<menu_item_call label="Загрузить из XML" name="Load from XML"/>
+			<menu_item_call label="Сохранить в XML" name="Save to XML"/>
+			<menu_item_check label="Показать названия XUI" name="Show XUI Names"/>
+			<menu_item_check label="Показать отладочную информацию" name="DebugViews"/>
+			<menu_item_call label="Инструменты просмотра XUI" name="UI Preview Tool"/>
+			<menu_item_call label="Отправить пробное ЛС" name="Send Test IMs"/>
+			<menu_item_call label="Очистить кэши имен" name="Flush Names Caches"/>
+		</menu>
+		<menu label="Аватар" name="Character">
+			<menu label="Захват отрисованных текстур" name="Grab Baked Texture">
+				<menu_item_call label="Ирис" name="Grab Iris"/>
+				<menu_item_call label="Голова" name="Grab Head"/>
+				<menu_item_call label="Верх тела" name="Grab Upper Body"/>
+				<menu_item_call label="Низ тела" name="Grab Lower Body"/>
+				<menu_item_call label="Юбка" name="Grab Skirt"/>
+			</menu>
+			<menu label="Проверка персонажа" name="Character Tests">
+				<menu_item_call label="Внешность в XML" name="Appearance To XML"/>
+				<menu_item_call label="Переключить геометрию персонажа" name="Toggle Character Geometry"/>
+				<menu_item_call label="Проверка мужчины" name="Test Male"/>
+				<menu_item_call label="Проверка женщины" name="Test Female"/>
+				<menu_item_check label="Разрешить выбирать аватар" name="Allow Select Avatar"/>
+			</menu>
+			<menu label="Скорость анимации" name="Animation Speed">
+				<menu_item_call label="Все анимации на 10% быстрее" name="All Animations 10 Faster"/>
+				<menu_item_call label="Все анимации на 10% медленее" name="All Animations 10 Slower"/>
+				<menu_item_call label="Сбросить все скорости анимации" name="Reset All Animation Speed"/>
+				<menu_item_check label="Анимации медленных движений" name="Slow Motion Animations"/>
+			</menu>
+			<menu_item_call label="Сброс настроек на начальные" name="Force Params to Default"/>
+			<menu_item_check label="Информация об анимации" name="Animation Info"/>
+			<menu_item_check label="Показать взгляд" name="Show Look At"/>
+			<menu_item_check label="Показать указание" name="Show Point At"/>
+			<menu_item_check label="Отладка обновлений соединений" name="Debug Joint Updates"/>
+			<menu_item_check label="Отключить детализацию (LOD)" name="Disable LOD"/>
+			<menu_item_check label="Отладка видимости персонажа" name="Debug Character Vis"/>
+			<menu_item_check label="Показать скелет" name="Show Collision Skeleton"/>
+			<menu_item_check label="Показать кости" name="Show Bones"/>
+			<menu_item_check label="Отобразить действие агента" name="Display Agent Target"/>
+			<menu_item_check label="Показать степень упрощения" name="Show Impostor Extents"/>
+			<menu_item_call label="Дамп присоединений" name="Dump Attachments"/>
+			<menu_item_call label="Отладка текстур аватара" name="Debug Avatar Textures"/>
+			<menu_item_call label="Дамп локальных текстур" name="Dump Local Textures"/>
+			<menu_item_call label="Перезагрузка частиц облака аватара" name="Reload Avatar Cloud Particle"/>
+		</menu>
+		<menu_item_check label="HTTP Текстуры" name="HTTP Textures"/>
+		<menu_item_call label="Сжатие изображений" name="Compress Images"/>
+		<menu_item_call label="Проверка сжатия файла" name="Compress File Test"/>
+		<menu_item_call label="Primfeed тест авторизации" name="primfeed_auth_test"/>
+		<menu_item_call label="Primfeed сброс авторизации" name="primfeed_auth_clear"/>
+		<menu_item_call label="Включить Visual Leak Detector" name="Enable Visual Leak Detector"/>
+		<menu_item_check label="Вывод минидампа при отладке" name="Output Debug Minidump"/>
+		<menu_item_check label="Окно консоли при следующем запуске" name="Console Window"/>
+		<menu label="Установить уровень журнала" name="Set Logging Level">
+			<menu_item_check label="Отладка" name="Debug"/>
+			<menu_item_check label="Информация" name="Info"/>
+			<menu_item_check label="Предупреждение" name="Warning"/>
+			<menu_item_check label="Ошибка" name="Error"/>
+			<menu_item_check label="Нет" name="None"/>
+		</menu>
+		<menu_item_call label="Запрос статуса администратора" name="Request Admin Options"/>
+		<menu_item_call label="Выход из статуса администратора" name="Leave Admin Options"/>
+		<menu_item_check label="Показать меню администратора" name="View Admin Options"/>
+	</menu>
+	<menu label="Администратор" name="Admin">
+		<menu label="Объект" name="AdminObject">
+			<menu_item_call label="Получить копию" name="Admin Take Copy"/>
+			<menu_item_call label="Назначить меня владельцем" name="Force Owner To Me"/>
+			<menu_item_call label="Назначить полноправным владельцем" name="Force Owner Permissive"/>
+			<menu_item_call label="Удалить" name="Delete"/>
+			<menu_item_call label="Заблокировать" name="Lock"/>
+			<menu_item_call label="Получить ID активов" name="Get Assets IDs"/>
+		</menu>
+		<menu label="Участок" name="Parcel">
+			<menu_item_call label="Назначить меня владельцем" name="Owner To Me"/>
+			<menu_item_call label="Задать для контента Linden" name="Set to Linden Content"/>
+			<menu_item_call label="Запрос на публичную землю" name="Claim Public Land"/>
+		</menu>
+		<menu name="Регион">
+			<menu_item_call label="Дамп временных данных актива" name="Dump Temp Asset Data"/>
+			<menu_item_call label="Сохранить состояние региона" name="Save Region State"/>
+		</menu>
+		<menu_item_call label="Инструменты Бога" name="God Tools"/>
+	</menu>
+	<menu name="Deprecated">
+		<menu label="Присоеденить объект" name="Attach Object"/>
+		<menu label="Отсоединить объект" name="Detach Object"/>
+		<menu label="Снять одежду" name="Take Off Clothing">
+			<menu_item_call label="Рубашку" name="Shirt"/>
+			<menu_item_call label="Штаны" name="Pants"/>
+			<menu_item_call label="Обувь" name="Shoes"/>
+			<menu_item_call label="Носки" name="Socks"/>
+			<menu_item_call label="Куртку" name="Jacket"/>
+			<menu_item_call label="Перчатки" name="Gloves"/>
+			<menu_item_call label="Майку" name="Menu Undershirt"/>
+			<menu_item_call label="Трусы" name="Menu Underpants"/>
+			<menu_item_call label="Юбку" name="Skirt"/>
+			<menu_item_call label="Тутуировку" name="Tattoo"/>
+			<menu_item_call label="Физику" name="Physics"/>
+			<menu_item_call label="Всю одежду" name="All Clothes"/>
+		</menu>
+		<menu label="Помощь" name="DeprecatedHelp">
+			<menu_item_call label="Официальный блог Linden" name="Official Linden Blog"/>
+			<menu_item_call label="Портал скриптов" name="Scripting Portal"/>
+			<menu label="Сообщение об ошибке" name="Bug Reporting">
+				<menu_item_call label="Общедоступное средство отслеживания проблем" name="Public Issue Tracker"/>
+				<menu_item_call label="Помощь по общедоступному средству отслеживания проблем" name="Publc Issue Tracker Help"/>
+				<menu_item_call label="Сообщение об ошибке 101" name="Bug Reporing 101"/>
+				<menu_item_call label="Проблемы безопасности" name="Security Issues"/>
+				<menu_item_call label="QA Wiki" name="QA Wiki"/>
+				<menu_item_call label="Официальный блог Linden" name="Official Linden Blog"/>
+			</menu>
+		</menu>
+	</menu>
+</menu_bar>

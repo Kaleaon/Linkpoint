@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--
+  Not can_close / no title to avoid window chrome
+  Single instance - only have one at a time, recycle it each spawn
+-->
+<floater name="inspect_group">
+	<string name="PrivateGroup">
+		私人群組
+	</string>
+	<string name="FreeToJoin">
+		免費加入
+	</string>
+	<string name="CostToJoin">
+		花費 L$[AMOUNT] 加入
+	</string>
+	<string name="YouAreMember">
+		你是成員
+	</string>
+	<text name="group_subtitle">
+		123 位成員
+	</text>
+	<text name="group_details">
+		這一群人責在建立有麋鹿的房間。
+麋鹿萬歲！貓鼬萬歲！
+	</text>
+	<text name="group_cost">
+		加入費用 L$123
+	</text>
+	<button label="加入" name="join_btn"/>
+	<button label="退出" name="leave_btn"/>
+	<button label="察看檔案" name="view_profile_btn"/>
+</floater>

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<context_menu
+ layout="topleft"
+ name="Friends Popup">  
+    <menu_item_call
+     label="View Profile"
+     layout="topleft"
+     name="show_agent">
+        <menu_item_call.on_click
+         function="Contacts.Friends.ShowProfile"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Send IM..."
+     layout="topleft"
+     name="send_im">
+        <menu_item_call.on_click
+         function="Contacts.Friends.SendIM"/>
+    </menu_item_call>
+    <menu_item_call
+     label="View chat transcripts..."
+     layout="topleft"
+     name="chat_history">
+        <menu_item_call.on_click
+         function="Contacts.Friends.Calllog"/>
+        <menu_item_call.on_enable
+         function="Contacts.Friends.EnableItem"
+         parameter="can_callog"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Add to Set..."
+     layout="topleft"
+     name="Add to Set">
+        <menu_item_call.on_click
+         function="Contacts.Friends.AddToContactSet"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Zoom at Friend"
+     layout="topleft"
+     name="zoom_agent">
+        <menu_item_call.on_click
+         function="Contacts.Friends.ZoomIn"/>
+        <menu_item_call.on_enable
+         function="Contacts.Friends.EnableZoomIn"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Teleport to Friend"
+     layout="topleft"
+     name="teleportto_agent">
+        <menu_item_call.on_click
+         function="Contacts.Friends.TeleportToTarget"/>
+        <menu_item_call.on_enable
+         function="Contacts.Friends.EnableItem"
+         parameter="teleport_to"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Offer Teleport"
+     layout="topleft"
+     name="offer_teleport">
+        <menu_item_call.on_click
+         function="Contacts.Friends.OfferTeleport"/>
+        <menu_item_call.on_enable
+         function="Contacts.Friends.EnableItem"
+         parameter="offer_teleport"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Request Teleport"
+     layout="topleft"
+     name="request_teleport">
+        <menu_item_call.on_click
+         function="Contacts.Friends.RequestTeleport"/>
+        <menu_item_call.on_enable
+         function="Contacts.Friends.EnableItem"
+         parameter="request_teleport"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Pay"
+     layout="topleft"
+     name="pay">
+        <menu_item_call.on_click
+         function="Contacts.Friends.Pay"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Track Friend"
+     layout="topleft"
+     name="track_agent">
+        <menu_item_call.on_click
+         function="Contacts.Friends.TrackAvatar"/>
+        <menu_item_call.on_enable
+         function="Contacts.Friends.EnableItem"
+         parameter="track_avatar"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Remove Friend..."
+     layout="topleft"
+     name="remove_friend">
+        <menu_item_call.on_click
+         function="Contacts.Friends.RemoveFriend"/>
+        <menu_item_call.on_enable
+         function="Contacts.Friends.EnableItem"
+         parameter="remove_friend"/>
+    </menu_item_call>
+    <menu_item_separator
+     layout="topleft" />
+    <menu_item_call
+     label="Copy Name to clipboard"
+     layout="topleft"
+     name="url_copy_label">
+        <menu_item_call.on_click
+         function="Contacts.Friends.CopyLabel"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Copy Url to clipboard"
+     layout="topleft"
+     name="url_copy">
+        <menu_item_call.on_click
+         function="Contacts.Friends.CopyUrl"/>
+    </menu_item_call>
+    <menu_item_separator/>
+    <menu name="options" label="Options...">
+        <menu_item_check
+         label="Show username column"
+         name="show_username">
+            <menu_item_check.on_click
+             function="ToggleControl"
+             parameter="FSFriendListColumnShowUserName"/>
+            <menu_item_check.on_check
+             control="FSFriendListColumnShowUserName"/>
+            <menu_item_check.on_enable
+             function="Contacts.Friends.EnableItem"
+             parameter="FSFriendListColumnShowUserName"/>
+        </menu_item_check>
+        <menu_item_check
+         label="Show display name column"
+         name="show_displayname">
+            <menu_item_check.on_click
+             function="ToggleControl"
+             parameter="FSFriendListColumnShowDisplayName"/>
+            <menu_item_check.on_check
+             control="FSFriendListColumnShowDisplayName"/>
+            <menu_item_check.on_enable
+             function="Contacts.Friends.EnableItem"
+             parameter="FSFriendListColumnShowDisplayName"/>
+        </menu_item_check>
+        <menu_item_check
+         label="Show full name column"
+         name="show_fullname">
+            <menu_item_check.on_click
+             function="ToggleControl"
+             parameter="FSFriendListColumnShowFullName"/>
+            <menu_item_check.on_check
+             control="FSFriendListColumnShowFullName"/>
+            <menu_item_check.on_enable
+             function="Contacts.Friends.EnableItem"
+             parameter="FSFriendListColumnShowFullName"/>
+        </menu_item_check>
+        <menu_item_check
+         label="Show permission columns"
+         name="show_permissions">
+            <menu_item_check.on_click
+             function="ToggleControl"
+             parameter="FSFriendListColumnShowPermissions"/>
+            <menu_item_check.on_check
+             control="FSFriendListColumnShowPermissions"/>
+        </menu_item_check>
+        <menu_item_separator/>
+        <menu_item_check
+         label="Sort by username"
+         name="sort_by_username">
+            <menu_item_check.on_click
+             function="Contacts.Friends.SelectOption"
+             parameter="sort_by_username"/>
+            <menu_item_check.on_check
+             function="Contacts.Friends.CheckOption"
+             parameter="sort_by_username"/>
+        </menu_item_check>
+        <menu_item_check
+         label="Sort by display name"
+         name="sort_by_displayname">
+            <menu_item_check.on_click
+             function="Contacts.Friends.SelectOption"
+             parameter="sort_by_displayname"/>
+            <menu_item_check.on_check
+             function="Contacts.Friends.CheckOption"
+             parameter="sort_by_displayname"/>
+        </menu_item_check>
+        <menu_item_separator/>
+        <menu_item_check
+         label="Full name format Username (Display name)"
+         name="format_username_displayname">
+            <menu_item_check.on_click
+             function="Contacts.Friends.SelectOption"
+             parameter="format_username_displayname"/>
+            <menu_item_check.on_check
+             function="Contacts.Friends.CheckOption"
+             parameter="format_username_displayname"/>
+            <menu_item_check.on_enable
+             function="Contacts.Friends.EnableItem"
+             parameter="FSFriendListFullNameFormat"/>
+        </menu_item_check>
+        <menu_item_check
+         label="Full name format Display name (Username)"
+         name="format_displayname_username">
+            <menu_item_check.on_click
+             function="Contacts.Friends.SelectOption"
+             parameter="format_displayname_username"/>
+            <menu_item_check.on_check
+             function="Contacts.Friends.CheckOption"
+             parameter="format_displayname_username"/>
+            <menu_item_check.on_enable
+             function="Contacts.Friends.EnableItem"
+             parameter="FSFriendListFullNameFormat"/>
+        </menu_item_check>
+        <menu_item_separator/>
+        <menu_item_check
+         label="Show search filter"
+         name="friend_filter">
+            <menu_item_check.on_click
+             function="ToggleControl"
+             parameter="FSContactListShowSearch"/>
+            <menu_item_check.on_check
+             control="FSContactListShowSearch"/>
+        </menu_item_check>
+    </menu>
+    <menu_item_separator/>
+    <menu_item_check
+     label="Online status for friends visible"
+     name="GlobalOnlineStatusToggle">
+        <menu_item_check.on_click
+         function="TogglePerAccountControl"
+         parameter="GlobalOnlineStatusToggle"/>
+        <menu_item_check.on_check
+         function="CheckPerAccountControl"
+         parameter="GlobalOnlineStatusToggle"/>
+    </menu_item_check>
+</context_menu>

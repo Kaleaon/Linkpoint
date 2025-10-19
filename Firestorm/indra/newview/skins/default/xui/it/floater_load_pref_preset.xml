@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="load_pref_preset" title="Carica Preset">
+	<string name="title_graphic">
+		Carica Preset Grafica
+	</string>
+	<string name="title_camera">
+		Carica Preset Camera
+	</string>
+	<text name="Preset">
+		Seleziona un preset
+	</text>
+	<button label="Annulla" name="cancel"/>
+</floater>

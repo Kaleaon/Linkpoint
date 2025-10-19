@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="buy currency" title="ACHETER DES L$">
+	<floater.string name="buy_currency">
+		Achetez [LINDENS] L$ pour environ [LOCALAMOUNT]
+	</floater.string>
+	<floater.string name="info_cannot_buy">
+		Achat impossible
+	</floater.string>
+	<layout_stack name="outer_stack">
+		<layout_panel name="layout_panel_title">
+			<text left="5" name="info_need_more" right="-5">
+				Plus de L$ sont requis
+			</text>
+			<text left="5" name="info_buying">
+				Acheter des L$
+			</text>
+		</layout_panel>
+		<layout_panel name="layout_panel_price">
+			<text name="target_price_label">
+				Vous avez besoin de
+			</text>
+			<text name="target_price">
+				[AMT] L$
+			</text>
+		</layout_panel>
+		<layout_panel name="layout_panel_balance">
+			<text name="balance_label">
+				Vous avez
+			</text>
+			<text name="balance_amount">
+				[AMT] L$
+			</text>
+		</layout_panel>
+		<layout_panel name="layout_panel_required">
+			<text name="required_label">
+				Vous devez acheter au moins
+			</text>
+			<text name="required_amount">
+				[AMT] L$
+			</text>
+		</layout_panel>
+		<layout_panel name="layout_panel_action">
+			<text name="currency_action">
+				Vous voulez acheter
+			</text>
+			<text name="currency_est">
+				environ [LOCALAMOUNT]
+			</text>
+			<text name="getting_data">
+				Estimation en cours...
+			</text>
+			<text name="total_label">
+				Votre nouveau solde sera
+			</text>
+			<text name="total_amount">
+				[AMT] L$
+			</text>
+		</layout_panel>
+		<layout_panel name="layout_panel_msg">
+			<text name="currency_links">
+				[http://www.secondlife.com/my/account/payment_method_management.php mode de paiement] | [http://www.secondlife.com/my/account/currency.php devise]
+			</text>
+			<text name="exchange_rate_note">
+				Saisissez à nouveau le montant pour voir le taux de change actuel.
+			</text>
+			<text name="purchase_warning_repurchase">
+				Confirm. cet achat n'achète que des L$, pas l'objet.
+			</text>
+		</layout_panel>
+		<layout_panel name="layout_panel_buttons">
+			<text name="contacting">
+				Contact avec LindeX...
+			</text>
+			<button label="Acheter" name="buy_btn" />
+			<button label="Annuler" name="cancel_btn" />
+		</layout_panel>
+	</layout_stack>
+</floater>

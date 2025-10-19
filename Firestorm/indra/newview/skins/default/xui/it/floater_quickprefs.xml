@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="quickprefs" title="Preferenze Rapide">
+	<panel name="quickprefs">
+		<layout_stack name="wl_options_stack">
+			<layout_panel name="wl_options_panel">
+				<text name="HoverHeightLabel" tool_tip="Imposta l&apos;altezza da terra dell&apos;avatar">
+					Altezza da terra:
+				</text>
+				<text name="Maximum bandwidth" tool_tip="Imposta la banda di rete in Kbps (kilobits al secondo)">
+					Max banda:
+				</text>
+				<text name="Maximum complexity" tool_tip="Controlla oltre quale limite un avatar complesso viene mostrato come pupazzo">
+					Max complessità:
+				</text>
+				<text name="IndirectMaxComplexityText">
+					No limiti
+				</text>
+				<text name="WL Sky" tool_tip="Preset ambiente per il cielo">
+					Cielo:
+				</text>
+				<text name="WL Water" tool_tip="Preset ambiente per l&apos;acqua">
+					Acqua:
+				</text>
+				<text name="Day Cycle" tool_tip="Preset ambiente per il ciclo giornata">
+					Giornata:
+				</text>
+				<button name="btn_personal_lighting" label="Illuminazione Personalizzata" />
+				<button name="ResetToRegionDefault" tool_tip="Ripristina le impostazioni dell'ambiente condiviso" />
+				<button name="button_edit" tool_tip="Clic per modificare il controlli del pannello" />
+			</layout_panel>
+		</layout_stack>
+	</panel>
+	<panel name="edit_overlay_panel">
+		<button name="move_up_button" tool_tip="Muovere il controllo su di una riga"/>
+		<button name="add_new_button" tool_tip="Aggiungere un nuovo controllo"/>
+		<line_editor name="label_edit" tool_tip="Scrivere qui il titolo del controllo" label="Titolo:"/>
+		<button name="move_down_button" tool_tip="Muovere in controllo giù di una riga"/>
+		<combo_box name="control_name_combo" tool_tip="Scegliere il controllo dalla lista delle impostazioni debug">
+			<combo_box.item label="=== Scegliere ===" name="control_name_list_header"/>
+		</combo_box>
+		<text name="control_type_label">
+			Tipo:
+		</text>
+		<combo_box name="control_type_combo_box" tool_tip="Scegliere il tipo di interfaccia da inserire per questo controllo">
+			<combo_box.item label="Spunta (checkbox)" name="Checkbox"/>
+			<combo_box.item label="Testo" name="Text"/>
+			<combo_box.item label="Spinner" name="Spinner"/>
+			<combo_box.item label="Cursore" name="Slider"/>
+			<combo_box.item label="Opzione (radio)" name="Radio"/>
+			<combo_box.item label="Colore 3" name="Color 3"/>
+			<combo_box.item label="Colore 4" name="Color 4"/>
+		</combo_box>
+		<check_box name="control_integer_checkbox" tool_tip="Attivare se l&apos;impostazione accetta solo valori interi" label="Interi" />
+		<spinner name="control_min_edit" tool_tip="Il valore più basso che si potrà impostare" label="Min:"/>
+		<spinner name="control_max_edit" tool_tip="Il valore più alto che si potrà impostare" label="Max:"/>
+		<spinner name="control_increment_edit" tool_tip="L&apos;incremento che si otterrà cliccando le frecce su/giù o scorrendo un cursore" label="Incr:"/>
+		<button name="Restore_Btn" tool_tip="Ripristina le impostazioni predefinite" label="Ripristina"/>
+		<button name="button_close" tool_tip="Chiudi il pannello di modifica"/>
+	</panel>
+</floater>

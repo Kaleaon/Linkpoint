@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Уведомления" name="popups">
+<tab_container name="tabs">
+	<panel label="Мир" name="tab-world">
+		<check_box label="Когда я трачу или получаю L$" name="notify_money_change_checkbox"/>
+		<check_box name="FSPaymentInfoInChat" label="Сообщать об операциях с L$ в общем чате вместо всплавающего окна"/>
+		<check_box label="Сообщить об изменении версии симулятора при изменении региона" name="FSShowServerVersionChangeNotice" tool_tip="Отображает уведомление, если меняется версия симулятора при телепортации или при пересечении региона."/>
+		<check_box label="Запросить status.secondlifegrid.net для получения последних новостей при входе" name="AutoQueryGridStatus"/>
+		<check_box label="Включить Growl уведомления" name="notify_growl_checkbox"/>
+		<check_box label="Показывать Growl уведомления даже когда Firestorm активен" name="notify_growl_always_checkbox"/>
+		<check_box name="FSFilterGrowlKeywordDuplicateIMs" label="Фильтр повторных ЛС, если они уже были отражены как часть ключевых слов"/>
+	</panel>
+	<panel label="Люди" name="tab-people">
+		<check_box label="Мигание значка приложения при получении новых сообщение, если [APP_NAME] свернут" name="FSFlashOnMessage"/>
+		<check_box label="Также мигание значка приложения при получении сообщения от объекта" name="FSFlashOnObjectIM" />
+		<check_box label="Сообщать мне, если кто-то изменил свое отображаемое имя" name="FSShowDisplayNameUpdateNotification"/>
+		<check_box label="Сообщать мне, если я кого-то заблокировал или разблокировал" name="FSReportBlockToNearbyChat"/>
+		<text name="friends_logon_label">
+			Когда мои друзья заходят или выходят из сети:
+		</text>
+		<check_box label="Как всплывающее окно" width="170" name="friends_online_notify_checkbox"/>
+		<check_box name="OnlineOfflinetoNearbyChat" label="В консоль общего чата"/>
+		<check_box label="Только в общий чат" name="OnlineOfflinetoNearbyChatHistory"/>
+	</panel>
+	<panel label="Объекты и скрипты" name="tab-objects">
+		<check_box label="Мигание значка приложения при получении диалога скриптов, когда [APP_NAME] свернут" name="FSFlashOnScriptDialog"/>
+		<check_box label="Показывать уведомления о столкновениях в общем чате" name="FSCollisionMessagesInChat"/>
+		<check_box label="Сообщать об ошибках скрипта в:" name="show_script_errors"/>
+		<radio_group name="show_script_errors_location">
+			<radio_item label="Общий чат" name="script_0"/>
+			<radio_item label="Отдельное окно" name="script_1"/>
+		</radio_group>
+		<check_box label="Когда регионы изменяют общее значение скриптов:" name="FSReportTotalScriptCountChanges"/>
+		<spinner name="FSReportTotalScriptCountChangesThreshold" tool_tip="Порог общих изменений количества скриптов, прежде чем сообщить [По умолчанию: 100]"/>
+		<check_box label="Уведомлять о столкновении скриптов в канале:" name="FSReportCollisionMessages"/>
+		<spinner name="FSReportCollisionMessagesChannel" tool_tip="Канал, используемый для уведомления сообщений о столкновениях на скриптах [По умолчанию: -25000]"/>
+	</panel>
+	<panel label="Инвентарь" name="tab-inventory">
+		<check_box label="Когда я заплатил за загрузку" name="FSShowUploadPaymentToast" />
+		<check_box label="Когда была создана закладка" name="landmark_created_checkbox"/>
+		<check_box label="Отключить уведомление 'Объект был возвращен в ваш инвентарь'" name="FSDisableReturnObjectNotification"/>
+		<check_box label="Записывать название файла сохраненных снимков в историю чата" name="FSLogSnapshotsToLocal"/>
+		<check_box label="Сообщать об элементах из объектов, приходящих слишком быстро" name="FSNotifyIncomingObjectSpam" />
+		<check_box label="Сообщать об элементах от других жителей, приходящих слишком быстро" name="FSNotifyIncomingObjectSpamFrom" />
+		<slider name="FSOfferThrottleMaxCount" label="Порог количества поступающих объектов:" tool_tip="Установите порог количества поступающих объектов в течении 10 секунд. По умолчанию 5" />
+	</panel>
+	<panel label="Оповещения" name="tab-alerts">
+		<text name="show_label" tool_tip="Список оповещений в программе просмотра. Поставьте отметку слева, чтобы включить оповещение, снимите отметку, чтобы скрыть оповещение.">
+			Оповещения которые можно показать или скрыть:
+		</text>
+		<filter_editor label="Фильтр оповещений" name="popup_filter" tool_tip="Введите здесь интересующий вас поисковый запрос. Результаты будут отображаться для частичных полнотекстовых совпадений."/>
+		<scroll_list name="all_popups">
+			<column label="Показ" name="alert_enabled_check"/>
+			<column label="Оповещение" name="alert_label"/>
+		</scroll_list>
+	</panel>
+</tab_container>
+</panel>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="godtools floater" title="BOSKIE NARZĘDZIA">
+	<tab_container name="GodTools Tabs">
+		<panel name="grid">
+			<button label="Odśwież bufor widoczności mapy Regionu" label_selected="Odśwież bufor widoczności mapy Regionu" name="Flush This Region&apos;s Map Visibility Caches" />
+		</panel>
+		<panel name="region">
+			<text name="Region Name:">
+				Region:
+			</text>
+			<check_box label="Wstęp" name="check prelude" tool_tip="Zaznacz, aby ustawić region jako Wstęp" />
+			<check_box label="Stałe słońce" name="check fixed sun" tool_tip="Stałe słońce (jak w Region/Majtek &gt; Teren)." />
+			<check_box label="Resetuj Start po teleportacji" name="check reset home" tool_tip="Gdy Rezydent się wyteleportowywuje, to jego pozycja startowa zostaje ustawiona na pozycję docelową." />
+			<check_box label="Widoczny" name="check visible" tool_tip="Wybierz tą opcję by ustawić region widocznym dla wszystkich." />
+			<check_box label="Uszkodzenia" name="check damage" tool_tip="Wybierz tę opcję by uruchomić opcję uszkodzeń w regionie." />
+			<check_box label="Zablokuj śledzenie ruchu" name="block dwell" tool_tip="Wybierz tą opcję by zablokować monitorowanie ruchu (trafficu) w regionie." />
+			<check_box label="Zablokuj terraformowanie" name="block terraform" tool_tip="Wybierz tą opcję by zablokować terraforming w regionie" />
+			<check_box label="Piaskownica" name="is sandbox" tool_tip="Ustawia region jako piaskownicę (sandbox)" />
+			<button label="Ustal teren" label_selected="Ustal teren" name="Bake Terrain" tool_tip="(Bake Terrain) Zapamiętaj obecny teren jako początkowy dla cofnięcia modyfikacji terenu." />
+			<button label="Cofnij modyfikacje" label_selected="Cofnij modyfikacje" name="Revert Terrain" tool_tip="Przywróć ustawienia domyślne Regionu dla terenu." />
+			<button label="Zamień teren" label_selected="Zamień teren" name="Swap Terrain" tool_tip="Zamień bieżący teren na domyślny" />
+			<text name="estate id">
+				ID Regionu:
+			</text>
+			<text name="parent id">
+				ID Rodzica:
+			</text>
+			<line_editor name="parentestate" tool_tip="To jest Majątek-Rodzic dla tego regionu" />
+			<text name="Grid Pos: ">
+				Poz. Siatki:
+			</text>
+			<line_editor name="gridposx" tool_tip="Pozycja x siatki dla regionu" />
+			<line_editor name="gridposy" tool_tip="Pozycja y siatki dla regionu" />
+			<text name="Redirect to Grid: ">
+				Kier. na siatkę:
+			</text>
+			<text name="billable factor text">
+				Czynnik płatności:
+			</text>
+			<text name="land cost text">
+				L$/m²:
+			</text>
+			<button label="Odśwież" label_selected="Odśwież" name="Refresh" tool_tip="Kliknij tutaj aby odswieżyć powyższe informacje" />
+			<button label="Zastosuj" label_selected="Zastosuj" name="Apply" tool_tip="Kliknij tutaj aby zastosować powyższe zmiany" />
+			<button label="Wybierz Region" label_selected="Wybierz Region" name="Select Region" tool_tip="Wybierz cały Region za pomocą narzędzi edycji terenu" />
+			<button label="Autozapisz teraz" label_selected="Autozapisz teraz" name="Autosave now" tool_tip="Zapisz spakowany gzipem stan do katalogu autozapisu" />
+		</panel>
+		<panel label="Obiekty" name="objects">
+			<panel.string name="no_target">
+				(brak celu)
+			</panel.string>
+			<text name="Region Name:">
+				Nazwa Regionu:
+			</text>
+			<check_box label="Wyłącz skrypty" name="disable scripts" tool_tip="Wybierz aby wyłączyć skrypty w tym Regionie" />
+			<check_box label="Wyłącz kolizje" name="disable collisions" tool_tip="Wybierz aby wyłączyć kolizje inne niż awatarów w tym Regionie" />
+			<check_box label="Wyłącz fizykę" name="disable physics" tool_tip="Wybierz aby wyłączyć fizykę w tym Regionie" />
+			<button label="Zastosuj" label_selected="Zastosuj" name="Apply" tool_tip="Kliknij tu aby zastosować powyższe zmiany" />
+			<button label="Ustaw cel" label_selected="Ustaw cel" name="Set Target" tool_tip="Ustaw docelowego awatara w celu skasowania obiektów" />
+			<text name="target_avatar_name">
+				(brak celu)
+			</text>
+			<button label="Usuń oskryptowane obiekty celu na innych działkach" label_selected="Usuń oskryptowane obiekty celu na innych działkach" name="Delete Target&apos;s Scripted Objects On Others Land" tool_tip="Skasuj wszystkie oskryptowane obiekty posiadane przez cel na działki, której nie jest właścicielem (obiekty bez praw kopiowania zostaną zwrócone)." />
+			<button label="Usuń oskryptowane obiekty celu na jakichkolwiek działkach" label_selected="Usuń oskryptowane obiekty celu na jakichkolwiek działkach" name="Delete Target&apos;s Scripted Objects On *Any* Land" tool_tip="Skasuj wszystkie oksryptowane obiekty posiadane przez cel w tym Regionie (obiekty bez praw kopiowania zostaną zwrócone)." />
+			<button label="Usuń wszystkie obiekty celu" label_selected="Usuń wszystkie obiekty celu" name="Delete *ALL* Of Target&apos;s Objects" tool_tip="Skasuj wszystkie obiekty posiadane przez cel w tym Regionie (obiekty bez praw kopiowania zostaną zwrócone)." />
+			<button label="Główne kolizje" label_selected="Główne kolizje" name="Get Top Colliders" tool_tip="Lista obiektów, które najbardziej doświadczają kolizji" />
+			<button label="Główne skrypty" label_selected="Główne skrypty" name="Get Top Scripts" tool_tip="Lista obiektów, które najdłużej podtrzymują działanie skryptów" />
+			<button label="Skrócone: skrypty" label_selected="Skrócone: skrypty" name="Scripts digest" tool_tip="Wyświetla listę wszystkich skryptów i liczbę ich wystąpień." />
+		</panel>
+		<panel label="Zażądaj" name="request">
+			<text name="Destination:">
+				Cel:
+			</text>
+			<combo_box name="destination">
+				<combo_box.item label="Selekcja" name="item1" />
+				<combo_box.item label="Agent Regionu" name="item2" />
+			</combo_box>
+			<text name="Request:">
+				Żądanie:
+			</text>
+			<combo_box name="request">
+				<combo_box.item label="kolizje &lt;kroki&gt;" name="item1" />
+				<combo_box.item label="skrypty &lt;policz&gt;,&lt;opcjonalny wzorzec&gt;" name="item2" />
+				<combo_box.item label="obiekty &lt;wzorzec&gt;" name="item3" />
+				<combo_box.item label="rezzuj &lt;asset_id&gt;" name="item4" />
+			</combo_box>
+			<text name="Parameter:">
+				Parametr:
+			</text>
+			<button label="Zażądaj" label_selected="Zażądaj" name="Make Request" />
+		</panel>
+	</tab_container>
+</floater>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="preview_texture">
+	<floater.string name="Title">
+		Doku: [NAME]
+	</floater.string>
+	<floater.string name="Copy">
+		Envantere Kopyala
+	</floater.string>
+	<layout_stack name="preview_stack">
+		<layout_panel name="texture_panel">
+			<text name="desc txt">
+				Açıklama:
+			</text>
+			<text name="dimensions">
+				[WIDTH]pks x [HEIGHT]pks
+			</text>
+			<text name="aspect_ratio">
+				En boy oranını önizle
+			</text>
+			<combo_box name="combo_aspect_ratio" tool_tip="Sabit en boy oranında önizle"/>
+		</layout_panel>
+		<layout_panel name="buttons_panel">
+			<button label="Tamam" name="Keep"/>
+			<button label="At" name="Discard"/>
+			<button label="Farklı Kaydet" name="save_tex_btn"/>
+		</layout_panel>
+	</layout_stack>
+</floater>

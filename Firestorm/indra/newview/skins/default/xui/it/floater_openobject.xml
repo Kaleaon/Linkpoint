@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="objectcontents" title="Contenuti Oggetto">
+	<layout_stack name="button_bar_ls">
+		<layout_panel name="copy_btn_lp">
+			<flyout_button label="Copia in inventario" name="copy_flyout">
+				<flyout_button.item label="Sostituisci vestiti" name="replace" />
+				<flyout_button.item label="Aggiungi vestiti" name="add"/>
+			</flyout_button>
+		</layout_panel>
+		<layout_panel name="cancel_btn_lp">
+			<button label="Annulla" label_selected="Annulla" name="cancel_button"/>
+		</layout_panel>
+	</layout_stack>
+</floater>

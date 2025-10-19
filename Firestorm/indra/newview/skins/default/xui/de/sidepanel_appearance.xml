@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Outfits" name="appearance panel">
+	<string name="No Outfit" value="Kein Outfit"/>
+	<string name="Unsaved Changes" value="Ungespeicherte Änderungen"/>
+	<string name="Now Wearing" value="Aktuelles Outfit..."/>
+	<string name="Changing outfits" value="Outfits ändern"/>
+	<panel name="panel_currentlook">
+		<button label="B" name="editappearance_btn"/>
+		<button label="Ö" name="openoutfit_btn"/>
+		<text name="currentlook_status">
+			(Status)
+		</text>
+		<text name="currentlook_name">
+			MyOutfit With a really Long Name like MOOSE
+		</text>
+		<button label="" name="edit_outfit_btn" tool_tip="Dieses Outfit bearbeiten"/>
+	</panel>
+	<layout_stack name="top_menu_panel">
+		<layout_panel name="filter_panel">
+			<filter_editor label="Outfits filtern" name="Filter"/>
+		</layout_panel>
+		<layout_panel name="options_gear_btn_panel">
+			<menu_button tool_tip="Zusätzliche Optionen anzeigen" name="options_gear_btn"/>
+		</layout_panel>
+		<layout_panel name="options_sort_btn_panel">
+			<menu_button tool_tip="Sortier-Optionen anzeigen" name="sorting_menu_btn"/>
+		</layout_panel>
+		<layout_panel name="trash_btn_panel">
+			<dnd_button name="trash_btn" tool_tip="Ausgewähltes Outfit löschen"/>
+		</layout_panel>
+	</layout_stack>
+</panel>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="MemLeak" title="SYMULACJA WYCIEKU PAMIĘCI">
+	<spinner label="Prędkość wycieków (bajty na klatkę):" name="leak_speed" />
+	<spinner label="Maks. wycieki (MB):" name="max_leak" />
+	<text name="total_leaked_label">
+		Wyciekło: [SIZE] KB
+	</text>
+	<button label="Uwolnij" name="release_btn" />
+	<button label="Zamknij" name="close_btn" />
+</floater>

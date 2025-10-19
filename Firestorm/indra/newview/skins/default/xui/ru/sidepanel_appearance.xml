@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Комплекты" name="appearance panel">
+	<string name="No Outfit" value="Нет комплектов"/>
+	<string name="Unsaved Changes" value="Несохраненные изменения"/>
+	<string name="Now Wearing" value="Надето..."/>
+	<string name="Changing outfits" value="Смена комплекта"/>
+	<panel name="panel_currentlook">
+		<text name="currentlook_status">(Статус)</text>
+		<button name="edit_outfit_btn" tool_tip="Редактировать комплект"/>
+	</panel>
+	<layout_stack name="top_menu_panel">
+		<layout_panel name="filter_panel">
+			<filter_editor label="Фильтр комплектов" name="Filter"/>
+		</layout_panel>
+		<layout_panel name="options_gear_btn_panel">
+			<menu_button name="options_gear_btn" tool_tip="Показать дополнительные параметры"/>
+		</layout_panel>
+		<layout_panel name="options_sort_btn_panel">
+			<menu_button name="sorting_menu_btn" tool_tip="Показать параметры сортировки"/>
+		</layout_panel>
+		<layout_panel name="trash_btn_panel">
+			<dnd_button name="trash_btn" tool_tip="Удалить выбранный комплект"/>
+		</layout_panel>
+	</layout_stack>
+</panel>

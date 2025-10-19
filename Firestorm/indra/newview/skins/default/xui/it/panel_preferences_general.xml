@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Generale" name="general_panel">
+	<text name="language_textbox">
+		Lingua:
+	</text>
+	<combo_box name="language_combobox">
+		<combo_box.item label="English (Inglese)" name="English"/>
+		<combo_box.item label="Azərbaycanca (Azero)" name="Azerbaijani"/>
+		<!--<combo_box.item label="Dansk (Danese) - Beta" name="Danish"/> -->
+		<combo_box.item label="Deutsch (Tedesco)" name="Deutsch(German)"/>
+		<combo_box.item label="Español (Spagnolo) - Beta" name="Spanish"/>
+		<combo_box.item label="Français (Francese)" name="French"/>
+		<combo_box.item label="Italiano" name="Italian"/>
+		<combo_box.item label="Polski (Polacco)" name="Polish"/>
+		<!-- <combo_box.item label="Português (Portoghese) - Beta" name="Portugese"/> -->
+		<combo_box.item label="Русский (Russo)" name="Russian"/>
+		<!-- <combo_box.item label="Türkçe (Turco) - Beta" name="Turkish"/> -->
+		<combo_box.item label="日本語 (Giapponese) - Beta" name="(Japanese)"/>
+		<combo_box.item label="正體中文 (Cinese tradizionale)" name="Traditional Chinese"/>
+	</combo_box>
+	<text name="language_textbox2">
+		(richiede riavvio)
+	</text>
+	<text name="maturity_desired_prompt">
+		Accedi ai contenuti di tipo:
+	</text>
+	<text name="maturity_desired_textbox"/>
+	<combo_box name="maturity_desired_combobox">
+		<combo_box.item label="Generale, Moderato e Adulti" name="Desired_Adult"/>
+		<combo_box.item label="Generale e Moderato" name="Desired_Mature"/>
+		<combo_box.item label="Generale" name="Desired_PG"/>
+	</combo_box>
+	<text name="start_location_textbox">
+		Luogo di partenza:
+	</text>
+	<combo_box name="start_location_combo">
+		<combo_box.item label="Ultimo luogo visitato" name="MyLastLocation" tool_tip="Vai automaticamente all&apos;ultimo luogo visitato quando effettui l&apos;accesso."/>
+		<combo_box.item label="Casa" name="MyHome" tool_tip="Vai automaticamente a casa quando effettui l&apos;accesso"/>
+	</combo_box>
+	<check_box label="Mostra nella schermata di accesso" name="show_location_checkbox"/>
+	<text name="name_tags_textbox">
+		Nome:
+	</text>
+	<radio_group name="Name_Tag_Preference" width="240">
+		<radio_item label="No" name="radio"/>
+		<radio_item label="Sì" name="radio2"/>
+		<radio_item label="Mostra brevemente" name="radio3"/>
+	</radio_group>
+	<text name="RenderNameShowTime_LabelPrefix">
+		(
+	</text>
+	<text name="RenderNameShowTime_LabelSuffix">
+		secondi)
+	</text>
+	<check_box label="Mostra il mio nome" name="show_my_name_checkbox1"/>
+	<check_box label="Mostra Nome Utente" name="show_slids" tool_tip="Mostra il nome utente, come bobsmith123"/>
+	<check_box label="Mostra il titolo del gruppo" name="show_all_title_checkbox1" tool_tip="Mostra titoli di gruppo, come Funzionario o Membro"/>
+	<check_box label="Evidenzia amici" name="show_friends" tool_tip="Evidenzia le etichette dei nomi dei tuoi amici"/>
+	<check_box label="Mostra Nome Visualizzato" name="display_names_check" tool_tip="Seleziona per visualizzare i nomi in chat, IM, etichette, ecc."/>
+	<check_box label="Nascondi il mio titolo del gruppo" name="RenderHideGroupTitle" tool_tip="Nasconde/Mostra il proprio titolo del gruppo attivo, nel tag, a tutti e a se stesso." />
+	<check_box label="Nome Utente in formato legacy" name="FSshow_legacyun" tool_tip="Mostra il Nome Utente in formato legacy (Nome Cognome) invece del formato username (nome.cognome)"/>
+	<check_box label="Togli 'Resident' dal Nome Utente (legacy)" name="legacy_trim_check" tool_tip="Toglie 'Resident' dal Nome Utente in formato legacy"/>
+	<check_box label="Posizione etichetta fissa" name="FSLegacyNametagPosition" tool_tip="Se attivo, l'etichetta non si muove con i movimenti della testa dell'avatar dovuti ad animazioni." />
+	<check_box label="Mostra modalità autorisposta nell'etichetta" name="FSShowAutorespondInNameTag" tool_tip="Mostra nella propria etichetta se è attiva la modalità autorisposta."/>
+	<check_box label="Mostra complessità avatar" name="FSTagShowARW" tool_tip="Se attivo, mostra nell'etichetta la complessità dell'avatar."/>
+	<check_box label="Solo se eccessiva" name="FSTagShowTooComplexOnlyARW" tool_tip="Se attivo, mostra nell'etichetta la complessità solo se l'avatar è troppo complesso ed è mostrato come pupazzo (JellyDoll)."/>
+	<check_box label="Mostra propria complessità" name="FSTagShowOwnARW" tool_tip="Se attivo, mostra nella propria etichetta la complessità attuale."/>
+	<text name="title_afk_text">
+		Pausa assenza:
+	</text>
+	<text name="title_afk_quit_text" left_pad="40">
+		Uscita per assenza dopo:
+	</text>
+	<combo_box label="Pausa assenza:" name="afk">
+		<combo_box.item label="2 minuti" name="item0"/>
+		<combo_box.item label="5 minuti" name="item1"/>
+		<combo_box.item label="10 minuti" name="item2"/>
+		<combo_box.item label="30 minuti" name="item3"/>
+		<combo_box.item label="60 minuti" name="item4"/>
+		<combo_box.item label="Mai" name="item5"/>
+	</combo_box>
+	<combo_box label="Uscita per assenza dopo:" name="quitafk" left_pad="45">
+		<combo_box.item label="2 minuti" name="item0"/>
+		<combo_box.item label="5 minuti" name="item1"/>
+		<combo_box.item label="10 minuti" name="item2"/>
+		<combo_box.item label="30 minuti" name="item3"/>
+		<combo_box.item label="Mai" name="item4"/>
+	</combo_box>
+	<check_box name="AvatarSitOnAway" label="Siedi quando assente"/>
+	<text name="text_box3">
+		I messaggi per Non disponibile e Autorisposta si trovano in Riservatezza/Autorisposte.
+	</text>
+</panel>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="texture picker" title="WYBÓR: TEKSTURA">
+	<floater.string name="choose_picture">
+		Kliknij by wybrać obraz
+	</floater.string>
+	<floater.string name="pick title">
+		Wybór:
+	</floater.string>
+	<text name="Multiple">
+		Wiele tekstur
+	</text>
+	<combo_box name="mode_selection">
+		<combo_box.item label="Szafa" name="inventory" />
+		<combo_box.item label="Lokalna" name="local" />
+	</combo_box>
+	<button label="Domyślna" label_selected="Domyślna" name="Default" />
+	<button label="Pusta" label_selected="Pusta" name="Blank" />
+	<button label="Przezrocz." label_selected="Przezrocz." name="None" />
+	<text name="preview_disabled" value="Podgląd wyłączony" />
+	<filter_editor label="Filtruj tekstury" name="inventory search editor" />
+	<check_box label="Pokaż foldery" name="show_folders_check" />
+	<button label="Dodaj" label_selected="Dodaj" name="l_add_btn" />
+	<button label="Usuń" label_selected="Usuń" name="l_rem_btn" />
+	<button label="Załaduj" label_selected="Załaduj" name="l_upl_btn" />
+	<scroll_list name="l_name_list">
+		<column name="unit_name" label="Nazwa" />
+	</scroll_list>
+	<button label="Anuluj" label_selected="Anuluj" name="Cancel" />
+	<check_box label="Podgląd" name="apply_immediate_check" />
+</floater>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Cose" name="objects panel">
+	<panel label="" name="sidepanel_inventory_panel">
+		<layout_stack name="inventory_layout_stack">
+			<layout_panel name="inbox_layout_panel">
+				<panel label="" name="marketplace_inbox">
+					<string name="InboxLabelWithArg">
+						Oggetti ricevuti ([NUM])
+					</string>
+					<string name="InboxLabelNoArg">
+						Oggetti ricevuti
+					</string>
+					<button label="Oggetti ricevuti" name="inbox_btn"/>
+					<text name="inbox_fresh_new_count">
+						[NUM] nuovi
+					</text>
+					<panel name="inbox_inventory_placeholder_panel" tool_tip="Trascina gli elementi nell&apos;inventario per usarli">
+						<text name="inbox_inventory_placeholder">
+							Gli acquisti dal mercato verranno consegnati qui.
+						</text>
+					</panel>
+				</panel>
+			</layout_panel>
+		</layout_stack>
+		<panel name="button_panel">
+			<layout_stack name="button_panel_ls">
+				<layout_panel name="info_btn_lp">
+					<button label="Profilo" name="info_btn" tool_tip="Mostra profilo dell&apos;oggetto"/>
+				</layout_panel>
+				<layout_panel name="share_btn_lp">
+					<button label="Condividi" name="share_btn" tool_tip="Condividi un oggetto dell&apos;inventario"/>
+				</layout_panel>
+				<layout_panel name="shop_btn_lp">
+					<button label="Acquisti" name="shop_btn" tool_tip="Apri pagina web di Marketplace"/>
+					<button label="Indossa" name="wear_btn" tool_tip="Indossa il vestiario selezionato"/>
+					<button label="Gioca" name="play_btn"/>
+					<button label="Teleport" name="teleport_btn" tool_tip="Teleport alla zona selezionata"/>
+				</layout_panel>
+			</layout_stack>
+		</panel>
+	</panel>
+</panel>

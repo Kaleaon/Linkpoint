@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<menu_bar name="Login Menu">
+	<menu label="Yo" name="File">
+		<menu_item_call label="Preferencias..." name="Preferences..."/>
+		<menu_item_call label="Cerrar la ventana" name="Close Window"/>
+		<menu_item_check label="Mostrar selector del Grid" name="Show Grid Picker"/>
+		<menu_item_call label="Salir de [APP_NAME]" name="Quit"/>
+	</menu>
+	<menu label="Ayuda" name="Help">
+		<menu_item_call label="Cómo..." name="How To"/>
+		<menu_item_call label="Guía rápida" name="Quickstart"/>
+		<menu_item_call label="Base de Conocimientos" name="Knowledge Base"/>
+		<menu_item_call label="Wiki" name="Wiki"/>
+		<menu_item_call label="Foros comunitarios" name="Community Forums"/>
+		<menu_item_call label="Portal de soporte" name="Support portal"/>
+		<menu_item_call label="Noticias de [SECOND_LIFE]" name="Second Life News"/>
+		<menu_item_call label="Blogs de [SECOND_LIFE]" name="Second Life Blogs"/>
+		<menu_item_call label="Informar de un fallo" name="Report Bug"/>
+		<menu_item_call label="Acerca de [APP_NAME]" name="About Second Life"/>
+	</menu>
+	<menu_item_check label="Mostrar el menú 'Debug'" name="Show Debug Menu"/>
+	<menu label="Depurar" name="Debug">
+		<menu_item_call label="Mostrar las configuraciones del depurador" name="Debug Settings"/>
+		<menu label="Pruebas de la interfaz" name="UI Tests"/>
+		<menu_item_call label="Definir el tamaño de la ventana..." name="Set Window Size..."/>
+		<menu_item_call label="Mostrar los 'TOS'" name="TOS"/>
+		<menu_item_call label="Mostrar mensaje crítico" name="Critical"/>
+		<menu_item_call label="Navegador de medios" name="Media Browser"/>
+		<menu label="Configurar el nivel de registro" name="Set Logging Level">
+			<menu_item_check label="Depurar" name="Debug"/>
+			<menu_item_check label="Información" name="Info"/>
+			<menu_item_check label="¡Atención!" name="Warning"/>
+			<menu_item_check label="Error" name="Error"/>
+			<menu_item_check label="Ninguno" name="None"/>
+		</menu>
+		<menu_item_call label="Mostrar la consola de notificaciones" name="Show Notifications Console"/>
+		<menu_item_call name="UI Preview Tool" label="Herramienta de previsualización  XUI"/>
+	</menu>
+</menu_bar>

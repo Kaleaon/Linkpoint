@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="panel_im">
+	<floater.string name="participant_added" value="[NAME] został/a zaproszony/a do rozmowy." />
+	<floater.string name="multiple_participants_added" value="[NAME] zostali zaproszeni do rozmowy." />
+	<layout_stack name="ls_control_panel">
+		<layout_panel name="gprofile_panel">
+			<button name="group_info_btn" tool_tip="Pokaż profil tej grupy"/>
+		</layout_panel>
+		<layout_panel name="profile_panel">
+			<button name="view_profile_btn" tool_tip="Pokaż profil tego rezydenta"/>
+		</layout_panel>
+		<layout_panel name="friend_panel">
+			<button name="add_friend_btn" tool_tip="Dodaj tego rezydenta do znajomych"/>
+		</layout_panel>
+		<layout_panel name="tp_panel">
+			<menu_button name="teleport_btn" tool_tip="Zaoferuj lub proponuj teleportację"/>
+		</layout_panel>
+		<layout_panel name="share_panel">
+			<button name="share_btn" tool_tip="Wyślij przedmiot temu rezydentowi"/>
+		</layout_panel>
+		<layout_panel name="pay_panel">
+			<button name="pay_btn" tool_tip="Wyślij pieniądze temu rezydentowi"/>
+		</layout_panel>
+		<layout_panel name="call_btn_panel">
+			<button name="call_btn" tool_tip="Dodaj rozmowę głosową do tego czata"/>
+		</layout_panel>
+		<layout_panel name="end_call_btn_panel">
+			<button name="end_call_btn" tool_tip="Zakończ rozmowę głosową"/>
+		</layout_panel>
+		<layout_panel name="voice_ctrls_btn_panel">
+			<button name="voice_ctrls_btn" tool_tip="Właściwości głosu"/>
+		</layout_panel>
+		<layout_panel name="im_history_btn_panel">
+			<button name="im_history_btn" tool_tip="Otwórz logi tej konwersacji"/>
+		</layout_panel>
+		<layout_panel name="add_participant_panel">
+			<button name="add_participant_btn" tool_tip="Zaproś kogoś do tej rozmowy"/>
+		</layout_panel>
+		<layout_panel name="send_sysinfo_btn_panel">
+			<button tool_tip="Wyślij info systemowe" name="send_sysinfo_btn"/>
+		</layout_panel>
+		<layout_panel name="lp_options_btn">
+			<menu_button tool_tip="Opcje czatu" name="chat_options_btn"/>
+		</layout_panel>
+		<layout_panel name="lp_chat_search_btn">
+			<button name="chat_search_btn" tool_tip="Przeszukaj czat" />
+		</layout_panel>
+		<layout_panel name="support_panel">
+			<check_box label="Dodawaj wersję" name="FSSupportGroupChatPrefix_toggle" tool_tip="Dodaje aktualną wersję przeglądarki, informację o skórce, system operacyjny i status RLVa przed wiadomościami wysyłanymi przez Ciebie w tej grupie, co będzie pomagać członkom załogi wsparcia w prawidłowym diagnozowaniu Twoich problemów i poprawi dokładność odpowiedzi na Twoje pytania"/>
+		</layout_panel>
+		<layout_panel name="testing_panel">
+			<check_box label="Dodawaj kompilację" name="FSSupportGroupChatPrefixTesting_toggle" tool_tip="Dodaje aktualną wersję przeglądarki, informację o skórce, system operacyjny i status RLVa przed wiadomościami wysyłanymi przez Ciebie w tej grupie, co będzie pomagać członkom załogi wsparcia w prawidłowym diagnozowaniu Twoich problemów i poprawi dokładność odpowiedzi na Twoje pytania (to oddzielne od grup wsparcia)" />
+		</layout_panel>
+	</layout_stack>
+	<layout_stack name="chat_stack">
+		<layout_panel name="panel_im_control_lp">
+			<layout_stack name="im_panels">
+				<layout_panel name="unread_messages_holder">
+					<text name="unread_messages_text">
+						Nieprzeczytanych: [NUM]
+					</text>
+				</layout_panel>
+				<layout_panel name="chat_layout_panel">
+					<layout_stack name="input_panels">
+						<layout_panel name="emoji_button_layout_panel">
+							<button name="emoji_picker_toggle_btn" tool_tip="Pokaż panel emoji" />
+							<button name="emoji_recent_panel_toggle_btn" tool_tip="Pokaż/ukryj ostatnie emoji" />
+						</layout_panel>
+						<layout_panel name="input_button_layout_panel">
+							<button name="send_chat" label="Wyślij" tool_tip="Wyślij wiadomość IM" />
+						</layout_panel>
+						<layout_panel name="emoji_recent_layout_panel">
+							<text name="emoji_recent_empty_text">
+								Tutaj pojawią się ostatnio używane emoji
+							</text>
+						</layout_panel>
+					</layout_stack>
+				</layout_panel>
+			</layout_stack>
+		</layout_panel>
+	</layout_stack>
+</floater>
