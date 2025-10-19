@@ -164,38 +164,46 @@ class CORSHandler {
    * Use public CORS proxy
    */
   async usePublicProxy(url, options) {
-    const proxiedUrl = this.corsProxyUrl + encodeURIComponent(url);
+    const errors = [];
     
-    try {
-      const response = await fetch(proxiedUrl, {
-        method: options.method || 'GET',
-        headers: options.headers || {},
-        body: options.body
-      });
+    // Try each proxy in sequence
+    for (let i = 0; i < this.corsProxies.length; i++) {
+      const proxy = this.corsProxies[this.currentProxyIndex];
+      const proxiedUrl = proxy.encode ? 
+        proxy.url + encodeURIComponent(url) : 
+        proxy.url + url;
       
-      return response;
-    } catch (proxyError) {
-      // Try alternative proxies
-      console.warn('[CORS] Primary proxy failed, trying alternatives');
-      
-      for (const alternativeProxy of this.alternativeProxies) {
-        try {
-          const altUrl = alternativeProxy + encodeURIComponent(url);
-          const response = await fetch(altUrl, {
-            method: options.method || 'GET',
-            headers: options.headers || {},
-            body: options.body
-          });
-          
-          console.log('[CORS] Alternative proxy succeeded');
+      try {
+        console.log(`[CORS] Trying ${proxy.name} proxy...`);
+        
+        const response = await fetch(proxiedUrl, {
+          method: options.method || 'GET',
+          headers: options.headers || {},
+          body: options.body,
+          signal: AbortSignal.timeout(10000) // 10 second timeout
+        });
+        
+        if (response.ok) {
+          console.log(`[CORS] ${proxy.name} proxy succeeded`);
           return response;
-        } catch (altError) {
-          console.warn(`[CORS] Alternative proxy failed: ${alternativeProxy}`);
+        } else {
+          errors.push(`${proxy.name}: HTTP ${response.status}`);
+          console.warn(`[CORS] ${proxy.name} returned ${response.status}`);
         }
+      } catch (error) {
+        errors.push(`${proxy.name}: ${error.message}`);
+        console.warn(`[CORS] ${proxy.name} failed:`, error.message);
       }
       
-      throw new Error('All CORS proxies failed. Please try using a desktop app or check your internet connection.');
+      // Try next proxy
+      this.currentProxyIndex = (this.currentProxyIndex + 1) % this.corsProxies.length;
     }
+    
+    // All proxies failed
+    const errorMessage = `All CORS proxies failed:\n${errors.join('\n')}`;
+    console.error('[CORS]', errorMessage);
+    
+    throw new Error(errorMessage + '\n\n💡 Solutions:\n1. Try without VPN\n2. Try different network\n3. Use desktop app (no CORS issues)');
   }
 
   /**
