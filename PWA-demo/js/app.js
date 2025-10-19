@@ -70,6 +70,7 @@ class LinkpointApp {
     await this.voice.init();
     await this.inventory.init();
     await this.friends.init();
+    this.groups.init();
     await this.teleport.init();
     await this.search.init();
     await this.notifications.init();
