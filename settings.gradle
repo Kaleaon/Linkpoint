@@ -1,1 +1,12 @@
 include ':app'
+
+// Filament Android Libraries
+include ':Filament:android:filament-android'
+include ':Filament:android:filament-utils-android'
+include ':Filament:android:gltfio-android'
+include ':Filament:android:filamat-android'
+
+project(':Filament:android:filament-android').projectDir = new File(rootDir, 'Filament/android/filament-android')
+project(':Filament:android:filament-utils-android').projectDir = new File(rootDir, 'Filament/android/filament-utils-android')
+project(':Filament:android:gltfio-android').projectDir = new File(rootDir, 'Filament/android/gltfio-android')
+project(':Filament:android:filamat-android').projectDir = new File(rootDir, 'Filament/android/filamat-android')
