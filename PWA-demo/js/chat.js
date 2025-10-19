@@ -469,6 +469,65 @@ Available commands:
       this.chatMessages.innerHTML = '<div class="system-message">Chat history cleared</div>';
     }
   }
+  
+  /**
+   * Handle group chat message
+   */
+  handleGroupMessage(data) {
+    const messageData = {
+      id: data.id || Utils.generateUUID(),
+      sender: data.fromName || 'Unknown',
+      senderId: data.fromId,
+      text: data.message || data.text,
+      timestamp: data.timestamp || Date.now(),
+      type: 'group',
+      groupId: data.groupId,
+      groupName: data.groupName,
+      channel: 'group'
+    };
+    
+    this.addMessage(messageData, false);
+    
+    // If viewing group chat, display immediately
+    if (this.currentChatType === 'group') {
+      this.displayMessage(messageData, false);
+    }
+    
+    this.emit('group_message_received', messageData);
+  }
+  
+  /**
+   * Handle instant message
+   */
+  handleInstantMessage(data) {
+    const messageData = {
+      id: data.id || Utils.generateUUID(),
+      sender: data.fromName || 'Unknown',
+      senderId: data.fromId,
+      text: data.message || data.text,
+      timestamp: data.timestamp || Date.now(),
+      type: 'im',
+      channel: 'im'
+    };
+    
+    this.addMessage(messageData, false);
+    
+    // If viewing IM, display immediately
+    if (this.currentChatType === 'im') {
+      this.displayMessage(messageData, false);
+    }
+    
+    this.emit('im_received', messageData);
+  }
+  
+  /**
+   * Set current group for group chat
+   */
+  setCurrentGroup(groupId, groupName) {
+    this.currentGroupId = groupId;
+    this.currentGroupName = groupName;
+    this.switchChatType('group');
+  }
 }
 
 // Make available globally
