@@ -301,6 +301,75 @@
           </div>
         </section>
         
+        <!-- Groups View -->
+        <section id="groups-view" class="view-container">
+          <div class="view-content">
+            <div class="groups-header">
+              <h2>Groups</h2>
+              <button class="btn btn-small" id="create-group-btn">Create Group</button>
+            </div>
+            
+            <div id="groups-container" class="groups-container">
+              <!-- My Groups List -->
+              <div class="groups-section">
+                <h3 class="section-title">My Groups</h3>
+                <div id="groups-list" class="groups-list">
+                  <p class="placeholder-text">No groups</p>
+                </div>
+              </div>
+              
+              <!-- Group Details -->
+              <div id="group-details" class="group-details" style="display: none;">
+                <div class="group-detail-header">
+                  <h3 id="group-detail-name">Group Name</h3>
+                  <button class="btn btn-small" id="leave-group-btn">Leave Group</button>
+                </div>
+                
+                <div class="group-tabs">
+                  <button class="group-tab active" data-tab="info">Info</button>
+                  <button class="group-tab" data-tab="members">Members</button>
+                  <button class="group-tab" data-tab="roles">Roles</button>
+                  <button class="group-tab" data-tab="notices">Notices</button>
+                </div>
+                
+                <div class="group-tab-content">
+                  <!-- Group Info Tab -->
+                  <div id="group-info-tab" class="group-tab-panel active">
+                    <div class="group-info-content">
+                      <p><strong>Charter:</strong></p>
+                      <p id="group-charter" class="group-charter">Loading...</p>
+                      <p><strong>Founder:</strong> <span id="group-founder">Loading...</span></p>
+                      <p><strong>Membership Fee:</strong> L$<span id="group-fee">0</span></p>
+                      <p><strong>Open Enrollment:</strong> <span id="group-enrollment">No</span></p>
+                    </div>
+                  </div>
+                  
+                  <!-- Group Members Tab -->
+                  <div id="group-members-tab" class="group-tab-panel">
+                    <div id="group-members-list" class="members-list">
+                      <p class="placeholder-text">Loading members...</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Group Roles Tab -->
+                  <div id="group-roles-tab" class="group-tab-panel">
+                    <div id="group-roles-list" class="roles-list">
+                      <p class="placeholder-text">Loading roles...</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Group Notices Tab -->
+                  <div id="group-notices-tab" class="group-tab-panel">
+                    <div id="group-notices-list" class="notices-list">
+                      <p class="placeholder-text">No notices</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
         <!-- Teleport View -->
         <section id="teleport-view" class="view-container">
           <div class="view-content">
