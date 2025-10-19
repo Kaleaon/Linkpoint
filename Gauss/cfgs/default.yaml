@@ -1,0 +1,59 @@
+seed:                  123
+device:                "cuda:0"
+# Evaluation
+eval:                  False # Render the optimized Image-GS representation
+render_height:         2048 # Image height for rendering (aspect ratio is maintained)
+# Bit precision
+quantize:              False # Enable bit precision control of Gaussian parameters
+pos_bits:              16 # Bit precision of individual coordinate dimension
+scale_bits:            16 # Bit precision of individual scale dimension
+rot_bits:              16 # Bit precision of Gaussian orientation angle
+feat_bits:             16 # Bit precision of individual feature dimension
+# Logging
+log_root:              "results"
+exp_name:              "test/anime-1_2k" # Path to the logging directory
+log_level:             "INFO"
+save_image_format:     "jpg"
+save_plot_format:      "jpg"
+vis_gaussians:         False # Visualize Gaussians during optimization
+save_image_steps:      100000 # Frequency of rendering intermediate results during optimization
+save_ckpt_steps:       100000 # Frequency of checkpointing during optimization
+eval_steps:            100
+# Target images
+gamma:                 1.0 # Optimize in a gamma-corrected space, modify with caution
+data_root:             "media"
+input_path:            "images/anime-1_2k.png" # Path to an image file or a directory containing a texture stack
+downsample:            False # Load a downsampled version of the input image or texture stack as the optimization target to evaluate image upsampling performance
+downsample_ratio:      2.0
+# Gaussians
+num_gaussians:         10000 # Number of Gaussians (for compression rate control)
+init_scale:            5.0 # Initial Gaussian scale in number of pixels
+topk:                  10 # Warning: Must match hardcoded value in CUDA kernel, modify with caution
+disable_topk_norm:     False # Disable top-K normalization
+disable_inverse_scale: False # Disable inverse Gaussian scale optimization
+ckpt_file:             ""
+disable_color_init:    False
+init_mode:             "gradient" # Gaussian position initialization mode, valid values include "gradient", "saliency", and "random"
+init_random_ratio:     0.3 # Ratio of Gaussians with randomly initialized position
+smap_filter_size:      20 # Gaussian filter size for smoothing saliency maps
+# Loss functions
+l1_loss_ratio:         1.0
+l2_loss_ratio:         0.0
+ssim_loss_ratio:       0.1
+# Optimization
+disable_tiles:         False # Disable tile-based rendering (warning: optimization and rendering without tiles will be way slower)
+max_steps:             10000 # Maximum number of optimization steps
+pos_lr:                5.0e-4
+scale_lr:              2.0e-3
+rot_lr:                2.0e-3
+feat_lr:               5.0e-3
+disable_lr_schedule:   False # Disable learning rate schedule and early stopping
+decay_ratio:           10.0
+check_decay_steps:     1000
+max_decay_times:       1
+decay_threshold:       1.0e-3
+disable_prog_optim:    False # Disable error-guided progressive optimization
+initial_ratio:         0.5
+add_steps:             500
+add_times:             4
+post_min_steps:        3000
