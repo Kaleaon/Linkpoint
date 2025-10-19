@@ -232,35 +232,62 @@ class XMLRPCClient {
         }
       }
       
-      // 5. Web Browser or fallback - Use CORS proxy
+      // 5. Web Browser or fallback - Try multiple CORS proxies
       console.log('[SL] Using CORS proxy for web browser');
-      const corsProxyUrl = 'https://corsproxy.io/?';
-      const proxiedUrl = corsProxyUrl + encodeURIComponent(url);
       
-      const response = await fetch(proxiedUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/xml',
-          'Accept': 'text/xml, application/xml'
-        },
-        body: xmlRequest
-      });
+      // List of CORS proxies to try (in order of preference)
+      const corsProxies = [
+        { name: 'corsproxy.io', url: 'https://corsproxy.io/?' },
+        { name: 'cors.sh', url: 'https://cors.sh/' },
+        { name: 'allorigins', url: 'https://api.allorigins.win/raw?url=' }
+      ];
+      
+      let lastError = null;
+      
+      // Try each proxy until one works
+      for (const proxy of corsProxies) {
+        try {
+          console.log(`[XMLRPCClient] Trying ${proxy.name}...`);
+          const proxiedUrl = proxy.url + encodeURIComponent(url);
+          
+          const response = await fetch(proxiedUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'text/xml',
+              'Accept': 'text/xml, application/xml'
+            },
+            body: xmlRequest
+          });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[XMLRPCClient] CORS proxy error:', errorText.substring(0, 500));
-        throw new Error(`HTTP ${response.status}: ${response.statusText}. The CORS proxy may be unavailable.`);
-      }
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.warn(`[XMLRPCClient] ${proxy.name} failed with HTTP ${response.status}:`, errorText.substring(0, 200));
+            lastError = new Error(`${proxy.name}: HTTP ${response.status}`);
+            continue; // Try next proxy
+          }
 
-      const responseText = await response.text();
-      
-      // Check if response looks like XML
-      if (!responseText.trim().startsWith('<?xml') && !responseText.trim().startsWith('<methodResponse')) {
-        console.error('[XMLRPCClient] CORS proxy returned non-XML:', responseText.substring(0, 500));
-        throw new Error('The CORS proxy returned an invalid response. Please try again later or use the app as an installed PWA.');
+          const responseText = await response.text();
+          
+          // Check if response looks like XML
+          if (!responseText.trim().startsWith('<?xml') && !responseText.trim().startsWith('<methodResponse')) {
+            console.warn(`[XMLRPCClient] ${proxy.name} returned non-XML:`, responseText.substring(0, 200));
+            lastError = new Error(`${proxy.name}: Invalid response format`);
+            continue; // Try next proxy
+          }
+          
+          console.log(`[XMLRPCClient] ✅ Success with ${proxy.name}`);
+          return this.parseLoginResponse(responseText);
+          
+        } catch (proxyError) {
+          console.warn(`[XMLRPCClient] ${proxy.name} failed:`, proxyError.message);
+          lastError = proxyError;
+          continue; // Try next proxy
+        }
       }
       
-      return this.parseLoginResponse(responseText);
+      // If all proxies failed, throw a helpful error
+      console.error('[XMLRPCClient] All CORS proxies failed. Last error:', lastError);
+      throw new Error('Unable to connect to Second Life servers. All CORS proxies failed. Please try:\n1. Installing the app as a PWA (Add to Home Screen)\n2. Using a desktop app version\n3. Trying again later when the service is available');
       
     } catch (error) {
       console.error('XML-RPC request failed:', error);
