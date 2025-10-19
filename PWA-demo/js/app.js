@@ -40,6 +40,7 @@ class LinkpointApp {
     this.voice = new VoiceManager(this.protocol, this.auth);
     this.inventory = new InventoryManager(this.protocol, this.auth);
     this.friends = new FriendsManager(this.protocol, this.auth);
+    this.groups = new GroupsUIManager(this.protocol, this.auth);
     this.teleport = new TeleportManager(this.protocol, this.auth, this.world);
     this.search = new SearchManager(this.protocol);
     this.notifications = new NotificationsManager(this.protocol, this.auth, this.preferences);
