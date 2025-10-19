@@ -267,7 +267,7 @@ class ModernSecondLifeFeatures {
             boolean hasEmojiSupport = false
         }
         
-        enum class class ChatChannel {
+        enum class ChatChannel {
             SAY, SHOUT, WHISPER, GROUP, IM, SYSTEM
         }
     }
