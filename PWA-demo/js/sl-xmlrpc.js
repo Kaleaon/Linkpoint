@@ -87,9 +87,56 @@ class XMLRPCClient {
 
   /**
    * Send XML-RPC request
-   * Supports: Electron, Tauri, Capacitor, and browser
+   * Uses CORSHandler for automatic environment detection and CORS bypass
    */
   static async sendRequest(url, xmlRequest) {
+    try {
+      // Use CORS handler if available
+      if (window.corsHandler) {
+        console.log('[SL] Using CORSHandler for request');
+        const response = await window.corsHandler.makeRequest(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/xml',
+            'Accept': 'text/xml, application/xml'
+          },
+          body: xmlRequest
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const responseText = await response.text();
+        return this.parseLoginResponse(responseText);
+      }
+      
+      // Fallback to original implementation
+      console.log('[SL] CORSHandler not available, using fallback');
+      return await this.sendRequestFallback(url, xmlRequest);
+      
+    } catch (error) {
+      console.error('XML-RPC request failed:', error);
+      
+      // Show helpful error message
+      if (error.helpMessage) {
+        const userMessage = error.helpMessage;
+        console.error(userMessage);
+        
+        // Show in UI if Utils is available
+        if (window.Utils && window.Utils.showToast) {
+          Utils.showToast('Connection failed. Check console for details.', 'error');
+        }
+      }
+      
+      throw error;
+    }
+  }
+  
+  /**
+   * Fallback implementation (original code)
+   */
+  static async sendRequestFallback(url, xmlRequest) {
     try {
       // Detect environment and use appropriate method
       
