@@ -22,15 +22,21 @@ class ChatManager extends Utils.EventEmitter {
   init() {
     this.chatInput = document.getElementById('chat-input');
     this.chatMessages = document.getElementById('chat-messages');
-    this.sendBtn = document.getElementById('send-btn');
+    const chatForm = document.getElementById('chat-form');
 
-    if (!this.chatInput || !this.chatMessages || !this.sendBtn) {
+    if (!this.chatInput || !this.chatMessages) {
       console.error('Chat elements not found');
       return;
     }
 
     // Setup event listeners
-    this.sendBtn.addEventListener('click', () => this.sendMessage());
+    if (chatForm) {
+      chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.sendMessage();
+      });
+    }
+    
     this.chatInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -38,11 +44,79 @@ class ChatManager extends Utils.EventEmitter {
       }
     });
 
+    // Setup chat type tabs
+    const chatTabs = document.querySelectorAll('.chat-tab');
+    chatTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const chatType = tab.dataset.chatType;
+        this.switchChatType(chatType);
+      });
+    });
+
     // Setup protocol listeners
     this.protocol.on('chat_message', (data) => this.handleIncomingMessage(data));
+    this.protocol.on('group_chat', (data) => this.handleGroupMessage(data));
+    this.protocol.on('instant_message', (data) => this.handleInstantMessage(data));
 
     // Load chat history from storage
     this.loadChatHistory();
+  }
+  
+  /**
+   * Switch chat type (local, group, im)
+   */
+  switchChatType(chatType) {
+    this.currentChatType = chatType;
+    
+    // Update tab UI
+    document.querySelectorAll('.chat-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.chatType === chatType);
+    });
+    
+    // Update input placeholder
+    if (this.chatInput) {
+      switch (chatType) {
+        case 'local':
+          this.chatInput.placeholder = 'Type a message...';
+          break;
+        case 'group':
+          this.chatInput.placeholder = 'Send to group...';
+          break;
+        case 'im':
+          this.chatInput.placeholder = 'Send instant message...';
+          break;
+      }
+    }
+    
+    // Load messages for this type
+    this.displayMessagesForType(chatType);
+  }
+  
+  /**
+   * Display messages for specific chat type
+   */
+  displayMessagesForType(chatType) {
+    if (!this.chatMessages) return;
+    
+    // Clear current messages
+    this.chatMessages.innerHTML = '';
+    
+    // Filter and display messages for this type
+    const filteredMessages = this.messages.filter(msg => {
+      if (chatType === 'local') return msg.type === 'local' || !msg.type;
+      if (chatType === 'group') return msg.type === 'group';
+      if (chatType === 'im') return msg.type === 'im';
+      return false;
+    });
+    
+    if (filteredMessages.length === 0) {
+      this.addSystemMessage(`No ${chatType} messages`);
+    } else {
+      filteredMessages.forEach(msg => {
+        const isSelf = msg.senderId === this.auth.getUser()?.id;
+        this.displayMessage(msg, isSelf);
+      });
+    }
   }
 
   /**
