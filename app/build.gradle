@@ -209,42 +209,51 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.4.2'
-    implementation 'com.google.android.material:material:1.6.1'
+    // AndroidX Core - Updated to latest stable
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
+    implementation 'androidx.activity:activity-ktx:1.8.2'
+    
+    // Lifecycle components - Modern versions
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
+    
+    // Google libraries
     implementation 'com.google.guava:guava:32.1.3-android'
-    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
 
     // Multidex support for large method counts  
     implementation 'androidx.multidex:multidex:2.0.1'
 
     // Google Play Services (Cloud Plugin stubs)
     implementation 'com.google.android.gms:play-services-drive:17.0.0'
-    implementation 'com.google.android.gms:play-services-auth:20.7.0'
+    implementation 'com.google.android.gms:play-services-auth:21.0.0'
+    implementation 'com.google.android.gms:play-services-base:18.3.0'
 
-    // WebRTC for voice chat - using Stream WebRTC Android library (available in Maven Central)
-    implementation 'io.getstream:stream-webrtc-android:1.0.7'
-    implementation 'io.getstream:stream-webrtc-android-ui:1.0.7'
-
-    // Audio processing - using AAudio and OpenSL ES Android libraries
-    implementation 'androidx.media:media:1.6.0'
-
-    // OkHttp and logging for signaling flows
+    // Networking - Updated OkHttp
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
-    // JSON
-    implementation 'com.google.code.gson:gson:2.10.1'
+    // WebRTC for voice chat - Stream WebRTC Android library
+    implementation 'io.getstream:stream-webrtc-android:1.1.1'
+    implementation 'io.getstream:stream-webrtc-android-ui:1.1.1'
+    implementation 'io.getstream:stream-webrtc-android-ktx:1.1.1'
 
-    // LLSD Java library - transitioning to @Kaleaon's enhanced version
-    // Current: Using compatible base version, planning migration to enhanced features
+    // Audio processing - AAudio and OpenSL ES Android libraries
+    implementation 'androidx.media:media:1.7.0'
+
+    // LLSD Java library - @Kaleaon's enhanced version
     implementation 'lindenlab:llsd:1.0'
     
-    // Kotlin support for @Kaleaon's enhanced LLSD features (now enabled)
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.8.22'
-
-    // Google Play base
-    implementation 'com.google.android.gms:play-services-base:18.2.0'
+    // Kotlin support - Latest stable Kotlin 1.9.x
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.9.22'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
 
     // Back-compat libs
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -253,11 +262,16 @@ dependencies {
     implementation 'com.astuetz:pagerslidingtabstrip:1.0.1'
 
     // Preferences
-    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    
+    // Graphics - OpenGL ES helper libraries
+    implementation 'androidx.opengl:opengl:1.0.0-alpha01'
 
+    // Testing
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.10.3'
-    testImplementation 'org.mockito:mockito-core:4.11.0'
+    testImplementation 'org.robolectric:robolectric:4.11.1'
+    testImplementation 'org.mockito:mockito-core:5.7.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
@@ -274,10 +288,11 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-compat'
 
         resolutionStrategy {
-            force 'androidx.appcompat:appcompat:1.4.2'
-            force 'com.google.android.material:material:1.6.1'
-            force 'androidx.activity:activity:1.4.0'
-            force 'androidx.activity:activity-ktx:1.4.0'
+            force 'androidx.appcompat:appcompat:1.6.1'
+            force 'com.google.android.material:material:1.11.0'
+            force 'androidx.activity:activity:1.8.2'
+            force 'androidx.activity:activity-ktx:1.8.2'
+            force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
         }
     }
 }

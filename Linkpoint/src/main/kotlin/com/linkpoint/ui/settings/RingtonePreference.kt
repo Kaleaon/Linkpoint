@@ -11,55 +11,58 @@ import com.google.common.base.Objects
 import com.linkpoint.R
 import com.linkpoint.ui.media.NotificationSounds
 
-class RingtonePreference : Preference() {
-    private Int defaultRawResource = 0
+/**
+ * Custom preference for ringtone selection with default resource support
+ * Modernized Kotlin implementation
+ */
+class RingtonePreference : Preference {
+    private var defaultRawResource = 0
 
-    public RingtonePreference(Context context) {
-        super(context)
+    constructor(context: Context) : super(context)
+
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
+        applyAttributes(context, attrs, 0, 0)
     }
 
-    public RingtonePreference(Context context, AttributeSet attributeSet) {
-        super(context, attributeSet)
-        applyAttributes(context, attributeSet, 0, 0)
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : 
+        super(context, attrs, defStyleAttr) {
+        applyAttributes(context, attrs, defStyleAttr, 0)
     }
 
-    public RingtonePreference(Context context, AttributeSet attributeSet, Int i) {
-        super(context, attributeSet, i)
-        applyAttributes(context, attributeSet, i, 0)
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : 
+        super(context, attrs, defStyleAttr, defStyleRes) {
+        applyAttributes(context, attrs, defStyleAttr, defStyleRes)
     }
 
-    public RingtonePreference(Context context, AttributeSet attributeSet, Int i, Int i2) {
-        super(context, attributeSet, i, i2)
-        applyAttributes(context, attributeSet, i, i2)
-    }
-
-    private Unit applyAttributes(Context context, AttributeSet attributeSet, Int i, Int i2) {
-        TypedArray obtainStyledAttributes = context.getTheme().obtainStyledAttributes(attributeSet, R.styleable.RingtonePreference, i, i2)
-        try {
-            this.defaultRawResource = obtainStyledAttributes.getResourceId(0, this.defaultRawResource)
-        } finally {
-            obtainStyledAttributes.recycle()
+    private fun applyAttributes(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) {
+        context.theme.obtainStyledAttributes(
+            attrs,
+            R.styleable.RingtonePreference,
+            defStyleAttr,
+            defStyleRes
+        ).use { typedArray ->
+            defaultRawResource = typedArray.getResourceId(0, defaultRawResource)
         }
     }
 
-    /* access modifiers changed from: package-private */
-    public Int getDefaultRawResource() {
-        return this.defaultRawResource
-    }
+    internal fun getDefaultRawResource(): Int = defaultRawResource
 
-    public CharSequence getSummary() {
-        String string = getSharedPreferences().getString(getKey(), (String) null)
-        if (string == null) {
-            return "Default"
+    override fun getSummary(): CharSequence {
+        val savedValue = sharedPreferences?.getString(key, null)
+        
+        return when {
+            savedValue == null -> "Default"
+            savedValue.isEmpty() -> "Silent"
+            else -> {
+                val uri = Uri.parse(savedValue)
+                when {
+                    Objects.equal(NotificationSounds.getResourceUri(defaultRawResource), uri) -> "Default"
+                    else -> {
+                        val ringtone = RingtoneManager.getRingtone(context, uri)
+                        ringtone?.getTitle(context) ?: "No sound selected"
+                    }
+                }
+            }
         }
-        Uri parse = Uri.parse(string)
-        if (Objects.equal(NotificationSounds.getResourceUri(this.defaultRawResource), parse)) {
-            return "Default"
-        }
-        if (string.isEmpty()) {
-            return "Silent"
-        }
-        Ringtone ringtone = RingtoneManager.getRingtone(getContext(), parse)
-        return ringtone != null ? ringtone.getTitle(getContext()) : "No sound selected"
     }
 }

@@ -1,5 +1,4 @@
 package com.linkpoint.ui.settings
-import java.util.*
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,7 +10,6 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-
 import com.linkpoint.LinkpointApp
 
 /**
@@ -19,20 +17,23 @@ import com.linkpoint.LinkpointApp
  * Provides comprehensive configuration options for all modern components
  */
 class ModernSettingsActivity : AppCompatActivity() {
-    private const val TAG: String = "ModernSettingsActivity"
+    
+    companion object {
+        private const val TAG = "ModernSettingsActivity"
+    }
     
     // UI Components
-    private Toolbar toolbar
-    private ScrollView scrollView
-    private LinearLayout mainLayout
+    private lateinit var toolbar: Toolbar
+    private lateinit var scrollView: ScrollView
+    private lateinit var mainLayout: LinearLayout
     
     // Settings sections
-    private LinearLayout graphicsSection
-    private LinearLayout networkSection
-    private LinearLayout assetSection
-    private LinearLayout debugSection
+    private lateinit var graphicsSection: LinearLayout
+    private lateinit var networkSection: LinearLayout
+    private lateinit var assetSection: LinearLayout
+    private lateinit var debugSection: LinearLayout
     
-    override protected Unit onCreate(Bundle savedInstanceState) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         createSettingsLayout()
@@ -40,24 +41,27 @@ class ModernSettingsActivity : AppCompatActivity() {
         populateSettings()
     }
     
-    private Unit createSettingsLayout() {
+    private fun createSettingsLayout() {
         // Create root scroll view
-        scrollView = ScrollView(this)
-        scrollView.setFillViewport(true)
+        scrollView = ScrollView(this).apply {
+            isFillViewport = true
+        }
         
         // Create main layout
-        mainLayout = LinearLayout(this)
-        mainLayout.setOrientation(LinearLayout.VERTICAL)
-        mainLayout.setPadding(24, 16, 24, 24)
+        mainLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(24, 16, 24, 24)
+        }
         
         // Create toolbar
-        toolbar = Toolbar(this)
-        toolbar.setBackgroundColor(0xFF3F51B5)
-        toolbar.setTitleTextColor(0xFFFFFFFF)
-        LinearLayout.LayoutParams toolbarParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, 
-            (Int) (56 * getResources().getDisplayMetrics().density))
-        toolbar.setLayoutParams(toolbarParams)
+        toolbar = Toolbar(this).apply {
+            setBackgroundColor(0xFF3F51B5.toInt())
+            setTitleTextColor(0xFFFFFFFF.toInt())
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                (56 * resources.displayMetrics.density).toInt()
+            )
+        }
         mainLayout.addView(toolbar)
         
         // Create settings sections
@@ -71,83 +75,103 @@ class ModernSettingsActivity : AppCompatActivity() {
         setContentView(scrollView)
     }
     
-    private Unit setupToolbar() {
+    private fun setupToolbar() {
         setSupportActionBar(toolbar)
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle("Demo Settings")
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.apply {
+            title = "Demo Settings"
+            setDisplayHomeAsUpEnabled(true)
         }
     }
     
-    private Unit createGraphicsSection() {
+    private fun createGraphicsSection() {
         graphicsSection = createSection("🎨 Graphics Settings")
         
         // Graphics quality setting
-        addSwitchSetting(graphicsSection, 
-                        "High Quality Graphics", 
-                        "Enable maximum graphics quality (may impact battery)",
-                        true)
+        addSwitchSetting(
+            graphicsSection, 
+            "High Quality Graphics", 
+            "Enable maximum graphics quality (may impact battery)",
+            true
+        )
         
         // PBR rendering setting
-        addSwitchSetting(graphicsSection,
-                        "PBR Rendering", 
-                        "Use physically-based rendering (requires OpenGL ES 3.0+)",
-                        true)
+        addSwitchSetting(
+            graphicsSection,
+            "PBR Rendering", 
+            "Use physically-based rendering (requires OpenGL ES 3.0+)",
+            true
+        )
         
         // Texture compression setting
-        addSwitchSetting(graphicsSection,
-                        "Advanced Texture Compression", 
-                        "Use ASTC/ETC2 compression for optimal quality",
-                        true)
+        addSwitchSetting(
+            graphicsSection,
+            "Advanced Texture Compression", 
+            "Use ASTC/ETC2 compression for optimal quality",
+            true
+        )
         
         // Frame rate limit
-        addTextSetting(graphicsSection,
-                      "Target Frame Rate", 
-                      "Maximum FPS for graphics rendering",
-                      "60 FPS")
+        addTextSetting(
+            graphicsSection,
+            "Target Frame Rate", 
+            "Maximum FPS for graphics rendering",
+            "60 FPS"
+        )
         
         // GPU memory limit
-        addTextSetting(graphicsSection,
-                      "GPU Memory Limit", 
-                      "Maximum GPU memory usage for textures",
-                      "50 MB")
+        addTextSetting(
+            graphicsSection,
+            "GPU Memory Limit", 
+            "Maximum GPU memory usage for textures",
+            "50 MB"
+        )
     }
     
-    private Unit createNetworkSection() {
+    private fun createNetworkSection() {
         networkSection = createSection("🌐 Network Settings")
         
         // Connection timeout
-        addTextSetting(networkSection,
-                      "Connection Timeout", 
-                      "Timeout for network connections",
-                      "30 seconds")
+        addTextSetting(
+            networkSection,
+            "Connection Timeout", 
+            "Timeout for network connections",
+            "30 seconds"
+        )
         
         // HTTP/2 setting
-        addSwitchSetting(networkSection,
-                        "Use HTTP/2 CAPS", 
-                        "Enable modern HTTP/2 protocol for CAPS",
-                        true)
+        addSwitchSetting(
+            networkSection,
+            "Use HTTP/2 CAPS", 
+            "Enable modern HTTP/2 protocol for CAPS",
+            true
+        )
         
         // WebSocket events
-        addSwitchSetting(networkSection,
-                        "WebSocket Events", 
-                        "Use WebSocket for real-time event streaming",
-                        true)
+        addSwitchSetting(
+            networkSection,
+            "WebSocket Events", 
+            "Use WebSocket for real-time event streaming",
+            true
+        )
         
         // Connection pooling
-        addSwitchSetting(networkSection,
-                        "Connection Pooling", 
-                        "Reuse connections for better performance",
-                        true)
+        addSwitchSetting(
+            networkSection,
+            "Connection Pooling", 
+            "Reuse connections for better performance",
+            true
+        )
         
         // Bandwidth optimization
-        addTextSetting(networkSection,
-                      "Bandwidth Mode", 
-                      "Network usage optimization level",
-                      "Adaptive")
+        addTextSetting(
+            networkSection,
+            "Bandwidth Mode", 
+            "Network usage optimization level",
+            "Adaptive"
+        )
     }
     
-    private Unit createAssetSection() {
+    private fun createAssetSection() {
         assetSection = createSection("📦 Asset Management")
         
         // Cache size
@@ -181,7 +205,7 @@ class ModernSettingsActivity : AppCompatActivity() {
                         false)
     }
     
-    private Unit createDebugSection() {
+    private fun createDebugSection() {
         debugSection = createSection("🔧 Debug & Testing")
         
         // Logging level
@@ -233,285 +257,318 @@ class ModernSettingsActivity : AppCompatActivity() {
                        this::resetToDefaults)
     }
     
-    private LinearLayout createSection(String title) {
+    private fun createSection(title: String): LinearLayout {
         // Section header
-        TextView header = TextView(this)
-        header.setText(title)
-        header.setTextSize(18)
-        header.setTypeface(null, android.graphics.Typeface.BOLD)
-        header.setPadding(16, 32, 16, 16)
-        header.setTextColor(0xFF1976D2)
+        val header = TextView(this).apply {
+            text = title
+            textSize = 18f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setPadding(16, 32, 16, 16)
+            setTextColor(0xFF1976D2.toInt())
+        }
         mainLayout.addView(header)
         
         // Section container
-        LinearLayout section = LinearLayout(this)
-        section.setOrientation(LinearLayout.VERTICAL)
-        section.setPadding(16, 0, 16, 0)
-        section.setBackgroundColor(0xFFF8F9FA)
+        val section = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(16, 0, 16, 0)
+            setBackgroundColor(0xFFF8F9FA.toInt())
+        }
         mainLayout.addView(section)
         
         return section
     }
     
-    private Unit addSwitchSetting(LinearLayout parent, String title, String description, Boolean defaultValue) {
+    private fun addSwitchSetting(parent: LinearLayout, title: String, description: String, defaultValue: Boolean) {
         // Container for this setting
-        LinearLayout container = LinearLayout(this)
-        container.setOrientation(LinearLayout.HORIZONTAL)
-        container.setPadding(16, 12, 16, 12)
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(16, 12, 16, 12)
+        }
         
         // Text container
-        LinearLayout textContainer = LinearLayout(this)
-        textContainer.setOrientation(LinearLayout.VERTICAL)
-        LinearLayout.LayoutParams textParams = LinearLayout.LayoutParams(
-            0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
-        textContainer.setLayoutParams(textParams)
+        val textContainer = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f
+            )
+        }
         
         // Title
-        TextView titleText = TextView(this)
-        titleText.setText(title)
-        titleText.setTextSize(16)
-        titleText.setTypeface(null, android.graphics.Typeface.BOLD)
+        val titleText = TextView(this).apply {
+            text = title
+            textSize = 16f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
         textContainer.addView(titleText)
         
         // Description
-        TextView descText = TextView(this)
-        descText.setText(description)
-        descText.setTextSize(12)
-        descText.setTextColor(0xFF666666)
+        val descText = TextView(this).apply {
+            text = description
+            textSize = 12f
+            setTextColor(0xFF666666.toInt())
+        }
         textContainer.addView(descText)
         
         // Switch
-        Switch switchView = Switch(this)
-        switchView.setChecked(defaultValue)
+        val switchView = Switch(this).apply {
+            isChecked = defaultValue
+        }
         
         container.addView(textContainer)
         container.addView(switchView)
         parent.addView(container)
     }
     
-    private Unit addTextSetting(LinearLayout parent, String title, String description, String value) {
+    private fun addTextSetting(parent: LinearLayout, title: String, description: String, value: String) {
         // Container for this setting
-        LinearLayout container = LinearLayout(this)
-        container.setOrientation(LinearLayout.HORIZONTAL)
-        container.setPadding(16, 12, 16, 12)
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setPadding(16, 12, 16, 12)
+        }
         
         // Text container
-        LinearLayout textContainer = LinearLayout(this)
-        textContainer.setOrientation(LinearLayout.VERTICAL)
-        LinearLayout.LayoutParams textParams = LinearLayout.LayoutParams(
-            0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
-        textContainer.setLayoutParams(textParams)
+        val textContainer = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f
+            )
+        }
         
         // Title
-        TextView titleText = TextView(this)
-        titleText.setText(title)
-        titleText.setTextSize(16)
-        titleText.setTypeface(null, android.graphics.Typeface.BOLD)
+        val titleText = TextView(this).apply {
+            text = title
+            textSize = 16f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
         textContainer.addView(titleText)
         
         // Description
-        TextView descText = TextView(this)
-        descText.setText(description)
-        descText.setTextSize(12)
-        descText.setTextColor(0xFF666666)
+        val descText = TextView(this).apply {
+            text = description
+            textSize = 12f
+            setTextColor(0xFF666666.toInt())
+        }
         textContainer.addView(descText)
         
         // Value
-        TextView valueText = TextView(this)
-        valueText.setText(value)
-        valueText.setTextSize(14)
-        valueText.setTextColor(0xFF2196F3)
-        valueText.setTypeface(null, android.graphics.Typeface.BOLD)
+        val valueText = TextView(this).apply {
+            text = value
+            textSize = 14f
+            setTextColor(0xFF2196F3.toInt())
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
         
         container.addView(textContainer)
         container.addView(valueText)
         parent.addView(container)
     }
     
-    private Unit addActionButton(LinearLayout parent, String title, String description, Runnable action) {
+    private fun addActionButton(parent: LinearLayout, title: String, description: String, action: Runnable) {
         // Container for this setting
-        LinearLayout container = LinearLayout(this)
-        container.setOrientation(LinearLayout.VERTICAL)
-        container.setPadding(16, 12, 16, 12)
-        container.setClickable(true)
-        container.setOnClickListener(v -> action.run())
-        
-        // Add slight background color for buttons
-        container.setBackgroundColor(0xFFE3F2FD)
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(16, 12, 16, 12)
+            isClickable = true
+            setOnClickListener { action.run() }
+            setBackgroundColor(0xFFE3F2FD.toInt())
+        }
         
         // Title
-        TextView titleText = TextView(this)
-        titleText.setText(title)
-        titleText.setTextSize(16)
-        titleText.setTypeface(null, android.graphics.Typeface.BOLD)
-        titleText.setTextColor(0xFF1976D2)
+        val titleText = TextView(this).apply {
+            text = title
+            textSize = 16f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTextColor(0xFF1976D2.toInt())
+        }
         container.addView(titleText)
         
         // Description
-        TextView descText = TextView(this)
-        descText.setText(description)
-        descText.setTextSize(12)
-        descText.setTextColor(0xFF666666)
+        val descText = TextView(this).apply {
+            text = description
+            textSize = 12f
+            setTextColor(0xFF666666.toInt())
+        }
         container.addView(descText)
         
         parent.addView(container)
     }
     
-    private Unit populateSettings() {
+    private fun populateSettings() {
         // This method would load settings from SharedPreferences
         // For the demo, we're using default values
     }
     
-    private Unit exportDebugLogs() {
+    private fun exportDebugLogs() {
         // Simulate log export
         showToast("🔄 Exporting debug logs to Downloads...")
         
         // In a real implementation, this would export actual logs
-        Thread(() -> {
+        Thread {
             try {
-                Thread.sleep(2000); // Simulate export time
-                runOnUiThread(() -> {
+                Thread.sleep(2000) // Simulate export time
+                runOnUiThread {
                     showToast("✅ Debug logs exported successfully!")
-            } catch (InterruptedException e) {
+                }
+            } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()
             }
-        }).start()
+        }.start()
     }
     
-    private Unit clearAllCaches() {
+    private fun clearAllCaches() {
         // Simulate cache clearing
         showToast("🔄 Clearing all caches...")
         
-        Thread(() -> {
+        Thread {
             try {
-                Thread.sleep(3000); // Simulate clearing time
-                runOnUiThread(() -> {
+                Thread.sleep(3000) // Simulate clearing time
+                runOnUiThread {
                     showToast("✅ All caches cleared successfully!")
-            } catch (InterruptedException e) {
+                }
+            } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()
             }
-        }).start()
+        }.start()
     }
     
-    private Unit resetToDefaults() {
+    private fun resetToDefaults() {
         showToast("🔄 Resetting all settings to defaults...")
         
-        Thread(() -> {
+        Thread {
             try {
-                Thread.sleep(1000); // Simulate reset time
-                runOnUiThread(() -> {
+                Thread.sleep(1000) // Simulate reset time
+                runOnUiThread {
                     showToast("✅ Settings reset to default values!")
                     // In a real implementation, would reload the UI
-            } catch (InterruptedException e) {
+                }
+            } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()
             }
-        }).start()
+        }.start()
     }
     
-    private Unit showToast(String message) {
+    private fun showToast(message: String) {
         android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
     }
     
-    override Boolean onCreateOptionsMenu(Menu menu) {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menu.add(0, 1, 0, "Save Settings").setIcon(android.R.drawable.ic_menu_save)
         menu.add(0, 2, 0, "Help").setIcon(android.R.drawable.ic_menu_help)
         return true
     }
     
-    override Boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
                 finish()
-                return true
-            case 1: // Save
+                true
+            }
+            1 -> { // Save
                 saveSettings()
-                return true
-            case 2: // Help
+                true
+            }
+            2 -> { // Help
                 showSettingsHelp()
-                return true
-            default:
-                return super.onOptionsItemSelected(item)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
     
-    private Unit createEmulatorSection() {
-        LinearLayout emulatorSection = createSection("🔧 Emulator Management")
+    private fun createEmulatorSection() {
+        val emulatorSection = createSection("🔧 Emulator Management")
         
         // Emulator availability check
-        EmulatorManager emulatorManager = EmulatorManager(this)
-        Boolean isAvailable = emulatorManager.isAvailable()
+        val emulatorManager = EmulatorManager(this)
+        val isAvailable = emulatorManager.isAvailable()
         
-        addTextSetting(emulatorSection,
-                      "Emulator Tools Status", 
-                      "Android emulator management availability",
-                      isAvailable ? "Available" : "Not Available")
+        addTextSetting(
+            emulatorSection,
+            "Emulator Tools Status", 
+            "Android emulator management availability",
+            if (isAvailable) "Available" else "Not Available"
+        )
         
         // Quick emulator status
-        addActionButton(emulatorSection,
-                       "Check Emulator Status",
-                       "Show running emulators and connected devices",
-                       () -> {
-                           if (isAvailable) {
-                               emulatorManager.getStatus(EmulatorManager.EmulatorCallback() {
-                                   override Unit onSuccess(String message) {
-                                       runOnUiThread(() -> showToast("Status checked - see notification"))
-                                   }
-                                   
-                                   override Unit onError(String error) {
-                                       runOnUiThread(() -> showToast("Status check failed"))
-                                   }
-                                   
-                                   override Unit onStatusUpdate(String status) {
-                                       // Update UI if needed
-                                   }
-                           } else {
-                               showToast("Emulator management not available")
-                           }
+        addActionButton(
+            emulatorSection,
+            "Check Emulator Status",
+            "Show running emulators and connected devices",
+            Runnable {
+                if (isAvailable) {
+                    emulatorManager.getStatus(object : EmulatorManager.EmulatorCallback {
+                        override fun onSuccess(message: String) {
+                            runOnUiThread { showToast("Status checked - see notification") }
+                        }
+                        
+                        override fun onError(error: String) {
+                            runOnUiThread { showToast("Status check failed") }
+                        }
+                        
+                        override fun onStatusUpdate(status: String) {
+                            // Update UI if needed
+                        }
+                    })
+                } else {
+                    showToast("Emulator management not available")
+                }
+            }
+        )
         
         // Open full emulator settings
-        addActionButton(emulatorSection,
-                       "Open Emulator Settings",
-                       "Access full emulator management interface",
-                       () -> {
-                           if (isAvailable) {
-                               Intent intent = Intent(this, EmulatorSettingsActivity.class)
-                               startActivity(intent)
-                           } else {
-                               showToast("Emulator management not available")
-                           }
+        addActionButton(
+            emulatorSection,
+            "Open Emulator Settings",
+            "Access full emulator management interface",
+            Runnable {
+                if (isAvailable) {
+                    val intent = Intent(this, EmulatorSettingsActivity::class.java)
+                    startActivity(intent)
+                } else {
+                    showToast("Emulator management not available")
+                }
+            }
+        )
         
         // Quick AVD list
-        addActionButton(emulatorSection,
-                       "List Available AVDs",
-                       "Show currently configured Android Virtual Devices",
-                       () -> {
-                           if (isAvailable) {
-                               emulatorManager.listAVDs(EmulatorManager.EmulatorCallback() {
-                                   override Unit onSuccess(String output) {
-                                       runOnUiThread(() -> {
-                                           String summary = EmulatorManager.formatAVDSummary(
-                                               EmulatorManager.parseAVDList(output))
-                                           showToast("AVDs: " + summary.split("\n").length + " found")
-                                   }
-                                   
-                                   override Unit onError(String error) {
-                                       runOnUiThread(() -> showToast("Failed to list AVDs"))
-                                   }
-                                   
-                                   override Unit onStatusUpdate(String status) {
-                                       // Update UI if needed
-                                   }
-                           } else {
-                               showToast("Emulator management not available")
-                           }
+        addActionButton(
+            emulatorSection,
+            "List Available AVDs",
+            "Show currently configured Android Virtual Devices",
+            Runnable {
+                if (isAvailable) {
+                    emulatorManager.listAVDs(object : EmulatorManager.EmulatorCallback {
+                        override fun onSuccess(output: String) {
+                            runOnUiThread {
+                                val summary = EmulatorManager.formatAVDSummary(
+                                    EmulatorManager.parseAVDList(output)
+                                )
+                                showToast("AVDs: ${summary.split("\n").size} found")
+                            }
+                        }
+                        
+                        override fun onError(error: String) {
+                            runOnUiThread { showToast("Failed to list AVDs") }
+                        }
+                        
+                        override fun onStatusUpdate(status: String) {
+                            // Update UI if needed
+                        }
+                    })
+                } else {
+                    showToast("Emulator management not available")
+                }
+            }
+        )
     }
     
-    private Unit saveSettings() {
+    private fun saveSettings() {
         showToast("💾 Settings saved successfully!")
         // In a real implementation, would save to SharedPreferences
     }
     
-    private Unit showSettingsHelp() {
+    private fun showSettingsHelp() {
         showToast("ℹ️ Settings help: Configure demo application behavior")
         // In a real implementation, would show detailed help dialog
     }
