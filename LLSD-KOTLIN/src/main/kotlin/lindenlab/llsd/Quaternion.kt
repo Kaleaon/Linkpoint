@@ -20,7 +20,7 @@ data class Quaternion(
     /** The w-component (scalar part) of the quaternion. */
     val w: Float
 ) {
-    override fun toString(): String = String.format("<%f, %f, %f, %f>", x, y, z, w)
+    override fun toString(): String = String.format(java.util.Locale.US, "<%f, %f, %f, %f>", x, y, z, w)
     
     companion object {
         /** The identity quaternion, representing no rotation. */

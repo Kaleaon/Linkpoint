@@ -22,7 +22,7 @@ data class Color4(
     /** The alpha (transparency) component of the color. */
     val a: Float
 ) {
-    override fun toString(): String = String.format("<%f, %f, %f, %f>", r, g, b, a)
+    override fun toString(): String = String.format(java.util.Locale.US, "<%f, %f, %f, %f>", r, g, b, a)
     
     companion object {
         /** The color black (R=0, G=0, B=0, A=1). */

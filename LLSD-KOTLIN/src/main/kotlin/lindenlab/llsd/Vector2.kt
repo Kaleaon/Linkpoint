@@ -19,7 +19,7 @@ data class Vector2(
     /** The y-component of the vector. */
     val y: Float
 ) {
-    override fun toString(): String = String.format("<%f, %f>", x, y)
+    override fun toString(): String = String.format(java.util.Locale.US, "<%f, %f>", x, y)
     
     companion object {
         /** A vector with all components set to zero. */

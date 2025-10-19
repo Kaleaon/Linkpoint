@@ -4,8 +4,8 @@
 
 package lindenlab.llsd.viewer.secondlife.building
 
-import lindenlab.llsd.viewer.secondlife.engine.Vector3
-import lindenlab.llsd.viewer.secondlife.engine.Quaternion
+import lindenlab.llsd.Vector3
+import lindenlab.llsd.Quaternion
 
 /**
  * Simple demonstration of the building system functionality

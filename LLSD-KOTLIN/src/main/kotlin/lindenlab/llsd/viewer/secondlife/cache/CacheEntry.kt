@@ -25,6 +25,7 @@ class CacheEntry(
     val accessCount: Int
         get() = _accessCount
     
+    @Synchronized
     fun updateAccessTime() {
         _lastAccessTime = System.currentTimeMillis()
         _accessCount++

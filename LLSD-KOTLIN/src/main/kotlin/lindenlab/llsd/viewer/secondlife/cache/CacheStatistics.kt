@@ -30,7 +30,7 @@ data class CacheStatistics(
     }
     
     fun getAvailableSpace(): Long {
-        return maxSize - totalSize
+        return if (totalSize >= maxSize) 0L else maxSize - totalSize
     }
     
     fun getTotalRequests(): Long {
@@ -55,9 +55,9 @@ data class CacheStatistics(
         return buildString {
             append("Cache Statistics:\n")
             append("  Total Size: ${CacheManager.formatBytes(totalSize)} / ${CacheManager.formatBytes(maxSize)}")
-            append(" (${String.format("%.1f", getUsagePercent())}%)\n")
+            append(" (${String.format(java.util.Locale.US, "%.1f", getUsagePercent())}%)\n")
             append("  Available: ${CacheManager.formatBytes(getAvailableSpace())}\n")
-            append("  Hit Ratio: ${String.format("%.2f", getHitRatio() * 100)}%\n")
+            append("  Hit Ratio: ${String.format(java.util.Locale.US, "%.2f", getHitRatio() * 100)}%\n")
             append("  Requests: ${getTotalRequests()} ($totalHits hits, $totalMisses misses)\n")
             append("  Writes: $totalWrites\n")
             append("  Cleanups: $totalCleanups\n")
@@ -70,7 +70,7 @@ data class CacheStatistics(
                 val limit = getTypeLimit(type)
                 val percent = getTypeUsagePercent(type)
                 append("    ${type.name}: ${CacheManager.formatBytes(size)} / ${CacheManager.formatBytes(limit)}")
-                append(" (${String.format("%.1f", percent)}%)\n")
+                append(" (${String.format(java.util.Locale.US, "%.1f", percent)}%)\n")
             }
         }
     }

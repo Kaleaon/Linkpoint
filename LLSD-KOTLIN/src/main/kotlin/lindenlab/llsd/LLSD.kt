@@ -48,7 +48,11 @@ class LLSD(val content: Any?) {
     fun serialise(writer: Writer, charset: String) {
         writer.write("<?xml version=\"1.0\" encoding=\"$charset\"?>\n")
         writer.write("<llsd>\n")
-        content?.let { serialiseElement(writer, it) }
+        if (content == null) {
+            writer.write("<undef/>\n")
+        } else {
+            serialiseElement(writer, content)
+        }
         writer.write("</llsd>\n")
     }
     
