@@ -46,7 +46,7 @@ class FilamentSurfaceView @JvmOverloads constructor(
     
     // Lifecycle state
     private var isAttached = false
-    private var isPaused = false
+    private var isPaused = true  // Start paused, will be resumed in onAttachedToWindow
     
     /**
      * Renderer callback interface for custom rendering
@@ -104,6 +104,13 @@ class FilamentSurfaceView @JvmOverloads constructor(
             
             isAttached = true
             
+            // Auto-resume rendering when attached to window
+            if (isPaused) {
+                isPaused = false
+                choreographer.postFrameCallback(frameCallback)
+                Log.i(TAG, "Auto-started rendering on attach")
+            }
+            
             Log.i(TAG, "Attached to window")
         } catch (e: Exception) {
             Log.e(TAG, "Error attaching to window", e)
@@ -131,14 +138,20 @@ class FilamentSurfaceView @JvmOverloads constructor(
      * Resume rendering (call from Activity.onResume())
      */
     fun onResume() {
-        if (!isPaused) return
+        if (!isPaused) {
+            Log.d(TAG, "Already resumed, skipping")
+            return
+        }
         
         isPaused = false
         
-        // Start frame callbacks
-        choreographer.postFrameCallback(frameCallback)
-        
-        Log.i(TAG, "Resumed")
+        // Start frame callbacks if attached
+        if (isAttached) {
+            choreographer.postFrameCallback(frameCallback)
+            Log.i(TAG, "Resumed")
+        } else {
+            Log.d(TAG, "Not attached yet, will resume when attached")
+        }
     }
     
     /**

@@ -6,6 +6,7 @@ import com.google.android.filament.*
 import com.google.android.filament.RenderableManager.PrimitiveType
 import com.google.android.filament.VertexBuffer.AttributeType
 import com.google.android.filament.VertexBuffer.VertexAttribute
+import com.google.android.filament.filamat.MaterialBuilder
 import com.lumiyaviewer.lumiya.slproto.types.LLVector3
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -96,76 +97,53 @@ class FilamentWorldRenderer(
     }
     
     /**
-     * Create a simple unlit material
+     * Create a simple unlit material using MaterialBuilder
+     * 
+     * This uses runtime material compilation. In production, materials should be:
+     * 1. Written as .mat files
+     * 2. Compiled offline with matc tool to .filamat
+     * 3. Loaded from assets at runtime
+     * 
+     * Runtime compilation is slower but works for testing.
      */
     private fun createSimpleMaterial(): Material {
-        // Create a simple unlit material using Filament's material builder
-        // For now, we'll create a basic colored material inline
-        val materialPackage = """
-            material {
-                name : SimpleMaterial,
-                shadingModel : unlit,
-                vertexDomain : world,
-                parameters : [
-                    { type : float3, name : baseColor }
-                ],
-                requires : [ color ]
-            }
-            
-            fragment {
-                void material(inout MaterialInputs material) {
-                    prepareMaterial(material);
-                    material.baseColor.rgb = getColor().rgb;
-                }
-            }
-            
-            vertex {
-                void materialVertex(inout MaterialVertexInputs material) {
-                }
-            }
-        """.trimIndent()
-        
-        // Note: In production, materials should be precompiled with matc
-        // For now, we'll create a simple hardcoded material
         try {
+            // Initialize MaterialBuilder (only needed once per process)
+            MaterialBuilder.init()
+            
+            // Build a simple unlit material with vertex colors
+            val materialPackage = MaterialBuilder()
+                .platform(MaterialBuilder.Platform.MOBILE)
+                .name("UnlitVertexColor")
+                .shading(MaterialBuilder.Shading.UNLIT)
+                .require(MaterialBuilder.VertexAttribute.COLOR)
+                .material("""
+                    void material(inout MaterialInputs material) {
+                        prepareMaterial(material);
+                        material.baseColor = getColor();
+                    }
+                """.trimIndent())
+                .optimization(MaterialBuilder.Optimization.NONE)
+                .build(engine.backend)
+            
+            if (!materialPackage.isValid) {
+                throw RuntimeException("Generated invalid material package")
+            }
+            
             val material = Material.Builder()
-                .payload(createBasicMaterialPayload(), 0)
+                .payload(materialPackage.buffer, materialPackage.size)
                 .build(engine)
+            
+            // Cleanup MaterialBuilder resources
+            MaterialBuilder.shutdown()
+            
+            Log.i(TAG, "Created runtime-compiled unlit material with vertex colors")
             return material
+            
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to create material, using default", e)
-            // Create a fallback material
-            return createFallbackMaterial()
+            Log.e(TAG, "Failed to create material with MaterialBuilder", e)
+            throw RuntimeException("Unable to create material for rendering", e)
         }
-    }
-    
-    /**
-     * Create a fallback material when material compilation fails
-     */
-    private fun createFallbackMaterial(): Material {
-        // Create the simplest possible material
-        val packageData = ByteBuffer.allocateDirect(1024)
-        packageData.put(0.toByte()) // Placeholder
-        packageData.flip()
-        
-        return Material.Builder()
-            .payload(packageData, packageData.remaining())
-            .build(engine)
-    }
-    
-    /**
-     * Create a basic material payload
-     * Note: This is a placeholder - real materials need to be compiled with matc
-     */
-    private fun createBasicMaterialPayload(): ByteBuffer {
-        // This is a placeholder - in a real app, you would:
-        // 1. Write material files (.mat)
-        // 2. Compile them with matc tool to .filamat
-        // 3. Load the .filamat files from assets
-        val buffer = ByteBuffer.allocateDirect(1024)
-        buffer.put(0.toByte())
-        buffer.flip()
-        return buffer
     }
     
     /**
