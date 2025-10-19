@@ -28,21 +28,21 @@ import com.lumiyaviewer.lumiya.debug.AutoLogUploader
  * Updated to use AndroidX libraries and modern Android development practices.
  * Extends MultiDexApplication to support large applications with 64K+ methods.
  */
-object LumiyaApp extends MultiDexApplication {
-    private String TAG = "LumiyaApp"
-    private DisplayMetrics displayMetrics = DisplayMetrics()
-    private Context mContext
-    private SharedPreferences prefs
+object LumiyaApp : MultiDexApplication() {
+    private const val TAG = "LumiyaApp"
+    private val displayMetrics = DisplayMetrics()
+    private var mContext: Context? = null
+    private var prefs: SharedPreferences? = null
     
     // Modern components
-    private ModernLinkpointDemo modernDemo
+    private var modernDemo: ModernLinkpointDemo? = null
 
     fun getAppVersion(): String {
-        try {
-            return mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0).versionName
-        } catch (NameNotFoundException e) {
+        return try {
+            mContext?.packageManager?.getPackageInfo(mContext!!.packageName, 0)?.versionName ?: ""
+        } catch (e: NameNotFoundException) {
             Log.w(TAG, "Could not get app version", e)
-            return ""
+            ""
         }
     }
     
@@ -54,19 +54,19 @@ object LumiyaApp extends MultiDexApplication {
             return "Application context not initialized"
         }
         
-        StringBuilder status = StringBuilder()
+        val status = StringBuilder()
         status.append("Lumiya Application Status:\n")
-        status.append("- Context: ").append(mContext != null ? "OK" : "NULL").append("\n")
-        status.append("- Modern Components: ").append(modernDemo != null ? "Active" : "Safe Mode").append("\n")
+        status.append("- Context: ").append(if (mContext != null) "OK" else "NULL").append("\n")
+        status.append("- Modern Components: ").append(if (modernDemo != null) "Active" else "Safe Mode").append("\n")
         
-        if (modernDemo != null) {
+        modernDemo?.let { demo ->
             try {
-                status.append("- Graphics: ").append(modernDemo.getGraphicsInfo()).append("\n")
-                status.append("- Connection: ").append(modernDemo.isConnected() ? "Connected" : "Disconnected").append("\n")
-            } catch (Exception e) {
-                status.append("- Component Status: Error checking - ").append(e.getMessage()).append("\n")
+                status.append("- Graphics: ").append(demo.getGraphicsInfo()).append("\n")
+                status.append("- Connection: ").append(if (demo.isConnected()) "Connected" else "Disconnected").append("\n")
+            } catch (e: Exception) {
+                status.append("- Component Status: Error checking - ").append(e.message).append("\n")
             }
-        } else {
+        } ?: run {
             status.append("- Running in Safe Mode - basic functionality only\n")
         }
         
@@ -76,11 +76,11 @@ object LumiyaApp extends MultiDexApplication {
     /**
      * Upload debug logs immediately (for debug builds only)
      */
-    fun uploadDebugLogsNow(reason: String): Unit {
-        if (mContext != null) {
+    fun uploadDebugLogsNow(reason: String) {
+        mContext?.let { context ->
             try {
-                AutoLogUploader.getInstance(mContext).uploadLogsNow(reason)
-            } catch (Exception e) {
+                AutoLogUploader.getInstance(context).uploadLogsNow(reason)
+            } catch (e: Exception) {
                 Log.e(TAG, "Failed to trigger log upload", e)
             }
         }
@@ -89,70 +89,71 @@ object LumiyaApp extends MultiDexApplication {
     /**
      * Report a crash for automatic upload (debug builds only)
      */
-    fun reportCrash(crash: Throwable, additionalInfo: String): Unit {
-        if (mContext != null) {
+    fun reportCrash(crash: Throwable, additionalInfo: String) {
+        mContext?.let { context ->
             try {
-                AutoLogUploader.getInstance(mContext).uploadCrashReport(crash, additionalInfo)
-            } catch (Exception e) {
+                AutoLogUploader.getInstance(context).uploadCrashReport(crash, additionalInfo)
+            } catch (e: Exception) {
                 Log.e(TAG, "Failed to upload crash report", e)
             }
         }
     }
 
-    fun getAssetManager(): AssetManager {
-        return mContext != null ? mContext.getAssets() : null
+    fun getAssetManager(): AssetManager? {
+        return mContext?.assets
     }
 
     fun getContext(): Context {
-        return mContext
+        return mContext!!
     }
 
     fun getDefaultSharedPreferences(): SharedPreferences {
         if (prefs == null) {
             prefs = PreferenceManager.getDefaultSharedPreferences(getContext())
         }
-        return prefs
+        return prefs!!
     }
 
+    @Suppress("DEPRECATION")
     fun isSplitScreenNeeded(context: Context): Boolean {
-        String string = getDefaultSharedPreferences().getString("split_screens", "auto")
-        if (string.equals("never")) {
+        val string = getDefaultSharedPreferences().getString("split_screens", "auto") ?: "auto"
+        if (string == "never") {
             return false
         }
-        if (string.equals("always")) {
+        if (string == "always") {
             return true
         }
-        Display defaultDisplay = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
-        if (string.equals("landscape")) {
-            return defaultDisplay.getWidth() > defaultDisplay.getHeight()
+        val defaultDisplay = (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
+        if (string == "landscape") {
+            return defaultDisplay.width > defaultDisplay.height
         } else {
             defaultDisplay.getMetrics(displayMetrics)
-            float f = ((float) displayMetrics.heightPixels) / displayMetrics.ydpi
-            float f2 = ((float) displayMetrics.widthPixels) / displayMetrics.xdpi
-            double diagonalInches = Math.sqrt((double) ((f * f) + (f2 * f2)))
-            if (diagonalInches <= 6.5d || f2 < 5.0f) {
+            val f = displayMetrics.heightPixels.toFloat() / displayMetrics.ydpi
+            val f2 = displayMetrics.widthPixels.toFloat() / displayMetrics.xdpi
+            val diagonalInches = Math.sqrt(((f * f) + (f2 * f2)).toDouble())
+            if (diagonalInches <= 6.5 || f2 < 5.0f) {
                 return false
             }
             Log.i(TAG, String.format("LumiyaApp: Display width in dp: %.2f, xInches %.1f, diag %.1f", 
-                ((float) defaultDisplay.getWidth()) / displayMetrics.density, f2, diagonalInches))
-            return ((float) defaultDisplay.getWidth()) / displayMetrics.density >= 1000.0f
+                defaultDisplay.width.toFloat() / displayMetrics.density, f2, diagonalInches))
+            return defaultDisplay.width.toFloat() / displayMetrics.density >= 1000.0f
         }
     }
 
-    fun restartApp(): Unit {
+    fun restartApp() {
         try {
-            AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE)
-            PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 0, 
-                Intent(getContext(), LauncherActivity.class), 
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE)
+            val alarmManager = getContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val pendingIntent = PendingIntent.getActivity(getContext(), 0, 
+                Intent(getContext(), LauncherActivity::class.java), 
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             alarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, pendingIntent)
             System.exit(0)
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to restart app", e)
         }
     }
 
-    override fun onCreate(): Unit {
+    override fun onCreate() {
         super.onCreate()
         
         Log.i(TAG, "Lumiya Application starting up")
@@ -167,7 +168,7 @@ object LumiyaApp extends MultiDexApplication {
             try {
                 ResourceConflictResolver.initialize(this)
                 Log.i(TAG, "Resource conflict resolver initialized successfully")
-            } catch (Exception e) {
+            } catch (e: Exception) {
                 Log.e(TAG, "Resource conflict resolver failed - continuing anyway", e)
             }
             
@@ -181,24 +182,22 @@ object LumiyaApp extends MultiDexApplication {
             initializeDebugLogUpload()
             
             Log.i(TAG, "Lumiya Application initialization complete")
-        } catch (Throwable e) {
+        } catch (e: Throwable) {
             // Catch all throwables including OutOfMemoryError, LinkageError, etc.
             Log.e(TAG, "CRITICAL: Application initialization failed", e)
             
             // Upload crash report for debug builds
             try {
                 AutoLogUploader.getInstance(this).uploadCrashReport(e, "Application initialization failure")
-            } catch (Exception uploadError) {
+            } catch (uploadError: Exception) {
                 Log.e(TAG, "Failed to upload crash report", uploadError)
             }
             
             // Log specific error types for debugging
-            if (e instanceof OutOfMemoryError) {
-                Log.e(TAG, "Out of memory during initialization")
-            } else if (e instanceof NoClassDefFoundError) {
-                Log.e(TAG, "Missing object definition: " + e.getMessage())
-            } else if (e instanceof UnsatisfiedLinkError) {
-                Log.e(TAG, "Native library linking failed: " + e.getMessage())
+            when (e) {
+                is OutOfMemoryError -> Log.e(TAG, "Out of memory during initialization")
+                is NoClassDefFoundError -> Log.e(TAG, "Missing object definition: ${e.message}")
+                is UnsatisfiedLinkError -> Log.e(TAG, "Native library linking failed: ${e.message}")
             }
             
             // Set a safe fallback state
@@ -213,7 +212,7 @@ object LumiyaApp extends MultiDexApplication {
      * Initialize modern Second Life protocol and rendering systems
      * Uses defensive programming to prevent crashes if modern components fail
      */
-    private fun initializeModernSystems(): Unit {
+    private fun initializeModernSystems() {
         Log.i(TAG, "Initializing modern Linkpoint components...")
         
         try {
@@ -228,34 +227,34 @@ object LumiyaApp extends MultiDexApplication {
             modernDemo = ModernLinkpointDemo(this)
             Log.i(TAG, "Modern Linkpoint systems initialized successfully")
             
-        } catch (NoClassDefFoundError e) {
+        } catch (e: NoClassDefFoundError) {
             Log.e(TAG, "Modern system object not found - likely missing dependency", e)
-            Log.e(TAG, "Missing class: " + e.getMessage())
+            Log.e(TAG, "Missing class: ${e.message}")
             modernDemo = null
             
-        } catch (UnsatisfiedLinkError e) {
+        } catch (e: UnsatisfiedLinkError) {
             Log.e(TAG, "Native library loading failed - modern graphics features will be disabled", e)
-            Log.e(TAG, "Library loading error: " + e.getMessage())
+            Log.e(TAG, "Library loading error: ${e.message}")
             modernDemo = null
             
-        } catch (SecurityException e) {
+        } catch (e: SecurityException) {
             Log.e(TAG, "Security error during modern system initialization", e)
             modernDemo = null
             
-        } catch (OutOfMemoryError e) {
+        } catch (e: OutOfMemoryError) {
             Log.e(TAG, "Out of memory during modern system initialization", e)
             modernDemo = null
             // Force garbage collection
             System.gc()
             
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize modern systems - continuing with graceful degradation", e)
             modernDemo = null
             
             // Log specific error for debugging
-            Log.e(TAG, "Modern component initialization failed: " + e.getClass().getSimpleName() + " - " + e.getMessage())
+            Log.e(TAG, "Modern component initialization failed: ${e.javaClass.simpleName} - ${e.message}")
             
-        } catch (Throwable t) {
+        } catch (t: Throwable) {
             // Catch any other throwables that might occur
             Log.e(TAG, "Unexpected error during modern system initialization", t)
             modernDemo = null
@@ -282,27 +281,27 @@ object LumiyaApp extends MultiDexApplication {
             }
             
             // Check if we have basic Android API requirements
-            int apiLevel = android.os.Build.VERSION.SDK_INT
+            val apiLevel = android.os.Build.VERSION.SDK_INT
             if (apiLevel < 21) { // API 21 = Android 5.0 minimum
-                Log.w(TAG, "Android API level " + apiLevel + " below minimum for modern components (21)")
+                Log.w(TAG, "Android API level $apiLevel below minimum for modern components (21)")
                 return false
             }
             
             // Check available memory
-            Runtime runtime = Runtime.getRuntime()
-            long freeMemory = runtime.freeMemory()
-            long totalMemory = runtime.totalMemory()
-            double memoryUsage = (double)(totalMemory - freeMemory) / totalMemory
+            val runtime = Runtime.getRuntime()
+            val freeMemory = runtime.freeMemory()
+            val totalMemory = runtime.totalMemory()
+            val memoryUsage = (totalMemory - freeMemory).toDouble() / totalMemory
             
             if (memoryUsage > 0.8) { // If using more than 80% of heap
-                Log.w(TAG, "Memory usage too high (" + (memoryUsage * 100) + "%) - skipping modern components")
+                Log.w(TAG, "Memory usage too high (${memoryUsage * 100}%) - skipping modern components")
                 return false
             }
             
             Log.i(TAG, "System checks passed - proceeding with modern component initialization")
             return true
             
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Error during system checks", e)
             return false
         }
@@ -311,12 +310,12 @@ object LumiyaApp extends MultiDexApplication {
     /**
      * Initialize debug log upload system for debug builds only
      */
-    private fun initializeDebugLogUpload(): Unit {
+    private fun initializeDebugLogUpload() {
         try {
-            AutoLogUploader logUploader = AutoLogUploader.getInstance(this)
+            val logUploader = AutoLogUploader.getInstance(this)
             logUploader.initializeAutoUpload()
             Log.i(TAG, "Debug log upload system initialized")
-        } catch (Exception e) {
+        } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize debug log upload", e)
             // Don't crash the app if log upload fails
         }
@@ -325,11 +324,11 @@ object LumiyaApp extends MultiDexApplication {
     /**
      * Get modern components demo instance
      */
-    fun getModernDemo(): ModernLinkpointDemo {
+    fun getModernDemo(): ModernLinkpointDemo? {
         return modernDemo
     }
 
-    override protected fun attachBaseContext(base: Context): Unit {
+    override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
         MultiDex.install(this)
     }
