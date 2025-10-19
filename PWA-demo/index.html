@@ -148,6 +148,21 @@
               <div class="help-text">
                 <p><small>Don't have an account? <a href="https://secondlife.com/my/account/request.php" target="_blank" rel="noopener">Sign up for Second Life</a></small></p>
               </div>
+              
+              <!-- CORS Status Info -->
+              <div class="cors-status-info" id="cors-status-info" style="margin-top: 1rem;">
+                <details>
+                  <summary style="cursor: pointer; color: var(--text-secondary); font-size: 0.875rem;">
+                    <span id="cors-env-name">Connection Status</span> ▼
+                  </summary>
+                  <div style="margin-top: 0.5rem; padding: 0.75rem; background: var(--surface-light); border-radius: 0.5rem; font-size: 0.875rem;">
+                    <p><strong>Environment:</strong> <span id="cors-env-type">Detecting...</span></p>
+                    <p><strong>CORS Support:</strong> <span id="cors-support-type">Checking...</span></p>
+                    <p><strong>Status:</strong> <span id="cors-status-message">Ready</span></p>
+                    <div id="cors-recommendations" style="margin-top: 0.5rem;"></div>
+                  </div>
+                </details>
+              </div>
             </div>
           </div>
         </section>
