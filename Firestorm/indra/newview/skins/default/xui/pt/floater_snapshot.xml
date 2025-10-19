@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Snapshot" title="FOTO">
+	<floater.string name="unknown">
+		desconhecido
+	</floater.string>
+	<string name="postcard_progress_str">
+		Enviando e-mail
+	</string>
+	<string name="facebook_progress_str">
+		Como publicar no Facebook
+	</string>
+	<string name="profile_progress_str">
+		Postando
+	</string>
+	<string name="inventory_progress_str">
+		Salvando no inventário
+	</string>
+	<string name="local_progress_str">
+		Salvo no computador
+	</string>
+	<string name="facebook_succeeded_str">
+		Imagem carregada
+	</string>
+	<string name="profile_succeeded_str">
+		Imagem carregada
+	</string>
+	<string name="postcard_succeeded_str">
+		E-mail enviado!
+	</string>
+	<string name="inventory_succeeded_str">
+		Salvo no inventário!
+	</string>
+	<string name="local_succeeded_str">
+		Salvo no computador!
+	</string>
+	<string name="facebook_failed_str">
+		Falha ao carregar a imagem na sua linha do tempo no Facebook.
+	</string>
+	<string name="profile_failed_str">
+		Falha ao carregar a imagem no feed do seu perfil.
+	</string>
+	<string name="postcard_failed_str">
+		Falha ao enviar e-mail.
+	</string>
+	<string name="inventory_failed_str">
+		Falha ao salvar no inventário.
+	</string>
+	<string name="local_failed_str">
+		Falha ao salvar no computador.
+	</string>
+	<button label="ATUALIZAR" name="new_snapshot_btn"/>
+	<view name="controls_container">
+	<panel name="advanced_options_panel">
+		<text name="layer_type_label">
+			Capturar:
+		</text>
+		<combo_box label="Camadas da imagem" name="layer_types">
+			<combo_box.item label="Cores" name="Colors"/>
+			<combo_box.item label="Profundidade" name="Depth"/>
+		</combo_box>
+		<check_box label="Interface" name="ui_check"/>
+		<check_box label="HUDs" name="hud_check"/>
+		<check_box label="Gerar quadro (tela inteira)" name="freeze_frame_check"/>
+		<check_box label="Atualização automática" name="auto_snapshot_check"/>
+		<text name="filter_list_label">
+			Filtro:
+		</text>
+		<combo_box name="filters_combobox" tool_tip="Filtros de imagem">
+			<combo_box.item label="Sem filtro" name="NoFilter"/>
+		</combo_box>
+	</panel>
+	</view>
+	<text name="image_res_text">
+		[WIDTH]px (largura) x [HEIGHT]px (altura)
+	</text>
+	<text name="file_size_label">
+		[TAMANHO] KB
+	</text>
+</floater>

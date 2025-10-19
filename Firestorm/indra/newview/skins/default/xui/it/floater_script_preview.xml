@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="preview lsl text" title="Script: rotazione">
+	<floater.string name="Title">
+		Script: [NAME]
+	</floater.string>
+	<text name="path_txt" tool_tip="Posizione: [PATH]">
+		Posizione: [PATH]
+	</text>
+	<text name="desc txt">
+		Descrizione:
+	</text>
+</floater>

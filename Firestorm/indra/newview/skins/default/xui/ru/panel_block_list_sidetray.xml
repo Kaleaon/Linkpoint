@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel name="block_list_panel">
+     <panel name="blocked_buttons_panel">
+         <filter_editor label="Фильтр" name="blocked_filter_input"/>
+         <menu_button name="blocked_gear_btn" tool_tip="Действия с выбранным человеком или объектом"/>
+         <menu_button name="view_btn" tool_tip="Варианты сортировки"/>
+         <menu_button name="plus_btn" tool_tip="Выберите резидента или объект для блокировки"/>
+         <button name="unblock_btn" tool_tip="Удалить резидента или объект из списка заблокированных"/>
+     </panel>
+     <text name="block_limit">
+          [COUNT] в вашем черном списке, максимум [LIMIT].
+      </text>
+    <block_list name="blocked" tool_tip="Список заблокированных жителей в настоящее время"/>
+</panel>

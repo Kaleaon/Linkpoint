@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="sidetray_tab_panel">
+	<button name="undock" tool_tip="Détacher"/>
+	<button name="dock" tool_tip="Attacher"/>
+	<button name="minimize" tool_tip="Réduire"/>
+</panel>

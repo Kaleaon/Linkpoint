@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="preview lsl text" title="Skript: Rotations-Skript">
+	<floater.string name="Title">
+		Skript: [NAME]
+	</floater.string>
+	<text name="path_txt" tool_tip="Inventar-Ort: [PATH]">Inventar-Ort: [PATH]</text>
+	<text name="desc txt" width="90">
+		Beschreibung:
+	</text>
+    <line_editor left_delta="90" name="desc"/>
+</floater>

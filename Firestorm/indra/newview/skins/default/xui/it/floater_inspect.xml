@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater min_width="450" name="inspect" title="Ispeziona Oggetti">
+	<floater.string name="timeStamp">
+		[wkday,datetime,slt] [day,datetime,slt] [mth,datetime,slt] [year,datetime,slt], [hour,datetime,slt]:[min,datetime,slt]:[second,datetime,slt]
+	</floater.string>
+	<floater.string name="Group">
+		(Gruppo)
+	</floater.string>
+	<floater.string name="stats_list">
+		Stat. totali:
+
+[NUM_OBJECTS] oggetti, [NUM_PRIMS] prim
+
+Facce: [NUM_FACES]
+Vertici: [NUM_VERTICES]
+Triangoli: [NUM_TRIANGLES]
+Complessità: [COMPLEXITY]
+
+Texture: [NUM_TEXTURES]
+TexMem: [TEXTURE_MEMORY] KB
+VRAM: [VRAM_USAGE] KB
+	</floater.string>
+	<text_editor name="linksetstats_text" value="(caricamento...)"/>
+	<scroll_list name="object_list" tool_tip="Seleziona un oggetto da questo elenco per evidenziarlo inworld">
+		<scroll_list.columns label="Nome dell&apos;oggetto" name="object_name"/>
+		<scroll_list.columns label="Descrizione" name="description" />
+		<scroll_list.columns label="Proprietario" name="owner_name"/>
+		<scroll_list.columns label="Creatore" name="creator_name"/>
+		<scroll_list.columns label="Facce" name="facecount"/>
+		<scroll_list.columns label="Vertici" name="vertexcount"/>
+		<scroll_list.columns label="Triangoli" name="trianglecount"/>
+		<scroll_list.columns label="VRAM tex" name="tramcount" />
+		<scroll_list.columns label="VRAM" name="vramcount" />
+		<scroll_list.columns label="Data di creazione" name="creation_date"/>
+	</scroll_list>
+	<button label="Profilo del proprietario..." name="button owner" tool_tip="Vedi il profilo del proprietario dell&apos;oggetto evidenziato" width="185"/>
+	<button label="Profilo del creatore..." left="205" name="button creator" tool_tip="Vedi il profilo del creatore originale dell&apos;oggetto evidenziato" width="165"/>
+	<menu_button name="options_btn" tool_tip="Opzioni" />
+</floater>

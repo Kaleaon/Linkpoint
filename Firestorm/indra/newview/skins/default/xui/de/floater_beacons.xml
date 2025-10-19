@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="beacons" title="Ortungssignale">
+	<panel name="beacons_panel">
+		<text name="label_show">
+			Anzeigen:
+		</text>
+		<check_box label="Bounding Boxes für Lichtquellen" name="lights_bounding_boxes"/>
+		<check_box label="Ortungssignale" name="beacons"/>
+		<check_box label="Hervorhebung" name="highlights"/>
+		<check_box label="Signale-Infotext im Viewerfenster" name="FSRenderBeaconText"/>
+		<text name="beacon_width_label" tool_tip="Strahlbreite">
+			Breite:
+		</text>
+		<text name="label_objects">
+			Für diese Objekte:
+		</text>
+		<check_box label="Physisch" name="physical"/>
+		<check_box label="Skriptobjekte" name="scripted"/>
+		<check_box label="Nur berühren" name="touch_only"/>
+		<check_box label="Soundquellen" name="sounds"/>
+		<check_box label="Partikelquellen" name="particles"/>
+		<check_box label="Medienquellen" name="moapbeacon"/>
+		<text name="label_direction">
+			Zeige Richtung zu:
+		</text>
+		<check_box label="Sonne" name="sun"/>
+		<check_box label="Mond" name="moon"/>
+	</panel>
+</floater>

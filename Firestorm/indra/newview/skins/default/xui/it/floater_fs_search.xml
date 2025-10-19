@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="floater_fs_search" title="Ricerca Firestorm">
+	<floater.string name="string.location">
+		Luogo: [LOCATION]
+	</floater.string>
+	<floater.string name="string.traffic">
+		Traffico: [DWELL]
+	</floater.string>
+	<floater.string name="string.area">
+		Area: [AREA]
+	</floater.string>
+	<floater.string name="string.members">
+		Membri: [MEMBER_COUNT]
+	</floater.string>
+	<floater.string name="string.founder">
+		Fondatore: [FOUNDER]
+	</floater.string>
+	<floater.string name="string.age">
+		Età: [AGE]
+	</floater.string>
+	<floater.string name="string.listing_price">
+		Prezzo: [LISTING_PRICE]
+	</floater.string>
+	<floater.string name="string.duration">
+		Durata: [DURATION]
+	</floater.string>
+	<floater.string name="string.covercharge">
+		Copertura: [COVERCHARGE]
+	</floater.string>
+	<tab_container name="ls_tabs">
+		<panel label="Web" name="panel_ls_web" />
+		<panel label="Persone" name="panel_ls_people" />
+		<panel label="Gruppi" name="panel_ls_groups" />
+		<panel label="Luoghi" name="panel_ls_places" />
+		<panel label="Vendita Terreni" name="panel_ls_land" />
+		<panel label="Eventi" name="panel_ls_events" />
+		<panel label="Inserzioni" name="panel_ls_classifieds" />
+	</tab_container>
+	<panel name="panel_ls_details">
+		<text_editor name="title" value="Nome non definito" />
+		<text_editor name="aux1" value="Campo info aggiuntive 1" />
+		<text_editor name="aux2" value="Campo info aggiuntive 2" />
+		<text_editor name="location" value="Info sul luogo" />
+		<text_editor name="desc" value="Apri questa porta con la chiave dell'immaginazione. Al di là c'è un'altra dimensione: una dimensione del suono, una dimensione della vista, una dimensione della mente. Ti stai spostando in una terra di ombra e di sostanza, di cose e di idee; sei appena entrato nella Twilight Zone. Quello che stai per vedere è reale; i contendenti sullo schermo non sono attori. Sono veri cittadini che, dopo aver depositato le loro pretese in un vero e proprio tribunale per le controversie di modesta entità, sono stati persuasi a depositare lì le loro cause e a farli insediare qui, in questo foro... il Tribunale del Popolo." />
+		<button label="Profilo" name="people_profile_btn"/>
+		<button label="Invia IM" name="people_message_btn"/>
+		<button label="Aggiungi Amico" name="people_friend_btn"/>
+		<button label="Profilo" name="group_profile_btn"/>
+		<button label="Entra in Chat" name="group_message_btn"/>
+		<button label="Entra nel Gruppo" name="group_join_btn"/>
+		<button label="Teleport" name="teleport_btn"/>
+		<button label="Mappa" name="map_btn"/>
+		<button label="Promemoria" name="event_reminder_btn"/>
+	</panel>
+</floater>

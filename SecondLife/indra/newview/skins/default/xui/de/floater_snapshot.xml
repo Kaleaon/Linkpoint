@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Snapshot" title="SCHNAPPSCHUSS">
+	<floater.string name="unknown">
+		unbekannt
+	</floater.string>
+	<string name="postcard_progress_str">
+		E-Mail senden
+	</string>
+	<string name="facebook_progress_str">
+		Auf Facebook posten
+	</string>
+	<string name="profile_progress_str">
+		Posten
+	</string>
+	<string name="inventory_progress_str">
+		Speichern im Inventar
+	</string>
+	<string name="local_progress_str">
+		Speichern auf Computer
+	</string>
+	<string name="facebook_succeeded_str">
+		Bild hochgeladen
+	</string>
+	<string name="profile_succeeded_str">
+		Bild hochgeladen
+	</string>
+	<string name="postcard_succeeded_str">
+		E-Mail gesendet!
+	</string>
+	<string name="inventory_succeeded_str">
+		Im Inventar gespeichert!
+	</string>
+	<string name="local_succeeded_str">
+		Auf Computer gespeichert!
+	</string>
+	<string name="facebook_failed_str">
+		Fehler beim Hochladen des Bilds in Ihre Facebook-Chronik.
+	</string>
+	<string name="profile_failed_str">
+		Fehler beim Hochladen des Bilds in Ihr Profil.
+	</string>
+	<string name="postcard_failed_str">
+		Fehler beim Senden der E-Mail.
+	</string>
+	<string name="inventory_failed_str">
+		Fehler beim Speichern im Inventar.
+	</string>
+	<string name="local_failed_str">
+		Fehler beim Speichern auf dem Computer.
+	</string>
+	<button label="AKTUALISIEREN" name="new_snapshot_btn"/>
+	<panel name="advanced_options_panel">
+		<text name="layer_type_label">
+			Aufnehmen:
+		</text>
+		<combo_box label="Bildebenen" name="layer_types">
+			<combo_box.item label="Farben" name="Colors"/>
+			<combo_box.item label="Tiefe" name="Depth"/>
+		</combo_box>
+		<check_box label="Benutzeroberfläche" name="ui_check"/>
+		<check_box label="HUDs" name="hud_check"/>
+		<check_box label="Standbild (Vollbild)" name="freeze_frame_check"/>
+		<check_box label="Automatisch aktualisieren" name="auto_snapshot_check"/>
+		<text name="filter_list_label">
+			Filter:
+		</text>
+		<combo_box label="Filter" name="filters_combobox" tool_tip="Bildfilter">
+			<combo_box.item label="Kein Filter" name="NoFilter"/>
+		</combo_box>
+	</panel>
+	<text name="image_res_text">
+		[WIDTH] px (Breite) x [HEIGHT] px (Höhe)
+	</text>
+	<text name="file_size_label">
+		[SIZE] KB
+	</text>
+</floater>

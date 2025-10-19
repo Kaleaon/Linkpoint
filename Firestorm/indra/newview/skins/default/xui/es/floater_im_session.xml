@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="panel_im">
+	<floater.string name="participant_added" value="[NAME] ha sido invitado a la conversación."/>
+	<floater.string name="multiple_participants_added" value="[NAME] han sido invitados a la conversación."/>
+	<floater.string name="tooltip_to_separate_window" value="Mover esta conversación a una ventana separada"/>
+	<floater.string name="tooltip_to_main_window" value="Volver a poner esta conversación en la ventana principal"/>
+	<floater.string name="start_call_button_tooltip" value="Abrir conexión de voz"/>
+	<floater.string name="end_call_button_tooltip" value="Cerrar la conexión de voz"/>
+	<floater.string name="expcol_button_not_tearoff_tooltip" value="Contraer este panel"/>
+	<floater.string name="expcol_button_tearoff_and_expanded_tooltip" value="Contraer la lista de participantes"/>
+	<floater.string name="expcol_button_tearoff_and_collapsed_tooltip" value="Expandir la lista de participantes"/>
+	<view name="contents_view">
+		<layout_stack name="main_stack">
+			<layout_panel name="toolbar_panel">
+				<menu_button name="view_options_btn" tool_tip="Opciones de vista/orden"/>
+				<menu_button name="gear_btn" tool_tip="Acciones sobre el residente seleccionado"/>
+				<button name="add_btn" tool_tip="Añadir a alguien a esta conversación"/>
+				<button name="voice_call_btn" tool_tip="Abrir conexión de voz"/>
+				<button name="close_btn" tool_tip="Finalizar esta conversación"/>
+				<button name="expand_collapse_btn" tool_tip="Contraer/expandir este panel"/>
+			</layout_panel>
+			<layout_panel name="chat_layout_panel">
+				<layout_stack name="input_panels">
+					<layout_panel name="input_editor_layout_panel">
+						<chat_editor label="A" name="chat_editor"/>
+					</layout_panel>
+					<layout_panel name="input_button_layout_panel">
+						<button name="minz_btn" tool_tip="Muestra/oculta el panel de mensajes"/>
+					</layout_panel>
+				</layout_stack>
+			</layout_panel>
+		</layout_stack>
+	</view>
+</floater>

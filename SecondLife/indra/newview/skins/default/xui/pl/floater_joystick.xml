@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="Joystick" title="KONFIGURACJA JOYSTICKA">
+	<floater.string name="NoDevice">
+		nie wykryto urządzenia
+	</floater.string>
+	<check_box label="Włącz joystick:" name="enable_joystick" />
+	<spinner label="Kalibruj oś X" name="JoystickAxis1" />
+	<spinner label="Kalibruj oś Y" name="JoystickAxis2" />
+	<spinner label="Kalibruj oś Z" name="JoystickAxis0" />
+	<spinner label="Kalibruj wznoszenie" name="JoystickAxis4" />
+	<spinner label="Kalibruj wychył" name="JoystickAxis5" />
+	<spinner label="Kalibruj obrót" name="JoystickAxis3" />
+	<spinner label="Kalibruj powiększenie" name="JoystickAxis6" />
+	<check_box label="Bezp. powięk." name="ZoomDirect" />
+	<check_box label="Kursor 3D" name="Cursor3D" />
+	<check_box label="Autopoziom" name="AutoLeveling" />
+	<text name="Control Modes:">
+		Kontroluj:
+	</text>
+	<check_box label="Awatara" name="JoystickAvatarEnabled" />
+	<check_box label="Budow." name="JoystickBuildEnabled" />
+	<check_box label="Kamerę latając" name="JoystickFlycamEnabled" />
+	<stat_view label="Monitor Joysticka" name="axis_view">
+		<stat_bar label="Oś 0" name="axis0" />
+		<stat_bar label="Oś 1" name="axis1" />
+		<stat_bar label="Oś 2" name="axis2" />
+		<stat_bar label="Oś 3" name="axis3" />
+		<stat_bar label="Oś 4" name="axis4" />
+		<stat_bar label="Oś 5" name="axis5" />
+	</stat_view>
+	<text name="XScale">
+		Skala X
+	</text>
+	<text name="YScale">
+		Skala Y
+	</text>
+	<text name="ZScale">
+		Skala Z
+	</text>
+	<text name="PitchScale">
+		Skala wznoszenia
+	</text>
+	<text name="YawScale">
+		Skala odchylania
+	</text>
+	<text name="RollScale">
+		Skala obrotu
+	</text>
+	<text name="XDeadZone">
+		Tolerancja osi X
+	</text>
+	<text name="YDeadZone">
+		Tolerancja osi Y
+	</text>
+	<text name="ZDeadZone">
+		Tolerancja osi Z
+	</text>
+	<text name="PitchDeadZone">
+		Tolerancja wznoszenia
+	</text>
+	<text name="YawDeadZone">
+		Tolerancja odchylania
+	</text>
+	<text name="RollDeadZone">
+		Tolerancja obrotu
+	</text>
+	<text name="Feathering">
+		Przenikanie
+	</text>
+	<text name="ZoomScale2">
+		Skala powiększania
+	</text>
+	<text name="ZoomDeadZone">
+		Tolerancja powiększania
+	</text>
+	<button label="Ustawienia domyślne" name="SpaceNavigatorDefaults" />
+	<button label="Anuluj" label_selected="Anuluj" name="cancel_btn" />
+</floater>

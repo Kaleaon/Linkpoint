@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="prefs_graphics_advanced" title="Расширенные настройки графики">
+	<text name="GeneralText">
+		Общие
+	</text>
+	<slider label="Дальность отрисовки:" name="DrawDistance"/>
+	<text name="DrawDistanceMeterText2">
+		м
+	</text>
+	<slider label="Макс. количество частиц:" name="MaxParticleCount"/>
+	<slider label="Качество постобработки:" name="RenderPostProcess"/>
+	<text name="PostProcessText">
+		Низкое
+	</text>
+	<text name="MaxTextureResolutionLabel">
+		Макс. разрешение LOD:
+	</text>
+	<combo_box name="MaxTextureResolution" tool_tip="Максимальное разрешение для текстур с'высоким уровнем детализации'"/>
+	<slider label="Макс. источн.света рядом:" label_width="185" name="MaxLights" width="336" />
+	<check_box label="Включить VSync" name="vsync" tool_tip="Синхронизирует частоту кадров с частотой обновления монитора, что обеспечивает плавную работу."/>
+	<text name="AvatarText">
+		Аватар
+	</text>
+	<text name="AvatarComplexityModeLabel" width="140">
+		Отображение аватара:
+	</text>
+	<combo_box name="AvatarComplexityMode" left_delta="140">
+		<combo_box.item label="Огр. по сложности" name="0"/>
+		<combo_box.item label="Всегда показ друзей" name="1"/>
+		<combo_box.item label="Только показ друзей" name="2"/>
+	</combo_box>
+	<slider label="Максимальная сложность:" name="IndirectMaxComplexity" tool_tip="Указывает расстояние, начиная с которого визуально сложный аватар рисуется как желейная фигура"/>
+	<slider label="Макс. кол-во объемных:" name="IndirectMaxNonImpostors"/>
+	<slider label="Детализация:" name="AvatarMeshDetail"/>
+	<text name="AvatarMeshDetailText">
+		Низкая
+	</text>
+	<slider label="Физика:" name="AvatarPhysicsDetail"/>
+	<text name="AvatarPhysicsDetailText">
+		Низкая
+	</text>
+	<text name="HardwareText">
+		Аппаратное оборудование
+	</text>
+	<check_box label="Анизотропная фильтрация (медленнее, если включено)" name="ani"/>
+	<check_box label="Разрешить сжатие текстур (требует перезагрузки)" name="texture compression" tool_tip="Сжатие текстур в видеопамяти, что позволяет загружать текстуры большего размера за счет некоторого падения качества цвета."/>
+	<check_box label="Включить поддержку HiDPI дисплея (нужен перезапуск)" name="use HiDPI" tool_tip="Разрешить OpenGL отображение с высоким разрешением."/>
+	<text name="antialiasing label">
+		Сглаживание:
+	</text>
+	<combo_box label="Сглаживание" name="fsaa">
+		<combo_box.item label="Выключено" name="FSAADisabled"/>
+	</combo_box>
+	<text name="antialiasing quality label" width="135">
+		Качество сглаживания:
+	</text>
+	<combo_box label="Сглаживание" name="fsaa quality" left_pad="25">
+		<combo_box.item label="Низкое" name="Low"/>
+		<combo_box.item label="Среднее" name="Medium"/>
+		<combo_box.item label="Высокое" name="High"/>
+		<combo_box.item label="Ультра" name="Ultra"/>
+	</combo_box>
+	<text name="MeshText">
+		Меш
+	</text>
+	<slider label="Детализация меша:" name="TerrainMeshDetail"/>
+	<text name="TerrainMeshDetailText">
+		Низкая
+	</text>
+	<slider label="Деревья:" name="TreeMeshDetail"/>
+	<text name="TreeMeshDetailText">
+		Низкая
+	</text>
+	<slider label="Объекты:" name="ObjectMeshDetail"/>
+	<text name="ObjectMeshDetailText">
+		Низкая
+	</text>
+	<slider label="Гибкие примитивы:" name="FlexibleMeshDetail"/>
+	<text name="FlexibleMeshDetailText">
+		Низкая
+	</text>
+	<text name="antialiasing restart">
+		(нужен рестарт)
+	</text>
+	<text name="ShadersText">
+		Шейдеры
+	</text>
+	<check_box label="Прозрачность воды" name="TransparentWater"/>
+	<slider label="Небо:" name="SkyMeshDetail"/>
+	<text name="SkyMeshDetailText">
+		Низкая
+	</text>
+	<check_box label="Экранное пространство Окружающая окклюзия" name="UseSSAO"/>
+	<check_box label="Глубина резкости" name="UseDoF"/>
+	<check_box label="HDR и Эмиссионные" name="VintageMode"/>
+	<text name="RenderShadowDetailText">
+		Тени:
+	</text>
+	<combo_box name="ShadowDetail">
+		<combo_box.item label="Нет" name="0"/>
+		<combo_box.item label="Солнце/луна" name="1"/>
+		<combo_box.item label="Солнце/луна + осветители" name="2"/>
+	</combo_box>
+	<check_box label="Отражения на экране" name="ScreenSpaceReflections"/>
+	<text name="ReflectionDetailText">Детали отражения:</text>
+	<combo_box name="ReflectionDetail">
+		<combo_box.item label="Только статические" name="0"/>
+		<combo_box.item label="Статика + Динамика" name="1"/>
+		<combo_box.item label="В реальном времени" name="2"/>
+	</combo_box>
+	<text name="ReflectionProbeText">Покрытие отражения:</text>
+	<combo_box name="ReflectionLevel">
+		<combo_box.item label="Ничего" name="0"/>
+		<combo_box.item label="Только вручную" name="1"/>
+		<combo_box.item label="Вручную + местность" name="2"/>
+		<combo_box.item label="Полная сцена" name="3"/>
+	</combo_box>
+	<text name="ReflectionProbeCount">
+		Макс.датч.отражений:
+	</text>
+	<combo_box label="Макс. датчиков отражений:" name="ProbeCount" width="150">
+		<combo_box.item label="Нет" name="1"/>
+		<combo_box.item label="Низкий" name="32"/>
+		<combo_box.item label="Средний" name="64"/>
+		<combo_box.item label="Высокий" name="128"/>
+		<combo_box.item label="Ультра" name="256"/>
+	</combo_box>
+	<slider label="Экспозиция:" name="RenderExposure"/>
+	<!-- Mirror settings. -->
+	<check_box label="Зеркала" name="Mirrors"/>
+	<text width="178" name="MirrorResolutionText">Зеркальное разрешение:</text>
+	<combo_box left_delta="180" name="MirrorResolution">
+		<combo_box.item label="256" name="0"/>
+		<combo_box.item label="512" name="1"/>
+		<combo_box.item label="1024" name="2"/>
+		<combo_box.item label="2048" name="3"/>
+	</combo_box>
+	<text width="178" name="HeroProbeUpdateText">Скорость обновления зеркала:</text>
+	<combo_box left_delta="180" name="HeroProbeUpdateRate">
+		<combo_box.item label="Каждый кадр" name="0"/>
+		<combo_box.item label="Каждый 2-й кадр" name="1"/>
+		<combo_box.item label="Каждый 3-й кадр" name="2"/>
+		<combo_box.item label="Каждый 4-й кадр" name="3"/>
+	</combo_box>
+	<!-- End of mirror settings -->
+	<slider label="Заострение:" name="RenderSharpness"/>
+	<text name="TonemapTypeText">
+		Карты тонов:
+	</text>
+	<combo_box name="TonemapType">
+		<combo_box.item label="Khronos Neutral" name="0"/>
+		<combo_box.item label="ACES" name="1"/>
+	</combo_box>
+	<slider label="Смесь карт тонов:" tool_tip="Комбинируйте цвета с линейной и тональной картировкой" name="TonemapMix"/>
+	<button label="Вернуть рекомендуемые настройки" name="Defaults"/>
+	<button label="OK" label_selected="OK" name="OK"/>
+	<button label="Отмена" label_selected="Отмена" name="Cancel"/>
+	<check_box label="Отрисовка аватара макс. сложности" name="RenderAvatarMaxComplexity"/>
+	<check_box label="Отрисовка макс. кол-ва 3-D аватаров" name="RenderAvatarMaxNonImpostors"/>
+</floater>

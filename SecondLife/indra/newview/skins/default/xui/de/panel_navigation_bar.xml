@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="navigation_bar">
+	<layout_stack name="nvp_stack">
+		<layout_panel name="navigation_layout_panel">
+			<panel name="navigation_panel">
+				<pull_button name="back_btn" tool_tip="Zum vorherigen Standort zurückgehen"/>
+				<pull_button name="forward_btn" tool_tip="Einen Standort weiter gehen"/>
+				<button name="home_btn" tool_tip="Zu meinem Zuhause teleportieren"/>
+				<location_input label="Standort" name="location_combo"/>
+			</panel>
+		</layout_panel>
+		<layout_panel name="favorites_layout_panel">
+			<favorites_bar name="favorite" tool_tip="Landmarken hierher ziehen für schnellen Zugriff auf Lieblingsorte in Second Life.">
+				<label name="favorites_bar_label" tool_tip="Landmarken hierher ziehen für schnellen Zugriff auf Lieblingsorte in Second Life.">
+					Favoritenleiste
+				</label>
+				<more_button name="&gt;&gt;" tool_tip="Mehr meiner Favoriten anzeigen">
+					Mehr ▼
+				</more_button>
+			</favorites_bar>
+		</layout_panel>
+	</layout_stack>
+</panel>

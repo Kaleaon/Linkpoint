@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="texture picker" title="CHOISIR : TEXTURE">
+	<floater.string name="choose_picture">
+		Cliquez pour sélectionner une image
+	</floater.string>
+	<floater.string name="pick title">
+		Choisir :
+	</floater.string>
+	<text name="Multiple">
+		Textures multiples
+	</text>
+	<radio_group name="mode_selection">
+		<radio_item label="Inventaire" name="inventory" width="75" />
+		<radio_item label="Local" name="local"/>
+		<radio_item label="BOM" name="bake"/>
+	</radio_group>
+	<text name="size_lbl">
+		Taille:
+[DIMENSIONS]
+	</text>
+	<text name="over_limit_lbl">
+		La texture sélectionnée est [TEXDIM]. L'image d'inventaire doit être carrée et pas moins de [MINTEXDIM].
+	</text>
+	<button label="Défaut" label_selected="Défaut" name="Default" />
+	<button label="Vierge" label_selected="Vierge" name="Blank" />
+	<button label="Aucune" label_selected="Aucune" name="None" />
+	<button bottom="-240" label="" label_selected="" name="Pipette"/>
+	<text name="preview_disabled" value="Aperçu désactivé"/>
+	<filter_editor label="Filtrer les textures" name="inventory search editor"/>
+	<check_box initial_value="false" label="Afficher les dossiers" name="show_folders_check"/>
+	<button label="Ajouter" label_selected="Ajouter" name="l_add_btn"/>
+	<button label="Supprimer" label_selected="Supprimer" name="l_rem_btn"/>
+	<button label="Charger" label_selected="Charger" name="l_upl_btn"/>
+	<scroll_list name="l_name_list">
+		<column label="Nom" name="unit_name"/>
+		<column label="ID" name="unit_id_HIDDEN"/>
+	</scroll_list>
+	<combo_box name="l_bake_use_texture_combo_box" tool_tip="Choisir la texture mixte">
+		<combo_box.item label="Aucun" name="None"/>
+		<combo_box.item label="BAKED_HEAD" name="BAKED_HEAD"/>
+		<combo_box.item label="BAKED_UPPER" name="BAKED_UPPER"/>
+		<combo_box.item label="BAKED_LOWER" name="BAKED_LOWER"/>
+		<combo_box.item label="BAKED_EYES" name="BAKED_EYES"/>
+		<combo_box.item label="BAKED_SKIRT" name="BAKED_SKIRT"/>
+		<combo_box.item label="BAKED_HAIR" name="BAKED_HAIR"/>
+		<combo_box.item label="BAKED_LEFTARM" name="BAKED_LEFTARM"/>
+		<combo_box.item label="BAKED_LEFTLEG" name="BAKED_LEFTLEG"/>
+		<combo_box.item label="BAKED_AUX1" name="BAKED_AUX1"/>
+		<combo_box.item label="BAKED_AUX2" name="BAKED_AUX2"/>
+		<combo_box.item label="BAKED_AUX3" name="BAKED_AUX3"/>
+	</combo_box>
+	<check_box initial_value="false" label="Masquer la région maillée de base" name="hide_base_mesh_region"/>
+	<line_editor name="TextureKey" tool_tip="Clé de la texture"/>
+	<button name="TextureKeyApply" label="Appl. UUID" tool_tip="Appliquer cet UUID"/>
+	<button label="OK" label_selected="OK" name="Select"/>
+	<button label="Annuler" label_selected="Annuler" name="Cancel"/>
+	<check_box initial_value="true" label="Appliquer" name="apply_immediate_check"/>
+</floater>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel label="Сообщения об ошибках" name="crash_reports">
+    <check_box label="Отправить отчет об ошибке на firestormviewer.org" name="checkSendCrashReports" />
+    <check_box label="Всегда спрашивать перед отправкой" name="checkSendCrashReportsAlwaysAsk" />
+    <check_box label="Включая файлы настроек" name="checkSendSettings" />
+    <text name="textSendSettings">
+        (содержит имя пользователя)
+    </text>
+    <check_box label="Включая имя пользователя" name="checkSendName" />
+    <text name="textSendName">
+        (используется для запроса дополнительной информации, если это необходимо)
+    </text>
+    <text name="textRestartRequired">
+        Изменения, внесенные в любой параметр, требуют перезапуска, чтобы вступить в силу.
+    </text>
+    <text name="textInformation1">
+        Отмеченные выше отчеты об ошибках содержат информацию только относящуюся к аварии.
+    </text>
+    <text name="textInformation2">
+        Журналы не отправляются, пожалуйста, просмотрите ее содержимое и e-mail,
+    </text>
+    <text name="textInformation3">
+        если вы чувствуете, что они могут содержать дополнительную информацию.
+    </text>
+    <text name="textInformation4">
+        Политика конфиденциальности: [URL]
+    </text>
+</panel>

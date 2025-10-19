@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Snapshot" title="ANLIK GÖRÜNTÜ">
+	<floater.string name="unknown">
+		bilinmiyor
+	</floater.string>
+	<string name="postcard_progress_str">
+		E-posta Gönderiliyor
+	</string>
+	<string name="facebook_progress_str">
+		Facebook&apos;ta yayınlanıyor
+	</string>
+	<string name="profile_progress_str">
+		Yayınlanıyor
+	</string>
+	<string name="inventory_progress_str">
+		Envantere Kaydediliyor
+	</string>
+	<string name="local_progress_str">
+		Bilgisayara Kaydediliyor
+	</string>
+	<string name="facebook_succeeded_str">
+		Görüntü yüklendi
+	</string>
+	<string name="profile_succeeded_str">
+		Görüntü yüklendi
+	</string>
+	<string name="postcard_succeeded_str">
+		E-posta Gönderildi!
+	</string>
+	<string name="inventory_succeeded_str">
+		Envantere Kaydedildi!
+	</string>
+	<string name="local_succeeded_str">
+		Bilgisayara Kaydedildi!
+	</string>
+	<string name="facebook_failed_str">
+		Görüntü Facebook zaman tünelinize yüklenemedi.
+	</string>
+	<string name="profile_failed_str">
+		Görüntü Profil Akışınıza yüklenemedi.
+	</string>
+	<string name="postcard_failed_str">
+		E-posta gönderilemedi.
+	</string>
+	<string name="inventory_failed_str">
+		Envantere kaydedilemedi.
+	</string>
+	<string name="local_failed_str">
+		Bilgisayara kaydedilemedi.
+	</string>
+	<button label="YENİLE" name="new_snapshot_btn"/>
+	<view name="controls_container">
+	<panel name="advanced_options_panel">
+		<text name="layer_type_label">
+			Yakala:
+		</text>
+		<combo_box label="Görüntü Katmanları" name="layer_types">
+			<combo_box.item label="Renkler" name="Colors"/>
+			<combo_box.item label="Derinlik" name="Depth"/>
+		</combo_box>
+		<check_box label="Arayüz" name="ui_check"/>
+		<check_box label="BÜG&apos;ler" name="hud_check"/>
+		<check_box label="Kare dondur (tam ekran)" name="freeze_frame_check"/>
+		<check_box label="Otomatik yenile" name="auto_snapshot_check"/>
+		<text name="filter_list_label">
+			Filtre:
+		</text>
+		<combo_box name="filters_combobox" tool_tip="Görüntü filtreleri">
+			<combo_box.item label="Filtre Yok" name="NoFilter"/>
+		</combo_box>
+	</panel>
+	</view>
+	<text name="image_res_text">
+		[WIDTH] px (genişlik) x [HEIGHT] px (yükseklik)
+	</text>
+	<text name="file_size_label">
+		[SIZE] KB
+	</text>
+</floater>

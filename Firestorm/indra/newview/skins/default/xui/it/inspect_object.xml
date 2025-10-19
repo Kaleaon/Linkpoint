@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="inspect_object">
+	<string name="Creator">
+		CreatoreCreatore [CREATOR]
+	</string>
+	<string name="CreatorAndOwner">
+		Creatore [CREATOR]
+Proprietario [OWNER]
+	</string>
+	<string name="Price">
+		[AMOUNT]L$
+	</string>
+	<string name="PriceFree">
+		Gratis
+	</string>
+	<string name="Touch">
+		Tocca
+	</string>
+	<string name="Sit">
+		Siediti qui
+	</string>
+	<icon name="secure_browsing" tool_tip="Browsing sicuro"/>
+	<button label="Acquista" name="buy_btn"/>
+	<button label="Paga" name="pay_btn"/>
+	<button label="Prendi copia" name="take_free_copy_btn"/>
+	<button label="Tocca" name="touch_btn"/>
+	<button label="Siediti" name="sit_btn"/>
+	<button label="Apri" name="open_btn"/>
+	<button label="Altre info" name="more_info_btn"/>
+</floater>

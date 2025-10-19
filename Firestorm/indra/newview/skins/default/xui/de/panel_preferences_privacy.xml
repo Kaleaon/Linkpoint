@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Kommunikation" name="im">
+	<string name="AutoresponseItemNotSet">
+		Kein Objekt ausgewählt
+	</string>
+	<string name="AutoresponseItemNotAvailable">
+		Objekt nicht verfügbar
+	</string>
+	<string name="AutoresponseItemNotLoggedIn">
+		Nicht eingeloggt
+	</string>
+	<tab_container label="Privacy" name="tabs">
+		<!--General-->
+		<panel label="Allgemein" name="tab-general">
+			<panel.string name="log_in_to_change">
+				Anmelden, um Änderungen vorzunehmen
+			</panel.string>
+			<button label="Cache leeren" name="clear_webcache" tool_tip="Suchverlauf, Teleport-Liste, Internet- und Texturen-Cache löschen"/>
+			<text name="cache_size_label">
+				(Standorte, Bilder, Web, Suchverlauf)
+			</text>
+			<check_box label="Zeige meine Profilinformationen in den Suchergebnissen" name="online_searchresults"/>
+			<check_box label="Nur Freunde und Gruppen wissen, dass ich online bin" name="online_visibility"/>
+			<check_box label="Nur Freunde und Gruppen können mich anrufen oder mir eine IM schicken" name="voice_call_friends_only_check"/>
+			<check_box label="Einladungen für bereits beigetretene Gruppen anzeigen" name="FSShowJoinedGroupInvitations"/>
+			<check_box label="Mikrofon ausschalten, wenn Anrufe beendet werden" name="auto_disengage_mic_check"/>
+			<check_box label="Objekten erlauben, die aktuelle Spracheinstellung abzufragen" name="LanguageIsPublic"/>
+			<check_box label="Automatisches Akzeptieren von Inventar-Angeboten" name="Auto_Accept_New_Inventory"/>
+			<check_box label="Automatisch akzeptierte Inventar-Angebote im Chat in der Nähe protokollieren" name="FSLogAutoAcceptInventoryToChat"/>
+			<check_box label="Benachrichtigung für automatisch akzeptiertes neues Inventar anzeigen" name="FSShowAutoAcceptInventoryInNotifications"/>
+			<check_box label="Klassische Annahme/Ablehnungs-Nachrichten für Inventar-Angebote verwenden" name="FSUseLegacyInventoryAcceptMessages" tool_tip="Falls aktiviert, werden Annahme- bzw. Ablehnungs-Nachrichten erst verschickt, wenn der entsprechende Button angeklickt wurde. Falls deaktiviert, wird automatisch eine Annahme-Nachricht verschickt, sobald das angebotene Objekt im Inventar eingetroffen ist. Diese Option hat keinen Effekt, wenn Inventar-Angebote automatisch akzeptiert werden."/>
+			<check_box label="Automatisch empfangene Objekte im Inventar anzeigen" name="Show_In_Inventory"/>
+			<check_box label="Automatisch akzeptierte Notizkarten, Landmarken und Texturen anzeigen" name="Show_New_Inventory"/>
+			<check_box label="Automatisch Fotos nach dem Hochladen im Inventar anzeigen" name="FSOpenInventoryAfterSnapshot"/>
+			<check_box label="Partikeleffekte erzeugen, wenn Objekte an andere Avatare gegeben werden" name="FSCreateGiveInventoryParticleEffect"/>
+			<check_box label="Meine Lieblingslandmarken bei Anmeldung anzeigen (im Dropdown-Menü „Hier anfangen“)" name="favorites_on_login_check" />
+			<button label="Ignorierte Einwohner/Objekte" name="block_list" width="180" />
+		</panel>
+
+		<!--Logging-->
+		<panel label="Protokoll und Verläufe" name="tab-logging">
+			<text name="logging_label" width="100">
+				Speichern:
+			</text>
+			<combo_box name="conversation_log_combo" tool_tip="Protokoll: Liste von Gesprächen, die von Ihnen oder einer anderen Person initiiert wurden. Verläufe: Der eigentliche Text, wie er auf dem Bildschirm dargestellt wurde.">
+				<item name="log_and_transcripts" label="Protokoll und Verläufe"/>
+				<item name="log_only" label="Nur Protokoll"/>
+				<item name="no_log_or_transcript" label="Kein Protokoll oder Verläufe"/>
+			</combo_box>
+			<button label="Protokoll löschen..." name="clear_log"/>
+			<button label="Verläufe löschen..." name="delete_transcripts"/>
+			<check_box name="LogNearbyChat" label="Chat in der Nähe speichern" tool_tip="Verlauf von Gesprächen in der Nähe auf meinem Computer speichern"/>
+			<check_box name="UseLegacyIMLogNames" label="Klassisches Dateinamensformat für Verläufe verwenden" tool_tip="Falls aktiviert, wird das alte Namensformat für Verläufe (Benutzer Name) anstatt des aktuellen (benutzer_name) verwendet."/>
+			<check_box name="LogFileNamewithDate" label="Datum zum Verlaufsdateinamen hinzufügen" tool_tip="Fügt das aktuelle Datum zum Dateinamen des Verlaufs im Format „chat-JJJJ-MM-TT“ bzw. „Verlaufname-JJJJ-MM-TT“ hinzu."/>
+			<check_box name="FSUseBuiltInHistory" label="Integrierte Verlaufsansicht verwenden" tool_tip="Verwendet den integrierten Betrachter für Verläufe. Falls deaktiviert, wird der standardmäßige Texteditor des Betriebssystems verwendet."/>
+		</panel>
+
+		<!--LookAt-->
+		<panel label="Kamerafokus" name="tab-lookat">
+			<check_box label="Kamerafokus anzeigen:" name="showlookat" tool_tip="Der Kamerafokus wird von Viewern dazu verwendet, die Rotation von Augen, Kopf und Torso zu bestimmen. Es kann auch dazu verwendet werden, den Kamerafokus anderer Avatare zu bestimmen."/>
+			<text name="lookatshownames" tool_tip="Namensformat auswählen, in dem Avatarnamen zusätzlich zum Fadenkreuz angezeigt werden.">
+				Namensanzeige für Kamerafokus:
+			</text>
+			<combo_box name="lookatshownames_combobox">
+				<combo_box.item label="Keine Anzeige" name="None"/>
+				<combo_box.item label="Vollständiger Name" name="Complete_Name"/>
+				<combo_box.item label="Anzeigename" name="Display_Name"/>
+				<combo_box.item label="Altes Namenssystem" name="Legacy_Name"/>
+				<combo_box.item label="Benutzername" name="User_Name"/>
+			</combo_box>
+			<check_box label="Eigenen Kamerafokus nicht anzeigen" name="LookAtHideOwn" tool_tip="Fadenkreuz für den eigenen Kamerafokus nicht anzeigen."/>
+			<check_box label="Linien zum Kamerafokus anzeigen" name="ExodusLookAtLines" tool_tip="Zeichnet eine Linie vom Avatar zum Fadenkreuz seines Kamerafokus."/>
+
+			<text name="mylookat">
+				Eigener Kamerafokus:
+			</text>
+			<check_box label="Eigenen Kamerafokus nicht an andere senden" name="privatelookat" tool_tip="Verhindert, dass der eigene Kamerafokus an andere gesendet wird."/>
+			<check_box label="Eigenen Kamerafokus auch lokal nicht setzen" name="privateLocalLookat" tool_tip="Verhindert, dass der Kopf des eigenen Avatars sich zum fokussierten Punkt der Kamera dreht. Die Kopfbewegung muss zwangsläufig nicht nicht anderen sichtbar sein, unabhängig wie diese Option gesetzt ist!"/>
+			<check_box label="Eigene Bearbeitungsauswahl nicht an andere senden" name="privatepointat" tool_tip="Verhindert, dass die eigene Auswahl an andere gesendet wird."/>
+			<check_box label="Distanz beschränken (vom eigenen Kopf aus):" name="LimitLookAt" width="270" tool_tip="Beschränkt die Distanz auf die angegebene Entfernung vom eigenen Kopf aus gemessen."/>
+			<text name="LimitLookAtDistanceMeterText">
+				m
+			</text>
+		</panel>
+
+		<!--Autoresponse1-->
+		<panel label="Autom. Antwort 1" name="tab-autoresponse-1">
+			<text name="autorespond_toggle_location_tip">
+				Hinweis: Zum Aktivieren der automatischen Antworten setzen Sie Ihren Online-Status über das Hauptmenü unter Unterhalten &gt; Online-Status
+			</text>
+			<text name="text_box3">
+				Automatische Antwort wenn im „Beschäftigt“-Modus:
+			</text>
+			<text name="autorespond_response_label">
+				Automatische Antwort für Onlinestatus „Automatische Antwort“:
+			</text>
+			<text name="autorespond_nf_response_label">
+				Automatische Antwort für Onlinestatus „Automatische Antwort an Nicht-Freunde“:
+			</text>
+			<check_box label="Automatische Antwort während des „Abwesend“-Modus senden:" name="send_away_av_response" tool_tip="Sendet den unten stehenden Text an jemanden, wenn sie eine Instant Message während des „Abwesend“-Modus schickt."/>
+			<check_box label="Automatische Antwort an geblockte Avatare senden:" name="send_muted_av_response" tool_tip="Sendet den unten stehenden Text an die geblockte Person, wenn sie eine Instant Message schickt."/>
+		</panel>
+
+		<!--Autoresponse2-->
+		<panel label="Autom. Antwort 2" name="tab-autoresponse-2">
+			<text name="autorespond_rto_response_label">
+				Automatische Antwort für Onlinestatus „Teleport-Angebote und -Anforderungen abweisen“:
+			</text>
+			<check_box label="Teleport-Angebote und -Anforderungen von Freunden nicht abweisen" name="FSDontRejectTeleportOffersFromFriends"/>
+			<text name="autorespond_rfr_response_label">
+				Automatische Antwort für Onlinestatus „Alle Freundschaftsanfragen abweisen“:
+			</text>
+			<text name="autoresponse_item_label" width="150">
+				Objekt für autom. Antwort:
+			</text>
+			<fs_copytrans_inventory_drop_target name="autoresponse_item" right="-70" tool_tip="Hier Inventarobjekt via Drag&amp;Drop ablegen"/>
+			<button label="Löschen" name="clear_autoresponse_item" width="60"/>
+		</panel>
+	</tab_container>
+</panel>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater
+ positioning="cascading"
+ legacy_header_height="18"
+ can_minimize="true"
+ can_close="true"
+ can_resize="true"
+ min_height="75"
+ min_width="515"
+ height="75"
+ layout="topleft"
+ name="HoverHeight"
+ single_instance="true"
+ help_topic="hover_height"
+ save_rect="true"
+ save_visibility="true"
+ title="Set Hover Height"
+ width="515">
+      <slider
+     enabled="false"
+     decimal_digits="3"
+     follows="top|left"
+     height="15"
+     increment="0.001"
+     initial_value="0.0"
+     label="Height"
+     label_width="60"
+     left="10"
+     width="501"
+     layout="topleft"
+     name="HoverHeightSlider"
+     top="25"
+     can_edit_text="true"
+     >
+    </slider>
+  <check_box
+     control_name="HoverHeightAffectsCamera"
+     follows="all"
+     height="15"
+     label="Affect Camera view"
+     layout="topleft"
+     name="BindCameraCheck"
+     top_pad="10"
+     width="237"/>
+</floater>

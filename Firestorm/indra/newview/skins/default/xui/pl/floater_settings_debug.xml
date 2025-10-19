@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="settings_debug" title="Ustawienia debugowania">
+	<panel name="debug_settings_search_panel">
+		<search_editor label="Szukaj tutaj" name="search_settings_input" tool_tip="Wpisz tutaj interesujący Cię termin do wyszukania. Wyniki będą oparte na nazwie ustawienia oraz jego komentarzu."/>
+		<scroll_list name="settings_scroll_list">
+			<scroll_list.columns label="Ustawienie" name="setting" />
+		</scroll_list>
+		<check_box label="Pokaż tylko zmienione" name="hide_default" />
+	</panel>
+	<panel name="debug_settings_values_panel">
+		<text_editor name="comment_text" tool_tip="Komentarz ustawienia debugowania. Często przekazuje użyteczną informację o zaznaczonym ustawieniu."/>
+		<radio_group name="boolean_combo">
+			<radio_item label="PRAWDA" name="TRUE" />
+			<radio_item label="FAŁSZ" name="FALSE" />
+		</radio_group>
+		<color_swatch label="Kolor" name="val_color_swatch"/>
+		<button name="sanity_warning_btn" tool_tip="To ustawienie debugowania nie wydaje się być poprawne; jego wartość leży poza zalecanym zakresem." />
+		<button label="Kopiuj" name="copy_btn" tool_tip="Skopiuj nazwę ustawienia do schowka."/>
+		<button label="Domyślnie" name="default_btn" tool_tip="Resetuj to ustawienie do wartości domyślnej."/>
+	</panel>
+</floater>

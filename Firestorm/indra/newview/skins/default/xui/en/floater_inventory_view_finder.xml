@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- <FS:Zi> Changed height from 512 to 528 in this block -->
+<!-- <FS:minerjr> [FIRE-35042] Inventory - Only Coalesced Filter - More accessible  -->
+<!-- Changed height from 528 to 598 to make room for new Only Coalesced and Show Links filter -->
+<floater
+ legacy_header_height="18"
+ can_minimize="false"
+ height="598"
+ layout="topleft"
+ name="Inventory Finder"
+ help_topic="inventory_finder"
+ title="Inventory Recent Items"
+ width="160">
+    <!-- </FS:minerjr> [FIRE-35042] -->
+    <icon
+     height="16"
+     image_name="Inv_Animation"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_animation"
+     top="22"
+     width="16" />
+    <check_box
+     height="16"
+     label="Animation"
+     layout="topleft"
+     left_pad="2"
+     name="check_animation"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_CallingCard"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_calling_card"
+     top="42"
+     width="16" />
+    <check_box
+     height="16"
+     label="Calling Cards"
+     layout="topleft"
+     left_pad="2"
+     name="check_calling_card"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_Shirt"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_clothing"
+     top="62"
+     width="16" />
+    <check_box
+     height="16"
+     label="Clothing"
+     layout="topleft"
+     left_pad="2"
+     name="check_clothing"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_Gesture"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_gesture"
+     top="82"
+     width="16" />
+    <check_box
+     height="16"
+     label="Gestures"
+     layout="topleft"
+     left_pad="2"
+     name="check_gesture"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_Landmark"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_landmark"
+     top="102"
+     width="16" />
+    <check_box
+     height="16"
+     label="Landmarks"
+     layout="topleft"
+     left_pad="2"
+     name="check_landmark"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_Material"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_material"
+     top="122"
+     width="16" />
+    <check_box
+     height="16"
+     label="Materials"
+     layout="topleft"
+     left_pad="2"
+     name="check_material"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_Notecard"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_notecard"
+     top="142"
+     width="16" />
+    <check_box
+     height="16"
+     label="Notecards"
+     layout="topleft"
+     left_pad="2"
+     name="check_notecard"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_Object"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_object"
+     top="162"
+     width="16" />
+    <check_box
+     height="16"
+     label="Objects"
+     layout="topleft"
+     left_pad="2"
+     name="check_object"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_Script"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_script"
+     top="182"
+     width="16" />
+    <check_box
+     height="16"
+     label="Scripts"
+     layout="topleft"
+     left_pad="2"
+     name="check_script"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_Sound"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_sound"
+     top="202"
+     width="16" />
+    <check_box
+     height="16"
+     label="Sounds"
+     layout="topleft"
+     left_pad="2"
+     name="check_sound"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_Texture"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_texture"
+     top="222"
+     width="16" />
+    <check_box
+     height="16"
+     label="Textures"
+     layout="topleft"
+     left_pad="2"
+     name="check_texture"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_Snapshot"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_snapshot"
+     top="242"
+     width="16" />
+    <check_box
+     height="16"
+     label="Snapshots"
+     layout="topleft"
+     left_pad="2"
+     name="check_snapshot"
+     top_delta="0"
+     width="126" />
+    <icon
+     height="16"
+     image_name="Inv_SettingsDay"
+     layout="topleft"
+     left="8"
+     mouse_opaque="true"
+     name="icon_settings"
+     top="262"
+     width="16" />
+    <check_box
+     height="16"
+     label="Settings"
+     layout="topleft"
+     left_pad="2"
+     name="check_settings"
+     top_delta="0"
+     width="126" />
+    <button
+     follows="left|top"
+     height="20"
+     label="All"
+     label_selected="All"
+     layout="topleft"
+     left="8"
+     name="All"
+     top="282"
+     width="100" />
+    <button
+     height="20"
+     label="None"
+     label_selected="None"
+     left="8"
+     name="None"
+     width="100" />
+    <!-- <FS:Zi> FIRE-1175 - Filter Permissions Menu -->
+    <check_box
+     height="16"
+     label="Mod"
+     layout="topleft"
+     left="8"
+     name="check_modify"
+     top_pad="6"
+     width="45" />
+    <check_box
+     height="16"
+     label="Copy"
+     layout="topleft"
+     left_pad="2"
+     name="check_copy"
+     width="45" />
+    <check_box
+     height="16"
+     label="Trans"
+     layout="topleft"
+     left_pad="2"
+     name="check_transfer"
+     width="45" />
+    <!-- Changed top_pad from 6 to 0 in this block -->
+    <check_box
+     height="16"
+     label="Always show folders"
+     layout="topleft"
+     left="8"
+     name="check_show_empty"
+     top_pad="0"
+     width="144" />
+    <!-- </FS:Zi> -->
+    <!-- <FS:minerjr> [FIRE-35042] Inventory - Only Coalesced Filter - More accessible  -->
+    <!-- Added new check box to allow finder panel the ability to set and view the Only Coalesced flag -->
+    <!-- Switched icon and checkbox left/right order to better fit aesthetics of the rest of the panel -->
+    <check_box
+     height="16"
+     label="Only Coalesced"
+     layout="topleft"
+     left="8"
+     name="check_only_coalesced"
+     top_pad="6"
+     width="106" />
+    <icon
+     height="16"
+     follows="left|top"
+     image_name="Inv_Object_Multi"
+     layout="topleft"
+     left_pad="3"
+     mouse_opaque="true"
+     name="icon_coalesced"
+     top_delta="0"
+     width="16" />
+    <!-- Added combo box for the link filters -->
+    <!-- The order matches the order in the Gear->menu, but the values are the actual filter value, used to simplify the actual code -->
+    <combo_box     
+     follows="left|top"
+     height="23"
+     layout="topleft"
+     left="8"
+     top_pad="6"
+     tool_tip="Filters linked objects"
+     name="inventory_filter_show_links_combo"
+     width="145">
+        <combo_box.item name="show_links"
+                        label="Show Links"
+                        value="0"/>
+        <combo_box.item name="show_links_only"
+                        label="Show Links Only"
+                        value="2"/>
+        <combo_box.item name="hide_links"
+                        label="Hide Links"
+                        value="1"/>
+    </combo_box>
+    <!-- </FS:minerjr> [FIRE-35042] -->    
+    <check_box
+     height="16"
+     label="Created by me"
+     layout="topleft"
+     left="8"
+     name="check_created_by_me"
+     top_pad="6"
+     width="144" />
+    <check_box
+     height="16"
+     label="Created by others"
+     layout="topleft"
+     left="8"
+     name="check_created_by_others"
+     top_pad="0"
+     width="144" />
+    <check_box
+     height="16"
+     label="Since Logoff"
+     layout="topleft"
+     left_delta="0"
+     name="check_since_logoff"
+     top_pad="6"
+     width="144" />
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     halign="center"
+     height="20"
+     layout="topleft"
+     left_delta="0"
+     name="- OR -"
+     top_pad="0"
+     width="144">
+        - OR -
+    </text>
+    <radio_group
+     height="23"
+     layout="topleft"
+     name="date_search_direction"
+     top_pad="0"
+     left="8"
+     width="270">
+     <radio_item
+      label="Newer than"
+      layout="topleft"
+      name="newer"
+      top_pad="0"
+      left="0" />
+     <radio_item
+      label="Older than"
+      layout="topleft"
+      name="older"
+      top_pad="6"
+      left="0" />
+    </radio_group>
+    <spinner
+     follows="left|top"
+     height="16"
+     increment="1"
+     initial_value="0"
+     layout="topleft"
+     left_delta="0"
+     max_val="240000"
+     name="spin_hours_ago"
+     top_pad="4"
+     width="64" />
+    <text
+     name="label_hours"
+     type="string"
+     length="1"
+     follows="left|top"
+     height="16"
+     layout="topleft"
+     left_pad="3"
+     top_delta="4"
+     width="80">
+        Hours
+    </text>
+    <spinner
+     follows="left|top"
+     height="16"
+     increment="1"
+     initial_value="0"
+     layout="topleft"
+     max_val="10000"
+     name="spin_days_ago"
+     top_pad="4"
+     left="8"
+     width="64" />
+    <text
+     name="label_days"
+     type="string"
+     length="1"
+     follows="left|top"
+     height="16"
+     layout="topleft"
+     left_pad="3"
+     top_delta="4"
+     width="80">
+        Days
+    </text>
+    <button
+     left="5"
+     follows="top|left"
+     height="20"
+     label="Reset"
+     label_selected="Reset"
+     layout="topleft"
+     name="btnReset"
+     top_pad="8"
+     width="72" />
+    <button
+     right="-6"
+     follows="top|left"
+     height="20"
+     label="Close"
+     label_selected="Close"
+     layout="topleft"
+     name="Close"
+     top_delta="0"
+     width="72" />
+</floater>

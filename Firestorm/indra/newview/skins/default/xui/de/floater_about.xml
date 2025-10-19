@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="floater_about" title="Info über [APP_NAME]">
+	<tab_container name="about_tab">
+		<panel label="Info" name="support_panel">
+    <text name="support_intro">    
+Aktuelle Informationen über Firestorm finden Sie unter
+https://www.firestormviewer.org
+    </text>
+			<button label="In Zwischenablage kopieren" name="copy_btn"/>
+			<button label="Nach Updates suchen" name="update_btn"/>
+		</panel>
+		<panel label="Danksagung" name="credits_panel">
+			<text name="linden_intro">
+Ohne Linden Labs Entscheidung, den Second Life-Viewer quelloffen zu machen, wäre Firestorm nicht möglich gewesen.
+
+Second Life wird präsentiert von den Lindens,
+mit Open-Source-Beiträgen von:
+			</text>
+			<text_editor name="contrib_names">
+				Dummy-Name wird zur Laufzeit ersetzt
+			</text_editor>
+		</panel>
+<!-- Firestorm Credits -->
+		<panel label="Firestorm" name="fs_credits_panel" height="930">
+			<scroll_container name="fs_credits_scroll_container">
+				<panel name="fs_credits_scroll_container_content_panel">
+					<text name="firestorm_intro" height="120">
+Firestorm ist ein Community-Projekt, um das SecondLife(tm)-Viewer-Erlebnis zu verbessern. Wir verbinden Beiträge von Community-Entwicklern mit Code von Linden Lab sowie eigenen Erweiterungen, um ein qualitativ hochwertiges und funktionsreiches Viewer-Erlebnis zu bieten. Wir werden durch ein großes, freiwilliges Support-Team unterstützt. Firestorm wird Ihnen präsentiert von The Phoenix Firestorm Project, Inc., einer gemeinnützigen Organisation.
+
+Das Firestorm Entwickler-Team:
+					</text>
+					<text name="fs_contrib_intro" >
+Zusätzlicher Programmcode von:
+					</text>
+					<text name="fs_support_intro" >
+Besonderer Dank gilt unserem Firestorm-Support-Team sowie den Wiki-Autoren, Schulungsleitern und Übersetzern:
+					</text>
+					<text name="fs_art_intro" >
+Firestorm enthält Starlight, modifiziert für Firestorm. Es ist von Einwohnern für Einwohner und hat das Ziel, eine alternative, freundlichere und hoffentlich einfacher zu bedienende Oberfläche bereitzustellen. Für weitere Details, siehe &lt;nolink&gt;https://wiki.secondlife.com/wiki/Viewer_Skins/Starlight&lt;/nolink&gt;.
+
+UI-Künstler und Designer:
+					</text>
+				</panel>
+			</scroll_container>
+		</panel>
+		<panel label="Lizenzen" name="licenses_panel">
+			<text_editor name="licenses_editor">
+				3Dconnexion SDK Copyright (C) 1992-2009 3Dconnexion.
+APR Copyright (C) 2011 The Apache Software Foundation
+Collada DOM Copyright 2006 Sony Computer Entertainment Inc.
+cURL Copyright (C) 1996-2010, Daniel Stenberg (daniel@haxx.se).
+DBus/dbus-glib Copyright (C) 2002, 2003  CodeFactory AB / Copyright (C) 2003, 2004 Red Hat, Inc.
+expat Copyright (C) 1998, 1999, 2000 Thai Open Source Software Center Ltd.
+FMOD Sound System Copyright (C) Firelight Technologies Pty, Ltd., 1994-2020
+FreeType Copyright (C) 1996-2002, 2006 David Turner, Robert Wilhelm und Werner Lemberg.
+GL Copyright (C) 1999-2004 Brian Paul.
+Havok.com(TM) Copyright (C) 1999-2001, Telekinesys Research Limited.
+HACD Copyright (C) 2011, Khaled Mamou (kmamou@gmail.com)
+jpeg2000 Copyright (C) 2001, David Taubman, The University of New South Wales (UNSW).
+jpeglib Copyright (C) 1991-1998, Thomas G. Lane.
+meshoptimizer Copyright (c) 2016-2021 Arseny Kapoulkine
+ogg/vorbis Copyright (C) 2002, Xiphophorus.
+OpenSSL Copyright (C) 1998-2008 The OpenSSL Project.
+PCRE Copyright (c) 1997-2012 University of Cambridge.
+SDL Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002 Sam Lantinga.
+SSLeay Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com).
+xxHash Copyright (C) 2012-2020 Yann Collet.
+zlib Copyright (C) 1995-2012 Jean-loup Gailly und Mark Adler.
+
+Second Life Viewer verwendet Havok (TM) Physics. (c)Copyright 1999-2010 Havok.com Inc. (und Lizenzgeber). Alle Rechte vorbehalten. Details siehe www.havok.com.
+
+Diese Software enthält von der NVIDIA Corporation bereitgestellten Quellcode.
+
+Alle Rechte vorbehalten.  Details siehe licenses.txt.
+
+Audiocodierung für Voice-Chat: Polycom(R) Siren14(TM) (ITU-T Rec. G.722.1 Annex C)
+			</text_editor>
+		</panel>
+	</tab_container>
+</floater>

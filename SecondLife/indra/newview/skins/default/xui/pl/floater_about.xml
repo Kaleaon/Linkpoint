@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="floater_about" title="O [CAPITALIZED_APP_NAME]">
+	<tab_container name="about_tab">
+		<panel label="Informacje" name="support_panel">
+			<button label="Kopiuj do schowka" name="copy_btn" />
+		</panel>
+		<panel label="Podziękowania"  name="credits_panel">
+			<text name="linden_intro">
+Second Life zostało dla Ciebie stworzone przez Lindenów, 
+z wkładem open source od:
+			</text>
+		</panel>
+		<panel label="Licencje" name="licenses_panel" />
+	</tab_container>
+</floater>

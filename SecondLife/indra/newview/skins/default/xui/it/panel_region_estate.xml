@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Proprietà immobiliari" name="Estate">
+	<text name="estate_help_text">
+		Le modifiche apportate in questa scheda saranno valide per tutte le regioni in questa proprietà.
+	</text>
+	<text name="estate_text">
+		Proprietà immobiliari:
+	</text>
+	<text name="estate_name">
+		(sconosciuto)
+	</text>
+	<text name="owner_text">
+		Proprietario immobiliare:
+	</text>
+	<text name="estate_owner">
+		(sconosciuto)
+	</text>
+	<radio_group name="externally_visible_radio">
+		<radio_item label="Consenti accesso solo ai residenti e ai gruppi elencati nella scheda di Accesso" name="estate_restricted_access"/>
+		<radio_item label="Chiunque può visitare" name="estate_public_access"/>
+	</radio_group>
+	<check_box label="È necessario avere più di 18 anni" name="limit_age_verified" tool_tip="Per poter visitare questa proprietà immobiliare i Residenti devono avere almeno 18 anni. Vedi [SUPPORT_SITE] per maggiori informazioni."/>
+	<check_box label="È necessario aver registrato le informazioni di pagamento" name="limit_payment" tool_tip="Per poter visitare questa proprietà immobiliare i Residenti devono aver fornito informazioni di pagamento a Linden Lab.  Vedi [SUPPORT_SITE] per maggiori informazioni."/>
+	<check_box label="I proprietari dei lotti possono essere più restrittivi" name="parcel_access_override"/>
+	<check_box label="Permetti la chat voice" name="voice_chat_check"/>
+	<check_box label="Permetti teleport diretto" name="allow_direct_teleport"/>
+	<button label="Applica" name="apply_btn"/>
+	<text name="estate_manager_label">
+		Manager delle proprietà:
+	</text>
+	<text name="allow_resident_label">
+		Sempre consentito:
+	</text>
+	<button label="Aggiungi..." name="add_estate_manager_btn"/>
+	<button label="Rimuovi..." name="remove_estate_manager_btn"/>
+	<button label="Aggiungi..." name="add_allowed_avatar_btn"/>
+	<button label="Rimuovi..." name="remove_allowed_avatar_btn"/>
+	<text name="allow_group_label">
+		Gruppi sempre consentiti:
+	</text>
+	<text name="ban_resident_label">
+		Sempre escluso:
+	</text>
+	<button label="Aggiungi..." name="add_allowed_group_btn"/>
+	<button label="Rimuovi..." name="remove_allowed_group_btn"/>
+	<button label="Aggiungi..." name="add_banned_avatar_btn"/>
+	<button label="Rimuovi..." name="remove_banned_avatar_btn"/>
+	<button font="SansSerifSmall" label="Manda un messaggio di le proprietà..." name="message_estate_btn"/>
+	<button font="SansSerifSmall" label="Espelli residente dalla proprietà..." name="kick_user_from_estate_btn"/>
+</panel>

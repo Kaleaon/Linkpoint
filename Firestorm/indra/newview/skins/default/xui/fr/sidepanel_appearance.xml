@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Outfits" name="appearance panel">
+	<string name="No Outfit" value="Aucune tenue" />
+	<string name="Unsaved Changes" value="Modifications non enregistrées" />
+	<string name="Now Wearing" value="Je porte maintenant..." />
+	<string name="Changing outfits" value="Changing outfits" />
+	<panel name="panel_currentlook">
+		<button label="E" name="editappearance_btn"/>
+		<button label="O" name="openoutfit_btn"/>
+		<text name="currentlook_status">(Statut)</text>
+		<text name="currentlook_name">(Chargement)</text>
+		<button name="edit_outfit_btn" tool_tip="Modifier cette tenue"/>
+	</panel>
+	<filter_editor label="Filtrer les tenues" name="Filter"/>
+</panel>

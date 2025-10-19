@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="objectcontents" title="Contenu de l'objet">
+	<layout_stack name="button_bar_ls">
+		<layout_panel name="copy_btn_lp" width="150">
+			<flyout_button label="Copier dans l'inventaire" name="copy_flyout" width="140">
+				<flyout_button.item label="Remplacer la tenue portée par le contenu" name="replace"/>
+				<flyout_button.item label="Ajouter le contenu à la tenue portée" name="add"/>
+			</flyout_button>
+		</layout_panel>
+		<layout_panel name="cancel_btn_lp">
+			<button label="Annuler" label_selected="Annuler" name="cancel_button" width="60" left="30"/>
+		</layout_panel>
+	</layout_stack>
+</floater>

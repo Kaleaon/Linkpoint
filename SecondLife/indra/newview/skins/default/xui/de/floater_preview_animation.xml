@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="preview_anim">
+	<floater.string name="Title">
+		Animation: [NAME]
+	</floater.string>
+	<text name="desc txt" width="140">
+		Beschreibung:
+	</text>
+	<line_editor left="108" name="desc" width="160"/>
+	<button label="Inworld abspielen" label_selected="Stopp" name="Inworld" tool_tip="Diese Animation so wiedergeben, dass andere sie sehen können."/>
+	<button label="Lokal wiedergeben" label_selected="Stopp" name="Locally" tool_tip="Diese Animation so wiedergeben, dass nur Sie sie sehen."/>
+</floater>

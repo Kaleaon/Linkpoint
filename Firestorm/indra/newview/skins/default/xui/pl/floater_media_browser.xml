@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="floater_about" title="Przeglądarka mediów">
+	<layout_stack name="stack1">
+		<layout_panel name="nav_controls">
+			<button label="Wstecz" name="back"/>
+			<button label="Dalej" name="forward"/>
+			<button label="Odśwież" name="reload"/>
+			<button label="Idź" name="go"/>
+		</layout_panel>
+		<layout_panel name="time_controls">
+			<button label="przewiń" name="rewind" />
+			<button label="dalej" name="seek" />
+		</layout_panel>
+		<layout_panel name="parcel_owner_controls">
+			<button label="Wyślij obecną stronę na działkę" name="assign"/>
+		</layout_panel>
+		<layout_panel name="external_controls">
+			<text name="plugin_fail_text">
+Wygląda na to, że wtyczka przeglądarki długo się otwiera.
+Jeśli plugin się wcale nie załaduje, to odwiedź:
+
+https://wiki.firestormviewer.org/fs_media
+
+aby poznać możliwe kroki naprawy błędu.
+			</text>
+			<button label="Użyj mojej przeglądarki" name="open_browser"/>
+			<button label="Zamknij" name="close"/>
+		</layout_panel>
+	</layout_stack>
+</floater>

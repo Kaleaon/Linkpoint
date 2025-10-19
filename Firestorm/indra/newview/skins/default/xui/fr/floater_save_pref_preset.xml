@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<floater name="save_pref_preset" title="ENREGISTRER LE PRÉRÉGLAGE PRÉF.">
+	<text name="Preset">
+		Tapez un nom pour le préréglage ou choisissez un préréglage existant.
+	</text>
+	<button label="Enregistrer" name="save"/>
+	<button label="Annuler" name="cancel"/>
+</floater>

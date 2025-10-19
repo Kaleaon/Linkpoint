@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="block_list_panel">
+	<panel label="bottom_panel" name="blocked_buttons_panel">
+		<filter_editor label="過濾器" name="blocked_filter_input"/>
+		<menu_button name="blocked_gear_btn" tool_tip="對所選的人或物件採取動作"/>
+		<menu_button name="view_btn" tool_tip="排序選項"/>
+		<menu_button name="plus_btn" tool_tip="挑選一位居民或物件，加以封鎖"/>
+		<button name="unblock_btn" tool_tip="將居民或物件由封鎖清單中移除"/>
+	</panel>
+	<text name="block_limit">
+		封鎖名單目前有[COUNT]名，上限為[LIMIT]。
+	</text>
+	<block_list name="blocked" tool_tip="目前封鎖的居民清單"/>
+</panel>

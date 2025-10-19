@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater
+ legacy_header_height="18"
+ can_minimize="false"
+ can_close="false" 
+ height="215"
+ layout="topleft"
+ name="Display Name"
+ help_topic="display_name"
+ save_rect="false"
+ title="Change Display Name"
+ width="445">
+    <floater.string name="LockOutDateFormat">
+        [month,datetime,slt] [day,datetime,slt] [year,datetime,slt] [hour12,datetime,slt]:[min,datetime,slt]:[second,datetime,slt] [ampm,datetime,slt] [timezone,datetime,slt]
+    </floater.string>
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     font="SansSerif"
+     height="40"
+     layout="topleft"
+     left="15"
+     name="info_text"
+     top="20"
+     use_ellipses="true"
+     right="-10"
+     wrap="true">
+      Your display name is what other people see above your head. It is different from your login name. You can change it once a week.
+    </text>
+	<text
+     type="string"
+     length="1"
+     follows="left|top"
+     font="SansSerif"
+     height="30"
+     layout="topleft"
+     left="15"
+	 text_color="EmphasisColor" 
+     name="lockout_text"
+     top="55"
+     use_ellipses="true"
+	 visible="false" 
+     right="-10"
+     wrap="true">
+		You cannot change your Display Name until:
+[TIME].
+	</text>
+    <text
+      top_pad="5"
+      width="150"
+      height="20"
+      font="SansSerif"
+      name="set_name_label">
+      New Display Name:
+    </text>
+    <line_editor
+      width="330"
+      name="display_name_editor"
+      max_length_chars="31"
+      height="20"
+      top_pad="0"
+      left_delta="0" />
+	<text
+       top_pad="8"
+       left="15"
+       width="380"
+       height="20"
+       font="SansSerif"
+       name="name_confirm_label">
+      Type your new name again to confirm:
+    </text>
+    <line_editor
+      width="330"
+      name="display_name_confirm"
+      max_length_chars="31"
+      height="20"
+      top_pad="0"
+      left_delta="0" />
+    <button
+     label="Reset"
+     layout="topleft"
+     font="SansSerif"
+     width="120"
+     height="23"
+     top_pad="8"
+     left_delta="0"
+     name="reset_btn"
+     tool_tip="Use Username as a Display Name" />
+    <button
+     height="23"
+     label="Save"
+     layout="topleft"
+     font="SansSerif"
+     left_pad="50"
+     name="save_btn"
+     tool_tip="Save your new Display Name" 
+     top_delta="0"
+     width="120" />
+    <button
+     height="23"
+     label="Cancel"
+     font="SansSerif"
+     layout="topleft"
+     left_pad="5"
+     name="cancel_btn"
+     width="120" />
+</floater>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="avatarpicker" title="Scegli persona">
+	<floater.string name="not_found">
+		&apos;[TEXT]&apos; non trovato
+	</floater.string>
+	<floater.string name="not_found_text">
+		Residente non trovato
+	</floater.string>
+	<floater.string name="no_one_near">
+		Nessuno vicino
+	</floater.string>
+	<floater.string name="no_results">
+		Nessun risultato
+	</floater.string>
+	<floater.string name="searching">
+		Ricerca...
+	</floater.string>
+	<string label="Seleziona" name="Select">
+		Seleziona
+	</string>
+	<string name="Close">
+		Chiudi
+	</string>
+	<tab_container name="ResidentChooserTabs">
+		<panel label="Cerca" name="SearchPanel">
+			<text name="InstructSearchResidentName">
+				Comincia a digitare il nome della persona:
+			</text>
+			<button label="Vai" label_selected="Vai" name="Find"/>
+			<fs_scroll_list name="SearchResults">
+				<columns label="Nome" name="name"/>
+				<columns label="Nome utente" name="username"/>
+			</fs_scroll_list>
+		</panel>
+		<panel label="Amici" name="FriendsPanel">
+			<text name="InstructSelectFriend">
+				Scegli una persona:
+			</text>
+			<fs_scroll_list name="Friends">
+				<columns label="Nome" name="name"/>
+				<columns label="Nome utente" name="username"/>
+			</fs_scroll_list>
+		</panel>
+		<panel label="Vicino a me" name="NearMePanel">
+			<text name="InstructSelectResident">
+				Scegli una persona nei dintorni
+			</text>
+			<slider label="Area" name="near_me_range"/>
+			<text name="meters">
+				metri
+			</text>
+			<fs_scroll_list name="NearMe">
+				<columns label="Nome" name="name"/>
+				<columns label="Nome utente" name="username"/>
+			</fs_scroll_list>
+		</panel>
+		<panel label="Cerca per UUID" name="SearchPanelUUID">
+			<text name="SearchByUUIDLabel">
+				Inserisci UUID residente:
+			</text>
+			<button label="Cerca" name="FindUUID"/>
+			<fs_scroll_list name="SearchResultsUUID">
+				<columns label="Nome" name="nameUUID"/>
+				<columns label="Nome utente" name="usernameUUID"/>
+			</fs_scroll_list>
+		</panel>
+	</tab_container>
+	<button label="Annulla" label_selected="Annulla" name="cancel_btn"/>
+</floater>

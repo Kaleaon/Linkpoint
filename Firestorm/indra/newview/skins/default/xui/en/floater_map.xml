@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater
+ positioning="none"
+ bg_alpha_image_overlay="DkGray"
+ legacy_header_height="0"
+ can_minimize="true" 
+ can_resize="true"
+ header_height="0"
+ height="200"
+ layout="topleft"
+ min_height="64"
+ min_width="64"
+ name="Map"
+ title=""
+ help_topic="map"
+ save_rect="true"
+ save_visibility="true"
+ single_instance="true"
+ width="200">
+    <!-- RLVa shows the anonymized name on the regular tooltip when @shownames=n restricted (rather than show the avatar inspector) --> 
+    <floater.string
+     name="ToolTipMsg">
+        [AGENT][PARCEL_NAME_MSG][PARCEL_SALE_PRICE_MSG][PARCEL_SALE_AREA_MSG][PARCEL_OWNER_MSG][REGION_NAME_MSG][TOOL_TIP_HINT_MSG]
+    </floater.string>
+    <floater.string
+     name="ParcelNameMsg">
+        [PARCEL_NAME]
+    </floater.string>
+    <floater.string
+     name="ParcelSalePriceMsg">
+        Price: L$[PRICE] (L$[PRICE_PER_SQM]/m²)
+    </floater.string>
+    <floater.string
+     name="ParcelSaleAreaMsg">
+        Area: [AREA]m²
+    </floater.string>
+    <floater.string
+     name="ParcelOwnerMsg">
+        Owner: [PARCEL_OWNER]
+    </floater.string>
+    <floater.string
+     name="RegionNameMsg">
+        Region: [REGION_NAME]
+    </floater.string>
+    <floater.string
+     name="ToolTipHintMsg">
+        Double-click to open map
+    </floater.string>
+    <floater.string
+     name="AltToolTipHintMsg">
+        Double-click to teleport
+    </floater.string>
+    <floater.string name="mini_map_caption">
+        Mini-map
+    </floater.string>
+    <net_map
+     bg_color="Transparent"
+     follows="top|left|bottom|right"
+     layout="topleft"
+     left="0"
+     mouse_opaque="false"
+     name="Net Map"
+     width="200"
+     height="218"
+     top="0"/>
+    <text
+     type="string"
+     length="1"
+     label="N"
+     layout="topleft"
+     name="floater_map_north"
+     text_color="1 1 1 0.7">
+        N
+    </text>
+    <text
+     type="string"
+     length="1"
+     label="E"
+     layout="topleft"
+     name="floater_map_east"
+     text_color="1 1 1 0.7">
+        E
+    </text>
+    <text
+     type="string"
+     length="1"
+     label="W"
+     layout="topleft"
+     name="floater_map_west"
+     text_color="1 1 1 0.7">
+        W
+    </text>
+    <text
+     type="string"
+     length="1"
+     label="S"
+     layout="topleft"
+     name="floater_map_south"
+     text_color="1 1 1 0.7">
+        S
+    </text>
+    <text
+     type="string"
+     length="1"
+     label="SE"
+     layout="topleft"
+     name="floater_map_southeast"
+     text_color="1 1 1 0.7">
+        SE
+    </text>
+    <text
+     type="string"
+     length="1"
+     label="NE"
+     layout="topleft"
+     name="floater_map_northeast"
+     text_color="1 1 1 0.7">
+        NE
+    </text>
+    <text
+     type="string"
+     length="1"
+     label="SW"
+     layout="topleft"
+     name="floater_map_southwest"
+     text_color="1 1 1 0.7">
+        SW
+    </text>
+    <text
+     type="string"
+     length="1"
+     label="NW"
+     layout="topleft"
+     name="floater_map_northwest"
+     text_color="1 1 1 0.7">
+        NW
+    </text>
+</floater>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="object_weights" title="Proprietà avanzate">
+	<text name="selected_text" value="Selezionati"/>
+	<text name="objects_label" value="Oggetti"/>
+	<text name="prims_label" value="Prim"/>
+	<text name="weights_of_selected_text" value="Peso elementi selezionati"/>
+	<text name="download_label" value="Scaricamento"/>
+	<text name="physics_label" value="Fisica"/>
+	<text name="server_label" value="Server"/>
+	<text name="display_label" value="Visualizzazione"/>
+	<text name="land_impacts_text" value="Impatto terreno"/>
+	<text name="selected_label" value="Selezionati"/>
+	<text name="rezzed_on_land_label" value="Posati sul terreno"/>
+	<text name="remaining_capacity_label" value="Capacità restante"/>
+	<text name="total_capacity_label" value="Capacità totale"/>
+	<text name="help_SLURL" value="[secondlife:///app/help/object_weights Di cosa si tratta?...]"/>
+</floater>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="顯像" name="Display panel">
+	<text name="preset_text">
+		（無）
+	</text>
+	<text name="QualitySpeed">
+		品質與速度：
+	</text>
+	<text name="ShadersPrefText">
+		低
+	</text>
+	<text name="ShadersPrefText2">
+		中
+	</text>
+	<text name="ShadersPrefText3">
+		高
+	</text>
+	<text name="ShadersPrefText4">
+		超高
+	</text>
+	<text name="FasterText">
+		最快
+	</text>
+	<text name="BetterText">
+		最佳
+	</text>
+	<check_box initial_value="true" label="大氣著色" name="WindLightUseAtmosShaders"/>
+	<check_box initial_value="true" label="進階照明模型" name="UseLightShaders"/>
+	<slider label="化身最大複雜度：" name="IndirectMaxComplexity" tool_tip="控制在何時機下讓複雜化身呈像為「JellyDoll」"/>
+	<text name="IndirectMaxComplexityText">
+		0
+	</text>
+	<check_box initial_value="true" label="永遠呈現朋友" name="AlwaysRenderFriends"/>
+	<button label="例外…" name="RenderExceptionsButton"/>
+	<button label="將設定存為預設值 …" name="PrefSaveButton"/>
+	<button label="載入預設..." name="PrefLoadButton"/>
+	min_val=&quot;0.125&quot;
+	<button label="刪除自訂配置…" name="PrefDeleteButton"/>
+	<button label="重設為我們建議的設定" name="Defaults"/>
+	<button label="進階設定…" name="AdvancedSettings"/>
+</panel>

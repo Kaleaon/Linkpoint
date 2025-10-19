@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="texture picker" title="Выбрать: Текстуру" min_height="350">
+
+	<!--  top static -->
+	<floater.string name="choose_picture">
+		Щелкните для выбора изображения
+	</floater.string>
+	<floater.string name="pick title">
+		Выбрать:
+	</floater.string>
+	<text name="Multiple">
+		Несколько текстур
+	</text>
+
+	<!-- mode selector -->
+	<radio_group name="mode_selection" left="7">
+		<radio_item label="Инв." name="inventory"/>
+		<radio_item label="Лок." name="local"/>
+		<radio_item label="Зпеч." name="bake"/>
+	</radio_group>
+	<text name="size_lbl">
+Размер:
+[DIMENSIONS]
+	</text>
+	<text name="over_limit_lbl">
+		Выбрана текстура [TEXDIM]. Изображение инвентаря должно быть квадратным, не меньше [MINTEXDIM].
+	</text>
+
+	<!--  middle: inventory mode -->
+	<button label="По умолч." label_selected="По умолч." name="Default"/>
+	<button label="Очистить" label_selected="Очистить" name="Blank"/>
+	<button label="Прозрачно" label_selected="Прозрачно" name="Transparent" tool_tip="Примечание. Если выбрана прозрачная текстура или другая текстура с частичной прозрачностью, свет не будет проецироваться."/>
+	<button label="Нет" label_selected="Нет" name="None"/>
+	<text name="preview_disabled" value="Просмотр отключен"/>
+
+	<!--  middle: local mode -->
+	<filter_editor label="Фильтровать текстуры" name="inventory search editor"/>
+	<check_box initial_value="false" label="Показывать папки" name="show_folders_check"/>
+	<button label="Добавить" label_selected="Добавить" name="l_add_btn"/>
+	<button label="Удалить" label_selected="Удалить" name="l_rem_btn"/>
+	<button label="Передать" label_selected="Передать" name="l_upl_btn"/>
+	<scroll_list name="l_name_list">
+		<column label="Имя" name="unit_name"/>
+		<column label="ID" name="unit_id_HIDDEN"/>
+	</scroll_list>
+
+	<!-- middle: bake mode -->
+	<combo_box name="l_bake_use_texture_combo_box" tool_tip="Выберите текстуру">
+		<combo_box.item label="Нет" name="None"/>
+		<combo_box.item label="ГОЛОВА" name="BAKED_HEAD"/>
+		<combo_box.item label="ВЕРХ" name="BAKED_UPPER"/>
+		<combo_box.item label="НИЗ" name="BAKED_LOWER"/>
+		<combo_box.item label="ГЛАЗА" name="BAKED_EYES"/>
+		<combo_box.item label="ЮБКА" name="BAKED_SKIRT"/>
+		<combo_box.item label="ВОЛОСЫ" name="BAKED_HAIR"/>
+		<combo_box.item label="РУКА" name="BAKED_LEFTARM"/>
+		<combo_box.item label="НОГА" name="BAKED_LEFTLEG"/>
+		<combo_box.item label="ДОП1" name="BAKED_AUX1"/>
+		<combo_box.item label="ДОП2" name="BAKED_AUX2"/>
+		<combo_box.item label="ДОП3" name="BAKED_AUX3"/>
+	</combo_box>
+	<check_box label="Скрыть базовый регион меша" name="hide_base_mesh_region"/>
+
+	<!-- bottom static -->
+	<line_editor name="TextureKey" tool_tip="Ключ Текстуры"/>
+	<button name="TextureKeyApply" label="Прим. UUID" width="100" tool_tip="Применить этот UUID"/>
+	<button label="Да" label_selected="Да" name="Select" left="150"/>
+	<button label="Отмена" label_selected="Отмена" name="Cancel"/>
+	<check_box initial_value="true" label="Применить сейчас" name="apply_immediate_check" width="200"/>
+</floater>

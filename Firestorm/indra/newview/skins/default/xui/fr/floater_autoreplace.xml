@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="autoreplace_floater" title="Paramètres de substitution automatique">
+	<check_box label="Activer la substitution automatique" name="autoreplace_enable" tool_tip="Lorsque vous saisissez du texte, chaque mot-clé saisi sera remplacé par entrées avec la substitution correspondante"/>
+	<button name="autoreplace_import_list" width="115" left_pad="5" label="Importer une liste..." tool_tip="Charger une liste précédemment exportée à partir d'un fichier."/>
+	<button name="autoreplace_export_list" width="115" left_pad="5" label="Exporter une liste..." tool_tip="Enregistrer la liste sélectionnée dans un fichier afin que vous puissiez la partager."/>
+	<button name="autoreplace_new_list" width="115" left_pad="5" label="Nouvelle Liste..." tool_tip="Créer une nouvelle liste."/>
+	<button name="autoreplace_delete_list" width="115" left_pad="5" label="Supprimer la liste" tool_tip="Supprimer la liste sélectionnée."/>
+	<button name="autoreplace_list_up" tool_tip="Déplacer cette liste en priorité."/>
+	<button name="autoreplace_list_down" tool_tip="Déplacer cette liste dans la priorité."/>
+	<scroll_list name="autoreplace_list_replacements">
+		<scroll_list.columns label="Mot-clé" name="keyword"/>
+		<scroll_list.columns label="Remplacement" name="replacement"/>
+	</scroll_list>
+	<button name="autoreplace_add_entry" label="Ajouter..."/>
+	<button name="autoreplace_delete_entry" label="Supprimer"/>
+	<text name="autoreplace_keyword_txt">Mot-clé :</text>
+	<text name="autoreplace_replacement_txt">Substitution :</text>
+	<button name="autoreplace_save_entry" label="Sauvegarder" tool_tip="Sauvegarder cette entrée."/>
+	<button name="autoreplace_save_changes" label="Appliquer" tool_tip="Sauvegarder tous les changements."/>
+	<button name="autoreplace_cancel" label="Annuler" tool_tip="Annuler tous les changements."/>
+</floater>

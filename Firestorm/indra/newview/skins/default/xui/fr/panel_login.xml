@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel name="panel_login">
+	<panel.string name="forgot_password_url">
+		http://secondlife.com/account/request.php?lang=fr
+	</panel.string>
+	<panel.string name="sign_up_url">
+		https://www.firestormviewer.org/join-secondlife/
+	</panel.string>
+	<layout_stack name="ui_stack">
+		<layout_panel name="ui_container">
+			<combo_box label="Nom d'utilisateur" tool_tip="Le nom d'utilisateur avec lequel vous vous êtes enregistré, comme bobsmith12 ou Steller Sunshine" name="username_combo"/>
+			<line_editor name="password_edit" label="Mot de passe"/>
+			<combo_box label="Mes lieux favoris" name="start_location_combo">
+				<combo_box.item label="Mon dernier emplacement" name="MyLastLocation"/>
+				<combo_box.item label="Mon domicile" name="MyHome"/>
+			</combo_box>
+			<button label="Connexion" name="connect_btn"/>
+			<check_box label="Se souvenir de moi" name="remember_check"/>
+			<text name="forgot_password_text">
+				Mot de passe oublié
+			</text>
+			<combo_box label="Sélectionner la grille" left_pad="20" name="server_combo"/>
+			<text name="sign_up_text">
+				S&apos;inscrire
+			</text>
+		</layout_panel>
+	</layout_stack>
+</panel>

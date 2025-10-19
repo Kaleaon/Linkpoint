@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<multi_floater
+ single_instance="true"
+ can_resize="true"
+ height="233"
+ layout="topleft"
+ name="script debug floater"
+ help_topic="script_debug_floater"
+ save_rect="true"
+ title="Script Warning/Error/Debug"
+ reuse_instance="true"
+ width="450">
+    <tab_container
+     background_visible="false"
+     follows="left|top|right|bottom"
+     height="230"
+     layout="topleft"
+     left="1"
+     name="Preview Tabs"
+     tab_position="bottom"
+     top="0"
+     width="448"
+     enable_tabs_flashing="true"/>
+</multi_floater>

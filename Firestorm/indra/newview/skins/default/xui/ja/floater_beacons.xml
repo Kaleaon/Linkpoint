@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="beacons" title="ビーコン">
+	<panel name="beacons_panel">
+		<text name="label_show">
+			表示：
+		</text>
+		<check_box label="シーン内の光源のバウンディングボックス" name="lights_bounding_boxes"/>
+		<check_box label="リージョンのコーナー" name="fsregioncornerbeacons"/>
+		<check_box label="ビーコン" name="beacons"/>
+		<check_box label="ハイライト" name="highlights"/>
+		<check_box label="ビーコン情報をビューアウィンドウに載せる" name="FSRenderBeaconText"/>
+		<text name="beacon_width_label" tool_tip="ビーコンの幅を設定します。">
+			幅：
+		</text>
+		<text name="label_objects">
+			対象オブジェクト：
+		</text>
+		<check_box label="物理的" name="physical"/>
+		<check_box label="スクリプト" name="scripted"/>
+		<check_box label="触れる" name="touch_only"/>
+		<check_box label="音源" name="sounds"/>
+		<check_box label="パーティクル源" name="particles"/>
+		<check_box label="メディア源" name="moapbeacon"/>
+		<text name="label_direction">
+			以下の方角を表示：
+		</text>
+		<check_box label="太陽" name="sun"/>
+		<check_box label="月" name="moon"/>
+	</panel>
+</floater>

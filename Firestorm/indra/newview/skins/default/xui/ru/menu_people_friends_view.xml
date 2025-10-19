@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<toggleable_menu name="menu_group_plus">
+	<menu_item_check label="Сортировать по имени" name="sort_name" />
+	<menu_item_check label="Сортировать по имени пользователя" name="sort_username" />
+	<menu_item_check label="Сортировать по статусу" name="sort_status" />
+	<menu_item_check name="view_icons" label="Показать иконки" />
+	<menu_item_check name="view_permissions" label="Показать разрешения" />
+	<menu_item_check name="view_conversation" label="Покажать журнал разговоров..." />
+</toggleable_menu>

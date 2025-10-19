@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Estado" name="Estate">
+	<text name="estate_help_text">
+		Los cambios en la configuración de esta pestaña afectarán a todas las regiones del estado.
+	</text>
+	<text name="estate_text">
+		Estado:
+	</text>
+	<text name="estate_name">
+		(desconocido)
+	</text>
+	<text name="owner_text">
+		Propietario del estado:
+	</text>
+	<text name="estate_owner">
+		(desconocido)
+	</text>
+	<radio_group name="externally_visible_radio">
+		<radio_item label="Permitir únicamente a los residentes y grupos indicados en la pestaña Acceso" name="estate_restricted_access"/>
+		<radio_item label="Cualquiera puede visitar" name="estate_public_access"/>
+	</radio_group>
+	<check_box label="Debe ser mayor de 18" name="limit_age_verified" tool_tip="Para poder acceder a este estado, los Residentes deben ser mayores de 18 años. Para más información, consulta [SUPPORT_SITE]."/>
+	<check_box label="Debe haber información archivada sobre el pago" name="limit_payment" tool_tip="Para poder acceder a este estado los Residentes deben haber aportado información de pago en su cuenta. Para más información, ver [SUPPORT_SITE]."/>
+	<check_box label="Los propietarios de parcelas pueden ser más restrictivos" name="parcel_access_override"/>
+	<check_box label="Permitir el chat de voz" name="voice_chat_check"/>
+	<check_box label="Permitir el teleporte a cualquier punto" name="allow_direct_teleport"/>
+	<button label="Aplicar" name="apply_btn"/>
+	<text name="Only Allow">
+		Sólo permitir el acceso a residentes que:
+	</text>
+	<text name="estate_manager_label">
+		Administradores del Estado:
+	</text>
+	<text name="allow_resident_label">
+		Residentes autorizados:
+	</text>
+	<button label="Añadir..." name="add_estate_manager_btn"/>
+	<button label="Quitar..." name="remove_estate_manager_btn"/>
+	<button label="Añadir..." name="add_allowed_avatar_btn"/>
+	<button label="Quitar..." name="remove_allowed_avatar_btn"/>
+	<text name="allow_group_label">
+		Grupos autorizados:
+	</text>
+	<text name="ban_resident_label">
+		Residentes no autorizados:
+	</text>
+	<button label="Añadir..." name="add_allowed_group_btn"/>
+	<button label="Quitar..." name="remove_allowed_group_btn"/>
+	<button label="Añadir..." name="add_banned_avatar_btn"/>
+	<button label="Quitar..." name="remove_banned_avatar_btn"/>
+	<button label="Enviar un mensaje al Estado..." name="message_estate_btn"/>
+	<button label="Expulsar a un Residente del Estado..." name="kick_user_from_estate_btn"/>
+</panel>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Note e Privacy" name="panel_notes">
+	<text name="status_message" value="Annotazioni su questa persona (solo tu puoi vederle)."/>
+	<button name="notes_save_changes" label="Salva" />
+	<button name="notes_discard_changes" label="Annulla" />
+</panel>

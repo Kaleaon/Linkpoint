@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<teleport_messages>
+	<message_set name="errors">
+		<message name="invalid_tport">
+			Количество попыток телепортации ограничено до 6 в минуту. Если у вас возникли проблемы, подождите минуту и попробуйте телепортироваться снова. Если проблема не исчезнет, выйдите из системы и войдите снова.
+		</message>
+		<message name="invalid_region_handoff">
+			При пересечении границы региона возникла проблема. Возможно, вам придется повторить вход перед тем, как вы сможете перейти границу.
+Если данное сообщение повторится, посетите сайт [SUPPORT_SITE].
+		</message>
+		<message name="blocked_tport">
+			Телепортация сейчас заблокирована. Повторите попытку позже.
+Если вам все равно не удается телепортироваться, выйдите и войдите в систему, чтобы устранить проблему.
+		</message>
+		<message name="nolandmark_tport">
+			Системе не удалось определить место назначения закладки.
+		</message>
+		<message name="timeout_tport">
+			Системе не удалось выполнить подключение телепорта.
+Повторите попытку позже.
+		</message>
+		<message name="NoHelpIslandTP">
+			Телепортироваться назад на Остров прибытия нельзя.
+Для повторения обучения перейдите на 'Остров прибытия - общий'.
+		</message>
+		<message name="noaccess_tport">
+			У вас нет доступа к точке назначения этого телепорта.
+		</message>
+		<message name="missing_attach_tport">
+			Ваши присоединения еще не доставлены. Подождите несколько секунд либо выйдите и войдите в программу, прежде чем повторить попытку телепортации.
+		</message>
+		<message name="too_many_uploads_tport">
+			Очередь активов в данном регионе заполнена, поэтому ваш запрос на телепортацию не будет выполнен своевременно. Повторите попытку через несколько минут или перейдите в менее загруженный регион.
+		</message>
+		<message name="expired_tport">
+			Системе не удалось своевременно выполнить ваш запрос на телепортацию. Повторите попытку через несколько минут.
+		</message>
+		<message name="expired_region_handoff">
+			Системе не удалось своевременно выполнить ваше пересечение границы. Повторите попытку через несколько минут.
+		</message>
+		<message name="preexisting_tport">
+			Cистема не смогла запустить ваш телепорт. Пожалуйста, попробуйте еще раз через несколько минут.
+		</message>
+		<message name="no_host">
+			Не удается найти назначение телепорта. Назначение может быть временно недоступно или не существует. Пожалуйста, попробуйте еще раз через несколько минут.
+		</message>
+		<message name="no_inventory_host">
+			Система инвентаря в настоящее время недоступена.
+		</message>
+		<message name="MustGetAgeRegion">
+			Для посещения данного региона вам должно быть не менее 18 лет.
+		</message>
+		<message name="RegionTPSpecialUsageBlocked">
+			Невозможно войти в регион. '[REGION_NAME]' является игровым регионом и вы должны отвечать определенным критериям, чтобы войти. Для получения дополнительной информации, пожалуйста, просмотрите [http://wiki.secondlife.com/wiki/Linden_Lab_Official:Second_Life_Skill_Gaming_FAQ Skill Gaming FAQ].
+		</message>
+	</message_set>
+	<message_set name="progress">
+		<message name="sending_dest">
+			Отправка по назначению.
+		</message>
+		<message name="redirecting">
+			Перенаправление в другую локацию.
+		</message>
+		<message name="relaying">
+			Ретрансляция по назначению.
+		</message>
+		<message name="sending_home">
+			Отправка запроса домашней локации.
+		</message>
+		<message name="sending_landmark">
+			Отправка запроса закладки локации.
+		</message>
+		<message name="completing">
+			Телепортация завершена.
+		</message>
+		<message name="completed_from">
+			Телепортация завершена из [T_SLURL]
+		</message>
+		<message name="resolving">
+			Решение назначения
+		</message>
+		<message name="contacting">
+			Соединение с новым регионом.
+		</message>
+		<message name="arriving">
+			Прибытие...
+		</message>
+		<message name="requesting">
+			Запрашивается телепортация...
+		</message>
+		<message name="pending">
+			Ожидается телепортация...
+		</message>
+	</message_set>
+</teleport_messages>

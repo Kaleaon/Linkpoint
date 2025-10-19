@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater name="floater_new_feature_notification" title="NOWA FUNKCJA">
+	<floater.string name="title_txt_inventory">
+		Nowe funkcje szafy
+	</floater.string>
+	<floater.string name="description_txt_inventory">
+		Możesz teraz oznaczać przedmioty i foldery jako ulubione. Ulubione elementy pojawią się w zakładce Ulubione w szafie i domyślnie będą wyróżnione gwiazdką w głównym widoku.
+	</floater.string>
+	<text name="title_txt">
+		Nowa funkcja
+	</text>
+	<text name="description_txt">
+		Opis funkcji
+	</text>
+	<button label="Rozumiem" name="close_btn" />
+</floater>

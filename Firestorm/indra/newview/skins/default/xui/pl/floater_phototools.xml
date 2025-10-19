@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater title="Fotograf" name="phototools">
+	<tab_container name="tabs">
+		<panel name="EnvironmentTab" label="Otocz.">
+			<panel name="PT_WL_Settings">
+				<text name="T_WL_Settings">
+					Ustawienia otoczenia
+				</text>
+			</panel>
+			<panel name="P_WL_Sky_Water">
+				<text name="WL Sky" tool_tip="Wybierz i zarządzaj ustawieniami nieba, aby dostosować oświetlenie atmosferyczne.">
+					Niebo
+				</text>
+				<text name="WL Water" tool_tip="Wybierz ustawienia dotyczące wody, aby zmodyfikować odbicia i właściwości powierzchni.">
+					Woda
+				</text>
+				<text name="Day Cycle" tool_tip="Zarządzaj ustawieniami cyklu dnia, aby kontrolować zmiany środowiskowe w zależności od czasu.">
+					Cykl dnia
+				</text>
+			</panel>
+			<panel name="P_WL_Sky_Water_2">
+				<button name="btn_personal_lighting" tool_tip="Otwiera to okno 'własnego oświetlenia', które służy do wprowadzania tymczasowych zmian w otoczeniu, w którym się znajdujesz. Jest to przydatne do fotografii lub po prostu do zmiany czegoś zgodnie z własnymi preferencjami. NIE służy do tworzenia własnych zasobów ustawień, poza tym zmian nie można zapisać." label="Własne oświetlenie" />
+				<button label="Pauzuj chmury" name="PauseClouds" tool_tip="Wstrzymaj dynamiczny ruch chmur, aby uzyskać statyczne kompozycje nieba." />
+			</panel>
+			<panel name="P_Q_Windlights">
+				<text name="T_Q_Windlights">
+					Szybkie otoczenia
+				</text>
+				<button name="Sunrise" label="Wschód" tool_tip="Ustaw otoczenie na warunki oświetlenia wschodu słońca." />
+				<button name="Noon" label="Południe" tool_tip="Dostosuj oświetlenie tak, aby symulowało jasność południa." />
+				<button name="Sunset" label="Zachód" tool_tip="Zastosuj oświetlenie zachodzącego słońca, aby uzyskać ciepłe, złote odcienie." />
+				<button name="Midnight" label="Północ" tool_tip="Przełącz na ustawienia nocne w przypadku miejsc o słabym oświetleniu." />
+				<button name="Revert to Region Default" label="Otocz. współdzielone" tool_tip="Przywróć ustawienia współdzielonego środowiska regionu." />
+			</panel>
+			<panel name="P_WL_Presets">
+				<text name="T_WL_Presets">
+					Zapisane otoczenia
+				</text>
+				<button name="new_sky_preset" label="Nowe ust. nieba" tool_tip="Utwórz nowy zestaw ustawień środowiska na podstawie aktualnie załadowanych ustawień nieba." />
+				<button name="new_water_preset" label="Nowe ust. wody" tool_tip="Utwórz nowy zestaw ustawień środowiska na podstawie aktualnie załadowanych ustawień wody." />
+				<button name="new_day_preset" label="Nowe ust. dnia" tool_tip="Utwórz nowy zestaw ustawień środowiska na podstawie aktualnie załadowanych ustawień cyklu dnia." />
+			</panel>
+			<panel name="P_W_Reflections">
+				<text name="T_W_Reflections">
+					Odbicia
+				</text>
+			</panel>
+			<panel name="P_R_Res">
+				<check_box label="Przezroczysta woda" name="TransparentWater" tool_tip="Renderuj wodę jako powierzchnię przezroczystą. Wyłączenie tej opcji pokryje wodę nieprzejrzystą, prostą teksturą." />
+				<check_box label="Odbicia obszaru ekranu (SSR)" name="ScreenSpaceReflections" tool_tip="Włącza odbicia na podstawie bieżącego widoku ekranu. Zapewnia realistyczne odbicia dla obiektów w polu widzenia kamery, ale może pomijać szczegóły poza ekranem, a także mieć wpływ na wydajność w zależności od złożoności sceny." />
+				<check_box label="Lustra" name="Mirrors" tool_tip="Włącza odbicia lustrzane w czasie rzeczywistym. Dokładnie odzwierciedla otoczenie, w tym obiekty i awatary, ale może znacząco wpłynąć na wydajność ze względu na dodatkowe obciążenie renderowania." />
+				<check_box label="Zaznacz sondy refleksyjne" name="checkbox select probes" tool_tip="Włącz możliwość zaznaczania i inspekcji sond refleksyjnych sceny." />
+			</panel>
+			<panel name="P_R_Res_2">
+				<text name="ReflectionDetailText" tool_tip="Określa poziom szczegółowości odbić. 'Tylko statyczne' odbija obiekty nieruchome, natomiast wyższe ustawienia obejmują obiekty dynamiczne i odbicia w czasie rzeczywistym.">
+					Szczegóły odbić
+				</text>
+				<combo_box name="ReflectionDetail">
+					<combo_box.item label="Tylko statyczne" name="0" />
+					<combo_box.item label="Statyczne + dynamiczne" name="1" />
+					<combo_box.item label="W czasie rzeczywistym" name="2" />
+				</combo_box>
+				<text name="ReflectionProbeText" tool_tip="Kontroluje, jaka część sceny jest pokryta odbiciami. Opcja 'tylko ręczne' powoduje odbijanie jedynie wybranych obiektów, natomiast 'pełna scena' obejmuje wszystko, co znajduje się w polu widzenia.">
+					Zasięg odbić
+				</text>
+				<combo_box name="ReflectionLevel">
+					<combo_box.item label="Brak" name="0" />
+					<combo_box.item label="Tylko ręczne" name="1" />
+					<combo_box.item label="Ręczne + podłoże" name="2" />
+					<combo_box.item label="Pełna scena" name="3" />
+				</combo_box>
+				<text name="MirrorResolutionText" tool_tip="Ustawia rozdzielczość odbić lustrzanych. Wyższe wartości dają ostrzejsze odbicia, ale wymagają więcej mocy obliczeniowej.">
+					Rozdzielczość luster
+				</text>
+				<text name="HeroProbeUpdateText" tool_tip="Dostosowuje częstotliwość aktualizacji odbić lustrzanych. Wyższe ustawienia oferują płynniejsze odbicia w czasie rzeczywistym, ale mogą mieć wpływ na wydajność.">
+					Odświeżanie luster
+				</text>
+				<combo_box name="HeroProbeUpdateRate">
+					<combo_box.item label="Powoli" name="6" />
+					<combo_box.item label="Średnio" name="3" />
+					<combo_box.item label="Szybko" name="1" />
+				</combo_box>
+				<text name="Probe_Resolution" tool_tip="Definiuje rozdzielczość sond refleksyjnych. Wyższe rozdzielczości zapewniają bardziej szczegółowe odbicia, ale mogą zwiększyć wykorzystanie pamięci i wymagać ponownego uruchomienia przeglądarki, aby zaczęły działać. Ustawienia powyżej 128 mogą zużywać znaczne ilości pamięci VRAM, co może potencjalnie wpłynąć na wydajność w systemach z ograniczonymi zasobami mocy GPU.">
+					Rozdzielcz. sondy (restart)
+				</text>
+			</panel>
+			<panel name="P_R_Res_3">
+				<text name="T_Reflection_Distance" tool_tip="Steruje zakresem widoczności odbić, wpływając na szczegóły odbić oraz wydajność w sondach refleksyjnych, lustrach i odbiciach przestrzeni ekranu. Wyższe wartości zwiększają odległość, z której odbicia są widoczne, zwiększając szczegóły, ale zwiększając koszt wydajności.">
+					Odl. odbić
+				</text>
+				<button name="Reset_Reflection_Distance" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+			</panel>
+		</panel>
+		<panel name="P_Lighting" label="Cienie">
+			<panel name="PT_Light_Shadows">
+				<text name="T_Light_Shadows">
+					Ustawienia świateł i cieni
+				</text>
+			</panel>
+			<panel name="P_L_S_Settings">
+				<text name="T_Shadow_Types" tool_tip="Kontroluje typy cieni renderowanych przez źródła światła. Oświetlenie punktowe bez funkcji projekcji tworzy efekty świetlne, ale nie rzuca cieni. Tekstury rzutowanego światła (projektory) pozostają widoczne niezależnie od tego ustawienia.">
+					Typy cieni
+				</text>
+				<combo_box name="ShadowDetail">
+					<combo_box.item label="Brak" name="0"/>
+					<combo_box.item label="Słońce/Księżyc" name="1"/>
+					<combo_box.item label="Słońce/Księżyc + inne źródła" name="2"/>
+				</combo_box>
+				<text name="local lights_label" tool_tip="Definiuje, ile lokalnych źródeł światła jest renderowanych jednocześnie. Ustawienie tej wartości na 0 powoduje wyłączenie wszystkich lokalnych świateł. Wyższe wartości mogą mieć wpływ na wydajność w złożonych scenach.">
+					Światła (restart)
+				</text>
+				<combo_box name="LocalLightsDetail">
+					<combo_box.item label="Pełne (domyślne)" name="3" />
+					<combo_box.item label="Częściowe" name="2" />
+					<combo_box.item label="Tylko Słońce/Księżyc" name="1" />
+				</combo_box>
+				<check_box label="Doczepiane światła (np. twarzy)" tool_tip="Ta opcja włącza światła doczepione do awatarów, na przykład te oświetlające twarze. Użyteczne, gdy trzeba wyłączyć oświetlenie twarzy." name="Render Attached Lights" />
+			</panel>
+			<panel name="P_Shadow_Res">
+				<text name="T_Local_Lights" tool_tip="Liczba lokalnych świateł do wyrenderowania.">
+					Il. świateł
+				</text>
+				<button name="Reset_Local_Lights" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Shadow_Res" tool_tip="Dostosowuje jakość i ostrość cieni. Wyższe wartości dają bardziej szczegółowe cienie, ale mogą znacząco wpłynąć na wydajność, szczególnie w złożonych scenach. Do ogólnego użytku ustaw to ustawienie na niskim poziomie, aby zachować płynną wydajność. Przygotowując się do wysokiej jakości zdjęć, ustaw je na około 1,0, a następnie stopniowo zwiększaj, monitorując liczbę klatek na sekundę. Korzystanie z paska statystyk (znajdującego się w sekcji 'pomoce' w sekcji 'pomoce interfejsu') może pomóc Ci znaleźć optymalną równowagę dla Twojego systemu. Uwaga: Zbyt szybkie zwiększenie tego ustawienia lub ustawienie go na zbyt wysokim poziomie może spowodować niestabilność przeglądarki lub awarie.">
+					Rozdz. cieni
+				</text>
+				<button name="Reset_Shadow_Res" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Shd_Clarity" tool_tip="To ustawienie kontroluje ostrość i wyrazistość cieni Słońca/Księżyca. Aby uzyskać optymalne rezultaty, zaleca się dostosowanie tego ustawienia po ustawieniu rozdzielczości cieni na około 1. Stopniowo zwiększaj wartość czystości cieni, aż osiągną one pożądaną ostrość. Pamiętaj, że klarowność cieni zależy zarówno od kąta kamery, jak i położenia Słońca/Księżyca, więc wszelkie zmiany oświetlenia lub ustawienia kamery mogą wymagać ponownej regulacji. Aby ułatwić dokładne dostrajanie, tymczasowo ustaw 'rozmycie cieni' na 0 - aby wyraźnie zobaczyć efekty tej regulacji przed ponownym zastosowaniem rozmycia, jeśli to konieczne.">
+					Czyst. cieni
+				</text>
+				<button name="Shd_Clarity_Reset" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Blur_Size" tool_tip="To ustawienie kontroluje miękkość krawędzi cienia, umożliwiając tworzenie ostrych, dobrze zdefiniowanych cieni lub bardziej miękkich, bardziej rozproszonych. Zwiększenie wartości powoduje rozmycie krawędzi cieni, podczas gdy ustawienie jej na 0 daje najostrzejsze możliwe cienie. Rozmycie cieni działa w połączeniu z ustawieniem 'wygładzanie cieni', które umożliwia dodatkowe precyzyjne dostrajanie miękkości cieni, szczególnie gdy rozmycie cieni jest ustawione na wyższe wartości (np. około 4). Aby uzyskać precyzyjne regulacje, rozważ tymczasowe ustawienie rozmycia cieni na 0, aby zaobserwować zmiany w przejrzystości przed ponownym zastosowaniem rozmycia. Uwaga: Aby to ustawienie działało prawidłowo, musi być włączona okluzja otoczenia, ponieważ opiera się na obliczeniach oświetlenia opartych na głębi.">
+					Rozmycie
+				</text>
+				<button name="Blur_Reset" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Shd_Soften" tool_tip="Steruje efektem wygładzania cieni Słońca/Księżyca. Prostym sposobem ustawienia tej wartości dla konkretnych potrzeb jest ustawienie najpierw 'rozmycia' powyżej 3. Następnie użycie tego suwaka tutaj, aby złagodzić cienie Słońca/Księżyca według własnych upodobań. Należy pamiętać, że wartość 0 skutecznie wyłączy wszystkie cienie Słońca/Księżyca. Ponadto nie ma ona wpływu na cienie rzucane przez światła tzw. projektorów.">
+					Wygł. cieni
+				</text>
+				<button name="Shd_Soften_Reset" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Blur_Dist" tool_tip="Określa odległość od kamery, w której cienie zaczynają się rozmywać. Niższe wartości powodują rozmycie bliżej kamery. Wymaga włączenia okluzji otoczenia.">
+					Odl. rozm.
+				</text>
+				<button name="Blur_Dist_Reset" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_FOV_Cutoff" tool_tip="Ustawia próg pola widzenia (FOV), przy którym przeglądarka przełącza się z perspektywy na ortograficzne renderowanie cieni. Dostosuj, aby zredukować postrzępione cienie.">
+					Odcięcie
+				</text>
+				<button name="FOV_Cutoff_Reset" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Spot_Cutoff" tool_tip="Dostosowuje przesunięcie cieni rzucanych przez reflektory, aby zminimalizować artefakty lub niepożądane linie na powierzchniach.">
+					Przesn. pnkt.
+				</text>
+				<button name="Spot_Cutoff_Reset" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Shd_Bias" tool_tip="Steruje korekcją głębi stosowaną do cieni, aby zapobiec artefaktom związanym z samocieniem (tzw. 'shadow acne'). Niższe wartości tworzą dokładniejsze cienie, podczas gdy nieco wyższe wartości mogą pomóc zmniejszyć migotanie lub problemy z nakładaniem się cieni. Dostosowanie tego ustawienia może również pomóc w korygowaniu cieni, które wydają się unosić nad powierzchniami lub nie dotykają prawidłowo krawędzi obiektów. Reguluj stopniowo, aby zrównoważyć dokładność cieni i zapobieganie artefaktom.">
+					Skośność
+				</text>
+				<button name="Shd_Bias_Reset" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+			</panel>
+			<panel name="P_Ambient_Occlusion">
+				<text name="T_Ambient_Occlusion">
+					Ustawienia okluzji otoczenia
+				</text>
+			</panel>
+			<panel name="P_Amb_Occ_Settings">
+				<check_box label="Włącz okluzję otoczenia (percepcję głębi)" name="UseSSAO" tool_tip="Okluzja otoczenia symuluje miękkie cienie pojawiające się w załamaniach, rogach i miejscach, gdzie obiekty są blisko siebie, zwiększając głębię i realizm poprzez naśladowanie naturalnego zasłonięcia światła otoczenia. Chociaż funkcja okluzji działa skutecznie samodzielnie, ustawienia 'efekt' i 'wygadzanie' pomagają precyzyjnie dostroić intensywność i gładkość cieniowania. Okluzja przyczynia się do bardziej realistycznego obrazu w dowolnej rozdzielczości, chociaż jego subtelne szczegóły są bardziej zauważalne w wyższych rozdzielczościach, takich jak 2048 pikseli i więcej." />
+			</panel>
+			<panel name="P_Scale">
+				<text name="T_Scale" tool_tip="Steruje rozmiarem obszaru próbkowania używanego do okluzji otoczenia. Większe wartości zwiększają dokładność cieni i szczegółowość, ale mogą mieć wpływ na wydajność. Najlepiej stosować z korektami rozmycia cieni, aby uzyskać delikatniejsze efekty cieniowania.">
+					Skala
+				</text>
+				<button name="Reset_Scale" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Max_Scale" tool_tip="Określa maksymalną odległość, na jaką pobierane są próbki okluzji otoczenia. Wyższe wartości poprawiają głębię cieniowania w dużych scenach, ale mogą zmniejszyć wydajność. Dostosuj wraz ze 'skalą', aby uzyskać optymalne wyniki.">
+					Max. skala
+				</text>
+				<button name="Reset_Max_Scale" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Scaling_Factor" tool_tip="Reguluje ogólną siłę efektu okluzji otoczenia. Wyższe wartości tworzą ciemniejsze, bardziej widoczne cienie w załamaniach i rogach. Używaj ostrożnie, aby uniknąć nienaturalnego nadmiernego przyciemnienia.">
+					Mnożnik
+				</text>
+				<button name="Reset_Scaling_Factor" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_I_Max" tool_tip="Ustawia maksymalny limit jasności dla irradiancji w obliczeniach okluzji otoczenia. Działa jako górny limit, aby zapobiec dominacji efektu okluzji przez zbyt jasne obszary.">
+					Maks. irrad.
+				</text>
+				<button name="Reset_I_Max" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_I_Scaling" tool_tip="Kontroluje skalowanie natężenia światła w okluzji otoczenia, wpływając na to, jak intensywność światła wpływa na ciemność cienia. Dostosuj to ustawienie, aby uzyskać zrównoważone oświetlenie w jasnych scenach.">
+					Skala irrad.
+				</text>
+				<button name="Reset_I_Scaling" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Effect" tool_tip="Steruje intensywnością efektu zaciemniania otoczenia, który dodaje subtelne cienie w zagłębieniach, narożnikach i miejscach styku obiektów, aby zwiększyć głębię i realizm. Niższe wartości tworzą łagodniejsze, bardziej naturalne cieniowanie, które płynnie łączy się z otoczeniem, dając realistyczny wygląd. Wyższe wartości dają silniejszy, bardziej dramatyczny kontrast, co może sprawić, że efekt okluzji będzie bardziej wyraźny, ale może wyglądać nienaturalnie w niektórych warunkach oświetleniowych. Ostrożnie dostosuj to ustawienie, aby uniknąć zbyt ciemnych lub ostrych cieni, które mogą zniekształcić naturalne oświetlenie sceny. W przypadku efektów kreatywnych lub eksperymentalnych można użyć wartości ujemnych, aby odwrócić cieniowanie, tworząc niezwykłe rezultaty oświetlenia. To ustawienie działa najlepiej, gdy jest precyzyjnie dostrojone wraz z kontrolą 'wygładzania', aby zrównoważyć ostrość i gładkość cieni.">
+					Efekt
+				</text>
+				<button name="Reset_Effect" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_AO_Soften" tool_tip="Dostosowuje gładkość efektu okluzji otoczenia, redukując ostre krawędzie i szum. Działa najlepiej w połączeniu z 'rozmyciem cieni' ustawionym na około 4, aby zapewnić zrównoważone wygładzanie.">
+					Wygładzaj
+				</text>
+				<button name="Reset_AO_Soften" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+			</panel>
+		</panel>
+		<panel name="P_DoF_Glow" label="Efekty">
+			<panel name="PT_DoF_Glow">
+				<text name="T_DoF">
+					Ustawienia głębi ostrości
+				</text>
+			</panel>
+			<panel name="P_DoF_Settings">
+				<check_box label="Włącz głębię ostrości" name="UseDepthofField" tool_tip="Włącza głębię ostrości, która symuluje ostrość aparatu poprzez rozmycie obiektów znajdujących się poza płaszczyzną ogniskowej, tworząc realistyczny efekt fotograficzny. Wyłączenie tej funkcji może poprawić wydajność." />
+				<check_box label="Głębia ostrości podąża za kursorem" name="FSFocusPointFollowsPointer" tool_tip="Umożliwia punktowi ostrości głębi ostrości podążanie za kursorem myszy, podobnie jak zachowanie kamery Flycam. Przydatne w połączeniu z blokadą głębi ostrości w celu dynamicznej regulacji ostrości." />
+				<button name="FocusPointRenderToggle" tool_tip="Przełącz wyświetlanie celownika punktu ostrości. Celownik jest żółty, gdy jest wolny, i czerwony, gdy jest zablokowany." />
+				<check_box label="Pokazuj pole widzenia w przeglądarce" tool_tip="Wyświetla nakładkę na ekranie pokazującą bieżące pionowe pole widzenia kamery, pomagając w wizualizacji, jak różne ustawienia pola widzenia wpływają na kompozycję i perspektywę. Mniejsze pole widzenia symuluje dłuższą ogniskową, podobnie jak powiększanie za pomocą teleobiektywu - na przykład standardowy obiektyw 50 mm odpowiada pionowemu polu widzenia wynoszącemu około 27°, tworząc węższy widok z kompresją tła. Większe pole widzenia naśladuje obiektywy szerokokątne, rejestrując więcej sceny, jednocześnie wyolbrzymiając relacje przestrzenne. Możesz dostosować pole widzenia za pomocą suwaka powiększenia poniżej, aby dostroić kadrowanie. Aby uzyskać więcej szczegółów na temat relacji między pionowym polem widzenia a ogniskową, zapoznaj się z tą tabelą." name="MIC_Show_FOV" />
+			</panel>
+			<panel name="P_Zoom">
+				<text name="T_Zoom" tool_tip="Dostosowuje kąt widzenia kamery, skutecznie przybliżając lub oddalając. Działa podobnie do Ctrl + 0 (powiększanie) i Ctrl + 8 (pomniejszanie). To ustawienie jest wyłączone, gdy kamera Flycam (3D SpaceNavigator) jest aktywna.">
+					Kąt widz.
+				</text>
+				<button name="Reset_Zoom" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_FOV" tool_tip="Definiuje pole widzenia kamery w celu symulowania perspektywy obiektywu / soczewki. Dopasuj do bieżącego pola widzenia przeglądarki, aby uzyskać spójne efekty głębi ostrości.">
+					Pole widz.
+				</text>
+				<button name="Reset_FOV" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_F_Number" tool_tip="Reprezentuje ustawienie przysłony aparatu. Niższe wartości tworzą płytszą głębię ostrości (więcej rozmycia), podczas gdy wyższe wartości zwiększają głębię ostrości, dzięki czemu większa część sceny wydaje się być wyostrzona.">
+					Wartość F
+				</text>
+				<button name="Reset_F_Number" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Focal_Length" tool_tip="Symuluje ogniskową obiektywu aparatu. Wyższe wartości dają węższą głębię ostrości i powiększają odległe obiekty naśladując teleobiektywy.">
+					Ogniskowa
+				</text>
+				<button name="Reset_Focal_Length" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Foc_Time" tool_tip="Czas ogniskowania kontroluje, jak szybko kamera zmienia ostrość między obiektami. Wyższa wartość powoduje wolniejsze, płynniejsze przejście, wzmacniając efekty kinowe.">
+					Przejście
+				</text>
+				<button name="Reset_Foc_Time" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_CoC" tool_tip="Krąg rozmycia określa intensywność rozmycia poza głębią ostrości. Nie wpływa na sam zakres głębi, ale kontroluje, jak mocno rozmyte są obszary poza ostrością. Wartości ujemne mogą tworzyć unikalne efekty wizualne.">
+					Rozmycie
+				</text>
+				<button name="Reset_CoC" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Resolution" tool_tip="Dostosowuje rozdzielczość renderowania efektu głębi ostrości, wpływając zarówno na jego jakość wizualną, jak i wydajność. Wyższe wartości (do 1) tworzą ostrzejsze, bardziej szczegółowe przejścia rozmycia, idealne do wysokiej jakości migawek. Średnie ustawienia (0.5 - 0.7) zapewniają dobrą równowagę przy robieniu ujęć, podczas gdy niższe wartości (około 0.25) obniżają jakość, ale poprawiają wydajność - są odpowiednie do codziennego użytku. Uwaga: wyższe ustawienia mogą znacząco wpłynąć na liczbę klatek na sekundę, szczególnie w słabszych systemach. Dopuszcza się wartości ujemne dla kreatywnych, eksperymentalnych efektów.">
+					Rozdzielcz.
+				</text>
+				<button name="Reset_Resolution" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+			</panel>
+			<panel name="P_Tone_Settings">
+				<text name="T_Tone_Settings">
+					Ustawienia mapowania tonów HDR
+				</text>
+			</panel>
+			<panel name="P_Tone_Settings_2">
+				<check_box label="HDR i emisyjność" name="Disable_Vintage_Mode" tool_tip="Włącza High Dynamic Range (HDR) i efekty emisyjne, zwiększając intensywność kolorów, dynamiczne oświetlenie i blask materiałów emisyjnych. To ustawienie poprawia ogólny realizm oświetlenia w scenach, szczególnie w przypadku obiektów teksturowanych PBR (Physically Based Rendering). Wyłączenie tej opcji powoduje powrót do 'starego' trybu oświetlenia z mniejszym kontrastem i poświatą, a także usuwa światło emisyjne z obiektów z teksturą PBR, sprawiając, że wydają się płaskie lub mniej oświetlone." />
+			</panel>
+			<panel name="P_Tone_Settings_3">
+				<text name="T_Tonemap_Type" tool_tip="Steruje algorytmem używanym do mapowania tonów High Dynamic Range (HDR), który wpływa na to, jak jasne i ciemne obszary są zrównoważone. Khronos Neutral zapewnia naturalny, neutralny wygląd przy mniejszym kontraście i minimalnej manipulacji kolorami, zachowując oryginalne oświetlenie zgodnie z zamierzeniami. ACES (Academy Color Encoding System) został zaprojektowany, aby naśladować zakres dynamiki podobny do filmowego, oferując bogatsze kolory, wyższy kontrast i bardziej kinowe akcenty. Zmiana tego ustawienia może spowodować zmianę ogólnej jasności i balansu kolorów, w zależności od sceny.">
+					Typ mappingu
+				</text>
+				<text name="T_Tonemap_Type" tool_tip="Łączy wybrany styl tonemappingu HDR z surowym oświetleniem liniowym. Wartość 1 stosuje pełny efekt wybranego tonemappingu (Khronos Neutral lub ACES). Wartość 0 wyłącza tonemapping, pokazując surowe oświetlenie liniowe bez korekt post-processingu. Dostosuj to ustawienie, aby dostroić równowagę między naturalnym realizmem a kontrastem kinowym. Wyższe wartości podkreślają efekt tonemappingu, podczas gdy niższe wartości dają płaski, nieprzetworzony wygląd.">
+					Miksowanie
+				</text>
+				<button name="Reset_Tonemap_Type" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+			</panel>
+			<panel name="P_Glow_Settings">
+				<text name="T_Glow_Settings">
+					Ustawienia blasku
+				</text>
+			</panel>
+			<panel name="P_Glow_Quality">
+				<check_box label="Włącz blask" name="UseGlow" tool_tip="Aktywuje efekt blasku, powodując, że jasne obiekty i źródła światła emitują delikatną aureolę, symulującą efekt poświaty (bloom). Poprawia to wygląd materiałów emisyjnych, odbić i świateł, nadając oświetlonym obszarom bardziej dynamiczny i żywy wygląd. Wyłączenie tej opcji może poprawić wydajność, szczególnie w scenach ze złożonym oświetleniem." />
+				<check_box label="HDR dla mapy blasku" name="GlowHDR" tool_tip="Umożliwia przetwarzanie efektu blasku w trybie High Dynamic Range (HDR), co pozwala uzyskać bardziej intensywne, żywe poświaty z realistycznymi przejściami jasności. Poprawia to jakość blasku, zwłaszcza w scenach o wysokim kontraście, poprawiając sposób rozchodzenia się światła z bardzo jasnych obszarów. Przydatne podczas pracy z teksturami emisyjnymi i silnymi efektami świetlnymi." />
+			</panel>
+			<panel name="P_Glow_Iterations">
+				<text name="T_Glow_Quality" tool_tip="Steruje rozdzielczością renderowania efektu blasku. Wyższe wartości (bliższe 10) dają ostrzejsze, bardziej zdefiniowane poświaty, podczas gdy niższe wartości (bliższe 8) są bardziej przyjazne dla wydajności, ale mogą wydawać się nieco bardziej miękkie. Różnica między ustawieniami 8 i 10 jest subtelna, ale wyższe wartości mogą mieć wpływ na wydajność w słabszych systemach.">
+					Jakość
+				</text>
+				<button name="Reset_Glow_Quality" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Glow_Iterations" tool_tip="Określa, ile razy efekt blasku jest przetwarzany w celu uzyskania gładkości i rozproszenia. Niższe wartości powodują mocniejsze, ostrzejsze poświaty przy minimalnym rozmyciu, podczas gdy wyższe wartości tworzą szersze, delikatniejsze poświaty o bardziej rozproszonym wyglądzie. Zwiększanie liczby iteracji może poprawić jakość blasku, ale również i obniżyć wydajność.">
+					Powtórz.
+				</text>
+				<button name="Reset_Glow_Iterations" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Glow_Strength" tool_tip="Steruje intensywnością efektu świecenia. Niskie wartości (około 0,01 do 0,05) zapewniają subtelne, naturalnie wyglądające świecenie. Wyższe wartości sprawiają, że obiekty wydają się intensywnie jasne, ale nadmierne wartości mogą powodować nierealistyczne poświaty lub przytłaczać scenę. Dostosuj to ustawienie stopniowo, ponieważ niewielkie zmiany mogą znacząco wpłynąć na ostateczny wygląd.">
+					Siła
+				</text>
+				<button name="Reset_Glow_Strength" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Glow_Width" tool_tip="Kontroluje szerokość efektu poświaty, określając, jak daleko poświata rozprzestrzenia się od obiektów emitujących światło. Wyższe wartości tworzą szerszą, delikatniejszą poświatę, która pokrywa większy obszar, wzmacniając efekt. Jednakże zbyt duże zwiększenie szerokości może spowodować, że poświata będzie wyglądała na pikselowaną lub utraci szczegóły. Niższe wartości dają mocniejszą, bardziej skupioną poświatę wokół źródła. Dostosuj to ustawienie stopniowo, aby znaleźć równowagę pomiędzy naturalnym, delikatnym blaskiem i zachowaniem klarowności wizualnej.">
+					Szerokość
+				</text>
+				<button name="Reset_Glow_Width" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+			</panel>
+		</panel>
+		<panel name="P_General" label="Ogólne">
+			<panel name="PT_General">
+				<text name="T_General">
+					Ogólne ustawienia renderowania
+				</text>
+			</panel>
+			<panel name="P_General_Settings">
+				<text name="T_Draw_Distance" tool_tip="Ustawia maksymalną odległość, na jaką obiekty renderowane są w scenie. Zwiększenie tej wartości pozwala widzieć dalej, dodając szczegółów do dużych krajobrazów lub odległych obiektów. Wyższe wartości znacząco wpływają jednak na wydajność, zmniejszając liczbę klatek na sekundę, szczególnie w złożonych obszarach. Aby uzyskać lepszą wydajność, należy używać niższych wartości w zatłoczonych miejscach lub w przypadku korzystania ze starszego sprzętu.">
+					Pole widz.
+				</text>
+				<button name="Reset_Draw_Distance" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Avi_Count" tool_tip="Określa maksymalną liczbę awatarów renderowanych w scenie. Ograniczenie tej liczby poprawia wydajność, szczególnie w przypadku zatłoczonych wydarzeń lub ruchliwych lokalizacji. Niższe wartości zmniejszają ilość szczegółów i zwiększają liczbę klatek na sekundę, natomiast wyższe wartości pozwalają na wyświetlenie większej liczby awatarów, ale mogą spowolnić działanie podczas większych spotkań.">
+					Ilość awat.
+				</text>
+				<button name="Reset_Avi_Count" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Avi_Detail" tool_tip="Dostosowuje poziom szczegółowości (LOD) awatarów. Wyższe wartości poprawiają jakość obrazu, dzięki czemu starsze awatary wydają się bardziej szczegółowe nawet przy większych odległościach. Niższe wartości zmniejszają szczegółowość - poprawiając wydajność - co jest przydatne na obszarach, gdzie zajduje się wiele awatarów lub podczas używania słabszego komputera. To ustawienie dotyczy przede wszystkim starszych awatarów (systemowych) i ma mniejszy wpływ na awatary meszowe, ponieważ ich poziom szczegółowości jest kontrolowany przez ich własne ustawienia LOD w meszu, a dodatkowo wpływają na to ustawienia złożoności awatarów znajdujące się w panelu Grafika, w Preferencjach.">
+					Det. awat.
+				</text>
+				<button name="Reset_Avi_Detail" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Avi_Physics" tool_tip="Kontroluje poziom szczegółowości efektów fizyki awatara, takich jak fizyka piersi i inne zachowania deformacji meszu. Wyższe wartości zapewniają płynniejszy, bardziej realistyczny ruch kosztem wydajności. Niższe wartości zmniejszają złożoność obliczeń fizycznych, poprawiając wydajność w zatłoczonych obszarach.">
+					Fiz. awat.
+				</text>
+				<button name="Reset_Avi_Physics" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Particle_Cnt" tool_tip="Ustawia maksymalną liczbę cząsteczek, które przeglądarka wyrenderuje jednocześnie. Dotyczy to efektów takich jak dym, ogień, magiczne zaklęcia, liny, łańcuchy i animacje oparte na cząsteczkach. Wyższe wartości pozwalają uzyskać więcej cząstek w celu uzyskania szczegółowych efektów wizualnych, ale mogą zmniejszyć wydajność w środowiskach o dużej zawartości cząsteczek.">
+					Ilość cząst.
+				</text>
+				<button name="Reset_Particle_Cnt" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Terrain_Scale" tool_tip="Określa współczynnik skalowania domyślnej tekstury podłoża (terenu), wpływając na to, jak rozciągnięty lub szczegółowy wydaje się teren. Wyższe wartości tworzą delikatniejsze, bardziej szczegółowe tekstury, podczas gdy niższe wartości zmniejszają szczegółowość, ale mogą poprawić wydajność.">
+					Rozm. podł.
+				</text>
+				<button name="Reset_Terrain_Scale" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Terrain_Quality" tool_tip="Kontroluje współczynnik poziomu szczegółowości (LOD) renderowania terenu. Wyższe wartości zapewniają bardziej szczegółowy teren, zwłaszcza na większych dystansach, zwiększając realizm. Niższe wartości upraszczają szczegóły terenu, zapewniając lepszą wydajność w dużych regionach.">
+					Jakość podł.
+				</text>
+				<button name="Reset_Terrain_Quality" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Object_Detail" tool_tip="Dostosowuje poziom szczegółowości (LOD) obiektów w świecie. Wyższe wartości pozwalają zachować wysoką jakość szczegółów obiektów nawet przy większych odległościach, ale mogą obniżyć wydajność, zwłaszcza w złożonych scenach. Niższe wartości szybciej uruchamiają prostsze modele obiektów (LOD), poprawiając liczbę klatek na sekundę, ale potencjalnie zmniejszając wierność wizualną.">
+					Det. obktw
+				</text>
+				<button name="Reset_Object_Detail" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Flexi_Detail" tool_tip="Steruje poziomem szczegółowości obiektów elastycznych (flexi), takich jak smukłe włosy, flagi i liny. Wyższe wartości zapewniają płynniejszy i bardziej realistyczny ruch, ale mogą mieć wpływ na wydajność. Niższe wartości upraszczają obliczenia ruchu i umożliwiają szybsze renderowanie.">
+					Elastyczne
+				</text>
+				<button name="Reset_Flexi_Detail" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Tree_Detail" tool_tip="Ustawia poziom szczegółowości (LOD) dla drzew i innej roślinności. Wyższe wartości skutkują bardziej złożonym, szczegółowym listowiem, podczas gdy niższe wartości upraszczają geometrię drzew w celu poprawy wydajności, szczególnie w regionach gęsto nimi porośniętych. To ustawienie dotyczy drzew systemowych (starszych) i nie wpływa na drzewa niesystemowe ani drzewa oparte na meszach, które zarządzają swoimi szczegółami za pomocą własnych ustawień poziomów szczegółowości.">
+					Det. drzew
+				</text>
+				<button name="Reset_Tree_Detail" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Sky_Detail" tool_tip="Kontroluje szczegółowość wierzchołków nieba w środowisku, wpływając na gładkość gradientów, kształty chmur i efekty atmosferyczne. Wyższe wartości zwiększają realizm nieba, ale mogą zmniejszać wydajność. Niższe wartości poprawiają liczbę klatek na sekundę, ale mogą sprawić, że niebo będzie wyglądało na mniej szczegółowe.">
+					Det. nieba
+				</text>
+				<button name="Reset_Sky_Detail" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Sharpening" tool_tip="Dostosowuje ostrość całego obrazu za pomocą funkcji wyostrzania z adaptacją do kontrastu (CAS). Wyższe wartości zwiększają klarowność obrazu poprzez zwiększenie kontrastu wokół krawędzi, co może poprawić szczegółowość obrazu. Nadmierne wyostrzanie może spowodować pojawienie się artefaktów lub sprawić, że obraz będzie wyglądał nieestetycznie.">
+					Wyostrzanie
+				</text>
+				<button name="Reset_Sharpening" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Exposure" tool_tip="Kontroluje ogólną jasność sceny, symulując ustawienia ekspozycji aparatu. Wyższe wartości sprawiają, że obraz jest jaśniejszy, co jest przydatne w ciemnym otoczeniu, natomiast niższe wartości przyciemniają scenę, zwiększając kontrast w jasnych obszarach. Używaj ostrożnie, aby zapobiec zbytniemu rozmyciu świateł lub zbyt ciemnym cieniom.">
+					Ekspozycja
+				</text>
+				<button name="Reset_Exposure" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+			</panel>
+			<panel name="P_Render">
+				<check_box label="Nie renderuj poza polem widzenia" name="UseFarClip" tool_tip="Włącza limit odległości rysowania (pola widzenia) ograniczając odległość, na jaką przeglądarka będzie renderować obiekty w oparciu o ustawioną odległość rysowania. Wyłączenie tej opcji spowoduje, że przeglądarka będzie renderować obiekty poza określoną odległość, co może znacząco obniżyć wydajność w dużych, szczegółowych środowiskach." />
+				<check_box label="Dynamicznie dobieraj poziom detali" name="RednerLod1" tool_tip="Umożliwia przeglądarce automatyczne dostosowanie poziomu szczegółowości (LOD) obiektów w oparciu o odległość od nich. Poprawia to wydajność poprzez zmniejszenie szczegółowości odległych obiektów, a jednocześnie utrzymanie wysokiej szczegółowości pobliskich. Może to jednak powodować zauważalne obniżenie jakości obiektów podczas szybkiego poruszania się lub w dużych scenach." />
+				<check_box label="Renderuj tylko obiekty widoczne dla kamery" tool_tip="Włącza occlusion culling, który optymalizuje wydajność poprzez renderowanie tylko obiektów znajdujących się w polu widzenia kamery, ale nieukrytych za innymi obiektami. Może to zwiększyć wydajność w złożonych scenach, ale czasami może ją też zmniejszyć w bardziej pustych obszarach. Przetestuj to ustawienie, aby sprawdzić, czy poprawia ono wydajność w Twoim konkretnym przypadku." name="UssOcclusion1" />
+				<check_box label="Filtr anizotropowy (wyraźniejsze tekstury)" tool_tip="Poprawia ostrość i klarowność tekstur oglądanych pod kątem, dzięki czemu powierzchnie takie jak podłogi, drogi i ściany wydają się wyraźniejsze. Włączenie filtrowania anizotropowego może nieznacznie wpłynąć na wydajność, szczególnie na słabszym sprzęcie." name="Anisotropic" />
+				<check_box label="Renderuj cząsteczki innych awatarów" tool_tip="Włącza renderowanie efektów cząsteczkowych dołączonych do innych awatarów lub przez nie emitowanych, takich jak efekty blasku, ślady lub efekty wizualne oparte na awatarach. Dotyczy to także cząsteczek przyczepionych do mebli lub przedmiotów, na których siedzą awatary. Wyłączenie tej opcji może poprawić wydajność w zatłoczonych obszarach, ale spowoduje ukrycie tych efektów." name="Render Attached Particle" />
+			</panel>
+			<panel name="P_Anti-aliasing">
+				<text name="T_Antialiasing_Type" tool_tip="Wybiera typ antyaliasingu używanego do wygładzania postrzępionych krawędzi obiektów. FXAA (Fast Approximate Antialiasing) to szybka metoda o umiarkowanej jakości. SMAA (Subpixel Morphological Antialiasing) zapewnia lepsze wygładzanie krawędzi przy nieco wyższych kosztach wydajności. Zmiany tego ustawienia mogą wymagać ponownego uruchomienia przeglądarki, aby zaczęły obowiązywać na niektórych urządzeniach.">
+					Typ antyaliasingu (restart)
+				</text>
+				<combo_box name="CB_Antialiasing_Type">
+					<combo_box.item label="Wyłączony" name="FSAADisabled" />
+				</combo_box>
+				<text name="T_Anti-aliasing" tool_tip="Określa jakość antyaliasingu, który wygładza krawędzie obiektów. Wyższe ustawienia zmniejszają postrzępienie krawędzi, zapewniając czystszy wygląd. W przypadku kart graficznych z najwyższej półki wyższe wartości mają minimalny wpływ na wydajność. W słabszych systemach wyższe ustawienia mogą obniżyć wydajność.">
+					Jakość antyaliasingu
+				</text>
+				<combo_box name="fsaa">
+					<combo_box.item label="Niska" name="Low" />
+					<combo_box.item label="Średnia" name="Medium" />
+					<combo_box.item label="Wysoka" name="High" />
+				</combo_box>
+				<text name="T_Texture_Bumpiness" tool_tip="Kontroluje siłę i rozdzielczość map normalnych i wypukłości, które dodają szczegóły tekstur do powierzchni bez zwiększania liczby wielokątów. Wyższe ustawienia zwiększają szczegółowość powierzchni, podczas gdy niższe ustawienia poprawiają wydajność poprzez zmniejszenie złożoności wizualnej.">
+					Wypukłości tekstur
+				</text>
+				<combo_box name="BumpStrengthSelection">
+					<combo_box.item label="Bardzo drobne (bardzo słabe)" name="0"/>
+					<combo_box.item label="Drobniejsze (słabsze)" name="1"/>
+					<combo_box.item label="Drobne (słabe)" name="2"/>
+					<combo_box.item label="Normalne" name="3"/>
+					<combo_box.item label="Ostre (silniejsze)" name="4"/>
+					<combo_box.item label="Ostrzejsze (bardzo silne)" name="5"/>
+				</combo_box>
+				<text name="T_RestrictMaxTexture" tool_tip="Określa maksymalną rozdzielczość tekstur wyświetlanych w świecie. Wyższe rozdzielczości (np. 2048 pikseli) zapewniają ostrzejsze i bardziej szczegółowe obrazy, ale wymagają więcej pamięci wideo, co może mieć wpływ na wydajność. Niższe ustawienia pomagają oszczędzać pamięć, zmniejszając ryzyko rozmywania się tekstur z powodu ograniczeń pamięci.">
+					Maks. rozdz. tekstur
+				</text>
+				<text name="T_AvatarDisplay" tool_tip="Kontroluje sposób wyświetlania awatarów w oparciu o stopień złożoności i status znajomości. 'Ogranicz po złożoności' ogranicza renderowanie awatarów powyżej pewnej złożoności w celu poprawy wydajności. 'Zawsze pokazuj znajomych' zapewnia, że ​​znajomi są w pełni renderowani niezależnie od ich złożoności. 'Pokazuj tylko znajomych' renderuje tylko Twoich znajomych, ukrywając inne awatary w celu optymalizacji wydajności w zatłoczonych obszarach.">
+					Render awatarów
+				</text>
+				<combo_box name="AvatarComplexityModeSelection">
+					<combo_box.item label="Ogranicz po złożoności" name="0" />
+					<combo_box.item label="Zawsze pokazuj znajomych" name="1" />
+					<combo_box.item label="Pokazuj tylko znajomych" name="2" />
+				</combo_box>
+			</panel>
+		</panel>
+		<panel name="P_Aids" label="Pomoce">
+			<panel name="PT_Aids">
+				<text name="T_Aids">
+					Pomoce interfejsu
+				</text>
+			</panel>
+			<panel name="P_Aids_Settings">
+				<check_box tool_tip="Wyświetla ramki w trybie szkieletowym wokół wszystkich źródeł światła w scenie, pomagając w wizualizacji rozmieszczenia i zasięgu świateł na potrzeby debugowania lub konfiguracji sceny." label="Bryły brzegowe wszystkich świateł sceny" name="Lights" />
+				<check_box tool_tip="Wyświetla efektywny promień wybranych źródeł światła umożliwiając zobaczenie, jak daleko dociera ono na scenie. Przydatne do precyzyjnego dostrajania oświetlenia." label="Wizualny zasięg światła dla zaznaczenia" name="Show Light Radius for Selection" />
+				<check_box tool_tip="Włącza ramki w trybie szkieletowym wokół wszystkich obiektów na scenie. Pomaga to w identyfikowaniu granic obiektów na potrzeby wyrównania, skalowania lub rozwiązywania problemów z renderowaniem." label="Pokaż bryły brzegowe obiektów na scenie" name="Bounding Boxes" />
+				<check_box tool_tip="Wyświetla w czasie rzeczywistym statystyki wydajności, w tym liczbę klatek na sekundę (FPS), dane sieciowe i mierniki renderowania. Przydatne do monitorowania wydajności przeglądarki i identyfikowania wąskich gardeł." label="Pokaż panel statystyk" name="Statistics Bar" />
+				<check_box tool_tip="Wyświetla szczegółowe informacje na temat położenia, orientacji i ruchu kamery w scenie. Przydatne do precyzyjnej pracy z kamerą przy fotografii, machinimie lub budowaniu." label="Pokaż detale pozycji kamery" name="Camera" />
+				<check_box tool_tip="Otwiera konsolę tekstur wyświetlającą w czasie rzeczywistym informacje na temat sposobu ładowania tekstur, w tym ich rozmiary, czas ładowania i wykorzystanie pamięci. Pomaga w diagnozowaniu problemów z wydajnością związanych z teksturami." label="Pokaż detale ładowania tekstur" name="Texture Console" />
+				<check_box tool_tip="Wyświetla wartości kolorów RGB (czerwony, zielony, niebieski) i intensywności (I) piksela bezpośrednio pod kursorem. Przydatne przy dopasowywaniu kolorów, pracach projektowych lub debugowaniu problemów z oświetleniem." label="Pokaż wartość RGB-I spod kursora" name="Show Color Under Cursor" />
+				<check_box tool_tip="Podświetla przezroczyste obiekty na czerwono, dzięki czemu łatwiej je zidentyfikować. Jest to szczególnie przydatne do lokalizowania niewidocznych prim lub ukrytych obiektów podczas budowania lub rozwiązywania problemów." label="Podświetl przezroczystość na czerwono" name="Highlight Transparent" />
+				<check_box tool_tip="Renderuje całą scenę w trybie szkieletowym, wyświetlając podstawową geometrię obiektów bez tekstur lub ich cieniowania. Przydatne do analizowania struktur obiektów, LOD (poziomu szczegółowości) i topologii meszy." label="Pokaż scenę w trybie obrazu szkieletowego" name="Wireframe" />
+				<check_box tool_tip="Wyświetla wszystkie dodatki HUD (Heads-Up Display) aktualnie noszone przez Twojego awatara. Wyłączenie tej opcji ukrywa HUD-y, co może być przydatne do zmniejszenia bałaganu na ekranie lub poprawy wydajności." label="Pokaż podczepione dodatki HUD" name="Show HUD Attachments" />
+				<check_box label="Spowolnij awatara (tylko w tej przeglądarce)" tool_tip="Spowalnia animacje awatara w przeglądarce, pozwalając na szczegółową obserwację ruchu. To ustawienie nie wpływa na to, jak inni widzą Twojego awatara." name="Slow Motion Animations" />
+				<button name="Rebake Texture" tool_tip="Zmusza przeglądarkę do ponownego przetworzenia lub odświeżenia tekstur awatara. Może to rozwiązać problemy takie jak rozmyte skórki, nieprawidłowe ładowanie ubrań lub inne problemy związane z teksturami." label="Wymuś odświeżenie wyglądu (rebake)" />
+				<button name="Set Window Size..." label="Ustaw rozmiar okna..." tool_tip="Otwiera okno dialogowe umożliwiające ustawienie dokładnych wymiarów okna przeglądarki. Przydatne do tworzenia zrzutów ekranu w określonych rozdzielczościach lub dopasowywania rozmiaru okna do machinimy." />
+				<button name="Debug Settings" label="Pokaż ustawienia debugowania" tool_tip="Otwiera menu ustawień debugowania, umożliwiając dostęp do zaawansowanych ustawień przeglądarki niedostępnych w standardowych preferencjach. Używaj ostrożnie, ponieważ zmiany mogą mieć wpływ na wydajność i stabilność." />
+			</panel>
+			<panel name="P_Quick_Stats">
+				<text name="T_Quick_Stats" tool_tip="Tutaj można znaleźć kilka bardzo przydatnych statystyk dla określenia wydajności systemu. Zwijaj/rozwijaj poszczególne pozycje klikając na etykietach.">
+					Szybkie statystyki
+				</text>
+			</panel>
+			<scroll_container name="statistics_scroll">
+				<container_view name="statistics_view">
+					<stat_view name="basic">
+						<stat_bar name="fps" label="Klatki/sek (FPS)" tool_tip="FPS: Ile razy Twój komputer rysuje ponownie (albo odświeża) to, co znajduje się na ekranie. Wyższe wartości są lepsze. Częstotliwość wyświetlania klatek pomiędzy 12 i 15 jest powszechna dla animacji, 24 jest standardem dla filmów, a 25 (PAL) / 30 (NTSC) jest używana w telewizji szerokopasmowej."/>
+						<stat_bar name="bandwidth" label="Przepustowość" tool_tip="Przepustowość: Jak wiele danych jest transferowanych pomiędzy Twoim komputerem, a światem wirtualnym. Ta liczba jest bardzo zależna od Twoich ustawień przepustowości, gdzie znajdujesz się w świecie, co się dzieje i czy ciągle przeglądarka pobiera jakieś dane (obiekty, tekstury itp.) znajdujące się w Twoim polu widzenia. Jeśli przepustowość wskazuje 0 Kbps coś może być nie w porządku (możesz być częściowo rozłączony/a)."/>
+						<stat_bar name="ktrisframe" label="KTris rysowane na kl." unit_label="/kl" tool_tip="Rysowanie KTris: (na klatkę) Obiekty generowanie komputerowo są zbudowane z trójkątów (podstawowy kształt geometryczny). Wartość tutaj to liczba trójkątów, lub 'tris', w każdej klatce sceny."/>
+						<stat_bar name="ktrissec" label="KTris rysowane na sek." unit_label="/sek" tool_tip="Rysowanie KTris: (na sekundę) Wartość tutaj to liczba trójkątów ('tris') rysowanych w każdej sekundzie. Generowane komputerowo obiekty są złożone właśnie z nich (to podstawowy kształt geometryczny)."/>
+						<stat_bar name="objs" label="Wszystkie obiekty" tool_tip="Wszystkie obiekty: Liczba obiektów obecnie widocznych: Primy, awatary, połacie terenu, drzewa, cząsteczki i obszary wody."/>
+						<stat_bar name="newobjs" label="Nowe obiekty" unit_label="/sek" tool_tip="Nowe obiekty: Liczba obiektów pobieranych na sekundę."/>
+						<stat_bar name="numimagesstat" label="Ilość tekstur" tool_tip="Ilość tekstur: Liczba unikalnych tekstur załadowanych przez przeglądarkę."/>
+					</stat_view>
+				</container_view>
+			</scroll_container>
+		</panel>
+		<panel name="P_Cam" label="Kamera">
+			<panel name="PT_Cam">
+				<text name="T_Cam">
+					Ustawienia myszy 3D (joysticka)
+				</text>
+			</panel>
+			<panel name="P_Cam_Settings">
+				<text name="T_LR_Axis" tool_tip="Reguluje czułość poziomego ruchu kamery. Niższe wartości pozwalają na dokładniejszą kontrolę, podczas gdy wyższe wartości zwiększają prędkość ruchu.">
+					Lewo/Prawo
+				</text>
+				<button name="Reset_LR_Axis" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_UD_Axis" tool_tip="Reguluje czułość pionowego ruchu kamery. Niższe wartości pozwalają na dokładniejszą kontrolę, podczas gdy wyższe wartości zwiększają prędkość ruchu.">
+					Góra/Dół
+				</text>
+				<button name="Reset_UD_Axis" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_IO_Axis" tool_tip="Steruje czułością ruchu kamery do przodu i do tyłu, podobnie jak w przypadku dollyingu w kinematografii w świecie rzeczywistym. Dzięki temu cała kamera przybliża się lub oddala od obiektu, zmieniając perspektywę, a nie regulując pole widzenia (FOV) tak, jak zrobiłby to zoom. Niższe wartości zapewniają bardziej precyzyjną kontrolę w celu uzyskania płynnych, stopniowych ruchów, natomiast wyższe wartości zwiększają prędkość ruchu w celu szybszej regulacji.">
+					We/Wyj
+				</text>
+				<button name="Reset_IO_Axis" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Tilt" tool_tip="Reguluje czułość ruchu przechylania w górę i w dół. Zmniejszenie tego ustawienia spowoduje, że przechylanie kamery będzie bardziej stopniowe.">
+					Przechyły
+				</text>
+				<button name="Reset_Tilt" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Spin" tool_tip="Modyfikuje czułość odchylania / wirowania (ruch obrotowy w lewo i w prawo). Niższe ustawienia spowodują powolne obracanie się, przydatne przy precyzyjnym kadrowaniu.">
+					Wirowanie
+				</text>
+				<button name="Reset_Spin" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Roll" tool_tip="Reguluje czułość ruchu obrotowego, który powoduje przechylenie kamery na boki - podobnie jak obrót głowy w lewo lub w prawo. Niższe wartości zapewniają lepszą kontrolę i precyzyjną regulację, natomiast wyższe wartości powodują, że ruch jest szybszy. Uwaga: to ustawienie nie będzie miało żadnego efektu, jeśli włączona jest opcja 'autopoziom', ponieważ automatyczne poziomowanie utrzymuje horyzont idealnie wypoziomowany, zapobiegając przechyleniom.">
+					Obroty
+				</text>
+				<button name="Reset_Roll" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Zoom_Speed" tool_tip="Steruje metodą przybliżania i oddalania poprzez regulację ogniskowej kamery lub pionowego pola widzenia (FOV), podobnie jak przy zmianie obiektywu w prawdziwym aparacie. Ma to wpływ na to, jak duża część sceny jest widoczna i jak wygląda 'powiększony' widok. Aby włączyć funkcję powiększania, ustaw oś powiększenia na '4'. To ustawienie nie wpływa na płynność zoomu, a raczej określa zakres regulacji FOV, pozwalając na precyzyjną kontrolę nad poziomem zoomu kamery.">
+					Szyb. pow.
+				</text>
+				<button name="Reset_Zoom_Speed" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+				<text name="T_Feathering" tool_tip="Kontroluje płynność ruchów kamery. Przesunięcie suwaka w prawo sprawia, że kamera jest sztywna i szybko reaguje na polecenia. Przesunięcie w lewo sprawia, że ​​kamera zachowuje się bardziej, jakby miała bezwładność, co jest idealne do kinowych ujęć z lotu ptaka.">
+					Lekkość
+				</text>
+				<button name="Reset_Feathering" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+			</panel>
+			<panel name="P_Axis_Mapping">
+				<spinner label="Oś powiększenia" name="JoystickAxis6" tool_tip="Określa, która oś joysticka lub myszy steruje funkcją powiększania. Ustaw na '4', aby włączyć zoom za pomocą joysticka." />
+				<check_box label="Włącz mysz 3D" tool_tip="Włącza lub wyłącza obsługę joysticka/myszy 3D do sterowania kamerą." name="enable_joystick" />
+				<check_box name="CB_ZoomDirect" label="Kontrola powiększania (zobacz chmurkę)" tool_tip="Aktywuje kontrolę zoomu za pomocą myszy 3D. Upewnij się, że 'oś powiększenia' jest ustawione na '4', aby zapewnić prawidłowe działanie." />
+				<check_box name="CB_AutoLeveling" label="Autopoziom (zapobiega obrotom kamery)" tool_tip="Utrzymuje kamerę w poziomie, zapobiegając niezamierzonemu przechylaniu. Jest to przydatne do utrzymania stabilnego horyzontu podczas ruchu." />
+				<check_box name="CB_Move_Avatar" label="Użyj myszy 3D, aby poruszać awatarem" tool_tip="Umożliwia sterowanie ruchem awatara za pomocą myszy 3D zamiast kamery." />
+				<check_box name="CB_Move_Objects" label="... aby poruszać obiektami (budowanie)" tool_tip="Umożliwia używanie myszy 3D do manipulowania obiektami w trakcie budowania i edycji." />
+				<check_box label="Pokazuj pole widzenia w przeglądarce" tool_tip="Wyświetla informacje o bieżącym pionowym polu widzenia (FOV). Dostosuj je za pomocą suwaka powiększenia." name="CAM_Show_FOV" />
+				<check_box tool_tip="Wyświetla szczegółowe informacje o położeniu, orientacji i ruchu kamery. Przydatne w przypadku fotografii, machinimy lub precyzyjnej edycji." label="Pokaż szczegóły pozycji kamery" name="Camera" />
+			</panel>
+			<panel name="P_Viewer_Cam_Menu">
+				<text name="PT_Viewer_Cam_Menu">
+					Ustawienia widoku kamery
+				</text>
+			</panel>
+			<panel name="P_Viewer_Cam_Menu_Settings">
+				<tab_container name="TC_Viewer_Cam_Menu_Settings">
+					<panel name="CamMov" label="Ruch kamery">
+						<panel name="P_Cam2">
+							<text name="T_Zoom2" tool_tip="W prawdziwym świecie to jest funkcja powiększania (zoom) - zmieni pole widzenia w oknie przeglądarki. Działa tak samo, jak naciskanie Ctrl+0 lub Ctrl+8. UWAGA: Ta opcja nie będzie działać, gdy będzie włączona 'wolna kamera' (3D SpaceNavigator).">
+								Kąt widzenia
+							</text>
+							<button name="Reset_Zoom2" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+							<text name="T_Zoom_Speed2" tool_tip="Kontroluje jak szybko/wolno kamera będzie powiększać i pomniejszać obraz. Wyższe wartości powodują wolniejsze i gładsze powiększanie.">
+								Szybk. powiększ.
+							</text>
+							<button name="Reset_Zoom_Speed2" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+							<text name="T_Camera_Lag" tool_tip="Opóźnienie ruchu kamery po ruchu awatara (0 = brak, 30 = prędkość awatara).">
+								Opóźn. kamery
+							</text>
+							<button name="Reset_Camera_Lag" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+							<text name="T_Camera_Offset" tool_tip="Kontroluje, jak daleko kamera jest przesunięta/oddalona od domyślnego punktu widzenia.">
+								Przesun. kamery
+							</text>
+							<button name="Reset_Camera_Offset" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+							<text name="T_Cam_Smoothing" tool_tip="Kontroluje, jak płynnie kamera rozpoczyna i kończy swój ruch. Wyższe wartości dają gładszy (i nieco wolniejszy) ruch.">
+								Wygładz. kamery
+							</text>
+							<button name="Reset_Cam_Smoothing" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+						</panel>
+					</panel>
+					<panel name="P_Mouse" label="Myszka">
+						<panel name="P_Mouse_Settings">
+							<text name="T_Mouse_Sens" tool_tip="Kontrola szybkości reakcji myszki w trybie pierwszoosobowym.">
+								Czułość myszy
+							</text>
+							<button name="Reset_Mouse_Sens" tool_tip="Kliknij tutaj, aby zresetować ustawienia do domyślnych."/>
+							<check_box label="Pokaż awatara w trybie pierwszoosobowym" tool_tip="Pokazuj awatara i dodatki poniżej szyi podczas przebywania w widoku pierwszoosobowym. Domyślnie ta opcja jest wyłączona." name="first_person_avatar_visible"/>
+							<check_box label="Wygładź ruchy myszy w trybie pierwszoos." tool_tip="Wygładzaj ruchy myszy w trybie pierwszoosobowym." name="MouseSmooth"/>
+						</panel>
+					</panel>
+					<panel name="P_Misc" label="Inne ustawienia">
+						<panel name="P_Misc_Settings">
+							<check_box label="Nie resetuj kamery, gdy kliknę na awatara" name="clickonavatarkeepscamera" tool_tip="Normalnie gdy klikniesz na swojego awatara pozycja kamery ulega zresetowaniu. Ta opcja usuwa to zachowanie."/>
+							<check_box label="Resetuj pozycję kamery po teleportacji" name="FSResetCameraOnTP" tool_tip="Normalnie pozycja kamery ulega zresetowaniu po teleportacji. Ta opcja zapobiega temu zachowaniu."/>
+							<check_box label="Przenikaj przez primy bez ograniczeń" name="ignorecameraconstraints" tool_tip="Ignoruje 'pchnięcie' stosowane przez symulator, aby utrzymać kamerę na zewnątrz obiektów. WYMAGA RESTARTU!"/>
+							<check_box label="Resetuj pozycję kamery przy poruszaniu się" name="resetcamerapositiononmovement" tool_tip="Resetuje pozycję kamery do domyślnej pozycji, gdy poruszysz awatarem."/>
+						</panel>
+					</panel>
+				</tab_container>
+			</panel>
+		</panel>
+	</tab_container>
+</floater>

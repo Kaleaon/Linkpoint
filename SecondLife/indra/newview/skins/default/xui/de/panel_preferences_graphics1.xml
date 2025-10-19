@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Grafik" name="Display panel">
+	<text name="preset_text">
+		(Keine)
+	</text>
+	<text name="QualitySpeed" top_delta="20">
+		Qualität und Geschwindigkeit:
+	</text>
+	<text name="ShadersPrefText" top_delta="15">
+		Niedrig
+	</text>
+	<text name="ShadersPrefText2">
+		Mittel
+	</text>
+	<text name="ShadersPrefText3">
+		Hoch
+	</text>
+	<text name="ShadersPrefText4">
+		Ultra
+	</text>
+	<text name="FasterText">
+		Schneller
+	</text>
+	<text name="BetterText">
+		Besser
+	</text>
+	<check_box initial_value="true" label="Atmosphären-Shader" name="WindLightUseAtmosShaders"/>
+	<check_box initial_value="true" label="Erweitertes Beleuchtungsmodell" name="UseLightShaders"/>
+	<slider label="Maximale Avatarkomplexität:" name="IndirectMaxComplexity" tool_tip="Bestimmt, an welchem Punkt ein visuell komplexer Avatar als JellyDoll dargestellt wird"/>
+	<text name="IndirectMaxComplexityText">
+		0
+	</text>
+	<check_box initial_value="true" label="Freunde immer darstellen" name="AlwaysRenderFriends"/>
+	<button label="Ausnahmen..." name="RenderExceptionsButton"/>
+	<button label="Einstellungen als Voreinstellung speichern" name="PrefSaveButton" width="235" left="5"/>
+	<button label="Voreinstellung laden" name="PrefLoadButton" width="120"/>
+	min_val=&quot;0.125&quot;
+	<button label="Voreinstellung löschen" name="PrefDeleteButton" width="130"/>
+	<button label="Auf empfohlene Einstellungen zurücksetzen" name="Defaults" width="248"/>
+	<button label="Erweiterte Einstellungen..." name="AdvancedSettings"/>
+</panel>

@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel
+ border="true"
+ follows="all"
+ height="480"
+ layout="topleft"
+ left="1"
+ top="1"
+ width="540"
+ label="Popups"
+ name="popups">
+<tab_container
+ label="Alerts"
+ layout="topleft"
+ follows="all"
+ top="5"
+ bottom="-1"
+ left="1"
+ right="-1"
+ name="tabs"
+ tab_min_width="50"
+ tab_position="top">
+ 
+    <!-- World -->
+    <panel
+     top_pad="5"
+     bottom="-1"
+     left="1"
+     right="-1"
+     follows="all"
+     label="World"
+     name="tab-world">
+
+    <check_box
+     control_name="NotifyMoneyChange"
+     height="16"
+     label="Notify me when I spend or get L$"
+     layout="topleft"
+     left="10"
+     name="notify_money_change_checkbox"
+     top="10"
+     width="450" />
+    <check_box
+     enabled_control="NotifyMoneyChange"
+     layout="topleft"
+     follows="left|top"
+     left="20"
+     top_pad="3"
+     height="16"
+     control_name="FSPaymentInfoInChat"
+     name="FSPaymentInfoInChat"
+     label="Report L$ transactions in nearby chat instead of toasts"/>
+    <check_box
+     control_name="FSShowServerVersionChangeNotice"
+     height="16"
+     label="Notify if the simulator version changes while changing the region"
+     layout="topleft"
+     left="10"
+     name="FSShowServerVersionChangeNotice"
+     top_pad="3"
+     tool_tip="Displays a notice if the simulator version changes during a teleport or while crossing a region."
+     width="450"/>
+    <check_box
+     control_name="AutoQueryGridStatus"
+     height="16"
+     label="Query status.secondlifegrid.net for latest news at login"
+     layout="topleft"
+     name="AutoQueryGridStatus"
+     top_pad="3"
+     width="450"/>
+
+    <check_box
+      control_name="FSEnableGrowl"
+      height="16"
+      label="Enable Growl Notifications"
+      layout="topleft"
+      left="10"
+      name="notify_growl_checkbox"
+      top_pad="15"
+      width="450"/>
+    <check_box
+      enabled_control="FSEnableGrowl"
+      layout="topleft"
+      follows="left|top"
+      left_delta="10"
+      top_pad="3"
+      height="16"
+      control_name="FSGrowlWhenActive"
+      name="notify_growl_always_checkbox"
+      label="Show Growl Notifications even when Firestorm is active"/>
+    <check_box
+      enabled_control="FSEnableGrowl"
+      layout="topleft"
+      follows="left|top"
+      top_pad="3"
+      height="16"
+      control_name="FSFilterGrowlKeywordDuplicateIMs"
+      name="FSFilterGrowlKeywordDuplicateIMs"
+      label="Filter duplicate IMs if they have already been shown as part of a keyword alert"/>
+
+    </panel>
+
+    <!-- People -->
+    <panel
+     top_pad="5"
+     bottom="-1"
+     left="1"
+     right="-1"
+     follows="all"
+     label="People"
+     name="tab-people">
+
+    <check_box
+     control_name="FSFlashOnMessage"
+     height="16"
+     label="Flash the app icon when receiving a message and [APP_NAME] is not in focus"
+     layout="topleft"
+     left="10"
+     name="FSFlashOnMessage"
+     top="10"
+     width="450"/>
+    <check_box
+     control_name="FSFlashOnObjectIM"
+     enabled_control="FSFlashOnMessage"
+     height="16"
+     label="Also flash the app icon when receiving an instant message from an object"
+     layout="topleft"
+     left="20"
+     name="FSFlashOnObjectIM"
+     top_pad="3"
+     width="450"/>
+    <check_box
+     control_name="FSShowDisplayNameUpdateNotification"
+     height="16"
+     label="Notify me when somebody changes their display name"
+     layout="topleft"
+     left="10"
+     top_pad="3"
+     name="FSShowDisplayNameUpdateNotification"
+     width="450" />
+    <check_box
+     control_name="FSReportBlockToNearbyChat"
+     height="16"
+     label="Notify me when I block or unblock somebody"
+     layout="topleft"
+     left="10"
+     top_pad="3"
+     name="FSReportBlockToNearbyChat"
+     width="450" />
+    <text
+        type="string"
+        length="1"
+        follows="top|left"
+        height="15"
+        layout="topleft"
+        left="10"
+        top_pad="10"
+        name="friends_logon_label"
+        width="430">
+        Notify me when my friends log in or out:
+    </text>
+    <check_box
+    control_name="ChatOnlineNotification"
+    height="16"
+    label="As toasts"
+    layout="topleft"
+    name="friends_online_notify_checkbox"
+    top_pad="5"
+    left_delta="5"
+    width="100" />
+    <check_box
+      control_name="OnlineOfflinetoNearbyChat"
+      name="OnlineOfflinetoNearbyChat"
+      label="In nearby chat and console"
+      layout="topleft"
+      left_pad="0"
+      height="18"
+      width="190">
+      <check_box.commit_callback
+      function="Pref.Online_Notices" />
+    </check_box>
+    <check_box
+      enabled="false"
+      control_name="OnlineOfflinetoNearbyChatHistory"
+      follows="left|top"
+      height="18"
+      label="In nearby chat only"
+      layout="topleft"
+      left_pad="0"
+      name="OnlineOfflinetoNearbyChatHistory"
+      width="180" />
+
+	</panel>
+
+    <!-- Objects & Scripts -->
+    <panel
+     top_pad="5"
+     bottom="-1"
+     left="1"
+     right="-1"
+     follows="all"
+     label="Objects &amp; Scripts"
+     name="tab-objects">
+
+    <check_box
+     control_name="FSFlashOnScriptDialog"
+     height="16"
+     label="Flash the app icon when receiving a script dialog and [APP_NAME] is not in focus"
+     layout="topleft"
+     left="10"
+     name="FSFlashOnScriptDialog"
+     top="10"
+     width="450"/>
+    <check_box
+     top_pad="3"
+     control_name="FSCollisionMessagesInChat"
+     height="16"
+     label="Report collision notifications to nearby chat"
+     layout="topleft"
+     name="FSCollisionMessagesInChat"
+     width="450" />
+	<check_box
+     control_name="ShowScriptErrors"
+     follows="left|top"
+     height="16"
+     label="Report Script Errors in:"
+     layout="topleft"
+     left="10"
+     top_pad="3"
+     name="show_script_errors"
+     width="450" />
+    <radio_group
+     enabled_control="ShowScriptErrors"
+     control_name="ShowScriptErrorsLocation"
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     top_pad="5"
+     name="show_script_errors_location"
+     width="250">
+        <radio_item
+         height="16"
+         label="Nearby chat"
+         layout="topleft"
+         left_delta="5"
+         name="script_0"
+         top="0"
+         value="0"
+         width="100" />
+        <radio_item
+         height="16"
+         label="Separate window"
+         layout="topleft"
+         left_delta="100"
+         name="script_1"
+         top_delta="0"
+         value="1"
+         width="100" />
+    </radio_group>
+
+	<check_box
+		control_name="FSReportTotalScriptCountChanges"
+		height="16"
+		label="Report region's total script count changes:"
+		layout="topleft"
+		left="10"
+		top_pad="15"
+		name="FSReportTotalScriptCountChanges"
+		width="450" />
+	<spinner
+		top_pad="3"
+		control_name="FSReportTotalScriptCountChangesThreshold"
+		enabled_control="FSReportTotalScriptCountChanges"
+		decimal_digits="0"
+		layout="topleft"
+		follows="left|top"
+		height="18"
+		left_delta="10"
+		increment="1"
+		max_val="10000"
+		min_val="0"
+		name="FSReportTotalScriptCountChangesThreshold"
+		width="90"
+		tool_tip="The threshold for total script count changes before reporting [Default: 100]"/>
+
+    <check_box
+     control_name="FSReportCollisionMessages"
+     height="16"
+     label="Report collision notifications to scripts on channel:"
+     layout="topleft"
+     left="10"
+     top_pad="20"
+     name="FSReportCollisionMessages"
+     width="450" />
+    <spinner
+      top_pad="3"
+      control_name="FSReportCollisionMessagesChannel"
+      enabled_control="FSReportCollisionMessages"
+      decimal_digits="0"
+      layout="topleft"
+      follows="left|top"
+      height="18"
+      left_delta="10"
+      increment="1"
+      initial_value="-25000"
+      max_val="2147483647"
+      min_val="-2147483648"
+      name="FSReportCollisionMessagesChannel"
+      width="90"
+      tool_tip="The channel used for reporting collision messages to scripts [Default: -25000]"/>
+
+    </panel>
+
+    <!-- Inventory -->
+    <panel
+     top_pad="5"
+     bottom="-1"
+     left="1"
+     right="-1"
+     follows="all"
+     label="Inventory"
+     name="tab-inventory">
+
+    <check_box
+     layout="topleft"
+     follows="left|top"
+     top="10"
+     height="16"
+     left="10"
+     control_name="FSShowUploadPaymentToast"
+     name="FSShowUploadPaymentToast"
+     label="Notify me when I am charged for an upload" />
+    <check_box
+     control_name="FSLandmarkCreatedNotification"
+     height="16"
+     label="Notify me when a landmark has been created"
+     layout="topleft"
+     name="landmark_created_checkbox"
+     top_pad="3" />
+    <check_box
+     control_name="FSDisableReturnObjectNotification"
+     height="16"
+     label="Disable 'object has been returned to your inventory' notifications"
+     layout="topleft"
+     name="FSDisableReturnObjectNotification"
+     top_pad="3" />
+    <check_box
+     control_name="FSLogSnapshotsToLocal"
+     height="16"
+     label="Log filename of saved snapshots in to chat history"
+     layout="topleft"
+     name="FSLogSnapshotsToLocal"
+     top_pad="3" />
+    <check_box
+     top_pad="3"
+     left="10"
+     label="Notify about items from objects coming in too fast"
+     control_name="FSNotifyIncomingObjectSpam"
+     follows="left|top"
+     height="16"
+     name="FSNotifyIncomingObjectSpam"
+     width="200" />
+    <check_box
+     top_pad="3"
+     left="10"
+     label="Notify about items from other residents coming in too fast"
+     control_name="FSNotifyIncomingObjectSpamFrom"
+     follows="left|top"
+     height="16"
+     name="FSNotifyIncomingObjectSpamFrom"
+     width="200" />
+    <slider
+     left="10"
+     top_pad="3"
+     name="FSOfferThrottleMaxCount"
+     control_name="FSOfferThrottleMaxCount"
+     decimal_digits="0"
+     enabled="true"
+     follows="left|top"
+     height="18"
+     increment="1"
+     initial_value="5"
+     label="Incoming object offers throttle threshold:"
+     label_width="225"
+     max_val="20"
+     min_val="1"
+     show_text="true"
+     width="350"
+     tool_tip="Sets the threshold of incoming object offers within 10 seconds before they get throttled. Default 5" />
+    </panel>
+
+    <!-- Alerts -->
+    <panel
+     top_pad="5"
+     bottom="-1"
+     left="1"
+     right="-1"
+     follows="all"
+     label="Alerts"
+     name="tab-alerts">
+    <text
+     type="string"
+     follows="top|left|right"
+     height="12"
+     left="10"
+     name="show_label"
+     tool_tip="List of alerts in the viewer. Check the mark to the left to enable the alert, uncheck it to hide the alert."
+     top="8"
+     right="-10">
+       Viewer alerts that can be shown or hidden:
+    </text>
+    <filter_editor
+     follows="top|left|right"
+     height="22"
+     right="-10"
+     top_pad="8"
+     label="Filter Alerts"
+     name="popup_filter"
+     text_pad_left="6"
+     tool_tip="Type the search term you are interested in here. Results will be displayed for partial fulltext matches.">
+       <filter_editor.commit_callback
+        function="Pref.UpdatePopupFilter" />
+    </filter_editor>
+    <!-- Making scroll lists follow="all" results in all kinds of havoc :( -Zi -->
+    <scroll_list
+     follows="top|left|right"
+     height="384"
+     top_pad="8"
+     sort_column="2"
+     sort_ascending="true"
+     multi_select="true"
+     name="all_popups"
+     right="-10">
+        <!-- using a blank padding column to make things look prettier, since "halign" doesn't seem to work for checkboxes -Zi -->
+        <column label="" name="make_pretty" width="1" />
+        <column label="Show" name="alert_enabled_check" width="22" />
+        <column label="Alert" name="alert_label" width="460" />
+        <scroll_list.commit_callback
+         function="Pref.SelectPopup" />
+    </scroll_list>
+    </panel>
+</tab_container>
+</panel>

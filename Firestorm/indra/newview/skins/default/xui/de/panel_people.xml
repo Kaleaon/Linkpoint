@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Side tray panel -->
+<panel label="Leute" name="people_panel">
+	<string name="no_recent_people" value="Hier sind keine Leute."/>
+	<string name="no_filtered_recent_people" value="Sie haben nicht das Richtige gefunden? Versuchen Sie es mit der [secondlife:///app/search/people/[SEARCH_TERM] Suche]."/>
+	<string name="no_one_near" value="Es ist niemand in der Nähe. Sie suchen nach Leuten? Verwenden Sie die [secondlife:///app/search/people Suche] oder die [secondlife:///app/worldmap Karte]."/>
+	<string name="no_one_filtered_near" value="Sie haben nicht das Richtige gefunden? Versuchen Sie es mit der [secondlife:///app/search/people/[SEARCH_TERM] Suche]."/>
+	<string name="no_friends_online" value="Keine Freunde online"/>
+	<string name="no_friends" value="Keine Freunde"/>
+	<string name="no_friends_msg">
+		Um jemanden als Freund hinzuzufügen, klicken Sie mit rechts auf deren Avatar oder Namen.
+
+Sie suchen nach Orten mit mehr Leuten?
+
+[secondlife:///app/floater/destinations Ziele] enthält Orte, die vom Grid-Betreiber ausgewählt wurden.
+
+[secondlife:///app/search/ Suche] lässt Sie das Grid nach bestimmten Schlüsselwörtern durchsuchen.
+	</string>
+	<string name="no_filtered_friends_msg">
+		Sie haben nicht das Richtige gefunden? Versuchen Sie es mit der [secondlife:///app/search/people/[SEARCH_TERM] Suche].
+	</string>
+	<string name="no_filtered_groups_msg" value="Sie haben nicht das Richtige gefunden? Versuchen Sie es mit der [secondlife:///app/search/groups/[SEARCH_TERM] Suche]."/>
+	<string name="no_groups_msg" value="Suchen Sie nach Gruppen? Versuchen Sie es mit der [secondlife:///app/search/groups Suche].">
+		Sie sind kein Mitglied einer Gruppe.
+
+Lernen Sie über [https://community.secondlife.com/knowledgebase/joining-and-participating-in-groups-r51/ Gruppen].
+	</string>
+	<string name="MiniMapToolTipMsg" value="[REGION] (Doppelklicken, um Karte zu öffnen; Umschalttaste gedrückt halten und ziehen, um zu schwenken)"/>
+	<string name="AltMiniMapToolTipMsg" value="[REGION] (Doppelklicken, um zu teleportieren; Umschalttaste gedrückt halten und ziehen, um zu schwenken)"/>
+	<string name="GroupCountWithInfo" value="Du gehörst zu [COUNT] Gruppen, und kannst [REMAINING] weiteren beitreten. [secondlife:/// Erhöhe dein Limit]"/>
+	<string name="empty_list">
+		Dieses Kontakt-Set ist leer.
+	</string>
+	<string name="no_sets">
+		Keine Kontakt-Sets
+	</string>
+	<string name="all_sets">
+		Alle Kontakt-Sets
+	</string>
+	<string name="pseudonyms">
+		Aliase
+	</string>
+	<string name="AllFriendsTitle">
+		Alle ([ALL])
+	</string>
+	<string name="OnlineFriendsTitle">
+		Online ([ONLINE])
+	</string>
+	<tab_container name="tabs">
+		<panel label="In der Nähe" name="nearby_panel">
+			<panel label="bottom_panel" name="nearby_buttons_panel">
+				<filter_editor label="Nach Personen filtern" name="nearby_filter_input"/>
+				<button name="gear_btn" tool_tip="Aktionen für ausgewählte Person"/>
+				<menu_button name="nearby_view_btn" tool_tip="Anzeige-/Sortieroptionen"/>
+				<button name="add_friend_btn" tool_tip="Einem Einwohner die Freundschaft anbieten"/>
+				<dnd_button name="nearby_del_btn" tool_tip="Ausgewählte Person als Freund entfernen"/>
+			</panel>
+		</panel>
+		<panel label="Freunde" name="friends_panel">
+			<tab_container name="friends_accordion">
+				<panel name="tab_online" title="Online"/>
+				<panel name="tab_all" title="Alle"/>
+				<panel name="tab_suggested_friends" title="Mögliche Freunde"/>
+			</tab_container>
+			<panel label="bottom_panel" name="friends_buttons_panel">
+				<filter_editor label="Nach Personen filtern" name="friends_filter_input"/>
+				<button name="gear_btn" tool_tip="Aktionen für ausgewählte Person"/>
+				<menu_button name="friends_view_btn" tool_tip="Anzeige-/Sortieroptionen"/>
+				<button name="friends_add_btn" tool_tip="Einem Einwohner die Freundschaft anbieten"/>
+				<button name="GlobalOnlineStatusToggle" tool_tip="Sichtbarkeit des Onlinestatus global umschalten"/>
+				<dnd_button name="friends_del_btn" tool_tip="Ausgewählte Person als Freund entfernen"/>
+			</panel>
+				<accordion_tab name="tab_suggested_friends" title="Potenzielle Freunde"/>
+		</panel>
+		<panel label="Gruppen" name="groups_panel">
+			<panel label="bottom_panel" name="groups_buttons_panel">
+				<filter_editor label="Nach Gruppen filtern" name="groups_filter_input"/>
+				<menu_button name="groups_gear_btn" tool_tip="Aktionen für ausgewählte Gruppe"/>
+				<menu_button name="groups_view_btn" tool_tip="Anzeige-/Sortieroptionen"/>
+				<menu_button name="plus_btn" tool_tip="Gruppe beitreten/Neue Gruppe erstellen"/>
+				<dnd_button name="minus_btn" tool_tip="Ausgewählte Gruppe verlassen"/>
+			</panel>
+			<text name="groupcount">
+				Sie gehören [COUNT] Gruppe(n) an ([REMAINING] verbleibend).
+			</text>
+		</panel>
+		<panel label="Aktuell" name="recent_panel">
+			<panel label="bottom_panel" name="recent_buttons_panel">
+				<filter_editor label="Nach Personen filtern" name="recent_filter_input"/>
+				<button name="gear_btn" tool_tip="Aktionen für ausgewählte Person"/>
+				<menu_button name="recent_view_btn" tool_tip="Anzeige-/Sortieroptionen"/>
+				<button name="add_friend_btn" tool_tip="Einem Einwohner die Freundschaft anbieten"/>
+				<dnd_button name="recent_del_btn" tool_tip="Ausgewählte Person als Freund entfernen"/>
+			</panel>
+		</panel>
+		<panel label="Ignoriert" name="blocked_panel">
+			<panel label="Ignorierte Einwohner und Objekte" name="panel_block_list_sidetray"/>
+		</panel>
+		<panel label="Kontakt-Sets" name="contact_sets_panel">
+			<panel label="Kontakt-Sets" name="panel_people_contacts_sidetray"/>
+		</panel>
+	</tab_container>
+</panel>

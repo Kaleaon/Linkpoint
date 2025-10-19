@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<floater name="load_pref_preset" title="Загрузить Предустановку">
+	<string name="title_graphic">
+		Загрузить предустановку графики
+	</string>
+	<string name="title_camera">
+		Загрузить предустановку камеры
+	</string>
+	<text name="Preset">
+		Выберите предустановку
+	</text>
+	<button label="OK" name="ok"/>
+	<button label="Отмена" name="cancel"/>
+</floater>

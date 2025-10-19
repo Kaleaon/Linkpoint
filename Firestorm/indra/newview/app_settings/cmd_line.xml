@@ -1,0 +1,478 @@
+<?xml version="1.0"?>
+<llsd>
+  <map>
+    <!-- Please insert new keys in alphabetical order. -->
+    <key>analyzeperformance</key>
+    <map>
+      <key>desc</key>
+      <string>When used in conjunction with logperformance, analyzes result of log against baseline.</string>
+      <key>map-to</key>
+      <string>AnalyzePerformance</string>
+    </map>
+
+    <key>autologin</key>
+    <map>
+      <key>desc</key>
+      <string>log in as last saved user</string>
+      <key>map-to</key>
+      <string>AutoLogin</string>
+    </map>
+
+    <key>channel</key>
+    <map>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>CmdLineChannel</string>
+    </map>
+
+    <key>console</key>
+    <map>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>ShowConsoleWindow</string>
+    </map>
+
+    <key>cooperative</key>
+    <map>
+      <key>desc</key>
+      <string>Yield some idle time to local host.</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>YieldTime</string>
+    </map>
+
+    <key>crashonstartup</key>
+    <map>
+      <key>desc</key>
+      <string>Crashes on startup. For QA use.</string>
+      <key>map-to</key>
+      <string>CrashOnStartup</string>
+    </map>
+
+    <key>debugsession</key>
+    <map>
+      <key>desc</key>
+      <string>Run as if RenderDebugGLSession is TRUE, but log errors until end of session.</string>
+      <key>map-to</key>
+      <string>DebugSession</string>
+    </map>
+
+    <key>debugviews</key>
+    <map>
+      <key>map-to</key>
+      <string>DebugViews</string>
+    </map>
+
+    <key>disablecrashlogger</key>
+    <map>
+      <key>desc</key>
+      <string>Disables the crash logger and lets the OS handle crashes</string>
+      <key>map-to</key>
+      <string>DisableCrashLogger</string>
+    </map>
+
+    <key>drop</key>
+    <map>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>PacketDropPercentage</string>
+    </map>
+    
+    <key>god</key>
+    <map>
+      <key>desc</key>
+      <string>Log in a god if you have god access.</string>
+      <key>map-to</key>
+      <string>ConnectAsGod</string>
+    </map>
+
+    <key>graphicslevel</key>
+    <map>
+      <key>desc</key>
+      <string>Set the detail level. 
+0 - low, 1 - medium, 2 - high, 3 - ultra</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>RenderQualityPerformance</string>
+    </map>
+
+    <key>grid</key>
+    <map>
+      <key>desc</key>
+      <string>Specify the name of the grid to connect to.</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>CmdLineGridChoice</string>
+    </map>
+
+    <key>update-service</key>
+    <map>
+      <key>desc</key>
+      <string>Override the url base for the update query.</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>CmdLineUpdateService</string>
+    </map>
+
+    <key>help</key>
+    <map>
+      <key>desc</key>
+      <string>display this help message</string>
+
+      <key>short</key>
+      <string>h</string>
+    </map>
+
+    <key>helperuri</key>
+    <map>
+      <key>desc</key>
+      <string>helper web CGI prefix to use</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>CmdLineHelperURI</string>
+    </map>
+
+    <key>ignorepixeldepth</key>
+    <map>
+      <key>desc</key>
+      <string>Ignore pixel depth settings.</string>
+      <key>map-to</key>
+      <string>IgnorePixelDepth</string>
+    </map>
+
+    <key>inbw</key>
+    <map>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>InBandwidth</string>
+    </map>
+
+    <key>leap</key>
+    <map>
+      <key>desc</key>
+      <string>command line to run an LLSD Event API Plugin</string>
+      <key>count</key>
+      <integer>1</integer>
+      <!-- you can specify multiple such plugins -->
+      <key>compose</key>
+      <boolean>true</boolean>
+      <key>map-to</key>
+      <string>LeapCommand</string>
+    </map>
+
+    <key>logfile</key>
+    <map>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>UserLogFile</string>
+    </map>
+
+	<!-- [FS:CR] Use UserLoginInfoCmdLine Plz -->
+    <key>login</key>
+    <map>
+      <key>desc</key>
+      <string>3 tokens: first, last and password</string>
+      <key>count</key>
+      <integer>3</integer>
+      <key>map-to</key>
+      <string>UserLoginInfoCmdLine</string>
+    </map>
+
+    <key>loginpage</key>
+    <map>
+      <key>desc</key>
+      <string>Login authentication page to use.</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>LoginPage</string>
+    </map>
+
+    <key>loginuri</key>
+    <map>
+      <key>desc</key>
+      <string>login server and CGI script to use</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>CmdLineLoginURI</string>
+    </map>
+
+    <key>logmetrics</key>
+    <map>
+      <key>desc</key>
+      <string>Log metrics for benchmarking</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>LogMetrics</string>
+    </map>
+
+    <key>logperformance</key>
+    <map>
+      <key>desc</key>
+      <string>Log performance metrics for benchmarking</string>
+      <key>map-to</key>
+      <string>LogPerformance</string>
+    </map>
+
+    <key>multiple</key>		  
+    <map>
+      <key>desc</key>
+      <string>Allow multiple viewers.</string>
+      <key>map-to</key>
+      <string>AllowMultipleViewers</string>
+    </map>
+
+    <key>noaudio</key>
+    <map>
+      <key>map-to</key>
+      <string>NoAudio</string>
+    </map>
+
+    <key>nofmod</key>
+    <map>
+      <key>map-to</key>
+      <string>UseMediaPluginsForStreamingAudio</string>
+    </map>
+
+    <key>noninteractive</key>
+    <map>
+      <key>desc</key>
+      <string>Run in semi-headless mode where only login and logout need to work.</string>
+      <key>map-to</key>
+      <string>NonInteractive</string>
+    </map>
+
+    <key>nonotifications</key>
+    <map>
+      <key>desc</key>
+      <string>User will not get any notifications. NOTE: All notifications that occur will get added to ignore file for future runs.</string>
+      <key>map-to</key>
+      <string>IgnoreAllNotifications</string>      
+    </map>
+
+    <key>nopreload</key>
+    <map>
+      <key>map-to</key>
+      <string>NoPreload</string>
+    </map>
+
+    <key>noprobe</key>
+    <map>
+      <key>map-to</key>
+      <string>NoHardwareProbe</string>
+    </map>
+
+    <key>noquicktime</key>
+    <map>
+      <key>map-to</key>
+      <string>NoQuickTime</string>
+    </map>
+
+    <key>nosound</key>
+    <map>
+      <key>map-to</key>
+      <string>NoAudio</string>
+    </map>
+
+    <key>no-verify-ssl-cert</key>
+    <map>
+      <key>map-to</key>
+      <string>NoVerifySSLCert</string>
+    </map>
+
+    <key>novoice</key>
+    <map>
+      <key>desc</key>
+      <string>Disable voice.</string>
+      <key>map-to</key>
+      <string>CmdLineDisableVoice</string>
+    </map>
+
+    <key>outbw</key>
+    <map>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>OutBandwidth</string>
+    </map>
+
+    <key>port</key>
+    <map>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>UserConnectionPort</string>
+    </map>
+
+    <key>purge</key>
+    <map>
+      <key>desc</key>
+      <string>Delete files in the cache.</string>
+      <key>map-to</key>
+      <string>PurgeCacheOnNextStartup</string>
+    </map>
+
+    <key>qa</key>
+    <map>
+      <key>desc</key>
+      <string>Activated debugging menu in Advanced Settings.</string>
+      <key>map-to</key>
+      <string>QAMode</string>
+    </map>
+
+    <key>quitafter</key>
+    <map>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>QuitAfterSeconds</string>
+    </map>
+
+    <key>replaysession</key>
+    <map>
+      <key>desc</key>
+      <string>After login, replay last recorded session and quit.</string>
+      <key>map-to</key>
+      <string>ReplaySession</string>
+    </map>
+
+    <key>rotate</key>
+    <map>
+      <key>map-to</key>
+      <string>RotateRight</string>
+    </map>
+    
+    <key>safe</key>
+    <map>
+      <key>desc</key>
+      <string>Reset preferences, run in safe mode.</string>
+      <key>map-to</key>
+      <string>SafeMode</string>
+    </map>
+
+    <key>sessionsettings</key>
+    <map>
+      <key>desc</key>
+      <string>Specify the filename of a configuration file that contains temporary per-session configuration overrides.</string>
+      <key>count</key>
+      <integer>1</integer>
+      <!-- Special case. Mapped to settings procedurally. -->
+    </map>
+
+    <key>set</key>
+    <map>
+      <key>desc</key>
+      <string>specify the value of a particular configuration variable that overrides all other settings.</string>
+      <key>count</key>
+      <integer>2</integer>
+      <key>compose</key>
+      <boolean>true</boolean>
+      <!-- Special case. Mapped to settings procedurally. -->
+    </map>
+
+    <key>setdefault</key>
+    <map>
+      <key>desc</key>
+      <string>specify the value of a particular configuration variable which can be overridden by settings.xml.</string>
+      <key>count</key>
+      <integer>2</integer>
+      <!-- Special case. Mapped to settings procedurally. -->
+    </map>
+
+    <key>settings</key>
+    <map>
+      <key>desc</key>
+      <string>Specify the filename of a configuration file.</string>
+      <key>count</key>
+      <integer>1</integer>
+      <!-- Special case. Mapped to settings procedurally. -->
+    </map>
+
+    <key>skin</key>
+    <map>
+      <key>desc</key>
+      <string>ui/branding skin folder to use</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>SkinCurrent</string>
+    </map>
+
+    <key>slurl</key>
+    <map>
+      <key>desc</key>
+      <string>Startup SLurl</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>positional</key>
+      <boolean>true</boolean>
+      <key>last_option</key>
+      <boolean>true</boolean>
+      <key>map-to</key>
+      <string>CmdLineLoginLocation</string>
+    </map>
+
+    <key>url</key>
+    <map>
+      <key>desc</key>
+      <string>Startup location</string>            
+      <key>count</key>
+      <integer>1</integer>
+      <key>last_option</key>
+      <boolean>true</boolean>
+      <key>map-to</key>
+      <string>CmdLineLoginLocation</string>
+    </map>
+
+    <key>usersessionsettings</key>
+    <map>
+      <key>desc</key>
+      <string>Specify the filename of a configuration file that contains temporary per-session configuration user overrides.</string>
+      <key>count</key>
+      <integer>1</integer>
+      <!-- Special case. Mapped to settings procedurally. -->
+    </map>
+
+    <key>skipupdatecheck</key>
+    <map>
+      <key>desc</key>
+      <string>Skips update check at startup.</string>
+      <key>map-to</key>
+      <string>CmdLineSkipUpdater</string>
+    </map>
+
+    <!-- FS:Ansariel - Option to not auto-save passwords when using login option >
+    <key>logindontsavepassword</key>
+    <map>
+      <key>desc</key>
+      <string>Specifies that the password should not be saved if the login parameter is used.</string>
+      <! Special case. Mapped to settings procedurally. >
+    </map>
+    <! FS:Ansariel - Option to not auto-save passwords when using login option -->
+
+    <!-- FS:Ansariel FIRE-12671: Force VRAM if DirectX detection is broken -->
+    <key>forcevideomemory</key>
+    <map>
+      <key>desc</key>
+      <string>Overrides the video memory detection on Windows if a value greater 0 is passed</string>
+      <key>count</key>
+      <integer>1</integer>
+      <key>map-to</key>
+      <string>FSForcedVideoMemory</string>
+    </map>
+    <!-- FS:Ansariel -->
+
+  </map>
+</llsd>

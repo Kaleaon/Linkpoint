@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Terreno" name="Terrain">
+	<text name="region_text_lbl">
+		Región:
+	</text>
+	<text name="region_text">
+		desconocida
+	</text>
+	<spinner label="Nivel del agua" name="water_height_spin" label_width="80" width="140"/>
+	<spinner label="Límite de elevación 
+del terreno" name="terrain_raise_spin" left="180" label_width="180" width="250"/>
+	<spinner bottom_delta="-34" label="Límite de bajada del 
+terreno" name="terrain_lower_spin"/>
+	<text name="detail_texture_text">
+    Texturas del terreno
+  </text>
+	<text name="height_text_lbl">
+		1 (bajo)
+	</text>
+	<text name="height_text_lbl2">
+		2
+	</text>
+	<text name="height_text_lbl3">
+		3
+	</text>
+	<text name="height_text_lbl4">
+		4 (alto)
+	</text>
+	<text name="height_text_lbl5">
+		Intervalos de elevación de textura
+	</text>
+	<text name="height_text_lbl10">
+		Estos valores representan la gama de mezclas para las texturas anteriores.
+	</text>
+	<text name="height_text_lbl11">
+		El valor BAJA mide en metros la altura MÁXIMA de la textura n.º 1, y el valor ALTA es la altura MÍNIMA de la textura n.º 4.
+	</text>
+	<text name="height_text_lbl6">
+		Noroeste
+	</text>
+	<text name="height_text_lbl7">
+		Noreste
+	</text>
+	<spinner label="Bajo" name="height_start_spin_1"/>
+	<spinner label="Bajo" name="height_start_spin_3"/>
+	<spinner label="Alto" name="height_range_spin_1"/>
+	<spinner label="Alto" name="height_range_spin_3"/>
+	<text name="height_text_lbl8">
+		Suroeste
+	</text>
+	<text name="height_text_lbl9">
+		Sureste
+	</text>
+	<spinner label="Bajo" name="height_start_spin_0"/>
+	<spinner label="Bajo" name="height_start_spin_2"/>
+	<spinner label="Alto" name="height_range_spin_0"/>
+	<spinner label="Alto" name="height_range_spin_2"/>
+	<button label="Descargar el RAW del terreno..." name="download_raw_btn" tool_tip="Disponible sólo para los propietarios del estado, no para los administradores" width="190" left="8"/>
+	<button label="Subir un RAW para el terreno..." name="upload_raw_btn" tool_tip="Disponible sólo para los propietarios del estado, no para los administradores" width="190" left_pad="6"/>
+	<button label="Predeterminar" name="bake_terrain_btn" tool_tip="Definir el terreno actual como punto medio para los límites de elevación/bajada" left_pad="6"/>
+	<button label="Aplicar" name="apply_btn"/>
+</panel>

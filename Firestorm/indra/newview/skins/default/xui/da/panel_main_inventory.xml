@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Ting" name="main inventory panel">
+	<panel.string name="ItemcountFetching">
+		Henter [ITEM_COUNT] Genstande... [FILTER]
+	</panel.string>
+	<panel.string name="ItemcountCompleted">
+		[ITEM_COUNT] Genstande [FILTER]
+	</panel.string>
+	<text name="ItemcountText">
+		Genstande:
+	</text>
+    <layout_stack name="top_stack">
+        <layout_panel name="filter_panel">
+            <filter_editor label="Filter" name="inventory search editor"/>
+            <button name="options_gear_btn" tool_tip="Vis yderligere valg"/>
+            <button name="add_btn" tool_tip="Tilføj ny genstand"/>
+        </layout_panel>
+    </layout_stack>
+    <panel name="default_inventory_panel">
+        <tab_container name="inventory filter tabs">
+            <inventory_panel label="Alle ting" name="All Items"/>
+            <recent_inventory_panel label="Nye ting" name="Recent Items"/>
+        </tab_container>
+    </panel>
+</panel>

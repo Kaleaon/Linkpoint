@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Сеть и файлы" name="Input panel">
+	<tab_container name="tabs">
+		<panel label="Подключение" name="tab-conn">
+			<text name="Maximum bandwidth">
+				Максимальная пропускная способность ([https://wiki.firestormviewer.org/fs_speedtest Нужны подсказки?] (На английском)):
+			</text>
+			<text name="NetworkPrefText3">
+				Кабель
+			</text>
+			<text name="NetworkPrefText4">
+				Может вызвать проблемы
+			</text>
+			<check_box label="Пользовательский порт" name="connection_port_enabled"/>
+			<spinner label="Порт номер:" name="connection_port"/>
+			<text name="Web:">
+				Web браузер:
+			</text>
+			<radio_group name="preferred_browser_behavior">
+				<radio_item label="Использовать мой браузер (Chrome, Firefox, IE) для всех ссылок" name="new_external" tool_tip="Использовать системный браузер для просмотра ссылок. Не рекомендуется, если включен полноэкранный режим." />
+				<radio_item label="Использовать встроенный браузер только для Second Life ссылок" name="new_internal" tool_tip="Использовать встроенный браузер только для Second Life ссылок" />
+				<radio_item label="Использовать встроенный браузер для всех ссылок" name="new_internal_all" />
+			</radio_group>
+			<text name="numberwebfloaters_label">
+				Максимальное количество окон web браузера:
+			</text>
+			<combo_box tool_tip="Максимальное количество окон браузера, которое разрешено открыть" name="web_number_combobox">
+				<combo_box.item label="Без ограничений" name="web_unlimited"/>
+				<combo_box.item label="Одно окно" name="web_1"/>
+				<combo_box.item label="Пять окон" name="web_5"/>
+				<combo_box.item label="Десять окон" name="web_10"/>
+			</combo_box>
+			<button label="Очистить кэш браузера" name="ClearWebBrowserCache" width="195"/>
+			<check_box label="Принимать Cookies" name="cookies_enabled"/>
+			<check_box label="Включить Javascript" name="browser_javascript_enabled"/>
+			<check_box label="Включить всплывающие окна медиа" name="media_popup_enabled"/>
+			<button label="Настройка параметров прокси" label_selected="Настройка параметров прокси" name="set_proxy"/>
+			<text name="home_page_label_l">
+				Домашняя страница браузера:
+			</text>
+		</panel>
+		<panel label="Каталоги" name="tab-dir">
+			<text name="cache_size_label_l">
+				Размер кэша текстур ([https://wiki.firestormviewer.org/cache Нужны подсказки?] (На английском)):
+			</text>
+			<text name="text_box5">
+				МБ
+			</text>
+			<text name="asset_cache_size_label_l">
+				Размер кэша активов:
+			</text>
+			<text name="asset_text_box5">
+				МБ
+			</text>
+			<button label="Очистить кэш инвентаря" name="ClearInventoryCache" left="380" width="150"/>
+			<text name="Cache location">
+				Расположение кэша:
+			</text>
+			<button label="Открыть" label_selected="Открыть" width="60" name="open_cache"/>
+			<button label="Задать" label_selected="Задать" width="50" name="set_cache"/>
+			<button label="Сброс" label_selected="Сброс" width="50" name="reset_cache"/>
+			<button label="Очистить" label_selected="Очистить" width="60" name="clear_cache"/>
+			<text name="Sound Cache location">
+				Расположение звукового кэша:
+			</text>
+			<button label="Открыть" label_selected="Открыть" width="60" name="open_sound_cache"/>
+			<button label="Задать" label_selected="Задать" width="50" name="set_sound_cache"/>
+			<button label="Сброс" label_selected="Сброс" width="50" name="reset_sound_cache"/>
+			<check_box label="При выходе не удалять из кэша распакованные DSF-файлы (звуки)" tool_tip="ВНИМАНИЕ: При включении данной функции, звуковые файлы кэша удаляться не будут, что может привести к быстрому заполнению каталога кэша и уменьшению дискового пространства на вашем компьютере. По умолчанию данная функция отключена" name="keep_unpacked_cache"/>
+			<text name="log_path_desc">
+				Расположение журналов разговоров:
+			</text>
+			<button label="Открыть" label_selected="Открыть" width="60" name="open_log_path_button-panelsetup"/>
+			<button label="Задать" label_selected="Задать" width="50" name="log_path_button-panelsetup"/>
+			<button label="Сброс" label_selected="Сброс" name="reset_logpath"/>
+			<button label="Журнал ошибок" label_selected="Журнал ошибок" name="browse_crashlogs"/>
+			<button label="Папка с настройками" label_selected="Папка с настройками" name="browse_settingsdir"/>
+		</panel>
+	</tab_container>
+</panel>

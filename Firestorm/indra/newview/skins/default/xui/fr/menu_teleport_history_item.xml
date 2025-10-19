@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<toggleable_menu name="Teleport History Item Menu">
+	<menu_item_call label="Téléporter" name="Teleport"/>
+	<menu_item_call label="Plus d'informations" name="More Information"/>
+	<menu_item_call label="Copier la SLurl" name="CopyToClipboard"/>
+	<menu_item_call label="Supprimer de l'historique" name="remove_from_history"/>
+</toggleable_menu>

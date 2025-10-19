@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<menu label="Mini-Carte" name="Popup">
+	<menu_item_call label="Voir le Profil" name="View Profile"/>
+	<menu label="Voir le Profil" name="View Profiles"/>
+	<menu_item_call label="Ajouter au cercle" name="Add to Set Multiple"/>
+	<menu_item_call label="Zoomer" name="Cam"/>
+	<menu name="MarkAvatar" label="Marques...">
+		<menu_item_call label="Rouge" name="MarkRed"/>
+		<menu_item_call label="Vert" name="MarkGreen"/>
+		<menu_item_call label="Bleu" name="MarkBlue"/>
+		<menu_item_call label="Mauve" name="MarkPurple"/>
+		<menu_item_call label="Jaune" name="MarkYellow"/>
+		<menu_item_call label="Effacer la Marque" name="Clear Mark"/>
+		<menu_item_call label="Effacer toutes les Marques" name="Clear Marks"/>
+	</menu>
+	<menu name="More Options" label="Plus...">
+		<menu_item_call label="Devenir amis" name="Add Friend"/>
+		<menu_item_call label="Ajouter au cercle" name="Add to Set"/>
+		<menu_item_call label="Supprimer cet ami" name="Remove Friend"/>
+		<menu_item_call label="Envoyer un IM" name="IM"/>
+		<menu_item_call label="Appel vocal" name="Call"/>
+		<menu_item_call label="Voir sur la carte" name="Map"/>
+		<menu_item_call label="Partager" name="Share"/>
+		<menu_item_call label="Payer" name="Pay"/>
+		<menu_item_call label="Téléporter" name="teleport"/>
+		<menu_item_call label="Demander une téléportation" name="request_teleport"/>
+		<menu_item_call label="Se téléporter vers" name="teleport_to"/>
+		<menu_item_call label="Inviter dans un groupe" name="GroupInvite"/>
+		<menu_item_call label="Informations sur les scripts" name="ScriptInfo"/>
+		<menu_item_check label="Ignorer / Cesser d'ignorer" name="Block/Unblock"/>
+		<menu_item_call label="Signaler" name="report"/>
+		<menu_item_call label="Geler" name="freeze"/>
+		<menu_item_call label="Éjecter du terrain" name="eject"/>
+		<menu_item_call label="Éjecter du domaine" name="kick"/>
+		<menu_item_call label="Éjecter et renvoyer au domicile" name="teleport_home"/>
+		<menu_item_call label="Bannir du Domaine" name="estate_ban"/>
+		<menu_item_call label="Faire disparaitre temporairement" name="derender"/>
+		<menu_item_call label="Faire disparaitre &amp; Blacklister" name="derender_permanent"/>
+	</menu>
+	<menu_item_call label="Suivre" name="Start Tracking"/>
+	<menu_item_call label="Arrêter de suivre" name="Stop Tracking"/>
+	<menu label="Zoom" name="Minimap Zoom">
+		<menu_item_check label="Trés proche" name="Zoom very close"/>
+		<menu_item_check label="Proche" name="Zoom close"/>
+		<menu_item_check label="Moyen" name="Zoom medium"/>
+		<menu_item_check label="Distant" name="Zoom far"/>
+	</menu>
+	<menu label="Afficher" name="Minimap Show">
+		<menu_item_check label="Objets" name="Objects"/>
+		<menu_item_check label="Objets Physiques" name="Physical Objects"/>
+		<menu_item_check label="Objets Scriptés" name="Scripted Objects"/>
+		<menu_item_check label="État temporaire des objets" name="Temp On Rez Objects"/>
+		<menu_item_check label="Limites de terrain" name="Property Lines"/>
+		<menu_item_check label="Terrains à Vendre" name="Parcels for Sale"/>
+	</menu>
+	<menu_item_check label="Nord en haut" name="North at top" />
+	<menu_item_check label="Caméra en haut" name="Camera at top" />
+	<menu_item_check label="Centrage automatique" name="Auto Center"/>
+	<menu_item_call label="Recentrer la carte" name="Re-center map" />
+	<menu label="Portée des discussions" name="Chat Distance Rings Menu">
+		<menu_item_check label="Montrer la portée des discussions" name="Chat Distance Rings"/>
+		<menu_item_check label="Montrer la portée des murmures" name="Whisper Distance Ring"/>
+		<menu_item_check label="Montrer la portée des discussions" name="Chat Distance Ring"/>
+		<menu_item_check label="Montrer la portée des cris" name="Shout Distance Ring"/>
+	</menu>
+	<menu_item_call label="À propos du terrain" name="About Land" />
+	<menu_item_call label="Profil du lieu" name="Place Profile"/>
+	<menu_item_call label="Carte du Monde" name="World Map"/>
+</menu>

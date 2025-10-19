@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater name="Model Preview" title="CARICAMENTO MODELLO">
+	<string name="status_idle"/>
+	<string name="status_parse_error">
+		Errore: Errore elaborazione Dae - vedere il registro per informazioni dettagliate.
+	</string>
+	<string name="status_bind_shape_orientation">
+		Attenzione: la matrice bind shape non ha un’orientazione standard X in avanti.
+	</string>
+	<string name="status_material_mismatch">
+		Errore: il materiale del modello non è un sottoinsieme del modello di riferimento.
+	</string>
+	<string name="status_reading_file">
+		Caricamento in corso...
+	</string>
+	<string name="status_generating_meshes">
+		Generazione reticoli...
+	</string>
+	<string name="status_vertex_number_overflow">
+		Errore: numero di vertici maggiore di 65534, annullato.
+	</string>
+	<string name="bad_element">
+		Errore: elemento non valido
+	</string>
+	<string name="high">
+		Alto
+	</string>
+	<string name="medium">
+		Medio
+	</string>
+	<string name="low">
+		Basso
+	</string>
+	<string name="lowest">
+		Bassissimo
+	</string>
+	<string name="mesh_status_good">
+		Invia!
+	</string>
+	<string name="mesh_status_na">
+		N/D
+	</string>
+	<string name="mesh_status_none">
+		Nessuno
+	</string>
+	<string name="mesh_status_submesh_mismatch">
+		Ai vari livelli del dettaglio corrispondono numeri diversi di faccette con texture.
+	</string>
+	<string name="mesh_status_mesh_mismatch">
+		Ai vari livelli del dettaglio corrispondono numeri diversi istanze di reticoli.
+	</string>
+	<string name="mesh_status_too_many_vertices">
+		Troppi vertici per il livello di dettaglio.
+	</string>
+	<string name="mesh_status_missing_lod">
+		Livello di dettaglio minimo mancante.
+	</string>
+	<string name="mesh_status_invalid_material_list">
+		I materiali per il livello di dettaglio non sono un sottoinsieme  del modello di riferimento.
+	</string>
+	<string name="phys_status_vertex_limit_exceeded">
+		Alcuni scafi fisici superano i limiti relativi ai vertici.
+	</string>
+	<string name="layer_all">
+		Tutto
+	</string>
+	<string name="decomposing">
+		Analisi in corso...
+	</string>
+	<string name="simplifying">
+		Semplificazione in corso...
+	</string>
+	<string name="tbd">
+		Da definire
+	</string>
+	<panel name="left_panel">
+		<panel name="model_name_representation_panel">
+			<text name="name_label">
+				Nome modello:
+			</text>
+			<text name="model_category_label">
+				Questo modello rappresenta...
+			</text>
+			<combo_box name="model_category_combo">
+				<combo_item label="Seleziona uno..." name="Choose one"/>
+				<combo_item label="Forma avatar" name="Avatar shape"/>
+				<combo_item label="Elemento collegato all&apos;avatar" name="Avatar attachment"/>
+				<combo_item label="Oggetto mobile (veicolo, animale)" name="Moving object (vehicle, animal)"/>
+				<combo_item label="Componente edificio" name="Building Component"/>
+				<combo_item label="Grande, immobile, ecc." name="Large, non moving etc"/>
+				<combo_item label="Piccolo, immobile, ecc." name="Smaller, non-moving etc"/>
+				<combo_item label="Nessuno di questi" name="Not really any of these"/>
+			</combo_box>
+		</panel>
+		<tab_container name="import_tab">
+			<panel label="Livello di dettaglio" name="lod_panel" title="Livello di dettaglio">
+				<text initial_value="Fonte" name="source" value="Fonte"/>
+				<text initial_value="Triangoli" name="triangles" value="Triangoli"/>
+				<text initial_value="Vertici" name="vertices" value="Vertici"/>
+				<text initial_value="Alto" name="high_label" value="Alto"/>
+				<combo_box name="lod_source_high">
+					<item label="Carica da file" name="Load from file" value="Carica da file"/>
+					<item label="Genera" name="Generate" value="Genera"/>
+				</combo_box>
+				<button label="Sfoglia..." name="lod_browse_high"/>
+				<combo_box name="lod_mode_high">
+					<item label="Limite triangoli" name="Triangle Limit" value="Limite triangoli"/>
+					<item label="Limite errori" name="Error Threshold" value="Limite errori"/>
+				</combo_box>
+				<text initial_value="0" name="high_triangles" value="0"/>
+				<text initial_value="0" name="high_vertices" value="0"/>
+				<text initial_value="Medio" name="medium_label" value="Medio"/>
+				<combo_box name="lod_source_medium">
+					<item label="Carica da file" name="Load from file" value="Carica da file"/>
+					<item label="Genera" name="Generate" value="Genera"/>
+					<item label="Usa livello di dettaglio indicato in precedenza" name="Use LoD above" value="Usa livello di dettaglio indicato in precedenza"/>
+				</combo_box>
+				<button label="Sfoglia..." name="lod_browse_medium"/>
+				<combo_box name="lod_mode_medium">
+					<item label="Limite triangoli" name="Triangle Limit" value="Limite triangoli"/>
+					<item label="Limite errori" name="Error Threshold" value="Limite errori"/>
+				</combo_box>
+				<text initial_value="0" name="medium_triangles" value="0"/>
+				<text initial_value="0" name="medium_vertices" value="0"/>
+				<text initial_value="Basso" name="low_label" value="Basso"/>
+				<combo_box name="lod_source_low">
+					<item label="Carica da file" name="Load from file" value="Carica da file"/>
+					<item label="Genera" name="Generate" value="Genera"/>
+					<item label="Usa livello di dettaglio indicato in precedenza" name="Use LoD above" value="Usa livello di dettaglio indicato in precedenza"/>
+				</combo_box>
+				<button label="Sfoglia..." name="lod_browse_low"/>
+				<combo_box name="lod_mode_low">
+					<item label="Limite triangoli" name="Triangle Limit" value="Limite triangoli"/>
+					<item label="Limite errori" name="Error Threshold" value="Limite errori"/>
+				</combo_box>
+				<text initial_value="0" name="low_triangles" value="0"/>
+				<text initial_value="0" name="low_vertices" value="0"/>
+				<text initial_value="Bassissimo" name="lowest_label" value="Bassissimo"/>
+				<combo_box name="lod_source_lowest">
+					<item label="Carica da file" name="Load from file" value="Carica da file"/>
+					<item label="Genera" name="Generate" value="Genera"/>
+					<item label="Usa livello di dettaglio indicato in precedenza" name="Use LoD above" value="Usa livello di dettaglio indicato in precedenza"/>
+				</combo_box>
+				<button label="Sfoglia..." name="lod_browse_lowest"/>
+				<combo_box name="lod_mode_lowest">
+					<item label="Limite triangoli" name="Triangle Limit" value="Limite triangoli"/>
+					<item label="Limite errori" name="Error Threshold" value="Limite errori"/>
+				</combo_box>
+				<text initial_value="0" name="lowest_triangles" value="0"/>
+				<text initial_value="0" name="lowest_vertices" value="0"/>
+				<check_box label="Genera normali" name="gen_normals"/>
+				<text initial_value="Angolo piega:" name="crease_label" value="Angolo piega:"/>
+				<spinner name="crease_angle" value="75"/>
+			</panel>
+			<panel label="Fisica" name="physics_panel">
+				<panel name="physics geometry">
+					<text name="first_step_name">
+						Passaggio 1: Livello di dettaglio
+					</text>
+					<combo_box name="physics_lod_combo" tool_tip="Livello di dettaglio per forma fisica">
+						<combo_item name="choose_one">
+							Seleziona uno...
+						</combo_item>
+						<combo_item name="physics_high">
+							Alto
+						</combo_item>
+						<combo_item name="physics_medium">
+							Medio
+						</combo_item>
+						<combo_item name="physics_low">
+							Basso
+						</combo_item>
+						<combo_item name="physics_lowest">
+							Bassissimo
+						</combo_item>
+						<combo_item name="load_from_file">
+							Da file
+						</combo_item>
+					</combo_box>
+					<button label="Sfoglia..." name="physics_browse"/>
+				</panel>
+				<panel name="physics analysis">
+					<text name="method_label">
+						Passaggio 2: Analizza
+					</text>
+					<text name="analysis_method_label">
+						Metodo:
+					</text>
+					<text name="quality_label">
+						Qualità:
+					</text>
+					<text name="smooth_method_label">
+						Liscia:
+					</text>
+					<check_box label="Chiudi fori" name="Close Holes (Slow)"/>
+					<button label="Analizza" name="Decompose"/>
+					<button label="Annulla" name="decompose_cancel"/>
+				</panel>
+				<panel name="physics simplification">
+					<text name="second_step_label">
+						Passaggio 3: Semplifica
+					</text>
+					<text name="simp_method_header">
+						Metodo:
+					</text>
+					<text name="pass_method_header">
+						Passaggi:
+					</text>
+					<text name="Detail Scale label">
+						Scala dettagli:
+					</text>
+					<text name="Retain%_label">
+						Mantieni:
+					</text>
+					<combo_box name="Combine Quality" value="1"/>
+					<button label="Semplifica" name="Simplify"/>
+					<button label="Annulla" name="simplify_cancel"/>
+				</panel>
+				<panel name="physics info">
+					<text name="results_text">
+						Risultati:
+					</text>
+					<text name="physics_triangles">
+						Triangoli: [TRIANGLES],
+					</text>
+					<text name="physics_points">
+						Vertici: [POINTS],
+					</text>
+					<text name="physics_hulls">
+						Scafi: [HULLS]
+					</text>
+				</panel>
+			</panel>
+			<panel label="Carica opzioni" name="modifiers_panel">
+				<text name="scale_label">
+					Scala (1=nessuna scala):
+				</text>
+				<spinner name="import_scale" value="1.0"/>
+				<text name="dimensions_label">
+					Dimensioni:
+				</text>
+				<text name="import_dimensions">
+					[X] X [Y] X [Z]
+				</text>
+				<check_box label="Includi texture" name="upload_textures"/>
+				<text name="include_label">
+					Solo per modelli avatar:
+				</text>
+				<check_box label="Includi peso pelle" name="upload_skin"/>
+				<check_box label="Includi posizioni giunti" name="upload_joints"/>
+				<check_box label="Blocca scala se è definita la posizione dei giunti" name="lock_scale_if_joint_position"/>
+				<text name="pelvis_offset_label">
+					Spostamento Z (sposta l&apos;avatar in alto o in basso):
+				</text>
+				<spinner name="pelvis_offset" value="0.0"/>
+			</panel>
+		</tab_container>
+		<panel name="weights_and_warning_panel">
+			<button label="Calcolare pesi e tariffa" name="calculate_btn" tool_tip="Calcolare pesi e tariffa"/>
+			<button label="Annulla" name="cancel_btn"/>
+			<button label="Carica" name="ok_btn" tool_tip="Carica al simulatore"/>
+			<button label="Annulla impostazioni e ripristina modulo" name="reset_btn"/>
+			<text name="upload_fee">
+				Costo caricamento: L$ [FEE]
+			</text>
+			<text name="prim_weight">
+				Impatto sul terreno: [EQ]
+			</text>
+			<text name="download_weight">
+				Download: [ST]
+			</text>
+			<text name="physics_weight">
+				Fisica: [PH]
+			</text>
+			<text name="server_weight">
+				Server: [SIM]
+			</text>
+			<text name="warning_title">
+				NOTA:
+			</text>
+			<text name="warning_message">
+				Non hai l&apos;autorizzazione per caricare i modelli di reticolo. [[VURL] Scopri come] ottenere la certificazione.
+			</text>
+			<text name="status">
+				[STATUS]
+			</text>
+		</panel>
+	</panel>
+	<text name="lod_label">
+		Anteprima:
+	</text>
+	<panel name="right_panel">
+		<combo_box name="preview_lod_combo" tool_tip="Livello di dettaglio per anteprima rendering">
+			<combo_item name="high">
+				Alto
+			</combo_item>
+			<combo_item name="medium">
+				Medio
+			</combo_item>
+			<combo_item name="low">
+				Basso
+			</combo_item>
+			<combo_item name="lowest">
+				Bassissimo
+			</combo_item>
+		</combo_box>
+		<text name="label_display">
+			Visualizzazione...
+		</text>
+		<check_box label="Bordi" name="show_edges"/>
+		<check_box label="Fisica" name="show_physics"/>
+		<check_box label="Texture" name="show_textures"/>
+		<check_box label="Pesi pelle" name="show_skin_weight"/>
+		<check_box label="Giunti" name="show_joint_positions"/>
+		<text name="physics_explode_label">
+			Anteprima spaziatura:
+		</text>
+	</panel>
+</floater>
