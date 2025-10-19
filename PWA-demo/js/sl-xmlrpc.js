@@ -104,10 +104,19 @@ class XMLRPCClient {
         });
         
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[XMLRPCClient] HTTP error response:', errorText.substring(0, 500));
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
         const responseText = await response.text();
+        
+        // Check if response looks like XML
+        if (!responseText.trim().startsWith('<?xml') && !responseText.trim().startsWith('<methodResponse')) {
+          console.error('[XMLRPCClient] Response is not XML:', responseText.substring(0, 500));
+          throw new Error('Server returned an invalid response. This may be a CORS issue. Try using the app as an installed PWA or desktop app for better connectivity.');
+        }
+        
         return this.parseLoginResponse(responseText);
       }
       
@@ -238,10 +247,19 @@ class XMLRPCClient {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('[XMLRPCClient] CORS proxy error:', errorText.substring(0, 500));
+        throw new Error(`HTTP ${response.status}: ${response.statusText}. The CORS proxy may be unavailable.`);
       }
 
       const responseText = await response.text();
+      
+      // Check if response looks like XML
+      if (!responseText.trim().startsWith('<?xml') && !responseText.trim().startsWith('<methodResponse')) {
+        console.error('[XMLRPCClient] CORS proxy returned non-XML:', responseText.substring(0, 500));
+        throw new Error('The CORS proxy returned an invalid response. Please try again later or use the app as an installed PWA.');
+      }
+      
       return this.parseLoginResponse(responseText);
       
     } catch (error) {
@@ -260,13 +278,18 @@ class XMLRPCClient {
    * Parse XML-RPC login response
    */
   static parseLoginResponse(xmlText) {
+    // Log response for debugging
+    console.log('[XMLRPCClient] Response length:', xmlText?.length || 0);
+    console.log('[XMLRPCClient] Response preview:', xmlText?.substring(0, 200) || 'empty');
+    
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlText, 'text/xml');
     
     // Check for parse errors
     const parseError = doc.querySelector('parsererror');
     if (parseError) {
-      throw new Error('XML parse error: ' + parseError.textContent);
+      console.error('[XMLRPCClient] XML parse error. Response text:', xmlText);
+      throw new Error('Invalid server response. The server may be temporarily unavailable or the CORS proxy is not working correctly. Please try again later.');
     }
 
     const result = {};
