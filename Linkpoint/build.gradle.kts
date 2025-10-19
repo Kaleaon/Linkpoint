@@ -169,6 +169,12 @@ dependencies {
     // UI Components
     implementation("com.astuetz:pagerslidingtabstrip:1.0.1")
     
+    // Filament Rendering Engine - Modern PBR renderer
+    implementation("com.google.android.filament:filament-android:1.66.0")
+    implementation("com.google.android.filament:filament-utils-android:1.66.0")
+    implementation("com.google.android.filament:gltfio-android:1.66.0")
+    implementation("com.google.android.filament:filamat-android:1.66.0")  // Runtime material compilation
+    
     // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.10.3")
