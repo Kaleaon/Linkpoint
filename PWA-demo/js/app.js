@@ -19,6 +19,7 @@ class LinkpointApp {
     this.currentView = 'login';
     this.deferredPrompt = null;
     this.serviceWorkerRegistration = null;
+    this.eventHandlers = {}; // Event handlers storage
   }
 
   /**
@@ -140,10 +141,10 @@ class LinkpointApp {
       });
     });
 
-    // Setup menu button
-    const menuBtn = document.getElementById('menu-btn');
+    // Setup menu button (support multiple ID patterns)
+    const menuBtn = document.getElementById('menu-btn') || document.getElementById('menu-toggle');
     const sidebar = document.getElementById('sidebar');
-    const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+    const sidebarCloseBtn = document.getElementById('sidebar-close-btn') || document.getElementById('sidebar-close');
 
     menuBtn?.addEventListener('click', () => {
       sidebar?.classList.add('active');
@@ -633,6 +634,21 @@ class LinkpointApp {
    */
   emit(event, data) {
     window.dispatchEvent(new CustomEvent(`linkpoint:${event}`, { detail: data }));
+    
+    // Also call registered event handlers
+    if (this.eventHandlers[event]) {
+      this.eventHandlers[event].forEach(handler => handler(data));
+    }
+  }
+  
+  /**
+   * Register event handler
+   */
+  on(event, handler) {
+    if (!this.eventHandlers[event]) {
+      this.eventHandlers[event] = [];
+    }
+    this.eventHandlers[event].push(handler);
   }
 }
 

@@ -509,6 +509,91 @@ a:hover {
 }
 
 /* ============================================
+   Virtual Joystick Controls
+   ============================================ */
+.joystick-container {
+  position: absolute;
+  bottom: 40px;
+  width: 140px;
+  height: 140px;
+  pointer-events: auto;
+  z-index: 100;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.joystick-container.active {
+  opacity: 1;
+}
+
+.joystick-left {
+  left: 20px;
+}
+
+.joystick-right {
+  right: 20px;
+}
+
+.joystick-base {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, var(--surface) 0%, var(--surface-light) 100%);
+  border: 3px solid var(--border-color);
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.joystick-stick {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, var(--primary-light) 0%, var(--primary-color) 100%);
+  border: 2px solid var(--accent-color);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.05s ease-out;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.joystick-container.active .joystick-stick {
+  background: radial-gradient(circle, var(--accent-color) 0%, var(--primary-light) 100%);
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 12px rgba(0, 212, 255, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Hide joysticks on desktop by default */
+@media (min-width: 768px) {
+  .joystick-container {
+    display: none;
+  }
+}
+
+/* Show joysticks on mobile/tablet */
+@media (max-width: 767px) {
+  .world-controls {
+    display: none; /* Hide button controls on mobile in favor of joysticks */
+  }
+  
+  .joystick-container {
+    display: block;
+  }
+}
+
+/* Ensure joysticks are always visible when world view is active on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .joystick-container {
+    display: block;
+  }
+  
+  .world-controls {
+    display: none;
+  }
+}
+
+/* ============================================
    Chat View
    ============================================ */
 .chat-container {

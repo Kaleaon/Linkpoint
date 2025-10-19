@@ -158,17 +158,14 @@ class WorldViewer extends Utils.EventEmitter {
    * Setup movement controls
    */
   setupControls() {
-    const moveForward = document.getElementById('move-forward');
-    const moveBack = document.getElementById('move-back');
-    const moveLeft = document.getElementById('move-left');
-    const moveRight = document.getElementById('move-right');
-    const flyBtn = document.getElementById('fly-btn');
-
-    moveForward?.addEventListener('click', () => this.moveCamera(0, -5, 0));
-    moveBack?.addEventListener('click', () => this.moveCamera(0, 5, 0));
-    moveLeft?.addEventListener('click', () => this.moveCamera(-5, 0, 0));
-    moveRight?.addEventListener('click', () => this.moveCamera(5, 0, 0));
-    flyBtn?.addEventListener('click', () => this.toggleFly());
+    // Wire up control buttons using data-action attributes
+    const controlButtons = document.querySelectorAll('.control-btn[data-action]');
+    controlButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        this.handleControlAction(action);
+      });
+    });
 
     // Keyboard controls
     document.addEventListener('keydown', (e) => this.handleKeyboard(e));
@@ -178,6 +175,241 @@ class WorldViewer extends Utils.EventEmitter {
     this.canvas?.addEventListener('mousemove', (e) => this.handleMouseMove(e));
     this.canvas?.addEventListener('mouseup', (e) => this.handleMouseUp(e));
     this.canvas?.addEventListener('wheel', (e) => this.handleWheel(e));
+    
+    // Setup dual joysticks for mobile
+    this.setupDualJoysticks();
+  }
+  
+  /**
+   * Handle control button actions
+   */
+  handleControlAction(action) {
+    switch (action) {
+      case 'move-forward':
+        this.moveCamera(0, -5, 0);
+        break;
+      case 'move-backward':
+        this.moveCamera(0, 5, 0);
+        break;
+      case 'move-left':
+        this.moveCamera(-5, 0, 0);
+        break;
+      case 'move-right':
+        this.moveCamera(5, 0, 0);
+        break;
+      case 'move-up':
+        this.moveCamera(0, 0, 5);
+        break;
+      case 'move-down':
+        this.moveCamera(0, 0, -5);
+        break;
+      case 'fly':
+        this.toggleFly();
+        break;
+    }
+  }
+  
+  /**
+   * Setup dual virtual joysticks for mobile touch controls
+   * Left joystick: forward/backward/strafe movement
+   * Right joystick: camera look rotation
+   */
+  setupDualJoysticks() {
+    // Create joystick containers
+    const worldContainer = document.getElementById('world-container');
+    if (!worldContainer) return;
+    
+    // Create left joystick for movement
+    const leftJoystickContainer = document.createElement('div');
+    leftJoystickContainer.className = 'joystick-container joystick-left';
+    leftJoystickContainer.innerHTML = `
+      <div class="joystick-base">
+        <div class="joystick-stick"></div>
+      </div>
+    `;
+    
+    // Create right joystick for camera look
+    const rightJoystickContainer = document.createElement('div');
+    rightJoystickContainer.className = 'joystick-container joystick-right';
+    rightJoystickContainer.innerHTML = `
+      <div class="joystick-base">
+        <div class="joystick-stick"></div>
+      </div>
+    `;
+    
+    worldContainer.appendChild(leftJoystickContainer);
+    worldContainer.appendChild(rightJoystickContainer);
+    
+    // Initialize joystick state
+    this.joysticks = {
+      left: {
+        active: false,
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        currentY: 0,
+        container: leftJoystickContainer,
+        stick: leftJoystickContainer.querySelector('.joystick-stick')
+      },
+      right: {
+        active: false,
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        currentY: 0,
+        container: rightJoystickContainer,
+        stick: rightJoystickContainer.querySelector('.joystick-stick')
+      }
+    };
+    
+    // Setup touch event handlers for left joystick (movement)
+    this.setupJoystickEvents('left');
+    
+    // Setup touch event handlers for right joystick (camera)
+    this.setupJoystickEvents('right');
+    
+    // Start joystick update loop
+    this.startJoystickLoop();
+  }
+  
+  /**
+   * Setup touch events for a joystick
+   */
+  setupJoystickEvents(side) {
+    const joystick = this.joysticks[side];
+    const container = joystick.container;
+    
+    const handleStart = (e) => {
+      e.preventDefault();
+      const touch = e.touches ? e.touches[0] : e;
+      const rect = container.getBoundingClientRect();
+      
+      joystick.active = true;
+      joystick.startX = rect.left + rect.width / 2;
+      joystick.startY = rect.top + rect.height / 2;
+      joystick.currentX = touch.clientX;
+      joystick.currentY = touch.clientY;
+      
+      container.classList.add('active');
+      this.updateJoystickVisual(side);
+    };
+    
+    const handleMove = (e) => {
+      if (!joystick.active) return;
+      e.preventDefault();
+      
+      const touch = e.touches ? e.touches[0] : e;
+      joystick.currentX = touch.clientX;
+      joystick.currentY = touch.clientY;
+      
+      this.updateJoystickVisual(side);
+    };
+    
+    const handleEnd = (e) => {
+      if (!joystick.active) return;
+      e.preventDefault();
+      
+      joystick.active = false;
+      joystick.currentX = joystick.startX;
+      joystick.currentY = joystick.startY;
+      
+      container.classList.remove('active');
+      this.updateJoystickVisual(side);
+    };
+    
+    // Touch events
+    container.addEventListener('touchstart', handleStart, { passive: false });
+    container.addEventListener('touchmove', handleMove, { passive: false });
+    container.addEventListener('touchend', handleEnd, { passive: false });
+    container.addEventListener('touchcancel', handleEnd, { passive: false });
+    
+    // Mouse events for desktop testing
+    container.addEventListener('mousedown', handleStart);
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleEnd);
+  }
+  
+  /**
+   * Update joystick visual position
+   */
+  updateJoystickVisual(side) {
+    const joystick = this.joysticks[side];
+    if (!joystick.stick) return;
+    
+    // Calculate offset from center
+    const deltaX = joystick.currentX - joystick.startX;
+    const deltaY = joystick.currentY - joystick.startY;
+    
+    // Limit stick movement to base radius (50px)
+    const maxRadius = 50;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    let x = deltaX;
+    let y = deltaY;
+    
+    if (distance > maxRadius) {
+      const angle = Math.atan2(deltaY, deltaX);
+      x = Math.cos(angle) * maxRadius;
+      y = Math.sin(angle) * maxRadius;
+    }
+    
+    // Update stick position
+    joystick.stick.style.transform = `translate(${x}px, ${y}px)`;
+  }
+  
+  /**
+   * Get normalized joystick values (-1 to 1)
+   */
+  getJoystickValues(side) {
+    const joystick = this.joysticks[side];
+    if (!joystick.active) return { x: 0, y: 0 };
+    
+    const deltaX = joystick.currentX - joystick.startX;
+    const deltaY = joystick.currentY - joystick.startY;
+    
+    // Normalize to -1 to 1 range
+    const maxRadius = 50;
+    return {
+      x: Math.max(-1, Math.min(1, deltaX / maxRadius)),
+      y: Math.max(-1, Math.min(1, deltaY / maxRadius))
+    };
+  }
+  
+  /**
+   * Start joystick update loop
+   */
+  startJoystickLoop() {
+    const updateJoysticks = () => {
+      if (!this.joysticks) return;
+      
+      // Left joystick controls movement
+      const leftValues = this.getJoystickValues('left');
+      if (leftValues.x !== 0 || leftValues.y !== 0) {
+        // Apply movement based on joystick position
+        const moveSpeed = 2.0; // Units per frame
+        const dx = leftValues.x * moveSpeed;
+        const dy = leftValues.y * moveSpeed;
+        
+        this.moveCamera(dx, dy, 0);
+      }
+      
+      // Right joystick controls camera rotation
+      const rightValues = this.getJoystickValues('right');
+      if (rightValues.x !== 0 || rightValues.y !== 0) {
+        // Apply camera rotation based on joystick position
+        const rotateSpeed = 0.05; // Radians per frame
+        const rotX = -rightValues.y * rotateSpeed;
+        const rotY = -rightValues.x * rotateSpeed;
+        
+        if (this.use3D && this.camera3d) {
+          this.camera3d.rotate(rotX, rotY);
+        }
+      }
+      
+      requestAnimationFrame(updateJoysticks);
+    };
+    
+    updateJoysticks();
   }
 
   /**
