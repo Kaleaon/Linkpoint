@@ -137,10 +137,6 @@ class XMLRPCClient {
    * Fallback implementation (original code)
    */
   static async sendRequestFallback(url, xmlRequest) {
-  /**
-   * Fallback implementation (original code)
-   */
-  static async sendRequestFallback(url, xmlRequest) {
     try {
       // Detect environment and use appropriate method
       
