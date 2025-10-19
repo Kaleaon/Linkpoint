@@ -4,87 +4,111 @@ import com.google.common.cache.Cache
 import com.google.common.cache.CacheBuilder
 import com.lumiyaviewer.lumiya.memory.MemoryManager
 import com.lumiyaviewer.lumiya.memory.MemoryPressureListener
-import java.util.Set
 
-abstract class ResourceMemoryCache<ResourceParams, ResourceType> extends ResourceManager<ResourceParams, ResourceType> implements MemoryPressureListener {
-    private Cache<ResourceParams, ResourceType> finalResults
-    private Cache<ResourceParams, ResourceType> intermediateResults
-    private MemoryManager memoryManager
+/**
+ * Memory cache for resources with automatic memory pressure handling
+ */
+abstract class ResourceMemoryCache<ResourceParams, ResourceType>(
+    private val memoryManager: MemoryManager
+) : ResourceManager<ResourceParams, ResourceType>(), MemoryPressureListener {
     
-    constructor(memoryManager: MemoryManager) {
-        this.memoryManager = memoryManager
-        this.finalResults = CacheBuilder.newBuilder()
-                .weakValues()
-                .removalListener(notification -> {
-                    if (notification.getValue() != null) {
-                        String key = "final_" + String.valueOf(notification.getKey().hashCode())
-                        this.memoryManager.trackDeallocation(key, estimateSize(notification.getValue()))
-                    }
-                })
-                .build()
+    private val finalResults: Cache<ResourceParams, ResourceType>
+    private val intermediateResults: Cache<ResourceParams, ResourceType>
+    
+    init {
+        finalResults = CacheBuilder.newBuilder()
+            .weakValues()
+            .removalListener<ResourceParams, ResourceType> { notification ->
+                notification.value?.let { value ->
+                    val key = "final_${notification.key.hashCode()}"
+                    memoryManager.trackDeallocation(key, estimateSize(value))
+                }
+            }
+            .build()
         
-        this.intermediateResults = CacheBuilder.newBuilder()
-                .weakValues()
-                .removalListener(notification -> {
-                    if (notification.getValue() != null) {
-                        String key = "intermediate_" + String.valueOf(notification.getKey().hashCode())
-                        this.memoryManager.trackDeallocation(key, estimateSize(notification.getValue()))
-                    }
-                })
-                .build()
+        intermediateResults = CacheBuilder.newBuilder()
+            .weakValues()
+            .removalListener<ResourceParams, ResourceType> { notification ->
+                notification.value?.let { value ->
+                    val key = "intermediate_${notification.key.hashCode()}"
+                    memoryManager.trackDeallocation(key, estimateSize(value))
+                }
+            }
+            .build()
                 
         memoryManager.addMemoryPressureListener(this)
     }
     
+    /**
+     * Estimate the memory size of a resource
+     */
     protected abstract fun estimateSize(resource: ResourceType): Long
 
-    fun CompleteRequest(resourceparams: ResourceParams, resourcetype: ResourceType, set: Set<ResourceConsumer>): Unit {
-        if (resourcetype != null) {
-            String key = "final_" + String.valueOf(resourceparams.hashCode())
-            memoryManager.trackAllocation(key, resourcetype, estimateSize(resourcetype))
-            this.finalResults.put(resourceparams, resourcetype)
+    /**
+     * Complete a resource request with final result
+     */
+    fun CompleteRequest(params: ResourceParams, resource: ResourceType?, consumers: Set<ResourceConsumer>) {
+        if (resource != null) {
+            val key = "final_${params.hashCode()}"
+            memoryManager.trackAllocation(key, resource, estimateSize(resource))
+            finalResults.put(params, resource)
         } else {
-            this.finalResults.invalidate(resourceparams)
+            finalResults.invalidate(params)
         }
-        super.CompleteRequest(resourceparams, resourcetype, set)
+        super.CompleteRequest(params, resource, consumers)
     }
 
-    fun IntermediateResult(resourceparams: ResourceParams, resourcetype: ResourceType, set: Set<ResourceConsumer>): Unit {
-        if (resourcetype != null) {
-            String key = "intermediate_" + String.valueOf(resourceparams.hashCode())
-            memoryManager.trackAllocation(key, resourcetype, estimateSize(resourcetype))
-            this.intermediateResults.put(resourceparams, resourcetype)
+    /**
+     * Provide intermediate result for a resource request
+     */
+    fun IntermediateResult(params: ResourceParams, resource: ResourceType?, consumers: Set<ResourceConsumer>) {
+        if (resource != null) {
+            val key = "intermediate_${params.hashCode()}"
+            memoryManager.trackAllocation(key, resource, estimateSize(resource))
+            intermediateResults.put(params, resource)
         } else {
-            this.intermediateResults.invalidate(resourceparams)
+            intermediateResults.invalidate(params)
         }
-        super.IntermediateResult(resourceparams, resourcetype, set)
+        super.IntermediateResult(params, resource, consumers)
     }
 
-    fun RequestResource(resourceparams: ResourceParams, resourceConsumer: ResourceConsumer): Unit {
-        ResourceType ifPresent = this.finalResults.getIfPresent(resourceparams)
-        if (ifPresent != null) {
-            resourceConsumer.OnResourceReady(ifPresent, false)
+    /**
+     * Request a resource, checking caches first
+     */
+    fun RequestResource(params: ResourceParams, consumer: ResourceConsumer) {
+        // Check final results first
+        finalResults.getIfPresent(params)?.let {
+            consumer.OnResourceReady(it, isIntermediate = false)
             return
         }
-        ResourceType ifPresent2 = this.intermediateResults.getIfPresent(resourceparams)
-        if (ifPresent2 != null) {
-            resourceConsumer.OnResourceReady(ifPresent2, true)
+        
+        // Check intermediate results
+        intermediateResults.getIfPresent(params)?.let {
+            consumer.OnResourceReady(it, isIntermediate = true)
         }
-        super.RequestResource(resourceparams, resourceConsumer)
+        
+        super.RequestResource(params, consumer)
     }
     
-    override fun onMemoryPressure(): Unit {
+    /**
+     * Handle memory pressure by clearing caches
+     */
+    override fun onMemoryPressure() {
         // Clear intermediate results first as they're less critical
         intermediateResults.invalidateAll()
         
-        // Trim results cache by 50%
-        long currentSize = finalResults.size()
+        // Trim final results cache by approximately 50%
+        val currentSize = finalResults.size()
         if (currentSize > 10) { // Only trim if we have a reasonable number of items
-            finalResults.asMap().entrySet().removeIf(entry -> 
-                entry.getKey().hashCode() % 2 == 0); // Remove roughly half
+            finalResults.asMap().entries.removeIf { entry -> 
+                entry.key.hashCode() % 2 == 0 // Remove roughly half
+            }
         }
     }
     
+    /**
+     * Get total cache size
+     */
     fun getCacheSize(): Long {
         return finalResults.size() + intermediateResults.size()
     }

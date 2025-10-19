@@ -1,6 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto
 
 import com.lumiyaviewer.lumiya.Debug
+import com.lumiyaviewer.lumiya.GlobalOptions
 import com.lumiyaviewer.lumiya.eventbus.EventBus
 import com.lumiyaviewer.lumiya.res.textures.TextureCache
 import com.lumiyaviewer.lumiya.slproto.auth.SLAuth
@@ -13,381 +14,421 @@ import com.lumiyaviewer.lumiya.slproto.caps.SLCaps.SLCapability
 import com.lumiyaviewer.lumiya.slproto.events.SLConnectionStateChangedEvent
 import com.lumiyaviewer.lumiya.slproto.events.SLDisconnectEvent
 import com.lumiyaviewer.lumiya.slproto.events.SLLoginResultEvent
+import com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent
 import com.lumiyaviewer.lumiya.slproto.modules.SLModules
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager
 import java.io.IOException
-import java.util.Collections
-import java.util.HashMap
-import java.util.Iterator
-import java.util.Map
-import java.util.Map.Entry
-import java.util.UUID
+import java.util.*
 
-class SLGridConnection extends SLConnection {
-    /* renamed from: -com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
-    private /* synthetic */ int[] syntheticField = null
-    private String DEFAULT_SYSTEM_ACCOUNT = "Second Life"
-    private boolean autoresponseEnabled = false
-    private String autoresponseText = ""
-    private UUID activeAgentUUID
-    private SLAgentCircuit agentCircuit
-    private SLAuthParams authParams
-    SLAuthReply authReply
-    SLCapEventQueue capEventQueue
-    private ConnectionState connectionState = ConnectionState.Idle
-    private EventBus eventBus = EventBus.getInstance()
-    private volatile boolean firstConnect = true
-    private volatile boolean hadConnected = false
-    private volatile boolean isReconnecting = false
-    private volatile Thread loginThread = null
-    private SLModules modules
-    SLParcelInfo parcelInfo = SLParcelInfo()
-    private volatile int reconnectAttempts = 0
-    private Map<SLAuthReply, SLTempCircuit> tempCircuits = Collections.synchronizedMap(HashMap())
-    private UserManager userManager
-    private volatile boolean userWantsConnected = false
+/**
+ * Grid connection manager for Second Life protocol
+ * Handles authentication, circuit management, and reconnection logic
+ */
+class SLGridConnection : SLConnection() {
+    
+    private val DEFAULT_SYSTEM_ACCOUNT = "Second Life"
+    private var autoresponseEnabled = false
+    private var autoresponseText = ""
+    
+    private var activeAgentUUID: UUID? = null
+    private var agentCircuit: SLAgentCircuit? = null
+    private var authParams: SLAuthParams? = null
+    internal var authReply: SLAuthReply? = null
+    internal var capEventQueue: SLCapEventQueue? = null
+    private var connectionState = ConnectionState.Idle
+    private val eventBus = EventBus.getInstance()
+    
+    @Volatile private var firstConnect = true
+    @Volatile private var hadConnected = false
+    @Volatile private var isReconnecting = false
+    @Volatile private var loginThread: Thread? = null
+    
+    private var modules: SLModules? = null
+    internal val parcelInfo = SLParcelInfo()
+    
+    @Volatile private var reconnectAttempts = 0
+    private val tempCircuits = Collections.synchronizedMap(HashMap<SLAuthReply, SLTempCircuit>())
+    private var userManager: UserManager? = null
+    
+    @Volatile private var userWantsConnected = false
 
-    enum class class ConnectionState {
+    /**
+     * Connection states
+     */
+    enum class ConnectionState {
         Idle,
         Connecting,
         Connected
     }
 
-    class NotConnectedException extends Exception {
-        private long serialVersionUID = 2164121452714562470L
-
-        NotConnectedException() {
-            super("Grid not connected")
+    /**
+     * Exception thrown when operations require an active connection
+     */
+    class NotConnectedException : Exception("Grid not connected") {
+        companion object {
+            private const val serialVersionUID = 2164121452714562470L
         }
     }
 
-    /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues */
-    private /* synthetic */ int[] m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues() {
-        if (syntheticField != null) {
-            return syntheticField
-        }
-        int[] iArr = new int[ConnectionState.values().length]
+    /**
+     * Perform connection to grid with authentication
+     */
+    private fun doConnect(authParams: SLAuthParams, location: String) {
         try {
-            iArr[ConnectionState.Connected.ordinal()] = 1
-        } catch (NoSuchFieldError e) {
-        }
-        try {
-            iArr[ConnectionState.Connecting.ordinal()] = 2
-        } catch (NoSuchFieldError e2) {
-        }
-        try {
-            iArr[ConnectionState.Idle.ordinal()] = 3
-        } catch (NoSuchFieldError e3) {
-        }
-        syntheticField = iArr
-        return iArr
-    }
-
-    private void DoConnect(SLAuthParams sLAuthParams, String str) {
-        try {
-            SLAuthReply Login = SLAuth().Login(sLAuthParams.withLocation(str))
-            if (Login.success) {
-                synchronized (this) {
-                    if (this.connectionState == ConnectionState.Idle) {
+            val loginReply = SLAuth().Login(authParams.withLocation(location))
+            if (loginReply.success) {
+                synchronized(this) {
+                    if (connectionState == ConnectionState.Idle) {
                         return
                     }
-                    this.authReply = Login
-                    this.activeAgentUUID = this.authReply.agentID
-                    this.userManager = UserManager.getUserManager(this.activeAgentUUID)
-                    if (this.userManager != null) {
-                        this.userManager.getChatterList().getFriendManager().updateFriendList(this.authReply.friends)
-                    }
-                    this.parcelInfo.reset(this.userManager)
-                    startCircuit(Login, null)
+                    authReply = loginReply
+                    activeAgentUUID = loginReply.agentID
+                    userManager = UserManager.getUserManager(activeAgentUUID)
+                    userManager?.getChatterList()?.getFriendManager()?.updateFriendList(loginReply.friends)
+                    parcelInfo.reset(userManager)
+                    startCircuit(loginReply, null)
                     return
                 }
             }
             setConnectionState(ConnectionState.Idle)
-            reconnectOrDrop(true, false, Login.message)
-        } catch (Exception e) {
+            reconnectOrDrop(isLogin = true, fromLogout = false, message = loginReply.message ?: "Login failed")
+        } catch (e: Exception) {
             setConnectionState(ConnectionState.Idle)
-            reconnectOrDrop(true, false, "Failed to connect to login server.")
+            reconnectOrDrop(isLogin = true, fromLogout = false, message = "Failed to connect to login server.")
         }
     }
 
-    /* DevToolsApp WARNING: Missing block: B:17:0x0048, code:
-            return true
+    /**
+     * Attempt to reconnect to the grid
      */
-    private synchronized boolean Reconnect() {
-    synchronized boolean Reconnect() {
+    @Synchronized
+    private fun reconnect(): Boolean {
         // Check if we should attempt reconnection
-        if (!this.userWantsConnected || !this.hadConnected) {
-            this.isReconnecting = false
+        if (!userWantsConnected || !hadConnected) {
+            isReconnecting = false
             return false
         }
         
-        if (!com.lumiyaviewer.lumiya.GlobalOptions.getInstance().getAutoReconnect()) {
-            this.isReconnecting = false
+        if (!GlobalOptions.getAutoReconnect()) {
+            isReconnecting = false
             return false
         }
         
-        if (this.reconnectAttempts >= com.lumiyaviewer.lumiya.GlobalOptions.getInstance().getMaxReconnectAttempts()) {
-            this.isReconnecting = false
+        if (reconnectAttempts >= GlobalOptions.getMaxReconnectAttempts()) {
+            isReconnecting = false
             return false
         }
         
         // Only reconnect if we're in idle state and have auth params
-        if (this.connectionState != ConnectionState.Idle || this.authParams == null) {
-            this.isReconnecting = false
-            return true; // Return true to indicate we're still trying to reconnect
+        if (connectionState != ConnectionState.Idle || authParams == null) {
+            isReconnecting = false
+            return true // Return true to indicate we're still trying to reconnect
         }
         
         // Attempt reconnection
-        this.reconnectAttempts++
-        this.isReconnecting = true
+        reconnectAttempts++
+        isReconnecting = true
         
         // Publish reconnecting event
-        this.eventBus.publish(new com.lumiyaviewer.lumiya.slproto.events.SLReconnectingEvent(this.reconnectAttempts))
+        eventBus.publish(SLReconnectingEvent(reconnectAttempts))
         
         // Start connecting with "last" location
-        startConnecting(true, "last")
+        startConnecting(delay = true, location = "last")
         
         return true
     }
+
+    /**
+     * Get autoresponse text if enabled
+     */
+    fun getAutoresponse(): String? {
+        return if (autoresponseEnabled) autoresponseText else null
     }
 
-    String getAutoresponse() {
-        return !autoresponseEnabled ? null : autoresponseText
-    }
-
-    private void reconnectOrDrop(boolean z, boolean z2, String str) {
-        if (!Reconnect()) {
-            if (this.activeAgentUUID != null) {
-                GridConnectionManager.removeConnection(this.activeAgentUUID, this)
+    /**
+     * Reconnect or drop connection based on state
+     */
+    private fun reconnectOrDrop(isLogin: Boolean, fromLogout: Boolean, message: String) {
+        if (!reconnect()) {
+            activeAgentUUID?.let {
+                GridConnectionManager.removeConnection(it, this)
             }
-            if (z) {
-                this.eventBus.publish(SLLoginResultEvent(false, str, this.activeAgentUUID))
+            if (isLogin) {
+                eventBus.publish(SLLoginResultEvent(false, message, activeAgentUUID))
             } else {
-                this.eventBus.publish(SLDisconnectEvent(z2, str))
+                eventBus.publish(SLDisconnectEvent(fromLogout, message))
             }
         }
     }
 
-    void setAutoresponseInfo(boolean z, String str) {
-        autoresponseEnabled = z
-        autoresponseText = str
+    /**
+     * Set autoresponse information
+     */
+    fun setAutoresponseInfo(enabled: Boolean, text: String) {
+        autoresponseEnabled = enabled
+        autoresponseText = text
     }
 
-    private void setConnectionState(ConnectionState connectionState) {
-        if (this.connectionState != connectionState) {
-            this.connectionState = connectionState
-            this.eventBus.publish(SLConnectionStateChangedEvent(connectionState))
+    /**
+     * Update connection state and notify listeners
+     */
+    private fun setConnectionState(newState: ConnectionState) {
+        if (connectionState != newState) {
+            connectionState = newState
+            eventBus.publish(SLConnectionStateChangedEvent(newState))
         }
     }
 
-    private void startCircuit(SLAuthReply sLAuthReply, SLTempCircuit sLTempCircuit) {
-        Debug.Log("login reply: ip = " + sLAuthReply.simAddress.toString() + ", port = " + sLAuthReply.simPort + ", ccode = " + sLAuthReply.circuitCode)
-        if (sLAuthReply.inventoryRoot != null) {
-            Debug.Log("inventory root: " + sLAuthReply.inventoryRoot.toString())
-        } else {
-            Debug.Log("inventory root is null")
-        }
-        SLCaps sLCaps = SLCaps()
-        sLCaps.GetCapabilites(this.authReply.loginURL, this.authReply.seedCapability)
+    /**
+     * Start circuit connection to simulator
+     */
+    private fun startCircuit(authReply: SLAuthReply, tempCircuit: SLTempCircuit?) {
+        Debug.Log("login reply: ip = ${authReply.simAddress}, port = ${authReply.simPort}, ccode = ${authReply.circuitCode}")
+        authReply.inventoryRoot?.let {
+            Debug.Log("inventory root: $it")
+        } ?: Debug.Log("inventory root is null")
+        
+        val caps = SLCaps()
+        caps.GetCapabilites(this.authReply!!.loginURL, this.authReply!!.seedCapability)
+        
         try {
-            this.agentCircuit = SLAgentCircuit(this, SLCircuitInfo(sLAuthReply), sLAuthReply, sLCaps, sLTempCircuit)
-            this.modules = this.agentCircuit.getModules()
+            agentCircuit = SLAgentCircuit(this, SLCircuitInfo(authReply), authReply, caps, tempCircuit)
+            modules = agentCircuit?.getModules()
+            
             try {
-                this.capEventQueue = SLCapEventQueue(sLCaps.getCapabilityOrThrow(SLCapability.EventQueueGet), this.agentCircuit)
-            } catch (NoSuchCapabilityException e) {
+                capEventQueue = SLCapEventQueue(caps.getCapabilityOrThrow(SLCapability.EventQueueGet), agentCircuit!!)
+            } catch (e: NoSuchCapabilityException) {
                 e.printStackTrace()
             }
-            this.parcelInfo.reset(this.userManager)
-            TextureCache.getInstance().setFetcher(this.modules.textureFetcher)
-            AddCircuit(this.agentCircuit)
-            this.agentCircuit.SendUseCode()
-            this.firstConnect = false
-        } catch (IOException e2) {
+            
+            parcelInfo.reset(userManager)
+            TextureCache.getInstance().setFetcher(modules?.textureFetcher)
+            AddCircuit(agentCircuit!!)
+            agentCircuit?.SendUseCode()
+            firstConnect = false
+        } catch (e: IOException) {
             setConnectionState(ConnectionState.Idle)
-            reconnectOrDrop(true, false, "Failed to connect to the simulator.")
+            reconnectOrDrop(isLogin = true, fromLogout = false, message = "Failed to connect to the simulator.")
         }
     }
 
-    private void startConnecting(boolean z, String str) {
-        this.loginThread = Thread(Runnable() {
-            void run() {
-                if (z) {
-                    try {
-                        Thread.sleep(3000)
-                    } catch (InterruptedException e) {
-                        e.printStackTrace()
-                    }
+    /**
+     * Start connecting with optional delay
+     */
+    private fun startConnecting(delay: Boolean, location: String) {
+        loginThread = Thread {
+            if (delay) {
+                try {
+                    Thread.sleep(3000)
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
                 }
-                SLGridConnection.this.DoConnect(SLGridConnection.this.authParams, str)
-                SLGridConnection.this.loginThread = null
             }
+            authParams?.let { doConnect(it, location) }
+            loginThread = null
+        }
         setConnectionState(ConnectionState.Connecting)
-        this.loginThread.start()
+        loginThread?.start()
     }
 
-    synchronized void CancelConnect() {
-        this.userWantsConnected = false
-        this.isReconnecting = false
-        this.hadConnected = false
+    /**
+     * Cancel connection attempt
+     */
+    @Synchronized
+    fun CancelConnect() {
+        userWantsConnected = false
+        isReconnecting = false
+        hadConnected = false
         closeConnectionObjects()
     }
 
-    synchronized void Connect(SLAuthParams sLAuthParams) {
-        if (this.connectionState == ConnectionState.Idle) {
-            this.authParams = sLAuthParams
-            this.userWantsConnected = true
-            this.reconnectAttempts = 0
-            this.isReconnecting = false
-            this.hadConnected = false
-            this.firstConnect = true
-            startConnecting(false, sLAuthParams.startLocation)
+    /**
+     * Connect to grid with authentication parameters
+     */
+    @Synchronized
+    fun Connect(authParams: SLAuthParams) {
+        if (connectionState == ConnectionState.Idle) {
+            this.authParams = authParams
+            userWantsConnected = true
+            reconnectAttempts = 0
+            isReconnecting = false
+            hadConnected = false
+            firstConnect = true
+            startConnecting(delay = false, location = authParams.startLocation)
         }
     }
 
-    synchronized void Disconnect() {
-        this.userWantsConnected = false
-        this.isReconnecting = false
-        this.hadConnected = false
-        if (this.agentCircuit != null) {
-            this.agentCircuit.SendLogoutRequest()
-        } else {
-            processDisconnect(true, "Logged out")
-        }
+    /**
+     * Disconnect from grid
+     */
+    @Synchronized
+    fun Disconnect() {
+        userWantsConnected = false
+        isReconnecting = false
+        hadConnected = false
+        agentCircuit?.SendLogoutRequest() ?: processDisconnect(fromLogout = true, message = "Logged out")
     }
 
-    synchronized void HandleTeleportFinish(SLAuthReply sLAuthReply) {
-        if (this.agentCircuit != null) {
-            this.agentCircuit.CloseCircuit()
-            this.agentCircuit = null
+    /**
+     * Handle teleport completion
+     */
+    @Synchronized
+    fun HandleTeleportFinish(authReply: SLAuthReply) {
+        agentCircuit?.let {
+            it.CloseCircuit()
+            agentCircuit = null
         }
-        if (this.capEventQueue != null) {
-            this.capEventQueue.stopQueue()
-            this.capEventQueue = null
+        capEventQueue?.let {
+            it.stopQueue()
+            capEventQueue = null
         }
-        this.authReply = sLAuthReply
-        startCircuit(sLAuthReply, (SLTempCircuit) this.tempCircuits.remove(this.authReply))
+        this.authReply = authReply
+        startCircuit(authReply, tempCircuits.remove(authReply))
     }
 
-    synchronized void addTempCircuit(SLAuthReply sLAuthReply) {
-        if (!this.tempCircuits.containsKey(sLAuthReply)) {
+    /**
+     * Add temporary circuit for region crossing
+     */
+    @Synchronized
+    fun addTempCircuit(authReply: SLAuthReply) {
+        if (!tempCircuits.containsKey(authReply)) {
             try {
-                SLCircuit sLTempCircuit = SLTempCircuit(this, SLCircuitInfo(sLAuthReply), sLAuthReply)
-                this.tempCircuits.put(sLAuthReply, sLTempCircuit)
-                AddCircuit(sLTempCircuit)
-                sLTempCircuit.SendUseCode()
-            } catch (IOException e) {
+                val tempCircuit = SLTempCircuit(this, SLCircuitInfo(authReply), authReply)
+                tempCircuits[authReply] = tempCircuit
+                AddCircuit(tempCircuit)
+                tempCircuit.SendUseCode()
+            } catch (e: IOException) {
                 e.printStackTrace()
             }
         }
-        return
     }
 
-    synchronized void closeConnectionObjects() {
-        Thread thread = this.loginThread
-        if (thread != null) {
-            thread.interrupt()
+    /**
+     * Close all connection objects
+     */
+    @Synchronized
+    fun closeConnectionObjects() {
+        loginThread?.interrupt()
+        loginThread = null
+        modules = null
+        
+        agentCircuit?.let {
+            it.CloseCircuit()
+            agentCircuit = null
         }
-        this.loginThread = null
-        this.modules = null
-        if (this.agentCircuit != null) {
-            this.agentCircuit.CloseCircuit()
-            this.agentCircuit = null
+        
+        capEventQueue?.let {
+            it.stopQueue()
+            capEventQueue = null
         }
-        if (this.capEventQueue != null) {
-            this.capEventQueue.stopQueue()
-            this.capEventQueue = null
-        }
+        
         TextureCache.getInstance().setFetcher(null)
-        for (SLTempCircuit CloseCircuit : this.tempCircuits.values()) {
-            CloseCircuit.CloseCircuit()
-        }
-        this.tempCircuits.clear()
+        
+        tempCircuits.values.forEach { it.CloseCircuit() }
+        tempCircuits.clear()
+        
         setConnectionState(ConnectionState.Idle)
     }
 
-    synchronized void forceDisconnect(boolean z) {
-        if (z) {
-            this.userWantsConnected = false
-            this.isReconnecting = false
-            this.hadConnected = false
+    /**
+     * Force disconnect from grid
+     */
+    @Synchronized
+    fun forceDisconnect(fromLogoutRequest: Boolean) {
+        if (fromLogoutRequest) {
+            userWantsConnected = false
+            isReconnecting = false
+            hadConnected = false
         }
-        Debug.Log("GridConnection: forceDisconnect() called, fromLogoutRequest = " + (z ? "true" : "false"))
-        switch (m71-getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues()[this.connectionState.ordinal()]) {
-            case 1:
+        Debug.Log("GridConnection: forceDisconnect() called, fromLogoutRequest = $fromLogoutRequest")
+        
+        when (connectionState) {
+            ConnectionState.Connected -> {
                 closeConnectionObjects()
-                reconnectOrDrop(false, z, "Network connection lost.")
-                break
-            case 2:
+                reconnectOrDrop(isLogin = false, fromLogout = fromLogoutRequest, message = "Network connection lost.")
+            }
+            ConnectionState.Connecting -> {
                 closeConnectionObjects()
-                reconnectOrDrop(true, z, "Network connection lost.")
-                break
-        }
-    }
-
-    UUID getActiveAgentUUID() {
-        return this.activeAgentUUID
-    }
-
-    SLAgentCircuit getAgentCircuit() throws NotConnectedException {
-        if (this.agentCircuit != null) {
-            return this.agentCircuit
-        }
-        throw NotConnectedException()
-    }
-
-    synchronized ConnectionState getConnectionState() {
-        return this.connectionState
-    }
-
-    boolean getIsReconnecting() {
-        return this.isReconnecting
-    }
-
-    synchronized SLModules getModules() throws NotConnectedException {
-        if (this.modules == null) {
-            throw NotConnectedException()
-        }
-        return this.modules
-    }
-
-    int getReconnectAttempt() {
-        return this.reconnectAttempts
-    }
-
-    boolean isFirstConnect() {
-        return this.firstConnect
-    }
-
-    synchronized void notifyLoginError(String str) {
-        closeConnectionObjects()
-        reconnectOrDrop(true, false, str)
-    }
-
-    synchronized void notifyLoginSuccess() {
-        this.hadConnected = true
-        this.reconnectAttempts = 0
-        this.isReconnecting = false
-        setConnectionState(ConnectionState.Connected)
-        if (this.activeAgentUUID != null) {
-            GridConnectionManager.setConnection(this.activeAgentUUID, this)
-        }
-        this.eventBus.publish(SLLoginResultEvent(true, null, this.activeAgentUUID))
-    }
-
-    synchronized void processDisconnect(boolean z, String str) {
-        if (this.connectionState != ConnectionState.Idle) {
-            closeConnectionObjects()
-            reconnectOrDrop(false, z, str)
-        }
-    }
-
-    synchronized void removeTempCircuit(SLTempCircuit sLTempCircuit) {
-        Iterator it = this.tempCircuits.entrySet().iterator()
-        while (it.hasNext()) {
-            if (((Entry) it.next()).getValue() == sLTempCircuit) {
-                it.remove()
+                reconnectOrDrop(isLogin = true, fromLogout = fromLogoutRequest, message = "Network connection lost.")
+            }
+            ConnectionState.Idle -> {
+                // Already idle, nothing to do
             }
         }
-        sLTempCircuit.CloseCircuit()
+    }
+
+    // Public accessors
+
+    fun getActiveAgentUUID(): UUID? = activeAgentUUID
+
+    @Throws(NotConnectedException::class)
+    fun getAgentCircuit(): SLAgentCircuit {
+        return agentCircuit ?: throw NotConnectedException()
+    }
+
+    @Synchronized
+    fun getConnectionState(): ConnectionState = connectionState
+
+    fun getIsReconnecting(): Boolean = isReconnecting
+
+    @Synchronized
+    @Throws(NotConnectedException::class)
+    fun getModules(): SLModules {
+        return modules ?: throw NotConnectedException()
+    }
+
+    fun getReconnectAttempt(): Int = reconnectAttempts
+
+    fun isFirstConnect(): Boolean = firstConnect
+
+    /**
+     * Notify that login failed
+     */
+    @Synchronized
+    fun notifyLoginError(message: String) {
+        closeConnectionObjects()
+        reconnectOrDrop(isLogin = true, fromLogout = false, message = message)
+    }
+
+    /**
+     * Notify that login succeeded
+     */
+    @Synchronized
+    fun notifyLoginSuccess() {
+        hadConnected = true
+        reconnectAttempts = 0
+        isReconnecting = false
+        setConnectionState(ConnectionState.Connected)
+        
+        activeAgentUUID?.let {
+            GridConnectionManager.setConnection(it, this)
+        }
+        
+        eventBus.publish(SLLoginResultEvent(true, null, activeAgentUUID))
+    }
+
+    /**
+     * Process disconnect event
+     */
+    @Synchronized
+    fun processDisconnect(fromLogout: Boolean, message: String) {
+        if (connectionState != ConnectionState.Idle) {
+            closeConnectionObjects()
+            reconnectOrDrop(isLogin = false, fromLogout = fromLogout, message = message)
+        }
+    }
+
+    /**
+     * Remove temporary circuit
+     */
+    @Synchronized
+    fun removeTempCircuit(tempCircuit: SLTempCircuit) {
+        val iterator = tempCircuits.entries.iterator()
+        while (iterator.hasNext()) {
+            if (iterator.next().value == tempCircuit) {
+                iterator.remove()
+            }
+        }
+        tempCircuit.CloseCircuit()
     }
 }
