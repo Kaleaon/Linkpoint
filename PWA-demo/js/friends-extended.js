@@ -459,9 +459,9 @@ class FriendsExtended {
   getRecentlyOnlineFriends(limit = 10) {
     const friendsArray = Array.from(this.friends.entries())
       .map(([uuid, friend]) => ({ uuid, ...friend }))
-      .filter(f => f.lastOnline);
+      .filter(f => f.onlineSince);
     
-    friendsArray.sort((a, b) => b.lastOnline - a.lastOnline);
+    friendsArray.sort((a, b) => b.onlineSince - a.onlineSince);
     
     return friendsArray.slice(0, limit);
   }
