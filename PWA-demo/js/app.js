@@ -551,6 +551,69 @@ class LinkpointApp {
       }
     }
   }
+  
+  /**
+   * Update CORS status display
+   */
+  updateCORSStatus() {
+    if (!window.corsHandler) {
+      console.warn('[App] CORS handler not available');
+      return;
+    }
+    
+    const status = window.corsHandler.displayStatus();
+    
+    // Update UI elements
+    const envName = document.getElementById('cors-env-name');
+    const envType = document.getElementById('cors-env-type');
+    const supportType = document.getElementById('cors-support-type');
+    const statusMessage = document.getElementById('cors-status-message');
+    const recommendations = document.getElementById('cors-recommendations');
+    
+    if (envName) {
+      envName.textContent = `${status.environment.name}`;
+    }
+    
+    if (envType) {
+      envType.textContent = status.environment.name;
+    }
+    
+    if (supportType) {
+      let supportText = status.environment.corsSupport;
+      let emoji = '✅';
+      
+      if (status.environment.needsProxy) {
+        emoji = '⚠️';
+        supportText += ' (using public proxy)';
+      }
+      
+      supportType.innerHTML = `${emoji} ${supportText}`;
+    }
+    
+    if (statusMessage) {
+      if (status.environment.needsProxy) {
+        statusMessage.innerHTML = '⚠️ Using public CORS proxy (may be slower)';
+      } else {
+        statusMessage.innerHTML = '✅ Optimal connection (no proxy needed)';
+      }
+    }
+    
+    if (recommendations && status.solution) {
+      let html = `<p><strong>💡 ${status.solution.primary}</strong></p>`;
+      html += `<p style="font-size: 0.8rem; color: var(--text-secondary);">${status.solution.instructions}</p>`;
+      
+      if (status.solution.alternatives.length > 0) {
+        html += `<p style="font-size: 0.8rem; margin-top: 0.5rem;"><strong>Alternatives:</strong></p>`;
+        html += '<ul style="font-size: 0.8rem; margin: 0; padding-left: 1.5rem;">';
+        status.solution.alternatives.forEach(alt => {
+          html += `<li>${alt}</li>`;
+        });
+        html += '</ul>';
+      }
+      
+      recommendations.innerHTML = html;
+    }
+  }
 
   /**
    * Handle query parameters
