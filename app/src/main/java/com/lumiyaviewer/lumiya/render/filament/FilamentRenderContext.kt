@@ -58,6 +58,9 @@ class FilamentRenderContext(private val context: Context) {
     var uiHelper: UiHelper? = null
         private set
     
+    // Reference to the surface view for display access
+    private var surfaceView: SurfaceView? = null
+    
     // Initialization state
     var isInitialized = false
         private set
@@ -141,6 +144,9 @@ class FilamentRenderContext(private val context: Context) {
         if (!isInitialized) {
             throw IllegalStateException("Filament context not initialized")
         }
+        
+        // Store reference to surface view
+        this.surfaceView = surfaceView
         
         // Create UI helper
         uiHelper = UiHelper(UiHelper.ContextErrorPolicy.DONT_CHECK).apply {
@@ -262,7 +268,7 @@ class FilamentRenderContext(private val context: Context) {
             swapChain = engine.createSwapChain(surface, flags)
             
             // Attach display helper
-            displayHelper?.attach(renderer, uiHelper?.surfaceView?.display)
+            displayHelper?.attach(renderer, surfaceView?.display)
             
             Log.i(TAG, "SwapChain created for surface")
         }
