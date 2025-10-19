@@ -11,6 +11,7 @@ class LinkpointApp {
     this.voice = null;
     this.inventory = null;
     this.friends = null;
+    this.groups = null;
     this.teleport = null;
     this.search = null;
     this.preferences = null;
