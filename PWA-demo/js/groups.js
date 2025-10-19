@@ -501,16 +501,7 @@ class GroupsManager {
     return members ? Array.from(members) : [];
   }
   
-  /**
-   * Get chat history for group
-   * @param {string} groupUUID - UUID of the group
-   * @param {number} limit - Number of messages to return
-   * @returns {Array} Array of chat messages
-   */
-  getGroupChatHistory(groupUUID, limit = 100) {
-    const history = this.chatHistories.get(groupUUID) || [];
-    return history.slice(-limit);
-  }
+  // Removed duplicate getGroupChatHistory method (see line 510 for the active implementation)
   
   /**
    * Clear group chat history
