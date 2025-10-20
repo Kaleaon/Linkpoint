@@ -1,312 +1,311 @@
 package com.linkpoint.slproto.avatar
-import java.util.*
 
+import android.opengl.GLES20
 import com.linkpoint.render.RenderContext
+import com.linkpoint.render.drawable.DrawableFaceTexture
 import com.linkpoint.render.glres.buffers.GLLoadableBuffer
 import com.linkpoint.rawbuffers.DirectByteBuffer
 
-class SLAnimatedMeshData : SLMeshData() {
-    private const val BUF_INDEX: Int = 1
-    private const val BUF_TEXCOORD: Int = 2
-    private const val BUF_VERTEX: Int = 0
-    private const val BUF_WEIGHTS: Int = 3
-    private Boolean VBOLoaded = false
-    private val Boolean animated
-    private val DirectByteBuffer animatedVertexData
-    private GLLoadableBuffer[] glBuffers = GLLoadableBuffer[4]
-    private Boolean texCoordsDirty = false
-    private Boolean verticesDirty = false
+/**
+ * SLAnimatedMeshData - Animated avatar mesh with GPU buffers
+ * Handles vertex animation and rendering with VBOs
+ * Based on Firestorm's avatar rendering pipeline
+ */
+class SLAnimatedMeshData : SLMeshData {
+    
+    companion object {
+        private const val BUF_VERTEX = 0
+        private const val BUF_INDEX = 1
+        private const val BUF_TEXCOORD = 2
+        private const val BUF_WEIGHTS = 3
+    }
+    
+    private var vboLoaded = false
+    private val animated: Boolean
+    private val animatedVertexData: DirectByteBuffer?
+    private val glBuffers = arrayOfNulls<GLLoadableBuffer>(4)
+    private var texCoordsDirty = false
+    private var verticesDirty = false
 
-    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
-    public SLAnimatedMeshData(SLPolyMesh sLPolyMesh, Boolean z) {
-        super(sLPolyMesh)
-        Boolean z2 = false
-        this.animated = sLPolyMesh.hasWeights ? !z : z2
+    /**
+     * Create animated mesh from poly mesh
+     * @param sourceMesh The source poly mesh
+     * @param skipAnimation If true, skip animation even if mesh has weights
+     */
+    constructor(sourceMesh: SLPolyMesh, skipAnimation: Boolean = false) : super(sourceMesh) {
+        // Determine if this mesh should be animated
+        this.animated = sourceMesh.hasWeights && !skipAnimation
+        
         if (this.animated) {
-            this.animatedVertexData = DirectByteBuffer(this.vertexBuffer)
+            // Create separate buffer for animated vertices
+            this.animatedVertexData = DirectByteBuffer(this.vertexBuffer!!)
             this.verticesDirty = true
-            return
+        } else {
+            this.animatedVertexData = null
         }
-        this.animatedVertexData = null
     }
 
-    private Unit setupVBOs(RenderContext renderContext) {
-        if (!this.VBOLoaded || this.texCoordsDirty || this.verticesDirty) {
-            if (!this.VBOLoaded || this.verticesDirty) {
-                DirectByteBuffer directByteBuffer = this.animated ? this.animatedVertexData : this.vertexBuffer
-                if (this.glBuffers[0] == null) {
-                    this.glBuffers[0] = GLLoadableBuffer(directByteBuffer)
-                } else if (this.animated) {
-                    this.glBuffers[0].Reload(renderContext)
+    /**
+     * Setup VBOs (Vertex Buffer Objects) for GPU rendering
+     */
+    private fun setupVBOs(renderContext: RenderContext) {
+        if (!vboLoaded || texCoordsDirty || verticesDirty) {
+            
+            // Setup vertex buffer
+            if (!vboLoaded || verticesDirty) {
+                val vertexData = if (animated) animatedVertexData else vertexBuffer
+                
+                if (glBuffers[BUF_VERTEX] == null) {
+                    glBuffers[BUF_VERTEX] = GLLoadableBuffer(vertexData)
+                } else if (animated) {
+                    // Reload animated vertices each frame
+                    glBuffers[BUF_VERTEX]!!.Reload(renderContext)
                 }
             }
-            if (!this.VBOLoaded) {
-                if (renderContext.hasGL20 && this.referenceData.hasWeights) {
-                    this.glBuffers[3] = GLLoadableBuffer(this.referenceData.weightsBuffer)
+            
+            // Setup index and weights buffers (only first time)
+            if (!vboLoaded) {
+                // Setup weights buffer if rigged
+                if (renderContext.hasGL20 && referenceData?.hasWeights == true) {
+                    glBuffers[BUF_WEIGHTS] = GLLoadableBuffer(referenceData!!.weightsBuffer)
                 }
-                this.glBuffers[1] = GLLoadableBuffer(this.indexBuffer)
+                
+                // Setup index buffer
+                glBuffers[BUF_INDEX] = GLLoadableBuffer(indexBuffer)
             }
-            if (!this.VBOLoaded || this.texCoordsDirty) {
-                if (this.glBuffers[2] == null) {
-                    this.glBuffers[2] = GLLoadableBuffer(this.texCoordsBuffer)
+            
+            // Setup texture coordinate buffer
+            if (!vboLoaded || texCoordsDirty) {
+                if (glBuffers[BUF_TEXCOORD] == null) {
+                    glBuffers[BUF_TEXCOORD] = GLLoadableBuffer(texCoordsBuffer)
                 } else {
-                    this.glBuffers[2].Reload(renderContext)
+                    glBuffers[BUF_TEXCOORD]!!.Reload(renderContext)
                 }
             }
-            this.VBOLoaded = true
-            this.verticesDirty = false
-            this.texCoordsDirty = false
+            
+            vboLoaded = true
+            verticesDirty = false
+            texCoordsDirty = false
         }
     }
 
-    /* JADX WARNING: Removed duplicated region for block: B:13:0x0025  */
-    /* JADX WARNING: Removed duplicated region for block: B:29:0x00e2  */
-    /* JADX WARNING: Removed duplicated region for block: B:35:0x0116  */
-    /* JADX WARNING: Removed duplicated region for block: B:44:? A[RETURN, SYNTHETIC] */
-    /* Code decompiled incorrectly, please refer to instructions dump. */
-    val Unit GLDraw(com.lumiyaviewer.lumiya.render.RenderContext r9, com.lumiyaviewer.lumiya.render.drawable.DrawableFaceTexture r10) {
-        /*
-            r8 = this
-            r0 = 0
-            r8.setupVBOs(r9)
-            if (r10 == 0) goto L_0x0199
-            Boolean r0 = r9.hasGL20
-            if (r0 != 0) goto L_0x000f
-            r0 = 3553(0xde1, Float:4.979E-42)
-            android.opengl.GLES20.glEnable(r0)
-        L_0x000f:
-            r0 = 1
-            Boolean r1 = r10.GLDraw(r9)
-            if (r1 != 0) goto L_0x0199
-            Boolean r0 = r9.hasGL20
-            if (r0 != 0) goto L_0x001f
-            r0 = 3553(0xde1, Float:4.979E-42)
-            android.opengl.GLES20.glDisable(r0)
-        L_0x001f:
-            r0 = 0
-            r7 = r0
-        L_0x0021:
-            Boolean r0 = r9.hasGL20
-            if (r0 == 0) goto L_0x0116
-            Boolean r0 = r8.VBOLoaded
-            if (r0 == 0) goto L_0x00e0
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
-            r0.setTextureEnabled(r7)
-            if (r7 != 0) goto L_0x0036
-            r0 = 3553(0xde1, Float:4.979E-42)
-            r1 = 0
-            android.opengl.GLES20.glBindTexture(r0, r1)
-        L_0x0036:
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
-            Int r0 = r0.uObjWorldMatrix
-            r9.glObjWorldApplyMatrix(r0)
-            if (r7 == 0) goto L_0x00ed
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
-            Int r0 = r0.vColor
-            r1 = 1065353216(0x3f800000, Float:1.0)
-            r2 = 1065353216(0x3f800000, Float:1.0)
-            r3 = 1065353216(0x3f800000, Float:1.0)
-            r4 = 1065353216(0x3f800000, Float:1.0)
-            android.opengl.GLES20.glUniform4f(r0, r1, r2, r3, r4)
-        L_0x004e:
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 0
-            r0 = r0[r1]
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r1 = r9.avatarProgram
-            Int r2 = r1.vPosition
-            r3 = 3
-            r4 = 5126(0x1406, Float:7.183E-42)
-            r5 = 24
-            r6 = 0
-            r1 = r9
-            r0.Bind20(r1, r2, r3, r4, r5, r6)
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 0
-            r0 = r0[r1]
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r1 = r9.avatarProgram
-            Int r2 = r1.vNormal
-            r3 = 3
-            r4 = 5126(0x1406, Float:7.183E-42)
-            r5 = 24
-            r6 = 12
-            r1 = r9
-            r0.Bind20(r1, r2, r3, r4, r5, r6)
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 1
-            r0 = r0[r1]
-            r0.BindElements20(r9)
-            if (r7 == 0) goto L_0x00fe
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 2
-            r0 = r0[r1]
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r1 = r9.avatarProgram
-            Int r2 = r1.vTexCoord
-            r3 = 2
-            r4 = 5126(0x1406, Float:7.183E-42)
-            r5 = 8
-            r6 = 0
-            r1 = r9
-            r0.Bind20(r1, r2, r3, r4, r5, r6)
-        L_0x0092:
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 3
-            r0 = r0[r1]
-            if (r0 == 0) goto L_0x0106
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 3
-            r0 = r0[r1]
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r1 = r9.avatarProgram
-            Int r2 = r1.vWeight
-            r3 = 1
-            r4 = 5126(0x1406, Float:7.183E-42)
-            r5 = 4
-            r6 = 0
-            r1 = r9
-            r0.Bind20(r1, r2, r3, r4, r5, r6)
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
-            Int r0 = r0.uJointMap
-            com.lumiyaviewer.lumiya.slproto.avatar.SLPolyMesh r1 = r8.referenceData
-            Int[] r1 = r1.jointMap
-            Int r1 = r1.length
-            com.lumiyaviewer.lumiya.slproto.avatar.SLPolyMesh r2 = r8.referenceData
-            Int[] r2 = r2.jointMap
-            r3 = 0
-            android.opengl.GLES20.glUniform1iv(r0, r1, r2, r3)
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
-            Int r0 = r0.uJointMapLength
-            com.lumiyaviewer.lumiya.slproto.avatar.SLPolyMesh r1 = r8.referenceData
-            Int[] r1 = r1.jointMap
-            Int r1 = r1.length
-            android.opengl.GLES20.glUniform1i(r0, r1)
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
-            Int r0 = r0.uUseWeight
-            r1 = 1
-            android.opengl.GLES20.glUniform1i(r0, r1)
-        L_0x00d0:
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 1
-            r0 = r0[r1]
-            Int r1 = r8.numFaces
-            Int r1 = r1 * 3
-            r2 = 4
-            r3 = 5123(0x1403, Float:7.179E-42)
-            r4 = 0
-            r0.DrawElements20(r2, r1, r3, r4)
-        L_0x00e0:
-            if (r7 == 0) goto L_0x00ec
-            Boolean r0 = r9.hasGL20
-            if (r0 == 0) goto L_0x018c
-            r0 = 3553(0xde1, Float:4.979E-42)
-            r1 = 0
-            android.opengl.GLES20.glBindTexture(r0, r1)
-        L_0x00ec:
+    /**
+     * Draw mesh with OpenGL
+     * @param renderContext Rendering context
+     * @param faceTexture Optional texture to apply
+     */
+    fun GLDraw(renderContext: RenderContext, faceTexture: DrawableFaceTexture?) {
+        setupVBOs(renderContext)
+        
+        // Determine if we're rendering with texture
+        var hasTexture = false
+        
+        if (faceTexture != null) {
+            if (!renderContext.hasGL20) {
+                GLES20.glEnable(GLES20.GL_TEXTURE_2D)
+            }
+            hasTexture = faceTexture.GLDraw(renderContext)
+            if (!hasTexture && !renderContext.hasGL20) {
+                GLES20.glDisable(GLES20.GL_TEXTURE_2D)
+            }
+        }
+        
+        if (!vboLoaded) {
             return
-        L_0x00ed:
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
-            Int r0 = r0.vColor
-            r1 = 1056964608(0x3f000000, Float:0.5)
-            r2 = 1056964608(0x3f000000, Float:0.5)
-            r3 = 1056964608(0x3f000000, Float:0.5)
-            r4 = 1065353216(0x3f800000, Float:1.0)
-            android.opengl.GLES20.glUniform4f(r0, r1, r2, r3, r4)
-            goto L_0x004e
-        L_0x00fe:
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
-            Int r0 = r0.vTexCoord
-            android.opengl.GLES20.glDisableVertexAttribArray(r0)
-            goto L_0x0092
-        L_0x0106:
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
-            Int r0 = r0.vWeight
-            android.opengl.GLES20.glDisableVertexAttribArray(r0)
-            com.lumiyaviewer.lumiya.render.shaders.AvatarProgram r0 = r9.avatarProgram
-            Int r0 = r0.uUseWeight
-            r1 = 0
-            android.opengl.GLES20.glUniform1i(r0, r1)
-            goto L_0x00d0
-        L_0x0116:
-            com.lumiyaviewer.lumiya.slproto.avatar.SLPolyMesh r0 = r8.referenceData
-            Boolean r0 = r0.hasWeights
-            if (r0 == 0) goto L_0x0189
-            com.lumiyaviewer.rawbuffers.DirectByteBuffer r0 = r8.animatedVertexData
-        L_0x011e:
-            if (r0 == 0) goto L_0x00e0
-            r0 = 1065353216(0x3f800000, Float:1.0)
-            r1 = 1065353216(0x3f800000, Float:1.0)
-            r2 = 1065353216(0x3f800000, Float:1.0)
-            r3 = 1065353216(0x3f800000, Float:1.0)
-            android.opengl.GLES10.glColor4f(r0, r1, r2, r3)
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 0
-            r0 = r0[r1]
-            r2 = 32884(0x8074, Float:4.608E-41)
-            r3 = 3
-            r4 = 5126(0x1406, Float:7.183E-42)
-            r5 = 24
-            r6 = 0
-            r1 = r9
-            r0.Bind(r1, r2, r3, r4, r5, r6)
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 0
-            r0 = r0[r1]
-            r2 = 32885(0x8075, Float:4.6082E-41)
-            r3 = 3
-            r4 = 5126(0x1406, Float:7.183E-42)
-            r5 = 24
-            r6 = 12
-            r1 = r9
-            r0.Bind(r1, r2, r3, r4, r5, r6)
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 2
-            r0 = r0[r1]
-            r2 = 32888(0x8078, Float:4.6086E-41)
-            r3 = 2
-            r4 = 5126(0x1406, Float:7.183E-42)
-            r5 = 8
-            r6 = 0
-            r1 = r9
-            r0.Bind(r1, r2, r3, r4, r5, r6)
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 1
-            r0 = r0[r1]
-            r0.BindElements(r9)
-            com.lumiyaviewer.lumiya.render.glres.buffers.GLLoadableBuffer[] r0 = r8.glBuffers
-            r1 = 1
-            r0 = r0[r1]
-            Int r1 = r8.numFaces
-            Int r3 = r1 * 3
-            r2 = 4
-            r4 = 5123(0x1403, Float:7.179E-42)
-            r5 = 0
-            r1 = r9
-            r0.DrawElements(r1, r2, r3, r4, r5)
-            r0 = 32885(0x8075, Float:4.6082E-41)
-            android.opengl.GLES10.glDisableClientState(r0)
-            r0 = 32888(0x8078, Float:4.6086E-41)
-            android.opengl.GLES10.glDisableClientState(r0)
-            goto L_0x00e0
-        L_0x0189:
-            com.lumiyaviewer.rawbuffers.DirectByteBuffer r0 = r8.vertexBuffer
-            goto L_0x011e
-        L_0x018c:
-            r0 = 3553(0xde1, Float:4.979E-42)
-            r1 = 0
-            android.opengl.GLES10.glBindTexture(r0, r1)
-            r0 = 3553(0xde1, Float:4.979E-42)
-            android.opengl.GLES10.glDisable(r0)
-            goto L_0x00ec
-        L_0x0199:
-            r7 = r0
-            goto L_0x0021
-        */
-        throw UnsupportedOperationException("Method not decompiled: com.lumiyaviewer.lumiya.slproto.avatar.SLAnimatedMeshData.GLDraw(com.lumiyaviewer.lumiya.render.RenderContext, com.lumiyaviewer.lumiya.render.drawable.DrawableFaceTexture):Unit")
+        }
+        
+        // Render with appropriate path
+        if (renderContext.hasGL20) {
+            drawGL20(renderContext, hasTexture)
+        } else {
+            drawGL11(renderContext, hasTexture)
+        }
+        
+        // Cleanup texture binding
+        if (hasTexture) {
+            if (renderContext.hasGL20) {
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+            } else {
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+                GLES20.glDisable(GLES20.GL_TEXTURE_2D)
+            }
+        }
     }
 
-    public DirectByteBuffer getAnimatedVertexData() {
-        return this.animatedVertexData
+    /**
+     * Render using OpenGL ES 2.0+ (shader-based)
+     */
+    private fun drawGL20(renderContext: RenderContext, hasTexture: Boolean) {
+        val program = renderContext.avatarProgram
+        
+        // Set texture enabled state
+        program.setTextureEnabled(hasTexture)
+        if (!hasTexture) {
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+        }
+        
+        // Apply object world matrix
+        renderContext.glObjWorldApplyMatrix(program.uObjWorldMatrix)
+        
+        // Set vertex color (white for textured, gray for untextured)
+        if (hasTexture) {
+            GLES20.glUniform4f(program.vColor, 1.0f, 1.0f, 1.0f, 1.0f)
+        } else {
+            GLES20.glUniform4f(program.vColor, 0.5f, 0.5f, 0.5f, 1.0f)
+        }
+        
+        // Bind vertex positions and normals
+        glBuffers[BUF_VERTEX]!!.Bind20(
+            renderContext,
+            program.vPosition,
+            3,  // 3 floats per position
+            GLES20.GL_FLOAT,
+            24,  // stride (6 floats = 24 bytes)
+            0    // offset for position
+        )
+        
+        glBuffers[BUF_VERTEX]!!.Bind20(
+            renderContext,
+            program.vNormal,
+            3,  // 3 floats per normal
+            GLES20.GL_FLOAT,
+            24,  // stride
+            12   // offset for normal (after 3 position floats = 12 bytes)
+        )
+        
+        // Bind indices
+        glBuffers[BUF_INDEX]!!.BindElements20(renderContext)
+        
+        // Bind texture coordinates
+        if (hasTexture) {
+            glBuffers[BUF_TEXCOORD]!!.Bind20(
+                renderContext,
+                program.vTexCoord,
+                2,  // 2 floats per texcoord
+                GLES20.GL_FLOAT,
+                8,   // stride (2 floats = 8 bytes)
+                0    // offset
+            )
+        } else {
+            GLES20.glDisableVertexAttribArray(program.vTexCoord)
+        }
+        
+        // Bind weights for rigged mesh
+        if (glBuffers[BUF_WEIGHTS] != null) {
+            glBuffers[BUF_WEIGHTS]!!.Bind20(
+                renderContext,
+                program.vWeight,
+                1,  // 1 float per weight
+                GLES20.GL_FLOAT,
+                4,   // stride (1 float = 4 bytes)
+                0    // offset
+            )
+            
+            // Upload joint map
+            val jointMap = referenceData?.jointMap
+            if (jointMap != null) {
+                GLES20.glUniform1iv(program.uJointMap, jointMap.size, jointMap, 0)
+                GLES20.glUniform1i(program.uJointMapLength, jointMap.size)
+            }
+            
+            GLES20.glUniform1i(program.uUseWeight, 1)
+        } else {
+            GLES20.glDisableVertexAttribArray(program.vWeight)
+            GLES20.glUniform1i(program.uUseWeight, 0)
+        }
+        
+        // Draw triangles
+        glBuffers[BUF_INDEX]!!.DrawElements20(
+            GLES20.GL_TRIANGLES,
+            numFaces * 3,
+            GLES20.GL_UNSIGNED_SHORT,
+            0
+        )
     }
 
+    /**
+     * Render using OpenGL ES 1.1 (fixed function pipeline - deprecated)
+     */
+    private fun drawGL11(renderContext: RenderContext, hasTexture: Boolean) {
+        // Use animated or static vertices
+        val vertexData = if (referenceData?.hasWeights == true) {
+            animatedVertexData
+        } else {
+            vertexBuffer
+        }
+        
+        if (vertexData == null) {
+            return
+        }
+        
+        // Set color
+        GLES20.glColor4f(1.0f, 1.0f, 1.0f, 1.0f)
+        
+        // Bind vertex positions
+        glBuffers[BUF_VERTEX]!!.Bind(
+            renderContext,
+            GLES20.GL_VERTEX_ARRAY,
+            3,
+            GLES20.GL_FLOAT,
+            24,
+            0
+        )
+        
+        // Bind normals
+        glBuffers[BUF_VERTEX]!!.Bind(
+            renderContext,
+            GLES20.GL_NORMAL_ARRAY,
+            3,
+            GLES20.GL_FLOAT,
+            24,
+            12
+        )
+        
+        // Bind texture coordinates
+        glBuffers[BUF_TEXCOORD]!!.Bind(
+            renderContext,
+            GLES20.GL_TEXTURE_COORD_ARRAY,
+            2,
+            GLES20.GL_FLOAT,
+            8,
+            0
+        )
+        
+        // Bind indices
+        glBuffers[BUF_INDEX]!!.BindElements(renderContext)
+        
+        // Draw triangles
+        glBuffers[BUF_INDEX]!!.DrawElements(
+            renderContext,
+            GLES20.GL_TRIANGLES,
+            numFaces * 3,
+            GLES20.GL_UNSIGNED_SHORT,
+            0
+        )
+        
+        // Disable client states
+        GLES20.glDisableClientState(GLES20.GL_NORMAL_ARRAY)
+        GLES20.glDisableClientState(GLES20.GL_TEXTURE_COORD_ARRAY)
+    }
+
+    /**
+     * Get animated vertex data buffer
+     */
+    fun getAnimatedVertexData(): DirectByteBuffer? {
+        return animatedVertexData
+    }
+
+    /**
+     * Mark vertices as dirty (need to be re-uploaded to GPU)
+     */
     fun setVerticesDirty() {
-        this.verticesDirty = true
+        verticesDirty = true
+    }
+    
+    /**
+     * Mark texture coordinates as dirty
+     */
+    fun setTexCoordsDirty() {
+        texCoordsDirty = true
     }
 }
