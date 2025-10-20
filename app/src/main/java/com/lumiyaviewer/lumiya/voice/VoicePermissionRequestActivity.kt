@@ -18,9 +18,11 @@ import com.lumiyaviewer.lumiya.voice.VoiceService
 import javax.annotation.Nonnull
 
 class VoicePermissionRequestActivity : AppCompatActivity() {
-    private const val PERMISSION_AUDIO_REQUEST_CODE: Int = 100
-    const val VOICE_INIT_MESSAGE: String = "voiceInitMessage"
-    const val VOICE_INIT_REPLY_TO: String = "voiceInitReplyTo"
+    companion object {
+        private const val PERMISSION_AUDIO_REQUEST_CODE: Int = 100
+        const val VOICE_INIT_MESSAGE: String = "voiceInitMessage"
+        const val VOICE_INIT_REPLY_TO: String = "voiceInitReplyTo"
+    }
     private Boolean serviceBound = false
     private val ServiceConnection serviceConnection = ServiceConnection(this){
         final VoicePermissionRequestActivity this$0
