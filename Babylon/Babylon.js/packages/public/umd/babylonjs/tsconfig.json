@@ -1,0 +1,10 @@
+{
+    "extends": "../../../../tsconfig.json",
+
+    "compilerOptions": {
+        "paths": {
+            "core/*": ["dev/core/dist/*"],
+            "@lts/core/*": ["lts/core/dist/*"],
+        }
+    },
+}

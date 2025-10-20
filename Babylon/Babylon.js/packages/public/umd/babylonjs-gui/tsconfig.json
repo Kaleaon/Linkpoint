@@ -1,0 +1,10 @@
+{
+    "extends": "../../../../tsconfig.json",
+
+    "compilerOptions": {
+        "paths": {
+            "gui/*": ["dev/gui/src/*"],
+            "@lts/gui/*": ["lts/gui/src/*"],
+        }
+    },
+}

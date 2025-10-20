@@ -1,0 +1,53 @@
+{
+    "compilerOptions": {
+        "baseUrl": "packages",
+        "importHelpers": true,
+        "moduleResolution": "node",
+        "module": "ES2020",
+        "target": "es2021", // esnext has an issue with class generation and our decoders. TODO - avoid using decorators until in standard
+        "declaration": true,
+        "sourceMap": true,
+        "inlineSources": true,
+        "experimentalDecorators": true,
+        "noImplicitAny": true,
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "skipLibCheck": true,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "jsx": "react-jsx",
+        "lib": ["es5", "dom", "es2015.promise", "es2015.collection", "es2015.iterable", "es2015.symbol.wellknown", "es2020.bigint", "es2017"],
+        "paths": {
+            "core/*": ["dev/core/dist/*"],
+            "gui/*": ["dev/gui/dist/*"],
+            "materials/*": ["dev/materials/dist/*"],
+            "addons/*": ["dev/addons/dist/*"],
+            "post-processes/*": ["dev/postProcesses/dist/*"],
+            "procedural-textures/*": ["dev/proceduralTextures/dist/*"],
+            "loaders/*": ["dev/loaders/dist/*"],
+            "serializers/*": ["dev/serializers/dist/*"],
+            "inspector/*": ["dev/inspector/dist/*"],
+            "inspector-v2/*": ["dev/inspector-v2/dist/*"],
+            "shared-ui-components/*": ["dev/sharedUiComponents/dist/*"],
+            "node-editor/*": ["tools/nodeEditor/dist/*"],
+            "node-geometry-editor/*": ["tools/nodeGeometryEditor/dist/*"],
+            "node-render-graph-editor/*": ["tools/nodeRenderGraphEditor/dist/*"],
+            "node-particle-editor/*": ["tools/nodeParticleEditor/dist/*"],
+            "gui-editor/*": ["tools/guiEditor/dist/*"],
+            "accessibility/*": ["tools/accessibility/dist/*"],
+            "viewer/*": ["tools/viewer/dist/*"],
+            "ktx2decoder/*": ["tools/ktx2Decoder/dist/*"],
+            "vsm": ["tools/vsm/dist/*"],
+            "smart-filters": ["dev/smartFilters/dist"],
+            "smart-filters-blocks": ["dev/smartFilterBlocks/dist"],
+            "smart-filters-blocks/*": ["dev/smartFilterBlocks/dist/*"],
+            "smart-filters-editor-control": ["tools/smartFiltersEditorControl/dist"]
+        }
+    },
+
+    "exclude": ["**/node_modules", "**/dist"]
+}

@@ -1,0 +1,6 @@
+{
+    "declarationLibs": ["@dev/procedural-textures", "@lts/procedural-textures"],
+    "devPackageName": "procedural-textures",
+    "filename": "babylonjs.proceduralTextures.module.d.ts",
+    "outputDirectory": "./"
+}

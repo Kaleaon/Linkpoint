@@ -1,0 +1,10 @@
+{
+    "extends": "../../../../tsconfig.json",
+
+    "compilerOptions": {
+        "paths": {
+            "serializers/*": ["dev/serializers/src/*"],
+            "@lts/serializers/*": ["lts/serializers/src/*"],
+        }
+    },
+}

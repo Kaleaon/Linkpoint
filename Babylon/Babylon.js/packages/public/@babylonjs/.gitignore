@@ -1,0 +1,19 @@
+# ignore the following in those public folders
+node_modules
+*.js
+*.ts
+*.map
+*.scss
+*.css
+*.svg
+*.png
+*.jpg
+*.wasm
+*.license
+!inspector/**/*.*
+!node-editor/**/*.*
+!node-geometry-editor/**/*.*
+!node-render-graph-editor/**/*.*
+!node-particle-editor/**/*.*
+!gui-editor/**/*.*
+!accessibility/**/*.*

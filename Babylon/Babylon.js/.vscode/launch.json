@@ -1,0 +1,571 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            /*
+            Attach to Playground
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Attach to Playground (Edge)",
+            "url": "http://localhost:1338"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Run and Watch Dev Server (ES5-Dev)",
+            "url": "http://localhost:1337",
+            "preLaunchTask": "CDN Serve and watch (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Run and Watch Dev Server - SSL (ES5-Dev)",
+            "url": "https://localhost:1337",
+            "preLaunchTask": "CDN Serve and watch (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Dev Host development (Edge)",
+            "url": "http://localhost:1338",
+            "preLaunchTask": "Run Dev host (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "chrome",
+            "request": "launch",
+            "name": "Dev Host development (Chrome)",
+            "url": "http://localhost:1338",
+            "preLaunchTask": "Run Dev host (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Dev Host development - SSL (Edge)",
+            "url": "https://localhost:1338",
+            "preLaunchTask": "Run Dev host (Dev)",
+            "env": {
+                "ENABLE_HTTPS": "true"
+            }
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "chrome",
+            "request": "launch",
+            "name": "Dev Host development - SSL (Chrome)",
+            "url": "https://localhost:1338",
+            "preLaunchTask": "Run Dev host (Dev)",
+            "env": {
+                "ENABLE_HTTPS": "true"
+            }
+        },
+        {
+            /*
+            Playground development - meant for development of the playground
+            It doesn't set any source code watchers!
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Playground development (Edge)",
+            "url": "http://localhost:1338",
+            "preLaunchTask": "Playground Serve (Dev)"
+        },
+        {
+            /*
+            Playground development - meant for development of the playground
+            It doesn't set any source code watchers!
+            */
+            "type": "chrome",
+            "request": "launch",
+            "name": "Playground development (Chrome)",
+            "url": "http://localhost:1338",
+            "preLaunchTask": "Playground Serve (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Launch Playground (Edge)",
+            "url": "http://localhost:1338",
+            "preLaunchTask": "Playground Serve for core (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Playground (Chrome)",
+            "url": "http://localhost:1338",
+            "preLaunchTask": "Playground Serve for core (Dev)"
+        },
+        {
+            /*
+            Playground development - meant for development of the playground
+            It doesn't set any source code watchers!
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Sandbox development (Edge)",
+            "url": "http://localhost:1339",
+            "preLaunchTask": "Sandbox Serve (Dev)"
+        },
+        {
+            /*
+            Playground development - meant for development of the playground
+            It doesn't set any source code watchers!
+            */
+            "type": "chrome",
+            "request": "launch",
+            "name": "Sandbox development (Chrome)",
+            "url": "http://localhost:1339",
+            "preLaunchTask": "Sandbox Serve (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Launch Sandbox (Edge)",
+            "url": "http://localhost:1339",
+            "preLaunchTask": "Sandbox Serve for core (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Sandbox (Chrome)",
+            "url": "http://localhost:1339",
+            "preLaunchTask": "Sandbox Serve for core (Dev)"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "GUI Editor development (Edge)",
+            "url": "http://localhost:1341",
+            "preLaunchTask": "GUI Editor Serve (Dev)"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "GUI Editor development (Chrome)",
+            "url": "http://localhost:1341",
+            "preLaunchTask": "GUI Editor Serve (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Launch GUI Editor (Edge)",
+            "url": "http://localhost:1341",
+            "preLaunchTask": "GUI Editor Serve for core (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch GUI Editor (Chrome)",
+            "url": "http://localhost:1341",
+            "preLaunchTask": "GUI Editor Serve for core (Dev)"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Node Editor development (Edge)",
+            "url": "http://localhost:1340",
+            "preLaunchTask": "Node Editor Serve (Dev)"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Node Editor development (Chrome)",
+            "url": "http://localhost:1340",
+            "preLaunchTask": "Node Editor Serve (Dev)"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Node Geometry Editor development (Edge)",
+            "url": "http://localhost:1343",
+            "preLaunchTask": "Node Geometry Editor Serve (Dev)"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Node Geometry Editor development (Chrome)",
+            "url": "http://localhost:1343",
+            "preLaunchTask": "Node Geometry Editor Serve (Dev)"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Node Render Graph Editor development (Edge)",
+            "url": "http://localhost:1344",
+            "preLaunchTask": "Node Render Graph Editor Serve (Dev)"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Node Render Graph Editor development (Chrome)",
+            "url": "http://localhost:1344",
+            "preLaunchTask": "Node Render Graph Editor Serve (Dev)"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Node Particle Editor development (Edge)",
+            "url": "http://localhost:1345",
+            "preLaunchTask": "Node Particle Editor Serve (Dev)"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Node Particle Editor development (Chrome)",
+            "url": "http://localhost:1345",
+            "preLaunchTask": "Node Particle Editor Serve (Dev)"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Smart Filter Editor development (Edge)",
+            "url": "http://localhost:1346",
+            "preLaunchTask": "Smart Filter Editor Serve (Dev)"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Smart Filter Editor development (Chrome)",
+            "url": "http://localhost:1346",
+            "preLaunchTask": "Smart Filter Editor Serve (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Launch Node Editor (Edge)",
+            "url": "http://localhost:1340",
+            "preLaunchTask": "Node Editor Serve for core (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Node Editor (Chrome)",
+            "url": "http://localhost:1340",
+            "preLaunchTask": "Node Editor Serve for core (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "msedge",
+            "request": "launch",
+            "name": "Launch Node Geometry Editor (Edge)",
+            "url": "http://localhost:1343",
+            "preLaunchTask": "Node Geometry Editor Serve for core (Dev)"
+        },
+        {
+            /*
+            Launch the playground to be use to test changes in dev packages
+            */
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Node Geometry Editor (Chrome)",
+            "url": "http://localhost:1343",
+            "preLaunchTask": "Node Geometry Editor Serve for core (Dev)"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Launch Node Render Graph Editor (Edge)",
+            "url": "http://localhost:1344",
+            "preLaunchTask": "Node Render Graph Editor Serve for core (Dev)"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Node Render Graph Editor (Chrome)",
+            "url": "http://localhost:1344",
+            "preLaunchTask": "Node Render Graph Editor Serve for core (Dev)"
+        },
+        {
+            /*
+            Launch tests
+            https://jestjs.io/docs/troubleshooting#debugging-in-vs-code
+            */
+            "type": "node",
+            "request": "launch",
+            "name": "Run and Debug unit tests (Dev)",
+            "runtimeArgs": ["--inspect-brk", "${workspaceRoot}/node_modules/jest/bin/jest.js", "--runInBand", "--selectProjects", "unit"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            // "outFiles": ["${workspaceRoot}/**/dist/**/*"], // debugging sources
+            // "envFile": "${workspaceRoot}/.env",
+            "preLaunchTask": "Build (Dev)"
+        },
+        {
+            /*
+            Launch tests
+            https://jestjs.io/docs/troubleshooting#debugging-in-vs-code
+            */
+            "type": "node",
+            "request": "launch",
+            "name": "Run and Debug current unit test file (Dev)",
+            "runtimeArgs": [
+                "--inspect-brk",
+                "${workspaceRoot}/node_modules/jest/bin/jest.js",
+                "--runInBand",
+                "--selectProjects",
+                "unit",
+                "--test-path-pattern",
+                "${fileBasenameNoExtension}"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            // "outFiles": ["${workspaceRoot}/**/dist/**/*"], // debugging sources
+            // "envFile": "${workspaceRoot}/.env",
+            "preLaunchTask": "Build (Dev)"
+        },
+        {
+            /*
+            Launch tests
+            Note - the recommended way would be to use the extension in the test tab of vscode.
+            */
+            "type": "node",
+            "request": "launch",
+            "name": "Run validation tests - WebGL2 (Dev)",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["playwright", "test", "-c", "${workspaceRoot}/playwright.config.ts", "--project", "webgl2"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            // "outFiles": ["${workspaceRoot}/**/dist/**/*"], // debugging sources
+            // "envFile": "${workspaceRoot}/.env",
+            "preLaunchTask": "CDN Serve and watch (Dev)"
+        },
+        {
+            /*
+            Launch test
+            Note that the recommended way would be to use the extension in the test tab of vscode.
+            */
+            "type": "node",
+            "request": "launch",
+            "name": "Run single validation test - WebGL2 (Dev)",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["playwright", "test", "-c", "${workspaceRoot}/playwright.config.ts", "--project", "webgl2", "-g", "${input:testName}"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            // "outFiles": ["${workspaceRoot}/**/dist/**/*"], // debugging sources
+            // "envFile": "${workspaceRoot}/.env",
+            "preLaunchTask": "CDN Serve and watch (Dev)"
+        },
+        {
+            /*
+            Update test snapshots
+            Note that the recommended way would be to use the extension in the test tab of vscode.
+            */
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npx",
+            "name": "Update single validation test - WebGL2 (Dev)",
+            "runtimeArgs": ["playwright", "test", "-c", "${workspaceRoot}/playwright.config.ts", "--project", "webgl2", "-g", "${input:testName}", "--update-snapshots"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            // "outFiles": ["${workspaceRoot}/**/dist/**/*"], // debugging sources
+            // "envFile": "${workspaceRoot}/.env",
+            "preLaunchTask": "CDN Serve and watch (Dev)"
+        },
+        {
+            /*
+            Launch tests
+            https://jestjs.io/docs/troubleshooting#debugging-in-vs-code
+            */
+            "type": "node",
+            "request": "launch",
+            "name": "Run validation tests - WebGL1 (Dev)",
+            "runtimeArgs": ["--inspect-brk", "${workspaceRoot}/node_modules/jest/bin/jest.js", "--runInBand", "--selectProjects", "visualization", "-i", "webgl1"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            // "outFiles": ["${workspaceRoot}/**/dist/**/*"], // debugging sources
+            // "envFile": "${workspaceRoot}/.env",
+            "preLaunchTask": "CDN Serve and watch (Dev)"
+        },
+        {
+            /*
+            Launch tests
+            https://jestjs.io/docs/troubleshooting#debugging-in-vs-code
+            */
+            "type": "node",
+            "request": "launch",
+            "name": "Run single validation test - WebGL1 (Dev)",
+            "runtimeArgs": [
+                "--inspect-brk",
+                "${workspaceRoot}/node_modules/jest/bin/jest.js",
+                "--runInBand",
+                "--selectProjects",
+                "visualization",
+                "-i",
+                "webgl1",
+                "-t",
+                "${input:testName}"
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            // "outFiles": ["${workspaceRoot}/**/dist/**/*"], // debugging sources
+            // "envFile": "${workspaceRoot}/.env",
+            "preLaunchTask": "CDN Serve and watch (Dev)"
+        },
+        {
+            /*
+            Launch tests
+            Recommended way would be to use the extension in the test tab of vscode.
+            */
+            "type": "node",
+            "request": "launch",
+            "name": "Run validation tests - WebGPU (Dev)",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["playwright", "test", "-c", "${workspaceRoot}/playwright.config.ts", "--project", "webgpu"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            "env": {
+                "TEST_ENGINE": "webgpu"
+            },
+            // "outFiles": ["${workspaceRoot}/**/dist/**/*"], // debugging sources
+            // "envFile": "${workspaceRoot}/.env",
+            "preLaunchTask": "CDN Serve and watch (Dev)"
+        },
+        {
+            /*
+            Launch tests
+            Recommended way would be to use the extension in the test tab of vscode.
+            */
+            "type": "node",
+            "request": "launch",
+            "name": "Run single validation test - WebGPU (Dev)",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["playwright", "test", "-c", "${workspaceRoot}/playwright.config.ts", "--project", "webgpu", "-g", "${input:testName}"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            // "outFiles": ["${workspaceRoot}/**/dist/**/*"], // debugging sources
+            // "envFile": "${workspaceRoot}/.env",
+            "preLaunchTask": "CDN Serve and watch (Dev)"
+        },
+        {
+            /*
+            Launch tests
+            Recommended way would be to use the extension in the test tab of vscode.
+            */
+            "type": "node",
+            "request": "launch",
+            "name": "Run interactions tests (Dev)",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["playwright", "test", "-c", "${workspaceRoot}/playwright.config.ts", "--project", "webgpu", "-g", "${input:testName}", "--update-snapshots"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            "preLaunchTask": "CDN Serve and watch (Dev)"
+        },
+        {
+            /*
+            Launch tests
+            https://jestjs.io/docs/troubleshooting#debugging-in-vs-code
+            */
+            "type": "node",
+            "request": "launch",
+            "name": "Run and Debug integration tests (Dev)",
+            "runtimeArgs": ["--inspect-brk", "${workspaceRoot}/node_modules/jest/bin/jest.js", "--runInBand", "--selectProjects", "integration"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "port": 9229,
+            "env": {
+                "HEADLESS": "true"
+            },
+            // "outFiles": ["${workspaceRoot}/**/dist/**/*"], // debugging sources
+            // "envFile": "${workspaceRoot}/.env",
+            "preLaunchTask": "CDN Serve Prod (Dev)"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Viewer Test App (Web) (Edge)",
+            "url": "http://localhost:1342/packages/tools/viewer/test/apps/web/index.html",
+            "preLaunchTask": "Viewer Test App (Web)"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Viewer Test App (Web) (Chrome)",
+            "url": "http://localhost:1342/packages/tools/viewer/test/apps/web/index.html",
+            "preLaunchTask": "Viewer Test App (Web)"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Viewer Configurator development (Chrome)",
+            "url": "http://localhost:3003",
+            "preLaunchTask": "Viewer Configurator Serve (Dev)"
+        },
+        {
+            "type": "msedge",
+            "request": "launch",
+            "name": "Inspector v2 development (Edge)",
+            "url": "http://localhost:9001",
+            "preLaunchTask": "Inspector v2 Test App"
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Inspector v2 development (Chrome)",
+            "url": "http://localhost:9001",
+            "preLaunchTask": "Inspector v2 Test App"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "testName",
+            "type": "promptString",
+            "description": "Enter test name"
+        }
+    ]
+}

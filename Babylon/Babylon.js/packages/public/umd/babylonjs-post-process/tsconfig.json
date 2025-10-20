@@ -1,0 +1,10 @@
+{
+    "extends": "../../../../tsconfig.json",
+
+    "compilerOptions": {
+        "paths": {
+            "post-processes/*": ["dev/postProcesses/src/*"],
+            "@lts/post-processes/*": ["lts/postProcesses/src/*"],
+        }
+    },
+}
