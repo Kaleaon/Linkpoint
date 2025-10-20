@@ -11,168 +11,76 @@ import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
-/**
- * SLPolyMorphData - Morph target data for avatar customization
- * Handles visual parameter morphs (body shape, face shape, etc.)
- * Based on Firestorm's LLPolyMorphData implementation
- */
 class SLPolyMorphData {
-    
-    companion object {
-        // Empty placeholder for missing morph data
-        val EMPTY = SLPolyMorphData()
-    }
-    
-    private var indexBuffer: DirectByteBuffer? = null
-    private var isMasked: Boolean = false
-    private var mesh: SLPolyMesh? = null
-    private var morphID: SLVisualParamID? = null
-    private var numVertices: Int = 0
-    private var texCoordsBuffer: DirectByteBuffer? = null
-    private var vertexBuffer: DirectByteBuffer? = null
+    private DirectByteBuffer indexBuffer
+    private Boolean isMasked
+    private SLPolyMesh mesh
+    private SLVisualParamID morphID
+    private Int numVertices
+    private DirectByteBuffer texCoordsBuffer
+    private DirectByteBuffer vertexBuffer
 
-    /**
-     * Empty constructor for EMPTY placeholder
-     */
-    private constructor() {
-        // Empty morph
-    }
-
-    /**
-     * Load morph data from stream
-     */
-    @Throws(IOException::class)
-    constructor(paramID: SLVisualParamID, parentMesh: SLPolyMesh, dataInputStream: DataInputStream) {
-        this.morphID = paramID
-        this.mesh = parentMesh
-        
-        // Read mask flag (whether morph is masked by alpha channel)
-        this.isMasked = dataInputStream.readByte() != 0.toByte()
-        
-        // Read number of affected vertices
+    public SLPolyMorphData(SLVisualParamID sLVisualParamID, SLPolyMesh sLPolyMesh, DataInputStream dataInputStream) throws IOException {
+        Boolean z = false
+        this.morphID = sLVisualParamID
+        this.mesh = sLPolyMesh
+        this.isMasked = dataInputStream.readByte() != 0 ? true : z
         this.numVertices = dataInputStream.readInt()
-        
-        // Allocate buffers
-        this.vertexBuffer = DirectByteBuffer(this.numVertices * 24)  // 6 floats per vertex
-        this.texCoordsBuffer = DirectByteBuffer(this.numVertices * 8)  // 2 floats per vertex
-        this.indexBuffer = DirectByteBuffer(this.numVertices * 4)  // 1 int per vertex (index into main mesh)
-        
-        // Read morph data
-        this.vertexBuffer!!.read(dataInputStream)
-        this.texCoordsBuffer!!.read(dataInputStream)
-        this.indexBuffer!!.read(dataInputStream)
-        
-        Debug.Log("SLPolyMorphData: Loaded morph '$paramID', vertices = $numVertices")
+        this.vertexBuffer = DirectByteBuffer(this.numVertices * 24)
+        this.texCoordsBuffer = DirectByteBuffer(this.numVertices * 8)
+        this.indexBuffer = DirectByteBuffer(this.numVertices * 4)
+        this.vertexBuffer.read(dataInputStream)
+        this.texCoordsBuffer.read(dataInputStream)
+        this.indexBuffer.read(dataInputStream)
+        Debug.Log("SLPolyMorphData: Loaded morph '" + sLVisualParamID + "', vertices = " + this.numVertices)
     }
 
-    /**
-     * Apply morph to mesh with given weight (fast native version)
-     * @param targetMesh The mesh to morph
-     * @param weight Morph strength (0.0 to 1.0)
-     * @param alphaMask Optional texture for masked morphs
-     */
-    fun applyMorphData(targetMesh: SLMeshData, weight: Float, alphaMask: GLTexture?) {
-        if (vertexBuffer == null || indexBuffer == null || targetMesh.vertexBuffer == null) {
-            return
-        }
-        
-        var maskBuffer: ByteBuffer? = null
-        var maskWidth = 0
-        var maskHeight = 0
-        var maskOffset = 0
-        
-        // Handle masked morphs (e.g., makeup that only applies to face texture regions)
-        if (isMasked && alphaMask != null) {
-            maskWidth = alphaMask.width
-            maskHeight = alphaMask.height
-            maskBuffer = alphaMask.extraComponentsBuffer
-            if (maskBuffer != null) {
-                maskOffset = maskBuffer.position()
+    fun applyMorphData(SLMeshData sLMeshData, Float f, GLTexture gLTexture) {
+        ByteBuffer byteBuffer = null
+        Int i3 = 0
+        if (this.isMasked && gLTexture != null) {
+            i2 = gLTexture.getWidth()
+            i = gLTexture.getHeight()
+            byteBuffer = gLTexture.getExtraComponentsBuffer()
+            if (byteBuffer != null) {
+                i3 = byteBuffer.position()
             }
+        } else {
+            i = 0
+            i2 = 0
         }
-        
-        // Use native OpenJPEG function for performance
-        OpenJPEG.applyMeshMorph(
-            weight,
-            targetMesh.vertexBuffer!!.asByteBuffer(),
-            targetMesh.texCoordsBuffer!!.asByteBuffer(),
-            numVertices,
-            indexBuffer!!.asByteBuffer(),
-            vertexBuffer!!.asByteBuffer(),
-            texCoordsBuffer!!.asByteBuffer(),
-            maskWidth,
-            maskHeight,
-            maskOffset,
-            maskBuffer
-        )
+        OpenJPEG.applyMeshMorph(f, sLMeshData.vertexBuffer.asByteBuffer(), sLMeshData.texCoordsBuffer.asByteBuffer(), this.numVertices, this.indexBuffer.asByteBuffer(), this.vertexBuffer.asByteBuffer(), this.texCoordsBuffer.asByteBuffer(), i2, i, i3, byteBuffer)
     }
 
-    /**
-     * Slow Kotlin version of morph application (for debugging/testing)
-     * Matches LLPolyMorphTarget::apply() logic
-     */
-    fun applyMorphDataSlow(targetMesh: SLMeshData, weight: Float, alphaMask: GLTexture?) {
-        if (vertexBuffer == null || indexBuffer == null ||
-            targetMesh.vertexBuffer == null || targetMesh.texCoordsBuffer == null) {
-            return
-        }
-        
-        val morphVertices = vertexBuffer!!.asFloatBuffer()
-        val morphTexCoords = texCoordsBuffer!!.asFloatBuffer()
-        val morphIndices = indexBuffer!!.asIntBuffer()
-        val targetVertices = targetMesh.vertexBuffer!!.asFloatBuffer()
-        val targetTexCoords = targetMesh.texCoordsBuffer!!.asFloatBuffer()
-        
-        // Setup masking if needed
-        var useMask = isMasked && alphaMask != null
-        var maskWidth = 0
-        var maskHeight = 0
-        var maskBuffer: ByteBuffer? = null
-        var maskOffset = 0
-        
-        if (useMask) {
-            maskWidth = alphaMask!!.width
-            maskHeight = alphaMask.height
-            maskBuffer = alphaMask.extraComponentsBuffer
-            if (maskBuffer != null) {
-                maskOffset = maskBuffer.position()
+    fun applyMorphDataSlow(SLMeshData sLMeshData, Float f, GLTexture gLTexture) {
+        FloatBuffer asFloatBuffer = this.vertexBuffer.asFloatBuffer()
+        FloatBuffer asFloatBuffer2 = this.texCoordsBuffer.asFloatBuffer()
+        IntBuffer asIntBuffer = this.indexBuffer.asIntBuffer()
+        FloatBuffer asFloatBuffer3 = sLMeshData.vertexBuffer.asFloatBuffer()
+        FloatBuffer asFloatBuffer4 = sLMeshData.texCoordsBuffer.asFloatBuffer()
+        Boolean z = this.isMasked && gLTexture != null
+        Int i = 0
+        Int i2 = 0
+        ByteBuffer byteBuffer = null
+        Int i3 = 0
+        if (z) {
+            i = gLTexture.getWidth()
+            i2 = gLTexture.getHeight()
+            byteBuffer = gLTexture.getExtraComponentsBuffer()
+            if (byteBuffer != null) {
+                i3 = byteBuffer.position()
             } else {
-                useMask = false
+                z = false
             }
         }
-        
-        // Apply morph to each affected vertex
-        for (i in 0 until numVertices) {
-            val vertexIndex = morphIndices.get(i)
-            
-            // Calculate mask value if needed (sample alpha from texture coordinates)
-            var effectiveWeight = weight
-            if (useMask && maskBuffer != null) {
-                val u = targetTexCoords.get(vertexIndex * 2 + 0)
-                val v = targetTexCoords.get(vertexIndex * 2 + 1)
-                
-                val texX = Math.floor((u * maskWidth).toDouble()).toInt()
-                val texY = Math.floor((v * maskHeight).toDouble()).toInt()
-                val maskIndex = texY * maskWidth + texX + maskOffset
-                
-                if (maskIndex >= 0 && maskIndex < maskBuffer.limit()) {
-                    val maskValue = (maskBuffer.get(maskIndex).toInt() and 0xFF).toFloat() / 255.0f
-                    effectiveWeight = maskValue * weight
-                }
+        for (Int i4 = 0; i4 < this.numVertices; i4++) {
+            Int i5 = asIntBuffer.get(i4)
+            Float f2 = z ? (((Float) (byteBuffer.get(((Int) Math.floor((Double) (asFloatBuffer4.get((i5 * 2) + 0) * ((Float) i)))) + ((((Int) Math.floor((Double) (asFloatBuffer4.get((i5 * 2) + 1) * ((Float) i2)))) * i) + i3)) & UnsignedBytes.MAX_VALUE)) / 255.0f) * f : f
+            for (Int i6 = 0; i6 < 6; i6++) {
+                asFloatBuffer3.put((i5 * 6) + i6, asFloatBuffer3.get((i5 * 6) + i6) + (asFloatBuffer.get((i4 * 6) + i6) * f2))
             }
-            
-            // Apply morph to vertex position and normal (6 floats)
-            for (component in 0 until 6) {
-                val originalValue = targetVertices.get(vertexIndex * 6 + component)
-                val morphDelta = morphVertices.get(i * 6 + component)
-                targetVertices.put(vertexIndex * 6 + component, originalValue + morphDelta * effectiveWeight)
-            }
-            
-            // Apply morph to texture coordinates (2 floats)
-            for (component in 0 until 2) {
-                val originalValue = targetTexCoords.get(vertexIndex * 2 + component)
-                val morphDelta = morphTexCoords.get(i * 2 + component)
-                targetTexCoords.put(vertexIndex * 2 + component, originalValue + morphDelta * effectiveWeight)
+            for (Int i7 = 0; i7 < 2; i7++) {
+                asFloatBuffer4.put((i5 * 2) + i7, asFloatBuffer4.get((i5 * 2) + i7) + (asFloatBuffer2.get((i4 * 2) + i7) * f2))
             }
         }
     }

@@ -1,98 +1,97 @@
 package com.linkpoint.slproto.types
 
-import com.linkpoint.slproto.llsd.LLSD
-import kotlin.math.*
-
-/**
- * LLVector2 - 2D vector class
- * 
- * Based on Firestorm's v2math.h/cpp
- * Used primarily for texture coordinates
- */
 class LLVector2 {
-    
-    val mV = FloatArray(LENGTHOFVECTOR2)
-    
-    companion object {
-        const val LENGTHOFVECTOR2 = 2
-        const val VX = 0
-        const val VY = 1
-        
-        val zero = LLVector2(0f, 0f)
-        val x_axis = LLVector2(1f, 0f)
-        val y_axis = LLVector2(0f, 1f)
-        
-        const val FP_MAG_THRESHOLD = 1e-7f
+    const val FP_MAG_THRESHOLD: Float = 1.0E-7f
+    public Float x
+    public Float y
+
+    public LLVector2() {
+        this.x = 0.0f
+        this.y = 0.0f
     }
-    
-    var x: Float
-        get() = mV[VX]
-        set(value) { mV[VX] = value }
-    
-    var y: Float
-        get() = mV[VY]
-        set(value) { mV[VY] = value }
-    
-    constructor() {
-        mV[VX] = 0f
-        mV[VY] = 0f
+
+    public LLVector2(Float f, Float f2) {
+        this.x = f
+        this.y = f2
     }
-    
-    constructor(x: Float, y: Float) {
-        mV[VX] = x
-        mV[VY] = y
+
+    public LLVector2(LLVector2 lLVector2) {
+        this.x = lLVector2.x
+        this.y = lLVector2.y
     }
-    
-    constructor(vec: FloatArray) {
-        mV[VX] = vec[VX]
-        mV[VY] = vec[VY]
+
+    @JvmStatic
+    LLVector2 sub(LLVector2 lLVector2, LLVector2 lLVector22) {
+        return LLVector2(lLVector2.x - lLVector22.x, lLVector2.y - lLVector22.y)
     }
-    
-    constructor(other: LLVector2) {
-        mV[VX] = other.mV[VX]
-        mV[VY] = other.mV[VY]
+
+    @JvmStatic
+    LLVector2 sum(LLVector2 lLVector2, LLVector2 lLVector22) {
+        return LLVector2(lLVector2.x + lLVector22.x, lLVector2.y + lLVector22.y)
     }
-    
-    fun set(x: Float, y: Float): LLVector2 {
-        mV[VX] = x
-        mV[VY] = y
-        return this
+
+    fun add(LLVector2 lLVector2) {
+        this.x += lLVector2.x
+        this.y += lLVector2.y
     }
-    
-    fun set(other: LLVector2): LLVector2 {
-        mV[VX] = other.mV[VX]
-        mV[VY] = other.mV[VY]
-        return this
+
+    public Float dot(LLVector2 lLVector2) {
+        return (this.x * lLVector2.x) + (this.y * lLVector2.y)
     }
-    
-    fun clear() {
-        mV[VX] = 0f
-        mV[VY] = 0f
-    }
-    
-    fun length(): Float = sqrt(lengthSquared())
-    fun lengthSquared(): Float = mV[VX] * mV[VX] + mV[VY] * mV[VY]
-    
-    fun normalize(): Float {
-        val mag = length()
-        if (mag > FP_MAG_THRESHOLD) {
-            val oomag = 1f / mag
-            mV[VX] *= oomag
-            mV[VY] *= oomag
+
+    public Boolean equals(Object obj) {
+        if (obj == this) {
+            return true
         }
-        return mag
+        if (!(obj instanceof LLVector2)) {
+            return false
+        }
+        LLVector2 lLVector2 = (LLVector2) obj
+        return this.x == lLVector2.x && this.y == lLVector2.y
     }
-    
-    operator fun plus(other: LLVector2) = LLVector2(mV[VX] + other.mV[VX], mV[VY] + other.mV[VY])
-    operator fun minus(other: LLVector2) = LLVector2(mV[VX] - other.mV[VX], mV[VY] - other.mV[VY])
-    operator fun times(scalar: Float) = LLVector2(mV[VX] * scalar, mV[VY] * scalar)
-    operator fun div(scalar: Float) = LLVector2(mV[VX] / scalar, mV[VY] / scalar)
-    operator fun unaryMinus() = LLVector2(-mV[VX], -mV[VY])
-    
-    operator fun get(index: Int): Float = mV[index]
-    operator fun set(index: Int, value: Float) { mV[index] = value }
-    
-    infix fun dot(other: LLVector2): Float = mV[VX] * other.mV[VX] + mV[VY] * other.mV[VY]
-    
-    override fun toString() = "LLVector2($x, $y)"
+
+    public Int hashCode() {
+        return Float.floatToIntBits(this.x) + Float.floatToIntBits(this.y)
+    }
+
+    public Float magVec() {
+        return (Float) Math.sqrt((Double) ((this.x * this.x) + (this.y * this.y)))
+    }
+
+    fun mul(Float f) {
+        this.x *= f
+        this.y *= f
+    }
+
+    public Float normVec() {
+        Float sqrt = (Float) Math.sqrt((Double) ((this.x * this.x) + (this.y * this.y)))
+        if (sqrt > 1.0E-7f) {
+            Float f = 1.0f / sqrt
+            this.x *= f
+            this.y = f * this.y
+        } else {
+            this.x = 0.0f
+            this.y = 0.0f
+        }
+        return sqrt
+    }
+
+    fun set(Float f, Float f2) {
+        this.x = f
+        this.y = f2
+    }
+
+    fun setMax(LLVector2 lLVector2) {
+        this.x = Math.max(this.x, lLVector2.x)
+        this.y = Math.max(this.y, lLVector2.y)
+    }
+
+    fun setMin(LLVector2 lLVector2) {
+        this.x = Math.min(this.x, lLVector2.x)
+        this.y = Math.min(this.y, lLVector2.y)
+    }
+
+    public String toString() {
+        return String.format("(%f, %f)", Object[]{Float.valueOf(this.x), Float.valueOf(this.y)})
+    }
 }

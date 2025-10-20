@@ -1,381 +1,253 @@
 package com.linkpoint.slproto.types
+import java.util.*
 
-import com.linkpoint.slproto.llsd.LLSD
-import kotlin.math.*
+import com.google.common.primitives.UnsignedBytes
+import com.linkpoint.slproto.llsd.LLSDNode
+import com.linkpoint.slproto.llsd.types.LLSDDouble
+import com.linkpoint.slproto.llsd.types.LLSDMap
+import java.nio.ByteBuffer
 
-/**
- * LLVector3 - 3D vector math class
- * 
- * Based on Firestorm's v3math.h/cpp
- * Provides all vector operations needed for Second Life
- */
 class LLVector3 {
-    
-    // Components stored in array for compatibility
-    val mV = FloatArray(LENGTHOFVECTOR3)
-    
-    companion object {
-        const val LENGTHOFVECTOR3 = 3
-        const val VX = 0
-        const val VY = 1
-        const val VZ = 2
-        
-        // Standard axis vectors
-        val zero = LLVector3(0f, 0f, 0f)
-        val x_axis = LLVector3(1f, 0f, 0f)
-        val y_axis = LLVector3(0f, 1f, 0f)
-        val z_axis = LLVector3(0f, 0f, 1f)
-        val x_axis_neg = LLVector3(-1f, 0f, 0f)
-        val y_axis_neg = LLVector3(0f, -1f, 0f)
-        val z_axis_neg = LLVector3(0f, 0f, -1f)
-        val all_one = LLVector3(1f, 1f, 1f)
-        
-        const val FP_MAG_THRESHOLD = 1e-7f
+    const val FP_MAG_THRESHOLD: Float = 1.0E-7f
+    const val LLVector3 Zero = LLVector3(0.0f, 0.0f, 0.0f)
+    const val LLVector3 z_axis = LLVector3(0.0f, 0.0f, 1.0f)
+    public Float x = 0.0f
+    public Float y = 0.0f
+    public Float z = 0.0f
+
+    public LLVector3() {
     }
-    
-    // Accessors
-    var x: Float
-        get() = mV[VX]
-        set(value) { mV[VX] = value }
-    
-    var y: Float
-        get() = mV[VY]
-        set(value) { mV[VY] = value }
-    
-    var z: Float
-        get() = mV[VZ]
-        set(value) { mV[VZ] = value }
-    
-    // Constructors
-    constructor() {
-        mV[VX] = 0f
-        mV[VY] = 0f
-        mV[VZ] = 0f
+
+    public LLVector3(Float f, Float f2, Float f3) {
+        this.x = f
+        this.y = f2
+        this.z = f3
     }
-    
-    constructor(x: Float, y: Float, z: Float) {
-        mV[VX] = x
-        mV[VY] = y
-        mV[VZ] = z
+
+    public LLVector3(LLVector3 lLVector3) {
+        this.x = lLVector3.x
+        this.y = lLVector3.y
+        this.z = lLVector3.z
     }
-    
-    constructor(vec: FloatArray) {
-        mV[VX] = vec[VX]
-        mV[VY] = vec[VY]
-        mV[VZ] = vec[VZ]
+
+    @JvmStatic
+    LLVector3 cross(LLVector3 lLVector3, LLVector3 lLVector32) {
+        return LLVector3((lLVector3.y * lLVector32.z) - (lLVector32.y * lLVector3.z), (lLVector3.z * lLVector32.x) - (lLVector32.z * lLVector3.x), (lLVector3.x * lLVector32.y) - (lLVector32.x * lLVector3.y))
     }
-    
-    constructor(other: LLVector3) {
-        mV[VX] = other.mV[VX]
-        mV[VY] = other.mV[VY]
-        mV[VZ] = other.mV[VZ]
+
+    @JvmStatic
+    LLVector3 lerp(LLVector3 lLVector3, LLVector3 lLVector32, Float f) {
+        return LLVector3(lLVector3.x + ((lLVector32.x - lLVector3.x) * f), lLVector3.y + ((lLVector32.y - lLVector3.y) * f), lLVector3.z + ((lLVector32.z - lLVector3.z) * f))
     }
-    
-    constructor(llsd: LLSD) {
-        mV[VX] = llsd[0].asFloat()
-        mV[VY] = llsd[1].asFloat()
-        mV[VZ] = llsd[2].asFloat()
+
+    @JvmStatic
+    LLVector3 parseFloatVec(ByteBuffer byteBuffer) {
+        return LLVector3(byteBuffer.getFloat(), byteBuffer.getFloat(), byteBuffer.getFloat())
     }
-    
-    // LLSD conversion
-    fun getValue(): LLSD {
-        val array = LLSD()
-        array.add(LLSD(mV[VX]))
-        array.add(LLSD(mV[VY]))
-        array.add(LLSD(mV[VZ]))
-        return array
+
+    @JvmStatic
+    LLVector3 parseU16Vec(ByteBuffer byteBuffer, Float f, Float f2, Float f3, Float f4) {
+        return LLVector3(LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2), LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f, f2), LLTersePacking.U16_to_float(byteBuffer.getShort() & 65535, f3, f4))
     }
-    
-    fun setValue(llsd: LLSD) {
-        mV[VX] = llsd[0].asFloat()
-        mV[VY] = llsd[1].asFloat()
-        mV[VZ] = llsd[2].asFloat()
+
+    @JvmStatic
+    LLVector3 parseU8Vec(ByteBuffer byteBuffer, Float f, Float f2, Float f3, Float f4) {
+        return LLVector3(LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f3, f4))
     }
-    
-    // Validation
-    fun isFinite(): Boolean {
-        return mV[VX].isFinite() && mV[VY].isFinite() && mV[VZ].isFinite()
+
+    @JvmStatic
+    LLVector3 scaleFromMatrix(Float[] fArr) {
+        return LLVector3((Float) Math.sqrt((Double) ((fArr[0] * fArr[0]) + (fArr[1] * fArr[1]) + (fArr[2] * fArr[2]))), (Float) Math.sqrt((Double) ((fArr[4] * fArr[4]) + (fArr[5] * fArr[5]) + (fArr[6] * fArr[6]))), (Float) Math.sqrt((Double) ((fArr[8] * fArr[8]) + (fArr[9] * fArr[9]) + (fArr[10] * fArr[10]))))
     }
-    
-    fun isExactlyZero(): Boolean {
-        return mV[VX] == 0f && mV[VY] == 0f && mV[VZ] == 0f
+
+    @JvmStatic
+    LLVector3 sub(LLVector3 lLVector3, LLVector3 lLVector32) {
+        return LLVector3(lLVector3.x - lLVector32.x, lLVector3.y - lLVector32.y, lLVector3.z - lLVector32.z)
     }
-    
-    // Setters
-    fun set(x: Float, y: Float, z: Float): LLVector3 {
-        mV[VX] = x
-        mV[VY] = y
-        mV[VZ] = z
-        return this
+
+    fun add(LLVector3 lLVector3) {
+        this.x += lLVector3.x
+        this.y += lLVector3.y
+        this.z += lLVector3.z
     }
-    
-    fun set(other: LLVector3): LLVector3 {
-        mV[VX] = other.mV[VX]
-        mV[VY] = other.mV[VY]
-        mV[VZ] = other.mV[VZ]
-        return this
+
+    fun addMul(ImmutableVector immutableVector, Float f) {
+        this.x += immutableVector.x * f
+        this.y += immutableVector.y * f
+        this.z += immutableVector.z * f
     }
-    
-    fun clear() {
-        mV[VX] = 0f
-        mV[VY] = 0f
-        mV[VZ] = 0f
+
+    fun addMul(LLVector3 lLVector3, Float f) {
+        this.x += lLVector3.x * f
+        this.y += lLVector3.y * f
+        this.z += lLVector3.z * f
     }
-    
-    fun setZero() = clear()
-    
-    // Vector operations
-    fun length(): Float {
-        return sqrt(lengthSquared())
+
+    public Float dot(LLVector3 lLVector3) {
+        return (this.x * lLVector3.x) + (this.y * lLVector3.y) + (this.z * lLVector3.z)
     }
-    
-    fun lengthSquared(): Float {
-        return mV[VX] * mV[VX] + mV[VY] * mV[VY] + mV[VZ] * mV[VZ]
-    }
-    
-    fun normalize(): Float {
-        val mag = length()
-        
-        if (mag > FP_MAG_THRESHOLD) {
-            val oomag = 1f / mag
-            mV[VX] *= oomag
-            mV[VY] *= oomag
-            mV[VZ] *= oomag
-        } else {
-            mV[VX] = 0f
-            mV[VY] = 0f
-            mV[VZ] = 0f
-        }
-        
-        return mag
-    }
-    
-    fun normalized(): LLVector3 {
-        val copy = LLVector3(this)
-        copy.normalize()
-        return copy
-    }
-    
-    fun distance(other: LLVector3): Float {
-        val dx = mV[VX] - other.mV[VX]
-        val dy = mV[VY] - other.mV[VY]
-        val dz = mV[VZ] - other.mV[VZ]
-        return sqrt(dx * dx + dy * dy + dz * dz)
-    }
-    
-    fun distanceSquared(other: LLVector3): Float {
-        val dx = mV[VX] - other.mV[VX]
-        val dy = mV[VY] - other.mV[VY]
-        val dz = mV[VZ] - other.mV[VZ]
-        return dx * dx + dy * dy + dz * dz
-    }
-    
-    // Clamping
-    fun clamp(min: Float, max: Float): Boolean {
-        var changed = false
-        
-        if (mV[VX] < min) { mV[VX] = min; changed = true }
-        if (mV[VX] > max) { mV[VX] = max; changed = true }
-        
-        if (mV[VY] < min) { mV[VY] = min; changed = true }
-        if (mV[VY] > max) { mV[VY] = max; changed = true }
-        
-        if (mV[VZ] < min) { mV[VZ] = min; changed = true }
-        if (mV[VZ] > max) { mV[VZ] = max; changed = true }
-        
-        return changed
-    }
-    
-    fun clamp(minVec: LLVector3, maxVec: LLVector3): Boolean {
-        var changed = false
-        
-        if (mV[VX] < minVec.mV[VX]) { mV[VX] = minVec.mV[VX]; changed = true }
-        if (mV[VX] > maxVec.mV[VX]) { mV[VX] = maxVec.mV[VX]; changed = true }
-        
-        if (mV[VY] < minVec.mV[VY]) { mV[VY] = minVec.mV[VY]; changed = true }
-        if (mV[VY] > maxVec.mV[VY]) { mV[VY] = maxVec.mV[VY]; changed = true }
-        
-        if (mV[VZ] < minVec.mV[VZ]) { mV[VZ] = minVec.mV[VZ]; changed = true }
-        if (mV[VZ] > maxVec.mV[VZ]) { mV[VZ] = maxVec.mV[VZ]; changed = true }
-        
-        return changed
-    }
-    
-    fun clampLength(lengthLimit: Float): Boolean {
-        val len = length()
-        if (len > lengthLimit && len > 0f) {
-            val scale = lengthLimit / len
-            mV[VX] *= scale
-            mV[VY] *= scale
-            mV[VZ] *= scale
+
+    public Boolean equals(Object obj) {
+        if (obj == this) {
             return true
         }
-        return false
-    }
-    
-    // Quantization (for network transmission)
-    fun quantize16(lowerXY: Float, upperXY: Float, lowerZ: Float, upperZ: Float) {
-        val rangeXY = upperXY - lowerXY
-        val rangeZ = upperZ - lowerZ
-        
-        // Clamp first
-        mV[VX] = mV[VX].coerceIn(lowerXY, upperXY)
-        mV[VY] = mV[VY].coerceIn(lowerXY, upperXY)
-        mV[VZ] = mV[VZ].coerceIn(lowerZ, upperZ)
-        
-        // Quantize to 16-bit
-        val quantX = ((mV[VX] - lowerXY) / rangeXY * 65535f).toInt()
-        val quantY = ((mV[VY] - lowerXY) / rangeXY * 65535f).toInt()
-        val quantZ = ((mV[VZ] - lowerZ) / rangeZ * 65535f).toInt()
-        
-        // Dequantize
-        mV[VX] = lowerXY + (quantX.toFloat() / 65535f) * rangeXY
-        mV[VY] = lowerXY + (quantY.toFloat() / 65535f) * rangeXY
-        mV[VZ] = lowerZ + (quantZ.toFloat() / 65535f) * rangeZ
-    }
-    
-    // Absolute value
-    fun abs(): Boolean {
-        var changed = false
-        if (mV[VX] < 0f) { mV[VX] = -mV[VX]; changed = true }
-        if (mV[VY] < 0f) { mV[VY] = -mV[VY]; changed = true }
-        if (mV[VZ] < 0f) { mV[VZ] = -mV[VZ]; changed = true }
-        return changed
-    }
-    
-    // Operators
-    operator fun plus(other: LLVector3): LLVector3 {
-        return LLVector3(
-            mV[VX] + other.mV[VX],
-            mV[VY] + other.mV[VY],
-            mV[VZ] + other.mV[VZ]
-        )
-    }
-    
-    operator fun minus(other: LLVector3): LLVector3 {
-        return LLVector3(
-            mV[VX] - other.mV[VX],
-            mV[VY] - other.mV[VY],
-            mV[VZ] - other.mV[VZ]
-        )
-    }
-    
-    operator fun times(scalar: Float): LLVector3 {
-        return LLVector3(
-            mV[VX] * scalar,
-            mV[VY] * scalar,
-            mV[VZ] * scalar
-        )
-    }
-    
-    operator fun times(other: LLVector3): LLVector3 {
-        // Component-wise multiply
-        return LLVector3(
-            mV[VX] * other.mV[VX],
-            mV[VY] * other.mV[VY],
-            mV[VZ] * other.mV[VZ]
-        )
-    }
-    
-    operator fun div(scalar: Float): LLVector3 {
-        if (abs(scalar) < FP_MAG_THRESHOLD) {
-            return LLVector3(0f, 0f, 0f)
+        if (!(obj instanceof LLVector3)) {
+            return false
         }
-        return LLVector3(
-            mV[VX] / scalar,
-            mV[VY] / scalar,
-            mV[VZ] / scalar
-        )
+        LLVector3 lLVector3 = (LLVector3) obj
+        return this.x == lLVector3.x && this.y == lLVector3.y && this.z == lLVector3.z
     }
-    
-    operator fun unaryMinus(): LLVector3 {
-        return LLVector3(-mV[VX], -mV[VY], -mV[VZ])
-    }
-    
-    operator fun get(index: Int): Float = mV[index]
-    operator fun set(index: Int, value: Float) { mV[index] = value }
-    
-    // Dot product
-    infix fun dot(other: LLVector3): Float {
-        return mV[VX] * other.mV[VX] + mV[VY] * other.mV[VY] + mV[VZ] * other.mV[VZ]
-    }
-    
-    // Cross product
-    infix fun cross(other: LLVector3): LLVector3 {
-        return LLVector3(
-            mV[VY] * other.mV[VZ] - mV[VZ] * other.mV[VY],
-            mV[VZ] * other.mV[VX] - mV[VX] * other.mV[VZ],
-            mV[VX] * other.mV[VY] - mV[VY] * other.mV[VX]
-        )
-    }
-    
-    // Rotation
-    fun rotVec(angle: Float, axis: LLVector3): LLVector3 {
-        val quat = LLQuaternion(angle, axis)
-        return this * quat
-    }
-    
-    fun rotVec(quat: LLQuaternion): LLVector3 {
-        return this * quat
-    }
-    
-    // Scaling
-    fun scaleVec(scale: LLVector3): LLVector3 {
-        mV[VX] *= scale.mV[VX]
-        mV[VY] *= scale.mV[VY]
-        mV[VZ] *= scale.mV[VZ]
-        return this
-    }
-    
-    // Interpolation
-    fun lerp(other: LLVector3, t: Float): LLVector3 {
-        return LLVector3(
-            mV[VX] + (other.mV[VX] - mV[VX]) * t,
-            mV[VY] + (other.mV[VY] - mV[VY]) * t,
-            mV[VZ] + (other.mV[VZ] - mV[VZ]) * t
-        )
-    }
-    
-    // Comparison
-    fun equals(other: LLVector3, epsilon: Float): Boolean {
-        return abs(mV[VX] - other.mV[VX]) < epsilon &&
-               abs(mV[VY] - other.mV[VY]) < epsilon &&
-               abs(mV[VZ] - other.mV[VZ]) < epsilon
-    }
-    
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is LLVector3) return false
-        return mV[VX] == other.mV[VX] &&
-               mV[VY] == other.mV[VY] &&
-               mV[VZ] == other.mV[VZ]
-    }
-    
-    override fun hashCode(): Int {
-        var result = mV[VX].hashCode()
-        result = 31 * result + mV[VY].hashCode()
-        result = 31 * result + mV[VZ].hashCode()
-        return result
-    }
-    
-    override fun toString(): String {
-        return "LLVector3(${mV[VX]}, ${mV[VY]}, ${mV[VZ]})"
-    }
-    
-    // Conversion to rotation (for single-axis rotations)
-    fun toQuaternion(): LLQuaternion {
-        // Interpret as axis-angle where length is angle
-        val angle = length()
-        return if (angle > FP_MAG_THRESHOLD) {
-            val axis = this / angle
-            LLQuaternion(angle, axis)
-        } else {
-            LLQuaternion() // Identity
-        }
-    }
-}
 
-// Extension functions for operator overloading
-operator fun Float.times(vec: LLVector3): LLVector3 {
-    return vec * this
+    public Float getDistanceTo(LLVector3 lLVector3) {
+        Float f = this.x - lLVector3.x
+        Float f2 = this.y - lLVector3.y
+        Float f3 = this.z - lLVector3.z
+        return (Float) Math.sqrt((Double) ((f * f) + (f2 * f2) + (f3 * f3)))
+    }
+
+    public Float getMax() {
+        return Math.max(Math.max(this.x, this.y), this.z)
+    }
+
+    public LLVector3 getRotatedOffset(Float f, Float f2) {
+        Float f3 = (3.1415927f * f2) / 180.0f
+        return LLVector3((((Float) Math.cos((Double) f3)) * f) + this.x, (((Float) Math.sin((Double) f3)) * f) + this.y, this.z)
+    }
+
+    public Int hashCode() {
+        return Float.floatToIntBits(this.x) + Float.floatToIntBits(this.y) + Float.floatToIntBits(this.z)
+    }
+
+    public Boolean isZero() {
+        return this.x == 0.0f && this.y == 0.0f && this.z == 0.0f
+    }
+
+    public Float magVec() {
+        return (Float) Math.sqrt((Double) ((this.x * this.x) + (this.y * this.y) + (this.z * this.z)))
+    }
+
+    public Float magVecSquared() {
+        return (this.x * this.x) + (this.y * this.y) + (this.z * this.z)
+    }
+
+    fun mul(Float f) {
+        this.x *= f
+        this.y *= f
+        this.z *= f
+    }
+
+    fun mul(LLQuaternion lLQuaternion) {
+        Float f = (((-lLQuaternion.x) * this.x) - (lLQuaternion.y * this.y)) - (lLQuaternion.z * this.z)
+        Float f2 = ((lLQuaternion.w * this.x) + (lLQuaternion.y * this.z)) - (lLQuaternion.z * this.y)
+        Float f3 = ((lLQuaternion.w * this.y) + (lLQuaternion.z * this.x)) - (lLQuaternion.x * this.z)
+        Float f4 = ((lLQuaternion.w * this.z) + (lLQuaternion.x * this.y)) - (lLQuaternion.y * this.x)
+        this.x = ((((-f) * lLQuaternion.x) + (lLQuaternion.w * f2)) - (lLQuaternion.z * f3)) + (lLQuaternion.y * f4)
+        this.y = ((((-f) * lLQuaternion.y) + (lLQuaternion.w * f3)) - (lLQuaternion.x * f4)) + (lLQuaternion.z * f2)
+        this.z = ((((-f) * lLQuaternion.z) + (f4 * lLQuaternion.w)) - (f2 * lLQuaternion.y)) + (lLQuaternion.x * f3)
+    }
+
+    fun mul(LLVector3 lLVector3) {
+        this.x *= lLVector3.x
+        this.y *= lLVector3.y
+        this.z *= lLVector3.z
+    }
+
+    fun mulWeighted(ImmutableVector immutableVector, Float f) {
+        this.x *= (immutableVector.x * f) + 1.0f
+        this.y *= (immutableVector.y * f) + 1.0f
+        this.z *= (immutableVector.z * f) + 1.0f
+    }
+
+    fun mulWeighted(LLVector3 lLVector3, Float f) {
+        this.x *= (lLVector3.x * f) + 1.0f
+        this.y *= (lLVector3.y * f) + 1.0f
+        this.z *= (lLVector3.z * f) + 1.0f
+    }
+
+    public Float normVec() {
+        Float sqrt = (Float) Math.sqrt((Double) ((this.x * this.x) + (this.y * this.y) + (this.z * this.z)))
+        if (sqrt > 1.0E-7f) {
+            Float f = 1.0f / sqrt
+            this.x *= f
+            this.y *= f
+            this.z = f * this.z
+        } else {
+            this.x = 0.0f
+            this.y = 0.0f
+            this.z = 0.0f
+        }
+        return sqrt
+    }
+
+    fun set(Float f, Float f2, Float f3) {
+        this.x = f
+        this.y = f2
+        this.z = f3
+    }
+
+    fun set(LLVector3 lLVector3) {
+        if (lLVector3 != null) {
+            this.x = lLVector3.x
+            this.y = lLVector3.y
+            this.z = lLVector3.z
+        }
+    }
+
+    fun setAdd(LLVector3 lLVector3, LLVector3 lLVector32) {
+        this.x = lLVector3.x + lLVector32.x
+        this.y = lLVector3.y + lLVector32.y
+        this.z = lLVector3.z + lLVector32.z
+    }
+
+    fun setCross(LLVector3 lLVector3) {
+        Float f = (this.y * lLVector3.z) - (lLVector3.y * this.z)
+        Float f2 = (this.z * lLVector3.x) - (lLVector3.z * this.x)
+        this.x = f
+        this.y = f2
+        this.z = (this.x * lLVector3.y) - (lLVector3.x * this.y)
+    }
+
+    fun setLerp(LLVector3 lLVector3, Float f, LLVector3 lLVector32, Float f2) {
+        this.x = (lLVector3.x * f) + (lLVector32.x * f2)
+        this.y = (lLVector3.y * f) + (lLVector32.y * f2)
+        this.z = (lLVector3.z * f) + (lLVector32.z * f2)
+    }
+
+    fun setLerp(LLVector3 lLVector3, LLVector3 lLVector32, Float f) {
+        this.x = lLVector3.x + ((lLVector32.x - lLVector3.x) * f)
+        this.y = lLVector3.y + ((lLVector32.y - lLVector3.y) * f)
+        this.z = lLVector3.z + ((lLVector32.z - lLVector3.z) * f)
+    }
+
+    fun setMul(LLVector3 lLVector3, Float f) {
+        this.x = lLVector3.x * f
+        this.y = lLVector3.y * f
+        this.z = lLVector3.z * f
+    }
+
+    fun setMul(LLVector3 lLVector3, LLVector3 lLVector32) {
+        this.x = lLVector3.x * lLVector32.x
+        this.y = lLVector3.y * lLVector32.y
+        this.z = lLVector3.z * lLVector32.z
+    }
+
+    fun setSub(LLVector3 lLVector3, LLVector3 lLVector32) {
+        this.x = lLVector3.x - lLVector32.x
+        this.y = lLVector3.y - lLVector32.y
+        this.z = lLVector3.z - lLVector32.z
+    }
+
+    fun sub(LLVector3 lLVector3) {
+        this.x -= lLVector3.x
+        this.y -= lLVector3.y
+        this.z -= lLVector3.z
+    }
+
+    public LLSDNode toLLSD() {
+        return LLSDMap(LLSDMap.LLSDMapEntry("X", LLSDDouble((Double) this.x)), LLSDMap.LLSDMapEntry("Y", LLSDDouble((Double) this.y)), LLSDMap.LLSDMapEntry("Z", LLSDDouble((Double) this.z)))
+    }
+
+    public String toString() {
+        return String.format("(%f, %f, %f)", Object[]{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z)})
+    }
 }

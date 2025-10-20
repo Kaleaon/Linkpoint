@@ -1,264 +1,200 @@
 package com.linkpoint.slproto.terrain
+import java.util.*
 
 import com.linkpoint.utils.BitBuffer
-import kotlin.math.cos
-import kotlin.math.PI
 
-/**
- * TerrainPatch - Handles Second Life terrain patch decompression
- * 
- * Second Life terrain uses DCT (Discrete Cosine Transform) compression
- * Similar to JPEG compression but for height maps.
- * 
- * Based on Firestorm's terrain patch decoding
- */
 class TerrainPatch {
-    
-    companion object {
-        // Constants for patch processing
-        const val END_OF_PATCHES: Int = 97
-        private const val OO_SQRT2: Float = 0.70710677f  // 1/sqrt(2)
-        
-        // Lookup tables for performance (computed once)
-        private val copyMatrix16 = IntArray(256)
-        private val copyMatrix32 = IntArray(256)
-        private val cosineTable16 = FloatArray(256)
-        private val dequantizeTable16 = FloatArray(256)
-        private val dequantizeTable32 = FloatArray(256)
-        private val quantizeTable16 = FloatArray(256)
-        
-        // Initialize lookup tables on class load
-        init {
-            buildDequantizeTable16()
-            setupCosines16()
-            buildCopyMatrix16()
-            buildQuantizeTable16()
-        }
-        
-        /**
-         * Build copy matrix for zigzag traversal
-         * This reorders DCT coefficients for better compression
-         */
-        private fun buildCopyMatrix16() {
-            var idx = 0
-            var row = 0
-            var col = 0
-            var diagonal = true
-            var increasing = false
-            
-            while (col < 16 && row < 16) {
-                copyMatrix16[row * 16 + col] = idx
-                idx++
-                
-                if (!increasing) {
-                    if (diagonal) {
-                        col = if (col < 15) col + 1 else col
-                        if (col >= 15) row++
-                        diagonal = false
-                        increasing = true
+    @JvmStatic
+private Int[] CopyMatrix16 = Int[256]
+    @JvmStatic
+private Int[] CopyMatrix32 = Int[256]
+    @JvmStatic
+private Float[] CosineTable16 = Float[256]
+    @JvmStatic
+private Float[] DequantizeTable16 = Float[256]
+    @JvmStatic
+private Float[] DequantizeTable32 = Float[256]
+    const val END_OF_PATCHES: Int = 97
+    @JvmStatic
+private Float OO_SQRT2 = 0.70710677f
+    @JvmStatic
+private Float[] QuantizeTable16 = Float[256]
+    Float DCOffset
+    Int PatchIDs
+    Int QuantWBits
+    Int Range
+    Int WordBits
+    public Float[] heightMap
+    Int[] patches
+
+    static {
+        BuildDequantizeTable16()
+        SetupCosines16()
+        BuildCopyMatrix16()
+        BuildQuantizeTable16()
+    }
+
+    @JvmStatic
+private Unit BuildCopyMatrix16() {
+        Int i = 0
+        Int i2 = 0
+        Int i3 = 0
+        Boolean z = true
+        Boolean z2 = false
+        while (i3 < 16 && i2 < 16) {
+            Int i4 = i + 1
+            CopyMatrix16[(i2 * 16) + i3] = i
+            if (!z2) {
+                if (z) {
+                    if (i3 < 15) {
+                        i3++
                     } else {
-                        row = if (row < 15) row + 1 else row
-                        if (row >= 15) col++
-                        diagonal = true
-                        increasing = true
+                        i2++
                     }
-                } else if (diagonal) {
-                    col++
-                    row--
-                    if (col == 15 || row == 0) {
-                        increasing = false
-                    }
+                    z = false
+                    z2 = true
                 } else {
-                    col--
-                    row++
-                    if (row == 15 || col == 0) {
-                        increasing = false
+                    if (i2 < 15) {
+                        i2++
+                    } else {
+                        i3++
                     }
+                    z = true
+                    z2 = true
+                }
+            } else if (z) {
+                i3++
+                i2--
+                if (i3 == 15 || i2 == 0) {
+                    z2 = false
+                }
+            } else {
+                i3--
+                i2++
+                if (i2 == 15 || i3 == 0) {
+                    z2 = false
                 }
             }
+            i = i4
         }
-        
-        /**
-         * Build dequantization table for 16x16 patches
-         * Maps quantized values back to DCT coefficients
-         */
-        private fun buildDequantizeTable16() {
-            for (i in 0 until 16) {
-                for (j in 0 until 16) {
-                    dequantizeTable16[i * 16 + j] = ((j + i).toFloat() * 2.0f) + 1.0f
-                }
-            }
-        }
-        
-        /**
-         * Build quantization table (inverse of dequantization)
-         */
-        private fun buildQuantizeTable16() {
-            for (i in 0 until 16) {
-                for (j in 0 until 16) {
-                    quantizeTable16[i * 16 + j] = 1.0f / (((j.toFloat() + i.toFloat()) * 2.0f) + 1.0f)
-                }
-            }
-        }
-        
-        /**
-         * Setup cosine lookup table for IDCT
-         * Precompute cos values for inverse DCT
-         */
-        private fun setupCosines16() {
-            for (i in 0 until 16) {
-                for (j in 0 until 16) {
-                    val angle = ((j.toFloat() * 2.0f + 1.0f) * i.toFloat() * PI / 32.0).toFloat()
-                    cosineTable16[i * 16 + j] = cos(angle.toDouble()).toFloat()
-                }
-            }
-        }
-        
-        /**
-         * Decompress a terrain patch from bit buffer
-         * 
-         * @param bitBuffer Buffer containing compressed patch data
-         * @param patchSize Size of patch (typically 16 or 32)
-         * @return Decompressed terrain patch or null if end marker
-         */
-        fun decompressPatch(bitBuffer: BitBuffer, patchSize: Int): TerrainPatch? {
-            // Read quantization bits
-            val quantWBits = bitBuffer.getBits(8)
-            
-            // Check for end of patches marker
-            if (quantWBits == END_OF_PATCHES) {
-                return null
-            }
-            
-            // Create new patch
-            val patch = TerrainPatch()
-            patch.quantWBits = quantWBits
-            patch.dcOffset = bitBuffer.getFloat()
-            patch.range = bitBuffer.getBits(16)
-            patch.patchIDs = bitBuffer.getBits(10)
-            patch.wordBits = (quantWBits and 15) + 2
-            
-            // Allocate patches array
-            val patchCount = patchSize * patchSize
-            patch.patches = IntArray(patchCount)
-            
-            // Decode patch coefficients
-            var i = 0
-            while (i < patchCount) {
-                when {
-                    bitBuffer.getBits(1) == 0 -> {
-                        // Zero coefficient
-                        patch.patches[i] = 0
-                    }
-                    bitBuffer.getBits(1) == 0 -> {
-                        // All remaining coefficients are zero
-                        while (i < patchCount) {
-                            patch.patches[i] = 0
-                            i++
-                        }
-                        break
-                    }
-                    bitBuffer.getBits(1) != 0 -> {
-                        // Negative coefficient
-                        patch.patches[i] = bitBuffer.getBits(patch.wordBits) * -1
-                    }
-                    else -> {
-                        // Positive coefficient
-                        patch.patches[i] = bitBuffer.getBits(patch.wordBits)
-                    }
-                }
-                i++
-            }
-            
-            // Perform inverse DCT to get height map
-            val tempBuffer = FloatArray(patchCount)
-            val heightMap = FloatArray(patchCount)
-            
-            // Calculate dequantization parameters
-            val quantBits = (patch.quantWBits shr 4) + 2
-            val dequantScale = (1.0f / (1 shl quantBits).toFloat()) * patch.range.toFloat()
-            val dequantOffset = patch.dcOffset + ((1 shl (quantBits - 1)).toFloat() * dequantScale)
-            
-            if (patchSize == 16) {
-                // Dequantize coefficients
-                for (idx in 0 until 256) {
-                    tempBuffer[idx] = patch.patches[copyMatrix16[idx]].toFloat() * dequantizeTable16[idx]
-                }
-                
-                // Inverse DCT - column transform
-                val columnBuffer = FloatArray(256)
-                for (col in 0 until 16) {
-                    idctColumn16(tempBuffer, columnBuffer, col)
-                }
-                
-                // Inverse DCT - row transform
-                for (row in 0 until 16) {
-                    idctLine16(columnBuffer, tempBuffer, row)
-                }
-            } else if (patchSize == 32) {
-                // 32x32 patches (less common, simplified handling)
-                for (idx in 0 until 1024) {
-                    tempBuffer[idx] = patch.patches[copyMatrix32[idx]].toFloat() * dequantizeTable32[idx]
-                }
-                // Note: Full 32x32 IDCT implementation would go here
-            }
-            
-            // Apply scale and offset to get final heights
-            for (idx in tempBuffer.indices) {
-                heightMap[idx] = (tempBuffer[idx] * dequantScale) + dequantOffset
-            }
-            
-            patch.heightMap = heightMap
-            return patch
-        }
-        
-        /**
-         * Inverse DCT for a column
-         */
-        private fun idctColumn16(input: FloatArray, output: FloatArray, col: Int) {
-            for (row in 0 until 16) {
-                var sum = input[col] * OO_SQRT2
-                for (k in 1 until 16) {
-                    val idx = k * 16
-                    sum += cosineTable16[idx + row] * input[idx + col]
-                }
-                output[row * 16 + col] = sum
-            }
-        }
-        
-        /**
-         * Inverse DCT for a row
-         */
-        private fun idctLine16(input: FloatArray, output: FloatArray, row: Int) {
-            val rowOffset = row * 16
-            for (col in 0 until 16) {
-                var sum = input[rowOffset] * OO_SQRT2
-                for (k in 1 until 16) {
-                    sum += input[rowOffset + k] * cosineTable16[k * 16 + col]
-                }
-                output[rowOffset + col] = sum * 0.125f
+    }
+
+    @JvmStatic
+private Unit BuildDequantizeTable16() {
+        for (Int i = 0; i < 16; i++) {
+            for (Int i2 = 0; i2 < 16; i2++) {
+                DequantizeTable16[(i * 16) + i2] = (((Float) (i2 + i)) * 2.0f) + 1.0f
             }
         }
     }
-    
-    // Instance variables
-    var dcOffset: Float = 0f
-    var patchIDs: Int = 0
-    var quantWBits: Int = 0
-    var range: Int = 0
-    var wordBits: Int = 0
-    var heightMap: FloatArray? = null
-    var patches: IntArray? = null
-    
-    /**
-     * Get X coordinate of patch in region
-     */
-    val x: Int
-        get() = patchIDs shr 5
-    
-    /**
-     * Get Y coordinate of patch in region
-     */
-    val y: Int
-        get() = patchIDs and 31
+
+    @JvmStatic
+private Unit BuildQuantizeTable16() {
+        for (Int i = 0; i < 16; i++) {
+            for (Int i2 = 0; i2 < 16; i2++) {
+                QuantizeTable16[(i * 16) + i2] = 1.0f / (((((Float) i2) + ((Float) i)) * 2.0f) + 1.0f)
+            }
+        }
+    }
+
+    @JvmStatic
+    TerrainPatch DecompressPatch(BitBuffer bitBuffer, Int i) {
+        Int bits = bitBuffer.getBits(8)
+        if (bits == 97) {
+            return null
+        }
+        TerrainPatch terrainPatch = TerrainPatch()
+        terrainPatch.QuantWBits = bits
+        terrainPatch.DCOffset = bitBuffer.getFloat()
+        terrainPatch.Range = bitBuffer.getBits(16)
+        terrainPatch.PatchIDs = bitBuffer.getBits(10)
+        terrainPatch.WordBits = (bits & 15) + 2
+        terrainPatch.patches = Int[(i * i)]
+        Int i2 = 0
+        while (true) {
+            if (i2 >= i * i) {
+                break
+            }
+            if (bitBuffer.getBits(1) == 0) {
+                terrainPatch.patches[i2] = 0
+            } else if (bitBuffer.getBits(1) == 0) {
+                while (i2 < i * i) {
+                    terrainPatch.patches[i2] = 0
+                    i2++
+                }
+            } else if (bitBuffer.getBits(1) != 0) {
+                terrainPatch.patches[i2] = bitBuffer.getBits(terrainPatch.WordBits) * -1
+            } else {
+                terrainPatch.patches[i2] = bitBuffer.getBits(terrainPatch.WordBits)
+            }
+            i2++
+        }
+        Float[] fArr = Float[(i * i)]
+        Float[] fArr2 = Float[(i * i)]
+        Int i3 = (terrainPatch.QuantWBits >> 4) + 2
+        Float f = (1.0f / ((Float) (1 << i3))) * ((Float) terrainPatch.Range)
+        Float f2 = terrainPatch.DCOffset + (((Float) (1 << (i3 - 1))) * f)
+        if (i == 16) {
+            for (Int i4 = 0; i4 < 256; i4++) {
+                fArr[i4] = ((Float) terrainPatch.patches[CopyMatrix16[i4]]) * DequantizeTable16[i4]
+            }
+            Float[] fArr3 = Float[256]
+            for (Int i5 = 0; i5 < 16; i5++) {
+                IDCTColumn16(fArr, fArr3, i5)
+            }
+            for (Int i6 = 0; i6 < 16; i6++) {
+                IDCTLine16(fArr3, fArr, i6)
+            }
+        } else {
+            for (Int i7 = 0; i7 < 1024; i7++) {
+                fArr[i7] = ((Float) terrainPatch.patches[CopyMatrix32[i7]]) * DequantizeTable32[i7]
+            }
+        }
+        for (Int i8 = 0; i8 < fArr.length; i8++) {
+            fArr2[i8] = (fArr[i8] * f) + f2
+        }
+        terrainPatch.heightMap = fArr2
+        return terrainPatch
+    }
+
+    @JvmStatic
+private Unit IDCTColumn16(Float[] fArr, Float[] fArr2, Int i) {
+        for (Int i2 = 0; i2 < 16; i2++) {
+            Float f = fArr[i] * OO_SQRT2
+            for (Int i3 = 1; i3 < 16; i3++) {
+                Int i4 = i3 * 16
+                f += CosineTable16[i4 + i2] * fArr[i4 + i]
+            }
+            fArr2[(i2 * 16) + i] = f
+        }
+    }
+
+    @JvmStatic
+private Unit IDCTLine16(Float[] fArr, Float[] fArr2, Int i) {
+        Int i2 = i * 16
+        for (Int i3 = 0; i3 < 16; i3++) {
+            Float f = fArr[i2] * OO_SQRT2
+            for (Int i4 = 1; i4 < 16; i4++) {
+                f += fArr[i2 + i4] * CosineTable16[(i4 * 16) + i3]
+            }
+            fArr2[i2 + i3] = f * 0.125f
+        }
+    }
+
+    @JvmStatic
+private Unit SetupCosines16() {
+        for (Int i = 0; i < 16; i++) {
+            for (Int i2 = 0; i2 < 16; i2++) {
+                CosineTable16[(i * 16) + i2] = (Float) Math.cos((Double) (((((Float) i2) * 2.0f) + 1.0f) * ((Float) i) * 0.09817477f))
+            }
+        }
+    }
+
+    public Int getX() {
+        return this.PatchIDs >> 5
+    }
+
+    public Int getY() {
+        return this.PatchIDs & 31
+    }
 }
