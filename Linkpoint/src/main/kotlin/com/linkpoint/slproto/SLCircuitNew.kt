@@ -301,10 +301,7 @@ open class SLCircuitNew(
      * Decode message from buffer
      */
     private fun decodeMessage(buffer: ByteBuffer): SLMessage? {
-        // TODO: Implement full message decoding based on message template
-        // For now, return null and log
-        Debug.Log("Message decoding not yet implemented")
-        return null
+        return com.linkpoint.protocol.MessageDecoder.decode(buffer)
     }
     
     /**

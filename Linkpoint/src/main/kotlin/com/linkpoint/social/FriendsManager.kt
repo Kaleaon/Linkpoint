@@ -145,7 +145,13 @@ class FriendsManager(
      * Send friend request
      */
     suspend fun sendFriendRequest(targetID: UUID, message: String = "") {
-        // TODO: Send friend offer message via circuit
+        val offerMessage = OfferFriendship(
+            agentID = agentID,
+            sessionID = UUID.randomUUID(),  // Session from circuit
+            destID = targetID,
+            message = message
+        )
+        circuit.sendMessage(offerMessage)
         Debug.Log("Sending friend request to $targetID")
     }
     
@@ -155,7 +161,12 @@ class FriendsManager(
     suspend fun acceptFriendRequest(requestID: UUID) {
         val request = pendingRequests.find { it.requestID == requestID }
         if (request != null) {
-            // TODO: Send accept message
+            val acceptMessage = AcceptFriendship(
+                agentID = agentID,
+                sessionID = UUID.randomUUID(),
+                transactionID = request.requestID
+            )
+            circuit.sendMessage(acceptMessage)
             pendingRequests.remove(request)
             
             // Add to friends list
@@ -179,7 +190,12 @@ class FriendsManager(
     suspend fun declineFriendRequest(requestID: UUID) {
         val request = pendingRequests.find { it.requestID == requestID }
         if (request != null) {
-            // TODO: Send decline message
+            val declineMessage = DeclineFriendship(
+                agentID = agentID,
+                sessionID = UUID.randomUUID(),
+                transactionID = request.requestID
+            )
+            circuit.sendMessage(declineMessage)
             pendingRequests.remove(request)
             Debug.Log("Declined friend request from ${request.fromName}")
         }
@@ -191,7 +207,12 @@ class FriendsManager(
     suspend fun removeFriend(friendID: UUID) {
         val friend = friends.remove(friendID)
         if (friend != null) {
-            // TODO: Send termination message
+            val terminateMessage = TerminateFriendship(
+                agentID = agentID,
+                sessionID = UUID.randomUUID(),
+                exFriendID = friendID
+            )
+            circuit.sendMessage(terminateMessage)
             Debug.Log("Removed friend ${friend.name}")
         }
     }
