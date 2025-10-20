@@ -93,22 +93,57 @@ class FilamentPerformanceOptimizer(
      * Check if a bounding box is in the frustum
      */
     private fun isBoxInFrustum(box: Box, frustum: FrustrumPlanes): Boolean {
-        // Simple implementation - check box center against planes
-        // TODO: Implement proper box-frustum intersection test
+        // Get box center and half-extents
+        val center = box.center
+        val halfExtent = box.halfExtent
         
-        val center = floatArrayOf(
-            (box.center[0]),
-            (box.center[1]),
-            (box.center[2])
-        )
-        
-        // For now, just do distance culling
+        // First do distance culling (faster than plane tests)
         val dx = center[0] - cameraPosition.x
         val dy = center[1] - cameraPosition.y
         val dz = center[2] - cameraPosition.z
         val distance = sqrt(dx * dx + dy * dy + dz * dz)
         
-        return distance < CULL_DISTANCE
+        if (distance > CULL_DISTANCE) {
+            return false
+        }
+        
+        // Test box against frustum planes
+        // For each plane, test if the box is completely outside
+        try {
+            val planes = listOf(
+                frustum.nearPlane,
+                frustum.farPlane,
+                frustum.leftPlane,
+                frustum.rightPlane,
+                frustum.topPlane,
+                frustum.bottomPlane
+            )
+            
+            for (plane in planes) {
+                // Calculate the vertex of the box that is farthest along the plane normal
+                val px = if (plane.a > 0) halfExtent[0] else -halfExtent[0]
+                val py = if (plane.b > 0) halfExtent[1] else -halfExtent[1]
+                val pz = if (plane.c > 0) halfExtent[2] else -halfExtent[2]
+                
+                // Calculate distance from plane
+                val distance = plane.a * (center[0] + px) +
+                              plane.b * (center[1] + py) +
+                              plane.c * (center[2] + pz) +
+                              plane.d
+                
+                // If the farthest vertex is behind the plane, box is outside frustum
+                if (distance < 0) {
+                    return false
+                }
+            }
+        } catch (e: Exception) {
+            // If frustum test fails, fall back to distance culling only
+            Log.w(TAG, "Frustum test failed, using distance culling only", e)
+            return true
+        }
+        
+        // Box is inside or intersecting the frustum
+        return true
     }
     
     /**

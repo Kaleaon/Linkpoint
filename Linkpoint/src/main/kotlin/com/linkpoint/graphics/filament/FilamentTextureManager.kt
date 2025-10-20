@@ -2,12 +2,16 @@ package com.linkpoint.graphics.filament
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.util.Log
 import com.google.android.filament.Engine
 import com.google.android.filament.Texture
 import com.google.android.filament.Texture.InternalFormat
 import com.google.android.filament.Texture.PixelBufferDescriptor
 import com.linkpoint.render.tex.TextureClass
+import com.linkpoint.slproto.modules.texfetcher.SLTextureFetcher
+import com.linkpoint.slproto.modules.texfetcher.SLTextureFetchRequest
+import java.io.File
 import java.nio.ByteBuffer
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -33,6 +37,17 @@ class FilamentTextureManager(
     // Texture cache
     private val textureCache = ConcurrentHashMap<UUID, Texture>()
     private val bitmapTextureCache = ConcurrentHashMap<String, Texture>()
+    
+    // Reference to the SL texture fetcher (can be set externally)
+    private var textureFetcher: SLTextureFetcher? = null
+    
+    /**
+     * Set the texture fetcher for loading textures from the network
+     */
+    fun setTextureFetcher(fetcher: SLTextureFetcher) {
+        this.textureFetcher = fetcher
+        Log.d(TAG, "Texture fetcher connected")
+    }
     
     /**
      * Create a Filament texture from a Bitmap
@@ -76,15 +91,70 @@ class FilamentTextureManager(
     /**
      * Load a texture by UUID (from SL texture system)
      */
-    fun loadTexture(uuid: UUID): Texture? {
+    fun loadTexture(uuid: UUID, onLoaded: ((Texture) -> Unit)? = null): Texture {
         // Check cache
-        textureCache[uuid]?.let { return it }
+        textureCache[uuid]?.let { 
+            onLoaded?.invoke(it)
+            return it 
+        }
         
-        // TODO: Integrate with existing texture fetcher
-        // For now, create a placeholder texture
-        Log.d(TAG, "Loading texture $uuid (placeholder)")
+        // If we have a texture fetcher, try to fetch the texture
+        val fetcher = textureFetcher
+        if (fetcher != null) {
+            try {
+                // Create a fetch request
+                val cacheDir = context.cacheDir
+                val textureFile = File(cacheDir, "textures/$uuid.j2c")
+                
+                val fetchRequest = SLTextureFetchRequest(uuid, textureFile)
+                fetchRequest.onFetchComplete = object : SLTextureFetchRequest.TextureFetchCompleteListener {
+                    override fun OnTextureFetchComplete(request: SLTextureFetchRequest) {
+                        // Load the texture from file
+                        try {
+                            val bitmap = BitmapFactory.decodeFile(request.outputFile.absolutePath)
+                            if (bitmap != null) {
+                                val texture = createTextureFromBitmap(bitmap, srgb = true)
+                                textureCache[uuid] = texture
+                                onLoaded?.invoke(texture)
+                                Log.d(TAG, "Loaded texture $uuid from network")
+                            } else {
+                                Log.w(TAG, "Failed to decode texture $uuid")
+                                val placeholder = createPlaceholderTexture()
+                                textureCache[uuid] = placeholder
+                                onLoaded?.invoke(placeholder)
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error loading texture $uuid", e)
+                            val placeholder = createPlaceholderTexture()
+                            textureCache[uuid] = placeholder
+                            onLoaded?.invoke(placeholder)
+                        }
+                    }
+                }
+                
+                // Start the fetch
+                fetcher.BeginFetch(fetchRequest)
+                
+                Log.d(TAG, "Started fetching texture $uuid")
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching texture $uuid", e)
+            }
+        } else {
+            Log.d(TAG, "No texture fetcher available for $uuid, using placeholder")
+        }
         
-        return createPlaceholderTexture()
+        // Return a placeholder immediately while loading
+        val placeholder = createPlaceholderTexture()
+        return placeholder
+    }
+    
+    /**
+     * Load a texture synchronously (blocking) if available in cache
+     */
+    fun loadTextureSync(uuid: UUID): Texture? {
+        // Check cache only
+        return textureCache[uuid]
     }
     
     /**

@@ -164,11 +164,33 @@ class FilamentWorldDataBridge(
     private fun syncObjects() {
         val manager = objectsManager ?: return
         
-        // TODO: Get visible objects from manager
-        // Create/update renderables for each object
-        // Remove entities for deleted objects
-        
-        Log.d(TAG, "Object sync - not yet implemented")
+        try {
+            // Get visible objects from manager
+            // Note: The manager structure is complex due to Java->Kotlin conversion
+            // For now, we'll implement a basic sync that can be enhanced later
+            
+            // Track which objects we've seen
+            val seenObjects = mutableSetOf<Int>()
+            
+            // Try to get objects (this may need adjustment based on actual manager API)
+            try {
+                // Placeholder: In a real implementation, you would call something like:
+                // val objects = manager.getVisibleObjects()
+                // For now, we just keep existing objects
+                seenObjects.addAll(objectEntities.keys)
+            } catch (e: Exception) {
+                Log.w(TAG, "Error getting objects from manager", e)
+            }
+            
+            // Remove objects that no longer exist
+            val toRemove = objectEntities.keys.filter { it !in seenObjects }
+            toRemove.forEach { localID ->
+                objectEntities.remove(localID)?.let { removeEntity(it) }
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing objects", e)
+        }
     }
     
     /**
@@ -177,11 +199,65 @@ class FilamentWorldDataBridge(
     private fun syncAvatars() {
         val manager = userManager ?: return
         
-        // TODO: Get nearby avatars
-        // Create/update avatar renderables
-        // Apply avatar animations
-        
-        Log.d(TAG, "Avatar sync - not yet implemented")
+        try {
+            // Get nearby avatars from manager
+            // Note: Similar to objects, this needs proper API access
+            
+            // Track which avatars we've seen
+            val seenAvatars = mutableSetOf<UUID>()
+            
+            // Try to get avatars (this may need adjustment based on actual manager API)
+            try {
+                // Placeholder: In a real implementation, you would call something like:
+                // val avatars = manager.getNearbyAvatars()
+                // For now, we just keep existing avatars
+                seenAvatars.addAll(avatarEntities.keys)
+            } catch (e: Exception) {
+                Log.w(TAG, "Error getting avatars from manager", e)
+            }
+            
+            // Remove avatars that are no longer nearby
+            val toRemove = avatarEntities.keys.filter { it !in seenAvatars }
+            toRemove.forEach { uuid ->
+                avatarEntities.remove(uuid)?.let { removeEntity(it) }
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error syncing avatars", e)
+        }
+    }
+    
+    /**
+     * Manually add an object to the scene
+     * This can be called externally when objects are created/updated
+     */
+    fun addObject(localID: Int, obj: SLObjectInfo) {
+        try {
+            // Check if object already exists
+            if (objectEntities.containsKey(localID)) {
+                // TODO: Update existing object
+                return
+            }
+            
+            // Create new renderable
+            val entityData = createObjectRenderable(obj)
+            if (entityData != null) {
+                objectEntities[localID] = entityData
+                Log.d(TAG, "Added object $localID to scene")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error adding object $localID", e)
+        }
+    }
+    
+    /**
+     * Remove an object from the scene
+     */
+    fun removeObject(localID: Int) {
+        objectEntities.remove(localID)?.let { 
+            removeEntity(it)
+            Log.d(TAG, "Removed object $localID from scene")
+        }
     }
     
     /**

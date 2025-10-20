@@ -158,6 +158,14 @@ class FilamentTerrainRenderer(
         val vertexData = ByteBuffer.allocateDirect(vertexCount * vertexSize)
             .order(ByteOrder.nativeOrder())
         
+        // Get patch info from terrain data
+        val patchInfo = try {
+            terrainData.getPatchInfo(patchX, patchY)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to get patch info for ($patchX, $patchY), using flat terrain", e)
+            null
+        }
+        
         // Generate vertices
         for (y in 0 until VERTICES_PER_PATCH) {
             for (x in 0 until VERTICES_PER_PATCH) {
@@ -165,8 +173,27 @@ class FilamentTerrainRenderer(
                 val worldY = (patchY * PATCH_SIZE + y).toFloat()
                 
                 // Get height from terrain data
-                // TODO: Read actual height from TerrainData.heightMap
-                val height = 20f // Placeholder flat terrain
+                val height = if (patchInfo != null) {
+                    try {
+                        // TerrainPatchInfo contains heightMap with 17x17 vertices
+                        val heightMap = patchInfo.heightMap
+                        if (heightMap != null) {
+                            val index = y * 17 + x
+                            if (index < heightMap.heights.size) {
+                                heightMap.heights[index]
+                            } else {
+                                20f // Fallback
+                            }
+                        } else {
+                            20f // Fallback
+                        }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Error reading height at ($x, $y)", e)
+                        20f // Fallback
+                    }
+                } else {
+                    20f // Fallback for missing patch data
+                }
                 
                 // Position
                 vertexData.putFloat(worldX)
