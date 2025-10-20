@@ -103,6 +103,8 @@ android {
                 '**/base64/**/*.java',               // Base64 encoding - decompiled issues
                 '**/utils/**/*.java',                // Utils classes - decompiled issues
                 '**/cloud/**/*.java',                // Cloud features
+                '**/vivox/**/*.java',                // Vivox - has compilation issues (replaced by WebRTC)
+                '**/vivox/**/*.kt',                  // Vivox Kotlin files
                 '**/dao/**/*.java',                  // Database access objects
                 '**/eventbus/**/*.java',             // Event bus
                 '**/fixes/**/*.java',                // Fixes
@@ -238,10 +240,10 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
-    // WebRTC for voice chat - Stream WebRTC Android library
-    implementation 'io.getstream:stream-webrtc-android:1.1.1'
-    implementation 'io.getstream:stream-webrtc-android-ui:1.1.1'
-    implementation 'io.getstream:stream-webrtc-android-ktx:1.1.1'
+    // WebRTC for voice chat - Stream WebRTC Android library (optional for voice)
+    // implementation 'io.getstream:stream-webrtc-android:1.1.1'
+    // implementation 'io.getstream:stream-webrtc-android-ui:1.1.1'
+    // implementation 'io.getstream:stream-webrtc-android-ktx:1.1.1'
 
     // Audio processing - AAudio and OpenSL ES Android libraries
     implementation 'androidx.media:media:1.7.0'
