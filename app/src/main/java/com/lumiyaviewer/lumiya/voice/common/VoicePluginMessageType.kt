@@ -18,6 +18,8 @@ enum class VoicePluginMessageType {
     VoiceSetAudioProperties,
     VoiceAudioProperties
 
-    const val VOICE_PLUGIN_MESSAGE: Int = 200
+    companion object {
+        const val VOICE_PLUGIN_MESSAGE: Int = 200
+    }
 }
 
