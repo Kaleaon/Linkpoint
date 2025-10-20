@@ -264,9 +264,6 @@ dependencies {
     // Preferences
     implementation 'androidx.preference:preference-ktx:1.2.1'
     
-    // Graphics - OpenGL ES helper libraries
-    implementation 'androidx.opengl:opengl:1.0.0-alpha01'
-    
     // Filament Rendering Engine - Modern PBR renderer
     implementation 'com.google.android.filament:filament-android:1.66.0'
     implementation 'com.google.android.filament:filament-utils-android:1.66.0'
