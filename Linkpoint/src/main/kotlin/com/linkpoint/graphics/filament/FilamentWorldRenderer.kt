@@ -89,7 +89,7 @@ class FilamentWorldRenderer(
             
             // Initialize avatar renderer
             avatarRenderer = FilamentAvatarRenderer(
-                engine, scene, materialManager, textureManager, gltfLoader
+                context, engine, scene, materialManager, textureManager, gltfLoader
             )
             avatarRenderer.initialize()
             

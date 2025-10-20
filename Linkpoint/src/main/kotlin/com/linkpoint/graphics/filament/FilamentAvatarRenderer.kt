@@ -1,5 +1,6 @@
 package com.linkpoint.graphics.filament
 
+import android.content.Context
 import android.util.Log
 import com.google.android.filament.*
 import com.google.android.filament.gltfio.FilamentAsset
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap
  * - Nametags
  */
 class FilamentAvatarRenderer(
+    private val context: Context,
     private val engine: Engine,
     private val scene: Scene,
     private val materialManager: FilamentMaterialManager,
@@ -35,6 +37,8 @@ class FilamentAvatarRenderer(
      */
     private data class AvatarEntity(
         @Entity val rootEntity: Int,
+        val vertexBuffer: VertexBuffer?,
+        val indexBuffer: IndexBuffer?,
         val asset: FilamentAsset?,
         val avatarInfo: SLObjectAvatarInfo,
         var lastUpdate: Long = 0
@@ -43,15 +47,26 @@ class FilamentAvatarRenderer(
     // Avatar entities (UUID -> avatar data)
     private val avatars = ConcurrentHashMap<UUID, AvatarEntity>()
     
-    // Default avatar mesh (loaded once, instanced for each avatar)
-    private var defaultAvatarAsset: FilamentAsset? = null
+    // Avatar mesh loader
+    private lateinit var avatarMeshLoader: FilamentAvatarMeshLoader
+    
+    // Default avatar mesh (loaded once, used for all avatars)
+    private var defaultAvatarMesh: FilamentAvatarMeshLoader.AvatarMesh? = null
     
     /**
      * Initialize avatar renderer
      */
     fun initialize() {
-        // TODO: Load default avatar mesh from assets
-        // For now, avatars will use simple geometry
+        // Create avatar mesh loader
+        avatarMeshLoader = FilamentAvatarMeshLoader(context, engine, gltfLoader)
+        
+        // Load default avatar mesh
+        try {
+            defaultAvatarMesh = avatarMeshLoader.loadDefaultAvatar()
+            Log.i(TAG, "Default avatar mesh loaded")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load default avatar mesh", e)
+        }
         
         Log.i(TAG, "Avatar renderer initialized")
     }
@@ -80,12 +95,36 @@ class FilamentAvatarRenderer(
         try {
             val uuid = avatarInfo.uuid ?: return
             
-            // For now, create a simple placeholder
-            // TODO: Load actual avatar mesh (glTF) based on avatar shape
+            // Get default avatar mesh
+            val avatarMesh = defaultAvatarMesh
+            if (avatarMesh == null) {
+                Log.w(TAG, "No avatar mesh available")
+                return
+            }
+            
+            // Create entity
             @Entity val entity = EntityManager.get().create()
             
-            // Create simple capsule/cube for avatar placeholder
+            // Get position
             val position = avatarInfo.getPosition() ?: LLVector3(128f, 128f, 25f)
+            
+            // Get material
+            val material = materialManager.getMaterial(
+                FilamentMaterialManager.MaterialType.PRIM_BASIC
+            )
+            
+            // Build renderable with avatar mesh
+            RenderableManager.Builder(1)
+                .boundingBox(Box(
+                    -0.5f, 0f, -0.5f,
+                    0.5f, 2.0f, 0.5f
+                ))
+                .geometry(0, RenderableManager.PrimitiveType.TRIANGLES,
+                    avatarMesh.vertexBuffer, avatarMesh.indexBuffer)
+                .material(0, material.defaultInstance)
+                .castShadows(true)
+                .receiveShadows(true)
+                .build(engine, entity)
             
             // Set transform
             val transform = FloatArray(16)
@@ -98,10 +137,11 @@ class FilamentAvatarRenderer(
             // Add to scene
             scene.addEntity(entity)
             
-            // Store avatar data
-            avatars[uuid] = AvatarEntity(entity, null, avatarInfo, System.currentTimeMillis())
+            // Store avatar data (don't own the buffers, they're shared)
+            avatars[uuid] = AvatarEntity(entity, null, null, null, avatarInfo,
+                System.currentTimeMillis())
             
-            Log.d(TAG, "Created avatar $uuid at ($position)")
+            Log.d(TAG, "Created avatar $uuid with humanoid mesh at ($position)")
             
         } catch (e: Exception) {
             Log.e(TAG, "Error creating avatar", e)
@@ -152,6 +192,10 @@ class FilamentAvatarRenderer(
             // Destroy asset if exists
             avatar.asset?.let { gltfLoader.destroyAsset(it) }
             
+            // Destroy buffers if owned by this avatar
+            avatar.vertexBuffer?.let { engine.destroyVertexBuffer(it) }
+            avatar.indexBuffer?.let { engine.destroyIndexBuffer(it) }
+            
             // Destroy entity
             engine.destroyEntity(avatar.rootEntity)
             EntityManager.get().destroy(avatar.rootEntity)
@@ -187,9 +231,12 @@ class FilamentAvatarRenderer(
     fun destroy() {
         clearAll()
         
-        // Destroy default avatar asset
-        defaultAvatarAsset?.let { gltfLoader.destroyAsset(it) }
-        defaultAvatarAsset = null
+        // Destroy avatar mesh loader
+        if (::avatarMeshLoader.isInitialized) {
+            avatarMeshLoader.destroy()
+        }
+        
+        defaultAvatarMesh = null
         
         Log.i(TAG, "Avatar renderer destroyed")
     }
