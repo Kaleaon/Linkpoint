@@ -16,10 +16,8 @@ enum class VoicePluginMessageType {
     VoiceTerminateCall,
     VoiceEnableMic,
     VoiceSetAudioProperties,
-    VoiceAudioProperties,
-    
+    VoiceAudioProperties
 
-    companion object {
-        const val VOICE_PLUGIN_MESSAGE = 200
-    }
+    const val VOICE_PLUGIN_MESSAGE: Int = 200
 }
+

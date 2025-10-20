@@ -1,0 +1,65 @@
+material {
+    name : AvatarSkin,
+    shadingModel : subsurface,
+    
+    parameters : [
+        {
+            type : sampler2D,
+            name : skinTexture
+        },
+        {
+            type : sampler2D,
+            name : normalMap
+        },
+        {
+            type : float3,
+            name : subsurfaceColor,
+            default : [0.8, 0.4, 0.3]
+        },
+        {
+            type : float,
+            name : subsurfacePower,
+            default : 12.234
+        },
+        {
+            type : float,
+            name : thickness,
+            default : 0.5
+        },
+        {
+            type : float,
+            name : roughness,
+            default : 0.6
+        }
+    ],
+    
+    requires : [
+        uv0,
+        tangents
+    ],
+}
+
+vertex {
+    void materialVertex(inout MaterialVertexInputs material) {
+        // Standard vertex processing for skinned mesh
+    }
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        
+        vec2 uv = getUV0();
+        vec4 skinColor = texture(materialParams_skinTexture, uv);
+        vec3 normal = texture(materialParams_normalMap, uv).rgb * 2.0 - 1.0;
+        
+        material.baseColor = skinColor;
+        material.normal = normal;
+        material.roughness = materialParams.roughness;
+        
+        // Subsurface scattering parameters
+        material.subsurfaceColor = materialParams.subsurfaceColor;
+        material.subsurfacePower = materialParams.subsurfacePower;
+        material.thickness = materialParams.thickness;
+    }
+}

@@ -1,23 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  android.annotation.SuppressLint
- *  android.app.Service
- *  android.content.BroadcastReceiver
- *  android.content.Context
- *  android.content.Intent
- *  android.content.IntentFilter
- *  android.content.pm.PackageInfo
- *  android.content.pm.PackageManager$NameNotFoundException
- *  android.media.AudioManager
- *  android.os.Build$VERSION
- *  android.os.Handler
- *  android.os.IBinder
- *  android.os.Message
- *  android.os.Messenger
- *  android.os.Parcelable
- */
 package com.lumiyaviewer.lumiya.voice
 
 import android.annotation.SuppressLint
@@ -57,97 +37,95 @@ import com.lumiyaviewer.lumiya.voice.common.model.VoiceBluetoothState
 import java.util.concurrent.atomic.AtomicInteger
 import javax.annotation.Nullable
 
-class VoiceService
-: Service {
-    Int MESSAGE_PERMISSION_RESULTS = 300
-    private Int REQUIRED_APP_VERSION = 60
-    Int STREAM_TYPE_BLUETOOTH = 6
-    private VoiceService serviceInstance = null
+class VoiceService : Service() {
+    const val MESSAGE_PERMISSION_RESULTS: Int = 300
+    private const val REQUIRED_APP_VERSION: Int = 60
+    const val STREAM_TYPE_BLUETOOTH: Int = 6
+    @JvmStatic
+private VoiceService serviceInstance = null
     private AudioManager audioManager = null
     private AudioStreamVolumeObserver audioStreamVolumeObserver = null
-    private AudioStreamVolumeObserver.OnAudioStreamVolumeChangedListener audioVolumeChangeListener
+    private val AudioStreamVolumeObserver.OnAudioStreamVolumeChangedListener audioVolumeChangeListener
     private Boolean bluetoothReceiverRegistered = false
-    private BroadcastReceiver bluetoothScoIntentReceiver
-    private AtomicInteger bluetoothScoState
+    private val BroadcastReceiver bluetoothScoIntentReceiver
+    private val AtomicInteger bluetoothScoState
     private Boolean isServiceBound = false
-    private Messenger mMessenger
-    private Handler mainThreadHandler = Handler()
+    private val Messenger mMessenger
+    private val Handler mainThreadHandler = Handler()
     private Messenger toAppMessenger = null
     private VivoxController vivoxController = null
 
-    VoiceService() {
+    public VoiceService() {
         this.bluetoothScoState = AtomicInteger(-1)
         this.mMessenger = Messenger((Handler)IncomingHandler(this))
         this.bluetoothScoIntentReceiver = BroadcastReceiver(this){
-            VoiceService this$0
+            final VoiceService this$0
             {
                 this.this$0 = voiceService
             }
 
-            Unit onReceive(Context context, Intent intent) {
+            fun onReceive(Context context, Intent intent) {
                 this.this$0.handleBluetoothStateIntent(intent)
             }
         }
         this.audioVolumeChangeListener = AudioStreamVolumeObserver.OnAudioStreamVolumeChangedListener(this){
-            VoiceService this$0
+            final VoiceService this$0
             {
                 this.this$0 = voiceService
             }
 
-            @Override
-            Unit onAudioStreamVolumeChanged(Int n, Int n2) {
+            override Unit onAudioStreamVolumeChanged(Int n, Int n2) {
                 Debug.Printf("Voice: audio volume changed: %d", n2)
                 this.this$0.updateAudioProperties()
             }
         }
     }
 
-    /* synthetic */ Unit access$000(VoiceService voiceService, VoiceInitialize voiceInitialize, Messenger messenger) {
+    static /* synthetic */ Unit access$000(VoiceService voiceService, VoiceInitialize voiceInitialize, Messenger messenger) {
         voiceService.onVoiceInitialize(voiceInitialize, messenger)
     }
 
-    /* synthetic */ Unit access$100(VoiceService voiceService, VoiceLogin voiceLogin, Messenger messenger) {
+    static /* synthetic */ Unit access$100(VoiceService voiceService, VoiceLogin voiceLogin, Messenger messenger) {
         voiceService.onVoiceLogin(voiceLogin, messenger)
     }
 
-    /* synthetic */ Unit access$1000(VoiceService voiceService, Messenger messenger, Boolean bl) {
+    static /* synthetic */ Unit access$1000(VoiceService voiceService, Messenger messenger, Boolean bl) {
         voiceService.onVoicePermissionResults(messenger, bl)
     }
 
-    /* synthetic */ Unit access$200(VoiceService voiceService, VoiceConnectChannel voiceConnectChannel, Messenger messenger) {
+    static /* synthetic */ Unit access$200(VoiceService voiceService, VoiceConnectChannel voiceConnectChannel, Messenger messenger) {
         voiceService.onVoiceConnectChannel(voiceConnectChannel, messenger)
     }
 
-    /* synthetic */ Unit access$300(VoiceService voiceService, VoiceSet3DPosition voiceSet3DPosition, Messenger messenger) {
+    static /* synthetic */ Unit access$300(VoiceService voiceService, VoiceSet3DPosition voiceSet3DPosition, Messenger messenger) {
         voiceService.onVoiceSet3DPosition(voiceSet3DPosition, messenger)
     }
 
-    /* synthetic */ Unit access$400(VoiceService voiceService, VoiceRejectCall voiceRejectCall, Messenger messenger) {
+    static /* synthetic */ Unit access$400(VoiceService voiceService, VoiceRejectCall voiceRejectCall, Messenger messenger) {
         voiceService.onVoiceRejectCall(voiceRejectCall, messenger)
     }
 
-    /* synthetic */ Unit access$500(VoiceService voiceService, VoiceAcceptCall voiceAcceptCall, Messenger messenger) {
+    static /* synthetic */ Unit access$500(VoiceService voiceService, VoiceAcceptCall voiceAcceptCall, Messenger messenger) {
         voiceService.onVoiceAcceptCall(voiceAcceptCall, messenger)
     }
 
-    /* synthetic */ Unit access$600(VoiceService voiceService, VoiceTerminateCall voiceTerminateCall, Messenger messenger) {
+    static /* synthetic */ Unit access$600(VoiceService voiceService, VoiceTerminateCall voiceTerminateCall, Messenger messenger) {
         voiceService.onVoiceTerminateCall(voiceTerminateCall, messenger)
     }
 
-    /* synthetic */ Unit access$700(VoiceService voiceService, VoiceEnableMic voiceEnableMic) {
+    static /* synthetic */ Unit access$700(VoiceService voiceService, VoiceEnableMic voiceEnableMic) {
         voiceService.onVoiceEnableMic(voiceEnableMic)
     }
 
-    /* synthetic */ Unit access$800(VoiceService voiceService, Messenger messenger) {
+    static /* synthetic */ Unit access$800(VoiceService voiceService, Messenger messenger) {
         voiceService.onVoiceLogout(messenger)
     }
 
-    /* synthetic */ Unit access$900(VoiceService voiceService, VoiceSetAudioProperties voiceSetAudioProperties) {
+    static /* synthetic */ Unit access$900(VoiceService voiceService, VoiceSetAudioProperties voiceSetAudioProperties) {
         voiceService.onVoiceSetAudioProperties(voiceSetAudioProperties)
     }
 
-    @Nullable
-    VoiceService getServiceInstance() {
+    static VoiceService getServiceInstance() {
         return serviceInstance
     }
 
@@ -190,7 +168,7 @@ class VoiceService
             if (((VoiceInitialize)object).appVersionCode < 60) {
                 object = VoicePluginMessageType.VoiceInitializeReply
                 VoiceInitializeReply voiceInitializeReply = VoiceInitializeReply(packageInfo.versionCode, this.getString(2131099681), false)
-                VoicePluginMessenger.sendMessage(messenger, (VoicePluginMessageType)((Any)object), voiceInitializeReply, null)
+                VoicePluginMessenger.sendMessage(messenger, (VoicePluginMessageType)((Object)object), voiceInitializeReply, null)
                 return
             }
             if (ContextCompat.checkSelfPermission((Context)this, "android.permission.RECORD_AUDIO") != 0) {
@@ -233,11 +211,11 @@ class VoiceService
         try {
             String string2
             PackageInfo packageInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0)
-            Any object = null
+            Object object = null
             if (bl) {
                 string2 = object
                 if (this.vivoxController == null) {
-                    Debug.Printf("Voice: Creating Vivox controller", Any[0])
+                    Debug.Printf("Voice: Creating Vivox controller", Object[0])
                     try {
                         this.vivoxController = VivoxController.getInstance((Context)this, this.mainThreadHandler, this.mMessenger)
                         string2 = object
@@ -252,7 +230,7 @@ class VoiceService
             }
             object = VoicePluginMessageType.VoiceInitializeReply
             VoiceInitializeReply voiceInitializeReply = VoiceInitializeReply(packageInfo.versionCode, string2, true)
-            VoicePluginMessenger.sendMessage(messenger, (VoicePluginMessageType)((Any)object), voiceInitializeReply, null)
+            VoicePluginMessenger.sendMessage(messenger, (VoicePluginMessageType)((Object)object), voiceInitializeReply, null)
             if (string2 != null) return
             this.toAppMessenger = messenger
             this.registerForBluetoothScoIntentBroadcast()
@@ -330,19 +308,19 @@ class VoiceService
         this.audioStreamVolumeObserver.stop()
     }
 
-    IBinder onBind(Intent intent) {
+    public IBinder onBind(Intent intent) {
         this.isServiceBound = true
         return this.mMessenger.getBinder()
     }
 
-    Unit onCreate() {
+    fun onCreate() {
         super.onCreate()
         serviceInstance = this
         this.audioManager = (AudioManager)this.getSystemService("audio")
         this.audioStreamVolumeObserver = AudioStreamVolumeObserver((Context)this)
     }
 
-    Unit onDestroy() {
+    fun onDestroy() {
         if (this.vivoxController != null) {
             this.vivoxController.setIncomingMessenger(null)
         }
@@ -360,12 +338,12 @@ class VoiceService
         super.onDestroy()
     }
 
-    Int onStartCommand(Intent intent, Int n, Int n2) {
+    public Int onStartCommand(Intent intent, Int n, Int n2) {
         return 2
     }
 
-    Boolean onUnbind(Intent intent) {
-        Debug.Printf("Voice: service is unbound", Any[0])
+    public Boolean onUnbind(Intent intent) {
+        Debug.Printf("Voice: service is unbound", Object[0])
         this.isServiceBound = false
         if (this.vivoxController != null) {
             this.vivoxController.Logout(null)
@@ -376,7 +354,7 @@ class VoiceService
     /*
      * Enabled aggressive block sorting
      */
-    Unit setVolume(Float f) {
+    fun setVolume(Float f) {
         if (this.audioManager != null) {
             Int n = this.audioManager.isBluetoothScoOn() ? 6 : 0
             Int n2 = Math.round((Float)this.audioManager.getStreamMaxVolume(n) * f)
@@ -423,9 +401,8 @@ class VoiceService
     }
 
     @SuppressLint(value={"HandlerLeak"})
-    private class IncomingHandler
-    : Handler {
-        VoiceService this$0
+    private class IncomingHandler : Handler() {
+        final VoiceService this$0
 
         private IncomingHandler(VoiceService voiceService) {
             this.this$0 = voiceService
@@ -434,7 +411,7 @@ class VoiceService
         /*
          * Exception decompiling
          */
-        Unit handleMessage(Message var1_1) {
+        fun handleMessage(Message var1_1) {
             /*
              * This method has failed to decompile.  When submitting a bug report, please provide this stack trace, and (if you hold appropriate legal rights) the relevant class file.
              * 

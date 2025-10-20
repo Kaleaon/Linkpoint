@@ -2,61 +2,62 @@ package com.lumiyaviewer.lumiya.voice
 
 import android.content.Context
 import android.util.Log
-
-import java.util.concurrent.CompletableFuture
+import kotlinx.coroutines.*
 
 /**
- * WebRTC Voice Adapter for Lumiya
+ * WebRTC Voice Adapter for Linkpoint
  * Bridges the existing Vivox-based voice system with WebRTC implementation
  * Provides drop-in replacement for Vivox functionality
+ * Modern Kotlin implementation with coroutines
  */
-class WebRTCVoiceAdapter {
-    private String TAG = "WebRTCVoiceAdapter"
+class WebRTCVoiceAdapter private constructor(context: Context) {
     
-    private WebRTCVoiceAdapter instance
-    private WebRTCVoiceManager webRTCManager
-    private Context context
-    private Boolean isInitialized = false
+    companion object {
+        private const val TAG = "WebRTCVoiceAdapter"
+        
+        @Volatile
+        private var instance: WebRTCVoiceAdapter? = null
+        
+        /**
+         * Get singleton instance
+         */
+        @JvmStatic
+        fun getInstance(context: Context): WebRTCVoiceAdapter {
+            return instance ?: synchronized(this) {
+                instance ?: WebRTCVoiceAdapter(context).also { instance = it }
+            }
+        }
+    }
+    
+    private val context = context.applicationContext
+    private var webRTCManager: WebRTCVoiceManager? = null
+    private var isInitialized = false
     
     // Voice state
-    private String currentVoiceAccountName
-    private String currentVoicePassword
-    private String currentChannelUri
-    private Boolean isConnectedToVoice = false
-    private Boolean isMicrophoneMuted = false
-    private Float speakerVolume = 1.0f
-    private Float microphoneVolume = 1.0f
+    private var currentVoiceAccountName: String? = null
+    private var currentVoicePassword: String? = null
+    private var currentChannelUri: String? = null
+    private var isConnectedToVoice = false
+    private var isMicrophoneMuted = false
+    private var speakerVolume = 1.0f
+    private var microphoneVolume = 1.0f
     
     // Callback interface for voice events
     interface VoiceAdapterCallback {
-        Unit onVoiceInitialized(Boolean success)
-        Unit onVoiceChannelConnected(String channelUri)
-        Unit onVoiceChannelDisconnected(String channelUri)
-        Unit onVoiceUserJoined(String userId, String displayName)
-        Unit onVoiceUserLeft(String userId)
-        Unit onVoiceError(String error)
+        fun onVoiceInitialized(success: Boolean)
+        fun onVoiceChannelConnected(channelUri: String)
+        fun onVoiceChannelDisconnected(channelUri: String)
+        fun onVoiceUserJoined(userId: String, displayName: String)
+        fun onVoiceUserLeft(userId: String)
+        fun onVoiceError(error: String)
     }
     
-    private VoiceAdapterCallback adapterCallback
-    
-    private WebRTCVoiceAdapter(Context context) {
-        this.context = context.getApplicationContext()
-    }
-    
-    /**
-     * Get singleton instance
-     */
-    synchronized WebRTCVoiceAdapter getInstance(Context context) {
-        if (instance == null) {
-            instance = WebRTCVoiceAdapter(context)
-        }
-        return instance
-    }
+    private var adapterCallback: VoiceAdapterCallback? = null
     
     /**
      * Set callback for voice events
      */
-    Unit setCallback(VoiceAdapterCallback callback) {
+    fun setCallback(callback: VoiceAdapterCallback) {
         this.adapterCallback = callback
     }
     
@@ -64,80 +65,60 @@ class WebRTCVoiceAdapter {
      * Initialize WebRTC voice system
      * Replaces Vivox vx_initialize()
      */
-    CompletableFuture<Boolean> initialize() {
+    suspend fun initialize(): Boolean {
         if (isInitialized) {
             Log.i(TAG, "WebRTC voice adapter already initialized")
-            return CompletableFuture.completedFuture(true)
+            return true
         }
         
         Log.i(TAG, "Initializing WebRTC voice adapter...")
         
-        webRTCManager = WebRTCVoiceManager(context, WebRTCVoiceManager.VoiceCallback() {
-            @Override
-            Unit onVoiceConnected(String channelUri) {
+        webRTCManager = WebRTCVoiceManager(context, object : WebRTCVoiceManager.VoiceCallback {
+            override fun onVoiceConnected(channelUri: String) {
                 isConnectedToVoice = true
                 currentChannelUri = channelUri
-                if (adapterCallback != null) {
-                    adapterCallback.onVoiceChannelConnected(channelUri)
-                }
+                adapterCallback?.onVoiceChannelConnected(channelUri)
             }
             
-            @Override
-            Unit onVoiceDisconnected(String channelUri, String reason) {
+            override fun onVoiceDisconnected(channelUri: String, reason: String) {
                 isConnectedToVoice = false
                 currentChannelUri = null
-                if (adapterCallback != null) {
-                    adapterCallback.onVoiceChannelDisconnected(channelUri)
-                }
+                adapterCallback?.onVoiceChannelDisconnected(channelUri)
             }
             
-            @Override
-            Unit onUserJoined(String channelUri, String userId, String displayName) {
-                if (adapterCallback != null) {
-                    adapterCallback.onVoiceUserJoined(userId, displayName)
-                }
+            override fun onUserJoined(channelUri: String, userId: String, displayName: String) {
+                adapterCallback?.onVoiceUserJoined(userId, displayName)
             }
             
-            @Override
-            Unit onUserLeft(String channelUri, String userId) {
-                if (adapterCallback != null) {
-                    adapterCallback.onVoiceUserLeft(userId)
-                }
+            override fun onUserLeft(channelUri: String, userId: String) {
+                adapterCallback?.onVoiceUserLeft(userId)
             }
             
-            @Override
-            Unit onUserSpeaking(String userId, Boolean speaking) {
+            override fun onUserSpeaking(userId: String, speaking: Boolean) {
                 // Can be used for UI indicators
             }
             
-            @Override
-            Unit onVoiceError(String error) {
-                if (adapterCallback != null) {
-                    adapterCallback.onVoiceError(error)
-                }
+            override fun onVoiceError(error: String) {
+                adapterCallback?.onVoiceError(error)
             }
+        })
         
-        return webRTCManager.initialize()
-            .thenApply(success -> {
-                isInitialized = success
-                if (adapterCallback != null) {
-                    adapterCallback.onVoiceInitialized(success)
-                }
-                Log.i(TAG, "WebRTC voice adapter initialization " + (success ? "successful" : "failed"))
-                return success
+        val success = webRTCManager?.initialize() ?: false
+        isInitialized = success
+        adapterCallback?.onVoiceInitialized(success)
+        Log.i(TAG, "WebRTC voice adapter initialization ${if (success) "successful" else "failed"}")
+        return success
     }
     
     /**
      * Shutdown voice system
      * Replaces Vivox vx_uninitialize()
      */
-    Unit shutdown() {
+    fun shutdown() {
         Log.i(TAG, "Shutting down WebRTC voice adapter...")
         
-        if (webRTCManager != null) {
-            webRTCManager.cleanup()
-            webRTCManager = null
-        }
+        webRTCManager?.cleanup()
+        webRTCManager = null
         
         isInitialized = false
         isConnectedToVoice = false
@@ -152,209 +133,179 @@ class WebRTCVoiceAdapter {
      * Account login for voice
      * Replaces Vivox vx_req_account_login
      */
-    CompletableFuture<Boolean> accountLogin(String accountName, String password, String serverUri) {
-        Log.i(TAG, "Voice account login: " + accountName + " to " + serverUri)
+    suspend fun accountLogin(accountName: String, password: String, serverUri: String): Boolean {
+        Log.i(TAG, "Voice account login: $accountName to $serverUri")
         
         if (!isInitialized) {
             Log.e(TAG, "Voice adapter not initialized")
-            return CompletableFuture.completedFuture(false)
+            return false
         }
         
-        this.currentVoiceAccountName = accountName
-        this.currentVoicePassword = password
+        currentVoiceAccountName = accountName
+        currentVoicePassword = password
         
         // In a real implementation, this would authenticate with the voice server
         // For now, simulate successful login
-        return CompletableFuture.completedFuture(true)
+        return true
     }
     
     /**
      * Account logout
      * Replaces Vivox vx_req_account_logout
      */
-    CompletableFuture<Boolean> accountLogout() {
+    suspend fun accountLogout(): Boolean {
         Log.i(TAG, "Voice account logout")
         
         // Disconnect from any active channels first
-        if (isConnectedToVoice && currentChannelUri != null) {
-            sessionTerminate(currentChannelUri)
+        currentChannelUri?.let {
+            if (isConnectedToVoice) {
+                sessionTerminate(it)
+            }
         }
         
         currentVoiceAccountName = null
         currentVoicePassword = null
         
-        return CompletableFuture.completedFuture(true)
+        return true
     }
     
     /**
      * Connect to voice channel
      * Replaces Vivox vx_req_session_create + vx_req_session_media_connect
      */
-    CompletableFuture<Boolean> sessionConnect(String channelUri, String authToken) {
-        Log.i(TAG, "Connecting to voice session: " + channelUri)
+    suspend fun sessionConnect(channelUri: String, authToken: String?): Boolean {
+        Log.i(TAG, "Connecting to voice session: $channelUri")
         
         if (!isInitialized) {
             Log.e(TAG, "Voice adapter not initialized")
-            return CompletableFuture.completedFuture(false)
+            return false
         }
         
-        if (webRTCManager == null) {
+        val manager = webRTCManager ?: run {
             Log.e(TAG, "WebRTC manager not available")
-            return CompletableFuture.completedFuture(false)
+            return false
         }
         
-        return webRTCManager.connectToVoiceChannel(channelUri, authToken)
+        return manager.connectToVoiceChannel(channelUri, authToken)
     }
     
     /**
      * Disconnect from voice channel
      * Replaces Vivox vx_req_session_terminate
      */
-    CompletableFuture<Boolean> sessionTerminate(String channelUri) {
-        Log.i(TAG, "Terminating voice session: " + channelUri)
+    suspend fun sessionTerminate(channelUri: String): Boolean {
+        Log.i(TAG, "Terminating voice session: $channelUri")
         
-        if (webRTCManager == null) {
-            return CompletableFuture.completedFuture(true)
-        }
-        
-        return webRTCManager.leaveVoiceChannel(channelUri)
+        return webRTCManager?.leaveVoiceChannel(channelUri) ?: true
     }
     
     /**
      * Set local speaker volume
      * Replaces Vivox vx_req_connector_set_local_speaker_volume
      */
-    Unit setSpeakerVolume(Float volume) {
-        this.speakerVolume = Math.max(0.0f, Math.min(1.0f, volume))
-        
-        if (webRTCManager != null) {
-            webRTCManager.setSpeakerVolume(this.speakerVolume)
-        }
-        
-        Log.i(TAG, "Speaker volume set to: " + this.speakerVolume)
+    fun setSpeakerVolume(volume: Float) {
+        speakerVolume = volume.coerceIn(0.0f, 1.0f)
+        webRTCManager?.setSpeakerVolume(speakerVolume)
+        Log.i(TAG, "Speaker volume set to: $speakerVolume")
     }
     
     /**
      * Set local microphone volume
      * Replaces Vivox vx_req_connector_set_local_mic_volume
      */
-    Unit setMicrophoneVolume(Float volume) {
-        this.microphoneVolume = Math.max(0.0f, Math.min(1.0f, volume))
-        
-        if (webRTCManager != null) {
-            webRTCManager.setMicrophoneVolume(this.microphoneVolume)
-        }
-        
-        Log.i(TAG, "Microphone volume set to: " + this.microphoneVolume)
+    fun setMicrophoneVolume(volume: Float) {
+        microphoneVolume = volume.coerceIn(0.0f, 1.0f)
+        webRTCManager?.setMicrophoneVolume(microphoneVolume)
+        Log.i(TAG, "Microphone volume set to: $microphoneVolume")
     }
     
     /**
      * Mute/unmute local microphone
      * Replaces Vivox vx_req_connector_mute_local_mic
      */
-    Unit setMicrophoneMuted(Boolean muted) {
-        this.isMicrophoneMuted = muted
-        
-        if (webRTCManager != null) {
-            webRTCManager.setMicrophoneMuted(muted)
-        }
-        
-        Log.i(TAG, "Microphone " + (muted ? "muted" : "unmuted"))
+    fun setMicrophoneMuted(muted: Boolean) {
+        isMicrophoneMuted = muted
+        webRTCManager?.setMicrophoneMuted(muted)
+        Log.i(TAG, "Microphone ${if (muted) "muted" else "unmuted"}")
     }
     
     /**
      * Check if voice system is initialized
      * Replaces Vivox vx_is_initialized
      */
-    Boolean isVoiceInitialized() {
-        return isInitialized
-    }
+    fun isVoiceInitialized(): Boolean = isInitialized
     
     /**
      * Check if connected to voice channel
      */
-    Boolean isConnectedToChannel() {
-        return isConnectedToVoice
-    }
+    fun isConnectedToChannel(): Boolean = isConnectedToVoice
     
     /**
      * Get current channel URI
      */
-    String getCurrentChannelUri() {
-        return currentChannelUri
-    }
+    fun getCurrentChannelUri(): String? = currentChannelUri
     
     /**
      * Check if microphone is muted
      */
-    Boolean isMicrophoneMuted() {
-        return isMicrophoneMuted
-    }
+    fun isMicrophoneMuted(): Boolean = isMicrophoneMuted
     
     /**
      * Get current speaker volume
      */
-    Float getSpeakerVolume() {
-        return speakerVolume
-    }
+    fun getSpeakerVolume(): Float = speakerVolume
     
     /**
      * Get current microphone volume
      */
-    Float getMicrophoneVolume() {
-        return microphoneVolume
-    }
+    fun getMicrophoneVolume(): Float = microphoneVolume
     
     /**
      * Process voice credentials from Second Life
      * This handles SL-specific voice authentication and channel setup
      */
-    CompletableFuture<Boolean> processSecondLifeVoiceCredentials(
-            String slVoiceUser, String slVoicePassword, String slVoiceServer, String channelUri) {
-        
-        Log.i(TAG, "Processing Second Life voice credentials...")
-        Log.i(TAG, "Voice user: " + slVoiceUser)
-        Log.i(TAG, "Voice server: " + slVoiceServer)
-        Log.i(TAG, "Channel URI: " + channelUri)
-        
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                // Step 1: Account login with SL voice credentials
-                Boolean accountLoginSuccess = accountLogin(slVoiceUser, slVoicePassword, slVoiceServer).join()
-                if (!accountLoginSuccess) {
-                    Log.e(TAG, "Voice account login failed")
-                    return false
-                }
-                
-                // Step 2: Connect to the voice channel
-                Boolean channelConnectSuccess = sessionConnect(channelUri, null).join()
-                if (!channelConnectSuccess) {
-                    Log.e(TAG, "Voice channel connection failed")
-                    return false
-                }
-                
-                Log.i(TAG, "Second Life voice credentials processed successfully")
-                return true
-                
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to process SL voice credentials", e)
-                return false
+    suspend fun processSecondLifeVoiceCredentials(
+        slVoiceUser: String,
+        slVoicePassword: String,
+        slVoiceServer: String,
+        channelUri: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            Log.i(TAG, "Processing Second Life voice credentials...")
+            Log.i(TAG, "Voice user: $slVoiceUser")
+            Log.i(TAG, "Voice server: $slVoiceServer")
+            Log.i(TAG, "Channel URI: $channelUri")
+            
+            // Step 1: Account login with SL voice credentials
+            val accountLoginSuccess = accountLogin(slVoiceUser, slVoicePassword, slVoiceServer)
+            if (!accountLoginSuccess) {
+                Log.e(TAG, "Voice account login failed")
+                return@withContext false
             }
+            
+            // Step 2: Connect to the voice channel
+            val channelConnectSuccess = sessionConnect(channelUri, null)
+            if (!channelConnectSuccess) {
+                Log.e(TAG, "Voice channel connection failed")
+                return@withContext false
+            }
+            
+            Log.i(TAG, "Second Life voice credentials processed successfully")
+            true
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to process SL voice credentials", e)
+            false
+        }
     }
     
     /**
      * Get build version info
      * Replaces Vivox BUILD_VERSION_get, BUILD_DATE_get, etc.
      */
-    String getBuildVersion() {
-        return "WebRTC-1.0"
-    }
+    fun getBuildVersion(): String = "WebRTC-1.0"
     
-    String getBuildDate() {
-        return "2024-09-13"
-    }
+    fun getBuildDate(): String = "2024-09-13"
     
-    String getBuildHost() {
-        return "Linkpoint-WebRTC"
-    }
+    fun getBuildHost(): String = "Linkpoint-WebRTC"
 }

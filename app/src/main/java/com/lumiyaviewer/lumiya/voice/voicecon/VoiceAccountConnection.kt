@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.lumiyaviewer.lumiya.voice.voicecon
 
 import com.lumiyaviewer.lumiya.voice.Debug
@@ -23,11 +20,11 @@ import javax.annotation.Nullable
 
 class VoiceAccountConnection {
     private Boolean disposed = false
-    private String handle
-    private VivoxMessageController messageController
-    private VoiceLoginInfo voiceLoginInfo
+    private val String handle
+    private val VivoxMessageController messageController
+    private val VoiceLoginInfo voiceLoginInfo
 
-    VoiceAccountConnection(VivoxMessageController object, VoiceConnector voiceConnector, VoiceLoginInfo voiceLoginInfo) throws VoiceException {
+    public VoiceAccountConnection(VivoxMessageController object, VoiceConnector voiceConnector, VoiceLoginInfo voiceLoginInfo) throws VoiceException {
         this.messageController = object
         this.voiceLoginInfo = voiceLoginInfo
         vx_req_account_login_t vx_req_account_login_t2 = vx_req_account_login_t()
@@ -39,7 +36,7 @@ class VoiceAccountConnection {
         vx_req_account_login_t2.setEnable_buddies_and_presence(0)
         vx_req_account_login_t2.setBuddy_management_mode(vx_buddy_management_mode.mode_application)
         vx_req_account_login_t2.setParticipant_property_frequency(10)
-        Debug.Printf("Voice: sending login request", Any[0])
+        Debug.Printf("Voice: sending login request", Object[0])
         object = ((VivoxMessageController)object).sendRequestAndWait(vx_req_account_login_t2.getBase())
         if (object == null) {
             throw VoiceException("Failed to login")
@@ -60,7 +57,7 @@ class VoiceAccountConnection {
         this.handle = object
     }
 
-    Unit createVoiceSession(VoiceChannelInfo object, @Nullable String string2) throws VoiceException {
+    fun createVoiceSession(VoiceChannelInfo object, String string2) throws VoiceException {
         vx_req_session_create_t vx_req_session_create_t2 = vx_req_session_create_t()
         vx_req_session_create_t2.setAccount_handle(this.handle)
         if (string2 != null) {
@@ -71,7 +68,7 @@ class VoiceAccountConnection {
         vx_req_session_create_t2.setConnect_audio(1)
         vx_req_session_create_t2.setConnect_text(0)
         vx_req_session_create_t2.setSession_font_id(0)
-        Debug.Printf("Voice: sending session create request", Any[0])
+        Debug.Printf("Voice: sending session create request", Object[0])
         object = this.messageController.sendRequestAndWait(vx_req_session_create_t2.getBase())
         Debug.Printf("Voice: got session create response: %s", object)
         if (object == null) {
@@ -85,7 +82,7 @@ class VoiceAccountConnection {
         }
     }
 
-    Unit dispose() {
+    fun dispose() {
         if (!this.disposed) {
             this.disposed = true
             vx_req_account_logout_t vx_req_account_logout_t2 = vx_req_account_logout_t()
@@ -95,11 +92,11 @@ class VoiceAccountConnection {
         }
     }
 
-    String getHandle() {
+    public String getHandle() {
         return this.handle
     }
 
-    VoiceLoginInfo getVoiceLoginInfo() {
+    public VoiceLoginInfo getVoiceLoginInfo() {
         return this.voiceLoginInfo
     }
 }

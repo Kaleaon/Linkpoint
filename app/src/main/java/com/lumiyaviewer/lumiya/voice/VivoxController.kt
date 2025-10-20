@@ -1,14 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  android.content.Context
- *  android.media.AudioManager
- *  android.os.Build$VERSION
- *  android.os.Handler
- *  android.os.Looper
- *  android.os.Messenger
- */
 package com.lumiyaviewer.lumiya.voice
 
 import android.content.Context
@@ -60,31 +49,28 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 import javax.annotation.Nullable
 
-class VivoxController
-: VivoxMessageController.OnVivoxMessageListener {
-    private VivoxController instance
-    private Any instanceLock
-    private AudioManager audioManager
+class VivoxController : VivoxMessageController.OnVivoxMessageListener {
+    @JvmStatic
+private VivoxController instance
+    private const val Object instanceLock
+    private val AudioManager audioManager
     private Int bluetoothScoState = -1
-    @Nullable
     private Messenger connectedMessenger = null
-    private Handler controllerHandler
+    private val Handler controllerHandler
     private Boolean controllerReady = false
-    private Any controllerReadyLock
-    private Thread controllerThread
-    private AtomicReference<Messenger> incomingMessengerRef = AtomicReference<Any>(null)
+    private val Object controllerReadyLock
+    private val Thread controllerThread
+    private val AtomicReference<Messenger> incomingMessengerRef = AtomicReference<Object>(null)
     private Boolean localMicEnabled = false
-    private Handler mainThreadHandler
-    private VivoxMessageController messageController
-    private Map<String, VoiceChannelInfo> outgoingRequests
-    @Nullable
+    private val Handler mainThreadHandler
+    private val VivoxMessageController messageController
+    private val Map<String, VoiceChannelInfo> outgoingRequests
     private VoiceAccountConnection voiceAccountConnection = null
-    @Nullable
     private VoiceConnector voiceConnector = null
-    private Map<String, VoiceSession> voiceSessions = Collections.synchronizedMap(HashMap())
+    private val Map<String, VoiceSession> voiceSessions = Collections.synchronizedMap(HashMap())
 
-    {
-        instanceLock = Any()
+    static {
+        instanceLock = Object()
         instance = null
     }
 
@@ -95,7 +81,7 @@ class VivoxController
      */
     private VivoxController(Context object, Handler object2) throws VivoxInitException {
         this.outgoingRequests = Collections.synchronizedMap(HashMap())
-        this.controllerReadyLock = Any()
+        this.controllerReadyLock = Object()
         try {
             if (VxClientProxy.vx_initialize() != 0) {
                 super("Failed to initialize voice subsystem")
@@ -130,32 +116,32 @@ class VivoxController
         }
     }
 
-    /* synthetic */ Boolean access$1002(VivoxController vivoxController, Boolean bl) {
+    static /* synthetic */ Boolean access$1002(VivoxController vivoxController, Boolean bl) {
         vivoxController.localMicEnabled = bl
         return bl
     }
 
-    /* synthetic */ Messenger access$1102(VivoxController vivoxController, Messenger messenger) {
+    static /* synthetic */ Messenger access$1102(VivoxController vivoxController, Messenger messenger) {
         vivoxController.connectedMessenger = messenger
         return messenger
     }
 
-    /* synthetic */ Int access$1602(VivoxController vivoxController, Int n) {
+    static /* synthetic */ Int access$1602(VivoxController vivoxController, Int n) {
         vivoxController.bluetoothScoState = n
         return n
     }
 
-    /* synthetic */ Boolean access$402(VivoxController vivoxController, Boolean bl) {
+    static /* synthetic */ Boolean access$402(VivoxController vivoxController, Boolean bl) {
         vivoxController.controllerReady = bl
         return bl
     }
 
-    /* synthetic */ VoiceAccountConnection access$602(VivoxController vivoxController, VoiceAccountConnection voiceAccountConnection) {
+    static /* synthetic */ VoiceAccountConnection access$602(VivoxController vivoxController, VoiceAccountConnection voiceAccountConnection) {
         vivoxController.voiceAccountConnection = voiceAccountConnection
         return voiceAccountConnection
     }
 
-    /* synthetic */ VoiceConnector access$802(VivoxController vivoxController, VoiceConnector voiceConnector) {
+    static /* synthetic */ VoiceConnector access$802(VivoxController vivoxController, VoiceConnector voiceConnector) {
         vivoxController.voiceConnector = voiceConnector
         return voiceConnector
     }
@@ -172,8 +158,9 @@ class VivoxController
      * Enabled unnecessary exception pruning
      * Enabled aggressive exception aggregation
      */
+    @JvmStatic
     VivoxController getInstance(Context context, Handler handler, Messenger messenger) throws VivoxInitException {
-        Any object = instanceLock
+        Object object = instanceLock
         synchronized (object) {
             if (instance == null) {
                 VivoxController vivoxController
@@ -205,7 +192,7 @@ class VivoxController
     private Unit setAudioVoiceMode(Boolean bl) {
         if (bl) {
             this.mainThreadHandler.post(Runnable(this){
-                VivoxController this$0
+                final VivoxController this$0
                 {
                     this.this$0 = vivoxController
                 }
@@ -215,8 +202,7 @@ class VivoxController
                  * Enabled unnecessary exception pruning
                  * Enabled aggressive exception aggregation
                  */
-                @Override
-                Unit run() {
+                override Unit run() {
                     VoiceService voiceService
                     if (this.this$0.audioManager != null && Build.VERSION.SDK_INT >= 11) {
                         try {
@@ -238,7 +224,7 @@ class VivoxController
             return
         }
         this.mainThreadHandler.post(Runnable(this){
-            VivoxController this$0
+            final VivoxController this$0
             {
                 this.this$0 = vivoxController
             }
@@ -248,8 +234,7 @@ class VivoxController
              * Enabled unnecessary exception pruning
              * Enabled aggressive exception aggregation
              */
-            @Override
-            Unit run() {
+            override Unit run() {
                 VoiceService voiceService
                 if (this.this$0.audioManager != null && Build.VERSION.SDK_INT >= 11) {
                     try {
@@ -275,8 +260,8 @@ class VivoxController
 
     private Unit setBluetoothEnable(Boolean bl) {
         this.mainThreadHandler.post(Runnable(this, bl){
-            VivoxController this$0
-            Boolean val$enable
+            final VivoxController this$0
+            final Boolean val$enable
             {
                 this.this$0 = vivoxController
                 this.val$enable = bl
@@ -287,8 +272,7 @@ class VivoxController
              * Enabled unnecessary exception pruning
              * Enabled aggressive exception aggregation
              */
-            @Override
-            Unit run() {
+            override Unit run() {
                 VoiceService voiceService
                 try {
                     this.this$0.audioManager.setBluetoothScoOn(this.val$enable)
@@ -320,7 +304,7 @@ class VivoxController
 
     private Unit tryStartingBluetooth() {
         this.mainThreadHandler.post(Runnable(this){
-            VivoxController this$0
+            final VivoxController this$0
             {
                 this.this$0 = vivoxController
             }
@@ -330,8 +314,7 @@ class VivoxController
              * Enabled unnecessary exception pruning
              * Enabled aggressive exception aggregation
              */
-            @Override
-            Unit run() {
+            override Unit run() {
                 VoiceService voiceService
                 try {
                     this.this$0.audioManager.startBluetoothSco()
@@ -353,10 +336,10 @@ class VivoxController
         }
     }
 
-    Unit AcceptCall(VoiceAcceptCall voiceAcceptCall) {
+    fun AcceptCall(VoiceAcceptCall voiceAcceptCall) {
         this.controllerHandler.post(Runnable(this, voiceAcceptCall){
-            VivoxController this$0
-            VoiceAcceptCall val$message
+            final VivoxController this$0
+            final VoiceAcceptCall val$message
             {
                 this.this$0 = vivoxController
                 this.val$message = voiceAcceptCall
@@ -365,10 +348,9 @@ class VivoxController
             /*
              * Enabled aggressive block sorting
              */
-            @Override
-            Unit run() {
+            override Unit run() {
                 VoiceSession voiceSession
-                Any var2_1 = null
+                Object var2_1 = null
                 if (this.val$message.sessionHandle != null) {
                     Debug.Printf("Voice: trying to accept session with handle %s", this.val$message.sessionHandle)
                     voiceSession = (VoiceSession)this.this$0.voiceSessions.get(this.val$message.sessionHandle)
@@ -383,20 +365,20 @@ class VivoxController
                     } while (!Objects.equal(voiceSession.getVoiceChannelInfo().voiceChannelURI, this.val$message.voiceChannelInfo.voiceChannelURI))
                 }
                 if (voiceSession != null) {
-                    Debug.Printf("Voice: accepting session", Any[0])
+                    Debug.Printf("Voice: accepting session", Object[0])
                     voiceSession.mediaConnect()
                     return
                 }
-                Debug.Printf("Voice: no session to accept", Any[0])
+                Debug.Printf("Voice: no session to accept", Object[0])
             }
     }
 
-    Unit ConnectChannel(VoiceChannelInfo voiceChannelInfo, @Nullable String string2, Messenger messenger) {
+    fun ConnectChannel(VoiceChannelInfo voiceChannelInfo, String string2, Messenger messenger) {
         this.controllerHandler.post(Runnable(this, voiceChannelInfo, string2, messenger){
-            VivoxController this$0
-            String val$channelCredentials
-            Messenger val$replyTo
-            VoiceChannelInfo val$voiceChannelInfo
+            final VivoxController this$0
+            final String val$channelCredentials
+            final Messenger val$replyTo
+            final VoiceChannelInfo val$voiceChannelInfo
             {
                 this.this$0 = vivoxController
                 this.val$voiceChannelInfo = voiceChannelInfo
@@ -410,8 +392,7 @@ class VivoxController
              * Enabled unnecessary exception pruning
              * Enabled aggressive exception aggregation
              */
-            @Override
-            Unit run() {
+            override Unit run() {
                 try {
                     if (this.this$0.voiceAccountConnection == null) {
                         VoiceException voiceException = VoiceException("Not logged in")
@@ -423,10 +404,10 @@ class VivoxController
                     return
                 }
                 {
-                    Any object3
-                    ArrayList<Any> arrayList = ArrayList<Any>()
-                    Any object2 = null
-                    for (Any object3 : this.this$0.voiceSessions.values()) {
+                    Object object3
+                    ArrayList<Object> arrayList = ArrayList<Object>()
+                    Object object2 = null
+                    for (Object object3 : this.this$0.voiceSessions.values()) {
                         if (((VoiceSession)object3).getVoiceChannelInfo().equals(this.val$voiceChannelInfo)) {
                             object2 = object3
                             continue
@@ -449,10 +430,10 @@ class VivoxController
             }
     }
 
-    Unit EnableVoiceMic(VoiceEnableMic voiceEnableMic) {
+    fun EnableVoiceMic(VoiceEnableMic voiceEnableMic) {
         this.controllerHandler.post(Runnable(this, voiceEnableMic){
-            VivoxController this$0
-            VoiceEnableMic val$message
+            final VivoxController this$0
+            final VoiceEnableMic val$message
             {
                 this.this$0 = vivoxController
                 this.val$message = voiceEnableMic
@@ -462,8 +443,7 @@ class VivoxController
              * Enabled force condition propagation
              * Lifted jumps to return sites
              */
-            @Override
-            Unit run() {
+            override Unit run() {
                 block6: {
                     block5: {
                         if (this.this$0.voiceConnector == null) break block5
@@ -479,11 +459,11 @@ class VivoxController
             }
     }
 
-    Unit Login(VoiceLoginInfo voiceLoginInfo, Messenger messenger) {
+    fun Login(VoiceLoginInfo voiceLoginInfo, Messenger messenger) {
         this.controllerHandler.post(Runnable(this, voiceLoginInfo, messenger){
-            VivoxController this$0
-            Messenger val$replyTo
-            VoiceLoginInfo val$voiceLoginInfo
+            final VivoxController this$0
+            final Messenger val$replyTo
+            final VoiceLoginInfo val$voiceLoginInfo
             {
                 this.this$0 = vivoxController
                 this.val$voiceLoginInfo = voiceLoginInfo
@@ -494,11 +474,10 @@ class VivoxController
              * Enabled force condition propagation
              * Lifted jumps to return sites
              */
-            @Override
-            Unit run() {
+            override Unit run() {
                 try {
                     VoiceConnector voiceConnector
-                    Debug.Printf("Voice: Logging in.", Any[0])
+                    Debug.Printf("Voice: Logging in.", Object[0])
                     if (this.this$0.voiceAccountConnection != null && !Objects.equal(this.val$voiceLoginInfo, this.this$0.voiceAccountConnection.getVoiceLoginInfo())) {
                         this.this$0.closeAllSessions()
                         this.this$0.voiceAccountConnection.dispose()
@@ -514,18 +493,18 @@ class VivoxController
                         VivoxController.access$802(this.this$0, null)
                     }
                     if (this.this$0.voiceConnector == null) {
-                        Debug.Printf("Voice: Creating voice connector.", Any[0])
+                        Debug.Printf("Voice: Creating voice connector.", Object[0])
                         VivoxController vivoxController = this.this$0
                         voiceConnector = VoiceConnector(this.this$0.messageController, this.val$voiceLoginInfo.voiceAccountServerName)
                         VivoxController.access$802(vivoxController, voiceConnector)
-                        Debug.Printf("Voice: Voice connector created.", Any[0])
+                        Debug.Printf("Voice: Voice connector created.", Object[0])
                     }
                     this.this$0.voiceConnector.setMuteLocalMic(true)
                     VivoxController.access$1002(this.this$0, false)
                     if (this.this$0.voiceAccountConnection == null) {
-                        Debug.Printf("Voice: Creating voice account connection.", Any[0])
+                        Debug.Printf("Voice: Creating voice account connection.", Object[0])
                         VivoxController.access$602(this.this$0, this.this$0.voiceConnector.createAccountConnection(this.val$voiceLoginInfo))
-                        Debug.Printf("Voice: Voice account connection created.", Any[0])
+                        Debug.Printf("Voice: Voice account connection created.", Object[0])
                     }
                     VivoxController.access$1102(this.this$0, this.val$replyTo)
                     voiceConnector = this.val$replyTo
@@ -543,18 +522,17 @@ class VivoxController
             }
     }
 
-    Unit Logout(Messenger messenger) {
+    fun Logout(Messenger messenger) {
         this.controllerHandler.post(Runnable(this, messenger){
-            VivoxController this$0
-            Messenger val$replyTo
+            final VivoxController this$0
+            final Messenger val$replyTo
             {
                 this.this$0 = vivoxController
                 this.val$replyTo = messenger
             }
 
-            @Override
-            Unit run() {
-                Debug.Printf("Voice: logging out.", Any[0])
+            override Unit run() {
+                Debug.Printf("Voice: logging out.", Object[0])
                 this.this$0.setLocalMicEnabled(false)
                 if (this.this$0.voiceAccountConnection != null) {
                     this.this$0.closeAllSessions()
@@ -565,15 +543,15 @@ class VivoxController
                     this.this$0.voiceConnector.dispose()
                     VivoxController.access$802(this.this$0, null)
                 }
-                Debug.Printf("Voice: logged out.", Any[0])
+                Debug.Printf("Voice: logged out.", Object[0])
                 VoicePluginMessenger.sendMessage(this.val$replyTo, VoicePluginMessageType.VoiceLoginStatus, VoiceLoginStatus(null, false, null), null)
             }
     }
 
-    Unit RejectCall(VoiceRejectCall voiceRejectCall) {
+    fun RejectCall(VoiceRejectCall voiceRejectCall) {
         this.controllerHandler.post(Runnable(this, voiceRejectCall){
-            VivoxController this$0
-            VoiceRejectCall val$message
+            final VivoxController this$0
+            final VoiceRejectCall val$message
             {
                 this.this$0 = vivoxController
                 this.val$message = voiceRejectCall
@@ -583,30 +561,28 @@ class VivoxController
              * Enabled force condition propagation
              * Lifted jumps to return sites
              */
-            @Override
-            Unit run() {
+            override Unit run() {
                 Debug.Printf("Voice: requested to reject session with handle %s", this.val$message.sessionHandle)
                 VoiceSession voiceSession = (VoiceSession)this.this$0.voiceSessions.get(this.val$message.sessionHandle)
                 if (voiceSession != null) {
-                    Debug.Printf("Voice: terminating session", Any[0])
+                    Debug.Printf("Voice: terminating session", Object[0])
                     voiceSession.mediaDisconnect(vx_termination_status.termination_status_busy)
                     return
                 }
-                Debug.Printf("Voice: no session to terminate", Any[0])
+                Debug.Printf("Voice: no session to terminate", Object[0])
             }
     }
 
-    Unit Set3DPosition(VoiceSet3DPosition voiceSet3DPosition) {
+    fun Set3DPosition(VoiceSet3DPosition voiceSet3DPosition) {
         this.controllerHandler.post(Runnable(this, voiceSet3DPosition){
-            VivoxController this$0
-            VoiceSet3DPosition val$message
+            final VivoxController this$0
+            final VoiceSet3DPosition val$message
             {
                 this.this$0 = vivoxController
                 this.val$message = voiceSet3DPosition
             }
 
-            @Override
-            Unit run() {
+            override Unit run() {
                 for (VoiceSession voiceSession : this.this$0.voiceSessions.values()) {
                     VoiceChannelInfo voiceChannelInfo = voiceSession.getVoiceChannelInfo()
                     if (!voiceChannelInfo.isSpatial || !Objects.equal(voiceChannelInfo, this.val$message.voiceChannelInfo)) continue
@@ -615,10 +591,10 @@ class VivoxController
             }
     }
 
-    Unit SetAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
+    fun SetAudioProperties(VoiceSetAudioProperties voiceSetAudioProperties) {
         this.controllerHandler.post(Runnable(this, voiceSetAudioProperties){
-            VivoxController this$0
-            VoiceSetAudioProperties val$message
+            final VivoxController this$0
+            final VoiceSetAudioProperties val$message
             {
                 this.this$0 = vivoxController
                 this.val$message = voiceSetAudioProperties
@@ -629,8 +605,7 @@ class VivoxController
              * Enabled unnecessary exception pruning
              * Enabled aggressive exception aggregation
              */
-            @Override
-            Unit run() {
+            override Unit run() {
                 VoiceService voiceService
                 if (this.this$0.audioManager != null && this.val$message.audioDevice != null && this.this$0.hasActiveSession()) {
                     switch (15.$SwitchMap$com$lumiyaviewer$lumiya$voice$common$model$VoiceAudioDevice[this.val$message.audioDevice.ordinal()]) {
@@ -673,17 +648,16 @@ class VivoxController
             }
     }
 
-    Unit TerminateCall(VoiceTerminateCall voiceTerminateCall) {
+    fun TerminateCall(VoiceTerminateCall voiceTerminateCall) {
         this.controllerHandler.post(Runnable(this, voiceTerminateCall){
-            VivoxController this$0
-            VoiceTerminateCall val$message
+            final VivoxController this$0
+            final VoiceTerminateCall val$message
             {
                 this.this$0 = vivoxController
                 this.val$message = voiceTerminateCall
             }
 
-            @Override
-            Unit run() {
+            override Unit run() {
                 ArrayList<VoiceSession> arrayList = ArrayList<VoiceSession>()
                 for (VoiceSession voiceSession : this.this$0.voiceSessions.values()) {
                     if (!Objects.equal(voiceSession.getVoiceChannelInfo().voiceChannelURI, this.val$message.channelInfo.voiceChannelURI)) continue
@@ -703,15 +677,14 @@ class VivoxController
 
     Unit onBluetoothScoStateChanged(Int n) {
         this.controllerHandler.post(Runnable(this, n){
-            VivoxController this$0
-            Int val$state
+            final VivoxController this$0
+            final Int val$state
             {
                 this.this$0 = vivoxController
                 this.val$state = n
             }
 
-            @Override
-            Unit run() {
+            override Unit run() {
                 VivoxController.access$1602(this.this$0, this.val$state)
                 if (this.this$0.bluetoothScoState == 1 && this.this$0.audioManager != null && this.this$0.hasActiveSession()) {
                     this.this$0.setBluetoothEnable(true)
@@ -722,11 +695,10 @@ class VivoxController
     /*
      * Enabled aggressive block sorting
      */
-    @Override
-    Unit onVivoxEvent(vx_evt_base_t object) {
+    override Unit onVivoxEvent(vx_evt_base_t object) {
         Debug.Printf("Voice: got vivox event: %s", object)
         if (object == null) return
-        Any object2 = ((vx_evt_base_t)object).getType()
+        Object object2 = ((vx_evt_base_t)object).getType()
         Debug.Printf("Voice: vx_event_type %s", object2)
         if (object2 == vx_event_type.evt_session_added) {
             if ((object = VxClientProxy.vx_message_base_t2vx_evt_session_added_t(((vx_evt_base_t)object).getMessage())) == null) return
@@ -748,7 +720,7 @@ class VivoxController
             return
         }
         if (object2 == vx_event_type.evt_participant_updated) {
-            Any object3 = VxClientProxy.vx_message_base_t2vx_evt_participant_updated_t(((vx_evt_base_t)object).getMessage())
+            Object object3 = VxClientProxy.vx_message_base_t2vx_evt_participant_updated_t(((vx_evt_base_t)object).getMessage())
             if (object3 == null) return
             object = this.voiceAccountConnection
             object2 = this.voiceSessions.get(((vx_evt_participant_updated_t)object3).getSession_handle())
@@ -798,8 +770,7 @@ class VivoxController
         this.setAudioVoiceMode(true)
     }
 
-    @Override
-    Unit onVivoxMessage(vx_message_base_t vx_message_base_t2) {
+    override Unit onVivoxMessage(vx_message_base_t vx_message_base_t2) {
         Debug.Printf("Voice: got vivox message: %s", vx_message_base_t2)
     }
 
@@ -807,11 +778,10 @@ class VivoxController
         this.incomingMessengerRef.set(messenger)
     }
 
-    private class ControllerThread
-    : Runnable {
+    private class ControllerThread : Runnable {
         private Handler handler
         private VivoxMessageController messageController
-        VivoxController this$0
+        final VivoxController this$0
 
         private ControllerThread(VivoxController vivoxController) {
             this.this$0 = vivoxController
@@ -822,12 +792,11 @@ class VivoxController
          * Enabled unnecessary exception pruning
          * Enabled aggressive exception aggregation
          */
-        @Override
-        Unit run() {
+        override Unit run() {
             Looper.prepare()
             this.handler = Handler()
             this.messageController = VivoxMessageController(this.this$0)
-            Any object = this.this$0.controllerReadyLock
+            Object object = this.this$0.controllerReadyLock
             synchronized (object) {
                 VivoxController.access$402(this.this$0, true)
                 this.this$0.controllerReadyLock.notifyAll()
@@ -836,13 +805,13 @@ class VivoxController
         }
     }
 
-    class VivoxInitException
-    : Exception {
-        VivoxInitException(String string2) {
+    @JvmStatic
+    class VivoxInitException : Exception() {
+        public VivoxInitException(String string2) {
             super(string2)
         }
 
-        VivoxInitException(String string2, Throwable throwable) {
+        public VivoxInitException(String string2, Throwable throwable) {
             super(string2, throwable)
         }
     }

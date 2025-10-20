@@ -1,10 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  android.os.Handler
- *  android.os.Message
- */
 package com.lumiyaviewer.lumiya.voice
 
 import android.os.Handler
@@ -25,19 +18,19 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.annotation.Nullable
 
 class VivoxMessageController {
-    private Handler handler
-    private AtomicBoolean listenForMessages
-    private OnVivoxMessageListener listener
-    private Map<String, PendingRequest> pendingRequests
-    private Runnable receiveMessages
-    private Thread receiverThread
-    private AtomicInteger requestId = AtomicInteger(1)
+    private val Handler handler
+    private val AtomicBoolean listenForMessages
+    private val OnVivoxMessageListener listener
+    private val Map<String, PendingRequest> pendingRequests
+    private val Runnable receiveMessages
+    private val Thread receiverThread
+    private val AtomicInteger requestId = AtomicInteger(1)
 
-    VivoxMessageController(OnVivoxMessageListener onVivoxMessageListener) {
+    public VivoxMessageController(OnVivoxMessageListener onVivoxMessageListener) {
         this.listenForMessages = AtomicBoolean(true)
         this.pendingRequests = Collections.synchronizedMap(HashMap())
         this.handler = Handler(this){
-            VivoxMessageController this$0
+            final VivoxMessageController this$0
             {
                 this.this$0 = vivoxMessageController
             }
@@ -46,7 +39,7 @@ class VivoxMessageController {
              * Enabled force condition propagation
              * Lifted jumps to return sites
              */
-            Unit handleMessage(Message object) {
+            fun handleMessage(Message object) {
                 block4: {
                     block3: {
                         if (!(((Message)object).obj instanceof vx_message_base_t)) break block3
@@ -61,24 +54,23 @@ class VivoxMessageController {
             }
         }
         this.receiveMessages = Runnable(this){
-            VivoxMessageController this$0
+            final VivoxMessageController this$0
             {
                 this.this$0 = vivoxMessageController
             }
 
-            @Override
-            Unit run() {
+            override Unit run() {
                 VivoxMessageQueue vivoxMessageQueue = VivoxMessageQueue.getInstance()
                 while (this.this$0.listenForMessages.get()) {
                     Boolean bl
                     vx_message_base_t vx_message_base_t2 = vivoxMessageQueue.getMessage()
                     if (vx_message_base_t2 == null) continue
-                    Any object = vx_message_base_t2.getType()
+                    Object object = vx_message_base_t2.getType()
                     Debug.Printf("Voice: got vxMessage (%s)", object)
                     Boolean bl2 = bl = false
                     if (object == vx_message_type.msg_response) {
                         object = vx_resp_base_t(vx_message_base_t.getCPtr(vx_message_base_t2), false)
-                        Any object2 = ((vx_resp_base_t)object).getRequest()
+                        Object object2 = ((vx_resp_base_t)object).getRequest()
                         bl2 = bl
                         if (object2 != null) {
                             object2 = ((vx_req_base_t)object2).getCookie()
@@ -92,7 +84,7 @@ class VivoxMessageController {
                         }
                     }
                     if (bl2) continue
-                    this.this$0.handler.sendMessage(this.this$0.handler.obtainMessage(1, (Any)vx_message_base_t2))
+                    this.this$0.handler.sendMessage(this.this$0.handler.obtainMessage(1, (Object)vx_message_base_t2))
                 }
             }
         }
@@ -102,10 +94,10 @@ class VivoxMessageController {
     }
 
     private String getRequestID() {
-        return Int.toString(this.requestId.getAndIncrement())
+        return Integer.toString(this.requestId.getAndIncrement())
     }
 
-    Unit sendRequest(vx_req_base_t vx_req_base_t2) {
+    fun sendRequest(vx_req_base_t vx_req_base_t2) {
         String string2 = this.getRequestID()
         Debug.Printf("Voice: sending request with cookie '%s'", string2)
         VxClientProxy.set_request_cookie(vx_req_base_t2, string2)
@@ -116,9 +108,8 @@ class VivoxMessageController {
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    @Nullable
-    vx_resp_base_t sendRequestAndWait(vx_req_base_t object) {
-        Any var3_3 = null
+    public vx_resp_base_t sendRequestAndWait(vx_req_base_t object) {
+        Object var3_3 = null
         String string2 = this.getRequestID()
         Debug.Printf("Voice: sending request with cookie '%s'", string2)
         VxClientProxy.set_request_cookie((vx_req_base_t)object, string2)
@@ -137,19 +128,21 @@ class VivoxMessageController {
         }
     }
 
-    Unit stop() {
+    fun stop() {
         this.listenForMessages.set(false)
         this.receiverThread.interrupt()
     }
 
+    @JvmStatic
     interface OnVivoxMessageListener {
-        Unit onVivoxEvent(vx_evt_base_t var1)
+        fun onVivoxEvent(vx_evt_base_t var1)
 
-        Unit onVivoxMessage(vx_message_base_t var1)
+        fun onVivoxMessage(vx_message_base_t var1)
     }
 
-    private class PendingRequest {
-        private Any monitor = Any()
+    @JvmStatic
+private class PendingRequest {
+        private val Object monitor = Object()
         private vx_resp_base_t result = null
 
         private PendingRequest() {
@@ -160,8 +153,8 @@ class VivoxMessageController {
          * Enabled unnecessary exception pruning
          * Enabled aggressive exception aggregation
          */
-        Unit signalRequestCompleted(vx_resp_base_t vx_resp_base_t2) {
-            Any object = this.monitor
+        fun signalRequestCompleted(vx_resp_base_t vx_resp_base_t2) {
+            Object object = this.monitor
             synchronized (object) {
                 this.result = vx_resp_base_t2
                 this.monitor.notifyAll()
@@ -174,8 +167,8 @@ class VivoxMessageController {
          * Enabled unnecessary exception pruning
          * Enabled aggressive exception aggregation
          */
-        vx_resp_base_t waitResult() throws InterruptedException {
-            Any object = this.monitor
+        public vx_resp_base_t waitResult() throws InterruptedException {
+            Object object = this.monitor
             synchronized (object) {
                 while (this.result == null) {
                     this.monitor.wait()

@@ -1,51 +1,96 @@
 package com.lumiyaviewer.lumiya.voice.common.model
 
 import android.os.Bundle
+import com.google.common.collect.Interner
 import com.google.common.collect.Interners
-import java.util.*
+import java.util.UUID
+import javax.annotation.Nonnull
+import javax.annotation.Nullable
 
-/**
- * Modern Kotlin VoiceChatInfo data class
- * Represents the current state of a voice chat session
- */
-data class VoiceChatInfo private constructor(
+class VoiceChatInfo private constructor(
     val state: VoiceChatState,
     val previousState: VoiceChatState,
     val numActiveSpeakers: Int,
     val activeSpeakerID: UUID?,
     val isConference: Boolean,
-    val localMicActive: Boolean,
+    val localMicActive: Boolean
 ) {
-    /**
-     * Voice chat state enum
-     */
+    private constructor(bundle: Bundle) : this(
+        VoiceChatState.valueOf(bundle.getString("state") ?: "None"),
+        VoiceChatState.valueOf(bundle.getString("previousState") ?: "None"),
+        bundle.getInt("numActiveSpeakers"),
+        bundle.getString("activeSpeakerID")?.let { UUID.fromString(it) },
+        bundle.getBoolean("isConference"),
+        bundle.getBoolean("localMicActive")
+    )
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        
+        val that = other as VoiceChatInfo
+        if (numActiveSpeakers != that.numActiveSpeakers) return false
+        if (isConference != that.isConference) return false
+        if (localMicActive != that.localMicActive) return false
+        if (state != that.state) return false
+        if (previousState != that.previousState) return false
+        return if (activeSpeakerID != null) {
+            activeSpeakerID == that.activeSpeakerID
+        } else {
+            that.activeSpeakerID == null
+        }
+    }
+
+    override fun hashCode(): Int {
+        var result = state.hashCode()
+        result = 31 * result + previousState.hashCode()
+        result = 31 * result + numActiveSpeakers
+        result = 31 * result + (activeSpeakerID?.hashCode() ?: 0)
+        result = 31 * result + if (isConference) 1 else 0
+        result = 31 * result + if (localMicActive) 1 else 0
+        return result
+    }
+
+    fun toBundle(): Bundle {
+        val bundle = Bundle()
+        bundle.putString("state", state.toString())
+        bundle.putString("previousState", previousState.toString())
+        bundle.putInt("numActiveSpeakers", numActiveSpeakers)
+        bundle.putString("activeSpeakerID", activeSpeakerID?.toString())
+        bundle.putBoolean("isConference", isConference)
+        bundle.putBoolean("localMicActive", localMicActive)
+        return bundle
+    }
+
+    override fun toString(): String {
+        return "VoiceChatInfo{" +
+                "state=$state" +
+                ", previousState=$previousState" +
+                ", numActiveSpeakers=$numActiveSpeakers" +
+                ", activeSpeakerID=$activeSpeakerID" +
+                ", isConference=$isConference" +
+                ", localMicActive=$localMicActive" +
+                '}'
+    }
+
     enum class VoiceChatState {
         None,
         Ringing,
         Connecting,
-        Active,
+        Active
     }
 
     companion object {
-        // Interner for memory efficiency (reuses identical instances)
-        private val interner = Interners.newWeakInterner<VoiceChatInfo>()
+        private val interner: Interner<VoiceChatInfo> = Interners.newWeakInterner()
+        private val emptyChatState: VoiceChatInfo = interner.intern(
+            VoiceChatInfo(VoiceChatState.None, VoiceChatState.None, 0, null, false, false)
+        )
 
-        // Empty/default chat state
-        private val emptyChatState =
-            interner.intern(
-                VoiceChatInfo(
-                    state = VoiceChatState.None,
-                    previousState = VoiceChatState.None,
-                    numActiveSpeakers = 0,
-                    activeSpeakerID = null,
-                    isConference = false,
-                    localMicActive = false,
-                ),
-            )
+        @JvmStatic
+        fun create(bundle: Bundle): VoiceChatInfo {
+            return interner.intern(VoiceChatInfo(bundle))
+        }
 
-        /**
-         * Creates a VoiceChatInfo instance (interned for memory efficiency)
-         */
         @JvmStatic
         fun create(
             state: VoiceChatState,
@@ -53,70 +98,16 @@ data class VoiceChatInfo private constructor(
             numActiveSpeakers: Int,
             activeSpeakerID: UUID?,
             isConference: Boolean,
-            localMicActive: Boolean,
+            localMicActive: Boolean
         ): VoiceChatInfo {
             return interner.intern(
-                VoiceChatInfo(
-                    state,
-                    previousState,
-                    numActiveSpeakers,
-                    activeSpeakerID,
-                    isConference,
-                    localMicActive,
-                ),
+                VoiceChatInfo(state, previousState, numActiveSpeakers, activeSpeakerID, isConference, localMicActive)
             )
         }
 
-        /**
-         * Creates a VoiceChatInfo from a Bundle
-         */
         @JvmStatic
-        fun create(bundle: Bundle): VoiceChatInfo {
-            val state = VoiceChatState.valueOf(bundle.getString("state") ?: "None")
-            val previousState = VoiceChatState.valueOf(bundle.getString("previousState") ?: "None")
-            val numActiveSpeakers = bundle.getInt("numActiveSpeakers")
-            val activeSpeakerID = bundle.getString("activeSpeakerID")?.let { UUID.fromString(it) }
-            val isConference = bundle.getBoolean("isConference")
-            val localMicActive = bundle.getBoolean("localMicActive")
-
-            return interner.intern(
-                VoiceChatInfo(
-                    state,
-                    previousState,
-                    numActiveSpeakers,
-                    activeSpeakerID,
-                    isConference,
-                    localMicActive,
-                ),
-            )
+        fun empty(): VoiceChatInfo {
+            return emptyChatState
         }
-
-        /**
-         * Returns an empty/default chat state
-         */
-        @JvmStatic
-        fun empty(): VoiceChatInfo = emptyChatState
-    }
-
-    /**
-     * Converts this chat info to a Bundle
-     */
-    fun toBundle(): Bundle =
-        Bundle().apply {
-            putString("state", state.toString())
-            putString("previousState", previousState.toString())
-            putInt("numActiveSpeakers", numActiveSpeakers)
-            putString("activeSpeakerID", activeSpeakerID?.toString())
-            putBoolean("isConference", isConference)
-            putBoolean("localMicActive", localMicActive)
-        }
-
-    /**
-     * String representation
-     */
-    override fun toString(): String {
-        return "VoiceChatInfo{state=$state, previousState=$previousState, " +
-            "numActiveSpeakers=$numActiveSpeakers, activeSpeakerID=$activeSpeakerID, " +
-            "isConference=$isConference, localMicActive=$localMicActive}"
     }
 }

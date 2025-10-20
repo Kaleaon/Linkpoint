@@ -4,7 +4,8 @@ import android.os.Bundle
 import com.lumiyaviewer.lumiya.voice.common.VoicePluginMessage
 
 class VoiceLogout : VoicePluginMessage {
-    override fun toBundle(): Bundle {
+    override Bundle toBundle() {
         return Bundle()
     }
 }
+

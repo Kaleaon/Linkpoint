@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- */
 package com.lumiyaviewer.lumiya.voice.voicecon
 
 import com.lumiyaviewer.lumiya.voice.Debug
@@ -22,11 +19,11 @@ import com.vivox.service.vx_session_handle_type
 
 class VoiceConnector {
     private Boolean disposed = false
-    private String handle
-    private VivoxMessageController messageController
-    private String voiceAccountServerName
+    private val String handle
+    private val VivoxMessageController messageController
+    private val String voiceAccountServerName
 
-    VoiceConnector(VivoxMessageController object, String string2) throws VoiceException {
+    public VoiceConnector(VivoxMessageController object, String string2) throws VoiceException {
         this.messageController = object
         this.voiceAccountServerName = string2
         vx_req_connector_create_t vx_req_connector_create_t2 = vx_req_connector_create_t()
@@ -57,11 +54,11 @@ class VoiceConnector {
         this.handle = object
     }
 
-    VoiceAccountConnection createAccountConnection(VoiceLoginInfo voiceLoginInfo) throws VoiceException {
+    public VoiceAccountConnection createAccountConnection(VoiceLoginInfo voiceLoginInfo) throws VoiceException {
         return VoiceAccountConnection(this.messageController, this, voiceLoginInfo)
     }
 
-    Unit dispose() {
+    fun dispose() {
         if (!this.disposed) {
             this.disposed = true
             vx_req_connector_initiate_shutdown_t vx_req_connector_initiate_shutdown_t2 = vx_req_connector_initiate_shutdown_t()
@@ -71,22 +68,22 @@ class VoiceConnector {
         }
     }
 
-    String getHandle() {
+    public String getHandle() {
         return this.handle
     }
 
-    String getVoiceAccountServerName() {
+    public String getVoiceAccountServerName() {
         return this.voiceAccountServerName
     }
 
-    Unit setLocalMicVolume(Int n) {
+    fun setLocalMicVolume(Int n) {
         vx_req_connector_set_local_mic_volume_t vx_req_connector_set_local_mic_volume_t2 = vx_req_connector_set_local_mic_volume_t()
         vx_req_connector_set_local_mic_volume_t2.setConnector_handle(this.handle)
         vx_req_connector_set_local_mic_volume_t2.setVolume(n)
         this.messageController.sendRequest(vx_req_connector_set_local_mic_volume_t2.getBase())
     }
 
-    Unit setLocalSpeakerVolume(Int n) {
+    fun setLocalSpeakerVolume(Int n) {
         vx_req_connector_set_local_speaker_volume_t vx_req_connector_set_local_speaker_volume_t2 = vx_req_connector_set_local_speaker_volume_t()
         vx_req_connector_set_local_speaker_volume_t2.setConnector_handle(this.handle)
         vx_req_connector_set_local_speaker_volume_t2.setVolume(n)
@@ -96,7 +93,7 @@ class VoiceConnector {
     /*
      * Enabled aggressive block sorting
      */
-    Unit setMuteLocalMic(Boolean bl) {
+    fun setMuteLocalMic(Boolean bl) {
         vx_req_connector_mute_local_mic_t vx_req_connector_mute_local_mic_t2 = vx_req_connector_mute_local_mic_t()
         vx_req_connector_mute_local_mic_t2.setConnector_handle(this.handle)
         Int n = bl ? 1 : 0
@@ -107,7 +104,7 @@ class VoiceConnector {
     /*
      * Enabled aggressive block sorting
      */
-    Unit setMuteLocalSpeaker(Boolean bl) {
+    fun setMuteLocalSpeaker(Boolean bl) {
         vx_req_connector_mute_local_speaker_t vx_req_connector_mute_local_speaker_t2 = vx_req_connector_mute_local_speaker_t()
         vx_req_connector_mute_local_speaker_t2.setConnector_handle(this.handle)
         Int n = bl ? 1 : 0

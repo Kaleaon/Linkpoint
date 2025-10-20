@@ -1,17 +1,3 @@
-/*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  android.content.ComponentName
- *  android.content.Context
- *  android.content.Intent
- *  android.content.ServiceConnection
- *  android.os.Bundle
- *  android.os.IBinder
- *  android.os.Message
- *  android.os.Messenger
- *  android.os.RemoteException
- */
 package com.lumiyaviewer.lumiya.voice
 
 import android.content.ComponentName
@@ -31,30 +17,29 @@ import com.lumiyaviewer.lumiya.voice.Debug
 import com.lumiyaviewer.lumiya.voice.VoiceService
 import javax.annotation.Nonnull
 
-class VoicePermissionRequestActivity
-: AppCompatActivity {
-    private Int PERMISSION_AUDIO_REQUEST_CODE = 100
-    String VOICE_INIT_MESSAGE = "voiceInitMessage"
-    String VOICE_INIT_REPLY_TO = "voiceInitReplyTo"
+class VoicePermissionRequestActivity : AppCompatActivity() {
+    private const val PERMISSION_AUDIO_REQUEST_CODE: Int = 100
+    const val VOICE_INIT_MESSAGE: String = "voiceInitMessage"
+    const val VOICE_INIT_REPLY_TO: String = "voiceInitReplyTo"
     private Boolean serviceBound = false
-    private ServiceConnection serviceConnection = ServiceConnection(this){
-        VoicePermissionRequestActivity this$0
+    private val ServiceConnection serviceConnection = ServiceConnection(this){
+        final VoicePermissionRequestActivity this$0
         {
             this.this$0 = voicePermissionRequestActivity
         }
 
-        Unit onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        fun onServiceConnected(ComponentName componentName, IBinder iBinder) {
             VoicePermissionRequestActivity.access$002(this.this$0, Messenger(iBinder))
             ActivityCompat.requestPermissions(this.this$0, String[]{"android.permission.RECORD_AUDIO"}, 100)
         }
 
-        Unit onServiceDisconnected(ComponentName componentName) {
+        fun onServiceDisconnected(ComponentName componentName) {
             VoicePermissionRequestActivity.access$002(this.this$0, null)
         }
     }
     private Messenger serviceMessenger = null
 
-    /* synthetic */ Messenger access$002(VoicePermissionRequestActivity voicePermissionRequestActivity, Messenger messenger) {
+    static /* synthetic */ Messenger access$002(VoicePermissionRequestActivity voicePermissionRequestActivity, Messenger messenger) {
         voicePermissionRequestActivity.serviceMessenger = messenger
         return messenger
     }
@@ -86,8 +71,7 @@ class VoicePermissionRequestActivity
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    @Override
-    protected Unit onCreate(@Nullable Bundle bundle) {
+    override protected Unit onCreate(Bundle bundle) {
         super.onCreate(bundle)
         if (ContextCompat.checkSelfPermission((Context)this, "android.permission.RECORD_AUDIO") != 0) {
             this.serviceBound = this.bindService(Intent((Context)this, VoiceService.class), this.serviceConnection, 1)
@@ -96,8 +80,7 @@ class VoicePermissionRequestActivity
         this.handlePermissionGranted(true)
     }
 
-    @Override
-    protected Unit onDestroy() {
+    override protected Unit onDestroy() {
         if (this.serviceBound) {
             this.serviceBound = false
             this.unbindService(this.serviceConnection)
@@ -109,8 +92,7 @@ class VoicePermissionRequestActivity
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    @Override
-    Unit onRequestPermissionsResult(Int n, @Nonnull String[] stringArray, @Nonnull Int[] nArray) {
+    override Unit onRequestPermissionsResult(Int n, String[] stringArray, Int[] nArray) {
         block4: {
             block3: {
                 Debug.Printf("Cardboard: onRequestPermissionResult, code %d", n)

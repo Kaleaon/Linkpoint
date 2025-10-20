@@ -1,14 +1,3 @@
-/*
-import java.util.*
- * Decompiled with CFR 0.152.
- * 
- * Could not load the following classes:
- *  android.content.Context
- *  android.database.ContentObserver
- *  android.media.AudioManager
- *  android.os.Handler
- *  android.provider.Settings$System
- */
 package com.lumiyaviewer.lumiya.voice
 
 import android.content.Context
@@ -16,64 +5,64 @@ import android.database.ContentObserver
 import android.media.AudioManager
 import android.os.Handler
 import android.provider.Settings
-import javax.annotation.Nonnull
 
+/**
+ * Observes changes to audio stream volume levels.
+ * Monitors system volume changes and notifies listeners when audio stream volumes change.
+ */
 class AudioStreamVolumeObserver {
-    private AudioStreamVolumeContentObserver mAudioStreamVolumeContentObserver
-    private Context mContext
+    private var mAudioStreamVolumeContentObserver: AudioStreamVolumeContentObserver? = null
+    private val mContext: Context
 
-    AudioStreamVolumeObserver(@Nonnull Context context) {
+    constructor(context: Context) {
         this.mContext = context
     }
 
-    Unit start(Int[] nArray, @Nonnull OnAudioStreamVolumeChangedListener onAudioStreamVolumeChangedListener) {
-        this.stop()
-        this.mAudioStreamVolumeContentObserver = AudioStreamVolumeContentObserver(Handler(), (AudioManager)this.mContext.getSystemService("audio"), nArray, onAudioStreamVolumeChangedListener)
-        this.mContext.getContentResolver().registerContentObserver(Settings.System.CONTENT_URI, true, (ContentObserver)this.mAudioStreamVolumeContentObserver)
+    fun start(streamTypes: IntArray, listener: OnAudioStreamVolumeChangedListener) {
+        stop()
+        mAudioStreamVolumeContentObserver = AudioStreamVolumeContentObserver(
+            Handler(),
+            mContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager,
+            streamTypes,
+            listener
+        )
+        mContext.contentResolver.registerContentObserver(
+            Settings.System.CONTENT_URI,
+            true,
+            mAudioStreamVolumeContentObserver!!
+        )
     }
 
-    /*
-     * Enabled force condition propagation
-     * Lifted jumps to return sites
-     */
-    Unit stop() {
-        if (this.mAudioStreamVolumeContentObserver == null) {
-            return
+    fun stop() {
+        mAudioStreamVolumeContentObserver?.let {
+            mContext.contentResolver.unregisterContentObserver(it)
+            mAudioStreamVolumeContentObserver = null
         }
-        this.mContext.getContentResolver().unregisterContentObserver((ContentObserver)this.mAudioStreamVolumeContentObserver)
-        this.mAudioStreamVolumeContentObserver = null
     }
 
-    private class AudioStreamVolumeContentObserver
-    : ContentObserver {
-        private AudioManager mAudioManager
-        private Int[] mAudioStreamTypes
-        private Int[] mLastVolumes
-        private OnAudioStreamVolumeChangedListener mListener
-
-        AudioStreamVolumeContentObserver(@Nonnull Handler handler, @Nonnull AudioManager audioManager, Int[] nArray, @Nonnull OnAudioStreamVolumeChangedListener onAudioStreamVolumeChangedListener) {
-            super(handler)
-            this.mAudioManager = audioManager
-            this.mAudioStreamTypes = nArray
-            this.mListener = onAudioStreamVolumeChangedListener
-            this.mLastVolumes = Int[this.mAudioStreamTypes.length]
-            for (Int i = 0; i < this.mAudioStreamTypes.length; ++i) {
-                this.mLastVolumes[i] = this.mAudioManager.getStreamVolume(this.mAudioStreamTypes[i])
-            }
+    private class AudioStreamVolumeContentObserver(
+        handler: Handler,
+        private val mAudioManager: AudioManager,
+        private val mAudioStreamTypes: IntArray,
+        private val mListener: OnAudioStreamVolumeChangedListener
+    ) : ContentObserver(handler) {
+        
+        private val mLastVolumes: IntArray = IntArray(mAudioStreamTypes.size) { i ->
+            mAudioManager.getStreamVolume(mAudioStreamTypes[i])
         }
 
-        Unit onChange(Boolean bl) {
-            for (Int i = 0; i < this.mAudioStreamTypes.length; ++i) {
-                Int n = this.mAudioManager.getStreamVolume(this.mAudioStreamTypes[i])
-                if (n == this.mLastVolumes[i]) continue
-                this.mLastVolumes[i] = n
-                this.mListener.onAudioStreamVolumeChanged(this.mAudioStreamTypes[i], n)
+        override fun onChange(selfChange: Boolean) {
+            for (i in mAudioStreamTypes.indices) {
+                val currentVolume = mAudioManager.getStreamVolume(mAudioStreamTypes[i])
+                if (currentVolume != mLastVolumes[i]) {
+                    mLastVolumes[i] = currentVolume
+                    mListener.onAudioStreamVolumeChanged(mAudioStreamTypes[i], currentVolume)
+                }
             }
         }
     }
 
     interface OnAudioStreamVolumeChangedListener {
-        Unit onAudioStreamVolumeChanged(Int var1, Int var2)
+        fun onAudioStreamVolumeChanged(streamType: Int, volume: Int)
     }
 }
-
