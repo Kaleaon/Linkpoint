@@ -1,6 +1,6 @@
-# Filament Rendering Integration
+# Filament Rendering Integration for Linkpoint
 
-This directory contains the integration of Google's Filament rendering engine into the Lumiya Viewer app. Filament is a modern, physically-based rendering (PBR) engine designed for mobile and desktop platforms.
+This directory contains the complete integration of Google's Filament rendering engine into Linkpoint, the modern Kotlin-based Second Life viewer. Filament is a modern, physically-based rendering (PBR) engine designed for mobile and desktop platforms.
 
 ## Overview
 

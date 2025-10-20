@@ -6,8 +6,10 @@ import com.google.android.filament.*
 import com.google.android.filament.RenderableManager.PrimitiveType
 import com.google.android.filament.VertexBuffer.AttributeType
 import com.google.android.filament.VertexBuffer.VertexAttribute
-import com.google.android.filament.filamat.MaterialBuilder
 import com.linkpoint.slproto.types.LLVector3
+import com.linkpoint.slproto.users.manager.ObjectsManager
+import com.linkpoint.slproto.users.manager.UserManager
+import com.linkpoint.slproto.terrain.TerrainData
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.PI
@@ -42,8 +44,15 @@ class FilamentWorldRenderer(
     private var cameraRotationX = 0f
     private var cameraRotationY = 0f
     
-    // Material manager
+    // Managers
     private lateinit var materialManager: FilamentMaterialManager
+    private lateinit var textureManager: FilamentTextureManager
+    private lateinit var lightingManager: FilamentLightingManager
+    private lateinit var worldDataBridge: FilamentWorldDataBridge
+    private lateinit var terrainRenderer: FilamentTerrainRenderer
+    private lateinit var gltfLoader: FilamentGltfLoader
+    private lateinit var avatarRenderer: FilamentAvatarRenderer
+    private lateinit var performanceOptimizer: FilamentPerformanceOptimizer
     
     // Test renderable (a simple triangle for now)
     @Entity private var testRenderable = 0
@@ -64,13 +73,39 @@ class FilamentWorldRenderer(
             materialManager = FilamentMaterialManager(context, engine)
             materialManager.preloadMaterials()
             
+            // Initialize texture manager
+            textureManager = FilamentTextureManager(context, engine)
+            
+            // Initialize lighting manager
+            lightingManager = FilamentLightingManager(engine, scene)
+            lightingManager.initialize()
+            
+            // Initialize terrain renderer
+            terrainRenderer = FilamentTerrainRenderer(engine, scene, materialManager)
+            terrainRenderer.initialize()
+            
+            // Initialize glTF loader
+            gltfLoader = FilamentGltfLoader(context, engine, scene)
+            
+            // Initialize avatar renderer
+            avatarRenderer = FilamentAvatarRenderer(
+                engine, scene, materialManager, textureManager, gltfLoader
+            )
+            avatarRenderer.initialize()
+            
+            // Initialize performance optimizer
+            performanceOptimizer = FilamentPerformanceOptimizer(engine, scene)
+            
+            // Initialize world data bridge
+            worldDataBridge = FilamentWorldDataBridge(context, renderContext, materialManager)
+            
             // Create a simple test scene
             createTestTriangle()
             
             // Set initial camera position
             updateCameraTransform()
             
-            Log.i(TAG, "FilamentWorldRenderer initialized")
+            Log.i(TAG, "FilamentWorldRenderer initialized with all managers")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize world renderer", e)
             throw e
@@ -247,6 +282,81 @@ class FilamentWorldRenderer(
     }
     
     /**
+     * Connect to world data sources
+     */
+    fun connectToWorldData(
+        objectsManager: ObjectsManager? = null,
+        userManager: UserManager? = null,
+        terrainData: TerrainData? = null
+    ) {
+        objectsManager?.let { worldDataBridge.setObjectsManager(it) }
+        userManager?.let { worldDataBridge.setUserManager(it) }
+        terrainData?.let { worldDataBridge.setTerrainData(it) }
+        
+        // Start syncing
+        worldDataBridge.startSync()
+        
+        Log.i(TAG, "Connected to world data sources")
+    }
+    
+    /**
+     * Disconnect from world data
+     */
+    fun disconnectFromWorldData() {
+        worldDataBridge.stopSync()
+        worldDataBridge.clearAll()
+        Log.i(TAG, "Disconnected from world data")
+    }
+    
+    /**
+     * Get the world data bridge for direct access
+     */
+    fun getWorldDataBridge(): FilamentWorldDataBridge = worldDataBridge
+    
+    /**
+     * Get the lighting manager for direct access
+     */
+    fun getLightingManager(): FilamentLightingManager = lightingManager
+    
+    /**
+     * Get the texture manager for direct access
+     */
+    fun getTextureManager(): FilamentTextureManager = textureManager
+    
+    /**
+     * Get the material manager for direct access
+     */
+    fun getMaterialManager(): FilamentMaterialManager = materialManager
+    
+    /**
+     * Get the terrain renderer for direct access
+     */
+    fun getTerrainRenderer(): FilamentTerrainRenderer = terrainRenderer
+    
+    /**
+     * Load and display terrain
+     */
+    fun loadTerrain(terrainData: TerrainData) {
+        terrainRenderer.updateTerrain(terrainData)
+        Log.i(TAG, "Terrain loaded and displayed")
+    }
+    
+    /**
+     * Get the glTF loader for direct access
+     */
+    fun getGltfLoader(): FilamentGltfLoader = gltfLoader
+    
+    /**
+     * Get the avatar renderer for direct access
+     */
+    fun getAvatarRenderer(): FilamentAvatarRenderer = avatarRenderer
+    
+    /**
+     * Get the performance optimizer for direct access
+     */
+    fun getPerformanceOptimizer(): FilamentPerformanceOptimizer = performanceOptimizer
+    
+    /**
      * Cleanup renderer resources
      */
     fun destroy() {
@@ -262,7 +372,25 @@ class FilamentWorldRenderer(
             testVertexBuffer?.let { engine.destroyVertexBuffer(it) }
             testIndexBuffer?.let { engine.destroyIndexBuffer(it) }
             
-            // Destroy material manager
+            // Destroy managers in reverse order
+            if (::worldDataBridge.isInitialized) {
+                worldDataBridge.destroy()
+            }
+            if (::avatarRenderer.isInitialized) {
+                avatarRenderer.destroy()
+            }
+            if (::gltfLoader.isInitialized) {
+                gltfLoader.destroy()
+            }
+            if (::terrainRenderer.isInitialized) {
+                terrainRenderer.destroy()
+            }
+            if (::lightingManager.isInitialized) {
+                lightingManager.destroy()
+            }
+            if (::textureManager.isInitialized) {
+                textureManager.destroy()
+            }
             if (::materialManager.isInitialized) {
                 materialManager.destroy()
             }

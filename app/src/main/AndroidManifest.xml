@@ -130,26 +130,6 @@
             android:name="com.lumiyaviewer.lumiya.ui.render.WorldViewActivity"
             android:exported="false"/>
 
-        <!-- Filament World View Activity - Modern Filament-based renderer -->
-        <activity
-            android:theme="@style/Theme.Lumiya.NoActionBar"
-            android:label="Filament World View"
-            android:name="com.lumiyaviewer.lumiya.ui.render.FilamentWorldViewActivity"
-            android:exported="false"/>
-
-        <!-- Filament Test Activity - For testing Filament rendering -->
-        <activity
-            android:theme="@style/Theme.Lumiya.NoActionBar"
-            android:label="Filament Test"
-            android:name="com.lumiyaviewer.lumiya.ui.render.FilamentTestActivity"
-            android:exported="true">
-            <!-- Make it launchable for testing -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
-
         <!-- Modern World View Activity with Material Design 3 -->
         <activity
             android:label="Modern World View"
