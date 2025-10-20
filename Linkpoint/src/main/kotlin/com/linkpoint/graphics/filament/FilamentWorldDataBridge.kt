@@ -53,6 +53,9 @@ class FilamentWorldDataBridge(
     private var userManager: UserManager? = null
     private var terrainData: TerrainData? = null
     
+    // Prim geometry generator
+    private val primGeometry = FilamentPrimGeometry(engine)
+    
     // Coroutine scope for async operations
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var updateJob: Job? = null
@@ -272,9 +275,24 @@ class FilamentWorldDataBridge(
             // Create entity
             @Entity val entity = renderContext.entityManager.create()
             
-            // Create simple cube mesh for now
-            // TODO: Use actual prim geometry based on object type
-            val (vertexBuffer, indexBuffer) = createCubeMesh(scale)
+            // Generate geometry based on prim type
+            val (vertexBuffer, indexBuffer) = try {
+                // Try to get volume params if this is a prim
+                val drawParams = (obj as? com.linkpoint.slproto.objects.SLObjectPrimInfo)
+                    ?.primDrawParams
+                
+                val volumeParams = drawParams?.getVolumeParams()
+                
+                if (volumeParams != null) {
+                    primGeometry.generatePrimMesh(volumeParams, scale)
+                } else {
+                    // Fallback to cube for avatars or unknown types
+                    createCubeMesh(scale)
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to generate prim geometry, using cube", e)
+                createCubeMesh(scale)
+            }
             
             // Get material
             val material = materialManager.getMaterial(FilamentMaterialManager.MaterialType.PRIM_BASIC)
