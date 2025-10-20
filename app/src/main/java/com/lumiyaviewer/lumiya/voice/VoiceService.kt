@@ -38,9 +38,11 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.annotation.Nullable
 
 class VoiceService : Service() {
-    const val MESSAGE_PERMISSION_RESULTS: Int = 300
-    private const val REQUIRED_APP_VERSION: Int = 60
-    const val STREAM_TYPE_BLUETOOTH: Int = 6
+    companion object {
+        const val MESSAGE_PERMISSION_RESULTS: Int = 300
+        private const val REQUIRED_APP_VERSION: Int = 60
+        const val STREAM_TYPE_BLUETOOTH: Int = 6
+    }
     @JvmStatic
 private VoiceService serviceInstance = null
     private AudioManager audioManager = null
