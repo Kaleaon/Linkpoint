@@ -1,0 +1,57 @@
+material {
+    name : PrimBasic,
+    shadingModel : lit,
+    
+    parameters : [
+        {
+            type : sampler2D,
+            name : baseColorMap
+        },
+        {
+            type : float3,
+            name : baseColor,
+            default : [1.0, 1.0, 1.0]
+        },
+        {
+            type : float,
+            name : metallic,
+            default : 0.0
+        },
+        {
+            type : float,
+            name : roughness,
+            default : 0.5
+        },
+        {
+            type : float,
+            name : alpha,
+            default : 1.0
+        }
+    ],
+    
+    requires : [
+        uv0
+    ],
+    
+    blending : masked,
+    maskThreshold : 0.4,
+}
+
+vertex {
+    void materialVertex(inout MaterialVertexInputs material) {
+        // Standard vertex processing
+    }
+}
+
+fragment {
+    void material(inout MaterialInputs material) {
+        prepareMaterial(material);
+        
+        vec2 uv = getUV0();
+        vec4 texColor = texture(materialParams_baseColorMap, uv);
+        
+        material.baseColor = vec4(texColor.rgb * materialParams.baseColor, texColor.a * materialParams.alpha);
+        material.metallic = materialParams.metallic;
+        material.roughness = materialParams.roughness;
+    }
+}

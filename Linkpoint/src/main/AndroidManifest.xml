@@ -51,6 +51,25 @@
         <activity android:name=".ui.settings.SettingsActivity" android:exported="false"/>
         <activity android:name=".ui.render.WorldViewActivity" android:exported="false"/>
         
+        <!-- Filament Rendering Activities -->
+        <activity
+            android:name=".ui.render.FilamentTestActivity"
+            android:label="Filament Test"
+            android:theme="@style/Theme.Linkpoint"
+            android:exported="true">
+            <!-- Make it launchable for testing -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        
+        <activity
+            android:name=".ui.render.FilamentWorldViewActivity"
+            android:label="Filament World View"
+            android:theme="@style/Theme.Linkpoint"
+            android:exported="false"/>
+        
         <!-- Services -->
         <service android:name=".GridConnectionService" android:exported="false"/>
         <service android:name=".StreamingMediaService" android:exported="false"/>
