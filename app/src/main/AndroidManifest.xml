@@ -135,6 +135,25 @@
             android:label="Modern World View"
             android:name="com.lumiyaviewer.lumiya.ui.modern.ModernWorldActivity"
             android:exported="false"/>
+            
+        <!-- Filament Rendering Activities -->
+        <activity
+            android:name="com.lumiyaviewer.lumiya.ui.render.FilamentTestActivity"
+            android:label="Filament Test"
+            android:theme="@style/Theme.Lumiya"
+            android:exported="true">
+            <!-- Make it launchable for testing -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+        
+        <activity
+            android:name="com.lumiyaviewer.lumiya.ui.render.FilamentWorldViewActivity"
+            android:label="Filament World View"
+            android:theme="@style/Theme.Lumiya"
+            android:exported="false"/>
 
         <activity
             android:theme="@style/Theme.Lumiya.NoActionBar"
