@@ -7,37 +7,32 @@ import java.io.IOException
 import java.util.UUID
 import org.xmlpull.v1.XmlSerializer
 
-class LLSDString : LLSDNode {
-    private String value
+class LLSDString(private val value: String) : LLSDNode() {
 
-    LLSDString(String str) {
-        this.value = str
+    override fun asBoolean(): Boolean {
+        return "true".equals(this.value, ignoreCase = true)
     }
 
-    Boolean asBoolean() {
-        return "true".equalsIgnoreCase(this.value)
-    }
-
-    String asString() {
+    override fun asString(): String {
         return this.value
     }
 
-    UUID asUUID() {
+    override fun asUUID(): UUID {
         return UUID.fromString(this.value)
     }
 
-    Unit toBinary(DataOutputStream dataOutputStream) throws IOException {
+    override fun toBinary(dataOutputStream: DataOutputStream) {
         dataOutputStream.writeByte(115)
         if (this.value.isEmpty()) {
             dataOutputStream.writeInt(0)
             return
         }
-        byte[] stringToVariableUTF = SLMessage.stringToVariableUTF(this.value)
-        dataOutputStream.writeInt(stringToVariableUTF.length)
+        val stringToVariableUTF = SLMessage.stringToVariableUTF(this.value)
+        dataOutputStream.writeInt(stringToVariableUTF.size)
         dataOutputStream.write(stringToVariableUTF)
     }
 
-    Unit toXML(XmlSerializer xmlSerializer) throws IOException {
+    override fun toXML(xmlSerializer: XmlSerializer) {
         xmlSerializer.startTag("", "string")
         xmlSerializer.text(this.value)
         xmlSerializer.endTag("", "string")

@@ -72,6 +72,22 @@ abstract class SLMessage : Parcelable {
         }
 
         /**
+         * Convert variable-length UTF-8 encoded byte array to String
+         * Format: [length bytes][UTF-8 data]
+         */
+        fun stringFromVariableUTF(data: ByteArray): String {
+            return String(data, Charsets.UTF_8)
+        }
+
+        /**
+         * Convert String to variable-length UTF-8 encoded byte array
+         * Format: [length bytes][UTF-8 data]
+         */
+        fun stringToVariableUTF(str: String): ByteArray {
+            return str.toByteArray(Charsets.UTF_8)
+        }
+
+        /**
          * Unpack a message from network buffer
          */
         fun unpack(
