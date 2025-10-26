@@ -9,7 +9,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.AssetManager
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import androidx.core.app.NotificationCompat
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication

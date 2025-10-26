@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.ui.grids
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import android.widget.ArrayAdapter
 import com.lumiyaviewer.lumiya.R
 import java.util.ArrayList

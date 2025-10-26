@@ -18,7 +18,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import androidx.annotation.Nullable
 import androidx.fragment.app.NotificationCompat
 import com.google.common.base.Strings

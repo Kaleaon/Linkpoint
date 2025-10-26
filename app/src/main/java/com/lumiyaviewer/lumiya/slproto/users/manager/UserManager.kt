@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.slproto.users.manager
 
 import android.database.Cursor
 import android.os.Environment
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.Table
