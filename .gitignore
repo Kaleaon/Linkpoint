@@ -134,3 +134,4 @@ __pycache__/
 # Environment files
 *.env
 *.env.*
+\n# Build outputs\napp/build/
