@@ -27,7 +27,7 @@ class AvatarAnimationList {
         this.animations = ImmutableList.copyOf(arrayList)
     }
 
-    Unit animate(AvatarSkeleton avatarSkeleton, Float[] fArr, Float[] fArr2, LLQuaternion[] lLQuaternionArr, LLVector3[] lLVector3Arr) {
+    Unit animate(AvatarSkeleton avatarSkeleton, FloatArray fArr, FloatArray fArr2, LLQuaternion[] lLQuaternionArr, LLVector3[] lLVector3Arr) {
         for (AvatarRunningAnimation animate : this.animations) {
             animate.animate(avatarSkeleton, fArr, fArr2, lLQuaternionArr, lLVector3Arr)
         }

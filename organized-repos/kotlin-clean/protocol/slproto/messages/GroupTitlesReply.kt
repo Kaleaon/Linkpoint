@@ -22,7 +22,7 @@ class GroupTitlesReply : SLMessage() {
     class GroupData {
         public UUID RoleID
         public Boolean Selected
-        public Byte[] Title
+        public ByteArray Title
     }
 
     public GroupTitlesReply() {

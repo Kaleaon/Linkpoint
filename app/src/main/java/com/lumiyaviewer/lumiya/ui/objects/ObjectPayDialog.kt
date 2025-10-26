@@ -19,7 +19,7 @@ class ObjectPayDialog {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356  reason: not valid java name */
     /* synthetic */ Unit m677lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356(AlertDialog alertDialog, PayInfo payInfo, Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface) {
         alertDialog.findViewById(R.id.object_pay_cancel).setOnClickListener($Lambda$X9q_n5C700PWS1S1Fm8NWTXuec(dialogInterface))
-        Int[] iArr = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
+        IntArray iArr = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
         ImmutableList<Int> payPrices = payInfo.payPrices()
         Int i = 0
         while (true) {

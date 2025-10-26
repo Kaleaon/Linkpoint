@@ -9,12 +9,12 @@ class LoadURL : SLMessage() {
 
     @JvmStatic
     class Data {
-        public Byte[] Message
+        public ByteArray Message
         public UUID ObjectID
-        public Byte[] ObjectName
+        public ByteArray ObjectName
         public UUID OwnerID
         public Boolean OwnerIsGroup
-        public Byte[] URL
+        public ByteArray URL
     }
 
     public LoadURL() {

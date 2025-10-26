@@ -14,8 +14,8 @@ class PrimFlexibleInfo {
     private Int NumSections = 0
     private Long lastUpdateMillis
     private volatile Boolean needVertexBufferUpdate = false
-    private Float[] sectionData
-    private Float[] sectionMatrices
+    private FloatArray sectionData
+    private FloatArray sectionMatrices
     private FlexibleSection[] sections
     private GLLoadableBuffer vertexBuffer = null
 
@@ -33,7 +33,7 @@ class PrimFlexibleInfo {
         }
     }
 
-    Boolean doFlexibleUpdate(PrimFlexibleParams primFlexibleParams, Float[] fArr, Int i, Float f, Float f2, Float f3) {
+    Boolean doFlexibleUpdate(PrimFlexibleParams primFlexibleParams, FloatArray fArr, Int i, Float f, Float f2, Float f3) {
         Long currentTimeMillis = System.currentTimeMillis()
         if (currentTimeMillis < this.lastUpdateMillis + MIN_UPDATE_INTERVAL) {
             return false
@@ -60,14 +60,14 @@ class PrimFlexibleInfo {
         return true
     }
 
-    Boolean doFlexibleUpdateSlow(PrimFlexibleParams primFlexibleParams, Float[] fArr, Int i, Float f, Float f2, Float f3) {
+    Boolean doFlexibleUpdateSlow(PrimFlexibleParams primFlexibleParams, FloatArray fArr, Int i, Float f, Float f2, Float f3) {
         Long currentTimeMillis = System.currentTimeMillis()
         if (currentTimeMillis < this.lastUpdateMillis + MIN_UPDATE_INTERVAL) {
             return false
         }
         LLVector3 lLVector3 = LLVector3(fArr[i + 12], fArr[i + 13], fArr[i + 14])
         LLVector3 lLVector32 = LLVector3(f, f2, f3)
-        Float[] fArr2 = Float[32]
+        FloatArray fArr2 = FloatArray(32)
         Matrix.invertM(fArr2, 0, fArr, i)
         LLQuaternion lLQuaternion = LLQuaternion(fArr2)
         if (primFlexibleParams.NumFlexiSections != this.NumSections) {
@@ -164,7 +164,7 @@ class PrimFlexibleInfo {
             }
             i3++
         }
-        Float[] fArr3 = Float[32]
+        FloatArray fArr3 = FloatArray(32)
         Matrix.setIdentityM(fArr3, 16)
         Matrix.scaleM(fArr3, 16, 1.0f / lLVector32.x, 1.0f / lLVector32.y, 1.0f / lLVector32.z)
         Matrix.multiplyMM(fArr3, 0, fArr3, 16, lLQuaternion.getMatrix(), 0)
@@ -172,7 +172,7 @@ class PrimFlexibleInfo {
         if (this.sectionMatrices == null) {
             this.sectionMatrices = Float[(this.NumSections * 16)]
         }
-        Float[] fArr4 = Float[8]
+        FloatArray fArr4 = FloatArray(8)
         Int i4 = 0
         while (true) {
             Int i5 = i4
@@ -183,7 +183,7 @@ class PrimFlexibleInfo {
                 fArr4[3] = 1.0f
                 Matrix.multiplyMV(fArr4, 4, fArr3, 0, fArr4, 0)
                 Float f8 = (((Float) i5) / ((Float) this.NumSections)) - 0.5f
-                Float[] fArr5 = Float[32]
+                FloatArray fArr5 = FloatArray(32)
                 Matrix.setIdentityM(fArr5, 16)
                 Matrix.translateM(fArr5, 16, fArr4[4], fArr4[5], fArr4[6] - f8)
                 Matrix.translateM(fArr5, 16, 0.0f, 0.0f, f8)
@@ -219,7 +219,7 @@ class PrimFlexibleInfo {
         return gLLoadableBuffer
     }
 
-    Float[] getMatrices() {
+    FloatArray getMatrices() {
         return this.sectionMatrices
     }
 }

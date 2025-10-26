@@ -19,7 +19,7 @@ class ObjectProperties : SLMessage() {
         public Int Category
         public Long CreationDate
         public UUID CreatorID
-        public Byte[] Description
+        public ByteArray Description
         public Int EveryoneMask
         public UUID FolderID
         public UUID FromTaskID
@@ -28,7 +28,7 @@ class ObjectProperties : SLMessage() {
         public Int InventorySerial
         public UUID ItemID
         public UUID LastOwnerID
-        public Byte[] Name
+        public ByteArray Name
         public Int NextOwnerMask
         public UUID ObjectID
         public UUID OwnerID
@@ -36,9 +36,9 @@ class ObjectProperties : SLMessage() {
         public Int OwnershipCost
         public Int SalePrice
         public Int SaleType
-        public Byte[] SitName
-        public Byte[] TextureID
-        public Byte[] TouchName
+        public ByteArray SitName
+        public ByteArray TextureID
+        public ByteArray TouchName
     }
 
     public ObjectProperties() {

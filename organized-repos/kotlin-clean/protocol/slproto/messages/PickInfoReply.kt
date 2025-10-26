@@ -17,18 +17,18 @@ class PickInfoReply : SLMessage() {
     @JvmStatic
     class Data {
         public UUID CreatorID
-        public Byte[] Desc
+        public ByteArray Desc
         public Boolean Enabled
-        public Byte[] Name
-        public Byte[] OriginalName
+        public ByteArray Name
+        public ByteArray OriginalName
         public UUID ParcelID
         public UUID PickID
         public LLVector3d PosGlobal
-        public Byte[] SimName
+        public ByteArray SimName
         public UUID SnapshotID
         public Int SortOrder
         public Boolean TopPick
-        public Byte[] User
+        public ByteArray User
     }
 
     public PickInfoReply() {

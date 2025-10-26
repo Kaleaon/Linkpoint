@@ -97,7 +97,7 @@ class SLTransferManager : SLModule() {
     fun HandleTransferInfo(TransferInfo transferInfo) {
         SLTransfer sLTransfer = this.activeTransfers.get(transferInfo.TransferInfoData_Field.TransferID)
         if (sLTransfer != null) {
-            Debug.Log(String.format("Transfer: Info recd, status %d, size %d", Object[]{Integer.valueOf(transferInfo.TransferInfoData_Field.Status), Integer.valueOf(transferInfo.TransferInfoData_Field.Size)}))
+            Debug.Log(String.format("Transfer: Info recd, status %d, size %d", Array<Any>{Integer.valueOf(transferInfo.TransferInfoData_Field.Status), Integer.valueOf(transferInfo.TransferInfoData_Field.Size)}))
             sLTransfer.HandleTransferInfo(this, transferInfo)
         }
     }
@@ -106,7 +106,7 @@ class SLTransferManager : SLModule() {
     fun HandleTransferPacket(TransferPacket transferPacket) {
         SLTransfer sLTransfer = this.activeTransfers.get(transferPacket.TransferData_Field.TransferID)
         if (sLTransfer != null) {
-            Debug.Log(String.format("Transfer: data recd, packet %d, status %d, size %d.", Object[]{Integer.valueOf(transferPacket.TransferData_Field.Packet), Integer.valueOf(transferPacket.TransferData_Field.Status), Integer.valueOf(transferPacket.TransferData_Field.Data.length)}))
+            Debug.Log(String.format("Transfer: data recd, packet %d, status %d, size %d.", Array<Any>{Integer.valueOf(transferPacket.TransferData_Field.Packet), Integer.valueOf(transferPacket.TransferData_Field.Status), Integer.valueOf(transferPacket.TransferData_Field.Data.length)}))
             sLTransfer.HandleTransferPacket(this, transferPacket)
         }
     }

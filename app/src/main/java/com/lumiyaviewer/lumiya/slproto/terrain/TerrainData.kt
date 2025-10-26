@@ -11,15 +11,15 @@ class TerrainData {
     Int PatchesPerEdge = 16
     Int PatchesSize = 16
     Int TerrainPerEdge = 256
-    private Float[] heightMap = Float[65536]
-    private Boolean[] patchDirtyMap = Boolean[256]
+    private FloatArray heightMap = FloatArray(65536)
+    private BooleanArray patchDirtyMap = BooleanArray(256)
     private volatile TerrainTextures terrainTextures = TerrainTextures()
     private Int validCount = 0
-    private Boolean[] validMap = Boolean[65536]
-    private Float[] vertexHeights = Float[66049]
+    private BooleanArray validMap = BooleanArray(65536)
+    private FloatArray vertexHeights = FloatArray(66049)
     private Any vertexLock = Any()
-    private Float[] vertexNormals = Float[132098]
-    private Boolean[] vertexValids = Boolean[66049]
+    private FloatArray vertexNormals = FloatArray(132098)
+    private BooleanArray vertexValids = BooleanArray(66049)
     private Float waterHeight = 0.0f
     private Boolean waterHeightValid = false
 
@@ -103,7 +103,7 @@ class TerrainData {
         }
     }
 
-    Unit ProcessLayerData(Byte[] bArr) {
+    Unit ProcessLayerData(ByteArray bArr) {
         TerrainPatch DecompressPatch
         BitBuffer bitBuffer = BitBuffer(bArr)
         Int bits = bitBuffer.getBits(16)
@@ -161,8 +161,8 @@ class TerrainData {
         if (!z) {
             return null
         }
-        Float[] fArr = Float[289]
-        Float[] fArr2 = Float[578]
+        FloatArray fArr = FloatArray(289)
+        FloatArray fArr2 = FloatArray(578)
         Int i6 = 0
         while (true) {
             Int i7 = i6

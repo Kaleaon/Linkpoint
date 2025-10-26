@@ -68,7 +68,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
         L_0x001c:
             java.lang.String r4 = "MasterDetailsActivity: hasSelectorView = %b, sel fragment %b, hasDetailsView = %b, details fragment %b"
             r1 = 4
-            java.lang.Object[] r5 = java.lang.Object[r1]
+            java.lang.Array<Any> r5 = java.lang.Object[r1]
             android.view.View r1 = r14.findViewById(r13)
             if (r1 == 0) goto L_0x01b0
             r1 = r2
@@ -99,7 +99,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
             r5[r7] = r1
             com.lumiyaviewer.lumiya.Debug.Printf(r4, r5)
             java.lang.String r1 = "MasterDetailsActivity: intent = %s"
-            java.lang.Object[] r4 = java.lang.Object[r2]
+            java.lang.Array<Any> r4 = java.lang.Object[r2]
             android.content.Intent r5 = r14.getIntent()
             r4[r3] = r5
             com.lumiyaviewer.lumiya.Debug.Printf(r1, r4)
@@ -113,7 +113,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
             android.os.Bundle r1 = r10.getArguments()
             if (r1 == 0) goto L_0x0236
             java.lang.String r4 = "MasterDetailsActivity: implicit details tag = %b"
-            java.lang.Object[] r5 = java.lang.Object[r2]
+            java.lang.Array<Any> r5 = java.lang.Object[r2]
             java.lang.String r7 = "MasterDetailsActivityIsImplicitDetails"
             Boolean r7 = r1.getBoolean(r7, r3)
             java.lang.Boolean r7 = java.lang.Boolean.valueOf(r7)
@@ -125,7 +125,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
             r1 = r2
         L_0x00b0:
             java.lang.String r4 = "MasterDetailsActivity: hasExplicitDetails = %b"
-            java.lang.Object[] r5 = java.lang.Object[r2]
+            java.lang.Array<Any> r5 = java.lang.Object[r2]
             java.lang.Boolean r7 = java.lang.Boolean.valueOf(r1)
             r5[r3] = r7
             com.lumiyaviewer.lumiya.Debug.Printf(r4, r5)
@@ -155,7 +155,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
         L_0x00ee:
             if (r7 == 0) goto L_0x01e5
             java.lang.String r11 = "MasterDetailsActivity: existing fragment %s"
-            java.lang.Object[] r12 = java.lang.Object[r2]
+            java.lang.Array<Any> r12 = java.lang.Object[r2]
             if (r9 == 0) goto L_0x01c3
             java.lang.String r5 = r9.toString()
         L_0x00fb:
@@ -163,7 +163,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
             com.lumiyaviewer.lumiya.Debug.Printf(r11, r12)
             if (r9 == 0) goto L_0x01d8
             java.lang.String r11 = "MasterDetailsActivity: existing fragment is %s"
-            java.lang.Object[] r12 = java.lang.Object[r2]
+            java.lang.Array<Any> r12 = java.lang.Object[r2]
             Boolean r5 = r9.isVisible()
             if (r5 == 0) goto L_0x01c8
             java.lang.String r5 = "visible"
@@ -180,7 +180,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
         L_0x0123:
             java.lang.String r11 = "MasterDetailsActivity: selectorVisible %b, detailsVisible %b, hasExplicitDetails %b"
             r12 = 3
-            java.lang.Object[] r12 = java.lang.Object[r12]
+            java.lang.Array<Any> r12 = java.lang.Object[r12]
             java.lang.Boolean r7 = java.lang.Boolean.valueOf(r7)
             r12[r3] = r7
             java.lang.Boolean r7 = java.lang.Boolean.valueOf(r5)
@@ -192,7 +192,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
             if (r5 == 0) goto L_0x0222
             if (r10 != 0) goto L_0x0202
             java.lang.String r2 = "MasterDetailsActivity: creating details fragment"
-            java.lang.Object[] r3 = java.lang.Object[r3]
+            java.lang.Array<Any> r3 = java.lang.Object[r3]
             com.lumiyaviewer.lumiya.Debug.Printf(r2, r3)
             if (r9 == 0) goto L_0x01f5
             android.os.Bundle r2 = r9.getArguments()     // Catch:{ Exception -> 0x01fd }
@@ -222,7 +222,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
         L_0x0189:
             java.lang.String r2 = "MasterDetailsActivity: adding details fragment: %s"
             r3 = 1
-            java.lang.Object[] r3 = java.lang.Object[r3]     // Catch:{ Exception -> 0x01fd }
+            java.lang.Array<Any> r3 = java.lang.Object[r3]     // Catch:{ Exception -> 0x01fd }
             r4 = 0
             r3[r4] = r1     // Catch:{ Exception -> 0x01fd }
             com.lumiyaviewer.lumiya.Debug.Printf(r2, r3)     // Catch:{ Exception -> 0x01fd }
@@ -296,7 +296,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
         L_0x0202:
             java.lang.String r1 = "MasterDetailsActivity: not creating details fragment. existing is detached: %b (%s)"
             r4 = 2
-            java.lang.Object[] r4 = java.lang.Object[r4]
+            java.lang.Array<Any> r4 = java.lang.Object[r4]
             Boolean r5 = r10.isDetached()
             java.lang.Boolean r5 = java.lang.Boolean.valueOf(r5)
             r4[r3] = r5
@@ -341,7 +341,7 @@ abstract class MasterDetailsActivity : DetailsActivity() {
         beginTransaction.setCustomAnimations(17432576, R.anim.slide_to_right, 0, 17432577)
         beginTransaction.remove(findFragmentById)
         Fragment findFragmentById2 = supportFragmentManager.findFragmentById(R.id.selector)
-        Object[] objArr = Object[3]
+        Array<Any> objArr = Object[3]
         objArr[0] = Boolean.valueOf(findFragmentById2 != null)
         objArr[1] = Boolean.valueOf(findFragmentById2 != null ? findFragmentById2.isDetached() : false)
         objArr[2] = Boolean.valueOf(findFragmentById2 != null ? findFragmentById2.isHidden() : false)

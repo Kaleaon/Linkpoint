@@ -22,10 +22,10 @@ import org.xmlpull.v1.XmlPullParserFactory
 class LLSDStreamingParser {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-https-LLSDContentTypeDetector$LLSDContentTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues = null
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-llsd-LLSDNodeTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues = null
 
     interface LLSDContentHandler {
         LLSDContentHandler onArrayBegin(String str) throws LLSDXMLException
@@ -61,11 +61,11 @@ class LLSDStreamingParser {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-https-LLSDContentTypeDetector$LLSDContentTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m196getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues() {
+private /* synthetic */ IntArray m196getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues() {
         if (f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues != null) {
             return f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues
         }
-        Int[] iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
+        IntArray iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
         try {
             iArr[LLSDContentTypeDetector.LLSDContentType.llsdBinary.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -80,11 +80,11 @@ private /* synthetic */ Int[] m196getcomlumiyaviewerlumiyaslprotohttpsLLSDConten
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-llsd-LLSDNodeTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m197getcomlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues() {
+private /* synthetic */ IntArray m197getcomlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues() {
         if (f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues != null) {
             return f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues
         }
-        Int[] iArr = Int[LLSDNodeType.values().length]
+        IntArray iArr = Int[LLSDNodeType.values().length]
         try {
             iArr[LLSDNodeType.llsdArray.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -273,10 +273,10 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             goto L_0x0035
         L_0x0083:
             Int r0 = r12.readInt()
-            Byte[] r0 = Byte[r0]
+            ByteArray r0 = Byte[r0]
             r12.readFully(r0)
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBinary r2 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBinary
-            r2.<init>((Byte[]) r0)
+            r2.<init>((ByteArray) r0)
             r13.onPrimitiveValue(r11, r2)
             Int r0 = r1 + -1
             goto L_0x0035
@@ -291,7 +291,7 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             Int r0 = r1 + -1
             goto L_0x0035
         L_0x00ab:
-            Byte[] r0 = Byte[r0]
+            ByteArray r0 = Byte[r0]
             r12.readFully(r0)
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDString r2 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDString
             java.lang.String r0 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r0)
@@ -309,7 +309,7 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             Int r0 = r1 + -1
             goto L_0x0035
         L_0x00d2:
-            Byte[] r0 = Byte[r0]
+            ByteArray r0 = Byte[r0]
             r12.readFully(r0)
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDURI r2 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDURI
             java.lang.String r0 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r0)
@@ -364,7 +364,7 @@ private Unit parseBinaryNode(Int r10, java.lang.String r11, java.io.DataInputStr
             throw r0
         L_0x0148:
             Int r5 = r12.readInt()
-            Byte[] r5 = Byte[r5]
+            ByteArray r5 = Byte[r5]
             r12.readFully(r5)
             java.lang.String r5 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r5)
             parseBinaryNode(r9, r5, r12, r0)

@@ -18,7 +18,7 @@ class LogDwellTime : SLMessage() {
         public Int RegionX
         public Int RegionY
         public UUID SessionID
-        public Byte[] SimName
+        public ByteArray SimName
     }
 
     public LogDwellTime() {

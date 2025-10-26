@@ -20,11 +20,11 @@ class GroupRoleUpdate : SLMessage() {
 
     @JvmStatic
     class RoleData {
-        public Byte[] Description
-        public Byte[] Name
+        public ByteArray Description
+        public ByteArray Name
         public Long Powers
         public UUID RoleID
-        public Byte[] Title
+        public ByteArray Title
         public Int UpdateType
     }
 

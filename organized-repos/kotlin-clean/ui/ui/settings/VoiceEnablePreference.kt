@@ -56,7 +56,7 @@ class VoiceEnablePreference : CheckBoxPreference() {
         VoicePluginServiceConnection.setInstallOfferDisplayed(true)
         super.onClick()
         if (isChecked() && !VoicePluginServiceConnection.checkPluginInstalled(getContext())) {
-            AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_voice).setMessage((CharSequence) getContext().getString(R.string.enable_voice_plugin_message, Object[]{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
+            AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_voice).setMessage((CharSequence) getContext().getString(R.string.enable_voice_plugin_message, Array<Any>{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f585$f0

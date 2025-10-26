@@ -7,13 +7,13 @@ import java.util.Arrays
 
 class AnimationSkeletonData {
     private Int numAnimatedBones = 133
-    private Float[] animMatrix = Float[2128]
-    private Float[] animMatrix_Swap = Float[2128]
-    private Float[] animOffsets = Float[532]
-    private Float[] animOffsets_Swap = Float[532]
+    private FloatArray animMatrix = FloatArray(2128)
+    private FloatArray animMatrix_Swap = FloatArray(2128)
+    private FloatArray animOffsets = FloatArray(532)
+    private FloatArray animOffsets_Swap = FloatArray(532)
     private LLVector3[] animPosArray = LLVector3[133]
-    private Float[] animPriorityPosArray = Float[133]
-    private Float[] animPriorityRotArray = Float[133]
+    private FloatArray animPriorityPosArray = FloatArray(133)
+    private FloatArray animPriorityRotArray = FloatArray(133)
     private LLQuaternion[] animRotArray = LLQuaternion[133]
 
     AnimationSkeletonData() {
@@ -40,7 +40,7 @@ class AnimationSkeletonData {
             this.animOffsets_Swap[(i * 4) + 2] = this.animPosArray[i].z
             this.animOffsets_Swap[(i * 4) + 3] = 1.0f - this.animPriorityPosArray[i]
         }
-        Float[] fArr = this.animMatrix
+        FloatArray fArr = this.animMatrix
         this.animMatrix = this.animMatrix_Swap
         this.animMatrix_Swap = fArr
         fArr = this.animOffsets
@@ -48,11 +48,11 @@ class AnimationSkeletonData {
         this.animOffsets_Swap = fArr
     }
 
-    Float[] getAnimMatrix() {
+    FloatArray getAnimMatrix() {
         return this.animMatrix
     }
 
-    Float[] getAnimOffsets() {
+    FloatArray getAnimOffsets() {
         return this.animOffsets
     }
 }

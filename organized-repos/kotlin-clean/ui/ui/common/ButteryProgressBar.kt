@@ -60,7 +60,7 @@ private class ExponentialInterpolator : Interpolator {
             this.mSolidBarDetentWidth = obtainStyledAttributes.getDimensionPixelSize(2, Math.round(this.mDensity * 3.0f))
             obtainStyledAttributes.recycle()
             this.mAnimator = ValueAnimator()
-            this.mAnimator.setFloatValues(Float[]{1.0f, 2.0f})
+            this.mAnimator.setFloatValues(FloatArray{1.0f, 2.0f})
             this.mAnimator.setRepeatCount(-1)
             this.mAnimator.setInterpolator(ExponentialInterpolator((ExponentialInterpolator) null))
             this.mAnimator.addUpdateListener(ValueAnimator.AnimatorUpdateListener() {
@@ -68,7 +68,7 @@ private class ExponentialInterpolator : Interpolator {
                     ButteryProgressBar.this.invalidate()
                 }
             this.mPaint.setColor(this.mBarColor)
-            this.mShadow = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, Int[]{(this.mBarColor & ViewCompat.MEASURED_SIZE_MASK) | 570425344, 0})
+            this.mShadow = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, IntArray{(this.mBarColor & ViewCompat.MEASURED_SIZE_MASK) | 570425344, 0})
         } catch (Throwable th) {
             obtainStyledAttributes.recycle()
             throw th

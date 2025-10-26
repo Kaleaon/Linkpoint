@@ -16,7 +16,7 @@ class CreateGroupReply : SLMessage() {
     @JvmStatic
     class ReplyData {
         public UUID GroupID
-        public Byte[] Message
+        public ByteArray Message
         public Boolean Success
     }
 

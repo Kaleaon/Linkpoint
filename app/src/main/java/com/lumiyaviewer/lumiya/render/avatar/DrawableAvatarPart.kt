@@ -24,7 +24,7 @@ class DrawableAvatarPart : ResourceConsumer {
     private val meshUpdate: Runnable = Runnable() {
         fun run(): Unit {
             GLTexture -get3
-            Float[] -get2
+            FloatArray -get2
             Debug.Printf("Avatar: meshUpdate entered for part %s", DrawableAvatarPart.this.faceIndex.toString())
             synchronized (DrawableAvatarPart.this.updateLock) {
                 -get3 = DrawableAvatarPart.this.rawTexture
@@ -41,7 +41,7 @@ class DrawableAvatarPart : ResourceConsumer {
             }
         }
     }
-    private volatile Float[] partMorphParams
+    private volatile FloatArray partMorphParams
     private volatile OpenJPEG rawTexture
     private SLPolyMesh referenceMeshData
     private volatile DrawableFaceTexture texture
@@ -59,7 +59,7 @@ class DrawableAvatarPart : ResourceConsumer {
         PrimComputeExecutor.getInstance().execute(this.meshUpdate)
     }
 
-    Unit GLDraw(RenderContext renderContext, Float[] fArr, Boolean z) {
+    Unit GLDraw(RenderContext renderContext, FloatArray fArr, Boolean z) {
         SLAnimatedMeshData sLAnimatedMeshData
         DrawableFaceTexture drawableFaceTexture
         if (renderContext.hasGL20) {
@@ -100,7 +100,7 @@ class DrawableAvatarPart : ResourceConsumer {
         return this.faceIndex
     }
 
-    Unit setPartMorphParams(Float[] fArr) {
+    Unit setPartMorphParams(FloatArray fArr) {
         Int equals
         synchronized (this.updateLock) {
             equals = Arrays == this.partMorphParams, fArr ^ 1

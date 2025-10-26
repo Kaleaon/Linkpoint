@@ -22,10 +22,10 @@ import org.xmlpull.v1.XmlPullParserFactory
 class LLSDStreamingParser {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-https-LLSDContentTypeDetector$LLSDContentTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues = null
+    private /* synthetic */ IntArray f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues = null
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-llsd-LLSDNodeTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues = null
+    private /* synthetic */ IntArray f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues = null
 
     interface LLSDContentHandler {
         LLSDContentHandler onArrayBegin(String str) throws LLSDXMLException
@@ -59,11 +59,11 @@ class LLSDStreamingParser {
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-https-LLSDContentTypeDetector$LLSDContentTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m196getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues() {
+    private /* synthetic */ IntArray m196getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues() {
         if (f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues != null) {
             return f115comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues
         }
-        Int[] iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
+        IntArray iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
         try {
             iArr[LLSDContentTypeDetector.LLSDContentType.llsdBinary.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -77,11 +77,11 @@ class LLSDStreamingParser {
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-llsd-LLSDNodeTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m197getcomlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues() {
+    private /* synthetic */ IntArray m197getcomlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues() {
         if (f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues != null) {
             return f116comlumiyaviewerlumiyaslprotollsdLLSDNodeTypeSwitchesValues
         }
-        Int[] iArr = Int[LLSDNodeType.values().length]
+        IntArray iArr = Int[LLSDNodeType.values().length]
         try {
             iArr[LLSDNodeType.llsdArray.ordinal()] = 1
         } catch (NoSuchFieldError e) {

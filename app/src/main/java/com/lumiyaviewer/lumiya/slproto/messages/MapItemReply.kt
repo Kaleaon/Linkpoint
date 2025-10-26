@@ -21,7 +21,7 @@ class MapItemReply : SLMessage {
         Int Extra
         Int Extra2
         UUID ID
-        Byte[] Name
+        ByteArray Name
         Int X
         Int Y
     }

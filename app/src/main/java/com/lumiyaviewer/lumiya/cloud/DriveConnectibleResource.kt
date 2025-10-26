@@ -300,7 +300,7 @@ abstract class DriveConnectibleResource {
      * Enabled aggressive block sorting
      */
     void getResource(OnResourceReadyListener onResourceReadyListener) {
-        Debug.Printf("Asked for resource '%s', state %s", new Object[]{this.resourceName, this.state})
+        Debug.Printf("Asked for resource '%s', state %s", new Array<Any>{this.resourceName, this.state})
         if (this.driveResource != null) {
             if (onResourceReadyListener == null) return
             onResourceReadyListener.onResourceReady(this.driveResource, null)

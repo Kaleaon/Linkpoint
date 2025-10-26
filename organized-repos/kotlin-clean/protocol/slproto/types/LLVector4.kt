@@ -126,6 +126,6 @@ class LLVector4 {
     }
 
     public String toString() {
-        return String.format("(%f, %f, %f)", Object[]{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z)})
+        return String.format("(%f, %f, %f)", Array<Any>{Float.valueOf(this.x), Float.valueOf(this.y), Float.valueOf(this.z)})
     }
 }

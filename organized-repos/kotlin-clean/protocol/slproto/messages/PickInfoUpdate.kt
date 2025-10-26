@@ -18,9 +18,9 @@ class PickInfoUpdate : SLMessage() {
     @JvmStatic
     class Data {
         public UUID CreatorID
-        public Byte[] Desc
+        public ByteArray Desc
         public Boolean Enabled
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParcelID
         public UUID PickID
         public LLVector3d PosGlobal

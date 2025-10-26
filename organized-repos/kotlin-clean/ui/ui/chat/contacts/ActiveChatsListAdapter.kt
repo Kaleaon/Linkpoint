@@ -71,7 +71,7 @@ class ActiveChatsListAdapter : BaseAdapter(), Closeable, DismissableAdapter {
                 sb.append(": ")
                 Int inChatRangeUsers = ActiveChatsListAdapter.this.currentLocationInfo.inChatRangeUsers()
                 if (inChatRangeUsers != 0) {
-                    sb.append(context.getString(R.string.someone_in_chat_range, Object[]{Integer.valueOf(inChatRangeUsers)}))
+                    sb.append(context.getString(R.string.someone_in_chat_range, Array<Any>{Integer.valueOf(inChatRangeUsers)}))
                 } else {
                     sb.append(context.getString(R.string.no_one_in_chat_range))
                 }

@@ -16,10 +16,10 @@ class TerrainPatchGeometry {
     Int DrawPatchSize = 16
     private Int index_size_bytes = 3072
     private Int vertex_size_bytes = 9248
-    private Float[] waterAmplitude = {0.5f, 0.5f, 0.3f, 0.4f}
-    private Float[] waterDirection = {1.0f, 0.3f, 0.4f, 0.75f, -0.5f, 0.7f, 0.63f, -0.3f}
-    private Float[] waterFrequency = {17.951958f, 12.566371f, 8.975979f, 15.707963f}
-    private Float[] waterPhase = {1.73f, 0.64f, 1.27f, 0.9f}
+    private FloatArray waterAmplitude = {0.5f, 0.5f, 0.3f, 0.4f}
+    private FloatArray waterDirection = {1.0f, 0.3f, 0.4f, 0.75f, -0.5f, 0.7f, 0.63f, -0.3f}
+    private FloatArray waterFrequency = {17.951958f, 12.566371f, 8.975979f, 15.707963f}
+    private FloatArray waterPhase = {1.73f, 0.64f, 1.27f, 0.9f}
     private Int water_vertex_size_bytes = 3468
     private GLLoadableBuffer indexBuffer
     private var index_count: Int = 0
@@ -39,8 +39,8 @@ class TerrainPatchGeometry {
         this.water_index_count = 0
         LLVector3 lLVector3 = LLVector3()
         Float waterHeight = terrainPatchHeightMap.getWaterHeight()
-        Float[] heightArray = terrainPatchHeightMap.getHeightArray()
-        Float[] normalArray = terrainPatchHeightMap.getNormalArray()
+        FloatArray heightArray = terrainPatchHeightMap.getHeightArray()
+        FloatArray normalArray = terrainPatchHeightMap.getNormalArray()
         Int i = 0
         Int i2 = 0
         while (true) {
@@ -129,7 +129,7 @@ class TerrainPatchGeometry {
         GLES11.glMatrixMode(5888)
     }
 
-    Unit GLDraw(RenderContext renderContext, Float[] fArr, GLLoadedTexture gLLoadedTexture) {
+    Unit GLDraw(RenderContext renderContext, FloatArray fArr, GLLoadedTexture gLLoadedTexture) {
         if (this.index_count != 0) {
             if (!renderContext.hasGL20) {
                 renderContext.glObjWorldPushAndMultMatrixf(fArr, 0)

@@ -86,7 +86,7 @@ class TeleportSLURLActivity : AppCompatActivity(), View.OnClickListener {
             findViewById(R.id.buttonTeleport).setOnClickListener(this)
             findViewById(R.id.buttonTeleportCancel).setOnClickListener(this)
             ((TextView) findViewById(R.id.teleportTargetName)).setText(this.slurl.getLocationName())
-            ((TextView) findViewById(R.id.teleportTargetCoords)).setText(String.format("(%d, %d, %d)", Object[]{Integer.valueOf(this.slurl.getLocationX()), Integer.valueOf(this.slurl.getLocationY()), Integer.valueOf(this.slurl.getLocationZ())}))
+            ((TextView) findViewById(R.id.teleportTargetCoords)).setText(String.format("(%d, %d, %d)", Array<Any>{Integer.valueOf(this.slurl.getLocationX()), Integer.valueOf(this.slurl.getLocationY()), Integer.valueOf(this.slurl.getLocationZ())}))
         } catch (Exception e2) {
             finish()
         }

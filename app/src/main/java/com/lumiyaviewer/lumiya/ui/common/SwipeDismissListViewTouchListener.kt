@@ -108,7 +108,7 @@ class SwipeDismissListViewTouchListener : View.OnTouchListener {
                 }
                 Rect rect = Rect()
                 Int childCount = this.mListView.getChildCount()
-                Int[] iArr = Int[2]
+                IntArray iArr = IntArray(2)
                 this.mListView.getLocationOnScreen(iArr)
                 Int rawX = ((Int) motionEvent.getRawX()) - iArr[0]
                 Int rawY = ((Int) motionEvent.getRawY()) - iArr[1]

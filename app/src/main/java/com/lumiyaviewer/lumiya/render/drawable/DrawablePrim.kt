@@ -26,17 +26,17 @@ class DrawablePrim {
     Int RENDER_PASS_ALL = 3
     Int RENDER_PASS_OPAQUE = 1
     Int RENDER_PASS_TRANSPARENT = 2
-    private Int[] FaceColorsIDs
+    private IntArray FaceColorsIDs
     private Int FaceCount
     private DrawableFaceTexture[] FaceTextures
-    private Float[] FaceUVMatrices
+    private FloatArray FaceUVMatrices
     private var drawingTextureEnabled: Boolean? = null
     private var firstFace: Boolean? = null
     private Boolean isRiggedMesh
     private Boolean isSingleFace
     private Boolean riggingFitsGL20
     private Int singleFaceColor
-    private Float[] singleFaceMatrix
+    private FloatArray singleFaceMatrix
     private DrawableFaceTexture singleFaceTexture
     private DrawableGeometry volumeGeometry
 
@@ -74,7 +74,7 @@ class DrawablePrim {
                 return
             }
             this.isSingleFace = true
-            this.singleFaceMatrix = Float[16]
+            this.singleFaceMatrix = FloatArray(16)
             SLTextureEntryFace GetFace2 = textures.GetFace(0)
             if (GetFace2 != null) {
                 this.singleFaceColor = GetFace2.getRGBA(GetDefaultTexture)
@@ -194,7 +194,7 @@ class DrawablePrim {
     }
 
     private fun initFaceUVMatrix(sLTextureEntryFace: SLTextureEntryFace, sLTextureEntryFace2: SLTextureEntryFace, fArr: FloatArray, i: Int): Unit {
-        Float[] fArr2 = Float[16]
+        FloatArray fArr2 = FloatArray(16)
         Matrix.setIdentityM(fArr2, 0)
         Matrix.translateM(fArr2, 0, sLTextureEntryFace2.getOffsetU(sLTextureEntryFace) + 0.5f, sLTextureEntryFace2.getOffsetV(sLTextureEntryFace) + 0.5f, 0.0f)
         Matrix.scaleM(fArr2, 0, sLTextureEntryFace2.getRepeatU(sLTextureEntryFace), sLTextureEntryFace2.getRepeatV(sLTextureEntryFace), 1.0f)
@@ -213,7 +213,7 @@ class DrawablePrim {
         DrawableGeometry drawableGeometry = this.volumeGeometry
         this.firstFace = true
         if (renderContext.hasGL20) {
-            Float[] matrices = primFlexibleInfo != null ? primFlexibleInfo.getMatrices() : null
+            FloatArray matrices = primFlexibleInfo != null ? primFlexibleInfo.getMatrices() : null
             renderContext.curPrimProgram = (!this.isRiggedMesh || !this.riggingFitsGL20) ? matrices != null ? renderContext.flexiPrimProgram : renderContext.primProgram : renderContext.riggedMeshProgram
             GLES20.glUseProgram(renderContext.curPrimProgram.getHandle())
             renderContext.glModelApplyMatrix(renderContext.curPrimProgram.uMVPMatrix)
@@ -246,7 +246,7 @@ class DrawablePrim {
 
     Int DrawFast20(RenderContext renderContext, Boolean z, PrimFlexibleInfo primFlexibleInfo, Int i) {
         Boolean z2 = true
-        Float[] fArr = null
+        FloatArray fArr = null
         Int i2 = 0
         DrawableGeometry drawableGeometry = this.volumeGeometry
         if (primFlexibleInfo != null) {

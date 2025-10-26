@@ -23,7 +23,7 @@ class UpdateInventoryItem : SLMessage {
         Int CallbackID
         Int CreationDate
         UUID CreatorID
-        Byte[] Description
+        ByteArray Description
         Int EveryoneMask
         Int Flags
         UUID FolderID
@@ -32,7 +32,7 @@ class UpdateInventoryItem : SLMessage {
         Boolean GroupOwned
         Int InvType
         UUID ItemID
-        Byte[] Name
+        ByteArray Name
         Int NextOwnerMask
         UUID OwnerID
         Int OwnerMask

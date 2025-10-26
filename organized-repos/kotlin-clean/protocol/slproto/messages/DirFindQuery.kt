@@ -19,7 +19,7 @@ class DirFindQuery : SLMessage() {
         public Int QueryFlags
         public UUID QueryID
         public Int QueryStart
-        public Byte[] QueryText
+        public ByteArray QueryText
     }
 
     public DirFindQuery() {

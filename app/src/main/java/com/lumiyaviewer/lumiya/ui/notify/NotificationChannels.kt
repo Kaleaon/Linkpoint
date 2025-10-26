@@ -12,7 +12,7 @@ import javax.annotation.Nullable
 class NotificationChannels {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues = null
+    private /* synthetic */ IntArray f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues = null
     String MESSAGE_NOTIFICATION_GROUP = "messageNotifications"
     private NotificationChannelManager channelManager
 
@@ -48,11 +48,11 @@ class NotificationChannels {
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-settings-NotificationTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m666getcomlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues() {
+    private /* synthetic */ IntArray m666getcomlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues() {
         if (f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues != null) {
             return f464comlumiyaviewerlumiyauisettingsNotificationTypeSwitchesValues
         }
-        Int[] iArr = Int[NotificationType.values().length]
+        IntArray iArr = Int[NotificationType.values().length]
         try {
             iArr[NotificationType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {

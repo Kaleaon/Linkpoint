@@ -31,7 +31,7 @@ class SLChatInventoryItemOfferedByYouEvent : SLChatEvent {
 
     /* access modifiers changed from: protected */
     String getText(Context context, @Nonnull UserManager userManager) {
-        return context.getString(R.string.chat_inventory_own_offer_format, Object[]{this.itemName})
+        return context.getString(R.string.chat_inventory_own_offer_format, Array<Any>{this.itemName})
     }
 
     SLChatEvent.ChatMessageViewType getViewType() {

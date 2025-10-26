@@ -20,7 +20,7 @@ class AgentCachedTextureResponse : SLMessage() {
 
     @JvmStatic
     class WearableData {
-        public Byte[] HostName
+        public ByteArray HostName
         public UUID TextureID
         public Int TextureIndex
     }

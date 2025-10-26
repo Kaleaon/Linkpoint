@@ -9,7 +9,7 @@ class ScriptMailRegistration : SLMessage {
 
     class DataBlock {
         Int Flags
-        Byte[] TargetIP
+        ByteArray TargetIP
         Int TargetPort
         UUID TaskID
     }

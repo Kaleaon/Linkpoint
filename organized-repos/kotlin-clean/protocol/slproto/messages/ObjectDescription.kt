@@ -19,7 +19,7 @@ class ObjectDescription : SLMessage() {
 
     @JvmStatic
     class ObjectData {
-        public Byte[] Description
+        public ByteArray Description
         public Int LocalID
     }
 

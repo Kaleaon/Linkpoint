@@ -17,11 +17,11 @@ class CreateGroupRequest : SLMessage() {
     @JvmStatic
     class GroupData {
         public Boolean AllowPublish
-        public Byte[] Charter
+        public ByteArray Charter
         public UUID InsigniaID
         public Boolean MaturePublish
         public Int MembershipFee
-        public Byte[] Name
+        public ByteArray Name
         public Boolean OpenEnrollment
         public Boolean ShowInList
     }

@@ -109,7 +109,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
 
     SLInventoryEntry find(SQLiteDatabase sQLiteDatabase, UUID uuid) {
         try {
-            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", String[]{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
+            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", Array<String>{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
             if (query.moveToFirst()) {
                 SLInventoryEntry sLInventoryEntry = SLInventoryEntry(query)
                 query.close()
@@ -129,7 +129,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         } else if (uuid == null) {
             throw DBObject.DatabaseBindingException(SLInventoryEntry.class, "folderUUID is null")
         } else {
-            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", String[]{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
+            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, fieldNames, "uuid_low = ? AND uuid_high = ?", Array<String>{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
             if (query.moveToFirst()) {
                 SLInventoryEntry sLInventoryEntry = SLInventoryEntry(query)
                 query.close()
@@ -148,7 +148,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         } else if (uuid == null) {
             throw DBObject.DatabaseBindingException(SLInventoryEntry.class, "folderUUID is null")
         } else {
-            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, String[]{"_id"}, "uuid_low = ? AND uuid_high = ?", String[]{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
+            Cursor query = sQLiteDatabase.query(InventoryEntryDBObject.tableName, Array<String>{"_id"}, "uuid_low = ? AND uuid_high = ?", Array<String>{Long.toString(uuid.getLeastSignificantBits()), Long.toString(uuid.getMostSignificantBits())}, (String) null, (String) null, (String) null)
             if (query.moveToFirst()) {
                 SLInventoryEntry sLInventoryEntry = SLInventoryEntry()
                 sLInventoryEntry._id = query.getLong(0)
@@ -325,7 +325,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    Cursor query(SQLiteDatabase sQLiteDatabase, String str, String[] strArr, String str2) {
+    Cursor query(SQLiteDatabase sQLiteDatabase, String str, Array<String> strArr, String str2) {
         if (sQLiteDatabase == null) {
             return null
         }
@@ -337,7 +337,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
         }
     }
 
-    Cursor query(DBHandle dBHandle, String str, String[] strArr, String str2) {
+    Cursor query(DBHandle dBHandle, String str, Array<String> strArr, String str2) {
         if (dBHandle == null) {
             return null
         }
@@ -527,7 +527,7 @@ class SLInventoryEntry : InventoryEntryDBObject : Parcelable {
     }
 
     Unit updateOrInsert(SQLiteDatabase sQLiteDatabase) throws DBObject.DatabaseBindingException {
-        super.updateOrInsert(sQLiteDatabase, "uuid_low = ? AND uuid_high = ?", String[]{Long.toString(this.uuid.getLeastSignificantBits()), Long.toString(this.uuid.getMostSignificantBits())})
+        super.updateOrInsert(sQLiteDatabase, "uuid_low = ? AND uuid_high = ?", Array<String>{Long.toString(this.uuid.getLeastSignificantBits()), Long.toString(this.uuid.getMostSignificantBits())})
     }
 
     Unit updateOrInsert(SQLiteStatement sQLiteStatement, SQLiteStatement sQLiteStatement2) throws DBObject.DatabaseBindingException {

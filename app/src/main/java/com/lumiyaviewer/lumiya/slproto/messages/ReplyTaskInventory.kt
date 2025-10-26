@@ -8,7 +8,7 @@ class ReplyTaskInventory : SLMessage {
     InventoryData InventoryData_Field = InventoryData()
 
     class InventoryData {
-        Byte[] Filename
+        ByteArray Filename
         Int Serial
         UUID TaskID
     }

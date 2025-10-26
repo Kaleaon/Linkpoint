@@ -9,9 +9,9 @@ class EmailMessageRequest : SLMessage() {
 
     @JvmStatic
     class DataBlock {
-        public Byte[] FromAddress
+        public ByteArray FromAddress
         public UUID ObjectID
-        public Byte[] Subject
+        public ByteArray Subject
     }
 
     public EmailMessageRequest() {

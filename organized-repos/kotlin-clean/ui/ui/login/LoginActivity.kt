@@ -254,7 +254,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         if (!z && (gridConnection = GridConnectionService.getGridConnection()) != null && gridConnection.getConnectionState() == SLGridConnection.ConnectionState.Connecting) {
             showProgressView(true)
             if (gridConnection.getIsReconnecting()) {
-                ((TextView) findViewById(R.id.connect_status_text)).setText(getString(R.string.status_reconnecting, Object[]{Integer.valueOf(gridConnection.getReconnectAttempt())}))
+                ((TextView) findViewById(R.id.connect_status_text)).setText(getString(R.string.status_reconnecting, Array<Any>{Integer.valueOf(gridConnection.getReconnectAttempt())}))
                 z = true
             } else {
                 ((TextView) findViewById(R.id.connect_status_text)).setText(R.string.status_logging_in)
@@ -430,7 +430,7 @@ class LoginActivity : ThemedActivity(), View.OnClickListener, TextWatcher, GridE
         ((EditText) findViewById(R.id.editPassword)).addTextChangedListener(this)
         loadSavedLogin()
         SpannableStringBuilder spannableStringBuilder = SpannableStringBuilder()
-        spannableStringBuilder.append(getString(R.string.whatsnew_caption, Object[]{LinkpointApp.getAppVersion()}))
+        spannableStringBuilder.append(getString(R.string.whatsnew_caption, Array<Any>{LinkpointApp.getAppVersion()}))
         spannableStringBuilder.setSpan(URLSpan(""), 0, spannableStringBuilder.length(), 33)
         ((TextView) findViewById(R.id.whatsnewText)).setText(spannableStringBuilder, TextView.BufferType.SPANNABLE)
         findViewById(R.id.whatsnewText).setClickable(true)

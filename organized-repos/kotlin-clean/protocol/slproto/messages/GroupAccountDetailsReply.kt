@@ -21,7 +21,7 @@ class GroupAccountDetailsReply : SLMessage() {
     @JvmStatic
     class HistoryData {
         public Int Amount
-        public Byte[] Description
+        public ByteArray Description
     }
 
     @JvmStatic
@@ -29,7 +29,7 @@ class GroupAccountDetailsReply : SLMessage() {
         public Int CurrentInterval
         public Int IntervalDays
         public UUID RequestID
-        public Byte[] StartDate
+        public ByteArray StartDate
     }
 
     public GroupAccountDetailsReply() {

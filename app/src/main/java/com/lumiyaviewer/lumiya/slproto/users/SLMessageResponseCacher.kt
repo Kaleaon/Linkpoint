@@ -25,7 +25,7 @@ class SLMessageResponseCacher<Key, MessageType : SLMessage> : ResponseCacher<Key
     }
 
     /* access modifiers changed from: protected */
-    MessageType loadCached(Byte[] bArr) {
+    MessageType loadCached(ByteArray bArr) {
         ByteBuffer order = ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder())
         Int DecodeMessageIDGeneric = SLMessage.DecodeMessageIDGeneric(order)
         MessageType CreateByID = SLMessageFactory.CreateByID(DecodeMessageIDGeneric)
@@ -42,8 +42,8 @@ class SLMessageResponseCacher<Key, MessageType : SLMessage> : ResponseCacher<Key
     }
 
     /* access modifiers changed from: protected */
-    Byte[] storeCached(@Nonnull MessageType messagetype) {
-        Byte[] bArr = Byte[messagetype.CalcPayloadSize()]
+    ByteArray storeCached(@Nonnull MessageType messagetype) {
+        ByteArray bArr = Byte[messagetype.CalcPayloadSize()]
         messagetype.PackPayload(ByteBuffer.wrap(bArr).order(ByteOrder.nativeOrder()))
         return bArr
     }

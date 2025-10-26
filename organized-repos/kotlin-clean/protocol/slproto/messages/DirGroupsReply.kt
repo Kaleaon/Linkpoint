@@ -25,7 +25,7 @@ class DirGroupsReply : SLMessage() {
     @JvmStatic
     class QueryReplies {
         public UUID GroupID
-        public Byte[] GroupName
+        public ByteArray GroupName
         public Int Members
         public Float SearchOrder
     }

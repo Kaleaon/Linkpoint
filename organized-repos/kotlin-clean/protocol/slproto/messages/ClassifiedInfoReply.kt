@@ -22,15 +22,15 @@ class ClassifiedInfoReply : SLMessage() {
         public UUID ClassifiedID
         public Int CreationDate
         public UUID CreatorID
-        public Byte[] Desc
+        public ByteArray Desc
         public Int ExpirationDate
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParcelID
-        public Byte[] ParcelName
+        public ByteArray ParcelName
         public Int ParentEstate
         public LLVector3d PosGlobal
         public Int PriceForListing
-        public Byte[] SimName
+        public ByteArray SimName
         public UUID SnapshotID
     }
 

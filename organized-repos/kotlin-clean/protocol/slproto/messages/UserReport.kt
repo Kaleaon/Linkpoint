@@ -19,17 +19,17 @@ class UserReport : SLMessage() {
     @JvmStatic
     class ReportData {
         public UUID AbuseRegionID
-        public Byte[] AbuseRegionName
+        public ByteArray AbuseRegionName
         public UUID AbuserID
         public Int Category
         public Int CheckFlags
-        public Byte[] Details
+        public ByteArray Details
         public UUID ObjectID
         public LLVector3 Position
         public Int ReportType
         public UUID ScreenshotID
-        public Byte[] Summary
-        public Byte[] VersionString
+        public ByteArray Summary
+        public ByteArray VersionString
     }
 
     public UserReport() {

@@ -85,7 +85,7 @@ class GridList {
     public GridList(Context context2) {
         this.context = context2
         for (String split : context2.getResources().getStringArray(R.array.grids)) {
-            String[] split2 = split.split(";")
+            Array<String> split2 = split.split(";")
             this.predefGrids.add(GridInfo(split2[0], split2[1], true, UUID.fromString(split2[2])))
         }
         this.customGrids = ArrayList<>()

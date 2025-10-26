@@ -19,8 +19,8 @@ class PlacesQuery : SLMessage {
     class QueryData {
         Int Category
         Int QueryFlags
-        Byte[] QueryText
-        Byte[] SimName
+        ByteArray QueryText
+        ByteArray SimName
     }
 
     class TransactionData {

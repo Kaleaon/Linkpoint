@@ -16,7 +16,7 @@ class UpdateUserInfo : SLMessage() {
 
     @JvmStatic
     class UserData {
-        public Byte[] DirectoryVisibility
+        public ByteArray DirectoryVisibility
         public Boolean IMViaEMail
     }
 

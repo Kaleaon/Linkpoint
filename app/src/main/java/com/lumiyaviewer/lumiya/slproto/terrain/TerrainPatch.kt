@@ -4,21 +4,21 @@ import java.util.*
 import com.lumiyaviewer.lumiya.utils.BitBuffer
 
 class TerrainPatch {
-    private Int[] CopyMatrix16 = Int[256]
-    private Int[] CopyMatrix32 = Int[256]
-    private Float[] CosineTable16 = Float[256]
-    private Float[] DequantizeTable16 = Float[256]
-    private Float[] DequantizeTable32 = Float[256]
+    private IntArray CopyMatrix16 = IntArray(256)
+    private IntArray CopyMatrix32 = IntArray(256)
+    private FloatArray CosineTable16 = FloatArray(256)
+    private FloatArray DequantizeTable16 = FloatArray(256)
+    private FloatArray DequantizeTable32 = FloatArray(256)
     Int END_OF_PATCHES = 97
     private Float OO_SQRT2 = 0.70710677f
-    private Float[] QuantizeTable16 = Float[256]
+    private FloatArray QuantizeTable16 = FloatArray(256)
     Float DCOffset
     Int PatchIDs
     Int QuantWBits
     Int Range
     Int WordBits
-    Float[] heightMap
-    Int[] patches
+    FloatArray heightMap
+    IntArray patches
 
     {
         BuildDequantizeTable16()
@@ -118,8 +118,8 @@ class TerrainPatch {
             }
             i2++
         }
-        Float[] fArr = Float[(i * i)]
-        Float[] fArr2 = Float[(i * i)]
+        FloatArray fArr = Float[(i * i)]
+        FloatArray fArr2 = Float[(i * i)]
         Int i3 = (terrainPatch.QuantWBits >> 4) + 2
         Float f = (1.0f / ((Float) (1 << i3))) * ((Float) terrainPatch.Range)
         Float f2 = terrainPatch.DCOffset + (((Float) (1 << (i3 - 1))) * f)
@@ -127,7 +127,7 @@ class TerrainPatch {
             for (Int i4 = 0; i4 < 256; i4++) {
                 fArr[i4] = ((Float) terrainPatch.patches[CopyMatrix16[i4]]) * DequantizeTable16[i4]
             }
-            Float[] fArr3 = Float[256]
+            FloatArray fArr3 = FloatArray(256)
             for (Int i5 = 0; i5 < 16; i5++) {
                 IDCTColumn16(fArr, fArr3, i5)
             }
@@ -146,7 +146,7 @@ class TerrainPatch {
         return terrainPatch
     }
 
-    private Unit IDCTColumn16(Float[] fArr, Float[] fArr2, Int i) {
+    private Unit IDCTColumn16(FloatArray fArr, FloatArray fArr2, Int i) {
         for (Int i2 = 0; i2 < 16; i2++) {
             Float f = fArr[i] * OO_SQRT2
             for (Int i3 = 1; i3 < 16; i3++) {
@@ -157,7 +157,7 @@ class TerrainPatch {
         }
     }
 
-    private Unit IDCTLine16(Float[] fArr, Float[] fArr2, Int i) {
+    private Unit IDCTLine16(FloatArray fArr, FloatArray fArr2, Int i) {
         Int i2 = i * 16
         for (Int i3 = 0; i3 < 16; i3++) {
             Float f = fArr[i2] * OO_SQRT2

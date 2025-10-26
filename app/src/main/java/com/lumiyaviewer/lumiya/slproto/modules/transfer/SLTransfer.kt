@@ -57,7 +57,7 @@ class SLTransfer {
     private UUID assetUUID
     private Int channelType
     private Int currentSize
-    private Byte[] data
+    private ByteArray data
     private UUID itemUUID
     private Int nextPacket
     private UUID ownerUUID
@@ -142,7 +142,7 @@ class SLTransfer {
     }
 
     /* access modifiers changed from: package-private */
-    Byte[] getData() {
+    ByteArray getData() {
         return this.data
     }
 

@@ -262,7 +262,7 @@ class SLGroupManager : SLModule() {
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("todo")
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[0]
+        improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(0)
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)
     }
@@ -500,10 +500,10 @@ class SLGroupManager : SLModule() {
                 improvedInstantMessage.MessageBlock_Field.BinaryBucket = SLMessage.stringToVariableOEM(serializeToXML)
             } catch (IOException e) {
                 e.printStackTrace()
-                improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[0]
+                improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(0)
             }
         } else {
-            improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[0]
+            improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(0)
         }
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)

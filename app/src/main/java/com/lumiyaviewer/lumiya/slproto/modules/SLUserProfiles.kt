@@ -60,19 +60,19 @@ class SLUserProfiles : SLModule {
     private ResultHandler<UUID, AvatarGroupList> avatarGroupListsResultHandler
     private RequestHandler<UUID> avatarNotesRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
         Unit onRequest(@Nonnull UUID uuid) {
-            SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarnotesrequest", String[]{uuid.toString()})
+            SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarnotesrequest", Array<String>{uuid.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<UUID, AvatarNotesReply> avatarNotesResultHandler
     private RequestHandler<AvatarPickKey> avatarPickInfosRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<AvatarPickKey>() {
         Unit onRequest(@Nonnull AvatarPickKey avatarPickKey) {
-            SLUserProfiles.this.agentCircuit.SendGenericMessage("pickinforequest", String[]{avatarPickKey.avatarID.toString(), avatarPickKey.pickID.toString()})
+            SLUserProfiles.this.agentCircuit.SendGenericMessage("pickinforequest", Array<String>{avatarPickKey.avatarID.toString(), avatarPickKey.pickID.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<AvatarPickKey, PickInfoReply> avatarPickInfosResultHandler
     private RequestHandler<UUID> avatarPicksRequestHandler = AsyncLimitsRequestHandler(this.agentCircuit, SimpleRequestHandler<UUID>() {
         Unit onRequest(@Nonnull UUID uuid) {
-            SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarpicksrequest", String[]{uuid.toString()})
+            SLUserProfiles.this.agentCircuit.SendGenericMessage("avatarpicksrequest", Array<String>{uuid.toString()})
         }
     }, false, 3, 15000)
     private ResultHandler<UUID, AvatarPicksReply> avatarPicksResultHandler

@@ -23,16 +23,16 @@ class PlacesReply : SLMessage() {
     class QueryData {
         public Int ActualArea
         public Int BillableArea
-        public Byte[] Desc
+        public ByteArray Desc
         public Float Dwell
         public Int Flags
         public Float GlobalX
         public Float GlobalY
         public Float GlobalZ
-        public Byte[] Name
+        public ByteArray Name
         public UUID OwnerID
         public Int Price
-        public Byte[] SimName
+        public ByteArray SimName
         public UUID SnapshotID
     }
 

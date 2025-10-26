@@ -21,11 +21,11 @@ class ParcelProperties : SLMessage {
         Int Area
         Int AuctionID
         UUID AuthBuyerID
-        Byte[] Bitmap
+        ByteArray Bitmap
         Int Category
         Int ClaimDate
         Int ClaimPrice
-        Byte[] Desc
+        ByteArray Desc
         UUID GroupID
         Int GroupPrims
         Boolean IsGroupOwned
@@ -34,9 +34,9 @@ class ParcelProperties : SLMessage {
         Int MaxPrims
         Int MediaAutoScale
         UUID MediaID
-        Byte[] MediaURL
-        Byte[] MusicURL
-        Byte[] Name
+        ByteArray MediaURL
+        ByteArray MusicURL
+        ByteArray Name
         Int OtherCleanTime
         Int OtherCount
         Int OtherPrims

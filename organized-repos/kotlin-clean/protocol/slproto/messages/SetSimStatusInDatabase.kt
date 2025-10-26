@@ -11,10 +11,10 @@ class SetSimStatusInDatabase : SLMessage() {
     @JvmStatic
     class Data {
         public Int AgentCount
-        public Byte[] HostName
+        public ByteArray HostName
         public Int PID
         public UUID RegionID
-        public Byte[] Status
+        public ByteArray Status
         public Int TimeToLive
         public Int X
         public Int Y

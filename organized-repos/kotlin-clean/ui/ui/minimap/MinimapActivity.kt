@@ -46,7 +46,7 @@ class MinimapActivity : ConnectedActivity() {
             if (str == null) {
                 str = getString(R.string.name_loading_title)
             }
-            setActivityTitle(str, getString(R.string.nearby_users_format, Object[]{Integer.valueOf(currentLocationInfo2.nearbyUsers())}))
+            setActivityTitle(str, getString(R.string.nearby_users_format, Array<Any>{Integer.valueOf(currentLocationInfo2.nearbyUsers())}))
         }
     }
 

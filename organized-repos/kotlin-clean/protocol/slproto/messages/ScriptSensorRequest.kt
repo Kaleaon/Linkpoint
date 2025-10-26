@@ -18,7 +18,7 @@ class ScriptSensorRequest : SLMessage() {
         public UUID RequestID
         public LLQuaternion SearchDir
         public UUID SearchID
-        public Byte[] SearchName
+        public ByteArray SearchName
         public LLVector3 SearchPos
         public Int SearchRegions
         public UUID SourceID

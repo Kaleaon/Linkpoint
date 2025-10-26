@@ -50,7 +50,7 @@ class LLVector3 {
         return LLVector3(LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f, f2), LLTersePacking.U8_to_float(byteBuffer.get() & UnsignedBytes.MAX_VALUE, f3, f4))
     }
 
-    LLVector3 scaleFromMatrix(Float[] fArr) {
+    LLVector3 scaleFromMatrix(FloatArray fArr) {
         return LLVector3((Float) Math.sqrt((Double) ((fArr[0] * fArr[0]) + (fArr[1] * fArr[1]) + (fArr[2] * fArr[2]))), (Float) Math.sqrt((Double) ((fArr[4] * fArr[4]) + (fArr[5] * fArr[5]) + (fArr[6] * fArr[6]))), (Float) Math.sqrt((Double) ((fArr[8] * fArr[8]) + (fArr[9] * fArr[9]) + (fArr[10] * fArr[10]))))
     }
 

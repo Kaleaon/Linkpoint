@@ -18,7 +18,7 @@ class ChatMessageDao : AbstractDao<ChatMessage, Long> {
         Property AssetType = Property(17, Int.class, "assetType", false, "ASSET_TYPE")
         Property ChatChannel = Property(20, Int.class, "chatChannel", false, "CHAT_CHANNEL")
         Property ChatterID = Property(1, Long.TYPE, ChatterFragment.CHATTER_ID_KEY, false, "CHATTER_ID")
-        Property DialogButtons = Property(26, Byte[].class, "dialogButtons", false, "DIALOG_BUTTONS")
+        Property DialogButtons = Property(26, ByteArray.class, "dialogButtons", false, "DIALOG_BUTTONS")
         Property DialogIgnored = Property(21, Boolean.class, "dialogIgnored", false, "DIALOG_IGNORED")
         Property DialogSelectedOption = Property(27, String.class, "dialogSelectedOption", false, "DIALOG_SELECTED_OPTION")
         Property EventState = Property(12, Int.class, "eventState", false, "EVENT_STATE")
@@ -160,7 +160,7 @@ class ChatMessageDao : AbstractDao<ChatMessage, Long> {
         if (senderType != null) {
             sQLiteStatement.bindLong(26, (Long) senderType.intValue())
         }
-        Byte[] dialogButtons = chatMessage.getDialogButtons()
+        ByteArray dialogButtons = chatMessage.getDialogButtons()
         if (dialogButtons != null) {
             sQLiteStatement.bindBlob(27, dialogButtons)
         }

@@ -10,10 +10,10 @@ class SetSimStatusInDatabase : SLMessage {
 
     class Data {
         Int AgentCount
-        Byte[] HostName
+        ByteArray HostName
         Int PID
         UUID RegionID
-        Byte[] Status
+        ByteArray Status
         Int TimeToLive
         Int X
         Int Y

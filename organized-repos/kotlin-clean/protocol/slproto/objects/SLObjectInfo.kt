@@ -100,7 +100,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
     public String touchName = ""
     val LinkedTreeNode<SLObjectInfo> treeNode = LinkedTreeNode<>(this)
     protected UUID uuid
-    public Float[] worldMatrix
+    public FloatArray worldMatrix
 
     /* JADX WARNING: Code restructure failed: missing block: B:3:0x001f, code lost:
         r7.objectCoords.set(0, com.lumiyaviewer.lumiya.slproto.types.LLVector3.parseFloatVec(r8))
@@ -216,13 +216,13 @@ private Int attachmentIDFromState(Int i) {
         return (((i & 255) & AGENT_ATTACH_MASK) >> 4) | (((i & 255) & -241) << 4)
     }
 
-    private Float[] calculateWorldMatrix(Float[] fArr) {
+    private FloatArray calculateWorldMatrix(FloatArray fArr) {
         LLQuaternion lLQuaternion = this.rotation
         if (lLQuaternion == null) {
             return null
         }
-        Float[] fArr2 = Float[16]
-        Float[] fArr3 = Float[16]
+        FloatArray fArr2 = FloatArray(16)
+        FloatArray fArr3 = FloatArray(16)
         this.objectCoords.MatrixTranslate(fArr3, 0, fArr, 0, 0)
         Matrix.multiplyMM(fArr2, 0, fArr3, 0, lLQuaternion.getInverseMatrix(), 0)
         return fArr2
@@ -385,7 +385,7 @@ private Int attachmentIDFromState(Int i) {
             r1 = 0
             Int r0 = r13.UpdateFlags
             r12.UpdateFlags = r0
-            Byte[] r0 = r13.Data
+            ByteArray r0 = r13.Data
             java.nio.ByteBuffer r4 = java.nio.ByteBuffer.wrap(r0)
             java.nio.ByteOrder r0 = java.nio.ByteOrder.BIG_ENDIAN
             r4.order(r0)
@@ -470,7 +470,7 @@ private Int attachmentIDFromState(Int i) {
             if (r2 != 0) goto L_0x013e
         L_0x00d3:
             if (r0 == 0) goto L_0x01b7
-            Byte[] r7 = Byte[r0]
+            ByteArray r7 = Byte[r0]
             r4.get(r7, r1, r0)
             java.lang.String r2 = java.lang.String     // Catch:{ UnsupportedEncodingException -> 0x0141 }
             java.lang.String r8 = "ISO-8859-1"
@@ -708,10 +708,10 @@ private Int attachmentIDFromState(Int i) {
     }
 
     fun getObjectExtents(MatrixStack matrixStack, Boolean z, LLVector3 lLVector3, LLVector3 lLVector32) {
-        Float[] fArr = Float[8]
+        FloatArray fArr = FloatArray(8)
         Int elementOffset = this.objectCoords.getElementOffset(0)
         Int elementOffset2 = this.objectCoords.getElementOffset(1)
-        Float[] data = this.objectCoords.getData()
+        FloatArray data = this.objectCoords.getData()
         matrixStack.glPushMatrix()
         matrixStack.glTranslatef(data[elementOffset + 0], data[elementOffset + 1], data[elementOffset + 2])
         matrixStack.glMultMatrixf(this.rotation.getInverseMatrix(), 0)
@@ -878,11 +878,11 @@ private Int attachmentIDFromState(Int i) {
 
     fun updateWorldMatrix(Boolean z) {
         SLObjectInfo parentObject = getParentObject()
-        Float[] matrix = parentObject == null ? IdentityMatrix.getMatrix() : parentObject.isAvatar() ? IdentityMatrix.getMatrix() : parentObject.worldMatrix
+        FloatArray matrix = parentObject == null ? IdentityMatrix.getMatrix() : parentObject.isAvatar() ? IdentityMatrix.getMatrix() : parentObject.worldMatrix
         if (matrix != null) {
             this.objRadius = this.objectCoords.getMaxComponent(1) / 2.0f
-            Float[] calculateWorldMatrix = calculateWorldMatrix(matrix)
-            Float[] fArr = this.worldMatrix
+            FloatArray calculateWorldMatrix = calculateWorldMatrix(matrix)
+            FloatArray fArr = this.worldMatrix
             if (fArr == null || !Arrays.equals(calculateWorldMatrix, fArr)) {
                 this.worldMatrix = calculateWorldMatrix
                 this.objectCoords.set(3, this.worldMatrix[12], this.worldMatrix[13], this.worldMatrix[14])

@@ -19,7 +19,7 @@ class ObjectPayDialog {
     /* renamed from: lambda$-com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356  reason: not valid java name */
     static /* synthetic */ Unit m677lambda$com_lumiyaviewer_lumiya_ui_objects_ObjectPayDialog_1356(AlertDialog alertDialog, PayInfo payInfo, Context context, UserManager userManager, SLObjectProfileData sLObjectProfileData, DialogInterface dialogInterface) {
         alertDialog.findViewById(R.id.object_pay_cancel).setOnClickListener($Lambda$X9q_n5C700PWS1S1Fm8NWTXuec(dialogInterface))
-        Int[] iArr = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
+        IntArray iArr = {R.id.object_pay_button1, R.id.object_pay_button2, R.id.object_pay_button3, R.id.object_pay_button4}
         ImmutableList<Integer> payPrices = payInfo.payPrices()
         Int i = 0
         while (true) {
@@ -33,7 +33,7 @@ class ObjectPayDialog {
                 alertDialog.findViewById(iArr[i2]).setVisibility(8)
                 alertDialog.findViewById(iArr[i2]).setTag(R.id.object_pay_price_tag, 0)
             } else {
-                ((Button) alertDialog.findViewById(iArr[i2])).setText(String.format(context.getString(R.string.pay_button_format), Object[]{Integer.valueOf(defaultPayPrice)}))
+                ((Button) alertDialog.findViewById(iArr[i2])).setText(String.format(context.getString(R.string.pay_button_format), Array<Any>{Integer.valueOf(defaultPayPrice)}))
                 alertDialog.findViewById(iArr[i2]).setVisibility(0)
                 alertDialog.findViewById(iArr[i2]).setTag(R.id.object_pay_price_tag, Integer.valueOf(defaultPayPrice))
                 alertDialog.findViewById(iArr[i2]).setOnClickListener(View.OnClickListener(defaultPayPrice, userManager, sLObjectProfileData, dialogInterface) {
@@ -133,7 +133,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
         if (payInfo.defaultPayPrice() != -1) {
             if (((EditText) alertDialog.findViewById(R.id.object_pay_amount)).getText().toString().equals("")) {
                 if (payInfo.defaultPayPrice() > 0) {
-                    ((EditText) alertDialog.findViewById(R.id.object_pay_amount)).setText(context.getString(R.string.object_pay_amount_format, Object[]{Integer.valueOf(payInfo.defaultPayPrice())}))
+                    ((EditText) alertDialog.findViewById(R.id.object_pay_amount)).setText(context.getString(R.string.object_pay_amount_format, Array<Any>{Integer.valueOf(payInfo.defaultPayPrice())}))
                 } else {
                     ((EditText) alertDialog.findViewById(R.id.object_pay_amount)).setText("")
                 }
@@ -249,7 +249,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
         PayInfo payInfo = sLObjectProfileData.payInfo()
         if (payInfo != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(context)
-            builder.setTitle((CharSequence) context.getString(R.string.object_pay_dialog_caption, Object[]{sLObjectProfileData.name().or(context.getString(R.string.name_loading_title))}))
+            builder.setTitle((CharSequence) context.getString(R.string.object_pay_dialog_caption, Array<Any>{sLObjectProfileData.name().or(context.getString(R.string.name_loading_title))}))
             builder.setCancelable(true)
             builder.setView((Int) R.layout.object_pay_dialog)
             AlertDialog create = builder.create()

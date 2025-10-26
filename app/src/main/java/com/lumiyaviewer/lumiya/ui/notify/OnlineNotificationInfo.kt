@@ -15,18 +15,18 @@ import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels
 class OnlineNotificationInfo {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f465comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues = null
+    private /* synthetic */ IntArray f465comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues = null
     private String contentText
     private Boolean hasProgress
     private String titleText
     private Boolean visible
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-SLGridConnection$ConnectionStateSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m668getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues() {
+    private /* synthetic */ IntArray m668getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues() {
         if (f465comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues != null) {
             return f465comlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues
         }
-        Int[] iArr = Int[SLGridConnection.ConnectionState.values().length]
+        IntArray iArr = Int[SLGridConnection.ConnectionState.values().length]
         try {
             iArr[SLGridConnection.ConnectionState.Connected.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -62,7 +62,7 @@ class OnlineNotificationInfo {
         L_0x0012:
             return
         L_0x0013:
-            Int[] r0 = m668getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues()
+            IntArray r0 = m668getcomlumiyaviewerlumiyaslprotoSLGridConnection$ConnectionStateSwitchesValues()
             com.lumiyaviewer.lumiya.slproto.SLGridConnection$ConnectionState r2 = r10.getConnectionState()
             Int r2 = r2.ordinal()
             r0 = r0[r2]

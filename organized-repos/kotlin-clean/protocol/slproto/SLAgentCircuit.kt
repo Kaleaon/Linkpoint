@@ -137,9 +137,9 @@ import javax.annotation.Nullable
 
 class SLAgentCircuit : SLThreadingCircuit(), ICapsEventHandler {
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues */
-    private const val /* synthetic */ Int[] syntheticField = null
+    private const val /* synthetic */ IntArray syntheticField = null
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues */
-    private const val /* synthetic */ Int[] syntheticField = null
+    private const val /* synthetic */ IntArray syntheticField = null
     private Subscription agentNameSubscription
     private Boolean agentPaused = false
     private val UUID agentUUID
@@ -176,11 +176,11 @@ class SLAgentCircuit : SLThreadingCircuit(), ICapsEventHandler {
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues() {
+private /* synthetic */ IntArray m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapEventQueue$CapsEventTypeSwitchesValues() {
         if (syntheticField != null) {
             return syntheticField
         }
-        Int[] iArr = Int[CapsEventType.values().length]
+        IntArray iArr = Int[CapsEventType.values().length]
         try {
             iArr[CapsEventType.AgentGroupDataUpdate.ordinal()] = 9
         } catch (NoSuchFieldError e) {
@@ -227,11 +227,11 @@ private /* synthetic */ Int[] m38-getcom-lumiyaviewer-lumiya-slproto-caps-SLCapE
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues */
     @JvmStatic
-private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues() {
+private /* synthetic */ IntArray m39-getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues() {
         if (syntheticField != null) {
             return syntheticField
         }
-        Int[] iArr = Int[ChatterType.values().length]
+        IntArray iArr = Int[ChatterType.values().length]
         try {
             iArr[ChatterType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -388,7 +388,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                 String asString = lLSDNode.byKey("sim-ip-and-port").asString()
                 String asString2 = lLSDNode.byKey("seed-capability").asString()
                 UUID asUUID = lLSDNode.byKey("agent-id").asUUID()
-                String[] split = asString.split(":")
+                Array<String> split = asString.split(":")
                 this.gridConn.addTempCircuit(SLAuthReply(this.authReply, true, true, asUUID, split[0], Integer.parseInt(split[1]), asString2))
             } catch (Exception e2) {
                 e2.printStackTrace()
@@ -405,7 +405,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             UUID uuid = UUID(wrap.getLong(), wrap.getLong())
             String str = ""
             if (b != (Byte) 0) {
-                Byte[] bArr = Byte[wrap.remaining()]
+                ByteArray bArr = Byte[wrap.remaining()]
                 wrap.get(bArr)
                 str = SLMessage.stringFromVariableOEM(bArr)
             }
@@ -632,7 +632,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
                 UUID sourceUUID = chatMessageSource.getSourceUUID()
                 if (sourceUUID != null) {
                     this.userManager.getChatterList().getFriendManager().addFriend(sourceUUID)
-                    SendGenericMessage("requestonlinenotification", String[]{sourceUUID.toString()})
+                    SendGenericMessage("requestonlinenotification", Array<String>{sourceUUID.toString()})
                 }
             }
         }
@@ -666,8 +666,8 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
             try {
                 LLSDNode byIndex = lLSDNode.byKey("Info").byIndex(0)
                 String asString = byIndex.byKey("SeedCapability").asString()
-                Byte[] asBinary = byIndex.byKey("SimIP").asBinary()
-                Debug.Printf("sim address: %s", SLAuthReply(this.authReply, true, false, this.authReply.agentID, String.format("%d.%d.%d.%d", Object[]{Integer.valueOf(asBinary[0] & 255), Integer.valueOf(asBinary[1] & 255), Integer.valueOf(asBinary[2] & 255), Integer.valueOf(asBinary[3] & 255)}), byIndex.byKey("SimPort").asInt(), asString).simAddress)
+                ByteArray asBinary = byIndex.byKey("SimIP").asBinary()
+                Debug.Printf("sim address: %s", SLAuthReply(this.authReply, true, false, this.authReply.agentID, String.format("%d.%d.%d.%d", Array<Any>{Integer.valueOf(asBinary[0] & 255), Integer.valueOf(asBinary[1] & 255), Integer.valueOf(asBinary[2] & 255), Integer.valueOf(asBinary[3] & 255)}), byIndex.byKey("SimPort").asInt(), asString).simAddress)
                 this.modules.avatarControl.setEnableAgentUpdates(false)
                 this.gridConn.HandleTeleportFinish(r0)
                 return
@@ -777,7 +777,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SendMessage(completeAgentMovement)
     }
 
-    private Unit SendEstateOwnerMessage(String str, String[] strArr) {
+    private Unit SendEstateOwnerMessage(String str, Array<String> strArr) {
         SLMessage estateOwnerMessage = EstateOwnerMessage()
         estateOwnerMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         estateOwnerMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -808,7 +808,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("")
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[1]
+        improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(1)
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)
     }
@@ -831,7 +831,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str)
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[0]
+        improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(0)
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)
         if (!(i == 20 || i == 41 || i == 42)) {
@@ -943,14 +943,14 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF("")
         if (uuid3 != null) {
-            ByteBuffer wrap = ByteBuffer.wrap(Byte[16])
+            ByteBuffer wrap = ByteBuffer.wrap(ByteArray(16))
             wrap.order(ByteOrder.BIG_ENDIAN)
             wrap.putLong(uuid3.getMostSignificantBits())
             wrap.putLong(uuid3.getLeastSignificantBits())
             wrap.position(0)
             improvedInstantMessage.MessageBlock_Field.BinaryBucket = wrap.array()
         } else {
-            improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[0]
+            improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(0)
         }
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)
@@ -971,7 +971,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str)
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[0]
+        improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(0)
         improvedInstantMessage.isReliable = true
         SendMessage(improvedInstantMessage)
     }
@@ -1365,7 +1365,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         SLObjectInfo sLObjectInfo = (SLObjectInfo) this.gridConn.parcelInfo.allObjectsNearby.get(payPriceReply.ObjectData_Field.ObjectID)
         if (sLObjectInfo != null) {
             Int i = payPriceReply.ObjectData_Field.DefaultPayPrice
-            Int[] iArr = Int[payPriceReply.ButtonData_Fields.size()]
+            IntArray iArr = Int[payPriceReply.ButtonData_Fields.size()]
             Int i2 = 0
             while (true) {
                 Int i3 = i2
@@ -1406,10 +1406,10 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
     }
 
     fun HandleScriptDialog(ScriptDialog scriptDialog) {
-        String[] strArr
+        Array<String> strArr
         Int i = 0
         if (scriptDialog.Buttons_Fields.size() > 0) {
-            String[] strArr2 = String[scriptDialog.Buttons_Fields.size()]
+            Array<String> strArr2 = String[scriptDialog.Buttons_Fields.size()]
             Int i2 = 0
             for (Buttons buttons : scriptDialog.Buttons_Fields) {
                 strArr2[i2] = SLMessage.stringFromVariableUTF(buttons.ButtonLabel)
@@ -1566,7 +1566,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         if (!this.isEstateManager) {
             return false
         }
-        SendEstateOwnerMessage("restart", String[]{Integer.toString(i)})
+        SendEstateOwnerMessage("restart", Array<String>{Integer.toString(i)})
         return true
     }
 
@@ -1716,7 +1716,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
     }
 
-    fun SendGenericMessage(String str, String[] strArr) {
+    fun SendGenericMessage(String str, Array<String> strArr) {
         SLMessage genericMessage = GenericMessage()
         genericMessage.AgentData_Field.AgentID = this.circuitInfo.agentID
         genericMessage.AgentData_Field.SessionID = this.circuitInfo.sessionID
@@ -1747,7 +1747,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         improvedInstantMessage.MessageBlock_Field.Timestamp = 0
         improvedInstantMessage.MessageBlock_Field.FromAgentName = SLMessage.stringToVariableOEM("todo")
         improvedInstantMessage.MessageBlock_Field.Message = SLMessage.stringToVariableUTF(str)
-        improvedInstantMessage.MessageBlock_Field.BinaryBucket = Byte[1]
+        improvedInstantMessage.MessageBlock_Field.BinaryBucket = ByteArray(1)
         improvedInstantMessage.isReliable = true
         synchronized (this.startedGroupSessions) {
             if (this.startedGroupSessions.contains(uuid)) {
@@ -2059,7 +2059,7 @@ private /* synthetic */ Int[] m39-getcom-lumiyaviewer-lumiya-slproto-users-Chatt
         }
         LLVector3 position = this.modules.avatarControl.getAgentPosition().getPosition()
         try {
-            return String.format("http://maps.secondlife.com/secondlife/%s/%d/%d/%d", Object[]{URLEncoder.encode(this.regionName, "UTF-8"), Integer.valueOf((Int) position.x), Integer.valueOf((Int) position.y), Integer.valueOf((Int) position.z)})
+            return String.format("http://maps.secondlife.com/secondlife/%s/%d/%d/%d", Array<Any>{URLEncoder.encode(this.regionName, "UTF-8"), Integer.valueOf((Int) position.x), Integer.valueOf((Int) position.y), Integer.valueOf((Int) position.z)})
         } catch (UnsupportedEncodingException e) {
             return null
         }

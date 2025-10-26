@@ -20,10 +20,10 @@ class GroupNoticesListReply : SLMessage() {
     @JvmStatic
     class Data {
         public Int AssetType
-        public Byte[] FromName
+        public ByteArray FromName
         public Boolean HasAttachment
         public UUID NoticeID
-        public Byte[] Subject
+        public ByteArray Subject
         public Int Timestamp
     }
 

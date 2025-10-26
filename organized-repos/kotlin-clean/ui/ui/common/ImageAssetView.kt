@@ -189,7 +189,7 @@ class ImageAssetView : View() {
     }
 
     fun setAssetID(UUID uuid) {
-        Object[] objArr = Object[1]
+        Array<Any> objArr = Object[1]
         objArr[0] = uuid != null ? uuid.toString() : null
         Debug.Printf("asset ID: %s", objArr)
         if (uuid != null && uuid.equals(UUIDPool.ZeroUUID)) {

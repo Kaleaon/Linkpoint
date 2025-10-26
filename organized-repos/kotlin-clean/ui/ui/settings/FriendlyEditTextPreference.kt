@@ -24,6 +24,6 @@ class FriendlyEditTextPreference : EditTextPreference() {
         if (TextUtils.isEmpty(text) || (summary = super.getSummary()) == null) {
             return null
         }
-        return String.format(summary.toString(), Object[]{text})
+        return String.format(summary.toString(), Array<Any>{text})
     }
 }

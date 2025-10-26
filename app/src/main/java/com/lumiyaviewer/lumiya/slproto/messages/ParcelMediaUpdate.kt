@@ -12,14 +12,14 @@ class ParcelMediaUpdate : SLMessage {
     class DataBlock {
         Int MediaAutoScale
         UUID MediaID
-        Byte[] MediaURL
+        ByteArray MediaURL
     }
 
     class DataBlockExtended {
-        Byte[] MediaDesc
+        ByteArray MediaDesc
         Int MediaHeight
         Int MediaLoop
-        Byte[] MediaType
+        ByteArray MediaType
         Int MediaWidth
     }
 

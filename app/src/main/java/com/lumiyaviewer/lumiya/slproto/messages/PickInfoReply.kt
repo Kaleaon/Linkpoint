@@ -15,18 +15,18 @@ class PickInfoReply : SLMessage {
 
     class Data {
         UUID CreatorID
-        Byte[] Desc
+        ByteArray Desc
         Boolean Enabled
-        Byte[] Name
-        Byte[] OriginalName
+        ByteArray Name
+        ByteArray OriginalName
         UUID ParcelID
         UUID PickID
         LLVector3d PosGlobal
-        Byte[] SimName
+        ByteArray SimName
         UUID SnapshotID
         Int SortOrder
         Boolean TopPick
-        Byte[] User
+        ByteArray User
     }
 
     PickInfoReply() {

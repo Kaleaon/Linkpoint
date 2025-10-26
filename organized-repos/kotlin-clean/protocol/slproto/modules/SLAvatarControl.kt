@@ -431,7 +431,7 @@ class SLAvatarControl : SLModule() {
 
     @SLMessageHandler
     fun HandleScriptQuestion(ScriptQuestion scriptQuestion) {
-        Debug.Log("ScriptQuestion: ItemID = " + scriptQuestion.Data_Field.ItemID + ", questions = " + String.format("%08x", Object[]{Integer.valueOf(scriptQuestion.Data_Field.Questions)}))
+        Debug.Log("ScriptQuestion: ItemID = " + scriptQuestion.Data_Field.ItemID + ", questions = " + String.format("%08x", Array<Any>{Integer.valueOf(scriptQuestion.Data_Field.Questions)}))
         SLChatPermissionRequestEvent sLChatPermissionRequestEvent = SLChatPermissionRequestEvent(scriptQuestion, this.agentCircuit.getAgentUUID())
         if (sLChatPermissionRequestEvent.getQuestions() != 0) {
             this.agentCircuit.HandleChatEvent(this.agentCircuit.getLocalChatterID(), sLChatPermissionRequestEvent, true)

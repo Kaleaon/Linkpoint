@@ -29,7 +29,7 @@ import javax.annotation.Nullable
 abstract class AvatarPickerFragment : FragmentWithTitle : AdapterView.OnItemClickListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-avapicker-AvatarPickerFragment$ContactListTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues = null
+    private /* synthetic */ IntArray f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues = null
 
     class AvatarPickerPagerAdapter : PagerAdapter {
         private Context context
@@ -101,11 +101,11 @@ abstract class AvatarPickerFragment : FragmentWithTitle : AdapterView.OnItemClic
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-avapicker-AvatarPickerFragment$ContactListTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m388getcomlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues() {
+    private /* synthetic */ IntArray m388getcomlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues() {
         if (f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues != null) {
             return f234comlumiyaviewerlumiyauiavapickerAvatarPickerFragment$ContactListTypeSwitchesValues
         }
-        Int[] iArr = Int[ContactListType.values().length]
+        IntArray iArr = Int[ContactListType.values().length]
         try {
             iArr[ContactListType.Friends.ordinal()] = 1
         } catch (NoSuchFieldError e) {

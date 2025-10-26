@@ -25,10 +25,10 @@ class DrawableHoverText : ResourceConsumer, GLCleanable {
     }
 
     Unit DrawAtWorld(RenderContext renderContext, Float f, Float f2, Float f3, Float f4, MatrixStack matrixStack, Boolean z, Int i) {
-        r0 = Float[8]
-        Float[] matrixData = renderContext.modelViewMatrix.getMatrixData()
+        r0 = FloatArray(8)
+        FloatArray matrixData = renderContext.modelViewMatrix.getMatrixData()
         Int matrixDataOffset = renderContext.modelViewMatrix.getMatrixDataOffset()
-        Float[] matrixData2 = matrixStack.getMatrixData()
+        FloatArray matrixData2 = matrixStack.getMatrixData()
         Int matrixDataOffset2 = matrixStack.getMatrixDataOffset()
         r0[0] = f
         r0[1] = f2

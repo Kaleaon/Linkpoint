@@ -15,7 +15,7 @@ class StartAuction : SLMessage() {
 
     @JvmStatic
     class ParcelData {
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParcelID
         public UUID SnapshotID
     }

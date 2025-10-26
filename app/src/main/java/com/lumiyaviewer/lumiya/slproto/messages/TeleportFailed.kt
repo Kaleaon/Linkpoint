@@ -12,13 +12,13 @@ class TeleportFailed : SLMessage {
     Info Info_Field
 
     class AlertInfo {
-        Byte[] ExtraParams
-        Byte[] Message
+        ByteArray ExtraParams
+        ByteArray Message
     }
 
     class Info {
         UUID AgentID
-        Byte[] Reason
+        ByteArray Reason
     }
 
     TeleportFailed() {

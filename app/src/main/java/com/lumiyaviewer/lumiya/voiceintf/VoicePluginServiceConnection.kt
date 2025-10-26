@@ -85,15 +85,15 @@ class VoicePluginServiceConnection : ServiceConnection {
     private Handler fromPluginHandler = Handler() {
 
         /* renamed from: -com-lumiyaviewer-lumiya-voice-common-VoicePluginMessageTypeSwitchesValues  reason: not valid java name */
-        private /* synthetic */ Int[] f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues = null
-        /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$voice$common$VoicePluginMessageType
+        private /* synthetic */ IntArray f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues = null
+        /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$voice$common$VoicePluginMessageType
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-voice-common-VoicePluginMessageTypeSwitchesValues  reason: not valid java name */
-        private /* synthetic */ Int[] m906getcomlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues() {
+        private /* synthetic */ IntArray m906getcomlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues() {
             if (f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues != null) {
                 return f611comlumiyaviewerlumiyavoicecommonVoicePluginMessageTypeSwitchesValues
             }
-            Int[] iArr = Int[VoicePluginMessageType.values().length]
+            IntArray iArr = Int[VoicePluginMessageType.values().length]
             try {
                 iArr[VoicePluginMessageType.VoiceAcceptCall.ordinal()] = 6
             } catch (NoSuchFieldError e) {
@@ -232,11 +232,11 @@ class VoicePluginServiceConnection : ServiceConnection {
     }
 
     Boolean isPluginSupported() {
-        String[] strArr
+        Array<String> strArr
         if (Build.VERSION.SDK_INT >= 21) {
             strArr = Build.SUPPORTED_ABIS
         } else {
-            strArr = String[]{Build.CPU_ABI, Build.CPU_ABI2}
+            strArr = Array<String>{Build.CPU_ABI, Build.CPU_ABI2}
         }
         if (strArr == null) {
             return false

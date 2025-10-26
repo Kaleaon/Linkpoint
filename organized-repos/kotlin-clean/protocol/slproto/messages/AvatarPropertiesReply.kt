@@ -16,15 +16,15 @@ class AvatarPropertiesReply : SLMessage() {
 
     @JvmStatic
     class PropertiesData {
-        public Byte[] AboutText
-        public Byte[] BornOn
-        public Byte[] CharterMember
-        public Byte[] FLAboutText
+        public ByteArray AboutText
+        public ByteArray BornOn
+        public ByteArray CharterMember
+        public ByteArray FLAboutText
         public UUID FLImageID
         public Int Flags
         public UUID ImageID
         public UUID PartnerID
-        public Byte[] ProfileURL
+        public ByteArray ProfileURL
     }
 
     public AvatarPropertiesReply() {

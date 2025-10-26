@@ -11,7 +11,7 @@ class ImageData : SLMessage() {
 
     @JvmStatic
     class ImageDataData {
-        public Byte[] Data
+        public ByteArray Data
     }
 
     @JvmStatic

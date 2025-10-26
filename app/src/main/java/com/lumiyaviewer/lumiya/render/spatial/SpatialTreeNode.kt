@@ -11,7 +11,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
     private Boolean leaf
     SpatialTreeNode nextDepth = null
     private SpatialTreeNode parent
-    Float[] position
+    FloatArray position
     SpatialTreeNode prevDepth = null
     private var singleChild: SpatialTreeNode = null
     private SpatialTree spatialTree
@@ -19,7 +19,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
 
     constructor(spatialTree: SpatialTree, f: Float, f2: Float, f3: Float) {
         this.spatialTree = spatialTree
-        this.position = Float[]{0.0f, 0.0f, 0.0f, f, f2, f3, 0.0f, 0.0f, 0.0f, f, f2, f3}
+        this.position = FloatArray{0.0f, 0.0f, 0.0f, f, f2, f3, 0.0f, 0.0f, 0.0f, f, f2, f3}
         this.leaf = false
         this.parent = null
         this.indexInParent = 0
@@ -28,7 +28,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
 
     constructor(spatialTreeNode: SpatialTreeNode, i: Int) {
         this.spatialTree = spatialTreeNode.spatialTree
-        this.position = Float[12]
+        this.position = FloatArray(12)
         this.parent = spatialTreeNode
         this.indexInParent = i
         Boolean z = true
@@ -130,7 +130,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
     private fun shrinkBoundingBox(): Unit {
         Int i = 1
         if (this.parent != null) {
-            Any obj = Float[6]
+            Any obj = FloatArray(6)
             DrawListEntry drawListEntry = (DrawListEntry) getFirst()
             Int i4 = 0
             while (drawListEntry != null) {

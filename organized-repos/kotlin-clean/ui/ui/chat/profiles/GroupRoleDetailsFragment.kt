@@ -556,7 +556,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 ((TextView) view.findViewById(R.id.role_title_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Title))
                 ((EditText) view.findViewById(R.id.role_description_edit)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Description))
                 ((TextView) view.findViewById(R.id.role_description_view)).setText(SLMessage.stringFromVariableOEM(selectedRoleData.Description))
-                ((TextView) view.findViewById(R.id.role_member_count)).setText(getResources().getQuantityString(R.plurals.members, memberCount, Object[]{Integer.valueOf(memberCount)}))
+                ((TextView) view.findViewById(R.id.role_member_count)).setText(getResources().getQuantityString(R.plurals.members, memberCount, Array<Any>{Integer.valueOf(memberCount)}))
                 setPermissionCheckboxes(selectedRoleData.Powers, (ViewGroup) view.findViewById(R.id.role_permission_list_layout))
                 view.findViewById(R.id.group_role_members_card_view).setVisibility(0)
             } else {

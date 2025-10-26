@@ -12,7 +12,7 @@ class NeighborList : SLMessage() {
     @JvmStatic
     class NeighborBlock {
         public Inet4Address IP
-        public Byte[] Name
+        public ByteArray Name
         public Int Port
         public Inet4Address PublicIP
         public Int PublicPort

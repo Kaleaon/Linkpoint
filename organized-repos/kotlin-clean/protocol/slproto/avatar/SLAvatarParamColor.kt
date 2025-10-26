@@ -5,7 +5,7 @@ import javax.annotation.Nonnull
 
 class SLAvatarParamColor {
     val ColorOperation colorOperation
-    private val Int[] colorValues
+    private val IntArray colorValues
 
     enum class ColorOperation {
         Default,
@@ -13,7 +13,7 @@ class SLAvatarParamColor {
         Multiply
     }
 
-    SLAvatarParamColor(ColorOperation colorOperation2, Int[] iArr) {
+    SLAvatarParamColor(ColorOperation colorOperation2, IntArray iArr) {
         this.colorOperation = colorOperation2
         this.colorValues = iArr
     }

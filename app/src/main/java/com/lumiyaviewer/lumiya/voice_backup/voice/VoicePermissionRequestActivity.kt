@@ -32,7 +32,7 @@ class VoicePermissionRequestActivity : AppCompatActivity() {
 
         fun onServiceConnected(ComponentName componentName, IBinder iBinder) {
             VoicePermissionRequestActivity.access$002(this.this$0, Messenger(iBinder))
-            ActivityCompat.requestPermissions(this.this$0, String[]{"android.permission.RECORD_AUDIO"}, 100)
+            ActivityCompat.requestPermissions(this.this$0, Array<String>{"android.permission.RECORD_AUDIO"}, 100)
         }
 
         fun onServiceDisconnected(ComponentName componentName) {
@@ -94,7 +94,7 @@ class VoicePermissionRequestActivity : AppCompatActivity() {
      * Enabled force condition propagation
      * Lifted jumps to return sites
      */
-    override Unit onRequestPermissionsResult(Int n, String[] stringArray, Int[] nArray) {
+    override Unit onRequestPermissionsResult(Int n, Array<String> stringArray, IntArray nArray) {
         block4: {
             block3: {
                 Debug.Printf("Cardboard: onRequestPermissionResult, code %d", n)

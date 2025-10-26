@@ -15,7 +15,7 @@ class ScriptDialogReply : SLMessage {
 
     class Data {
         Int ButtonIndex
-        Byte[] ButtonLabel
+        ByteArray ButtonLabel
         Int ChatChannel
         UUID ObjectID
     }

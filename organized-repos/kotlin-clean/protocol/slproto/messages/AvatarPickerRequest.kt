@@ -18,7 +18,7 @@ class AvatarPickerRequest : SLMessage() {
 
     @JvmStatic
     class Data {
-        public Byte[] Name
+        public ByteArray Name
     }
 
     public AvatarPickerRequest() {

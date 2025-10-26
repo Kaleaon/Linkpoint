@@ -302,7 +302,7 @@ private VoiceService serviceInstance = null
                 if (!bl) break block4
                 AudioStreamVolumeObserver audioStreamVolumeObserver = this.audioStreamVolumeObserver
                 AudioStreamVolumeObserver.OnAudioStreamVolumeChangedListener onAudioStreamVolumeChangedListener = this.audioVolumeChangeListener
-                audioStreamVolumeObserver.start(Int[]{0, 6}, onAudioStreamVolumeChangedListener)
+                audioStreamVolumeObserver.start(IntArray{0, 6}, onAudioStreamVolumeChangedListener)
                 this.updateAudioProperties()
             }
             return

@@ -12,7 +12,7 @@ class CachedAssetDao : AbstractDao<CachedAsset, String> {
     String TABLENAME = "CachedAssets"
 
     class Properties {
-        Property Data = Property(2, Byte[].class, "data", false, "DATA")
+        Property Data = Property(2, ByteArray.class, "data", false, "DATA")
         Property Key = Property(0, String.class, "key", true, "KEY")
         Property MustRevalidate = Property(3, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE")
         Property Status = Property(1, Int.TYPE, NotificationCompat.CATEGORY_STATUS, false, "STATUS")
@@ -41,7 +41,7 @@ class CachedAssetDao : AbstractDao<CachedAsset, String> {
             sQLiteStatement.bindString(1, key)
         }
         sQLiteStatement.bindLong(2, (Long) cachedAsset.getStatus())
-        Byte[] data = cachedAsset.getData()
+        ByteArray data = cachedAsset.getData()
         if (data != null) {
             sQLiteStatement.bindBlob(3, data)
         }
@@ -57,7 +57,7 @@ class CachedAssetDao : AbstractDao<CachedAsset, String> {
     }
 
     fun readEntity(cursor: Cursor, i: Int): CachedAsset {
-        Byte[] bArr = null
+        ByteArray bArr = null
         Boolean z = false
         String string = cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
         Int i2 = cursor.getInt(i + 1)
@@ -71,7 +71,7 @@ class CachedAssetDao : AbstractDao<CachedAsset, String> {
     }
 
     fun readEntity(cursor: Cursor, cachedAsset: CachedAsset, i: Int): Unit {
-        Byte[] bArr = null
+        ByteArray bArr = null
         cachedAsset.setKey(cursor.isNull(i + 0) ? null : cursor.getString(i + 0))
         cachedAsset.setStatus(cursor.getInt(i + 1))
         if (!cursor.isNull(i + 2)) {

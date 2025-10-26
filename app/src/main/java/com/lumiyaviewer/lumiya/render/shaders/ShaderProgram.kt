@@ -24,7 +24,7 @@ abstract class ShaderProgram {
         int[] iArr = IntArray(1)
         GLES20.glGetProgramiv(this.handle, 35714, iArr, 0)
         if (iArr[0] != 1) {
-            throw ShaderCompileException(String.format("Shader link error: '%s'", new Object[]{GLES20.glGetProgramInfoLog(this.handle)}))
+            throw ShaderCompileException(String.format("Shader link error: '%s'", new Array<Any>{GLES20.glGetProgramInfoLog(this.handle)}))
         }
         Debug.Printf("Shaders: Binding variables...", Array<Object>(0))
         bindVariables()

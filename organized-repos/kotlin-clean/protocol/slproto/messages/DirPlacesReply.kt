@@ -28,7 +28,7 @@ class DirPlacesReply : SLMessage() {
         public Boolean Auction
         public Float Dwell
         public Boolean ForSale
-        public Byte[] Name
+        public ByteArray Name
         public UUID ParcelID
     }
 

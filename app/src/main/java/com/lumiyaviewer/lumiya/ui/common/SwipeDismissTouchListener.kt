@@ -71,7 +71,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
     Unit performDismiss() {
         ViewGroup.LayoutParams layoutParams = this.mView.getLayoutParams()
         Int height = this.mView.getHeight()
-        ValueAnimator duration = ValueAnimator.ofInt(Int[]{height, 1}).setDuration(this.mAnimationTime)
+        ValueAnimator duration = ValueAnimator.ofInt(IntArray{height, 1}).setDuration(this.mAnimationTime)
         duration.addListener(AnimatorListenerAdapter() {
             Unit onAnimationEnd(Animator animator) {
                 SwipeDismissTouchListener.this.mCallbacks.onDismiss(SwipeDismissTouchListener.this.mView, SwipeDismissTouchListener.this.mToken)

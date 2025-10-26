@@ -12,7 +12,7 @@ class UUIDGroupNameReply : SLMessage() {
 
     @JvmStatic
     class UUIDNameBlock {
-        public Byte[] GroupName
+        public ByteArray GroupName
         public UUID ID
     }
 

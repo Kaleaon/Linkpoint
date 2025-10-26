@@ -37,7 +37,7 @@ class SpatialObjectIndex {
     private val objectsToUpdate: Set<DrawListObjectEntry> = Collections.newSetFromMap(IdentityHashMap())
     private val objectsUpdateTask: ObjectsUpdateTask = ObjectsUpdateTask(this, null)
     private SpatialTree spatialTree
-    private DrawListTerrainEntry[][] terrain = ((DrawListTerrainEntry[][]) Array.newInstance(DrawListTerrainEntry.class, Int[]{16, 16}))
+    private DrawListTerrainEntry[][] terrain = ((DrawListTerrainEntry[][]) Array.newInstance(DrawListTerrainEntry.class, IntArray{16, 16}))
     private val terrainDirty: Map<Int, TerrainData> = HashMap()
     private val terrainLock: Any = Any()
     private val terrainUpdate: Runnable = Runnable() {

@@ -228,7 +228,7 @@ class DetailsActivity : ConnectedActivity {
         updateTitle()
     }
 
-    Unit onRequestPermissionsResult(Int i, @NonNull String[] strArr, @NonNull Int[] iArr) {
+    Unit onRequestPermissionsResult(Int i, @NonNull Array<String> strArr, @NonNull IntArray iArr) {
         super.onRequestPermissionsResult(i, strArr, iArr)
         List<Fragment> fragments = getSupportFragmentManager().getFragments()
         if (fragments != null) {

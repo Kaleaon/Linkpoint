@@ -26,12 +26,12 @@ class GroupRoleDataReply : SLMessage() {
 
     @JvmStatic
     class RoleData {
-        public Byte[] Description
+        public ByteArray Description
         public Int Members
-        public Byte[] Name
+        public ByteArray Name
         public Long Powers
         public UUID RoleID
-        public Byte[] Title
+        public ByteArray Title
     }
 
     public GroupRoleDataReply() {

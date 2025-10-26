@@ -6,7 +6,7 @@ import java.util.ArrayList
 
 class PrimProfile {
     Int MIN_DETAIL_FACES = 6
-    private Float[] tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
+    private FloatArray tableScale = {1.0f, 1.0f, 1.0f, 0.5f, 0.707107f, 0.53f, 0.525f, 0.5f}
     Boolean Concave = false
     Boolean Dirty = true
     LLVector3[] EdgeCenters

@@ -18,7 +18,7 @@ class ObjectExtraParams : SLMessage {
 
     class ObjectData {
         Int ObjectLocalID
-        Byte[] ParamData
+        ByteArray ParamData
         Boolean ParamInUse
         Int ParamSize
         Int ParamType

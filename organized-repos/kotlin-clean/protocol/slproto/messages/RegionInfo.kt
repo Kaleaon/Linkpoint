@@ -23,8 +23,8 @@ class RegionInfo : SLMessage() {
         public Int HardMaxAgents
         public Int HardMaxObjects
         public Int MaxAgents32
-        public Byte[] ProductName
-        public Byte[] ProductSKU
+        public ByteArray ProductName
+        public ByteArray ProductSKU
     }
 
     @JvmStatic
@@ -44,7 +44,7 @@ class RegionInfo : SLMessage() {
         public Int RedirectGridY
         public Int RegionFlags
         public Int SimAccess
-        public Byte[] SimName
+        public ByteArray SimName
         public Float SunHour
         public Float TerrainLowerLimit
         public Float TerrainRaiseLimit

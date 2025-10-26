@@ -74,7 +74,7 @@ enum class Shader(
             return this.handle
         }
         shaderCode = GLES20.glGetShaderInfoLog(this.handle)
-        throw ShaderCompileException(String.format("Shader (%s) compile error: '%s'", new Object[]{this.fileName, shaderCode}))
+        throw ShaderCompileException(String.format("Shader (%s) compile error: '%s'", new Array<Any>{this.fileName, shaderCode}))
     }
 
     int getHandle() {

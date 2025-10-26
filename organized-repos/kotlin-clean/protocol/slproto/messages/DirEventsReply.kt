@@ -25,10 +25,10 @@ class DirEventsReply : SLMessage() {
 
     @JvmStatic
     class QueryReplies {
-        public Byte[] Date
+        public ByteArray Date
         public Int EventFlags
         public Int EventID
-        public Byte[] Name
+        public ByteArray Name
         public UUID OwnerID
         public Int UnixTime
     }

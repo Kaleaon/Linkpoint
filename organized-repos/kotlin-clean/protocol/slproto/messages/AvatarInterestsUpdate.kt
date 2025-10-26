@@ -16,11 +16,11 @@ class AvatarInterestsUpdate : SLMessage() {
 
     @JvmStatic
     class PropertiesData {
-        public Byte[] LanguagesText
+        public ByteArray LanguagesText
         public Int SkillsMask
-        public Byte[] SkillsText
+        public ByteArray SkillsText
         public Int WantToMask
-        public Byte[] WantToText
+        public ByteArray WantToText
     }
 
     public AvatarInterestsUpdate() {

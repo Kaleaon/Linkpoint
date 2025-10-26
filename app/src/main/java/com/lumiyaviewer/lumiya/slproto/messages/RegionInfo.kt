@@ -21,8 +21,8 @@ class RegionInfo : SLMessage {
         Int HardMaxAgents
         Int HardMaxObjects
         Int MaxAgents32
-        Byte[] ProductName
-        Byte[] ProductSKU
+        ByteArray ProductName
+        ByteArray ProductSKU
     }
 
     class RegionInfo3 {
@@ -40,7 +40,7 @@ class RegionInfo : SLMessage {
         Int RedirectGridY
         Int RegionFlags
         Int SimAccess
-        Byte[] SimName
+        ByteArray SimName
         Float SunHour
         Float TerrainLowerLimit
         Float TerrainRaiseLimit

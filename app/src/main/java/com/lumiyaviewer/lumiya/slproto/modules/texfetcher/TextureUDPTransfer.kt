@@ -22,7 +22,7 @@ class TextureUDPTransfer {
     private Boolean headerReceived = false
     private Long lastReceivedPacket = 0
     private Int nextExpectedPacket = 0
-    private Map<Int, Byte[]> outOfOrderPackets = HashMap()
+    private Map<Int, ByteArray> outOfOrderPackets = HashMap()
     private File outputFile
     private FileOutputStream outputStream
     private Int packets
@@ -34,7 +34,7 @@ class TextureUDPTransfer {
         this.outputFile = file
     }
 
-    private Unit HandleDataPacket(Int i, Byte[] bArr) {
+    private Unit HandleDataPacket(Int i, ByteArray bArr) {
         this.lastReceivedPacket = System.currentTimeMillis()
         if (!this.headerReceived || this.nextExpectedPacket != i) {
             this.outOfOrderPackets.put(Int.valueOf(i), bArr)
@@ -42,7 +42,7 @@ class TextureUDPTransfer {
         }
         HandleNextDataPacket(bArr)
         while (true) {
-            Byte[] remove = this.outOfOrderPackets.remove(Int.valueOf(this.nextExpectedPacket))
+            ByteArray remove = this.outOfOrderPackets.remove(Int.valueOf(this.nextExpectedPacket))
             if (remove != null) {
                 HandleNextDataPacket(remove)
             } else {
@@ -51,7 +51,7 @@ class TextureUDPTransfer {
         }
     }
 
-    private Unit HandleNextDataPacket(Byte[] bArr) {
+    private Unit HandleNextDataPacket(ByteArray bArr) {
         this.lastReceivedPacket = System.currentTimeMillis()
         try {
             if (this.nextExpectedPacket == 0 && this.outputStream == null) {

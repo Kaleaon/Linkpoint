@@ -136,7 +136,7 @@ class HybridSLTransport {
             // Example format: <map><key>EventQueueGet</key><string>http://...</string></map>
             
             // Common Second Life capabilities to extract
-            String[] capabilityNames = {
+            Array<String> capabilityNames = {
                 "EventQueueGet", "ChatSessionRequest", "SendChatMessage",
                 "UploadBakedTexture", "FetchInventory", "GetMesh", 
                 "GetTexture", "AgentPreferences", "UpdateAgentInformation"

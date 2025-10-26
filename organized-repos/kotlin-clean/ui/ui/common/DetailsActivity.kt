@@ -228,7 +228,7 @@ private class DetailsStackEntry : Parcelable {
         updateTitle()
     }
 
-    fun onRequestPermissionsResult(Int i, String[] strArr, Int[] iArr) {
+    fun onRequestPermissionsResult(Int i, Array<String> strArr, IntArray iArr) {
         super.onRequestPermissionsResult(i, strArr, iArr)
         List<Fragment> fragments = getSupportFragmentManager().getFragments()
         if (fragments != null) {
@@ -355,14 +355,14 @@ private class DetailsStackEntry : Parcelable {
             r1 = 2131755284(0x7f100114, Float:1.9141443E38)
             android.support.v4.app.Fragment r1 = r0.findFragmentById(r1)
             java.lang.String r0 = "updateTitle: detailsFragment %s"
-            java.lang.Object[] r4 = java.lang.Object[r2]
+            java.lang.Array<Any> r4 = java.lang.Object[r2]
             r4[r3] = r1
             com.lumiyaviewer.lumiya.Debug.Printf(r0, r4)
             Boolean r0 = r1 instanceof com.lumiyaviewer.lumiya.ui.common.FragmentHasTitle
             if (r0 == 0) goto L_0x0082
             java.lang.String r0 = "updateTitle: detailsFragment added %b hidden %b detached %b"
             r4 = 3
-            java.lang.Object[] r4 = java.lang.Object[r4]
+            java.lang.Array<Any> r4 = java.lang.Object[r4]
             Boolean r5 = r1.isAdded()
             java.lang.Boolean r5 = java.lang.Boolean.valueOf(r5)
             r4[r3] = r5
@@ -387,7 +387,7 @@ private class DetailsStackEntry : Parcelable {
             com.lumiyaviewer.lumiya.ui.common.FragmentHasTitle r1 = (com.lumiyaviewer.lumiya.ui.common.FragmentHasTitle) r1
             java.lang.String r1 = r1.getSubTitle()
             java.lang.String r4 = "updateTitle: got title '%s', subtitle '%s'"
-            java.lang.Object[] r5 = java.lang.Object[r6]
+            java.lang.Array<Any> r5 = java.lang.Object[r6]
             r5[r3] = r0
             r5[r2] = r1
             com.lumiyaviewer.lumiya.Debug.Printf(r4, r5)

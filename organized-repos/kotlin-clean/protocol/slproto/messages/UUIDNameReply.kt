@@ -12,9 +12,9 @@ class UUIDNameReply : SLMessage() {
 
     @JvmStatic
     class UUIDNameBlock {
-        public Byte[] FirstName
+        public ByteArray FirstName
         public UUID ID
-        public Byte[] LastName
+        public ByteArray LastName
     }
 
     public UUIDNameReply() {

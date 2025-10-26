@@ -12,7 +12,7 @@ class UpdateSimulator : SLMessage {
         Int EstateID
         UUID RegionID
         Int SimAccess
-        Byte[] SimName
+        ByteArray SimName
     }
 
     UpdateSimulator() {

@@ -141,7 +141,7 @@ object SLAuth {
         L_0x0105:
             java.lang.String r0 = "Auth: viewer channel '%s', version '%s'"
             r6 = 2
-            java.lang.Object[] r6 = new java.lang.Object[r6]
+            java.lang.Array<Any> r6 = new java.lang.Object[r6]
             r6[r2] = r4
             r8 = 1
             r6[r8] = r3

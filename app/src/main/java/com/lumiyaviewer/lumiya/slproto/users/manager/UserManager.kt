@@ -478,7 +478,7 @@ class UserManager {
         return this.userNamesPool
     }
 
-    Byte[] getUserPic(UUID uuid) {
+    ByteArray getUserPic(UUID uuid) {
         if (uuid == null) {
             return null
         }
@@ -601,7 +601,7 @@ class UserManager {
         updateUserNames(uuid, (String) null, (String) null, true)
     }
 
-    Unit setUserPic(UUID uuid, Byte[] bArr) {
+    Unit setUserPic(UUID uuid, ByteArray bArr) {
         if (uuid != null) {
             Query<UserPic> forCurrentThread = this.findUserPicQuery.forCurrentThread()
             forCurrentThread.setParameter(0, uuid.toString())

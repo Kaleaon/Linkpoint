@@ -23,7 +23,7 @@ class MapBlockReply : SLMessage() {
         public Int Access
         public Int Agents
         public UUID MapImageID
-        public Byte[] Name
+        public ByteArray Name
         public Int RegionFlags
         public Int WaterHeight
         public Int X

@@ -171,7 +171,7 @@ class ModernAuthManager {
             SecretKey secretKey = generateSecretKey()
             
             // Create a simple token (in real implementation, this would be more sophisticated)
-            Byte[] tokenBytes = Byte[32]
+            ByteArray tokenBytes = ByteArray(32)
             java.security.SecureRandom().nextBytes(tokenBytes)
             
             return Base64.encodeToString(tokenBytes, Base64.NO_WRAP)

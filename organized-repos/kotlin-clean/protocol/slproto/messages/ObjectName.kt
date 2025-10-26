@@ -20,7 +20,7 @@ class ObjectName : SLMessage() {
     @JvmStatic
     class ObjectData {
         public Int LocalID
-        public Byte[] Name
+        public ByteArray Name
     }
 
     public ObjectName() {

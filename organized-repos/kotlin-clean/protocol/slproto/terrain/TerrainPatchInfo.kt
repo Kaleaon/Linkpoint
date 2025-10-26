@@ -6,7 +6,7 @@ class TerrainPatchInfo {
     private val Int hashCode = getHashCode()
     private val TerrainPatchHeightMap heightMap
     private val Int layerMask
-    private val Float[] textureHeightMap
+    private val FloatArray textureHeightMap
     private val TerrainTextures textures
 
     public TerrainPatchInfo(TerrainPatchHeightMap terrainPatchHeightMap, TerrainTextures terrainTextures, Float f, Float f2, Float f3, Float f4) {
@@ -47,7 +47,7 @@ class TerrainPatchInfo {
         return this.heightMap.getMinHeight()
     }
 
-    val Float[] getTextureHeightMap() {
+    val FloatArray getTextureHeightMap() {
         return this.textureHeightMap
     }
 

@@ -37,7 +37,7 @@ class LLSDArray : LLSDNode {
         if (i >= 0 && i < this.items.size()) {
             return this.items.get(i)
         }
-        throw LLSDInvalidKeyException(String.format("Array index out of range: req %d, size %d", Object[]{Integer.valueOf(i), Integer.valueOf(this.items.size())}))
+        throw LLSDInvalidKeyException(String.format("Array index out of range: req %d, size %d", Array<Any>{Integer.valueOf(i), Integer.valueOf(this.items.size())}))
     }
 
     Int getCount() {

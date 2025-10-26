@@ -94,7 +94,7 @@ class SLWorldMap : SLModule {
         findAgent.AgentBlock_Field.Hunter = this.circuitInfo.agentID
         findAgent.AgentBlock_Field.Prey = uuid
         try {
-            findAgent.AgentBlock_Field.SpaceIP = (Inet4Address) Inet4Address.getByAddress(Byte[]{0, 0, 0, 0})
+            findAgent.AgentBlock_Field.SpaceIP = (Inet4Address) Inet4Address.getByAddress(ByteArray{0, 0, 0, 0})
             findAgent.LocationBlock_Fields.add(FindAgent.LocationBlock())
             findAgent.isReliable = true
             SendMessage(findAgent)

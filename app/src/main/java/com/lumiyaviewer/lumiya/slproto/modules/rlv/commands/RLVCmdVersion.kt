@@ -9,7 +9,7 @@ import java.util.UUID
 class RLVCmdVersion : RLVCommand {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-modules-rlv-RLVCommandsSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f128comlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues = null
+    private /* synthetic */ IntArray f128comlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues = null
     private Int RLV_VERSION_BUILD = 0
     private Int RLV_VERSION_MAJOR = 1
     private Int RLV_VERSION_MINOR = 10
@@ -19,11 +19,11 @@ class RLVCmdVersion : RLVCommand {
     private Int RLVa_VERSION_PATCH = 1
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-modules-rlv-RLVCommandsSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m232getcomlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues() {
+    private /* synthetic */ IntArray m232getcomlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues() {
         if (f128comlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues != null) {
             return f128comlumiyaviewerlumiyaslprotomodulesrlvRLVCommandsSwitchesValues
         }
-        Int[] iArr = Int[RLVCommands.values().length]
+        IntArray iArr = Int[RLVCommands.values().length]
         try {
             iArr[RLVCommands.accepttp.ordinal()] = 4
         } catch (NoSuchFieldError e) {

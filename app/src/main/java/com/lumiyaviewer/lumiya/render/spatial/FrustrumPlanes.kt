@@ -5,8 +5,8 @@ class FrustrumPlanes {
     Int INTERSECT = 0
     private Int NUM_PLANES = 6
     Int OUTSIDE = -1
-    private Float[] params = Float[24]
-    private Int[] pnIndex = Int[36]
+    private FloatArray params = FloatArray(24)
+    private IntArray pnIndex = IntArray(36)
 
     constructor(fArr: FloatArray) {
         Int i = 0
@@ -34,7 +34,7 @@ class FrustrumPlanes {
         }
         f2 = (Float) Math.sqrt((Double) f2)
         for (i3 = 0; i3 < 4; i3++) {
-            Float[] fArr2 = this.params
+            FloatArray fArr2 = this.params
             Int i6 = i5 + i3
             fArr2[i6] = fArr2[i6] / f2
         }

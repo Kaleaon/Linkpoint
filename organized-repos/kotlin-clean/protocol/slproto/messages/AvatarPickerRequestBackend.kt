@@ -20,7 +20,7 @@ class AvatarPickerRequestBackend : SLMessage() {
 
     @JvmStatic
     class Data {
-        public Byte[] Name
+        public ByteArray Name
     }
 
     public AvatarPickerRequestBackend() {

@@ -175,7 +175,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     fun m437com_lumiyaviewer_lumiya_ui_chat_profiles_GroupMainProfileTabmthref0(SLAgentCircuit sLAgentCircuit) {
         View view = getView()
         if (view != null) {
-            for (Int findViewById : Int[]{R.id.show_in_profile_checkbox, R.id.active_group_checkbox, R.id.group_profile_contribution_button, R.id.group_join_button, R.id.group_leave_button, R.id.group_invite_button, R.id.group_change_role_button}) {
+            for (Int findViewById : IntArray{R.id.show_in_profile_checkbox, R.id.active_group_checkbox, R.id.group_profile_contribution_button, R.id.group_join_button, R.id.group_leave_button, R.id.group_invite_button, R.id.group_change_role_button}) {
                 view.findViewById(findViewById).setEnabled(this.agentCircuit.hasData())
             }
         }

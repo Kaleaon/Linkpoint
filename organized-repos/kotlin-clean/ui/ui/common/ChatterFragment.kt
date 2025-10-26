@@ -22,7 +22,7 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
     public UserManager userManager
 
     private ChatterNameRetriever getNameRetriever(ChatterID chatterID2) {
-        Object[] objArr = Object[1]
+        Array<Any> objArr = Object[1]
         objArr[0] = chatterID2 != null ? chatterID2.toString() : "null"
         Debug.Printf("UserFunctionsFragment: ChatterNameRetriever: requesting for %s", objArr)
         if (chatterID2 != null) {
@@ -61,7 +61,7 @@ abstract class ChatterFragment : FragmentWithTitle() : ChatterNameRetriever.OnCh
     }
 
     fun onChatterNameUpdated(ChatterNameRetriever chatterNameRetriever) {
-        Object[] objArr = Object[1]
+        Array<Any> objArr = Object[1]
         objArr[0] = this.chatterID != null ? this.chatterID.toString() : "null"
         Debug.Printf("updateTitle: ChatterNameRetriever: retrieved for %s", objArr)
         if (this.chatterID != null && Objects.equal(chatterNameRetriever.chatterID, this.chatterID)) {

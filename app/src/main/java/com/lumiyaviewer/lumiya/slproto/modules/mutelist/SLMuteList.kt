@@ -143,7 +143,7 @@ class SLMuteList : SLModule : SLXfer.SLXferCompletionListener {
         return this.muteListData.isMutedByName(str)
     }
 
-    Unit onXferComplete(Any obj, String str, Byte[] bArr) {
+    Unit onXferComplete(Any obj, String str, ByteArray bArr) {
         if (bArr != null) {
             this.muteListData = MuteListData(bArr)
             if (this.muteListCachedDataDao != null) {

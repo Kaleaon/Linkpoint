@@ -20,7 +20,7 @@ class StartLure : SLMessage() {
     @JvmStatic
     class Info {
         public Int LureType
-        public Byte[] Message
+        public ByteArray Message
     }
 
     @JvmStatic

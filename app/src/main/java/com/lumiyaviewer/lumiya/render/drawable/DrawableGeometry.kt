@@ -20,8 +20,8 @@ import com.lumiyaviewer.rawbuffers.DirectByteBuffer
 
 class DrawableGeometry : GLCleanable {
     private Int FaceCount
-    private Int[] FaceIndexStartsCounts
-    private Int[] FaceVertexStartsCounts
+    private IntArray FaceIndexStartsCounts
+    private IntArray FaceVertexStartsCounts
     private GLLoadableBuffer IndexBuffer
     private Int IndexCount
     private Int IndexSizeBytes
@@ -112,7 +112,7 @@ class DrawableGeometry : GLCleanable {
         }
     }
 
-    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v13, resolved type: Int[]} */
+    /* JADX DEBUG: Multi-variable search result rejected for TypeSearchVarInfo{r2v13, resolved type: IntArray} */
     /* JADX WARNING: type inference failed for: r5v6 */
     /* JADX WARNING: type inference failed for: r5v7, types: [Short, Int] */
     /* JADX WARNING: type inference failed for: r5v10 */
@@ -167,11 +167,11 @@ class DrawableGeometry : GLCleanable {
             r13.FaceCount = r0
             Int r0 = r13.FaceCount
             Int r0 = r0 * 3
-            Int[] r0 = Int[r0]
+            IntArray r0 = Int[r0]
             r13.FaceIndexStartsCounts = r0
             Int r0 = r13.FaceCount
             Int r0 = r0 * 2
-            Int[] r0 = Int[r0]
+            IntArray r0 = Int[r0]
             r13.FaceVertexStartsCounts = r0
             Int r0 = r2 * 4
             Int r0 = r0 * 6
@@ -209,34 +209,34 @@ class DrawableGeometry : GLCleanable {
             com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace r6 = (com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace) r6
             Int r2 = r5 * 6
             com.lumiyaviewer.lumiya.slproto.types.VertexArray r4 = r6.vertexArray
-            Float[] r4 = r4.getData()
+            FloatArray r4 = r4.getData()
             Int r12 = r6.NumVertices
             Int r12 = r12 * 6
             r9.loadFromFloatArray(r2, r4, r3, r12)
             Int r2 = r5 * 2
             com.lumiyaviewer.lumiya.slproto.types.VertexArray r4 = r6.vertexArray
-            Float[] r4 = r4.getTexCoordsData()
+            FloatArray r4 = r4.getTexCoordsData()
             Int r12 = r6.NumVertices
             Int r12 = r12 * 2
             r10.loadFromFloatArray(r2, r4, r3, r12)
-            Short[] r2 = r6.Indices
+            ShortArray r2 = r6.Indices
             Int r4 = r6.NumIndices
             r0.loadFromShortArrayOffset(r1, r2, r3, r4, r5)
-            Int[] r2 = r13.FaceIndexStartsCounts
+            IntArray r2 = r13.FaceIndexStartsCounts
             Int r4 = r8 + 1
             Int r12 = r6.ID
             r2[r8] = r12
-            Int[] r2 = r13.FaceIndexStartsCounts
+            IntArray r2 = r13.FaceIndexStartsCounts
             Int r8 = r4 + 1
             r2[r4] = r1
-            Int[] r2 = r13.FaceIndexStartsCounts
+            IntArray r2 = r13.FaceIndexStartsCounts
             Int r4 = r8 + 1
             Int r12 = r6.NumIndices
             r2[r8] = r12
-            Int[] r2 = r13.FaceVertexStartsCounts
+            IntArray r2 = r13.FaceVertexStartsCounts
             Int r8 = r7 + 1
             r2[r7] = r5
-            Int[] r7 = r13.FaceVertexStartsCounts
+            IntArray r7 = r13.FaceVertexStartsCounts
             Int r2 = r8 + 1
             Int r12 = r6.NumVertices
             r7[r8] = r12
@@ -265,34 +265,34 @@ class DrawableGeometry : GLCleanable {
             com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace r1 = (com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeFace) r1
             Int r8 = r2 * 6
             com.lumiyaviewer.lumiya.slproto.types.VertexArray r11 = r1.vertexArray
-            Float[] r11 = r11.getData()
+            FloatArray r11 = r11.getData()
             Int r12 = r1.NumVertices
             Int r12 = r12 * 6
             r9.loadFromFloatArray(r8, r11, r3, r12)
             Int r8 = r2 * 2
             com.lumiyaviewer.lumiya.slproto.types.VertexArray r11 = r1.vertexArray
-            Float[] r11 = r11.getTexCoordsData()
+            FloatArray r11 = r11.getTexCoordsData()
             Int r12 = r1.NumVertices
             Int r12 = r12 * 2
             r10.loadFromFloatArray(r8, r11, r3, r12)
-            Short[] r8 = r1.Indices
+            ShortArray r8 = r1.Indices
             Int r11 = r1.NumIndices
             r0.loadFromShortArray(r6, r8, r3, r11)
-            Int[] r8 = r13.FaceIndexStartsCounts
+            IntArray r8 = r13.FaceIndexStartsCounts
             Int r11 = r5 + 1
             Int r12 = r1.ID
             r8[r5] = r12
-            Int[] r5 = r13.FaceIndexStartsCounts
+            IntArray r5 = r13.FaceIndexStartsCounts
             Int r8 = r11 + 1
             r5[r11] = r6
-            Int[] r11 = r13.FaceIndexStartsCounts
+            IntArray r11 = r13.FaceIndexStartsCounts
             Int r5 = r8 + 1
             Int r12 = r1.NumIndices
             r11[r8] = r12
-            Int[] r8 = r13.FaceVertexStartsCounts
+            IntArray r8 = r13.FaceVertexStartsCounts
             Int r11 = r4 + 1
             r8[r4] = r2
-            Int[] r8 = r13.FaceVertexStartsCounts
+            IntArray r8 = r13.FaceVertexStartsCounts
             Int r4 = r11 + 1
             Int r12 = r1.NumVertices
             r8[r11] = r12

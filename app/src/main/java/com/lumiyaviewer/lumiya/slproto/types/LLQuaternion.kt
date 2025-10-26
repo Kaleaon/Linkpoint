@@ -6,10 +6,10 @@ import java.nio.ByteBuffer
 class LLQuaternion {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-types-LLQuaternion$OrderSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f143comlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues = null
+    private /* synthetic */ IntArray f143comlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues = null
     Float FP_MAG_THRESHOLD = 1.0E-7f
-    private Float[] inverseMatrix
-    private Float[] matrix
+    private FloatArray inverseMatrix
+    private FloatArray matrix
     Float w
     Float x
     Float y
@@ -25,11 +25,11 @@ class LLQuaternion {
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-types-LLQuaternion$OrderSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m258getcomlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues() {
+    private /* synthetic */ IntArray m258getcomlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues() {
         if (f143comlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues != null) {
             return f143comlumiyaviewerlumiyaslprototypesLLQuaternion$OrderSwitchesValues
         }
-        Int[] iArr = Int[Order.values().length]
+        IntArray iArr = Int[Order.values().length]
         try {
             iArr[Order.XYZ.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -85,7 +85,7 @@ class LLQuaternion {
         this.w = lLQuaternion.w
     }
 
-    LLQuaternion(Float[] fArr) {
+    LLQuaternion(FloatArray fArr) {
         this.matrix = null
         this.inverseMatrix = null
         Float f = fArr[0] + 1.0f + fArr[5] + fArr[10]
@@ -265,7 +265,7 @@ class LLQuaternion {
         return acos
     }
 
-    Unit getInverseMatrix(Float[] fArr, Int i) {
+    Unit getInverseMatrix(FloatArray fArr, Int i) {
         Float f = this.x * this.x
         Float f2 = this.y * this.y
         Float f3 = this.z * this.z
@@ -293,7 +293,7 @@ class LLQuaternion {
         fArr[i + 15] = 1.0f
     }
 
-    Float[] getInverseMatrix() {
+    FloatArray getInverseMatrix() {
         if (this.inverseMatrix != null) {
             return this.inverseMatrix
         }
@@ -306,11 +306,11 @@ class LLQuaternion {
         Float f7 = this.w * (-this.x)
         Float f8 = this.w * (-this.y)
         Float f9 = this.w * (-this.z)
-        this.inverseMatrix = Float[]{1.0f - ((f2 + f3) * 2.0f), (f4 - f9) * 2.0f, (f5 + f8) * 2.0f, 0.0f, (f4 + f9) * 2.0f, 1.0f - ((f3 + f) * 2.0f), (f6 - f7) * 2.0f, 0.0f, (f5 - f8) * 2.0f, (f6 + f7) * 2.0f, 1.0f - ((f + f2) * 2.0f), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f}
+        this.inverseMatrix = FloatArray{1.0f - ((f2 + f3) * 2.0f), (f4 - f9) * 2.0f, (f5 + f8) * 2.0f, 0.0f, (f4 + f9) * 2.0f, 1.0f - ((f3 + f) * 2.0f), (f6 - f7) * 2.0f, 0.0f, (f5 - f8) * 2.0f, (f6 + f7) * 2.0f, 1.0f - ((f + f2) * 2.0f), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f}
         return this.inverseMatrix
     }
 
-    Float[] getMatrix() {
+    FloatArray getMatrix() {
         if (this.matrix != null) {
             return this.matrix
         }
@@ -323,7 +323,7 @@ class LLQuaternion {
         Float f7 = this.w * this.x
         Float f8 = this.w * this.y
         Float f9 = this.w * this.z
-        this.matrix = Float[]{1.0f - ((f2 + f3) * 2.0f), (f4 - f9) * 2.0f, (f5 + f8) * 2.0f, 0.0f, (f4 + f9) * 2.0f, 1.0f - ((f3 + f) * 2.0f), (f6 - f7) * 2.0f, 0.0f, (f5 - f8) * 2.0f, (f6 + f7) * 2.0f, 1.0f - ((f + f2) * 2.0f), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f}
+        this.matrix = FloatArray{1.0f - ((f2 + f3) * 2.0f), (f4 - f9) * 2.0f, (f5 + f8) * 2.0f, 0.0f, (f4 + f9) * 2.0f, 1.0f - ((f3 + f) * 2.0f), (f6 - f7) * 2.0f, 0.0f, (f5 - f8) * 2.0f, (f6 + f7) * 2.0f, 1.0f - ((f + f2) * 2.0f), 0.0f, 0.0f, 0.0f, 0.0f, 1.0f}
         return this.matrix
     }
 

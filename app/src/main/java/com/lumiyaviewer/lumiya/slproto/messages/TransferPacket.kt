@@ -9,7 +9,7 @@ class TransferPacket : SLMessage {
 
     class TransferData {
         Int ChannelType
-        Byte[] Data
+        ByteArray Data
         Int Packet
         Int Status
         UUID TransferID

@@ -9,7 +9,7 @@ class ReplyTaskInventory : SLMessage() {
 
     @JvmStatic
     class InventoryData {
-        public Byte[] Filename
+        public ByteArray Filename
         public Int Serial
         public UUID TaskID
     }

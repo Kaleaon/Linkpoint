@@ -39,7 +39,7 @@ val class SLChatTextBoxDialog : SLChatDialogEvent() {
                 if (this.ignored) {
                     chatTextBoxViewHolder.dialogResultTextView.setText(R.string.dialog_ignored)
                 } else {
-                    chatTextBoxViewHolder.dialogResultTextView.setText(chatTextBoxViewHolder.dialogResultTextView.getContext().getString(R.string.text_box_entered, Object[]{this.enteredValue}))
+                    chatTextBoxViewHolder.dialogResultTextView.setText(chatTextBoxViewHolder.dialogResultTextView.getContext().getString(R.string.text_box_entered, Array<Any>{this.enteredValue}))
                 }
                 chatTextBoxViewHolder.dialogResultTextView.setVisibility(0)
                 chatTextBoxViewHolder.dialogButtonsLayout.setVisibility(8)

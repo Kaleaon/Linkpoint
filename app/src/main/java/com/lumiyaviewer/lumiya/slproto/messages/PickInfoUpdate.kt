@@ -16,9 +16,9 @@ class PickInfoUpdate : SLMessage {
 
     class Data {
         UUID CreatorID
-        Byte[] Desc
+        ByteArray Desc
         Boolean Enabled
-        Byte[] Name
+        ByteArray Name
         UUID ParcelID
         UUID PickID
         LLVector3d PosGlobal

@@ -18,7 +18,7 @@ class ObjectName : SLMessage {
 
     class ObjectData {
         Int LocalID
-        Byte[] Name
+        ByteArray Name
     }
 
     ObjectName() {

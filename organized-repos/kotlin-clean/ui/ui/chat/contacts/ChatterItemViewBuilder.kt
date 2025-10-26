@@ -52,7 +52,7 @@ class ChatterItemViewBuilder {
             TextView textView = (TextView) inflate.findViewById(z ? R.id.userDistanceInlineTextView : R.id.userDistanceTextView)
             if (textView != null) {
                 if (this.distanceSet) {
-                    textView.setText((this.distance >= 9.5f ? Integer.toString(Math.round(this.distance)) : String.format("%.1f", Object[]{Float.valueOf(this.distance)})) + " m")
+                    textView.setText((this.distance >= 9.5f ? Integer.toString(Math.round(this.distance)) : String.format("%.1f", Array<Any>{Float.valueOf(this.distance)})) + " m")
                     if (this.distance <= 20.0f) {
                         textView.setTypeface(textView.getTypeface(), 1)
                     } else {

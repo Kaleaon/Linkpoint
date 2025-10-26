@@ -10,8 +10,8 @@ class WhatsNewActivity : ThemedActivity() {
     fun onCreate(Bundle bundle) {
         super.onCreate(bundle)
         setContentView((Int) R.layout.whats_new)
-        ((TextView) findViewById(R.id.whatsnewCaption)).setText(String.format(getString(R.string.whatsnew_caption), Object[]{LinkpointApp.getAppVersion()}))
-        String[] stringArray = getResources().getStringArray(R.array.whatsnew_array)
+        ((TextView) findViewById(R.id.whatsnewCaption)).setText(String.format(getString(R.string.whatsnew_caption), Array<Any>{LinkpointApp.getAppVersion()}))
+        Array<String> stringArray = getResources().getStringArray(R.array.whatsnew_array)
         StringBuilder sb = StringBuilder()
         for (String str : stringArray) {
             if (sb.length() != 0) {

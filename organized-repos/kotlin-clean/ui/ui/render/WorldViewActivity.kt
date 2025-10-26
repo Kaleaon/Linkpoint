@@ -410,7 +410,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             if (WorldViewActivity.this.isDragging) {
                 WorldViewActivity.this.dragSelectorSetRawPosition((Int) rawX, (Int) rawY)
             } else if (!WorldViewActivity.this.isInScaling && (!WorldViewActivity.this.wasInScaling)) {
-                Int[] iArr = Int[2]
+                IntArray iArr = IntArray(2)
                 WorldViewActivity.this.worldViewHolder.getLocationOnScreen(iArr)
                 WorldViewActivity.this.mGLView.pickObjectHover(rawX - ((Float) iArr[0]), rawY - ((Float) iArr[1]))
             }
@@ -450,7 +450,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             if (WorldViewActivity.this.isDragging) {
                 WorldViewActivity.this.dragSelectorSetRawPosition((Int) motionEvent.getRawX(), (Int) motionEvent.getRawY())
             } else if (WorldViewActivity.this.displayedHUDid != 0) {
-                Int[] iArr = Int[2]
+                IntArray iArr = IntArray(2)
                 WorldViewActivity.this.worldViewHolder.getLocationOnScreen(iArr)
                 WorldViewActivity.this.mGLView.touchHUD(motionEvent.getRawX() - ((Float) iArr[0]), motionEvent.getRawY() - ((Float) iArr[1]))
             } else {
@@ -926,7 +926,7 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     fun dragSelectorSetRawPosition(Int i, Int i2) {
-        Int[] iArr = Int[2]
+        IntArray iArr = IntArray(2)
         this.dragPointerLayout.getLocationOnScreen(iArr)
         Int width = i - (this.dragPointer.getWidth() / 2)
         Int height = i2 - (this.dragPointer.getHeight() / 2)
@@ -950,7 +950,7 @@ private class SelectableAttachment {
     private Unit enterCardboardView() {
         if (ContextCompat.checkSelfPermission(this, "android.permission.RECORD_AUDIO") != 0) {
             Debug.Printf("Cardboard: audio permission not yet granted", Object[0])
-            ActivityCompat.requestPermissions(this, String[]{"android.permission.RECORD_AUDIO"}, 100)
+            ActivityCompat.requestPermissions(this, Array<String>{"android.permission.RECORD_AUDIO"}, 100)
             return
         }
         Debug.Printf("Cardboard: audio permission already granted", Object[0])
@@ -1067,9 +1067,9 @@ private class SelectableAttachment {
 
     /* access modifiers changed from: private */
     fun selectByDragPointer(Int i, Int i2) {
-        Int[] iArr = Int[2]
+        IntArray iArr = IntArray(2)
         this.dragPointerLayout.getLocationOnScreen(iArr)
-        Int[] iArr2 = Int[2]
+        IntArray iArr2 = IntArray(2)
         this.worldViewHolder.getLocationOnScreen(iArr2)
         this.mGLView.pickObjectHover((Float) (((iArr[0] + (this.dragPointer.getWidth() / 2)) + i) - iArr2[0]), (Float) (((iArr[1] + (this.dragPointer.getHeight() / 2)) + i2) - iArr2[1]))
     }
@@ -1318,7 +1318,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         L_0x0047:
             java.lang.String r3 = "isSitting %b, isFlying %b, hasHUDs %b, isDragging %b"
             r9 = 4
-            java.lang.Object[] r9 = java.lang.Object[r9]
+            java.lang.Array<Any> r9 = java.lang.Object[r9]
             java.lang.Boolean r10 = java.lang.Boolean.valueOf(r7)
             r11 = 0
             r9[r11] = r10
@@ -1673,7 +1673,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
     private Unit updateSplitScreenLayout() {
         Int i = 0
         Fragment findFragmentById = getSupportFragmentManager().findFragmentById(R.id.details)
-        Object[] objArr = Object[3]
+        Array<Any> objArr = Object[3]
         objArr[0] = Boolean.valueOf(this.isSplitScreen)
         objArr[1] = Boolean.valueOf(findFragmentById != null)
         objArr[2] = Boolean.valueOf(findFragmentById != null ? findFragmentById.isDetached() : false)
@@ -2004,7 +2004,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         initContentView()
         this.fadingTextViewLog = FadingTextViewLog(this.userManager, this, this.chatsOverlayLayout, Color.rgb(192, 192, 192), Color.argb(160, 0, 0, 0))
         if (Build.VERSION.SDK_INT >= 12) {
-            this.buttonsFadeAnimator = ValueAnimator.ofFloat(Float[]{0.0f, 1.0f})
+            this.buttonsFadeAnimator = ValueAnimator.ofFloat(FloatArray{0.0f, 1.0f})
             this.buttonsFadeAnimator.setDuration(1000)
             this.buttonsFadeAnimator.addUpdateListener(ValueAnimator.AnimatorUpdateListener(this) {
 
@@ -2174,7 +2174,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             }
             if (this.pickedObject.saleType != 0) {
                 AlertDialog.Builder builder = AlertDialog.Builder(this)
-                builder.setMessage((CharSequence) String.format(getString(R.string.object_buy_confirm), Object[]{name, Integer.valueOf(this.pickedObject.salePrice)})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
+                builder.setMessage((CharSequence) String.format(getString(R.string.object_buy_confirm), Array<Any>{name, Integer.valueOf(this.pickedObject.salePrice)})).setCancelable(false).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
                     /* renamed from: -$f0 */
                     private val /* synthetic */ Object f534$f0
@@ -2352,7 +2352,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
         return super.onPrepareOptionsMenu(menu)
     }
 
-    fun onRequestPermissionsResult(Int i, String[] strArr, Int[] iArr) {
+    fun onRequestPermissionsResult(Int i, Array<String> strArr, IntArray iArr) {
         Debug.Printf("Cardboard: onRequestPermissionResult, code %d", Integer.valueOf(i))
         if (i == 100) {
             startCardboardActivity()
@@ -2510,7 +2510,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             Uri uriForFile = FileProvider.getUriForFile(this, "com.lumiyaviewer.files", file2)
             SLAgentCircuit data = this.agentCircuit.getData()
             String agentSLURL = data != null ? data.getAgentSLURL() : null
-            String string = agentSLURL != null ? getString(R.string.screenshot_taken_slurl, Object[]{agentSLURL}) : getString(R.string.screenshot_taken_lumiya)
+            String string = agentSLURL != null ? getString(R.string.screenshot_taken_slurl, Array<Any>{agentSLURL}) : getString(R.string.screenshot_taken_lumiya)
             Intent intent = Intent()
             intent.setAction("android.intent.action.SEND")
             intent.putExtra("android.intent.extra.TEXT", string)

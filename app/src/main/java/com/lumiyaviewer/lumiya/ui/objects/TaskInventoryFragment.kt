@@ -40,7 +40,7 @@ import javax.annotation.Nullable
 class TaskInventoryFragment : FragmentWithTitle {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-inventory-SLAssetTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues = null
+    private /* synthetic */ IntArray f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues = null
     private String OBJECT_LOCAL_ID_KEY = "objectLocalId"
     private String OBJECT_UUID_KEY = "objectUUID"
     @Nullable
@@ -126,11 +126,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
     private Subscription<Int, SLTaskInventory> taskInventorySubscription
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-inventory-SLAssetTypeSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m684getcomlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues() {
+    private /* synthetic */ IntArray m684getcomlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues() {
         if (f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues != null) {
             return f501comlumiyaviewerlumiyaslprotoinventorySLAssetTypeSwitchesValues
         }
-        Int[] iArr = Int[SLAssetType.values().length]
+        IntArray iArr = Int[SLAssetType.values().length]
         try {
             iArr[SLAssetType.AT_ANIMATION.ordinal()] = 3
         } catch (NoSuchFieldError e) {

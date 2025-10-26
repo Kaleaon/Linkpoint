@@ -29,7 +29,7 @@ class VertexArray {
         this.texCoords.set(i, lLVector22.x, lLVector22.y)
     }
 
-    public Float[] getData() {
+    public FloatArray getData() {
         return this.vertexAndNormalsData.getData()
     }
 
@@ -45,7 +45,7 @@ class VertexArray {
         return this.texCoords
     }
 
-    public Float[] getTexCoordsData() {
+    public FloatArray getTexCoordsData() {
         return this.texCoords.getData()
     }
 

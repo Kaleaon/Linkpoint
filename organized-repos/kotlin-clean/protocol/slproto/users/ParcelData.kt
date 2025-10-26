@@ -13,7 +13,7 @@ class ParcelData : Serializable {
     private val String mediaURL
     private val String name
     private val UUID ownerID
-    private val Boolean[] parcelBitmap = Boolean[4096]
+    private val BooleanArray parcelBitmap = BooleanArray(4096)
     private val Int parcelID
     private val UUID snapshotUUID
 
@@ -31,7 +31,7 @@ class ParcelData : Serializable {
         this.ownerID = lLSDNode.keyExists("OwnerID") ? lLSDNode.byKey("OwnerID").asUUID() : uuid
         this.isGroupOwned = lLSDNode.keyExists("IsGroupOwned") ? lLSDNode.byKey("IsGroupOwned").asBoolean() : false
         this.area = lLSDNode.keyExists("Area") ? lLSDNode.byKey("Area").asInt() : 0
-        Byte[] asBinary = lLSDNode.byKey("Bitmap").asBinary()
+        ByteArray asBinary = lLSDNode.byKey("Bitmap").asBinary()
         Int i = 0
         while (i < asBinary.length && i < 512) {
             Byte b = asBinary[i]
@@ -65,7 +65,7 @@ class ParcelData : Serializable {
         return this.ownerID
     }
 
-    public Boolean[] getParcelBitmap() {
+    public BooleanArray getParcelBitmap() {
         return this.parcelBitmap
     }
 

@@ -40,17 +40,17 @@ class DrawableAvatarStub : OnChatterNameUpdated {
 
     fun DrawNameTag(renderContext: RenderContext): Unit {
         DrawableHoverText drawableHoverText = this.drawableNameTag
-        Float[] worldMatrix = getWorldMatrix(renderContext)
+        FloatArray worldMatrix = getWorldMatrix(renderContext)
         if (drawableHoverText != null && worldMatrix != null) {
             drawableHoverText.DrawAtWorld(renderContext, worldMatrix[12], worldMatrix[13], 0.75f + worldMatrix[14], 0.5f, renderContext.projectionMatrix, false, 0)
         }
     }
 
-    Float[] getWorldMatrix(RenderContext renderContext) {
+    FloatArray getWorldMatrix(RenderContext renderContext) {
         if (!this.avatarObject.isMyAvatar() || this.avatarObject.parentID != 0) {
             return this.avatarObject.worldMatrix
         }
-        Float[] fArr = Float[32]
+        FloatArray fArr = FloatArray(32)
         LLQuaternion rotation = this.avatarObject.getRotation()
         if (rotation != null) {
             Matrix.setIdentityM(fArr, 16)

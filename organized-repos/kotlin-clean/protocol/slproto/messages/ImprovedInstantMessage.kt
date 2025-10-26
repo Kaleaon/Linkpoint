@@ -18,12 +18,12 @@ class ImprovedInstantMessage : SLMessage() {
 
     @JvmStatic
     class MessageBlock {
-        public Byte[] BinaryBucket
+        public ByteArray BinaryBucket
         public Int Dialog
-        public Byte[] FromAgentName
+        public ByteArray FromAgentName
         public Boolean FromGroup
         public UUID ID
-        public Byte[] Message
+        public ByteArray Message
         public Int Offline
         public Int ParentEstateID
         public LLVector3 Position

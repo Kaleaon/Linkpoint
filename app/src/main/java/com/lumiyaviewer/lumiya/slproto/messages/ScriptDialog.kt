@@ -13,17 +13,17 @@ class ScriptDialog : SLMessage {
     ArrayList<OwnerData> OwnerData_Fields = ArrayList<>()
 
     class Buttons {
-        Byte[] ButtonLabel
+        ByteArray ButtonLabel
     }
 
     class Data {
         Int ChatChannel
-        Byte[] FirstName
+        ByteArray FirstName
         UUID ImageID
-        Byte[] LastName
-        Byte[] Message
+        ByteArray LastName
+        ByteArray Message
         UUID ObjectID
-        Byte[] ObjectName
+        ByteArray ObjectName
     }
 
     class OwnerData {

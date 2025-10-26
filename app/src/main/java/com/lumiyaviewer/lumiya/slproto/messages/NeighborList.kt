@@ -11,7 +11,7 @@ class NeighborList : SLMessage {
 
     class NeighborBlock {
         Inet4Address IP
-        Byte[] Name
+        ByteArray Name
         Int Port
         Inet4Address PublicIP
         Int PublicPort

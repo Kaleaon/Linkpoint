@@ -15,7 +15,7 @@ class RpcScriptRequestInboundForward : SLMessage() {
         public UUID ItemID
         public Inet4Address RPCServerIP
         public Int RPCServerPort
-        public Byte[] StringValue
+        public ByteArray StringValue
         public UUID TaskID
     }
 

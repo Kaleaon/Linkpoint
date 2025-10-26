@@ -9,7 +9,7 @@ class TransferRequest : SLMessage {
 
     class TransferInfo {
         Int ChannelType
-        Byte[] Params
+        ByteArray Params
         Float Priority
         Int SourceType
         UUID TransferID

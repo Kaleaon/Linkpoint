@@ -102,7 +102,7 @@ import javax.microedition.khronos.opengles.GL10
 class CardboardActivity : DetailsActivity(), ObjectPopupsManager.ObjectPopupListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-render-MoveControlSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f580comlumiyaviewerlumiyauirenderMoveControlSwitchesValues = null
+    private const val /* synthetic */ IntArray f580comlumiyaviewerlumiyauirenderMoveControlSwitchesValues = null
     private const val DEFAULT_FONT_SIZE_SP: Int = 16
     private const val LISTVIEW_SCROLL_DURATION: Int = 500
     private const val LISTVIEW_SCROLL_OFFSET: Int = 100
@@ -114,7 +114,7 @@ class CardboardActivity : DetailsActivity(), ObjectPopupsManager.ObjectPopupList
     private const val Float controlSizeFactorY = 0.75f
     private const val Float crosshairSize = 0.1f
     /* access modifiers changed from: private */
-    const val Int[] dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
+    const val IntArray dialogButtonIds = {R.id.buttonDialog1, R.id.buttonDialog2, R.id.buttonDialog3, R.id.buttonDialog4, R.id.buttonDialog5, R.id.buttonDialog6, R.id.buttonDialog7, R.id.buttonDialog8, R.id.buttonDialog9, R.id.buttonDialog10, R.id.buttonDialog11, R.id.buttonDialog12}
     /* access modifiers changed from: private */
     public SLChatScriptDialog activeScriptDialog = null
     private SLChatYesNoEvent activeYesNoEvent = null
@@ -358,7 +358,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
         fun onConnectionStateChanged(Int i) {
             super.onConnectionStateChanged(i)
-            Object[] objArr = Object[1]
+            Array<Any> objArr = Object[1]
             objArr[0] = i == 3 ? "connected" : "disconnected"
             Debug.Printf("Cardboard: Daydream controller is now %s", objArr)
             CardboardActivity.this.controllerConnectionState.set(i)
@@ -1136,7 +1136,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     val AtomicDouble keypadTurning = AtomicDouble(0.0d)
     /* access modifiers changed from: private */
     public String lastSpeechRecognitionResults = ""
-    private val Int[] locationInWindow = Int[2]
+    private val IntArray locationInWindow = IntArray(2)
     @BindView(2131755259)
     ViewGroup moveButtonsLayout
     /* access modifiers changed from: private */
@@ -1854,7 +1854,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             Debug.Printf("Cardboard: beginning of speech", Object[0])
         }
 
-        fun onBufferReceived(Byte[] bArr) {
+        fun onBufferReceived(ByteArray bArr) {
         }
 
         fun onEndOfSpeech() {
@@ -2233,15 +2233,15 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         private const val YAW_AVERAGE_FACTOR: Float = 1.0E-4f
         private Boolean agentHeadingAcquired = false
         private Boolean crosshairVisible = false
-        private val Float[] extTextureMatrixUV = Float[16]
+        private val FloatArray extTextureMatrixUV = FloatArray(16)
         private GLExternalTexture externalTexture
-        private val Float[] eyeHitTests = Float[4]
-        private val Float[] eyeOffset = Float[4]
-        private val Float[] eyeOffsetMatrix = Float[16]
-        private val Float[] eyeProjection = Float[32]
-        private val Boolean[] eyeProjectionValid = Boolean[2]
+        private val FloatArray eyeHitTests = FloatArray(4)
+        private val FloatArray eyeOffset = FloatArray(4)
+        private val FloatArray eyeOffsetMatrix = FloatArray(16)
+        private val FloatArray eyeProjection = FloatArray(32)
+        private val BooleanArray eyeProjectionValid = BooleanArray(2)
         private Float eyeSeparation = 0.0f
-        private val Int[] eyeViewport = Int[4]
+        private val IntArray eyeViewport = IntArray(4)
         private val HeadTransformCompat headTransformCompat = HeadTransformCompat()
         private Long lastFrameTime = 0
         private Int viewportHeight = 0
@@ -2277,7 +2277,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             if (CardboardActivity.this.renderSettings != null && (!this.eyeProjectionValid[i2] || eye.getProjectionChanged())) {
                 System.arraycopy(eye.getPerspective(0.5f, (Float) CardboardActivity.this.renderSettings.drawDistance), 0, this.eyeProjection, i2 * 16, 16)
             }
-            CardboardActivity.this.renderer.onDrawFrame((GL10) null, this.headTransformCompat, this.eyeOffset, this.eyeViewport, (Float[]) null, (Float[]) null, 0)
+            CardboardActivity.this.renderer.onDrawFrame((GL10) null, this.headTransformCompat, this.eyeOffset, this.eyeViewport, (FloatArray) null, (FloatArray) null, 0)
             if (this.externalTexture != null) {
                 CardboardActivity.this.renderer.drawExternalTexture(this.externalTexture, this.extTextureMatrixUV, f, this.headTransformCompat.pitchDegrees, this.headTransformCompat.useButtonsYaw, CardboardActivity.controlDrawSizeFactor, 1.125f, this.eyeHitTests, type == 1 ? 0 : 2)
                 if (this.crosshairVisible) {
@@ -2593,11 +2593,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-render-MoveControlSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m734getcomlumiyaviewerlumiyauirenderMoveControlSwitchesValues() {
+private /* synthetic */ IntArray m734getcomlumiyaviewerlumiyauirenderMoveControlSwitchesValues() {
         if (f580comlumiyaviewerlumiyauirenderMoveControlSwitchesValues != null) {
             return f580comlumiyaviewerlumiyauirenderMoveControlSwitchesValues
         }
-        Int[] iArr = Int[MoveControl.values().length]
+        IntArray iArr = Int[MoveControl.values().length]
         try {
             iArr[MoveControl.Backward.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -2897,7 +2897,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     /* access modifiers changed from: private */
     /* renamed from: onCardboardTrigger */
     fun m759com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref13() {
-        Object[] objArr = Object[3]
+        Array<Any> objArr = Object[3]
         objArr[0] = Integer.valueOf(this.hoveringOverButton != null ? this.hoveringOverButton.getId() : -1)
         objArr[1] = Integer.valueOf(this.hoveringPressedButton != null ? this.hoveringPressedButton.getId() : -1)
         objArr[2] = Boolean.valueOf(this.hitPointValid)
@@ -3320,7 +3320,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         Int actionMasked = motionEvent.getActionMasked()
         String str = actionMasked == 0 ? "down" : actionMasked == 1 ? "up" : null
         if (str != null) {
-            Object[] objArr = Object[3]
+            Array<Any> objArr = Object[3]
             objArr[0] = str
             objArr[1] = Integer.valueOf(this.hoveringOverButton != null ? this.hoveringOverButton.getId() : -1)
             if (this.hoveringPressedButton != null) {
@@ -4128,7 +4128,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 SLChatScriptDialog sLChatScriptDialog = (SLChatScriptDialog) sLChatEvent
                 this.activeScriptDialog = sLChatScriptDialog
                 setControlsPage(ControlsPage.pageScriptDialog)
-                String[] buttons = sLChatScriptDialog.getButtons()
+                Array<String> buttons = sLChatScriptDialog.getButtons()
                 for (Int i = 0; i < dialogButtonIds.length; i++) {
                     Button button = (Button) findViewById(dialogButtonIds[i])
                     if (i < buttons.length) {

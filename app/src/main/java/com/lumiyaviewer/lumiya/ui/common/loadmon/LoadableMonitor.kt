@@ -15,7 +15,7 @@ import javax.annotation.Nullable
 class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRefreshListener {
 
     /* renamed from: -com-lumiyaviewer-lumiya-ui-common-loadmon-Loadable$StatusSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] f379comlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues = null
+    private /* synthetic */ IntArray f379comlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues = null
     @Nullable
     private String emptyMessage = null
     private Boolean isExtraLoading = false
@@ -39,11 +39,11 @@ class LoadableMonitor : Loadable.LoadableStatusListener, SwipeRefreshLayout.OnRe
     }
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-ui-common-loadmon-Loadable$StatusSwitchesValues  reason: not valid java name */
-    private /* synthetic */ Int[] m579getcomlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues() {
+    private /* synthetic */ IntArray m579getcomlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues() {
         if (f379comlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues != null) {
             return f379comlumiyaviewerlumiyauicommonloadmonLoadable$StatusSwitchesValues
         }
-        Int[] iArr = Int[Loadable.Status.values().length]
+        IntArray iArr = Int[Loadable.Status.values().length]
         try {
             iArr[Loadable.Status.Error.ordinal()] = 1
         } catch (NoSuchFieldError e) {

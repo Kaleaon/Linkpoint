@@ -32,7 +32,7 @@ class ChildAgentUpdate : SLMessage() {
         public Int AgentAccess
         public UUID AgentID
         public LLVector3 AgentPos
-        public Byte[] AgentTextures
+        public ByteArray AgentTextures
         public LLVector3 AgentVel
         public Boolean AlwaysRun
         public Float Aspect
@@ -51,7 +51,7 @@ class ChildAgentUpdate : SLMessage() {
         public Long RegionHandle
         public UUID SessionID
         public LLVector3 Size
-        public Byte[] Throttles
+        public ByteArray Throttles
         public LLVector3 UpAxis
         public Int ViewerCircuitCode
     }
@@ -81,7 +81,7 @@ class ChildAgentUpdate : SLMessage() {
 
     @JvmStatic
     class NVPairData {
-        public Byte[] NVPairs
+        public ByteArray NVPairs
     }
 
     @JvmStatic

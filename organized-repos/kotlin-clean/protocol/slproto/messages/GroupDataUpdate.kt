@@ -15,7 +15,7 @@ class GroupDataUpdate : SLMessage() {
         public UUID AgentID
         public Long AgentPowers
         public UUID GroupID
-        public Byte[] GroupTitle
+        public ByteArray GroupTitle
     }
 
     public GroupDataUpdate() {

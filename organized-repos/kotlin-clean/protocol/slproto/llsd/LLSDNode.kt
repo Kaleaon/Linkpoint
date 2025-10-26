@@ -31,15 +31,15 @@ import org.xmlpull.v1.XmlSerializer
 abstract class LLSDNode {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-https-LLSDContentTypeDetector$LLSDContentTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f114comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f114comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues = null
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-https-LLSDContentTypeDetector$LLSDContentTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m195getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues() {
+private /* synthetic */ IntArray m195getcomlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues() {
         if (f114comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues != null) {
             return f114comlumiyaviewerlumiyaslprotohttpsLLSDContentTypeDetector$LLSDContentTypeSwitchesValues
         }
-        Int[] iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
+        IntArray iArr = Int[LLSDContentTypeDetector.LLSDContentType.values().length]
         try {
             iArr[LLSDContentTypeDetector.LLSDContentType.llsdBinary.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -151,10 +151,10 @@ private /* synthetic */ Int[] m195getcomlumiyaviewerlumiyaslprotohttpsLLSDConten
             return r4
         L_0x006f:
             Int r0 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
-            Byte[] r0 = Byte[r0]     // Catch:{ IOException -> 0x0026 }
+            ByteArray r0 = Byte[r0]     // Catch:{ IOException -> 0x0026 }
             r6.readFully(r0)     // Catch:{ IOException -> 0x0026 }
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBinary r1 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDBinary     // Catch:{ IOException -> 0x0026 }
-            r1.<init>((Byte[]) r0)     // Catch:{ IOException -> 0x0026 }
+            r1.<init>((ByteArray) r0)     // Catch:{ IOException -> 0x0026 }
             return r1
         L_0x007e:
             Int r0 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
@@ -164,7 +164,7 @@ private /* synthetic */ Int[] m195getcomlumiyaviewerlumiyaslprotohttpsLLSDConten
             r0.<init>(r1)     // Catch:{ IOException -> 0x0026 }
             return r0
         L_0x008d:
-            Byte[] r0 = Byte[r0]     // Catch:{ IOException -> 0x0026 }
+            ByteArray r0 = Byte[r0]     // Catch:{ IOException -> 0x0026 }
             r6.readFully(r0)     // Catch:{ IOException -> 0x0026 }
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDString r1 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDString     // Catch:{ IOException -> 0x0026 }
             java.lang.String r0 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r0)     // Catch:{ IOException -> 0x0026 }
@@ -178,7 +178,7 @@ private /* synthetic */ Int[] m195getcomlumiyaviewerlumiyaslprotohttpsLLSDConten
             r0.<init>((java.lang.String) r1)     // Catch:{ IOException -> 0x0026 }
             return r0
         L_0x00ab:
-            Byte[] r0 = Byte[r0]     // Catch:{ IOException -> 0x0026 }
+            ByteArray r0 = Byte[r0]     // Catch:{ IOException -> 0x0026 }
             r6.readFully(r0)     // Catch:{ IOException -> 0x0026 }
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDURI r1 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDURI     // Catch:{ IOException -> 0x0026 }
             java.lang.String r0 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r0)     // Catch:{ IOException -> 0x0026 }
@@ -229,7 +229,7 @@ private /* synthetic */ Int[] m195getcomlumiyaviewerlumiyaslprotohttpsLLSDConten
             throw r0     // Catch:{ IOException -> 0x0026 }
         L_0x0116:
             Int r3 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
-            Byte[] r3 = Byte[r3]     // Catch:{ IOException -> 0x0026 }
+            ByteArray r3 = Byte[r3]     // Catch:{ IOException -> 0x0026 }
             r6.readFully(r3)     // Catch:{ IOException -> 0x0026 }
             java.lang.String r3 = com.lumiyaviewer.lumiya.slproto.SLMessage.stringFromVariableUTF(r3)     // Catch:{ IOException -> 0x0026 }
             com.lumiyaviewer.lumiya.slproto.llsd.LLSDNode r4 = fromBinary(r6)     // Catch:{ IOException -> 0x0026 }
@@ -310,7 +310,7 @@ private /* synthetic */ Int[] m195getcomlumiyaviewerlumiyaslprotohttpsLLSDConten
         }
     }
 
-    public Byte[] asBinary() throws LLSDValueTypeException {
+    public ByteArray asBinary() throws LLSDValueTypeException {
         throw LLSDValueTypeException("binary", this)
     }
 

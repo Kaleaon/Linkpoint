@@ -20,7 +20,7 @@ class TelehubInfo : SLMessage() {
     @JvmStatic
     class TelehubBlock {
         public UUID ObjectID
-        public Byte[] ObjectName
+        public ByteArray ObjectName
         public LLVector3 TelehubPos
         public LLQuaternion TelehubRot
     }

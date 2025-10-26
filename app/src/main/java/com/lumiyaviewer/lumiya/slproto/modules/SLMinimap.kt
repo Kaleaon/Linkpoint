@@ -52,7 +52,7 @@ class SLMinimap : SLModule {
     @Nullable
     ImmutableVector myAvatarPosition = null
     private Int nearbyUsersCount = 0
-    private Int[] parcelIDs = Int[4096]
+    private IntArray parcelIDs = IntArray(4096)
     private Map<Int, ParcelData> parcels = ConcurrentHashMap()
     private RequestHandler<SubscriptionSingleKey> userLocationRequestHandler = SimpleRequestHandler<SubscriptionSingleKey>() {
         Unit onRequest(@Nonnull SubscriptionSingleKey subscriptionSingleKey) {
@@ -70,7 +70,7 @@ class SLMinimap : SLModule {
     class MinimapBitmap {
         private Int bitmapHeight
         private Int bitmapWidth
-        Int[] colors
+        IntArray colors
 
         MinimapBitmap(Int i, Int i2) {
             this.bitmapWidth = i
@@ -78,7 +78,7 @@ class SLMinimap : SLModule {
             this.colors = Int[(i * i2)]
         }
 
-        MinimapBitmap(MinimapBitmap minimapBitmap, Int i, Int i2, Int[] iArr) {
+        MinimapBitmap(MinimapBitmap minimapBitmap, Int i, Int i2, IntArray iArr) {
             this.bitmapWidth = minimapBitmap.bitmapWidth
             this.bitmapHeight = minimapBitmap.bitmapHeight
             this.colors = Arrays.copyOf(minimapBitmap.colors, minimapBitmap.colors.length)
@@ -194,7 +194,7 @@ class SLMinimap : SLModule {
             Int r0 = r13.myAvatarParcelDataIndex
             if (r0 < 0) goto L_0x01e8
             java.util.Map<java.lang.Int, com.lumiyaviewer.lumiya.slproto.users.ParcelData> r0 = r13.parcels
-            Int[] r1 = r13.parcelIDs
+            IntArray r1 = r13.parcelIDs
             Int r4 = r13.myAvatarParcelDataIndex
             r1 = r1[r4]
             java.lang.Int r1 = java.lang.Int.valueOf(r1)
@@ -243,7 +243,7 @@ class SLMinimap : SLModule {
             if (r0 == r6) goto L_0x01e5
             r13.myAvatarParcelDataIndex = r0
             java.util.Map<java.lang.Int, com.lumiyaviewer.lumiya.slproto.users.ParcelData> r0 = r13.parcels
-            Int[] r4 = r13.parcelIDs
+            IntArray r4 = r13.parcelIDs
             Int r6 = r13.myAvatarParcelDataIndex
             r4 = r4[r6]
             java.lang.Int r4 = java.lang.Int.valueOf(r4)
@@ -446,9 +446,9 @@ class SLMinimap : SLModule {
     @SLMessageHandler
     Unit HandleParcelOverlay(ParcelOverlay parcelOverlay) {
         Debug.Log("ParcelOverlay: SequenceID = " + parcelOverlay.ParcelData_Field.SequenceID)
-        Byte[] bArr = parcelOverlay.ParcelData_Field.Data
+        ByteArray bArr = parcelOverlay.ParcelData_Field.Data
         Int length = bArr.length / 64
-        Int[] iArr = Int[(length * 4 * 64 * 4)]
+        IntArray iArr = Int[(length * 4 * 64 * 4)]
         Int i = 0
         Int i2 = 0
         while (i2 < length) {
@@ -552,7 +552,7 @@ class SLMinimap : SLModule {
             java.util.Map<java.lang.Int, com.lumiyaviewer.lumiya.slproto.users.ParcelData> r0 = r9.parcels     // Catch:{ LLSDException -> 0x0040 }
             java.lang.Int r7 = java.lang.Int.valueOf(r6)     // Catch:{ LLSDException -> 0x0040 }
             r0.put(r7, r5)     // Catch:{ LLSDException -> 0x0040 }
-            Boolean[] r5 = r5.getParcelBitmap()     // Catch:{ LLSDException -> 0x0040 }
+            BooleanArray r5 = r5.getParcelBitmap()     // Catch:{ LLSDException -> 0x0040 }
             r0 = r1
             r1 = r2
         L_0x002c:
@@ -560,7 +560,7 @@ class SLMinimap : SLModule {
             if (r1 >= r7) goto L_0x0045
             Boolean r7 = r5[r1]     // Catch:{ LLSDException -> 0x0057 }
             if (r7 == 0) goto L_0x003d
-            Int[] r7 = r9.parcelIDs     // Catch:{ LLSDException -> 0x0057 }
+            IntArray r7 = r9.parcelIDs     // Catch:{ LLSDException -> 0x0057 }
             r7[r1] = r6     // Catch:{ LLSDException -> 0x0057 }
             Int r7 = r9.myAvatarParcelDataIndex     // Catch:{ LLSDException -> 0x0057 }
             if (r1 != r7) goto L_0x003d

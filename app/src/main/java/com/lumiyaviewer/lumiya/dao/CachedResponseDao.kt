@@ -11,7 +11,7 @@ class CachedResponseDao : AbstractDao<CachedResponse, String> {
     String TABLENAME = "CachedResponses"
 
     class Properties {
-        Property Data = Property(1, Byte[].class, "data", false, "DATA")
+        Property Data = Property(1, ByteArray.class, "data", false, "DATA")
         Property Key = Property(0, String.class, "key", true, "KEY")
         Property MustRevalidate = Property(2, Boolean.TYPE, "mustRevalidate", false, "MUST_REVALIDATE")
     }
@@ -38,7 +38,7 @@ class CachedResponseDao : AbstractDao<CachedResponse, String> {
         if (key != null) {
             sQLiteStatement.bindString(1, key)
         }
-        Byte[] data = cachedResponse.getData()
+        ByteArray data = cachedResponse.getData()
         if (data != null) {
             sQLiteStatement.bindBlob(2, data)
         }
@@ -54,7 +54,7 @@ class CachedResponseDao : AbstractDao<CachedResponse, String> {
     }
 
     fun readEntity(cursor: Cursor, i: Int): CachedResponse {
-        Byte[] bArr = null
+        ByteArray bArr = null
         Boolean z = false
         String string = cursor.isNull(i + 0) ? null : cursor.getString(i + 0)
         if (!cursor.isNull(i + 1)) {
@@ -67,7 +67,7 @@ class CachedResponseDao : AbstractDao<CachedResponse, String> {
     }
 
     fun readEntity(cursor: Cursor, cachedResponse: CachedResponse, i: Int): Unit {
-        Byte[] bArr = null
+        ByteArray bArr = null
         cachedResponse.setKey(cursor.isNull(i + 0) ? null : cursor.getString(i + 0))
         if (!cursor.isNull(i + 1)) {
             bArr = cursor.getBlob(i + 1)

@@ -13,7 +13,7 @@ class AgentAlertMessage : SLMessage {
     }
 
     class AlertData {
-        Byte[] Message
+        ByteArray Message
         Boolean Modal
     }
 

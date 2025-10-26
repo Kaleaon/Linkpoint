@@ -18,7 +18,7 @@ class StartLure : SLMessage {
 
     class Info {
         Int LureType
-        Byte[] Message
+        ByteArray Message
     }
 
     class TargetData {

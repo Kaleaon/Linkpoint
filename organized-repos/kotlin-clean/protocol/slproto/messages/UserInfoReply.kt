@@ -15,8 +15,8 @@ class UserInfoReply : SLMessage() {
 
     @JvmStatic
     class UserData {
-        public Byte[] DirectoryVisibility
-        public Byte[] EMail
+        public ByteArray DirectoryVisibility
+        public ByteArray EMail
         public Boolean IMViaEMail
     }
 

@@ -20,16 +20,16 @@ class ParcelPropertiesUpdate : SLMessage() {
     class ParcelData {
         public UUID AuthBuyerID
         public Int Category
-        public Byte[] Desc
+        public ByteArray Desc
         public Int Flags
         public UUID GroupID
         public Int LandingType
         public Int LocalID
         public Int MediaAutoScale
         public UUID MediaID
-        public Byte[] MediaURL
-        public Byte[] MusicURL
-        public Byte[] Name
+        public ByteArray MediaURL
+        public ByteArray MusicURL
+        public ByteArray Name
         public Int ParcelFlags
         public Float PassHours
         public Int PassPrice

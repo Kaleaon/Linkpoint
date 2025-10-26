@@ -23,10 +23,10 @@ class PrimVolumeFace {
     public Int BeginS
     public Int BeginT
     public LLVector3 Center
-    public Int[] Edge
+    public IntArray Edge
     public LLVector3[] Extents = {LLVector3(), LLVector3()}
     public Int ID
-    public Short[] Indices
+    public ShortArray Indices
     public Vector3Array Normals
     public Int NumIndices
     public Int NumS
@@ -367,7 +367,7 @@ class PrimVolumeFace {
         }
         this.Normals.clear()
         LLVector3[] lLVector3Arr = LLVector3[3]
-        Short[] sArr = Short[3]
+        ShortArray sArr = ShortArray(3)
         for (Int i28 = 0; i28 < 3; i28++) {
             lLVector3Arr[i28] = LLVector3()
         }
@@ -527,8 +527,8 @@ class PrimVolumeFace {
         this.Center.add(lLVector32)
         this.Center.mul(0.5f)
         resizeIndices(size2 * size2 * 6)
-        Short[] sArr = this.Indices
-        Short[] sArr2 = {0, 1, (Short) (size2 + 1 + 1), (Short) (size2 + 1 + 1), (Short) (size2 + 1), 0}
+        ShortArray sArr = this.Indices
+        ShortArray sArr2 = {0, 1, (Short) (size2 + 1 + 1), (Short) (size2 + 1 + 1), (Short) (size2 + 1), 0}
         Int i11 = 0
         Int i12 = 0
         while (true) {

@@ -11,7 +11,7 @@ class RpcScriptReplyInbound : SLMessage {
         UUID ChannelID
         Int IntValue
         UUID ItemID
-        Byte[] StringValue
+        ByteArray StringValue
         UUID TaskID
     }
 

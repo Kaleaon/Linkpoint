@@ -17,7 +17,7 @@ class ObjectDescription : SLMessage {
     }
 
     class ObjectData {
-        Byte[] Description
+        ByteArray Description
         Int LocalID
     }
 

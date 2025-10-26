@@ -10,7 +10,7 @@ class TransferPacket : SLMessage() {
     @JvmStatic
     class TransferData {
         public Int ChannelType
-        public Byte[] Data
+        public ByteArray Data
         public Int Packet
         public Int Status
         public UUID TransferID

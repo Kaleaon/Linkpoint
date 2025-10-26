@@ -17,17 +17,17 @@ class UserReport : SLMessage {
 
     class ReportData {
         UUID AbuseRegionID
-        Byte[] AbuseRegionName
+        ByteArray AbuseRegionName
         UUID AbuserID
         Int Category
         Int CheckFlags
-        Byte[] Details
+        ByteArray Details
         UUID ObjectID
         LLVector3 Position
         Int ReportType
         UUID ScreenshotID
-        Byte[] Summary
-        Byte[] VersionString
+        ByteArray Summary
+        ByteArray VersionString
     }
 
     UserReport() {

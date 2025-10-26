@@ -275,7 +275,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
         SLAgentCircuit activeAgentCircuit = getActiveAgentCircuit()
         if (sLInventoryEntry != null && chatterID != null && activeAgentCircuit != null) {
             AlertDialog.Builder builder = AlertDialog.Builder(getContext())
-            builder.setMessage(String.format(getContext().getString(R.string.share_inv_item_title), Object[]{sLInventoryEntry.name, str})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(runnable, activeAgentCircuit, chatterID, sLInventoryEntry) {
+            builder.setMessage(String.format(getContext().getString(R.string.share_inv_item_title), Array<Any>{sLInventoryEntry.name, str})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(runnable, activeAgentCircuit, chatterID, sLInventoryEntry) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f401$f0
@@ -542,7 +542,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             if (Strings.isNullOrEmpty(str)) {
                 str = "Landmark"
             }
-            String format = String.format("%s, %s (%d, %d, %d)", Object[]{str, regionName, Integer.valueOf((Int) lLVector3.x), Integer.valueOf((Int) lLVector3.y), Integer.valueOf((Int) lLVector3.z)})
+            String format = String.format("%s, %s (%d, %d, %d)", Array<Any>{str, regionName, Integer.valueOf((Int) lLVector3.x), Integer.valueOf((Int) lLVector3.y), Integer.valueOf((Int) lLVector3.z)})
             Dialog dialog = Dialog(getContext())
             dialog.setContentView(R.layout.inv_rename_dialog)
             dialog.setTitle(R.string.new_landmark_dialog_title)

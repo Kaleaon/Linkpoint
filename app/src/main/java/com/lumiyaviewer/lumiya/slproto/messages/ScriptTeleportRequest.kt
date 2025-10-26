@@ -9,8 +9,8 @@ class ScriptTeleportRequest : SLMessage {
 
     class Data {
         LLVector3 LookAt
-        Byte[] ObjectName
-        Byte[] SimName
+        ByteArray ObjectName
+        ByteArray SimName
         LLVector3 SimPosition
     }
 

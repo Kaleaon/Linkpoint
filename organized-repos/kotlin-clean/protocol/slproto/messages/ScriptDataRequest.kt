@@ -12,7 +12,7 @@ class ScriptDataRequest : SLMessage() {
     @JvmStatic
     class DataBlock {
         public Long Hash
-        public Byte[] Request
+        public ByteArray Request
         public Int RequestType
     }
 

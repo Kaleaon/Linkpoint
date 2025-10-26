@@ -27,7 +27,7 @@ class SLChatGroupInvitationSentEvent : SLChatEvent {
     /* access modifiers changed from: protected */
     String getText(Context context, @Nonnull UserManager userManager) {
         String sourceName = this.source.getSourceName(userManager)
-        Object[] objArr = Object[1]
+        Array<Any> objArr = Object[1]
         if (sourceName == null) {
             sourceName = "(unknown)"
         }

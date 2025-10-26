@@ -142,7 +142,7 @@ class AvatarVisualState {
         }
     }
 
-    synchronized Unit ApplyVisualParams(Int[] iArr) {
+    synchronized Unit ApplyVisualParams(IntArray iArr) {
         AvatarShapeParams avatarShapeParams = this.avatarShapeParams
         this.avatarShapeParams = AvatarShapeParams.create(avatarShapeParams, iArr)
         if (!this.avatarShapeParams == avatarShapeParams) {

@@ -13,8 +13,8 @@ class ChatPass : SLMessage() {
     class ChatData {
         public Int Channel
         public UUID ID
-        public Byte[] Message
-        public Byte[] Name
+        public ByteArray Message
+        public ByteArray Name
         public UUID OwnerID
         public LLVector3 Position
         public Float Radius

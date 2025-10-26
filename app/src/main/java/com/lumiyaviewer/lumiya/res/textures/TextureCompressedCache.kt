@@ -26,20 +26,20 @@ class TextureCompressedCache : ResourceManager<DrawableTextureParams, File> {
     private class TextureFetchRequest : ResourceRequest<DrawableTextureParams, File> : Startable, SLTextureFetchRequest.TextureFetchCompleteListener, Runnable, HasPriority {
 
         /* renamed from: -com-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
-        private /* synthetic */ Int[] f53comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null
+        private /* synthetic */ IntArray f53comlumiyaviewerlumiyarendertexTextureClassSwitchesValues = null
         private Int MAX_RETRIES = 2
-        /* synthetic */ Int[] $SWITCH_TABLE$com$lumiyaviewer$lumiya$render$tex$TextureClass
+        /* synthetic */ IntArray $SWITCH_TABLE$com$lumiyaviewer$lumiya$render$tex$TextureClass
         private File compressedFile
         private volatile SLTextureFetchRequest fetchRequest
         private volatile Future<?> fetchTask
         private SLTextureFetcher fetcher
 
         /* renamed from: -getcom-lumiyaviewer-lumiya-render-tex-TextureClassSwitchesValues  reason: not valid java name */
-        private /* synthetic */ Int[] m119getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues() {
+        private /* synthetic */ IntArray m119getcomlumiyaviewerlumiyarendertexTextureClassSwitchesValues() {
             if (f53comlumiyaviewerlumiyarendertexTextureClassSwitchesValues != null) {
                 return f53comlumiyaviewerlumiyarendertexTextureClassSwitchesValues
             }
-            Int[] iArr = Int[TextureClass.values().length]
+            IntArray iArr = Int[TextureClass.values().length]
             try {
                 iArr[TextureClass.Asset.ordinal()] = 3
             } catch (NoSuchFieldError e) {

@@ -7,7 +7,7 @@ class ParcelOverlay : SLMessage {
     ParcelData ParcelData_Field = ParcelData()
 
     class ParcelData {
-        Byte[] Data
+        ByteArray Data
         Int SequenceID
     }
 

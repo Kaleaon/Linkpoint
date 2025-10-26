@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger
 abstract class UserFunctionsFragment : ChatterReloadableFragment() : ReloadableFragment {
 
     /* renamed from: -com-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
-    private const val /* synthetic */ Int[] f378comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
+    private const val /* synthetic */ IntArray f378comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues = null
     protected val SubscriptionData<SubscriptionSingleKey, CurrentLocationInfo> currentLocationInfo = SubscriptionData<>(UIThreadExecutor.getInstance(), Subscription.OnData(this) {
 
         /* renamed from: -$f0 */
@@ -168,11 +168,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
 
     /* renamed from: -getcom-lumiyaviewer-lumiya-slproto-users-ChatterID$ChatterTypeSwitchesValues  reason: not valid java name */
     @JvmStatic
-private /* synthetic */ Int[] m559getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
+private /* synthetic */ IntArray m559getcomlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues() {
         if (f378comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues != null) {
             return f378comlumiyaviewerlumiyaslprotousersChatterID$ChatterTypeSwitchesValues
         }
-        Int[] iArr = Int[ChatterID.ChatterType.values().length]
+        IntArray iArr = Int[ChatterID.ChatterType.values().length]
         try {
             iArr[ChatterID.ChatterType.Group.ordinal()] = 1
         } catch (NoSuchFieldError e) {
@@ -191,7 +191,7 @@ private /* synthetic */ Int[] m559getcomlumiyaviewerlumiyaslprotousersChatterID$
 
     private Unit handleEnableVoice() {
         if (!VoicePluginServiceConnection.checkPluginInstalled(getContext())) {
-            AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_voice).setMessage((CharSequence) getContext().getString(R.string.enable_voice_plugin_message, Object[]{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
+            AlertDialog.Builder(getContext()).setTitle((Int) R.string.enable_voice).setMessage((CharSequence) getContext().getString(R.string.enable_voice_plugin_message, Array<Any>{LicenseChecker.APP_STORE_NAME})).setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f368$f0
@@ -1091,7 +1091,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         if (str == null) {
             str = getString(R.string.name_loading_title)
         }
-        builder.setMessage(String.format(getString(R.string.delete_friend_title_format), Object[]{str})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(sLAgentCircuit, chatterIDUser) {
+        builder.setMessage(String.format(getString(R.string.delete_friend_title_format), Array<Any>{str})).setCancelable(true).setPositiveButton("Yes", DialogInterface.OnClickListener(sLAgentCircuit, chatterIDUser) {
 
             /* renamed from: -$f0 */
             private val /* synthetic */ Object f349$f0
@@ -1769,7 +1769,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.common.-$Lambda$EG
         AvatarGroupList avatarGroupList
         AvatarGroupList.AvatarGroupEntry avatarGroupEntry
         super.onPrepareOptionsMenu(menu)
-        Int[] iArr = {R.id.item_open_chat, R.id.item_view_profile, R.id.item_location_details, R.id.item_play_parcel_media, R.id.item_send_group_notice, R.id.item_offer_teleport, R.id.item_request_teleport, R.id.item_teleport_to, R.id.item_pay_user, R.id.item_share_object, R.id.item_add_friend, R.id.item_remove_friend, R.id.item_close, R.id.item_close_and_mute, R.id.item_unmute, R.id.item_unblock, R.id.item_start_voice, R.id.item_enable_voice}
+        IntArray iArr = {R.id.item_open_chat, R.id.item_view_profile, R.id.item_location_details, R.id.item_play_parcel_media, R.id.item_send_group_notice, R.id.item_offer_teleport, R.id.item_request_teleport, R.id.item_teleport_to, R.id.item_pay_user, R.id.item_share_object, R.id.item_add_friend, R.id.item_remove_friend, R.id.item_close, R.id.item_close_and_mute, R.id.item_unmute, R.id.item_unblock, R.id.item_start_voice, R.id.item_enable_voice}
         UserManager userManager = this.chatterID != null ? this.chatterID.getUserManager() : null
         if (this.chatterID == null || userManager == null) {
             for (Int findItem : iArr) {

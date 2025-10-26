@@ -31,7 +31,7 @@ class SLObjectAvatarInfo : SLObjectInfo {
         this.avatarVisualState.ApplyTextures(sLTextureEntry, z)
     }
 
-    Unit ApplyAvatarVisualParams(Int[] iArr) {
+    Unit ApplyAvatarVisualParams(IntArray iArr) {
         this.avatarVisualState.ApplyVisualParams(iArr)
     }
 

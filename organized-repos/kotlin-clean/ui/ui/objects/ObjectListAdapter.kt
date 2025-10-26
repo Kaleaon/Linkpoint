@@ -131,7 +131,7 @@ class ObjectListAdapter : BaseExpandableListAdapter() {
         }
         TextView textView = (TextView) view.findViewById(R.id.objectDistanceTextView)
         if (!Float.isNaN(sLObjectDisplayInfo.distance)) {
-            str = String.format("%d m", Object[]{Integer.valueOf(Math.round(sLObjectDisplayInfo.distance))})
+            str = String.format("%d m", Array<Any>{Integer.valueOf(Math.round(sLObjectDisplayInfo.distance))})
         }
         textView.setText(str)
         if (sLObjectDisplayInfo instanceof SLPrimObjectDisplayInfo) {

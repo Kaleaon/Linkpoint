@@ -19,7 +19,7 @@ class UpdateInventoryFolder : SLMessage {
 
     class FolderData {
         UUID FolderID
-        Byte[] Name
+        ByteArray Name
         UUID ParentID
         Int Type
     }
