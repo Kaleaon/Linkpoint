@@ -80,7 +80,7 @@ class LLVector4 {
     }
 
     Float normalize3() {
-        Float sqrt = (Float) Math.sqrt((Double) ((this.x * this.x) + (this.y * this.y) + (this.z * this.z)))
+        Float sqrt = Math.sqrt(((this.x * this.x.toDouble()).toFloat() + (this.y * this.y) + (this.z * this.z)))
         if (sqrt > 1.0E-7f) {
             Float f = 1.0f / sqrt
             this.x *= f

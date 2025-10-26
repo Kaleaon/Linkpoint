@@ -86,7 +86,7 @@ class Vector3Array : VectorArray {
         Float f = this.data[i2 + 0] - lLVector3.x
         Float f2 = this.data[i2 + 1] - lLVector3.y
         Float f3 = this.data[i2 + 2] - lLVector3.z
-        return (Float) Math.sqrt((Double) ((f3 * f3) + (f * f) + (f2 * f2)))
+        return Math.sqrt(((f3 * f3.toDouble()).toFloat() + (f * f) + (f2 * f2)))
     }
 
     Float getMaxComponent(Int i) {

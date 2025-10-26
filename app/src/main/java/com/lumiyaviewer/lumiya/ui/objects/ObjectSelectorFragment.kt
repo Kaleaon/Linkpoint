@@ -262,7 +262,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
         if (Build.VERSION.SDK_INT >= 14) {
             ButteryProgressBar butteryProgressBar = ButteryProgressBar(layoutInflater.getContext())
             butteryProgressBar.setId(R.id.object_progress_bar)
-            ((FrameLayout) inflate.findViewById(R.id.object_list_root_layout)).addView(butteryProgressBar, FrameLayout.LayoutParams(-1, (Int) TypedValue.applyDimension(1, 4.0f, layoutInflater.getContext().getResources().getDisplayMetrics())))
+            ((FrameLayout) inflate.findViewById(R.id.object_list_root_layout)).addView(butteryProgressBar, FrameLayout.LayoutParams(-1, TypedValue.toInt().applyDimension(1, 4.0f, layoutInflater.getContext().getResources().getDisplayMetrics())))
         }
         return inflate
     }
@@ -300,7 +300,7 @@ class ObjectSelectorFragment : Fragment : SeekBar.OnSeekBarChangeListener, Compo
                 modules.drawDistance.EnableObjectSelect()
                 View view = getView()
                 if (view != null) {
-                    Int objectSelectRange = (Int) modules.drawDistance.getObjectSelectRange()
+                    Int objectSelectRange = modules.toInt().drawDistance.getObjectSelectRange()
                     if (objectSelectRange < 1) {
                         i = 1
                     } else if (objectSelectRange <= 256) {

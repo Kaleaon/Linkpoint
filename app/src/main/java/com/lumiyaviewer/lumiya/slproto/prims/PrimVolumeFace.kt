@@ -251,7 +251,7 @@ class PrimVolumeFace {
         Vector3Array vector3Array2 = this.Positions
         Vector3Array vector3Array3 = this.Normals
         Vector2Array vector2Array = this.TexCoords
-        Int floor = (Int) Math.floor((Double) arrayList.get(this.BeginS).z)
+        Int floor = Math.toInt().floor(arrayList.toDouble().get(this.BeginS).z)
         Int i8 = ((this.TypeMask & 16) == 0 || (this.TypeMask & 256) == 0 || this.NumS <= 2) ? this.NumS : this.NumS / 2
         Int i9 = this.BeginT
         Int i10 = 0
@@ -264,7 +264,7 @@ class PrimVolumeFace {
             Int i12 = 0
             Int i13 = i10
             while (i12 < i8) {
-                Float f2 = ((this.TypeMask & 4) != 0 || this.BeginS + i12 >= arrayList.size()) ? i12 != 0 ? 1.0f : 0.0f : !z ? arrayList.get(this.BeginS + i12).z : arrayList.get(this.BeginS + i12).z - ((Float) floor)
+                Float f2 = ((this.TypeMask & 4) != 0 || this.BeginS + i12 >= arrayList.size()) ? i12 != 0 ? 1.0f : 0.0f : !z ? arrayList.get(this.BeginS + i12).z : arrayList.get(this.BeginS + i12).z - (floor.toFloat())
                 if (z4) {
                     f2 = 1.0f - f2
                 }
@@ -287,7 +287,7 @@ class PrimVolumeFace {
             } else {
                 Int i16 = (this.TypeMask & 128) != 0 ? i8 - 1 : 0
                 Int i17 = this.BeginS + i16 + (i6 * i11)
-                Float f3 = this.BeginS + i16 < arrayList.size() ? arrayList.get(i16 + this.BeginS).z - ((Float) floor) : i16 != 0 ? 1.0f : 0.0f
+                Float f3 = this.BeginS + i16 < arrayList.size() ? arrayList.get(i16 + this.BeginS).z - (floor.toFloat()) : i16 != 0 ? 1.0f : 0.0f
                 vector3Array2.set(i13, vector3Array, i17)
                 vector2Array.set(i13, f3, f)
                 i10 = i13 + 1
@@ -510,7 +510,7 @@ class PrimVolumeFace {
                 if (i10 >= size2 + 1) {
                     break
                 }
-                this.vertexArray.LerpPlanarVertex(i6, vertexArray2, 0, vertexArray2, 1, vertexArray2, 3, ((Float) i8) / ((Float) size2), ((Float) i10) / ((Float) size2), lLVector35, lLVector36, lLVector2, lLVector22)
+                this.vertexArray.LerpPlanarVertex(i6, vertexArray2, 0, vertexArray2, 1, vertexArray2, 3, (i8.toFloat()) / (size2.toFloat()), (i10.toFloat()) / (size2.toFloat()), lLVector35, lLVector36, lLVector2, lLVector22)
                 this.vertexArray.getNormals().set(i6, lLVector33)
                 if (i8 == 0 && i10 == 0) {
                     vector3Array2.get(i6, lLVector3)

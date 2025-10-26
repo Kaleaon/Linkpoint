@@ -29,10 +29,10 @@ class TerrainPatchGeometry {
     private var water_index_count: Int = 0
 
     constructor(terrainPatchHeightMap: TerrainPatchHeightMap) {
-        DirectByteBuffer directByteBuffer = DirectByteBuffer((Int) vertex_size_bytes)
-        DirectByteBuffer directByteBuffer2 = DirectByteBuffer((Int) water_vertex_size_bytes)
-        DirectByteBuffer directByteBuffer3 = DirectByteBuffer((Int) index_size_bytes)
-        DirectByteBuffer directByteBuffer4 = DirectByteBuffer((Int) index_size_bytes)
+        DirectByteBuffer directByteBuffer = DirectByteBuffer(vertex_size_bytes.toInt())
+        DirectByteBuffer directByteBuffer2 = DirectByteBuffer(water_vertex_size_bytes.toInt())
+        DirectByteBuffer directByteBuffer3 = DirectByteBuffer(index_size_bytes.toInt())
+        DirectByteBuffer directByteBuffer4 = DirectByteBuffer(index_size_bytes.toInt())
         directByteBuffer.position(0)
         directByteBuffer2.position(0)
         this.index_count = 0
@@ -49,18 +49,18 @@ class TerrainPatchGeometry {
                 break
             }
             for (Int i4 = 0; i4 < 17; i4++) {
-                directByteBuffer.putFloat((Float) i4)
-                directByteBuffer.putFloat((Float) i3)
+                directByteBuffer.putFloat(i4.toFloat())
+                directByteBuffer.putFloat(i3.toFloat())
                 directByteBuffer.putFloat(heightArray[i2 + i4])
                 lLVector3.set(-normalArray[(i2 + i4) * 2], normalArray[((i2 + i4) * 2) + 1], 2.0f)
                 lLVector3.normVec()
                 directByteBuffer.putFloat(lLVector3.x)
                 directByteBuffer.putFloat(lLVector3.y)
                 directByteBuffer.putFloat(lLVector3.z)
-                directByteBuffer.putFloat(((Float) i4) / 16.0f)
-                directByteBuffer.putFloat(((Float) i3) / 16.0f)
-                directByteBuffer2.putFloat((Float) i4)
-                directByteBuffer2.putFloat((Float) i3)
+                directByteBuffer.putFloat((i4.toFloat()) / 16.0f)
+                directByteBuffer.putFloat((i3.toFloat()) / 16.0f)
+                directByteBuffer2.putFloat(i4.toFloat())
+                directByteBuffer2.putFloat(i3.toFloat())
                 directByteBuffer2.putFloat(waterHeight)
             }
             i2 += 17

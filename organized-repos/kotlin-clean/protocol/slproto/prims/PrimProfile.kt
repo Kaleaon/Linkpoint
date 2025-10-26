@@ -62,7 +62,7 @@ class PrimProfile {
 
     private Face addHole(PrimProfileParams primProfileParams, Boolean z, Float f, Float f2, Float f3, Float f4, Int i) {
         this.TotalOut = this.Total
-        genNGon(primProfileParams, (Int) Math.floor((Double) f), f2, -1.0f, f4, i)
+        genNGon(primProfileParams, Math.toInt().floor(f.toDouble()), f2, -1.0f, f4, i)
         Face addFace = addFace(this.TotalOut, this.Total - this.TotalOut, 0.0f, 4, z)
         LLVector3[] lLVector3Arr = LLVector3[this.Total]
         Int i2 = this.TotalOut
@@ -100,17 +100,17 @@ class PrimProfile {
         Float f5
         Float f6 = primProfileParams.Begin
         Float f7 = primProfileParams.End
-        Float f8 = 1.0f / ((Float) i)
+        Float f8 = 1.0f / (i.toFloat())
         Float f9 = 6.2831855f * f8 * f3
-        Int round = Math.round(((Float) i) / f3)
+        Int round = Math.round((i.toFloat()) / f3)
         Float f10 = round < 8 ? tableScale[round] : 0.5f
-        Float floor = (Float) (Math.floor((Double) (((Float) i) * f6)) / ((Double) ((Float) i)))
+        Float floor = (Float) (Math.floor((Double) ((i.toFloat()) * f6)) / ((Double) (i.toFloat())))
         Float f11 = 6.2831855f * ((floor * f3) + f)
-        LLVector3 lLVector3 = LLVector3(((Float) Math.cos((Double) f11)) * f10, ((Float) Math.sin((Double) f11)) * f10, floor)
+        LLVector3 lLVector3 = LLVector3((Math.toFloat().cos(f11.toDouble())) * f10, (Math.toFloat().sin(f11.toDouble())) * f10, floor)
         Float f12 = floor + f8
         Float f13 = f11 + f9
-        LLVector3 lLVector32 = LLVector3(((Float) Math.cos((Double) f13)) * f10, ((Float) Math.sin((Double) f13)) * f10, f12)
-        Float f14 = (f6 - floor) * ((Float) i)
+        LLVector3 lLVector32 = LLVector3((Math.toFloat().cos(f13.toDouble())) * f10, (Math.toFloat().sin(f13.toDouble())) * f10, f12)
+        Float f14 = (f6 - floor) * (i.toFloat())
         if (f14 < 0.9999f) {
             this.Profile.add(LLVector3.lerp(lLVector3, lLVector32, f14))
             f5 = f13
@@ -120,7 +120,7 @@ class PrimProfile {
             f4 = f12
         }
         while (f4 < f7) {
-            LLVector3 lLVector33 = LLVector3(((Float) Math.cos((Double) f5)) * f10, ((Float) Math.sin((Double) f5)) * f10, f4)
+            LLVector3 lLVector33 = LLVector3((Math.toFloat().cos(f5.toDouble())) * f10, (Math.toFloat().sin(f5.toDouble())) * f10, f4)
             if (this.Profile.size() > 0) {
                 LLVector3 lLVector34 = this.Profile.get(this.Profile.size() - 1)
                 for (Int i3 = 0; i3 < i2; i3++) {
@@ -132,8 +132,8 @@ class PrimProfile {
             f4 += f8
             lLVector3 = lLVector33
         }
-        LLVector3 lLVector35 = LLVector3(((Float) Math.cos((Double) f5)) * f10, f10 * ((Float) Math.sin((Double) f5)), f4)
-        Float f15 = (f7 - (f4 - f8)) * ((Float) i)
+        LLVector3 lLVector35 = LLVector3((Math.toFloat().cos(f5.toDouble())) * f10, f10 * (Math.toFloat().sin(f5.toDouble())), f4)
+        Float f15 = (f7 - (f4 - f8)) * (i.toFloat())
         if (f15 > 1.0E-4f) {
             LLVector3 lerp = LLVector3.lerp(lLVector3, lLVector35, f15)
             if (this.Profile.size() > 0) {
@@ -162,10 +162,10 @@ private Int getNumNGonPoints(PrimProfileParams primProfileParams, Int i, Float f
         Float f4
         Float f5 = primProfileParams.Begin
         Float f6 = primProfileParams.End
-        Float f7 = 1.0f / ((Float) i)
-        Float floor = (Float) (Math.floor((Double) (((Float) i) * f5)) / ((Double) ((Float) i)))
+        Float f7 = 1.0f / (i.toFloat())
+        Float floor = (Float) (Math.floor((Double) ((i.toFloat()) * f5)) / ((Double) (i.toFloat())))
         Float f8 = floor + f7
-        if ((f5 - floor) * ((Float) i) < 0.9999f) {
+        if ((f5 - floor) * (i.toFloat()) < 0.9999f) {
             Float f9 = f8
             i3 = 1
             f4 = f9
@@ -178,7 +178,7 @@ private Int getNumNGonPoints(PrimProfileParams primProfileParams, Int i, Float f
             f4 += f7
             i3++
         }
-        if ((f6 - (f4 - f7)) * ((Float) i) > 1.0E-4f) {
+        if ((f6 - (f4 - f7)) * (i.toFloat()) > 1.0E-4f) {
             i3++
         }
         return ((f6 - f5) * f3 >= 0.99f || primProfileParams.Hollow > 0.0f) ? i3 : i3 + 1
@@ -196,7 +196,7 @@ private Int getNumNGonPoints(PrimProfileParams primProfileParams, Int i, Float f
                 if (f2 != 0.0f && (primProfileParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK) == 32) {
                     f3 = (Float) (Math.ceil((Double) (f3 / 4.0f)) * 4.0d)
                 }
-                Int i3 = (Int) f3
+                Int i3 = f3.toInt()
                 if (z2) {
                     i3 = i2
                 }
@@ -215,7 +215,7 @@ private Int getNumNGonPoints(PrimProfileParams primProfileParams, Int i, Float f
                 if (f2 != 0.0f && (primProfileParams.CurveType & PrimProfileParams.LL_PCODE_HOLE_MASK) == 32) {
                     f4 = (Float) (Math.ceil((Double) (f4 / 2.0f)) * 2.0d)
                 }
-                Int numNGonPoints4 = getNumNGonPoints(primProfileParams, (Int) Math.floor((Double) f4), 0.5f, 0.0f, 0.5f, 0)
+                Int numNGonPoints4 = getNumNGonPoints(primProfileParams, Math.toInt().floor(f4.toDouble()), 0.5f, 0.0f, 0.5f, 0)
                 if (f2 != 0.0f) {
                     numNGonPoints4 *= 2
                 }
@@ -239,7 +239,7 @@ private Int getNumNGonPoints(PrimProfileParams primProfileParams, Int i, Float f
             if (z && i2 >= i) {
                 this.Normals[i2].mul(-1.0f)
             }
-            if (((Double) this.Normals[i2].magVec()) < 0.001d) {
+            if ((this.toDouble().Normals[i2].magVec()) < 0.001d) {
                 Int i3 = i2 + -1 >= 0 ? i2 - 1 : size - 1
                 Int i4 = i3 + -1 >= 0 ? i3 - 1 : size - 1
                 Int i5 = i2 + 1 < size ? i2 + 1 : 0
@@ -325,7 +325,7 @@ private Int getNumNGonPoints(PrimProfileParams primProfileParams, Int i, Float f
                     f3 = f7
                     b2 = 0
                 }
-                Int i4 = (Int) f3
+                Int i4 = f3.toInt()
                 if (z2) {
                     i4 = i2
                 }
@@ -357,11 +357,11 @@ private Int getNumNGonPoints(PrimProfileParams primProfileParams, Int i, Float f
                 if (z) {
                     addCap(1)
                 }
-                Int floor = (Int) Math.floor((Double) (4.0f * f4))
+                Int floor = Math.toInt().floor((Double) (4.0f * f4))
                 while (true) {
                     Int i5 = floor
                     Int i6 = i3
-                    if (i5 >= ((Int) Math.floor((Double) ((4.0f * f5) + 0.999f)))) {
+                    if (i5 >= (Math.toInt().floor((Double) ((4.0f * f5) + 0.999f)))) {
                         Int i7 = 0
                         while (true) {
                             Int i8 = i7
@@ -406,8 +406,8 @@ private Int getNumNGonPoints(PrimProfileParams primProfileParams, Int i, Float f
                         if (z) {
                             addCap(1)
                         }
-                        Int floor2 = (Int) Math.floor((Double) (3.0f * f4))
-                        while (floor2 < ((Int) Math.floor((Double) ((3.0f * f5) + 0.999f)))) {
+                        Int floor2 = Math.toInt().floor((Double) (3.0f * f4))
+                        while (floor2 < (Math.toInt().floor((Double) ((3.0f * f5) + 0.999f)))) {
                             addFace(i3 * (i + 1), i + 2, 1.0f, (Short) (32 << floor2), true)
                             floor2++
                             i3++
@@ -447,7 +447,7 @@ private Int getNumNGonPoints(PrimProfileParams primProfileParams, Int i, Float f
                     f2 = f9
                     b = 0
                 }
-                genNGon(primProfileParams, (Int) Math.floor((Double) f2), 0.5f, 0.0f, 0.5f, 0)
+                genNGon(primProfileParams, Math.toInt().floor(f2.toDouble()), 0.5f, 0.0f, 0.5f, 0)
                 if (z) {
                     addCap(1)
                 }

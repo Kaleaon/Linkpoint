@@ -270,7 +270,7 @@ private /* synthetic */ IntArray m684getcomlumiyaviewerlumiyaslprotoinventorySLA
                     }
                     if (z2) {
                         AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-                        builder.setMessage((Int) R.string.object_contents_has_no_copy).setPositiveButton((Int) R.string.object_contents_yes_move, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
+                        builder.setMessage(R.toInt().string.object_contents_has_no_copy).setPositiveButton(R.toInt().string.object_contents_yes_move, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this) {
 
                             /* renamed from: -$f0 */
                             private val /* synthetic */ Object f466$f0
@@ -372,7 +372,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$2
                             
 */
 
-                        }).setNegativeButton((Int) R.string.cancel, (DialogInterface.OnClickListener) $Lambda$2R1p9WuPUwPagPVBm9YiYK9KyJ0())
+                        }).setNegativeButton(R.toInt().string.cancel, (DialogInterface.OnClickListener) $Lambda$2R1p9WuPUwPagPVBm9YiYK9KyJ0())
                         builder.create().show()
                         return
                     }

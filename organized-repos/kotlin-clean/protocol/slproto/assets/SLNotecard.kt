@@ -61,7 +61,7 @@ private class AttachmentSpan : ReplacementSpan() : InventoryEntrySpan {
                 Paint paint2 = Paint(paint)
                 paint2.setUnderlineText(true)
                 paint2.setColor(Color.rgb(0, 50, 100))
-                canvas.drawText(this.linkText, 0, this.linkText.length(), f, (Float) i4, paint2)
+                canvas.drawText(this.linkText, 0, this.linkText.length(), f, i4.toFloat(), paint2)
             }
         }
 
@@ -79,7 +79,7 @@ private class AttachmentSpan : ReplacementSpan() : InventoryEntrySpan {
                 fontMetricsInt.top = fontMetricsInt2.top
             }
             if (i != i2) {
-                return (Int) paint.measureText(this.linkText, 0, this.linkText.length())
+                return paint.toInt().measureText(this.linkText, 0, this.linkText.length())
             }
             return 0
         }

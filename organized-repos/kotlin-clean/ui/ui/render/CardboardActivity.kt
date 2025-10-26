@@ -2275,7 +2275,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             eye.getEyeView()
             Int i2 = type == 1 ? 0 : 1
             if (CardboardActivity.this.renderSettings != null && (!this.eyeProjectionValid[i2] || eye.getProjectionChanged())) {
-                System.arraycopy(eye.getPerspective(0.5f, (Float) CardboardActivity.this.renderSettings.drawDistance), 0, this.eyeProjection, i2 * 16, 16)
+                System.arraycopy(eye.getPerspective(0.5f, CardboardActivity.toFloat().this.renderSettings.drawDistance), 0, this.eyeProjection, i2 * 16, 16)
             }
             CardboardActivity.this.renderer.onDrawFrame((GL10) null, this.headTransformCompat, this.eyeOffset, this.eyeViewport, (FloatArray) null, (FloatArray) null, 0)
             if (this.externalTexture != null) {
@@ -2289,8 +2289,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         fun onFinishFrame(Viewport viewport) {
             CardboardActivity.this.renderer.onFinishFrame()
             if (this.externalTexture != null) {
-                Int width = (Int) (((((this.eyeHitTests[0] + this.eyeHitTests[2]) / 2.0f) * 2.0f) + 0.5f) * ((Float) this.externalTexture.getWidth()))
-                Int height = (Int) (((-(((this.eyeHitTests[1] + this.eyeHitTests[3]) / 2.0f) * 2.0f)) + 0.5f) * ((Float) this.externalTexture.getHeight()))
+                Int width = (Int) (((((this.eyeHitTests[0] + this.eyeHitTests[2]) / 2.0f) * 2.0f) + 0.5f) * (this.toFloat().externalTexture.getWidth()))
+                Int height = (Int) (((-(((this.eyeHitTests[1] + this.eyeHitTests[3]) / 2.0f) * 2.0f)) + 0.5f) * (this.toFloat().externalTexture.getHeight()))
                 synchronized (CardboardActivity.this.hitPointLock) {
                     Int unused = CardboardActivity.this.postedHitPointX = width
                     Int unused2 = CardboardActivity.this.postedHitPointY = height
@@ -2454,14 +2454,14 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     Double d = CardboardActivity.this.keypadTurning.get()
                     z3 = d < 0.0d
                     z4 = d > 0.0d
-                    f = (Float) Math.abs(d)
+                    f = Math.toFloat().abs(d)
                 }
                 if ((angleMinusAngle < -35.0f && (!z2)) || z4) {
-                    this.headTransformCompat.viewExtraYaw = CameraParams.wrapAngle(this.headTransformCompat.viewExtraYaw - (f * (((Float) j) * TURN_DEGREES_PER_MS)))
+                    this.headTransformCompat.viewExtraYaw = CameraParams.wrapAngle(this.headTransformCompat.viewExtraYaw - (f * ((j.toFloat()) * TURN_DEGREES_PER_MS)))
                 } else if ((angleMinusAngle <= TURN_DEGREES || !(!z2)) && !z3) {
-                    this.headTransformCompat.neutralYaw = CameraParams.wrapAngle(this.headTransformCompat.neutralYaw + (YAW_AVERAGE_FACTOR * angleMinusAngle * ((Float) j)))
+                    this.headTransformCompat.neutralYaw = CameraParams.wrapAngle(this.headTransformCompat.neutralYaw + (YAW_AVERAGE_FACTOR * angleMinusAngle * (j.toFloat())))
                 } else {
-                    this.headTransformCompat.viewExtraYaw = CameraParams.wrapAngle((f * ((Float) j) * TURN_DEGREES_PER_MS) + this.headTransformCompat.viewExtraYaw)
+                    this.headTransformCompat.viewExtraYaw = CameraParams.wrapAngle((f * (j.toFloat()) * TURN_DEGREES_PER_MS) + this.headTransformCompat.viewExtraYaw)
                 }
             }
             if (this.headTransformCompat.viewExtraYaw != CardboardActivity.this.neutralAgentHeading || Float.isNaN(CardboardActivity.this.neutralAgentHeading)) {
@@ -2498,7 +2498,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             if (this.externalTexture != null) {
                 this.externalTexture.release()
             }
-            this.externalTexture = GLExternalTexture((Int) (((Float) i) * 1.0f), ((Int) (((Float) i2) * CardboardActivity.controlSizeFactorY)) + CardboardActivity.this.voiceViewHeightAllowance)
+            this.externalTexture = GLExternalTexture((Int) ((i.toFloat()) * 1.0f), ((Int) ((i2.toFloat()) * CardboardActivity.controlSizeFactorY)) + CardboardActivity.this.voiceViewHeightAllowance)
             this.eyeSeparation = CardboardActivity.this.gvrView.getInterpupillaryDistance()
             this.headTransformCompat.neutralYawValid = false
             CardboardActivity.this.runOnUiThread(Runnable(this) {
@@ -2734,7 +2734,7 @@ private /* synthetic */ IntArray m734getcomlumiyaviewerlumiyauirenderMoveControl
                 case 4:
                     if (f != 0.0f) {
                         this.keypadActive.set(true)
-                        this.keypadTurning.set((Double) f)
+                        this.keypadTurning.set(f.toDouble())
                         return
                     }
                     this.keypadTurning.set(0.0d)
@@ -2911,10 +2911,10 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                     onTouchListener.onTouch(findViewById(this.currentControlsPage.pageViewId), MotionEvent.obtain(uptimeMillis, uptimeMillis + 100, 1, 0.0f, 0.0f, 0))
                 }
             } else if (this.hoveringOverButton == null || (!this.touchActivatedButtons.contains(this.hoveringOverButton))) {
-                MotionEvent obtain = MotionEvent.obtain(this.insideSince, uptimeMillis, 0, (Float) this.hitPointX, (Float) this.hitPointY, 0)
+                MotionEvent obtain = MotionEvent.obtain(this.insideSince, uptimeMillis, 0, this.toFloat().hitPointX, this.toFloat().hitPointY, 0)
                 obtain.setSource(2)
                 this.onScreenControlsLayout.dispatchTouchEvent(obtain)
-                MotionEvent obtain2 = MotionEvent.obtain(this.insideSince, uptimeMillis + 1, 1, (Float) this.hitPointX, (Float) this.hitPointY, 0)
+                MotionEvent obtain2 = MotionEvent.obtain(this.insideSince, uptimeMillis + 1, 1, this.toFloat().hitPointX, this.toFloat().hitPointY, 0)
                 obtain2.setSource(2)
                 this.onScreenControlsLayout.dispatchTouchEvent(obtain2)
             }
@@ -2943,13 +2943,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
     fun onExternalButtonAction(Boolean z) {
         Long uptimeMillis = SystemClock.uptimeMillis()
         if (z) {
-            MotionEvent obtain = MotionEvent.obtain(uptimeMillis, uptimeMillis, 0, (Float) this.hitPointX, (Float) this.hitPointY, 0)
+            MotionEvent obtain = MotionEvent.obtain(uptimeMillis, uptimeMillis, 0, this.toFloat().hitPointX, this.toFloat().hitPointY, 0)
             obtain.setSource(2)
             onVrTouchInternal(obtain, true)
             m759com_lumiyaviewer_lumiya_ui_render_CardboardActivitymthref13()
             return
         }
-        MotionEvent obtain2 = MotionEvent.obtain(uptimeMillis, uptimeMillis, 1, (Float) this.hitPointX, (Float) this.hitPointY, 0)
+        MotionEvent obtain2 = MotionEvent.obtain(uptimeMillis, uptimeMillis, 1, this.toFloat().hitPointX, this.toFloat().hitPointY, 0)
         obtain2.setSource(2)
         onVrTouchInternal(obtain2, true)
     }
@@ -2966,11 +2966,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 if (!this.insideControls) {
                     this.insideControls = true
                     this.insideSince = SystemClock.uptimeMillis()
-                    MotionEvent obtain = MotionEvent.obtain(this.insideSince, this.insideSince, 9, (Float) i, (Float) i2, 0)
+                    MotionEvent obtain = MotionEvent.obtain(this.insideSince, this.insideSince, 9, i.toFloat(), i2.toFloat(), 0)
                     obtain.setSource(2)
                     this.onScreenControlsLayout.dispatchGenericMotionEvent(obtain)
                 }
-                MotionEvent obtain2 = MotionEvent.obtain(this.insideSince, SystemClock.uptimeMillis(), 7, (Float) i, (Float) i2, 0)
+                MotionEvent obtain2 = MotionEvent.obtain(this.insideSince, SystemClock.uptimeMillis(), 7, i.toFloat(), i2.toFloat(), 0)
                 obtain2.setSource(2)
                 this.onScreenControlsLayout.dispatchGenericMotionEvent(obtain2)
                 if (this.currentControlsPage == ControlsPage.pageDetails && (findMatchingView = findMatchingView(this.cardboardDetailsPage, i, i2, 0, 0, Predicate(this) {
@@ -3157,7 +3157,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
                 }
             } else if (this.insideControls) {
                 this.insideControls = false
-                MotionEvent obtain3 = MotionEvent.obtain(this.insideSince, SystemClock.uptimeMillis(), 10, (Float) i, (Float) i2, 0)
+                MotionEvent obtain3 = MotionEvent.obtain(this.insideSince, SystemClock.uptimeMillis(), 10, i.toFloat(), i2.toFloat(), 0)
                 obtain3.setSource(2)
                 this.onScreenControlsLayout.dispatchGenericMotionEvent(obtain3)
             }
@@ -3622,7 +3622,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         requestWindowFeature(1)
         getWindow().setFlags(1024, 1024)
         this.fullscreenMode = FullscreenMode(getWindow())
-        setContentView((Int) R.layout.cardboard_layout)
+        setContentView(R.toInt().layout.cardboard_layout)
         this.userManager = ActivityUtils.getUserManager(getIntent())
         if (this.userManager == null) {
             finish()
@@ -3708,8 +3708,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
             
 */
 
-        Int applyDimension = (Int) TypedValue.applyDimension(2, 16.0f, getResources().getDisplayMetrics())
-        this.voiceViewHeightAllowance = instance.getVoiceEnabled() ? (Int) TypedValue.applyDimension(1, VOICE_VIEW_HEIGHT_ALLOWANCE_DP, getResources().getDisplayMetrics()) : 0
+        Int applyDimension = TypedValue.toInt().applyDimension(2, 16.0f, getResources().getDisplayMetrics())
+        this.voiceViewHeightAllowance = instance.getVoiceEnabled() ? TypedValue.toInt().applyDimension(1, VOICE_VIEW_HEIGHT_ALLOWANCE_DP, getResources().getDisplayMetrics()) : 0
         this.renderer = WorldViewRenderer(this.stateHandler, true, this.userManager, applyDimension)
         this.renderer.setDrawDistance(this.renderSettings.drawDistance)
         this.renderer.setAvatarCountLimit(this.renderSettings.avatarCountLimit)
@@ -3809,7 +3809,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$yh
         this.voiceStatusView.setLightTheme()
         this.voiceStatusView.enableHover(this.hoverListener)
         this.voiceStatusView.setOnCallButtonListener(this.onVoiceCallButtonListener)
-        Int applyDimension2 = (Int) TypedValue.applyDimension(1, 1.0f, getResources().getDisplayMetrics())
+        Int applyDimension2 = TypedValue.toInt().applyDimension(1, 1.0f, getResources().getDisplayMetrics())
         for (Int findViewById : dialogButtonIds) {
             Button button = (Button) findViewById(findViewById)
             button.setAlpha(0.5f)

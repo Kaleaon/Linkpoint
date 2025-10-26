@@ -1437,7 +1437,7 @@ private /* synthetic */ IntArray m39-getcom-lumiyaviewer-lumiya-slproto-users-Ch
     fun HandleSimulatorViewerTimeMessage(SimulatorViewerTimeMessage simulatorViewerTimeMessage) {
         if (!this.authReply.isTemporary && this.gridConn != null && this.gridConn.parcelInfo != null) {
             Float f = (simulatorViewerTimeMessage.TimeInfo_Field.SunPhase / 6.2831855f) + 0.25f
-            this.gridConn.parcelInfo.setSunHour((Float) (((Double) f) - Math.floor((Double) f)))
+            this.gridConn.parcelInfo.setSunHour((Float) ((f.toDouble()) - Math.floor(f.toDouble())))
         }
     }
 
@@ -1873,8 +1873,8 @@ private /* synthetic */ IntArray m39-getcom-lumiyaviewer-lumiya-slproto-users-Ch
     }
 
     fun TeleportToGlobalPosition(LLVector3 lLVector3) {
-        Int floor = (Int) Math.floor((Double) lLVector3.x)
-        Int floor2 = (Int) Math.floor((Double) lLVector3.y)
+        Int floor = Math.toInt().floor(lLVector3.toDouble().x)
+        Int floor2 = Math.toInt().floor(lLVector3.toDouble().y)
         floor -= floor % 256
         Long j = ((Long) (floor2 - (floor2 % 256))) | (((Long) floor) << 32)
         LLVector3 lLVector32 = LLVector3(lLVector3.x % 256.0f, lLVector3.y % 256.0f, lLVector3.z)
@@ -1969,7 +1969,7 @@ private /* synthetic */ IntArray m39-getcom-lumiyaviewer-lumiya-slproto-users-Ch
             teleportLocationRequest.AgentData_Field.AgentID = this.circuitInfo.agentID
             teleportLocationRequest.AgentData_Field.SessionID = this.circuitInfo.sessionID
             teleportLocationRequest.Info_Field.RegionHandle = j
-            teleportLocationRequest.Info_Field.Position = LLVector3((Float) i, (Float) i2, (Float) i3)
+            teleportLocationRequest.Info_Field.Position = LLVector3(i.toFloat(), i2.toFloat(), i3.toFloat())
             teleportLocationRequest.Info_Field.LookAt = LLVector3(0.0f, 1.0f, 0.0f)
             teleportLocationRequest.isReliable = true
             teleportLocationRequest.setEventListener(SLMessageEventListener() {
@@ -2046,9 +2046,9 @@ private /* synthetic */ IntArray m39-getcom-lumiyaviewer-lumiya-slproto-users-Ch
         Int i = (Int) ((this.regionHandle >> 32) & 4294967295L)
         Int i2 = (Int) (this.regionHandle & 4294967295L)
         LLVector3d lLVector3d = LLVector3d()
-        lLVector3d.x = ((Double) i) + ((Double) position.x)
-        lLVector3d.y = ((Double) i2) + ((Double) position.y)
-        lLVector3d.z = (Double) position.z
+        lLVector3d.x = (i.toDouble()) + (position.toDouble().x)
+        lLVector3d.y = (i2.toDouble()) + (position.toDouble().y)
+        lLVector3d.z = position.toDouble().z
         return lLVector3d
     }
 
@@ -2059,7 +2059,7 @@ private /* synthetic */ IntArray m39-getcom-lumiyaviewer-lumiya-slproto-users-Ch
         }
         LLVector3 position = this.modules.avatarControl.getAgentPosition().getPosition()
         try {
-            return String.format("http://maps.secondlife.com/secondlife/%s/%d/%d/%d", Array<Any>{URLEncoder.encode(this.regionName, "UTF-8"), Integer.valueOf((Int) position.x), Integer.valueOf((Int) position.y), Integer.valueOf((Int) position.z)})
+            return String.format("http://maps.secondlife.com/secondlife/%s/%d/%d/%d", Array<Any>{URLEncoder.encode(this.regionName, "UTF-8"), Integer.valueOf(position.toInt().x), Integer.valueOf(position.toInt().y), Integer.valueOf(position.toInt().z)})
         } catch (UnsupportedEncodingException e) {
             return null
         }

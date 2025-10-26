@@ -308,7 +308,7 @@ private MutableSLTextureEntryFace CreateFace(MutableSLTextureEntryFace[] mutable
 
     @JvmStatic
 private Float getGlow(ByteBuffer byteBuffer) {
-        return ((Float) byteBuffer.get()) / 255.0f
+        return (byteBuffer.toFloat().get()) / 255.0f
     }
 
     private Int getHashValue() {
@@ -325,12 +325,12 @@ private Float getGlow(ByteBuffer byteBuffer) {
 
     @JvmStatic
 private Float getOffset(ByteBuffer byteBuffer) {
-        return ((Float) byteBuffer.getShort()) / 32767.0f
+        return (byteBuffer.toFloat().getShort()) / 32767.0f
     }
 
     @JvmStatic
 private Float getRotation(ByteBuffer byteBuffer) {
-        return (((Float) byteBuffer.getShort()) / 32767.0f) * 3.1415927f * 2.0f
+        return ((byteBuffer.toFloat().getShort()) / 32767.0f) * 3.1415927f * 2.0f
     }
 
     @JvmStatic

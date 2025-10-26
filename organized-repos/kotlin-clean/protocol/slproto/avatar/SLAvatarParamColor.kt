@@ -113,13 +113,13 @@ class SLAvatarParamColor {
             return this.colorValues[0]
         }
         Int length = this.colorValues.length - 1
-        Float f2 = ((Float) length) * f
-        Int i = (Int) f2
+        Float f2 = (length.toFloat()) * f
+        Int i = f2.toInt()
         Int i2 = i + 1
         if (i >= length) {
             return this.colorValues[length]
         }
-        return colorLerp(this.colorValues[i], this.colorValues[i2], f2 - ((Float) i))
+        return colorLerp(this.colorValues[i], this.colorValues[i2], f2 - (i.toFloat()))
     }
 
     public Int hashCode() {

@@ -36,7 +36,7 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
         private Int mOriginalCapturedViewTop
 
         private Boolean shouldDismiss(View view, Float f, Float f2) {
-            Float scaledMinimumFlingVelocity = (Float) ViewConfiguration.get(view.getContext()).getScaledMinimumFlingVelocity()
+            Float scaledMinimumFlingVelocity = ViewConfiguration.toFloat().get(view.getContext()).getScaledMinimumFlingVelocity()
             if (f < (-scaledMinimumFlingVelocity) && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0) {
                 return true
             }
@@ -50,7 +50,7 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
                 return true
             }
             Int left = view.getLeft() - this.mOriginalCapturedViewLeft
-            Int round = Math.round(((Float) view.getWidth()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
+            Int round = Math.round((view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
             if (left < (-round) && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0) {
                 return true
             }
@@ -58,7 +58,7 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
                 return true
             }
             Int top = view.getTop() - this.mOriginalCapturedViewTop
-            Int round2 = Math.round(((Float) view.getHeight()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
+            Int round2 = Math.round((view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mDragDismissThreshold)
             if (top >= (-round2) || (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 4) == 0) {
                 return top > round2 && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 8) != 0
             }
@@ -125,7 +125,7 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
             if (abs == 0 && i5 == 0) {
                 ViewCompat.setAlpha(view, 1.0f)
             } else {
-                ViewCompat.setAlpha(view, 1.0f - Math.max(SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction(((Float) view.getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, ((Float) view.getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, (Float) abs), 1.0f), SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction(((Float) view.getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, ((Float) view.getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, (Float) i5), 1.0f)))
+                ViewCompat.setAlpha(view, 1.0f - Math.max(SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction((view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, (view.toFloat().getWidth()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, abs.toFloat()), 1.0f), SwipeDismissAdvancedBehavior.clamp(0.0f, SwipeDismissAdvancedBehavior.fraction((view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaStartSwipeDistance, (view.toFloat().getHeight()) * SwipeDismissAdvancedBehavior.this.mAlphaEndSwipeDistance, i5.toFloat()), 1.0f)))
             }
         }
 
@@ -135,7 +135,7 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
             Int left = view.getLeft()
             Int top = view.getTop()
             if (shouldDismiss(view, f, f2)) {
-                Float scaledMinimumFlingVelocity = (Float) ViewConfiguration.get(view.getContext()).getScaledMinimumFlingVelocity()
+                Float scaledMinimumFlingVelocity = ViewConfiguration.toFloat().get(view.getContext()).getScaledMinimumFlingVelocity()
                 if (f < (-scaledMinimumFlingVelocity) && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 1) != 0) {
                     left = this.mOriginalCapturedViewLeft - width
                 } else if (f > scaledMinimumFlingVelocity && (SwipeDismissAdvancedBehavior.this.mSwipeDirection & 2) != 0) {
@@ -247,7 +247,7 @@ class SwipeDismissAdvancedBehavior<V : View>, CoordinatorLayout.Behavior<V> {
                 }
                 break
             default:
-                this.mIgnoreEvents = !coordinatorLayout.isPointInChildBounds(v, (Int) motionEvent.getX(), (Int) motionEvent.getY())
+                this.mIgnoreEvents = !coordinatorLayout.isPointInChildBounds(v, motionEvent.toInt().getX(), motionEvent.toInt().getY())
                 break
         }
         if (this.mIgnoreEvents) {

@@ -131,7 +131,7 @@ abstract class LLSDNode {
         L_0x0048:
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDInt r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDInt     // Catch:{ IOException -> 0x0026 }
             Int r1 = r6.readInt()     // Catch:{ IOException -> 0x0026 }
-            r0.<init>((Int) r1)     // Catch:{ IOException -> 0x0026 }
+            r0.<init>(r1.toInt())     // Catch:{ IOException -> 0x0026 }
             return r0
         L_0x0052:
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDDouble r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDDouble     // Catch:{ IOException -> 0x0026 }

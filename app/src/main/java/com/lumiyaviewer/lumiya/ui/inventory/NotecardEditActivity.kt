@@ -706,7 +706,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             return
         }
         setTitle(getString(this.isEditingScript ? R.string.script_edit_title : R.string.notecard_edit_window_title))
-        setContentView((Int) R.layout.notecard_edit)
+        setContentView(R.toInt().layout.notecard_edit)
         findViewById(R.id.notecardSaveButton).setOnClickListener(this)
         findViewById(R.id.notecardDiscardButton).setOnClickListener(this)
         findViewById(R.id.notecardEditButton).setOnClickListener(this)

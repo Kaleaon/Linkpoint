@@ -72,7 +72,7 @@ class TextFieldDialogBuilder {
         editText.setText(this.defaultText)
         editText.setSingleLine(true)
         FrameLayout frameLayout = FrameLayout(this.context)
-        Int applyDimension = (Int) TypedValue.applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics())
+        Int applyDimension = TypedValue.toInt().applyDimension(1, 10.0f, this.context.getResources().getDisplayMetrics())
         FrameLayout.LayoutParams layoutParams = FrameLayout.LayoutParams(-1, -2)
         layoutParams.leftMargin = applyDimension
         layoutParams.rightMargin = applyDimension

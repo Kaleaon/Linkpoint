@@ -243,8 +243,8 @@ class SLUserProfiles : SLModule() {
             return false
         }
         LLVector3 position = this.agentCircuit.getModules().avatarControl.getAgentPosition().getPosition()
-        Double agentHeading = (((Double) this.agentCircuit.getModules().avatarControl.getAgentHeading()) * 3.141592653589793d) / 180.0d
-        LLSDMap lLSDMap = LLSDMap(LLSDMap.LLSDMapEntry("HomeLocation", LLSDMap(LLSDMap.LLSDMapEntry("LocationId", LLSDInt(1)), LLSDMap.LLSDMapEntry("LocationPos", position.toLLSD()), LLSDMap.LLSDMapEntry("LocationLookAt", LLVector3((Float) Math.cos(agentHeading), (Float) Math.sin(agentHeading), 0.0f).toLLSD()))))
+        Double agentHeading = ((this.toDouble().agentCircuit.getModules().avatarControl.getAgentHeading()) * 3.141592653589793d) / 180.0d
+        LLSDMap lLSDMap = LLSDMap(LLSDMap.LLSDMapEntry("HomeLocation", LLSDMap(LLSDMap.LLSDMapEntry("LocationId", LLSDInt(1)), LLSDMap.LLSDMapEntry("LocationPos", position.toLLSD()), LLSDMap.LLSDMapEntry("LocationLookAt", LLVector3(Math.toFloat().cos(agentHeading), Math.toFloat().sin(agentHeading), 0.0f).toLLSD()))))
         try {
             LLSDNode PerformRequest = LLSDXMLRequest().PerformRequest(this.setHomeLocationCap, lLSDMap)
             if (PerformRequest == null) {

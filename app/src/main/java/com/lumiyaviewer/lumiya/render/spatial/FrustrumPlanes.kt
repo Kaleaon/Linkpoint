@@ -32,7 +32,7 @@ class FrustrumPlanes {
             Float f3 = this.params[i5 + i3]
             f2 += f3 * f3
         }
-        f2 = (Float) Math.sqrt((Double) f2)
+        f2 = Math.sqrt(f2.toDouble()).toFloat()
         for (i3 = 0; i3 < 4; i3++) {
             FloatArray fArr2 = this.params
             Int i6 = i5 + i3

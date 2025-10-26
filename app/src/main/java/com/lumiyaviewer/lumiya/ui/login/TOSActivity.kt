@@ -31,7 +31,7 @@ class TOSActivity : ThemedActivity : View.OnClickListener {
 
     Unit onCreate(Bundle bundle) {
         super.onCreate(bundle)
-        setContentView((Int) R.layout.tos)
+        setContentView(R.toInt().layout.tos)
         findViewById(R.id.tos_accept_button).setOnClickListener(this)
         findViewById(R.id.tos_decline_button).setOnClickListener(this)
         WebView webView = (WebView) findViewById(R.id.tos_view)

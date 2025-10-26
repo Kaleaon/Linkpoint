@@ -310,7 +310,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
     Unit addGroupRoleMember(ChatterID.ChatterIDUser chatterIDUser) {
         UUID uuid = UUIDPool.getUUID(getArguments().getString(ROLE_TO_ADD_KEY))
         if (uuid != null) {
-            AlertDialog.Builder(getContext()).setTitle((Int) R.string.add_role_member_confirm).setPositiveButton((Int) R.string.yes_add_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, uuid, chatterIDUser) {
+            AlertDialog.Builder(getContext()).setTitle(R.toInt().string.add_role_member_confirm).setPositiveButton(R.toInt().string.yes_add_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, uuid, chatterIDUser) {
 
                 /* renamed from: -$f0 */
                 private /* synthetic */ Any f274$f0
@@ -409,13 +409,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-            }).setNegativeButton((Int) R.string.cancel, (DialogInterface.OnClickListener) $Lambda$MA84Fd9rUtD4VNMgzavMq_NILXY()).create().show()
+            }).setNegativeButton(R.toInt().string.cancel, (DialogInterface.OnClickListener) $Lambda$MA84Fd9rUtD4VNMgzavMq_NILXY()).create().show()
         }
     }
 
     /* access modifiers changed from: private */
     Unit ejectGroupMember(ChatterID.ChatterIDUser chatterIDUser) {
-        AlertDialog.Builder(getContext()).setTitle((Int) R.string.eject_member_confirm).setPositiveButton((Int) R.string.yes_eject_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, chatterIDUser) {
+        AlertDialog.Builder(getContext()).setTitle(R.toInt().string.eject_member_confirm).setPositiveButton(R.toInt().string.yes_eject_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, chatterIDUser) {
 
             /* renamed from: -$f0 */
             private /* synthetic */ Any f272$f0
@@ -504,7 +504,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             
 */
 
-        }).setNegativeButton((Int) R.string.cancel, (DialogInterface.OnClickListener) DialogInterface.OnClickListener() {
+        }).setNegativeButton(R.toInt().string.cancel, (DialogInterface.OnClickListener) DialogInterface.OnClickListener() {
             private /* synthetic */ Unit $m$0(
 /*
 Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$Lambda$MA84Fd9rUtD4VNMgzavMq_NILXY.1.$m$0(android.content.DialogInterface, Int):Unit, dex: classes.dex

@@ -420,7 +420,7 @@ class LoginActivity : ThemedActivity : View.OnClickListener, TextWatcher, GridEd
                 return
             }
         }
-        setContentView((Int) R.layout.login)
+        setContentView(R.toInt().layout.login)
         Debug.Log("LoginActivity: created.")
         this.gridList = GridList(this)
         this.accountList = AccountList(this)

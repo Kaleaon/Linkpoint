@@ -17,7 +17,7 @@ class NotificationChannels {
     private NotificationChannelManager channelManager
 
     enum Channel {
-        OnlineStatus("onlineStatus", R.string.notify_online_status_name, R.string.notify_online_status_desc, (Int) null, R.id.online_notify_id),
+        OnlineStatus("onlineStatus", R.string.notify_online_status_name, R.string.notify_online_status_desc, null.toInt(), R.id.online_notify_id),
         Local("localChat", R.string.notify_local_chat_name, R.string.notify_local_chat_desc, NotificationType.LocalChat, R.id.unread_notify_local_id),
         Group("groupChat", R.string.notify_group_chat_name, R.string.notify_group_chat_desc, NotificationType.Group, R.id.unread_notify_group_id),
         IM("privateIM", R.string.notify_im_name, R.string.notify_im_desc, NotificationType.Private, R.id.unread_notify_im_id)

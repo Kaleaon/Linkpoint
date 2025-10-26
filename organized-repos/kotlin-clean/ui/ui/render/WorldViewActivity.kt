@@ -395,8 +395,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             if (WorldViewActivity.this.isInScaling || !(!WorldViewActivity.this.wasInScaling) || !(!WorldViewActivity.this.isDragging)) {
                 return false
             }
-            Float height = (f * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
-            Float height2 = ((-f2) * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
+            Float height = (f * 60.0f) / (WorldViewActivity.toFloat().this.worldViewHolder.getHeight())
+            Float height2 = ((-f2) * 60.0f) / (WorldViewActivity.toFloat().this.worldViewHolder.getHeight())
             if (WorldViewActivity.this.avatarControl == null) {
                 return true
             }
@@ -408,11 +408,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             Float rawX = motionEvent.getRawX()
             Float rawY = motionEvent.getRawY()
             if (WorldViewActivity.this.isDragging) {
-                WorldViewActivity.this.dragSelectorSetRawPosition((Int) rawX, (Int) rawY)
+                WorldViewActivity.this.dragSelectorSetRawPosition(rawX.toInt(), rawY.toInt())
             } else if (!WorldViewActivity.this.isInScaling && (!WorldViewActivity.this.wasInScaling)) {
                 IntArray iArr = IntArray(2)
                 WorldViewActivity.this.worldViewHolder.getLocationOnScreen(iArr)
-                WorldViewActivity.this.mGLView.pickObjectHover(rawX - ((Float) iArr[0]), rawY - ((Float) iArr[1]))
+                WorldViewActivity.this.mGLView.pickObjectHover(rawX - (iArr.toFloat()[0]), rawY - (iArr.toFloat()[1]))
             }
         }
 
@@ -420,8 +420,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             if (WorldViewActivity.this.isDragging) {
                 AbsoluteLayout.LayoutParams layoutParams = (AbsoluteLayout.LayoutParams) WorldViewActivity.this.dragPointer.getLayoutParams()
                 if (layoutParams != null) {
-                    layoutParams.x = Math.max(Math.min((Int) (((Float) layoutParams.x) - f), WorldViewActivity.this.dragPointerLayout.getWidth() - WorldViewActivity.this.dragPointer.getWidth()), 0)
-                    layoutParams.y = Math.max(Math.min((Int) (((Float) layoutParams.y) - f2), WorldViewActivity.this.dragPointerLayout.getHeight() - WorldViewActivity.this.dragPointer.getHeight()), 0)
+                    layoutParams.x = Math.max(Math.min((Int) ((layoutParams.toFloat().x) - f), WorldViewActivity.this.dragPointerLayout.getWidth() - WorldViewActivity.this.dragPointer.getWidth()), 0)
+                    layoutParams.y = Math.max(Math.min((Int) ((layoutParams.toFloat().y) - f2), WorldViewActivity.this.dragPointerLayout.getHeight() - WorldViewActivity.this.dragPointer.getHeight()), 0)
                     WorldViewActivity.this.dragPointer.setLayoutParams(layoutParams)
                     WorldViewActivity.this.selectByDragPointer(layoutParams.x, layoutParams.y)
                 }
@@ -431,13 +431,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
             } else {
                 if (WorldViewActivity.this.displayedHUDid != 0) {
                     WorldViewActivity worldViewActivity = WorldViewActivity.this
-                    Float unused = worldViewActivity.hudOffsetX = worldViewActivity.hudOffsetX + ((f / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())) / 2.0f)
+                    Float unused = worldViewActivity.hudOffsetX = worldViewActivity.hudOffsetX + ((f / (WorldViewActivity.toFloat().this.worldViewHolder.getHeight())) / 2.0f)
                     WorldViewActivity worldViewActivity2 = WorldViewActivity.this
-                    Float unused2 = worldViewActivity2.hudOffsetY = worldViewActivity2.hudOffsetY + ((f2 / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())) / 2.0f)
+                    Float unused2 = worldViewActivity2.hudOffsetY = worldViewActivity2.hudOffsetY + ((f2 / (WorldViewActivity.toFloat().this.worldViewHolder.getHeight())) / 2.0f)
                     WorldViewActivity.this.mGLView.setHUDOffset(WorldViewActivity.this.hudOffsetX, WorldViewActivity.this.hudOffsetY)
                 } else {
-                    Float height = ((-f) * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
-                    Float height2 = (f2 * 60.0f) / ((Float) WorldViewActivity.this.worldViewHolder.getHeight())
+                    Float height = ((-f) * 60.0f) / (WorldViewActivity.toFloat().this.worldViewHolder.getHeight())
+                    Float height2 = (f2 * 60.0f) / (WorldViewActivity.toFloat().this.worldViewHolder.getHeight())
                     if (WorldViewActivity.this.avatarControl != null) {
                         WorldViewActivity.this.avatarControl.processCameraRotate(height, height2)
                     }
@@ -448,11 +448,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
 
         public Boolean onSingleTapUp(MotionEvent motionEvent) {
             if (WorldViewActivity.this.isDragging) {
-                WorldViewActivity.this.dragSelectorSetRawPosition((Int) motionEvent.getRawX(), (Int) motionEvent.getRawY())
+                WorldViewActivity.this.dragSelectorSetRawPosition(motionEvent.toInt().getRawX(), motionEvent.toInt().getRawY())
             } else if (WorldViewActivity.this.displayedHUDid != 0) {
                 IntArray iArr = IntArray(2)
                 WorldViewActivity.this.worldViewHolder.getLocationOnScreen(iArr)
-                WorldViewActivity.this.mGLView.touchHUD(motionEvent.getRawX() - ((Float) iArr[0]), motionEvent.getRawY() - ((Float) iArr[1]))
+                WorldViewActivity.this.mGLView.touchHUD(motionEvent.getRawX() - (iArr.toFloat()[0]), motionEvent.getRawY() - (iArr.toFloat()[1]))
             } else {
                 WorldViewActivity.this.handlePickedObject((ObjectIntersectInfo) null)
             }
@@ -596,8 +596,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.render.-$Lambda$Yn
                 Float unused = WorldViewActivity.this.hudScaleFactor = Math.max(0.1f, Math.min(WorldViewActivity.this.hudScaleFactor * scaleGestureDetector.getScaleFactor(), 10.0f))
                 WorldViewActivity.this.mGLView.setHUDScaleFactor(WorldViewActivity.this.hudScaleFactor)
             } else {
-                Float width = (Float) WorldViewActivity.this.worldViewTouchReceiver.getWidth()
-                Float height = (Float) WorldViewActivity.this.worldViewTouchReceiver.getHeight()
+                Float width = WorldViewActivity.toFloat().this.worldViewTouchReceiver.getWidth()
+                Float height = WorldViewActivity.toFloat().this.worldViewTouchReceiver.getHeight()
                 Float focusX = scaleGestureDetector.getFocusX()
                 Float focusY = scaleGestureDetector.getFocusY()
                 Float f = ((focusX / width) - 0.5f) * (height / width)
@@ -958,7 +958,7 @@ private class SelectableAttachment {
     }
 
     private Unit initContentView() {
-        setContentView((Int) R.layout.world_view)
+        setContentView(R.toInt().layout.world_view)
         ButterKnife.bind((Activity) this)
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar))
         this.mGLView = WorldSurfaceView(this, this.userManager)
@@ -981,7 +981,7 @@ private class SelectableAttachment {
         View findViewById = findViewById(R.id.offline_notify_status_layout)
         if (findViewById != null) {
             findViewById.setBackgroundColor(Color.argb(128, 0, 0, 0))
-            Int applyDimension = (Int) TypedValue.applyDimension(1, 10.0f, getResources().getDisplayMetrics())
+            Int applyDimension = TypedValue.toInt().applyDimension(1, 10.0f, getResources().getDisplayMetrics())
             findViewById.setPadding(applyDimension, applyDimension, applyDimension, applyDimension)
         }
     }
@@ -1100,7 +1100,7 @@ private class SelectableAttachment {
             }
             ArrayAdapter arrayAdapter = ArrayAdapter(this, 17367043, arrayList)
             AlertDialog.Builder builder = AlertDialog.Builder(this)
-            builder.setTitle((Int) R.string.select_hud_title)
+            builder.setTitle(R.toInt().string.select_hud_title)
             builder.setAdapter(arrayAdapter, DialogInterface.OnClickListener(this, arrayList) {
 
                 /* renamed from: -$f0 */

@@ -182,12 +182,12 @@ class DrawableGeometry : GLCleanable {
             Int r5 = r0 * 2
             com.lumiyaviewer.rawbuffers.DirectByteBuffer r9 = com.lumiyaviewer.rawbuffers.DirectByteBuffer
             Int r0 = r13.VertexSizeBytes
-            r9.<init>((Int) r0)
+            r9.<init>(r0.toInt())
             com.lumiyaviewer.rawbuffers.DirectByteBuffer r0 = com.lumiyaviewer.rawbuffers.DirectByteBuffer
             Int r6 = r13.IndexSizeBytes
-            r0.<init>((Int) r6)
+            r0.<init>(r6.toInt())
             com.lumiyaviewer.rawbuffers.DirectByteBuffer r10 = com.lumiyaviewer.rawbuffers.DirectByteBuffer
-            r10.<init>((Int) r5)
+            r10.<init>(r5.toInt())
             if (r2 >= r7) goto L_0x00f9
             if (r1 >= r7) goto L_0x00f9
             r1 = 1

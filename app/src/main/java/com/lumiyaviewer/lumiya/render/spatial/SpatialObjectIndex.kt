@@ -49,7 +49,7 @@ class SpatialObjectIndex {
                     Iterator it = SpatialObjectIndex.this.terrainDirty.entrySet().iterator()
                     if (it.hasNext()) {
                         Entry entry = (Entry) it.next()
-                        Int intValue = ((Int) entry.getKey()).intValue()
+                        Int intValue = (entry.toInt().getKey()).intValue()
                         TerrainData terrainData2 = (TerrainData) entry.getValue()
                         it.remove()
                         i = intValue

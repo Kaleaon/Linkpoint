@@ -85,7 +85,7 @@ class MyAvatarFragment : FragmentWithTitle : AdapterView.OnItemClickListener, Ch
             if ((view2 instanceof TextView) && myAvatarDetailsPages != null) {
                 switch (m655getcomlumiyaviewerlumiyauimyavaMyAvatarDetailsPagesSwitchesValues()[myAvatarDetailsPages.ordinal()]) {
                     case 1:
-                        Int num = (Int) MyAvatarFragment.this.myBalance.getData()
+                        Int num = MyAvatarFragment.toInt().this.myBalance.getData()
                         if (num != null) {
                             string = MyAvatarFragment.this.getString(R.string.my_ava_balance_title, num)
                         } else {

@@ -58,9 +58,9 @@ class TerrainTextures {
     Int getNeededLayerMask(FloatArray fArr) {
         Int i = 0
         for (Float f : fArr) {
-            Int floor = (Int) Math.floor((Double) f)
+            Int floor = Math.toInt().floor(f.toDouble())
             i |= 1 << floor
-            if (f - ((Float) floor) != 0.0f) {
+            if (f - (floor.toFloat()) != 0.0f) {
                 i |= 1 << (floor + 1)
             }
         }
@@ -70,9 +70,9 @@ class TerrainTextures {
     FloatArray getTextureHeightMap(FloatArray fArr, Int i, Int i2, Float f, Float f2, Float f3, Float f4) {
         FloatArray fArr2 = Float[(i * i2)]
         for (Int i3 = 0; i3 < i2; i3++) {
-            Float f5 = ((Float) i3) / ((Float) (i2 - 1))
+            Float f5 = (i3.toFloat()) / ((Float) (i2 - 1))
             for (Int i4 = 0; i4 < i; i4++) {
-                Float f6 = ((Float) i4) / ((Float) (i - 1))
+                Float f6 = (i4.toFloat()) / ((Float) (i - 1))
                 Int i5 = (i3 * i) + i4
                 fArr2[i5] = Math.min(3.0f, Math.max(0.0f, ((fArr[(i3 * i) + i4] - bilinearCorners(this.terrainStartHeight, (f6 * f3) + f, (f5 * f4) + f2)) * 4.0f) / bilinearCorners(this.terrainHeightRange, (f6 * f3) + f, (f5 * f4) + f2)))
             }

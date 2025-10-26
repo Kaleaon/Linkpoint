@@ -304,7 +304,7 @@ class SLTextureEntry {
     }
 
     private Float getGlow(ByteBuffer byteBuffer) {
-        return ((Float) byteBuffer.get()) / 255.0f
+        return (byteBuffer.toFloat().get()) / 255.0f
     }
 
     private Int getHashValue() {
@@ -320,11 +320,11 @@ class SLTextureEntry {
     }
 
     private Float getOffset(ByteBuffer byteBuffer) {
-        return ((Float) byteBuffer.getShort()) / 32767.0f
+        return (byteBuffer.toFloat().getShort()) / 32767.0f
     }
 
     private Float getRotation(ByteBuffer byteBuffer) {
-        return (((Float) byteBuffer.getShort()) / 32767.0f) * 3.1415927f * 2.0f
+        return ((byteBuffer.toFloat().getShort()) / 32767.0f) * 3.1415927f * 2.0f
     }
 
     private UUID getUUID(ByteBuffer byteBuffer) {

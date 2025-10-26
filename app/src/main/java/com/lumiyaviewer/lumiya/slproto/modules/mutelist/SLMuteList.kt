@@ -151,7 +151,7 @@ class SLMuteList : SLModule : SLXfer.SLXferCompletionListener {
                 crc32.update(bArr)
                 Long value = crc32.getValue()
                 this.muteListCachedDataDao.deleteAll()
-                this.muteListCachedDataDao.insert(MuteListCachedData((Long) null, (Int) value, bArr))
+                this.muteListCachedDataDao.insert(MuteListCachedData((Long) null, value.toInt(), bArr))
             }
             this.userManager.muteListPool().requestUpdate(SubscriptionSingleKey.Value)
         }

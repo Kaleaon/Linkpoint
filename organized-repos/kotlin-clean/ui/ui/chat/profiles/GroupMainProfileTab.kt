@@ -198,7 +198,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             }
             AtomicInteger atomicInteger = AtomicInteger(i2)
             AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-            builder.setTitle((Int) R.string.select_group_role_title).setSingleChoiceItems(charSequenceArr, i2, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(atomicInteger) {
+            builder.setTitle(R.toInt().string.select_group_role_title).setSingleChoiceItems(charSequenceArr, i2, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(atomicInteger) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f326$f0
@@ -277,7 +277,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                 
 */
 
-            }).setPositiveButton((Int) R.string.set_role_dialog_ok, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, atomicInteger, uuid) {
+            }).setPositiveButton(R.toInt().string.set_role_dialog_ok, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, atomicInteger, uuid) {
 
                 /* renamed from: -$f0 */
                 private val /* synthetic */ Object f323$f0
@@ -370,11 +370,11 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             AvatarGroupList.AvatarGroupEntry avatarGroupEntry = this.myGroupList.get().Groups.get(this.groupProfile.get().GroupData_Field.GroupID)
             if (avatarGroupEntry != null) {
                 AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-                builder.setTitle((Int) R.string.set_land_contribution_title)
+                builder.setTitle(R.toInt().string.set_land_contribution_title)
                 View inflate = LayoutInflater.from(getContext()).inflate(R.layout.contribute_land_dialog_box_layout, (ViewGroup) getView(), false)
                 builder.setView(inflate)
                 ((EditText) inflate.findViewById(R.id.land_contribution_value)).setText(getString(R.string.generic_int_format, Integer.valueOf(avatarGroupEntry.Contribution)))
-                builder.setPositiveButton((Int) R.string.set_land_contribution_ok_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, inflate) {
+                builder.setPositiveButton(R.toInt().string.set_land_contribution_ok_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, inflate) {
 
                     /* renamed from: -$f0 */
                     private val /* synthetic */ Object f317$f0
@@ -546,13 +546,13 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             UUID uuid = this.groupProfile.get().GroupData_Field.GroupID
             if (this.myGroupList.get().Groups.get(uuid) == null) {
                 AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-                builder.setTitle((Int) R.string.join_group_dialog_title)
+                builder.setTitle(R.toInt().string.join_group_dialog_title)
                 if (this.groupProfile.get().GroupData_Field.MembershipFee == 0) {
-                    builder.setMessage((Int) R.string.join_group_question_message_free)
+                    builder.setMessage(R.toInt().string.join_group_question_message_free)
                 } else {
                     builder.setMessage((CharSequence) getString(R.string.join_group_question_message_not_free, Integer.valueOf(this.groupProfile.get().GroupData_Field.MembershipFee)))
                 }
-                builder.setPositiveButton((Int) R.string.yes_join_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, uuid) {
+                builder.setPositiveButton(R.toInt().string.yes_join_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, uuid) {
 
                     /* renamed from: -$f0 */
                     private val /* synthetic */ Object f319$f0
@@ -635,7 +635,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                     
 */
 
-                builder.setNegativeButton((Int) R.string.cancel, (DialogInterface.OnClickListener) $Lambda$qgA5NpRVpRFsQYZFFPT9VQYjWms())
+                builder.setNegativeButton(R.toInt().string.cancel, (DialogInterface.OnClickListener) $Lambda$qgA5NpRVpRFsQYZFFPT9VQYjWms())
                 builder.create().show()
             }
         } catch (SubscriptionData.DataNotReadyException e) {
@@ -651,8 +651,8 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
             UUID uuid = this.groupProfile.get().GroupData_Field.GroupID
             if (this.myGroupList.get().Groups.get(uuid) != null) {
                 AlertDialog.Builder builder = AlertDialog.Builder(getActivity())
-                builder.setTitle((Int) R.string.leave_group_confirm)
-                builder.setPositiveButton((Int) R.string.yes_leave_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, uuid) {
+                builder.setTitle(R.toInt().string.leave_group_confirm)
+                builder.setPositiveButton(R.toInt().string.yes_leave_button, (DialogInterface.OnClickListener) DialogInterface.OnClickListener(this, uuid) {
 
                     /* renamed from: -$f0 */
                     private val /* synthetic */ Object f321$f0
@@ -735,7 +735,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$La
                     
 */
 
-                builder.setNegativeButton((Int) R.string.cancel, (DialogInterface.OnClickListener) DialogInterface.OnClickListener() {
+                builder.setNegativeButton(R.toInt().string.cancel, (DialogInterface.OnClickListener) DialogInterface.OnClickListener() {
                     private val /* synthetic */ Unit $m$0(
 /*
 Method generation error in method: com.lumiyaviewer.lumiya.ui.chat.profiles.-$Lambda$qgA5NpRVpRFsQYZFFPT9VQYjWms.1.$m$0(android.content.DialogInterface, Int):Unit, dex: classes.dex

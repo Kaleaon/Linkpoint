@@ -48,7 +48,7 @@ class SLAvatarParamBuilder {
                         }
                         if (byIndex2.keyExists("paramAlpha")) {
                             LLSDNode byKey4 = byIndex2.byKey("paramAlpha")
-                            sLAvatarParamAlpha = SLAvatarParamAlpha((Float) byKey4.byKey("domain").asDouble(), byKey4.keyExists("tgaFile") ? byKey4.byKey("tgaFile").asString() : null, byKey4.byKey("skipIfZero").asBoolean(), byKey4.byKey("multiplyBlend").asBoolean())
+                            sLAvatarParamAlpha = SLAvatarParamAlpha(byKey4.toFloat().byKey("domain").asDouble(), byKey4.keyExists("tgaFile") ? byKey4.byKey("tgaFile").asString() : null, byKey4.byKey("skipIfZero").asBoolean(), byKey4.byKey("multiplyBlend").asBoolean())
                         }
                         MeshIndex valueOf = byIndex2.keyExists("meshIndex") ? MeshIndex.valueOf(byIndex2.byKey("meshIndex").asString()) : null
                         ImmutableList immutableList = null
@@ -57,7 +57,7 @@ class SLAvatarParamBuilder {
                             LLSDNode byKey5 = byIndex2.byKey("driven")
                             for (Int i4 = 0; i4 < byKey5.getCount(); i4++) {
                                 LLSDNode byIndex3 = byKey5.byIndex(i4)
-                                builder2.add((Object) SLAvatarParams.DrivenParam(byIndex3.byKey("driven_id").asInt(), (Float) byIndex3.byKey("min1").asDouble(), (Float) byIndex3.byKey("max1").asDouble(), (Float) byIndex3.byKey("min2").asDouble(), (Float) byIndex3.byKey("max2").asDouble()))
+                                builder2.add((Object) SLAvatarParams.DrivenParam(byIndex3.byKey("driven_id").asInt(), byIndex3.toFloat().byKey("min1").asDouble(), byIndex3.toFloat().byKey("max1").asDouble(), byIndex3.toFloat().byKey("min2").asDouble(), byIndex3.toFloat().byKey("max2").asDouble()))
                             }
                             immutableList = builder2.build()
                         }
@@ -74,7 +74,7 @@ class SLAvatarParamBuilder {
                             }
                             immutableMap = Maps.immutableEnumMap(enumMap)
                         }
-                        builder.add((Object) SLAvatarParams.AvatarParam(valueOf, (Float) byIndex2.byKey("minValue").asDouble(), (Float) byIndex2.byKey("maxValue").asDouble(), (Float) byIndex2.byKey("defValue").asDouble(), byIndex2.byKey("morph").asBoolean(), sLAvatarParamColor, sLAvatarParamAlpha, immutableList, immutableMap))
+                        builder.add((Object) SLAvatarParams.AvatarParam(valueOf, byIndex2.toFloat().byKey("minValue").asDouble(), byIndex2.toFloat().byKey("maxValue").asDouble(), byIndex2.toFloat().byKey("defValue").asDouble(), byIndex2.byKey("morph").asBoolean(), sLAvatarParamColor, sLAvatarParamAlpha, immutableList, immutableMap))
                     }
                     SLAvatarParams.ParamSet paramSet = SLAvatarParams.ParamSet(byIndex.byKey("setId").asInt(), byIndex.byKey("appearanceIndex").asInt(), SLVisualParamID.valueOf(byIndex.byKey("setName").asString()), builder.build())
                     map.put(Integer.valueOf(paramSet.id), paramSet)
@@ -97,6 +97,6 @@ private ImmutableVector vectorFromNode(LLSDNode lLSDNode, String str) throws LLS
             return null
         }
         LLSDNode byKey = lLSDNode.byKey(str)
-        return ImmutableVector((Float) byKey.byKey("x").asDouble(), (Float) byKey.byKey("y").asDouble(), (Float) byKey.byKey("z").asDouble())
+        return ImmutableVector(byKey.toFloat().byKey("x").asDouble(), byKey.toFloat().byKey("y").asDouble(), byKey.toFloat().byKey("z").asDouble())
     }
 }

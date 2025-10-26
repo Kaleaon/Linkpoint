@@ -244,7 +244,7 @@ class LLSDStreamingParser {
         L_0x004d:
             com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDInt r0 = com.lumiyaviewer.lumiya.slproto.llsd.types.LLSDInt
             Int r2 = r12.readInt()
-            r0.<init>((Int) r2)
+            r0.<init>(r2.toInt())
             r13.onPrimitiveValue(r11, r0)
             Int r0 = r1 + -1
             goto L_0x0035

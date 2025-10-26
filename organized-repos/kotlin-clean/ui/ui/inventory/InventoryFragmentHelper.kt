@@ -542,7 +542,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.inventory.-$Lambda
             if (Strings.isNullOrEmpty(str)) {
                 str = "Landmark"
             }
-            String format = String.format("%s, %s (%d, %d, %d)", Array<Any>{str, regionName, Integer.valueOf((Int) lLVector3.x), Integer.valueOf((Int) lLVector3.y), Integer.valueOf((Int) lLVector3.z)})
+            String format = String.format("%s, %s (%d, %d, %d)", Array<Any>{str, regionName, Integer.valueOf(lLVector3.toInt().x), Integer.valueOf(lLVector3.toInt().y), Integer.valueOf(lLVector3.toInt().z)})
             Dialog dialog = Dialog(getContext())
             dialog.setContentView(R.layout.inv_rename_dialog)
             dialog.setTitle(R.string.new_landmark_dialog_title)

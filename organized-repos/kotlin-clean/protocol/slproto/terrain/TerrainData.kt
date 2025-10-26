@@ -80,7 +80,7 @@ const val T: InterrainPerEdge = 256
                     i6++
                 }
                 if (i6 == 4) {
-                    this.vertexHeights[(i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5] = f / ((Float) i6)
+                    this.vertexHeights[(i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5] = f / (i6.toFloat())
                     Float f2 = this.heightMap[(min4 * 256) + min3] - this.heightMap[min + (min4 * 256)]
                     Float f3 = this.heightMap[(min4 * 256) + min3] - this.heightMap[(min2 * 256) + min3]
                     this.vertexNormals[((i2 * InputDeviceCompat.SOURCE_KEYBOARD) + i5) * 2] = f2
@@ -178,7 +178,7 @@ const val T: InterrainPerEdge = 256
                 }
                 i6 = i7 + 1
             } else {
-                return TerrainPatchInfo(TerrainPatchHeightMap(this.waterHeight, fArr, fArr2, 17, 17), this.terrainTextures, ((Float) i) / 16.0f, ((Float) i) / 16.0f, 0.0625f, 0.0625f)
+                return TerrainPatchInfo(TerrainPatchHeightMap(this.waterHeight, fArr, fArr2, 17, 17), this.terrainTextures, (i.toFloat()) / 16.0f, (i.toFloat()) / 16.0f, 0.0625f, 0.0625f)
             }
         }
     }

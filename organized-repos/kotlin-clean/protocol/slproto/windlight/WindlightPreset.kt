@@ -46,13 +46,13 @@ class WindlightPreset {
 
     private Unit gammaFloatArray(FloatArray fArr, Float f, Float f2) {
         for (Int i = 0; i < fArr.length; i++) {
-            fArr[i] = ((Float) Math.pow((Double) fArr[i], (Double) (1.0f / f))) * f2
+            fArr[i] = (Math.toFloat().pow(fArr.toDouble()[i], (Double) (1.0f / f))) * f2
         }
     }
 
     private Unit getFloatArray(LLSDNode lLSDNode, FloatArray fArr, Float f) throws LLSDException {
         for (Int i = 0; i < fArr.length; i++) {
-            fArr[i] = ((Float) lLSDNode.byIndex(i).asDouble()) / f
+            fArr[i] = (lLSDNode.toFloat().byIndex(i).asDouble()) / f
         }
     }
 
@@ -81,7 +81,7 @@ class WindlightPreset {
             getFloatArray(parseXML.byKey("cloud_pos_density1"), this.cloud_pos_density1, 3.0f)
             getFloatArray(parseXML.byKey("cloud_pos_density2"), this.cloud_pos_density2, 3.0f)
             getFloatArray(parseXML.byKey("cloud_shadow"), this.cloud_shadow, 1.0f)
-            this.star_brightness = (Float) parseXML.byKey("star_brightness").asDouble()
+            this.star_brightness = parseXML.toFloat().byKey("star_brightness").asDouble()
             gammaFloatArray(this.ambient, WINDLIGHT_GAMMA, 1.25f)
             gammaFloatArray(this.sunlight_color, WINDLIGHT_GAMMA, 1.25f)
             darkenUnderWater(this.ambientBelowWater, this.ambient)

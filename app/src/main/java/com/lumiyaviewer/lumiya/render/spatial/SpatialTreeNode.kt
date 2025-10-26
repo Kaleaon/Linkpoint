@@ -38,7 +38,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
             Float f2 = spatialTreeNode.position[i2 + 9] - f
             if (i2 == spatialTreeNode.splitAxis) {
                 f2 /= MIN_SIZE
-                f += (f2 / MIN_SIZE) * ((Float) i)
+                f += (f2 / MIN_SIZE) * (i.toFloat())
             }
             this.position[i2 + 6] = f
             this.position[i2 + 9] = f + f2
@@ -216,7 +216,7 @@ class SpatialTreeNode : InlineList<DrawListEntry> {
         Int i2 = -1
         while (i < 3) {
             Float f2 = (this.position[(this.splitAxis + 6) + 3] - this.position[this.splitAxis + 6]) / MIN_SIZE
-            Float f3 = this.position[this.splitAxis + 6] + ((f2 / MIN_SIZE) * ((Float) i))
+            Float f3 = this.position[this.splitAxis + 6] + ((f2 / MIN_SIZE) * (i.toFloat()))
             if (fArr[this.splitAxis] < f3 || fArr[this.splitAxis + 3] > f3 + f2) {
                 f2 = f
                 i3 = i2

@@ -41,8 +41,8 @@ class SLWorldMap : SLModule {
                 Double d = findAgent.LocationBlock_Fields.get(0).GlobalX
                 Double d2 = findAgent.LocationBlock_Fields.get(0).GlobalY
                 if (!(d == 0.0d && d2 == 0.0d)) {
-                    Int floor = (Int) Math.floor(d)
-                    Int floor2 = (Int) Math.floor(d2)
+                    Int floor = Math.toInt().floor(d)
+                    Int floor2 = Math.toInt().floor(d2)
                     Int i = floor & 255
                     Int i2 = floor2 & 255
                     Long j = (((Long) (floor & InputDeviceCompat.SOURCE_ANY)) << 32) | (((Long) (floor2 & InputDeviceCompat.SOURCE_ANY)) & 4294967295L)

@@ -125,18 +125,18 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                     Float abs = Math.abs(xVelocity)
                     Float abs2 = Math.abs(yVelocity)
                     if (this.mSwiping && this.mSwipingX && this.canSwipeRight && rawX > ((Float) (this.mViewWidth / 2))) {
-                        f2 = (Float) this.mViewWidth
+                        f2 = this.toFloat().mViewWidth
                         f = 0.0f
                     } else if (this.mSwiping && this.mSwipingX && this.canSwipeLeft && rawX < ((Float) (-(this.mViewWidth / 2)))) {
                         f2 = (Float) (-this.mViewWidth)
                         f = 0.0f
                     } else if (this.mSwiping && this.mSwipingY && this.canSwipeDown && rawY > ((Float) (this.mViewHeight / 2))) {
-                        f = (Float) this.mViewHeight
+                        f = this.toFloat().mViewHeight
                         f2 = 0.0f
                     } else if (this.mSwiping && this.mSwipingY && this.canSwipeUp && rawY < ((Float) (-(this.mViewHeight / 2)))) {
                         f = (Float) (-this.mViewHeight)
                         f2 = 0.0f
-                    } else if (((Float) this.mMinFlingVelocity) <= abs && abs <= ((Float) this.mMaxFlingVelocity) && abs2 < abs && this.mSwiping && this.mSwipingX) {
+                    } else if ((this.toFloat().mMinFlingVelocity) <= abs && abs <= (this.toFloat().mMaxFlingVelocity) && abs2 < abs && this.mSwiping && this.mSwipingX) {
                         Boolean z4 = xVelocity < 0.0f ? this.canSwipeLeft : this.canSwipeRight
                         Boolean z5 = xVelocity < 0.0f
                         if (rawX >= 0.0f) {
@@ -145,7 +145,7 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                         z3 = z5 == z3 ? z4 : false
                         f2 = (Float) (xVelocity < 0.0f ? -this.mViewWidth : this.mViewWidth)
                         f = 0.0f
-                    } else if (((Float) this.mMinFlingVelocity) > abs2 || abs2 > ((Float) this.mMaxFlingVelocity) || abs >= abs2 || !this.mSwiping) {
+                    } else if ((this.toFloat().mMinFlingVelocity) > abs2 || abs2 > (this.toFloat().mMaxFlingVelocity) || abs >= abs2 || !this.mSwiping) {
                         f = 0.0f
                         f2 = 0.0f
                         z3 = false
@@ -191,9 +191,9 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                     Float rawY2 = motionEvent.getRawY() - this.mDownY
                     if (!this.mSwiping) {
                         Boolean z8 = (rawX2 >= ((Float) (-this.mSlop)) || Math.abs(rawY2) >= Math.abs(rawX2) / 2.0f) ? false : this.canSwipeLeft
-                        Boolean z9 = (rawX2 <= ((Float) this.mSlop) || Math.abs(rawY2) >= Math.abs(rawX2) / 2.0f) ? false : this.canSwipeRight
+                        Boolean z9 = (rawX2 <= (this.toFloat().mSlop) || Math.abs(rawY2) >= Math.abs(rawX2) / 2.0f) ? false : this.canSwipeRight
                         Boolean z10 = (rawY2 >= ((Float) (-this.mSlop)) || Math.abs(rawX2) >= Math.abs(rawY2) / 2.0f) ? false : this.canSwipeUp
-                        Boolean z11 = (rawY2 <= ((Float) this.mSlop) || Math.abs(rawX2) >= Math.abs(rawY2) / 2.0f) ? false : this.canSwipeDown
+                        Boolean z11 = (rawY2 <= (this.toFloat().mSlop) || Math.abs(rawX2) >= Math.abs(rawY2) / 2.0f) ? false : this.canSwipeDown
                         if (z8) {
                             z9 = true
                         }
@@ -229,12 +229,12 @@ class SwipeDismissTouchListener : OnInterceptTouchEventListener {
                     if (this.mSwiping) {
                         this.mTranslationX = this.mSwipingX ? rawX2 : 0.0f
                         this.mTranslationY = this.mSwipingY ? rawY2 : 0.0f
-                        this.mView.setTranslationX(this.mSwipingX ? rawX2 - ((Float) this.mSwipingSlopX) : 0.0f)
-                        this.mView.setTranslationY(this.mSwipingY ? rawY2 - ((Float) this.mSwipingSlopY) : 0.0f)
+                        this.mView.setTranslationX(this.mSwipingX ? rawX2 - (this.toFloat().mSwipingSlopX) : 0.0f)
+                        this.mView.setTranslationY(this.mSwipingY ? rawY2 - (this.toFloat().mSwipingSlopY) : 0.0f)
                         if (this.mSwipingX) {
-                            this.mView.setAlpha(Math.max(0.0f, Math.min(1.0f, 1.0f - ((Math.abs(rawX2) * 2.0f) / ((Float) this.mViewWidth)))))
+                            this.mView.setAlpha(Math.max(0.0f, Math.min(1.0f, 1.0f - ((Math.abs(rawX2) * 2.0f) / (this.toFloat().mViewWidth)))))
                         } else if (this.mSwipingY) {
-                            this.mView.setAlpha(Math.max(0.0f, Math.min(1.0f, 1.0f - ((Math.abs(rawY2) * 2.0f) / ((Float) this.mViewHeight)))))
+                            this.mView.setAlpha(Math.max(0.0f, Math.min(1.0f, 1.0f - ((Math.abs(rawY2) * 2.0f) / (this.toFloat().mViewHeight)))))
                         }
                         return true
                     }

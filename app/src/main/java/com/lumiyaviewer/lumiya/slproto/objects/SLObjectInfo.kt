@@ -547,7 +547,7 @@ abstract class SLObjectInfo : Identifiable<UUID> {
         L_0x016d:
             com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams r5 = com.lumiyaviewer.lumiya.slproto.prims.PrimVolumeParams.createFromPackedData(r4)
             Int r0 = r4.getInt()     // Catch:{ Exception -> 0x01ac }
-            com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry r0 = com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry.create((java.nio.ByteBuffer) r4, (Int) r0)     // Catch:{ Exception -> 0x01ac }
+            com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry r0 = com.lumiyaviewer.lumiya.slproto.textures.SLTextureEntry.create((java.nio.ByteBuffer) r4, r0.toInt())     // Catch:{ Exception -> 0x01ac }
             r12.onTexturesUpdate(r0)     // Catch:{ Exception -> 0x01b5 }
         L_0x017c:
             if (r5 == 0) goto L_0x0184

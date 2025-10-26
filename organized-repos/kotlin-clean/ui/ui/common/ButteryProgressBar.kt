@@ -40,7 +40,7 @@ private class ExponentialInterpolator : Interpolator {
         }
 
         public Float getInterpolation(Float f) {
-            return ((Float) Math.pow(2.0d, (Double) f)) - 1.0f
+            return (Math.toFloat().pow(2.0d, f.toDouble())) - 1.0f
         }
     }
 
@@ -91,13 +91,13 @@ private class ExponentialInterpolator : Interpolator {
     fun onDraw(Canvas canvas) {
         if (this.mAnimator.isStarted()) {
             this.mShadow.draw(canvas)
-            Float floatValue = ((Float) this.mAnimator.getAnimatedValue()).floatValue()
+            Float floatValue = (this.toFloat().mAnimator.getAnimatedValue()).floatValue()
             Int width = getWidth()
             Int i = width >> (this.mSegmentCount - 1)
             Int i2 = 0
             while (i2 < this.mSegmentCount) {
                 Float f = floatValue * ((Float) (width >> (i2 + 1)))
-                canvas.drawRect((f + ((Float) this.mSolidBarDetentWidth)) - ((Float) i), 0.0f, (i2 == 0 ? (Float) (width + i) : 2.0f * f) - ((Float) i), (Float) this.mSolidBarHeight, this.mPaint)
+                canvas.drawRect((f + (this.toFloat().mSolidBarDetentWidth)) - (i.toFloat()), 0.0f, (i2 == 0 ? (Float) (width + i) : 2.0f * f) - (i.toFloat()), this.toFloat().mSolidBarHeight, this.mPaint)
                 i2++
             }
         }
@@ -108,7 +108,7 @@ private class ExponentialInterpolator : Interpolator {
         if (z) {
             Int width = getWidth()
             this.mShadow.setBounds(0, this.mSolidBarHeight, width, getHeight() - this.mSolidBarHeight)
-            Float f = (((Float) width) / this.mDensity) / 300.0f
+            Float f = ((width.toFloat()) / this.mDensity) / 300.0f
             this.mAnimator.setDuration((Long) ((Int) ((((f - 1.0f) * 0.3f) + 1.0f) * 500.0f)))
             this.mSegmentCount = (Int) ((((f - 1.0f) * 0.1f) + 1.0f) * 5.0f)
         }

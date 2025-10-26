@@ -128,14 +128,14 @@ class ImageAssetView : View() {
             canvas.drawARGB(50, 0, 0, 0)
             String str = (this.assetID == null || UUIDPool.ZeroUUID.equals(this.assetID)) ? "No image" : this.loadTask == null ? "Failed to load" : this.loadTask.getStatus() == AsyncTask.Status.FINISHED ? "Failed to load" : "Loading..."
             this.textPaint.getTextBounds(str, 0, str.length(), this.bitmapSrcRect)
-            canvas.drawText(str, ((Float) width) / 2.0f, (((Float) height) / 2.0f) + (((Float) this.bitmapSrcRect.height()) / 2.0f), this.textPaint)
+            canvas.drawText(str, (width.toFloat()) / 2.0f, ((height.toFloat()) / 2.0f) + ((this.toFloat().bitmapSrcRect.height()) / 2.0f), this.textPaint)
             return
         }
         Int width2 = this.imageBitmap.getWidth()
         Int height2 = this.imageBitmap.getHeight()
-        Float max = Math.max(((Float) width2) / ((Float) width), ((Float) height2) / ((Float) height))
-        Int round = Math.round(((Float) width2) / max)
-        Int round2 = Math.round(((Float) height2) / max)
+        Float max = Math.max((width2.toFloat()) / (width.toFloat()), (height2.toFloat()) / (height.toFloat()))
+        Int round = Math.round((width2.toFloat()) / max)
+        Int round2 = Math.round((height2.toFloat()) / max)
         Int i = (width / 2) - (round / 2)
         Int i2 = this.alignTop ? 0 : (height / 2) - (round2 / 2)
         this.bitmapDestRect.left = i + 1

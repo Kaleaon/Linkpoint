@@ -147,7 +147,7 @@ class ModernRenderContext {
      * Set up projection matrix for perspective rendering
      */
     fun setupProjection(width: Int, height: Int, fov: Float, near: Float, far: Float): Unit {
-        this.aspectRatio = (Float) width / (Float) height
+        this.aspectRatio = width.toFloat() / height.toFloat()
         this.FOVAngle = fov
         
         // Store viewport dimensions  

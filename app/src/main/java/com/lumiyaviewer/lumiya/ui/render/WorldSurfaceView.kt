@@ -68,7 +68,7 @@ class WorldSurfaceView : GLSurfaceView {
     WorldSurfaceView(WorldViewActivity worldViewActivity, UserManager userManager) {
         super(worldViewActivity)
         this.activity = worldViewActivity
-        Int applyDimension = (Int) TypedValue.applyDimension(2, 16.0f, getResources().getDisplayMetrics())
+        Int applyDimension = TypedValue.toInt().applyDimension(2, 16.0f, getResources().getDisplayMetrics())
         this.supportsGL20 = ((ActivityManager) getContext().getSystemService("activity")).getDeviceConfigurationInfo().reqGlEsVersion >= 131072
         if (Debug.isDebugBuild()) {
             setDebugFlags(3)

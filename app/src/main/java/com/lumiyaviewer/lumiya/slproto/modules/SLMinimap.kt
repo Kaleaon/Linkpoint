@@ -139,8 +139,8 @@ class SLMinimap : SLModule {
 
     private Int getParcelDataIndex(ImmutableVector immutableVector) {
         Int i = 0
-        Int floor = (Int) Math.floor((Double) ((immutableVector.getX() * 64.0f) / 256.0f))
-        Int floor2 = (Int) Math.floor((Double) ((immutableVector.getY() * 64.0f) / 256.0f))
+        Int floor = Math.toInt().floor((Double) ((immutableVector.getX() * 64.0f) / 256.0f))
+        Int floor2 = Math.toInt().floor((Double) ((immutableVector.getY() * 64.0f) / 256.0f))
         if (floor < 0) {
             floor = 0
         } else if (floor >= 64) {
@@ -223,12 +223,12 @@ class SLMinimap : SLModule {
             com.lumiyaviewer.lumiya.slproto.messages.CoarseLocationUpdate$Location r0 = (com.lumiyaviewer.lumiya.slproto.messages.CoarseLocationUpdate.Location) r0
             com.lumiyaviewer.lumiya.slproto.types.ImmutableVector r10 = com.lumiyaviewer.lumiya.slproto.types.ImmutableVector
             Int r11 = r0.X
-            Float r11 = (Float) r11
+            Float r11 = r11.toFloat()
             Int r12 = r0.Y
-            Float r12 = (Float) r12
+            Float r12 = r12.toFloat()
             Int r0 = r0.Z
             Int r0 = r0 * 4
-            Float r0 = (Float) r0
+            Float r0 = r0.toFloat()
             r10.<init>(r11, r12, r0)
             com.lumiyaviewer.lumiya.slproto.messages.CoarseLocationUpdate$Index r0 = r14.Index_Field
             Int r0 = r0.You

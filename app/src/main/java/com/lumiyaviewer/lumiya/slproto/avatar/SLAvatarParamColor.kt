@@ -113,7 +113,7 @@ class SLAvatarParamColor {
         }
         Int length = this.colorValues.length - 1
         float f2 = ((float) length) * f
-        Int i = (Int) f2
+        Int i = f2.toInt()
         Int i2 = i + 1
         if (i >= length) {
             return this.colorValues[length]

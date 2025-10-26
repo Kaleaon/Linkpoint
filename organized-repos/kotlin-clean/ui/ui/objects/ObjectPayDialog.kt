@@ -251,7 +251,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$X
             AlertDialog.Builder builder = AlertDialog.Builder(context)
             builder.setTitle((CharSequence) context.getString(R.string.object_pay_dialog_caption, Array<Any>{sLObjectProfileData.name().or(context.getString(R.string.name_loading_title))}))
             builder.setCancelable(true)
-            builder.setView((Int) R.layout.object_pay_dialog)
+            builder.setView(R.toInt().layout.object_pay_dialog)
             AlertDialog create = builder.create()
             create.setOnShowListener(DialogInterface.OnShowListener(create, payInfo, context, userManager, sLObjectProfileData) {
 

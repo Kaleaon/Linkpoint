@@ -92,7 +92,7 @@ class SpatialTree {
 
     Unit setEntryDepth(SpatialTreeNode spatialTreeNode, Float f) {
         Int i = 0
-        Int round = Math.round((((Float) this.numBins) * f) / this.drawDistance)
+        Int round = Math.round(((this.toFloat().numBins) * f) / this.drawDistance)
         if (round >= 0) {
             i = round >= this.numBins ? this.numBins - 1 : round
         }

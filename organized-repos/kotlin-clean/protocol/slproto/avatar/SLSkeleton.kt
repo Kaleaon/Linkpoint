@@ -40,7 +40,7 @@ class SLSkeleton {
             return 0.0f
         }
         Double positionZ = (Double) (sLSkeletonBone4.getPositionZ() * sLSkeletonBone5.getScaleZ())
-        return (Float) (((Double) (sLSkeletonBone.getScaleZ() * sLSkeletonBone6.getPositionZ())) + positionZ + ((Double) getPelvisToFoot()) + (Math.sqrt(2.0d) * ((Double) (sLSkeletonBone2.getPositionZ() * sLSkeletonBone3.getScaleZ()))) + ((Double) (sLSkeletonBone3.getPositionZ() * sLSkeletonBone4.getScaleZ())) + ((Double) (sLSkeletonBone5.getPositionZ() * sLSkeletonBone6.getScaleZ())))
+        return (Float) (((Double) (sLSkeletonBone.getScaleZ() * sLSkeletonBone6.getPositionZ())) + positionZ + (getPelvisToFoot.toDouble()()) + (Math.sqrt(2.0d) * ((Double) (sLSkeletonBone2.getPositionZ() * sLSkeletonBone3.getScaleZ()))) + ((Double) (sLSkeletonBone3.getPositionZ() * sLSkeletonBone4.getScaleZ())) + ((Double) (sLSkeletonBone5.getPositionZ() * sLSkeletonBone6.getScaleZ())))
     }
 
     public Float getPelvisToFoot() {

@@ -779,7 +779,7 @@ Method generation error in method: com.lumiyaviewer.lumiya.ui.objects.-$Lambda$I
                     }
                     if (!(activeAgentCircuit == null || data == null || str == null)) {
                         AlertDialog.Builder builder = AlertDialog.Builder(getContext())
-                        builder.setMessage((Int) R.string.object_block_question)
+                        builder.setMessage(R.toInt().string.object_block_question)
                         builder.setPositiveButton((CharSequence) "Yes", (DialogInterface.OnClickListener) DialogInterface.OnClickListener(activeAgentCircuit, data, str) {
 
                             /* renamed from: -$f0 */
