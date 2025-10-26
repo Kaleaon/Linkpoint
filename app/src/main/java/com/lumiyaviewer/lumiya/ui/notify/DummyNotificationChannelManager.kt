@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.ui.notify
 
 import android.content.Context
 import android.os.Build
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import com.google.common.collect.ImmutableSet
 import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels
 import com.lumiyaviewer.lumiya.ui.settings.NotificationType

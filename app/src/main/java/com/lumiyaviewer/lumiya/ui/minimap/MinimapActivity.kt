@@ -2,9 +2,9 @@ package com.lumiyaviewer.lumiya.ui.minimap
 
 import android.app.Activity
 import android.os.Bundle
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentTransaction
-import android.support.v7.app.ActionBar
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import androidx.appcompat.app.ActionBar
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout

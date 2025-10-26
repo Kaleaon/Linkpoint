@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.chat.generic
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.View
 import com.lumiyaviewer.lumiya.slproto.chat.generic.ChatEventViewHolder
 import com.lumiyaviewer.lumiya.slproto.chat.generic.SLChatEvent

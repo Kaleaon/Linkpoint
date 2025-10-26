@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.inventory
 import java.util.*
 
-import android.support.v4.os.EnvironmentCompat
+import androidx.v4.os.EnvironmentCompat
 import com.google.common.collect.ImmutableMap
 import com.lumiyaviewer.lumiya.R
 

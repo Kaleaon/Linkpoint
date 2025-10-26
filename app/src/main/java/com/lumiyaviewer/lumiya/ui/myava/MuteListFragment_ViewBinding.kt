@@ -1,8 +1,8 @@
 package com.lumiyaviewer.lumiya.ui.myava
 import java.util.*
 
-import android.support.annotation.CallSuper
-import android.support.annotation.UiThread
+import androidx.annotation.CallSuper
+import androidx.annotation.UiThread
 import android.view.View
 import android.widget.ListView
 import butterknife.Unbinder

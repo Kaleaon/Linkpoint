@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.chat.generic
 
 import android.content.Context
-import android.support.v7.widget.CardView
+import androidx.recyclerview.widget.CardView
 import android.widget.Button
 import android.widget.TextView
 import com.lumiyaviewer.lumiya.dao.ChatMessage

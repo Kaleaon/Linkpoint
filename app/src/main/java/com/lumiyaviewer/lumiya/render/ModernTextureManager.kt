@@ -15,43 +15,45 @@ import java.io.InputStream
  * This replaces the legacy JPEG2000-based texture system with a modern
  * GPU-native approach using KTX2 container format and runtime transcoding.
  */
-class ModernTextureManager {
-    private String TAG = "ModernTextureManager"
-    
-    // Texture format constants matching JNI implementation
-    Int FORMAT_ASTC_4x4_RGBA = 0
-    Int FORMAT_ETC2_RGBA = 1
-    Int FORMAT_BC7_RGBA = 2
-    Int FORMAT_RGBA32 = 3
+class ModernTextureManager(private val context: Context) {
+    companion object {
+        private const val TAG = "ModernTextureManager"
+        
+        // Texture format constants matching JNI implementation
+        const val FORMAT_ASTC_4x4_RGBA = 0
+        const val FORMAT_ETC2_RGBA = 1
+        const val FORMAT_BC7_RGBA = 2
+        const val FORMAT_RGBA32 = 3
+    }
     
     // GPU capability flags
     private var supportsASTC: Boolean = false
     private var supportsETC2: Boolean = false
     private var supportsBC7: Boolean = false
     
+    // Instance state
+    private var initialized: Boolean = false
+    
     // Native library loading
-    {
+    init {
         try {
             System.loadLibrary("basis_transcoder")
             Log.i(TAG, "Basis transcoder native library loaded successfully")
-        } catch (UnsatisfiedLinkError e) {
+        } catch (e: UnsatisfiedLinkError) {
             Log.e(TAG, "Failed to load basis transcoder native library", e)
             throw RuntimeException("Critical: Native library not available", e)
         }
     }
     
-    // Instance state
-    private var initialized: Boolean = false
-    
     // Native method declarations
-    private native Boolean nativeInit()
-    private native Long nativeCreateTranscoder()
-    private native Boolean nativeInitTranscoder(Long handle, Byte[] ktx2Data)
-    private native Int[] nativeGetTextureDimensions(Long handle)
-    private native Byte[] nativeTranscodeTexture(Long handle, Int targetFormat, Int level)
-    private native Unit nativeDestroyTranscoder(Long handle)
+    private external fun nativeInit(): Boolean
+    private external fun nativeCreateTranscoder(): Long
+    private external fun nativeInitTranscoder(handle: Long, ktx2Data: ByteArray): Boolean
+    private external fun nativeGetTextureDimensions(handle: Long): IntArray
+    private external fun nativeTranscodeTexture(handle: Long, targetFormat: Int, level: Int): ByteArray
+    private external fun nativeDestroyTranscoder(handle: Long)
     
-    constructor(context: Context) {
+    init {
         // Initialize the transcoder
         try {
             if (!nativeInit()) {
@@ -81,8 +83,8 @@ class ModernTextureManager {
     /**
      * Detect GPU texture format capabilities
      */
-    private fun detectGPUCapabilities(): Unit {
-        String extensions = GLES20.glGetString(GLES20.GL_EXTENSIONS)
+    private fun detectGPUCapabilities() {
+        val extensions = GLES20.glGetString(GLES20.GL_EXTENSIONS)
         if (extensions != null) {
             supportsASTC = extensions.contains("GL_KHR_texture_compression_astc_ldr")
             supportsETC2 = extensions.contains("GL_OES_compressed_ETC2_RGB8_texture") ||
@@ -117,34 +119,19 @@ class ModernTextureManager {
      * Get format name for debugging
      */
     fun getFormatName(format: Int): String {
-        switch (format) {
-            case FORMAT_ASTC_4x4_RGBA: return "ASTC 4x4 RGBA"
-            case FORMAT_ETC2_RGBA: return "ETC2 RGBA"
-            case FORMAT_BC7_RGBA: return "BC7 RGBA"
-            case FORMAT_RGBA32: return "RGBA32"
-            default: return "Unknown"
-        }
-    }
-    
-    /**
-     * Get the optimal texture format for this GPU
-     */
-    fun getOptimalTextureFormat(): Int {
-        if (supportsASTC) {
-            return FORMAT_ASTC_4x4_RGBA
-        } else if (supportsETC2) {
-            return FORMAT_ETC2_RGBA
-        } else if (supportsBC7) {
-            return FORMAT_BC7_RGBA
-        } else {
-            return FORMAT_RGBA32; // Fallback to uncompressed
+        return when (format) {
+            FORMAT_ASTC_4x4_RGBA -> "ASTC 4x4 RGBA"
+            FORMAT_ETC2_RGBA -> "ETC2 RGBA"
+            FORMAT_BC7_RGBA -> "BC7 RGBA"
+            FORMAT_RGBA32 -> "RGBA32"
+            else -> "Unknown"
         }
     }
     
     /**
      * Load and transcode a KTX2 texture from input stream
      */
-    TextureData loadKTX2Texture(InputStream inputStream) throws IOException {
+    fun loadKTX2Texture(inputStream: InputStream): TextureData {
         if (!initialized) {
             throw IllegalStateException("ModernTextureManager not properly initialized")
         }
@@ -154,16 +141,16 @@ class ModernTextureManager {
     /**
      * Load and transcode a KTX2 texture with specific format
      */
-    TextureData loadKTX2Texture(InputStream inputStream, Int targetFormat) throws IOException {
+    fun loadKTX2Texture(inputStream: InputStream, targetFormat: Int): TextureData {
         if (!initialized) {
             throw IllegalStateException("ModernTextureManager not properly initialized")
         }
         // Read KTX2 data from input stream
-        Byte[] ktx2Data = readInputStreamToByteArray(inputStream)
+        val ktx2Data = readInputStreamToByteArray(inputStream)
         
         // Create transcoder instance
-        Long transcoderHandle = nativeCreateTranscoder()
-        if (transcoderHandle == 0) {
+        val transcoderHandle = nativeCreateTranscoder()
+        if (transcoderHandle == 0L) {
             throw IOException("Failed to create transcoder instance")
         }
         
@@ -174,24 +161,21 @@ class ModernTextureManager {
             }
             
             // Get texture dimensions
-            Int[] dimensions = nativeGetTextureDimensions(transcoderHandle)
-            if (dimensions == null || dimensions.length != 3) {
+            val dimensions = nativeGetTextureDimensions(transcoderHandle)
+            if (dimensions.size != 3) {
                 throw IOException("Failed to get texture dimensions")
             }
             
-            Int width = dimensions[0]
-            Int height = dimensions[1]
-            Int levels = dimensions[2]
+            val width = dimensions[0]
+            val height = dimensions[1]
+            val levels = dimensions[2]
             
-            Log.i(TAG, "Loading KTX2 texture: " + width + "x" + height + " with " + levels + " mip levels")
+            Log.i(TAG, "Loading KTX2 texture: ${width}x${height} with $levels mip levels")
             
             // Transcode base level (level 0)
-            Byte[] transcodedData = nativeTranscodeTexture(transcoderHandle, targetFormat, 0)
-            if (transcodedData == null) {
-                throw IOException("Failed to transcode texture data")
-            }
+            val transcodedData = nativeTranscodeTexture(transcoderHandle, targetFormat, 0)
             
-            Log.i(TAG, "Successfully transcoded texture: " + transcodedData.length + " bytes")
+            Log.i(TAG, "Successfully transcoded texture: ${transcodedData.size} bytes")
             
             return TextureData(width, height, levels, targetFormat, transcodedData)
             
@@ -204,12 +188,12 @@ class ModernTextureManager {
     /**
      * Read input stream into Byte array
      */
-    private Byte[] readInputStreamToByteArray(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream outputStream = ByteArrayOutputStream()
-        Byte[] buffer = Byte[8192]
-        Int bytesRead
+    private fun readInputStreamToByteArray(inputStream: InputStream): ByteArray {
+        val outputStream = ByteArrayOutputStream()
+        val buffer = ByteArray(8192)
+        var bytesRead: Int
         
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
+        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
             outputStream.write(buffer, 0, bytesRead)
         }
         
@@ -220,57 +204,43 @@ class ModernTextureManager {
      * Get OpenGL texture format constant for upload
      */
     fun getOpenGLFormat(textureFormat: Int): Int {
-        switch (textureFormat) {
-            case FORMAT_ASTC_4x4_RGBA:
-                return 0x93B0; // GL_COMPRESSED_RGBA_ASTC_4x4_KHR
-            case FORMAT_ETC2_RGBA:
-                return 0x9278; // GL_COMPRESSED_RGBA8_ETC2_EAC
-            case FORMAT_BC7_RGBA:
-                return 0x8E8C; // GL_COMPRESSED_RGBA_BPTC_UNORM
-            case FORMAT_RGBA32:
-                return GLES20.GL_RGBA
-            default:
-                return GLES20.GL_RGBA
-        }
-    }
-    
-    /**
-     * Get format name for logging
-     */
-    fun getFormatName(textureFormat: Int): String {
-        switch (textureFormat) {
-            case FORMAT_ASTC_4x4_RGBA: return "ASTC_4x4_RGBA"
-            case FORMAT_ETC2_RGBA: return "ETC2_RGBA"
-            case FORMAT_BC7_RGBA: return "BC7_RGBA"
-            case FORMAT_RGBA32: return "RGBA32"
-            default: return "UNKNOWN"
+        return when (textureFormat) {
+            FORMAT_ASTC_4x4_RGBA -> 0x93B0 // GL_COMPRESSED_RGBA_ASTC_4x4_KHR
+            FORMAT_ETC2_RGBA -> 0x9278 // GL_COMPRESSED_RGBA8_ETC2_EAC
+            FORMAT_BC7_RGBA -> 0x8E8C // GL_COMPRESSED_RGBA_BPTC_UNORM
+            FORMAT_RGBA32 -> GLES20.GL_RGBA
+            else -> GLES20.GL_RGBA
         }
     }
     
     /**
      * Data structure for transcoded texture information
      */
-    class TextureData {
-        Int width
-        Int height
-        Int levels
-        Int format
-        Byte[] data
-        
-        TextureData(Int width, Int height, Int levels, Int format, Byte[] data) {
-            this.width = width
-            this.height = height
-            this.levels = levels
-            this.format = format
-            this.data = data
-        }
-        
+    data class TextureData(
+        val width: Int,
+        val height: Int,
+        val levels: Int,
+        val format: Int,
+        val data: ByteArray
+    ) {
         fun getOpenGLFormat(): Int {
-            return ModernTextureManager.getOpenGLFormat(format)
+            return when (format) {
+                FORMAT_ASTC_4x4_RGBA -> 0x93B0 // GL_COMPRESSED_RGBA_ASTC_4x4_KHR
+                FORMAT_ETC2_RGBA -> 0x9278 // GL_COMPRESSED_RGBA8_ETC2_EAC
+                FORMAT_BC7_RGBA -> 0x8E8C // GL_COMPRESSED_RGBA_BPTC_UNORM
+                FORMAT_RGBA32 -> GLES20.GL_RGBA
+                else -> GLES20.GL_RGBA
+            }
         }
         
         fun getFormatName(): String {
-            return ModernTextureManager.getFormatName(format)
+            return when (format) {
+                FORMAT_ASTC_4x4_RGBA -> "ASTC_4x4_RGBA"
+                FORMAT_ETC2_RGBA -> "ETC2_RGBA"
+                FORMAT_BC7_RGBA -> "BC7_RGBA"
+                FORMAT_RGBA32 -> "RGBA32"
+                else -> "UNKNOWN"
+            }
         }
         
         fun isCompressed(): Boolean {
@@ -278,8 +248,28 @@ class ModernTextureManager {
         }
         
         override fun toString(): String {
-            return String.format("TextureData[%dx%d, %d levels, %s, %d bytes]",
-                    width, height, levels, getFormatName(), data.length)
+            return "TextureData[${width}x$height, $levels levels, ${getFormatName()}, ${data.size} bytes]"
+        }
+        
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            other as TextureData
+            if (width != other.width) return false
+            if (height != other.height) return false
+            if (levels != other.levels) return false
+            if (format != other.format) return false
+            if (!data.contentEquals(other.data)) return false
+            return true
+        }
+        
+        override fun hashCode(): Int {
+            var result = width
+            result = 31 * result + height
+            result = 31 * result + levels
+            result = 31 * result + format
+            result = 31 * result + data.contentHashCode()
+            return result
         }
     }
 }

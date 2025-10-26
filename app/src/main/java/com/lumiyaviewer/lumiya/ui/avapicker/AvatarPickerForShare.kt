@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.ui.avapicker
 
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.FragmentActivity
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.inventory.SLInventoryEntry
 import com.lumiyaviewer.lumiya.slproto.users.ChatterID

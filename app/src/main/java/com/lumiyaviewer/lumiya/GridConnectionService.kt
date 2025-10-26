@@ -19,8 +19,8 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Message
 import android.preference.PreferenceManager
-import android.support.annotation.Nullable
-import android.support.v4.app.NotificationCompat
+import androidx.annotation.Nullable
+import androidx.fragment.app.NotificationCompat
 import com.google.common.base.Strings
 import com.lumiyaviewer.lumiya.GlobalOptions.GlobalOptionsChangedEvent
 import com.lumiyaviewer.lumiya.eventbus.EventBus

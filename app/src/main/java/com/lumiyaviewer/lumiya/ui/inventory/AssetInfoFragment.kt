@@ -4,8 +4,8 @@ import android.app.Dialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.fragment.app.FragmentActivity
+import androidx.core.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater

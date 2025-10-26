@@ -5,9 +5,9 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
-import android.support.annotation.Nullable
-import android.support.v7.app.AlertDialog
-import android.support.v7.widget.CardView
+import androidx.annotation.Nullable
+import androidx.appcompat.app.AlertDialog
+import androidx.recyclerview.widget.CardView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

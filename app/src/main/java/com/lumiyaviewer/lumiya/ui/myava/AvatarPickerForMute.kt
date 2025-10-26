@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.ui.myava
 
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.FragmentActivity
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
 import com.lumiyaviewer.lumiya.slproto.modules.mutelist.MuteListEntry

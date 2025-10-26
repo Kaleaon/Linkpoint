@@ -16,7 +16,7 @@ import android.os.IBinder
 import android.os.Message
 import android.os.Messenger
 import android.os.Parcelable
-import android.support.v7.app.NotificationCompat
+import androidx.appcompat.app.NotificationCompat
 import com.google.common.base.Objects
 import com.google.common.base.Strings
 import com.google.common.collect.BiMap

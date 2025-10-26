@@ -5,7 +5,7 @@ import android.content.res.TypedArray
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
-import android.support.v7.preference.Preference
+import androidx.preference.Preference
 import android.util.AttributeSet
 import com.google.common.base.Objects
 import com.lumiyaviewer.lumiya.R

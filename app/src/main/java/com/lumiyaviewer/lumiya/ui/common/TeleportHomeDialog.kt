@@ -3,7 +3,7 @@ import java.util.*
 
 import android.app.Activity
 import android.content.DialogInterface
-import android.support.v7.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.slproto.SLAgentCircuit
 import com.lumiyaviewer.lumiya.slproto.users.manager.UserManager

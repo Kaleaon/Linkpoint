@@ -5,8 +5,8 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.support.v7.widget.PopupMenu
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.PopupMenu
+import androidx.recyclerview.widget.RecyclerView
 import android.text.ClipboardManager
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan

@@ -4,7 +4,7 @@ import android.content.ClipData
 import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.core.widget.SwipeRefreshLayout
 import android.text.ClipboardManager
 import android.text.util.Linkify
 import android.view.LayoutInflater

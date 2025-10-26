@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
-import android.support.v7.app.AlertDialog
-import android.support.v7.preference.CheckBoxPreference
+import androidx.appcompat.app.AlertDialog
+import androidx.preference.CheckBoxPreference
 import android.util.AttributeSet
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.licensing.LicenseChecker

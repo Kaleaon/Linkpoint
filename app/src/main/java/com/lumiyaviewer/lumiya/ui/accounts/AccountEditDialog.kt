@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.ui.accounts
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v7.app.AppCompatDialog
+import androidx.appcompat.app.AppCompatDialog
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod

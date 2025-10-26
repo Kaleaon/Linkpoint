@@ -2,10 +2,10 @@ package com.lumiyaviewer.lumiya.ui.chat.profiles
 
 import android.os.Bundle
 import android.os.Parcelable
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.view.ViewPager
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.core.view.ViewPager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

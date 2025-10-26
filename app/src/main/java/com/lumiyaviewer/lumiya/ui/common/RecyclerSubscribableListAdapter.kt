@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.ui.common
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.ViewGroup
 import com.google.common.base.Optional
 import com.lumiyaviewer.lumiya.react.UIThreadExecutor

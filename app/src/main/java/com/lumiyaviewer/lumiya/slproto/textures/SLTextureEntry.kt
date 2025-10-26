@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.textures
 
-import android.support.v4.internal.view.SupportMenu
+import androidx.v4.internal.view.SupportMenu
 import com.google.common.base.Ascii
 import com.google.common.logging.nano.Vr
 import com.lumiyaviewer.lumiya.Debug

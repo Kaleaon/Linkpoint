@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.ui.settings
 
 import android.content.Context
-import android.support.v7.preference.Preference
+import androidx.preference.Preference
 import android.util.AttributeSet
 import com.google.common.base.Strings
 import com.lumiyaviewer.lumiya.R

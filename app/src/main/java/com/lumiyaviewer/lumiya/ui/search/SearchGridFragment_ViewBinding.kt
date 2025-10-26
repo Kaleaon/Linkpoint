@@ -1,9 +1,9 @@
 package com.lumiyaviewer.lumiya.ui.search
 import java.util.*
 
-import android.support.annotation.CallSuper
-import android.support.annotation.UiThread
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.CallSuper
+import androidx.annotation.UiThread
+import androidx.recyclerview.widget.RecyclerView
 import android.view.KeyEvent
 import android.view.View
 import android.widget.EditText

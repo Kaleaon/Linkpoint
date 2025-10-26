@@ -3,7 +3,7 @@ package com.lumiyaviewer.lumiya.ui.settings
 import android.annotation.TargetApi
 import android.content.Context
 import android.content.res.TypedArray
-import android.support.v7.preference.Preference
+import androidx.preference.Preference
 import android.util.AttributeSet
 import com.lumiyaviewer.lumiya.R
 import com.lumiyaviewer.lumiya.ui.notify.NotificationChannels

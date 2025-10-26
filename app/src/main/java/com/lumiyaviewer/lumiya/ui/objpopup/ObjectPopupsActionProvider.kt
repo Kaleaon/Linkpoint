@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.ui.objpopup
 import java.util.*
 
 import android.content.Context
-import android.support.v4.view.ActionProvider
+import androidx.core.view.ActionProvider
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

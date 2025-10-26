@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.objects
 import java.util.*
 
-import android.support.annotation.Nullable
+import androidx.annotation.Nullable
 import com.google.common.collect.ImmutableList
 
 class AutoValue_PayInfo : PayInfo {

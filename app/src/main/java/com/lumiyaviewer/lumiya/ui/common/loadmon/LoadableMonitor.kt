@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.ui.common.loadmon
 
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.core.widget.SwipeRefreshLayout
 import com.google.common.base.Strings
 import com.lumiyaviewer.lumiya.react.RefreshableOne
 import com.lumiyaviewer.lumiya.react.UnsubscribableOne

@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.modules.voice
 
-import android.support.v4.app.NotificationCompat
+import androidx.fragment.app.NotificationCompat
 import com.google.common.base.Objects
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.GlobalOptions

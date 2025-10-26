@@ -1,7 +1,7 @@
 package com.lumiyaviewer.lumiya.slproto.terrain
 import java.util.*
 
-import android.support.v4.view.InputDeviceCompat
+import androidx.core.view.InputDeviceCompat
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.render.spatial.SpatialIndex
 import com.lumiyaviewer.lumiya.slproto.messages.RegionHandshake

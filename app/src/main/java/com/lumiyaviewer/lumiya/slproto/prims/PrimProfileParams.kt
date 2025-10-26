@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.prims
 
-import android.support.v4.internal.view.SupportMenu
+import androidx.v4.internal.view.SupportMenu
 import com.lumiyaviewer.lumiya.slproto.messages.ObjectUpdate
 import java.nio.ByteBuffer
 

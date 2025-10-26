@@ -2,7 +2,7 @@ package com.lumiyaviewer.lumiya.ui.chat.profiles
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.core.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

@@ -1,9 +1,9 @@
 package com.lumiyaviewer.lumiya.ui.chat.profiles
 import java.util.*
 
-import android.support.annotation.CallSuper
-import android.support.annotation.UiThread
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.annotation.CallSuper
+import androidx.annotation.UiThread
+import androidx.core.widget.SwipeRefreshLayout
 import android.view.View
 import android.widget.Button
 import android.widget.TextView

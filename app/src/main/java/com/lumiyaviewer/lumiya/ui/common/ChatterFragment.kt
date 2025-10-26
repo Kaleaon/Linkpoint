@@ -1,8 +1,8 @@
 package com.lumiyaviewer.lumiya.ui.common
 
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.ActivityCompat
+import androidx.fragment.app.FragmentActivity
 import com.google.common.base.Objects
 import com.lumiyaviewer.lumiya.Debug
 import com.lumiyaviewer.lumiya.R

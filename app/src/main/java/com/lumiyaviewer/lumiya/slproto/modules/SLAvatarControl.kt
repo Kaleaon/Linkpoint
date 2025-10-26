@@ -1,6 +1,6 @@
 package com.lumiyaviewer.lumiya.slproto.modules
 
-import android.support.v4.view.InputDeviceCompat
+import androidx.core.view.InputDeviceCompat
 import com.google.common.base.Strings
 import com.google.common.collect.ImmutableSet
 import com.lumiyaviewer.lumiya.Debug
